@@ -1,0 +1,86 @@
+#-*-makefile-*-
+
+MAKEFLAGS += -R
+
+all:
+.PHONY: all
+
+%.dvi: %.tex ; $(latex)
+%.ps: %.dvi ; $(dvips)
+%.pdf: %.tex ; $(pdflatex)
+
+%.o: %.c ; $(compile)
+
+%: %.o ; $(build)
+
+%.dep: %.c ; $(makedep)
+
+%.elc: %.el ; $(emacsbuild)
+
+%: %.pre ; $(preprocess)
+%.ps: %.ps.pre ; $(preprocess)
+
+%.dir: ; $(installdir)
+
+%.so: %.o ; $(link)
+
+
+CC = gcc
+XLIB    += -L"/usr/X11R6/lib" -lX11
+CPPFLAGS += -DSTARTUP_DIR="\"$(PREFIX)\""
+CLFLAGS += $(XLIB) # linker flags
+#CSFLAGS += -shared   # shared lib flags
+#CFPIC   += -fpic # pic variable for shared library and base object
+#-ffast-math -maltivec -mabi=altivec -mpowerpc-gpopt -O2
+#options = -O2 #-mcpu=7450 
+ccwarn  = -Wall -Wno-main -W #-Wformat -Wimplicit
+
+compile = $(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+build   = $(CC) $(CFLAGS) $(CLFLAGS) -o $@ $^ -lm -ldl
+#link    = $(compile) $(CSFLAGS)
+#link = 	$(CC) -bundle -undefined dynamic_lookup -o $@ $^
+link = $(CC) $(CFLAGS) $(CSFLAGS) -o $@ $^
+#-flat_namespace -undefined suppress
+#-bundle -dylib -single_module -undefined dynamic_lookup -o $@ $^
+installexec = install -m 0755 -bp $< $@
+installfile = install -m 0644 -bp $< $@
+installdir  = install -d $*
+
+emacsbuild = emacs --batch --eval='(byte-compile-file "$<")'
+
+preprocess = sed \
+	-e 's/@PREFIX@/$(subst /,\/,$(PREFIX))/' \
+	-e 's/@ELPREFIX@/$(subst /,\/,$(ELPREFIX))/' \
+	-e 's/@DOCPREFIX@/$(subst /,\/,$(DOCPREFIX))/' \
+	-e 's/@SHPREFIX@/$(subst /,\/,$(SHPREFIX))/' \
+	-e 's/@PSPREFIX@/$(subst /,\/,$(PSPREFIX))/' \
+	$< > $@
+
+slatex    = latex \\nonstopmode\\input $<
+latex     = $(slatex) && $(slatex) && $(slatex)
+spdflatex = pdflatex \\nonstopmode\\input $<
+pdflatex  = $(spdflatex) && $(spdflatex) && $(spdflatex)
+dvips     = dvips $< -o $@
+
+CCDEP     = -MM
+makedep  = \
+	set -e ; \
+	$(CC) $(CCDEP) $(CPPFLAGS) $< \
+		| sed 's/$*\.o[ :]*/$*.o $@ : /g' \
+		> $@ ; \
+	[ -s $@ ] || rm -f $@
+
+
+.PHONY: clean
+.PHONY: distclean
+distclean: clean $(subdirs); -rm Makefile
+
+.PHONY: install
+
+.PHONY: $(subdirs)
+all: $(subdirs)
+clean: $(subdirs)
+install: $(subdirs)
+
+$(subdirs): ; $(MAKE) -C $@ $(MAKECMDGOALS)
+

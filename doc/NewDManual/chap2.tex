@@ -1,0 +1,262 @@
+\chapter{THE MACHINE}
+
+This chapter gives you a thorough tour of the D machine and informs you of the substrates of the machine, the D objects.
+
+\section{The objects}
+
+\begin{tabular}{>{\normalfont}l>{\bfseries}l}
+Simple objects & null\\    
+               & numeral\\ 
+               & operator\\
+               & name\\
+               & mark\\
+               & boolean\\\\
+
+Composite objects & array\\
+                  & list\\
+                  & dictionary\\
+                  & box\\\\
+\end{tabular}
+
+\noindent Simple  objects  are  unique,   self-contained  quanta  of  information. Composite objects may be or may not be unique,  and always consist of two separate  parts:  information that describes the object  and  information that represents the value of the object.  Simple objects are analogous to small  pieces  of  merchandise  that can  be  traded  over  the  counter. Composite objects are analogous to real estate. When you pass a composite object  via the operand stack to an operator,  you pass  the  information that describes the object,  you do not pass the value. Likewise, when you trade your house,  you do not put it physically on the negotiation table: you bring the deed.
+
+\begin{itemize}
+
+\item The \textbf{null} object fills a space and serves as a void. Certain types of null object serve as the vehicle of a simple value that the D machine does operate on but that it needs to pass around among operators (e.g., the handle of a network socket).
+
+\item The  \textbf{numeral} object comes in several types of number representation and range. The  numeral types comprise three ranges of signed integer (\emph{byte}, \emph{word}, and \emph{long} of 8, 16, and 32 bit), and two precisions of IEEE real, \emph{single} and \emph{double} (32-bit and 64-bit). Operators that work on  numeral  objects use the intrinsic type specification to determine what arithmetics and conversions are required.  Where numeral types need to  be specified explicitly (e.g. when creating an array),  this is done by (passive) name objects whose  initial character is a type mnemonic, e.g. /w or /Word.
+
+\item The \textbf{operator} object represents an operation intrinsic to D or  provided in user-created libraries of extrinsic operators. An operator's value is an array of machine code. For reasons of sanity, D does not \emp{provide} operators that let you operate on an operator's value. (For reasons of principle, D does not \emph{prevent} you from writing extrinsic operators that do just that.)
+
+\item The  \textbf{name} object's value is a compacted string. Currently name values are restricted to maximally 14 significant characters. Allowed characters are letters (upper and lower cases are distinguished), digits, and \emph{underline}. The first character of a name must not be a digit. When a name  object carrying the \emph{active} attribute is executed, the current vocabulary is searched the  for an object associated with this name. The vocabulary is defined by the dictionaries currently held on the dictionary stack. A fast search  algorithm,  employing hashing,  performs  this  critical task (most searches in a dictionary conclude  after  a single name comparison regardless of the size of the dictionary). Name objects carrying the \emph{passive} attribute provide their value as a literal (for instance, for associating the name with some object).
+
+\item The \textbf{mark} object is explained by its name.
+
+\item The \textbf{boolean} object's value is either `true' or `false'.
+
+\item An \textbf{array} value is formed by a linearly ordered set of numeral values  of identical  types.  A \textbf{string} is an array of  byte-integers.  Elements  of arrays  are referred to by index;  the index of the  first  array element is zero. (Note that character codes are \emph{signed} byte integers.)
+
+\item A  \textbf{list} value is formed by a linearly ordered,  generally mixed  set  of (whole)  simple  objects  and/or  (descriptions  of)  composite  objects. \textbf{Procedures} are \emph{active} lists (see below),  of objects  to  be  executed. Because the list value,  again,  may contain lists or  dictionaries,  you can use lists to build nested high-order structures.  (Value) elements of lists  are  referred to by index;  the index of  the  first  list element is zero.
+
+Note  the  difference  between arrays and  lists:  arrays  pack  numeral values of the same type, not objects, whereas lists contain objects. Although you can make a  list of exclusively numeral  objects,  an  array  will  be preferable for organizing numerals of identical types,  because the array stores  the  numerical  values  in  a  more  compact  form  and   because mathematical  operators deal more efficiently with array than  with  list values.
+
+When you duplicate an array or list object,  or when you create a  child object that represents a subset of an array or list value, the respective operators create a new description, but they do not duplicate elements of the  value.  Hence the new objects share their values with the  original. Changes made to a shared value (by modifying the value of one of the sharing objects) will affect all sharing objects.
+
+\item A \textbf{dictionary} value is formed by a set of association pairs, of which one partner is a name,  and the other partner, any object. If the association is with a composite object,  that object is represented by a  description rather than the value.  Associations are constructed dynamically, through operators. Dictionary entries are always made or retrieved through a name key,  rather  than  a numerical index.  The information  contained  in  a dictionary is transparently organized for quick retrieval by  name.  This organization precludes access via an index or subpartitioning into  child dictionaries.
+
+\item A \textbf{box} value is also composite. A plain box in VM brackets a set of composite objects that can be discarded selectively (e.g., arrays temporarily created and used during the execution of an algorithm). Typed boxes in VM \emph{can} be reserved for composite values that are created and used by specialized operators, but are inaccessible to common D operators (mind \emph{Pandora's box}, however). A plain box stored in a file holds a folded tree of binary objects, which are saved and retrieved en bloc.
+\end{itemize}
+
+Objects  have several \textbf{attributes}.  In composite objects,  these  attributes  are part  of the description;  objects that share a value thus need not  have identical  attributes.  An  object  is either  \emph{passive} or  \emph{active}.  This attribute  is changeable and directs the use of the object,  as datum  or instruction. The value of a composite object that is given the \emph{readonly} attribute can only be read,  but not modified (note that \emph{readonly} does  not preclude  changes  to the value made through  other  objects). If the creation of a composite object involves the creation of a value,  this  object receives the \emph{parent} attribute;  objects  created  to share  a subset of a parent object value receive the \emph{child} attribute. 
+
+\section{Where D objects live}
+
+Objects  live  on  three stacks and in  a  large  memory  area (in RAM) referred to as the Virtual Memory (VM). Sizes of these storage facilities are set to fixed values when the D machine is brought up (\emph{dvt}) or are created to a desired size by an operator (\emph{dnodes}).  The stacks  hold  whole simple  objects  or descriptions of composite objects.  The  VM  holds  a master  description  and  the  value of  all  parent (and hence child) composite objects.
+
+\begin{itemize}
+\item The \textbf{operand stack} holds objects to be consumed by operators or resulting from operators. D uses the \emph{reverse Polish notation}, and the operand stack serves as the universal vehicle for passing operands from one operator to another.  Objects  accumulate on this stack until an operation consumes them as operands.  While they remain on the stack,  they can  be explicitly manipulated by stack operators.
+
+\item The  \textbf{execution  stack}  holds a file of objects  in  execution.  The  top element  is the next in line for execution,  whereas elements  below  are suspended.  An  object carrying the \emph{active} attribute can be submitted  to execution by pushing it on the execution stack (by an operator or through reference  to  an associated active name).  The execution stack  will  be populated mostly by strings or procedures (active lists).  After a string has been moved to the execution stack,  the object tokens contained in it are successively translated and submitted to execution,  until the string is  exhausted  and  removed from the execution stack  (this  exposes  the latest suspended object).  With a procedure, the objects constituting its value  are successively submitted to execution.  Other objects pushed  on the execution stack are consumed at once.
+
+The  execution  stack  is used also by the operators  that  control  the repeated  execution  of procedures (like loop operators).  In  this  way,  the execution  stack suffices to maintain the entire flow of control in  a  D machine.
+
+Objects  moved  to  the execution stack can  be  earmarked  as  dropback levels.  If  an  object subsequently pushed on the  stack  for  execution invokes  a certain control operator,  this operator drops  the  execution stack  down to the latest earmarked object.  This effects a return  to  a former  level  of execution,  skipping intermediate levels  of  procedure calls or nested loops if necessary.  Activities can be swiftly terminated or  aborted in this way,  returning control to an  embracing  layer.  The technique also serves to terminate loops from within.  D is a  structural purist's language:  there is no `goto' statement. The dropback mechanism, however,  provides  for all cases where a `goto' might be desirable in  a structured program.
+
+\item The \textbf{dictionary stack} holds dictionary objects currently in use.  When  an active  name  object  is  executed,  the  name  is  looked  up  in  these dictionaries,  beginning  with the dictionary on top of  the  stack.  The first  object  found to be associated with the name substitutes  for  the name  object.  The  dictionary  stack is  explicitly  maintained  through operators.
+
+\item The \textbf{VM} occupies a substantial chunk of the host machine's RAM space.  It is  called  `virtual'  because  you can  use  this  memory  only  through operators that establish a particular logical memory model.
+
+As composite objects become defined during a D  session,  they consume  storage space in VM and eventually exhaust all available  space. This is prevented by using three housekeeping operators, by which sets of VM objects are earmarked and selectively discarded (references made to them in remaining objects are voided). Another operator (available in a \emph{dnode}) can de novo create blank stacks and an empty VM whose sizes can be chosen within the resources of the host.
+\end{itemize} 
+
+\section{The text representation of objects}
+
+Objects are formulated in text using the printable subset of the USASCII character set  plus  the control characters,  `space', `newline', and `carriage return'. `Newline' and `carriage return' are equivalent in terminating a line. Object  tokens  are  separated  by \textbf{white  space},  a  single  or  several successive control characters. \textbf{Comment}, a `$|$' character and its followers up  to the end of the line, also act as white space (they  are  otherwise ignored by the machine).  In  addition  to the separation by white  space,  objects  are  delimited by any of the special characters,  ( ) [ ] \{ \} $<$ $>$, which serve to segregate enumerated or constructed contents of composite objects.
+
+A \textbf{numeral}  starts  with  a  digit,   sign,   or  `*'   character.   An \emph{integer} numeral consists of (optional)  sign  and a sequence  of  digits, optionally  followed  by a type specifier.  The range of the  integer  is determined by the specifier ('b/B' for byte,  'w/W' for word,  'l/L'  for long.. A \emph{real numeral} is distinguished from an integer  by  the  presence  of at least one  of:  a  fractional  part,  an exponent,  or a 's/S' or 'd/D'  specifier.  The exponential part consists of one  of the  characters  'e/E'  immediately followed by a  (signed)  sequence  of exponent   digits.   Real  numbers are  stored  with  32-bit   (single) or 64-bit (double) precision. Numerals that do not carry a type specifier will by default be of type /L (when lacking real-number features) or /D.
+
+Numeral  values  can  be  \emph{undefined}.  Mathematical  operators  using  an \emph{undefined} value as an operand return \emph{undefined} results. Thus, arrays that contain invalid data in a few positions may be submitted to  computations without special attention to such exceptions,  a little luxury that saves tedious programming.  The text representation of an undefined numeral  is an  `*',  which  may  be  followed by a decimal  point  (to  indicate  an undefined real numeral), or by one of the type specifiers.
+
+A \textbf{name} is a sequence of letters,  digits, or `underline' characters (the leading character must not be a digit). Names are limited to 14 significant characters (longer names are silently truncated).  Upper and lower case are distinguished. A name preceded by `/' is given the \emph{passive} attribute; otherwise the attribute is \emph{active}.  If you are familiar with  PostScript, please note the difference that D excludes you from using characters like `?!@#&\$' in names.
+
+Simple  objects  other  than  numeral  or  name  have  no  direct   text representation.  Such  objects  are specified through  associated  names: `null' for the \textbf{null} object,  `true' or `false' for a \textbf{boolean},  and  names such as `add' for \textbf{operator} objects.  The \textbf{mark} object and a  complementary list  operator  are accessed through the `[' and `]'  special  characters, making  list  \emph{construction} formally  similar  to  array  or   procedure \emph{enumeration}. Note, however, that the objects that are enclosed between the `[' and `]' operators are executed at the time when this text is interpreted; their \emph{results} (which are accumulated on the operand stack) become the body of the list finally created by `]'. In this way passive-list contents are always computed rather than enumerated.
+
+All  classes of \textbf{composite} object can be created through  operators,  but only  \textbf{arrays}  and active lists (\textbf{procedures}) can be  defined  directly  in text form by enumerating their elements.
+
+Enumerated \textbf{arrays} are  composed of numeral values enclosed between  `$<$'  and  `$>$';  the array type is specified by  a  letter that immediately follows  the  `$<$'  character and applies to all numerals in the array.  Arrays  of  the byte type (\textbf{string}) may be defined  also  by alphanumerical  enumeration enclosed between `(' and `)';  character codes  that cannot  be designated directly in such an enumeration are represented  by the backslash sequences:\\
+
+\begin{tabular}{>{\normalfont}l>{\normalfont}l}
+
+$\backslash$n &   newline (line feed)\\
+$\backslash$r &   carriage return\\
+$\backslash$( &   left parenthesis\\
+$\backslash$) &   right parenthesis\\
+$\backslash \backslash$ &    backslash\\
+$\backslash$ddd &  ASCII character code ddd (octal)\\
+$\backslash$ newline & no character - both are ignored\\\\
+\end{tabular}
+
+Elements  of an enumerated \textbf{procedure} are embraced by  `\{' and ` \}'.  Objects  so embraced  are  not  executed:  they are translated  into  their  internal representation  and  simply stored as the value of the  procedure  object (compiled,  so  to  speak).  In particular,  no dictionary  searches  are performed  for active names at this time.  The objects contained  in  the procedure  value  will  be  executed  only  through  invokations  of  the procedure.
+
+Names or the `[' operator can be prefixed by `$\tidle$'. This is a shorthand (offered with apologies) for a name that is submitted to the operator \emph{mkact} or to the mark object starting a list that is submitted to the operator \emph{mkact} after it is closed by `]'. The $\tilde$ shorthand is useful in building `computed' procedures in D.
+
+Arrays  and  procedures  defined by enumeration have  to  be  completely contained  within a single portion of text submitted to  the  translator (such as a command line or a string whose content has been derived from a file). The  translator  is used implicitly by the D executive  (mill)  described below.
+
+In  summary:  the  text  form  of D  code  is  translated  with  minimal grammatical ado into a linear sequence of internal objects. Object tokens become  either individual simple objects,  or become incorporated into  a composite  object  when  they  are  enclosed  between  certain  types  of bracket.
+
+\section{The mill}
+
+This  section describeses the executive of the D machine,  briefly  called the \emph{mill}.  The mill accepts the objects that are handed to the machine and guides  them  to their targets,  where  they  are  stored,  consumed,  or transformed. Like with any machine that you operate, you want to know how the D machine comes to life, what rules it follows while running, and how you can shut it down.
+
+There are two different versions of D machine, the D virtual terminal (\emph{dvt}) and the D node (\emph{dnode}). Both machines are equally capable, but they have some specializations of their mills that make the machines deal differently with  external events and errors. These differences will be described in subsequent sections, which also tell you how to start up each type of D machine, or terminate its operation. Here we describe the ordinary business that applies to both the \emph{dvt} and \emph{dnode} machines.
+
+When  the  program  that  implements  the  D  machine  is  brought   up, initializations are performed. These effect that:
+
+\begin{itemize}
+\item the  dictionary stack contains the \emph{system} dictionary  (of  intrinsic operators) and a \emph{user} dictionary (the `root` dictionary of the D amchine).
+\item the execution stack holds a single,  string object. The string value is  derived  from a text file (called `startup\_dvt.d' or `startup\_dnode'; details are described below).  This string holds the first sequence  of  objects  to be executed and,  thus,  is  analogous  to  the `bootstrap'  code  of an ordinary computer. The D objects imported from the startup file extend the operator set of the system by a library of procedures that are needed very often and may be viewed as operators that happen to be written in D.
+\item The VM is empty.
+\end{itemize}
+
+After this initialization,  the mill will cycle through a succession  of three  phases.  The ultimate goal of the mill's activity is to empty  the execution stack by fair play. When the execution stack has been exhausted, the D machine is idle, waiting for an external event that delivers new objects to the execution stack (e.g., a command line).
+
+Each  turn of the D mill  begins with the \textbf{test phase} evaluating conditions  that require special attention. This is followed by the \textbf{fetch phase},  during  which  the next object in sequence for execution is  determined.  That object, then, is executed in the \textbf{execution phase}.
+
+The \textbf{test phase} deals with external events that will typically push new objects onto the execution stack. The chief difference between the \emph{dvt} anf \emph{dnode} is in their organizations of the test phase. The test phases of the two machine versions will be described separately in later sections. 
+
+In the \textbf{fetch    phase},    the   execution   stack   is   inspected    to derive the next object to be executed. This stack will only hold objects carrying the  \emph{active}  attribute.   A  simple  object   will be popped   and submitted directly to the  execution  phase.  Of a  procedure  or string, instead, the first object or translated token is extracted and submitted to the execution phase, whereas the remainder of the  procedure or string remains on the execution stack until the  entire procedure or string has been exhausted.
+
+A fine point is that a procedure object actually is popped  from the  execution stack \emph{prior} to the execution of its last value object  (to save stack space during end-to-end recursion).
+
+Any \emph{passive}  object  passed to the \textbf{execution  phase}  is  `executed'  by transfering it to the operand stack.
+
+An  \emph{active} object passed to the execution phase is given special attention if it is a  \emph{name}.  A  \emph{name} object is replaced by the currently associated object.  The search for an associated  object  involves  the  dictionaries  currently  held  on  the dictionary  stack and proceeds from the top of  that  stack to the bottom. The first association detected for the name is used. An active associated object  is pushed on the execution stack,  whereas a  passive  associated object is pushed on the operand stack. The mill starts a new turn.
+
+Execution  of other active objects also is directed by object class:
+\begin{itemize}
+\item A \emph{null} object is discarded.
+\item An \emph{operator}  object  is  invoked, i.e.  the  host  program  module represented  by the operator is executed.  A large set of system operators has been built into the D machine and is accessible through the system dictionary \emph{systemdict}), which is permanently present at the bottom of the dictionary stack. Libraries of additional operators (your personal extensions to the D operator set) can be loaded using certain operators and then become also incorporated into \emph{systemdict}.
+\item Any other object is executed like a passive object,  by  transferring it to the top of the operand stack.
+\end{itemize}
+
+Two small points require a note here:  (1)~ A passive null object is pushed  on the  operand  stack,  but  an active null  object  effects  nothing.  (2)~ A procedure object  encountered on the execution stack always  serves  as `instruction' because of its \emph{active} attribute;  reference to a  procedure through  an  active name has the same effect.  If a procedure  is  to  be worked  on  as `data',  it needs to be transferred to the  operand  stack (an operator sees to that).
+
+Many functions that are essential for the D machine,  such as definition of name-object associations,  are not of concern to the mill. The mill is concerned only with the orderly consumption of objects,  whereas specific tasks   belong  to  the  operators.   This  strict  division   of   labor keeps  the plan simple and the D machine robust.  Operators will  be  dealt with in Chapter 3.
+
+The  mill  of a \emph{dvt} halts when  the `quit' operator is executed; this terminates the program that implements this type of D machine. A \emph{dnode} is terminated by killing its process from the Unix shell that was used to bring it up. A \emph{dnode}, however, will typically not be killed after a session: it rather is put into a dormant state from which it can be recruited by a \emph{dvt} that supervises new work (\emph{dnodes} are used like servers).
+
+\textbf{Errors} recognized by the  mill,  text  translator,  or operators  lead  to a consistent response in each type of D machine. In both cases, the instance  of  discovery and a numeral representing the  error are reported on the \emph{dvt} that supervises the activity. Details of the reaction to errors will be described separately for each machine type.
+
+In  summary,  the D mill can execute any object submitted to it via  the execution stack, with effects that depend on the active/passive attribute and the class of the object.  Object associations by name are resolved in the act. Executed objects eventually precipitate in objects pushed on the operand  stack  (to  serve  as `data' for  operators),  or  lead  to  the execution  of  host  program modules (which  perform  the  `instructions' implied by D operators).
+
+\section{The D virtual terminal (\emph{dvt})}
+
+The \emph{dvt} serves as a combination of text and graphical terminal between you and one or many \emph{dnodes} that you have recruited to do computations for you. Communication is via the tcp/ip facilities. Hence it does not matter whether communicating D machines reside in one and the same host, or are spread over many hosts. In principle, all D machines in a tcp/ip network can chat randomly with one another, because their tcp/ip communications are not a priori restricted. In practice, however, only a fraction of that communication capacity will suffice to support your work. Typically, \emph{dnodes} participating in a hookup receive commands from the \emph{dvt} and report back to the \emph{dvt}. The \emph{dvt} thus serves as a coordinating hub.
+
+The function of a \emph{dvt} is, at a more basic level than that of a \emph{dnode}, implemented in D code. This D code is loaded upon initialization when the file `startup\_dvt.d' is read and interpreted. The D code of the bottom-most loop of the \emph{dvt} uses a dvt-specific operator, \emph{nextevent} to receive an object to be executed. The operator delivers requests made by you at the console  of the \emph{dvt}, requests made by \emph{dnode} windows associated with the \emph{dvt}, and requests made from other \emph{dnodes} over network connections.
+
+You likely will use the \emph{dvt} as a versatile console, but, in the longer run, may find it useful to automate the supervising of \emph{dnodes} by D code that you let the \emph{dvt} execute. If you wish to do this, you need to be aware of a basic rule that ensures proper functioning of the \emph{dvt}. The basic loop of the \emph{dvt} attends to requests made to it sequentially. That is, a new request is dealt with only after the service of the preceding request has been either completed or aborted. (A service is aborted, for instance, when an error is discovered.) If you make the \emph{dvt} execute major chunks of your own D code, you must organize this code such that it can be executed in short bursts of mill cycles rather than, in the worst case, in an endless loop contained in your code. If your \emph{dvt} code being tested turns out such an obstinate customer, press the `control-c` combination on the \emph{dvt} keyboard to abort its execution and return control to the loop that fairly attends to requests made to the \emph{dvt}.
+
+The \emph{dvt} can be run from any text shell and then mimicks a text console that has built-in a set of functions for administrating \emph{dnodes}. More likely, the \emph{dvt} lives in a combination of \emph{emacs} and \emph{Xwindows} environments. \emph{emacs} then provides a shell for the \emph{dvt} and is configured in a variety of ways to support the \emph{dvt} using setup files that accompany the D machine. This support includes intelligent editing of D code and special \emph{emacs} functions hardwired to key combinations. \emph{Xwindows} adds a graphical interface by which the \emph{dvt} and \emph{dnodes} can display information on screens of the \emph{dvt} host. The communication paths of \emph{Xwindows} also lets you initiate actions using the mouse of the \emph{dvt} host.
+
+The D operator set of the \emph{dvt} includes a small set of operators that either are unique to the \emph{dvt} or are implemented there in a unique way. These, like a set of specialized \emph{dnode} operators, are described in separate sections of Chapter 3.
+
+\subsection{The \emph{dvt} in plain-text operation}
+
+When you start the \emph{dvt} process from a shell, the \emph{dvt} will inherit this shell as its console. You therefore retain the editing capabilities inherent to that shell when you work at the console of the \emph{dvt}. To start the \emph{dvt} in this mode of operation, make the D machine's home directory (called `dm') the current directory and use the command `./dvt'.
+
+The \emph{dvt} can hook up over a network with D machines called \emph{dnodes}, and thenceforth serves as the console of these D machines. The \emph{dvt} provides a mechanism, described below, to switch the console among the various D machines that are hooked up to it. Initially, the console targets the \emph{dvt}'s D machine itself. When the \emph{dvt} process is started, D code contained in the file `startup\_dvt.d' is read and interpreted. This code defines a number of procedures that let you set up and administrate your cluster of \emph{dnodes}. These are ordinary D procedures and take their operands from the operand stack:\\ 
+
+\begin{tabular}{>{\sffamily\bfseries}l>{\sffamily}l}
+\_c    & (hostname) port\# group\# $|$ ---\\\\
+\end{tabular}
+
+\noindent opens a connection between the \emph{dvt} and the \emph{dnode} described by the name of its host and the D machine port where this \emph{dnode} is listening (this port number is assigned to the \emph{dnode} when the \emph{dnode} is started from a shell (see the section on \emph{dnodes})). Port numbers are positive integers including $0$. When the connection is established, the target \emph{dnode} is instructed to use this \emph{dvt} as its console and to send \emph{Xwindows} communications to the \emph{Xwindows} server on the host of this \emph{dvt}. (There is a more fancy version of this command that tells also the \emph{dnode} to color all its text communications with the \emph{dvt} so that they appear as visually distinct.) The connected \emph{dnode} is assigned a node number. Node numbers are positive integers ($0$ is reserved for the \emph{dvt}) and are assigned and disassigned to \emph{dnodes} as these are connected and disconnected (thus node 3 may be unused, whereas node 4 may be in use). Connected \emph{dnodes} can be grouped by associating them with a group number (a negative integer). The \emph{dvt} broadcasts console lines to all \emph{dnodes} of a group when a group is selected as the current target.\\
+
+\begin{tabular}{>{\sffamily\bfseries}p{1cm}>{\sffamily}p{9cm}}
+\_csu    & (hostname) port\# group\# $<$l opdssize excssize dictssize vmsize\_in\_MB userdictsize $>$ $|$ ---\\\\
+\end{tabular}
+
+\noindent includes the functions of \emph{\_c} but also sets up the storage capacities of the \emph{dnode} to the dimensions specified in the array operand (`opdssize', for instance, is the capacity, in objects, of the \emph{dnode's} operand stack). It also instructs the \emph{dnode} to read and interpret the `startup\_dnode.d' file, which defines a library of procedures in the primed \emph{dnode}.\\
+
+\begin{tabular}{>{\sffamily\bfseries}l>{\sffamily}l}
+c\_    & --- $|$ ---\\\\
+\end{tabular}
+
+\noindent prints on the \emph{dvt} console screen the node numbers of the dvt (which is $0$), and of all currently connected \emph{dnodes} together with their host name, port number, status (`ready' or `busy'), and group number.\\  
+
+
+\begin{tabular}{>{\sffamily\bfseries}l>{\sffamily}l}
+\_dc    & node\#  $|$ ---\\\\
+\end{tabular}
+
+\noindent disconnects the specified \emph{dnode} from this \emph{dvt}. Note that you can connect, disconnect, and reconnect \emph{dnodes} as often as you wish without interfering with ongoing activity in the \emph{dnode's} D machine: the \emph{dnode} can continue to execute D code that constitutes a long job, independent of whether it is connected to a \empf{dvt}. \emph{\_dc} does not tell the node to close \emph{Xwindows} activity on the \epmh{dvt} host. You can continue to interact with the \emph{dnode} using these windows, even though the \emph{dnode} is no longer connected to a \emph{dvt} on this host.\\
+
+\begin{tabular}{>{\sffamily\bfseries}l>{\sffamily}l}
+\_dx    & node\#  $|$ ---\\\\
+\end{tabular}
+
+\noindent acts like \emph{\_dc} but also instructs the \emph{dnode} being disconnected from the \emph{dvt} to close all \emph{Xwindows} activities with the \emph{dvt} host.\\
+
+\begin{tabular}{>{\sffamily\bfseries}l>{\sffamily}l}
+kill    & node\#  $|$ ---\\\\
+\end{tabular}
+
+\noindent acts like \emph{\_dx}, and, in addition, tells the \emph{dnode} being disconnected to resize its memory allocations to those of a dormant \emph{dnode}. This terminates all ongoing activity in that \emph{dnode}, except its listening to incoming connection requests.\\
+
+\begin{tabular}{>{\sffamily\bfseries}l>{\sffamily}l}
+\_t    & node\#\_or\_group\#  $|$ ---\\\\
+\end{tabular} 
+
+\noindent selects a node or group of nodes as the target(s) for subsequent console input. (again, node $0$ directs keyboard input to the \emph{dvt} itself).\\
+
+\begin{tabular}{>{\sffamily\bfseries}l>{\sffamily}l}
+\_r    & node\#  $|$ ---\\\\
+\end{tabular} 
+
+\noindent forces the `ready` status of the node. When a \emph{dnode} that is the currently selected target is given a console line to execute, the status of this node is set to `busy`, and the console line is delivered to the \emph{dnode} together with a request to inform the \emph{dvt} when the activity started by this console line has been completed (or stopped). When the \emph{dvt} receives this completion message, it sets the status of the node to `ready'. This mechanism ensures that activity initiated by a console line delivered to a \emph{dnode} will be completed before you can give another console line to the \emph{dnode}. (\emph{dnodes} interrupt their activity to respond to requests made on their connections). If you try to give a console line to a `busy' node, the \emph{dvt} will refuse (discard) it and warn you by the console message ``Wait!''. You can override this mechanism by prefixing your console line with a tag (see below). Note that this mechanism belongs to the \emph{dvt} --- \emph{dnodes} are unaware of its existence.
+
+The functions of several of the \emph{dvt} commands described above are duplicated, in a more convenient interface, by an\emph{Xwindows} window entitled ``TheHorses''.
+
+\paragraph{Tagged console lines.} Certain characters when appearing as the first character of a console line direct the \emph{dvt} to treat the remainder of the console line in some special way. The effect of the tag will also depend on the currently selected target type, \emph{dvt} or \emph{dnode}.
+
+\begin{description}
+\item[No tag] \emph{dvt}: execute line as D code\\
+              \emph{dnode}: transmit line as D code, observing the `ready/busy` rule\\
+\item[!] \emph{dvt}: execute line as D code\\
+         \emph{dnode}: transmit line as D code, disregarding the `ready/busy` rule\\ 
+\item[\$] \emph{dvt}: submit line as Unix shell command to the host of the \emph{dvt}\\
+          \emph{dnode}: transmit line and submit it as Unix shell command to the host of the \emph{dnode}, observing the `ready/busy' rule\\
+\item[\#] \emph{dvt}: execute line in the D machine of the \emph{dvt}, use results to build a Unix shell command, submit the shell command to the host of the \emph{dvt}\\
+          \emph{dnode}: execute line in the D machine of the \emph{dvt}, use results to build a Unix shell command, submit the shell command to the host of the \emph{dnode}, observing the `ready/busy' rule\\
+\item[@] \emph{dvt}: execute line in the D machine of the \emph{dvt}, use results to build a Unix shell command, submit the shell command to the host of the \emph{dvt}\\
+         \emph{dnode}: transmit the line to the \emph{dnode} and execute it in the D machine of the \emph{dnode}; make the \emph{dnode} build build a Unix shell command from the results, and submit it to the host of the \emph{dnode}, observing the `ready/busy' rule
+\end{description}
+
+The last two tags have complex effects --- you will hardly use them when typing console lines (they rather are used in `macros' produced by clicks into the ``DVT macros'' window maintained by the \emph{dvt} when it uses \emph{Xwindows}.
+
+\subsection{The \emph{Xwindows} enhancements of the \emph{dvt}}
+
+When the \emph{dvt} process is running on a host that provides an \emph{Xwindows} server, it will create and maintain three windows, two of which are \emph{dvt}-specific and therefore fully described in this section. Moreover, a \emph{dvt} using \emph{Xwindows} needs to be complemented by an \emph{emacs} environment. The Makefile of the D machine package also sets up enhancements for \emph{emacs}. One enhancement is that D code is recognized and its elements are highlighted on edit and shell screens. Another enhancement consists in a set of shortcut \emph{emacs} commands. In particular, `M-x dvt' will start up a \emph{dvt} in an \emph{emacs} shell. This should be your standard way of starting a \emph{dvt}. The three windows maintained by the \emph{dvt} are:
+
+\begin{description}
+\item[TheHorses] This window shows the list of nodes with the \emph{dvt} on top, followed by the connected \emph{dnodes} (described as hostname: port\#). The backround of each entry shows the status of the node: white for `ready', and green for `busy'. Currently selected target nodes are highlighted by showing their name(s) in blue and boldface. You can select a node as target by a simple mouse click. You can select a group of nodes as targets by control/clicking on one of the nodes of the group. Only one node or group will be selected at a given time. You can force the \emph{dvt} to set a node to the `ready' status by shift/clicking on it. If you have a multi-button mouse: shift/click and control/click are equivalent to clicking on buttons 2 or 3.
+
+\item[DVT macros] displays a list of command mnemonics. When you click on a mnemonic, a string is placed into the console screen. You can execute this string as a console line by moving the cursor over it and pressing `return' (function key `F1' combines both actions). Typically, you will have to click two mnemonics to produce a complete command, one designating a source and the other a destination object. The source and destination objects, in turn, are derived from objects selected in the third window, called `TheEye`. For instance, you may select a .tex file using \emph{TheEye}, and click, in \emph{DVT macros}, `tex' on the `PrintFrom' line, and `pdf' on the `PrintTo' line, followed by pressing `F1'. This will compile the .tex file and submit it to \emph{Preview} for display and optional printing. The services of the \emph{DVT macros} are defined by shell scripts and by D code contained in `startup\_dvt.d'. Note that you can modify console lines produced by \emph{DVT macros} by editing them prior to submitting them for execution: clicking mnemonics of \emph{DVT macros} simply provides templates for commands that are hard to remember.
+
+\item[TheEye] lets you view any object contained in the associated D machine, and any file system known to the host from which the \emph{TheEye} originates. \emph{TheEye} is the universal browser of D machines. Both the \emph{dvt} and \emph{dnodes} connected to it will create and maintain their own \emph{TheEye} windows (with their owners identified in the window header). The use of \emph{TheEye} is described in a separate section.
+
+\end{description}
+
+\paragraph{Shortcuts and specific \emph{emacs} commands}
+
+
+  
+
+\section{The D node (\emph{dnode})}
+
+There is much less to be said about the workhorses, the \emph{dnodes}, than there is to be said about their supervisor, the \emph{dvt}. A \emph{dnode} is alerted (from a state of dormancy that uses no CPU cycles, or amidst the execution of D code) whenever a connection request is made to it, when an established connection transmits a request, and when an established \emph{Xwindows} connection requires attention. The code that schedules reactions to such events is buried in the mill of the \emph{dnode} (in the \emph{dvt} these events are attended to by code written in D). The \emph{dnode} mill tests for external conditions at intervals no greater than the time needed to go round 100 turns, which typically is a very small amount of time on a human scale. When an event is detected, it is attended to by invoking D code that does so, thereby \emph{interrupting} the execution of D code that might have been in progress. In this sense, the \emph{dnode} acts as a slave to any other D machine that makes a request to it. It is the responsibility of requesting machines to stay within the bounds of the reasonable.
+
+A responsible supervisor of \emph{dnodes} is the \emph{dvt} version of the D machine. Nevertheless, one might imagine other forms of responsible uses of \emph{dnodes}. In designing such uses, remember: whatever you order, a \emph{dnode} will execute like the demon of Aladdin's lamp. You get exactly what you order, no questions asked.
+
+The transactions needed to establish the connection between a \emph{dvt} and a \emph{dnode} are handled by the D code of the \emph{dvt}. The \emph{dvt} tells the \emph{dnode} what it has to do at its own end of the connection. The respective procedures all reside in the \emph{dvt}. The `startup\_dnode.d' file contains only a library of procedures that are needed in any D machine. These are described in a separate section of Chapter 3.

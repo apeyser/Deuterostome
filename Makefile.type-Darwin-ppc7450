@@ -1,0 +1,25 @@
+#-*-makefile-*-
+
+CPPFLAGS += \
+	-DOSX -I/usr/X11R6/include -no-cpp-precomp
+
+CFLAGS += \
+	$(ccwarn) $(CPPFLAGS) \
+	-g -O3 -pipe \
+	-mcpu=7450 -mtune=7450 \
+	-fno-math-errno \
+	-fno-trapping-math \
+	-fno-rounding-math \
+	-fno-signaling-nans \
+	-fcx-limited-range \
+	-dynamic -fno-unsigned-char \
+	-Wno-pointer-sign
+
+CLFLAGS += -arch ppc7450
+CSFLAGS += -bundle -undefined dynamic_lookup
+
+%.so: CFLAGS += -bundle
+
+export MACOSX_DEPLOYMENT_TARGET=10.4
+include Makefile.main
+

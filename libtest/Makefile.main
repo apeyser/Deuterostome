@@ -1,0 +1,21 @@
+#-*-makefile-*-
+
+include ../Makefile.base
+
+sources = libtest.c libtest2.c
+
+ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),distclean)
+include $(sources:%.c=%.dep)
+endif
+endif
+
+all: libtest.so libtest2.so
+
+install: $(LIBPREFIX).dir $(LIBPREFIX)/libtest.so $(LIBPREFIX)/libtest2.so
+
+$(LIBPREFIX)/libtest.so: libtest.so ; $(installexec)
+$(LIBPREFIX)/libtest2.so: libtest2.so ; $(installexec)
+
+clean: ; -rm *.o *.dep *.so 
+

@@ -1,0 +1,38 @@
+|------------------------------ DVT macros ---------------------------
+
+50 dict dup begin
+  /myname (DVT macros) def
+  /myshortname myname def
+  /keywords {
+      (Files:) PRE (  MakeDir) KEY (  Remove) KEY
+         (  Copy) KEY (  Save) KEY (  Load) KEY (  Open) KEY NL
+
+      (PrintFrom:) PRE (  Talk) KEY (  Ascii) KEY (  PS) KEY
+         ( xPS) KEY ( pdf) KEY ( dvi) KEY ( tex) KEY NL      
+      (PrintTo:) PRE (  gs) KEY (  paper) KEY (  pdf) KEY (  dvi) KEY 10 GAP
+    } def
+
+   /commands [
+|-- Files
+      (#\(mkdir \) fax faxLpage\n)
+      (#\(rm -rf \) fax faxRpage\n)
+      (#\(cp -R \) fax faxRpage \( \) fax faxLpage\n)
+      (getRpage getLpage tofiles\n)
+      (getRpage dup 0 get exch 1 get { exch dup 3 -1 roll fromfiles } forall pop\n)
+     (#\(emacsclient -n \) fax faxRpage\n)
+|-- PrintFrom
+      (#\(@SHPREFIX@/print.sh talk \) fax )
+      (#\(@SHPREFIX@/print.sh ascii \) fax )
+      (#\(@SHPREFIX@/print.sh ps \) fax )
+      (#\(@SHPREFIX@/print.sh xps \) fax )
+      (#\(@SHPREFIX@/print.sh pdf \) fax )
+      (#\(@SHPREFIX@/print.sh dvi \) fax )
+      (#\(@SHPREFIX@/print.sh tex \) fax )
+|-- PrintTo
+      (\(gs \) fax faxRpage\n)
+      (\(lw \) fax faxRpage\n)
+      (\(xpdf \) fax faxRpage\n)
+      (\(xdvi \) fax faxRpage\n)
+
+    ] def
+end makemacros

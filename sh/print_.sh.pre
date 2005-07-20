@@ -1,0 +1,272 @@
+#! /bin/bash
+
+case "$1" in
+    --wait)   wait=true; shift;;
+    --nowait) wait=""  ; shift;;
+    *)        wait=""         ;;
+esac
+
+source="$1"; shift
+dest="$1"; shift
+
+if [ "$1" == "--pin" ] ; then shift; pin="$1" ; shift ; else pin="" ; fi
+if [ "$1" == "--pout" ] ; then shift; pout="$1"; shift ; else pout="" ; fi
+
+function notransform()
+{
+    echo "No transform from $1 to $2" 1>&2
+    exit -1
+}
+
+function dirname_()
+{
+    dirname "$i"
+}
+
+function basename_()
+{ 
+    basename "$i"
+}
+
+function pap_()
+{
+    host="klutz2"
+    printer="LaserWriter Pro 630"
+    cat "$@" | ssh "$host" "atprint '$printer'"
+    #cat "$@" | /mnt/Lab1/dm-3.0/pap.pl 1200 -p "$printer"
+}
+
+function concat()
+{
+    tmp=$(tempfile)
+    #{ cat "$@" ; echo "clear /a arct"; }  \
+    cat "$@" \
+	>$tmp
+}
+
+function talk_gs()
+{
+    #xterm $pin -e 
+    gs $pout
+}
+
+function talk_lw()
+{
+    #xterm $pin -e
+    notransform talk lw
+    #pap -p "LaserWriter Pro 630" $pout
+}
+
+function talk_xpdf()
+{
+    notransform talk xpdf
+}
+
+function talk_xdvi()
+{
+    notransform talk xdvi
+}
+
+function ascii_gs()
+{
+    #xterm -e 
+    gs -sPAPERSIZE=letter -dBATCH $pout \
+	<(a2ps -o- -2 --print-anyway=1 --medium=Letter $pin "$@")
+}
+
+function xpdf()
+{
+    launch -i com.apple.Preview "$@"
+}
+
+function xpdfprint()
+{
+    lp "$@"
+}
+
+function ascii_xpdf()
+{
+    for i ; do 
+	a2ps -o- -2 --print-anyway=1 --medium=Letter $pin "$i" \
+	    | ps2pdf - "$i.pdf"
+	xpdf "$i.pdf" &
+    done
+}   
+
+function ascii_lw()
+{
+    for i ; do 
+	a2ps -o- -2 --print-anyway=1 --medium=Letter $pin "$i" \
+	    | ps2pdf - "$i.pdf"
+	xpdfprint "$i.pdf" &
+    done
+}
+
+function ascii_xdvi()
+{
+    notransform ascii xdvi
+}
+
+function ps_gs()
+{
+    for i ; do 
+	#xterm $pin -e 
+	gs -sPAPERSIZE=letter -dBATCH $pout "$i" 
+    done
+}
+
+function ps_xpdf()
+{
+    for i ; do 
+	ps2pdf "$i" "$i.pdf" 
+	xpdf "$i.pdf" & 
+    done
+}
+
+function ps_lw()
+{
+    for i ; do 
+	ps2pdf "$i" "$i.pdf" 
+	xpdfprint "$i.pdf" & 
+    done
+}
+
+function ps_xdvi()
+{
+    notransform ps xdvi
+}
+
+function xps_gs()
+{
+    #xterm $pin -e 
+    gs -sPAPERSIZE=letter -dBATCH $pout \
+	@PSPREFIX@/{form_2,text,graf_1,struct}.ps \
+	"$@"
+}
+
+function xps_lw()
+{
+    for i ; do
+	cat @PSPREFIX@/{form_2,text,graf_1,struct}.ps "$i" \
+	    | ps2pdf13 -dEmbedAllFonts=true - "$i.pdf"
+	xpdfprint "$i.pdf" &
+    done
+}
+
+function xps_xpdf()
+{
+    for i ; do
+	cat @PSPREFIX@/{form_1,text,graf_1,struct}.ps "$i" \
+	    | ps2pdf13 -dEmbedAllFonts=true - "$i.pdf"
+	xpdf "$i.pdf" &
+    done
+}
+
+function xps_xdvi()
+{
+    notransform xps xdvi
+}
+
+function pdf_gs()
+{
+    for i ; do j[${#j[@]}]="$i.ps"; pdf2ps $pin "$i" "$i.ps" ; done
+    ps_gs "${j[@]}"
+}
+
+function pdf_lw()
+{
+    xpdfprint "$@"
+}
+
+function pdf_xpdf()
+{
+    for i ; do xpdf "$i" & done
+}
+
+function pdf_xdvi()
+{
+    notransform pdf xdvi
+}
+
+function dvi_gs()
+{
+    for i ; do 
+	j[${#j[@]}]="$i.ps"
+	dvips -t letter $pin "$i" -o "$i.ps" 
+    done
+    ps_gs "${j[@]}"
+}
+
+function dvi_lw()
+{
+    for i ; do 
+	j[${#j[@]}]="$i.pdf"
+	dvipdf -sPAPERSIZE=letter $pin "$i" "$i.pdf"
+    done
+    pdf_lw "${j[@]}"
+}
+
+function dvi_xpdf()
+{
+    for i ; do 
+	j[${#j[@]}]="$i.pdf"
+	dvipdf -sPAPERSIZE=letter $pin "$i" "$i.pdf" ; done
+    pdf_xpdf "${j[@]}"
+}
+
+function dvi_xdvi()
+{
+    for i ; do xdvi "$i" & done
+}
+
+function tex_gs()
+{
+    for i ; do 
+	j[${#j[@]}]="${i%.tex}.dvi"
+	( 
+	    cd "$(dirname_)"
+	    latex "\\nonstopmode\\input{$(basename_)}" 
+	) 
+    done
+    dvi_gs "${j[@]}"
+}
+
+function tex_lw()
+{
+    for i ; do 
+	j[${#j[@]}]="${i%.tex}.dvi"
+	(
+	    cd "$(dirname_)"
+	    latex "\\nonstopmode\\input{$(basename_)}" 
+	) 
+    done
+    dvi_lw "${j[@]}"
+}
+
+function tex_xpdf()
+{
+    for i ; do 
+	j[${#j[@]}]="${i%.tex}.pdf"
+	(
+	    cd "$(dirname_)"
+	    pdflatex "\\nonstopmode\\input{$(basename_)}" 
+	) 
+    done
+    pdf_xpdf "${j[@]}"
+}
+
+function tex_xdvi()
+{
+    for i ; do 
+	j[${#j[@]}]="${i%.tex}.dvi"
+	(
+	    cd "$(dirname_)"
+	    latex "\\nonstopmode\\input{$(basename_)}"
+	)
+    done
+    dvi_xdvi "${j[@]}"
+}
+
+eval "${source}_${dest}" "$@"
+echo "Done printing $@"
+if [ "$wait" ] ; then read -p "Hit return to exit..." ; fi

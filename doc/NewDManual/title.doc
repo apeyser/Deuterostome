@@ -1,0 +1,68 @@
+
+/* ------------------------------------------- test phase */
+
+x_t:
+if (TickCount() >= nexttick)
+   { nexttick = TickCount() + 6; return(TIMER); }
+if (FREEexecs <= FLOORexecs) return(DONE);
+
+/* ---------------------------------------- fetch phase */
+x_f: 
+fclass = CLASS(x_1);
+if (fclass == LIST) goto f_list; 
+if (fclass == ARRAY) goto f_arr;
+if (fclass < BOX) { f = x_1; FREEexecs = x_1; goto x_e; }
+errsource = fetch_err; return(CORR_OBJ);
+
+f_arr:
+if (TAG(x_1) == (ARRAY | BYTETYPE))
+   { if ((retc = tokenize(x_1) != OK))
+      { if (retc == DONE) { FREEexecs = x_1; goto x_t; }
+        errsource = transl_err; return(retc);
+      }
+     f = FREEopds = o_1;
+   } else f = x_1;
+goto x_e;
+
+f_list:
+if (VALUE_BASE(x_1) >= LIST_CEIL(x_1))
+   { FREEexecs = x_1; goto x_t; }
+f = (B *)VALUE_BASE(x_1);
+if ((VALUE_BASE(x_1) += FRAMEBYTES) >= LIST_CEIL(x_1))
+   FREEexecs = x_1;
+
+/* -----------------------------------------  execution phase */
+x_e: 
+if ((ATTR(f) & ACTIVE) == 0) goto e_opd;
+if ((fclass = CLASS(f)) == OP) goto e_op;
+if (fclass == NAME) goto e_name;
+if (fclass == NULL) goto x_t;
+if (fclass > BOX) { retc = CORR_OBJ; goto e_er_1; }
+
+e_opd:                               /* push object on operand stack */
+if (FREEopds >= CEILopds) { retc = OPDS_OVF; goto e_er_1; }
+moveframe(f,o1); FREEopds = o2;
+goto x_t;
+
+e_op:                                /* only C operators for the time! */
+tmis = (OPER)OP_CODE(f);
+if ((retc = (*tmis)()) != OK)
+   { errsource = (B *)OP_NAME(f); return(retc); }
+goto x_t;
+
+e_name:
+dict = FREEdicts;
+while ((dict -= FRAMEBYTES) >= FLOORdicts)
+   { if ((af = lookup(f, (B *)(VALUE_BASE(dict)))) != 0L)
+       { f = af;
+         if (ATTR(af) & ACTIVE) 
+          { if (FREEexecs >= CEILexecs) { retc = EXECS_OVF; goto e_er_1; }
+            moveframe(f,x1); FREEexecs = x2; goto x_t;
+          } else { goto e_opd; } 
+        }
+   }
+pullname(f,undfn_buf);  errsource = undfn_buf; return(UNDF);
+
+e_er_1:   errsource = exec_err; return(retc);
+}
+

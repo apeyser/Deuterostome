@@ -1,0 +1,13 @@
+(setq load-path (append (list nil "@ELPREFIX@") load-path))
+(setenv "TERM" "ansi")
+
+;; load local functions
+;;(require 'my-buffer-funcs)
+(setq init-el-compile nil)
+(eval-when-compile (setq init-el-compile t))
+(eval-and-compile (if (not init-el-compile) (require 'd-mode)))
+
+(set-face-foreground 'd-mode-oref-face "olivedrab")
+(set-face-bold-p 'd-mode-oref-face nil)
+
+(eval-and-compile (if (not init-el-compile) (require 'd-comint-mode)))

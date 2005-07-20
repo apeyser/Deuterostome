@@ -1,0 +1,7 @@
+#! /bin/bash
+
+if [ -z "$DISPLAY" ] ; then
+    exec @SHPREFIX@/print_.sh --nowait "$@"
+else
+    exec xterm -class d_machine -e @SHPREFIX@/print_.sh --wait "$@"
+fi

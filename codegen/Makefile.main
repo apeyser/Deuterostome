@@ -1,0 +1,16 @@
+#-*-makefile-*-
+
+include ../Makefile.base
+
+sources = dmnuminc.d dsp1f.d
+
+../src/dmnuminc.c: dmnuminc.d $(PREFIX)/dvt
+	echo '($(<D)/) ($(<F)) fromfiles dmnuminc begin ($(@D)/) all end quit' \
+	| $(PREFIX)/dvt
+
+../src/dsp1f.c: dsp1f.d $(PREFIX)/dvt
+	echo '($(<D)/) ($(<F)) fromfiles dsp1 begin ($(@D)/) all end quit' \
+	| $(PREFIX)/dvt
+
+all: ../src/dmnuminc.c ../src/dsp1f.c
+

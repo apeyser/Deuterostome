@@ -1,0 +1,27 @@
+#!/bin/bash 
+
+cd @PREFIX@
+
+#trap "" SIGCHLD
+set -m
+
+case $TERM in
+    xterm*|rxvt|eterm)
+	echo -ne "\033]0;${0}:${1}@${HOSTNAME%%.*}:${DISPLAY}\007"
+	;;
+    screen)
+	echo -ne "\033_${0}:${1}@${HOSTNAME%%.*}:${DISPLAY}\033\\"
+	;;
+esac
+
+while true
+do
+  echo -n "Starting dnode on '$DISPLAY':"
+  ./dnode "$1" &
+  sudo renice "$2" $! 
+  wait $! && exit
+  echo "Trying again..."
+  sleep 5
+done
+
+

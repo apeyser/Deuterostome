@@ -1,0 +1,221 @@
+
+\chapter{INTRODUCTION}
+
+`D' is the name of a virtual computer and also names the native language of the machine. D is implemented by a program that is coded in C and runs on top of Unix. D is a general-purpose computer.
+
+\section{A computer of objects}
+
+The  D computer works with quanta of information,  which we  shall  call `objects'  (adding  a usage to an existing term,  rather  than  inventing something like `quarks').  An object comprises a \textbf{value} (the essence, from your   point  of  view)  and  a  \textbf{description}  that  carries  a   thorough specification (transparently used by the machine,  but also accessible to you).  Objects hold pieces of information that are familiar to you and `understood' by the machine. Objects thus provide  a common ground between person and machine.
+
+D  sets out from a few varieties of \textbf{simple  object}.  Among  them,  \emph{name}, \emph{numeral},  and \emph{operator} are the workhorses.  Simple objects serve as  the building  material  of \textbf{composite objects}.  There  are  several  composite varieties,  such as the \emph{list} and  the  \emph{dictionary}. Composite objects themselves can become elements of higher composite objects, and so on.  There  is no logical limit to the internal complexity  of  composite objects that you create.  With regard to quantity, anything from a single measured sample to a data base of the accumulated experimental results of several years can become one object to the D machine.
+
+Objects can be worked on as data, or they can instruct the machine how to work on objects. `Datum' or `instruction' are a changeable attribute of information,  not fundamental  properties. Because  one  and the same form fits datum  and  instruction,  these  two varieties of information can be combined into composite objects that represent  both \textbf{passive and active properties} of things that you wish  to work with in the computer.
+
+D  retrieves  objects by \textbf{association}.  Collections of objects  that  are mutually associated in some sense can be created in the form of composite objects.  Composite  objects that hold associations of objects are  \textbf{lists} and  \textbf{dictionaries}.  Lists  hold  a linear array of objects  that  are  accessed randomly or sequentially through a numerical index.  Dictionaries hold an array of paired entries, of which one is a name, and the other any object that is associated with the name.  References within  dictionaries are made through the name.  Lists and dictionaries are dynamic:  entries are  made and re-defined at any time.
+
+Albeit  a logical entity,  the value and the description of a  composite object are physically distinct.  When you logically designate a composite object,  you  physically  refer  to  a  description  of  the  object.  By physically  duplicating  only  the description  of  a  composite  object, multiple   logical  copies  of  the  composite  object  can  be   created economically and used in multiple associations.
+
+D  lets you create composite objects that comprise a subset  of  the value of a parent composite object. These \textbf{children objects} do not receive a duplicate of the parent's value:  they share one and the same original. Children  objects are combined with other objects (including children  of other composite objects) into new composite objects in unlimited cut-and-paste operations.  Altogether,  these techniques,  transparently based on object  descriptions  as the representatives of values,  let  you  create multiple specific access schemes to a body of information. Thus the capability of building data bases is innate to D.
+
+The  most  common method for the retrieval of a D object is  through  an associated  name,  a time-honoured practice.  Upon every reference  to  a name,  however,  the D machine determines the \textbf{currently associated object} through  an ad hoc search of the vocabulary in use.  This  vocabulary  is subject to change. Names can be defined or re-defined in each dictionary, and  dictionaries as a whole can be moved in and out of  use.  The machine  can  learn new  terms. It can react intelligibly to terms, much like craftsmen of different trades act upon their specific readings of a blueprint.  Furthermore,  by switching among contexts defined by dictionaries, the machine can randomly attend to a variety of tasks without confusing their matters.  The instructions to  control  these capabilities are very simple. 
+
+A  D  machine at work \emph{feeds on objects},  consuming them one at  a  time. Every received object is dealt with immediately according to the rules of the  \textbf{reverse  Polish  notation} (RPN,  as  familiar  from  Hewlett-Packard calculators). A consumed object either is transferred to an operand stack to serve as operand, or initiates one or several operations. An operation consumes some or all of the objects accumulated on the operand stack, and in turn may push result objects on the stack,  ready for being  processed by  subsequent operations.  By an ironclad design  rule,  operations  are unaware  of  their  precursors  or  followers: that  is  your  exclusive privilege.  Information  passed  from one operation to  another  by  the implicit  use of the stack needs not be specified over and over.  This keeps  the  code lean and the focus on the action.  Perhaps the most important windfall of RPN is that, for any single object that you feed the machine, you know  the exact consequences and the exact instant when these occur.  No high-level syntax, however well you keep abreast with its twists, can substitute for this knowledge.
+
+The  D  machine  accepts  objects in  two  forms:  \textbf{text} or  \textbf{binary}.  It recognizes automatically which form is being presented (by inspecting the description of the composite source object).  When working from  text,  D automatically   translates  text  tokens  into  binary   objects  before submitting  them to its internal mill of binaries.  This front end  makes obsolete  intermediaries  such  as  command  line   interpreters,   batch processors,  compilers, linkers, or loaders of executable files, and spreadsheat and data base front ends, together with their many idioms. (There goes an industry!)  Binary objects are readily converted into their text form and passed around among different platforms. In effect, one \emph{lingua franca}, D, serves to concisely express and communicate all kinds of datum or instruction.
+
+As a language of action,  D thrives on verbs,  here called \emph{operators} and \emph{procedures}. \textbf{Operators} invoke hardware code.  Some  operators  do jobs as small as  those  of  hardware instructions of the host machine,  but the majority provide services that require  many host instructions.  Polymorphic D operators accept  diverse kinds of object to work on,  and tune themselves using information in the object  descriptions.   For  instance,   the  \emph{add}  operator  takes  any combination of numeral types,  performs the addition in several  possible forms of arithmetic or precision,  and accommodates all permutations of scalar and array.  Old and new  undefined  values  are recognized  and  propagated into the results without  need  for  explicit exception handling.  Your plan can be formulated in D without  attracting the usual cloud of confusing, albeit necessary, second thoughts.
+
+Versatile  operators keep D programs concise and comfortable  to  write. Furthermore,  D  lets you define new operators in the form of  \textbf{procedures} (lists  of  objects  to be executed).  The  overhead  of  composition  is minimal.  In the text representation, a pair of \{ \} brackets wrap a set of objects  that constitute the procedure;  a subsequent  operation  usually gives the new tool a name.  Procedures being executed can use the  stack for  their operands and results as do the operators.  Thus,  there is  no formal  difference  between  references to an operator  and  those  to  a procedure.   This  continuity  fosters  the  fine-grain  decomposition  of instructions,  and,  together with explicit and well-thought names,  produces structured code that is intelligible to person and machine.
+
+While executing objects,  the machine \textbf{controls its own operation} much like  hardware that executes its native code.  Hence,  D can implement functions of operating systems, shells, graphical interfaces, debuggers, menus, tasks, or  whatever layers of instruction are desirable. Much of D's capacity of self-organization flows from a capacity sheepishly excluded from conventional programming models: data  and instructions are formed from one and the same set, objects. The D  machine can compute `instructions' like it  computes `data'.  This capacity is  a trademark  of life, from the cell chemistry to the human ability to reflect on your own thinking. No matter what your  problems  are: computed  instructions  offer  solid,   elegant,   and  sometimes  unique solutions  in cases that range from unspeakably boring to hair raising.
+
+Defining  a  problem in D involves developing a specific  vocabulary  of objects,  and  in this sense a new language.  D may be paraphrased  as \textbf{a language to make languages}.  Diversified vocabularies are one strength of the D machine; a strong stomach is another. Almost never will you have to write  an  ad hoc interpreter of your new idiom,  because  the  secondary language code can go right through the existing D  mill. D code resembles the `vectors' constructed by a molecular biologist: it achieves the desired product not by creating a new,  but by exploiting an existing,  machinery for expression.
+
+D likely differs from most programming techniques you have met because it does not use a `high-level' syntax. Rather than rules, D gives you verbs (\emph{operators}) to learn. D, in essence, is an unlimited collection of verbs. You  can work through  D's resident verbs by  installment, ignoring those you do not need,  gearing up as you go, and winding down as your project matures. You can invent your own verbs, use them, and discard them as you move on. Learning and re-learning of verbs and their usage is eased by the extreme simplicity of form. D code flows smoothly because it uses human words rather than computer expletives. The other surprise may be that, underneath its easy manners, D hides a Laconian.  
+
+D is \textbf{robust}, because it is simple and because it works with objects that include a thorough specification.  Its operators,  for example,  will  choose either  to  adapt to their operand objects or to reject the given objects  as unsuited  for  the  attempted  use  (this  summarizes  most  of   the safeguards necessary to let the machine steer clear of crashes). An  able defender of its own integrity, the machine abstains from questioning your designs in terms of selfish syntactical rules. Instead, D respects you:  it  accepts  every  word that you present and  executes  this  word \textbf{verbatim}.  This  may  remind you of the ways of a fool,  but it  is  also reminiscent  of the method of Socrates:  the machine dares you to  follow through  what  you conceive.  You are rewarded by  solutions  that  work, convince, and are delivered with egg-laying promptness.
+
+\section{Talking in Objects}
+
+The widely used languages,  Fortran,  Basic,  C, or Pascal, use a multi-level syntax: tokens form expressions, expressions statements, statements functions,  and  functions  programs.  D  uses a syntax  of  objects  and requires no rules of composition beyond those of constructing objects.
+
+You may wonder how D organizes objects into instructions.  A comparison of phrases  in  C and D shows that the  method  of  D  is  simple, consistent, and very generally useful.\\
+
+\begin{tabular}{>{\normalfont}l>{\sffamily\bfseries}l}
+The C statement:  & y = 9.8 * exp(-x/tau);\\\\
+could read in D:  & /y 9.8 x neg tau div exp mul def\\\\
+\end{tabular}
+
+\noindent The  C code assigns the result of an algebraic expression to a variable and neatly concludes the statement with a semicolon.  The D code is an open-ended  string of objects.  Like you walk by putting one foot in front of the other,  the D machine computes by executing one object in the  string after the other:\\
+
+\begin{tabular}{>{\sffamily\bfseries}p{1cm}>{\normalfont}p{9cm}}
+/y & pushes a name object of value `y' onto the operand stack; the `/' gives the name the \emph{passive} attribute, designating it for use as an operand (a literal)\\\\
+ 
+9.8 & pushes  a  numeral  object of value `9.8' onto  the  operand  stack (thereby `executing' the numeral)\\\\
+
+x & looks up the object associated with the name `x' (a numeral in  our case) and pushes a copy of it onto the operand stack (a name without  the `/' prefix receives the \emph{active} attribute, designating it for use in    a dictionary  search)\\\\
+
+neg & looks up the object associated with the name `neg',  which is an operator;  invokes the operator,  which negates the value of the top element of the operand stack (the copy of x)\\\\
+ 
+tau & pushes the object associated with `tau' onto the operand stack  (you got the idea)\\\\
+
+div & resolves to an operator, which divides the next-to-top element of the operand stack by the  top element, removes the divisor and divident from the stack, pushes the quotient\\\\
+ 
+exp & another operator, which replaces the top element of the operand stack by its exponential\\\\
+
+mul & an operator, which multiplies  the  top two elements of the operand stack  (9.8 and the exponential) with one another, replaces the factors by the product\\\\
+
+def & this  name resolves to an essential operator,  which  associates the  object at the top of the stack (the numeral result  of  the expression) with the name (`y',  now the next-to-top element  of the stack), and places the new association pair into the current dictionary for future reference.\\\\
+
+\end{tabular}
+
+\noindent D  code  thus  builds  on operands and operators  held  together  by  an invisible  glue,  the \emph{reverse Polish notation}.  The rule is  minimal:  an operator  expects that the operand stack contain a sufficient  number  of suitable operands.  Beyond that, there are \emph{no other formal constraints} on the order or choice of objects that form a D script.
+
+The C code has the appeal of high-school algebra:  sort of  familiar.  D uses  the more elegant and general  concept  of  operators.  Since elegance can be measured by the frugality of means,  let's count:  the  C example needs twelve tokens,  two more than D; C uses six kinds of token, D three. The advantage is on D, albeit small. We will note below that the distance grows steeply even with mild increases of difficulty.  D travels on foot where C gets only with heavy gear.
+
+The C code in this example is shorter to type than the D  code,  because it  employs  special characters as shorthands.  Good  D  style  generally abstains  from  shorthand in order to keep things  clear  and  consistent (shorthand  systems have a knack to befuddle their inventors).  You  will see  below that D lets you spell out in full what is needed for  clarity, and nevertheless allows you to be more concise than in shorthand C code.
+
+Having  looked  at algebra,  we may ask:  how does D express  a  control statement?  For  instance,  C implements a \emph{for} loop through  a  special grammatical  construct called a \emph{for-statement}.  D builds a  \emph{for}  loop through an operator and does so without grammatical ado.  Thus,  to  form the sum of the integers between 0 and 100 by brute force, you may write\\
+
+\begin{tabular}{>{\normalfont}l>{\sffamily\bfseries}l}
+
+In C: & for (k = sum = 0; k $<$= 100; k++)  sum += k;\\\\
+
+In D: & /sum 0   0 1 100 \{ add \} for   def\\\\
+
+\end{tabular}
+
+\noindent The  \emph{sum}  is  defined  as the effect of the  \emph{for}  operator  and  its operands  (i.e.  0 1 100 \{ add \}) onto a value seeded on the  stack,  0. \emph{for} executes  the loop body (the procedure,  { add }) once  for  each value from the initial 0,  by steps of 1,  to the limit 100.  The current count is passed to the procedure by pushing it on the operand stack.  The procedure in our example contains a single operator,  \emph{add},  which  adds the current count to the running sum maintained on the stack.
+
+The C \emph{for} statement is compact,  as it bristles of shorthands.  Yet it needs  20 tokens,  whereas the D statement has 11.  The C code uses  nine different kinds of token, the D code, four.
+
+To prime an array x of n real numbers with zeroes you may write\\
+
+\begin{tabular}{>{\normalfont}l>{\sffamily\bfseries}l>{\normalfont}r}
+
+In C: & for (k=0; k$<$n; k++) x[k] = 0.0; & (20 tokens)\\\\
+
+In D: & 0.0 x copy & (3 tokens)\\\\
+
+\end{tabular}
+
+\noindent There is no need not look for the champion here.  D uses an  intelligent operator that determines automatically the dimension of the object it  is working  with  and  controls  an internal  loop  accordingly.  In  the  C construct,  you are responsible for the count,  and an error in the limit variable can cause a crash;  you also have to reckon with C's expletives, which please a compiler but hardly a human.
+
+This example raises the question of how fast the intelligent D operators execute.  Obviously,  they  have to do a lot of object checking.  On  the other hand,  D operators absorb the innermost loop when working on  whole composite  objects  such  as arrays,  and then execute as  fast  as  host machine  code can do.  Only small-grain number crunching will  be  significantly slower.  But does this really matter?  Science is change, and the economy of   instructing  a  computer  for  a  new  twist  of  science   precedes considerations regarding the speed of computation (consider:  programming costs  \textbf{your} prime time,  whereas execution ties up a computer  and,  when numerically extensive,  often can use many boxes around the clock). Furthermore, after stable D code has evolved,  it always can be speeded by replacing bottlenecks by fast ad hoc operators written in C (there exists a mechanism for doing just that).  This still is by far less work than developing the entire project in a language like C.
+
+Moving up in syntax, let's cast the exponential expression from before as a  function,  such that x and tau are submitted and the expression  value returned:\\
+
+\begin{tabular}{>{\normalfont}l>{\sffamily\bfseries}l>{\normalfont}r}
+
+In C: & float myexp(tau,x) & (27 tokens)\\
+      & float tau,x;\\
+      & \{\\
+      & return(9.8 * exp(-x/tau));\\
+      & \}\\\\
+In D: & /myexp \{ & (10 tokens)\\
+      & div neg exp 9.8 mul\\
+      & \} def\\\\
+\end{tabular}
+
+\noindent You associate the name \emph{myexp} with a procedure,  whose body is  enclosed between \{\}.  When you enter this code,  the objects in the procedure body are not executed: they are translated into their internal form and stored for later invokation (the D analog of `compilation'). Invokations of this function/procedure could read:\\
+
+\begin{tabular}{>{\normalfont}l>{\sffamily\bfseries}l}
+In C: & y = myexp(x,tau);\\\\
+In D: & /y x tau myexp def\\\\
+\end{tabular}
+
+\noindent Both  languages provide the means for partitioning code  into  re-usable tools  (functions in C,  procedures in D).  Both use a stack to  transfer arguments.  C  functions can take many arguments and return at  most  one value,  whereas  D procedures can return several values. Are things in C and D really that similar? They are not.
+
+The  compiled  C function is linked  into  a  program.  The  function thenceforth stays as is,  subserves the program,  and can be invoked only from  the  context of the program.  The  D  procedure,  in  contrast,  is assimilated as an individual object into the machine.  Any D code already present, passing through, or assimilated thereafter can use the procedure or be used by it. Moreover, the procedure thus assimilated is not forever cast as is, for two reasons: (1) because you can edit the procedure in memory, (2) because you can replace the entire procedure associated with a name by a new one: the name-object associations are changeable. (Even  intrinsic operators do not `own' their names;  hence, there are no `reserved words' in  D and, conversely, you can substitute or expand system operators by procedures that you associate with the former operator names).  In  effect,  whereas the elements of a C program are  rigid  and welded together, those of a D process remain ductile and able to form new connections.
+
+Although  D  objects  can  assemble  ad  hoc  in  the   machine,   their relationships are tightly controllable.  The method is encapsulation. The following code invokes a procedure twice,  each time providing it with  a different context by executing it with different current dictionaries:\\
+
+\begin{tabular}{>{\normalfont}l>{\sffamily\bfseries}l}
+ & dict\_A begin that\_procedure end\\
+ & dict\_B begin that\_procedure end\\\\
+\end{tabular}
+
+\noindent \emph{that\_procedure} can retrieve objects from all dictionaries currently  on the dictionary stack.  If it defines or re-defines objects in the  course of  its execution,  these changes are made exclusively in the  dictionary placed  on  top of the dictionary stack through the \emph{begin} operator  (and later removed by \emph{end)});  this holds true for the entire dynamic context of \emph{that\_procedure}.  The current dictionary, hence, provides a semi-permeable capsule around the procedure.  The invoking program can put objects to be used  by the procedure into the capsule,  read results deposited  in  the capsule,  or  may  leave  the capsule alone as a  private  space  of  the procedure.  Since any number of capsules can be maintained, the procedure can be used randomly in varying contexts without a risk of confusion.
+
+Encapsulation is a responsibility of the caller. This greatly simplifies the  writing of procedures,  because no attention needs be given  to  the scope  of  their object names:  you can write along as if  there  was  no possibility  of  interference  with other code.  This  technique  is  the opposite  to C's approach to control access,  where the lexical scope  is determined by declarations contained in each function.  The encapsulation technique is used by operating systems, to isolate the system itself from user  processes and one user process from another.  It is the  method  of choice in all systems that do not \emph{a priori} restrict the players.
+
+D  extends encapsulation to the flow of control.  You can  execute  code with  the  provision that control can return immediately to  the  calling code,  cutting through a nest of pending procedures or loops. Consider as an example:\\
+
+\begin{tabular}{>{\normalfont}l>{\sffamily\bfseries}l}
+ & \{ my\_program \} stopped \\\\
+\end{tabular}
+
+\noindent The operator \emph{stopped} invokes the procedure operand,  which  contains  a reference  to a user program.  If \emph{my\_program} executes the operator \emph{stop}  upon  recognizing a severe problem anywhere within its  dynamic  context, execution resumes with the object following \emph{stopped} (a boolean object  is returned  on  the operand stack to inform the caller about  the  kind  of termination).  D provides a hierarchy of such escape mechanisms by  which unpredicted events trigger orderly retreats to prepared  positions.  Most procedures can be written on the assumption that things go well,  because surprises are passed from their discoverer straight to the supervisor  of the  context  rather than bubble back through a chain  of  command where they would require attention at every intermediate level.
+
+We now turn to composite objects.  Such objects (and nests thereof)  are not  `declared' like a C function or structure.  D operators let you \emph{build} such  objects  from  constituent  objects,   or,  conversely,  \emph{dissect}  a composite  object  into smaller entities for specific  uses.  D  objects, hence, are inherently dynamic. The following examples produce some composite objects:\\
+
+\begin{tabular}{>{\normalfont}l>{\sffamily\bfseries}l}
+1: & 100 (w) array\\
+2: & (This is a string)\\
+3: & $<$s 120. 40. 28. 1e5 29.546 1 -99$>$\\
+4: & [ a b 100 (HOHOHO) ]\\
+5: & 12 dict  130000 list\\
+6: & \{ ($\backslash$n Honni soit qui mal y pense) toconsole \}\\\\
+\end{tabular}
+
+\noindent The objects are:  (1) an array of 100 16-bit integers holding unpredictable initial values;  (2)  an  initialized string  (i.e.  array  of  byte integers);  (3)  an initialized array of single-precision  floating-point numbers;  (4)  a  list of the objects included between  brackets;  (5)  a virgin  dictionary  for  up to 12  associations,  and  a  list  initially containing 130,000 null objects;  (6) a procedure that when executed writes  a bonmot on the console screen.  The composite objects thus created populate the top 7 positions of the operand stack.
+
+Composite  D objects include arrays (a set of numeral values that  share the  same  characteristics),  and  lists (a set  of  arbitrary  objects). Lists and arrays can be created in a fashion that defines all elements of their value,  or with initially undefined or null elements.  Elements  of these objects are accessed through an index. Alternatively, a composite D object  is  built  in the form of a dictionary,  where  each  element  is associated with a name for reference.  Dictionaries are created empty and are filled explicitly by subsequent operations.
+
+As  an example of composite object dynamics in D,  consider a family  of recorded current traces from an electrophysiological experiment.  Some subsection of each  sweep  was recorded while an agent was present and reports the time course of the agent's action.  Assume that in one  sweep  the block of 200 samples that starts at index 1750 contains the episode. To make a new object from this block, use\\
+
+\begin{tabular}{>{\sffamily\bfseries}l}
+   /onresponse sweep 1750 200 getinterval def\\\\
+\end{tabular}
+
+\noindent The  \emph{getinterval} operator creates a new array object  that  represents the specified subset of the values contained in the array associated with \emph{sweep}; we associate the subset object with \emph{onresponse}. Objects representing time courses of drug action from many recorded sweeps are grouped together into  a  family object by:\\
+
+\begin{tabular}{>{\sffamily\bfseries}l}
+  /responsefamily [ onresponse \ldots ] def\\\\
+\end{tabular}
+
+\noindent The  family  then may be submitted as an entity to analysis  or  picture taking.  Note  that  the included episodes need not occupy the  same  subset  of samples  in  each  sweep:  they can start anywhere and  be  of  arbitrary lengths, because the children objects formed about them automatically inherit this information  and  carry it on to operators,  which will use it  to  focus their effects. These objects and their list form a new and more specific system of reference for your data.
+
+On another occasion, you have received, as text mail sent by a colleague, an alphanumerical list consisting of one-column tables of floating  point numbers.  You  want to submit this material to an analysis that you  have developed on your D machine.  All you need to do is use the text editor that is associated with your D machine (\emph{emacs}) to put `vectors' like\\
+
+\begin{tabular}{>{\sffamily\bfseries}l}
+ /RateConstants $<$s \ldots $>$ def\\\\
+\end{tabular}
+
+\noindent around each table that you wish to package.  Then,  back from the editor, you use a browser window (called \emph{TheEye} and established when the D machine is brought up) to select the edited file, and a command window (called \emph{DVT macros}) to select the action \emph{Load}, and hit the function key `F1' on your keyboard. The selected file is read into a temporary string buffer and the string is interpreted by the D machine. The result is that your current dictionary receives a new entry, \emph{RateConstants} that is associated with a single-precision array of floating point numbers that is stored in the memory of the D machine.  
+
+Let's  step  back  and re-consider what happened  here.  We  invented  a notation to present data to the computer,  a language so to  speak.  That language happens to be D. By this trick, we assimilated the data into the machine   without  having  written  a  single  line  of   classical   I/O instructions.   The  technique  is  attractive  because  the  grammatical overhead of D is so small. 
+
+Now,  assume  that  these  data came in non-standard  units  related  to physical  quirks  of  the  colleague's  recording  apparatus.   For   re-calibration,  you include, after the data and in the same text file, some D  code  that  transforms  the raw arrays  into  the  proper  units,  for example:\\
+
+\begin{tabular}{>{\sffamily\bfseries}l}
+ [ RateConstants \ldots ] \{ 1.745e-6 mul pop \} forall\\\\
+\end{tabular}
+
+\noindent The  \emph{forall} operator applies the calibration procedure to  all  arrays whose  names  are included in the list (enclosed  between  [\ ]),  and  the multiplication  operator  in the procedure scales all  elements  of  each array (evidently, D is not verbose).
+
+Whenever  you  will  go back to this data file,  you  will  get  properly calibrated  data  without  sacrificing the original or  losing  track  of your additional calibrations.  With minimal ado,  you have converted this data set into something that takes care of itself:  an object  comprising both `data' and `instruction', self-calibrating data, so to speak.
+
+A natural form of organizing larger collections of objects is the \textbf{tree}. A  tree  starts  from a dictionary or list that  holds  simple  or  other composite objects;  these composite objects,  again,  can hold  composite objects, and so on to any level of nesting. Since trees are a very useful form  of organizing objects,  D provides operators to move  entire  trees among media. For instance,\\
+
+\begin{tabular}{>{\sffamily\bfseries}l}
+ SolutionsBook (path) (filename) writeboxfile\\\\
+\end{tabular}
+
+\noindent puts the tree that rooted in the list \emph{SolutionBook} into a file. This list contain a collection of all solution descriptions ever used in your lab, probably in the form of one dictionary per solution; each dictionary has a number of standardized entries, including lists of stock solution names, their indices in the book, and pipetted volumes. Altogether, moving this whole structure piecewise would be very cumbersome, and moving only changed or added pieces would be error prone. The \emph{writeboxfile} operator packs the binary objects of the entire tree into a box object and saves it as a whole. In order to load this tree into a D machine for further work, use\\
+
+\begin{tabular}{>{\sffamily\bfseries}l}
+ /SolutionsBook (path) (filename) readboxfile def\\\\
+\end{tabular}
+
+\noindent This unwraps the tree of objects and returns the root object of the tree that was folded into the box, and associates it with a name in the current dictionary. You now can look up individual solutions or add new entries to the book.
+
+A  procedure (provided in a general tool  library), \emph{tofile},  lets  you translate  a tree into its text equivalent and save that text in a  file. The  converse procedure, \emph{fromfiles},  executes the D code contained in  a text file and thus creates in the VM all objects that are defined in  the  text  file.  You can also use \emph{tofile} to prepare a  file  containing  a collection  of D objects that you wish to submit in toto to a  PostScript machine for printing or plotting. Thus, objects organized as trees can be moved and converted efficiently with a few smart operators or procedures.
+
+In  the  recent  examples,  no equivalent C phrases  have  been  listed, because  C  lacks  the intrinsic means to hold  its  ground.  The  means, though,  can be created in C, by composing a virtual D machine. This explains how D came into existence -- and to a name.
+
+This concludes our first tour of D. The following chapters will give a full reference of the machine model and operators.  The best way to learn D,  as always,  is by example.  The D machine comes with a stock of useful D objects in text files. These implement basic utilities that you likely will use in most work on the D machine. They include operator-like extensions of  the D machine in the form of procedure libraries, including a mouse-operated universal browser that lets you inspect and select any information organized by the D machine (called `TheEye'). These use some of the capacities that set D apart from other language models, and thus may serve you also as a grab bag of useful bits and pieces.
+
+A D machine is also embedded in the operating system of its host. In particular, it cooperates with a resident editor (\emph{emacs}) and many other useful programs of the host that you do not want duplicate in D. The current D machine is designed for use in a networked cluster of hosts. Multiple D machines can exist in each host and communicate with one another and across hosts for distributed processing. In fact, there are two flavors of D machine, one slightly specialized to communicate with you (the D virtual terminal, \emph{dvt}) and one slightly specialized to work with other D machines (called a D node, \emph{dnode}). The \emph{dvt} is the D machine usually running inside an \emph{emacs} shell.. All D machines can also hook up via the \emph{Xwindows} system. Communications on the network are passed through \emph{ssh}. Thus D machines can safely communicate beyond a secure network.
+
+All this may at first appear as a big machinery to master, and might make you expect frequent crashes. Perhaps it helps you to know that D machines run as long you let them: they do not crash. More likely, you will forget in what month you have started them up. By the way, the latest precursor of this manual was dated ``6/27/1995'' --- most code of the D machine has been well exercised.

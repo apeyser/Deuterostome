@@ -1,0 +1,26 @@
+#-*-makefile-*-
+
+include ../Makefile.base
+
+sources = benchmark.d color.d dvt_macros.d master.d printers.d \
+	sched.d startup_dnode.d startup_dvt.d theeye.d
+
+dvt_macros.d: dvt_macros.d.pre
+
+all: $(sources)
+
+install: $(PREFIX).dir $(sources:%.d=$(PREFIX)/%.d)
+
+$(PREFIX)/benchmark.d: benchmark.d ; $(installfile)
+$(PREFIX)/color.d: color.d ; $(installfile)
+$(PREFIX)/dmnuminc2.d: dmnuminc2.d ; $(installfile)
+$(PREFIX)/dvt_macros.d: dvt_macros.d ; $(installfile)
+$(PREFIX)/master.d: master.d ; $(installfile)
+$(PREFIX)/printers.d: printers.d ; $(installfile)
+$(PREFIX)/sched.d: sched.d ; $(installfile)
+$(PREFIX)/startup_dnode.d: startup_dnode.d ; $(installfile)
+$(PREFIX)/startup_dvt.d: startup_dvt.d ; $(installfile)
+$(PREFIX)/theeye.d: theeye.d ; $(installfile)
+
+clean: ; -rm dvt_macros.d
+

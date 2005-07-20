@@ -1,0 +1,22 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}
+\BOOKMARK [1][-]{section.2}{System Overview}{}
+\BOOKMARK [2][-]{subsection.2.1}{Environment}{section.2}
+\BOOKMARK [2][-]{subsection.2.2}{DVT}{section.2}
+\BOOKMARK [2][-]{subsection.2.3}{Dnodes}{section.2}
+\BOOKMARK [1][-]{section.3}{Running a d-machine}{}
+\BOOKMARK [2][-]{subsection.3.1}{Using TheHorses}{section.3}
+\BOOKMARK [2][-]{subsection.3.2}{Tiny Window Manager}{section.3}
+\BOOKMARK [2][-]{subsection.3.3}{TheEye}{section.3}
+\BOOKMARK [2][-]{subsection.3.4}{Keyboard/Emacs}{section.3}
+\BOOKMARK [3][-]{subsubsection.3.4.1}{Color coding of d-node output}{subsection.3.4}
+\BOOKMARK [2][-]{subsection.3.5}{DVT Macro}{section.3}
+\BOOKMARK [1][-]{section.4}{Operator changes}{}
+\BOOKMARK [2][-]{subsection.4.1}{Operators save and restore}{section.4}
+\BOOKMARK [2][-]{subsection.4.2}{Operators send, console, and connect}{section.4}
+\BOOKMARK [2][-]{subsection.4.3}{Tilde'd operators}{section.4}
+\BOOKMARK [1][-]{section.5}{Shortcuts}{}
+\BOOKMARK [2][-]{subsection.5.1}{TheHorses shortcuts}{section.5}
+\BOOKMARK [2][-]{subsection.5.2}{TheEye shortcuts}{section.5}
+\BOOKMARK [2][-]{subsection.5.3}{Emacs shortcuts}{section.5}
+\BOOKMARK [2][-]{subsection.5.4}{DVT macros}{section.5}
+\BOOKMARK [2][-]{subsection.5.5}{X-windows}{section.5}

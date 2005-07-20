@@ -1,0 +1,8 @@
+#-*-makefile-*-
+
+subdirs = src doc sh emacs dcode libtest ps
+
+include Makefile.base
+
+all: 
+install: $(PREFIX).dir

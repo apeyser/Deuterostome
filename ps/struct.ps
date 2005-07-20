@@ -1,0 +1,914 @@
+(%%[ Loading: struct.ps WN ]%%\n\015) print flush
+
+%----------------------- Structured Typesetting (ST) -------------------------
+%
+% The typesetting of complex objects, such as mathematical or chemical
+% expressions, tables, or composite figures, cannot be adequately controlled
+% by the linear instructions that are suitable for sequential text, but
+% requires instructions that can deal with more than one dimension or nested
+% organizations. Typically, the spatial organization of such objects is an
+% important part of their message: it unfolds from within the object and
+% cannot be imposed by an external form. ST builds on the existing tools for
+% the typesetting of text and figures, but adds new tools to organize 
+% the typesetting of complex objects made of text or graphical elements.
+%
+% As always, it is desirable to achieve a presentable result with minimal
+% geometrical instruction, by using a logical description of the elements
+% and an automatic mechanism to express this description. The components
+% of the machinery should be orthogonal in behavior, expandable in number,
+% and nestable in use. 
+%
+% The root element of the logical description is in the form of an operator
+% construct, e.g.
+%
+%  [ numerator denominator ] fraction
+%
+% Since the rendering of this construct requires that the geometrical structure
+% be analyzed before ink is dispatched, the 'fraction' operator, rather than
+% actually performing its logical purpose, translates this construct into
+% an extended and encapsulated construct, which can be stored and executed
+% repeatedly (in the different contexts of determining metrics and rendering
+% the fraction): 
+%
+% [ [ numerator denominator ] [ metrics ] fraction ]
+%
+% The logical description is expanded by an array of voids to store metrics.
+% The metrics array is filled in during the metric phase and used during
+% rendering. Note that you can follow the logical description by PS code to
+% name the description (i.e. the array that results from it) for later use.
+%
+% The metric and rendering phases are executed by placement operators, such as
+% 'RightHere'. These take (an array resulting from) a logical description as
+% operand.
+%
+% The internal elements of a logical description are composed from the set:
+%
+% !....|                - embedded WP text
+% ( .. ) _              - a computed string holding WP text
+% [ .. ] form_operator  - a nested-in sub-structure
+% { .. }                - a postscript procedure (to control parameters used
+%                         by form operators)
+%
+% Sub-structures can be nested to arbitrary depth. The scope of effects of
+% embedded PS procedures is limited to the substructure of the instance
+% (exactly: the substructure elements enumerated following the instance) and
+% the substructures nested therein.
+%
+% NOTE: no other PostScript constructs must be used inside the structured
+%       text definition than code that helps generate the definition.
+% 
+
+%------------------------------- Form Operators ------------------------------
+%
+% Form operators define the elementary constructs that can be used in the
+% composition of a complex structure. The design of the ST machinery is open-
+% ended regarding these operators: add on what you need. Each operator is
+% represented in the front-end, metrics, and rendering contexts.
+%
+% All operators can take basic elements or sub-structures as elements, and they
+% can be nested or used recursively up to a certain depth (currently 20).
+%
+% The following operators' are intended to help build mathematical expressions:
+% ----------------------------------------------------------------------------
+%
+% [ el .. ] expr
+%
+%   The list contains definitions of expression elements. These will be
+%   arranged in one row, horizontally packed from the left, and vertically
+%   aligned with respect to their logical backbones.
+%
+% [ num denom ] fraction
+% [ num denom ] sfraction
+%
+%   The list contains definitions of the numerator and denominator (text or
+%   sub-structures). 'fraction ' arranges these elements vertically,
+%   above and below a fraction line. 'sfraction' arranges these elements
+%   horizontally separated by a large 'slash' symbol (this notation may
+%   require parentheses for mathematical correctness).
+%
+%
+% [ main super ] supersc
+% [ main sub ] subsc
+%
+%   Act like 'expr', but vertically align 'super' ('sub') as a superscript
+%   (subscript) to 'main'. 'main' can be a sub-structure in itself, in which 
+%   case the alignment considers the vertical extent of that substructure in
+%   placing the superscript or subscript.
+%
+%
+% [ el .. ] par
+% [ el .. ] bracket
+% [ el .. ] brace
+% [ el .. ] angle
+%
+%   Include the effects of 'expr', and add left and right parentheses, '( )',
+%   brackets, '[ ]', braces '{ }', or angled brackets '< >' around the
+%   elements of the list. All parentheses are vertically matched to the
+%   actual vertical dimension of the contents.
+%
+%
+% [ body from to ] integral
+% [ body from to ] sum
+% [ body from to ] product
+%
+%   Precede 'body' with an 'integral','sum', or 'product'  symbol that is
+%   vertically matched to the height of 'body'. The 'from' and 'to' elements
+%   are optional and are rendered as the integral bounds on the right side
+%   near the bottom and top of the 'integral' symbol, or below and on top of
+%   the 'sum' or 'product' symbol.
+%
+% [ [ el .. ] [ el .. ] .. ] rowmatrix
+%
+%   Render a two-dimensional scheme organized into 'rows' and 'colums' of 
+%   elements. Column widths and row heights are determined from the minimal
+%   space requirements of each element. These widths/heights then are edited
+%   according to the parameters 'colthreshold' and 'rowthreshold' (which
+%   cannot be varied during the rowmatrix definition). If the respective
+%   threshold is set to t, this defines a lower bound, 1/(1+t), and an upper
+%   bound, 1+t. Column widths (row heights) whose relative extents fall between
+%   the bounds are assigned a uniform size. This operation is repeated with
+%   columns (rows) not assigned to a group in the first pass, until no further
+%   groups can be formed. Note that setting the threshold to 0 ensures that
+%   all colums (rows) are sized individually, whereas a large setting, like
+%   100, will ensure that all colums (rows) are sized uniformly. The free
+%   space between rows and columns is controlled by the parameters 'rowspace'
+%   and 'colspace'. The parameter 'coladjust' controls the horizontal
+%   adjustment of elements within their bounding boxes. The space and adjustment
+%   parameters can be varied dynamically in the rowmatrix definition.
+%
+% [ width height vert_alignment {...} ] figure
+%
+%   'width' and 'height' define an area that is assumed to hold the figure
+%   without extra margins. That area will be aligned vertically with respect
+%   to 'vert_alignment' from its basis. The procedure draws the contents of
+%   the figure; its execution will be bracketed by 'save' and 'restore', and
+%   a clipping path matching the figure's area is established prior to
+%   invoking the procedure. The figure context may invoke procedures of
+%   this structured typesetter.
+%   
+%----------------------- Front end of the ST facility ------------------------
+%
+% Front-end operators contained in the logical definition produce one list
+% per operator:
+%
+% !..|           => [ (..) [ m ] textelement ]
+% [..] _         => [ (..) [ m ] textelement ]
+% [..] form_op   => [ [..] [ m ] form_op ]          (typical)
+%
+% The 'm'-list has three null or more elements to be replaced by the metrics
+% information of the substructure.
+%
+% Embedded PostScript procedures are passed into the list unchanged (by virtue
+% of the PostScript syntax):
+%
+% {..}           => {..} 
+
+/! { /TextProcessor /textelement cvx def } bind def
+/_ { [ exch 3 array /textelement cvx ] } bind def 
+
+/expr { [ exch 3 array /expr cvx ] } bind def
+/fraction { [ exch 3 array /fraction cvx ] } bind def
+/sfraction { [ exch 6 array /sfraction cvx ] } bind def
+/supersc { [ exch 3 array /supersc cvx ] } bind def
+/subsc { [ exch 3 array /subsc cvx ] } bind def
+/par { [ exch 3 array /expr cvx ] [ exch 6 array 0 /par cvx ] } bind def
+/bracket { [ exch 3 array /expr cvx ] [ exch 6 array 1 /par cvx ] } bind def
+/brace { [ exch 3 array /expr cvx ] [ exch 6 array 2 /par cvx ] } bind def
+/angle { [ exch 3 array /expr cvx ] [ exch 6 array 3 /par cvx ] } bind def
+/integral { [ exch 7 array /integral cvx ] } bind def
+/sum { [ exch 8 array (\123) /sumprod cvx ] } bind def
+/product { [ exch 8 array (\120) /sumprod cvx ] } bind def
+/rowmatrix { [ exch 6 array /rowmatrix cvx ] } bind def
+/figure { [ exch 3 array /figure cvx ] } bind def
+
+%------------------------------------------ support procedures (front end)
+
+%-- process WP text element
+
+/textelement {
+  dup length string copy [ exch 3 array /textelement cvx ]
+} bind def
+
+%-- defaultSTparameters
+
+/eqnfontlist [
+   /Times-Italic findfont 12 scalefont
+   /Times-BoldItalic findfont 12 scalefont
+   /Times-Roman findfont 12 scalefont
+   /Symbol findfont [ 12 0 3 12 -1 0 ] makefont
+   /Times-Italic findfont 9 scalefont
+   /Times-BoldItalic findfont 9 scalefont
+   /Helvetica findfont 9 scalefont
+   /Symbol findfont [ 9 0 2.25 9 -0.75 0 ] makefont
+ ] def
+
+/eqnfonts {
+   /fontlist eqnfontlist def
+   /mathfont /Symbol findfont 12 scalefont def
+   mathfont setfont
+   /superscriptlevel 6 def
+   /subscriptlevel -4 def
+} bind def
+
+/defaultSTparameters {
+   /shrinkfactor 0.5 sqrt sqrt def   % shrinks to 1/2 at level 4
+   textfontlist 3 get setfont
+   newpath 0 0 moveto (=) false charpath flattenpath pathbbox
+     /yh name /xr name /yl name /xl name
+   newpath 0 0 moveto (=) stringwidth pop /w name
+   /vspace yh yl add 2 div def
+   /hspace xr xl sub 2 div def
+   newpath 0 0 moveto (-) false charpath flattenpath pathbbox
+     2 index sub setlinewidth pop pop pop
+   /STlevel 0 def
+   eqnfonts
+} bind def
+
+%-- pushcontext
+%
+% recruits a dictionary for the current substructure context and makes it
+% the current dictionary; saves the current graphic state
+
+/pushSTcontext { (+) print flush
+   STdictlist STlevel get 
+   dup { pop 2 copy undef pop } forall
+   begin
+   /STlevel STlevel 1 add def
+   gsave
+} bind def
+
+%-- popcontext
+%
+% returns the current context dictionary to the pool and restores the
+% former graphics state
+
+/popSTcontext {
+   end
+   grestore 
+   (-) print flush
+} bind def
+
+%-- dput: value array index |
+
+/dput { 3 -1 roll put } bind def 
+
+%-- context dictionaries
+
+/STdictlist [ 20 { 50 dict } repeat ] def
+
+
+
+%--------------- Form Operators: metrics phase ------------------------
+%
+% The minimal metrics of a form element are described in the array [ w h v ]:
+%
+% w   - the width of the bounding box (including character spacing)
+% h   - the height of the bounds box (excluding any spacing)
+% v   - distance of the vertical alignment level from the lower box edge
+%
+% A form operator executes all element substructures while assembling the
+% metrics information for its own form. This info is inserted into the
+% metrics array of the form element. Note that some form operators create
+% mterics arrays that contain elements beyond the basic three elements.
+%
+
+/STmetrics 50 dict dup begin
+
+%-- textelement
+
+/textelement { (t) print flush pushSTcontext /themet name /thetext name
+   TextFilter /theline thetext def
+   /lineordinate 0 def /lineabscissa 0 def
+   /show load /show { false charpath } def
+   /style 0 def 1 LineAdjust ShowLine /show name 1 LineAdjust /style 0 def
+   flattenpath pathbbox /yh name /xr name /yl name /xl name
+   themet 0 xr xl add put
+   themet 1 yh yl sub put
+   themet 2 yl neg put
+   popSTcontext  
+} bind def
+
+%-- expr
+
+/expr { (e) print flush pushSTcontext /themet name
+  /ylo 0 def /yhi 0 def /w 0 def
+  { dup xcheck
+     { exec }
+     { dup 1 get /theelmet name
+       cvx exec 
+       /w w theelmet 0 get add def
+       /ylo ylo theelmet 2 get 2 copy lt { exch } if pop def
+       /yhi yhi theelmet 1 get theelmet 2 get sub 2 copy lt { exch } if pop def
+     }
+     ifelse
+  } forall
+  themet 0 w put themet 1 ylo yhi add put themet 2 ylo put
+  popSTcontext 
+} bind def
+
+%-- fraction
+ 
+/fraction { (f) print flush pushSTcontext /themet name
+  { dup xcheck { exec } { dup 1 get exch cvx exec } ifelse } forall
+  /thedmet name /thenmet name
+  thenmet 0 get thedmet 0 get 2 copy lt { exch } if pop hspace dup add add
+    themet 0 dput
+  thenmet 1 get thedmet 1 get add vspace dup add add 
+    themet 1 dput
+  thedmet 1 get vspace add vspace sub themet 2 dput
+  popSTcontext 
+} bind def
+
+%-- sfraction
+%
+% metrics: [ w h v phs pvs pv ]
+
+/sfraction { (f) print flush pushSTcontext /themet name
+  { dup xcheck { exec } { dup 1 get exch cvx exec } ifelse } forall
+  /thedmet name /thenmet name
+  mathfont setfont 0 0 moveto
+    (\057) /thechar name
+    thechar false charpath flattenpath
+    pathbbox 2 index sub /ph name pop /pd name pop
+    thechar stringwidth pop /pw name
+  thenmet 2 get thedmet 2 get 2 copy lt { exch } if pop themet 2 dput
+  thenmet 1 get thenmet 2 get sub thedmet 1 get thedmet 2 get sub
+    2 copy lt { exch } if pop themet 2 get add themet 1 dput
+  /vscale themet 1 get ph div def
+  /hscale vscale 1 lt { vscale } { vscale sqrt } ifelse def
+  thenmet 0 get thedmet 0 get add pw hscale mul add hspace add
+    themet 0 dput
+  hscale themet 3 dput vscale themet 4 dput
+  pd vscale mul neg themet 5 dput
+  popSTcontext 
+} bind def
+
+%-- supersc, subsc
+ 
+/supersc { (u) print flush pushSTcontext /themet name
+  { dup xcheck { exec } { dup 1 get exch cvx exec } ifelse } forall
+  /thesmet name /themmet name
+  themmet 0 get hspace 0.5 mul add thesmet 0 get shrinkfactor mul add
+    themet 0 dput
+  themmet 1 get themmet 2 get sub 0.75 mul themmet 2 get add thesmet 1 get
+    shrinkfactor mul add themet 1 dput
+  themmet 2 get themet 2 dput
+  popSTcontext 
+} bind def
+
+/subsc { (d) print flush pushSTcontext /themet name
+  { dup xcheck { exec } { dup 1 get exch cvx exec } ifelse } forall
+  /thesmet name /themmet name
+  themmet 0 get hspace 0.5 mul add thesmet 0 get shrinkfactor mul add
+    themet 0 dput
+  /sh thesmet 1 get shrinkfactor mul 0.75 mul def
+  sh themmet 2 get 2 copy lt { exch } if pop /sh name
+  themmet 1 get themmet 2 get sub sh add themet 1 dput
+  sh themet 2 dput
+  popSTcontext 
+} bind def
+
+%-- par, bracket, brace, angle
+%
+% metrics: [ w h v phs pvs pv bh ]
+
+/par { (p) print flush pushSTcontext
+  /thetype name /themet name dup 1 get /theemet name cvx exec
+  mathfont setfont 0 0 moveto
+    (\050\133\173\341) thetype 1 getinterval /thechar name
+    thechar false charpath flattenpath
+    pathbbox 2 index sub /ph name pop /pd name pop
+    thechar stringwidth pop /pw name
+  theemet 1 get 1.1 mul ph div /vscale name
+  /hscale vscale 1 lt { vscale } { 1 } ifelse def
+  theemet 0 get pw 3 mul hscale mul add themet 0 dput
+  theemet 1 get 1.1 mul themet 1 dput
+  theemet 2 get 1.1 mul themet 2 dput
+  hscale themet 3 dput vscale themet 4 dput
+  pd vscale mul neg themet 5 dput
+  popSTcontext
+} bind def
+
+%-- integral
+%
+% metrics: [ w h v phs pvs pv pw ]
+
+/integral { (i) print flush pushSTcontext /themet name
+  [ exch { dup xcheck { exec } { dup cvx exec } ifelse } forall
+  counttomark 1 sub /nbounds name
+    /to nbounds 1 gt def   to { 1 get /thetmet name } if
+    /from nbounds 0 gt def from { 1 get /thefmet name } if
+    /thebody name cleartomark
+    thebody 1 get /thebmet name
+  mathfont setfont 0 0 moveto
+    (\362) /thechar name
+    thechar false charpath flattenpath
+    pathbbox 2 index sub /ph name pop /pd name pop
+    thechar stringwidth pop /pw name
+  thebmet 1 get  
+    to { thetmet 1 get } { 0 } ifelse
+    from { thefmet 1 get add } if 
+    2 div shrinkfactor mul add /inth name
+    inth ph div /vscale name
+    /hscale vscale 1 lt { vscale } { vscale sqrt } ifelse def
+  pw 2 mul hscale mul dup themet 6 dput
+  thebmet 0 get add 
+    to { thetmet 0 get } { 0 } ifelse
+    from { thefmet 0 get } { 0 } ifelse
+    2 copy lt { exch } if pop shrinkfactor mul add
+    themet 0 dput
+  inth 
+    to { thetmet 1 get } { 0 } ifelse
+    from { thefmet 1 get add } if
+    2 div shrinkfactor mul add themet 1 dput
+  inth 0.1 mul thebmet 2 get add
+    from { thefmet 1 get 2 div shrinkfactor mul add } if
+    themet 2 dput
+  hscale themet 3 dput vscale themet 4 dput
+  pd vscale mul neg
+    from { thefmet 1 get 2 div shrinkfactor mul add } if
+    themet 5 dput
+  popSTcontext
+} bind def
+
+%-- sum, product 
+%
+% metrics: [ w h v phs pvs pv pw ph]
+
+/sumprod { (s) print flush pushSTcontext /thechar name /themet name
+  [ exch { dup xcheck { exec } { dup cvx exec } ifelse } forall
+  counttomark 1 sub /nbounds name
+    /to nbounds 1 gt def   to { 1 get /thetmet name } if
+    /from nbounds 0 gt def from { 1 get /thefmet name } if
+    /thebody name cleartomark
+    thebody 1 get /thebmet name
+  mathfont setfont 0 0 moveto
+    thechar false charpath flattenpath
+    pathbbox 2 index sub /ph name pop /pd name pop
+    thechar stringwidth pop /pw name
+  thebmet 1 get /inth name
+    inth ph div /vscale name
+    /hscale vscale 1 lt { vscale } { vscale sqrt sqrt } ifelse def
+  pw 1.25 mul hscale mul themet 6 dput
+  themet 6 get
+    from { thefmet 0 get shrinkfactor mul 2 copy lt { exch } if pop } if
+    to { thetmet 0 get shrinkfactor mul 2 copy lt { exch } if pop } if
+    2 div themet 7 dput
+  themet 6 get thebmet 0 get dup add add
+    from { thefmet 0 get shrinkfactor mul 2 copy lt { exch } if pop } if
+    to { thetmet 0 get shrinkfactor mul 2 copy lt { exch } if pop } if
+    2 div themet 7 get add themet 0 dput      
+  inth 
+    to { thetmet 1 get vspace add } { 0 } ifelse
+    from { thefmet 1 get vspace add add } if
+    shrinkfactor mul add themet 1 dput
+  thebmet 2 get 
+    from { thefmet 1 get vspace add shrinkfactor mul add } if
+    themet 2 dput
+  hscale themet 3 dput vscale themet 4 dput
+  pd vscale mul neg
+    from { thefmet 1 get vspace add shrinkfactor mul add } if
+    themet 5 dput
+  popSTcontext
+} bind def
+
+%-- rowmatrix
+
+/rowmatrix { (m) print flush pushSTcontext /themet name /thematrix name
+  /tcol colthreshold def /trow rowthreshold def
+%- phase 1: determine the dimensions of the matrix
+  /nrow 0 def /ncol 0 def
+  thematrix  
+   { dup xcheck
+     { pop }
+     { nrow 0 eq { { xcheck not { /ncol ncol 1 add def } if } forall }
+                 { pop }
+                 ifelse
+       /nrow nrow 1 add def
+     }
+     ifelse
+   } forall
+  /colw [ ncol { 0 } repeat ] def
+  /rowh [ nrow { 0 } repeat ] def
+  /rowv [ nrow { 0 } repeat ] def
+%- phase 2: measure column widths and row heights
+  /krow 0 def /sumrowspace 0 def /sumcolspace 0 def
+  thematrix  
+   { /kcol 0 def /rowhi 0 def /rowlo 0 def 
+     dup xcheck
+     { exec }
+     { /sumrowspace sumrowspace rowspace add def
+       { dup xcheck 
+          { exec }
+          { krow 0 eq { /sumcolspace sumcolspace colspace add def } if
+            dup 1 get /theelmet name
+            cvx exec
+            colw kcol 2 copy get theelmet 0 get 2 copy lt { exch } if pop put
+            /rowhi rowhi theelmet 1 get theelmet 2 get sub
+              2 copy lt { exch } if pop def
+            /rowlo rowlo theelmet 2 get 2 copy lt { exch } if pop def
+            /kcol kcol 1 add def
+          }
+          ifelse
+       } forall % columns of the row
+       rowh krow rowhi rowlo add put
+       rowv krow rowlo put
+       krow 0 eq { /sumcolspace sumcolspace colspace sub def } if
+     }
+     ifelse     /krow krow 1 add def
+   } forall  % rows
+   /sumrowspace sumrowspace rowspace sub def
+%- phase 3: equalize element dimensions
+  colw null colthreshold equalize
+  rowh rowv rowthreshold equalize
+%- phase 4: finalize metrics of rowmatrix
+  themet 0 0 colw { add } forall sumcolspace add put
+  themet 1 0 rowh { add } forall sumrowspace add put
+  themet 2 themet 1 get 2 div put
+  themet 3 colw put
+  themet 4 rowh put
+  themet 5 rowv put
+  popSTcontext 
+} bind def
+
+%- equalize
+
+/equalize { /t name /v name /h name
+   /tl 1 1 t add div def /th 1 t add def
+   /kf 0 def /kl h length 1 sub def
+   { kf kl gt { exit } if
+     /hf h kf get def /hmax hf def
+     kf 1 add 1 kl { /k name h k get /hk name
+           hk hf tl mul ge hk hf th mul le and
+              { /hmax hk hmax 2 copy lt { exch } if pop def
+              } if 
+         } for
+     /kkf -1 def
+     kf 1 kl { /k name h k get /hk name
+           hk hf tl mul ge hk hf th mul le and
+              { h k hmax put
+                v type /arraytype eq { 
+                    v k hmax hk sub 2 div v k get add put
+                  } if
+              }
+              { kkf -1 eq { /kkf k def } if }
+              ifelse
+         } for
+     /kf kkf -1 eq { kl 1 add } { kkf } ifelse def
+   } loop
+} bind def
+
+%-- figure
+
+/figure { (f) print flush pushSTcontext /themet name
+  0 3 getinterval themet copy pop
+  popSTcontext 
+} bind def
+
+end def % of STmetrics
+
+     
+%------------------------ Form Operators: show phase ------------------------
+%
+% These procedures expect the user coordinate system origin to be the
+% lower, left corner of their bounding box and expect the scale to be
+% adjusted by the caller.
+%
+% They use a threaded-code technique that preserves the phase of embedded
+% PotsScript procedures.
+%
+
+/STshow 100 dict dup begin
+
+%-- string metrics textelement 
+
+/textelement { pushSTcontext /themet name /thetext name
+   TextFilter /theline thetext def
+   themet 2 get /lineordinate name /lineabscissa 0 def
+   /style 0 def 1 LineAdjust ShowLine
+   popSTcontext 
+} bind def
+
+%-- [ .. ] metrics expr
+
+/expr { pushSTcontext /themet name /thebody name
+   thebody { 
+      dup xcheck 
+         { exec } 
+         { /theel name theel 1 get /theelmet name
+           gsave
+           0 themet 2 get theelmet 2 get sub translate
+           theel cvx exec
+           grestore
+           theelmet 0 get 0 translate
+         }
+         ifelse
+    } forall
+  popSTcontext
+} bind def
+
+%-- [ num denom ] metrics fraction
+ 
+/fraction { pushSTcontext /themet name /thebody name
+   /action /fractionnum load def
+   thebody { dup xcheck { exec } { action } ifelse } forall
+   newpath
+     hspace themet 1 get thenmet 1 get thedmet 1 get sub sub
+     2 div 2 copy moveto exch pop themet 0 get hspace sub exch lineto stroke
+   popSTcontext
+} bind def
+
+/fractionnum { /thenum name thenum 1 get /thenmet name
+   gsave
+     themet 0 get thenmet 0 get sub 2 div
+     themet 1 get thenmet 1 get sub
+     translate 
+     thenum cvx exec
+   grestore
+   /action /fractionden load def
+} bind def
+
+/fractionden { /theden name theden 1 get /thedmet name
+   gsave
+     themet 0 get thedmet 0 get sub 2 div 0
+     translate 
+     theden cvx exec
+   grestore
+   /action /skip load def
+} bind def
+
+/skip { pop } bind def
+
+%-- sfraction
+
+/sfraction { pushSTcontext /themet name /thebody name
+   /action /sfractionnum load def
+   thebody { dup xcheck { exec } { action } ifelse } forall
+   popSTcontext
+} bind def
+
+/sfractionnum { /thenum name thenum 1 get /thenmet name
+   thenum cvx exec
+   gsave
+     thenmet 0 get hspace 2 div add themet 5 get translate
+     themet 3 get themet 4 get scale
+     0 0 moveto (\057) show
+   grestore
+   /action /sfractionden load def
+} bind def
+
+/sfractionden { /theden name theden 1 get /thedmet name
+   gsave
+     themet 0 get thedmet 0 get sub 0 translate 
+     theden cvx exec
+   grestore
+   /action /skip load def
+} bind def
+
+%-- [ main super/sub ] metrics supersc/subsc
+ 
+/supersc { pushSTcontext /themet name /thebody name
+   /action /supermain load def
+   thebody { dup xcheck { exec } { action } ifelse } forall
+   popSTcontext
+} bind def
+
+/supermain { dup /themain name 1 get /themmet name 
+   gsave
+     hspace 0.5 mul 0 translate
+     themain cvx exec
+   grestore 
+   /action /super load def
+} bind def
+
+/super { /thesup name thesup 1 get /thesmet name
+   gsave
+     themet 0 get thesmet 0 get shrinkfactor mul sub
+     themet 1 get thesmet 1 get shrinkfactor mul sub
+     translate shrinkfactor dup scale
+     thesup cvx exec
+   grestore
+   /action /skip load def
+} bind def
+
+/subsc { pushSTcontext /themet name /thebody name
+   /action /submain load def
+   thebody { dup xcheck { exec } { action } ifelse } forall
+   popSTcontext
+} bind def
+
+/submain { dup /themain name 1 get /themmet name 
+   gsave
+     hspace 0.5 mul themet 1 get themmet 1 get sub translate
+     themain cvx exec
+   grestore 
+   /action /subsub load def
+} bind def
+
+/subsub { /thesub name thesub 1 get /thesmet name
+   gsave
+     themet 0 get thesmet 0 get shrinkfactor mul sub
+     themet 2 get thesmet 1 get shrinkfactor mul 0.75 mul sub
+     translate shrinkfactor dup scale
+     thesub cvx exec
+   grestore
+   /action /skip load def
+} bind def
+
+%-- [ el .. ] [ w h v phs pvs pv ] par/bracket/brace/angle
+
+/par { pushSTcontext /thetype name /themet name /thebody name
+   thebody 1 get /theemet name
+   /phspace themet 0 get theemet 0 get sub 6 div def   gsave 
+     themet 0 get theemet 0 get sub 2 div
+     themet 1 get theemet 1 get sub 2 div translate
+     thebody cvx exec
+   grestore
+   gsave
+     phspace themet 5 get translate
+     themet 3 get themet 4 get scale
+     0 0 moveto (\050\133\173\341) thetype 1 getinterval show
+   grestore
+   gsave     themet 0 get theemet 0 get sub 2 div theemet 0 get add 
+     themet 5 get translate
+     themet 3 get themet 4 get scale
+     0 0 moveto (\051\135\175\361) thetype 1 getinterval show
+   grestore
+   popSTcontext
+} bind def
+
+%-- [ body from to ] [ w h v phs pvs pv pw ]  integral
+
+/integral { pushSTcontext /themet name /theint name
+   /action /intbody load def
+   theint { dup xcheck { exec } { action } ifelse } forall
+   popSTcontext
+} bind def
+
+/intbody { dup /thebody name 1 get /thebmet name 
+   /ihspace themet 6 get 3 div def
+   gsave
+     themet 0 get thebmet 0 get sub
+     themet 2 get thebmet 2 get sub translate
+     thebody cvx exec
+   grestore
+   gsave
+     ihspace themet 5 get translate
+     themet 3 get themet 4 get scale
+     0 0 moveto (\362) show
+   grestore 
+   /action /intfrom load def
+} bind def
+
+/intfrom { /thefrom name thefrom 1 get /thefmet name
+   gsave
+     themet 6 get ihspace 2 div sub 0 translate
+     shrinkfactor dup scale
+     thefrom cvx exec
+   grestore
+   /action /intto load def
+} bind def
+
+/intto { /theto name theto 1 get /thetmet name
+   gsave
+     themet 6 get themet 1 get thetmet 1 get sub translate
+     shrinkfactor dup scale
+     theto cvx exec
+   grestore
+   /action /skip load def
+} bind def
+
+%-- [ body from to ] [ w h v phs pvs pv pw ph ] (symbol) sumprod
+
+/sumprod { pushSTcontext /thechar name /themet name /theint name
+   /action /sumprodbody load def
+   theint { dup xcheck { exec } { action } ifelse } forall
+   popSTcontext
+} bind def
+
+/sumprodbody { dup /thebody name 1 get /thebmet name 
+   /ihspace themet 6 get 4 div def
+   gsave
+     themet 7 get themet 6 get 2 div add
+     themet 2 get thebmet 2 get sub translate
+     thebody cvx exec
+   grestore
+   gsave
+     themet 7 get themet 6 get 2.5 div sub themet 5 get translate
+     themet 3 get themet 4 get scale
+     0 0 moveto thechar show
+   grestore 
+   /action /sumprodfrom load def
+} bind def
+
+/sumprodfrom { /thefrom name thefrom 1 get /thefmet name
+   gsave
+     themet 7 get thefmet 0 get 2 div shrinkfactor mul sub 0 translate
+     shrinkfactor dup scale
+     thefrom cvx exec
+   grestore
+   /action /sumprodto load def
+} bind def
+
+/sumprodto { /theto name theto 1 get /thetmet name
+   gsave
+     themet 7 get thefmet 0 get 2 div shrinkfactor mul sub 
+     themet 1 get thetmet 1 get shrinkfactor mul sub translate
+     shrinkfactor dup scale
+     theto cvx exec
+   grestore
+   /action /skip load def
+} bind def
+
+%-- [ [ el..] .. ] [ w h v colw rowh rowv ]  rowmatrix
+
+/rowmatrix { pushSTcontext /themet name /thematrix name
+   /krow 0 def
+   0 themet 1 get translate
+   thematrix {
+      /rowh themet 4 get krow get def
+      /rowv themet 5 get krow get def
+      gsave
+      0 rowv rowh sub translate 
+      dup xcheck 
+         { exec } 
+         { /kcol 0 def
+           { dup xcheck
+             { exec }
+             { /theel name theel 1 get /theelmet name
+               gsave
+               /colw themet 3 get kcol get def
+               coladjusters coladjust get exec
+               0 theelmet 2 get neg translate
+               theel cvx exec
+               grestore
+               colw colspace add 0 translate
+               /kcol kcol 1 add def 
+             }
+             ifelse
+           } forall % row elements
+         }
+         ifelse
+      grestore
+      0 rowh rowspace add neg translate
+      /krow krow 1 add def    } forall % rows
+   popSTcontext
+} bind def
+
+/coladjusters [
+   { }                                            % 0 - to left
+   { colw theelmet 0 get sub 0 translate }        % 1 - to right
+   { colw theelmet 0 get sub 2 div 0 translate }  % 2 - to center
+] def
+
+%---- [ w h v { } ] [ w h v ] figure
+
+/figure { pushSTcontext /themet name 3 get /thefig name
+   (f) print flush
+   save /figsave name
+   0 themet 2 get neg translate
+   newpath 0 0 moveto 0 themet 1 get lineto themet 0 get themet 1 get lineto
+   themet 0 get 0 lineto closepath clip
+   thefig
+   figsave restore
+   popSTcontext
+} bind def
+
+end def  % of STshow
+
+%--------------------------- Rendering Operators -------------------------------
+
+% These operators are front-end procedures and generally are fine-tuned by
+% parameters.
+
+%---------------------------- RightHere
+%
+% Places the structured element into the running body of text. RightHere 
+% determines the space demand of the element and renders the element on the
+% current or, if necessary, a new page. If the element does not fit laterally
+% into 'textwidth', the element is reduced in scale to make it fit.
+%
+/RightHere { /thebody name
+%-- fill in metrics of structure elements
+   gsave
+     /lineabscissa 0 def
+     defaultSTparameters 
+     STmetrics begin thebody cvx exec end
+   grestore
+%-- design the placement of the structure on the page
+   thebody 1 get /themet name
+   1.0 textwidth themet 0 get div dup 1 gt { pop 1.0 } if div /reduction name
+   lineordinate themet 1 get reduction mul sub bottomoftext lt nopage or
+     { NewPage } if
+%-- show the structure
+   gsave
+     leftmargin lineordinate themet 1 get reduction mul sub translate
+     reduction dup scale
+     defaultSTparameters
+     STshow begin thebody cvx exec end
+   grestore
+%-- advance show position
+   /lineordinate lineordinate themet 1 get sub def
+   textfonts
+} bind def
+

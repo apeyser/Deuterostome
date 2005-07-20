@@ -1,0 +1,34 @@
+
+Steps:
+(1) if a build for a different architecture/setup has been done previously:
+	make distclean
+
+(2) Configure:
+	./configure.sh 
+
+	Flags: --flag (default) : notes
+		--prefix (/dm) : base directory for installation, particularly of executables
+		--shprefix (<PREFIX>/sh) : directory for shell scripts
+		--docprefix (<PREFIX>/doc) : directory for documentations
+		--elprefix (<PREFIX>/emacs) : directory for emacs files (.el,.elc)
+		--libprefix (<PREFIX>/lib) : directory for loadable dictionaries
+		--psprefix (<PREFIX>/ps) : directory for ps libraries
+		--type (current architecture) : architecture, such as Darwin-ppc7450
+			   by default is a tag of the form os-arch, where os=uname -s
+			   and arch=$(machine) for Darwin,
+			   and arch=$(uname -i | sed 's/,.*//')$(uname -m) for Linux
+			   Others do not have -arch.
+
+(3) Build:
+	make -R
+
+(4) Install:
+	sudo make -R install
+	(sudo is necessary if building to a public directory, such as "/dm")
+
+(5) Set-up emacs:
+	Add to your `~/.emacs' file: (load "<ELPREFIX>/init"),
+	where <ELPREFIX> is the emacs library location (by default "<PREFIX>/emacs",
+	where <PREFIX> is by default "/dm").
+
+(6) Startup emacs, and Meta-X dvt.

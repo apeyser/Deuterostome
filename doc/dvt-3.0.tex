@@ -1,0 +1,869 @@
+\documentclass[12pt]{article}
+
+\usepackage[dvips]{geometry}
+
+\usepackage{pdf}
+\usepackage{hyperref}
+
+\usepackage{natbib}
+\bibliographystyle{plainnat}
+
+\usepackage{redefs}
+\renewcommand{\bibsection}{%
+  \section*{\refname}%
+  \addcontentsline{toc}{section}{\refname}%
+}
+
+\title{
+  \vspace*{-2\baselineskip}
+  D-machine 3.0 Extensions and DVT interface
+}
+\author{Alexander Peyser}
+
+\begin{document}
+
+\pagenumbering{roman}
+\maketitle\vspace{-4\baselineskip}
+\vspace{\stretch{1}}\tableofcontents\vspace{\stretch{1}}
+\newpage
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\pagenumbering{arabic}
+
+\section{Introduction}
+\label{sec:intro}
+
+The 3.0 version of the d-machine introduces a fundamental shift from a
+single Mac OS system to a clustered Unix approach.  This has demanded
+a significant rewrite of the underlying operating system interface and
+an extension into the world of tcp connectivity. The `dvt,' which
+previously was both an interface and a processor, has been replaced
+with a dedicated interface and `dnode' manager.  The dnodes handle all
+heavy processing independently, and can be viewed as threads within
+the larger d-machine.
+
+From an interface perspective, the `eye' and `hand' have been
+translated from a Mac OS-centric system handled directly by dvt d-code
+to an X-windows based system.  The eye is still handled directly by
+the d-code, but has been extended into a group of eyes, one for each
+dvt and dnode, functioning independently.  The hand is now composed of
+an emacs frame combining emacs lisp code and d-code in the dvt and the
+dnodes, for which it acts as an agent.
+
+Additionally, interfaces that will be discussed are the DVT macro bar,
+`TheHorses' and the Tiny Window Manager (twm) elements of the
+interface. In term of a high-level model, the d-machine has been
+distributed over several machines and tools external to the d-machine
+proper, to handle the additional complexity due to clustering and to
+re-use open source code instead of recoding several internal elements.
+
+A separate manual, ``Emacs \& D-machine: d source files and dvt''
+\citep{dvt-emacs}, stored as \verb$dvt-emacs.tex$ and
+\verb$dvt-emacs.pdf$, covers the details specifically of the emacs
+interface to the dvt.  This manual will focus on overall user function
+and relevant d-code, integrating the usage of the system.
+
+\textbf{NB:} On G5 Panther machines, all references in this manual to
+the Alt key must be replaced with the Apple key.
+
+\section{System Overview}
+\label{sec:overview}
+
+All primary source code resides in \texttt{/mnt/Lab1/dm-3.0/}, which
+at the local UM cluster is a shared NSF mount.  For other
+installations, it can be on a local machine which is rsync'd for
+updates. To build an architecture specific d-machine, \verb$make$ is
+called with one of the following paramters: \verb$osx$ for osx G5's,
+\verb$g4$ for linux G4's, or \verb$g5$ for linux G5's (which is not
+yet implemented).  This builds a directory \texttt{/mnt/Lab1/dm-3.0/arch/}
+and a link to it in \texttt{/mnt/Lab1/dm-3.0-arch/}, where arch is
+osx, g4 or g5.
+
+Inside this directory, all d-scripts, bash-scripts, perl-scripts and
+lisp code is inserted, and the executables \texttt{dvt} and
+\texttt{dnode} are placed.  This directory
+(\texttt{/mnt/Lab1/dm-3.0-arch/}) should be your current directory
+when you run any d-machine associated code.
+
+\subsection{Environment}
+\label{sec:env}
+
+The d-machine can be built for linux running on a powerpc (g4), on a
+g5 when the 64-bit compiler is production ready, and under osx on a
+g5. The code is almost identical under all these architectures; osx,
+being a version of BSD unix, has a few parameter changes, in addition
+to some Apple `tweaks,' to be kind, in precompiliation which had to be
+worked around. Emacsen under which the dvt works include versions
+21.3.1 and 21.3.50.1. Each version uses optimized compilation flags,
+benchmarked primarily for double-precision floating point operations.
+
+Under both linux and osx, dvt, dnodes and emacs use X-windows as the
+graphics server, managed by twm.  Under linux, X is started by
+\verb$startx$, and on osx the DarwinX button on the doc is used to
+start it. For the latter case there is the option of rootless or
+not. When not rootless, the X windows run directly over aqua; in the
+other case, an X root window replaces the aqua windows, and can be
+switched out with \verb$Ctrl-Apple-A$.  Either will work, to preference.
+However, the X root window does not interface well with the aqua
+screen saver.
+
+Tiny Window Manager puts the buttons and borders around the windows.
+This should be part of the initial installation and is customized for
+d.  The d windows have a class of ``d\_machine,'' which twm's
+\texttt{system.twmrc} recognizes.  An alternate icon manager is used
+to collect those windows, and is initially located in the upper
+right-hand side of the screen.  This `docks' the windows for
+minimization and maximization, and groups d-machine window separately
+from other X windows.
+
+\subsection{DVT}
+\label{sec:dvt}
+
+The dvt proper exists as a child process of emacs, running under X.
+After initializing X and emacs, the dvt is started via the command
+\verb$Alt-x dvt$.  See the dvt-emacs manual \citep{dvt-emacs} for a
+general description of the interface. The dvt begins by loading
+\texttt{dvt\_startup.d}, which initalizes the \verb$userdict$, and
+begins the main interface loop, which is partially implemented in d.
+During installation, the lisp code is linked to begin the dvt in the
+proper directory.
+
+Minimal d-code should be run directly in the dvt, for several reasons:
+\begin{enumerate}
+  \item The memory allocated, including stacks sizes, is hard-coded in
+  c.  To run large jobs, the code must be recompiled. Dnodes have
+  flexible memory allocation.
+  \item Debugging capabilities are severely limited. In order to
+  minimize loss of interface under an error, whenever an \verb$abort$
+  event occurs, the stacks and dictionaries are cleared, returning to
+  the main interface loop. This leaves little evidence of the cause of
+  the error (there is a work-around though, the \verb$debug_abort$
+  mechanism in \texttt{dvt\_startup.d}).
+  \item Running code in the dvt will interfere with management of
+  d-nodes. Simply, the dvt may not be available for handling dnode
+  communication while it is processing, and its behaviour may be quite
+  complicated with numerous execution stack subsets running. This
+  includes TheHorses functionality, and the macro bar.
+  \item The dnodes can be combined to multithread operations; the dvt
+  shoudle exist, by definition, as a single master thread.
+\end{enumerate}
+
+When the dvt starts, the following windows should pop up:
+\begin{description}
+  \item[TheEye] is the X version of the old eye.  It allows file
+  operations, and dictionary, list and array investigations. It is a
+  purely mouse driven interface. On the top bar, the node to which it
+  belongs is labeled (at first you only have the dvt eye).
+  \item[TheHorses] contain all currently connected nodes of the
+  d-machine. Initially, it only contains the dvt itself (labeled
+  \verb$dvt$). This interface controls the current keyboard owner and
+  reflects the busy state of each node. This is also mouse driven.
+  \item[DVT macros] allows the integration of mouse-driven and
+  keyboard-driven events. One can choose a macro, which appears in the
+  emacs dvt window as a d-command. This d-command may look at
+  selections in the eye to open files, etc\dots 
+  \item[d\_machine Icon Manager] organizes the icons for the
+  preceeding windows. This does not include the main emacs window
+  which does not, by default, belong to the proper class.
+\end{description}
+
+
+\subsection{Dnodes}
+\label{sec:dnode}
+
+Processing occurs in dnodes, each of which can act as a separate
+thread of operation, cooperatively or not.  The can exist on the dvt's
+host machine, or on any other available machine. Currently, this has
+only been implemented for ppc's, but no obvious endian issues exist
+for intercommunication.  The dnode host just needs to have the X
+libraries required to communicate with the host, but it does not need
+to be running an Xserver, itselve.
+
+Each dnode runs as a server on a tcp port (5000+n). A script exists in
+the architecture directory: \verb$dnode.sh$. It has one parameter (n),
+and start the dnode immediately. If the dnode fails because the port
+is currently unavailable, the script will continue trying to start the
+dnode at some small interval.  This may occur after a dnode dies and
+before the os has finished the cleanup of the port connection, making
+the available once again.
+
+The dnode itself will respond to a \verb$HUP$, \verb$QUIT$ or
+\verb$TERM$ signal (such as by: \verb$killall -HUP dnode$) by shutting
+down cleanly, and responds to an \verb$INT$ with an abort. In the
+former cases, the dnode.sh script will terminate immediately and not
+try to restart the dnode.
+
+When initially started, the dnode has a `tiny' memory, just enough to
+bootstrap itself. In this state, it uses minimal resources, including
+cpu utilization.
+
+\pagebreak[3]
+So, to summarize:\nopagebreak
+
+\textbf{Local Start}\\*[-1.5\baselineskip]
+\begin{enumerate}
+  \item open an xterm (terminal window)
+  \item change to your directory: \verb$cd /mnt/Lab1/dm-3.0-arch/$.
+  \item run \texttt{dnode.sh}: \verb$./dnode.sh 0$ (or n). 
+\end{enumerate}
+
+\textbf{SSH Start}\\*[-1.5\baselineskip]
+\begin{enumerate}
+  \item open an xterm
+  \item make sure that you can access your local xserver, either with
+  xhost +otherserver, or using ssh mechanisms (see section~\ref{sec:run}).
+  \item \verb$ssh otherserver$.
+  \item \verb$cd /mnt/Lab1/dm-3.0-arch/$
+  \item \verb$./dnode.sh 0$ (or n).
+\end{enumerate}
+
+
+\section{Running a d-machine}
+\label{sec:run}
+
+Once the dvt and dnodes are started, the machine can be
+integrated. The basic command for this is:
+
+\verb$host port group memorysize _csu$
+\begin{description}
+  \item[host] is a string identifying the dnode host machine. It
+  should be of the form: \verb$(klutz3.nonnerlabe)$. For G5's running
+  OSX Panther, use \verb$(klutz3)$ with no domain appended. The name
+  (localhost) generally does not work.
+  \item[port] is the port number offset for that host (n), usually a
+  small number like 0,1,10\dots, depending on the number of dnodes
+  running on that host.
+  \item[group] is a small negative number that puts several nodes into
+  a `group' with that same number. This is a device for sending the
+  same command to multiple nodes.
+  \item[memorysize] is an array(5) of longs describing memory
+  allocation as follows:
+  \begin{description}
+    \item[1: nopds] The size of the operand stack. Between 1000 and
+    100000.
+    \item[2: ndicts] The size of the dictionary stack. Between 100 and 10000.
+    \item[3: nexecs] The size of the execution stack. Between 50 and 5000.
+    \item[4: VM] The size of the VM in megabytes. Between 1 and 1000.
+    \item[6: userdictsize]  The size of the initial userdict. Between
+    200 and 5000.
+  \end{description}
+\end{description}
+
+At the dnode, \verb$_csu$ calls \verb$vmresize$, which takes the final
+parameter of \verb$_csu$ as its only parameter. It creates the memory,
+and then \verb$_csu$ loads \texttt{startup\_dnode.d}. This initializes
+the userdict for the dnode.
+
+This file also initializes the X-connection to the dvt. An eye for the
+dnode is popped up on the Xserver identified by \verb$/getmyname$ at
+the dvt. This is initialized by default to the value of the
+environmental variable \verb-$DISPLAY-,%$
+or the local hostname if that is set to localhost:x, where x is the
+display number.  Usually, this is all set automagically.  However,
+this can be a security issue; this means that \verb$xhost +$ may have
+to be called on the command line, or \verb$/getmyname$ may need to be
+set to an ssh tunnel by hand, before calling \verb$_csu$.
+
+At this point, several graphical changes should occur:
+\begin{itemize}
+  \item TheHorses should be populated with the new dnode. A new line
+  should appear saying something like klutz3:0, for a dnode on the
+  klutz3 on port 0.
+  \item A new eye should appear labeled in the same way.
+\end{itemize}
+
+This can be repeated to connect several dnodes. In order to disconnect
+from a dnode, call:
+
+\verb$host _dc$, 
+
+where host is the dnodes number in order of TheHorses interface. In
+other words, the first dnode you connect to will be 1, the next 2,
+\dots If you attempt to reconnect later, empty spaces will be filled,
+and the number will be of its \emph{position}, not the order in which
+it was created.  When a node is disconnected, its eye will continue on
+the current screen.  It can, however, be destroyed by calling
+\verb$null vmresize$ directly on the dnode before disconnection.
+
+A dnode can be reconnected after a \verb$_csu$, \verb$_dc$ sequences
+without reinitializing the memory by calling:
+
+\verb$hostname port group _c$,
+
+where hostname, port and group are the same as in \verb$_csu$.  This
+can be particularly useful if the dvt dies. Operations on the dnodes
+are not interrupted. They continue, and any output goes to their
+standard error stream (probably the xterm on which they were started).
+By starting a new dvt, and using \verb$_c$, the output is redirected
+to the new dvt without interrupting pending operations. However, this
+will not move the node's eye from its current screen.
+
+
+\subsection{Using TheHorses}
+\label{sec:horses}
+
+To talk with the a dnode, TheHorses is the primary controlling
+interface. By left-clicking on a dnode or the dvt, it is selected as
+the primary keyboard owner. By clicking with button three (or
+\verb$Ctrl$-button 1), the node and other nodes in its group are
+selected as the keyboard owner.  All selected nodes appear in bold
+blue text. An alternate method for selected a node is via:
+
+\verb$target _t$,
+
+where target is a node\#, or group\# (as in \verb$_dc$,
+section~\ref{sec:dnode}).
+
+While selected as the keyboard owner, all commands entered through
+emacs are directed to those nodes. To send a command to the dvt, it
+must be reselected as the keyboard owner. The command is sent to the
+selected nodes when return is hit; if a command is entered, and then
+the node selected is changed, and finally return is hit from the
+keyboard, it will be sent to the newly selected node.
+
+While a node is processing the sent command, the node is highlighted
+in TheHorses. If it is selected as the current keyboard owner,
+commands will be rejected when return is hit unless prepended by an
+exclamation mark (\verb$!$). See the other manual for control keys
+associated with this. 
+
+When the operation is finished, the node will return to its
+unhighlighted state. This lock mechanism is intended to avoid
+accidentally interrupting a long-running process. If an error occurs
+at the dnode, \verb$!stop$ sent to the node will usually end the
+process, and set the node as ready. To force a node to appear to be
+ready, either click the node with button 2, or shift-button1, or call
+\verb$target setready$ in the dictionary \verb$dvt$.  This will clear
+the busy flag, but will not actually send any command to the node. It
+simply allows one to send a command without prepending a \verb$!$.
+
+These operations are summarized in section~\ref{sec:shorthorses}.
+
+TheHorses belongs to the dvt. Its operations occur within the dvt, and
+do not `speak' directly to the dnodes. They only change the state of
+the dvt, and thereby control the directing of keyboard input to the
+proper node, subsequently.
+
+
+\subsection{Tiny Window Manager}
+\label{sec:twm}
+
+All windows are managed by twm. The manager is fully documented by the
+man pages (accessed by typing in emacs \verb$Alt-x man$ and then
+\verb$twm$). However, a brief comment may be useful.
+
+The d-machine windows, excluding emacs, will appear in the d\_machine
+Icon Manager, which is initially on the upper right hand side of the
+screen. Each row has the name of the associated window, and clicking
+on it either minimizes or restores that window. Windows can be dragged
+by the title bar. On the right side of the window is a resize symbol.
+By dragging it past the edge of the window, one can resize windows;
+however, most d-machine windows are not resizable.
+
+The first symbol on the left-hand side of the title bar will
+minimize/restore the window upon clicking. The next-symbol from the
+left will pop-up a bar with the options: Iconify (minimize/restore),
+Delete (request that the owning process kill the window), and Kill
+(immediately remove the window).  Using kill will generally also kill
+the associated process (kill your dnode).
+
+Windows pop up randomly on the screen. You will have to place them in
+some useful/rational order by dragging the title bars. 
+
+\subsection{TheEye}
+\label{sec:eye}
+
+Now that the dnodes are connected and can be operated on via the
+keyboard, TheEye can be analyzed. One exists for each dnode, in
+addition to the dvt. It is important to note that when an operation is
+done on an eye, a piece of d-code is placed on top of the execution
+stack, interrupting current operation. This has two implications:
+\begin{enumerate}
+  \item While a d operation is within an operator (i.e., within a
+  piece of c), TheEye will not respond until after its completion.
+  \item At the end of an operation, TheEye's operation will begin with
+  the current stack, dictionaries, etc\dots, unaltered below the level
+  of the current operation. Generally this is safe, as TheEye
+  operations encapsulate themselves, leaving the state of the node/dvt
+  unchanged. However, don't push it too far; clicking quickly during
+  important/time-consuming operations is a recipe for disaster.
+\end{enumerate}
+
+The eye is composed of:
+\begin{description}
+  \item[Left Pane:] stores complex objects that have been selected.
+  Left-clicking puts identifying characteristics in the top bar.
+  \verb$Alt$-click, or middle-click selects the object for macro
+  operations (it turns red). \verb$Ctrl$-click, or right-click, opens
+  the composite object in the right pane. \verb$Shift$-click removes
+  the object from the left pane. Userdict and the filesystem root
+  (\verb$/$) appear automatically in the left pane, and cannot be
+  removed.
+  \item[Right Pane:] displays all the members of the last opened
+  composite object. Left-clicking puts identifying characteristics in
+  the top bar. \verb$Ctrl$-click or right-click will place a composite
+  object in the left-pane, and open it in the right pane.
+  \verb$Alt$-click or middle-click will toggle the select state for
+  the object for macro operations (it will turn bold blue or return to
+  black). Multiple objects can concurrently be selected in the right
+  pane.
+  \item[Bottom Bar:] controls scrolling for the left and right panes;
+  it is repeated twice, each one controlling the pane above it. The
+  single-headed arrows scroll the window one line in the obvious
+  direction. The double headed arrows scroll by a page. The double
+  headed arrow with a bar moves to the beginning or end of the pane.
+  \verb$Shift$-click or right-click will move proportionally, in terms
+  of your position on the bar. In other words, right-clicking with the
+  mouse in the middle of the bar will scroll to the middle of the
+  pane, and right-clicking two-thirds to the right will scroll to
+  two-thirds of the way through the pane.
+  \item[Top Bar:] displays identifying information of a
+  d-object/file which has been left-clicked. 
+  \begin{description}
+    \item[file:] size, modification time, and permission.
+    \item[directory:] canonical path.
+    \item[dictionary:] total elements, and current number of elements.
+    \item[list:] elements.
+    \item[array:] type and size. For byte arrays, the initial string is
+    also shown.
+    \item[boolean,number:] type and value.
+  \end{description}
+\end{description}
+
+The shortcuts are summarized in section~\ref{sec:shorteye}.
+
+Remember, each eye belongs to a separate node, which may be running
+on a different machine. The dvt is not directly linked to the eyes of
+the dnodes (only its own).  Your X-server is displaying it on your
+screen, but the code that creates the window is running inside the
+process of the associated dnode.  So, to access the state of an eye,
+you must run code in the associated dnode.  This is important for the
+interaction of the several windows, particularly the macro interface
+(discussed in section~\ref{sec:macro}).
+
+\subsection{Keyboard/Emacs}
+\label{sec:keyboard}
+
+Of course, the primary interface to the system is via the command
+line, embedded within emacs \citep{dvt-emacs}. Once the connections
+have been made, TheHorse, TheEye and the command line interact to
+manage the operation of the entire d-machine.
+
+A command entered if font-lock is on is initially colored by d-code
+conventions. After \verb$return$ is hit, this is converted by emacs to
+blue. Output from a node is by default in black text. In particular,
+output from the dvt is always black. Errors from any node are in red.
+This is encoded by the node using ansi color codes, and requires for
+conversion into actual colors that
+\verb$ansi-color-for-comint-term-on$ be called in emacs for the dvt
+buffer. That command is called by default by the dvt-mode code.
+
+A line entered is understood in terms of a preceding tag by the dvt,
+which then feeds the phrase up to the newline, in the proper context,
+to the current target (which may be itself):
+\begin{description}
+  \item[untagged] the phrase is sent to the keyboard owner, to be
+  interpreted as d-code.
+  \item[\texttt{!}] the phrase is decode to be sent to the keyboard
+  owner, regardless of the current busy state.
+  \item[\texttt{\$}] the phrase is a shell command to be executed by
+  the keyboard owner.
+  \item[\texttt{\#}] the phrase is interpreted as d-code by the dvt,
+  regardless of owner. The string produced is then sent to the
+  keyboard owner, to be executed as a shell command.
+  \item[\texttt{@}] same as \verb$#$, but it is interpreted by the
+  keyboard owner rather than the dvt.
+\end{description}
+
+For \verb$#$ and \verb$@$, the command line should be of the following form:
+\begin{description}
+  \item[\texttt{(string) fax}] appends a shell string literal.
+  \item[\texttt{faxLpage}] appends the object selected in the left
+  pane of the eye.
+  \item[\texttt{faxRpage}] appends all selected objects in the right
+  pane of the eye.
+\end{description}
+A string-buffer and index are placed on the stack before the operation
+is called. Afterwards, \verb$0 exch getinterval$ is called and the
+resulting string is executed as a shell command. For \verb$#$, this is
+done in the context of the dvt's eye, and for \verb$@$ this is in term
+of the keyboard owners eye.
+
+In the dvt the shell command is spun off as a background process,
+allowing the continued operation of the dvt. However, in a dnode it is
+a foreground process, halting operation of the dnode until it has
+terminated. Generally, operating system commands are most usefully
+done directly from the dvt. The dvt and the dnodes are generally setup
+to have parallel file structures; in other words, the
+\texttt{/mnt/Lab*} are the same directories, either through nsf
+network mounting or by having the dnode and the dvt on the same local
+machine.
+
+For normal d-code, the following operators are useful:
+\begin{description}
+  \item[\texttt{getLpage}] returns the object selected in the left
+  pane of the eye.
+  \item[\texttt{getRpage}] returns a list of objects selected in the
+  right pane of the eye.
+\end{description}
+These commands of course occur in the context of the current keyboard
+owner.
+
+Further color-coding is available in the module
+\texttt{/mnt/Lab1/dm-3.0-arch/color.d}. This modules creates two
+operators in the userdict, \verb$color_fax$ and \verb$color_text$,
+useful for adding color control codes to strings. They work both in
+the dvt and in dnodes. Usage instructions are embedded in the module's
+commentary.
+
+
+\subsubsection{Color coding of d-node output}
+\label{sec:color}
+
+To have alternate colors for the output of each node, a command line
+interface has been added to the dvt. The command \verb$color_node$ in
+userdict takes a color list and a node\# (in terms of TheHorses), and
+sets the color output of that node. The coloring is actually done in
+the dnode.
+
+{For example:\samepage
+\begin{verbatim}
+[/cyan /italic] 1 color_node
+\end{verbatim}
+  will set output all output from a \verb$/toconsole$ command on node 1
+  to cyan and italic.}
+
+{To remove coloring:\samepage
+\begin{verbatim}
+[/reset] 1 color_node
+\end{verbatim}}
+  
+An alternate formulation for multiple nodes is: \\
+\verb$[[/color_name...]...] color_nodes$.  This will call
+\verb$color_node$ on each node from 1\dots n, where n is the length
+of the list, with the respective color name list. Zero member color
+lists will cause the command to skip the associated node (not call
+\verb$color_node$ on that dnode).
+
+The full list of color names are: 
+\begin{description}
+  \item[Foreground:] \verb$/black$, \verb$/red$, \verb$/green$,
+  \verb$/yellow$, \verb$/blue$, \verb$/magenta$, \verb$/cyan$,
+  \verb$/white$.
+  \item[Background:] \verb$/on_black$, \verb$/on_red$,
+  \verb$/on_green$, \verb$/on_yellow$, \verb$/on_blue$, \\
+  \verb$/on_magenta$, \verb$/on_cyan$, \verb$/on_white$.
+  \item[Styles:] \verb$/bold$, \verb$/faint$, \verb$/italic$,
+  \verb$/underlined$, \verb$/slow_blink$, \verb$/rapid_blink$,
+  \verb$/negative$. (Some of these are implemented fairly poorly by
+  emacs).
+\end{description}
+
+Additionally, all of these operators will add a code the TheHorse,
+following the hostname and port number. The letter B followed by a
+single letter indicates the background color (\textbf{b}lack,
+\textbf{r}ed, \textbf{g}reen, \textbf{y}ellow, b\textbf{l}ue,
+\textbf{m}agenta, \textbf{c}yan, \textbf{w}hite). The letters will be
+in a color similar to that produced on emacs. The letter F followed by
+the same letter indicates the foreground color. Finally, the letter S
+followed by a code indicates the style of the output (\textbf{i}talic,
+\textbf{b}old, \textbf{f}aint, \textbf{\_} underlined, \textbf{s}low
+blink, \textbf{r}apid blink, \textbf{n}egative), and will be styled in
+a way suggestive of the output.
+
+\subsection{DVT Macro}
+\label{sec:macro}
+
+An essential integrative window is the DVT macro bar. This bar runs in
+the dvt proper, and sends to the emacs screen a string that can be
+entered by the user to do a standard operation. Generally, this means
+that you click on a command, choose something in the eye and then hit
+\verb$up-cursor return$ or the \verb$f1$ key to send that string back
+to the dvt \citep{dvt-emacs}.
+
+The proper keyboard owner and matching eye must be used for many of
+these command. For example, to load a module one would click on
+\emph{Load} on the macro bar. The command:
+
+\hspace{-0.6em}\verb$getRpage dup 0 get exch 1 get { exch dup 3 -1 roll fromfiles } forall pop$
+
+will appear on the emacs command line. Select all modules to load in
+the right pane of the dnode you want, and select that dnode as the
+keyboard owner. Then hit \verb$f1$ or \verb$up-cursor return$ to enter
+that command and thereby send it to the dnode. While the operation is
+occurring you will see that dnode highlighted in TheHorses.
+
+The operations functional under osx are:
+\begin{description}
+  \item[ChangeDir] changes the current working directory. By default,
+  the node runs in \texttt{/mnt/Lab1/dm-3.0-arch}, and all operations
+  are relative to that. This command uses the currently selected
+  directory in the left pane of the current keyboard owners.
+  \item[MakeDir] creates a directory. The selected directory in the
+  left pane of the dvt eye is recreated on the current keyboard
+  owners' host machines.
+  \item[Remove] removes all files or directories selected in the right
+  pane of the dvt from the current keyboard owners' hosts.
+  \item[Copy] copies all files or directories selected in the right
+  pane of the dvt to the directory selected on the left pane of the
+  dvt, on the current keyboard owners' hosts.
+  \item[Save] saves objects to the file chosen in the right pane,
+  using the object generator selected in the left pane.  A literal
+  directory path must be prepended by hand, such as
+  \verb$(/mnt/Lab3/ic1/)$. This all occurs in the context of the
+  current keyboard owners. (I haven't actually seen this one used.)
+  \item[Load] loads modules from the files selected on the right
+  pane. This also occurs in the context of current keyboard owners.
+\end{description}
+
+Additionally, under linux the following operators are available:
+\begin{description}
+  \item[CD:]\ \\*[-1.5\baselineskip]
+  \begin{description}
+    \item[Mount] mounts the cd drive to \texttt{/mnt/cdrom}.
+    \item[Eject] ejects the cd drive.
+  \end{description}
+  \item[Stick:]\ \\*[-1.5\baselineskip]
+  \begin{description}
+    \item[Mount] mounts the the stick to \texttt{/mnt/usbmem}.
+    \item[Unmount] unmounts the stick (which actually syncs the
+    buffer).
+  \end{description}
+  \item[Printer Ops] are divided into two groups, \emph{PrintFrom} and
+  \emph{PrintTo}. The operations in the first group print out the
+  beginning of a print command, without a following newline. The
+  second set completes the command, and adds a newline. So
+  conceptually, the first group identifies the source type, and the
+  second the destination. They print out the files currently selected
+  in the right pane of the dvt, and generally are best used with the
+  dvt as the keyboard owner. The \emph{PrintFrom} options are:
+  \begin{description}
+    \item[Talk] Directly connect to the print device. An xterm is
+    created, which allows one to enter postscript commands to be
+    executed by the printer or ghostscript.
+    \item[Ascii] Send ascii files transformed by the shell command
+    \texttt{a2ps} into postscript to the print device. That command
+    nicely formats some known file types, like c code, and prints out
+    in a two-page per physical page format.
+    \item[PS] Send standard postscript directly to the print device.
+    \item[xPS] Prepends the reporter-created postscript files with
+    standard include files
+    (\texttt{/mnt/Lab1/ps/\{form\_2.ps,text.ps,graf\_1.ps,struct.ps\}})
+    before sending them to the print device.
+  \end{description}
+  The \emph{PrintTo} options are:
+  \begin{description}
+    \item[gs] Print to the ghostscript engine. This will pop up an
+    xterm and a ghostscript window which will render the output.
+    Hitting return will display page by page of the output.
+    \item[LW] Print to \texttt{LaserWriter Pro 630}. The printer has
+    to be manually reset (hit the power) often.
+    \item[xpdf] Convert postscript to pdf (\texttt{file.ps} to
+    \texttt{file.pdf}), and display the pdf with xpdf.
+  \end{description}
+  Finally, \emph{LWstatus} prints to the dvt terminal the current
+  status of the laser writer (to check whether you need to hit the
+  power button on it).
+\end{description}
+
+Additionally, if the module \texttt{color.d} is loaded into the dvt,
+the macro commands will not be in the dvt's standard black, but will
+appear in bold blue.
+
+\section{Operator changes}
+
+Some operators behave differently than in earlier implementations, or
+have been added. These changes focus on tcp connectivity and the
+multithreaded behavior of the d-machine.
+
+\subsection{Operators \texttt{save} and \texttt{restore}}
+\label{sec:save}
+
+In earlier versions, \verb$restore$'ing an uncapped \verb$save$ would
+result in the operand and dictionary stacks returning to their state
+at the time of the original save. In the current implementation, this
+often lead to segment violations. Therefore, the behavior of the
+operator has been changed.
+
+Now, the \verb$restore$ operator on an uncapped \verb$save$ acts in a
+manner similar to a capped \verb$save$. In other words, the memory in
+the box is deallocated without reverting the dictionary and operand
+stacks. However, the \verb$restore$ on a capped \verb$save$ will fail
+if either of those stacks contain reference into that region of memory
+(such as an array on the stack which lives in the box). On the other
+hand, the uncapped save will simply remove the offending frames from
+the operand, dictionary and executable stacks.
+
+\subsection{Operators \texttt{send}, \texttt{console}, and \texttt{connect}}
+\label{sec:send}
+
+A \verb$send$ operator has been added, which sends operators from the
+dvt to the dnode and back. Its parameters are as follows:
+\begin{verbatim}
+socket [root (string)] |send| --
+socket (string)        |send| --
+\end{verbatim}
+where socket is a null object encapsulating a socket number as
+produced by \verb$connect$, root is a list (including procedure),
+array or dictionary, and string is a piece of d code.
+
+The (string) is executed on the foreign node. In the first form, the
+root object is placed on the operand stack before executing the
+(string).
+
+Normally, the socket is retrieved on the dvt form \verb$nodelist$ in
+the \verb$dvt$ dictionary (see the description of \verb$nodelist$ in
+\texttt{startup\_dvt.d}). This value, however, is originally created
+by the \verb$connect$ operator:
+\begin{verbatim}
+(servername) port# |connect| socket
+\end{verbatim}
+
+To simplify coding of dnode code, the \verb$console$ operator has been
+added, which returns the socket of the dvt managing the dnode. This is
+primarily for use in send, where most operation have a return send to
+the dvt embedded in the command to be executed on the dnode.
+
+For example, the following:
+\begin{verbatim}
+somenode (2 2 add _ console \(1 1 add _ \) send) send
+\end{verbatim}
+will add 2 and 2 on somenode, then send a command back to the
+dvt to add 1 and 1.
+
+\subsection{Tilde'd operators}
+\label{sec:tilde}
+
+Tilde'd operators have been added to simplify the creation of
+procedures on the fly to send to dnodes or return to the dvt. A
+name that has been tilded on the execution stack is neither placed on
+the operand stack as a passive name, or executed on the execution
+stack. Instead it is placed as an \emph{active} name on the
+\emph{operand} stack. Likewise, a tilded mark creates an active list
+(a procedure), of the elements between the mark and the close mark.
+
+For example:\samepage
+\begin{verbatim}
+/somedict 2 dict dup begin 
+  /a {(a1\n) toconsole} def 
+  /b {(b1\n) toconsole} def 
+end def
+/a {(a2\n) toconsole} def 
+/b {(b2\n) toconsole} def 
+/test ~[ somedict ~begin a ~b ~end] def
+/somedict 2 dict dup begin 
+ /a {(a3\n) toconsole} def 
+ /b {(b3\n) toconsole} def 
+end
+test
+\end{verbatim}
+will output \verb$a2$ during the definition of \verb$test$, and
+\verb$b1$ when \verb$test$ is called. The operators \verb$a$ and
+\verb$somedict$ are resolved and executed during the definition of
+\verb$test$, but \verb$b$ is resolved and executed during the
+execution of \verb$test$.  Additionally, the resolution of \verb$b$ is
+in context of the \verb$somedict$ resolved during the definition,
+instead of the \verb$somedict$ that would normally be resolved during
+execution.
+
+This can be most useful in locutions involving \verb$send$ (subsection
+\ref{sec:send}), as follows:\samepage
+\begin{verbatim}
+/n 1 def
+somenode [~[~nodedict ~begin n ~n ~add ~_ ~pop] (exec)] send
+\end{verbatim}
+
+This will add the current value of \verb$n$ in the dvt (1), with the value
+of n in nodedict on the dnode (\verb$somenode$), and display it.
+
+\section{Shortcuts}
+\label{sec:short}
+
+Most graphical commands can be entered in one of three ways: by a
+piece of dvt code, by a one-button mouse combined with control, alt,
+or shift, or by a three-button mouse click.
+
+\textbf{NB:} On G5 Panther machines, all references to Alt key must be
+replaced with the Apple key.
+
+\subsection{TheHorses shortcuts}
+\label{sec:shorthorses}
+
+\begin{tabular}{|l|c|c|c|}
+  \hline
+  Operation & DVT command & 1-button & 3-button \\
+  \hline
+  Select Node & \verb$target _t$ & Click & 1-click \\
+  Clear Busy & \verb$target setready$ & Shift & 2-click \\
+  Select Group & \verb$-target _t$ & Ctrl & 3-click \\
+  \hline
+\end{tabular}
+
+\subsection{TheEye shortcuts}
+\label{sec:shorteye}
+\textbf{Left Pane:}\nopagebreak
+
+\begin{tabular}{|l|c|c|}
+  \hline
+  Operation & 1-button & 3-button \\
+  \hline
+  Get Info & Click & 1-click \\
+  Select & Alt & 2-click \\
+  Open  & Ctrl & 3-click \\
+  Remove  & Shift & Shift-1-click \\
+  \hline
+\end{tabular}
+\bigskip
+
+
+\textbf{Right Pane:}\nopagebreak
+
+\begin{tabular}{|l|c|c|}
+  \hline
+  Operation & 1-button & 3-button \\
+  \hline
+  Get Info & Click & 1-click \\
+  Select & Alt & 2-click \\
+  Open & Ctrl & 3-click \\
+  \hline
+\end{tabular}
+\bigskip
+
+\textbf{Bottom Bar}:\nopagebreak
+
+\begin{tabular}{|l|c|c|c|}
+  \hline
+  Operation & Location & 1-button & 3-button \\
+  \hline
+  Scroll 1 line & $<$ or $>$ & click & 1-click \\
+  Scroll 1 page & $<\!\!<$ or $>\!\!>$ & click & 1-click \\
+  Scroll to end & $|\!\!\!<\!\!<$ or $>\!\!>\!\!\!|$ & click & 1-click \\
+  Scroll proportionally & proportional position & Shift-click &
+  3-click \\
+  \hline
+\end{tabular}
+\bigskip
+
+\subsection{Emacs shortcuts}
+\label{sec:shortemacs}
+
+These are described in \citet{dvt-emacs}.
+
+
+\subsection{DVT macros}
+\label{sec:shortmacro}
+
+The macro bar functions by left-click or single-click. The text
+produced on the terminal then must be sent to the keyboard owner with
+an \verb$up-cursor return$ or by \verb$f1$. The commands available are
+explained in section~\ref{sec:macro}.
+
+\subsection{X-windows}
+
+Under aqua on osx and full-screen X, \verb$Ctrl-Apple-A$ will switch
+between the X and aqua desktops.
+
+\bibliography{dvt}
+
+\end{document}

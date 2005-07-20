@@ -1,0 +1,27 @@
+#-*-makefile-*-
+
+CPPFLAGS = 
+
+#CC = gcc-4.0
+
+CFLAGS += \
+	$(ccwarn) $(CPPFLAGS) \
+	-g -O3 -pipe \
+	-fno-math-errno \
+	-fno-trapping-math \
+	-fno-signaling-nans \
+	-fno-unsigned-char \
+	-mcpu=7450 -mtune=7450
+
+#CFLAGS = \
+#       $(ccwarn) $(CPPFLAGS) \
+#	-g -O -pipe -mcpu=7400 \
+#	-fsigned-char -ffast-math -mpowerpc-gpopt
+
+CSFLAGS += -shared
+
+#CLFLAGS += -arch ppc7450
+
+%.so: CFLAGS += -fpic -nostdlib
+
+include Makefile.main
