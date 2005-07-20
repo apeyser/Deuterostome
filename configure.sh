@@ -77,7 +77,7 @@ include Makefile.type-$TYPE
 
 EOF
 
-for i in $(find . -mindepth 1 -type d) ; do
+for i in $(find . -mindepth 1 -name '.*' -prune -o -type d -print) ; do
     echo "$(revpath '$i')Makefile" "$i/Makefile"
     ln -sf "$(revpath '$i')Makefile" "$i/Makefile"
 	for j in Makefile.type-* ; do
