@@ -6,7 +6,7 @@ CPPFLAGS =
 
 CFLAGS += \
 	$(ccwarn) $(CPPFLAGS) \
-	-g -O3 -pipe \
+	-g -O2 -pipe \
 	-fno-math-errno \
 	-fno-trapping-math \
 	-fno-signaling-nans \
