@@ -11,10 +11,13 @@ install: $(SHPREFIX).dir $(sources:%.sh=$(SHPREFIX)/%.sh)
 
 dnode.sh: dnode.sh.pre
 print_.sh: print_.sh.pre
+print.sh: print.sh.pre
+
+print.sh.pre: print.sh.pre.$TYPE ; ln -s print.sh.pre.$TYPE print.sh.pre
 
 $(SHPREFIX)/dnode.sh: dnode.sh ; $(installexec)
 $(SHPREFIX)/print.sh: print.sh ; $(installexec)
 $(SHPREFIX)/print_.sh: print_.sh ; $(installexec)
 
-clean: ; -rm dnode.sh print_.sh
+clean: ; -rm dnode.sh print_.sh print.sh print.sh.pre
 
