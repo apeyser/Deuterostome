@@ -1,22 +1,28 @@
-#!/bin/bash 
+#!/bin/bash
 
 function usage() {
     cat <<EOF 1>&2
 Usage: $0 [--prefix <prefix>]? [--shprefix <shprefix>]? \
 [--docprefix <docprefix>]? [--elprefix <elprefix>]? \
 [--libprefix <libprefix>]? [--type <Makefile suffix>]? \
-[--psprefix <psprefix>]?
+[--psprefix <psprefix>]? [--gui <gui>]?
 EOF
     exit 1
 }
 
 if [[ $(uname -s) == 'Linux' ]] ; then
+    MAINTYPE="$(uname -s)"
     #TYPE="$(uname -s)-$(uname -i | sed 's/,.*//')$(uname -m)"
-    TYPE="$(uname -s)-$(uname -m)$(cat /proc/cpuinfo | grep -E '^cpu[[:space:]]+:' | sed -re 's/^cpu[[:space:]]+:[[:space:]]*//' -e 's/,.*//')"
+    SUBTYPE="$(uname -m)$(cat /proc/cpuinfo | grep -E '^cpu[[:space:]]+:' | sed -re 's/^cpu[[:space:]]+:[[:space:]]*//' -e 's/,.*//')"
+    TYPE="$MAINTYPE-$SUBTYPE"
 elif [[ $(uname -s) == 'Darwin' ]] ; then
-	TYPE="$(uname -s)-$(machine)"
+    MAINTYPE="$(uname -s)"
+    SUBTYPE="$(machine)"
+    TYPE="$MAINTYPE-$SUBTYPE"
 else
-	TYPE="$(uname -s)"
+    MAINTYPE="$(uname -s)"
+    SUBTYPE=""
+    TYPE="$MAINTYPE"
 fi
 
 while (( $# > 0 )) ; do
@@ -32,9 +38,12 @@ while (( $# > 0 )) ; do
 	--libprefix)
 	    shift; LIBPREFIX="$1"; shift;;
 	--psprefix)
-		shift; PSPREFIX="$1"; shift;;
+	    shift; PSPREFIX="$1"; shift;;
 	--type)
-	    shift; TYPE="$1"; shift;;
+	    shift; TYPE="$1"; 
+	    MAINTYPE="${TYPE%%-*}"; SUBTYPE="${TYPE#*-}"; shift;;
+	--gui)
+	    shift; GUI="$1"; shift;;
 	*)
 	    echo "Unknown flag: $1" 1>&2
 	    usage;;
@@ -63,6 +72,18 @@ checkpre ELPREFIX "$PREFIX" /emacs
 checkpre LIBPREFIX "$PREFIX" /lib
 checkpre PSPREFIX "$PREFIX" /ps
 
+if [[ -z "$GUI" ]] ; then
+    case "$MAINTYPE" in
+	Darwin) 
+	    GUI=aqua;;
+	Linux)
+	    GUI=gnome;;
+	*)
+	    echo "No known gui, defaulting to gnome"
+	    GUI=gnome;;
+    esac
+fi
+
 cat <<EOF >./Makefile
 #-*-makefile-*-
 
@@ -72,6 +93,10 @@ DOCPREFIX = $DOCPREFIX
 ELPREFIX = $ELPREFIX
 LIBPREFIX = $LIBPREFIX
 PSPREFIX = $PSPREFIX
+TYPE = $TYPE
+MAINTYPE = $MAINTYPE
+SUBTYPE = $SUBTYPE
+GUI = $GUI
 
 include Makefile.type-$TYPE
 

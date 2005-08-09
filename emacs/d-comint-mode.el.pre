@@ -1,4 +1,5 @@
-(setq d-comint-mode-compile nil)
+(defvar d-comint-mode-server t)
+(defvar d-comint-mode-compile nil)
 (eval-when-compile (setq d-comint-mode-compile t))
 (eval-and-compile (if (not d-comint-mode-compile) (require 'd-mode)))
 (require 'comint)
@@ -56,6 +57,7 @@ property."
 ;;;###autoload
 (define-derived-mode d-comint-mode comint-mode "DVT"
   "Major mode for handling d-machine"
+  (if d-comint-mode-server (server-start))
   (setq comint-prompt-regexp "^")
   (setq comint-input-ring-file-name "~/.dvt_history")
 

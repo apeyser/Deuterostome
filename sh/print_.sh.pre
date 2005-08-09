@@ -76,7 +76,8 @@ function ascii_gs()
 
 function xpdf()
 {
-    launch -i com.apple.Preview "$@"
+@GUI[aqua][launch -i com.apple.Preview "$@"]@
+@GUI[gnome][gnome-open "$@"]@
 }
 
 function xpdfprint()

@@ -48,12 +48,24 @@ installdir  = install -d $*
 
 emacsbuild = emacs --batch --eval='(byte-compile-file "$<")'
 
-preprocess = sed \
+preprocess = sed -r \
 	-e 's/@PREFIX@/$(subst /,\/,$(PREFIX))/' \
 	-e 's/@ELPREFIX@/$(subst /,\/,$(ELPREFIX))/' \
 	-e 's/@DOCPREFIX@/$(subst /,\/,$(DOCPREFIX))/' \
 	-e 's/@SHPREFIX@/$(subst /,\/,$(SHPREFIX))/' \
 	-e 's/@PSPREFIX@/$(subst /,\/,$(PSPREFIX))/' \
+	-e 's/@TYPE@/$(TYPE)/' \
+	-e 's/@TYPE(.)$(TYPE)(.)\1(.*)\2@/\3/' \
+	-e 's/@TYPE(.).*(.)\1(.*)\2@//' \
+	-e 's/@MAINTYPE@/$(MAINTYPE)/' \
+	-e 's/@MAINTYPE(.)$(MAINTYPE)(.)\1(.*)\2@/\3/' \
+	-e 's/@MAINTYPE(.).*(.)\1(.*)\2@//' \
+	-e 's/@SUBTYPE@/$(SUBTYPE)/' \
+	-e 's/@SUBTYPE(.)$(SUBTYPE)(.)\1(.*)\2@/\3/' \
+	-e 's/@SUBTYPE(.).*(.)\1(.*)\2@//' \
+	-e 's/@GUI@/$(GUI)/' \
+	-e 's/@GUI(.)$(GUI)(.)\1(.*)\2@/\3/' \
+	-e 's/@GUI(.).*(.)\1(.*)\2@//' \
 	$< > $@
 
 slatex    = latex \\nonstopmode\\input $<
