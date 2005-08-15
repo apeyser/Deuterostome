@@ -337,6 +337,11 @@ W i; B c;
               | sb[13]; 
 
 /* key = exclusive or of all nameframe words except CLASS/ATTR */
+     fprintf(stderr, "Name: %s, %lx:%lx:%lx\n", 
+	     namestring,
+	     *(UL*) nameframe, 
+	     *(UL*)(nameframe+4),
+	     *(UL*) (nameframe+8));
      *(W *)(nameframe+10) ^=  *(W *)(nameframe+8) ^ 
                               *(W *)(nameframe+6) ^
                               *(W *)(nameframe+4) ^
