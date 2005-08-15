@@ -342,11 +342,11 @@ W i; B c;
                               *(W *)(nameframe+4) ^
                               *(W *)(nameframe+2) ^
                              (*(W *)nameframe & 0xF00);
-     fprintf(stderr, "Name: %s, %lx:%lx:%hx\n", 
+     fprintf(stderr, "Name: %s, %lx:%lx:%lx\n", 
 	     namestring,
 	     *(UL*) nameframe, 
 	     *(UL*)(nameframe+4),
-	     *(UW*) (nameframe+8));
+	     *(UL*) (nameframe+8));
 } 
 
 void pullname(B *nameframe, B *namestring)
