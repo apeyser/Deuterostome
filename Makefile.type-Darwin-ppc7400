@@ -13,7 +13,9 @@ CFLAGS += \
 	-fno-signaling-nans \
 	-fcx-limited-range \
 	-dynamic -fno-unsigned-char \
-	-Wno-pointer-sign
+	-Wno-pointer-sign \
+	-fno-strict-aliasing
+
 
 CLFLAGS += -arch ppc7400
 CSFLAGS += -bundle -undefined dynamic_lookup

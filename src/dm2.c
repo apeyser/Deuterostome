@@ -337,22 +337,12 @@ W i; B c;
               | sb[13]; 
 
 /* key = exclusive or of all nameframe words except CLASS/ATTR */
-     fprintf(stderr, "Name: %s, %lx:%lx:%lx\n", 
-	     namestring,
-	     *(UL*) nameframe, 
-	     *(UL*)(nameframe+4),
-	     *(UL*) (nameframe+8));
-     *(W *)(nameframe+10) ^=  *(W *)(nameframe+8) ^ 
+     *(W *)(nameframe+10) ^=  *(W *)(nameframe+8) ^
                               *(W *)(nameframe+6) ^
                               *(W *)(nameframe+4) ^
                               *(W *)(nameframe+2) ^
                              (*(W *)nameframe & 0xF00);
-     fprintf(stderr, "Name: %s, %lx:%lx:%lx\n", 
-	     namestring,
-	     *(UL*) nameframe, 
-	     *(UL*)(nameframe+4),
-	     *(UL*) (nameframe+8));
-} 
+}
 
 void pullname(B *nameframe, B *namestring)
 {
