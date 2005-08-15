@@ -16,6 +16,8 @@ B* ll_export[] = {
     "libnum", (B*) op_test2_libnum,
     "say5", (B*) op_say5,
     "sayerror", (B*) op_sayerror,
+    "say5_2", (B*) op_say5,
+    "sayerror_2", (B*) op_sayerror,
     "", NULL
 };
 

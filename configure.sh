@@ -5,7 +5,7 @@ function usage() {
 Usage: $0 [--prefix <prefix>]? [--shprefix <shprefix>]? \
 [--docprefix <docprefix>]? [--elprefix <elprefix>]? \
 [--libprefix <libprefix>]? [--type <Makefile suffix>]? \
-[--psprefix <psprefix>]? [--gui <gui>]?
+[--psprefix <psprefix>]? [--gui <gui>]? [--sysdict <sysdictsize>]?
 EOF
     exit 1
 }
@@ -44,6 +44,8 @@ while (( $# > 0 )) ; do
 	    MAINTYPE="${TYPE%%-*}"; SUBTYPE="${TYPE#*-}"; shift;;
 	--gui)
 	    shift; GUI="$1"; shift;;
+	--sysdict)
+	    shift; SYSDICT="$1" shift;;
 	*)
 	    echo "Unknown flag: $1" 1>&2
 	    usage;;
@@ -84,6 +86,9 @@ if [[ -z "$GUI" ]] ; then
     esac
 fi
 
+[[ -z "$SYSDICT" ]] && SYSDICT=500
+    
+
 cat <<EOF >./Makefile
 #-*-makefile-*-
 
@@ -97,6 +102,7 @@ TYPE = $TYPE
 MAINTYPE = $MAINTYPE
 SUBTYPE = $SUBTYPE
 GUI = $GUI
+SYSDICT = $SYSDICT
 
 include Makefile.type-$TYPE
 

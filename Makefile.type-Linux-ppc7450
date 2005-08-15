@@ -19,6 +19,7 @@ CFLAGS += \
 #	-fsigned-char -ffast-math -mpowerpc-gpopt
 
 CSFLAGS += -shared
+CLFLAGS += -rdynamic
 
 #CLFLAGS += -arch ppc7450
 

@@ -27,7 +27,7 @@ all:
 
 CC = gcc
 XLIB    += -L"/usr/X11R6/lib" -lX11
-CPPFLAGS += -DSTARTUP_DIR="\"$(PREFIX)\""
+CPPFLAGS += -DSTARTUP_DIR="\"$(PREFIX)\"" -DSYSDICTSIZE="$(SYSDICT)"
 CLFLAGS += $(XLIB) # linker flags
 #CSFLAGS += -shared   # shared lib flags
 #CFPIC   += -fpic # pic variable for shared library and base object

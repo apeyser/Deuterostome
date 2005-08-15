@@ -222,7 +222,7 @@ L syserrc[] =
     OPD_CLA, OPD_TYP, OPD_ERR, RNG_CHK, OPD_ATR, UNDF, DICT_ATR,
     DICT_OVF, DICT_USED, UNDF_VAL, DIR_NOSUCH,
     CORR_OP, BADBOX, BAD_MSG, NOSYSTEM, INV_MSG, NOT_HOST,
-    LIB_LOAD, LIB_EXPORT, LIB_LINK, LIB_ADD, LIB_LOADED, LIB_OVF,
+    LIB_LOAD, LIB_EXPORT, LIB_LINK, LIB_ADD, LIB_LOADED, LIB_OVF, LIB_MERGE,
     NO_XWINDOWS, X_ERR, X_BADFONT, X_BADHOST,
     0L,
 };
@@ -272,7 +272,8 @@ B* syserrm[] =
     "** Library has not been loaded",
     "** Unable to add operation to library dictionary",
     "** Library already loaded",
-    "** Overflow in malloc while loading library"
+    "** Overflow in malloc while loading library",
+    "** Unable to merge library into sysdict",
     "** X windows unavailable",
     "** Error in X windows",
     "** Bad X windows font",

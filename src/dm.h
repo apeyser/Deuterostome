@@ -242,6 +242,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define LIB_ADD     0x0000090AL /* unable to add op to lib dict          */
 #define LIB_LOADED  0x0000090BL /* lib already loaded                    */
 #define LIB_OVF     0x0000090CL /* malloc in lib overflowed              */
+#define LIB_MERGE   0x0000090DL /* out of space in sysdict for merge     */
 
 #define NO_XWINDOWS 0x00000A01L /* X windows unavailable                 */
 #define X_ERR       0x00000A02L /* X lib error                           */
@@ -320,6 +321,7 @@ B* nextlib(B* frame);
 B* geterror(L e);
 B *makedict(L n);
 void cleardict(B *dict);
+B *makeopdictbase(B *opdefs, L *errc, B **errm, L n1);
 B *makeopdict(B *opdefs, L *errc, B **errm);
 void d_reloc(B *dict, L oldd, L newd);
 void d_rreloc(B *dict, L oldd, L newd);
@@ -335,6 +337,7 @@ void moveS(S *source, S *dest, L n);
 void moveD(D *source, D *dest, L n);
 B *lookup(B *nameframe, B *dict);
 BOOLEAN insert(B *nameframe, B *dict, B *framedef);
+BOOLEAN mergedict(B *source, B *sink);
 L exec(L turns);
 L foldobj(B *frame, L base, W *depth);
 L unfoldobj(B *frame, L base);

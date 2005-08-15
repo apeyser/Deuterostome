@@ -16,6 +16,8 @@ B* ll_export[] = {
     "libnum", (B*) op_test_libnum,
     "say5", (B*) op_say5,
     "sayerror", (B*) op_sayerror,
+    "say5_1", (B*) op_say5,
+    "sayerror_1", (B*) op_sayerror,
     "", NULL
 };
 
@@ -30,3 +32,4 @@ L op_say5(void)
 }
 
 L op_sayerror(void) {return ll_type | TEST_ERROR;}
+

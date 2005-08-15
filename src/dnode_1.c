@@ -277,7 +277,7 @@ return(DONE);
     vmresize.  Sysdict is at the bottom of vm, not top
 */
   
-  static void maketinysetup(void)
+static void maketinysetup(void)
 {
   B *sysdict, *userdict;
   
@@ -360,7 +360,8 @@ L op_vmresize(void)
       Dmemory = (B *)malloc(nb+9);
       if (Dmemory == 0) return(RNG_CHK);
       makeDmemory(Dmemory,setup);
-      if ((sysdict = makeopdict((B*) sysop,syserrc,syserrm)) == (B*) -1L)
+      if ((sysdict = makeopdictbase((B*) sysop,syserrc,syserrm,SYSDICTSIZE)) 
+	  == (B*) -1L)
           error(EXIT_FAILURE, 0, "systemdict > vm");
       if ((userdict = makedict(setup[4])) == (B *)(-1L))
         error(EXIT_FAILURE, 0, "userdict > vm");
@@ -468,6 +469,7 @@ L op_loadlib(void)
     UL* libtype;
     B* oldCEILvm;
     B* oldFREEvm;
+    B* sysdict;
 
     B* frame;
     B* dict;
@@ -529,9 +531,13 @@ L op_loadlib(void)
         return VM_OVF;
     }
 
+
     LIB_TYPE(dict - FRAMEBYTES) = type;
     LIB_HANDLE(dict - FRAMEBYTES) = (L) handle;
     FREEopds = o_2;
+
+    sysdict = VALUE_BASE(FLOORdicts);
+    if (! mergedict(dict, sysdict)) return LIB_MERGE;
     return OK;
 }
 

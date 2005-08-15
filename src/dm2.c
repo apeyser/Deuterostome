@@ -40,7 +40,7 @@ L wrap_hi(B* hival)
     if (FLOORopds > o_2) return OPDS_UNF;
     if (! VALUE(o_1, &index)) return UNDF_VAL;
     hilen = strlen(hival);
-    if (index + hilen > ARRAY_SIZE(o_1)) return RNG_CHK;
+    if (index + hilen > ARRAY_SIZE(o_2)) return RNG_CHK;
 
     strncpy(VALUE_PTR(o_2) + index, hival, hilen);
     LONG_VAL(o_1) = index + hilen;
@@ -180,9 +180,16 @@ for (k=0; k<DICT_CONHASH(dict); k++) ((L *)DICT_CEIL(dict))[k] = -1L;
   as containing operators such that they can be distinguished from
   other dictionary objects there (and can be scanned considering their
   OPLIB extension).
+
+  makeopdict just redirects to makeopdictbase, which is the original
+  makeoptdict, with a dictionary length added (for sysdict).
 */
 
-B *makeopdict(B *opdefs, L *errc, B **errm)
+B *makeopdict(B *opdefs, L *errc, B **errm) {
+  return makeopdictbase(opdefs, errc, errm, 0);
+}
+
+B *makeopdictbase(B *opdefs, L *errc, B **errm, L n1)
 {
 L n;
 B *opdef, *dict, *frame, framebuf[FRAMEBYTES], nameframe[FRAMEBYTES],
@@ -190,18 +197,20 @@ B *opdef, *dict, *frame, framebuf[FRAMEBYTES], nameframe[FRAMEBYTES],
 
  oldFREEvm = FREEvm;
  n = 0; opdef = opdefs;
-while ( OPDEF_CODE(opdef) != 0) { n++; opdef += OPDEFBYTES; }
-if ((dict = makedict(n))== (B *)(-1L)) return((B *)(-1L));
+ while ( OPDEF_CODE(opdef) != 0) { n++; opdef += OPDEFBYTES; };
+ if (! n1) n1 = n;
+
+ if ((dict = makedict(n1))== (B *)(-1L)) return((B *)(-1L));
  if (FREEvm + LIBBYTES > CEILvm) return((B*) -1L);
-frame = framebuf;
-TAG(frame) = OP; ATTR(frame) = ACTIVE | READONLY;
-for (opdef = opdefs; n; opdef += OPDEFBYTES, n--)
-     {
-     OP_NAME(frame) = OPDEF_NAME(opdef);
-     OP_CODE(frame) = OPDEF_CODE(opdef);
-     makename(((B *)OP_NAME(frame)),nameframe);
-     if (!insert(nameframe,dict,frame)) return((B *)(-1L));
-     }
+ frame = framebuf;
+ TAG(frame) = OP; ATTR(frame) = ACTIVE | READONLY;
+ for (opdef = opdefs; n; opdef += OPDEFBYTES, n--)
+ {
+   OP_NAME(frame) = OPDEF_NAME(opdef);
+   OP_CODE(frame) = OPDEF_CODE(opdef);
+   makename(((B *)OP_NAME(frame)),nameframe);
+   if (!insert(nameframe,dict,frame)) return((B *)(-1L));
+ }
  FREEvm = oldFREEvm; 
  CEILvm -= FRAMEBYTES + LIBBYTES + DICT_NB(oldFREEvm);
  moveD((D*) oldFREEvm, (D*) CEILvm, (DICT_NB(oldFREEvm) + FRAMEBYTES)>>3);
@@ -333,7 +342,12 @@ W i; B c;
                               *(W *)(nameframe+4) ^
                               *(W *)(nameframe+2) ^
                              (*(W *)nameframe & 0xF00);
-}
+     fprintf(stderr, "Name: %s, %lx:%lx:%hx\n", 
+	     namestring,
+	     *(UL*) nameframe, 
+	     *(UL*)(nameframe+4),
+	     *(UW*) (nameframe+8));
+} 
 
 void pullname(B *nameframe, B *namestring)
 {
@@ -447,6 +461,26 @@ do { if (key == NAME_KEY(ASSOC_NAME(link)))
             return(ASSOC_FRAME(link));
    } while ( (link = (B *)(ASSOC_NEXT(link))) != (B *)(-1L));
 return(0L);
+}
+
+/* merge entries in source into sink */
+/* return false if not enough space in sink */
+BOOLEAN mergedict(B *source, B* sink) {
+  B *entry;
+  B hiname[FRAMEBYTES];
+  B libnumname[FRAMEBYTES];
+  makename("hi", hiname);
+  makename("libnum", libnumname);
+
+  for (entry = (B*) DICT_ENTRIES(source);
+       entry < (B*) DICT_FREE(source);
+       entry += ENTRYBYTES) {
+    if (! matchname(ASSOC_NAME(entry), hiname)
+	&& ! matchname(ASSOC_NAME(entry), libnumname)
+	&& ! insert(ASSOC_NAME(entry), sink, ASSOC_FRAME(entry)))
+      return FALSE;
+  }
+  return TRUE;
 }
 
 /*------------------------- insertion ----------------------------------
