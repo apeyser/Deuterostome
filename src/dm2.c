@@ -885,7 +885,6 @@ return(OK);
   
 
 L unfoldobj(B *frame, L base, B endian)
-
 {
 B *lframe, *dict, *entry, *dframe, *xframe, *ldict;
 L retc, k, *link;
