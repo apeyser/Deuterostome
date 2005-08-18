@@ -22,12 +22,21 @@
 
 /*---------------------------------------------- standard data types */
 
-typedef signed char B;
-typedef signed short W;
-typedef signed long L;
-typedef unsigned char UB;
-typedef unsigned short UW;
-typedef unsigned long UL;
+#include <stdint.h>
+
+/* typedef signed char B; */
+/* typedef signed short W; */
+/* typedef signed long L; */
+/* typedef unsigned char UB; */
+/* typedef unsigned short UW; */
+/* typedef unsigned long UL; */
+
+typedef int8_t B;
+typedef int16_t W;
+typedef int32_t L;
+typedef uint8_t UB;
+typedef uint16_t UW;
+typedef uint32_t UL;
 
 typedef W BOOLEAN;
 typedef L INT;
@@ -37,7 +46,9 @@ typedef  L  (*OPER)(void);
 #define TRUE -1
 #define FALSE 0
 
-typedef long F;
+/* typedef float S; */
+/* typedef double D; */
+
 typedef float S;
 typedef double D;
 
@@ -109,10 +120,18 @@ NOTE: all objects that can populate the D machine's workspace must
 #define SINGLETYPE                 ((UB) 0x03)
 #define DOUBLETYPE                 ((UB) 0x04)      
 #define SOCKETTYPE                 ((UB) 0x01)      /* null types */
+#define BIG_ENDIAN_TYPE            ((UB) 0x00)      /* Box endianness */
+#define LITTLE_ENDIAN_TYPE         ((UB) 0x02)
+
+#ifdef LITTLE_ENDIAN
+#define DEF_ENDIAN_TYPE LITTLE_ENDIAN_TYPE
+#else
+#define DEF_ENDIAN_TYPE BIG_ENDIAN_TYPE
+#fi
+
 #define CMACHINE                   ((UB) 0x00)      /* operator types */
 
 #define OPLIBTYPE                  ((UB) 0x01)      /* operator lib type */
-#define MCTYPE                     ((UB) 0x01)      /* MC box subtype */
 
 /* attributes qualify a frame, not an object value: */
 
@@ -126,19 +145,22 @@ NOTE: all objects that can populate the D machine's workspace must
 #define XMARK                      ((UB)0x70)
 #define BIND                       ((UB)0x80)   /* box op housekeeping */
 
-#define NUM_VAL(frame)             ( ((B *)(frame+4)))
-#define LONG_VAL(frame)            (*((L *)(frame+4)))
-#define BOOL_VAL(frame)            (*((BOOLEAN *)(frame+2)))
-#define NAME_KEY(frame)            (*((W *)(frame+10)))
-#define OP_CODE(frame)             (*((L *)(frame+4)))
-#define OP_NAME(frame)             (*((L *)(frame+8)))
-#define VALUE_BASE(frame)          (*((L *)(frame+4)))
-#define ARRAY_SIZE(frame)          (*((L *)(frame+8)))
-#define LIST_CEIL(frame)           (*((L *)(frame+8)))
-#define DICT_NB(frame)             (*((L *)(frame+8)))
-#define DICT_CURR(frame)           (*((L *)(frame+8)))
-#define BOX_NB(frame)              (*((L *)(frame+8)))
-#define VALUE_PTR(frame)           (*((B**) (frame+4)))
+#define NUM_VAL(frame)             ( ((B *)((frame)+4)))
+#define LONG_VAL(frame)            (*((L *)((frame)+4)))
+#define BOOL_VAL(frame)            (*((BOOLEAN *)((frame)+2)))
+#define NAME_KEY(frame)            (*((W *)((frame)+2)))
+
+#define OP_CODE(frame)             (*((L *)((frame)+4)))
+#define OP_NAME(frame)             (*((L *)((frame)+8)))
+#define VALUE_BASE(frame)          (*((L *)((frame)+4)))
+#define ARRAY_SIZE(frame)          (*((L *)((frame)+8)))
+#define LIST_CEIL(frame)           (*((L *)((frame)+8)))
+#define DICT_NB(frame)             (*((L *)((frame)+8)))
+#define DICT_CURR(frame)           (*((L *)((frame)+8)))
+#define BOX_NB(frame)              (*((L *)((frame)+8)))
+#define VALUE_PTR(frame)           (*((B**) ((frame)+4)))
+
+
 
 /* NB: Attention to moveframe & moveframes in dm2.c whenever
    framebytes is changed */
@@ -147,16 +169,17 @@ NOTE: all objects that can populate the D machine's workspace must
 /*-------------------------------------------- dictionary */
  
 #define ASSOC_NAME(entry)          ( ((B *)(entry)))
-#define ASSOC_NEXT(entry)          (*((L *)(entry+FRAMEBYTES)))
-#define ASSOC_FRAME(entry)         ( ((B *)(entry+4+FRAMEBYTES)))
+#define ASSOC_NEXT(entry)          (*((L *)((entry)+FRAMEBYTES)))
+#define ASSOC_FRAME(entry)         ( ((B *)((entry)+8+FRAMEBYTES)))
 
-#define ENTRYBYTES                 (4+FRAMEBYTES+FRAMEBYTES)
+// keep frame on 64 bit boundaries, so that doubles will be so.
+#define ENTRYBYTES                 (8+2*FRAMEBYTES)
 
 #define DICT_ENTRIES(dict)         (*((L *)(dict)))
-#define DICT_FREE(dict)            (*((L *)(dict+4)))
-#define DICT_CEIL(dict)            (*((L *)(dict+8)))
-#define DICT_CONHASH(dict)         (*((W *)(dict+12)))
-#define DICT_TABHASH(dict)         (*((L *)(dict+8)))
+#define DICT_FREE(dict)            (*((L *)((dict)+4)))
+#define DICT_CEIL(dict)            (*((L *)((dict)+8)))
+#define DICT_CONHASH(dict)         (*((W *)((dict)+12)))
+#define DICT_TABHASH(dict)         (*((L *)((dict)+8)))
 
 
 #define DICTBYTES                  16L
@@ -179,8 +202,8 @@ NOTE: all objects that can populate the D machine's workspace must
 
 /*---------------------------------------- save box */
 #define SBOX_NOPDS(box)          (*(L *)(box))
-#define SBOX_NDICTS(box)         (*(L *)(box+4))
-#define SBOX_CAP(box)            (*(B **)(box+8))
+#define SBOX_NDICTS(box)         (*(L *)((box)+4))
+#define SBOX_CAP(box)            (*(B **)((box)+8))
 
 #define SBOXBYTES                16
 
@@ -247,7 +270,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define NO_XWINDOWS 0x00000A01L /* X windows unavailable                 */
 #define X_ERR       0x00000A02L /* X lib error                           */
 #define X_BADFONT   0x00000A03L /* X font does not exist                 */
-#define X_BADHOST   0x00000A-4L /* X server cannot be connected          */
+#define X_BADHOST   0x00000A04L /* X server cannot be connected          */
 
 /* compare results */
 
@@ -340,13 +363,14 @@ BOOLEAN insert(B *nameframe, B *dict, B *framedef);
 BOOLEAN mergedict(B *source, B *sink);
 L exec(L turns);
 L foldobj(B *frame, L base, W *depth);
-L unfoldobj(B *frame, L base);
+L unfoldobj(B *frame, L base, B endian);
 
 /*--- DM3 */
 L make_socket(L port);
 L fromsocket(L socket, B *msf);
 L tosocket(L socket, B *sf, B *cf);
 L toconsole( B *string, L stringlength);
+L deendian_frame(B *frame, B endian);
 
 /*--- DMNUM */
 void DECODE(B *frame, BOOLEAN fauto, W prec, B *buf);

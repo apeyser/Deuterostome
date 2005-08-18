@@ -279,16 +279,18 @@ DICT_CEIL(dict) += offs;
  The internal makeup of the name object is hidden inside functions
  because of its akwardness:
 
-   cccc0000aaaaaaaa 0011111122222233
-   3333444444555555 6666667777778888
-   88999999AAAAAABB BBBBCCCCCCDDDDDD (kkkkkkkkkkkkkkkk)
+   ccccccccaaaaaaaa 0000001111112222
+   2233333344444455 5555666666777777
+   888888999999AAAA AABBBBBBCCCCCCDD
+   DDDDEEEEEEFFFFFF ----GGGGGGHHHHHH
 
  c:    class specifier
  a:    attribute
- 0..D: name string characters, encoded in six bits
- k:    after tiling in the string, the last word is replaced by the
-       name key, which is the exclusive-or checksum of the string fields
-       of all preceding words
+ 0..H: name string characters, encoded in six bits
+ -: zeroes
+   after tiling in the string, the first word is replaced by the
+   name key, which is the exclusive-or checksum of the string fields
+   of all words
  
  Name string characters are 0..9, A..Z, a..z, and '_'. In addition
  the name ']' is encoded by a zero in all character positions. A
@@ -301,7 +303,7 @@ DICT_CEIL(dict) += offs;
  Name strings need to be able to hold 15 bytes.
 */
 
-static B tosix[] = {
+static UB tosix[] = {
      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -312,77 +314,96 @@ static B tosix[] = {
      53,54,55,56,57,58,59,60,61,62,63,0,0,0,0,0
    };
 
-static B fromsix[] = 
+static UB fromsix[] =
    "\0000123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
 
-static B sb[16] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+static B sb[18];
 
 void makename(B *namestring, B *nameframe)
 {
 W i; B c;
 /* clear string buffer, copy string converting it to six-bit code,
-   truncate after 14 bytes
+   truncate after 18 bytes
 */
    i = 0;
-   while ((c = namestring[i])) { sb[i] = tosix[c]; if (++i >= 14) break; }
-   for (;i<14;i++) sb[i] = 0;
+   while ((c = namestring[i])) { sb[i] = tosix[c]; if (++i >= 18) break; }
+   for (;i<18;i++) sb[i] = 0;
 
 /* tile nameframe longwords with 6-bit characters */
-     *(L *)nameframe = ((((((((0x00000030L | (sb[0]>>2))<<10)
-              | (sb[0] & 0x3))<<6) | sb[1])<<6) | sb[2])<<2) | (sb[3]>>4);
-     *(L *)(nameframe+4) = (((((((((0x0000000FL & sb[3])<<6)
-              | sb[4])<<6) | sb[5])<<6) | sb[6])<<6 | sb[7])<<4) | (sb[8]>>2);
-     *(L *)(nameframe+8) = ((((((((((0x00000003L & sb[8])<<6)
-              | sb[9])<<6) | sb[10])<<6) | sb[11])<<6) | sb[12])<<6)
-              | sb[13]; 
-
-/* key = exclusive or of all nameframe words except CLASS/ATTR */
-     *(W *)(nameframe+10) ^=  *(W *)(nameframe+8) ^
-                              *(W *)(nameframe+6) ^
-                              *(W *)(nameframe+4) ^
-                              *(W *)(nameframe+2) ^
-                             (*(W *)nameframe & 0xF00);
+   *(UW *) (nameframe+2) = (((sb[0] << 6) | sb[1]) << 4) | (sb[2] >> 2);
+   *(UW *) (nameframe+4) = (((((sb[2] << 6) | sb[3]) << 6) | sb[4]) << 2)
+     | (sb[5] >> 4);
+   *(UW *) (nameframe+6) = (((sb[5] << 6) | sb[6]) << 6) | sb[7];
+   *(UW *) (nameframe+8) = (((sb[8] << 6) | sb[9]) << 4) | (sb[10] >> 2);
+   *(UW *) (nameframe+10) = (((((sb[10] << 6) | sb[11]) << 6) | sb[12]) << 2)
+     | (sb[13] >> 4);
+   *(UW *) (nameframe+12) = (((sb[13] << 6) | sb[14]) << 6) | sb[15];
+   *(UW *) (nameframe+14) = (sb[16] << 6) | sb[17];
+			     
+   /* key = exclusive or of all nameframe words except CLASS/ATTR */
+   *(UW *)(nameframe+2) ^=  *(W *)(nameframe+4)
+     ^ *(UW *)(nameframe+6)
+     ^ *(UW *)(nameframe+8)
+     ^ *(UW *)(nameframe+10)
+     ^ *(UW *)(nameframe+12)
+     ^ *(UW *)(nameframe+14);
 }
 
 void pullname(B *nameframe, B *namestring)
 {
-L lw; W w;
+  UW w0, w1;
   
-namestring[14] = '\000';
-/* recover string under checksum, merge into top longword */
-w =  *(W *)(nameframe+10) ^ *(W *)(nameframe+8) ^ 
-       *(W *)(nameframe+6) ^  *(W *)(nameframe+4) ^
-       *(W *)(nameframe+2) ^ (*(W *)nameframe & 0xF00);
-lw = (*(L *)(nameframe+8) & 0xFFFF0000) | (((L)w) & 0x0000FFFF);
+  namestring[18] = '\000';
+  /* recover string under checksum, merge into top longword */
+  w0 = *(UW *)(nameframe+2) 
+    ^ *(UW *)(nameframe+4)
+    ^ *(UW *)(nameframe+6) 
+    ^ *(UW *)(nameframe+8)
+    ^ *(UW *)(nameframe+10) 
+    ^ *(UW *)(nameframe+12)
+    ^ *(UW *)(nameframe+14);
+  w1 = *(UW *)(nameframe+4);
 
-namestring[13] = fromsix[lw & 0x3F]; lw >>= 6;
-namestring[12] = fromsix[lw & 0x3F]; lw >>= 6;
-namestring[11] = fromsix[lw & 0x3F]; lw >>= 6;
-namestring[10] = fromsix[lw & 0x3F]; lw >>= 6;
-namestring[9]   = fromsix[lw & 0x3F]; lw >>= 6;
-namestring[8]  = lw & 0x3;
-lw =   *(L *)(nameframe+4);
-namestring[8] = fromsix[namestring[8] | ((lw & 0xF)<<2)]; lw >>= 4;
-namestring[7]  = fromsix[lw & 0x3F]; lw >>= 6;
-namestring[6]  = fromsix[lw & 0x3F]; lw >>= 6;
-namestring[5]  = fromsix[lw & 0x3F]; lw >>= 6;
-namestring[4]  = fromsix[lw & 0x3F]; lw >>= 6;
-namestring[3]  = lw & 0xF;
-lw =   *(L *)nameframe;
-namestring[3] = fromsix[namestring[3] | ((lw & 0x3)<<4)]; lw >>= 2;
-namestring[2]  = fromsix[lw & 0x3F]; lw >>= 6;
-namestring[1]  = fromsix[lw & 0x3F]; lw >>= 6;
-namestring[0] = fromsix[(lw & 0x3) | (((lw>>10) & 0xF)<<2)];
-if (namestring[0] == 0) namestring[0] = ']';
+  if (! (namestring[0] = fromsix[(w0 >> 10)])) {
+    namestring[0] = ']'; 
+    namestring[1] = 0; 
+    return;
+  };
+  if (! (namestring[1] = fromsix[(w0 >> 4) & 0x3F])) return;
+  if (! (namestring[2] = fromsix[((w0 << 2) | (w1 >> 14)) & 0x3F])) return;
+
+  w0 = *(UW *)(nameframe+6);
+  if (! (namestring[3] = fromsix[(w1 >> 8) & 0x3F])) return;
+  if (! (namestring[4] = fromsix[(w1 >> 2) & 0x3F])) return;
+  if (! (namestring[5] = fromsix[((w1 << 4) | (w0 >> 12)) & 0x3F])) return;
+  
+  w1 = *(UW *)(nameframe+8);
+  if (! (namestring[6] = fromsix[(w0 >> 6) & 0x3F])) return;
+  if (! (namestring[7] = fromsix[w0 & 0x3F])) return;
+  
+  w0 = *(UW *)(nameframe+10);
+  if (! (namestring[8] = fromsix[(w1 >> 10)])) return;
+  if (! (namestring[9] = fromsix[(w1 >> 4) & 0x3F])) return;
+  if (! (namestring[10] = fromsix[((w1 << 2) | (w0 >> 14)) & 0x3F])) return;
+
+  w1 = *(UW *)(nameframe+12);
+  if (! (namestring[11] = fromsix[(w0 >> 8) & 0x3F])) return;
+  if (! (namestring[12] = fromsix[(w0 >> 2) & 0x3F])) return;
+  if (! (namestring[13] = fromsix[((w0 << 4) | (w1 >> 12)) & 0x3F])) return;
+  
+  w0 = *(UW *)(nameframe+14);
+  if (! (namestring[14] = fromsix[(w1 >> 6) & 0x3F])) return;
+  if (! (namestring[15] = fromsix[w1 & 0x3F])) return;
+  if (! (namestring[16] = fromsix[(w0 >> 6) & 0x3F])) return;
+  if (! (namestring[17] = fromsix[w0 & 0x3F])) return;
 }
 
 BOOLEAN matchname(B *nameframe1, B *nameframe2)
 {  
-/*  this expects that the namekeys already have been matched */
-return ( (*(L *)(nameframe1+2) == *(L *)(nameframe2+2)) &&
-         (*(L *)(nameframe1+6) == *(L *)(nameframe2+6)) &&
-         (((*(W *)nameframe1 ^ *(W *)nameframe2) & 0x0F00) == 0)
-       );
+  return (*(W *)(nameframe1+2) == *(W *)(nameframe2+2))
+    && (*(L *)(nameframe1+4) == *(L *)(nameframe2+4))
+    && (*(L *)(nameframe1+8) == *(L *)(nameframe2+8))
+    && (*(L *)(nameframe1+12) == *(L *)(nameframe2+12));
 }
 
 /* ======================== move frame(s) =============================
@@ -610,6 +631,147 @@ e_er_1:   errsource = exec_err; return(retc);
 
 /*-------------------- tree handling support --------------------------*/
 
+#define swapbytes(arr, temp, n1, n2) {		\
+    temp = (arr)[(n1)];				\
+    ((B*)(arr))[(n2)] = ((B*)(arr))[(n1)];	\
+    ((B*)(arr))[(n1)] = temp;			\
+  }
+
+#define swap2bytes(arr, temp) swapbytes(arr, temp, 0, 1)
+#define swap4bytes(arr, temp) {			\
+    swapbytes(arr, temp, 0, 3);			\
+    swapbytes(arr, temp, 1, 2);			\
+  }
+#define swap8bytes(arr, temp) {			\
+    swapbytes(arr, temp, 0, 7);			\
+    swapbytes(arr, temp, 1, 6);			\
+    swapbytes(arr, temp, 2, 5);			\
+    swapbytes(arr, temp, 3, 4);			\
+  }
+
+L deendian_frame(B *frame, B endian) {
+  B b, i;
+  if (endian == DEF_ENDIAN_TYPE) return OK;
+
+  switch (CLASS(frame)) {
+    case NULLOBJ: case BOOL: case MARK:
+      return OK;
+
+    case NUM:
+      switch (TYPE(frame)) {
+	case BYTETYPE:
+	  return OK;
+	case WORDTYPE:
+	  swap2bytes(NUM_VAL(frame), b);
+	  return OK;
+	case LONGTYPE: case SINGLETYPE:
+	  swap4bytes(NUM_VAL(frame), b);
+	  return OK;
+	case DOUBLETYPE:
+	  swap8bytes(NUM_VAL(frame), b);
+	  return OK;
+      };
+      return OPD_TYP;
+
+    case OP:
+      return OPD_CLA;
+
+    case NAME:
+      swap2bytes(frame+2, b);
+      swap2bytes(frame+4, b);
+      swap2bytes(frame+6, b);
+      swap2bytes(frame+8, b);
+      swap2bytes(frame+10, b);
+      swap2bytes(frame+12, b);
+      swap2bytes(frame+14, b);
+      return OK;
+
+    case ARRAY: case LIST:
+      swap4bytes(&VALUE_BASE(frame), b);
+      swap4bytes(&ARRAY_SIZE(frame), b);
+      return OK;
+
+    case DICT:
+      swap4bytes(&VALUE_BASE(frame), b);
+      swap4bytes(&DICT_NB(frame), b);
+      swap4bytes(&DICT_CURR(frame), b);
+      return OK;
+
+    case BOX:
+      swap4bytes(&VALUE_BASE(frame), b);
+      swap4bytes(&BOX_NB(frame), b);
+      return OK;
+
+    default:
+      return OPD_CLA;
+  };
+}
+
+static L deendian_array(B* frame, B endian) {
+  if (endian == DEF_ENDIAN_TYPE) return;
+
+  switch (TYPE(frame)) {
+    case BYTETYPE:
+      return;
+
+    case WORDTYPE: {
+      W* w;
+      B b;
+      for (w = (W*)VALUE_BASE(frame); 
+	   w < ((W*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
+	   ++w) {
+	swap2bytes(w, b);
+      };
+      return;
+    };
+
+    case LONGTYPE: case SINGLETYPE: {
+      L* l;
+      B b;
+      for (l = (L*)VALUE_BASE(frame); 
+	   l < ((L*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
+	   ++l) {
+	swap4bytes(l, b);
+      };
+      return;
+    };
+
+    case DOUBLETYPE: {
+      D* d;
+      B b;
+      for (d = (D*)VALUE_BASE(frame); 
+	   d < ((D*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
+	   ++d) {
+	swap8bytes(d, b);
+      };
+      return;
+    };
+
+    default:
+      return OPD_TYP;
+  }
+}
+
+static L deendian_dict(B* dict, B endian) {
+  B b;
+  if (endian == DEF_ENDIAN_TYPE) return;
+  
+  swap4bytes(&DICT_ENTRIES(dict), b);
+  swap4bytes(&DICT_FREE(dict), b);
+  swap4bytes(&DICT_CEIL(dict), b);
+  swap2bytes(&DICT_CONHASH(dict), b);
+  swap4bytes(&DICT_TABHASH(dict), b);
+  return OK;
+}
+
+static void deendian_entry(B* entry, B endian) {
+  B b;
+  if (endian == DEF_ENDIAN_TYPE) return;
+
+  swap4bytes(&ASSOC_NEXT(entry), b);
+  return deendian_frame(ASSOC_FRAME(entry), endian);
+}
+
 /*----------------------------- foldobj
 
   - receives the frame of an internal composite object and a box base
@@ -636,16 +798,18 @@ L k, retc, *link, nb, offset;
 
 if ((++(*depth)) > MAXDEPTH) return(RNG_CHK);
 
-switch(CLASS(frame))
-  {
-  case ARRAY: tframe = FREEvm; tvalue = tframe + FRAMEBYTES;
-              nb = (L)(DALIGN(ARRAY_SIZE(frame) * VALUEBYTES(TYPE(frame))));
-              if ((FREEvm+nb+FRAMEBYTES) > CEILvm) return(VM_OVF);
-              FREEvm += nb + FRAMEBYTES;
-              value = (B*)VALUE_BASE(frame);
-              VALUE_BASE(frame) = (L)tvalue - base;
-              moveframes(frame,tframe,1L); moveL((L *)value,(L *)tvalue,nb>>2);
-              break;
+switch(CLASS(frame)) {
+  case ARRAY: 
+    tframe = FREEvm; 
+    tvalue = tframe + FRAMEBYTES;
+    nb = (L)(DALIGN(ARRAY_SIZE(frame) * VALUEBYTES(TYPE(frame))));
+    if ((FREEvm+nb+FRAMEBYTES) > CEILvm) return(VM_OVF);
+    FREEvm += nb + FRAMEBYTES;
+    value = (B*)VALUE_BASE(frame);
+    VALUE_BASE(frame) = (L)tvalue - base;
+    moveframes(frame,tframe,1L); moveL((L *)value,(L *)tvalue,nb>>2);
+    break;
+
   case LIST:  tframe = FREEvm; tvalue = tframe + FRAMEBYTES;
               nb = LIST_CEIL(frame) - VALUE_BASE(frame);
               if ((FREEvm+nb+FRAMEBYTES) > CEILvm) return(VM_OVF);
@@ -718,67 +882,85 @@ return(OK);
       - applies itself recursively to internal list or dict objects
    - copies the frame into the master frame of the object
 */
-   
+  
 
-L unfoldobj(B *frame, L base)
+L unfoldobj(B *frame, L base, B endian)
 
 {
 B *lframe, *dict, *entry, *dframe, *xframe, *ldict;
 L retc, k, *link;
 
-switch(CLASS(frame))
-  {
-  case ARRAY: VALUE_BASE(frame) += base; break;
-  case LIST: VALUE_BASE(frame) += base; LIST_CEIL(frame) += base;
-             for (lframe = (B *)VALUE_BASE(frame);
-                  lframe < (B *)LIST_CEIL(frame); lframe += FRAMEBYTES)
-              { if (ATTR(lframe) & BIND)
-                   { dframe = FREEdicts - FRAMEBYTES; xframe = 0L;
-                     while ((dframe >= FLOORdicts) && (xframe == 0L))
-                       { ldict = (B *)VALUE_BASE(dframe);
-                         xframe = lookup(frame,ldict);
-                         dframe -= FRAMEBYTES;
-                       }
-                     if ((L)xframe > 0) 
-                        { moveframes(xframe,lframe,1L); }
-                       else
-                        { ATTR(lframe) &= (~BIND); }
-                     continue;
-                   }   
-                if (!COMPOSITE(lframe)) continue;
-                if ((retc = unfoldobj(lframe,base)) != OK) return(retc);
-              }
-             break;
-  case DICT: VALUE_BASE(frame) += base; dict = (B *)VALUE_BASE(frame);
-             DICT_ENTRIES(dict) += base; DICT_FREE(dict) += base;
-             DICT_CEIL(dict) += base;
-             for (k = 0, link = (L *)DICT_TABHASH(dict); 
-                  k < DICT_CONHASH(dict); k++, link++)
-                { if (*link != (-1L)) *link += base; }
-             for (entry = (B *)DICT_ENTRIES(dict); entry < (B *)DICT_FREE(dict);
-                  entry += ENTRYBYTES)
-               {
-               if (ASSOC_NEXT(entry) != (-1L)) ASSOC_NEXT(entry) += base;
-               lframe = ASSOC_FRAME(entry);
-               if (ATTR(lframe) & BIND)
-                   { dframe = FREEdicts - FRAMEBYTES; xframe = 0L;
-                     while ((dframe >= FLOORdicts) && (xframe == 0L))
-                       { ldict = (B *)VALUE_BASE(dframe);
-                         xframe = lookup(frame,ldict);
-                         dframe -= FRAMEBYTES;
-                       }
-                     if ((L)xframe > 0) 
-                        { moveframes(xframe,lframe,1L); }
-                       else
-                        { ATTR(lframe) &= (~BIND); }
-                     continue;
-                   }   
-               if (!COMPOSITE(lframe)) continue;
-               if ((retc = unfoldobj(lframe,base)) != OK) return(retc);
-               }
-             break;
-  default: return(CORR_OBJ);
-  }
-  moveframes(frame,(B *)VALUE_BASE(frame)-FRAMEBYTES,1L);
-return(OK);
+switch(CLASS(frame)) {
+ case ARRAY: 
+   VALUE_BASE(frame) += base; 
+   if ((retc = deendian_array(frame, endian)) != OK) return retc;
+   break;
+
+ case LIST: 
+   VALUE_BASE(frame) += base; 
+   LIST_CEIL(frame) += base;
+   for (lframe = (B *)VALUE_BASE(frame);
+	lframe < (B *)LIST_CEIL(frame); 
+	lframe += FRAMEBYTES) { 
+     if ((retc = deendian_frame(lframe, endian)) != OK) return retc;
+     if (ATTR(lframe) & BIND) { 
+       dframe = FREEdicts - FRAMEBYTES; xframe = 0L;
+       while ((dframe >= FLOORdicts) && (xframe == 0L)) { 
+	 ldict = (B *)VALUE_BASE(dframe);
+	 xframe = lookup(frame,ldict);
+	 dframe -= FRAMEBYTES;
+       }
+       if ((L)xframe > 0) { 
+	 moveframes(xframe,lframe,1L); 
+       } else { 
+	 ATTR(lframe) &= (~BIND); 
+       }
+       continue;
+     }   
+     if (!COMPOSITE(lframe)) continue;
+     if ((retc = unfoldobj(lframe, base, endian)) != OK) return(retc);
+   }
+   break;
+   
+ case DICT: 
+   VALUE_BASE(frame) += base; 
+   dict = (B *)VALUE_BASE(frame);
+   if ((retc = deendian_dict(dict, endian)) != OK) return retc;
+
+   DICT_ENTRIES(dict) += base; DICT_FREE(dict) += base;
+   DICT_CEIL(dict) += base;
+   for (k = 0, link = (L *)DICT_TABHASH(dict); 
+	k < DICT_CONHASH(dict); k++, link++)  { 
+     if (*link != (-1L)) *link += base; 
+   }
+   for (entry = (B *)DICT_ENTRIES(dict); 
+	entry < (B *)DICT_FREE(dict);
+	entry += ENTRYBYTES) {
+     if ((retc = deendian_entry(entry, endian)) != OK) return retc;
+     if (ASSOC_NEXT(entry) != (-1L)) ASSOC_NEXT(entry) += base;
+     lframe = ASSOC_FRAME(entry);
+     if (ATTR(lframe) & BIND) { 
+       dframe = FREEdicts - FRAMEBYTES; xframe = 0L;
+       while ((dframe >= FLOORdicts) && (xframe == 0L)) { 
+	 ldict = (B *)VALUE_BASE(dframe);
+	 xframe = lookup(frame,ldict);
+	 dframe -= FRAMEBYTES;
+       }
+       if ((L)xframe > 0) { 
+	 moveframes(xframe,lframe,1L); 
+       } else { 
+	 ATTR(lframe) &= (~BIND); 
+       }
+       continue;
+     }   
+     if (!COMPOSITE(lframe)) continue;
+     if ((retc = unfoldobj(lframe,base,endian)) != OK) return(retc);
+   }
+   break;
+
+   default: 
+     return(CORR_OBJ);
+ }
+ moveframes(frame,(B *)VALUE_BASE(frame)-FRAMEBYTES,1L);
+ return(OK);
 }

@@ -105,21 +105,23 @@ L init_sockaddr(struct sockaddr_in *name, const char *hostname,
 
 L fromsocket(L sock, B *bsf)
 {
-L nb, nsbuf, atmost, retc;
-B *p, sf[FRAMEBYTES+FRAMEBYTES], *bf, *sbuf, sbsf[FRAMEBYTES];
+  L nb, nsbuf, atmost, retc;
+  B *p, nf[3*FRAMEBYTES], *sf, *bf, *sbuf, sbsf[FRAMEBYTES];
+  B endian;
 
- moveframe(bsf,sbsf);
- nsbuf = ARRAY_SIZE(sbsf);
- sbuf = (B *)VALUE_BASE(sbsf);
- bf = sf + FRAMEBYTES;
+  moveframe(bsf,sbsf);
+  nsbuf = ARRAY_SIZE(sbsf);
+  sbuf = (B *)VALUE_BASE(sbsf);
+  sf = nf + FRAMEBYTES;
+  bf = sf + FRAMEBYTES;
+  
+  /*----- we give ourselves 10 sec */
+  alarm(10);
+  timeout = FALSE;
 
-/*----- we give ourselves 10 sec */
-alarm(10);
-timeout = FALSE;
-
-/*----- get the string and box/null frames and evaluate */
-//rd0: 
-p = sf; atmost = FRAMEBYTES + FRAMEBYTES;
+  /*----- get the string and box/null frames and evaluate */
+  //rd0: 
+  p = nf; atmost = 3*FRAMEBYTES;
 rd1:
   if (timeout) return(BAD_MSG);
   nb = read(sock, p, atmost);
@@ -130,10 +132,14 @@ rd1:
   if (nb == 0) return(DONE);
   p += nb;
   if ((atmost -= nb) > 0) goto rd1;
+  
+  if (CLASS(nf) != NULLOBJ) return BAD_MSG;
+  deendian_frame(sf, TYPE(nb));
   if (TAG(sf) != (ARRAY | BYTETYPE)) return(BAD_MSG);
   if (VALUE_BASE(sf) != 0 ) return(BAD_MSG);
   if (ARRAY_SIZE(sf) <= 0) return(BAD_MSG);
   if (ARRAY_SIZE(sf) > nsbuf) return(RNG_CHK);
+  deendian_frame(bf, TYPE(nb));
   if ((CLASS(bf) != NULLOBJ) && (CLASS(bf) != BOX)) return(BAD_MSG);
 
 /*----- get the string body */
@@ -167,7 +173,7 @@ rd3:
 /*----- relocate object tree of box and push root object on operand
         stack
 */
-  if ((retc = unfoldobj(FREEvm,(L)FREEvm)) != OK) return(retc);
+  if ((retc = unfoldobj(FREEvm,(L)FREEvm, TYPE(nf)) != OK) return(retc);
   if (o2 >= CEILopds) return(OPDS_OVF);
   moveframe(FREEvm,o1);                    /* root obj of box -> opds */
   FREEvm += BOX_NB(bf); 
@@ -195,9 +201,13 @@ L tosocket(L sock, B *sf, B *cf)
   B *p, *oldFREEvm, *bf;
   
   p = oldFREEvm = FREEvm;
+  if (p + FRAMEBYTES > CEILvm) return VM_OVF;
+  TAG(p) = NULLOBJ | DEF_ENDIAN_TYPE; ATTR(p) = 0;
+  p += FRAMEBYTES;
   nb = FRAMEBYTES + FRAMEBYTES + DALIGN(ARRAY_SIZE(sf));
   if (p + nb > CEILvm) return(VM_OVF);
-  moveframe(sf,p); VALUE_BASE(p) = 0; p += FRAMEBYTES; 
+  moveframe(sf,p); VALUE_BASE(p) = 0; 
+  p += FRAMEBYTES; 
   bf = p; moveframe(cf,bf); p += FRAMEBYTES;
   moveB((B *)VALUE_BASE(sf),p,ARRAY_SIZE(sf));
   p += DALIGN(ARRAY_SIZE(sf));
@@ -206,8 +216,9 @@ L tosocket(L sock, B *sf, B *cf)
       FREEvm = p; d = 0;
       moveframe(cf, frame);
       retc = foldobj(frame,(L)p,&d);
-      TAG(bf) = BOX; ATTR(bf) = 0; VALUE_BASE(bf) = 0; BOX_NB(bf) = FREEvm - p;
-      nb += FREEvm - p;
+      TAG(bf) = BOX; ATTR(bf) = 0;
+      VALUE_BASE(bf) = 0; BOX_NB(bf) = FREEvm - p;
+      nb += FREEvm - p + FRAMEBYTES; // from endian box
       FREEvm = oldFREEvm;
       if (retc != OK) return(retc);
     }

@@ -385,7 +385,7 @@ if (o1 >= CEILopds) return(OPDS_OVF);
 if ((FREEvm + FRAMEBYTES + SBOXBYTES) > CEILvm) return(VM_OVF);
 bf = FREEvm; bv = bf + FRAMEBYTES;
 SBOX_NOPDS(bv) = 0; SBOX_NDICTS(bv) = 0; SBOX_CAP(bv) = (B *)0;
-TAG(bf) = BOX; ATTR(bf) = PARENT;
+TAG(bf) = BOX | DEF_ENDIAN_TYPE; ATTR(bf) = PARENT;
 VALUE_BASE(bf) = (L)bv; BOX_NB(bf) = SBOXBYTES;
 FREEvm = bv + SBOXBYTES;
 moveframe(bf,o1); FREEopds = o2;
@@ -706,8 +706,7 @@ switch (CLASS(o_1)) {
         else *c = 'N';
         break;
     case BOX:
-        if (TYPE(o_1) == MCTYPE) *c = 'M';
-        else *c = 'N';
+        *c = 'N';
         break;
     case DICT:
         if (TYPE(o_1) == OPLIBTYPE) *c = 'O';

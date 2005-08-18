@@ -274,8 +274,7 @@ return(OK);
 #define END_ALARM { \
   alarm(0); \
   timeout = FALSE;}
-
-
+      
 
 /*---------------------------------------------------- readboxfile
    dir filename | root
@@ -291,7 +290,7 @@ L op_readboxfile(void)
 
 int fd;
 L nb, atmost, npath, retc;
-B *p;
+B *p, nullbox[FRAMEBYTES];
 DECLARE_ALARM;
 
 if (o_2 < FLOORopds) return(OPDS_UNF);
@@ -302,15 +301,30 @@ if (FREEvm + npath > CEILvm) return(VM_OVF);
 moveB((B *)VALUE_BASE(o_2), FREEvm, ARRAY_SIZE(o_2));
 moveB((B *)VALUE_BASE(o_1), FREEvm + ARRAY_SIZE(o_2), ARRAY_SIZE(o_1));
 FREEvm[npath-1] = '\000';
-atmost = CEILvm - FREEvm; 
 START_ALARM;
 rb1:
   CHECK_ALARM;
   fd = open(FREEvm, O_RDONLY | O_NONBLOCK);
-  if (fd == -1) {if ((errno == EINTR) || (errno == EAGAIN))
-    goto rb1; else {END_ALARM; return(-errno);};}
+  if (fd == -1) {
+    if ((errno == EINTR) || (errno == EAGAIN)) goto rb1; 
+    else {END_ALARM; return(-errno);};
+  }
   p = FREEvm; 
   
+rbnull:
+  CHECK_ALARM;
+  atmost = FRAMEBYTES;
+  nb = read(fd, nullbox, atmost);
+  if (nb == -1) {
+    if ((errno == EAGAIN) || (errno == EINTR)) goto rbnull;
+    else {END_ALARM; return(-errno);};
+  }
+  atmost -= nb;
+  if (! nb && atmost) return BAD_MSG;
+  if (atmost) goto rbnull;
+  if (CLASS(nullbox) != NULLOBJ) return BAD_MSG;
+  atmost = CEILvm - FREEvm; 
+
 rb2:
  CHECK_ALARM;
  nb = read(fd, p, chunk_size);
@@ -327,12 +341,13 @@ rb3:
  if (close(fd) == -1) {if ((errno == EINTR) || (errno == EAGAIN)) goto rb3;
    else return(-errno);}
  
-nb = DALIGN(p - FREEvm);
-if ((retc = unfoldobj(FREEvm,(L)FREEvm)) != OK) return(retc);
-moveframe(FREEvm,o_2);
-FREEvm += nb;
-FREEopds = o_1;
-return(OK);
+ nb = DALIGN(p - FREEvm);
+ if ((retc = deendian_frame(FREEvm, TYPE(nullbox))) != OK) return retc;
+ if ((retc = unfoldobj(FREEvm,(L)FREEvm, TYPE(nullbox))) != OK) return(retc);
+ moveframe(FREEvm,o_2);
+ FREEvm += nb;
+ FREEopds = o_1;
+ return(OK);
 }
 
 /*---------------------------------------------------- writeboxfile
@@ -351,30 +366,33 @@ L nb, atmost, retc, npath; W depth;
 B *p, *oldFREEvm;
 DECLARE_ALARM;
 
-if (o_3 < FLOORopds) return(OPDS_UNF);
-if (!((CLASS(o_3) == ARRAY) || (CLASS(o_3) == LIST) || (CLASS(o_3) == DICT)))
+ if (o_3 < FLOORopds) return(OPDS_UNF);
+ if (!((CLASS(o_3) == ARRAY) || (CLASS(o_3) == LIST) || (CLASS(o_3) == DICT)))
    return(OPD_ERR);
-if (TAG(o_2) != (ARRAY | BYTETYPE)) return(OPD_ERR);
-if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
+ if (TAG(o_2) != (ARRAY | BYTETYPE)) return(OPD_ERR);
+ if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
 
-oldFREEvm = FREEvm; p = FREEvm; depth = 0;
-if ((retc = foldobj(o_3,(L)p,&depth)) != OK)
-  { FREEvm = oldFREEvm; return(retc); }
-atmost = FREEvm - p; p = FREEvm; FREEvm = oldFREEvm;
-npath = ARRAY_SIZE(o_2) + ARRAY_SIZE(o_1) + 1;
-if (p + npath > CEILvm) return(VM_OVF);
-moveB((B *)VALUE_BASE(o_2), p, ARRAY_SIZE(o_2));
-moveB((B *)VALUE_BASE(o_1), p + ARRAY_SIZE(o_2), ARRAY_SIZE(o_1));
-p[npath-1] = '\000';
+ oldFREEvm = FREEvm; p = FREEvm; depth = 0;
+ if (p + FRAMEBYTES > CEILvm) return VM_OVF;
+ TAG(p) = NULLOBJ | DEF_ENDIAN_TYPE; ATTR(p) = 0;
+ p += FRAMEBYTES;
+ if ((retc = foldobj(o_3,(L)p,&depth)) != OK)
+   { FREEvm = oldFREEvm; return(retc); }
+ atmost = FREEvm - p; p = FREEvm; FREEvm = oldFREEvm;
+ npath = ARRAY_SIZE(o_2) + ARRAY_SIZE(o_1) + 1;
+ if (p + npath > CEILvm) return(VM_OVF);
+ moveB((B *)VALUE_BASE(o_2), p, ARRAY_SIZE(o_2));
+ moveB((B *)VALUE_BASE(o_1), p + ARRAY_SIZE(o_2), ARRAY_SIZE(o_1));
+ p[npath-1] = '\000';
 
-START_ALARM;
+ START_ALARM;
 wb1:
-  CHECK_ALARM;
-  fd = open(p, O_CREAT | O_NONBLOCK | O_RDWR | O_TRUNC,
-	    S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
-  if (fd == -1) {if ((errno == EINTR) || (errno == EAGAIN))
-    goto wb1; else {END_ALARM; return(-errno);};}
-  p = oldFREEvm;
+ CHECK_ALARM;
+ fd = open(p, O_CREAT | O_NONBLOCK | O_RDWR | O_TRUNC,
+	   S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
+ if (fd == -1) {if ((errno == EINTR) || (errno == EAGAIN))
+     goto wb1; else {END_ALARM; return(-errno);};}
+ p = oldFREEvm;
   
 wb2:
  CHECK_ALARM;
