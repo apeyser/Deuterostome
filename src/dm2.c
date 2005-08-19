@@ -138,7 +138,7 @@ L k,nb,ne, *hashtable; W hcon; B *dict,*mframe;
 k = 0;
 if ((n+n) >= lastprime) hcon = lastprime;
    else while ((hcon = primes[k]) < (n+n)) k++;
-ne = n * ENTRYBYTES;
+ne = n * NEWENTRYBYTES;
 nb = (L)(DALIGN(DICTBYTES + ne + (((L)hcon)<<2)));
 if ((FREEvm + nb + FRAMEBYTES) > CEILvm) return((B *)(-1L));
 dict = FREEvm + FRAMEBYTES;
@@ -148,7 +148,7 @@ DICT_ENTRIES(dict) = DICT_FREE(dict) = (L)dict + DICTBYTES;
 hashtable = (L *)(DICT_CEIL(dict) =  (L)(DICT_ENTRIES(dict) + ne));
 DICT_CONHASH(dict) = hcon;
 for (k=0; k<hcon; k++) hashtable[k] = -1L;
-TAG(mframe) = DICT; ATTR(mframe) = 0;
+TAG(mframe) = DICT; ATTR(mframe) = 0; SETNEWDICT(mframe);
 VALUE_BASE(mframe) = (L)dict; DICT_NB(mframe) = nb;
 return(dict);
 }
@@ -247,7 +247,7 @@ DICT_CEIL(dict) += offs;
       k < DICT_CONHASH(dict); k++, link++)
   if ( *link != (-1L)) *link += offs;
 for (entry = (B *)DICT_ENTRIES(dict); entry < (B *)DICT_FREE(dict);
-     entry += ENTRYBYTES)
+     entry += ENTRYBYTES(dict))
     if (ASSOC_NEXT(entry) != (-1L)) ASSOC_NEXT(entry) += offs;
 }
 
@@ -267,7 +267,7 @@ offs = newl - oldl;
 for (k = 0, link = (L *)DICT_TABHASH(dict); k <  DICT_CONHASH(dict); k++, link++)
   if ( *link != (-1L)) *link += offs;
 for (entry = (B *)DICT_ENTRIES(dict); entry < (B *)DICT_FREE(dict);
-     entry += ENTRYBYTES)
+     entry += ENTRYBYTES(dict))
     if (ASSOC_NEXT(entry) != (-1L)) ASSOC_NEXT(entry) += offs;
 DICT_ENTRIES(dict) += offs;
 DICT_FREE(dict) += offs;
@@ -474,7 +474,7 @@ hashtable = (L *)(DICT_TABHASH(dict));
 if ( (link = (B *)(hashtable[h])) == (B *)(-1L)) return((B *)0L);
 do { if (key == NAME_KEY(ASSOC_NAME(link)))
         if (matchname(nameframe,ASSOC_NAME(link))) 
-            return(ASSOC_FRAME(link));
+	  return(ASSOC_FRAME(link, dict));
    } while ( (link = (B *)(ASSOC_NEXT(link))) != (B *)(-1L));
 return(0L);
 }
@@ -490,10 +490,10 @@ BOOLEAN mergedict(B *source, B* sink) {
 
   for (entry = (B*) DICT_ENTRIES(source);
        entry < (B*) DICT_FREE(source);
-       entry += ENTRYBYTES) {
+       entry += ENTRYBYTES(source)) {
     if (! matchname(ASSOC_NAME(entry), hiname)
 	&& ! matchname(ASSOC_NAME(entry), libnumname)
-	&& ! insert(ASSOC_NAME(entry), sink, ASSOC_FRAME(entry)))
+	&& ! insert(ASSOC_NAME(entry), sink, ASSOC_FRAME(entry, source)))
       return FALSE;
   }
   return TRUE;
@@ -527,11 +527,11 @@ if (DICT_FREE(dict) >= DICT_CEIL(dict)) return(FALSE);
 link =  (B *)(ASSOC_NEXT(link) = DICT_FREE(dict)) ;
 
 ins_name:
-DICT_FREE(dict) += ENTRYBYTES;
+DICT_FREE(dict) += ENTRYBYTES(dict);
 moveframe(nameframe, ASSOC_NAME(link)); ASSOC_NEXT(link) = -1L;
 
 ins_fra:
-moveframe(framedef, ASSOC_FRAME(link));
+ moveframe(framedef, ASSOC_FRAME(link, dict));
 return(TRUE);
 }
 
@@ -649,9 +649,8 @@ e_er_1:   errsource = exec_err; return(retc);
     swapbytes(arr, temp, 3, 4);			\
   }
 
-L deendian_frame(B *frame, B endian) {
-  B b, i;
-  if (endian == DEF_ENDIAN_TYPE) return OK;
+L deendian_frame(B *frame) {
+  B b;
 
   switch (CLASS(frame)) {
     case NULLOBJ: case BOOL: case MARK:
@@ -707,12 +706,10 @@ L deendian_frame(B *frame, B endian) {
   };
 }
 
-static L deendian_array(B* frame, B endian) {
-  if (endian == DEF_ENDIAN_TYPE) return;
-
+L deendian_array(B* frame) {
   switch (TYPE(frame)) {
     case BYTETYPE:
-      return;
+      return OK;
 
     case WORDTYPE: {
       W* w;
@@ -722,7 +719,7 @@ static L deendian_array(B* frame, B endian) {
 	   ++w) {
 	swap2bytes(w, b);
       };
-      return;
+      return OK;
     };
 
     case LONGTYPE: case SINGLETYPE: {
@@ -733,7 +730,7 @@ static L deendian_array(B* frame, B endian) {
 	   ++l) {
 	swap4bytes(l, b);
       };
-      return;
+      return OK;
     };
 
     case DOUBLETYPE: {
@@ -744,7 +741,7 @@ static L deendian_array(B* frame, B endian) {
 	   ++d) {
 	swap8bytes(d, b);
       };
-      return;
+      return OK;
     };
 
     default:
@@ -752,9 +749,8 @@ static L deendian_array(B* frame, B endian) {
   }
 }
 
-static L deendian_dict(B* dict, B endian) {
+L deendian_dict(B* dict) {
   B b;
-  if (endian == DEF_ENDIAN_TYPE) return;
   
   swap4bytes(&DICT_ENTRIES(dict), b);
   swap4bytes(&DICT_FREE(dict), b);
@@ -764,13 +760,14 @@ static L deendian_dict(B* dict, B endian) {
   return OK;
 }
 
-static void deendian_entry(B* entry, B endian) {
+L deendian_entry(B* entry) {
   B b;
-  if (endian == DEF_ENDIAN_TYPE) return;
 
   swap4bytes(&ASSOC_NEXT(entry), b);
-  return deendian_frame(ASSOC_FRAME(entry), endian);
+  return OK;
 }
+
+  
 
 /*----------------------------- foldobj
 
@@ -847,10 +844,11 @@ switch(CLASS(frame)) {
                    k < DICT_CONHASH(tvalue); k++, link++)
                  { if (*link != (-1L)) *link += offset; }
               for (entry = (B *)DICT_ENTRIES(tvalue);
-                   entry < (B *)DICT_FREE(tvalue); entry += ENTRYBYTES)
+                   entry < (B *)DICT_FREE(tvalue); 
+		   entry += ENTRYBYTES(tvalue))
                  { if (ASSOC_NEXT(entry) != (-1L))
                        ASSOC_NEXT(entry) += offset;
-                   lframe = ASSOC_FRAME(entry);
+                   lframe = ASSOC_FRAME(entry, tvalue);
                    if (CLASS(lframe) == OP) 
                       { makename((B *)OP_NAME(lframe),lframe);
                         ATTR(lframe) |= (BIND | ACTIVE); continue;
@@ -884,7 +882,7 @@ return(OK);
 */
   
 
-L unfoldobj(B *frame, L base, B endian)
+L unfoldobj(B *frame, L base, BOOLEAN isnative)
 {
 B *lframe, *dict, *entry, *dframe, *xframe, *ldict;
 L retc, k, *link;
@@ -892,7 +890,8 @@ L retc, k, *link;
 switch(CLASS(frame)) {
  case ARRAY: 
    VALUE_BASE(frame) += base; 
-   if ((retc = deendian_array(frame, endian)) != OK) return retc;
+   if (! isnative && ((retc = deendian_array(frame)) != OK))
+     return retc;
    break;
 
  case LIST: 
@@ -901,7 +900,8 @@ switch(CLASS(frame)) {
    for (lframe = (B *)VALUE_BASE(frame);
 	lframe < (B *)LIST_CEIL(frame); 
 	lframe += FRAMEBYTES) { 
-     if ((retc = deendian_frame(lframe, endian)) != OK) return retc;
+     if (! isnative && ((retc = deendian_frame(lframe)) != OK))
+       return retc;
      if (ATTR(lframe) & BIND) { 
        dframe = FREEdicts - FRAMEBYTES; xframe = 0L;
        while ((dframe >= FLOORdicts) && (xframe == 0L)) { 
@@ -917,14 +917,15 @@ switch(CLASS(frame)) {
        continue;
      }   
      if (!COMPOSITE(lframe)) continue;
-     if ((retc = unfoldobj(lframe, base, endian)) != OK) return(retc);
+     if ((retc = unfoldobj(lframe, base, isnative)) != OK) return(retc);
    }
    break;
    
  case DICT: 
-   VALUE_BASE(frame) += base; 
+   VALUE_BASE(frame) += base;
+   
    dict = (B *)VALUE_BASE(frame);
-   if ((retc = deendian_dict(dict, endian)) != OK) return retc;
+   if (! isnative && ((retc = deendian_dict(dict)) != OK)) return retc;
 
    DICT_ENTRIES(dict) += base; DICT_FREE(dict) += base;
    DICT_CEIL(dict) += base;
@@ -934,10 +935,10 @@ switch(CLASS(frame)) {
    }
    for (entry = (B *)DICT_ENTRIES(dict); 
 	entry < (B *)DICT_FREE(dict);
-	entry += ENTRYBYTES) {
-     if ((retc = deendian_entry(entry, endian)) != OK) return retc;
+	entry += ENTRYBYTES(dict)) {
+     if (! isnative && ((retc = deendian_entry(entry)) != OK)) return retc;
      if (ASSOC_NEXT(entry) != (-1L)) ASSOC_NEXT(entry) += base;
-     lframe = ASSOC_FRAME(entry);
+     lframe = ASSOC_FRAME(entry, dict);
      if (ATTR(lframe) & BIND) { 
        dframe = FREEdicts - FRAMEBYTES; xframe = 0L;
        while ((dframe >= FLOORdicts) && (xframe == 0L)) { 
@@ -953,7 +954,7 @@ switch(CLASS(frame)) {
        continue;
      }   
      if (!COMPOSITE(lframe)) continue;
-     if ((retc = unfoldobj(lframe,base,endian)) != OK) return(retc);
+     if ((retc = unfoldobj(lframe,base,isnative)) != OK) return(retc);
    }
    break;
 

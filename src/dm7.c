@@ -43,9 +43,11 @@ extern BOOLEAN abortflag;
 
 L op_gettime(void)
 {
+  time_t timet;
   if (o1 > CEILopds) return(OPDS_OVF);
   TAG(o1) = NUM | LONGTYPE; ATTR(o1) = 0;
-  if (time(&LONG_VAL(o1)) == -1) LONG_VAL(o1) = 0;
+  if (time(&timet) == -1) LONG_VAL(o1) = 0;
+  else LONG_VAL(o1) = (L) timet;
   FREEopds = o2;
   return(OK);
 }
@@ -60,13 +62,13 @@ NOTE: month[1...12], day[1...31], hour[0...23], min,sec[0...59]
 
 L op_localtime(void)
 {
-time_t dt;
+time_t dt; L Ldt;
 struct tm *ldt;
 L *p;
 
 if (o_2 < FLOORopds) return(OPDS_UNF);
 if (CLASS(o_2) != NUM) return(OPD_CLA);
-if (!VALUE(o_2,&dt)) return(UNDF_VAL);
+if (!VALUE(o_2,&Ldt)) return(UNDF_VAL); dt = Ldt;
 if (TAG(o_1) != (ARRAY | LONGTYPE)) return(OPD_ERR);
 if (ATTR(o_1) & READONLY) return(OPD_ATR);
 if (ARRAY_SIZE(o_1) < 6) return(RNG_CHK);
@@ -290,7 +292,7 @@ L op_readboxfile(void)
 
 int fd;
 L nb, atmost, npath, retc;
-B *p, nullbox[FRAMEBYTES];
+B *p;
 DECLARE_ALARM;
 
 if (o_2 < FLOORopds) return(OPDS_UNF);
@@ -301,6 +303,7 @@ if (FREEvm + npath > CEILvm) return(VM_OVF);
 moveB((B *)VALUE_BASE(o_2), FREEvm, ARRAY_SIZE(o_2));
 moveB((B *)VALUE_BASE(o_1), FREEvm + ARRAY_SIZE(o_2), ARRAY_SIZE(o_1));
 FREEvm[npath-1] = '\000';
+atmost = CEILvm - FREEvm;   
 START_ALARM;
 rb1:
   CHECK_ALARM;
@@ -310,20 +313,6 @@ rb1:
     else {END_ALARM; return(-errno);};
   }
   p = FREEvm; 
-  
-rbnull:
-  CHECK_ALARM;
-  atmost = FRAMEBYTES;
-  nb = read(fd, nullbox, atmost);
-  if (nb == -1) {
-    if ((errno == EAGAIN) || (errno == EINTR)) goto rbnull;
-    else {END_ALARM; return(-errno);};
-  }
-  atmost -= nb;
-  if (! nb && atmost) return BAD_MSG;
-  if (atmost) goto rbnull;
-  if (CLASS(nullbox) != NULLOBJ) return BAD_MSG;
-  atmost = CEILvm - FREEvm; 
 
 rb2:
  CHECK_ALARM;
@@ -342,8 +331,10 @@ rb3:
    else return(-errno);}
  
  nb = DALIGN(p - FREEvm);
- if ((retc = deendian_frame(FREEvm, TYPE(nullbox))) != OK) return retc;
- if ((retc = unfoldobj(FREEvm,(L)FREEvm, TYPE(nullbox))) != OK) return(retc);
+ if (!  GETNATIVE(FREEvm) && (retc = deendian_frame(FREEvm) != OK))
+     return retc;
+ if ((retc = unfoldobj(FREEvm,(L)FREEvm, GETNATIVE(FREEvm))) != OK) 
+   return(retc);
  moveframe(FREEvm,o_2);
  FREEvm += nb;
  FREEopds = o_1;
@@ -373,11 +364,9 @@ DECLARE_ALARM;
  if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
 
  oldFREEvm = FREEvm; p = FREEvm; depth = 0;
- if (p + FRAMEBYTES > CEILvm) return VM_OVF;
- TAG(p) = NULLOBJ | DEF_ENDIAN_TYPE; ATTR(p) = 0;
- p += FRAMEBYTES;
  if ((retc = foldobj(o_3,(L)p,&depth)) != OK)
    { FREEvm = oldFREEvm; return(retc); }
+ SETNATIVE(p);
  atmost = FREEvm - p; p = FREEvm; FREEvm = oldFREEvm;
  npath = ARRAY_SIZE(o_2) + ARRAY_SIZE(o_1) + 1;
  if (p + npath > CEILvm) return(VM_OVF);

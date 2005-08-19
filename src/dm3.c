@@ -106,13 +106,12 @@ L init_sockaddr(struct sockaddr_in *name, const char *hostname,
 L fromsocket(L sock, B *bsf)
 {
   L nb, nsbuf, atmost, retc;
-  B *p, nf[3*FRAMEBYTES], *sf, *bf, *sbuf, sbsf[FRAMEBYTES];
-  B endian;
+  B *p, sf[2*FRAMEBYTES], *bf, *sbuf, sbsf[FRAMEBYTES];
+  BOOLEAN isnative;
 
   moveframe(bsf,sbsf);
   nsbuf = ARRAY_SIZE(sbsf);
   sbuf = (B *)VALUE_BASE(sbsf);
-  sf = nf + FRAMEBYTES;
   bf = sf + FRAMEBYTES;
   
   /*----- we give ourselves 10 sec */
@@ -121,7 +120,7 @@ L fromsocket(L sock, B *bsf)
 
   /*----- get the string and box/null frames and evaluate */
   //rd0: 
-  p = nf; atmost = 3*FRAMEBYTES;
+  p = sf; atmost = 2*FRAMEBYTES;
 rd1:
   if (timeout) return(BAD_MSG);
   nb = read(sock, p, atmost);
@@ -133,13 +132,15 @@ rd1:
   p += nb;
   if ((atmost -= nb) > 0) goto rd1;
   
-  if (CLASS(nf) != NULLOBJ) return BAD_MSG;
-  deendian_frame(sf, TYPE(nb));
+  isnative = GETNATIVE(sf);
+  if (! isnative) {
+    if ((retc = deendian_frame(sf)) != OK) return retc; 
+    if ((retc = deendian_frame(bf)) != OK) return retc;
+  };
   if (TAG(sf) != (ARRAY | BYTETYPE)) return(BAD_MSG);
   if (VALUE_BASE(sf) != 0 ) return(BAD_MSG);
   if (ARRAY_SIZE(sf) <= 0) return(BAD_MSG);
   if (ARRAY_SIZE(sf) > nsbuf) return(RNG_CHK);
-  deendian_frame(bf, TYPE(nb));
   if ((CLASS(bf) != NULLOBJ) && (CLASS(bf) != BOX)) return(BAD_MSG);
 
 /*----- get the string body */
@@ -173,7 +174,8 @@ rd3:
 /*----- relocate object tree of box and push root object on operand
         stack
 */
-  if ((retc = unfoldobj(FREEvm,(L)FREEvm, TYPE(nf)) != OK) return(retc);
+  if (! isnative && ((retc = deendian_frame(FREEvm)) != OK)) return retc;
+  if ((retc = unfoldobj(FREEvm,(L)FREEvm, isnative)) != OK) return retc;
   if (o2 >= CEILopds) return(OPDS_OVF);
   moveframe(FREEvm,o1);                    /* root obj of box -> opds */
   FREEvm += BOX_NB(bf); 
@@ -202,13 +204,11 @@ L tosocket(L sock, B *sf, B *cf)
   
   p = oldFREEvm = FREEvm;
   if (p + FRAMEBYTES > CEILvm) return VM_OVF;
-  TAG(p) = NULLOBJ | DEF_ENDIAN_TYPE; ATTR(p) = 0;
-  p += FRAMEBYTES;
   nb = FRAMEBYTES + FRAMEBYTES + DALIGN(ARRAY_SIZE(sf));
   if (p + nb > CEILvm) return(VM_OVF);
-  moveframe(sf,p); VALUE_BASE(p) = 0; 
+  moveframe(sf,p); VALUE_BASE(p) = 0; SETNATIVE(p);
   p += FRAMEBYTES; 
-  bf = p; moveframe(cf,bf); p += FRAMEBYTES;
+  bf = p; moveframe(cf,bf);   p += FRAMEBYTES;
   moveB((B *)VALUE_BASE(sf),p,ARRAY_SIZE(sf));
   p += DALIGN(ARRAY_SIZE(sf));
   if (CLASS(cf) != NULLOBJ)
@@ -216,9 +216,9 @@ L tosocket(L sock, B *sf, B *cf)
       FREEvm = p; d = 0;
       moveframe(cf, frame);
       retc = foldobj(frame,(L)p,&d);
-      TAG(bf) = BOX; ATTR(bf) = 0;
+      TAG(bf) = BOX; ATTR(bf) = 0; 
       VALUE_BASE(bf) = 0; BOX_NB(bf) = FREEvm - p;
-      nb += FREEvm - p + FRAMEBYTES; // from endian box
+      nb += FREEvm - p;
       FREEvm = oldFREEvm;
       if (retc != OK) return(retc);
     }

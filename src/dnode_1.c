@@ -170,8 +170,8 @@ if (TAG(o_2) != (ARRAY | BYTETYPE)) goto baderror;
 if (CLASS(o_1) != NUM) goto baderror;
 if (!VALUE(o_1,&e)) goto baderror;
 
- nb = snprintf(p,atmost,"\\033[31mOn %*s port %ld: ",
-        (int) ARRAY_SIZE(o_4), (B *)VALUE_BASE(o_4), LONG_VAL(o_3));
+ nb = snprintf(p,atmost,"\\033[31mOn %*s port %d: ",
+        (L) ARRAY_SIZE(o_4), (B *)VALUE_BASE(o_4), LONG_VAL(o_3));
  p += nb; atmost -= nb;
  if (e < 0) 
    { /*Clib error */
@@ -226,7 +226,7 @@ if (!VALUE(o_2,&e)) goto baderror;
 if (TAG(o_1) != (ARRAY | BYTETYPE)) goto baderror;
 
 s = (B *)VALUE_BASE(o_1); tnb = ARRAY_SIZE(o_1);
-nb = snprintf(s,tnb,"On %*s port %ld: ", (int) ARRAY_SIZE(o_5),
+nb = snprintf(s,tnb,"On %*s port %d: ", (L) ARRAY_SIZE(o_5),
 	      (B *)VALUE_BASE(o_5), LONG_VAL(o_4));
  if (nb > tnb) nb = tnb;
 s += nb; tnb -= nb;
@@ -536,7 +536,7 @@ L op_loadlib(void)
     LIB_HANDLE(dict - FRAMEBYTES) = (L) handle;
     FREEopds = o_2;
 
-    sysdict = VALUE_BASE(FLOORdicts);
+    sysdict = VALUE_PTR(FLOORdicts);
     if (! mergedict(dict, sysdict)) return LIB_MERGE;
     return OK;
 }

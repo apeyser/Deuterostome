@@ -24,6 +24,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 static W TYPEBYTES[] = { 1,2,4,4,8 };
 #define nTYPES  ((W)5)
@@ -70,7 +71,7 @@ switch(TYPE(frame))
                       sprintf(buf,"%d",*((W *)NUM_VAL(frame)));
                     return;
      case LONGTYPE: if (*((L *)NUM_VAL(frame)) == LINF) break;
-                      sprintf(buf,"%ld",*((L *)NUM_VAL(frame)));
+                      sprintf(buf,"%d",*((L *)NUM_VAL(frame)));
                     return;
      case SINGLETYPE: if (fabs(*((S *)NUM_VAL(frame))) == SINF) break;
                        else if (fauto)

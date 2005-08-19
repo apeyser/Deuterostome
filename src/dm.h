@@ -120,17 +120,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define SINGLETYPE                 ((UB) 0x03)
 #define DOUBLETYPE                 ((UB) 0x04)      
 #define SOCKETTYPE                 ((UB) 0x01)      /* null types */
-#define BIG_ENDIAN_TYPE            ((UB) 0x00)      /* Box endianness */
-#define LITTLE_ENDIAN_TYPE         ((UB) 0x02)
-
-#ifdef LITTLE_ENDIAN
-#define DEF_ENDIAN_TYPE LITTLE_ENDIAN_TYPE
-#else
-#define DEF_ENDIAN_TYPE BIG_ENDIAN_TYPE
-#fi
-
 #define CMACHINE                   ((UB) 0x00)      /* operator types */
-
 #define OPLIBTYPE                  ((UB) 0x01)      /* operator lib type */
 
 /* attributes qualify a frame, not an object value: */
@@ -139,6 +129,25 @@ NOTE: all objects that can populate the D machine's workspace must
 #define READONLY                   ((UB)0x02)
 #define PARENT                     ((UB)0x04)
 #define TILDE                      ((UB)0x08)
+/* Composite endianness */
+#define BIGENDIAN                  ((UB) 0x00)
+#define LITTLEENDIAN               ((UB) 0x10)
+
+#ifdef NATIVE_ENDIAN_LITTLE
+#define GETNATIVE(frame)  ((BOOLEAN) (ATTR(frame) & LITTLEENDIAN))
+#define SETNATIVE(frame)  (ATTR(frame) |= LITTLEENDIAN)
+#else
+#define GETNATIVE(frame)  ((BOOLEAN) (! (ATTR(frame) & LITTLEENDIAN)))
+#define SETNATIVE(frame)  (ATTR(frame) &= ~LITTLEENDIAN)
+//#define SETNATIVE(frame)  (frame)
+#endif
+
+/* dict size fix */
+#define OLDDICT                    ((UB) 0x00)
+#define NEWDICT                    ((UB) 0x20)
+#define SETNEWDICT(frame) (ATTR(frame) |= NEWDICT)
+#define ISOLDDICT(frame)  ((BOOLEAN) (! (ATTR(frame) & NEWDICT)))
+
 #define EXITMARK                   ((UB)0x10)   /* execstack marks */
 #define STOPMARK                   ((UB)0x20)
 #define ABORTMARK                  ((UB)0x40)
@@ -170,10 +179,15 @@ NOTE: all objects that can populate the D machine's workspace must
  
 #define ASSOC_NAME(entry)          ( ((B *)(entry)))
 #define ASSOC_NEXT(entry)          (*((L *)((entry)+FRAMEBYTES)))
-#define ASSOC_FRAME(entry)         ( ((B *)((entry)+8+FRAMEBYTES)))
+#define ASSOC_FRAME(entry, dict) \
+  (ISOLDDICT(dict-FRAMEBYTES) \
+   ? ((B *)((entry)+4+FRAMEBYTES)) : ((B *)((entry)+8+FRAMEBYTES)))
 
 // keep frame on 64 bit boundaries, so that doubles will be so.
-#define ENTRYBYTES                 (8+2*FRAMEBYTES)
+#define NEWENTRYBYTES  (8+2*FRAMEBYTES)
+#define ENTRYBYTES(dict) \
+  (ISOLDDICT(dict-FRAMEBYTES) \
+   ? 4+2*FRAMEBYTES : NEWENTRYBYTES)
 
 #define DICT_ENTRIES(dict)         (*((L *)(dict)))
 #define DICT_FREE(dict)            (*((L *)((dict)+4)))
@@ -363,14 +377,17 @@ BOOLEAN insert(B *nameframe, B *dict, B *framedef);
 BOOLEAN mergedict(B *source, B *sink);
 L exec(L turns);
 L foldobj(B *frame, L base, W *depth);
-L unfoldobj(B *frame, L base, B endian);
+L unfoldobj(B *frame, L base, BOOLEAN isnative);
+L deendian_frame(B *frame);
+L deendian_array(B* frame);
+L deendian_dict(B* dict);
+L deendian_entry(B* entry);
 
 /*--- DM3 */
 L make_socket(L port);
 L fromsocket(L socket, B *msf);
 L tosocket(L socket, B *sf, B *cf);
 L toconsole( B *string, L stringlength);
-L deendian_frame(B *frame, B endian);
 
 /*--- DMNUM */
 void DECODE(B *frame, BOOLEAN fauto, W prec, B *buf);

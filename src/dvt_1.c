@@ -348,7 +348,7 @@ L op_nextevent(void)
      switch(event.type) {
      case ConfigureNotify:
        wid = event.xconfigure.window;
-       snprintf(namestring, sizeof(namestring), "w%ld", wid);
+       snprintf(namestring, sizeof(namestring), "w%d", wid);
        makename(namestring, namef); ATTR(namef) = ACTIVE;
        if ((dictf = lookup(namef, userdict)) == 0L) return(UNDF);
        if (FREEdicts >= CEILdicts) return(DICTS_OVF);
@@ -365,7 +365,7 @@ L op_nextevent(void)
      case Expose:
        if (event.xexpose.count != 0) break;
        wid = event.xexpose.window;
-       snprintf(namestring, sizeof(namestring), "w%ld", wid);
+       snprintf(namestring, sizeof(namestring), "w%d", wid);
        makename(namestring, namef); ATTR(namef) = ACTIVE;
        if ((dictf = lookup(namef, userdict)) == 0L) return(UNDF);
        if (FREEdicts >= CEILdicts) return(DICTS_OVF);
@@ -381,7 +381,7 @@ L op_nextevent(void)
        if (FREEdicts >= CEILdicts) return(DICTS_OVF);
        if (x1 >= CEILexecs) return(EXECS_OVF);
        if (o2 >= CEILopds) return(OPDS_OVF);
-       snprintf(namestring, sizeof(namestring), "w%ld", wid);
+       snprintf(namestring, sizeof(namestring), "w%d", wid);
        makename(namestring, namef); ATTR(namef) = ACTIVE;
        if ((dictf = lookup(namef, userdict)) == 0L) return(UNDF);
        moveframe(dictf, FREEdicts); FREEdicts += FRAMEBYTES;

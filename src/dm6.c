@@ -385,7 +385,7 @@ if (o1 >= CEILopds) return(OPDS_OVF);
 if ((FREEvm + FRAMEBYTES + SBOXBYTES) > CEILvm) return(VM_OVF);
 bf = FREEvm; bv = bf + FRAMEBYTES;
 SBOX_NOPDS(bv) = 0; SBOX_NDICTS(bv) = 0; SBOX_CAP(bv) = (B *)0;
-TAG(bf) = BOX | DEF_ENDIAN_TYPE; ATTR(bf) = PARENT;
+TAG(bf) = BOX; ATTR(bf) = PARENT;
 VALUE_BASE(bf) = (L)bv; BOX_NB(bf) = SBOXBYTES;
 FREEvm = bv + SBOXBYTES;
 moveframe(bf,o1); FREEopds = o2;
@@ -532,11 +532,13 @@ while (cframe < FREEvm)
                   }
                dict = (B *)VALUE_BASE(cframe);
                if ((tdict = makedict((DICT_CEIL(dict) - DICT_ENTRIES(dict))
-                             / ENTRYBYTES)) == (B *)(-1L)) return(VM_OVF);
+				     / ENTRYBYTES(dict))) == (B *)(-1L)) 
+		 return(VM_OVF);
                for (entry = (B *)DICT_ENTRIES(dict);
-                    entry < (B *)DICT_FREE(dict); entry += ENTRYBYTES)
+                    entry < (B *)DICT_FREE(dict); 
+		    entry += ENTRYBYTES(dict))
                   {
-                  frame = ASSOC_FRAME(entry);
+		  frame = ASSOC_FRAME(entry, dict);
                   if (COMPOSITE(frame) && (VALUE_BASE(frame) < (L)CEILvm))
                     { if (VALUE_BASE(frame) >= (L)caplevel)
                         { VALUE_BASE(frame) -= offset;

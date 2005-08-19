@@ -185,7 +185,7 @@ static void sinft( D *y, L n)
 
 static BOOLEAN ludcmp(D **a, L n, L *indx, D *d, D *vv)
 {
-   L i, imax, j, k;
+   L i, imax = 0, j, k;
    D big, dum, sum, temp, TINY;
    TINY = 1e-20;
    
@@ -690,7 +690,7 @@ for (k=0; k<Nrowa; k++)
   
  if ((Ncola != Nrowb) || (Nrowa != Nrowc)) return(RNG_CHK);
  
- bp = VALUE_BASE(o_1); cp = VALUE_BASE(o_3);
+ bp = (D*) VALUE_BASE(o_1); cp = (D*) VALUE_BASE(o_3);
  for (i=0; i<Nrowc; i++)
    { sum = 0.0;
      for (k=0; k<Ncola; k++) sum += ap[i][k] * bp[k];

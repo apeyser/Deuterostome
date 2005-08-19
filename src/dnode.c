@@ -434,7 +434,7 @@ if (moreX) {
   moreX = QLength(dvtdisplay) ? TRUE : FALSE;
   switch(event.type) {
     case ConfigureNotify: wid = event.xconfigure.window;
-      snprintf(namestring, sizeof(namestring), "w%ld", wid);
+      snprintf(namestring, sizeof(namestring), "w%d", wid);
       makename(namestring, namef); ATTR(namef) = ACTIVE;
       userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
       if ((dictf = lookup(namef, userdict)) == 0L) 
@@ -452,7 +452,7 @@ if (moreX) {
       running = TRUE; goto tuwat;
     case Expose: if (event.xexpose.count != 0) break;
       wid = event.xexpose.window;
-      snprintf(namestring, sizeof(namestring), "w%ld", wid);
+      snprintf(namestring, sizeof(namestring), "w%d", wid);
       makename(namestring, namef); ATTR(namef) = ACTIVE;
       userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
       if ((dictf = lookup(namef, userdict)) == 0L) 
@@ -467,7 +467,7 @@ if (moreX) {
       if (FREEdicts >= CEILdicts) { retc = DICTS_OVF; goto Xderror; }
       if (x1 >= CEILexecs) { retc = EXECS_OVF; goto Xderror; }
       if (o3 >= CEILopds) { retc = OPDS_OVF; goto Xderror; }
-      snprintf(namestring, sizeof(namestring), "w%ld", wid);
+      snprintf(namestring, sizeof(namestring), "w%d", wid);
       makename(namestring, namef); ATTR(namef) = ACTIVE;
       userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
       if ((dictf = lookup(namef, userdict)) == 0L) 
