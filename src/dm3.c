@@ -132,11 +132,13 @@ rd1:
   p += nb;
   if ((atmost -= nb) > 0) goto rd1;
   
-  isnative = GETNATIVE(sf);
-  if (! isnative) {
+  if (! GETNATIVEFORMAT(sf) || ! GETNATIVEUNDEF(sf)) return BAD_FMT;
+  if (! (isnative = GETNATIVEENDIAN(sf))) {
     if ((retc = deendian_frame(sf)) != OK) return retc; 
     if ((retc = deendian_frame(bf)) != OK) return retc;
   };
+  FORMAT(sf) = 0;
+
   if (TAG(sf) != (ARRAY | BYTETYPE)) return(BAD_MSG);
   if (VALUE_BASE(sf) != 0 ) return(BAD_MSG);
   if (ARRAY_SIZE(sf) <= 0) return(BAD_MSG);

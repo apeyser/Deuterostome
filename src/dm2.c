@@ -138,7 +138,7 @@ L k,nb,ne, *hashtable; W hcon; B *dict,*mframe;
 k = 0;
 if ((n+n) >= lastprime) hcon = lastprime;
    else while ((hcon = primes[k]) < (n+n)) k++;
-ne = n * NEWENTRYBYTES;
+ne = n * ENTRYBYTES;
 nb = (L)(DALIGN(DICTBYTES + ne + (((L)hcon)<<2)));
 if ((FREEvm + nb + FRAMEBYTES) > CEILvm) return((B *)(-1L));
 dict = FREEvm + FRAMEBYTES;
@@ -148,7 +148,7 @@ DICT_ENTRIES(dict) = DICT_FREE(dict) = (L)dict + DICTBYTES;
 hashtable = (L *)(DICT_CEIL(dict) =  (L)(DICT_ENTRIES(dict) + ne));
 DICT_CONHASH(dict) = hcon;
 for (k=0; k<hcon; k++) hashtable[k] = -1L;
-TAG(mframe) = DICT; ATTR(mframe) = 0; SETNEWDICT(mframe);
+TAG(mframe) = DICT; ATTR(mframe) = 0; 
 VALUE_BASE(mframe) = (L)dict; DICT_NB(mframe) = nb;
 return(dict);
 }
@@ -217,7 +217,7 @@ B *opdef, *dict, *frame, framebuf[FRAMEBYTES], nameframe[FRAMEBYTES],
  newdict = CEILvm + FRAMEBYTES;
  d_reloc(newdict, (L) dict, (L) newdict);
  VALUE_BASE(CEILvm) = (L) newdict;
- TAG(CEILvm) |= OPLIBTYPE; ATTR(CEILvm) = READONLY;
+ TAG(CEILvm) |= OPLIBTYPE; ATTR(CEILvm) |= READONLY;
  LIB_TYPE(CEILvm) = 0;
  LIB_HANDLE(CEILvm) = 0;
  LIB_ERRC(CEILvm) = errc;
@@ -247,7 +247,7 @@ DICT_CEIL(dict) += offs;
       k < DICT_CONHASH(dict); k++, link++)
   if ( *link != (-1L)) *link += offs;
 for (entry = (B *)DICT_ENTRIES(dict); entry < (B *)DICT_FREE(dict);
-     entry += ENTRYBYTES(dict))
+     entry += ENTRYBYTES)
     if (ASSOC_NEXT(entry) != (-1L)) ASSOC_NEXT(entry) += offs;
 }
 
@@ -267,7 +267,7 @@ offs = newl - oldl;
 for (k = 0, link = (L *)DICT_TABHASH(dict); k <  DICT_CONHASH(dict); k++, link++)
   if ( *link != (-1L)) *link += offs;
 for (entry = (B *)DICT_ENTRIES(dict); entry < (B *)DICT_FREE(dict);
-     entry += ENTRYBYTES(dict))
+     entry += ENTRYBYTES)
     if (ASSOC_NEXT(entry) != (-1L)) ASSOC_NEXT(entry) += offs;
 DICT_ENTRIES(dict) += offs;
 DICT_FREE(dict) += offs;
@@ -328,6 +328,9 @@ W i; B c;
    i = 0;
    while ((c = namestring[i])) { sb[i] = tosix[c]; if (++i >= 18) break; }
    for (;i<18;i++) sb[i] = 0;
+
+   TAG(nameframe) = NAME;
+   ATTR(nameframe) = 0;
 
 /* tile nameframe longwords with 6-bit characters */
    *(UW *) (nameframe+2) = (((sb[0] << 6) | sb[1]) << 4) | (sb[2] >> 2);
@@ -474,7 +477,7 @@ hashtable = (L *)(DICT_TABHASH(dict));
 if ( (link = (B *)(hashtable[h])) == (B *)(-1L)) return((B *)0L);
 do { if (key == NAME_KEY(ASSOC_NAME(link)))
         if (matchname(nameframe,ASSOC_NAME(link))) 
-	  return(ASSOC_FRAME(link, dict));
+	  return(ASSOC_FRAME(link));
    } while ( (link = (B *)(ASSOC_NEXT(link))) != (B *)(-1L));
 return(0L);
 }
@@ -490,10 +493,10 @@ BOOLEAN mergedict(B *source, B* sink) {
 
   for (entry = (B*) DICT_ENTRIES(source);
        entry < (B*) DICT_FREE(source);
-       entry += ENTRYBYTES(source)) {
+       entry += ENTRYBYTES) {
     if (! matchname(ASSOC_NAME(entry), hiname)
 	&& ! matchname(ASSOC_NAME(entry), libnumname)
-	&& ! insert(ASSOC_NAME(entry), sink, ASSOC_FRAME(entry, source)))
+	&& ! insert(ASSOC_NAME(entry), sink, ASSOC_FRAME(entry)))
       return FALSE;
   }
   return TRUE;
@@ -527,11 +530,11 @@ if (DICT_FREE(dict) >= DICT_CEIL(dict)) return(FALSE);
 link =  (B *)(ASSOC_NEXT(link) = DICT_FREE(dict)) ;
 
 ins_name:
-DICT_FREE(dict) += ENTRYBYTES(dict);
+DICT_FREE(dict) += ENTRYBYTES;
 moveframe(nameframe, ASSOC_NAME(link)); ASSOC_NEXT(link) = -1L;
 
 ins_fra:
- moveframe(framedef, ASSOC_FRAME(link, dict));
+ moveframe(framedef, ASSOC_FRAME(link));
 return(TRUE);
 }
 
@@ -845,10 +848,10 @@ switch(CLASS(frame)) {
                  { if (*link != (-1L)) *link += offset; }
               for (entry = (B *)DICT_ENTRIES(tvalue);
                    entry < (B *)DICT_FREE(tvalue); 
-		   entry += ENTRYBYTES(tvalue))
+		   entry += ENTRYBYTES)
                  { if (ASSOC_NEXT(entry) != (-1L))
                        ASSOC_NEXT(entry) += offset;
-                   lframe = ASSOC_FRAME(entry, tvalue);
+                   lframe = ASSOC_FRAME(entry);
                    if (CLASS(lframe) == OP) 
                       { makename((B *)OP_NAME(lframe),lframe);
                         ATTR(lframe) |= (BIND | ACTIVE); continue;
@@ -935,10 +938,10 @@ switch(CLASS(frame)) {
    }
    for (entry = (B *)DICT_ENTRIES(dict); 
 	entry < (B *)DICT_FREE(dict);
-	entry += ENTRYBYTES(dict)) {
+	entry += ENTRYBYTES) {
      if (! isnative && ((retc = deendian_entry(entry)) != OK)) return retc;
      if (ASSOC_NEXT(entry) != (-1L)) ASSOC_NEXT(entry) += base;
-     lframe = ASSOC_FRAME(entry, dict);
+     lframe = ASSOC_FRAME(entry);
      if (ATTR(lframe) & BIND) { 
        dframe = FREEdicts - FRAMEBYTES; xframe = 0L;
        while ((dframe >= FLOORdicts) && (xframe == 0L)) { 

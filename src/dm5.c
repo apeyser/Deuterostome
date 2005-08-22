@@ -263,10 +263,10 @@ switch(CLASS(x_2))
                     { FREEexecs = x_2; return(OK); }
                  if (o2 >= CEILopds) return(OPDS_OVF);
                  entry = (B *)DICT_CURR(x_2); 
-		 DICT_CURR(x_2) += ENTRYBYTES(dict);
+		 DICT_CURR(x_2) += ENTRYBYTES;
                  moveframes(ASSOC_NAME(entry),o1,1L);
                  ATTR(o1) = 0;
-                 moveframes(ASSOC_FRAME(entry, dict),o2,1L);
+                 moveframes(ASSOC_FRAME(entry),o2,1L);
                   FREEopds = o3; break;
      default: return(EXECS_COR);
      }

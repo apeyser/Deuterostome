@@ -288,7 +288,7 @@ static void maketinysetup(void)
     error(EXIT_FAILURE, 0, "Cannot make user dictionary");
   tinymemory = TRUE;
 
-  moveframe(sysdict-FRAMEBYTES,FREEdicts); 
+  moveframe(sysdict-FRAMEBYTES,FREEdicts);
   FREEdicts += FRAMEBYTES;
   moveframe(userdict-FRAMEBYTES,FREEdicts); 
   FREEdicts += FRAMEBYTES;
@@ -425,6 +425,7 @@ L op_nextlib(void)
     if (! (lastlib = nextlib(lastlib))) return CORR_OBJ;
 
     moveframe(lastlib, o_1);
+
     TAG(o1) = BOOL;
     ATTR(o1) = 0;
     BOOL_VAL(o1) = TRUE;

@@ -532,13 +532,13 @@ while (cframe < FREEvm)
                   }
                dict = (B *)VALUE_BASE(cframe);
                if ((tdict = makedict((DICT_CEIL(dict) - DICT_ENTRIES(dict))
-				     / ENTRYBYTES(dict))) == (B *)(-1L)) 
+				     / ENTRYBYTES)) == (B *)(-1L)) 
 		 return(VM_OVF);
                for (entry = (B *)DICT_ENTRIES(dict);
                     entry < (B *)DICT_FREE(dict); 
-		    entry += ENTRYBYTES(dict))
+		    entry += ENTRYBYTES)
                   {
-		  frame = ASSOC_FRAME(entry, dict);
+		  frame = ASSOC_FRAME(entry);
                   if (COMPOSITE(frame) && (VALUE_BASE(frame) < (L)CEILvm))
                     { if (VALUE_BASE(frame) >= (L)caplevel)
                         { VALUE_BASE(frame) -= offset;

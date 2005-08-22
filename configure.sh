@@ -87,6 +87,30 @@ if [[ -z "$GUI" ]] ; then
 fi
 
 [[ -z "$SYSDICT" ]] && SYSDICT=500
+
+cat <<EOF | gcc -x c - -o testcc
+#include "src/dm.h"
+#include <stdio.h>
+#include <time.h>
+
+int main(void) {
+  fprintf(stderr, "Checking sizeof(time_t): ");
+  if (sizeof(time_t) != sizeof(L)) {
+    fprintf(stderr, "Size of time_t (%i) is not equal to size of L (%i)\n",
+            sizeof(time_t), sizeof(L));
+    return -1;
+  };
+  fprintf(stderr, "yes\n");
+  return 0;
+}         
+EOF
+
+if ! ./testcc ; then
+    echo "dm7.c must be fixed"
+    exit -1
+else
+    rm testcc
+fi
     
 
 cat <<EOF >./Makefile

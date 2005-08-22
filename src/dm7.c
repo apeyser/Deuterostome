@@ -43,11 +43,9 @@ extern BOOLEAN abortflag;
 
 L op_gettime(void)
 {
-  time_t timet;
   if (o1 > CEILopds) return(OPDS_OVF);
   TAG(o1) = NUM | LONGTYPE; ATTR(o1) = 0;
-  if (time(&timet) == -1) LONG_VAL(o1) = 0;
-  else LONG_VAL(o1) = (L) timet;
+  if (time((time_t*) &LONG_VAL(o1)) == -1) LONG_VAL(o1) = 0;
   FREEopds = o2;
   return(OK);
 }
@@ -62,13 +60,13 @@ NOTE: month[1...12], day[1...31], hour[0...23], min,sec[0...59]
 
 L op_localtime(void)
 {
-time_t dt; L Ldt;
+time_t dt;
 struct tm *ldt;
 L *p;
 
 if (o_2 < FLOORopds) return(OPDS_UNF);
 if (CLASS(o_2) != NUM) return(OPD_CLA);
-if (!VALUE(o_2,&Ldt)) return(UNDF_VAL); dt = Ldt;
+if (!VALUE(o_2,(L*) &dt)) return(UNDF_VAL);
 if (TAG(o_1) != (ARRAY | LONGTYPE)) return(OPD_ERR);
 if (ATTR(o_1) & READONLY) return(OPD_ATR);
 if (ARRAY_SIZE(o_1) < 6) return(RNG_CHK);
@@ -331,10 +329,12 @@ rb3:
    else return(-errno);}
  
  nb = DALIGN(p - FREEvm);
- if (!  GETNATIVE(FREEvm) && (retc = deendian_frame(FREEvm) != OK))
+ if (! GETNATIVEFORMAT(FREEvm) || ! GETNATIVEUNDEF(FREEvm)) return BAD_FMT;
+ if (! GETNATIVEENDIAN(FREEvm) && (retc = deendian_frame(FREEvm) != OK))
      return retc;
  if ((retc = unfoldobj(FREEvm,(L)FREEvm, GETNATIVE(FREEvm))) != OK) 
    return(retc);
+ FORMAT(FREEvm) = 0;
  moveframe(FREEvm,o_2);
  FREEvm += nb;
  FREEopds = o_1;
@@ -366,7 +366,7 @@ DECLARE_ALARM;
  oldFREEvm = FREEvm; p = FREEvm; depth = 0;
  if ((retc = foldobj(o_3,(L)p,&depth)) != OK)
    { FREEvm = oldFREEvm; return(retc); }
- SETNATIVE(p);
+ SETNATIVE(oldFREEvm);
  atmost = FREEvm - p; p = FREEvm; FREEvm = oldFREEvm;
  npath = ARRAY_SIZE(o_2) + ARRAY_SIZE(o_1) + 1;
  if (p + npath > CEILvm) return(VM_OVF);

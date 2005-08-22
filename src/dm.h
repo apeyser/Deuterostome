@@ -94,7 +94,8 @@ NOTE: all objects that can populate the D machine's workspace must
 */
 
 #define TAG(frame)                 (*((UB *)(frame)))
-#define ATTR(frame)                (*((UB *)(frame+1)))
+#define ATTR(frame)                (*(((UB*)(frame))+1))
+#define FORMAT(frame)              (*(((UB *)(frame))+2))
 
 #define CLASS(frame)               ((*((UB *)(frame))) & 0xF0)
 #define TYPE(frame)                ((*((UB *)(frame))) & 0x0F)
@@ -129,24 +130,37 @@ NOTE: all objects that can populate the D machine's workspace must
 #define READONLY                   ((UB)0x02)
 #define PARENT                     ((UB)0x04)
 #define TILDE                      ((UB)0x08)
+
 /* Composite endianness */
 #define BIGENDIAN                  ((UB) 0x00)
-#define LITTLEENDIAN               ((UB) 0x10)
+#define LITTLEENDIAN               ((UB) 0x01)
+#define ENDIANMASK                 ((UB) 0x01)
+/* Format specifier */
+#define FORMAT32                   ((UB) 0x10)
+#define FORMATMASK                 ((UB) 0xF0)
 
 #ifdef NATIVE_ENDIAN_LITTLE
-#define GETNATIVE(frame)  ((BOOLEAN) (ATTR(frame) & LITTLEENDIAN))
-#define SETNATIVE(frame)  (ATTR(frame) |= LITTLEENDIAN)
+#define GETNATIVEENDIAN(frame)  \
+  ((BOOLEAN) ((FORMAT(frame) & ENDIANMASK) == LITTLEENDIAN))
+#define SETNATIVEENDIAN(frame)  FORMAT(frame) |= LITTLEENDIAN
 #else
-#define GETNATIVE(frame)  ((BOOLEAN) (! (ATTR(frame) & LITTLEENDIAN)))
-#define SETNATIVE(frame)  (ATTR(frame) &= ~LITTLEENDIAN)
-//#define SETNATIVE(frame)  (frame)
+#define GETNATIVEENDIAN(frame)  \
+  ((BOOLEAN) ((FORMAT(frame) & ENDIANMASK) == BIGENDIAN))
+#define SETNATIVEENDIAN(frame)  FORMAT(frame) |= BIGENDIAN
 #endif
 
-/* dict size fix */
-#define OLDDICT                    ((UB) 0x00)
-#define NEWDICT                    ((UB) 0x20)
-#define SETNEWDICT(frame) (ATTR(frame) |= NEWDICT)
-#define ISOLDDICT(frame)  ((BOOLEAN) (! (ATTR(frame) & NEWDICT)))
+#define GETNATIVEFORMAT(frame) \
+  ((BOOLEAN) ((FORMAT(frame) & FORMATMASK) == FORMAT32))
+#define SETNATIVEFORMAT(frame) FORMAT(frame) |= FORMAT32
+
+#define GETNATIVE(frame) (GETNATIVEFORMAT(frame) && GETNATIVEENDIAN(frame))
+#define SETNATIVE(frame) \
+  FORMAT(frame) = 0; \
+  SETNATIVEFORMAT(frame); \
+  SETNATIVEENDIAN(frame)
+
+#define GETNATIVEUNDEF(frame) \
+  ((BOOLEAN) ! (FORMAT(frame) & ~(FORMATMASK | ENDIANMASK)))
 
 #define EXITMARK                   ((UB)0x10)   /* execstack marks */
 #define STOPMARK                   ((UB)0x20)
@@ -154,22 +168,20 @@ NOTE: all objects that can populate the D machine's workspace must
 #define XMARK                      ((UB)0x70)
 #define BIND                       ((UB)0x80)   /* box op housekeeping */
 
-#define NUM_VAL(frame)             ( ((B *)((frame)+4)))
+#define NUM_VAL(frame)             ( ((B *)(((B*)(frame))+4)))
 #define LONG_VAL(frame)            (*((L *)((frame)+4)))
 #define BOOL_VAL(frame)            (*((BOOLEAN *)((frame)+2)))
 #define NAME_KEY(frame)            (*((W *)((frame)+2)))
 
-#define OP_CODE(frame)             (*((L *)((frame)+4)))
-#define OP_NAME(frame)             (*((L *)((frame)+8)))
-#define VALUE_BASE(frame)          (*((L *)((frame)+4)))
-#define ARRAY_SIZE(frame)          (*((L *)((frame)+8)))
-#define LIST_CEIL(frame)           (*((L *)((frame)+8)))
-#define DICT_NB(frame)             (*((L *)((frame)+8)))
-#define DICT_CURR(frame)           (*((L *)((frame)+8)))
-#define BOX_NB(frame)              (*((L *)((frame)+8)))
-#define VALUE_PTR(frame)           (*((B**) ((frame)+4)))
-
-
+#define OP_CODE(frame)             (*((L *)(((B*)frame)+4)))
+#define OP_NAME(frame)             (*((L *)(((B*)(frame))+8)))
+#define VALUE_BASE(frame)          (*((L *)(((B*)(frame))+4)))
+#define ARRAY_SIZE(frame)          (*((L *)(((B*)(frame))+8)))
+#define LIST_CEIL(frame)           (*((L *)(((B*)(frame))+8)))
+#define DICT_NB(frame)             (*((L *)(((B*)(frame))+8)))
+#define DICT_CURR(frame)           (*((L *)(((B*)(frame))+8)))
+#define BOX_NB(frame)              (*((L *)(((B*)(frame))+8)))
+#define VALUE_PTR(frame)           (*((B**) (((B*)(frame))+4)))
 
 /* NB: Attention to moveframe & moveframes in dm2.c whenever
    framebytes is changed */
@@ -178,22 +190,17 @@ NOTE: all objects that can populate the D machine's workspace must
 /*-------------------------------------------- dictionary */
  
 #define ASSOC_NAME(entry)          ( ((B *)(entry)))
-#define ASSOC_NEXT(entry)          (*((L *)((entry)+FRAMEBYTES)))
-#define ASSOC_FRAME(entry, dict) \
-  (ISOLDDICT(dict-FRAMEBYTES) \
-   ? ((B *)((entry)+4+FRAMEBYTES)) : ((B *)((entry)+8+FRAMEBYTES)))
+#define ASSOC_NEXT(entry)          (*((L *)(((B*)(entry))+FRAMEBYTES)))
+#define ASSOC_FRAME(entry)   (((B*)(entry))+8+FRAMEBYTES)
 
 // keep frame on 64 bit boundaries, so that doubles will be so.
-#define NEWENTRYBYTES  (8+2*FRAMEBYTES)
-#define ENTRYBYTES(dict) \
-  (ISOLDDICT(dict-FRAMEBYTES) \
-   ? 4+2*FRAMEBYTES : NEWENTRYBYTES)
+#define ENTRYBYTES  (8+2*FRAMEBYTES)
 
 #define DICT_ENTRIES(dict)         (*((L *)(dict)))
-#define DICT_FREE(dict)            (*((L *)((dict)+4)))
-#define DICT_CEIL(dict)            (*((L *)((dict)+8)))
-#define DICT_CONHASH(dict)         (*((W *)((dict)+12)))
-#define DICT_TABHASH(dict)         (*((L *)((dict)+8)))
+#define DICT_FREE(dict)            (*((L *)(((B*)(dict))+4)))
+#define DICT_CEIL(dict)            (*((L *)(((B*)(dict))+8)))
+#define DICT_CONHASH(dict)         (*((W *)(((B*)(dict))+12)))
+#define DICT_TABHASH(dict)         (*((L *)(((B*)(dict))+8)))
 
 
 #define DICTBYTES                  16L
@@ -210,14 +217,14 @@ NOTE: all objects that can populate the D machine's workspace must
 /*---------------------------------- C Operator definition */
 
 #define OPDEF_NAME(operator)       (*((L *)(operator)))
-#define OPDEF_CODE(operator)       (*((L *)(operator+4)))
+#define OPDEF_CODE(operator)       (*((L *)(((B*)operator)+4)))
 
 #define OPDEFBYTES                 8L
 
 /*---------------------------------------- save box */
 #define SBOX_NOPDS(box)          (*(L *)(box))
-#define SBOX_NDICTS(box)         (*(L *)((box)+4))
-#define SBOX_CAP(box)            (*(B **)((box)+8))
+#define SBOX_NDICTS(box)         (*(L *)(((B*)(box))+4))
+#define SBOX_CAP(box)            (*(B **)(((B*)(box))+8))
 
 #define SBOXBYTES                16
 
@@ -272,6 +279,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define NOSYSTEM    0x00000704L /* 'system' call failed                  */
 #define INV_MSG     0x00000705L /* operand constitutes invalid message   */
 #define NOT_HOST    0x00000706L /* hostname not in hosts file            */
+#define BAD_FMT     0x00000707L /* message not in native format */
 
 #define LIB_LOAD    0x00000807L /* unable to dlload                      */
 #define LIB_EXPORT  0x00000808L /* unable to find object in lib          */

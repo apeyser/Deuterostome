@@ -33,7 +33,7 @@ nd = (L)DICTBYTES;
 if (o_1 < FLOORopds) return(OPDS_UNF);
 if (CLASS(o_1) != DICT) return(OPD_CLA);
 dict = (B *)VALUE_BASE(o_1);
- LONG_VAL(o_1) = (DICT_FREE(dict)-DICT_ENTRIES(dict))/ENTRYBYTES(dict);
+ LONG_VAL(o_1) = (DICT_FREE(dict)-DICT_ENTRIES(dict))/ENTRYBYTES;
 TAG(o_1) = NUM | LONGTYPE; ATTR(o_1) = 0;
 return(OK);
 }
@@ -56,7 +56,7 @@ switch(CLASS(o_1))
      case ARRAY: n = ARRAY_SIZE(o_1); break;
      case LIST: n = (LIST_CEIL(o_1) - VALUE_BASE(o_1))/FRAMEBYTES;  break;
      case DICT: dict = (B *)VALUE_BASE(o_1);
-       n = (DICT_CEIL(dict) - DICT_ENTRIES(dict))/ENTRYBYTES(dict); break;
+       n = (DICT_CEIL(dict) - DICT_ENTRIES(dict))/ENTRYBYTES; break;
      case BOX: n = BOX_NB(o_1); break;
      default: return(OPD_CLA);
      }
@@ -154,8 +154,8 @@ dict1 = freevm;
 moveW((W *)VALUE_BASE(o_2),(W *)dict1,DICT_NB(o_2)>>1);
 d_reloc(dict1,VALUE_BASE(o_2),(L)dict1);
 for (entry = (B *)DICT_ENTRIES(dict2); entry < (B *)DICT_FREE(dict2); 
-     entry += ENTRYBYTES(dict2))
-  { if (!insert(ASSOC_NAME(entry),dict1,ASSOC_FRAME(entry,dict2)))
+     entry += ENTRYBYTES)
+  { if (!insert(ASSOC_NAME(entry),dict1,ASSOC_FRAME(entry)))
          return(DICT_OVF);
     }
 d_rreloc(dict1,(L)dict1,VALUE_BASE(o_2));
