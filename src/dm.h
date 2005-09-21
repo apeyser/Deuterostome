@@ -22,14 +22,39 @@
 
 /*---------------------------------------------- standard data types */
 
-#include <stdint.h>
+#ifndef DM_H
+#define DM_H
 
-/* typedef signed char B; */
-/* typedef signed short W; */
-/* typedef signed long L; */
-/* typedef unsigned char UB; */
-/* typedef unsigned short UW; */
-/* typedef unsigned long UL; */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+// Need to be here because we define things such as x1
+#if ! X_DISPLAY_MISSING
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#endif
+
+#ifdef _WIN32
+#ifdef DLL_EXPORT
+#define DLL_SCOPE __declspec(dllexport)
+#else //! DLL_EXPORT
+#ifdef LIBDM_DLL_IMPORT
+#define DLL_SCOPE extern __declspec(dllimport)
+#endif //LIBDM_DLL_EXPORT
+#endif //DLL_EXPORT
+#endif //_WIN32
+
+#ifndef DLL_SCOPE
+#define DLL_SCOPE extern
+#endif
+
+#include <inttypes.h>
+#include <sys/socket.h>
+#include <sys/select.h>
+#if ! NO_ENDIAN_HDR
+#include ENDIAN_HDR
+#endif //NO_ENDIAN_HDR
 
 typedef int8_t B;
 typedef int16_t W;
@@ -43,11 +68,12 @@ typedef L INT;
 
 typedef  L  (*OPER)(void);
 
+#ifndef TRUE
 #define TRUE -1
+#endif
+#ifndef FALSE
 #define FALSE 0
-
-/* typedef float S; */
-/* typedef double D; */
+#endif
 
 typedef float S;
 typedef double D;
@@ -139,15 +165,31 @@ NOTE: all objects that can populate the D machine's workspace must
 #define FORMAT32                   ((UB) 0x10)
 #define FORMATMASK                 ((UB) 0xF0)
 
-#ifdef NATIVE_ENDIAN_LITTLE
+// make BSD and Linux look alike
+
+#if ! NO_ENDIAN_HDR && ! BYTE_ORDER
+#define BYTE_ORDER __BYTE_ORDER
+#define LITTLE_ENDIAN __LITTLE_ENDIAN
+#define BIG_ENDIAN __BIG_ENDIAN
+#endif // ! NO_ENDIAN_HDR && ! BYTE_ORDER
+
+#ifndef WORDS_BIGENDIAN
 #define GETNATIVEENDIAN(frame)  \
   ((BOOLEAN) ((FORMAT(frame) & ENDIANMASK) == LITTLEENDIAN))
 #define SETNATIVEENDIAN(frame)  FORMAT(frame) |= LITTLEENDIAN
-#else
+#else //! WORDS_BIGENDIAN
 #define GETNATIVEENDIAN(frame)  \
   ((BOOLEAN) ((FORMAT(frame) & ENDIANMASK) == BIGENDIAN))
 #define SETNATIVEENDIAN(frame)  FORMAT(frame) |= BIGENDIAN
-#endif
+#endif //WORDS_BIGENDIAN
+
+#if ! NO_ENDIAN_HDR && __FLOAT_WORD_ORDER
+#if __FLOAT_WORD_ORDER != __BYTE_ORDER
+#error "Can't handle float word order __FLOAT_WORD_ORDER"
+#endif //__FLOAT_WORD_ORDER
+#else
+#warning "Confirm that float word order = word order"
+#endif //! NO_ENDIAN_HDR
 
 #define GETNATIVEFORMAT(frame) \
   ((BOOLEAN) ((FORMAT(frame) & FORMATMASK) == FORMAT32))
@@ -187,11 +229,15 @@ NOTE: all objects that can populate the D machine's workspace must
    framebytes is changed */
 #define FRAMEBYTES                 16L
 
+// NAMEBYTES is defined in ../config.h
+// To change, update ../configure.ac
+//#define NAMEBYTES                  18L //not including a terminating 0
+
 /*-------------------------------------------- dictionary */
  
 #define ASSOC_NAME(entry)          ( ((B *)(entry)))
 #define ASSOC_NEXT(entry)          (*((L *)(((B*)(entry))+FRAMEBYTES)))
-#define ASSOC_FRAME(entry)   (((B*)(entry))+8+FRAMEBYTES)
+#define ASSOC_FRAME(entry)         (((B*)(entry))+ENTRYBYTES-FRAMEBYTES)
 
 // keep frame on 64 bit boundaries, so that doubles will be so.
 #define ENTRYBYTES  (8+2*FRAMEBYTES)
@@ -254,6 +300,9 @@ NOTE: all objects that can populate the D machine's workspace must
 #define SAVE_OVF    0x0000020AL /* save stack overflow                   */
 #define INV_REST    0x0000020BL /* invalid restore                       */
 #define SAVE_UNF    0x0000020DL /* save stack underflow                  */
+#define VMR_ERR     0x0000020EL /* couldn't allocate memory              */
+#define VMR_STATE   0x0000020FL /* vm already tiny                       */
+#define KILL_SOCKS  0x00000210L /* dvt must kill all non-server socks    */
 
 #define BAD_TOK     0x00000300L /* bad D token in source string          */
 #define BAD_ASC     0x00000301L /* bad ASCII character in source string  */
@@ -302,24 +351,39 @@ NOTE: all objects that can populate the D machine's workspace must
 #define UN                         2
 
 /*----------------------------------------------- globals  for DMACHINE */
-extern B *FLOORopds;
-extern B *FREEopds;
-extern B* CEILopds;
-extern B* FLOORdicts;
-extern B* FREEdicts;
-extern B* CEILdicts;
-extern B* FLOORexecs;
-extern B* FREEexecs;
-extern B* CEILexecs;
-extern B* FLOORvm;
-extern B* FREEvm;
-extern B* CEILvm;
-extern B* TOPvm;
+DLL_SCOPE B *FLOORopds;
+DLL_SCOPE B *FREEopds;
+DLL_SCOPE B* CEILopds;
+DLL_SCOPE B* FLOORdicts;
+DLL_SCOPE B* FREEdicts;
+DLL_SCOPE B* CEILdicts;
+DLL_SCOPE B* FLOORexecs;
+DLL_SCOPE B* FREEexecs;
+DLL_SCOPE B* CEILexecs;
+DLL_SCOPE B* FLOORvm;
+DLL_SCOPE B* FREEvm;
+DLL_SCOPE B* CEILvm;
+DLL_SCOPE B* TOPvm;
 
-extern B* errsource;
+DLL_SCOPE B* errsource;
 
-#define MAXDVTWINDOWS  ((L)20)
-#define MAXCACHEDFONTS ((L)10)
+DLL_SCOPE B locked;
+
+DLL_SCOPE fd_set sock_fds;
+DLL_SCOPE BOOLEAN timeout;             /* for I/O operations          */
+DLL_SCOPE BOOLEAN abortflag;
+DLL_SCOPE BOOLEAN numovf;             /* FPU overflow status            */
+DLL_SCOPE BOOLEAN tinymemory;
+DLL_SCOPE L recsocket;
+DLL_SCOPE L consolesocket;
+DLL_SCOPE fd_set sock_fds;            /* active sockets                 */
+DLL_SCOPE const char* startup_dir; // setup by makefile,
+                                   // defines which directory
+                                   // to use for the startup file
+DLL_SCOPE B* startup_dir_frame; // points the frame holding ^^^,
+                                // at the bottom of the vm
+DLL_SCOPE B* home_dir_frame; //points to the frame holding $HOME
+DLL_SCOPE UW ascii[];
 
 /*----------------------- operator hands ------------------------------*/
 
@@ -387,9 +451,11 @@ L exec(L turns);
 L foldobj(B *frame, L base, W *depth);
 L unfoldobj(B *frame, L base, BOOLEAN isnative);
 L deendian_frame(B *frame);
-L deendian_array(B* frame);
-L deendian_dict(B* dict);
-L deendian_entry(B* entry);
+//L deendian_array(B* frame);
+//L deendian_list(B* frame);
+//L deendian_dict(B* dict);
+//L deendian_entries(B* doct);
+void setupdirs(void);
 
 /*--- DM3 */
 L make_socket(L port);
@@ -431,8 +497,8 @@ void DECREMENT(B *frame);
 /*----------------------- system operators */
 L op_setlock(void);
 L op_getlock(void);
-L op_hi(void);
-L op_libnum(void);
+L op_syshi(void);
+L op_syslibnum(void);
 L op_error(void);
 L op_errormessage(void);
 L op_aborted(void);
@@ -443,33 +509,19 @@ L op_quit(void);
 L op_setconsole(void);
 L op_console(void);
 L op_toconsole(void);
+L op_tostderr(void);
 L op_connect(void);
 L op_disconnect(void);
 L op_send(void);
 L op_flush(void);
 L op_nextevent(void);
 L op_vmresize(void);
-L op_startupdir(void);
+L op_killsockets(void);
+L op_getstartupdir(void);
+L op_gethomedir(void);
 L op_getsocket(void);
 L op_getmyname(void);
 L op_getmyport(void);
-
-/*----------------------- X windows operators */
-L op_Xwindows(void);
-L op_Xdisplayname(void);
-L op_Xconnect(void);
-L op_Xdisconnect(void);
-L op_screensize(void);
-L op_makewindow(void);
-L op_deletewindow(void);
-L op_mapwindow(void);
-L op_resizewindow(void);
-L op_Xsync(void);
-L op_mapcolor(void);
-L op_drawline(void);
-L op_drawsymbols(void);
-L op_fillrectangle(void);
-L op_drawtext(void);
 
 L op_pop(void);
 L op_exch(void);
@@ -619,3 +671,5 @@ L op_matvecmul(void);
 #define ERRLEN (1000)
 
 #include "error.h"
+
+#endif //DM_H

@@ -33,8 +33,6 @@
 #include "dm.h"
 #include <math.h>
 
-extern W ascii[];
-
 /*------------------------------------- null
         --- | null
 */
@@ -280,7 +278,7 @@ of b, w, l, s, d, x, p); returns new internal object.
 
 L op_array(void)
 {
-B *mframe, type[16];  W t;  L n,nb;
+B *mframe, type[NAMEBYTES+1];  W t;  L n,nb;
 
 if (o_2 < FLOORopds) return(OPDS_UNF);
 if (CLASS(o_2) != NUM) return(OPD_CLA);

@@ -15,57 +15,18 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <signal.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
 #include <string.h>
 #include "dm.h"
+#include "dmx.h"
 
 L init_sockaddr(struct sockaddr_in *name, const char *hostname, L port);
 
 /*----------------- DM global variables -----------------------------*/
 
-B *FLOORopds;
-B *FREEopds;
-B* CEILopds;
-B* FLOORdicts;
-B* FREEdicts;
-B* CEILdicts;
-B* FLOORexecs;
-B* FREEexecs;
-B* CEILexecs;
-B* FLOORvm;
-B* FREEvm;
-B* CEILvm;
-B* TOPvm;
-B* errsource;
-
-extern B *sysop[];
-extern L errc[];
-extern B *errm[];
-BOOLEAN abortflag;          /* control_c from console         */
-BOOLEAN timeout;            /* for i/O operations             */
-fd_set sock_fds;            /* active sockets                 */
-BOOLEAN numovf;             /* FPU overflow status            */
-L recsocket;
-
 /*-- the X corner */
-
-typedef struct {
-  XFontStruct *fontstruct;
-  B fontname[100];
-} cachedfont;
-
-Display *dvtdisplay;
-B displayname[80] = "";
-Screen *dvtscreen;
-Window dvtrootwindow;
-XWindowAttributes rootwindowattr;
-GC dvtgc;
-L ndvtwindows;
-L dvtwindows[MAXDVTWINDOWS];
-L ncachedfonts;
-cachedfont cachedfonts[MAXCACHEDFONTS];
-int xsocket = -1;
+#if X_DISPLAY_MISSING
+const
+#endif
 BOOLEAN moreX = FALSE;
 
 /*----------------------- for the dvt module ------------------------*/
@@ -75,8 +36,8 @@ static L memsetup[5] = { 1000, 100, 20, 10, 200 };
 
 /*------------------- include modules of the dvt ---------------------*/
 
-#include "dvt_0.c"
-#include "dvt_1.c"
+#include "dvt_0.h"
+#include "dvt_1.h"
 
 /*------------------------- root tools -------------------------------*/
 
@@ -200,25 +161,10 @@ signal(SIGPIPE, SIG_IGN);
  /*-------------- fire up Xwindows (if there is) -----------------------*/
 
  
+#if ! X_DISPLAY_MISSING
  dvtdisplay = XOpenDisplay(NULL);  /* use the DISPLAY environment */
- if (dvtdisplay != NULL)
+ if (dvtdisplay && DisplayString(dvtdisplay))
  {
-     B* displaynum = NULL;
-     if (*DisplayString(dvtdisplay) == ':')
-         displaynum = DisplayString(dvtdisplay);
-     else if (!strncmp("localhost:", DisplayString(dvtdisplay), 10))
-         displaynum = DisplayString(dvtdisplay) + 9;
-     
-     if (displaynum)
-     {
-         if (gethostname(displayname, 80)
-             || strlen(displayname) + strlen(displaynum) > 79)
-             error(EXIT_FAILURE,0,
-                   "Xwindows: display name longer than 79 chars");
-         strcpy(displayname + strlen(displayname), displaynum);         
-     }
-     else strcpy(displayname, DisplayString(dvtdisplay));
-     
      dvtscreen = XDefaultScreenOfDisplay(dvtdisplay);
      dvtrootwindow = XDefaultRootWindow(dvtdisplay);
      if (XGetWindowAttributes(dvtdisplay,dvtrootwindow,&rootwindowattr) == 0)
@@ -227,7 +173,12 @@ signal(SIGPIPE, SIG_IGN);
      dvtgc = XCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
      xsocket = ConnectionNumber(dvtdisplay);
      FD_SET(xsocket, &sock_fds);
-   }
+ } else {
+   dvtdisplay = NULL;
+   *displayname = 0;
+ }
+#endif
+ 
 
 /*--------------------- set up the tiny D machine -------------------
    Not so tiny for the dvt, this should be good for most work
@@ -257,18 +208,7 @@ signal(SIGPIPE, SIG_IGN);
  moveframe (userdict-FRAMEBYTES,FREEdicts); 
  FREEdicts += FRAMEBYTES;
 
- if (FREEvm + FRAMEBYTES + DALIGN(sizeof(startup_dir)-1) > CEILvm)
-     error(EXIT_FAILURE,0,"VM overflow");
- startup_dir_frame = FREEvm;
- FREEvm += FRAMEBYTES + DALIGN(sizeof(startup_dir)-1);
- TAG(startup_dir_frame) = (ARRAY | BYTETYPE);
- ATTR(startup_dir_frame) = READONLY;
- ARRAY_SIZE(startup_dir_frame) = sizeof(startup_dir)-1;
- VALUE_PTR(startup_dir_frame) = startup_dir_frame + FRAMEBYTES;
- strncpy(startup_dir_frame + FRAMEBYTES,
-         startup_dir,
-         sizeof(startup_dir)-1);
-
+ setupdirs();
 /*----------------- construct frames for use in execution of D code */
  makename("error",errorframe); ATTR(errorframe) = ACTIVE;
  makename("abort",abortframe); ATTR(abortframe) = ACTIVE;
@@ -276,8 +216,8 @@ signal(SIGPIPE, SIG_IGN);
 /*----------- read startup_dvt.d and push on execs ----------*/
  startup_dvt = strcat(
      strcpy(
-         malloc(strlen(STARTUP_DIR) + strlen("/startup_dvt.d") + 1),
-         STARTUP_DIR),
+	 malloc(strlen(startup_dir) + strlen("/startup_dvt.d") + 1),
+         startup_dir),
      "/startup_dvt.d");
  
  if ((sufd = open(startup_dvt, O_RDONLY)) == -1)
@@ -302,8 +242,11 @@ signal(SIGPIPE, SIG_IGN);
    {
    case MORE:     goto more;
    case DONE:     goto more;
-   case QUIT:     XCloseDisplay(dvtdisplay);
+   case QUIT:     
+#if ! X_DISPLAY_MISSING
+                  if (dvtdisplay) XCloseDisplay(dvtdisplay);
                   *displayname = '\0';
+#endif
                   exit(EXIT_SUCCESS);
    case ABORT:    if (x1 >= CEILexecs) goto execsovfl;
      moveframe(abortframe,x1); FREEexecs = x2; goto more;

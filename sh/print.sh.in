@@ -1,0 +1,11 @@
+#! /bin/bash
+
+if [[ -z "$DVTSCRIPTPATH" ]] ; then
+    DVTSCRIPTPATH="@dmstartdir@"
+fi
+
+if [[ -z "$DISPLAY" ]] ; then
+    exec "$DVTSCRIPTPATH/print_.sh" --nowait "$@"
+else
+    exec xterm -class d_machine -e "$DVTSCRIPTPATH/print_.sh" --wait "$@"
+fi

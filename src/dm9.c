@@ -28,30 +28,26 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <signal.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
 #include <strings.h>
 #include <string.h>
+
 #include "dm.h"
+#include "dmx.h"
 
-/*-- NOTE: this typedef is duplicated here and in dvt.c (or dnode.c) */
+int xsocket = -1;
 
-typedef struct {
-  XFontStruct *fontstruct;
-  B fontname[100];
-} cachedfont;
-
-extern Display *dvtdisplay;
-extern B displayname[80];
-extern Screen *dvtscreen;
-extern Window dvtrootwindow;
-extern XWindowAttributes rootwindowattr;
-extern GC dvtgc;
-extern L ndvtwindows;
-extern L dvtwindows[MAXDVTWINDOWS];
-extern L ncachedfonts;
-extern cachedfont cachedfonts[MAXCACHEDFONTS];
-
+#if ! X_DISPLAY_MISSING
+Display *dvtdisplay;
+B displayname[80] = "";
+Screen *dvtscreen;
+Window dvtrootwindow;
+XWindowAttributes rootwindowattr;
+GC dvtgc;
+L ndvtwindows;
+L dvtwindows[MAXDVTWINDOWS];
+L ncachedfonts;
+cachedfont cachedfonts[MAXCACHEDFONTS];
+#endif
 
 /*----------------- some details on operands ----------------------------
 
@@ -202,12 +198,16 @@ FREEopds = o_2; return(OK);
 
 L coloropd()
 {
+#if X_DISPLAY_MISSING
+	return NO_XWINDOWS;
+#else
   if (o_1 < FLOORopds) return(OPDS_UNF);
   if (CLASS(o_1) != NUM) return(OPD_CLA);
   if (!VALUE(o_1,&colidx)) return(UNDF_VAL);
   XSetForeground(dvtdisplay,dvtgc,colidx);
   FREEopds = o_1;
   return(OK);
+#endif
 }
 
 /*----------------------------------------------- Xwindows
@@ -222,7 +222,11 @@ L op_Xwindows()
 {
   if (o1 >= CEILopds) return(OPDS_OVF);
   TAG(o1) = BOOL; ATTR(o1) = 0;
+#if X_DISPLAY_MISSING
+	BOOL_VAL(o1) = FALSE;
+#else
   BOOL_VAL(o1) = (dvtdisplay != NULL);
+#endif
   FREEopds = o2;
   return(OK);
 }
@@ -236,6 +240,9 @@ L op_Xwindows()
 
 L op_screensize()
 {
+#if X_DISPLAY_MISSING
+	return NO_XWINDOWS;
+#else
   if (dvtdisplay == NULL) return(NO_XWINDOWS);
   if (o2 > CEILopds) return(OPDS_OVF);
   TAG(o1) = TAG(o2) = NUM | LONGTYPE; ATTR(o1) = ATTR(o2) = 0;
@@ -243,6 +250,7 @@ L op_screensize()
   LONG_VAL(o2) = rootwindowattr.height;
   FREEopds = o3;
   return(OK);
+#endif
 }
 
 /*------------------------------------------------ makewindow
@@ -257,13 +265,18 @@ L op_screensize()
 
 L op_makewindow()
 {
+#if X_DISPLAY_MISSING
+	return NO_XWINDOWS;
+#else
   static XClassHint classhint = {"d_machine", "d_machine"};
   L retc; W *pxy;
   B *xyf, *freevm, nstr[31], icstr[13],
     *pn[1] = { nstr }, *pic[1] = { icstr };
   XSetWindowAttributes attr;
   XTextProperty wname, icname;
+	Atom atom;
 
+  if (dvtdisplay == NULL) return(NO_XWINDOWS);
   attr.event_mask = ButtonPressMask | ExposureMask |
     StructureNotifyMask;
   attr.override_redirect = True;
@@ -296,11 +309,14 @@ L op_makewindow()
   XSetWMName(dvtdisplay,wid,&wname);
   XSetWMIconName(dvtdisplay,wid,&icname);
   XSetClassHint(dvtdisplay,wid,&classhint);
+	atom = XInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False);
+	XSetWMProtocols(dvtdisplay, wid, &atom, 1);
   dvtwindows[ndvtwindows++] = wid;
   TAG(o1) = NUM | LONGTYPE; ATTR(o1) = 0;
   LONG_VAL(o1) = wid;
   FREEopds = o2;
   return(OK);    
+#endif
 }
 
 /*------------------------------------------------ deletewindow
@@ -313,7 +329,11 @@ L op_makewindow()
 
 L op_deletewindow()
 {
+#if X_DISPLAY_MISSING
+	return NO_XWINDOWS;
+#else
   L k;
+  if (dvtdisplay == NULL) return(NO_XWINDOWS);
   if (o_1 < FLOORopds) return(OPDS_UNF);
   if (CLASS(o_1) != NUM) return(OPD_CLA);
   if (!VALUE(o_1,&wid)) return(UNDF_VAL);
@@ -326,6 +346,7 @@ L op_deletewindow()
   XDestroyWindow(dvtdisplay,wid);
   FREEopds = o_1;
   return(OK);
+#endif
 }
 
 /*------------------------------------------------ mapwindow
@@ -339,7 +360,11 @@ L op_deletewindow()
 
 L op_mapwindow()
 {
+#if X_DISPLAY_MISSING
+	return NO_XWINDOWS;
+#else
   L k;
+  if (dvtdisplay == NULL) return(NO_XWINDOWS);
   if (o_2 < FLOORopds) return(OPDS_UNF);
   if (CLASS(o_2) != NUM) return(OPD_CLA);
   if (!VALUE(o_2,&wid)) return(UNDF_VAL);
@@ -354,6 +379,7 @@ L op_mapwindow()
     XUnmapWindow(dvtdisplay,wid);
   FREEopds = o_2;
   return(OK);
+#endif
 }
 
 /*------------------------------------------------- resizewindow
@@ -362,8 +388,12 @@ L op_mapwindow()
 
 L op_resizewindow()
 {
+#if X_DISPLAY_MISSING
+	return NO_XWINDOWS;
+#else
   L width, height, k;
 
+  if (dvtdisplay == NULL) return(NO_XWINDOWS);
   if (o_3 < FLOORopds) return(OPDS_UNF);
   if (CLASS(o_3) != NUM) return(OPD_CLA);
   if (!VALUE(o_3,&wid)) return(UNDF_VAL);
@@ -378,6 +408,7 @@ L op_resizewindow()
   XResizeWindow(dvtdisplay,wid,width,height);
   FREEopds = o_3;
   return(OK);
+#endif
 }
 
 /*------------------------------------------------- Xsync
@@ -388,8 +419,13 @@ L op_resizewindow()
 
 L op_Xsync()
 {
+#if X_DISPLAY_MISSING
+	return NO_XWINDOWS;
+#else
+  if (dvtdisplay == NULL) return(NO_XWINDOWS);
   XFlush(dvtdisplay);
   return OK;
+#endif
 }
 
 /*------------------------------------------------- mapcolor
@@ -401,8 +437,12 @@ L op_Xsync()
 
 L op_mapcolor()
 {
+#if X_DISPLAY_MISSING
+	return NO_XWINDOWS;
+#else
   XColor color; B f[FRAMEBYTES]; D val[3]; L k;
  
+  if (dvtdisplay == NULL) return(NO_XWINDOWS);
   if (o_1< FLOORopds) return(OPDS_UNF);
   if (CLASS(o_1) != ARRAY) return(OPD_CLA);
   if (ARRAY_SIZE(o_1) != 3) return(RNG_CHK);
@@ -418,6 +458,7 @@ L op_mapcolor()
   TAG(o_1) = (NUM | LONGTYPE); ATTR(o_1) = 0;
   LONG_VAL(o_1) = (L)color.pixel;
   return(OK);
+#endif
 }
 
 
@@ -432,8 +473,12 @@ L op_mapcolor()
 
 L op_fillrectangle()
 {
+#if X_DISPLAY_MISSING
+	return NO_XWINDOWS;
+#else
   B *xyf, *freevm; L retc, k;
 
+  if (dvtdisplay == NULL) return(NO_XWINDOWS);
   freevm = FREEvm;
   if ((retc = coloropd()) != OK) return(retc);
   if ((retc = xy(&xyf,&freevm)) != OK) return(retc);
@@ -448,6 +493,7 @@ L op_fillrectangle()
             }
   XFillRectangles(dvtdisplay,wid,dvtgc,(XRectangle *)VALUE_BASE(xyf),1);
   return(OK);
+#endif
 }
 
 /*------------------------------------------------- drawline
@@ -462,7 +508,11 @@ L op_fillrectangle()
 
 L op_drawline()
 {
+#if X_DISPLAY_MISSING
+	return NO_XWINDOWS;
+#else
   B *xyf, *freevm; L retc, k;
+  if (dvtdisplay == NULL) return(NO_XWINDOWS);
   if (o_1 < FLOORopds) return(OPDS_UNF);
   freevm = FREEvm;
   if ((retc = coloropd()) != OK) return(retc);
@@ -479,6 +529,7 @@ L op_drawline()
   XDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)VALUE_BASE(xyf),
 	     ARRAY_SIZE(xyf)>>1, CoordModeOrigin);
   return(OK);
+#endif
 }
 
 /*------------------------------------------------- drawsymbols
@@ -514,6 +565,7 @@ L op_drawline()
      entire perimeter even if it is stroked
 */
 
+#if ! X_DISPLAY_MISSING
 static void DOTsymbol()
 {
   XDrawPoint(dvtdisplay,wid,dvtgc,(L)x,(L)y);
@@ -667,11 +719,16 @@ static SYMBfunction SYMBlist[] = {
   ASTERsymbol, usTRIsymbol, dsTRIsymbol, rsTRIsymbol, lsTRIsymbol,
   vcBARsymbol, vuBARsymbol, vdBARsymbol, hcBARsymbol, hrBARsymbol,
   hlBARsymbol };
+#endif //! X_DISPLAY_MISSING
 
 L op_drawsymbols()
 {
+#if X_DISPLAY_MISSING
+	return NO_XWINDOWS;
+#else
   B *xyf, *freevm; L retc, k, symbol; SYMBfunction symbfct; W *p;
 
+  if (dvtdisplay == NULL) return(NO_XWINDOWS);
   if (o_5 < FLOORopds) return(OPDS_UNF);
   if (CLASS(o_2) != NUM) return(OPD_CLA);
   if (!VALUE(o_2,&symbol)) return(UNDF_VAL);
@@ -699,6 +756,7 @@ L op_drawsymbols()
       x = p[k]; y = p[k+1]; (*symbfct)();
     }
   return(OK);
+#endif
 }
 
 /*-------------------------------------- drawtext
@@ -719,9 +777,13 @@ L op_drawsymbols()
 
 L op_drawtext()
 {
+#if X_DISPLAY_MISSING
+	return NO_XWINDOWS;
+#else
   B *fl, fontspec[100]; L haln, valn, k, nname, dx; XFontStruct *font;
   BOOLEAN fontcached;
 
+  if (dvtdisplay == NULL) return(NO_XWINDOWS);
   if (o_5 < FLOORopds) return(OPDS_UNF);
   if (CLASS(o_1) != LIST) return(OPD_CLA);
   if (((LIST_CEIL(o_1) - VALUE_BASE(o_1)) / FRAMEBYTES) != 4)
@@ -783,6 +845,7 @@ L op_drawtext()
   
   XDrawString(dvtdisplay,wid,dvtgc,x,y,(B *)VALUE_BASE(o1),ARRAY_SIZE(o1));
   return(OK);
+#endif
 }
 
 //----------------------------------------------- Xdisplayname
@@ -798,10 +861,19 @@ L op_Xdisplayname(void)
     if (o_1 < FLOORopds) return OPDS_UNF;
     if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
 
+#if ! X_DISPLAY_MISSING
+		if (dvtdisplay == NULL) {
+#endif
+			ARRAY_SIZE(o_1) = 0;
+			return OK;
+#if ! X_DISPLAY_MISSING
+		}
+
     len = strlen(displayname);
     if (ARRAY_SIZE(o_1) < len) return RNG_CHK;
     moveB(displayname, (B*) VALUE_BASE(o_1), len);
     ARRAY_SIZE(o_1) = len;
 
     return OK;
+#endif
 }

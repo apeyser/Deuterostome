@@ -22,7 +22,9 @@
 #include "dm.h"
 #include <math.h>
 #define nTYPES  ((W)5)
-#include "dsp1f.c"
+
+#include "dsp1f.h"
+
 #include <stdio.h>
 
 /*---------------------------------------------------- interpolate

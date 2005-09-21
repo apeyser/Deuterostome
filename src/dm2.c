@@ -6,6 +6,7 @@
      -  fast moves for frames/blocks
      -  dictionary lookup and insertion
      -  mill
+     -  getstartupdir
 
 */
 
@@ -15,11 +16,9 @@
 #include <stdio.h>
 #include <string.h>
 
-extern BOOLEAN abortflag;
-
-static char sys_hi[] = "System Operators V3.1";
-L op_hi(void)   {return wrap_hi(sys_hi);}
-L op_libnum(void) {return wrap_libnum(0);}
+static char sys_hi[] = "System Operators V" PACKAGE_VERSION;
+L op_syshi(void)   {return wrap_hi(sys_hi);}
+L op_syslibnum(void) {return wrap_libnum(0);}
 
 L wrap_libnum(UL libnum)
 {
@@ -296,8 +295,8 @@ DICT_CEIL(dict) += offs;
  the name ']' is encoded by a zero in all character positions. A
  zero in positions 1-D concludes the string.
 
-  makename(->namestring, ->nameframe)
-  pullname(->nameframe, ->namestring)
+  makename(->namestring, ->nameframe) only first NAMEBYTES characters incl.
+  pullname(->nameframe, ->namestring) namestring must be NAMEBYTES+1 long
   BOOLEAN matchname(->nameframe1, ->nameframe2)
 
  Name strings need to be able to hold 15 bytes.
@@ -317,17 +316,20 @@ static UB tosix[] = {
 static UB fromsix[] =
    "\0000123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
 
-static B sb[18];
+static B sb[NAMEBYTES];
 
 void makename(B *namestring, B *nameframe)
 {
-W i; B c;
-/* clear string buffer, copy string converting it to six-bit code,
-   truncate after 18 bytes
-*/
+  W i; B c;
+  /* clear string buffer, copy string converting it to six-bit code,
+     truncate after 18 bytes
+  */
    i = 0;
-   while ((c = namestring[i])) { sb[i] = tosix[c]; if (++i >= 18) break; }
-   for (;i<18;i++) sb[i] = 0;
+   while ((c = namestring[i])) { 
+     sb[i] = tosix[c]; 
+     if (++i >= NAMEBYTES) break; 
+   }
+   for (; i<NAMEBYTES ; i++) sb[i] = 0;
 
    TAG(nameframe) = NAME;
    ATTR(nameframe) = 0;
@@ -352,11 +354,11 @@ W i; B c;
      ^ *(UW *)(nameframe+14);
 }
 
+// namestring must be NAMEBYTES+1 long
 void pullname(B *nameframe, B *namestring)
 {
   UW w0, w1;
   
-  namestring[18] = '\000';
   /* recover string under checksum, merge into top longword */
   w0 = *(UW *)(nameframe+2) 
     ^ *(UW *)(nameframe+4)
@@ -399,6 +401,8 @@ void pullname(B *nameframe, B *namestring)
   if (! (namestring[15] = fromsix[w1 & 0x3F])) return;
   if (! (namestring[16] = fromsix[(w0 >> 6) & 0x3F])) return;
   if (! (namestring[17] = fromsix[w0 & 0x3F])) return;
+
+  namestring[NAMEBYTES] = 0;
 }
 
 BOOLEAN matchname(B *nameframe1, B *nameframe2)
@@ -558,7 +562,7 @@ L exec(L turns)
 static B fetch_err[] = "fetch phase\n";
 static B transl_err[] = "translation phase\n";
 static B exec_err[] = "execution phase\n";
-static B undfn_buf[15];
+static B undfn_buf[NAMEBYTES+1];
  B *f, *af, *dict; L  retc; UB fclass;
 OPER tmis;
 
@@ -634,27 +638,27 @@ e_er_1:   errsource = exec_err; return(retc);
 
 /*-------------------- tree handling support --------------------------*/
 
-#define swapbytes(arr, temp, n1, n2) {		\
-    temp = (arr)[(n1)];				\
-    ((B*)(arr))[(n2)] = ((B*)(arr))[(n1)];	\
-    ((B*)(arr))[(n1)] = temp;			\
-  }
+static void swapbytes(B* arr, B n1, B n2) {
+  B temp = arr[n2];
+  arr[n2] = arr[n1];
+  arr[n1] = temp;
+}
 
-#define swap2bytes(arr, temp) swapbytes(arr, temp, 0, 1)
-#define swap4bytes(arr, temp) {			\
-    swapbytes(arr, temp, 0, 3);			\
-    swapbytes(arr, temp, 1, 2);			\
-  }
-#define swap8bytes(arr, temp) {			\
-    swapbytes(arr, temp, 0, 7);			\
-    swapbytes(arr, temp, 1, 6);			\
-    swapbytes(arr, temp, 2, 5);			\
-    swapbytes(arr, temp, 3, 4);			\
-  }
+static void swap2bytes(B* arr) {swapbytes(arr, 0, 1);}
+
+static void swap4bytes(B* arr) {
+  swapbytes(arr, 0, 3);
+  swapbytes(arr, 1 ,2);
+}
+
+static void swap8bytes(B* arr) {
+  swapbytes(arr, 0, 7);
+  swapbytes(arr, 1, 6);
+  swapbytes(arr, 2, 5);
+  swapbytes(arr, 3, 4);
+}
 
 L deendian_frame(B *frame) {
-  B b;
-
   switch (CLASS(frame)) {
     case NULLOBJ: case BOOL: case MARK:
       return OK;
@@ -664,13 +668,13 @@ L deendian_frame(B *frame) {
 	case BYTETYPE:
 	  return OK;
 	case WORDTYPE:
-	  swap2bytes(NUM_VAL(frame), b);
+	  swap2bytes(NUM_VAL(frame));
 	  return OK;
 	case LONGTYPE: case SINGLETYPE:
-	  swap4bytes(NUM_VAL(frame), b);
+	  swap4bytes(NUM_VAL(frame));
 	  return OK;
 	case DOUBLETYPE:
-	  swap8bytes(NUM_VAL(frame), b);
+	  swap8bytes(NUM_VAL(frame));
 	  return OK;
       };
       return OPD_TYP;
@@ -679,29 +683,29 @@ L deendian_frame(B *frame) {
       return OPD_CLA;
 
     case NAME:
-      swap2bytes(frame+2, b);
-      swap2bytes(frame+4, b);
-      swap2bytes(frame+6, b);
-      swap2bytes(frame+8, b);
-      swap2bytes(frame+10, b);
-      swap2bytes(frame+12, b);
-      swap2bytes(frame+14, b);
+      swap2bytes(frame+2);
+      swap2bytes(frame+4);
+      swap2bytes(frame+6);
+      swap2bytes(frame+8);
+      swap2bytes(frame+10);
+      swap2bytes(frame+12);
+      swap2bytes(frame+14);
       return OK;
 
     case ARRAY: case LIST:
-      swap4bytes(&VALUE_BASE(frame), b);
-      swap4bytes(&ARRAY_SIZE(frame), b);
+      swap4bytes((B*) &VALUE_BASE(frame));
+      swap4bytes((B*) &ARRAY_SIZE(frame));
       return OK;
 
     case DICT:
-      swap4bytes(&VALUE_BASE(frame), b);
-      swap4bytes(&DICT_NB(frame), b);
-      swap4bytes(&DICT_CURR(frame), b);
+      swap4bytes((B*) &VALUE_BASE(frame));
+      swap4bytes((B*) &DICT_NB(frame));
+      //CURR=NB
       return OK;
 
     case BOX:
-      swap4bytes(&VALUE_BASE(frame), b);
-      swap4bytes(&BOX_NB(frame), b);
+      swap4bytes((B*) &VALUE_BASE(frame));
+      swap4bytes((B*) &BOX_NB(frame));
       return OK;
 
     default:
@@ -709,40 +713,37 @@ L deendian_frame(B *frame) {
   };
 }
 
-L deendian_array(B* frame) {
+static L deendian_array(B* frame) {
   switch (TYPE(frame)) {
     case BYTETYPE:
       return OK;
 
     case WORDTYPE: {
       W* w;
-      B b;
       for (w = (W*)VALUE_BASE(frame); 
 	   w < ((W*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
 	   ++w) {
-	swap2bytes(w, b);
+	swap2bytes((B*) w);
       };
       return OK;
     };
 
     case LONGTYPE: case SINGLETYPE: {
       L* l;
-      B b;
       for (l = (L*)VALUE_BASE(frame); 
 	   l < ((L*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
 	   ++l) {
-	swap4bytes(l, b);
+	swap4bytes((B*) l);
       };
       return OK;
     };
 
     case DOUBLETYPE: {
       D* d;
-      B b;
       for (d = (D*)VALUE_BASE(frame); 
 	   d < ((D*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
 	   ++d) {
-	swap8bytes(d, b);
+	swap8bytes((B*) d);
       };
       return OK;
     };
@@ -752,25 +753,50 @@ L deendian_array(B* frame) {
   }
 }
 
-L deendian_dict(B* dict) {
-  B b;
-  
-  swap4bytes(&DICT_ENTRIES(dict), b);
-  swap4bytes(&DICT_FREE(dict), b);
-  swap4bytes(&DICT_CEIL(dict), b);
-  swap2bytes(&DICT_CONHASH(dict), b);
-  swap4bytes(&DICT_TABHASH(dict), b);
+static L deendian_list(B* frame) {
+  B* lframe;
+  L retc;
+
+  for (lframe = (B*)VALUE_BASE(frame);
+       lframe < (B*)LIST_CEIL(frame);
+       lframe += FRAMEBYTES)
+    if ((retc = deendian_frame(lframe)) != OK)
+      return retc;
+
+  return OK;
+}
+    
+
+static L deendian_dict(B* dict) {
+  swap4bytes((B*) &DICT_ENTRIES(dict));
+  swap4bytes((B*) &DICT_FREE(dict));
+  swap4bytes((B*) &DICT_CEIL(dict));
+  swap2bytes((B*) &DICT_CONHASH(dict));
+  //TABHASH==CEIL
   return OK;
 }
 
-L deendian_entry(B* entry) {
-  B b;
+static L deendian_entries(B* dict) {
+  L retc, i, *link;
+  B* entry;
 
-  swap4bytes(&ASSOC_NEXT(entry), b);
+  for (i = 0, link = (L*)DICT_TABHASH(dict);
+       i < DICT_CONHASH(dict); 
+       i++, link++)
+    swap4bytes((B*) link);
+
+  for (entry = (B*) DICT_ENTRIES(dict);
+       entry < (B*) DICT_FREE(dict);
+       entry += ENTRYBYTES) {
+    if ((retc = deendian_frame(ASSOC_NAME(entry))) != OK) 
+      return retc;
+    swap4bytes((B*) &ASSOC_NEXT(entry));
+    if ((retc = deendian_frame(ASSOC_FRAME(entry))) != OK)
+      return retc;
+  }
+
   return OK;
 }
-
-  
 
 /*----------------------------- foldobj
 
@@ -900,16 +926,17 @@ switch(CLASS(frame)) {
  case LIST: 
    VALUE_BASE(frame) += base; 
    LIST_CEIL(frame) += base;
+   if (! isnative && ((retc = deendian_list(frame)) != OK))
+     return retc;
+
    for (lframe = (B *)VALUE_BASE(frame);
 	lframe < (B *)LIST_CEIL(frame); 
 	lframe += FRAMEBYTES) { 
-     if (! isnative && ((retc = deendian_frame(lframe)) != OK))
-       return retc;
      if (ATTR(lframe) & BIND) { 
        dframe = FREEdicts - FRAMEBYTES; xframe = 0L;
        while ((dframe >= FLOORdicts) && (xframe == 0L)) { 
 	 ldict = (B *)VALUE_BASE(dframe);
-	 xframe = lookup(frame,ldict);
+	 xframe = lookup(lframe,ldict);//lframe not frame
 	 dframe -= FRAMEBYTES;
        }
        if ((L)xframe > 0) { 
@@ -928,25 +955,29 @@ switch(CLASS(frame)) {
    VALUE_BASE(frame) += base;
    
    dict = (B *)VALUE_BASE(frame);
-   if (! isnative && ((retc = deendian_dict(dict)) != OK)) return retc;
+   if (! isnative && ((retc = deendian_dict(dict)) != OK)) 
+     return retc;
 
    DICT_ENTRIES(dict) += base; DICT_FREE(dict) += base;
    DICT_CEIL(dict) += base;
+   if (! isnative && ((retc = deendian_entries(dict)) != OK))
+     return retc;
+
    for (k = 0, link = (L *)DICT_TABHASH(dict); 
-	k < DICT_CONHASH(dict); k++, link++)  { 
+	k < DICT_CONHASH(dict); 
+	k++, link++)  { 
      if (*link != (-1L)) *link += base; 
    }
    for (entry = (B *)DICT_ENTRIES(dict); 
 	entry < (B *)DICT_FREE(dict);
 	entry += ENTRYBYTES) {
-     if (! isnative && ((retc = deendian_entry(entry)) != OK)) return retc;
      if (ASSOC_NEXT(entry) != (-1L)) ASSOC_NEXT(entry) += base;
      lframe = ASSOC_FRAME(entry);
      if (ATTR(lframe) & BIND) { 
        dframe = FREEdicts - FRAMEBYTES; xframe = 0L;
        while ((dframe >= FLOORdicts) && (xframe == 0L)) { 
 	 ldict = (B *)VALUE_BASE(dframe);
-	 xframe = lookup(frame,ldict);
+	 xframe = lookup(lframe,ldict);//lframe, not frame
 	 dframe -= FRAMEBYTES;
        }
        if ((L)xframe > 0) { 
@@ -966,4 +997,59 @@ switch(CLASS(frame)) {
  }
  moveframes(frame,(B *)VALUE_BASE(frame)-FRAMEBYTES,1L);
  return(OK);
+}
+
+/*--------------------------------------------getstartupdir
+ *  --- | (directory)
+ *  returns the hardcoded path (hidden at bottom of vm)
+ *  to the startup directory for the node
+ */
+L op_getstartupdir(void)
+{    
+	if (CEILopds < o2) return OPDS_OVF;
+	if (!startup_dir_frame) return CORR_OBJ;
+	moveframe(startup_dir_frame, o1);
+	FREEopds = o2;
+	return OK;
+}
+
+/*---------------------------------------------------- gethomedir
+   -- | string
+   - returns $HOME
+*/
+
+L op_gethomedir(void) {
+  if (CEILopds < o2) return OPDS_OVF;
+	if (!home_dir_frame) return CORR_OBJ;
+  moveframe(home_dir_frame, o1);
+  FREEopds = o2;
+  return OK;
+}
+
+static void setupdir(B** frame, const char* string) {
+  L len = strlen(string);
+
+  if (FREEvm + FRAMEBYTES + DALIGN(len) > CEILvm)
+    error(EXIT_FAILURE,0,"VM overflow");
+
+  *frame = FREEvm;
+  FREEvm += FRAMEBYTES + DALIGN(len);
+  TAG(*frame) = (ARRAY | BYTETYPE);
+  ATTR(*frame) = READONLY;
+  ARRAY_SIZE(*frame) = len;
+  VALUE_PTR(*frame) = *frame + FRAMEBYTES;
+  strncpy(*frame + FRAMEBYTES, string, len);
+} 
+
+void setupdirs(void) {
+  const char* home_env = getenv("HOME");
+  const char* home_dir = "";
+  const char* startup_env = getenv("DVTSCRIPTPATH");
+
+  if (home_env) home_dir = home_env;
+  if (startup_env) startup_dir = startup_env;
+  else startup_dir = STARTUP_DIR;
+
+  setupdir(&home_dir_frame, home_dir);
+  setupdir(&startup_dir_frame, startup_dir);
 }

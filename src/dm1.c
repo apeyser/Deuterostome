@@ -6,72 +6,6 @@
 #include "dm.h"
 #include <math.h>
 
-/*---------------------------- ASCII character classification table
-
-Each 7-bit ASCII character is assigned a 16-bit classification key
-that assigns it possible roles:
-
-High byte                 Low byte
-----------                --------
-White space         80    00 no attention
-                          01 start of comment (|)
-                          02 end of comment (newline)
-Numeral             40    00 no attention (digit or sign)
-                          10 float characteristic (. or e/E)
-                          20 'undefined' specifier (*)
-                          3x type specifier (x=0-4 for b/w/l/s/d)
-                          40 octal digit
-Slash               10    00 /
-                          01 \
-                          02 ~
-Name                08       letters, digits, underline
-Special             04    00 <
-                          01 >
-                          02 {
-                          03 }
-                          04 [
-                          05 ]
-String              01    00 (
-                          01 )
-                    01    02 possible only in string, no attention
-Garbage             00    00 none of the above                         */
-
-UW ascii[128] =
-     {
-/*                                                                     */
-     0x0000, 0x0000, 0x0000, 0x0000,  0x0000, 0x0000, 0x0000, 0x0000,
-/*                     LF                       CR                     */
-     0x0000, 0x0000, 0x8002, 0x0000,  0x0000, 0x8002, 0x0000, 0x0000,
-/*                                                                     */
-     0x0000, 0x0000, 0x0000, 0x0000,  0x0000, 0x0000, 0x0000, 0x0000,
-/*                                                                     */
-     0x0000, 0x0000, 0x0000, 0x0000,  0x0000, 0x0000, 0x0000, 0x0000,
-/*    space    !       "       #        $       %       &       '      */
-     0x8000, 0x0102, 0x0102, 0x0102,  0x0102, 0x0102, 0x0102, 0x0102,
-/*     (       )       *       +        ,       -       .       /      */
-     0x0100, 0x0101, 0x4020, 0x4000,  0x0102, 0x4000, 0x4010, 0x1000,
-/*     0       1       2       3        4       5       6       7      */
-     0x4840, 0x4840, 0x4840, 0x4840,  0x4840, 0x4840, 0x4840, 0x4840,
-/*     8       9       :       ;        <       =       >       ?      */
-     0x4800, 0x4800, 0x0102, 0x0102,  0x0400, 0x0102, 0x0401, 0x0102,
-/*     @       A       B       C        D       E       F       G      */
-     0x0102, 0x0800, 0x4830, 0x0800,  0x4834, 0x4810, 0x0800, 0x0800,
-/*     H       I       J       K        L       M       N       O      */
-     0x0800, 0x0800, 0x0800, 0x0800,  0x4832, 0x0800, 0x0800, 0x0800,
-/*     P       Q       R       S        T       U       V       W      */
-     0x0800, 0x0800, 0x0800, 0x4833,  0x0800, 0x0800, 0x0800, 0x4831,
-/*     X       Y       Z       [        \       ]       ^       _      */
-     0x0800, 0x0800, 0x0800, 0x0404,  0x1001, 0x0405, 0x0102, 0x0800,
-/*     `       a       b       c        d       e       f       g      */
-     0x0102, 0x0800, 0x4830, 0x0800,  0x4834, 0x4810, 0x0800, 0x0800,
-/*     h       i       j       k        l       m       n       o      */
-     0x0800, 0x0800, 0x0800, 0x0800,  0x4832, 0x0800, 0x0800, 0x0800,
-/*     p       q       r       s        t       u       v       w      */
-     0x0800, 0x0800, 0x0800, 0x4833,  0x0800, 0x0800, 0x0800, 0x4831,
-/*     x       y       z       {        |       }       ~              */
-     0x0800, 0x0800, 0x0800, 0x0402,  0x8001, 0x0403, 0x1102, 0x0000
-     };
-
 /* NOTE: the '~' enjoys some fortuitous encoding */
 
 /*--------------- temporary VM space management shared by scanner and
@@ -520,18 +454,4 @@ goto iterate;
 
 } /* of tokenizer */
 
-/*--------------------------------------------startupdir
- *  --- | (directory)
- *  returns the hardcoded path (hidden at bottom of vm)
- *  to the startup directory for the node
- */
-L op_startupdir(void)
-{    
-    extern B* startup_dir_frame;
-    
-    if (CEILopds < o2) return OPDS_OVF;
-    moveframe(startup_dir_frame, o1);
-    FREEopds = o2;
-    return OK;
-}
 

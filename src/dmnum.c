@@ -46,7 +46,7 @@ static W TYPEBYTES[] = { 1,2,4,4,8 };
    S and D type * values are the quiet Nan's (+-INF) of the IEEE standard.
 */
 
-/*----------------------- include: DMNUMINC.C */
+/*----------------------- include: DMNUMINC.H */
 #define Pi 3.141592653589793
 static D thearc(D x, D y)
 {
@@ -54,7 +54,7 @@ static D thearc(D x, D y)
     return (y > 0) ? phi : 2*Pi-phi;
 }
 
-#include "dmnuminc.c"
+#include "dmnuminc.h"
 
 /*---------------------------------------------------- DECODE */
 

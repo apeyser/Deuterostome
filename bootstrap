@@ -1,0 +1,4 @@
+#!/bin/sh -v
+
+#libtoolize "$@" -c --ltdl
+autoreconf "$@" -v --install

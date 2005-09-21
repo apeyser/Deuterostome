@@ -31,9 +31,6 @@
 #include <math.h>
 #include "dm.h"
 
-extern BOOLEAN timeout;
-extern BOOLEAN abortflag;
-
 /*--------------------------------------------------- gettime
    -- | time
 
@@ -330,7 +327,7 @@ rb3:
  
  nb = DALIGN(p - FREEvm);
  if (! GETNATIVEFORMAT(FREEvm) || ! GETNATIVEUNDEF(FREEvm)) return BAD_FMT;
- if (! GETNATIVEENDIAN(FREEvm) && (retc = deendian_frame(FREEvm) != OK))
+ if (! GETNATIVEENDIAN(FREEvm) && ((retc = deendian_frame(FREEvm)) != OK))
      return retc;
  if ((retc = unfoldobj(FREEvm,(L)FREEvm, GETNATIVE(FREEvm))) != OK) 
    return(retc);

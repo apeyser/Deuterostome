@@ -90,7 +90,9 @@ userdict /dvt known {/dvt} {/dnode} ifelse userdict /dnode_escape put
       /slow_blink /rapid_blink /negative]]
 ] make_colors
 
+/nocolors [] def
 /_color_fax {| (buffer) /l-index --> (buffer) /l-index
+  colors null eq {/colors nocolors def} if
   {
     string (\n) search {
       /substring name pop /string name

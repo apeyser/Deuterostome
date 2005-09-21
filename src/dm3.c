@@ -21,12 +21,6 @@
 #include <unistd.h>
 #include <string.h>
 
-/* the following ansi bs needs to be here not in dm.h */
-L init_sockaddr(struct sockaddr_in *name, const char *hostname, L port);
-
-extern BOOLEAN timeout;
-extern fd_set sock_fds;
-extern L recsocket;
 extern int h_errno;
 
 /*---------------------------- support -------------------------------------*/
@@ -55,11 +49,12 @@ L make_socket(L port)
 {
   L sock;
   struct sockaddr_in name;
+  memset(&name, 0, sizeof(struct sockaddr_in));
 
   sock = socket(PF_INET, SOCK_STREAM, 0);
   if (sock < 0) return(-1);
   name.sin_family = AF_INET;
-  name.sin_port = port;
+  name.sin_port = htons(port);
   name.sin_addr.s_addr = htonl(INADDR_ANY);
   if (bind(sock, (struct sockaddr *) &name, sizeof(name)) < 0)
     return(-1);
@@ -69,9 +64,10 @@ L make_socket(L port)
 /*--------------------------- initialize a socket address */
 
 L init_sockaddr(struct sockaddr_in *name, const char *hostname,
-		   L port)
+		L port)
 {
   struct hostent *hostinfo;
+  memset(name, 0, sizeof(struct sockaddr_in));
   name->sin_family = AF_INET;
   name->sin_port = htons((UW)port);
   hostinfo = gethostbyname(hostname);
@@ -275,8 +271,8 @@ L op_connect(void)
     return(retc);
   if (connect(sock, (struct sockaddr *)&serveraddr,sizeof(serveraddr)) < 0)
     return(-errno);
-   if (fcntl(sock, F_SETFL, O_NONBLOCK) == -1)   /* make non-blocking  */
-      error(EXIT_FAILURE, errno, "fcntl");
+  if (fcntl(sock, F_SETFL, O_NONBLOCK) == -1)   /* make non-blocking  */
+    error(EXIT_FAILURE, errno, "fcntl");
   FD_SET(sock, &sock_fds);                      /* register the socket */
   TAG(o_2) = NULLOBJ | SOCKETTYPE; ATTR(o_2) = 0;
   LONG_VAL(o_2) = sock;

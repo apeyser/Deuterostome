@@ -57,8 +57,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
-extern W ascii[];
-extern BOOLEAN numovf;
 
 /*---------------------------------------------------- checkFPU
      -- | bool
@@ -627,7 +625,8 @@ return(OK);
  - does not distinguish between system and dynamic operators
 */
 
-static L bind(B *pframe)
+// name bind conflicts with socket bind function, changed to dmbind
+static L dmbind(B *pframe)
 /*B *pframe;*/
 {
 L retc; B *frame, *xframe, *dframe, *dict;
@@ -637,7 +636,7 @@ frame = (B *)VALUE_BASE(pframe);
 while (frame < (B *)LIST_CEIL(pframe))
    { switch(CLASS(frame))
        {
-       case PROC: if ((retc = bind(frame)) != OK) return(retc); break;
+       case PROC: if ((retc = dmbind(frame)) != OK) return(retc); break;
        case NAME: if ((ATTR(frame) & ACTIVE) == 0) break;
                   dframe = FREEdicts - FRAMEBYTES; xframe = 0;
                   while ((dframe >= FLOORdicts) && (xframe == 0L))
@@ -659,7 +658,7 @@ L op_bind(void)
 {
 if (o_1 < FLOORopds) return(OPDS_UNF);
 if (CLASS(o_1) != PROC) return(OK);
-return(bind(o_1));
+return(dmbind(o_1));
 }
 
 /*------------------------------------------- class
@@ -806,7 +805,7 @@ return(OK);
 
 L op_ctype(void)
 {
-B s[16]; W type;
+B s[NAMEBYTES+1]; W type;
 
 if (o_2 < FLOORopds) return(OPDS_UNF);
 if (CLASS(o_1) != NAME) return(OPD_ERR);
@@ -837,7 +836,7 @@ return(OK);
 
 L op_parcel(void)
 {
-B s[16]; W type;
+B s[NAMEBYTES+1]; W type;
 L length, sadjust, badjust, nb;
 
 if (o_3 < FLOORopds) return(OPDS_UNF);
@@ -878,7 +877,7 @@ return(OK);
 
 L op_text(void)
 {
-B *src, *dest, code, sbuf[15];
+B *src, *dest, code, sbuf[NAMEBYTES+1];
 L index, val, length, width, start;
 
 if (o_4 < FLOORopds) return(OPDS_UNF);

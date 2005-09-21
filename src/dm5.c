@@ -263,7 +263,7 @@ switch(CLASS(x_2))
                     { FREEexecs = x_2; return(OK); }
                  if (o2 >= CEILopds) return(OPDS_OVF);
                  entry = (B *)DICT_CURR(x_2); 
-		 DICT_CURR(x_2) += ENTRYBYTES;
+								 DICT_CURR(x_2) += ENTRYBYTES;
                  moveframes(ASSOC_NAME(entry),o1,1L);
                  ATTR(o1) = 0;
                  moveframes(ASSOC_FRAME(entry),o2,1L);
@@ -418,8 +418,16 @@ if (o_2 < FLOORopds) return(OPDS_UNF);
 if (CLASS(o_2) == CLASS(o_1))
    { switch(CLASS(o_2))
       {
-      case MARK:
-      case NULLOBJ: t = TRUE; break;
+      case MARK: t=TRUE; break;
+      case NULLOBJ: 
+				if (TYPE(o_1) != TYPE(o_2)) {t = FALSE; break;};
+				switch (TYPE(o_1)) {
+				  case SOCKETTYPE: 
+						t = (LONG_VAL(o_1) == LONG_VAL(o_2)) ? TRUE : FALSE;
+						break;
+				  default: t=TRUE; break;
+				};
+				break;
       case NUM: t = COMPARE(o_2,o_1);
                 if (t == UN) { t = ((TEST(o_2) == UN) && (TEST(o_1) == UN));
                                break; }
@@ -462,8 +470,16 @@ if (o_2 < FLOORopds) return(OPDS_UNF);
 if (CLASS(o_2) == CLASS(o_1))
    { switch(CLASS(o_2))
       {
-      case MARK:
-      case NULLOBJ: t = FALSE; break;
+      case MARK: t=FALSE; break;
+      case NULLOBJ: 
+				if (TYPE(o_1) != TYPE(o_2)) {t = TRUE; break;};
+				switch (TYPE(o_1)) {
+				  case SOCKETTYPE:
+						t = (LONG_VAL(o_1) != LONG_VAL(o_2)) ? TRUE : FALSE;
+						break;
+				  default: t=FALSE; break;
+				};
+				break;
       case NUM: t = COMPARE(o_2,o_1);
                 if (t == UN) { t = ((TEST(o_2) != UN) || (TEST(o_1) != UN));
                                break; }

@@ -11,13 +11,11 @@
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <signal.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
 #include "dm.h"
+#include "dmx.h"
 
 L init_sockaddr(struct sockaddr_in *name, const char *hostname, L port);
 
@@ -25,56 +23,14 @@ L init_sockaddr(struct sockaddr_in *name, const char *hostname, L port);
 
 
 /*-------------------------- DM globals --------------------------------*/
-B locked = FALSE;
-
-B *FLOORopds;
-B *FREEopds;
-B* CEILopds;
-B* FLOORdicts;
-B* FREEdicts;
-B* CEILdicts;
-B* FLOORexecs;
-B* FREEexecs;
-B* CEILexecs;
-B* FLOORvm;
-B* FREEvm;
-B* CEILvm;
-B* TOPvm;
-B* errsource;
-
-extern B *sysop[];
-extern L C_errno;
-fd_set sock_fds;
-BOOLEAN timeout;             /* for I/O operations          */
-BOOLEAN abortflag;
-BOOLEAN numovf;             /* FPU overflow status            */
-BOOLEAN tinymemory;
-L recsocket;
-L consolesocket;
 
 /*-- setup: opds, execs, dicts, VM/MB, userdict */
 L tinysetup[5] = { 100, 50, 10, 1 , 100 };
 L setup[5];
-B *tinyDmemory, *Dmemory;
+B *tinyDmemory, *Dmemory = NULL;
 
 /*-- the X corner */
 
-typedef struct {           /* note this typedef is repeated in dm9.c */
-  XFontStruct *fontstruct;
-  B fontname[100];
-} cachedfont;
-
-Display *dvtdisplay;
-int xsocket;
-B displayname[80] = "";
-Screen *dvtscreen;
-Window dvtrootwindow;
-XWindowAttributes rootwindowattr;
-GC dvtgc;
-L ndvtwindows;
-L dvtwindows[MAXDVTWINDOWS];
-L ncachedfonts;
-cachedfont cachedfonts[MAXCACHEDFONTS];
 char* defaultdisplay = NULL;
 
 /*------------------------- for this module --------------------------*/
@@ -84,8 +40,8 @@ static BOOLEAN running;
 static B msf[FRAMEBYTES], cmsf[FRAMEBYTES];
 
 /*------------------------- include modules of dnode -------------------*/
-#include "dnode_0.c"
-#include "dnode_1.c"
+#include "dnode_0.h"
+#include "dnode_1.h"
 
 /*----------------------- supervisor tools -------------------------*/
 
@@ -107,27 +63,31 @@ signal(sig, SIGALRMhandler);
 
 /*---------- signal handler: SIGINT */
 
-static void SIGINThandler(int sig)
+static void SIGABRThandler(int sig)
 {
-abortflag = TRUE;
-signal(sig, SIGINThandler);
+    fprintf(stderr, "Aborting on SIGABORT\n");
+    abortflag = TRUE;
+    signal(sig, SIGABRThandler);
 }
 
 /*---------- singnal handler: quit's */
-static void quithandler(int sig __attribute__((unused))){
+static void quithandler(int sig) {
     int i;
+    fprintf(stderr, "Exiting dnode on signal: %i\n", sig);
+#if ! X_DISPLAY_MISSING
     if (dvtdisplay != NULL)
       {XCloseDisplay(dvtdisplay); displayname[0] = '\0';}
+#endif
     
     for (i = 0; i < FD_SETSIZE; i++)
-        if ((i != xsocket) && FD_ISSET(i, &sock_fds)) close(i);
+        if (FD_ISSET(i, &sock_fds) && (i != xsocket)) close(i);
     exit(EXIT_SUCCESS);
 }
 
 static void makequithandler(void) 
 {
     struct sigaction sa;
-    int quitsigs[] = {SIGHUP, SIGQUIT, SIGTERM, 0};
+    int quitsigs[] = {SIGHUP, SIGQUIT, SIGTERM, SIGINT, 0};
     int* i;
     
     sa.sa_handler = quithandler;
@@ -257,7 +217,6 @@ If the mouse has more than one button (up to 5), these are reported
 
 int main(L argc, B *argv[])
 {
-
 B errorframe[FRAMEBYTES];
 L nb, retc;
 L serversocket, nact, i, kr;
@@ -267,19 +226,27 @@ B hostname[256];
 struct timeval zerosec = {0,0}, zerosec_;   /* constant: zero time interval */
 struct timeval *iv;
 struct sockaddr clientname;
+#if ! X_DISPLAY_MISSING
 XEvent event;
+#endif
 L wid, mod;
 B namef[FRAMEBYTES], *dictf, namestring[20];
-BOOLEAN moreX = FALSE;
 
+#if X_DISPLAY_MISSING
+const
+#endif
+
+#if ! X_DISPLAY_MISSING
 dvtdisplay = NULL;
-xsocket = -1;
 defaultdisplay = getenv("DISPLAY");
+#endif
 
 /*------------------------ get host name */
 
 if (gethostname(hostname,255) == -1) error(EXIT_FAILURE,errno,"gethostname");
 if (! (original_dir = getcwd(NULL, 0))) error(EXIT_FAILURE,errno,"getcwd");
+
+
 
 /*------------------------ parse arguments */
 
@@ -315,11 +282,15 @@ signal(SIGPIPE, SIG_IGN);
 timeout = FALSE;
 signal(SIGALRM, SIGALRMhandler);
 
+
+// Switched the following to SIGABRT, produced by kill -ABRT
+// rather than control-c, that normally terminates the job
+//
 /* The interrupt signal is produced by the control-c key of the
    console keyboard, it triggers the execution of 'abort'
 */
  abortflag = FALSE;
- signal(SIGINT, SIGINThandler);
+ signal(SIGABRT, SIGABRThandler);
 
  makequithandler();
 
@@ -347,44 +318,9 @@ if (listen(serversocket,5) < 0) error(EXIT_FAILURE,errno,"listen");
 
 nb = FRAMEBYTES * (tinysetup[0] + tinysetup[1] + tinysetup[2])
   + tinysetup[3] * 1000000;
-tinyDmemory = (B *)malloc(nb+9);
+tinyDmemory = (B *)malloc(nb+FRAMEBYTES/2+1);
 if (tinyDmemory == 0) error(EXIT_FAILURE, 0, "not enough memory");
-makeDmemory(tinyDmemory,tinysetup);
-tinymemory = TRUE;
-
-/* NOTE: the VM is used two ways: (1) ordinary composite objects are
-   built bottom-up, incrementing FREEvm after new insertions;
-   (2) dictionaries of operators are built top-down, decrementing CEILvm
-   after each insertion (the first insertion is the dictionary of system
-   operators; external operator dictionaries follow below the system
-   operator dictionary). The upper VM thus forms a stack of operator
-   dictionaries that is needed by functions that decode errors arising
-   in external and internal operators.
-*/
-
- if ((sysdict = makeopdict((B*) sysop,syserrc, syserrm)) == (B*) -1L)
-     error(EXIT_FAILURE,0, "Cannot make system dictionary");
- 
-if ((userdict = makedict(tinysetup[4])) == (B *)(-1L))
-  error(EXIT_FAILURE,0,"Cannot make user dictionary");
-
-/* The first two dictionaries on the dicts are systemdict and userdict;
-   they are not removable
-*/
-
-moveframe (sysdict-FRAMEBYTES,FREEdicts); 
-FREEdicts += FRAMEBYTES;
-moveframe (userdict-FRAMEBYTES,FREEdicts); 
-FREEdicts += FRAMEBYTES;
-
-/* We carve out a message string buffer from the tiny VM */
-
- TAG(msf) = (ARRAY | BYTETYPE); ATTR(msf) = READONLY;
- if (FREEvm + 100000 + FRAMEBYTES > CEILvm) error(EXIT_FAILURE, 0,
-   "VM chosen too small");
- VALUE_BASE(msf) = (L)FREEvm + FRAMEBYTES; ARRAY_SIZE(msf) = 100000;
- moveframe(msf,FREEvm); FREEvm += FRAMEBYTES + DALIGN(100000);
- moveframe(msf,cmsf);
+maketinysetup();
 
 /*----------------- construct frames for use in execution of D code */
 
@@ -411,28 +347,45 @@ theloop:             /* in each pass, we take an activity snapshot */
 
 sel1:
 read_fds = sock_fds;
+#if ! X_DISPLAY_MISSING
 if (dvtdisplay != NULL && ! moreX) {
     XFlush(dvtdisplay);
     moreX = QLength(dvtdisplay);
-} 
+}
+#endif 
 if (moreX || running) {zerosec_ = zerosec; iv = &zerosec_;}
 else iv = NULL; // Use ConnectionNumber instead of timeouts
  
 if ((nact = select(FD_SETSIZE, &read_fds, NULL, NULL, iv)) < 0) 
    {if (errno == EINTR) goto sel1; else error(EXIT_FAILURE, errno, "select");}
- 
+
+#if ! X_DISPLAY_MISSING 
 if (dvtdisplay != NULL && FD_ISSET(xsocket, &read_fds)) {
     moreX = TRUE;
     FD_CLR(xsocket, &read_fds);
     nact--;
 }
+#endif
  
 if (nact != 0) goto nextmsg;
  
+#if ! X_DISPLAY_MISSING
 if (moreX) {
   XNextEvent(dvtdisplay, &event);
   moreX = QLength(dvtdisplay) ? TRUE : FALSE;
   switch(event.type) {
+	  case ClientMessage:
+			if ((event.xclient.message_type 
+					 == XInternAtom(dvtdisplay, "WM_PROTOCOLS", False))
+					&& (event.xclient.data.l[0] 
+							== XInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False))) {
+				if (x2 > CEILexecs) {retc = EXECS_OVF; goto Xderror;}
+				makename("Xdisconnect", x1); ATTR(x1) = ACTIVE;
+				FREEexecs = x2;
+				running = TRUE;
+			}
+			goto tuwat;
+
     case ConfigureNotify: wid = event.xconfigure.window;
       snprintf(namestring, sizeof(namestring), "w%d", wid);
       makename(namestring, namef); ATTR(namef) = ACTIVE;
@@ -471,7 +424,7 @@ if (moreX) {
       makename(namestring, namef); ATTR(namef) = ACTIVE;
       userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
       if ((dictf = lookup(namef, userdict)) == 0L) 
-	{ retc = UNDF; goto Xderror; }
+				{ retc = UNDF; goto Xderror; }
       moveframe(dictf, FREEdicts); FREEdicts += FRAMEBYTES;
       makename("mouseclick",x1); ATTR(x1) = ACTIVE; FREEexecs = x2;
       TAG(o1) = (NUM | LONGTYPE); ATTR(o1) = 0;
@@ -484,18 +437,14 @@ if (moreX) {
       running = TRUE; goto tuwat;
   }
 } 
+#endif
  
 if (running) goto tuwat; else goto theloop;
 
 /*--- look first for a connection request and service it */
 nextmsg:
- if (FD_ISSET(serversocket, &read_fds))
-   {
-#ifdef OSX
-     int size;
-#else
-     size_t size;
-#endif
+ if (FD_ISSET(serversocket, &read_fds)) {
+   socklen_t size;
    L new; L psize;
    size = sizeof(clientname);
    new = accept(serversocket, &clientname, &size);
@@ -524,17 +473,26 @@ for (i=0; i < FD_SETSIZE; i++)  /* we go up to a full period, round robin */
       recsocket = kr;
       switch(retc = fromsocket(kr, cmsf))
       {
-      case DONE:   close(kr); FD_CLR(kr, &sock_fds); 
-                   goto tuwat;
-      case OK: if (x1 >= CEILexecs) goto execsovfl;
-	moveframe(o_1,x1); ATTR(x1) = ACTIVE;
+      case DONE:
+				close(kr); FD_CLR(kr, &sock_fds); 
+				goto tuwat;
+
+      case OK: 
+				if (x1 >= CEILexecs) goto execsovfl;
+				moveframe(o_1,x1); ATTR(x1) = ACTIVE;
         FREEexecs = x2;
         VALUE_BASE(cmsf) += (L)DALIGN(ARRAY_SIZE(o_1));
-	ARRAY_SIZE(cmsf) -= (L)DALIGN(ARRAY_SIZE(o_1));
+				ARRAY_SIZE(cmsf) -= (L)DALIGN(ARRAY_SIZE(o_1));
         FREEopds = o_1;
-	kr++; running = TRUE; goto tuwat;
-      default:     close(kr); FD_CLR(kr, &sock_fds);
-	errsource = "socketservice"; goto derror;
+				kr++; 
+				running = TRUE; 
+				goto tuwat;
+
+      default:
+				close(kr); 
+				FD_CLR(kr, &sock_fds);
+				errsource = "socketservice"; 
+				goto derror;
       }
     }
    kr++; if (kr >= FD_SETSIZE) kr = 0; 
@@ -546,12 +504,24 @@ if (!running) goto theloop;
 more:
 switch(retc = exec(100))
 {
- case MORE:   if (locked) goto more; else goto theloop;
- case DONE:   running = FALSE; locked = FALSE;
-     //if (dvtdisplay != NULL) ivcount = 0;
-   if (FREEexecs == FLOORexecs) moveframe(msf,cmsf);
-   goto theloop;
- default: goto derror;
+ case MORE: 
+	 if (locked) goto more; else goto theloop;
+
+ case DONE: running = FALSE; locked = FALSE;
+	          if (FREEexecs == FLOORexecs) moveframe(msf,cmsf);
+						goto theloop;
+
+ case KILL_SOCKS: 
+	 running = FALSE; locked = FALSE;
+	 op_Xdisconnect();
+	 for (i = 0; i < FD_SETSIZE; ++i)
+		 if (FD_ISSET(i, &sock_fds) && (i != serversocket)) {
+			 FD_CLR(i, &sock_fds);
+			 close(i);
+		 }
+	 goto sel1;
+
+ default:   goto derror;
 }
 
 /*------------------------------------ report an error */
@@ -576,8 +546,6 @@ derror:
    and push active name 'error' on execution stack
 */
 locked = FALSE;
-if (retc == OPDS_OVF) FREEopds = FLOORopds;
-if (retc == EXECS_OVF) FREEexecs = FLOORexecs;
 if (o4 >= CEILopds) FREEopds = FLOORopds;
 if (x1 >= CEILexecs) FREEexecs = FLOORexecs;
 TAG(o1) = ARRAY | BYTETYPE; ATTR(o1) = READONLY;
