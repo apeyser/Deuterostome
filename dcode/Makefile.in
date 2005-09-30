@@ -212,7 +212,9 @@ dist_dmstart_DATA = color.d dvt_macros.d master.d sched.d startup_dnode.d \
 nodist_dmstart_DATA = theeye.d
 EXTRA_DIST = theeye.d.in
 CLEANFILES = $(nodist_dmstart_DATA)
-edit = sed -e 's,[@]pkglibdir[@],$(pkglibdir),g'
+edit = sed -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
+						-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g'
+
 all: all-am
 
 .SUFFIXES:
@@ -419,7 +421,7 @@ uninstall-am: uninstall-dist_dmstartDATA uninstall-info-am \
 	uninstall-nodist_dmstartDATA
 
 
-theeye.d: Makefile $(srcdir)/theeye.d.in
+theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/theeye.d.in >$@.tmp
 	mv $@.tmp $@

@@ -27,7 +27,8 @@ B* ll_export[] = {
 	"writeproc", (B*) op_writeproc,
 	"readproc", (B*) op_readproc,
 	"killproc", (B*) op_killproc,
-	"waitproc", (B*) op_waitproc
+	"waitproc", (B*) op_waitproc,
+	"", NULL
 };
 
 #define DECLARE_ALARM \

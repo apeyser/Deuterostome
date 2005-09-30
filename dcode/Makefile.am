@@ -4,9 +4,10 @@ nodist_dmstart_DATA =  theeye.d
 EXTRA_DIST = theeye.d.in
 CLEANFILES = $(nodist_dmstart_DATA)
 
-edit = sed -e 's,[@]pkglibdir[@],$(pkglibdir),g'
+edit = sed -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
+						-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g'
 
-theeye.d: Makefile $(srcdir)/theeye.d.in
+theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/theeye.d.in >$@.tmp
 	mv $@.tmp $@
