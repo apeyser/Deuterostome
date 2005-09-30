@@ -229,7 +229,7 @@ L syserrc[] =
     CORR_OP, BADBOX, BAD_MSG, NOSYSTEM, INV_MSG, NOT_HOST, BAD_FMT,
     LIB_LOAD, LIB_EXPORT, LIB_LINK, LIB_ADD, LIB_LOADED, LIB_OVF, LIB_MERGE,
     NO_XWINDOWS, X_ERR, X_BADFONT, X_BADHOST,
-		VMR_ERR, VMR_STATE,
+		VMR_ERR, VMR_STATE, ILL_HANDLE,
     0L,
 };
 
@@ -286,7 +286,8 @@ B* syserrm[] =
     "** Bad X windows font",
     "** Cannot connect to X server",
 		"** Cannot allocate D memory",
-		"** Memory already minimized"
+		"** Memory already minimized",
+		"** Handle type mismatch"
 };
 
 // original directory for vmresize

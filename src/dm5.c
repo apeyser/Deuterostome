@@ -425,6 +425,9 @@ if (CLASS(o_2) == CLASS(o_1))
 				  case SOCKETTYPE: 
 						t = (LONG_VAL(o_1) == LONG_VAL(o_2)) ? TRUE : FALSE;
 						break;
+					case HANDLETYPE:
+						t = (HANDLE_ID(o_1) == HANDLE_ID(o_2))
+							&& (LONG_VAL(o_1) == LONG_VAL(o_2)) ? TRUE : FALSE;
 				  default: t=TRUE; break;
 				};
 				break;
@@ -477,6 +480,9 @@ if (CLASS(o_2) == CLASS(o_1))
 				  case SOCKETTYPE:
 						t = (LONG_VAL(o_1) != LONG_VAL(o_2)) ? TRUE : FALSE;
 						break;
+					case HANDLETYPE:
+						t = (HANDLE_ID(o_1) != HANDLE_ID(o_2))
+							|| (LONG_VAL(o_1) != LONG_VAL(o_2)) ? TRUE : FALSE;
 				  default: t=FALSE; break;
 				};
 				break;

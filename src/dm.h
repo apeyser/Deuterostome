@@ -141,12 +141,13 @@ NOTE: all objects that can populate the D machine's workspace must
 	
 #define COMPOSITE(frame)           ((UB)(CLASS(frame)) > (UB)(MARK))
 
-#define BYTETYPE                   ((UB) 0x00)       /* numeral types */     
+#define BYTETYPE                   ((UB) 0x00)       /* numeral types */
 #define WORDTYPE                   ((UB) 0x01)
 #define LONGTYPE                   ((UB) 0x02)
 #define SINGLETYPE                 ((UB) 0x03)
 #define DOUBLETYPE                 ((UB) 0x04)      
 #define SOCKETTYPE                 ((UB) 0x01)      /* null types */
+#define HANDLETYPE                 ((UB) 0x02)
 #define CMACHINE                   ((UB) 0x00)      /* operator types */
 #define OPLIBTYPE                  ((UB) 0x01)      /* operator lib type */
 
@@ -215,7 +216,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define BOOL_VAL(frame)            (*((BOOLEAN *)((frame)+2)))
 #define NAME_KEY(frame)            (*((W *)((frame)+2)))
 
-#define OP_CODE(frame)             (*((L *)(((B*)frame)+4)))
+#define OP_CODE(frame)             (*((L *)(((B*)(frame))+4)))
 #define OP_NAME(frame)             (*((L *)(((B*)(frame))+8)))
 #define VALUE_BASE(frame)          (*((L *)(((B*)(frame))+4)))
 #define ARRAY_SIZE(frame)          (*((L *)(((B*)(frame))+8)))
@@ -224,6 +225,9 @@ NOTE: all objects that can populate the D machine's workspace must
 #define DICT_CURR(frame)           (*((L *)(((B*)(frame))+8)))
 #define BOX_NB(frame)              (*((L *)(((B*)(frame))+8)))
 #define VALUE_PTR(frame)           (*((B**) (((B*)(frame))+4)))
+#define HANDLE_ID(frame)           (*((B*)(((B*)(frame))+3)))
+#define LONG_VAL2(frame)           (*((L *)(((B*)(frame))+8)))
+#define LONG_VAL3(frame)           (*((L *)(((B*)(frame))+12)))
 
 /* NB: Attention to moveframe & moveframes in dm2.c whenever
    framebytes is changed */
@@ -300,9 +304,11 @@ NOTE: all objects that can populate the D machine's workspace must
 #define SAVE_OVF    0x0000020AL /* save stack overflow                   */
 #define INV_REST    0x0000020BL /* invalid restore                       */
 #define SAVE_UNF    0x0000020DL /* save stack underflow                  */
-#define VMR_ERR     0x0000020EL /* couldn't allocate memory              */
-#define VMR_STATE   0x0000020FL /* vm already tiny                       */
-#define KILL_SOCKS  0x00000210L /* dvt must kill all non-server socks    */
+#define ILL_HANDLE  0x0000020EL /* handle type mismatch                  */
+
+#define VMR_ERR     0x00000210L /* couldn't allocate memory              */
+#define VMR_STATE   0x00000211L /* vm already tiny                       */
+#define KILL_SOCKS  0x00000212L /* dvt must kill all non-server socks    */
 
 #define BAD_TOK     0x00000300L /* bad D token in source string          */
 #define BAD_ASC     0x00000301L /* bad ASCII character in source string  */

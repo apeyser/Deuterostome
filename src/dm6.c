@@ -690,7 +690,7 @@ return(OK);
 
 /*------------------------------------------- type
    object | /type (upper-case, one-letter code)
-   NULLOBJ | /T (socket) or /N (none)
+   NULLOBJ | /T (socket) or /N (none) or /? (depending on handle type)
    BOX     | /M (mclib) or  /N (none)
    DICT    | /O (oplibtype) or /N (none)
 */
@@ -703,9 +703,12 @@ if (o_1 < FLOORopds) return(OPDS_UNF);
 
 switch (CLASS(o_1)) {
     case NULLOBJ:
-        if (TYPE(o_1) == SOCKETTYPE) *c = 'T';
-        else *c = 'N';
-        break;
+			switch (TYPE(o_1)) {
+				case SOCKETTYPE: *c = 'T'; break;
+				case HANDLETYPE: *c = HANDLE_ID(o_1); break;
+				default: *c = 'N'; break;
+			};
+			break;
     case BOX:
         *c = 'N';
         break;

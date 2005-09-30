@@ -60,6 +60,9 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* The size of a `pid_t', as computed by sizeof. */
+#undef SIZEOF_PID_T
+
 /* The size of a `time_t', as computed by sizeof. */
 #undef SIZEOF_TIME_T
 

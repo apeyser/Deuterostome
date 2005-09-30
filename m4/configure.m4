@@ -194,7 +194,13 @@ dnl
 AC_DEFUN([CF_AM_ENABLE], [dnl
 	if test x"$enable_$1" = x ; then enable_$1='$3'; fi
   AC_ARG_ENABLE([$1], [  --enable-$1     $2 ($3)])
-	AM_CONDITIONAL([$1], [test x"$enable_$1" = x"yes"])dnl
+	AM_CONDITIONAL([ENABLE_$1], [test x"$enable_$1" = x"yes"])dnl
+])
+
+AC_DEFUN([CF_IF_ENABLED], [dnl
+  if test x"$enable_$1" = x"yes" ; then 
+	  $2
+	fi dnl
 ])
 
 AC_DEFUN([CF_AM_PROG], [dnl
