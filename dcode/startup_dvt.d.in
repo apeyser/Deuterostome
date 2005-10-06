@@ -1541,6 +1541,11 @@ end
   mB 3 eq mM 0 eq and or
 } bind def
 
+/meta1_plain4or5 {
+  mB 1 eq            mM 8 eq and
+  mB 4 eq mB 5 eq or mM 0 eq and or
+} bind def
+
 /mouseclick { 
     { [ 4 1 roll busy { stop } if  | stopped and reentry lock
       /busy true def
@@ -1552,6 +1557,13 @@ end
       plain1 { /kbdowner knode def c_ stop } if
       shift1_plain2 { false nodelist knode get 3 put c_ stop } if
       ctrl1_plain3 { node 4 get _t stop } if
+      meta1_plain4or5 {
+        knode 0 eq {null true mapwindow} {
+          node 3 get not {
+            node 2 get (Xwindows {null true mapwindow} if) send
+          } if
+        } ifelse
+      } if
     } stopped cleartomark /busy false def
   end 
 } bind def
@@ -1755,7 +1767,7 @@ end userdict /macros put
 | wraps the object in an abort, and puts
 | opstack in userdict->[d_opstack]
 | dictstack in userdict->[d_dictstack]
-| execstack in userdict->[d_execstack]
+| execstack in userdict->[d_execstac]
 | in case of an abort
 | call s_debug_abort to do this without wrapping debug_aborted
 | and e_debug_abort to end that regime
@@ -1834,7 +1846,6 @@ end userdict /macros put
   } for pop
 } bind def
 
-  
 
 |----------------------------- start the dvt ------------------------------
 | A 'save' representing a clean dvt is associated with the name cleanDVT in
@@ -1854,6 +1865,10 @@ Xwindows {
       0 exch getinterval mkact exec put
   /busy false def
   wid true mapwindow  
+  wid true makewindowtop
 } if
 
+(Starting...\n) toconsole
+(Home: ) toconsole gethomedir toconsole (\n) toconsole
+(Startup: ) toconsole getstartupdir toconsole (\n) toconsole  
 supervisor   | we never return

@@ -28,7 +28,10 @@ char libPLUGIN_is_dll(void) {return 1;}
 
 #define EXPORTNAME(name) PLUGIN_JOIN(PLUGIN_NAME, _LTX_##name)
 
-#define PRIVATENAME(name) PLUGIN_JOIN(_, PLUGIN_JOIN(PLUGIN_NAME,_##name))
+#define PRIVATEPLUGIN PLUGIN_JOIN(_, PLUGIN_NAME)
+
+//#define PRIVATENAME(name) PLUGIN_JOIN(_, PLUGIN_JOIN(PLUGIN_NAME,_##name))
+#define PRIVATENAME(name) PLUGIN_JOIN(PRIVATEPLUGIN,_##name)
 
 #define PLUGIN_JOIN(name1,name2) PREPLUGIN_JOIN(name1,name2)
 #define PREPLUGIN_JOIN(name1,name2) name1##name2
@@ -38,9 +41,6 @@ PLUGIN_SCOPE L ll_errc[];
 PLUGIN_SCOPE B* ll_errm[];
 PLUGIN_SCOPE B* ll_export[];
 
-L op_hi(void);
-L op_libnum(void);
-
 #define RETURN_ERROR(err) return (ll_type | (err))
 
 #define ll_type   EXPORTNAME(ll_type)
@@ -49,5 +49,14 @@ L op_libnum(void);
 #define ll_export EXPORTNAME(ll_export)
 #define op_hi     EXPORTNAME(op_hi)
 #define op_libnum EXPORTNAME(op_libnum)
+#define op_INIT_  EXPORTNAME(op_INIT_)
+#define op_FINI_  EXPORTNAME(op_FINI_)
+
+L op_hi(void);
+L op_libnum(void);
+L op_INIT_(void);
+L op_FINI_(void);
+
+
 
 #endif //PLUGIN_H

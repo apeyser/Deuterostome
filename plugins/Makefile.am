@@ -5,10 +5,14 @@ AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 INCLUDE = @INCLTDL@ 
 LIBS += $(LTLIBOBJS) $(top_builddir)/src/libdmglobals.la
 
-pkglib_LTLIBRARIES = test.la test2.la process.la
+if ENABLE_process
+PROCESS_LIB=process.la
+process_la_SOURCES = process.c process.h
+endif ENABLE_process
+
+pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la
 
 test_la_SOURCES = test.c test.h
 test2_la_SOURCES = test2.c test2.h
-process_la_SOURCES = process.c process.h
-
+throw_la_SOURCES = throw.c throw.h
 

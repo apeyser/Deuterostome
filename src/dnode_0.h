@@ -11,6 +11,7 @@ B *sysop[] =
 {
       "getlock",     (B*) op_getlock, 
       "setlock",     (B*) op_setlock,
+			"lock",        (B*) op_lock,
       
 /*-- hi */
       "hi",            (B*) op_syshi,
@@ -58,6 +59,7 @@ B *sysop[] =
       "drawsymbols",    (B *)op_drawsymbols,
       "fillrectangle",  (B *)op_fillrectangle,
       "drawtext",       (B *)op_drawtext,
+			"makewindowtop",  (B *)op_makewindowtop,
 
 /*-- operand stack */
       "pop",            (B *)op_pop,
@@ -148,6 +150,7 @@ B *sysop[] =
       "bitshift",       (B *)op_bitshift,
 /*-- conversion, string, attribute, class ,type */
       "class",          (B *)op_class,
+			"handleid",       (B *)op_handleid,
       "type",           (B *)op_type,
       "readonly",       (B *)op_readonly,
       "active",         (B *)op_active,
@@ -281,6 +284,7 @@ B* syserrm[] =
     "** Library already loaded",
     "** Overflow in malloc while loading library",
     "** Unable to merge library into sysdict",
+		"** Unable to initialize loaded library",
     "** X windows unavailable",
     "** Error in X windows",
     "** Bad X windows font",

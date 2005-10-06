@@ -4,34 +4,50 @@
 #define PLUGIN_NAME process
 #include "../src/plugin.h"
 
-#define op_makeproc  EXPORTNAME(op_makeproc)
-#define op_writeproc EXPORTNAME(op_writeproc)
-#define op_readproc  EXPORTNAME(op_readproc)
-#define op_waitproc  EXPORTNAME(op_waitproc)
+#define op_makeproc   EXPORTNAME(op_makeproc)
+#define op_writeproc  EXPORTNAME(op_writeproc)
+#define op_killproc   EXPORTNAME(op_killproc)
+#define op_liveproc   EXPORTNAME(op_liveproc)
+#define op_readproc   EXPORTNAME(op_readproc)
+#define op_waitproc   EXPORTNAME(op_waitproc)
+#define op_unwaitproc EXPORTNAME(op_unwaitproc)
 
-// [(program) (argument)...] or (program) | null-handle
+// [(program) (argument)...] or (program) | handle
 L op_makeproc(void);
 
-// (string) null-handle | --
+// (string) handle | --
 L op_writeproc(void);
 
-// (buffer) index * or length null-handle | (buffer) index
+// (buffer) index * or length handle | (buffer) index
 L op_readproc(void);
 
-// null-handle | --
+// handle | --
 L op_killproc(void);
 
-// null-handle | true or return-code false
+// handle | true or return-code false
 L op_liveproc(void);
 
-// null-handle | --
+// handle | --
 L op_waitproc(void);
 
-#define PROCESS_HANDLE 'P'
+// handle | --
+L op_unwaitproc(void);
+
+#define PROCESS_HANDLE "PROC"
 #define PROC_ARGS 0x01L //argument types are not strings
 #define PROC_WAIT 0x02L //missed waitproc
 #define PROC_SIZE 0x03L //argument length must be >0
 #define PROC_SIG  0x04L //error setting signal handler
 #define PROC_EOF  0x05L //unexpected eof
+#define PROC_DEAD 0x06L //Process is dead
+
+#define PROCESS_PID(frame)    (*(pid_t*)VALUE_PTR(frame))
+#define PROCESS_STDIN(frame)  (*(int*)(VALUE_PTR(frame)+4))
+#define PROCESS_STDOUT(frame) (*(int*)(VALUE_PTR(frame)+8))
+#define PROCESS_STATE(frame)  (*(B*)(VALUE_PTR(frame)+12))
+#define PROCESS_BUFFC(frame)  (*(B*)(VALUE_PTR(frame)+13))
+
+#define PROCESS_BUFFD 1
+#define PROCESS_DEAD  2
 
 #endif

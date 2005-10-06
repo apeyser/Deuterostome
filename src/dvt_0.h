@@ -33,6 +33,7 @@ B *sysop[] =
       "drawsymbols",    (B *)op_drawsymbols,
       "fillrectangle",  (B *)op_fillrectangle,
       "drawtext",       (B *)op_drawtext,
+			"makewindowtop",  (B *)op_makewindowtop,
 /*-- operand stack */
       "pop",            (B *)op_pop,
       "exch",           (B *)op_exch,
@@ -252,6 +253,6 @@ B *syserrm[] =
      "** Error in X windows",
      "** Bad X windows font",
      "** Cannot connect to X server",
-		"** Handle type mismatch"
+		 "** Handle type mismatch"
      };
 

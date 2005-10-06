@@ -269,12 +269,13 @@ L op_makewindow()
 	return NO_XWINDOWS;
 #else
   static XClassHint classhint = {"d_machine", "d_machine"};
+	static XWMHints xwmhints = {InputHint, False};
+	static Atom atom[2];
   L retc; W *pxy;
   B *xyf, *freevm, nstr[31], icstr[13],
     *pn[1] = { nstr }, *pic[1] = { icstr };
   XSetWindowAttributes attr;
   XTextProperty wname, icname;
-	Atom atom;
 
   if (dvtdisplay == NULL) return(NO_XWINDOWS);
   attr.event_mask = ButtonPressMask | ExposureMask |
@@ -309,8 +310,10 @@ L op_makewindow()
   XSetWMName(dvtdisplay,wid,&wname);
   XSetWMIconName(dvtdisplay,wid,&icname);
   XSetClassHint(dvtdisplay,wid,&classhint);
-	atom = XInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False);
-	XSetWMProtocols(dvtdisplay, wid, &atom, 1);
+	atom[0] = XInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False);
+	atom[1] = XInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False);
+	XSetWMProtocols(dvtdisplay, wid, atom, 2);
+	XSetWMHints(dvtdisplay, wid, &xwmhints);
   dvtwindows[ndvtwindows++] = wid;
   TAG(o1) = NUM | LONGTYPE; ATTR(o1) = 0;
   LONG_VAL(o1) = wid;
@@ -318,6 +321,48 @@ L op_makewindow()
   return(OK);    
 #endif
 }
+
+/*------------------------------------------------ topwindow
+ * 
+ * window# true | --
+ *
+ * make window float above other iff true
+ */
+L op_makewindowtop(void) {
+#if X_DISPLAY_MISSING
+	return NO_XWINDOWS;
+#else
+	L k;
+	XEvent event;
+
+	if (dvtdisplay == NULL) return NO_XWINDOWS;
+	if (o_2 < FLOORopds) return OPDS_UNF;
+	if (CLASS(o_1) != BOOL || CLASS(o_2) != NUM) return OPD_CLA;
+	if (!VALUE(o_2, &wid)) return UNDF_VAL;
+
+	FREEopds = o_2;
+	for (k = 0; k < ndvtwindows && dvtwindows[k] != wid; k++);
+	if (k == ndvtwindows) return OK;
+
+	event.xclient.type = ClientMessage;
+	event.xclient.display = dvtdisplay;
+	event.xclient.window = wid;
+	event.xclient.message_type 
+		= XInternAtom(dvtdisplay, "_NET_WM_STATE", False);
+	event.xclient.format = 32;
+	event.xclient.data.l[0] = (BOOL_VAL(o2) ? 1 : 0);
+	event.xclient.data.l[1] 
+		= XInternAtom(dvtdisplay, "_NET_WM_STATE_ABOVE", False);
+	event.xclient.data.l[2] = 0;
+	event.xclient.data.l[3] = 2;
+	event.xclient.data.l[4] = 0;
+	XSendEvent(dvtdisplay, XRootWindowOfScreen(dvtscreen),
+						 False, (SubstructureNotifyMask|SubstructureRedirectMask),
+						 &event);
+	return OK;
+#endif
+}
+	
 
 /*------------------------------------------------ deletewindow
 
@@ -351,12 +396,34 @@ L op_deletewindow()
 
 /*------------------------------------------------ mapwindow
 
-   window# bool | --
+   <window#|null> bool | --
 
    - true: shows the window as the top window on the screen 
    - false: hides the window
    - does nothing if window does not exist 
+	 - if window# == null then map and raise or unmap all windows.
 */
+#if ! X_DISPLAY_MISSING
+void mapraisewindow(L win) {
+	XEvent event;
+/* 	XWindowChanges changes; */
+	XMapRaised(dvtdisplay, win);
+	event.xclient.type = ClientMessage;
+	event.xclient.display = dvtdisplay;
+	event.xclient.window = win;
+	event.xclient.message_type 
+		= XInternAtom(dvtdisplay, "_NET_ACTIVE_WINDOW", False);
+	event.xclient.format = 32;
+	event.xclient.data.l[0] = 2;
+	event.xclient.data.l[1] = time(NULL);
+	event.xclient.data.l[2] = 0;
+	event.xclient.data.l[3] = 0;
+	event.xclient.data.l[4] = 0;
+	XSendEvent(dvtdisplay, XRootWindowOfScreen(dvtscreen), 
+						 False, (SubstructureNotifyMask|SubstructureRedirectMask), 
+						 &event);
+}
+#endif //! X_DISPLAY_MISSING
 
 L op_mapwindow()
 {
@@ -366,19 +433,30 @@ L op_mapwindow()
   L k;
   if (dvtdisplay == NULL) return(NO_XWINDOWS);
   if (o_2 < FLOORopds) return(OPDS_UNF);
-  if (CLASS(o_2) != NUM) return(OPD_CLA);
-  if (!VALUE(o_2,&wid)) return(UNDF_VAL);
   if (CLASS(o_1) != BOOL) return(OPD_CLA);
-  k = 0;
-  while (1) { if (k >= ndvtwindows) { FREEopds = o_2; return(OK); }
-              if (dvtwindows[k] == wid) break; k++;
-            }
-  if (BOOL_VAL(o_1))
-    XMapRaised(dvtdisplay,wid);
-  else
-    XUnmapWindow(dvtdisplay,wid);
-  FREEopds = o_2;
-  return(OK);
+
+	switch (CLASS(o_2)) {
+		case NULLOBJ:
+			for (k = 0; k < ndvtwindows; k++)
+				if (BOOL_VAL(o_1)) mapraisewindow(dvtwindows[k]);
+				else XUnmapWindow(dvtdisplay, dvtwindows[k]);
+			break;
+
+		case NUM:
+			if (!VALUE(o_2,&wid)) return UNDF_VAL;
+			for (k = 0; k < ndvtwindows && dvtwindows[k] != wid; k++);
+			if (k == ndvtwindows) break;
+
+			if (BOOL_VAL(o_1)) mapraisewindow(wid);
+			else XUnmapWindow(dvtdisplay,wid);
+			break;
+
+		default:
+			return(OPD_CLA);
+	};
+
+	FREEopds = o_2;
+	return OK;
 #endif
 }
 

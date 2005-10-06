@@ -232,9 +232,9 @@ XEvent event;
 L wid, mod;
 B namef[FRAMEBYTES], *dictf, namestring[20];
 
-#if X_DISPLAY_MISSING
-const
-#endif
+//#if X_DISPLAY_MISSING
+//const 
+//#endif
 
 #if ! X_DISPLAY_MISSING
 dvtdisplay = NULL;
@@ -394,14 +394,17 @@ if (moreX) {
         { retc = UNDF; goto Xderror; }
       if (FREEdicts >= CEILdicts) { retc = DICTS_OVF; goto Xderror; }
       if (x1 >= CEILexecs) { retc = EXECS_OVF; goto Xderror; }
-      if (o2 >= CEILopds) { retc = OPDS_OVF; goto Xderror; }
+      if (o3 >= CEILopds) { retc = OPDS_OVF; goto Xderror; }
       moveframe(dictf, FREEdicts); FREEdicts += FRAMEBYTES;
-      makename("windowsize",x1); ATTR(x1) = ACTIVE; FREEexecs = x2;
       TAG(o1) = (NUM | LONGTYPE); ATTR(o1) = 0;
       LONG_VAL(o1) = event.xconfigure.width;
       TAG(o2) = (NUM | LONGTYPE); ATTR(o2) = 0;
       LONG_VAL(o2) = event.xconfigure.height;       
-      FREEopds = o3;
+      makename("windowsize",o3); ATTR(o3) = ACTIVE; 
+      FREEopds = o4;
+			TAG(x1) = OP; ATTR(x1) = ACTIVE;
+			OP_NAME(x1) = (L) "lock"; OP_CODE(x1) = (L) op_lock;
+			FREEexecs = x2;
       running = TRUE; goto tuwat;
     case Expose: if (event.xexpose.count != 0) break;
       wid = event.xexpose.window;
@@ -411,29 +414,37 @@ if (moreX) {
       if ((dictf = lookup(namef, userdict)) == 0L) 
         { retc = UNDF; goto Xderror; }
       if (FREEdicts >= CEILdicts) { retc = DICTS_OVF; goto Xderror; }
+			if (o1 >= CEILopds) {retc = OPDS_OVF; goto Xderror;}
       if (x1 >= CEILexecs) { retc = EXECS_OVF; goto Xderror; }
       moveframe(dictf, FREEdicts); FREEdicts += FRAMEBYTES;
-      makename("drawwindow",x1); ATTR(x1) = ACTIVE; FREEexecs = x2;
+      makename("drawwindow",o1); ATTR(o1) = ACTIVE; 
+			FREEopds = o2;
+			TAG(x1) = OP; ATTR(x1) = ACTIVE;
+			OP_NAME(x1) = (L) "lock"; OP_CODE(x1) = (L) op_lock;
+			FREEexecs = x2;
       running = TRUE; goto tuwat;
     case ButtonPress: wid = event.xbutton.window;
       mod = (event.xbutton.state & 0xFF) | (event.xbutton.button << 16);
       if (FREEdicts >= CEILdicts) { retc = DICTS_OVF; goto Xderror; }
       if (x1 >= CEILexecs) { retc = EXECS_OVF; goto Xderror; }
-      if (o3 >= CEILopds) { retc = OPDS_OVF; goto Xderror; }
+      if (o4 >= CEILopds) { retc = OPDS_OVF; goto Xderror; }
       snprintf(namestring, sizeof(namestring), "w%d", wid);
       makename(namestring, namef); ATTR(namef) = ACTIVE;
       userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
       if ((dictf = lookup(namef, userdict)) == 0L) 
 				{ retc = UNDF; goto Xderror; }
       moveframe(dictf, FREEdicts); FREEdicts += FRAMEBYTES;
-      makename("mouseclick",x1); ATTR(x1) = ACTIVE; FREEexecs = x2;
       TAG(o1) = (NUM | LONGTYPE); ATTR(o1) = 0;
       LONG_VAL(o1) = event.xbutton.x;
       TAG(o2) = (NUM | LONGTYPE); ATTR(o2) = 0;
       LONG_VAL(o2) = event.xbutton.y;
       TAG(o3) = (NUM | LONGTYPE); ATTR(o3) = 0;
       LONG_VAL(o3) = mod;
-      FREEopds = o4;
+      makename("mouseclick",o4); ATTR(o4) = ACTIVE;
+      FREEopds = o5;
+			TAG(x1) = OP; ATTR(x1) = ACTIVE;
+			OP_NAME(x1) = (L) "lock"; OP_CODE(x1) = (L) op_lock;
+			FREEexecs = x2;
       running = TRUE; goto tuwat;
   }
 } 

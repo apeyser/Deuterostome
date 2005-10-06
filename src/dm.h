@@ -138,8 +138,10 @@ NOTE: all objects that can populate the D machine's workspace must
 #define PROC                       ((UB) 0x70)
 #define DICT                       ((UB) 0x80)
 #define BOX                        ((UB) 0x90)
+#define HANDLE                     ((UB) 0xA0)
 	
-#define COMPOSITE(frame)           ((UB)(CLASS(frame)) > (UB)(MARK))
+#define COMPOSITE(frame) \
+	((UB)(CLASS(frame)) > (UB)(MARK) && TAG(frame) != (HANDLE | SIMPLETYPE))
 
 #define BYTETYPE                   ((UB) 0x00)       /* numeral types */
 #define WORDTYPE                   ((UB) 0x01)
@@ -147,7 +149,8 @@ NOTE: all objects that can populate the D machine's workspace must
 #define SINGLETYPE                 ((UB) 0x03)
 #define DOUBLETYPE                 ((UB) 0x04)      
 #define SOCKETTYPE                 ((UB) 0x01)      /* null types */
-#define HANDLETYPE                 ((UB) 0x02)
+#define SIMPLETYPE                 ((UB) 0x00)      /* handle types */
+#define COMPLEXTYPE                ((UB) 0x00)      
 #define CMACHINE                   ((UB) 0x00)      /* operator types */
 #define OPLIBTYPE                  ((UB) 0x01)      /* operator lib type */
 
@@ -224,10 +227,22 @@ NOTE: all objects that can populate the D machine's workspace must
 #define DICT_NB(frame)             (*((L *)(((B*)(frame))+8)))
 #define DICT_CURR(frame)           (*((L *)(((B*)(frame))+8)))
 #define BOX_NB(frame)              (*((L *)(((B*)(frame))+8)))
-#define VALUE_PTR(frame)           (*((B**) (((B*)(frame))+4)))
-#define HANDLE_ID(frame)           (*((B*)(((B*)(frame))+3)))
-#define LONG_VAL2(frame)           (*((L *)(((B*)(frame))+8)))
-#define LONG_VAL3(frame)           (*((L *)(((B*)(frame))+12)))
+#define VALUE_PTR(frame)           (*((B**)(((B*)(frame))+4)))
+#define HANDLE_ID(frame)           (*((L *)(((B*)(frame))+12)))
+#define HANDLE_CEIL(frame)         (*((B**)(((B*)(frame))+8)))
+
+static void SET_HANDLE_ID(B* frame, B* string) {
+	HANDLE_ID(frame) = *(L*)(string);
+}
+static void GET_HANDLE_ID(B* frame, B* string) {
+	*(L*)(string) = HANDLE_ID(frame);
+}
+static BOOLEAN EQ_HANDLE_ID(B* frame1, B* frame2) {
+	return HANDLE_ID(frame1) == HANDLE_ID(frame2);
+}
+static BOOLEAN EQ_HANDLE_ID_STRING(B* frame, B string[5]) {
+	return HANDLE_ID(frame) == *(L*)string;
+}
 
 /* NB: Attention to moveframe & moveframes in dm2.c whenever
    framebytes is changed */
@@ -285,7 +300,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define TIMER       0x00000002L /*                                       */
 #define WAIT        0x00000003L /*                                       */
 #define MORE        0x00000004L /*                                       */
-#define ABORT       0x00000005L /* control_c pressed on console          */
+#define ABORT       0x00000005L /* ABORT signal sent from console        */
 #define QUIT        0x00000006L /*                                       */
 
 #define CORR_OBJ    0x00000101L /* corrupted object                      */
@@ -343,6 +358,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define LIB_LOADED  0x0000090BL /* lib already loaded                    */
 #define LIB_OVF     0x0000090CL /* malloc in lib overflowed              */
 #define LIB_MERGE   0x0000090DL /* out of space in sysdict for merge     */
+#define LIB_INIT    0x0000090EL /* __init failed for lib */
 
 #define NO_XWINDOWS 0x00000A01L /* X windows unavailable                 */
 #define X_ERR       0x00000A02L /* X lib error                           */
@@ -503,6 +519,7 @@ void DECREMENT(B *frame);
 /*----------------------- system operators */
 L op_setlock(void);
 L op_getlock(void);
+L op_lock(void);
 L op_syshi(void);
 L op_syslibnum(void);
 L op_error(void);
@@ -617,6 +634,7 @@ L op_xor(void);
 L op_bitshift(void);
 /*-- conversion, string, attribute, class ,type */
 L op_class(void);
+L op_handleid(void);
 L op_type(void);
 L op_readonly(void);
 L op_active(void);

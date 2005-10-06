@@ -433,171 +433,192 @@ return(OK);
  */
 L op_restore(void)
 {
-B *cframe, *frame, *dict, *tdict, *entry, *box, *savebox,
-  *caplevel, *savefloor, *topframe;
-L nb, offset;
-BOOLEAN capped;
+	B *cframe, *frame, *dict, *tdict, *entry, *box, *savebox,
+		*caplevel, *savefloor, *topframe;
+	L nb, offset;
+	BOOLEAN capped;
 
-if (o_1 < FLOORopds) return(OPDS_UNF);
-if (CLASS(o_1) != BOX) return(OPD_CLA);
-savefloor = (B *)VALUE_BASE(o_1) - FRAMEBYTES; savebox = (B *)VALUE_BASE(o_1);
-if ((caplevel = SBOX_CAP(savebox)) == (B *)0)
-   { capped = FALSE; caplevel = FREEvm; }
-   else capped = TRUE;
-offset = caplevel - savefloor;
-FREEopds = o_1;
+	if (o_1 < FLOORopds) return(OPDS_UNF);
+	if (CLASS(o_1) != BOX) return(OPD_CLA);
+	savefloor = (B *)VALUE_BASE(o_1) - FRAMEBYTES; savebox = (B *)VALUE_BASE(o_1);
+	if ((caplevel = SBOX_CAP(savebox)) == (B *)0) { 
+		capped = FALSE; caplevel = FREEvm; 
+	}
+	else capped = TRUE;
+	offset = caplevel - savefloor;
+	FREEopds = o_1;
 
-topframe = cframe = FREEexecs - FRAMEBYTES;
-while (cframe >= FLOORexecs) {
+	topframe = cframe = FREEexecs - FRAMEBYTES;
+	while (cframe >= FLOORexecs) {
     if (COMPOSITE(cframe)
-          && (VALUE_BASE(cframe) >= (L)savefloor)
-          && (VALUE_BASE(cframe) < (L)caplevel)) {
-        if (capped) return(INV_REST);
-        moveframes(cframe + FRAMEBYTES,
-                   cframe,
-                   (topframe - cframe)/FRAMEBYTES);
-        topframe -= FRAMEBYTES;
-        FREEexecs -= FRAMEBYTES;
+				&& (VALUE_BASE(cframe) >= (L)savefloor)
+				&& (VALUE_BASE(cframe) < (L)caplevel)) {
+			if (capped) return(INV_REST);
+			moveframes(cframe + FRAMEBYTES,
+								 cframe,
+								 (topframe - cframe)/FRAMEBYTES);
+			topframe -= FRAMEBYTES;
+			FREEexecs -= FRAMEBYTES;
     }
     cframe -= FRAMEBYTES;
-}
+	}
  
-topframe = cframe = FREEdicts - FRAMEBYTES;
-while (cframe >= FLOORdicts) {
+	topframe = cframe = FREEdicts - FRAMEBYTES;
+	while (cframe >= FLOORdicts) {
     if (COMPOSITE(cframe)
-          && (VALUE_BASE(cframe) >= (L)savefloor)
-          && (VALUE_BASE(cframe) < (L)caplevel)) {
-        if (capped) return(INV_REST);
-        moveframes(cframe + FRAMEBYTES,
-                   cframe,
-                   (topframe - cframe)/FRAMEBYTES);
-        topframe -= FRAMEBYTES;
-        FREEdicts -= FRAMEBYTES;
+				&& (VALUE_BASE(cframe) >= (L)savefloor)
+				&& (VALUE_BASE(cframe) < (L)caplevel)) {
+			if (capped) return(INV_REST);
+			moveframes(cframe + FRAMEBYTES,
+								 cframe,
+								 (topframe - cframe)/FRAMEBYTES);
+			topframe -= FRAMEBYTES;
+			FREEdicts -= FRAMEBYTES;
     }
     cframe -= FRAMEBYTES;
-}
+	}
  
-topframe = cframe = FREEopds - FRAMEBYTES;
-while (cframe >= FLOORopds) {
+	topframe = cframe = FREEopds - FRAMEBYTES;
+	while (cframe >= FLOORopds) {
     if (COMPOSITE(cframe)
-          && (VALUE_BASE(cframe) >= (L)savefloor)
-          && (VALUE_BASE(cframe) < (L)caplevel)) {
-        if (capped) return(INV_REST);
-        moveframes(cframe + FRAMEBYTES,
-                   cframe,
-                   (topframe - cframe)/FRAMEBYTES);
-        topframe -= FRAMEBYTES;
-        FREEopds -= FRAMEBYTES;
+				&& (VALUE_BASE(cframe) >= (L)savefloor)
+				&& (VALUE_BASE(cframe) < (L)caplevel)) {
+			if (capped) return(INV_REST);
+			moveframes(cframe + FRAMEBYTES,
+								 cframe,
+								 (topframe - cframe)/FRAMEBYTES);
+			topframe -= FRAMEBYTES;
+			FREEopds -= FRAMEBYTES;
     }
     cframe -= FRAMEBYTES;
-}
+	}
  
-if (capped)
-   moveD((D *)caplevel, (D *)savefloor, (FREEvm - caplevel)/sizeof(D));
+	if (capped)
+		moveD((D *)caplevel, (D *)savefloor, (FREEvm - caplevel)/sizeof(D));
 
-FREEvm -= offset;
-cframe = FLOORvm;
-while (cframe < FREEvm)
-   {
-   switch(CLASS(cframe))
-      {
-   case ARRAY: nb = DALIGN(ARRAY_SIZE(cframe) * VALUEBYTES(TYPE(cframe)));
-               if (VALUE_BASE(cframe) >= (L)caplevel)
-                  VALUE_BASE(cframe) -= offset;
-               cframe += nb + FRAMEBYTES; break;
+	FREEvm -= offset;
+	cframe = FLOORvm;
+	while (cframe < FREEvm) {
+		switch(CLASS(cframe)) {
+			case ARRAY: 
+				nb = DALIGN(ARRAY_SIZE(cframe) * VALUEBYTES(TYPE(cframe)));
+				if (VALUE_BASE(cframe) >= (L)caplevel)
+					VALUE_BASE(cframe) -= offset;
+				cframe += nb + FRAMEBYTES; 
+				break;
+			case LIST:  
+				if (VALUE_BASE(cframe) >= (L)caplevel) { 
+					VALUE_BASE(cframe) -= offset; LIST_CEIL(cframe) -= offset; 
+				}
+				for (frame = (B *)VALUE_BASE(cframe);
+						 frame < (B *)LIST_CEIL(cframe); 
+						 frame += FRAMEBYTES) {
+					if (COMPOSITE(frame)) {  
+						if ((VALUE_BASE(frame) >= (L)caplevel) &&
+								(VALUE_BASE(frame) < (L) CEILvm)) { 
+							VALUE_BASE(frame) -= offset;
+							if (CLASS(frame) == LIST 
+									|| TAG(frame) == (HANDLE | COMPLEXTYPE)) 
+								LIST_CEIL(frame) -= offset;
+						}
+						else if ((VALUE_BASE(frame) >= (L)savefloor) 
+										 && (VALUE_BASE(frame) < (L) caplevel)) { 
+							TAG(frame) = NULLOBJ; ATTR(frame) = 0; 
+						}
+					}
+				}
+				cframe = (B *)LIST_CEIL(cframe); 
+				break;
+			case DICT:  
+				if (VALUE_BASE(cframe) >= (L)caplevel) { 
+					VALUE_BASE(cframe) -= offset;
+					d_reloc((B *)VALUE_BASE(cframe),VALUE_BASE(cframe)+offset,
+									VALUE_BASE(cframe));
+				}
+				dict = (B *)VALUE_BASE(cframe);
+				if ((tdict = makedict((DICT_CEIL(dict) - DICT_ENTRIES(dict))
+															/ ENTRYBYTES)) == (B *)(-1L)) 
+					return(VM_OVF);
+				for (entry = (B *)DICT_ENTRIES(dict);
+						 entry < (B *)DICT_FREE(dict); 
+						 entry += ENTRYBYTES) {
+					frame = ASSOC_FRAME(entry);
+					if (COMPOSITE(frame) && (VALUE_BASE(frame) < (L)CEILvm)) { 
+						if (VALUE_BASE(frame) >= (L)caplevel) { 
+							VALUE_BASE(frame) -= offset;
+							if (CLASS(frame) == LIST 
+									|| TAG(frame) == (HANDLE | COMPLEXTYPE))
+								LIST_CEIL(frame) -= offset;
+						}
+						else
+							if (VALUE_BASE(frame) >= (L)savefloor) continue;
+					}
+					insert(ASSOC_NAME(entry),tdict,frame);
+				} 
+				d_rreloc(tdict,(L)tdict,(L)dict);
+				moveD((D *)tdict, (D *)dict, DICT_NB(cframe)/sizeof(D));
+				FREEvm = tdict - FRAMEBYTES;
+				cframe += DICT_NB(cframe) + FRAMEBYTES; 
+				break;
+			case BOX:  
+				if (VALUE_BASE(cframe) >= (L)caplevel)
+					VALUE_BASE(cframe) -= offset;
+				box = (B *)VALUE_BASE(cframe);
+				if (SBOX_CAP(box)) { 
+					if (SBOX_CAP(box) >= caplevel) SBOX_CAP(box) -= offset;
+					else if (SBOX_CAP(box) > savefloor)
+						SBOX_CAP(box) = savefloor;
+				}
+				cframe += BOX_NB(cframe) + FRAMEBYTES; 
+				break;
+			case HANDLE:
+				if (TYPE(cframe) == COMPLEXTYPE
+						&& VALUE_BASE(cframe) >= (L)caplevel) {
+					VALUE_BASE(cframe) -= offset;
+					LIST_CEIL(cframe) -= offset;
+					cframe = (B*)LIST_CEIL(cframe);
+				}
+				break;
+			default:   return(CORR_OBJ);
+		}
+	}
 
-   case LIST:  if (VALUE_BASE(cframe) >= (L)caplevel)
-                 { VALUE_BASE(cframe) -= offset; LIST_CEIL(cframe) -= offset; }
-               for (frame = (B *)VALUE_BASE(cframe);
-                    frame < (B *)LIST_CEIL(cframe); frame += FRAMEBYTES)
-                  { if (COMPOSITE(frame)) {  
-                     if ((VALUE_BASE(frame) >= (L)caplevel) &&
-                         (VALUE_BASE(frame) < (L) CEILvm))
-                       { VALUE_BASE(frame) -= offset;
-                         if (CLASS(frame) == LIST) 
-                           LIST_CEIL(frame) -= offset;
-                       }
-		     else if ((VALUE_BASE(frame) >= (L)savefloor) &&
-			      (VALUE_BASE(frame) < (L) caplevel))
-		       { TAG(frame) = NULLOBJ; ATTR(frame) = 0; }
-                    }
-                  }
-               cframe = (B *)LIST_CEIL(cframe); break;
-   case DICT:  if (VALUE_BASE(cframe) >= (L)caplevel)
-                  { VALUE_BASE(cframe) -= offset;
-		    d_reloc((B *)VALUE_BASE(cframe),VALUE_BASE(cframe)+offset,
-                            VALUE_BASE(cframe));
-                  }
-               dict = (B *)VALUE_BASE(cframe);
-               if ((tdict = makedict((DICT_CEIL(dict) - DICT_ENTRIES(dict))
-				     / ENTRYBYTES)) == (B *)(-1L)) 
-		 return(VM_OVF);
-               for (entry = (B *)DICT_ENTRIES(dict);
-                    entry < (B *)DICT_FREE(dict); 
-		    entry += ENTRYBYTES)
-                  {
-		  frame = ASSOC_FRAME(entry);
-                  if (COMPOSITE(frame) && (VALUE_BASE(frame) < (L)CEILvm))
-                    { if (VALUE_BASE(frame) >= (L)caplevel)
-                        { VALUE_BASE(frame) -= offset;
-                          if (CLASS(frame) == LIST)
-                             LIST_CEIL(frame) -= offset;
-                        }
-                        else
-                        if (VALUE_BASE(frame) >= (L)savefloor) continue;
-                    }
-                  insert(ASSOC_NAME(entry),tdict,frame);
-                  } 
-               d_rreloc(tdict,(L)tdict,(L)dict);
-               moveD((D *)tdict, (D *)dict, DICT_NB(cframe)/sizeof(D));
-               FREEvm = tdict - FRAMEBYTES;
-               cframe += DICT_NB(cframe) + FRAMEBYTES; break;
-    case BOX:  if (VALUE_BASE(cframe) >= (L)caplevel)
-                 VALUE_BASE(cframe) -= offset;
-               box = (B *)VALUE_BASE(cframe);
-	       if (SBOX_CAP(box))
-	         { if (SBOX_CAP(box) >= caplevel) SBOX_CAP(box) -= offset;
-                   else if (SBOX_CAP(box) > savefloor)
-		      SBOX_CAP(box) = savefloor;
-                 }
-               cframe += BOX_NB(cframe) + FRAMEBYTES; break;
-    default:   return(CORR_OBJ);
-    }
- }
-
- if (capped)
-     { cframe = FREEexecs - FRAMEBYTES;
-       while (cframe >= FLOORexecs)      
-        { if (COMPOSITE(cframe))
-            if ((VALUE_BASE(cframe) >= (L)caplevel) &&
-                (VALUE_BASE(cframe) < (L) CEILvm))
-               { VALUE_BASE(cframe) -= offset;
-                 if (CLASS(cframe) == LIST) LIST_CEIL(cframe) -= offset;
-               }
-          cframe -= FRAMEBYTES;
-        }
-       cframe = FREEdicts - FRAMEBYTES;
-       while (cframe >= FLOORdicts)      
-        { if (COMPOSITE(cframe))
-            if ((VALUE_BASE(cframe) >= (L)caplevel) &&
-                (VALUE_BASE(cframe) < (L) CEILvm))
-               { VALUE_BASE(cframe) -= offset;
-                 if (CLASS(cframe) == LIST) LIST_CEIL(cframe) -= offset;
-               }
-          cframe -= FRAMEBYTES;
-        }
-       cframe = FREEopds - FRAMEBYTES;
-       while (cframe >= FLOORopds)      
-        { if (COMPOSITE(cframe))
-            if ((VALUE_BASE(cframe) >= (L)caplevel) &&
-                (VALUE_BASE(cframe) < (L) CEILvm))
-               { VALUE_BASE(cframe) -= offset;
-                 if (CLASS(cframe) == LIST) LIST_CEIL(cframe) -= offset;
-               }
-          cframe -= FRAMEBYTES;
-        } 
-     }
-return(OK);
+	if (capped) { 
+		cframe = FREEexecs - FRAMEBYTES;
+		while (cframe >= FLOORexecs) { 
+			if (COMPOSITE(cframe))
+				if ((VALUE_BASE(cframe) >= (L)caplevel) &&
+						(VALUE_BASE(cframe) < (L) CEILvm)) { 
+					VALUE_BASE(cframe) -= offset;
+					if (CLASS(cframe) == LIST || TAG(cframe) == (HANDLE|COMPLEXTYPE)) 
+						LIST_CEIL(cframe) -= offset;
+				}
+			cframe -= FRAMEBYTES;
+		}
+		cframe = FREEdicts - FRAMEBYTES;
+		while (cframe >= FLOORdicts)  { 
+			if (COMPOSITE(cframe))
+				if ((VALUE_BASE(cframe) >= (L)caplevel) 
+						&& (VALUE_BASE(cframe) < (L) CEILvm)) { 
+					VALUE_BASE(cframe) -= offset;
+					if (CLASS(cframe) == LIST || TAG(cframe) == (HANDLE|COMPLEXTYPE)) 
+						LIST_CEIL(cframe) -= offset;
+				}
+			cframe -= FRAMEBYTES;
+		}
+		cframe = FREEopds - FRAMEBYTES;
+		while (cframe >= FLOORopds) { 
+			if (COMPOSITE(cframe))
+				if ((VALUE_BASE(cframe) >= (L)caplevel) 
+						&& (VALUE_BASE(cframe) < (L) CEILvm)) { 
+					VALUE_BASE(cframe) -= offset;
+					if (CLASS(cframe) == LIST || TAG(cframe) == (HANDLE|COMPLEXTYPE)) 
+						LIST_CEIL(cframe) -= offset;
+				}
+			cframe -= FRAMEBYTES;
+		} 
+	}
+	return(OK);
 }
 
 /*----------------------------------------------- vmstatus
@@ -661,6 +682,19 @@ if (CLASS(o_1) != PROC) return(OK);
 return(dmbind(o_1));
 }
 
+/*------------------------------------------- handleid
+	handle | /handleid
+*/
+L op_handleid(void) {
+	char s[5] = {};
+
+	if (o_1 < FLOORopds) return OPDS_UNF;
+	if (CLASS(o_1) != HANDLE) return OPD_CLA;
+	GET_HANDLE_ID(o_1, s);
+	makename(s, o_1);
+	return OK;
+}
+
 /*------------------------------------------- class
    object | /classname     (see below)
 */
@@ -670,27 +704,28 @@ L op_class(void)
 B *s;
 
 if (o_1 < FLOORopds) return(OPDS_UNF);
-switch(CLASS(o_1))
-     {
-     case NULLOBJ:  s = "nullclass"; break;
-     case NUM:   s = "numclass"; break;
-     case OP:    s = "opclass"; break;
-     case NAME:  s = "nameclass"; break;
-     case BOOL:  s = "boolclass"; break;
-     case MARK:  s = "markclass"; break;
-     case ARRAY: s = "arrayclass"; break;
-     case LIST:  s = "listclass"; break;
-     case DICT:  s = "dictclass"; break;
-     case BOX:   s = "boxclass"; break;
-     default: return(CORR_OBJ);
-     }
+switch(CLASS(o_1)) {
+ case NULLOBJ:  s = "nullclass"; break;
+ case HANDLE: s = "handleclass"; break;
+ case NUM:   s = "numclass"; break;
+ case OP:    s = "opclass"; break;
+ case NAME:  s = "nameclass"; break;
+ case BOOL:  s = "boolclass"; break;
+ case MARK:  s = "markclass"; break;
+ case ARRAY: s = "arrayclass"; break;
+ case LIST:  s = "listclass"; break;
+ case DICT:  s = "dictclass"; break;
+ case BOX:   s = "boxclass"; break;
+ default: return(CORR_OBJ);
+}
 makename(s,o_1);
 return(OK);
 }
 
 /*------------------------------------------- type
    object | /type (upper-case, one-letter code)
-   NULLOBJ | /T (socket) or /N (none) or /? (depending on handle type)
+   NULLOBJ | /T (socket) or /N (none)
+	 HANDLE  | /S (simple) or /C (complex)
    BOX     | /M (mclib) or  /N (none)
    DICT    | /O (oplibtype) or /N (none)
 */
@@ -703,15 +738,14 @@ if (o_1 < FLOORopds) return(OPDS_UNF);
 
 switch (CLASS(o_1)) {
     case NULLOBJ:
-			switch (TYPE(o_1)) {
-				case SOCKETTYPE: *c = 'T'; break;
-				case HANDLETYPE: *c = HANDLE_ID(o_1); break;
-				default: *c = 'N'; break;
-			};
+			*c = (TYPE(o_1) == SOCKETTYPE) ? 'T' : 'N';
+			break;
+    case HANDLE:
+			*c = (TYPE(o_1) == SIMPLETYPE) ? 'S' : 'C';
 			break;
     case BOX:
-        *c = 'N';
-        break;
+			*c = 'N';
+			break;
     case DICT:
         if (TYPE(o_1) == OPLIBTYPE) *c = 'O';
         else *c = 'N';

@@ -7,6 +7,9 @@ AM_PATH_LISPDIR
 AM_MAINTAINER_MODE
 
 CF_AM_ENABLE([plugins], [compile or install plugins], [yes])
+CF_IF_ENABLED([plugins], [
+  CF_AM_ENABLE([process], [compile or install process plugin], [yes])
+])
 
 CF_AC_ARG_ENABLE([sysdictsize], 
 		 [system dictionary size], 
@@ -67,6 +70,7 @@ CF_AC_CHECK_SIZEOF([void*], [4])
 
 # check pid_t for plugins/process.c
 CF_IF_ENABLED([plugins], [CF_AC_CHECK_SIZEOF([pid_t], [4])])
+CF_IF_ENABLED([plugins], [CF_AC_CHECK_SIZEOF([int], [4])])
 CF_IF_ENABLED([plugins], [CF_AC_CHECK_HEADER([sys/wait.h])])
 
 CF_AC_CHECK_HEADERS([endian.h machine/endian.h], 

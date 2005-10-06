@@ -1,7 +1,8 @@
 (defvar d-comint-mode-server t)
-(defvar d-comint-mode-compile nil)
-(eval-when-compile (setq d-comint-mode-compile t))
-(eval-and-compile (if (not d-comint-mode-compile) (require 'd-mode)))
+;;(defvar d-comint-mode-compile nil)
+(require 'd-mode)
+;;(eval-when-compile (setq d-comint-mode-compile t))
+;;(eval-and-compile (if (not d-comint-mode-compile) (require 'd-mode)))
 (require 'comint)
 
 (defvar explicit-dvt-file-name nil "dvt program name")
@@ -53,6 +54,7 @@ property."
 
 (defvar d-comint-mode-redirect-ignore nil)
 (defvar d-comint-mode-redirect-process nil)
+(defvar d-comint-mode-redirect-mode)
 (defun d-comint-mode-redirect (string)
   (if (or (not d-comint-mode-redirect-mode) d-comint-mode-redirect-ignore)
       string
@@ -68,8 +70,8 @@ property."
   (require 'd-mode)
   (d-mode-shared)
   (ansi-color-for-comint-mode-on)
-  (make-variable-buffer-local 'd-comint-mode-redirect-process)
-  (make-variable-buffer-local 'd-comint-mode-redirect-ignore)
+  (make-local-variable 'd-comint-mode-redirect-process)
+  (make-local-variable 'd-comint-mode-redirect-ignore)
 
   (set-face-foreground 'comint-highlight-input "blue")
   (make-face-unbold 'comint-highlight-input)
@@ -131,6 +133,9 @@ property."
   (kill-process d-comint-mode-redirect-process)
   (setq d-comint-mode-redirect-process nil))
 
+(defvar d-comint-mode-redirect-command 
+  "{ echo 'New process: '; echo \"$(date)\" ; echo '-------------' ; exec cat ; } >> ")
+
 (defun d-comint-mode-redirect-process-open ()
   (let ((d-comint-mode-redirect-ignore t)
 	(string1 (concat "[31m"
@@ -147,7 +152,8 @@ property."
 	  (start-process (concat (buffer-name) "-redirect") nil
 	    "/bin/bash" "-c" (concat d-comint-mode-redirect-command 
 				     "\'" (buffer-name) "\'")))
-    (process-kill-without-query d-comint-mode-redirect-process)
+		(set-process-query-on-exit-flag d-comint-mode-redirect-process nil)
+    ;;(process-kill-without-query d-comint-mode-redirect-process)
     (add-hook 'kill-buffer-hook 'd-comint-mode-redirect-kill-process
 	      nil t))
 
@@ -157,9 +163,6 @@ property."
 
 (define-minor-mode d-comint-mode-redirect-mode "" nil " >"
   '() (d-comint-mode-redirect-process-open))
-
-(defvar d-comint-mode-redirect-command 
-  "{ echo 'New process: '; echo \"$(date)\" ; echo '-------------' ; exec cat ; } >> ")
 
 (defun d-comint-mode-invert ()
   (interactive)
@@ -251,13 +254,13 @@ Otherwise, one argument `-i' is passed to the shell.
 	     (cdir default-directory)
 	     dvt-buffer)
 	(save-excursion
-	  (cd dir)
+	  ;;(cd dir)
 	  (setq dvt-buffer (apply 'make-comint-in-buffer "dvt" buffer prog
 				  (if (file-exists-p startfile) startfile)
 				  (when (and xargs-name (boundp xargs-name))
 				    (symbol-value xargs-name))))
-	  (cd cdir)
 	  (set-buffer dvt-buffer)
+	  ;;(cd cdir)
 	  (d-comint-mode))
 	;(pop-to-buffer dvt-buffer))
 	(switch-to-buffer dvt-buffer))

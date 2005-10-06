@@ -57,14 +57,19 @@ am__installdirs = "$(DESTDIR)$(pkglibdir)"
 pkglibLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(pkglib_LTLIBRARIES)
 process_la_LIBADD =
-am_process_la_OBJECTS = process.lo
+am__process_la_SOURCES_DIST = process.c process.h
+@ENABLE_process_TRUE@am_process_la_OBJECTS = process.lo
 process_la_OBJECTS = $(am_process_la_OBJECTS)
+@ENABLE_process_TRUE@am_process_la_rpath = -rpath $(pkglibdir)
 test_la_LIBADD =
 am_test_la_OBJECTS = test.lo
 test_la_OBJECTS = $(am_test_la_OBJECTS)
 test2_la_LIBADD =
 am_test2_la_OBJECTS = test2.lo
 test2_la_OBJECTS = $(am_test2_la_OBJECTS)
+throw_la_LIBADD =
+am_throw_la_OBJECTS = throw.lo
+throw_la_OBJECTS = $(am_throw_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -76,9 +81,10 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(process_la_SOURCES) $(test_la_SOURCES) $(test2_la_SOURCES)
-DIST_SOURCES = $(process_la_SOURCES) $(test_la_SOURCES) \
-	$(test2_la_SOURCES)
+SOURCES = $(process_la_SOURCES) $(test_la_SOURCES) $(test2_la_SOURCES) \
+	$(throw_la_SOURCES)
+DIST_SOURCES = $(am__process_la_SOURCES_DIST) $(test_la_SOURCES) \
+	$(test2_la_SOURCES) $(throw_la_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -119,6 +125,8 @@ EMACS_ENABLED_FALSE = @EMACS_ENABLED_FALSE@
 EMACS_ENABLED_TRUE = @EMACS_ENABLED_TRUE@
 ENABLE_plugins_FALSE = @ENABLE_plugins_FALSE@
 ENABLE_plugins_TRUE = @ENABLE_plugins_TRUE@
+ENABLE_process_FALSE = @ENABLE_process_FALSE@
+ENABLE_process_TRUE = @ENABLE_process_TRUE@
 ENV_ENABLED = @ENV_ENABLED@
 ENV_ENABLED_FALSE = @ENV_ENABLED_FALSE@
 ENV_ENABLED_TRUE = @ENV_ENABLED_TRUE@
@@ -231,10 +239,12 @@ AM_CFLAGS = $(GCC_CPU) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
 AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 #@LIBPLUGIN_DLL_IMPORT@
 INCLUDE = @INCLTDL@ 
-pkglib_LTLIBRARIES = test.la test2.la process.la
+@ENABLE_process_TRUE@PROCESS_LIB = process.la
+@ENABLE_process_TRUE@process_la_SOURCES = process.c process.h
+pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la
 test_la_SOURCES = test.c test.h
 test2_la_SOURCES = test2.c test2.h
-process_la_SOURCES = process.c process.h
+throw_la_SOURCES = throw.c throw.h
 all: all-am
 
 .SUFFIXES:
@@ -296,11 +306,13 @@ clean-pkglibLTLIBRARIES:
 	  rm -f "$${dir}/so_locations"; \
 	done
 process.la: $(process_la_OBJECTS) $(process_la_DEPENDENCIES) 
-	$(LINK) -rpath $(pkglibdir) $(process_la_LDFLAGS) $(process_la_OBJECTS) $(process_la_LIBADD) $(LIBS)
+	$(LINK) $(am_process_la_rpath) $(process_la_LDFLAGS) $(process_la_OBJECTS) $(process_la_LIBADD) $(LIBS)
 test.la: $(test_la_OBJECTS) $(test_la_DEPENDENCIES) 
 	$(LINK) -rpath $(pkglibdir) $(test_la_LDFLAGS) $(test_la_OBJECTS) $(test_la_LIBADD) $(LIBS)
 test2.la: $(test2_la_OBJECTS) $(test2_la_DEPENDENCIES) 
 	$(LINK) -rpath $(pkglibdir) $(test2_la_LDFLAGS) $(test2_la_OBJECTS) $(test2_la_LIBADD) $(LIBS)
+throw.la: $(throw_la_OBJECTS) $(throw_la_DEPENDENCIES) 
+	$(LINK) -rpath $(pkglibdir) $(throw_la_LDFLAGS) $(throw_la_OBJECTS) $(throw_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -311,6 +323,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/throw.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \

@@ -19,7 +19,6 @@ L op_getlock(void)
     FREEopds = o2;
     return OK;
 }
-
     
 L op_setlock(void) 
 {
@@ -28,6 +27,45 @@ L op_setlock(void)
     locked = BOOL_VAL(o_1);
     FREEopds = o_1;
     return OK;
+}
+
+L x_op_lock(void) {
+	if (o_1 < FLOORopds) return OPDS_UNF;
+	if (x_1 < FLOORexecs) return EXECS_UNF;
+	if (TAG(o_1) != BOOL) return OPD_CLA;
+	if (TAG(x_1) != BOOL) return EXECS_COR;
+	
+	locked = BOOL_VAL(x_1);
+	if (! BOOL_VAL(o_1)) FREEexecs = x_1;
+	else {
+		TAG(x_1) = OP; ATTR(x_1) = ACTIVE;
+		OP_NAME(x_1) = (L) "stop"; OP_CODE(x_1) = (L) op_stop;
+	}
+	FREEopds = o_1;
+	return OK;
+}
+
+/* ~active | -- */
+L op_lock(void) {
+	if (o_1 < FLOORopds) return OPDS_UNF;
+	if (CEILexecs < x5) return EXECS_OVF;
+	if (! (ATTR(o_1) & ACTIVE)) return OPD_ATR;
+
+	TAG(x1) = BOOL; ATTR(x1) = 0;
+	BOOL_VAL(x1) = locked;
+
+	TAG(x2) = OP; ATTR(x2) = ACTIVE;
+	OP_NAME(x2) = (L) "x_lock"; OP_CODE(x2) = (L) x_op_lock;
+
+	TAG(x3) = BOOL; ATTR(x3) = (STOPMARK | ACTIVE);
+	BOOL_VAL(x3) = FALSE;
+
+	moveframe(o_1, x4);
+	FREEexecs = x5;
+	FREEopds = o_1;
+	locked = TRUE;
+
+	return OK;
 }
 
 /*------------------------------------- 'halt' 
@@ -332,11 +370,20 @@ static void closealllibs(void)
     const char * e;
     void* handle;  
     B* lib = NULL;
+		static B fininame[FRAMEBYTES];
+		static BOOLEAN fininame_ = TRUE;
+		B* frame;
+		if (fininame_) {
+			makename("FINI_", fininame);
+			fininame_ = FALSE;
+		}
+
     while((lib = nextlib(lib)) !=  NULL)
       if ((handle = (void*) LIB_HANDLE(lib)) != NULL) {
-	if (lt_dlclose((lt_dlhandle)handle)) {
-	  e = lt_dlerror();
-	  fprintf(stderr, "dlclose: %s\n", e ? e : "--");
+				if (frame = lookup(fininame, VALUE_PTR(lib))) ((OPER)OP_CODE(frame))();
+				if (lt_dlclose((lt_dlhandle)handle)) {
+					e = lt_dlerror();
+					fprintf(stderr, "dlclose: %s\n", e ? e : "--");
         }
       }
 
@@ -508,11 +555,11 @@ void* libsym(void* handle, const char* symbol)
     return r;
 }
 
-#define LIB_IMPORT(var, type, name)				\
+#define LIB_IMPORT(var, type, name)															\
   if (! (var = (type) lt_dlsym((lt_dlhandle)handle, #name))) {	\
-    fprintf(stderr, "Symbol not found: %s in %s\n",		\
-	    #name, FREEvm);					\
-    return LIB_EXPORT;						\
+    fprintf(stderr, "Symbol not found: %s in %s\n",							\
+						#name, FREEvm);																			\
+    return LIB_EXPORT;																					\
   }
 
 L op_loadlib(void)
@@ -529,6 +576,9 @@ L op_loadlib(void)
 
     B* frame;
     B* dict;
+		static B initname[FRAMEBYTES];
+		static BOOLEAN initname_ = TRUE;
+		UL retc;
 
     oldCEILvm = CEILvm;
     oldFREEvm = FREEvm;
@@ -551,20 +601,18 @@ L op_loadlib(void)
         return LIB_LOAD;
     }
 
-        // loop over super ceil region, looking for first dict for type
-        // and looking for sysop to stop
-        // check handles on all libs but sysdict
-        // assumed that sysdict has already been placed
+		// loop over super ceil region, looking for first dict for type
+		// and looking for sysop to stop
+		// check handles on all libs but sysdict
+		// assumed that sysdict has already been placed
     type = 0;
     frame = NULL;
-  ll_type:
-    if (! (frame = nextlib(frame))) return CORR_OBJ;
-    if (! type) type = LIB_TYPE(frame) + 1;
-    if (LIB_TYPE(frame))
-    {
-        if ((L) handle == LIB_HANDLE(frame)) return LIB_LOADED;
-        goto ll_type;
-    }
+		while (1) {
+			if (! (frame = nextlib(frame))) return CORR_OBJ;
+			if (! type) type = LIB_TYPE(frame) + 1;
+			if (! LIB_TYPE(frame)) break;
+			if ((L) handle == LIB_HANDLE(frame)) return LIB_LOADED;
+		}
     
     LIB_IMPORT(ops, B**, ll_export);
     LIB_IMPORT(errc, L*, ll_errc);
@@ -580,12 +628,26 @@ L op_loadlib(void)
         return VM_OVF;
     }
 
+		if (initname_) {
+			makename("INIT_", initname);
+			initname_ = FALSE;
+		}
+		if ((frame = lookup(initname, dict))
+				&& (retc = ((OPER) OP_CODE(frame))()) != OK) {
+			lt_dlclose((lt_dlhandle) handle);
+			FREEvm = oldFREEvm;
+			CEILvm = oldCEILvm;
+			return LIB_INIT;
+		}
+
+    FREEopds = o_2;
+
     LIB_TYPE(dict - FRAMEBYTES) = type;
     LIB_HANDLE(dict - FRAMEBYTES) = (L) handle;
-    FREEopds = o_2;
 
     sysdict = VALUE_PTR(FLOORdicts);
     if (! mergedict(dict, sysdict)) return LIB_MERGE;
+
     return OK;
 }
 

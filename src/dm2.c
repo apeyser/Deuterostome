@@ -490,18 +490,29 @@ return(0L);
 /* return false if not enough space in sink */
 BOOLEAN mergedict(B *source, B* sink) {
   B *entry;
-  B hiname[FRAMEBYTES];
-  B libnumname[FRAMEBYTES];
-  makename("hi", hiname);
-  makename("libnum", libnumname);
+	size_t i;
+	static B excludes_ = TRUE;
+	static B *_excludes[] = {"hi", "libnum", "INIT_", "FINI_"};
+	static B excludes[sizeof(_excludes)/sizeof(_excludes[0])][FRAMEBYTES];
+
+	if (excludes_) {
+		for (i = 0; i < sizeof(_excludes)/sizeof(_excludes[0]); i++) {
+			makename(_excludes[i], excludes[i]);
+		}
+		excludes_ = FALSE;
+	}
 
   for (entry = (B*) DICT_ENTRIES(source);
        entry < (B*) DICT_FREE(source);
        entry += ENTRYBYTES) {
-    if (! matchname(ASSOC_NAME(entry), hiname)
-	&& ! matchname(ASSOC_NAME(entry), libnumname)
-	&& ! insert(ASSOC_NAME(entry), sink, ASSOC_FRAME(entry)))
-      return FALSE;
+		for (i = 0; i < sizeof(_excludes)/sizeof(_excludes[0]); i++) {
+			if (matchname(ASSOC_NAME(entry), _excludes[i]))
+				goto nextentry;
+		}
+		if (! insert(ASSOC_NAME(entry), sink, ASSOC_FRAME(entry)))
+			return FALSE;
+
+	  nextentry: ;
   }
   return TRUE;
 }
@@ -807,7 +818,8 @@ static L deendian_entries(B* dict) {
       - leaves simple or external objects as unchanged
       - replaces operator objects by their name and earmarks them
       - applies itself recursively to an internal list or dict object
-      - replaces internal box objects referenced in dictionaries or
+      - replaces internal box objects, sockets and handles 
+			  referenced in dictionaries or
         contained in lists by null objects
   - returns a frame whose internal addresses are relative to base (side
     effect on VM freespace: objects belonging to lower nodes of tree)
@@ -816,6 +828,20 @@ NB: a dict is relocated in 2 steps: 1 - to the new physical mem loc
                                     2 - to the box base
 */
 #define MAXDEPTH 50  /* counts depth of object nesting (<= 20) */
+
+static BOOLEAN foldsubframe(B* lframe) {
+	switch (CLASS(lframe)) {
+		case OP:
+			makename((B *)OP_NAME(lframe),lframe);
+			ATTR(lframe) |= (BIND | ACTIVE); 
+			return FALSE;
+		case BOX: case NULLOBJ: case HANDLE:
+			TAG(lframe) = NULLOBJ; ATTR(lframe) = 0;
+			return FALSE;
+		default:
+			return COMPOSITE(lframe);
+	}
+}
 
 L foldobj(B *frame, L base, W *depth)
 {
@@ -845,18 +871,11 @@ switch(CLASS(frame)) {
               LIST_CEIL(frame) = VALUE_BASE(frame) + nb;
               moveframes(frame,tframe,1L); moveL((L *)value,(L *)tvalue,nb>>2);
               for (lframe = tvalue; lframe < (tvalue + nb); 
-                   lframe += FRAMEBYTES)
-                 { if (CLASS(lframe) == OP) 
-                      { makename((B *)OP_NAME(lframe),lframe);
-                        ATTR(lframe) |= (BIND | ACTIVE); continue;
-                      }
-                   if (CLASS(lframe) == BOX)
-                      { TAG(lframe) = NULLOBJ; ATTR(lframe) = 0;
-                        continue;
-                      }
-                   if (!COMPOSITE(lframe)) continue;
-                   if ((retc = foldobj(lframe,base,depth)) != OK) return(retc);
-                 }
+                   lframe += FRAMEBYTES) { 
+								if (foldsubframe(lframe) 
+										&& (retc = foldobj(lframe,base,depth)) != OK)
+									return(retc);
+							}
               break;
   case DICT:  tframe = FREEvm; tvalue = tframe + FRAMEBYTES;
               nb = DICT_NB(frame); 
@@ -870,25 +889,19 @@ switch(CLASS(frame)) {
               DICT_CEIL(tvalue) += offset;
               offset -= base;
               for (k = 0, link = (L *)DICT_TABHASH(tvalue);
-                   k < DICT_CONHASH(tvalue); k++, link++)
-                 { if (*link != (-1L)) *link += offset; }
+                   k < DICT_CONHASH(tvalue); k++, link++) { 
+								if (*link != (-1L)) *link += offset; 
+							}
               for (entry = (B *)DICT_ENTRIES(tvalue);
                    entry < (B *)DICT_FREE(tvalue); 
-		   entry += ENTRYBYTES)
-                 { if (ASSOC_NEXT(entry) != (-1L))
-                       ASSOC_NEXT(entry) += offset;
-                   lframe = ASSOC_FRAME(entry);
-                   if (CLASS(lframe) == OP) 
-                      { makename((B *)OP_NAME(lframe),lframe);
-                        ATTR(lframe) |= (BIND | ACTIVE); continue;
-                      }
-                   if (CLASS(lframe) == BOX)
-                      { TAG(lframe) = NULLOBJ; ATTR(lframe) = 0;
-                        continue;
-                      }
-                   if (!COMPOSITE(lframe)) continue;
-                   if ((retc = foldobj(lframe,base,depth)) != OK) return(retc);
-                 }
+									 entry += ENTRYBYTES) { 
+								if (ASSOC_NEXT(entry) != (-1L))
+									ASSOC_NEXT(entry) += offset;
+								lframe = ASSOC_FRAME(entry);
+								if (foldsubframe(lframe) 
+										&& (retc = foldobj(lframe,base,depth)) != OK) 
+									return(retc);
+							}
               DICT_ENTRIES(tvalue) -= base; DICT_FREE(tvalue) -= base;
               DICT_CEIL(tvalue) -= base;
               break;
@@ -930,19 +943,19 @@ switch(CLASS(frame)) {
      return retc;
 
    for (lframe = (B *)VALUE_BASE(frame);
-	lframe < (B *)LIST_CEIL(frame); 
-	lframe += FRAMEBYTES) { 
+				lframe < (B *)LIST_CEIL(frame); 
+				lframe += FRAMEBYTES) { 
      if (ATTR(lframe) & BIND) { 
        dframe = FREEdicts - FRAMEBYTES; xframe = 0L;
        while ((dframe >= FLOORdicts) && (xframe == 0L)) { 
-	 ldict = (B *)VALUE_BASE(dframe);
-	 xframe = lookup(lframe,ldict);//lframe not frame
-	 dframe -= FRAMEBYTES;
+				 ldict = (B *)VALUE_BASE(dframe);
+				 xframe = lookup(lframe,ldict);//lframe not frame
+				 dframe -= FRAMEBYTES;
        }
        if ((L)xframe > 0) { 
-	 moveframes(xframe,lframe,1L); 
+				 moveframes(xframe,lframe,1L); 
        } else { 
-	 ATTR(lframe) &= (~BIND); 
+				 ATTR(lframe) &= (~BIND); 
        }
        continue;
      }   
@@ -964,26 +977,26 @@ switch(CLASS(frame)) {
      return retc;
 
    for (k = 0, link = (L *)DICT_TABHASH(dict); 
-	k < DICT_CONHASH(dict); 
-	k++, link++)  { 
+				k < DICT_CONHASH(dict); 
+				k++, link++)  { 
      if (*link != (-1L)) *link += base; 
    }
    for (entry = (B *)DICT_ENTRIES(dict); 
-	entry < (B *)DICT_FREE(dict);
-	entry += ENTRYBYTES) {
+				entry < (B *)DICT_FREE(dict);
+				entry += ENTRYBYTES) {
      if (ASSOC_NEXT(entry) != (-1L)) ASSOC_NEXT(entry) += base;
      lframe = ASSOC_FRAME(entry);
      if (ATTR(lframe) & BIND) { 
        dframe = FREEdicts - FRAMEBYTES; xframe = 0L;
        while ((dframe >= FLOORdicts) && (xframe == 0L)) { 
-	 ldict = (B *)VALUE_BASE(dframe);
-	 xframe = lookup(lframe,ldict);//lframe, not frame
-	 dframe -= FRAMEBYTES;
+				 ldict = (B *)VALUE_BASE(dframe);
+				 xframe = lookup(lframe,ldict);//lframe, not frame
+				 dframe -= FRAMEBYTES;
        }
        if ((L)xframe > 0) { 
-	 moveframes(xframe,lframe,1L); 
+				 moveframes(xframe,lframe,1L); 
        } else { 
-	 ATTR(lframe) &= (~BIND); 
+				 ATTR(lframe) &= (~BIND); 
        }
        continue;
      }   
@@ -991,9 +1004,9 @@ switch(CLASS(frame)) {
      if ((retc = unfoldobj(lframe,base,isnative)) != OK) return(retc);
    }
    break;
-
-   default: 
-     return(CORR_OBJ);
+	 
+	default: 
+		return(CORR_OBJ);
  }
  moveframes(frame,(B *)VALUE_BASE(frame)-FRAMEBYTES,1L);
  return(OK);
@@ -1028,18 +1041,21 @@ L op_gethomedir(void) {
 
 static void setupdir(B** frame, const char* string) {
   L len = strlen(string);
+	L lenapp = len;
+	if (len == 0 || string[len-1] != '/') lenapp++;
 
   if (FREEvm + FRAMEBYTES + DALIGN(len) > CEILvm)
     error(EXIT_FAILURE,0,"VM overflow");
 
   *frame = FREEvm;
-  FREEvm += FRAMEBYTES + DALIGN(len);
+  FREEvm += FRAMEBYTES + DALIGN(lenapp);
   TAG(*frame) = (ARRAY | BYTETYPE);
   ATTR(*frame) = READONLY;
-  ARRAY_SIZE(*frame) = len;
+  ARRAY_SIZE(*frame) = lenapp;
   VALUE_PTR(*frame) = *frame + FRAMEBYTES;
   strncpy(*frame + FRAMEBYTES, string, len);
-} 
+	(*frame)[FRAMEBYTES+lenapp-1] = '/';
+}
 
 void setupdirs(void) {
   const char* home_env = getenv("HOME");
