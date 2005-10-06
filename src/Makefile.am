@@ -19,6 +19,7 @@ AM_LDFLAGS = -no-undefined $(X_LDFLAGS)
 INCLUDE = @INCLTDL@
 
 bin_PROGRAMS = dvt dnode
+noinst_PROGRAMS = testwordorder
 
 pkginclude_HEADERS = dm.h plugin.h dmx.h
 
@@ -29,6 +30,8 @@ dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dnode_SOURCES = dnode.c dnode_0.h dnode_1.h dmx.h
 dnode_LDADD = @LIBLTDL@ libdmglobals.la
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
+
+testwordorder_SOURCES = test-word-order.c
 
 lib_LTLIBRARIES = libdmglobals.la
 

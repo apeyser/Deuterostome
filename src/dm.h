@@ -191,8 +191,8 @@ NOTE: all objects that can populate the D machine's workspace must
 #if __FLOAT_WORD_ORDER != __BYTE_ORDER
 #error "Can't handle float word order __FLOAT_WORD_ORDER"
 #endif //__FLOAT_WORD_ORDER
-#else
-#warning "Confirm that float word order = word order"
+//#else //! NO_ENDIAN_HDR
+//#warning "Confirm that float word order = word order"
 #endif //! NO_ENDIAN_HDR
 
 #define GETNATIVEFORMAT(frame) \

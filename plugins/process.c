@@ -8,6 +8,13 @@
 #include <stdio.h>
 #include <fcntl.h>
 
+#if __APPLE__
+#include <crt_externs.h>
+#define environ (*_NSGetEnviron())
+#else
+extern char** environ;
+#endif
+
 #include "process.h"
 
 UL ll_type = 0;
@@ -362,7 +369,6 @@ L op_makeproc(void) {
 		char* prog;
 		char** args;
 		char** arg;
-		extern char **environ;
 
 		if (close(0) || close(1)) senderrno();
 		if (dup2(filedes_stdin[0], 0) == -1 
