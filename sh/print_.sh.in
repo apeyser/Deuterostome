@@ -164,7 +164,7 @@ function xps_lw()
 function xps_xpdf()
 {
     for i ; do
-	cat "$DVTPSPATH"/{form_1,text,graf_1,struct}.ps "$i" \
+	cat "$DVTPSPATH"/{form_2,text,graf_1,struct}.ps "$i" \
 	    | ps2pdf13 "$GSDVTPSPATH" -dEmbedAllFonts=true - "$i.pdf"
 	xpdf_ "$i.pdf" &
     done
