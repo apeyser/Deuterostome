@@ -622,7 +622,7 @@
   (interactive)
   (save-excursion
     (let ((coding (coding-system-eol-type buffer-file-coding-system)))
-      (print coding)
+      ;;(print coding)
       (when (and 
 	     (not (and
 		   (vectorp coding)
