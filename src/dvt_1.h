@@ -375,11 +375,24 @@ L op_nextevent(void)
      moreX = QLength(dvtdisplay);
      switch(event.type) {
 		 case ClientMessage:
-			 if ((event.xclient.message_type 
-						== XInternAtom(dvtdisplay, "WM_PROTOCOLS", False))
-					 && (event.xclient.data.l[0] 
-							 == XInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False)))
-				 XBell(dvtdisplay, 0);
+			 if (event.xclient.message_type 
+					 == XInternAtom(dvtdisplay, "WM_PROTOCOLS", False)) {
+				 if (event.xclient.data.l[0] 
+						 == XInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False))
+					 XBell(dvtdisplay, 0);
+				 else if (event.xclient.data.l[0]
+									== XInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False)) {
+					 wid = event.xclient.window;
+					 snprintf(namestring, sizeof(namestring), "w%d", wid);
+					 makename(namestring, namef); ATTR(namef) = ACTIVE;
+					 if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
+					 if (FREEdicts >= CEILdicts) return DICTS_OVF;
+					 moveframe(dictf, FREEdicts); FREEdicts += FRAMEBYTES;
+					 if (x1 >= CEILexecs) return EXECS_OVF;
+					 makename("take_input_focus", x1); ATTR(x1) = ACTIVE;
+					 FREEexecs = x2;
+				 }
+			 }
 			 return OK;
 
      case ConfigureNotify:

@@ -837,6 +837,24 @@ L op_drawsymbols()
 #endif
 }
 
+/*--------------------------------------- setinputfocus
+ * window# | --
+ * window# gets keyboard focus
+ */
+L op_setinputfocus(void) {
+#if X_DISPLAY_MISSING
+	return NO_XWINDOWS;
+#else
+	if (dvtdisplay == NULL) return NO_XWINDOWS;
+	if (o_1 < FLOORopds) return OPDS_UNF;
+	if (CLASS(o_1) != NUM) return OPD_CLA;
+	if (! VALUE(o_1, &wid)) return UNDF_VAL;
+	
+	XSetInputFocus(dvtdisplay, wid, RevertToParent, CurrentTime);
+	return OK;
+#endif
+}
+
 /*-------------------------------------- drawtext
    window# x y (text) [ (font_spec) col_idx h_align v_align ] | window# x y 
 

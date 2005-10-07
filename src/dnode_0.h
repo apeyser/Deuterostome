@@ -60,6 +60,7 @@ B *sysop[] =
       "fillrectangle",  (B *)op_fillrectangle,
       "drawtext",       (B *)op_drawtext,
 			"makewindowtop",  (B *)op_makewindowtop,
+			"setinputfocus",  (B *)op_setinputfocus,
 
 /*-- operand stack */
       "pop",            (B *)op_pop,

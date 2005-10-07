@@ -1846,6 +1846,29 @@ end userdict /macros put
   } for pop
 } bind def
 
+Xwindows {
+  /take_input_focus {end} bind def
+  /take_input_setup {
+    userdict begin
+    /emacs_buffer_name name /emacs_server_name name
+    
+    /take_input_focus ~[
+      {[} ~exec
+        1024 /b array 0 | {
+          (emacsclient -s ) fax
+          emacs_server_name fax
+          ( -n --eval "\(progn \(switch-to-buffer \") fax
+          emacs_buffer_name fax
+          (\\"\) \(select-frame) fax
+          (\(window-frame \(selected-window\)\)\)) fax
+          (\(x-focus-frame nil\)\)") fax
+          0 exch getinterval | }
+        {tosystem} ~stopped ~cleartomark | ]
+      ~end
+    ] bind def
+    end
+  } bind def
+} if
 
 |----------------------------- start the dvt ------------------------------
 | A 'save' representing a clean dvt is associated with the name cleanDVT in
@@ -1859,14 +1882,14 @@ Xwindows {
   getstartupdir (/theeye.d) fromfiles
   getstartupdir (/dvt_macros.d) fromfiles
   screensize /scrH name /scrW name
-  [ [ scrW wW sub 10 sub scrH wH sub 10 sub wW wH ]
+  [ [ scrW wW sub 10 sub scrH wH sub 10 sub wW wH ] | ]
     (TheHorses) (Horses) makewindow /wid name pop
   dvt userdict debug_dict /line get 0 (/w) fax * wid * number
       0 exch getinterval mkact exec put
   /busy false def
   wid true mapwindow  
   wid true makewindowtop
-} if
+} if  
 
 (Starting...\n) toconsole
 (Home: ) toconsole gethomedir toconsole (\n) toconsole

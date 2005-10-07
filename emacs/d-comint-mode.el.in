@@ -1,6 +1,7 @@
 (defvar d-comint-mode-server t)
 ;;(defvar d-comint-mode-compile nil)
 (require 'd-mode)
+(require 'server)
 ;;(eval-when-compile (setq d-comint-mode-compile t))
 ;;(eval-and-compile (if (not d-comint-mode-compile) (require 'd-mode)))
 (require 'comint)
@@ -254,14 +255,17 @@ Otherwise, one argument `-i' is passed to the shell.
 	     (cdir default-directory)
 	     dvt-buffer)
 	(save-excursion
-	  ;;(cd dir)
 	  (setq dvt-buffer (apply 'make-comint-in-buffer "dvt" buffer prog
 				  (if (file-exists-p startfile) startfile)
 				  (when (and xargs-name (boundp xargs-name))
 				    (symbol-value xargs-name))))
 	  (set-buffer dvt-buffer)
-	  ;;(cd cdir)
-	  (d-comint-mode))
+		(d-comint-mode)
+		(when d-comint-mode-server
+			(process-send-string 
+			 (get-buffer-process dvt-buffer)
+			 (format "Xwindows {(%s) (%s) take_input_setup} if\n"
+							 server-name (buffer-name dvt-buffer)))))
 	;(pop-to-buffer dvt-buffer))
 	(switch-to-buffer dvt-buffer))
     ;;(pop-to-buffer buffer)))

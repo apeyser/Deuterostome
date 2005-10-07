@@ -46,6 +46,7 @@ L op_drawsymbols(void);
 L op_fillrectangle(void);
 L op_drawtext(void);
 L op_makewindowtop(void);
+L op_setinputfocus(void);
 
 #endif
 
