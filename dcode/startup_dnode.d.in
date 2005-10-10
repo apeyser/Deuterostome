@@ -594,6 +594,21 @@ end def  | of xtext_dict
   (\n) fax
   0 exch getinterval toconsole_
 } bind def
+
+Xwindows_ {
+  /take_input_focus {
+    {[
+      console dup null eq {pop} {
+        (Xwindows {userdict begin take_input_focus} if) send
+      } ifelse |]
+    } stopped cleartomark
+    end
+  } bind def
+} if
   
 (Using startup_dnode.d $Id$ V@PACKAGE_VERSION@\n) toconsole_
+(Home:  ) toconsole_ gethomedir toconsole_ (\n) toconsole_
+(Startup: ) toconsole getstartupdir toconsole_ (\n) toconsole_
+
+
   

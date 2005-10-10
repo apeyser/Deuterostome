@@ -121,17 +121,19 @@ L op_setconsole(void)
 }
 
 /*-------------------------------------- 'console'
-    -- | consolesocket
+    -- | consolesocket or null (if stderr)
 
   - returns a null object of type 'socket' that refers to
     the current console socket (or 'stderr' for default)
 */
 
-L op_console(void)
-{
+L op_console(void) {
   if (o1 > CEILopds) return (OPDS_OVF);
-  TAG(o1) = NULLOBJ | SOCKETTYPE; 
-  LONG_VAL(o1) = consolesocket;
+  TAG(o1) = NULLOBJ;
+  if (consolesocket != LINF) {
+      TAG(o1) |= SOCKETTYPE;
+      LONG_VAL(o1) = consolesocket;
+  }
   FREEopds = o2;
   return(OK);
 }

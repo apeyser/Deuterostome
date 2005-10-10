@@ -595,16 +595,22 @@ end mkread /infoclasses name
 | - error messages are intercepted and displayed on the info line
 | - stacks are cleaned up and 'stop' is executed
 
+/errordict 1 dict dup begin | {
+  /error {error} bind def   | }
+end mkread def
+
 /error {
-  dup 3 1 roll
-  wid inforect BG fillrectangle
-  infoline errormessage dup length 1 sub 0 exch getinterval
-  wid 2 12 4 -1 roll INFOTEXT drawtext
-  208 ne {stop} {
-    (Illegal stop in the eye\n) toconsole
-    countdictstack 2 sub {end} repeat
-    abort
-  } ifelse
+  errordict begin {                                     | for both dvt and dnode:
+    dup 3 userdict /dvt known not {2 add} if 1 roll     | copy error #
+    wid inforect BG fillrectangle                       | under error stack
+    infoline errormessage dup length 1 sub 0 exch getinterval
+    wid 2 12 4 -1 roll INFOTEXT drawtext           | put err -newline in eye
+    208 ne {stop} {                                | avoid loop of illegal stops
+      (Illegal stop in the eye\n) toconsole
+      countdictstack 2 sub {end} repeat            | avoid redef of abort
+      abort                                        | drop all
+    } ifelse
+  } stopped end ~stop if
 } bind def
 
 |========================= left page machinery ============================

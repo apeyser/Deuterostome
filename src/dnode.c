@@ -375,16 +375,37 @@ if (moreX) {
   moreX = QLength(dvtdisplay) ? TRUE : FALSE;
   switch(event.type) {
 	  case ClientMessage:
-			if ((event.xclient.message_type 
-					 == XInternAtom(dvtdisplay, "WM_PROTOCOLS", False))
-					&& (event.xclient.data.l[0] 
-							== XInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False))) {
-				if (x2 > CEILexecs) {retc = EXECS_OVF; goto Xderror;}
-				makename("Xdisconnect", x1); ATTR(x1) = ACTIVE;
-				FREEexecs = x2;
-				running = TRUE;
-			}
-			goto tuwat;
+			if (event.xclient.message_type 
+          != XInternAtom(dvtdisplay, "WM_PROTOCOLS", False))
+          break;
+      
+      if (event.xclient.data.l[0] 
+          == XInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False)) {
+          if (x2 > CEILexecs) {retc = EXECS_OVF; goto Xderror;}
+          makename("Xdisconnect", x1); ATTR(x1) = ACTIVE;
+          FREEexecs = x2;
+          running = TRUE;
+          goto tuwat;
+      }
+      else if (event.xclient.data.l[0]
+               == XInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False)) {
+          wid = event.xclient.window;
+          snprintf(namestring, sizeof(namestring), "w%d", wid);
+          makename(namestring, namef); ATTR(namef) = ACTIVE;
+          if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
+          if (x1 >= CEILexecs) return EXECS_OVF;
+          if (o1 >= CEILopds) return OPDS_OVF;
+          if (FREEdicts >= CEILdicts) return DICTS_OVF;
+          moveframe(dictf, FREEdicts); FREEdicts += FRAMEBYTES;
+          makename("take_input_focus", o1); ATTR(o1) = ACTIVE;
+          FREEopds = o2;
+          TAG(x1) = OP; ATTR(x1) = ACTIVE;
+          OP_NAME(x1) = (L) "lock"; OP_CODE(x1) = (L) op_lock;
+          FREEexecs = x2;
+          running = TRUE;
+          goto tuwat;
+      }
+      break;
 
     case ConfigureNotify: wid = event.xconfigure.window;
       snprintf(namestring, sizeof(namestring), "w%d", wid);

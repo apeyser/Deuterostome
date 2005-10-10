@@ -220,7 +220,8 @@
 	(and consider-comment-start (eq (char-after) ?\|)))))
 
 (define-minor-mode d-mode-magic-delete "" nil "-d"
-  '(("\d" . d-mode-magic-delete-key)))
+  '(("\d" . d-mode-magic-delete-key)
+	([backspace] . d-mode-magic-delete-key)))
   
 (defun d-mode-backspace-function (arg)
   "Redirect to backward-delete-char-untabify."
@@ -239,9 +240,8 @@
     (let* ((here (point))
 					 (leave-a-space (not (looking-at "[\]\} \t\n\r\f]")))
 					 (now (+ here (skip-chars-backward " \t\n\r\f")))
-					 (leave-a-space 
-						(and leave-a-space 
-								 (or (= now (1- here)) (looking-back "[\[\{]" (1- now))))))
+					 (leave-a-space (and leave-a-space (/= now (1- here)) 
+															 (looking-back "[^\[\{/~]" (1- now)))))
 			(if (< now here)
 					(progn
 						(goto-char here)
@@ -341,6 +341,7 @@
 (defconst d-mode-ops
   '("loadlib"
     "nextlib"
+		"lock"
     "readboxfile"
     "writeboxfile"
     "getstartupdir"
@@ -435,6 +436,7 @@
     "halt"
     "continue"
     "error"
+		"errormessage"
     "abort"
     "countexecstack"
     "execstack"
@@ -509,7 +511,8 @@
     "drawsymbols"
     "fillrectangle"
     "drawtext"
-		"makewindowtop"
+	"makewindowtop"
+	"setinputfocus"
     "getsocket"
     "vmresize"
     "transcribe"
@@ -622,7 +625,6 @@
   (interactive)
   (save-excursion
     (let ((coding (coding-system-eol-type buffer-file-coding-system)))
-      ;;(print coding)
       (when (and 
 	     (not (and
 		   (vectorp coding)

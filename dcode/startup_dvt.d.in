@@ -1542,8 +1542,13 @@ end
 } bind def
 
 /meta1_plain4or5 {
-  mB 1 eq            mM 8 eq and
-  mB 4 eq mB 5 eq or mM 0 eq and or
+  mB 1 eq            mM 8 eq mM 10 eq or and
+  mB 4 eq mB 5 eq or mM 0 eq             and or
+} bind def
+
+/SM1_S4or5 {
+  mB 1 eq            mM 9 eq mM 11 eq or and
+  mB 5 eq mB 5 eq or mM 1 eq             and or
 } bind def
 
 /mouseclick { 
@@ -1551,6 +1556,7 @@ end
       /busy true def
       dup -16 bitshift /mB name 255 and /mM name
       /mY name /mX name 
+      SM1_S4or5 {raise_emacs stop} if
       /knode mY 1 sub 13 div def
       nodelist knode get /node name
       node 0 get class /nullclass eq { stop } if
@@ -1848,25 +1854,58 @@ end userdict /macros put
 
 Xwindows {
   /take_input_focus {end} bind def
+  /pop_emacs {} def
+  
   /take_input_setup {
     userdict begin
     /emacs_buffer_name name /emacs_server_name name
     
     /take_input_focus ~[
-      {[} ~exec
-        1024 /b array 0 | {
-          (emacsclient -s ) fax
-          emacs_server_name fax
-          ( -n --eval "\(progn \(switch-to-buffer \") fax
-          emacs_buffer_name fax
-          (\\"\) \(select-frame) fax
-          (\(window-frame \(selected-window\)\)\)) fax
-          (\(x-focus-frame nil\)\)") fax
-          0 exch getinterval | }
-        {tosystem} ~stopped ~cleartomark | ]
+      1024 /b array 0 | {
+        (emacsclient -s ) fax
+        emacs_server_name fax
+        ( -n --eval "\(d-comint-mode-focus \") fax
+        emacs_buffer_name fax
+        (\"\)") fax
+        0 exch getinterval | }
+      {[exch tosystem} ~stopped ~cleartomark |]
       ~end
     ] bind def
+
+    /raise_emacs ~[
+      1024 /b array 0 | {
+        (emacsclient -s ) fax
+        emacs_server_name fax
+        ( -n --eval "\(d-comint-mode-focus-raise \") fax
+        emacs_buffer_name fax
+        (\"\)") fax
+        0 exch getinterval | }
+      {[exch tosystem} ~stopped ~cleartomark |]
+    ] bind def
+
     end
+  } bind def
+
+  /raise_thehorses {TheHorsesWid true mapwindow end} bind def
+  /raise_all {
+    dvt /nodelist get 1 1 index length 1 sub getinterval {
+      dup 0 get null eq {pop} {
+        dup 3 get {pop} {
+          2 get [{null true mapwindow} (lock)] send
+        } ifelse
+      } ifelse
+    } forall
+    null true mapwindow end
+  } bind def
+  /hide_all {
+    dvt /nodelist get 1 1 index length 1 sub getinterval {
+      dup 0 get null eq {pop} {
+        dup 3 get {pop} {
+          2 get [{null false mapwindow} (lock)] send
+        } ifelse
+      } ifelse
+    } forall
+    null false mapwindow end
   } bind def
 } if
 
@@ -1889,6 +1928,7 @@ Xwindows {
   /busy false def
   wid true mapwindow  
   wid true makewindowtop
+  wid userdict /TheHorsesWid put
 } if  
 
 (Starting...\n) toconsole

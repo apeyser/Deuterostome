@@ -33,7 +33,8 @@ B *sysop[] =
       "drawsymbols",    (B *)op_drawsymbols,
       "fillrectangle",  (B *)op_fillrectangle,
       "drawtext",       (B *)op_drawtext,
-			"makewindowtop",  (B *)op_makewindowtop,
+      "makewindowtop",  (B *)op_makewindowtop,
+      "setinputfocus",  (B *)op_setinputfocus,
 /*-- operand stack */
       "pop",            (B *)op_pop,
       "exch",           (B *)op_exch,

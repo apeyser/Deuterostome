@@ -1,10 +1,25 @@
-(defvar d-comint-mode-server t)
-;;(defvar d-comint-mode-compile nil)
 (require 'd-mode)
 (require 'server)
-;;(eval-when-compile (setq d-comint-mode-compile t))
-;;(eval-and-compile (if (not d-comint-mode-compile) (require 'd-mode)))
 (require 'comint)
+
+(defgroup d-comint-mode nil "Major mode for DVT shell"
+  :prefix "d-comint-mode-"
+  :group 'd-mode)
+
+(defcustom d-comint-mode-server t
+  "Startup server for emacs when starting dvt"
+  :type '(boolean)
+  :group 'd-comint-mode)
+
+(defcustom d-comint-mode-keep-focus t 
+  "If true, tell dvt to return input focus to dvt buffer in emacs"
+  :type '(boolean)
+  :group 'd-comint-mode)
+
+(defcustom d-comint-mode-window-size 10
+  "Number of lines for popped up dvt window"
+  :type '(integer)
+  :group 'd-comint-mode)
 
 (defvar explicit-dvt-file-name nil "dvt program name")
 (defvar comint-last-output-start)
@@ -197,6 +212,11 @@ property."
   (define-key d-comint-mode-map [f2] 'd-comint-mode-continue)
   (define-key d-comint-mode-map [f3] 'd-comint-mode-stop)
   (define-key d-comint-mode-map [f4] 'd-comint-mode-abort)
+  (define-key d-comint-mode-map [f5] 'd-comint-mode-raise-thehorses)
+  (define-key d-comint-mode-map [f6] 'd-comint-mode-raise-all)
+  (define-key d-comint-mode-map [(shift f6)] 'd-comint-mode-hide-all)
+  (define-key d-comint-mode-map [f7] 'd-comint-mode-focus-raise)
+  (define-key d-comint-mode-map [f8] 'd-comint-mode-dnode)
   (define-key d-comint-mode-map [(control !)] 'd-comint-mode-scream)
   (define-key d-comint-mode-map [?\C-1] 'd-comint-mode-scream)
   ;;(define-key d-comint-mode-map [?\C-c ?\C-c] 'd-comint-mode-clear)
@@ -208,7 +228,6 @@ property."
 )
 (if (not d-comint-mode-map-setup) (d-comint-mode-setup-map))
 
-;;;###autoload
 (defun dvt (&optional buffer)
   "Run an inferior shell, with I/O through BUFFER (which defaults to `*shell*').
 Interactively, a prefix arg means to prompt for BUFFER.
@@ -239,10 +258,8 @@ Otherwise, one argument `-i' is passed to the shell.
 \(Type \\[describe-mode] in the shell buffer for a list of commands.)"
   (interactive
    (list
-    (and current-prefix-arg
-	 (read-buffer "DVT buffer: " "*dvt*"))))
-  (when (null buffer)
-    (setq buffer "*dvt*"))
+    (and current-prefix-arg (read-buffer "DVT buffer name: " "*dvt*"))))
+  (when (null buffer) (setq buffer "*dvt*"))
   (if (not (comint-check-proc buffer))
       (let* ((prog (or explicit-dvt-file-name
 		       (getenv "EDVT")
@@ -254,22 +271,117 @@ Otherwise, one argument `-i' is passed to the shell.
 	     (xargs-name 'dvt-args)
 	     (cdir default-directory)
 	     dvt-buffer)
-	(save-excursion
-	  (setq dvt-buffer (apply 'make-comint-in-buffer "dvt" buffer prog
-				  (if (file-exists-p startfile) startfile)
-				  (when (and xargs-name (boundp xargs-name))
-				    (symbol-value xargs-name))))
-	  (set-buffer dvt-buffer)
-		(d-comint-mode)
-		(when d-comint-mode-server
+		(save-excursion
+		  (set-buffer
+		   (setq dvt-buffer 
+				 (apply 'make-comint-in-buffer "dvt" buffer prog
+						(when (file-exists-p startfile) startfile)
+						(when (and xargs-name (boundp xargs-name))
+						  (symbol-value xargs-name)))))
+		  (d-comint-mode)
+		  (when d-comint-mode-server
 			(process-send-string 
 			 (get-buffer-process dvt-buffer)
-			 (format "Xwindows {(%s) (%s) take_input_setup} if\n"
-							 server-name (buffer-name dvt-buffer)))))
-	;(pop-to-buffer dvt-buffer))
-	(switch-to-buffer dvt-buffer))
-    ;;(pop-to-buffer buffer)))
+			 (concat 
+			  "Xwindows {(" (d-comint-mode-shell-quote server-name) ") ("
+			  (d-comint-mode-shell-quote (buffer-name dvt-buffer)) 
+			  ") take_input_setup} if\n"))))
+		(switch-to-buffer dvt-buffer))
     (switch-to-buffer buffer)))
+
+(defun d-comint-mode-quote (string)
+  "Quote a string to be sent to and interpreted by the dvt.
+This would apply to the body of a string between ( and ).
+Parens and backslashes are quoted"
+  (interactive "s")
+  (let ((start 1))
+	(while (string-match "[()\\\\]" string start)
+	  (setq start (1+ (match-end 0)))
+	  (setq string (replace-match "\\\\\\&" t nil string)))
+	string))
+
+(defun d-comint-mode-shell-quote (string)
+  "Quote a string which will be used by the dvt as a word in a shell command.
+This quotes per \\[shell-quote-argument], then requotes per \\[d-comint-mode-quote]"
+  (interactive "s")
+  (d-comint-mode-quote (shell-quote-argument string)))
+
+(defun d-comint-mode-focus (buffer-name)
+  "Set input focus to dvt buffer. 
+Used by dvt to signal to emacs that it should re-take focus."
+  (when d-comint-mode-keep-focus
+	(let ((old-windows (get-buffer-window-list buffer-name)))
+	  (pop-to-buffer buffer-name)
+	  (unless (catch 'find-window
+				(dolist (old-window old-windows)
+				  (when (eq old-window (selected-window))
+					(throw 'find-window t))))
+		(shrink-window (- (window-height) d-comint-mode-window-size))))
+	(if (eq window-system 'x)
+		(x-focus-frame nil))))
+
+(defun d-comint-mode-focus-raise (&optional buffer-name)
+  "Set input focus to dvt buffer, and raise frame in X.
+Used by dvt to signal to emacs that it should pop up and take focus"
+  (interactive
+   (list (and current-prefix-arg (read-buffer "DVT buffer: " "*dvt*"))))
+  (when (null buffer-name) (setq buffer-name "*dvt*"))
+  (d-comint-mode-focus (buffer-name))
+  (make-frame-visible)
+  (raise-frame (selected-frame)))
+
+(defun d-comint-mode-raise-thehorses ()
+  "Tell dvt to raise TheHorses window."
+  (interactive)
+  (process-send-string 
+   (get-buffer-process (current-buffer))
+   "* userdict begin raise_thehorses\n"))
+
+(defun d-comint-mode-raise-all ()
+  "Tell dvt to raise all dvt windows"
+  (interactive)
+  (process-send-string
+   (get-buffer-process (current-buffer))
+   "* userdict begin raise_all\n"))
+
+(defun d-comint-mode-hide-all ()
+  "Tell dvt to hide all dvt windows"
+  (interactive)
+  (process-send-string
+   (get-buffer-process (current-buffer))
+   "* userdict begin hide_all\n"))
+
+(define-minor-mode d-comint-mode-dnode-mode 
+  "Bind f8 to d-comint-mode-dnode in a dnode shell buffer." 
+  nil " dnode" '(([f8] . d-comint-mode-dnode)))
+
+(defun d-comint-mode-dnode (port &optional buffer-pre)
+  (interactive 
+   (list
+	(read-number "Port number: ")
+	(and current-prefix-arg (read-buffer "Dnode buffer prefix: " "*dnode*"))))
+  (when (null buffer-pre) (setq buffer-pre "*dnode*"))
+  
+  (let* ((buffer-name (concat buffer-pre (format "<%d>" port)))
+		 (old-windows (get-buffer-window-list buffer-name)))
+	(if (not (null d-comint-mode-dnode-mode))
+		(switch-to-buffer buffer-name)
+	  (pop-to-buffer buffer-name)
+	  (unless (catch 'find-window
+				(dolist (old-window old-windows)
+				  (when (eq old-window (selected-window))
+					(throw 'find-window t))))
+		(shrink-window (- (window-height) d-comint-mode-window-size))))
+	(shell buffer-name)
+	(when (null d-comint-mode-dnode-mode) 
+	  (d-comint-mode-dnode-mode)
+	  (goto-char (point-max))
+	  (insert (format "dnode %d" port)) 
+	  (comint-send-input)
+	  (add-hook 
+	   'comint-exec-hook 
+	   (lambda () (insert (format "dnode %d" port)) (comint-send-input))
+	   nil t))))
 
 (require 'ansi-color)
 (provide 'd-comint-mode)
