@@ -216,7 +216,7 @@ property."
   (define-key d-comint-mode-map [f6] 'd-comint-mode-raise-all)
   (define-key d-comint-mode-map [(shift f6)] 'd-comint-mode-hide-all)
   (define-key d-comint-mode-map [f7] 'd-comint-mode-focus-raise)
-  (define-key d-comint-mode-map [f8] 'd-comint-mode-dnode)
+  (define-key d-comint-mode-map [f8] 'dnode)
   (define-key d-comint-mode-map [(control !)] 'd-comint-mode-scream)
   (define-key d-comint-mode-map [?\C-1] 'd-comint-mode-scream)
   ;;(define-key d-comint-mode-map [?\C-c ?\C-c] 'd-comint-mode-clear)
@@ -255,7 +255,8 @@ such as `explicit-csh-args'.  If that symbol is a variable,
 its value is used as a list of arguments when invoking the shell.
 Otherwise, one argument `-i' is passed to the shell.
 
-\(Type \\[describe-mode] in the shell buffer for a list of commands.)"
+\(Type \\[describe-mode] in the shell buffer for a list of commands.)
+\\{d-comint-mode-map}"
   (interactive
    (list
     (and current-prefix-arg (read-buffer "DVT buffer name: " "*dvt*"))))
@@ -280,12 +281,12 @@ Otherwise, one argument `-i' is passed to the shell.
 						  (symbol-value xargs-name)))))
 		  (d-comint-mode)
 		  (when d-comint-mode-server
-			(process-send-string 
-			 (get-buffer-process dvt-buffer)
-			 (concat 
-			  "Xwindows {(" (d-comint-mode-shell-quote server-name) ") ("
-			  (d-comint-mode-shell-quote (buffer-name dvt-buffer)) 
-			  ") take_input_setup} if\n"))))
+				(process-send-string 
+				 (get-buffer-process dvt-buffer)
+				 (concat 
+					"Xwindows {(" (d-comint-mode-shell-quote server-name) ") ("
+					(d-comint-mode-shell-quote (buffer-name dvt-buffer)) 
+					") take_input_setup} if\n"))))
 		(switch-to-buffer dvt-buffer))
     (switch-to-buffer buffer)))
 
@@ -351,37 +352,55 @@ Used by dvt to signal to emacs that it should pop up and take focus"
    (get-buffer-process (current-buffer))
    "* userdict begin hide_all\n"))
 
-(define-minor-mode d-comint-mode-dnode-mode 
-  "Bind f8 to d-comint-mode-dnode in a dnode shell buffer." 
-  nil " dnode" '(([f8] . d-comint-mode-dnode)))
+(define-derived-mode d-comint-dnode-mode comint-mode "dnode"
+	"Major mode for handling dnodes.
+\\{d-comint-dnode-mode-map}")
 
-(defun d-comint-mode-dnode (port &optional buffer-pre)
-  (interactive 
-   (list
-	(read-number "Port number: ")
-	(and current-prefix-arg (read-buffer "Dnode buffer prefix: " "*dnode*"))))
+(defvar d-comint-dnode-mode-map-setup nil "")
+(defun d-comint-dnode-mode-setup-map ()
+	(interactive)
+	(setq d-comint-dnode-mode-map-setup t)
+	(define-key d-comint-dnode-mode-map [f8] 'dnode))
+(if (not d-comint-dnode-mode-map-setup) (d-comint-dnode-mode-setup-map))
+
+(defvar explicit-dnode-file-name nil)
+(defvar dnode-args nil)
+(defun dnode (port &optional buffer-pre)
+	(interactive (list
+		(read-number "Port number: ")
+		(and current-prefix-arg (read-buffer "Dnode buffer prefix: " "*dnode*"))))
   (when (null buffer-pre) (setq buffer-pre "*dnode*"))
   
-  (let* ((buffer-name (concat buffer-pre (format "<%d>" port)))
-		 (old-windows (get-buffer-window-list buffer-name)))
-	(if (not (null d-comint-mode-dnode-mode))
-		(switch-to-buffer buffer-name)
-	  (pop-to-buffer buffer-name)
-	  (unless (catch 'find-window
-				(dolist (old-window old-windows)
-				  (when (eq old-window (selected-window))
-					(throw 'find-window t))))
-		(shrink-window (- (window-height) d-comint-mode-window-size))))
-	(shell buffer-name)
-	(when (null d-comint-mode-dnode-mode) 
-	  (d-comint-mode-dnode-mode)
-	  (goto-char (point-max))
-	  (insert (format "dnode %d" port)) 
-	  (comint-send-input)
-	  (add-hook 
-	   'comint-exec-hook 
-	   (lambda () (insert (format "dnode %d" port)) (comint-send-input))
-	   nil t))))
+	(let* ((buffer-name (concat buffer-pre (format "<%d>" port)))
+				 (dnode-buffer (get-buffer buffer-name)))
+
+		(when (or (null dnode-buffer) (not (comint-check-proc dnode-buffer)))
+			(let* ((prog (or explicit-dnode-file-name
+											 (getenv "EDNODE")
+											 (getenv "DNODE")
+											 "@bindir@/dnode"))
+						 (port-string (format "%d" port))
+						 (name (format "%s-%d" (file-name-nondirectory prog) port))
+						 (dnode-args (append dnode-args (list port-string))))
+				(save-excursion
+					(set-buffer (setq dnode-buffer (get-buffer-create buffer-name)))
+					(insert "Starting at " (current-time-string) ": " prog)
+					(dolist (dnode-arg dnode-args) (insert " " dnode-arg))
+					(insert "\n")
+					(goto-char (point-max))
+					(apply 'make-comint-in-buffer 
+								 name dnode-buffer prog nil dnode-args)
+					(d-comint-dnode-mode))))
+
+		(if (eq major-mode 'd-comint-dnode-mode)
+				(switch-to-buffer dnode-buffer)
+			(let (old-windows (get-buffer-window-list dnode-buffer))
+				(pop-to-buffer dnode-buffer)
+				(unless (catch 'find-window
+									(dolist (old-window old-windows)
+										(when (eq old-window (selected-window))
+											(throw 'find-window t))))
+					(shrink-window (- (window-height) d-comint-mode-window-size)))))))
 
 (require 'ansi-color)
 (provide 'd-comint-mode)
