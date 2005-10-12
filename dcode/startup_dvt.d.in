@@ -1927,7 +1927,7 @@ Xwindows {
       0 exch getinterval mkact exec put
   /busy false def
   wid true mapwindow  
-  wid true makewindowtop
+  |wid true makewindowtop
   wid userdict /TheHorsesWid put
 } if  
 

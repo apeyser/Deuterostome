@@ -11,24 +11,6 @@ BOOLEAN moreX = FALSE;
 
 /*-------------------------- Dnode operators -------------------------*/
 
-L op_getlock(void)
-{
-    if (CEILopds < o2) return (OPDS_OVF);
-    TAG(o1) = BOOL;
-    BOOL_VAL(o1) = locked;
-    FREEopds = o2;
-    return OK;
-}
-    
-L op_setlock(void) 
-{
-    if (o_1 < FLOORopds) return (OPDS_UNF);
-    if (TAG(o_1) != BOOL) return (OPD_TYP);
-    locked = BOOL_VAL(o_1);
-    FREEopds = o_1;
-    return OK;
-}
-
 L x_op_lock(void) {
 	if (o_1 < FLOORopds) return OPDS_UNF;
 	if (x_1 < FLOORexecs) return EXECS_UNF;
@@ -78,17 +60,25 @@ L op_lock(void) {
 
 static L x_op_halt(void)
 {
+	if (x_1 < FLOORexecs) return EXECS_UNF;
+	if (TAG(x_1) != BOOL) return EXECS_COR;
   if (halt_flag) { FREEexecs = x2; return(DONE); }
-return(OK);
+	locked = BOOL_VAL(x_1);
+	FREEexecs = x_1;
+	return(OK);
 }
 
 L op_halt(void)
 {
-TAG(x1) = OP; ATTR(x1) = ACTIVE;
-OP_NAME(x1) = (L)"x_halt"; OP_CODE(x1) = (L)x_op_halt;
-FREEexecs = x2;
-halt_flag = TRUE;
-return(DONE);
+	if (x2 <= CEILexecs) return EXECS_OVF;
+
+	TAG(x1) = BOOL; ATTR(x1) = 0;
+	BOOL_VAL(x1) = locked;
+	TAG(x2) = OP; ATTR(x2) = ACTIVE;
+	OP_NAME(x2) = (L)"x_halt"; OP_CODE(x2) = (L)x_op_halt;
+	FREEexecs = x3;
+	halt_flag = TRUE;
+	return DONE;
 }
 
 /*------------------------------------- 'continue'

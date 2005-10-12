@@ -539,19 +539,24 @@ switch(retc = exec(100))
  case MORE: 
 	 if (locked) goto more; else goto theloop;
 
- case DONE: running = FALSE; locked = FALSE;
-	          if (FREEexecs == FLOORexecs) moveframe(msf,cmsf);
-						goto theloop;
-
  case KILL_SOCKS: 
-	 running = FALSE; locked = FALSE;
+	 // kill all socket connections
+	 nact = 0;
 	 op_Xdisconnect();
 	 for (i = 0; i < FD_SETSIZE; ++i)
 		 if (FD_ISSET(i, &sock_fds) && (i != serversocket)) {
 			 FD_CLR(i, &sock_fds);
 			 close(i);
 		 }
-	 goto sel1;
+	 if (x1 >= CEILexecs) {retc = EXECS_OVF; goto derror;};
+	 TAG(x1) = OP; ATTR(x1) = ACTIVE;
+	 OP_NAME(x1) = (L) "abort"; OP_CODE(x1) = (L) op_abort;
+	 FREEexecs = x2;
+	 goto more;
+
+ case DONE: running = FALSE; locked = FALSE;
+	          if (FREEexecs == FLOORexecs) moveframe(msf,cmsf);
+						goto theloop;
 
  default:   goto derror;
 }
@@ -577,7 +582,6 @@ derror:
      hostname string
    and push active name 'error' on execution stack
 */
-locked = FALSE;
 if (o4 >= CEILopds) FREEopds = FLOORopds;
 if (x1 >= CEILexecs) FREEexecs = FLOORexecs;
 TAG(o1) = ARRAY | BYTETYPE; ATTR(o1) = READONLY;

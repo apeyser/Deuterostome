@@ -9,8 +9,6 @@ L op_nextlib(void);
 
 B *sysop[] =
 {
-      "getlock",     (B*) op_getlock, 
-      "setlock",     (B*) op_setlock,
 			"lock",        (B*) op_lock,
       
 /*-- hi */

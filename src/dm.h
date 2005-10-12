@@ -517,8 +517,6 @@ void ATAN(B *frame);
 void DECREMENT(B *frame);
 
 /*----------------------- system operators */
-L op_setlock(void);
-L op_getlock(void);
 L op_lock(void);
 L op_syshi(void);
 L op_syslibnum(void);
