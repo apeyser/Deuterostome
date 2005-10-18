@@ -70,7 +70,7 @@ static L x_op_halt(void)
 
 L op_halt(void)
 {
-	if (x2 <= CEILexecs) return EXECS_OVF;
+	if (x2 >= CEILexecs) return EXECS_OVF;
 
 	TAG(x1) = BOOL; ATTR(x1) = 0;
 	BOOL_VAL(x1) = locked;
@@ -214,6 +214,7 @@ L op_toconsole(void)
 L op_error(void)
 {
 L e, nb, atmost; B *m, strb[256], *p;
+L ret;
 
 p = strb; atmost = 255;
 if (o_4 < FLOORopds) goto baderror;
@@ -243,17 +244,21 @@ if (!VALUE(o_1,&e)) goto baderror;
  VALUE_BASE(o_4) = (L)strb; ARRAY_SIZE(o_4) = nb;
  FREEopds = o_3;
  op_toconsole();
- return(op_halt());
+ if ((ret = op_halt()) == DONE) return DONE;
+
+ nb = snprintf(p, atmost, "** Error in internal halt!\n");
+ goto baderror2;
 
 baderror: 
-nb = snprintf(p,atmost,
-   "**Error with corrupted error info on operand stack!\n");
-op_abort();
+ nb = snprintf(p,atmost,
+			   "**Error with corrupted error info on operand stack!\n");
+baderror2:
+ op_abort();
  nb += (L)(p - strb);
  TAG(o1) = ARRAY | BYTETYPE; ATTR(o1) = READONLY;
  VALUE_BASE(o1) = (L)strb; ARRAY_SIZE(o1) = nb;
  FREEopds = o2;
-return(op_toconsole());
+ return(op_toconsole());
 }
 
 /*-------------------------------------- 'errormessage'
