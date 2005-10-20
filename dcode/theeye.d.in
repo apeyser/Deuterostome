@@ -457,6 +457,7 @@ end
                * fde 1 get * number * (/) text
                * fde 2 get * number * (/) text
                * fde 0 get * number * (   ) text 
+               fde 3 get 9 le {* 0 * number} if
                * fde 3 get * number * (:) text
                * fde 4 get * number (   ) fax
                fd 3 get 256 and 0 ne { (r) } { (-) } ifelse fax
