@@ -137,9 +137,6 @@ property."
 (require 'server)
 (define-derived-mode d-comint-mode comint-mode "DVT"
   "Major mode for handling d-machine"
-  (when d-comint-mode-server 
-	(setq server-name (format "server-%d" (emacs-pid)))
-	(server-start))
   (set (make-local-variable 'comint-prompt-regexp) "^")
   (set (make-local-variable 'comint-input-ring-file-name) "~/.dvt_history")
 
