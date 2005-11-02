@@ -23,7 +23,7 @@
       (#\(cp -R \) fax faxRpage \( \) fax faxLpage\n)
       (getRpage getLpage tofiles\n)
       (getRpage dup 0 get exch 1 get { exch dup 3 -1 roll fromfiles } forall pop\n)
-     (#\(emacsclient -n \) fax faxRpage\n)
+     (#\(emacsclient -n -s \) fax emacs_server_name fax \( \) fax faxRpage\n)
      (getRpage dup 0 get exch 1 get {exch dup 3 -1 roll loadlib} forall pop\n)
 |-- Dnodes
      (* dvt begin dnode_resize end\n)

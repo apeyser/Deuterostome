@@ -22,8 +22,3 @@
 ;; (setenv "DMLISPDIR" "some-path-to-emacs-code") ; overrides pkglispdir
 ;; (setq explicit-dmlispdir "some-path-to-emacs-code") ; overrides pkglispdir
 
-(when d-comint-mode-server 
-  (setq server-name (format "server-%d" (emacs-pid)))
-  (server-start)
-  (setenv "EDITOR" (format "emacsclient -s %s --alternate-editor emacs" 
-						   server-name)))

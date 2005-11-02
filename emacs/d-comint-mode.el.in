@@ -1,5 +1,5 @@
 (require 'd-mode)
-(require 'server)
+(require 'dm-server)
 (require 'comint)
 
 (defgroup d-comint-mode nil "Major mode for DVT shell"
@@ -7,7 +7,7 @@
   :group 'd-mode)
 
 (defcustom d-comint-mode-server t
-  "Startup server for emacs when starting dvt"
+  "Startup server for emacs when loading init"
   :type '(boolean)
   :group 'd-comint-mode)
 
@@ -55,11 +55,12 @@
   "Alist of frame properties for mini dvt window."
   :group 'd-comint-mode
   :type '(alist)
-  :options '((display string) 
-			 (title string)
+  :options '((title string)
 			 (name string)
-			 (left (choice integer (list (choice (const +) (const '- )) integer)))
-			 (top (choice integer (list (choice (const +) (const '- )) integer)))
+			 (left (choice integer (list (choice (const +) (const '- )) 
+										 integer)))
+			 (top (choice integer (list (choice (const +) (const '- )) 
+										integer)))
 			 (icon-left integer)
 			 (icon-top integer)
 			 (user-position boolean)
@@ -134,7 +135,6 @@ property."
 							  '(font-lock-face nil)))))
 
 ;;;###autoload
-(require 'server)
 (define-derived-mode d-comint-mode comint-mode "DVT"
   "Major mode for handling d-machine"
   (set (make-local-variable 'comint-prompt-regexp) "^")
@@ -285,6 +285,12 @@ property."
 )
 (if (not d-comint-mode-map-setup) (d-comint-mode-setup-map))
 
+(defun d-comint-mode-server ()
+  "Start d-comint-mode-server"
+  (when (and d-comint-mode-server (not dm-server-process))
+	(setq dm-server-name (format "dm-server-%d" (emacs-pid)))
+	(dm-server-start)))
+
 (defun dvt (&optional buffer)
   "Run an inferior shell, with I/O through BUFFER (which defaults to `*shell*').
 Interactively, a prefix arg means to prompt for BUFFER.
@@ -337,13 +343,14 @@ Otherwise, one argument `-i' is passed to the shell.
 						(when (and xargs-name (boundp xargs-name))
 						  (symbol-value xargs-name)))))
 		  (d-comint-mode)
-		  (when d-comint-mode-server
-				(process-send-string 
-				 (get-buffer-process dvt-buffer)
-				 (concat 
-					"Xwindows {(" (d-comint-mode-shell-quote server-name) ") ("
-					(d-comint-mode-shell-quote (buffer-name dvt-buffer)) 
-					") take_input_setup} if\n"))))
+		  (d-comint-mode-server)
+		  (when dm-server-process
+			(process-send-string 
+			 (get-buffer-process dvt-buffer)
+			 (concat 
+			  "Xwindows {(" (d-comint-mode-shell-quote dm-server-name) ") ("
+			  (d-comint-mode-shell-quote (buffer-name dvt-buffer)) 
+			  ") take_input_setup} if\n"))))
 		(switch-to-buffer dvt-buffer))
     (switch-to-buffer buffer)))
 
@@ -502,4 +509,3 @@ Used by dvt to signal to emacs that it should pop up and take focus"
 
 (require 'ansi-color)
 (provide 'd-comint-mode)
-
