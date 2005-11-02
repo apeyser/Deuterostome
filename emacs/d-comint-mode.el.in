@@ -45,6 +45,59 @@
   "Face for comint input"
   :group 'd-comint-mode)
 
+(defcustom d-comint-mode-frame-alist '((auto-raise . nil)
+									   (tool-bar-lines . nil)
+									   (menu-bar-lines . nil)
+									   (minibuffer . nil))
+  "Alist of frame properties for mini dvt window."
+  :group 'd-comint-mode
+  :type '(alist)
+  :options '((display string) 
+			 (title string)
+			 (name string)
+			 (left (choice integer (list (choice (const +) (const '- )) integer)))
+			 (top (choice integer (list (choice (const +) (const '- )) integer)))
+			 (icon-left integer)
+			 (icon-top integer)
+			 (user-position boolean)
+			 (height integer)
+			 (width integer)
+			 (user-size boolean)
+			 (fullscreen (choice 
+							(const fullwidth) 
+							(const fullheight) 
+							(const fullboth)))
+			 (minibuffer boolean)
+			 (auto-raise boolean)
+			 (auto-lower boolean)
+			 (vertical-scroll-bars boolean)
+			 (horizontal-scroll-bars boolean)
+			 (scroll-bar-width (choice integer (const nil)))
+			 (icon-type (choice boolean string))
+			 (icon-name (choice (const nil) string))
+			 (background-mode (choice (const dark) (const light)))
+			 (tty-color-mode (choice integer symbol))
+			 (display-type (choice (const color) 
+									 (const grayscale) 
+									 (const mono)))
+			 (cursor-type (choice (const box)
+									(const hollow)
+									(const nil)
+									(const bar)
+									(cons :tag "(bar . integer)" 
+										  (const bar) integer)
+									(const hbar)
+									(cons :tag "(hbar . integer)"
+										  (const hbar) integer)))
+			 (border-width integer)
+			 (internal-border-width integer)
+			 (left-fringe integer)
+			 (right-fringe integer)
+			 (unsplittable boolean)
+			 (menu-bar-lines (choice (const nil) integer))
+			 (tool-bar-lines (choice (const nil) integer))
+			 (line-spacing integer)))
+
 (defun d-comint-mode-freeze-overlay (overlay is-after begin end &optional len)
   "Prevent OVERLAY from being extended.
 This function can be used for the `modification-hooks' overlay
@@ -78,9 +131,12 @@ property."
 							  '(font-lock-face nil)))))
 
 ;;;###autoload
+(require 'server)
 (define-derived-mode d-comint-mode comint-mode "DVT"
   "Major mode for handling d-machine"
-  (if d-comint-mode-server (server-start))
+  (when d-comint-mode-server 
+	(setq server-name (format "server-%d" (emacs-pid)))
+	(server-start))
   (set (make-local-variable 'comint-prompt-regexp) "^")
   (set (make-local-variable 'comint-input-ring-file-name) "~/.dvt_history")
 
@@ -335,11 +391,9 @@ even if `d-comint-mode-keep-focus' is nil.
 			(t 
 			 (window-frame (special-display-popup-frame
 							buffer-name 
-							(list (cons 'height d-comint-mode-window-size)
-								  '(auto-raise . nil)
-								  '(tool-bar-lines . nil)
-								  '(menu-bar-lines . nil)
-								  '(minibuffer . nil))))))))
+							(append
+							 (list (cons 'height d-comint-mode-window-size))
+							 d-comint-mode-frame-alist)))))))
 	  (select-frame buffer-frame)
 	  (when (eq window-system 'x) (x-focus-frame buffer-frame)))))
 
