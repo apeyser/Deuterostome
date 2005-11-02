@@ -21,8 +21,11 @@
   :type '(integer)
   :group 'd-comint-mode)
 
-(defvar explicit-dvt-file-name nil "dvt program name")
-(defvar comint-last-output-start)
+(defcustom explicit-dvt-file-name nil "dvt program name"
+  :group 'd-comint-mode
+  :type '(choice (const nil) file))
+;;(defvar comint-last-output-start)
+(require 'comint)
 
 (defvar d-comint-mode-highlight-output 
   'd-comint-mode-highlight-output 
@@ -428,7 +431,11 @@ Used by dvt to signal to emacs that it should pop up and take focus"
    (get-buffer-process (current-buffer))
    "* userdict begin hide_all\n"))
 
-(defvar d-comint-dnode-mode-dnode-args nil)
+(defcustom d-comint-dnode-mode-dnode-args nil 
+  "Options to dnode program"
+  :group 'd-comint-mode
+  :type '(repeat string))
+
 (defvar d-comint-dnode-mode-dnode-buffer nil)
 (defvar d-comint-dnode-mode-prog nil)
 (define-derived-mode d-comint-dnode-mode comint-mode "dnode"
@@ -453,7 +460,11 @@ Used by dvt to signal to emacs that it should pop up and take focus"
 	(define-key d-comint-dnode-mode-map [f8] 'dnode))
 (if (not d-comint-dnode-mode-map-setup) (d-comint-dnode-mode-setup-map))
 
-(defvar explicit-dnode-file-name nil)
+(defcustom explicit-dnode-file-name nil
+  "Name of programe to run dnode"
+  :group 'd-comint-mode
+  :type '(choice (const nil) file))
+
 (defun dnode (port &optional buffer-pre)
 	(interactive (list
 		(read-number "Port number: ")
