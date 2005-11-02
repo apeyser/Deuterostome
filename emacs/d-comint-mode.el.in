@@ -338,7 +338,8 @@ even if `d-comint-mode-keep-focus' is nil.
 							(list (cons 'height d-comint-mode-window-size)
 								  '(auto-raise . nil)
 								  '(tool-bar-lines . nil)
-								  '(menu-bar-lines . nil))))))))
+								  '(menu-bar-lines . nil)
+								  '(minibuffer . nil))))))))
 	  (select-frame buffer-frame)
 	  (when (eq window-system 'x) (x-focus-frame buffer-frame)))))
 
