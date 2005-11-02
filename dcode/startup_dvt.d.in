@@ -811,6 +811,30 @@ c_         list all connections
 ) toconsole 
 } bind userdict 3 -1 roll put
 
+/hk_ {
+(
+  Emacs dvt keys:
+    f1: d-comint-mode-invert, execute the previous command line
+    f2: d-comint-mode-continue, send continue to the dvt/dnode
+    f3: d-comint-mode-stop, send stop to the dvt/dnode
+    f4: d-comint-mode-abort, send abort to the dvt/dnode
+    f5: d-comint-mode-raise-the-horses, pop up TheHorses window
+    f6: d-comint-mode-raise-all, pop up all dvt/dnode windows
+    shift-f6: d-comint-mode-hide-all, iconify all dvt/dnode windows
+    f7: d-comint-mode-focus-raise, raise the dvt emacs frame
+    f8: start a local dnode
+    control-h d: get this help
+    control-!: d-comint-mode-scream, ignore busy state when sending to dnodes
+    control-1: same as control-!
+    control-c c: d-comint-mode-clear, clear preceding text from emacs window
+    control-c control-a: d-comint-mode-dabort, send command wrapped 
+                         in debug abort
+    control >: d-comint-mode-redirect-mode, send output to log file
+    control-c control-n: d-comint-mode-narrow, narrow dvt buffer
+    control-c control-w: d-comint-mode-widen, widen dvt buffer
+) toconsole
+} bind userdict 3 -1 roll put
+
 |---------------------------------------------------- list active connections
 
 /c_ {

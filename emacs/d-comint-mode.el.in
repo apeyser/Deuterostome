@@ -274,6 +274,7 @@ property."
   (define-key d-comint-mode-map [(shift f6)] 'd-comint-mode-hide-all)
   (define-key d-comint-mode-map [f7] 'd-comint-mode-focus-raise)
   (define-key d-comint-mode-map [f8] 'dnode)
+  (define-key d-comint-mode-map [?\C-h ?d] 'd-comint-mode-help)
   (define-key d-comint-mode-map [(control !)] 'd-comint-mode-scream)
   (define-key d-comint-mode-map [?\C-1] 'd-comint-mode-scream)
   ;;(define-key d-comint-mode-map [?\C-c ?\C-c] 'd-comint-mode-clear)
@@ -413,6 +414,13 @@ Used by dvt to signal to emacs that it should pop up and take focus"
   (d-comint-mode-focus (buffer-name) t)
   (make-frame-invisible nil t)
   (raise-frame))
+
+(defun d-comint-mode-help ()
+  "Tell dvt to output help info"
+  (interactive)
+  (process-send-string
+   (get-buffer-process (current-buffer))
+   "hk_\nh_\n"))
 
 (defun d-comint-mode-raise-thehorses ()
   "Tell dvt to raise TheHorses window."
