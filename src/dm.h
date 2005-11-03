@@ -138,10 +138,9 @@ NOTE: all objects that can populate the D machine's workspace must
 #define PROC                       ((UB) 0x70)
 #define DICT                       ((UB) 0x80)
 #define BOX                        ((UB) 0x90)
-#define HANDLE                     ((UB) 0xA0)
+//#define HANDLE                     ((UB) 0xA0)
 	
-#define COMPOSITE(frame) \
-	((UB)(CLASS(frame)) > (UB)(MARK) && TAG(frame) != (HANDLE | SIMPLETYPE))
+#define COMPOSITE(frame)           ((UB)(CLASS(frame)) > (UB)(MARK))
 
 #define BYTETYPE                   ((UB) 0x00)       /* numeral types */
 #define WORDTYPE                   ((UB) 0x01)
@@ -153,6 +152,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define COMPLEXTYPE                ((UB) 0x00)      
 #define CMACHINE                   ((UB) 0x00)      /* operator types */
 #define OPLIBTYPE                  ((UB) 0x01)      /* operator lib type */
+#define OPAQUETYPE                 ((UB) 0x02)      /* opaque dictionary */
 
 /* attributes qualify a frame, not an object value: */
 
@@ -228,21 +228,21 @@ NOTE: all objects that can populate the D machine's workspace must
 #define DICT_CURR(frame)           (*((L *)(((B*)(frame))+8)))
 #define BOX_NB(frame)              (*((L *)(((B*)(frame))+8)))
 #define VALUE_PTR(frame)           (*((B**)(((B*)(frame))+4)))
-#define HANDLE_ID(frame)           (*((L *)(((B*)(frame))+12)))
-#define HANDLE_CEIL(frame)         (*((B**)(((B*)(frame))+8)))
+/* #define HANDLE_ID(frame)           (*((L *)(((B*)(frame))+12))) */
+/* #define HANDLE_CEIL(frame)         (*((B**)(((B*)(frame))+8))) */
 
-static void SET_HANDLE_ID(B* frame, B* string) {
-	HANDLE_ID(frame) = *(L*)(string);
-}
-static void GET_HANDLE_ID(B* frame, B* string) {
-	*(L*)(string) = HANDLE_ID(frame);
-}
-static BOOLEAN EQ_HANDLE_ID(B* frame1, B* frame2) {
-	return HANDLE_ID(frame1) == HANDLE_ID(frame2);
-}
-static BOOLEAN EQ_HANDLE_ID_STRING(B* frame, B string[5]) {
-	return HANDLE_ID(frame) == *(L*)string;
-}
+/* static void SET_HANDLE_ID(B* frame, B* string) { */
+/* 	HANDLE_ID(frame) = *(L*)(string); */
+/* } */
+/* static void GET_HANDLE_ID(B* frame, B* string) { */
+/* 	*(L*)(string) = HANDLE_ID(frame); */
+/* } */
+/* static BOOLEAN EQ_HANDLE_ID(B* frame1, B* frame2) { */
+/* 	return HANDLE_ID(frame1) == HANDLE_ID(frame2); */
+/* } */
+/* static BOOLEAN EQ_HANDLE_ID_STRING(B* frame, B string[5]) { */
+/* 	return HANDLE_ID(frame) == *(L*)string; */
+/* } */
 
 /* NB: Attention to moveframe & moveframes in dm2.c whenever
    framebytes is changed */
@@ -319,7 +319,7 @@ static BOOLEAN EQ_HANDLE_ID_STRING(B* frame, B string[5]) {
 #define SAVE_OVF    0x0000020AL /* save stack overflow                   */
 #define INV_REST    0x0000020BL /* invalid restore                       */
 #define SAVE_UNF    0x0000020DL /* save stack underflow                  */
-#define ILL_HANDLE  0x0000020EL /* handle type mismatch                  */
+#define ILL_OPAQUE  0x0000020EL /* Opaque dict type mismatch             */
 
 #define VMR_ERR     0x00000210L /* couldn't allocate memory              */
 #define VMR_STATE   0x00000211L /* vm already tiny                       */
@@ -479,6 +479,11 @@ L deendian_frame(B *frame);
 //L deendian_entries(B* doct);
 void setupdirs(void);
 
+//globals -- used only in plugins
+extern B opaquename[FRAMEBYTES];
+extern B saveboxname[FRAMEBYTES];
+extern BOOLEAN opaquename_;
+
 /*--- DM3 */
 L make_socket(L port);
 L fromsocket(L socket, B *msf);
@@ -632,7 +637,6 @@ L op_xor(void);
 L op_bitshift(void);
 /*-- conversion, string, attribute, class ,type */
 L op_class(void);
-L op_handleid(void);
 L op_type(void);
 L op_readonly(void);
 L op_active(void);

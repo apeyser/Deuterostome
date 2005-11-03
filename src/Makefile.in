@@ -65,8 +65,13 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libdmglobals_la_LIBADD =
+am__libdmglobals_la_SOURCES_DIST = dmglobals.c dm1.c dm2.c dm3.c dm4.c \
+	dm5.c dm6.c dm7.c dm8.c dm9.c dmnum.c dsp1.c dsp2.c dmnuminc.h \
+	dsp1f.h error.h plugin.c
+@ENABLE_plugins_TRUE@am__objects_1 = plugin.lo
 am_libdmglobals_la_OBJECTS = dmglobals.lo dm1.lo dm2.lo dm3.lo dm4.lo \
-	dm5.lo dm6.lo dm7.lo dm8.lo dm9.lo dmnum.lo dsp1.lo dsp2.lo
+	dm5.lo dm6.lo dm7.lo dm8.lo dm9.lo dmnum.lo dsp1.lo dsp2.lo \
+	$(am__objects_1)
 libdmglobals_la_OBJECTS = $(am_libdmglobals_la_OBJECTS)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
@@ -92,7 +97,7 @@ LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(libdmglobals_la_SOURCES) $(dnode_SOURCES) $(dvt_SOURCES) \
 	$(testwordorder_SOURCES)
-DIST_SOURCES = $(libdmglobals_la_SOURCES) $(dnode_SOURCES) \
+DIST_SOURCES = $(am__libdmglobals_la_SOURCES_DIST) $(dnode_SOURCES) \
 	$(dvt_SOURCES) $(testwordorder_SOURCES)
 pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(pkginclude_HEADERS)
@@ -267,9 +272,10 @@ dnode_LDADD = @LIBLTDL@ libdmglobals.la
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 testwordorder_SOURCES = test-word-order.c
 lib_LTLIBRARIES = libdmglobals.la
+@ENABLE_plugins_TRUE@PLUGINS_SRC = plugin.c
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
-	dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h error.h
+	dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h error.h $(PLUGINS_SRC)
 
 all: all-am
 
@@ -399,6 +405,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsp1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsp2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvt-dvt.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-word-order.Po@am__quote@
 
 .c.o:

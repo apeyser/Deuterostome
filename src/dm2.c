@@ -835,9 +835,15 @@ static BOOLEAN foldsubframe(B* lframe) {
 			makename((B *)OP_NAME(lframe),lframe);
 			ATTR(lframe) |= (BIND | ACTIVE); 
 			return FALSE;
-		case BOX: case NULLOBJ: case HANDLE:
+		case BOX: case NULLOBJ:
 			TAG(lframe) = NULLOBJ; ATTR(lframe) = 0;
 			return FALSE;
+	    case DICT:
+		  if (TYPE(lframe) == OPAQUETYPE) {
+			TAG(lframe) = NULLOBJ; ATTR(lframe) = 0;
+			return FALSE;
+		  }
+		  return TRUE;
 		default:
 			return COMPOSITE(lframe);
 	}

@@ -43,8 +43,27 @@ B* ll_export[] = {
 	"waitproc", (B*) op_waitproc,
 	"unwaitproc", (B*) op_unwaitproc,
 	"liveproc", (B*) op_liveproc,
+	"INIT_", (B*) op_INIT_,
 	"", NULL
 };
+
+B opaquename[FRAMEBYTES];
+static B PROCESS_PID_N[FRAMEBYTES];
+static B PROCESS_STDOUT_N[FRAMEBYTES];
+static B PROCESS_STDIN_N[FRAMEBYTES];
+static B PROCESS_STATE_N[FRAMEBYTES];
+static B PROCESS_BUFFC_N[FRAMEBYTES];
+
+L op_INIT_(void) {
+  makename(PROCESS_HANDLE, opaquename);
+  makename("pid", PROCESS_PID_N);
+  makename("stdout", PROCESS_STDOUT_N);
+  makename("stdin", PROCESS_STDIN_N);
+  makename("state", PROCESS_STATE_N);
+  makename("buffc", PROCESS_BUFFC_N);
+
+  return OK;
+}
 
 #define DECLARE_ALARM \
   clock_t endclock = clock() + 180*CLOCKS_PER_SEC; \
@@ -76,8 +95,8 @@ L op_writeproc(void) {
 	DECLARE_ALARM;
 
 	if (o_2 < FLOORopds) return OPDS_UNF;
-	if (TAG(o_1) != (HANDLE | COMPLEXTYPE)) return OPD_TYP;
-	if (! EQ_HANDLE_ID_STRING(o_1, PROCESS_HANDLE)) return ILL_HANDLE;
+	TEST_OPAQUE(o_1);
+	
 	if (TAG(o_2) != STRING) return OPD_TYP;
 	if (ARRAY_SIZE(o_2) == 0) return RNG_CHK;
 
@@ -112,8 +131,7 @@ L op_waitproc(void) {
 	B nextchar;
 
 	if (o_1 < FLOORopds) return OPDS_UNF;
-	if (TAG(o_1) != (HANDLE | COMPLEXTYPE)) return OPD_TYP;
-	if (! EQ_HANDLE_ID_STRING(o_1, PROCESS_HANDLE)) return ILL_HANDLE;
+	TEST_OPAQUE(o_1);
 
 	if (PROCESS_STATE(o_1) == PROCESS_DEAD) RETURN_ERROR(PROC_DEAD);
 	if (PROCESS_STATE(o_1) == PROCESS_BUFFD) return OK;
@@ -144,8 +162,8 @@ L op_readproc(void) {
 	DECLARE_ALARM;
 	
 	if (o_4 < FLOORopds) return OPDS_UNF;
-	if (TAG(o_1) != (HANDLE | COMPLEXTYPE)) return OPD_TYP;
-	if (! EQ_HANDLE_ID_STRING(o_1, PROCESS_HANDLE)) return ILL_HANDLE;
+	TEST_OPAQUE(o_1);
+
 	if (CLASS(o_2) != NUM) return OPD_TYP;
 	if (CLASS(o_3) != NUM) return OPD_TYP;
 	if (TAG(o_4) != STRING) return OPD_TYP;
@@ -191,8 +209,7 @@ L op_readproc(void) {
 
 L op_unwaitproc(void) {
 	if (o_1 < FLOORopds) return OPDS_UNF;
-	if (TAG(o_1) != (HANDLE | COMPLEXTYPE)) return OPD_TYP;
-	if (! EQ_HANDLE_ID_STRING(o_1, PROCESS_HANDLE)) return ILL_HANDLE;
+	TEST_OPAQUE(o_1);
 
 	if (PROCESS_STATE(o_1) == PROCESS_DEAD) RETURN_ERROR(PROC_DEAD);
 
@@ -208,8 +225,7 @@ L op_killproc(void) {
 	int errno_ = 0;
 
 	if (o_1 < FLOORopds) return OPDS_UNF;
-	if (TAG(o_1) != (HANDLE | COMPLEXTYPE)) return OPD_TYP;
-	if (! EQ_HANDLE_ID_STRING(o_1, PROCESS_HANDLE)) return ILL_HANDLE;
+	TEST_OPAQUE(o_1);
 
 	if (PROCESS_STATE(o_1) == PROCESS_DEAD) RETURN_ERROR(PROC_DEAD);
 	if (PROCESS_STATE(o_1) == PROCESS_BUFFD) RETURN_ERROR(PROC_WAIT);
@@ -223,6 +239,7 @@ L op_killproc(void) {
 	if (errno_) return -errno_;
 
 	FREEopds = o_1;
+	KILL_OPAQUE(o1);
 	return OK;
 }
 
@@ -235,8 +252,7 @@ L op_liveproc(void) {
 	L pipeout;
 
 	if (o_1 < FLOORopds) return OPDS_UNF;
-	if (TAG(o_1) != (HANDLE | COMPLEXTYPE)) return OPD_TYP;
-	if (! EQ_HANDLE_ID_STRING(o_1, PROCESS_HANDLE)) return ILL_HANDLE;
+	TEST_OPAQUE(o_1);
 
 	if (PROCESS_STATE(o_1) == PROCESS_DEAD) RETURN_ERROR(PROC_DEAD);
 
@@ -310,6 +326,8 @@ L op_makeproc(void) {
 	int ret;
 	int errno_;
 	size_t p;
+	B* procframe;
+	B initframe[FRAMEBYTES];
 
 	if (FREEvm + 2*FRAMEBYTES > CEILvm) return VM_OVF;
 
@@ -443,16 +461,25 @@ L op_makeproc(void) {
 		};
 	};
 	
-	TAG(FREEvm) = (HANDLE | COMPLEXTYPE); ATTR(FREEvm) = 0;
-	SET_HANDLE_ID(FREEvm, PROCESS_HANDLE);
-	VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
-	HANDLE_CEIL(FREEvm) = FREEvm + 2*FRAMEBYTES;
-	PROCESS_PID(FREEvm) = pid;
-	PROCESS_STDIN(FREEvm) = filedes_stdin[1];
-	PROCESS_STDOUT(FREEvm) = filedes_stdout[0];
-	PROCESS_STATE(FREEvm) = 0;
-	moveframe(FREEvm, o_1);
-	FREEvm = HANDLE_CEIL(FREEvm);
+	if (! (procframe = MAKE_OPAQUE(PROCESS_PID_N,
+								   PROCESS_STDOUT_N,
+								   PROCESS_STDIN_N,
+								   PROCESS_STATE_N,
+								   PROCESS_BUFFC_N))) 
+	  return VM_OVF;
 	
+	TAG(initframe) = (NUM | LONGTYPE); ATTR(initframe) = 0;
+	LONG_VAL(initframe) = pid;
+	OPAQUE_MEM_SET(procframe, PROCESS_PID_N, initframe);
+	LONG_VAL(initframe) = filedes_stdin[1];
+	OPAQUE_MEM_SET(procframe, PROCESS_STDIN_N, initframe);
+	LONG_VAL(initframe) = filedes_stdout[0];
+	OPAQUE_MEM_SET(procframe, PROCESS_STDOUT_N, initframe);
+	TAG(initframe) = (NUM | BYTETYPE);
+	*(NUM_VAL(initframe)) = 0;
+	OPAQUE_MEM_SET(procframe, PROCESS_STATE_N, initframe);
+	OPAQUE_MEM_SET(procframe, PROCESS_BUFFC_N, initframe);
+
+	moveframe(procframe, o_1);	
 	return OK;
 }

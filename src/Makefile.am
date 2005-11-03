@@ -35,8 +35,13 @@ testwordorder_SOURCES = test-word-order.c
 
 lib_LTLIBRARIES = libdmglobals.la
 
+if ENABLE_plugins
+PLUGINS_SRC = plugin.c
+endif ENABLE_plugins
+
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
-	dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h error.h
+	dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h error.h $(PLUGINS_SRC)
+
 
 

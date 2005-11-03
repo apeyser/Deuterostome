@@ -103,3 +103,8 @@ UW ascii[128] =
 #if defined _WIN32 && defined DLL_EXPORT
 char libDM_is_dll(void) {return 1;}
 #endif
+
+// used only in plugins
+B opaquename[FRAMEBYTES];
+B saveboxname[FRAMEBYTES];
+BOOLEAN opaquename_ = TRUE;

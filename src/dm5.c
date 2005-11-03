@@ -424,12 +424,6 @@ if (CLASS(o_2) == CLASS(o_1)) {
 						t = (LONG_VAL(o_1) == LONG_VAL(o_2)) ? TRUE : FALSE;
 				else t=TRUE;
 				break;
-		  case HANDLE:
-				if (TYPE(o_1) != TYPE(o_2) || ! EQ_HANDLE_ID(o_1, o_2))
-					t = FALSE;
-				else
-					t = VALUE_BASE(o_1) == VALUE_BASE(o_2) ? TRUE : FALSE;
-				break;
       case NUM: t = COMPARE(o_2,o_1);
                 if (t == UN) { t = ((TEST(o_2) == UN) && (TEST(o_1) == UN));
                                break; }
@@ -472,19 +466,13 @@ if (o_2 < FLOORopds) return(OPDS_UNF);
 if (CLASS(o_2) == CLASS(o_1)) { 
 	switch(CLASS(o_2)) {
       case MARK: t=FALSE; break;
-		  case NULLOBJ: 
-				if (TYPE(o_1) != TYPE(o_2)) 
-					t = TRUE;
-				else if (TYPE(o_1) == SOCKETTYPE)
-					t = (LONG_VAL(o_1) != LONG_VAL(o_2)) ? TRUE : FALSE;
-				else t=FALSE;
-				break;
-		  case HANDLE:
-				if (TYPE(o_1) != TYPE(o_2) || ! EQ_HANDLE_ID(o_1, o_2))
-					t = TRUE;
-				else
-					t = VALUE_BASE(o_1) == VALUE_BASE(o_2) ? TRUE : FALSE;
-				break;
+	  case NULLOBJ: 
+		if (TYPE(o_1) != TYPE(o_2)) 
+		  t = TRUE;
+		else if (TYPE(o_1) == SOCKETTYPE)
+		  t = (LONG_VAL(o_1) != LONG_VAL(o_2)) ? TRUE : FALSE;
+		else t=FALSE;
+		break;
       case NUM: t = COMPARE(o_2,o_1);
                 if (t == UN) { t = ((TEST(o_2) != UN) || (TEST(o_1) != UN));
                                break; }

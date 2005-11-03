@@ -276,15 +276,19 @@ end mkread def
               }
               ifelse
             } bind def
-/dictclass  { mkpass /obj name newline 
-              obj length 
-              objstr 0 * 4 -1 roll * number 0 exch getinterval
-              ftext (dict dup begin) ftext
-              2 indent
-              obj { 4 -2 roll newline
-                    4 -1 roll inword 3 -1 roll inword (def) ftext
+/dictclass  { mkpass /obj name
+              obj type /X ne {
+                  newline
+                  obj length 
+                  objstr 0 * 4 -1 roll * number 0 exch getinterval
+                  ftext (dict dup begin) ftext
+                  2 indent
+                  obj {
+                      4 -2 roll newline
+                      4 -1 roll inword 3 -1 roll inword (def) ftext
                   } forall
-              -2 indent (end) ftext
+                  -2 indent (end) ftext
+              } if
             } bind def
 /boxclass   { pop (null) ftext} bind def | discard a box object
 /markclass  { pop * ([) text } bind def

@@ -98,6 +98,7 @@ AC_CHECK_HEADER([X11/Xlib.h])
 AC_CHECK_HEADER([X11/Xutil.h])
 CF_AC_CHECK_HEADER([strings.h])
 CF_AC_CHECK_HEADER([inttypes.h])
+CF_IF_ENABLED([plugins], [CF_AC_CHECK_HEADER([stdarg.h])])
 AC_CHECK_HEADER([error.h], [
   AC_DEFINE([HAVE_ERROR_H], [1], [Define to 1 if you have <error.h>])
 ])

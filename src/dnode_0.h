@@ -9,7 +9,7 @@ L op_nextlib(void);
 
 B *sysop[] =
 {
-			"lock",        (B*) op_lock,
+      "lock",        (B*) op_lock,
       
 /*-- hi */
       "hi",            (B*) op_syshi,
@@ -30,7 +30,7 @@ B *sysop[] =
       "halt",           (B *)op_halt,
       "continue",       (B *)op_continue,
       "vmresize",       (B *)op_vmresize,
-			"killsockets",    (B *)op_killsockets,
+	  "killsockets",    (B *)op_killsockets,
       "getmyport",      (B *)op_getmyport,
 
 /*-- network */
@@ -41,8 +41,8 @@ B *sysop[] =
       "getmyname",      (B *)op_getmyname,
 
 /*-- X windows */
-			"Xwindows",       (B *)op_Xwindows,
-			"Xwindows_",      (B *)op_Xwindows_,
+	  "Xwindows",       (B *)op_Xwindows,
+	  "Xwindows_",      (B *)op_Xwindows_,
       "Xconnect",       (B *)op_Xconnect,
       "Xdisplayname",   (B *)op_Xdisplayname,
       "Xdisconnect",    (B *)op_Xdisconnect,
@@ -149,7 +149,6 @@ B *sysop[] =
       "bitshift",       (B *)op_bitshift,
 /*-- conversion, string, attribute, class ,type */
       "class",          (B *)op_class,
-			"handleid",       (B *)op_handleid,
       "type",           (B *)op_type,
       "readonly",       (B *)op_readonly,
       "active",         (B *)op_active,
@@ -231,7 +230,7 @@ L syserrc[] =
     CORR_OP, BADBOX, BAD_MSG, NOSYSTEM, INV_MSG, NOT_HOST, BAD_FMT,
     LIB_LOAD, LIB_EXPORT, LIB_LINK, LIB_ADD, LIB_LOADED, LIB_OVF, LIB_MERGE,
     NO_XWINDOWS, X_ERR, X_BADFONT, X_BADHOST,
-		VMR_ERR, VMR_STATE, ILL_HANDLE,
+	VMR_ERR, VMR_STATE, ILL_OPAQUE,
     0L,
 };
 
@@ -288,9 +287,9 @@ B* syserrm[] =
     "** Error in X windows",
     "** Bad X windows font",
     "** Cannot connect to X server",
-		"** Cannot allocate D memory",
-		"** Memory already minimized",
-		"** Handle type mismatch"
+	"** Cannot allocate D memory",
+	"** Memory already minimized",
+	"** Opaque dict type mismatch"
 };
 
 // original directory for vmresize

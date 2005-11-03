@@ -573,9 +573,9 @@ L op_loadlib(void)
 
     B* frame;
     B* dict;
-		static B initname[FRAMEBYTES];
-		static BOOLEAN initname_ = TRUE;
-		UL retc;
+	static B initname[FRAMEBYTES];
+	static BOOLEAN initname_ = TRUE;
+	UL retc;
 
     oldCEILvm = CEILvm;
     oldFREEvm = FREEvm;
@@ -625,17 +625,23 @@ L op_loadlib(void)
         return VM_OVF;
     }
 
-		if (initname_) {
-			makename("INIT_", initname);
-			initname_ = FALSE;
-		}
-		if ((frame = lookup(initname, dict))
-				&& (retc = ((OPER) OP_CODE(frame))()) != OK) {
-			lt_dlclose((lt_dlhandle) handle);
-			FREEvm = oldFREEvm;
-			CEILvm = oldCEILvm;
-			return LIB_INIT;
-		}
+	if (initname_) {
+	  makename("INIT_", initname);
+	  initname_ = FALSE;
+	}
+	if ((frame = lookup(initname, dict))
+		&& (retc = ((OPER) OP_CODE(frame))()) != OK) {
+	  lt_dlclose((lt_dlhandle) handle);
+	  FREEvm = oldFREEvm;
+	  CEILvm = oldCEILvm;
+	  return LIB_INIT;
+	}
+
+	if (opaquename_) {
+	  makename("OPAQUENAME", opaquename);
+	  makename("SAVEBOX", saveboxname);
+	  opaquename_ = FALSE;
+	}
 
     FREEopds = o_2;
 

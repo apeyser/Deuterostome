@@ -1,6 +1,8 @@
 #ifndef PLUGIN_H
 #define PLUGIN_H
 
+#ifndef PLUGIN_ONLY_LIB
+
 #ifndef PLUGIN_NAME
 #error "PLUGIN_NAME must be defined before it is included, " \
   "to the plugins' base name"
@@ -24,13 +26,13 @@
 char libPLUGIN_is_dll(void) {return 1;}
 #endif
 
+#endif //! PLUGIN_ONLY_LIB
 #include "dm.h"
+#ifndef PLUGIN_ONLY_LIB
 
 #define EXPORTNAME(name) PLUGIN_JOIN(PLUGIN_NAME, _LTX_##name)
 
 #define PRIVATEPLUGIN PLUGIN_JOIN(_, PLUGIN_NAME)
-
-//#define PRIVATENAME(name) PLUGIN_JOIN(_, PLUGIN_JOIN(PLUGIN_NAME,_##name))
 #define PRIVATENAME(name) PLUGIN_JOIN(PRIVATEPLUGIN,_##name)
 
 #define PLUGIN_JOIN(name1,name2) PREPLUGIN_JOIN(name1,name2)
@@ -56,6 +58,36 @@ L op_hi(void);
 L op_libnum(void);
 L op_INIT_(void);
 L op_FINI_(void);
+
+#define opaquename PRIVATENAME(opaquename)
+extern B opaquename[FRAMEBYTES];
+
+#define TEST_OPAQUE(frame)												\
+  if (TAG(frame) != (DICT | OPAQUETYPE)) return OPD_TYP;				\
+  if (! check_opaque_name(opaquename, VALUE_PTR(frame))) return ILL_OPAQUE
+
+#define OPAQUE_MEM(frame, nameframe) (lookup(nameframe, VALUE_PTR(frame)))
+#define OPAQUE_MEM_SET(frame, nameframe, newframe) \
+  moveframe(newframe, OPAQUE_MEM(frame, nameframe))
+  
+#define MAKE_OPAQUE(...) (make_opaque_frame(opaquename, __VA_ARGS__, NULL))
+
+// frame must be removed from the stack before call
+#define KILL_OPAQUE(frame) {					   \
+	L ret;										   \
+	if (o1 >= CEILopds) return OPDS_OVF;		   \
+	moveframe(OPAQUE_MEM(frame, saveboxname), o1); \
+	FREEopds = o2;								   \
+	if ((ret = op_restore()) != OK) return ret;	   \
+  }
+
+#endif //! PLUGIN_ONLY_LIB
+
+/* plugin.h */
+BOOLEAN check_opaque_name(B* nameframe, B* dict);
+// ... = null terminated list of nameframes to insert
+// first set to be null objects -- you must initialize them
+B* make_opaque_frame(B* pluginnameframe, ...);
 
 
 

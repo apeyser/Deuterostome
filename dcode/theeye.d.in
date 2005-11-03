@@ -943,7 +943,9 @@ end mkread /dupchecks name
                } LISTCOLOR show_value
              } bind def
 /dictclass   { { * (~|~ of ) text * theitem length * number
-                 theitem type /O eq {(:oplib) fax} if
+                 theitem type dup /O eq {pop (:oplib) fax} {
+                     /X eq {(:opaque) fax} if
+                 }ifelse
                } DICTCOLOR show_value
              } bind def
 /boxclass    { { * (|_| of ) text * theitem length * number

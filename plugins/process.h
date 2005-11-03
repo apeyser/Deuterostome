@@ -33,7 +33,7 @@ L op_waitproc(void);
 // handle | --
 L op_unwaitproc(void);
 
-#define PROCESS_HANDLE "PROC"
+#define PROCESS_HANDLE "PROCESS"
 #define PROC_ARGS 0x01L //argument types are not strings
 #define PROC_WAIT 0x02L //missed waitproc
 #define PROC_SIZE 0x03L //argument length must be >0
@@ -41,11 +41,11 @@ L op_unwaitproc(void);
 #define PROC_EOF  0x05L //unexpected eof
 #define PROC_DEAD 0x06L //Process is dead
 
-#define PROCESS_PID(frame)    (*(pid_t*)VALUE_PTR(frame))
-#define PROCESS_STDIN(frame)  (*(int*)(VALUE_PTR(frame)+4))
-#define PROCESS_STDOUT(frame) (*(int*)(VALUE_PTR(frame)+8))
-#define PROCESS_STATE(frame)  (*(B*)(VALUE_PTR(frame)+12))
-#define PROCESS_BUFFC(frame)  (*(B*)(VALUE_PTR(frame)+13))
+#define PROCESS_PID(frame) (LONG_VAL(OPAQUE_MEM(frame, PROCESS_PID_N)))
+#define PROCESS_STDIN(frame) (LONG_VAL(OPAQUE_MEM(frame, PROCESS_STDIN_N)))
+#define PROCESS_STDOUT(frame) (LONG_VAL(OPAQUE_MEM(frame, PROCESS_STDOUT_N)))
+#define PROCESS_STATE(frame) (*(NUM_VAL(OPAQUE_MEM(frame, PROCESS_STATE_N))))
+#define PROCESS_BUFFC(frame) (*(NUM_VAL(OPAQUE_MEM(frame, PROCESS_BUFFC_N))))
 
 #define PROCESS_BUFFD 1
 #define PROCESS_DEAD  2

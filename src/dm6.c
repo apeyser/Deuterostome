@@ -517,8 +517,7 @@ L op_restore(void)
 						if ((VALUE_BASE(frame) >= (L)caplevel) &&
 								(VALUE_BASE(frame) < (L) CEILvm)) { 
 							VALUE_BASE(frame) -= offset;
-							if (CLASS(frame) == LIST 
-									|| TAG(frame) == (HANDLE | COMPLEXTYPE)) 
+							if (CLASS(frame) == LIST)
 								LIST_CEIL(frame) -= offset;
 						}
 						else if ((VALUE_BASE(frame) >= (L)savefloor) 
@@ -546,8 +545,7 @@ L op_restore(void)
 					if (COMPOSITE(frame) && (VALUE_BASE(frame) < (L)CEILvm)) { 
 						if (VALUE_BASE(frame) >= (L)caplevel) { 
 							VALUE_BASE(frame) -= offset;
-							if (CLASS(frame) == LIST 
-									|| TAG(frame) == (HANDLE | COMPLEXTYPE))
+							if (CLASS(frame) == LIST)
 								LIST_CEIL(frame) -= offset;
 						}
 						else
@@ -571,14 +569,6 @@ L op_restore(void)
 				}
 				cframe += BOX_NB(cframe) + FRAMEBYTES; 
 				break;
-			case HANDLE:
-				if (TYPE(cframe) == COMPLEXTYPE
-						&& VALUE_BASE(cframe) >= (L)caplevel) {
-					VALUE_BASE(cframe) -= offset;
-					LIST_CEIL(cframe) -= offset;
-					cframe = (B*)LIST_CEIL(cframe);
-				}
-				break;
 			default:   return(CORR_OBJ);
 		}
 	}
@@ -590,7 +580,7 @@ L op_restore(void)
 				if ((VALUE_BASE(cframe) >= (L)caplevel) &&
 						(VALUE_BASE(cframe) < (L) CEILvm)) { 
 					VALUE_BASE(cframe) -= offset;
-					if (CLASS(cframe) == LIST || TAG(cframe) == (HANDLE|COMPLEXTYPE)) 
+					if (CLASS(cframe) == LIST) 
 						LIST_CEIL(cframe) -= offset;
 				}
 			cframe -= FRAMEBYTES;
@@ -601,7 +591,7 @@ L op_restore(void)
 				if ((VALUE_BASE(cframe) >= (L)caplevel) 
 						&& (VALUE_BASE(cframe) < (L) CEILvm)) { 
 					VALUE_BASE(cframe) -= offset;
-					if (CLASS(cframe) == LIST || TAG(cframe) == (HANDLE|COMPLEXTYPE)) 
+					if (CLASS(cframe) == LIST) 
 						LIST_CEIL(cframe) -= offset;
 				}
 			cframe -= FRAMEBYTES;
@@ -612,7 +602,7 @@ L op_restore(void)
 				if ((VALUE_BASE(cframe) >= (L)caplevel) 
 						&& (VALUE_BASE(cframe) < (L) CEILvm)) { 
 					VALUE_BASE(cframe) -= offset;
-					if (CLASS(cframe) == LIST || TAG(cframe) == (HANDLE|COMPLEXTYPE)) 
+					if (CLASS(cframe) == LIST)
 						LIST_CEIL(cframe) -= offset;
 				}
 			cframe -= FRAMEBYTES;
@@ -682,19 +672,6 @@ if (CLASS(o_1) != PROC) return(OK);
 return(dmbind(o_1));
 }
 
-/*------------------------------------------- handleid
-	handle | /handleid
-*/
-L op_handleid(void) {
-	char s[5] = {};
-
-	if (o_1 < FLOORopds) return OPDS_UNF;
-	if (CLASS(o_1) != HANDLE) return OPD_CLA;
-	GET_HANDLE_ID(o_1, s);
-	makename(s, o_1);
-	return OK;
-}
-
 /*------------------------------------------- class
    object | /classname     (see below)
 */
@@ -706,7 +683,6 @@ B *s;
 if (o_1 < FLOORopds) return(OPDS_UNF);
 switch(CLASS(o_1)) {
  case NULLOBJ:  s = "nullclass"; break;
- case HANDLE: s = "handleclass"; break;
  case NUM:   s = "numclass"; break;
  case OP:    s = "opclass"; break;
  case NAME:  s = "nameclass"; break;
@@ -725,9 +701,8 @@ return(OK);
 /*------------------------------------------- type
    object | /type (upper-case, one-letter code)
    NULLOBJ | /T (socket) or /N (none)
-	 HANDLE  | /S (simple) or /C (complex)
    BOX     | /M (mclib) or  /N (none)
-   DICT    | /O (oplibtype) or /N (none)
+   DICT    | /O (oplibtype) or /X (opaque) or /N (none)
 */
 
 L op_type(void)
@@ -740,16 +715,16 @@ switch (CLASS(o_1)) {
     case NULLOBJ:
 			*c = (TYPE(o_1) == SOCKETTYPE) ? 'T' : 'N';
 			break;
-    case HANDLE:
-			*c = (TYPE(o_1) == SIMPLETYPE) ? 'S' : 'C';
-			break;
     case BOX:
 			*c = 'N';
 			break;
     case DICT:
-        if (TYPE(o_1) == OPLIBTYPE) *c = 'O';
-        else *c = 'N';
-        break;
+	  switch (TYPE(o_1)) {
+	    case OPLIBTYPE: *c = 'O'; break;
+	    case OPAQUETYPE: *c = 'X'; break;
+	    default: *c = 'N'; break;
+	  };
+	  break;
     case NUM: case ARRAY:
         key = 0x4030 | TYPE(o_1);
         for (*c = 'A'; *c <= 'Z'; (*c)++) 
