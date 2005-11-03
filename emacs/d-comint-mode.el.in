@@ -51,7 +51,8 @@
 (defcustom d-comint-mode-frame-alist '((auto-raise . nil)
 									   (tool-bar-lines . nil)
 									   (menu-bar-lines . nil)
-									   (minibuffer . nil))
+									   (minibuffer . nil)
+									   (fullscreen . nil))
   "Alist of frame properties for mini dvt window."
   :group 'd-comint-mode
   :type '(alist)
@@ -70,7 +71,8 @@
 			 (fullscreen (choice 
 							(const fullwidth) 
 							(const fullheight) 
-							(const fullboth)))
+							(const fullboth)
+							(const nil)))
 			 (minibuffer boolean)
 			 (auto-raise boolean)
 			 (auto-lower boolean)
