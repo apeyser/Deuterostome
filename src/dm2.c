@@ -883,7 +883,9 @@ switch(CLASS(frame)) {
 									return(retc);
 							}
               break;
-  case DICT:  tframe = FREEvm; tvalue = tframe + FRAMEBYTES;
+  case DICT:  
+	          if (TYPE(frame) == OPAQUETYPE) return FOLD_OPAQUE;
+	          tframe = FREEvm; tvalue = tframe + FRAMEBYTES;
               nb = DICT_NB(frame); 
               if ((FREEvm+nb+FRAMEBYTES) > CEILvm) return(VM_OVF);
               FREEvm += nb + FRAMEBYTES;

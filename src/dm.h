@@ -320,6 +320,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define INV_REST    0x0000020BL /* invalid restore                       */
 #define SAVE_UNF    0x0000020DL /* save stack underflow                  */
 #define ILL_OPAQUE  0x0000020EL /* Opaque dict type mismatch             */
+#define FOLD_OPAQUE 0x0000020FL /* Illegal attempt to box opaque object  */
 
 #define VMR_ERR     0x00000210L /* couldn't allocate memory              */
 #define VMR_STATE   0x00000211L /* vm already tiny                       */

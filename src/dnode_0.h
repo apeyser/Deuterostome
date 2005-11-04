@@ -230,7 +230,7 @@ L syserrc[] =
     CORR_OP, BADBOX, BAD_MSG, NOSYSTEM, INV_MSG, NOT_HOST, BAD_FMT,
     LIB_LOAD, LIB_EXPORT, LIB_LINK, LIB_ADD, LIB_LOADED, LIB_OVF, LIB_MERGE,
     NO_XWINDOWS, X_ERR, X_BADFONT, X_BADHOST,
-	VMR_ERR, VMR_STATE, ILL_OPAQUE,
+	VMR_ERR, VMR_STATE, ILL_OPAQUE, FOLD_OPAQUE,
     0L,
 };
 
@@ -289,7 +289,8 @@ B* syserrm[] =
     "** Cannot connect to X server",
 	"** Cannot allocate D memory",
 	"** Memory already minimized",
-	"** Opaque dict type mismatch"
+	"** Opaque dict type mismatch",
+	"** Illegal attempt to fold opaque object"
 };
 
 // original directory for vmresize

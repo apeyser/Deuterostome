@@ -62,9 +62,10 @@ L op_FINI_(void);
 #define opaquename PRIVATENAME(opaquename)
 extern B opaquename[FRAMEBYTES];
 
-#define TEST_OPAQUE(frame)												\
-  if (TAG(frame) != (DICT | OPAQUETYPE)) return OPD_TYP;				\
-  if (! check_opaque_name(opaquename, VALUE_PTR(frame))) return ILL_OPAQUE
+#define TEST_OPAQUE(frame)	do {										\
+	if (TAG(frame) != (DICT | OPAQUETYPE)) return OPD_TYP;				\
+	if (! check_opaque_name(opaquename, VALUE_PTR(frame))) return ILL_OPAQUE; \
+  } while (0)
 
 #define OPAQUE_MEM(frame, nameframe) (lookup(nameframe, VALUE_PTR(frame)))
 #define OPAQUE_MEM_SET(frame, nameframe, newframe) \
@@ -73,13 +74,13 @@ extern B opaquename[FRAMEBYTES];
 #define MAKE_OPAQUE(...) (make_opaque_frame(opaquename, __VA_ARGS__, NULL))
 
 // frame must be removed from the stack before call
-#define KILL_OPAQUE(frame) {					   \
+#define KILL_OPAQUE(frame) do {					   \
 	L ret;										   \
 	if (o1 >= CEILopds) return OPDS_OVF;		   \
 	moveframe(OPAQUE_MEM(frame, saveboxname), o1); \
 	FREEopds = o2;								   \
 	if ((ret = op_restore()) != OK) return ret;	   \
-  }
+  } while (0)
 
 #endif //! PLUGIN_ONLY_LIB
 
