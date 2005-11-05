@@ -350,6 +350,23 @@ end def  | of xtext_dict
  } stopped pop fromfilessave restore
 } bind def
 
+| fromxfiles does the same as fromfiles, but first checks that the file
+| exists.
+
+/FTYPEMASK 61440L def
+/DIRTYPE 16384L def
+/FUSERREAD 256 def
+
+/fromxfiles {
+    2 copy findfile not {pop pop false} {
+        3 1 roll pop pop
+        dup FTYPEMASK and DIRTYPE eq {pop pop pop false} {
+            FUSERREAD and 0 eq {pop pop false} {fromfiles true} ifelse
+        } ifelse
+    } ifelse
+} bind def
+
+
 |====================== Support for toolboxes and projects =====================
 |
 | Toolboxes, projects, and snapshots all are modules. A module is a tree of
@@ -613,6 +630,11 @@ Xwindows_ {
 (Using startup_dnode.d $Id$ V@PACKAGE_VERSION@\n) toconsole_
 (Home:  ) toconsole_ gethomedir toconsole_ (\n) toconsole_
 (Startup: ) toconsole getstartupdir toconsole_ (\n) toconsole_
+(Plugins: ) toconsole getplugindir toconsole_ (\n) toconsole_
+
+/TYPE 61440L def
+/DIRTYPE 16384L def
 
 
-  
+(Tyring ~/.dnode ...\n) toconsole
+gethomedir (.dnode) fromxfiles {(Read ~/.dnode\n) toconsole_} if

@@ -461,11 +461,12 @@ L op_makeproc(void) {
 		};
 	};
 	
-	if (! (procframe = MAKE_OPAQUE(PROCESS_PID_N,
-								   PROCESS_STDOUT_N,
-								   PROCESS_STDIN_N,
-								   PROCESS_STATE_N,
-								   PROCESS_BUFFC_N))) 
+	if (! (procframe = MAKE_OPAQUE_DICT(0,
+										PROCESS_PID_N,
+										PROCESS_STDOUT_N,
+										PROCESS_STDIN_N,
+										PROCESS_STATE_N,
+										PROCESS_BUFFC_N))) 
 	  return VM_OVF;
 	
 	TAG(initframe) = (NUM | LONGTYPE); ATTR(initframe) = 0;

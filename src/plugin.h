@@ -1,8 +1,6 @@
 #ifndef PLUGIN_H
 #define PLUGIN_H
 
-#ifndef PLUGIN_ONLY_LIB
-
 #ifndef PLUGIN_NAME
 #error "PLUGIN_NAME must be defined before it is included, " \
   "to the plugins' base name"
@@ -26,9 +24,7 @@
 char libPLUGIN_is_dll(void) {return 1;}
 #endif
 
-#endif //! PLUGIN_ONLY_LIB
 #include "dm.h"
-#ifndef PLUGIN_ONLY_LIB
 
 #define EXPORTNAME(name) PLUGIN_JOIN(PLUGIN_NAME, _LTX_##name)
 
@@ -68,10 +64,14 @@ extern B opaquename[FRAMEBYTES];
   } while (0)
 
 #define OPAQUE_MEM(frame, nameframe) (lookup(nameframe, VALUE_PTR(frame)))
-#define OPAQUE_MEM_SET(frame, nameframe, newframe) \
-  moveframe(newframe, OPAQUE_MEM(frame, nameframe))
+#define OPAQUE_MEM_SET(frame, nameframe, newframe) do {	\
+	ATTR(newframe) |= READONLY;							\
+	moveframe(newframe, OPAQUE_MEM(frame, nameframe));	\
+  } while (0)
+	
   
-#define MAKE_OPAQUE(...) (make_opaque_frame(opaquename, __VA_ARGS__, NULL))
+#define MAKE_OPAQUE_DICT(n, ...) \
+  (make_opaque_frame(n, opaquename, __VA_ARGS__, NULL))
 
 // frame must be removed from the stack before call
 #define KILL_OPAQUE(frame) do {					   \
@@ -82,14 +82,6 @@ extern B opaquename[FRAMEBYTES];
 	if ((ret = op_restore()) != OK) return ret;	   \
   } while (0)
 
-#endif //! PLUGIN_ONLY_LIB
-
-/* plugin.h */
-BOOLEAN check_opaque_name(B* nameframe, B* dict);
-// ... = null terminated list of nameframes to insert
-// first set to be null objects -- you must initialize them
-B* make_opaque_frame(B* pluginnameframe, ...);
-
-
+#include "pluginlib.h"
 
 #endif //PLUGIN_H

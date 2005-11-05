@@ -3,9 +3,10 @@
   Include module for dnode.c: specific operators of dnode
 */
 
-#include <ltdl.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "pluginlib.h"
 
 BOOLEAN moreX = FALSE;
 
@@ -358,38 +359,6 @@ static void maketinysetup(void)
   moveframe(msf,cmsf);
 }
 
-/*------------------------------------------------closealllibs
- * walks through the libs at over the vm ceil and closes
- * the associated shared library handle
- */
-static void closealllibs(void)
-{
-    const char * e;
-    void* handle;  
-    B* lib = NULL;
-		static B fininame[FRAMEBYTES];
-		static BOOLEAN fininame_ = TRUE;
-		B* frame;
-		if (fininame_) {
-			makename("FINI_", fininame);
-			fininame_ = FALSE;
-		}
-
-    while((lib = nextlib(lib)) !=  NULL)
-      if ((handle = (void*) LIB_HANDLE(lib)) != NULL) {
-				if (frame = lookup(fininame, VALUE_PTR(lib))) ((OPER)OP_CODE(frame))();
-				if (lt_dlclose((lt_dlhandle)handle)) {
-					e = lt_dlerror();
-					fprintf(stderr, "dlclose: %s\n", e ? e : "--");
-        }
-      }
-
-    if (lt_dlexit()) {
-      e = lt_dlerror();
-      fprintf(stderr, "dlexit: %s\n", e ? e : "--");
-    }
-}
-
 /*-------------------------------------------- vmresize
     <L nopds ndicts nexecs nVM/MB userdictsize > | bool
                                             null | true
@@ -457,13 +426,8 @@ L op_vmresize(void)
       moveframe(userdict-FRAMEBYTES,FREEdicts);
       FREEdicts += FRAMEBYTES;
 
+	  initialize_plugins();
       setupdirs();
-
-      if (lt_dlinit()) {
-				const char* e = lt_dlerror();
-				fprintf(stderr, "dlinit: %s\n", e ? e: "--");
-				error(EXIT_FAILURE, 0, "Can't dlinit");
-      }
     }
 
   if (chdir(original_dir)) error(EXIT_FAILURE,errno,"chdir");
@@ -481,178 +445,6 @@ L op_vmresize(void)
  * --- | --- <<all non-server sockets closed>>
  */
 L op_killsockets(void) {return KILL_SOCKS;}
-
-/***************************************************nextlib
- * dict or null | nextdict true
- *              | false
- * takes a dictionary (of a lib or sysdict) that lives
- * over the ceiling and walks up the tree searching for the next
- * one.  False if no further dicts, and null finds the first
- * one over ceiling.  Dicts are ordered in reverse of loading,
- * i.e., sysdict is last, null returns last lib loaded.
- * */
-L op_nextlib(void)
-{
-    B* lastlib;
-    
-    if (o_1 < FLOORopds) return OPDS_UNF;
-    
-    switch (TAG(o_1))
-    {
-        case (DICT | OPLIBTYPE):
-            lastlib = VALUE_PTR(o_1) - FRAMEBYTES;
-            if (! LIB_TYPE(lastlib))
-            {
-                TAG(o_1) = BOOL;
-                ATTR(o_1) = 0;
-                BOOL_VAL(o_1) = FALSE;
-                return OK;
-            }
-            break;
-            
-        case NULLOBJ: lastlib = NULL; break;
-        default: return OPD_TYP;
-    }
-
-    if (CEILopds < o2) return OPDS_OVF;
-    if (! (lastlib = nextlib(lastlib))) return CORR_OBJ;
-
-    moveframe(lastlib, o_1);
-
-    TAG(o1) = BOOL;
-    ATTR(o1) = 0;
-    BOOL_VAL(o1) = TRUE;
-    FREEopds = o2;
-
-    return OK;
-}
-
-    
-    
-/******************************************************loadlib
- * The library loading mechanism
- * (dir) (file) |
- * loads the shared library, via its ll_export variable
- * and creates an opdict containing all exported ops
- * placed above the vm ceiling
- * a library can only be loaded once between vmresize's
- * or an error will be signalled
- * */
-
-void* libsym(void* handle, const char* symbol) 
-{
-    void* r;
-    const char* e;
-    
-    if (! (r = (void*) lt_dlsym((lt_dlhandle) handle, symbol))) {
-        e = lt_dlerror(); if (! e) e = "??";
-        lt_dlclose((lt_dlhandle) handle);
-        fprintf(stderr, "Symbol not found: %s: %s\n", symbol, e);
-    }
-    return r;
-}
-
-#define LIB_IMPORT(var, type, name)															\
-  if (! (var = (type) lt_dlsym((lt_dlhandle)handle, #name))) {	\
-    fprintf(stderr, "Symbol not found: %s in %s\n",							\
-						#name, FREEvm);																			\
-    return LIB_EXPORT;																					\
-  }
-
-L op_loadlib(void)
-{
-    UL type;
-    void *handle;
-    B** ops;
-    L* errc;
-    B** errm;
-    UL* libtype;
-    B* oldCEILvm;
-    B* oldFREEvm;
-    B* sysdict;
-
-    B* frame;
-    B* dict;
-	static B initname[FRAMEBYTES];
-	static BOOLEAN initname_ = TRUE;
-	UL retc;
-
-    oldCEILvm = CEILvm;
-    oldFREEvm = FREEvm;
-    
-    if (o_2 < FLOORopds) return OPDS_UNF;
-    if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
-    if (TAG(o_2) != (ARRAY | BYTETYPE)) return OPD_ERR;
-
-    if (FREEvm + ARRAY_SIZE(o_1) + ARRAY_SIZE(o_2) + 1 > CEILvm)
-      return VM_OVF;
-    
-    strncpy(FREEvm, VALUE_PTR(o_2), ARRAY_SIZE(o_2));
-    strncpy(FREEvm + ARRAY_SIZE(o_2), VALUE_PTR(o_1), ARRAY_SIZE(o_1));
-    FREEvm[ARRAY_SIZE(o_2) + ARRAY_SIZE(o_1)] = '\0';
-    
-    if (! (handle = (void*) lt_dlopen(FREEvm)))
-    {                                          
-        const char* e;                         
-        fprintf(stderr, "%s\n", (e = lt_dlerror()) ? e : "??");
-        return LIB_LOAD;
-    }
-
-		// loop over super ceil region, looking for first dict for type
-		// and looking for sysop to stop
-		// check handles on all libs but sysdict
-		// assumed that sysdict has already been placed
-    type = 0;
-    frame = NULL;
-		while (1) {
-			if (! (frame = nextlib(frame))) return CORR_OBJ;
-			if (! type) type = LIB_TYPE(frame) + 1;
-			if (! LIB_TYPE(frame)) break;
-			if ((L) handle == LIB_HANDLE(frame)) return LIB_LOADED;
-		}
-    
-    LIB_IMPORT(ops, B**, ll_export);
-    LIB_IMPORT(errc, L*, ll_errc);
-    LIB_IMPORT(errm, B**, ll_errm);
-    LIB_IMPORT(libtype, UL*, ll_type);
-
-    *libtype = type << 16;
-    if ((dict = makeopdict((B*) ops, errc, errm)) == (B*) -1L)
-    {
-        lt_dlclose((lt_dlhandle)handle);
-        FREEvm = oldFREEvm;
-        CEILvm = oldCEILvm;
-        return VM_OVF;
-    }
-
-	if (initname_) {
-	  makename("INIT_", initname);
-	  initname_ = FALSE;
-	}
-	if ((frame = lookup(initname, dict))
-		&& (retc = ((OPER) OP_CODE(frame))()) != OK) {
-	  lt_dlclose((lt_dlhandle) handle);
-	  FREEvm = oldFREEvm;
-	  CEILvm = oldCEILvm;
-	  return LIB_INIT;
-	}
-
-	if (opaquename_) {
-	  makename("OPAQUENAME", opaquename);
-	  makename("SAVEBOX", saveboxname);
-	  opaquename_ = FALSE;
-	}
-
-    FREEopds = o_2;
-
-    LIB_TYPE(dict - FRAMEBYTES) = type;
-    LIB_HANDLE(dict - FRAMEBYTES) = (L) handle;
-
-    sysdict = VALUE_PTR(FLOORdicts);
-    if (! mergedict(dict, sysdict)) return LIB_MERGE;
-
-    return OK;
-}
 
 /*------------------------------------------- Xconnect
      (hostname:screen#) | --

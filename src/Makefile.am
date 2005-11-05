@@ -14,34 +14,38 @@ distclean-local:
 
 
 AM_CFLAGS = $(X_CFLAGS)
-AM_CPPFLAGS = $(GCC_OPT) -DSTARTUP_DIR="\"$(dmstartdir)\""
+AM_CPPFLAGS = $(GCC_OPT) \
+	-DSTARTUP_DIR="\"$(dmstartdir)\"" \
+	-DPLUGIN_DIR="\"$(pkglibdir)\""
 AM_LDFLAGS = -no-undefined $(X_LDFLAGS)
 INCLUDE = @INCLTDL@
 
 bin_PROGRAMS = dvt dnode
 noinst_PROGRAMS = testwordorder
 
-pkginclude_HEADERS = dm.h plugin.h dmx.h
+if ENABLE_plugins
+PLUGIN_HDR = plugin.h
+PLUGIN_LD = @LIBLTDL@
+endif ENABLE_plugins
+
+pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h
 
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h
 dvt_LDADD = libdmglobals.la
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 
 dnode_SOURCES = dnode.c dnode_0.h dnode_1.h dmx.h
-dnode_LDADD = @LIBLTDL@ libdmglobals.la
+dnode_LDADD = libdmglobals.la
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 
 testwordorder_SOURCES = test-word-order.c
 
 lib_LTLIBRARIES = libdmglobals.la
-
-if ENABLE_plugins
-PLUGINS_SRC = plugin.c
-endif ENABLE_plugins
-
+libdmglobals_la_LIBADD = $(PLUGIN_LD)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
-	dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h error.h $(PLUGINS_SRC)
+	dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h error.h \
+	plugin.c pluginlib.h
 
 
 

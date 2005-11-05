@@ -326,6 +326,21 @@ end def  | of xtext_dict
  } stopped pop fromfilessave restore
 } bind def
 
+| fromxfiles does the same as fromfiles, but first checks that the file
+| exists.
+
+/FTYPEMASK 61440L def
+/DIRTYPE 16384L def
+/FUSERREAD 256 def
+
+/fromxfiles {
+    2 copy findfile not {pop pop false} {
+        3 1 roll pop pop
+        dup FTYPEMASK and DIRTYPE eq {pop pop pop false} {
+            FUSERREAD and 0 eq {pop pop false} {fromfiles true} ifelse
+        } ifelse
+    } ifelse
+} bind def
 
 |====================== Support for toolboxes and projects =====================
 |
@@ -1957,5 +1972,15 @@ Xwindows {
 
 (Starting...\n) toconsole
 (Home: ) toconsole gethomedir toconsole (\n) toconsole
-(Startup: ) toconsole getstartupdir toconsole (\n) toconsole  
+(Startup: ) toconsole getstartupdir toconsole (\n) toconsole
+
+| Read ~/.dvt, if it exists    
+end {
+    (Trying ~/.dvt ...\n) toconsole
+    gethomedir (.dvt) fromxfiles {(Read ~/.dvt\n) toconsole} if
+} aborted {
+    countdictstack 2 sub ~end repeat clear
+} if
+    
+dvt begin
 supervisor   | we never return

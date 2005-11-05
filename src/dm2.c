@@ -506,7 +506,7 @@ BOOLEAN mergedict(B *source, B* sink) {
        entry < (B*) DICT_FREE(source);
        entry += ENTRYBYTES) {
 		for (i = 0; i < sizeof(_excludes)/sizeof(_excludes[0]); i++) {
-			if (matchname(ASSOC_NAME(entry), _excludes[i]))
+			if (matchname(ASSOC_NAME(entry), excludes[i]))
 				goto nextentry;
 		}
 		if (! insert(ASSOC_NAME(entry), sink, ASSOC_FRAME(entry)))
@@ -1034,6 +1034,20 @@ L op_getstartupdir(void)
 	return OK;
 }
 
+/*---------------------------------------------------- getplugindir
+  -- | string
+ *  returns the hardcoded path (hidden at bottom of vm)
+ *  to the plugin directory for the node
+ */
+L op_getplugindir(void)
+{    
+	if (CEILopds < o2) return OPDS_OVF;
+	if (!plugin_dir_frame) return CORR_OBJ;
+	moveframe(plugin_dir_frame, o1);
+	FREEopds = o2;
+	return OK;
+}
+
 /*---------------------------------------------------- gethomedir
    -- | string
    - returns $HOME
@@ -1041,7 +1055,7 @@ L op_getstartupdir(void)
 
 L op_gethomedir(void) {
   if (CEILopds < o2) return OPDS_OVF;
-	if (!home_dir_frame) return CORR_OBJ;
+  if (!home_dir_frame) return CORR_OBJ;
   moveframe(home_dir_frame, o1);
   FREEopds = o2;
   return OK;
@@ -1049,8 +1063,8 @@ L op_gethomedir(void) {
 
 static void setupdir(B** frame, const char* string) {
   L len = strlen(string);
-	L lenapp = len;
-	if (len == 0 || string[len-1] != '/') lenapp++;
+  L lenapp = len;
+  if (len == 0 || string[len-1] != '/') lenapp++;
 
   if (FREEvm + FRAMEBYTES + DALIGN(len) > CEILvm)
     error(EXIT_FAILURE,0,"VM overflow");
@@ -1067,13 +1081,17 @@ static void setupdir(B** frame, const char* string) {
 
 void setupdirs(void) {
   const char* home_env = getenv("HOME");
-  const char* home_dir = "";
+  const char* home_dir = "/";
+  const char* plugin_env = getenv("DNODEPLUGINPATH");
+  const char* plugin_dir = PLUGIN_DIR;
   const char* startup_env = getenv("DVTSCRIPTPATH");
 
   if (home_env) home_dir = home_env;
+  if (plugin_env) plugin_dir = plugin_env;
   if (startup_env) startup_dir = startup_env;
   else startup_dir = STARTUP_DIR;
 
   setupdir(&home_dir_frame, home_dir);
   setupdir(&startup_dir_frame, startup_dir);
+  setupdir(&plugin_dir_frame, plugin_dir);
 }

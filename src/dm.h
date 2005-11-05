@@ -360,6 +360,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define LIB_OVF     0x0000090CL /* malloc in lib overflowed              */
 #define LIB_MERGE   0x0000090DL /* out of space in sysdict for merge     */
 #define LIB_INIT    0x0000090EL /* __init failed for lib */
+#define NOPLUGINS   0x0000090FL /* compiled without plugins */
 
 #define NO_XWINDOWS 0x00000A01L /* X windows unavailable                 */
 #define X_ERR       0x00000A02L /* X lib error                           */
@@ -406,6 +407,7 @@ DLL_SCOPE const char* startup_dir; // setup by makefile,
 DLL_SCOPE B* startup_dir_frame; // points the frame holding ^^^,
                                 // at the bottom of the vm
 DLL_SCOPE B* home_dir_frame; //points to the frame holding $HOME
+DLL_SCOPE B* plugin_dir_frame; //points to the frame holding plugindir
 DLL_SCOPE UW ascii[];
 
 /*----------------------- operator hands ------------------------------*/
@@ -479,11 +481,6 @@ L deendian_frame(B *frame);
 //L deendian_dict(B* dict);
 //L deendian_entries(B* doct);
 void setupdirs(void);
-
-//globals -- used only in plugins
-extern B opaquename[FRAMEBYTES];
-extern B saveboxname[FRAMEBYTES];
-extern BOOLEAN opaquename_;
 
 /*--- DM3 */
 L make_socket(L port);
@@ -661,6 +658,7 @@ L op_setwdir(void);
 L op_writefile(void);
 L op_readfile(void);
 L op_findfiles(void);
+L op_findfile(void);
 L op_readboxfile(void);
 L op_writeboxfile(void); 
 L op_tosystem(void);

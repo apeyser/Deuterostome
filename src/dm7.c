@@ -12,6 +12,7 @@
           - writeboxfile
           - readboxfile
           - findfiles
+		  - findfile
           - tosystem
           - transcribe
 */
@@ -537,6 +538,62 @@ L op_findfiles(void)
  moveframe(vmp, o_1);
  free(dirn);
  return(OK);
+}
+
+/**************************************************** findfile
+ *
+ * (dir) (file) | false : filesize datetime attribute-bits true
+ *
+ * see findfiles for description of output
+ *
+ **************************************************************
+*/
+
+L op_findfile(void) {
+  L s1, s2;
+  struct stat buf;
+
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if ((TAG(o_1) != (ARRAY | BYTETYPE)) || (TAG(o_2) != (ARRAY | BYTETYPE)))
+	return OPD_ERR;
+
+  // make null terminated file string
+  if (FREEvm+ARRAY_SIZE(o_1)+ARRAY_SIZE(o_2)+1 >= CEILvm)
+	return VM_OVF;
+  moveB(VALUE_PTR(o_2), FREEvm, ARRAY_SIZE(o_2));
+  moveB(VALUE_PTR(o_1), FREEvm + ARRAY_SIZE(o_2), ARRAY_SIZE(o_1));
+  FREEvm[ARRAY_SIZE(o_2)+ARRAY_SIZE(o_1)] = 0;
+
+  if (stat(FREEvm, &buf)) {
+	if (errno == ENOENT) { // non-existent returns false
+	  TAG(o_2) = BOOL; ATTR(o_2) = 0;
+	  BOOL_VAL(o_2) = FALSE;
+	  FREEopds = o_1;
+	  return OK;
+	}
+	return -errno;
+  }
+
+  // unhandled type return false
+  if (! S_ISDIR(buf.st_mode) && ! S_ISREG(buf.st_mode)) {
+	TAG(o_2) = BOOL; ATTR(o_2) = 0;
+	BOOL_VAL(o_2) = FALSE;
+	FREEopds = o_1;
+	return OK;
+  }
+
+  if (o3 > CEILopds) return OPDS_OVF;
+  TAG(o_2) = (NUM | LONGTYPE); ATTR(o_2) = 0;
+  LONG_VAL(o_2) = buf.st_size;
+  TAG(o_1) = (NUM | LONGTYPE); ATTR(o_1) = 0;
+  LONG_VAL(o_1) = buf.st_mtime;
+  TAG(o1) = (NUM | LONGTYPE); ATTR(o1) = 0;
+  LONG_VAL(o1) = buf.st_mode;
+  TAG(o2) = BOOL; ATTR(o2) = 0;
+  BOOL_VAL(o2) = TRUE;
+  FREEopds = o3;
+
+  return OK;
 }
 
 /*------------------------------------- transcribe

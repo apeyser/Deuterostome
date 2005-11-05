@@ -6,6 +6,7 @@
 /*--- LL */
 L op_loadlib(void);
 L op_nextlib(void);
+L op_getplugindir(void);
 
 B *sysop[] =
 {
@@ -171,6 +172,7 @@ B *sysop[] =
       "readfile",       (B *)op_readfile,
       "writefile",      (B *)op_writefile,
       "findfiles",      (B *)op_findfiles,
+	  "findfile",       (B *)op_findfile,
       "readboxfile",    (B *)op_readboxfile,
       "writeboxfile",   (B *)op_writeboxfile,
       "tosystem",       (B *)op_tosystem,
@@ -205,7 +207,7 @@ B *sysop[] =
       "matvecmul",      (B *)op_matvecmul,
       "getstartupdir",  (B *)op_getstartupdir,
       "gethomedir",     (B *)op_gethomedir,
-
+	  "getplugindir",   (B *)op_getplugindir,
       "",               (B *)0L, 
  };     
    
@@ -230,7 +232,7 @@ L syserrc[] =
     CORR_OP, BADBOX, BAD_MSG, NOSYSTEM, INV_MSG, NOT_HOST, BAD_FMT,
     LIB_LOAD, LIB_EXPORT, LIB_LINK, LIB_ADD, LIB_LOADED, LIB_OVF, LIB_MERGE,
     NO_XWINDOWS, X_ERR, X_BADFONT, X_BADHOST,
-	VMR_ERR, VMR_STATE, ILL_OPAQUE, FOLD_OPAQUE,
+	VMR_ERR, VMR_STATE, ILL_OPAQUE, FOLD_OPAQUE, NOPLUGINS,
     0L,
 };
 
@@ -290,7 +292,8 @@ B* syserrm[] =
 	"** Cannot allocate D memory",
 	"** Memory already minimized",
 	"** Opaque dict type mismatch",
-	"** Illegal attempt to fold opaque object"
+	"** Illegal attempt to fold opaque object",
+	"** Compiled without plugin support",
 };
 
 // original directory for vmresize

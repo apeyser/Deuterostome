@@ -32,6 +32,7 @@ const char* startup_dir; // setup by makefile in main
 B* startup_dir_frame; // points the frame holding ^^^, at the bottom of the vm
                       // make server port accessible from outside of main
 B* home_dir_frame; //points to the frame holding $HOME
+B* plugin_dir_frame; //points to the frame holding the plugindir
 
 
 /*---------------------------- ASCII character classification table
@@ -103,8 +104,3 @@ UW ascii[128] =
 #if defined _WIN32 && defined DLL_EXPORT
 char libDM_is_dll(void) {return 1;}
 #endif
-
-// used only in plugins
-B opaquename[FRAMEBYTES];
-B saveboxname[FRAMEBYTES];
-BOOLEAN opaquename_ = TRUE;

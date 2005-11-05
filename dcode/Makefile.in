@@ -214,8 +214,13 @@ dist_dmstart_DATA = color.d dvt_macros.d master.d sched.d startup_dnode.d \
 nodist_dmstart_DATA = theeye.d
 EXTRA_DIST = theeye.d.in
 CLEANFILES = $(nodist_dmstart_DATA)
+PLUGIN_START = /^[[:space:]]*[@]pluginstart[@][[:space:]]*$$/
+PLUGIN_END = /^[[:space:]]*[@]pluginend[@][[:space:]]*$$/
+@ENABLE_plugins_FALSE@PLUGIN_DELETE = -e '$(PLUGIN_START),$(PLUGIN_END) d'
+@ENABLE_plugins_TRUE@PLUGIN_DELETE = -e '$(PLUGIN_START) d' -e '$(PLUGIN_END) d'
 edit = sed -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
-						-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g'
+			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
+			$(PLUGIN_DELETE)
 
 all: all-am
 

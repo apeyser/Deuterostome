@@ -69,9 +69,12 @@ CF_AC_CHECK_SIZEOF([time_t], [4])
 CF_AC_CHECK_SIZEOF([void*], [4])
 
 # check pid_t for plugins/process.c
-CF_IF_ENABLED([plugins], [CF_AC_CHECK_SIZEOF([pid_t], [4])])
-CF_IF_ENABLED([plugins], [CF_AC_CHECK_SIZEOF([int], [4])])
-CF_IF_ENABLED([plugins], [CF_AC_CHECK_HEADER([sys/wait.h])])
+CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([pid_t], [4])])
+CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([int], [4])])
+CF_IF_ENABLED([process], [CF_AC_CHECK_HEADER([sys/wait.h])])
+CF_IF_ENABLED([plugins], [
+  AC_DEFINE([PLUGINS_ENABLED], [1], [Define to 1 if plugins are compiled])
+])
 
 CF_AC_CHECK_HEADERS([endian.h machine/endian.h], 
 		    [ENDIAN_HDR], 
