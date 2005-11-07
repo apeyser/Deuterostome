@@ -50,6 +50,7 @@ CF_EMACS_ENABLED
 AC_PROG_CC
 AC_PROG_CC_STDC
 AC_C_CONST
+AC_C_RESTRICT
 AC_CHECK_HEADERS([unistd.h])
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
@@ -107,13 +108,14 @@ AC_CHECK_HEADER([error.h], [
 ])
 
 CF_GCC_COMPILER_OPTION([GCC_OPT], [-pipe])
-CF_GCC_COMPILER_OPTION([GCC_OPT], [-fno-math-errno])
-CF_GCC_COMPILER_OPTION([GCC_OPT], [-fno-trapping-math])
-CF_GCC_COMPILER_OPTION([GCC_OPT], [-fno-signaling-nans])
+#CF_GCC_COMPILER_OPTION([GCC_OPT], [-fno-math-errno])
+#CF_GCC_COMPILER_OPTION([GCC_OPT], [-fno-trapping-math])
+#CF_GCC_COMPILER_OPTION([GCC_OPT], [-fno-signaling-nans])
 CF_GCC_COMPILER_OPTION([GCC_OPT], [-fno-unsigned-char])
+CF_GCC_COMPILER_OPTION([GCC_OPT], [-ffast-math])
+CF_GCC_COMPILER_OPTION([GCC_OPT], [-fno-finite-math-only])
 CF_GCC_COMPILER_OPTION([GCC_OPT], [-fno-strict-aliasing])
-CF_GCC_COMPILER_OPTION([GCC_OPT], [-fcx-limited-range])
-CF_GCC_COMPILER_OPTION([GCC_OPT], [-fno-unsigned-char])
+#CF_GCC_COMPILER_OPTION([GCC_OPT], [-fcx-limited-range])
 CF_GCC_COMPILER_OPTION([GCC_OPT], [-Wno-pointer-sign])
 AC_SUBST([GCC_OPT])
 

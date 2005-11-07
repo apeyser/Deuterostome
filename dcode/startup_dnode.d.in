@@ -636,5 +636,5 @@ Xwindows_ {
 /DIRTYPE 16384L def
 
 
-(Tyring ~/.dnode ...\n) toconsole
+(Trying ~/.dnode ...\n) toconsole
 gethomedir (.dnode) fromxfiles {(Read ~/.dnode\n) toconsole_} if

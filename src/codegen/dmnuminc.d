@@ -10,6 +10,8 @@
 /st__ { st mkact __ } def
 /dt__ { dt mkact __ } def
 /op__ { op mkact __ } def
+/n__  { * exch * number} def
+/rep__ {exch 1 sub exch __ } def
 /NL   { * (\n) text} def
 
 
@@ -314,35 +316,43 @@ NL
 
 /XYdyOPAA {
 
-NL (static void )__ dt__ st__ (dy)__ op__ (AA\(B *df, B *sf\))__
+NL (static void )__ dt__ st__ (dy)__ op__
+  (AA\(B * restrict df, B * restrict sf\))__
 NL ({)__
-NL (register L n; register )__  st__ ( *s; register )__ dt__ ( *d;)__
-NL (register D t1,t2,t3,t4,tt1,tt2,tt3,tt4; )__ 
+NL (L n; )__  st__ ( * s; )__ dt__ ( * d;)__
+|NL (register D t1,t2,t3,t4,tt1,tt2,tt3,tt4; )__
+NL (D t, tt;)  
 NL (s = \()__ st__ ( *\))__ (sf) ARRAY (;)__
 NL (d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
+(df) {
+  st {(s++)__} (tt) GETCV
+  dt {(d)__} (t) GETCV
+  () dyadic_d_x op get exec
+  dt {(d++)__} (t) CVPUT
+} FOR
 
- (df) { st { (s++)__ } (tt1) GETCV
-        dt { (d)__ } (t1) GETCV
-        (1) dyadic_d_x op get exec
-        st { (s++)__ } (tt2) GETCV
-        dt { (\(d+1\))__ } (t2) GETCV
-        (2) dyadic_d_x op get exec
-        st { (s++)__ } (tt3) GETCV
-        dt { (\(d+2\))__ } (t3) GETCV
-        (3) dyadic_d_x op get exec
-        st { (s++)__ } (tt4) GETCV
-        dt { (\(d+3\))__ } (t4) GETCV
-        (4) dyadic_d_x op get exec
-        dt { (d++)__ } (t1) CVPUT
-        dt { (d++)__ } (t2) CVPUT
-        dt { (d++)__ } (t3) CVPUT
-        dt { (d++)__ } (t4) CVPUT
-      } FOR_mod4
- (df) { st { (s++)__ } (tt1) GETCV
-        dt { (d)__ } (t1) GETCV
-        (1) dyadic_d_x op get exec
-        dt { (d++)__ } (t1) CVPUT
-      } FOR_mod1
+|  (df) { st { (s++)__ } (tt1) GETCV
+|         dt { (d)__ } (t1) GETCV
+|         (1) dyadic_d_x op get exec
+|         st { (s++)__ } (tt2) GETCV
+|         dt { (\(d+1\))__ } (t2) GETCV
+|         (2) dyadic_d_x op get exec
+|         st { (s++)__ } (tt3) GETCV
+|         dt { (\(d+2\))__ } (t3) GETCV
+|         (3) dyadic_d_x op get exec
+|         st { (s++)__ } (tt4) GETCV
+|         dt { (\(d+3\))__ } (t4) GETCV
+|         (4) dyadic_d_x op get exec
+|         dt { (d++)__ } (t1) CVPUT
+|         dt { (d++)__ } (t2) CVPUT
+|         dt { (d++)__ } (t3) CVPUT
+|         dt { (d++)__ } (t4) CVPUT
+|       } FOR_mod4
+| (df) { st { (s++)__ } (tt1) GETCV
+|        dt { (d)__ } (t1) GETCV
+|        (1) dyadic_d_x op get exec
+|        dt { (d++)__ } (t1) CVPUT
+|      } FOR_mod1
 NL (})__
 NL 
 } def
