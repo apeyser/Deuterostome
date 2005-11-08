@@ -249,7 +249,7 @@ if ((t = *((B *)s++)) == BINF) t = DINF;
 
 static void BBmoveAA(B *sf, B *df)
 {
-if (serialed) BBmoveAAs(sf,df);
+if (serialized) BBmoveAAs(sf,df);
 else BBmoveAAp(sf,df);
 }
 
@@ -390,7 +390,7 @@ if ((t = *((B *)s++)) == BINF) t = DINF;
 
 static void BWmoveAA(B *sf, B *df)
 {
-if (serialed) BWmoveAAs(sf,df);
+if (serialized) BWmoveAAs(sf,df);
 else BWmoveAAp(sf,df);
 }
 
@@ -531,7 +531,7 @@ if ((t = *((B *)s++)) == BINF) t = DINF;
 
 static void BLmoveAA(B *sf, B *df)
 {
-if (serialed) BLmoveAAs(sf,df);
+if (serialized) BLmoveAAs(sf,df);
 else BLmoveAAp(sf,df);
 }
 
@@ -672,7 +672,7 @@ if ((t = *((B *)s++)) == BINF) t = DINF;
 
 static void BSmoveAA(B *sf, B *df)
 {
-if (serialed) BSmoveAAs(sf,df);
+if (serialized) BSmoveAAs(sf,df);
 else BSmoveAAp(sf,df);
 }
 
@@ -813,7 +813,7 @@ if ((t = *((B *)s++)) == BINF) t = DINF;
 
 static void BDmoveAA(B *sf, B *df)
 {
-if (serialed) BDmoveAAs(sf,df);
+if (serialized) BDmoveAAs(sf,df);
 else BDmoveAAp(sf,df);
 }
 
@@ -954,7 +954,7 @@ if ((t = *((W *)s++)) == WINF) t = DINF;
 
 static void WBmoveAA(B *sf, B *df)
 {
-if (serialed) WBmoveAAs(sf,df);
+if (serialized) WBmoveAAs(sf,df);
 else WBmoveAAp(sf,df);
 }
 
@@ -1095,7 +1095,7 @@ if ((t = *((W *)s++)) == WINF) t = DINF;
 
 static void WWmoveAA(B *sf, B *df)
 {
-if (serialed) WWmoveAAs(sf,df);
+if (serialized) WWmoveAAs(sf,df);
 else WWmoveAAp(sf,df);
 }
 
@@ -1236,7 +1236,7 @@ if ((t = *((W *)s++)) == WINF) t = DINF;
 
 static void WLmoveAA(B *sf, B *df)
 {
-if (serialed) WLmoveAAs(sf,df);
+if (serialized) WLmoveAAs(sf,df);
 else WLmoveAAp(sf,df);
 }
 
@@ -1377,7 +1377,7 @@ if ((t = *((W *)s++)) == WINF) t = DINF;
 
 static void WSmoveAA(B *sf, B *df)
 {
-if (serialed) WSmoveAAs(sf,df);
+if (serialized) WSmoveAAs(sf,df);
 else WSmoveAAp(sf,df);
 }
 
@@ -1518,7 +1518,7 @@ if ((t = *((W *)s++)) == WINF) t = DINF;
 
 static void WDmoveAA(B *sf, B *df)
 {
-if (serialed) WDmoveAAs(sf,df);
+if (serialized) WDmoveAAs(sf,df);
 else WDmoveAAp(sf,df);
 }
 
@@ -1659,7 +1659,7 @@ if ((t = *((L *)s++)) == LINF) t = DINF;
 
 static void LBmoveAA(B *sf, B *df)
 {
-if (serialed) LBmoveAAs(sf,df);
+if (serialized) LBmoveAAs(sf,df);
 else LBmoveAAp(sf,df);
 }
 
@@ -1800,7 +1800,7 @@ if ((t = *((L *)s++)) == LINF) t = DINF;
 
 static void LWmoveAA(B *sf, B *df)
 {
-if (serialed) LWmoveAAs(sf,df);
+if (serialized) LWmoveAAs(sf,df);
 else LWmoveAAp(sf,df);
 }
 
@@ -1941,7 +1941,7 @@ if ((t = *((L *)s++)) == LINF) t = DINF;
 
 static void LLmoveAA(B *sf, B *df)
 {
-if (serialed) LLmoveAAs(sf,df);
+if (serialized) LLmoveAAs(sf,df);
 else LLmoveAAp(sf,df);
 }
 
@@ -2082,7 +2082,7 @@ if ((t = *((L *)s++)) == LINF) t = DINF;
 
 static void LSmoveAA(B *sf, B *df)
 {
-if (serialed) LSmoveAAs(sf,df);
+if (serialized) LSmoveAAs(sf,df);
 else LSmoveAAp(sf,df);
 }
 
@@ -2223,7 +2223,7 @@ if ((t = *((L *)s++)) == LINF) t = DINF;
 
 static void LDmoveAA(B *sf, B *df)
 {
-if (serialed) LDmoveAAs(sf,df);
+if (serialized) LDmoveAAs(sf,df);
 else LDmoveAAp(sf,df);
 }
 
@@ -2364,7 +2364,7 @@ t = *((S *)s++);
 
 static void SBmoveAA(B *sf, B *df)
 {
-if (serialed) SBmoveAAs(sf,df);
+if (serialized) SBmoveAAs(sf,df);
 else SBmoveAAp(sf,df);
 }
 
@@ -2505,7 +2505,7 @@ t = *((S *)s++);
 
 static void SWmoveAA(B *sf, B *df)
 {
-if (serialed) SWmoveAAs(sf,df);
+if (serialized) SWmoveAAs(sf,df);
 else SWmoveAAp(sf,df);
 }
 
@@ -2646,7 +2646,7 @@ t = *((S *)s++);
 
 static void SLmoveAA(B *sf, B *df)
 {
-if (serialed) SLmoveAAs(sf,df);
+if (serialized) SLmoveAAs(sf,df);
 else SLmoveAAp(sf,df);
 }
 
@@ -2787,7 +2787,7 @@ t = *((S *)s++);
 
 static void SSmoveAA(B *sf, B *df)
 {
-if (serialed) SSmoveAAs(sf,df);
+if (serialized) SSmoveAAs(sf,df);
 else SSmoveAAp(sf,df);
 }
 
@@ -2928,7 +2928,7 @@ t = *((S *)s++);
 
 static void SDmoveAA(B *sf, B *df)
 {
-if (serialed) SDmoveAAs(sf,df);
+if (serialized) SDmoveAAs(sf,df);
 else SDmoveAAp(sf,df);
 }
 
@@ -3069,7 +3069,7 @@ t = *((D *)s++);
 
 static void DBmoveAA(B *sf, B *df)
 {
-if (serialed) DBmoveAAs(sf,df);
+if (serialized) DBmoveAAs(sf,df);
 else DBmoveAAp(sf,df);
 }
 
@@ -3210,7 +3210,7 @@ t = *((D *)s++);
 
 static void DWmoveAA(B *sf, B *df)
 {
-if (serialed) DWmoveAAs(sf,df);
+if (serialized) DWmoveAAs(sf,df);
 else DWmoveAAp(sf,df);
 }
 
@@ -3351,7 +3351,7 @@ t = *((D *)s++);
 
 static void DLmoveAA(B *sf, B *df)
 {
-if (serialed) DLmoveAAs(sf,df);
+if (serialized) DLmoveAAs(sf,df);
 else DLmoveAAp(sf,df);
 }
 
@@ -3492,7 +3492,7 @@ t = *((D *)s++);
 
 static void DSmoveAA(B *sf, B *df)
 {
-if (serialed) DSmoveAAs(sf,df);
+if (serialized) DSmoveAAs(sf,df);
 else DSmoveAAp(sf,df);
 }
 
@@ -3633,7 +3633,7 @@ t = *((D *)s++);
 
 static void DDmoveAA(B *sf, B *df)
 {
-if (serialed) DDmoveAAs(sf,df);
+if (serialized) DDmoveAAs(sf,df);
 else DDmoveAAp(sf,df);
 }
 
@@ -3946,7 +3946,7 @@ t += tt;
 
 static void BBdyADDAA(B * df, B * sf)
 {
-if (serialed) BBdyADDAAs(df,sf);
+if (serialized) BBdyADDAAs(df,sf);
 else BBdyADDAAp(df,sf);
 }
 
@@ -4229,7 +4229,7 @@ t -= tt;
 
 static void BBdySUBAA(B * df, B * sf)
 {
-if (serialed) BBdySUBAAs(df,sf);
+if (serialized) BBdySUBAAs(df,sf);
 else BBdySUBAAp(df,sf);
 }
 
@@ -4512,7 +4512,7 @@ t *= tt;
 
 static void BBdyMULAA(B * df, B * sf)
 {
-if (serialed) BBdyMULAAs(df,sf);
+if (serialized) BBdyMULAAs(df,sf);
 else BBdyMULAAp(df,sf);
 }
 
@@ -4795,7 +4795,7 @@ t /= tt;
 
 static void BBdyDIVAA(B * df, B * sf)
 {
-if (serialed) BBdyDIVAAs(df,sf);
+if (serialized) BBdyDIVAAs(df,sf);
 else BBdyDIVAAp(df,sf);
 }
 
@@ -5078,7 +5078,7 @@ t = pow(t,tt);
 
 static void BBdyPWRAA(B * df, B * sf)
 {
-if (serialed) BBdyPWRAAs(df,sf);
+if (serialized) BBdyPWRAAs(df,sf);
 else BBdyPWRAAp(df,sf);
 }
 
@@ -5361,7 +5361,7 @@ t = fmod(t,tt);
 
 static void BBdyMODAA(B * df, B * sf)
 {
-if (serialed) BBdyMODAAs(df,sf);
+if (serialized) BBdyMODAAs(df,sf);
 else BBdyMODAAp(df,sf);
 }
 
@@ -5644,7 +5644,7 @@ t = thearc(t,tt);
 
 static void BBdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) BBdyTHEARCAAs(df,sf);
+if (serialized) BBdyTHEARCAAs(df,sf);
 else BBdyTHEARCAAp(df,sf);
 }
 
@@ -5927,7 +5927,7 @@ t += tt;
 
 static void BWdyADDAA(B * df, B * sf)
 {
-if (serialed) BWdyADDAAs(df,sf);
+if (serialized) BWdyADDAAs(df,sf);
 else BWdyADDAAp(df,sf);
 }
 
@@ -6210,7 +6210,7 @@ t -= tt;
 
 static void BWdySUBAA(B * df, B * sf)
 {
-if (serialed) BWdySUBAAs(df,sf);
+if (serialized) BWdySUBAAs(df,sf);
 else BWdySUBAAp(df,sf);
 }
 
@@ -6493,7 +6493,7 @@ t *= tt;
 
 static void BWdyMULAA(B * df, B * sf)
 {
-if (serialed) BWdyMULAAs(df,sf);
+if (serialized) BWdyMULAAs(df,sf);
 else BWdyMULAAp(df,sf);
 }
 
@@ -6776,7 +6776,7 @@ t /= tt;
 
 static void BWdyDIVAA(B * df, B * sf)
 {
-if (serialed) BWdyDIVAAs(df,sf);
+if (serialized) BWdyDIVAAs(df,sf);
 else BWdyDIVAAp(df,sf);
 }
 
@@ -7059,7 +7059,7 @@ t = pow(t,tt);
 
 static void BWdyPWRAA(B * df, B * sf)
 {
-if (serialed) BWdyPWRAAs(df,sf);
+if (serialized) BWdyPWRAAs(df,sf);
 else BWdyPWRAAp(df,sf);
 }
 
@@ -7342,7 +7342,7 @@ t = fmod(t,tt);
 
 static void BWdyMODAA(B * df, B * sf)
 {
-if (serialed) BWdyMODAAs(df,sf);
+if (serialized) BWdyMODAAs(df,sf);
 else BWdyMODAAp(df,sf);
 }
 
@@ -7625,7 +7625,7 @@ t = thearc(t,tt);
 
 static void BWdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) BWdyTHEARCAAs(df,sf);
+if (serialized) BWdyTHEARCAAs(df,sf);
 else BWdyTHEARCAAp(df,sf);
 }
 
@@ -7908,7 +7908,7 @@ t += tt;
 
 static void BLdyADDAA(B * df, B * sf)
 {
-if (serialed) BLdyADDAAs(df,sf);
+if (serialized) BLdyADDAAs(df,sf);
 else BLdyADDAAp(df,sf);
 }
 
@@ -8191,7 +8191,7 @@ t -= tt;
 
 static void BLdySUBAA(B * df, B * sf)
 {
-if (serialed) BLdySUBAAs(df,sf);
+if (serialized) BLdySUBAAs(df,sf);
 else BLdySUBAAp(df,sf);
 }
 
@@ -8474,7 +8474,7 @@ t *= tt;
 
 static void BLdyMULAA(B * df, B * sf)
 {
-if (serialed) BLdyMULAAs(df,sf);
+if (serialized) BLdyMULAAs(df,sf);
 else BLdyMULAAp(df,sf);
 }
 
@@ -8757,7 +8757,7 @@ t /= tt;
 
 static void BLdyDIVAA(B * df, B * sf)
 {
-if (serialed) BLdyDIVAAs(df,sf);
+if (serialized) BLdyDIVAAs(df,sf);
 else BLdyDIVAAp(df,sf);
 }
 
@@ -9040,7 +9040,7 @@ t = pow(t,tt);
 
 static void BLdyPWRAA(B * df, B * sf)
 {
-if (serialed) BLdyPWRAAs(df,sf);
+if (serialized) BLdyPWRAAs(df,sf);
 else BLdyPWRAAp(df,sf);
 }
 
@@ -9323,7 +9323,7 @@ t = fmod(t,tt);
 
 static void BLdyMODAA(B * df, B * sf)
 {
-if (serialed) BLdyMODAAs(df,sf);
+if (serialized) BLdyMODAAs(df,sf);
 else BLdyMODAAp(df,sf);
 }
 
@@ -9606,7 +9606,7 @@ t = thearc(t,tt);
 
 static void BLdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) BLdyTHEARCAAs(df,sf);
+if (serialized) BLdyTHEARCAAs(df,sf);
 else BLdyTHEARCAAp(df,sf);
 }
 
@@ -9889,7 +9889,7 @@ t += tt;
 
 static void BSdyADDAA(B * df, B * sf)
 {
-if (serialed) BSdyADDAAs(df,sf);
+if (serialized) BSdyADDAAs(df,sf);
 else BSdyADDAAp(df,sf);
 }
 
@@ -10172,7 +10172,7 @@ t -= tt;
 
 static void BSdySUBAA(B * df, B * sf)
 {
-if (serialed) BSdySUBAAs(df,sf);
+if (serialized) BSdySUBAAs(df,sf);
 else BSdySUBAAp(df,sf);
 }
 
@@ -10455,7 +10455,7 @@ t *= tt;
 
 static void BSdyMULAA(B * df, B * sf)
 {
-if (serialed) BSdyMULAAs(df,sf);
+if (serialized) BSdyMULAAs(df,sf);
 else BSdyMULAAp(df,sf);
 }
 
@@ -10738,7 +10738,7 @@ t /= tt;
 
 static void BSdyDIVAA(B * df, B * sf)
 {
-if (serialed) BSdyDIVAAs(df,sf);
+if (serialized) BSdyDIVAAs(df,sf);
 else BSdyDIVAAp(df,sf);
 }
 
@@ -11021,7 +11021,7 @@ t = pow(t,tt);
 
 static void BSdyPWRAA(B * df, B * sf)
 {
-if (serialed) BSdyPWRAAs(df,sf);
+if (serialized) BSdyPWRAAs(df,sf);
 else BSdyPWRAAp(df,sf);
 }
 
@@ -11304,7 +11304,7 @@ t = fmod(t,tt);
 
 static void BSdyMODAA(B * df, B * sf)
 {
-if (serialed) BSdyMODAAs(df,sf);
+if (serialized) BSdyMODAAs(df,sf);
 else BSdyMODAAp(df,sf);
 }
 
@@ -11587,7 +11587,7 @@ t = thearc(t,tt);
 
 static void BSdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) BSdyTHEARCAAs(df,sf);
+if (serialized) BSdyTHEARCAAs(df,sf);
 else BSdyTHEARCAAp(df,sf);
 }
 
@@ -11870,7 +11870,7 @@ t += tt;
 
 static void BDdyADDAA(B * df, B * sf)
 {
-if (serialed) BDdyADDAAs(df,sf);
+if (serialized) BDdyADDAAs(df,sf);
 else BDdyADDAAp(df,sf);
 }
 
@@ -12153,7 +12153,7 @@ t -= tt;
 
 static void BDdySUBAA(B * df, B * sf)
 {
-if (serialed) BDdySUBAAs(df,sf);
+if (serialized) BDdySUBAAs(df,sf);
 else BDdySUBAAp(df,sf);
 }
 
@@ -12436,7 +12436,7 @@ t *= tt;
 
 static void BDdyMULAA(B * df, B * sf)
 {
-if (serialed) BDdyMULAAs(df,sf);
+if (serialized) BDdyMULAAs(df,sf);
 else BDdyMULAAp(df,sf);
 }
 
@@ -12719,7 +12719,7 @@ t /= tt;
 
 static void BDdyDIVAA(B * df, B * sf)
 {
-if (serialed) BDdyDIVAAs(df,sf);
+if (serialized) BDdyDIVAAs(df,sf);
 else BDdyDIVAAp(df,sf);
 }
 
@@ -13002,7 +13002,7 @@ t = pow(t,tt);
 
 static void BDdyPWRAA(B * df, B * sf)
 {
-if (serialed) BDdyPWRAAs(df,sf);
+if (serialized) BDdyPWRAAs(df,sf);
 else BDdyPWRAAp(df,sf);
 }
 
@@ -13285,7 +13285,7 @@ t = fmod(t,tt);
 
 static void BDdyMODAA(B * df, B * sf)
 {
-if (serialed) BDdyMODAAs(df,sf);
+if (serialized) BDdyMODAAs(df,sf);
 else BDdyMODAAp(df,sf);
 }
 
@@ -13568,7 +13568,7 @@ t = thearc(t,tt);
 
 static void BDdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) BDdyTHEARCAAs(df,sf);
+if (serialized) BDdyTHEARCAAs(df,sf);
 else BDdyTHEARCAAp(df,sf);
 }
 
@@ -13851,7 +13851,7 @@ t += tt;
 
 static void WBdyADDAA(B * df, B * sf)
 {
-if (serialed) WBdyADDAAs(df,sf);
+if (serialized) WBdyADDAAs(df,sf);
 else WBdyADDAAp(df,sf);
 }
 
@@ -14134,7 +14134,7 @@ t -= tt;
 
 static void WBdySUBAA(B * df, B * sf)
 {
-if (serialed) WBdySUBAAs(df,sf);
+if (serialized) WBdySUBAAs(df,sf);
 else WBdySUBAAp(df,sf);
 }
 
@@ -14417,7 +14417,7 @@ t *= tt;
 
 static void WBdyMULAA(B * df, B * sf)
 {
-if (serialed) WBdyMULAAs(df,sf);
+if (serialized) WBdyMULAAs(df,sf);
 else WBdyMULAAp(df,sf);
 }
 
@@ -14700,7 +14700,7 @@ t /= tt;
 
 static void WBdyDIVAA(B * df, B * sf)
 {
-if (serialed) WBdyDIVAAs(df,sf);
+if (serialized) WBdyDIVAAs(df,sf);
 else WBdyDIVAAp(df,sf);
 }
 
@@ -14983,7 +14983,7 @@ t = pow(t,tt);
 
 static void WBdyPWRAA(B * df, B * sf)
 {
-if (serialed) WBdyPWRAAs(df,sf);
+if (serialized) WBdyPWRAAs(df,sf);
 else WBdyPWRAAp(df,sf);
 }
 
@@ -15266,7 +15266,7 @@ t = fmod(t,tt);
 
 static void WBdyMODAA(B * df, B * sf)
 {
-if (serialed) WBdyMODAAs(df,sf);
+if (serialized) WBdyMODAAs(df,sf);
 else WBdyMODAAp(df,sf);
 }
 
@@ -15549,7 +15549,7 @@ t = thearc(t,tt);
 
 static void WBdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) WBdyTHEARCAAs(df,sf);
+if (serialized) WBdyTHEARCAAs(df,sf);
 else WBdyTHEARCAAp(df,sf);
 }
 
@@ -15832,7 +15832,7 @@ t += tt;
 
 static void WWdyADDAA(B * df, B * sf)
 {
-if (serialed) WWdyADDAAs(df,sf);
+if (serialized) WWdyADDAAs(df,sf);
 else WWdyADDAAp(df,sf);
 }
 
@@ -16115,7 +16115,7 @@ t -= tt;
 
 static void WWdySUBAA(B * df, B * sf)
 {
-if (serialed) WWdySUBAAs(df,sf);
+if (serialized) WWdySUBAAs(df,sf);
 else WWdySUBAAp(df,sf);
 }
 
@@ -16398,7 +16398,7 @@ t *= tt;
 
 static void WWdyMULAA(B * df, B * sf)
 {
-if (serialed) WWdyMULAAs(df,sf);
+if (serialized) WWdyMULAAs(df,sf);
 else WWdyMULAAp(df,sf);
 }
 
@@ -16681,7 +16681,7 @@ t /= tt;
 
 static void WWdyDIVAA(B * df, B * sf)
 {
-if (serialed) WWdyDIVAAs(df,sf);
+if (serialized) WWdyDIVAAs(df,sf);
 else WWdyDIVAAp(df,sf);
 }
 
@@ -16964,7 +16964,7 @@ t = pow(t,tt);
 
 static void WWdyPWRAA(B * df, B * sf)
 {
-if (serialed) WWdyPWRAAs(df,sf);
+if (serialized) WWdyPWRAAs(df,sf);
 else WWdyPWRAAp(df,sf);
 }
 
@@ -17247,7 +17247,7 @@ t = fmod(t,tt);
 
 static void WWdyMODAA(B * df, B * sf)
 {
-if (serialed) WWdyMODAAs(df,sf);
+if (serialized) WWdyMODAAs(df,sf);
 else WWdyMODAAp(df,sf);
 }
 
@@ -17530,7 +17530,7 @@ t = thearc(t,tt);
 
 static void WWdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) WWdyTHEARCAAs(df,sf);
+if (serialized) WWdyTHEARCAAs(df,sf);
 else WWdyTHEARCAAp(df,sf);
 }
 
@@ -17813,7 +17813,7 @@ t += tt;
 
 static void WLdyADDAA(B * df, B * sf)
 {
-if (serialed) WLdyADDAAs(df,sf);
+if (serialized) WLdyADDAAs(df,sf);
 else WLdyADDAAp(df,sf);
 }
 
@@ -18096,7 +18096,7 @@ t -= tt;
 
 static void WLdySUBAA(B * df, B * sf)
 {
-if (serialed) WLdySUBAAs(df,sf);
+if (serialized) WLdySUBAAs(df,sf);
 else WLdySUBAAp(df,sf);
 }
 
@@ -18379,7 +18379,7 @@ t *= tt;
 
 static void WLdyMULAA(B * df, B * sf)
 {
-if (serialed) WLdyMULAAs(df,sf);
+if (serialized) WLdyMULAAs(df,sf);
 else WLdyMULAAp(df,sf);
 }
 
@@ -18662,7 +18662,7 @@ t /= tt;
 
 static void WLdyDIVAA(B * df, B * sf)
 {
-if (serialed) WLdyDIVAAs(df,sf);
+if (serialized) WLdyDIVAAs(df,sf);
 else WLdyDIVAAp(df,sf);
 }
 
@@ -18945,7 +18945,7 @@ t = pow(t,tt);
 
 static void WLdyPWRAA(B * df, B * sf)
 {
-if (serialed) WLdyPWRAAs(df,sf);
+if (serialized) WLdyPWRAAs(df,sf);
 else WLdyPWRAAp(df,sf);
 }
 
@@ -19228,7 +19228,7 @@ t = fmod(t,tt);
 
 static void WLdyMODAA(B * df, B * sf)
 {
-if (serialed) WLdyMODAAs(df,sf);
+if (serialized) WLdyMODAAs(df,sf);
 else WLdyMODAAp(df,sf);
 }
 
@@ -19511,7 +19511,7 @@ t = thearc(t,tt);
 
 static void WLdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) WLdyTHEARCAAs(df,sf);
+if (serialized) WLdyTHEARCAAs(df,sf);
 else WLdyTHEARCAAp(df,sf);
 }
 
@@ -19794,7 +19794,7 @@ t += tt;
 
 static void WSdyADDAA(B * df, B * sf)
 {
-if (serialed) WSdyADDAAs(df,sf);
+if (serialized) WSdyADDAAs(df,sf);
 else WSdyADDAAp(df,sf);
 }
 
@@ -20077,7 +20077,7 @@ t -= tt;
 
 static void WSdySUBAA(B * df, B * sf)
 {
-if (serialed) WSdySUBAAs(df,sf);
+if (serialized) WSdySUBAAs(df,sf);
 else WSdySUBAAp(df,sf);
 }
 
@@ -20360,7 +20360,7 @@ t *= tt;
 
 static void WSdyMULAA(B * df, B * sf)
 {
-if (serialed) WSdyMULAAs(df,sf);
+if (serialized) WSdyMULAAs(df,sf);
 else WSdyMULAAp(df,sf);
 }
 
@@ -20643,7 +20643,7 @@ t /= tt;
 
 static void WSdyDIVAA(B * df, B * sf)
 {
-if (serialed) WSdyDIVAAs(df,sf);
+if (serialized) WSdyDIVAAs(df,sf);
 else WSdyDIVAAp(df,sf);
 }
 
@@ -20926,7 +20926,7 @@ t = pow(t,tt);
 
 static void WSdyPWRAA(B * df, B * sf)
 {
-if (serialed) WSdyPWRAAs(df,sf);
+if (serialized) WSdyPWRAAs(df,sf);
 else WSdyPWRAAp(df,sf);
 }
 
@@ -21209,7 +21209,7 @@ t = fmod(t,tt);
 
 static void WSdyMODAA(B * df, B * sf)
 {
-if (serialed) WSdyMODAAs(df,sf);
+if (serialized) WSdyMODAAs(df,sf);
 else WSdyMODAAp(df,sf);
 }
 
@@ -21492,7 +21492,7 @@ t = thearc(t,tt);
 
 static void WSdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) WSdyTHEARCAAs(df,sf);
+if (serialized) WSdyTHEARCAAs(df,sf);
 else WSdyTHEARCAAp(df,sf);
 }
 
@@ -21775,7 +21775,7 @@ t += tt;
 
 static void WDdyADDAA(B * df, B * sf)
 {
-if (serialed) WDdyADDAAs(df,sf);
+if (serialized) WDdyADDAAs(df,sf);
 else WDdyADDAAp(df,sf);
 }
 
@@ -22058,7 +22058,7 @@ t -= tt;
 
 static void WDdySUBAA(B * df, B * sf)
 {
-if (serialed) WDdySUBAAs(df,sf);
+if (serialized) WDdySUBAAs(df,sf);
 else WDdySUBAAp(df,sf);
 }
 
@@ -22341,7 +22341,7 @@ t *= tt;
 
 static void WDdyMULAA(B * df, B * sf)
 {
-if (serialed) WDdyMULAAs(df,sf);
+if (serialized) WDdyMULAAs(df,sf);
 else WDdyMULAAp(df,sf);
 }
 
@@ -22624,7 +22624,7 @@ t /= tt;
 
 static void WDdyDIVAA(B * df, B * sf)
 {
-if (serialed) WDdyDIVAAs(df,sf);
+if (serialized) WDdyDIVAAs(df,sf);
 else WDdyDIVAAp(df,sf);
 }
 
@@ -22907,7 +22907,7 @@ t = pow(t,tt);
 
 static void WDdyPWRAA(B * df, B * sf)
 {
-if (serialed) WDdyPWRAAs(df,sf);
+if (serialized) WDdyPWRAAs(df,sf);
 else WDdyPWRAAp(df,sf);
 }
 
@@ -23190,7 +23190,7 @@ t = fmod(t,tt);
 
 static void WDdyMODAA(B * df, B * sf)
 {
-if (serialed) WDdyMODAAs(df,sf);
+if (serialized) WDdyMODAAs(df,sf);
 else WDdyMODAAp(df,sf);
 }
 
@@ -23473,7 +23473,7 @@ t = thearc(t,tt);
 
 static void WDdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) WDdyTHEARCAAs(df,sf);
+if (serialized) WDdyTHEARCAAs(df,sf);
 else WDdyTHEARCAAp(df,sf);
 }
 
@@ -23756,7 +23756,7 @@ t += tt;
 
 static void LBdyADDAA(B * df, B * sf)
 {
-if (serialed) LBdyADDAAs(df,sf);
+if (serialized) LBdyADDAAs(df,sf);
 else LBdyADDAAp(df,sf);
 }
 
@@ -24039,7 +24039,7 @@ t -= tt;
 
 static void LBdySUBAA(B * df, B * sf)
 {
-if (serialed) LBdySUBAAs(df,sf);
+if (serialized) LBdySUBAAs(df,sf);
 else LBdySUBAAp(df,sf);
 }
 
@@ -24322,7 +24322,7 @@ t *= tt;
 
 static void LBdyMULAA(B * df, B * sf)
 {
-if (serialed) LBdyMULAAs(df,sf);
+if (serialized) LBdyMULAAs(df,sf);
 else LBdyMULAAp(df,sf);
 }
 
@@ -24605,7 +24605,7 @@ t /= tt;
 
 static void LBdyDIVAA(B * df, B * sf)
 {
-if (serialed) LBdyDIVAAs(df,sf);
+if (serialized) LBdyDIVAAs(df,sf);
 else LBdyDIVAAp(df,sf);
 }
 
@@ -24888,7 +24888,7 @@ t = pow(t,tt);
 
 static void LBdyPWRAA(B * df, B * sf)
 {
-if (serialed) LBdyPWRAAs(df,sf);
+if (serialized) LBdyPWRAAs(df,sf);
 else LBdyPWRAAp(df,sf);
 }
 
@@ -25171,7 +25171,7 @@ t = fmod(t,tt);
 
 static void LBdyMODAA(B * df, B * sf)
 {
-if (serialed) LBdyMODAAs(df,sf);
+if (serialized) LBdyMODAAs(df,sf);
 else LBdyMODAAp(df,sf);
 }
 
@@ -25454,7 +25454,7 @@ t = thearc(t,tt);
 
 static void LBdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) LBdyTHEARCAAs(df,sf);
+if (serialized) LBdyTHEARCAAs(df,sf);
 else LBdyTHEARCAAp(df,sf);
 }
 
@@ -25737,7 +25737,7 @@ t += tt;
 
 static void LWdyADDAA(B * df, B * sf)
 {
-if (serialed) LWdyADDAAs(df,sf);
+if (serialized) LWdyADDAAs(df,sf);
 else LWdyADDAAp(df,sf);
 }
 
@@ -26020,7 +26020,7 @@ t -= tt;
 
 static void LWdySUBAA(B * df, B * sf)
 {
-if (serialed) LWdySUBAAs(df,sf);
+if (serialized) LWdySUBAAs(df,sf);
 else LWdySUBAAp(df,sf);
 }
 
@@ -26303,7 +26303,7 @@ t *= tt;
 
 static void LWdyMULAA(B * df, B * sf)
 {
-if (serialed) LWdyMULAAs(df,sf);
+if (serialized) LWdyMULAAs(df,sf);
 else LWdyMULAAp(df,sf);
 }
 
@@ -26586,7 +26586,7 @@ t /= tt;
 
 static void LWdyDIVAA(B * df, B * sf)
 {
-if (serialed) LWdyDIVAAs(df,sf);
+if (serialized) LWdyDIVAAs(df,sf);
 else LWdyDIVAAp(df,sf);
 }
 
@@ -26869,7 +26869,7 @@ t = pow(t,tt);
 
 static void LWdyPWRAA(B * df, B * sf)
 {
-if (serialed) LWdyPWRAAs(df,sf);
+if (serialized) LWdyPWRAAs(df,sf);
 else LWdyPWRAAp(df,sf);
 }
 
@@ -27152,7 +27152,7 @@ t = fmod(t,tt);
 
 static void LWdyMODAA(B * df, B * sf)
 {
-if (serialed) LWdyMODAAs(df,sf);
+if (serialized) LWdyMODAAs(df,sf);
 else LWdyMODAAp(df,sf);
 }
 
@@ -27435,7 +27435,7 @@ t = thearc(t,tt);
 
 static void LWdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) LWdyTHEARCAAs(df,sf);
+if (serialized) LWdyTHEARCAAs(df,sf);
 else LWdyTHEARCAAp(df,sf);
 }
 
@@ -27718,7 +27718,7 @@ t += tt;
 
 static void LLdyADDAA(B * df, B * sf)
 {
-if (serialed) LLdyADDAAs(df,sf);
+if (serialized) LLdyADDAAs(df,sf);
 else LLdyADDAAp(df,sf);
 }
 
@@ -28001,7 +28001,7 @@ t -= tt;
 
 static void LLdySUBAA(B * df, B * sf)
 {
-if (serialed) LLdySUBAAs(df,sf);
+if (serialized) LLdySUBAAs(df,sf);
 else LLdySUBAAp(df,sf);
 }
 
@@ -28284,7 +28284,7 @@ t *= tt;
 
 static void LLdyMULAA(B * df, B * sf)
 {
-if (serialed) LLdyMULAAs(df,sf);
+if (serialized) LLdyMULAAs(df,sf);
 else LLdyMULAAp(df,sf);
 }
 
@@ -28567,7 +28567,7 @@ t /= tt;
 
 static void LLdyDIVAA(B * df, B * sf)
 {
-if (serialed) LLdyDIVAAs(df,sf);
+if (serialized) LLdyDIVAAs(df,sf);
 else LLdyDIVAAp(df,sf);
 }
 
@@ -28850,7 +28850,7 @@ t = pow(t,tt);
 
 static void LLdyPWRAA(B * df, B * sf)
 {
-if (serialed) LLdyPWRAAs(df,sf);
+if (serialized) LLdyPWRAAs(df,sf);
 else LLdyPWRAAp(df,sf);
 }
 
@@ -29133,7 +29133,7 @@ t = fmod(t,tt);
 
 static void LLdyMODAA(B * df, B * sf)
 {
-if (serialed) LLdyMODAAs(df,sf);
+if (serialized) LLdyMODAAs(df,sf);
 else LLdyMODAAp(df,sf);
 }
 
@@ -29416,7 +29416,7 @@ t = thearc(t,tt);
 
 static void LLdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) LLdyTHEARCAAs(df,sf);
+if (serialized) LLdyTHEARCAAs(df,sf);
 else LLdyTHEARCAAp(df,sf);
 }
 
@@ -29699,7 +29699,7 @@ t += tt;
 
 static void LSdyADDAA(B * df, B * sf)
 {
-if (serialed) LSdyADDAAs(df,sf);
+if (serialized) LSdyADDAAs(df,sf);
 else LSdyADDAAp(df,sf);
 }
 
@@ -29982,7 +29982,7 @@ t -= tt;
 
 static void LSdySUBAA(B * df, B * sf)
 {
-if (serialed) LSdySUBAAs(df,sf);
+if (serialized) LSdySUBAAs(df,sf);
 else LSdySUBAAp(df,sf);
 }
 
@@ -30265,7 +30265,7 @@ t *= tt;
 
 static void LSdyMULAA(B * df, B * sf)
 {
-if (serialed) LSdyMULAAs(df,sf);
+if (serialized) LSdyMULAAs(df,sf);
 else LSdyMULAAp(df,sf);
 }
 
@@ -30548,7 +30548,7 @@ t /= tt;
 
 static void LSdyDIVAA(B * df, B * sf)
 {
-if (serialed) LSdyDIVAAs(df,sf);
+if (serialized) LSdyDIVAAs(df,sf);
 else LSdyDIVAAp(df,sf);
 }
 
@@ -30831,7 +30831,7 @@ t = pow(t,tt);
 
 static void LSdyPWRAA(B * df, B * sf)
 {
-if (serialed) LSdyPWRAAs(df,sf);
+if (serialized) LSdyPWRAAs(df,sf);
 else LSdyPWRAAp(df,sf);
 }
 
@@ -31114,7 +31114,7 @@ t = fmod(t,tt);
 
 static void LSdyMODAA(B * df, B * sf)
 {
-if (serialed) LSdyMODAAs(df,sf);
+if (serialized) LSdyMODAAs(df,sf);
 else LSdyMODAAp(df,sf);
 }
 
@@ -31397,7 +31397,7 @@ t = thearc(t,tt);
 
 static void LSdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) LSdyTHEARCAAs(df,sf);
+if (serialized) LSdyTHEARCAAs(df,sf);
 else LSdyTHEARCAAp(df,sf);
 }
 
@@ -31680,7 +31680,7 @@ t += tt;
 
 static void LDdyADDAA(B * df, B * sf)
 {
-if (serialed) LDdyADDAAs(df,sf);
+if (serialized) LDdyADDAAs(df,sf);
 else LDdyADDAAp(df,sf);
 }
 
@@ -31963,7 +31963,7 @@ t -= tt;
 
 static void LDdySUBAA(B * df, B * sf)
 {
-if (serialed) LDdySUBAAs(df,sf);
+if (serialized) LDdySUBAAs(df,sf);
 else LDdySUBAAp(df,sf);
 }
 
@@ -32246,7 +32246,7 @@ t *= tt;
 
 static void LDdyMULAA(B * df, B * sf)
 {
-if (serialed) LDdyMULAAs(df,sf);
+if (serialized) LDdyMULAAs(df,sf);
 else LDdyMULAAp(df,sf);
 }
 
@@ -32529,7 +32529,7 @@ t /= tt;
 
 static void LDdyDIVAA(B * df, B * sf)
 {
-if (serialed) LDdyDIVAAs(df,sf);
+if (serialized) LDdyDIVAAs(df,sf);
 else LDdyDIVAAp(df,sf);
 }
 
@@ -32812,7 +32812,7 @@ t = pow(t,tt);
 
 static void LDdyPWRAA(B * df, B * sf)
 {
-if (serialed) LDdyPWRAAs(df,sf);
+if (serialized) LDdyPWRAAs(df,sf);
 else LDdyPWRAAp(df,sf);
 }
 
@@ -33095,7 +33095,7 @@ t = fmod(t,tt);
 
 static void LDdyMODAA(B * df, B * sf)
 {
-if (serialed) LDdyMODAAs(df,sf);
+if (serialized) LDdyMODAAs(df,sf);
 else LDdyMODAAp(df,sf);
 }
 
@@ -33378,7 +33378,7 @@ t = thearc(t,tt);
 
 static void LDdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) LDdyTHEARCAAs(df,sf);
+if (serialized) LDdyTHEARCAAs(df,sf);
 else LDdyTHEARCAAp(df,sf);
 }
 
@@ -33661,7 +33661,7 @@ t += tt;
 
 static void SBdyADDAA(B * df, B * sf)
 {
-if (serialed) SBdyADDAAs(df,sf);
+if (serialized) SBdyADDAAs(df,sf);
 else SBdyADDAAp(df,sf);
 }
 
@@ -33944,7 +33944,7 @@ t -= tt;
 
 static void SBdySUBAA(B * df, B * sf)
 {
-if (serialed) SBdySUBAAs(df,sf);
+if (serialized) SBdySUBAAs(df,sf);
 else SBdySUBAAp(df,sf);
 }
 
@@ -34227,7 +34227,7 @@ t *= tt;
 
 static void SBdyMULAA(B * df, B * sf)
 {
-if (serialed) SBdyMULAAs(df,sf);
+if (serialized) SBdyMULAAs(df,sf);
 else SBdyMULAAp(df,sf);
 }
 
@@ -34510,7 +34510,7 @@ t /= tt;
 
 static void SBdyDIVAA(B * df, B * sf)
 {
-if (serialed) SBdyDIVAAs(df,sf);
+if (serialized) SBdyDIVAAs(df,sf);
 else SBdyDIVAAp(df,sf);
 }
 
@@ -34793,7 +34793,7 @@ t = pow(t,tt);
 
 static void SBdyPWRAA(B * df, B * sf)
 {
-if (serialed) SBdyPWRAAs(df,sf);
+if (serialized) SBdyPWRAAs(df,sf);
 else SBdyPWRAAp(df,sf);
 }
 
@@ -35076,7 +35076,7 @@ t = fmod(t,tt);
 
 static void SBdyMODAA(B * df, B * sf)
 {
-if (serialed) SBdyMODAAs(df,sf);
+if (serialized) SBdyMODAAs(df,sf);
 else SBdyMODAAp(df,sf);
 }
 
@@ -35359,7 +35359,7 @@ t = thearc(t,tt);
 
 static void SBdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) SBdyTHEARCAAs(df,sf);
+if (serialized) SBdyTHEARCAAs(df,sf);
 else SBdyTHEARCAAp(df,sf);
 }
 
@@ -35642,7 +35642,7 @@ t += tt;
 
 static void SWdyADDAA(B * df, B * sf)
 {
-if (serialed) SWdyADDAAs(df,sf);
+if (serialized) SWdyADDAAs(df,sf);
 else SWdyADDAAp(df,sf);
 }
 
@@ -35925,7 +35925,7 @@ t -= tt;
 
 static void SWdySUBAA(B * df, B * sf)
 {
-if (serialed) SWdySUBAAs(df,sf);
+if (serialized) SWdySUBAAs(df,sf);
 else SWdySUBAAp(df,sf);
 }
 
@@ -36208,7 +36208,7 @@ t *= tt;
 
 static void SWdyMULAA(B * df, B * sf)
 {
-if (serialed) SWdyMULAAs(df,sf);
+if (serialized) SWdyMULAAs(df,sf);
 else SWdyMULAAp(df,sf);
 }
 
@@ -36491,7 +36491,7 @@ t /= tt;
 
 static void SWdyDIVAA(B * df, B * sf)
 {
-if (serialed) SWdyDIVAAs(df,sf);
+if (serialized) SWdyDIVAAs(df,sf);
 else SWdyDIVAAp(df,sf);
 }
 
@@ -36774,7 +36774,7 @@ t = pow(t,tt);
 
 static void SWdyPWRAA(B * df, B * sf)
 {
-if (serialed) SWdyPWRAAs(df,sf);
+if (serialized) SWdyPWRAAs(df,sf);
 else SWdyPWRAAp(df,sf);
 }
 
@@ -37057,7 +37057,7 @@ t = fmod(t,tt);
 
 static void SWdyMODAA(B * df, B * sf)
 {
-if (serialed) SWdyMODAAs(df,sf);
+if (serialized) SWdyMODAAs(df,sf);
 else SWdyMODAAp(df,sf);
 }
 
@@ -37340,7 +37340,7 @@ t = thearc(t,tt);
 
 static void SWdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) SWdyTHEARCAAs(df,sf);
+if (serialized) SWdyTHEARCAAs(df,sf);
 else SWdyTHEARCAAp(df,sf);
 }
 
@@ -37623,7 +37623,7 @@ t += tt;
 
 static void SLdyADDAA(B * df, B * sf)
 {
-if (serialed) SLdyADDAAs(df,sf);
+if (serialized) SLdyADDAAs(df,sf);
 else SLdyADDAAp(df,sf);
 }
 
@@ -37906,7 +37906,7 @@ t -= tt;
 
 static void SLdySUBAA(B * df, B * sf)
 {
-if (serialed) SLdySUBAAs(df,sf);
+if (serialized) SLdySUBAAs(df,sf);
 else SLdySUBAAp(df,sf);
 }
 
@@ -38189,7 +38189,7 @@ t *= tt;
 
 static void SLdyMULAA(B * df, B * sf)
 {
-if (serialed) SLdyMULAAs(df,sf);
+if (serialized) SLdyMULAAs(df,sf);
 else SLdyMULAAp(df,sf);
 }
 
@@ -38472,7 +38472,7 @@ t /= tt;
 
 static void SLdyDIVAA(B * df, B * sf)
 {
-if (serialed) SLdyDIVAAs(df,sf);
+if (serialized) SLdyDIVAAs(df,sf);
 else SLdyDIVAAp(df,sf);
 }
 
@@ -38755,7 +38755,7 @@ t = pow(t,tt);
 
 static void SLdyPWRAA(B * df, B * sf)
 {
-if (serialed) SLdyPWRAAs(df,sf);
+if (serialized) SLdyPWRAAs(df,sf);
 else SLdyPWRAAp(df,sf);
 }
 
@@ -39038,7 +39038,7 @@ t = fmod(t,tt);
 
 static void SLdyMODAA(B * df, B * sf)
 {
-if (serialed) SLdyMODAAs(df,sf);
+if (serialized) SLdyMODAAs(df,sf);
 else SLdyMODAAp(df,sf);
 }
 
@@ -39321,7 +39321,7 @@ t = thearc(t,tt);
 
 static void SLdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) SLdyTHEARCAAs(df,sf);
+if (serialized) SLdyTHEARCAAs(df,sf);
 else SLdyTHEARCAAp(df,sf);
 }
 
@@ -39604,7 +39604,7 @@ t += tt;
 
 static void SSdyADDAA(B * df, B * sf)
 {
-if (serialed) SSdyADDAAs(df,sf);
+if (serialized) SSdyADDAAs(df,sf);
 else SSdyADDAAp(df,sf);
 }
 
@@ -39887,7 +39887,7 @@ t -= tt;
 
 static void SSdySUBAA(B * df, B * sf)
 {
-if (serialed) SSdySUBAAs(df,sf);
+if (serialized) SSdySUBAAs(df,sf);
 else SSdySUBAAp(df,sf);
 }
 
@@ -40170,7 +40170,7 @@ t *= tt;
 
 static void SSdyMULAA(B * df, B * sf)
 {
-if (serialed) SSdyMULAAs(df,sf);
+if (serialized) SSdyMULAAs(df,sf);
 else SSdyMULAAp(df,sf);
 }
 
@@ -40453,7 +40453,7 @@ t /= tt;
 
 static void SSdyDIVAA(B * df, B * sf)
 {
-if (serialed) SSdyDIVAAs(df,sf);
+if (serialized) SSdyDIVAAs(df,sf);
 else SSdyDIVAAp(df,sf);
 }
 
@@ -40736,7 +40736,7 @@ t = pow(t,tt);
 
 static void SSdyPWRAA(B * df, B * sf)
 {
-if (serialed) SSdyPWRAAs(df,sf);
+if (serialized) SSdyPWRAAs(df,sf);
 else SSdyPWRAAp(df,sf);
 }
 
@@ -41019,7 +41019,7 @@ t = fmod(t,tt);
 
 static void SSdyMODAA(B * df, B * sf)
 {
-if (serialed) SSdyMODAAs(df,sf);
+if (serialized) SSdyMODAAs(df,sf);
 else SSdyMODAAp(df,sf);
 }
 
@@ -41302,7 +41302,7 @@ t = thearc(t,tt);
 
 static void SSdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) SSdyTHEARCAAs(df,sf);
+if (serialized) SSdyTHEARCAAs(df,sf);
 else SSdyTHEARCAAp(df,sf);
 }
 
@@ -41585,7 +41585,7 @@ t += tt;
 
 static void SDdyADDAA(B * df, B * sf)
 {
-if (serialed) SDdyADDAAs(df,sf);
+if (serialized) SDdyADDAAs(df,sf);
 else SDdyADDAAp(df,sf);
 }
 
@@ -41868,7 +41868,7 @@ t -= tt;
 
 static void SDdySUBAA(B * df, B * sf)
 {
-if (serialed) SDdySUBAAs(df,sf);
+if (serialized) SDdySUBAAs(df,sf);
 else SDdySUBAAp(df,sf);
 }
 
@@ -42151,7 +42151,7 @@ t *= tt;
 
 static void SDdyMULAA(B * df, B * sf)
 {
-if (serialed) SDdyMULAAs(df,sf);
+if (serialized) SDdyMULAAs(df,sf);
 else SDdyMULAAp(df,sf);
 }
 
@@ -42434,7 +42434,7 @@ t /= tt;
 
 static void SDdyDIVAA(B * df, B * sf)
 {
-if (serialed) SDdyDIVAAs(df,sf);
+if (serialized) SDdyDIVAAs(df,sf);
 else SDdyDIVAAp(df,sf);
 }
 
@@ -42717,7 +42717,7 @@ t = pow(t,tt);
 
 static void SDdyPWRAA(B * df, B * sf)
 {
-if (serialed) SDdyPWRAAs(df,sf);
+if (serialized) SDdyPWRAAs(df,sf);
 else SDdyPWRAAp(df,sf);
 }
 
@@ -43000,7 +43000,7 @@ t = fmod(t,tt);
 
 static void SDdyMODAA(B * df, B * sf)
 {
-if (serialed) SDdyMODAAs(df,sf);
+if (serialized) SDdyMODAAs(df,sf);
 else SDdyMODAAp(df,sf);
 }
 
@@ -43283,7 +43283,7 @@ t = thearc(t,tt);
 
 static void SDdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) SDdyTHEARCAAs(df,sf);
+if (serialized) SDdyTHEARCAAs(df,sf);
 else SDdyTHEARCAAp(df,sf);
 }
 
@@ -43566,7 +43566,7 @@ t += tt;
 
 static void DBdyADDAA(B * df, B * sf)
 {
-if (serialed) DBdyADDAAs(df,sf);
+if (serialized) DBdyADDAAs(df,sf);
 else DBdyADDAAp(df,sf);
 }
 
@@ -43849,7 +43849,7 @@ t -= tt;
 
 static void DBdySUBAA(B * df, B * sf)
 {
-if (serialed) DBdySUBAAs(df,sf);
+if (serialized) DBdySUBAAs(df,sf);
 else DBdySUBAAp(df,sf);
 }
 
@@ -44132,7 +44132,7 @@ t *= tt;
 
 static void DBdyMULAA(B * df, B * sf)
 {
-if (serialed) DBdyMULAAs(df,sf);
+if (serialized) DBdyMULAAs(df,sf);
 else DBdyMULAAp(df,sf);
 }
 
@@ -44415,7 +44415,7 @@ t /= tt;
 
 static void DBdyDIVAA(B * df, B * sf)
 {
-if (serialed) DBdyDIVAAs(df,sf);
+if (serialized) DBdyDIVAAs(df,sf);
 else DBdyDIVAAp(df,sf);
 }
 
@@ -44698,7 +44698,7 @@ t = pow(t,tt);
 
 static void DBdyPWRAA(B * df, B * sf)
 {
-if (serialed) DBdyPWRAAs(df,sf);
+if (serialized) DBdyPWRAAs(df,sf);
 else DBdyPWRAAp(df,sf);
 }
 
@@ -44981,7 +44981,7 @@ t = fmod(t,tt);
 
 static void DBdyMODAA(B * df, B * sf)
 {
-if (serialed) DBdyMODAAs(df,sf);
+if (serialized) DBdyMODAAs(df,sf);
 else DBdyMODAAp(df,sf);
 }
 
@@ -45264,7 +45264,7 @@ t = thearc(t,tt);
 
 static void DBdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) DBdyTHEARCAAs(df,sf);
+if (serialized) DBdyTHEARCAAs(df,sf);
 else DBdyTHEARCAAp(df,sf);
 }
 
@@ -45547,7 +45547,7 @@ t += tt;
 
 static void DWdyADDAA(B * df, B * sf)
 {
-if (serialed) DWdyADDAAs(df,sf);
+if (serialized) DWdyADDAAs(df,sf);
 else DWdyADDAAp(df,sf);
 }
 
@@ -45830,7 +45830,7 @@ t -= tt;
 
 static void DWdySUBAA(B * df, B * sf)
 {
-if (serialed) DWdySUBAAs(df,sf);
+if (serialized) DWdySUBAAs(df,sf);
 else DWdySUBAAp(df,sf);
 }
 
@@ -46113,7 +46113,7 @@ t *= tt;
 
 static void DWdyMULAA(B * df, B * sf)
 {
-if (serialed) DWdyMULAAs(df,sf);
+if (serialized) DWdyMULAAs(df,sf);
 else DWdyMULAAp(df,sf);
 }
 
@@ -46396,7 +46396,7 @@ t /= tt;
 
 static void DWdyDIVAA(B * df, B * sf)
 {
-if (serialed) DWdyDIVAAs(df,sf);
+if (serialized) DWdyDIVAAs(df,sf);
 else DWdyDIVAAp(df,sf);
 }
 
@@ -46679,7 +46679,7 @@ t = pow(t,tt);
 
 static void DWdyPWRAA(B * df, B * sf)
 {
-if (serialed) DWdyPWRAAs(df,sf);
+if (serialized) DWdyPWRAAs(df,sf);
 else DWdyPWRAAp(df,sf);
 }
 
@@ -46962,7 +46962,7 @@ t = fmod(t,tt);
 
 static void DWdyMODAA(B * df, B * sf)
 {
-if (serialed) DWdyMODAAs(df,sf);
+if (serialized) DWdyMODAAs(df,sf);
 else DWdyMODAAp(df,sf);
 }
 
@@ -47245,7 +47245,7 @@ t = thearc(t,tt);
 
 static void DWdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) DWdyTHEARCAAs(df,sf);
+if (serialized) DWdyTHEARCAAs(df,sf);
 else DWdyTHEARCAAp(df,sf);
 }
 
@@ -47528,7 +47528,7 @@ t += tt;
 
 static void DLdyADDAA(B * df, B * sf)
 {
-if (serialed) DLdyADDAAs(df,sf);
+if (serialized) DLdyADDAAs(df,sf);
 else DLdyADDAAp(df,sf);
 }
 
@@ -47811,7 +47811,7 @@ t -= tt;
 
 static void DLdySUBAA(B * df, B * sf)
 {
-if (serialed) DLdySUBAAs(df,sf);
+if (serialized) DLdySUBAAs(df,sf);
 else DLdySUBAAp(df,sf);
 }
 
@@ -48094,7 +48094,7 @@ t *= tt;
 
 static void DLdyMULAA(B * df, B * sf)
 {
-if (serialed) DLdyMULAAs(df,sf);
+if (serialized) DLdyMULAAs(df,sf);
 else DLdyMULAAp(df,sf);
 }
 
@@ -48377,7 +48377,7 @@ t /= tt;
 
 static void DLdyDIVAA(B * df, B * sf)
 {
-if (serialed) DLdyDIVAAs(df,sf);
+if (serialized) DLdyDIVAAs(df,sf);
 else DLdyDIVAAp(df,sf);
 }
 
@@ -48660,7 +48660,7 @@ t = pow(t,tt);
 
 static void DLdyPWRAA(B * df, B * sf)
 {
-if (serialed) DLdyPWRAAs(df,sf);
+if (serialized) DLdyPWRAAs(df,sf);
 else DLdyPWRAAp(df,sf);
 }
 
@@ -48943,7 +48943,7 @@ t = fmod(t,tt);
 
 static void DLdyMODAA(B * df, B * sf)
 {
-if (serialed) DLdyMODAAs(df,sf);
+if (serialized) DLdyMODAAs(df,sf);
 else DLdyMODAAp(df,sf);
 }
 
@@ -49226,7 +49226,7 @@ t = thearc(t,tt);
 
 static void DLdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) DLdyTHEARCAAs(df,sf);
+if (serialized) DLdyTHEARCAAs(df,sf);
 else DLdyTHEARCAAp(df,sf);
 }
 
@@ -49509,7 +49509,7 @@ t += tt;
 
 static void DSdyADDAA(B * df, B * sf)
 {
-if (serialed) DSdyADDAAs(df,sf);
+if (serialized) DSdyADDAAs(df,sf);
 else DSdyADDAAp(df,sf);
 }
 
@@ -49792,7 +49792,7 @@ t -= tt;
 
 static void DSdySUBAA(B * df, B * sf)
 {
-if (serialed) DSdySUBAAs(df,sf);
+if (serialized) DSdySUBAAs(df,sf);
 else DSdySUBAAp(df,sf);
 }
 
@@ -50075,7 +50075,7 @@ t *= tt;
 
 static void DSdyMULAA(B * df, B * sf)
 {
-if (serialed) DSdyMULAAs(df,sf);
+if (serialized) DSdyMULAAs(df,sf);
 else DSdyMULAAp(df,sf);
 }
 
@@ -50358,7 +50358,7 @@ t /= tt;
 
 static void DSdyDIVAA(B * df, B * sf)
 {
-if (serialed) DSdyDIVAAs(df,sf);
+if (serialized) DSdyDIVAAs(df,sf);
 else DSdyDIVAAp(df,sf);
 }
 
@@ -50641,7 +50641,7 @@ t = pow(t,tt);
 
 static void DSdyPWRAA(B * df, B * sf)
 {
-if (serialed) DSdyPWRAAs(df,sf);
+if (serialized) DSdyPWRAAs(df,sf);
 else DSdyPWRAAp(df,sf);
 }
 
@@ -50924,7 +50924,7 @@ t = fmod(t,tt);
 
 static void DSdyMODAA(B * df, B * sf)
 {
-if (serialed) DSdyMODAAs(df,sf);
+if (serialized) DSdyMODAAs(df,sf);
 else DSdyMODAAp(df,sf);
 }
 
@@ -51207,7 +51207,7 @@ t = thearc(t,tt);
 
 static void DSdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) DSdyTHEARCAAs(df,sf);
+if (serialized) DSdyTHEARCAAs(df,sf);
 else DSdyTHEARCAAp(df,sf);
 }
 
@@ -51490,7 +51490,7 @@ t += tt;
 
 static void DDdyADDAA(B * df, B * sf)
 {
-if (serialed) DDdyADDAAs(df,sf);
+if (serialized) DDdyADDAAs(df,sf);
 else DDdyADDAAp(df,sf);
 }
 
@@ -51773,7 +51773,7 @@ t -= tt;
 
 static void DDdySUBAA(B * df, B * sf)
 {
-if (serialed) DDdySUBAAs(df,sf);
+if (serialized) DDdySUBAAs(df,sf);
 else DDdySUBAAp(df,sf);
 }
 
@@ -52056,7 +52056,7 @@ t *= tt;
 
 static void DDdyMULAA(B * df, B * sf)
 {
-if (serialed) DDdyMULAAs(df,sf);
+if (serialized) DDdyMULAAs(df,sf);
 else DDdyMULAAp(df,sf);
 }
 
@@ -52339,7 +52339,7 @@ t /= tt;
 
 static void DDdyDIVAA(B * df, B * sf)
 {
-if (serialed) DDdyDIVAAs(df,sf);
+if (serialized) DDdyDIVAAs(df,sf);
 else DDdyDIVAAp(df,sf);
 }
 
@@ -52622,7 +52622,7 @@ t = pow(t,tt);
 
 static void DDdyPWRAA(B * df, B * sf)
 {
-if (serialed) DDdyPWRAAs(df,sf);
+if (serialized) DDdyPWRAAs(df,sf);
 else DDdyPWRAAp(df,sf);
 }
 
@@ -52905,7 +52905,7 @@ t = fmod(t,tt);
 
 static void DDdyMODAA(B * df, B * sf)
 {
-if (serialed) DDdyMODAAs(df,sf);
+if (serialized) DDdyMODAAs(df,sf);
 else DDdyMODAAp(df,sf);
 }
 
@@ -53188,7 +53188,7 @@ t = thearc(t,tt);
 
 static void DDdyTHEARCAA(B * df, B * sf)
 {
-if (serialed) DDdyTHEARCAAs(df,sf);
+if (serialized) DDdyTHEARCAAs(df,sf);
 else DDdyTHEARCAAp(df,sf);
 }
 

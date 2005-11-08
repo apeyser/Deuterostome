@@ -4,14 +4,14 @@
 #define PLUGIN_NAME throw
 #include "../src/plugin.h"
 
-#define op_caught EXPORTNAME(op_caught)
+#define op_thrown EXPORTNAME(op_thrown)
 #define op_throw  EXPORTNAME(op_throw)
-#define x_op_uncaught PRIVATENAME(x_op_uncaught)
-#define x_op_uncaught_name PRIVATENAME(x_op_uncaught_name)
+#define x_op_thrown PRIVATENAME(x_op_thrown)
+#define x_op_thrown_name PRIVATENAME(x_op_thrown_name)
 
-L op_caught(void);
 L op_throw(void);
-L x_op_uncaught(void);
+L op_thrown(void);
+L x_op_thrown(void);
 const char* x_op_uncaught_name;
 
 #define INV_THROW 0x01L //invalid throw

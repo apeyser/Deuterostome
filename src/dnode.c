@@ -554,7 +554,7 @@ switch(retc = exec(100))
 	 FREEexecs = x2;
 	 goto more;
 
- case DONE: running = FALSE; locked = FALSE; serialed = FALSE;
+ case DONE: running = FALSE; locked = FALSE; serialized = FALSE;
 	          if (FREEexecs == FLOORexecs) moveframe(msf,cmsf);
 						goto theloop;
 

@@ -11,7 +11,7 @@ L op_getplugindir(void);
 B *sysop[] =
 {
       "lock",        (B*) op_lock,
-	  "serial",      (B*) op_serial,
+	  "serialize",   (B*) op_serialize,
       
 /*-- hi */
       "hi",            (B*) op_syshi,
