@@ -121,7 +121,7 @@ if ((t = *((B *)NUM_VAL(sf))) == BINF) t = DINF;
 
 static void BBmoveSA(B *sf, B *df)
 {
-D t; L n; B *d;
+D t; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((t = *((B *)NUM_VAL(sf))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -159,7 +159,7 @@ if ((t = *((B *)s)) == BINF) t = DINF;
 
 static void BBmoveAAp(B *sf, B *df)
 {
-D t; L n; B * restrict s; B * restrict d;
+D t; UL n; B * restrict s; B * restrict d;
 s = (B *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -204,7 +204,7 @@ if ((t = *((B *)s++)) == BINF) t = DINF;
 
 static void BBmoveAAs(B *sf, B *df)
 {
-D t; L n; B * s; B * d;
+D t; UL n; B * s; B * d;
 s = (B *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -262,7 +262,7 @@ if ((t = *((B *)NUM_VAL(sf))) == BINF) t = DINF;
 
 static void BWmoveSA(B *sf, B *df)
 {
-D t; L n; W *d;
+D t; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((t = *((B *)NUM_VAL(sf))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -300,7 +300,7 @@ if ((t = *((B *)s)) == BINF) t = DINF;
 
 static void BWmoveAAp(B *sf, B *df)
 {
-D t; L n; B * restrict s; W * restrict d;
+D t; UL n; B * restrict s; W * restrict d;
 s = (B *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -345,7 +345,7 @@ if ((t = *((B *)s++)) == BINF) t = DINF;
 
 static void BWmoveAAs(B *sf, B *df)
 {
-D t; L n; B * s; W * d;
+D t; UL n; B * s; W * d;
 s = (B *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -403,7 +403,7 @@ if ((t = *((B *)NUM_VAL(sf))) == BINF) t = DINF;
 
 static void BLmoveSA(B *sf, B *df)
 {
-D t; L n; L *d;
+D t; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((t = *((B *)NUM_VAL(sf))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -441,7 +441,7 @@ if ((t = *((B *)s)) == BINF) t = DINF;
 
 static void BLmoveAAp(B *sf, B *df)
 {
-D t; L n; B * restrict s; L * restrict d;
+D t; UL n; B * restrict s; L * restrict d;
 s = (B *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -486,7 +486,7 @@ if ((t = *((B *)s++)) == BINF) t = DINF;
 
 static void BLmoveAAs(B *sf, B *df)
 {
-D t; L n; B * s; L * d;
+D t; UL n; B * s; L * d;
 s = (B *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -544,7 +544,7 @@ if ((t = *((B *)NUM_VAL(sf))) == BINF) t = DINF;
 
 static void BSmoveSA(B *sf, B *df)
 {
-D t; L n; S *d;
+D t; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((t = *((B *)NUM_VAL(sf))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -582,7 +582,7 @@ if ((t = *((B *)s)) == BINF) t = DINF;
 
 static void BSmoveAAp(B *sf, B *df)
 {
-D t; L n; B * restrict s; S * restrict d;
+D t; UL n; B * restrict s; S * restrict d;
 s = (B *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -627,7 +627,7 @@ if ((t = *((B *)s++)) == BINF) t = DINF;
 
 static void BSmoveAAs(B *sf, B *df)
 {
-D t; L n; B * s; S * d;
+D t; UL n; B * s; S * d;
 s = (B *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -685,7 +685,7 @@ if ((t = *((B *)NUM_VAL(sf))) == BINF) t = DINF;
 
 static void BDmoveSA(B *sf, B *df)
 {
-D t; L n; D *d;
+D t; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((t = *((B *)NUM_VAL(sf))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -723,7 +723,7 @@ if ((t = *((B *)s)) == BINF) t = DINF;
 
 static void BDmoveAAp(B *sf, B *df)
 {
-D t; L n; B * restrict s; D * restrict d;
+D t; UL n; B * restrict s; D * restrict d;
 s = (B *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -768,7 +768,7 @@ if ((t = *((B *)s++)) == BINF) t = DINF;
 
 static void BDmoveAAs(B *sf, B *df)
 {
-D t; L n; B * s; D * d;
+D t; UL n; B * s; D * d;
 s = (B *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -826,7 +826,7 @@ if ((t = *((W *)NUM_VAL(sf))) == WINF) t = DINF;
 
 static void WBmoveSA(B *sf, B *df)
 {
-D t; L n; B *d;
+D t; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((t = *((W *)NUM_VAL(sf))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -864,7 +864,7 @@ if ((t = *((W *)s)) == WINF) t = DINF;
 
 static void WBmoveAAp(B *sf, B *df)
 {
-D t; L n; W * restrict s; B * restrict d;
+D t; UL n; W * restrict s; B * restrict d;
 s = (W *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -909,7 +909,7 @@ if ((t = *((W *)s++)) == WINF) t = DINF;
 
 static void WBmoveAAs(B *sf, B *df)
 {
-D t; L n; W * s; B * d;
+D t; UL n; W * s; B * d;
 s = (W *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -967,7 +967,7 @@ if ((t = *((W *)NUM_VAL(sf))) == WINF) t = DINF;
 
 static void WWmoveSA(B *sf, B *df)
 {
-D t; L n; W *d;
+D t; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((t = *((W *)NUM_VAL(sf))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1005,7 +1005,7 @@ if ((t = *((W *)s)) == WINF) t = DINF;
 
 static void WWmoveAAp(B *sf, B *df)
 {
-D t; L n; W * restrict s; W * restrict d;
+D t; UL n; W * restrict s; W * restrict d;
 s = (W *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1050,7 +1050,7 @@ if ((t = *((W *)s++)) == WINF) t = DINF;
 
 static void WWmoveAAs(B *sf, B *df)
 {
-D t; L n; W * s; W * d;
+D t; UL n; W * s; W * d;
 s = (W *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1108,7 +1108,7 @@ if ((t = *((W *)NUM_VAL(sf))) == WINF) t = DINF;
 
 static void WLmoveSA(B *sf, B *df)
 {
-D t; L n; L *d;
+D t; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((t = *((W *)NUM_VAL(sf))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1146,7 +1146,7 @@ if ((t = *((W *)s)) == WINF) t = DINF;
 
 static void WLmoveAAp(B *sf, B *df)
 {
-D t; L n; W * restrict s; L * restrict d;
+D t; UL n; W * restrict s; L * restrict d;
 s = (W *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1191,7 +1191,7 @@ if ((t = *((W *)s++)) == WINF) t = DINF;
 
 static void WLmoveAAs(B *sf, B *df)
 {
-D t; L n; W * s; L * d;
+D t; UL n; W * s; L * d;
 s = (W *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1249,7 +1249,7 @@ if ((t = *((W *)NUM_VAL(sf))) == WINF) t = DINF;
 
 static void WSmoveSA(B *sf, B *df)
 {
-D t; L n; S *d;
+D t; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((t = *((W *)NUM_VAL(sf))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1287,7 +1287,7 @@ if ((t = *((W *)s)) == WINF) t = DINF;
 
 static void WSmoveAAp(B *sf, B *df)
 {
-D t; L n; W * restrict s; S * restrict d;
+D t; UL n; W * restrict s; S * restrict d;
 s = (W *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1332,7 +1332,7 @@ if ((t = *((W *)s++)) == WINF) t = DINF;
 
 static void WSmoveAAs(B *sf, B *df)
 {
-D t; L n; W * s; S * d;
+D t; UL n; W * s; S * d;
 s = (W *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1390,7 +1390,7 @@ if ((t = *((W *)NUM_VAL(sf))) == WINF) t = DINF;
 
 static void WDmoveSA(B *sf, B *df)
 {
-D t; L n; D *d;
+D t; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((t = *((W *)NUM_VAL(sf))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1428,7 +1428,7 @@ if ((t = *((W *)s)) == WINF) t = DINF;
 
 static void WDmoveAAp(B *sf, B *df)
 {
-D t; L n; W * restrict s; D * restrict d;
+D t; UL n; W * restrict s; D * restrict d;
 s = (W *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1473,7 +1473,7 @@ if ((t = *((W *)s++)) == WINF) t = DINF;
 
 static void WDmoveAAs(B *sf, B *df)
 {
-D t; L n; W * s; D * d;
+D t; UL n; W * s; D * d;
 s = (W *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1531,7 +1531,7 @@ if ((t = *((L *)NUM_VAL(sf))) == LINF) t = DINF;
 
 static void LBmoveSA(B *sf, B *df)
 {
-D t; L n; B *d;
+D t; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((t = *((L *)NUM_VAL(sf))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1569,7 +1569,7 @@ if ((t = *((L *)s)) == LINF) t = DINF;
 
 static void LBmoveAAp(B *sf, B *df)
 {
-D t; L n; L * restrict s; B * restrict d;
+D t; UL n; L * restrict s; B * restrict d;
 s = (L *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1614,7 +1614,7 @@ if ((t = *((L *)s++)) == LINF) t = DINF;
 
 static void LBmoveAAs(B *sf, B *df)
 {
-D t; L n; L * s; B * d;
+D t; UL n; L * s; B * d;
 s = (L *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1672,7 +1672,7 @@ if ((t = *((L *)NUM_VAL(sf))) == LINF) t = DINF;
 
 static void LWmoveSA(B *sf, B *df)
 {
-D t; L n; W *d;
+D t; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((t = *((L *)NUM_VAL(sf))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1710,7 +1710,7 @@ if ((t = *((L *)s)) == LINF) t = DINF;
 
 static void LWmoveAAp(B *sf, B *df)
 {
-D t; L n; L * restrict s; W * restrict d;
+D t; UL n; L * restrict s; W * restrict d;
 s = (L *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1755,7 +1755,7 @@ if ((t = *((L *)s++)) == LINF) t = DINF;
 
 static void LWmoveAAs(B *sf, B *df)
 {
-D t; L n; L * s; W * d;
+D t; UL n; L * s; W * d;
 s = (L *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1813,7 +1813,7 @@ if ((t = *((L *)NUM_VAL(sf))) == LINF) t = DINF;
 
 static void LLmoveSA(B *sf, B *df)
 {
-D t; L n; L *d;
+D t; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((t = *((L *)NUM_VAL(sf))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1851,7 +1851,7 @@ if ((t = *((L *)s)) == LINF) t = DINF;
 
 static void LLmoveAAp(B *sf, B *df)
 {
-D t; L n; L * restrict s; L * restrict d;
+D t; UL n; L * restrict s; L * restrict d;
 s = (L *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1896,7 +1896,7 @@ if ((t = *((L *)s++)) == LINF) t = DINF;
 
 static void LLmoveAAs(B *sf, B *df)
 {
-D t; L n; L * s; L * d;
+D t; UL n; L * s; L * d;
 s = (L *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1954,7 +1954,7 @@ if ((t = *((L *)NUM_VAL(sf))) == LINF) t = DINF;
 
 static void LSmoveSA(B *sf, B *df)
 {
-D t; L n; S *d;
+D t; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((t = *((L *)NUM_VAL(sf))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -1992,7 +1992,7 @@ if ((t = *((L *)s)) == LINF) t = DINF;
 
 static void LSmoveAAp(B *sf, B *df)
 {
-D t; L n; L * restrict s; S * restrict d;
+D t; UL n; L * restrict s; S * restrict d;
 s = (L *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2037,7 +2037,7 @@ if ((t = *((L *)s++)) == LINF) t = DINF;
 
 static void LSmoveAAs(B *sf, B *df)
 {
-D t; L n; L * s; S * d;
+D t; UL n; L * s; S * d;
 s = (L *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2095,7 +2095,7 @@ if ((t = *((L *)NUM_VAL(sf))) == LINF) t = DINF;
 
 static void LDmoveSA(B *sf, B *df)
 {
-D t; L n; D *d;
+D t; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((t = *((L *)NUM_VAL(sf))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2133,7 +2133,7 @@ if ((t = *((L *)s)) == LINF) t = DINF;
 
 static void LDmoveAAp(B *sf, B *df)
 {
-D t; L n; L * restrict s; D * restrict d;
+D t; UL n; L * restrict s; D * restrict d;
 s = (L *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2178,7 +2178,7 @@ if ((t = *((L *)s++)) == LINF) t = DINF;
 
 static void LDmoveAAs(B *sf, B *df)
 {
-D t; L n; L * s; D * d;
+D t; UL n; L * s; D * d;
 s = (L *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2236,7 +2236,7 @@ t = *((S *)NUM_VAL(sf));
 
 static void SBmoveSA(B *sf, B *df)
 {
-D t; L n; B *d;
+D t; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 t = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2274,7 +2274,7 @@ t = *((S *)s);
 
 static void SBmoveAAp(B *sf, B *df)
 {
-D t; L n; S * restrict s; B * restrict d;
+D t; UL n; S * restrict s; B * restrict d;
 s = (S *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2319,7 +2319,7 @@ t = *((S *)s++);
 
 static void SBmoveAAs(B *sf, B *df)
 {
-D t; L n; S * s; B * d;
+D t; UL n; S * s; B * d;
 s = (S *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2377,7 +2377,7 @@ t = *((S *)NUM_VAL(sf));
 
 static void SWmoveSA(B *sf, B *df)
 {
-D t; L n; W *d;
+D t; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 t = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2415,7 +2415,7 @@ t = *((S *)s);
 
 static void SWmoveAAp(B *sf, B *df)
 {
-D t; L n; S * restrict s; W * restrict d;
+D t; UL n; S * restrict s; W * restrict d;
 s = (S *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2460,7 +2460,7 @@ t = *((S *)s++);
 
 static void SWmoveAAs(B *sf, B *df)
 {
-D t; L n; S * s; W * d;
+D t; UL n; S * s; W * d;
 s = (S *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2518,7 +2518,7 @@ t = *((S *)NUM_VAL(sf));
 
 static void SLmoveSA(B *sf, B *df)
 {
-D t; L n; L *d;
+D t; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 t = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2556,7 +2556,7 @@ t = *((S *)s);
 
 static void SLmoveAAp(B *sf, B *df)
 {
-D t; L n; S * restrict s; L * restrict d;
+D t; UL n; S * restrict s; L * restrict d;
 s = (S *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2601,7 +2601,7 @@ t = *((S *)s++);
 
 static void SLmoveAAs(B *sf, B *df)
 {
-D t; L n; S * s; L * d;
+D t; UL n; S * s; L * d;
 s = (S *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2659,7 +2659,7 @@ t = *((S *)NUM_VAL(sf));
 
 static void SSmoveSA(B *sf, B *df)
 {
-D t; L n; S *d;
+D t; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 t = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2697,7 +2697,7 @@ t = *((S *)s);
 
 static void SSmoveAAp(B *sf, B *df)
 {
-D t; L n; S * restrict s; S * restrict d;
+D t; UL n; S * restrict s; S * restrict d;
 s = (S *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2742,7 +2742,7 @@ t = *((S *)s++);
 
 static void SSmoveAAs(B *sf, B *df)
 {
-D t; L n; S * s; S * d;
+D t; UL n; S * s; S * d;
 s = (S *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2800,7 +2800,7 @@ t = *((S *)NUM_VAL(sf));
 
 static void SDmoveSA(B *sf, B *df)
 {
-D t; L n; D *d;
+D t; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 t = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2838,7 +2838,7 @@ t = *((S *)s);
 
 static void SDmoveAAp(B *sf, B *df)
 {
-D t; L n; S * restrict s; D * restrict d;
+D t; UL n; S * restrict s; D * restrict d;
 s = (S *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2883,7 +2883,7 @@ t = *((S *)s++);
 
 static void SDmoveAAs(B *sf, B *df)
 {
-D t; L n; S * s; D * d;
+D t; UL n; S * s; D * d;
 s = (S *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2941,7 +2941,7 @@ t = *((D *)NUM_VAL(sf));
 
 static void DBmoveSA(B *sf, B *df)
 {
-D t; L n; B *d;
+D t; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 t = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -2979,7 +2979,7 @@ t = *((D *)s);
 
 static void DBmoveAAp(B *sf, B *df)
 {
-D t; L n; D * restrict s; B * restrict d;
+D t; UL n; D * restrict s; B * restrict d;
 s = (D *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -3024,7 +3024,7 @@ t = *((D *)s++);
 
 static void DBmoveAAs(B *sf, B *df)
 {
-D t; L n; D * s; B * d;
+D t; UL n; D * s; B * d;
 s = (D *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -3082,7 +3082,7 @@ t = *((D *)NUM_VAL(sf));
 
 static void DWmoveSA(B *sf, B *df)
 {
-D t; L n; W *d;
+D t; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 t = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -3120,7 +3120,7 @@ t = *((D *)s);
 
 static void DWmoveAAp(B *sf, B *df)
 {
-D t; L n; D * restrict s; W * restrict d;
+D t; UL n; D * restrict s; W * restrict d;
 s = (D *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -3165,7 +3165,7 @@ t = *((D *)s++);
 
 static void DWmoveAAs(B *sf, B *df)
 {
-D t; L n; D * s; W * d;
+D t; UL n; D * s; W * d;
 s = (D *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -3223,7 +3223,7 @@ t = *((D *)NUM_VAL(sf));
 
 static void DLmoveSA(B *sf, B *df)
 {
-D t; L n; L *d;
+D t; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 t = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -3261,7 +3261,7 @@ t = *((D *)s);
 
 static void DLmoveAAp(B *sf, B *df)
 {
-D t; L n; D * restrict s; L * restrict d;
+D t; UL n; D * restrict s; L * restrict d;
 s = (D *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -3306,7 +3306,7 @@ t = *((D *)s++);
 
 static void DLmoveAAs(B *sf, B *df)
 {
-D t; L n; D * s; L * d;
+D t; UL n; D * s; L * d;
 s = (D *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -3364,7 +3364,7 @@ t = *((D *)NUM_VAL(sf));
 
 static void DSmoveSA(B *sf, B *df)
 {
-D t; L n; S *d;
+D t; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 t = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -3402,7 +3402,7 @@ t = *((D *)s);
 
 static void DSmoveAAp(B *sf, B *df)
 {
-D t; L n; D * restrict s; S * restrict d;
+D t; UL n; D * restrict s; S * restrict d;
 s = (D *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -3447,7 +3447,7 @@ t = *((D *)s++);
 
 static void DSmoveAAs(B *sf, B *df)
 {
-D t; L n; D * s; S * d;
+D t; UL n; D * s; S * d;
 s = (D *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -3505,7 +3505,7 @@ t = *((D *)NUM_VAL(sf));
 
 static void DDmoveSA(B *sf, B *df)
 {
-D t; L n; D *d;
+D t; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 t = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -3543,7 +3543,7 @@ t = *((D *)s);
 
 static void DDmoveAAp(B *sf, B *df)
 {
-D t; L n; D * restrict s; D * restrict d;
+D t; UL n; D * restrict s; D * restrict d;
 s = (D *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -3588,7 +3588,7 @@ t = *((D *)s++);
 
 static void DDmoveAAs(B *sf, B *df)
 {
-D t; L n; D * s; D * d;
+D t; UL n; D * s; D * d;
 s = (D *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -3678,7 +3678,7 @@ t += tt;
 
 static void BBdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -3740,7 +3740,7 @@ t += tt;
 
 static void BBdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -3786,7 +3786,7 @@ t += tt;
 
 static void BBdyADDAAp(B * df, B * sf)
 {
-L n; B * restrict s; B * restrict d;
+UL n; B * restrict s; B * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -3866,7 +3866,7 @@ t += tt;
 
 static void BBdyADDAAs(B * df, B * sf)
 {
-L n; B * s; B * d;
+UL n; B * s; B * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -3961,7 +3961,7 @@ t -= tt;
 
 static void BBdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -4023,7 +4023,7 @@ t -= tt;
 
 static void BBdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -4069,7 +4069,7 @@ t -= tt;
 
 static void BBdySUBAAp(B * df, B * sf)
 {
-L n; B * restrict s; B * restrict d;
+UL n; B * restrict s; B * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -4149,7 +4149,7 @@ t -= tt;
 
 static void BBdySUBAAs(B * df, B * sf)
 {
-L n; B * s; B * d;
+UL n; B * s; B * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -4244,7 +4244,7 @@ t *= tt;
 
 static void BBdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -4306,7 +4306,7 @@ t *= tt;
 
 static void BBdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -4352,7 +4352,7 @@ t *= tt;
 
 static void BBdyMULAAp(B * df, B * sf)
 {
-L n; B * restrict s; B * restrict d;
+UL n; B * restrict s; B * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -4432,7 +4432,7 @@ t *= tt;
 
 static void BBdyMULAAs(B * df, B * sf)
 {
-L n; B * s; B * d;
+UL n; B * s; B * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -4527,7 +4527,7 @@ t /= tt;
 
 static void BBdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -4589,7 +4589,7 @@ t /= tt;
 
 static void BBdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -4635,7 +4635,7 @@ t /= tt;
 
 static void BBdyDIVAAp(B * df, B * sf)
 {
-L n; B * restrict s; B * restrict d;
+UL n; B * restrict s; B * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -4715,7 +4715,7 @@ t /= tt;
 
 static void BBdyDIVAAs(B * df, B * sf)
 {
-L n; B * s; B * d;
+UL n; B * s; B * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -4810,7 +4810,7 @@ t = pow(t,tt);
 
 static void BBdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -4872,7 +4872,7 @@ t = pow(t,tt);
 
 static void BBdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -4918,7 +4918,7 @@ t = pow(t,tt);
 
 static void BBdyPWRAAp(B * df, B * sf)
 {
-L n; B * restrict s; B * restrict d;
+UL n; B * restrict s; B * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -4998,7 +4998,7 @@ t = pow(t,tt);
 
 static void BBdyPWRAAs(B * df, B * sf)
 {
-L n; B * s; B * d;
+UL n; B * s; B * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -5093,7 +5093,7 @@ t = fmod(t,tt);
 
 static void BBdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -5155,7 +5155,7 @@ t = fmod(t,tt);
 
 static void BBdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -5201,7 +5201,7 @@ t = fmod(t,tt);
 
 static void BBdyMODAAp(B * df, B * sf)
 {
-L n; B * restrict s; B * restrict d;
+UL n; B * restrict s; B * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -5281,7 +5281,7 @@ t = fmod(t,tt);
 
 static void BBdyMODAAs(B * df, B * sf)
 {
-L n; B * s; B * d;
+UL n; B * s; B * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -5376,7 +5376,7 @@ t = thearc(t,tt);
 
 static void BBdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -5438,7 +5438,7 @@ t = thearc(t,tt);
 
 static void BBdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -5484,7 +5484,7 @@ t = thearc(t,tt);
 
 static void BBdyTHEARCAAp(B * df, B * sf)
 {
-L n; B * restrict s; B * restrict d;
+UL n; B * restrict s; B * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -5564,7 +5564,7 @@ t = thearc(t,tt);
 
 static void BBdyTHEARCAAs(B * df, B * sf)
 {
-L n; B * s; B * d;
+UL n; B * s; B * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -5659,7 +5659,7 @@ t += tt;
 
 static void BWdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -5721,7 +5721,7 @@ t += tt;
 
 static void BWdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -5767,7 +5767,7 @@ t += tt;
 
 static void BWdyADDAAp(B * df, B * sf)
 {
-L n; W * restrict s; B * restrict d;
+UL n; W * restrict s; B * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -5847,7 +5847,7 @@ t += tt;
 
 static void BWdyADDAAs(B * df, B * sf)
 {
-L n; W * s; B * d;
+UL n; W * s; B * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -5942,7 +5942,7 @@ t -= tt;
 
 static void BWdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -6004,7 +6004,7 @@ t -= tt;
 
 static void BWdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -6050,7 +6050,7 @@ t -= tt;
 
 static void BWdySUBAAp(B * df, B * sf)
 {
-L n; W * restrict s; B * restrict d;
+UL n; W * restrict s; B * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -6130,7 +6130,7 @@ t -= tt;
 
 static void BWdySUBAAs(B * df, B * sf)
 {
-L n; W * s; B * d;
+UL n; W * s; B * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -6225,7 +6225,7 @@ t *= tt;
 
 static void BWdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -6287,7 +6287,7 @@ t *= tt;
 
 static void BWdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -6333,7 +6333,7 @@ t *= tt;
 
 static void BWdyMULAAp(B * df, B * sf)
 {
-L n; W * restrict s; B * restrict d;
+UL n; W * restrict s; B * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -6413,7 +6413,7 @@ t *= tt;
 
 static void BWdyMULAAs(B * df, B * sf)
 {
-L n; W * s; B * d;
+UL n; W * s; B * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -6508,7 +6508,7 @@ t /= tt;
 
 static void BWdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -6570,7 +6570,7 @@ t /= tt;
 
 static void BWdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -6616,7 +6616,7 @@ t /= tt;
 
 static void BWdyDIVAAp(B * df, B * sf)
 {
-L n; W * restrict s; B * restrict d;
+UL n; W * restrict s; B * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -6696,7 +6696,7 @@ t /= tt;
 
 static void BWdyDIVAAs(B * df, B * sf)
 {
-L n; W * s; B * d;
+UL n; W * s; B * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -6791,7 +6791,7 @@ t = pow(t,tt);
 
 static void BWdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -6853,7 +6853,7 @@ t = pow(t,tt);
 
 static void BWdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -6899,7 +6899,7 @@ t = pow(t,tt);
 
 static void BWdyPWRAAp(B * df, B * sf)
 {
-L n; W * restrict s; B * restrict d;
+UL n; W * restrict s; B * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -6979,7 +6979,7 @@ t = pow(t,tt);
 
 static void BWdyPWRAAs(B * df, B * sf)
 {
-L n; W * s; B * d;
+UL n; W * s; B * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -7074,7 +7074,7 @@ t = fmod(t,tt);
 
 static void BWdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -7136,7 +7136,7 @@ t = fmod(t,tt);
 
 static void BWdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -7182,7 +7182,7 @@ t = fmod(t,tt);
 
 static void BWdyMODAAp(B * df, B * sf)
 {
-L n; W * restrict s; B * restrict d;
+UL n; W * restrict s; B * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -7262,7 +7262,7 @@ t = fmod(t,tt);
 
 static void BWdyMODAAs(B * df, B * sf)
 {
-L n; W * s; B * d;
+UL n; W * s; B * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -7357,7 +7357,7 @@ t = thearc(t,tt);
 
 static void BWdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -7419,7 +7419,7 @@ t = thearc(t,tt);
 
 static void BWdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -7465,7 +7465,7 @@ t = thearc(t,tt);
 
 static void BWdyTHEARCAAp(B * df, B * sf)
 {
-L n; W * restrict s; B * restrict d;
+UL n; W * restrict s; B * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -7545,7 +7545,7 @@ t = thearc(t,tt);
 
 static void BWdyTHEARCAAs(B * df, B * sf)
 {
-L n; W * s; B * d;
+UL n; W * s; B * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -7640,7 +7640,7 @@ t += tt;
 
 static void BLdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -7702,7 +7702,7 @@ t += tt;
 
 static void BLdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -7748,7 +7748,7 @@ t += tt;
 
 static void BLdyADDAAp(B * df, B * sf)
 {
-L n; L * restrict s; B * restrict d;
+UL n; L * restrict s; B * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -7828,7 +7828,7 @@ t += tt;
 
 static void BLdyADDAAs(B * df, B * sf)
 {
-L n; L * s; B * d;
+UL n; L * s; B * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -7923,7 +7923,7 @@ t -= tt;
 
 static void BLdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -7985,7 +7985,7 @@ t -= tt;
 
 static void BLdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -8031,7 +8031,7 @@ t -= tt;
 
 static void BLdySUBAAp(B * df, B * sf)
 {
-L n; L * restrict s; B * restrict d;
+UL n; L * restrict s; B * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -8111,7 +8111,7 @@ t -= tt;
 
 static void BLdySUBAAs(B * df, B * sf)
 {
-L n; L * s; B * d;
+UL n; L * s; B * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -8206,7 +8206,7 @@ t *= tt;
 
 static void BLdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -8268,7 +8268,7 @@ t *= tt;
 
 static void BLdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -8314,7 +8314,7 @@ t *= tt;
 
 static void BLdyMULAAp(B * df, B * sf)
 {
-L n; L * restrict s; B * restrict d;
+UL n; L * restrict s; B * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -8394,7 +8394,7 @@ t *= tt;
 
 static void BLdyMULAAs(B * df, B * sf)
 {
-L n; L * s; B * d;
+UL n; L * s; B * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -8489,7 +8489,7 @@ t /= tt;
 
 static void BLdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -8551,7 +8551,7 @@ t /= tt;
 
 static void BLdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -8597,7 +8597,7 @@ t /= tt;
 
 static void BLdyDIVAAp(B * df, B * sf)
 {
-L n; L * restrict s; B * restrict d;
+UL n; L * restrict s; B * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -8677,7 +8677,7 @@ t /= tt;
 
 static void BLdyDIVAAs(B * df, B * sf)
 {
-L n; L * s; B * d;
+UL n; L * s; B * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -8772,7 +8772,7 @@ t = pow(t,tt);
 
 static void BLdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -8834,7 +8834,7 @@ t = pow(t,tt);
 
 static void BLdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -8880,7 +8880,7 @@ t = pow(t,tt);
 
 static void BLdyPWRAAp(B * df, B * sf)
 {
-L n; L * restrict s; B * restrict d;
+UL n; L * restrict s; B * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -8960,7 +8960,7 @@ t = pow(t,tt);
 
 static void BLdyPWRAAs(B * df, B * sf)
 {
-L n; L * s; B * d;
+UL n; L * s; B * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -9055,7 +9055,7 @@ t = fmod(t,tt);
 
 static void BLdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -9117,7 +9117,7 @@ t = fmod(t,tt);
 
 static void BLdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -9163,7 +9163,7 @@ t = fmod(t,tt);
 
 static void BLdyMODAAp(B * df, B * sf)
 {
-L n; L * restrict s; B * restrict d;
+UL n; L * restrict s; B * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -9243,7 +9243,7 @@ t = fmod(t,tt);
 
 static void BLdyMODAAs(B * df, B * sf)
 {
-L n; L * s; B * d;
+UL n; L * s; B * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -9338,7 +9338,7 @@ t = thearc(t,tt);
 
 static void BLdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -9400,7 +9400,7 @@ t = thearc(t,tt);
 
 static void BLdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -9446,7 +9446,7 @@ t = thearc(t,tt);
 
 static void BLdyTHEARCAAp(B * df, B * sf)
 {
-L n; L * restrict s; B * restrict d;
+UL n; L * restrict s; B * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -9526,7 +9526,7 @@ t = thearc(t,tt);
 
 static void BLdyTHEARCAAs(B * df, B * sf)
 {
-L n; L * s; B * d;
+UL n; L * s; B * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -9621,7 +9621,7 @@ t += tt;
 
 static void BSdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -9683,7 +9683,7 @@ t += tt;
 
 static void BSdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -9729,7 +9729,7 @@ t += tt;
 
 static void BSdyADDAAp(B * df, B * sf)
 {
-L n; S * restrict s; B * restrict d;
+UL n; S * restrict s; B * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -9809,7 +9809,7 @@ t += tt;
 
 static void BSdyADDAAs(B * df, B * sf)
 {
-L n; S * s; B * d;
+UL n; S * s; B * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -9904,7 +9904,7 @@ t -= tt;
 
 static void BSdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -9966,7 +9966,7 @@ t -= tt;
 
 static void BSdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -10012,7 +10012,7 @@ t -= tt;
 
 static void BSdySUBAAp(B * df, B * sf)
 {
-L n; S * restrict s; B * restrict d;
+UL n; S * restrict s; B * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -10092,7 +10092,7 @@ t -= tt;
 
 static void BSdySUBAAs(B * df, B * sf)
 {
-L n; S * s; B * d;
+UL n; S * s; B * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -10187,7 +10187,7 @@ t *= tt;
 
 static void BSdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -10249,7 +10249,7 @@ t *= tt;
 
 static void BSdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -10295,7 +10295,7 @@ t *= tt;
 
 static void BSdyMULAAp(B * df, B * sf)
 {
-L n; S * restrict s; B * restrict d;
+UL n; S * restrict s; B * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -10375,7 +10375,7 @@ t *= tt;
 
 static void BSdyMULAAs(B * df, B * sf)
 {
-L n; S * s; B * d;
+UL n; S * s; B * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -10470,7 +10470,7 @@ t /= tt;
 
 static void BSdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -10532,7 +10532,7 @@ t /= tt;
 
 static void BSdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -10578,7 +10578,7 @@ t /= tt;
 
 static void BSdyDIVAAp(B * df, B * sf)
 {
-L n; S * restrict s; B * restrict d;
+UL n; S * restrict s; B * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -10658,7 +10658,7 @@ t /= tt;
 
 static void BSdyDIVAAs(B * df, B * sf)
 {
-L n; S * s; B * d;
+UL n; S * s; B * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -10753,7 +10753,7 @@ t = pow(t,tt);
 
 static void BSdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -10815,7 +10815,7 @@ t = pow(t,tt);
 
 static void BSdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -10861,7 +10861,7 @@ t = pow(t,tt);
 
 static void BSdyPWRAAp(B * df, B * sf)
 {
-L n; S * restrict s; B * restrict d;
+UL n; S * restrict s; B * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -10941,7 +10941,7 @@ t = pow(t,tt);
 
 static void BSdyPWRAAs(B * df, B * sf)
 {
-L n; S * s; B * d;
+UL n; S * s; B * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -11036,7 +11036,7 @@ t = fmod(t,tt);
 
 static void BSdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -11098,7 +11098,7 @@ t = fmod(t,tt);
 
 static void BSdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -11144,7 +11144,7 @@ t = fmod(t,tt);
 
 static void BSdyMODAAp(B * df, B * sf)
 {
-L n; S * restrict s; B * restrict d;
+UL n; S * restrict s; B * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -11224,7 +11224,7 @@ t = fmod(t,tt);
 
 static void BSdyMODAAs(B * df, B * sf)
 {
-L n; S * s; B * d;
+UL n; S * s; B * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -11319,7 +11319,7 @@ t = thearc(t,tt);
 
 static void BSdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -11381,7 +11381,7 @@ t = thearc(t,tt);
 
 static void BSdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -11427,7 +11427,7 @@ t = thearc(t,tt);
 
 static void BSdyTHEARCAAp(B * df, B * sf)
 {
-L n; S * restrict s; B * restrict d;
+UL n; S * restrict s; B * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -11507,7 +11507,7 @@ t = thearc(t,tt);
 
 static void BSdyTHEARCAAs(B * df, B * sf)
 {
-L n; S * s; B * d;
+UL n; S * s; B * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -11602,7 +11602,7 @@ t += tt;
 
 static void BDdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -11664,7 +11664,7 @@ t += tt;
 
 static void BDdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -11710,7 +11710,7 @@ t += tt;
 
 static void BDdyADDAAp(B * df, B * sf)
 {
-L n; D * restrict s; B * restrict d;
+UL n; D * restrict s; B * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -11790,7 +11790,7 @@ t += tt;
 
 static void BDdyADDAAs(B * df, B * sf)
 {
-L n; D * s; B * d;
+UL n; D * s; B * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -11885,7 +11885,7 @@ t -= tt;
 
 static void BDdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -11947,7 +11947,7 @@ t -= tt;
 
 static void BDdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -11993,7 +11993,7 @@ t -= tt;
 
 static void BDdySUBAAp(B * df, B * sf)
 {
-L n; D * restrict s; B * restrict d;
+UL n; D * restrict s; B * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -12073,7 +12073,7 @@ t -= tt;
 
 static void BDdySUBAAs(B * df, B * sf)
 {
-L n; D * s; B * d;
+UL n; D * s; B * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -12168,7 +12168,7 @@ t *= tt;
 
 static void BDdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -12230,7 +12230,7 @@ t *= tt;
 
 static void BDdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -12276,7 +12276,7 @@ t *= tt;
 
 static void BDdyMULAAp(B * df, B * sf)
 {
-L n; D * restrict s; B * restrict d;
+UL n; D * restrict s; B * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -12356,7 +12356,7 @@ t *= tt;
 
 static void BDdyMULAAs(B * df, B * sf)
 {
-L n; D * s; B * d;
+UL n; D * s; B * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -12451,7 +12451,7 @@ t /= tt;
 
 static void BDdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -12513,7 +12513,7 @@ t /= tt;
 
 static void BDdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -12559,7 +12559,7 @@ t /= tt;
 
 static void BDdyDIVAAp(B * df, B * sf)
 {
-L n; D * restrict s; B * restrict d;
+UL n; D * restrict s; B * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -12639,7 +12639,7 @@ t /= tt;
 
 static void BDdyDIVAAs(B * df, B * sf)
 {
-L n; D * s; B * d;
+UL n; D * s; B * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -12734,7 +12734,7 @@ t = pow(t,tt);
 
 static void BDdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -12796,7 +12796,7 @@ t = pow(t,tt);
 
 static void BDdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -12842,7 +12842,7 @@ t = pow(t,tt);
 
 static void BDdyPWRAAp(B * df, B * sf)
 {
-L n; D * restrict s; B * restrict d;
+UL n; D * restrict s; B * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -12922,7 +12922,7 @@ t = pow(t,tt);
 
 static void BDdyPWRAAs(B * df, B * sf)
 {
-L n; D * s; B * d;
+UL n; D * s; B * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -13017,7 +13017,7 @@ t = fmod(t,tt);
 
 static void BDdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -13079,7 +13079,7 @@ t = fmod(t,tt);
 
 static void BDdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -13125,7 +13125,7 @@ t = fmod(t,tt);
 
 static void BDdyMODAAp(B * df, B * sf)
 {
-L n; D * restrict s; B * restrict d;
+UL n; D * restrict s; B * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -13205,7 +13205,7 @@ t = fmod(t,tt);
 
 static void BDdyMODAAs(B * df, B * sf)
 {
-L n; D * s; B * d;
+UL n; D * s; B * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -13300,7 +13300,7 @@ t = thearc(t,tt);
 
 static void BDdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; B *d;
+D t,tt; UL n; B *d;
 d = (B *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -13362,7 +13362,7 @@ t = thearc(t,tt);
 
 static void BDdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((B *)NUM_VAL(df))) == BINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -13408,7 +13408,7 @@ t = thearc(t,tt);
 
 static void BDdyTHEARCAAp(B * df, B * sf)
 {
-L n; D * restrict s; B * restrict d;
+UL n; D * restrict s; B * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -13488,7 +13488,7 @@ t = thearc(t,tt);
 
 static void BDdyTHEARCAAs(B * df, B * sf)
 {
-L n; D * s; B * d;
+UL n; D * s; B * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (B *)VALUE_BASE(df);
@@ -13583,7 +13583,7 @@ t += tt;
 
 static void WBdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -13645,7 +13645,7 @@ t += tt;
 
 static void WBdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -13691,7 +13691,7 @@ t += tt;
 
 static void WBdyADDAAp(B * df, B * sf)
 {
-L n; B * restrict s; W * restrict d;
+UL n; B * restrict s; W * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -13771,7 +13771,7 @@ t += tt;
 
 static void WBdyADDAAs(B * df, B * sf)
 {
-L n; B * s; W * d;
+UL n; B * s; W * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -13866,7 +13866,7 @@ t -= tt;
 
 static void WBdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -13928,7 +13928,7 @@ t -= tt;
 
 static void WBdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -13974,7 +13974,7 @@ t -= tt;
 
 static void WBdySUBAAp(B * df, B * sf)
 {
-L n; B * restrict s; W * restrict d;
+UL n; B * restrict s; W * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -14054,7 +14054,7 @@ t -= tt;
 
 static void WBdySUBAAs(B * df, B * sf)
 {
-L n; B * s; W * d;
+UL n; B * s; W * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -14149,7 +14149,7 @@ t *= tt;
 
 static void WBdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -14211,7 +14211,7 @@ t *= tt;
 
 static void WBdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -14257,7 +14257,7 @@ t *= tt;
 
 static void WBdyMULAAp(B * df, B * sf)
 {
-L n; B * restrict s; W * restrict d;
+UL n; B * restrict s; W * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -14337,7 +14337,7 @@ t *= tt;
 
 static void WBdyMULAAs(B * df, B * sf)
 {
-L n; B * s; W * d;
+UL n; B * s; W * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -14432,7 +14432,7 @@ t /= tt;
 
 static void WBdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -14494,7 +14494,7 @@ t /= tt;
 
 static void WBdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -14540,7 +14540,7 @@ t /= tt;
 
 static void WBdyDIVAAp(B * df, B * sf)
 {
-L n; B * restrict s; W * restrict d;
+UL n; B * restrict s; W * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -14620,7 +14620,7 @@ t /= tt;
 
 static void WBdyDIVAAs(B * df, B * sf)
 {
-L n; B * s; W * d;
+UL n; B * s; W * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -14715,7 +14715,7 @@ t = pow(t,tt);
 
 static void WBdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -14777,7 +14777,7 @@ t = pow(t,tt);
 
 static void WBdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -14823,7 +14823,7 @@ t = pow(t,tt);
 
 static void WBdyPWRAAp(B * df, B * sf)
 {
-L n; B * restrict s; W * restrict d;
+UL n; B * restrict s; W * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -14903,7 +14903,7 @@ t = pow(t,tt);
 
 static void WBdyPWRAAs(B * df, B * sf)
 {
-L n; B * s; W * d;
+UL n; B * s; W * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -14998,7 +14998,7 @@ t = fmod(t,tt);
 
 static void WBdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -15060,7 +15060,7 @@ t = fmod(t,tt);
 
 static void WBdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -15106,7 +15106,7 @@ t = fmod(t,tt);
 
 static void WBdyMODAAp(B * df, B * sf)
 {
-L n; B * restrict s; W * restrict d;
+UL n; B * restrict s; W * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -15186,7 +15186,7 @@ t = fmod(t,tt);
 
 static void WBdyMODAAs(B * df, B * sf)
 {
-L n; B * s; W * d;
+UL n; B * s; W * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -15281,7 +15281,7 @@ t = thearc(t,tt);
 
 static void WBdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -15343,7 +15343,7 @@ t = thearc(t,tt);
 
 static void WBdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -15389,7 +15389,7 @@ t = thearc(t,tt);
 
 static void WBdyTHEARCAAp(B * df, B * sf)
 {
-L n; B * restrict s; W * restrict d;
+UL n; B * restrict s; W * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -15469,7 +15469,7 @@ t = thearc(t,tt);
 
 static void WBdyTHEARCAAs(B * df, B * sf)
 {
-L n; B * s; W * d;
+UL n; B * s; W * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -15564,7 +15564,7 @@ t += tt;
 
 static void WWdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -15626,7 +15626,7 @@ t += tt;
 
 static void WWdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -15672,7 +15672,7 @@ t += tt;
 
 static void WWdyADDAAp(B * df, B * sf)
 {
-L n; W * restrict s; W * restrict d;
+UL n; W * restrict s; W * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -15752,7 +15752,7 @@ t += tt;
 
 static void WWdyADDAAs(B * df, B * sf)
 {
-L n; W * s; W * d;
+UL n; W * s; W * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -15847,7 +15847,7 @@ t -= tt;
 
 static void WWdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -15909,7 +15909,7 @@ t -= tt;
 
 static void WWdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -15955,7 +15955,7 @@ t -= tt;
 
 static void WWdySUBAAp(B * df, B * sf)
 {
-L n; W * restrict s; W * restrict d;
+UL n; W * restrict s; W * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -16035,7 +16035,7 @@ t -= tt;
 
 static void WWdySUBAAs(B * df, B * sf)
 {
-L n; W * s; W * d;
+UL n; W * s; W * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -16130,7 +16130,7 @@ t *= tt;
 
 static void WWdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -16192,7 +16192,7 @@ t *= tt;
 
 static void WWdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -16238,7 +16238,7 @@ t *= tt;
 
 static void WWdyMULAAp(B * df, B * sf)
 {
-L n; W * restrict s; W * restrict d;
+UL n; W * restrict s; W * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -16318,7 +16318,7 @@ t *= tt;
 
 static void WWdyMULAAs(B * df, B * sf)
 {
-L n; W * s; W * d;
+UL n; W * s; W * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -16413,7 +16413,7 @@ t /= tt;
 
 static void WWdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -16475,7 +16475,7 @@ t /= tt;
 
 static void WWdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -16521,7 +16521,7 @@ t /= tt;
 
 static void WWdyDIVAAp(B * df, B * sf)
 {
-L n; W * restrict s; W * restrict d;
+UL n; W * restrict s; W * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -16601,7 +16601,7 @@ t /= tt;
 
 static void WWdyDIVAAs(B * df, B * sf)
 {
-L n; W * s; W * d;
+UL n; W * s; W * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -16696,7 +16696,7 @@ t = pow(t,tt);
 
 static void WWdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -16758,7 +16758,7 @@ t = pow(t,tt);
 
 static void WWdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -16804,7 +16804,7 @@ t = pow(t,tt);
 
 static void WWdyPWRAAp(B * df, B * sf)
 {
-L n; W * restrict s; W * restrict d;
+UL n; W * restrict s; W * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -16884,7 +16884,7 @@ t = pow(t,tt);
 
 static void WWdyPWRAAs(B * df, B * sf)
 {
-L n; W * s; W * d;
+UL n; W * s; W * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -16979,7 +16979,7 @@ t = fmod(t,tt);
 
 static void WWdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -17041,7 +17041,7 @@ t = fmod(t,tt);
 
 static void WWdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -17087,7 +17087,7 @@ t = fmod(t,tt);
 
 static void WWdyMODAAp(B * df, B * sf)
 {
-L n; W * restrict s; W * restrict d;
+UL n; W * restrict s; W * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -17167,7 +17167,7 @@ t = fmod(t,tt);
 
 static void WWdyMODAAs(B * df, B * sf)
 {
-L n; W * s; W * d;
+UL n; W * s; W * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -17262,7 +17262,7 @@ t = thearc(t,tt);
 
 static void WWdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -17324,7 +17324,7 @@ t = thearc(t,tt);
 
 static void WWdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -17370,7 +17370,7 @@ t = thearc(t,tt);
 
 static void WWdyTHEARCAAp(B * df, B * sf)
 {
-L n; W * restrict s; W * restrict d;
+UL n; W * restrict s; W * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -17450,7 +17450,7 @@ t = thearc(t,tt);
 
 static void WWdyTHEARCAAs(B * df, B * sf)
 {
-L n; W * s; W * d;
+UL n; W * s; W * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -17545,7 +17545,7 @@ t += tt;
 
 static void WLdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -17607,7 +17607,7 @@ t += tt;
 
 static void WLdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -17653,7 +17653,7 @@ t += tt;
 
 static void WLdyADDAAp(B * df, B * sf)
 {
-L n; L * restrict s; W * restrict d;
+UL n; L * restrict s; W * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -17733,7 +17733,7 @@ t += tt;
 
 static void WLdyADDAAs(B * df, B * sf)
 {
-L n; L * s; W * d;
+UL n; L * s; W * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -17828,7 +17828,7 @@ t -= tt;
 
 static void WLdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -17890,7 +17890,7 @@ t -= tt;
 
 static void WLdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -17936,7 +17936,7 @@ t -= tt;
 
 static void WLdySUBAAp(B * df, B * sf)
 {
-L n; L * restrict s; W * restrict d;
+UL n; L * restrict s; W * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -18016,7 +18016,7 @@ t -= tt;
 
 static void WLdySUBAAs(B * df, B * sf)
 {
-L n; L * s; W * d;
+UL n; L * s; W * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -18111,7 +18111,7 @@ t *= tt;
 
 static void WLdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -18173,7 +18173,7 @@ t *= tt;
 
 static void WLdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -18219,7 +18219,7 @@ t *= tt;
 
 static void WLdyMULAAp(B * df, B * sf)
 {
-L n; L * restrict s; W * restrict d;
+UL n; L * restrict s; W * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -18299,7 +18299,7 @@ t *= tt;
 
 static void WLdyMULAAs(B * df, B * sf)
 {
-L n; L * s; W * d;
+UL n; L * s; W * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -18394,7 +18394,7 @@ t /= tt;
 
 static void WLdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -18456,7 +18456,7 @@ t /= tt;
 
 static void WLdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -18502,7 +18502,7 @@ t /= tt;
 
 static void WLdyDIVAAp(B * df, B * sf)
 {
-L n; L * restrict s; W * restrict d;
+UL n; L * restrict s; W * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -18582,7 +18582,7 @@ t /= tt;
 
 static void WLdyDIVAAs(B * df, B * sf)
 {
-L n; L * s; W * d;
+UL n; L * s; W * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -18677,7 +18677,7 @@ t = pow(t,tt);
 
 static void WLdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -18739,7 +18739,7 @@ t = pow(t,tt);
 
 static void WLdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -18785,7 +18785,7 @@ t = pow(t,tt);
 
 static void WLdyPWRAAp(B * df, B * sf)
 {
-L n; L * restrict s; W * restrict d;
+UL n; L * restrict s; W * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -18865,7 +18865,7 @@ t = pow(t,tt);
 
 static void WLdyPWRAAs(B * df, B * sf)
 {
-L n; L * s; W * d;
+UL n; L * s; W * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -18960,7 +18960,7 @@ t = fmod(t,tt);
 
 static void WLdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -19022,7 +19022,7 @@ t = fmod(t,tt);
 
 static void WLdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -19068,7 +19068,7 @@ t = fmod(t,tt);
 
 static void WLdyMODAAp(B * df, B * sf)
 {
-L n; L * restrict s; W * restrict d;
+UL n; L * restrict s; W * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -19148,7 +19148,7 @@ t = fmod(t,tt);
 
 static void WLdyMODAAs(B * df, B * sf)
 {
-L n; L * s; W * d;
+UL n; L * s; W * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -19243,7 +19243,7 @@ t = thearc(t,tt);
 
 static void WLdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -19305,7 +19305,7 @@ t = thearc(t,tt);
 
 static void WLdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -19351,7 +19351,7 @@ t = thearc(t,tt);
 
 static void WLdyTHEARCAAp(B * df, B * sf)
 {
-L n; L * restrict s; W * restrict d;
+UL n; L * restrict s; W * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -19431,7 +19431,7 @@ t = thearc(t,tt);
 
 static void WLdyTHEARCAAs(B * df, B * sf)
 {
-L n; L * s; W * d;
+UL n; L * s; W * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -19526,7 +19526,7 @@ t += tt;
 
 static void WSdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -19588,7 +19588,7 @@ t += tt;
 
 static void WSdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -19634,7 +19634,7 @@ t += tt;
 
 static void WSdyADDAAp(B * df, B * sf)
 {
-L n; S * restrict s; W * restrict d;
+UL n; S * restrict s; W * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -19714,7 +19714,7 @@ t += tt;
 
 static void WSdyADDAAs(B * df, B * sf)
 {
-L n; S * s; W * d;
+UL n; S * s; W * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -19809,7 +19809,7 @@ t -= tt;
 
 static void WSdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -19871,7 +19871,7 @@ t -= tt;
 
 static void WSdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -19917,7 +19917,7 @@ t -= tt;
 
 static void WSdySUBAAp(B * df, B * sf)
 {
-L n; S * restrict s; W * restrict d;
+UL n; S * restrict s; W * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -19997,7 +19997,7 @@ t -= tt;
 
 static void WSdySUBAAs(B * df, B * sf)
 {
-L n; S * s; W * d;
+UL n; S * s; W * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -20092,7 +20092,7 @@ t *= tt;
 
 static void WSdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -20154,7 +20154,7 @@ t *= tt;
 
 static void WSdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -20200,7 +20200,7 @@ t *= tt;
 
 static void WSdyMULAAp(B * df, B * sf)
 {
-L n; S * restrict s; W * restrict d;
+UL n; S * restrict s; W * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -20280,7 +20280,7 @@ t *= tt;
 
 static void WSdyMULAAs(B * df, B * sf)
 {
-L n; S * s; W * d;
+UL n; S * s; W * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -20375,7 +20375,7 @@ t /= tt;
 
 static void WSdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -20437,7 +20437,7 @@ t /= tt;
 
 static void WSdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -20483,7 +20483,7 @@ t /= tt;
 
 static void WSdyDIVAAp(B * df, B * sf)
 {
-L n; S * restrict s; W * restrict d;
+UL n; S * restrict s; W * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -20563,7 +20563,7 @@ t /= tt;
 
 static void WSdyDIVAAs(B * df, B * sf)
 {
-L n; S * s; W * d;
+UL n; S * s; W * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -20658,7 +20658,7 @@ t = pow(t,tt);
 
 static void WSdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -20720,7 +20720,7 @@ t = pow(t,tt);
 
 static void WSdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -20766,7 +20766,7 @@ t = pow(t,tt);
 
 static void WSdyPWRAAp(B * df, B * sf)
 {
-L n; S * restrict s; W * restrict d;
+UL n; S * restrict s; W * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -20846,7 +20846,7 @@ t = pow(t,tt);
 
 static void WSdyPWRAAs(B * df, B * sf)
 {
-L n; S * s; W * d;
+UL n; S * s; W * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -20941,7 +20941,7 @@ t = fmod(t,tt);
 
 static void WSdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -21003,7 +21003,7 @@ t = fmod(t,tt);
 
 static void WSdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -21049,7 +21049,7 @@ t = fmod(t,tt);
 
 static void WSdyMODAAp(B * df, B * sf)
 {
-L n; S * restrict s; W * restrict d;
+UL n; S * restrict s; W * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -21129,7 +21129,7 @@ t = fmod(t,tt);
 
 static void WSdyMODAAs(B * df, B * sf)
 {
-L n; S * s; W * d;
+UL n; S * s; W * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -21224,7 +21224,7 @@ t = thearc(t,tt);
 
 static void WSdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -21286,7 +21286,7 @@ t = thearc(t,tt);
 
 static void WSdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -21332,7 +21332,7 @@ t = thearc(t,tt);
 
 static void WSdyTHEARCAAp(B * df, B * sf)
 {
-L n; S * restrict s; W * restrict d;
+UL n; S * restrict s; W * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -21412,7 +21412,7 @@ t = thearc(t,tt);
 
 static void WSdyTHEARCAAs(B * df, B * sf)
 {
-L n; S * s; W * d;
+UL n; S * s; W * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -21507,7 +21507,7 @@ t += tt;
 
 static void WDdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -21569,7 +21569,7 @@ t += tt;
 
 static void WDdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -21615,7 +21615,7 @@ t += tt;
 
 static void WDdyADDAAp(B * df, B * sf)
 {
-L n; D * restrict s; W * restrict d;
+UL n; D * restrict s; W * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -21695,7 +21695,7 @@ t += tt;
 
 static void WDdyADDAAs(B * df, B * sf)
 {
-L n; D * s; W * d;
+UL n; D * s; W * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -21790,7 +21790,7 @@ t -= tt;
 
 static void WDdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -21852,7 +21852,7 @@ t -= tt;
 
 static void WDdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -21898,7 +21898,7 @@ t -= tt;
 
 static void WDdySUBAAp(B * df, B * sf)
 {
-L n; D * restrict s; W * restrict d;
+UL n; D * restrict s; W * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -21978,7 +21978,7 @@ t -= tt;
 
 static void WDdySUBAAs(B * df, B * sf)
 {
-L n; D * s; W * d;
+UL n; D * s; W * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -22073,7 +22073,7 @@ t *= tt;
 
 static void WDdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -22135,7 +22135,7 @@ t *= tt;
 
 static void WDdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -22181,7 +22181,7 @@ t *= tt;
 
 static void WDdyMULAAp(B * df, B * sf)
 {
-L n; D * restrict s; W * restrict d;
+UL n; D * restrict s; W * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -22261,7 +22261,7 @@ t *= tt;
 
 static void WDdyMULAAs(B * df, B * sf)
 {
-L n; D * s; W * d;
+UL n; D * s; W * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -22356,7 +22356,7 @@ t /= tt;
 
 static void WDdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -22418,7 +22418,7 @@ t /= tt;
 
 static void WDdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -22464,7 +22464,7 @@ t /= tt;
 
 static void WDdyDIVAAp(B * df, B * sf)
 {
-L n; D * restrict s; W * restrict d;
+UL n; D * restrict s; W * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -22544,7 +22544,7 @@ t /= tt;
 
 static void WDdyDIVAAs(B * df, B * sf)
 {
-L n; D * s; W * d;
+UL n; D * s; W * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -22639,7 +22639,7 @@ t = pow(t,tt);
 
 static void WDdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -22701,7 +22701,7 @@ t = pow(t,tt);
 
 static void WDdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -22747,7 +22747,7 @@ t = pow(t,tt);
 
 static void WDdyPWRAAp(B * df, B * sf)
 {
-L n; D * restrict s; W * restrict d;
+UL n; D * restrict s; W * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -22827,7 +22827,7 @@ t = pow(t,tt);
 
 static void WDdyPWRAAs(B * df, B * sf)
 {
-L n; D * s; W * d;
+UL n; D * s; W * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -22922,7 +22922,7 @@ t = fmod(t,tt);
 
 static void WDdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -22984,7 +22984,7 @@ t = fmod(t,tt);
 
 static void WDdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -23030,7 +23030,7 @@ t = fmod(t,tt);
 
 static void WDdyMODAAp(B * df, B * sf)
 {
-L n; D * restrict s; W * restrict d;
+UL n; D * restrict s; W * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -23110,7 +23110,7 @@ t = fmod(t,tt);
 
 static void WDdyMODAAs(B * df, B * sf)
 {
-L n; D * s; W * d;
+UL n; D * s; W * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -23205,7 +23205,7 @@ t = thearc(t,tt);
 
 static void WDdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; W *d;
+D t,tt; UL n; W *d;
 d = (W *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -23267,7 +23267,7 @@ t = thearc(t,tt);
 
 static void WDdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((W *)NUM_VAL(df))) == WINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -23313,7 +23313,7 @@ t = thearc(t,tt);
 
 static void WDdyTHEARCAAp(B * df, B * sf)
 {
-L n; D * restrict s; W * restrict d;
+UL n; D * restrict s; W * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -23393,7 +23393,7 @@ t = thearc(t,tt);
 
 static void WDdyTHEARCAAs(B * df, B * sf)
 {
-L n; D * s; W * d;
+UL n; D * s; W * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (W *)VALUE_BASE(df);
@@ -23488,7 +23488,7 @@ t += tt;
 
 static void LBdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -23550,7 +23550,7 @@ t += tt;
 
 static void LBdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -23596,7 +23596,7 @@ t += tt;
 
 static void LBdyADDAAp(B * df, B * sf)
 {
-L n; B * restrict s; L * restrict d;
+UL n; B * restrict s; L * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -23676,7 +23676,7 @@ t += tt;
 
 static void LBdyADDAAs(B * df, B * sf)
 {
-L n; B * s; L * d;
+UL n; B * s; L * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -23771,7 +23771,7 @@ t -= tt;
 
 static void LBdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -23833,7 +23833,7 @@ t -= tt;
 
 static void LBdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -23879,7 +23879,7 @@ t -= tt;
 
 static void LBdySUBAAp(B * df, B * sf)
 {
-L n; B * restrict s; L * restrict d;
+UL n; B * restrict s; L * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -23959,7 +23959,7 @@ t -= tt;
 
 static void LBdySUBAAs(B * df, B * sf)
 {
-L n; B * s; L * d;
+UL n; B * s; L * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -24054,7 +24054,7 @@ t *= tt;
 
 static void LBdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -24116,7 +24116,7 @@ t *= tt;
 
 static void LBdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -24162,7 +24162,7 @@ t *= tt;
 
 static void LBdyMULAAp(B * df, B * sf)
 {
-L n; B * restrict s; L * restrict d;
+UL n; B * restrict s; L * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -24242,7 +24242,7 @@ t *= tt;
 
 static void LBdyMULAAs(B * df, B * sf)
 {
-L n; B * s; L * d;
+UL n; B * s; L * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -24337,7 +24337,7 @@ t /= tt;
 
 static void LBdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -24399,7 +24399,7 @@ t /= tt;
 
 static void LBdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -24445,7 +24445,7 @@ t /= tt;
 
 static void LBdyDIVAAp(B * df, B * sf)
 {
-L n; B * restrict s; L * restrict d;
+UL n; B * restrict s; L * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -24525,7 +24525,7 @@ t /= tt;
 
 static void LBdyDIVAAs(B * df, B * sf)
 {
-L n; B * s; L * d;
+UL n; B * s; L * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -24620,7 +24620,7 @@ t = pow(t,tt);
 
 static void LBdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -24682,7 +24682,7 @@ t = pow(t,tt);
 
 static void LBdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -24728,7 +24728,7 @@ t = pow(t,tt);
 
 static void LBdyPWRAAp(B * df, B * sf)
 {
-L n; B * restrict s; L * restrict d;
+UL n; B * restrict s; L * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -24808,7 +24808,7 @@ t = pow(t,tt);
 
 static void LBdyPWRAAs(B * df, B * sf)
 {
-L n; B * s; L * d;
+UL n; B * s; L * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -24903,7 +24903,7 @@ t = fmod(t,tt);
 
 static void LBdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -24965,7 +24965,7 @@ t = fmod(t,tt);
 
 static void LBdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -25011,7 +25011,7 @@ t = fmod(t,tt);
 
 static void LBdyMODAAp(B * df, B * sf)
 {
-L n; B * restrict s; L * restrict d;
+UL n; B * restrict s; L * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -25091,7 +25091,7 @@ t = fmod(t,tt);
 
 static void LBdyMODAAs(B * df, B * sf)
 {
-L n; B * s; L * d;
+UL n; B * s; L * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -25186,7 +25186,7 @@ t = thearc(t,tt);
 
 static void LBdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -25248,7 +25248,7 @@ t = thearc(t,tt);
 
 static void LBdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -25294,7 +25294,7 @@ t = thearc(t,tt);
 
 static void LBdyTHEARCAAp(B * df, B * sf)
 {
-L n; B * restrict s; L * restrict d;
+UL n; B * restrict s; L * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -25374,7 +25374,7 @@ t = thearc(t,tt);
 
 static void LBdyTHEARCAAs(B * df, B * sf)
 {
-L n; B * s; L * d;
+UL n; B * s; L * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -25469,7 +25469,7 @@ t += tt;
 
 static void LWdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -25531,7 +25531,7 @@ t += tt;
 
 static void LWdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -25577,7 +25577,7 @@ t += tt;
 
 static void LWdyADDAAp(B * df, B * sf)
 {
-L n; W * restrict s; L * restrict d;
+UL n; W * restrict s; L * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -25657,7 +25657,7 @@ t += tt;
 
 static void LWdyADDAAs(B * df, B * sf)
 {
-L n; W * s; L * d;
+UL n; W * s; L * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -25752,7 +25752,7 @@ t -= tt;
 
 static void LWdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -25814,7 +25814,7 @@ t -= tt;
 
 static void LWdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -25860,7 +25860,7 @@ t -= tt;
 
 static void LWdySUBAAp(B * df, B * sf)
 {
-L n; W * restrict s; L * restrict d;
+UL n; W * restrict s; L * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -25940,7 +25940,7 @@ t -= tt;
 
 static void LWdySUBAAs(B * df, B * sf)
 {
-L n; W * s; L * d;
+UL n; W * s; L * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -26035,7 +26035,7 @@ t *= tt;
 
 static void LWdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -26097,7 +26097,7 @@ t *= tt;
 
 static void LWdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -26143,7 +26143,7 @@ t *= tt;
 
 static void LWdyMULAAp(B * df, B * sf)
 {
-L n; W * restrict s; L * restrict d;
+UL n; W * restrict s; L * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -26223,7 +26223,7 @@ t *= tt;
 
 static void LWdyMULAAs(B * df, B * sf)
 {
-L n; W * s; L * d;
+UL n; W * s; L * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -26318,7 +26318,7 @@ t /= tt;
 
 static void LWdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -26380,7 +26380,7 @@ t /= tt;
 
 static void LWdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -26426,7 +26426,7 @@ t /= tt;
 
 static void LWdyDIVAAp(B * df, B * sf)
 {
-L n; W * restrict s; L * restrict d;
+UL n; W * restrict s; L * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -26506,7 +26506,7 @@ t /= tt;
 
 static void LWdyDIVAAs(B * df, B * sf)
 {
-L n; W * s; L * d;
+UL n; W * s; L * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -26601,7 +26601,7 @@ t = pow(t,tt);
 
 static void LWdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -26663,7 +26663,7 @@ t = pow(t,tt);
 
 static void LWdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -26709,7 +26709,7 @@ t = pow(t,tt);
 
 static void LWdyPWRAAp(B * df, B * sf)
 {
-L n; W * restrict s; L * restrict d;
+UL n; W * restrict s; L * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -26789,7 +26789,7 @@ t = pow(t,tt);
 
 static void LWdyPWRAAs(B * df, B * sf)
 {
-L n; W * s; L * d;
+UL n; W * s; L * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -26884,7 +26884,7 @@ t = fmod(t,tt);
 
 static void LWdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -26946,7 +26946,7 @@ t = fmod(t,tt);
 
 static void LWdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -26992,7 +26992,7 @@ t = fmod(t,tt);
 
 static void LWdyMODAAp(B * df, B * sf)
 {
-L n; W * restrict s; L * restrict d;
+UL n; W * restrict s; L * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -27072,7 +27072,7 @@ t = fmod(t,tt);
 
 static void LWdyMODAAs(B * df, B * sf)
 {
-L n; W * s; L * d;
+UL n; W * s; L * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -27167,7 +27167,7 @@ t = thearc(t,tt);
 
 static void LWdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -27229,7 +27229,7 @@ t = thearc(t,tt);
 
 static void LWdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -27275,7 +27275,7 @@ t = thearc(t,tt);
 
 static void LWdyTHEARCAAp(B * df, B * sf)
 {
-L n; W * restrict s; L * restrict d;
+UL n; W * restrict s; L * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -27355,7 +27355,7 @@ t = thearc(t,tt);
 
 static void LWdyTHEARCAAs(B * df, B * sf)
 {
-L n; W * s; L * d;
+UL n; W * s; L * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -27450,7 +27450,7 @@ t += tt;
 
 static void LLdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -27512,7 +27512,7 @@ t += tt;
 
 static void LLdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -27558,7 +27558,7 @@ t += tt;
 
 static void LLdyADDAAp(B * df, B * sf)
 {
-L n; L * restrict s; L * restrict d;
+UL n; L * restrict s; L * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -27638,7 +27638,7 @@ t += tt;
 
 static void LLdyADDAAs(B * df, B * sf)
 {
-L n; L * s; L * d;
+UL n; L * s; L * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -27733,7 +27733,7 @@ t -= tt;
 
 static void LLdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -27795,7 +27795,7 @@ t -= tt;
 
 static void LLdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -27841,7 +27841,7 @@ t -= tt;
 
 static void LLdySUBAAp(B * df, B * sf)
 {
-L n; L * restrict s; L * restrict d;
+UL n; L * restrict s; L * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -27921,7 +27921,7 @@ t -= tt;
 
 static void LLdySUBAAs(B * df, B * sf)
 {
-L n; L * s; L * d;
+UL n; L * s; L * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -28016,7 +28016,7 @@ t *= tt;
 
 static void LLdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -28078,7 +28078,7 @@ t *= tt;
 
 static void LLdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -28124,7 +28124,7 @@ t *= tt;
 
 static void LLdyMULAAp(B * df, B * sf)
 {
-L n; L * restrict s; L * restrict d;
+UL n; L * restrict s; L * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -28204,7 +28204,7 @@ t *= tt;
 
 static void LLdyMULAAs(B * df, B * sf)
 {
-L n; L * s; L * d;
+UL n; L * s; L * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -28299,7 +28299,7 @@ t /= tt;
 
 static void LLdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -28361,7 +28361,7 @@ t /= tt;
 
 static void LLdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -28407,7 +28407,7 @@ t /= tt;
 
 static void LLdyDIVAAp(B * df, B * sf)
 {
-L n; L * restrict s; L * restrict d;
+UL n; L * restrict s; L * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -28487,7 +28487,7 @@ t /= tt;
 
 static void LLdyDIVAAs(B * df, B * sf)
 {
-L n; L * s; L * d;
+UL n; L * s; L * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -28582,7 +28582,7 @@ t = pow(t,tt);
 
 static void LLdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -28644,7 +28644,7 @@ t = pow(t,tt);
 
 static void LLdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -28690,7 +28690,7 @@ t = pow(t,tt);
 
 static void LLdyPWRAAp(B * df, B * sf)
 {
-L n; L * restrict s; L * restrict d;
+UL n; L * restrict s; L * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -28770,7 +28770,7 @@ t = pow(t,tt);
 
 static void LLdyPWRAAs(B * df, B * sf)
 {
-L n; L * s; L * d;
+UL n; L * s; L * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -28865,7 +28865,7 @@ t = fmod(t,tt);
 
 static void LLdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -28927,7 +28927,7 @@ t = fmod(t,tt);
 
 static void LLdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -28973,7 +28973,7 @@ t = fmod(t,tt);
 
 static void LLdyMODAAp(B * df, B * sf)
 {
-L n; L * restrict s; L * restrict d;
+UL n; L * restrict s; L * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -29053,7 +29053,7 @@ t = fmod(t,tt);
 
 static void LLdyMODAAs(B * df, B * sf)
 {
-L n; L * s; L * d;
+UL n; L * s; L * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -29148,7 +29148,7 @@ t = thearc(t,tt);
 
 static void LLdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -29210,7 +29210,7 @@ t = thearc(t,tt);
 
 static void LLdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -29256,7 +29256,7 @@ t = thearc(t,tt);
 
 static void LLdyTHEARCAAp(B * df, B * sf)
 {
-L n; L * restrict s; L * restrict d;
+UL n; L * restrict s; L * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -29336,7 +29336,7 @@ t = thearc(t,tt);
 
 static void LLdyTHEARCAAs(B * df, B * sf)
 {
-L n; L * s; L * d;
+UL n; L * s; L * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -29431,7 +29431,7 @@ t += tt;
 
 static void LSdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -29493,7 +29493,7 @@ t += tt;
 
 static void LSdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -29539,7 +29539,7 @@ t += tt;
 
 static void LSdyADDAAp(B * df, B * sf)
 {
-L n; S * restrict s; L * restrict d;
+UL n; S * restrict s; L * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -29619,7 +29619,7 @@ t += tt;
 
 static void LSdyADDAAs(B * df, B * sf)
 {
-L n; S * s; L * d;
+UL n; S * s; L * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -29714,7 +29714,7 @@ t -= tt;
 
 static void LSdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -29776,7 +29776,7 @@ t -= tt;
 
 static void LSdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -29822,7 +29822,7 @@ t -= tt;
 
 static void LSdySUBAAp(B * df, B * sf)
 {
-L n; S * restrict s; L * restrict d;
+UL n; S * restrict s; L * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -29902,7 +29902,7 @@ t -= tt;
 
 static void LSdySUBAAs(B * df, B * sf)
 {
-L n; S * s; L * d;
+UL n; S * s; L * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -29997,7 +29997,7 @@ t *= tt;
 
 static void LSdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -30059,7 +30059,7 @@ t *= tt;
 
 static void LSdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -30105,7 +30105,7 @@ t *= tt;
 
 static void LSdyMULAAp(B * df, B * sf)
 {
-L n; S * restrict s; L * restrict d;
+UL n; S * restrict s; L * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -30185,7 +30185,7 @@ t *= tt;
 
 static void LSdyMULAAs(B * df, B * sf)
 {
-L n; S * s; L * d;
+UL n; S * s; L * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -30280,7 +30280,7 @@ t /= tt;
 
 static void LSdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -30342,7 +30342,7 @@ t /= tt;
 
 static void LSdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -30388,7 +30388,7 @@ t /= tt;
 
 static void LSdyDIVAAp(B * df, B * sf)
 {
-L n; S * restrict s; L * restrict d;
+UL n; S * restrict s; L * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -30468,7 +30468,7 @@ t /= tt;
 
 static void LSdyDIVAAs(B * df, B * sf)
 {
-L n; S * s; L * d;
+UL n; S * s; L * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -30563,7 +30563,7 @@ t = pow(t,tt);
 
 static void LSdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -30625,7 +30625,7 @@ t = pow(t,tt);
 
 static void LSdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -30671,7 +30671,7 @@ t = pow(t,tt);
 
 static void LSdyPWRAAp(B * df, B * sf)
 {
-L n; S * restrict s; L * restrict d;
+UL n; S * restrict s; L * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -30751,7 +30751,7 @@ t = pow(t,tt);
 
 static void LSdyPWRAAs(B * df, B * sf)
 {
-L n; S * s; L * d;
+UL n; S * s; L * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -30846,7 +30846,7 @@ t = fmod(t,tt);
 
 static void LSdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -30908,7 +30908,7 @@ t = fmod(t,tt);
 
 static void LSdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -30954,7 +30954,7 @@ t = fmod(t,tt);
 
 static void LSdyMODAAp(B * df, B * sf)
 {
-L n; S * restrict s; L * restrict d;
+UL n; S * restrict s; L * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -31034,7 +31034,7 @@ t = fmod(t,tt);
 
 static void LSdyMODAAs(B * df, B * sf)
 {
-L n; S * s; L * d;
+UL n; S * s; L * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -31129,7 +31129,7 @@ t = thearc(t,tt);
 
 static void LSdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -31191,7 +31191,7 @@ t = thearc(t,tt);
 
 static void LSdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -31237,7 +31237,7 @@ t = thearc(t,tt);
 
 static void LSdyTHEARCAAp(B * df, B * sf)
 {
-L n; S * restrict s; L * restrict d;
+UL n; S * restrict s; L * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -31317,7 +31317,7 @@ t = thearc(t,tt);
 
 static void LSdyTHEARCAAs(B * df, B * sf)
 {
-L n; S * s; L * d;
+UL n; S * s; L * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -31412,7 +31412,7 @@ t += tt;
 
 static void LDdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -31474,7 +31474,7 @@ t += tt;
 
 static void LDdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -31520,7 +31520,7 @@ t += tt;
 
 static void LDdyADDAAp(B * df, B * sf)
 {
-L n; D * restrict s; L * restrict d;
+UL n; D * restrict s; L * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -31600,7 +31600,7 @@ t += tt;
 
 static void LDdyADDAAs(B * df, B * sf)
 {
-L n; D * s; L * d;
+UL n; D * s; L * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -31695,7 +31695,7 @@ t -= tt;
 
 static void LDdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -31757,7 +31757,7 @@ t -= tt;
 
 static void LDdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -31803,7 +31803,7 @@ t -= tt;
 
 static void LDdySUBAAp(B * df, B * sf)
 {
-L n; D * restrict s; L * restrict d;
+UL n; D * restrict s; L * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -31883,7 +31883,7 @@ t -= tt;
 
 static void LDdySUBAAs(B * df, B * sf)
 {
-L n; D * s; L * d;
+UL n; D * s; L * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -31978,7 +31978,7 @@ t *= tt;
 
 static void LDdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -32040,7 +32040,7 @@ t *= tt;
 
 static void LDdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -32086,7 +32086,7 @@ t *= tt;
 
 static void LDdyMULAAp(B * df, B * sf)
 {
-L n; D * restrict s; L * restrict d;
+UL n; D * restrict s; L * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -32166,7 +32166,7 @@ t *= tt;
 
 static void LDdyMULAAs(B * df, B * sf)
 {
-L n; D * s; L * d;
+UL n; D * s; L * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -32261,7 +32261,7 @@ t /= tt;
 
 static void LDdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -32323,7 +32323,7 @@ t /= tt;
 
 static void LDdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -32369,7 +32369,7 @@ t /= tt;
 
 static void LDdyDIVAAp(B * df, B * sf)
 {
-L n; D * restrict s; L * restrict d;
+UL n; D * restrict s; L * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -32449,7 +32449,7 @@ t /= tt;
 
 static void LDdyDIVAAs(B * df, B * sf)
 {
-L n; D * s; L * d;
+UL n; D * s; L * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -32544,7 +32544,7 @@ t = pow(t,tt);
 
 static void LDdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -32606,7 +32606,7 @@ t = pow(t,tt);
 
 static void LDdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -32652,7 +32652,7 @@ t = pow(t,tt);
 
 static void LDdyPWRAAp(B * df, B * sf)
 {
-L n; D * restrict s; L * restrict d;
+UL n; D * restrict s; L * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -32732,7 +32732,7 @@ t = pow(t,tt);
 
 static void LDdyPWRAAs(B * df, B * sf)
 {
-L n; D * s; L * d;
+UL n; D * s; L * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -32827,7 +32827,7 @@ t = fmod(t,tt);
 
 static void LDdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -32889,7 +32889,7 @@ t = fmod(t,tt);
 
 static void LDdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -32935,7 +32935,7 @@ t = fmod(t,tt);
 
 static void LDdyMODAAp(B * df, B * sf)
 {
-L n; D * restrict s; L * restrict d;
+UL n; D * restrict s; L * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -33015,7 +33015,7 @@ t = fmod(t,tt);
 
 static void LDdyMODAAs(B * df, B * sf)
 {
-L n; D * s; L * d;
+UL n; D * s; L * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -33110,7 +33110,7 @@ t = thearc(t,tt);
 
 static void LDdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; L *d;
+D t,tt; UL n; L *d;
 d = (L *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -33172,7 +33172,7 @@ t = thearc(t,tt);
 
 static void LDdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 if ((t = *((L *)NUM_VAL(df))) == LINF) t = DINF;
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -33218,7 +33218,7 @@ t = thearc(t,tt);
 
 static void LDdyTHEARCAAp(B * df, B * sf)
 {
-L n; D * restrict s; L * restrict d;
+UL n; D * restrict s; L * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -33298,7 +33298,7 @@ t = thearc(t,tt);
 
 static void LDdyTHEARCAAs(B * df, B * sf)
 {
-L n; D * s; L * d;
+UL n; D * s; L * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (L *)VALUE_BASE(df);
@@ -33393,7 +33393,7 @@ t += tt;
 
 static void SBdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -33455,7 +33455,7 @@ t += tt;
 
 static void SBdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -33501,7 +33501,7 @@ t += tt;
 
 static void SBdyADDAAp(B * df, B * sf)
 {
-L n; B * restrict s; S * restrict d;
+UL n; B * restrict s; S * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -33581,7 +33581,7 @@ t += tt;
 
 static void SBdyADDAAs(B * df, B * sf)
 {
-L n; B * s; S * d;
+UL n; B * s; S * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -33676,7 +33676,7 @@ t -= tt;
 
 static void SBdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -33738,7 +33738,7 @@ t -= tt;
 
 static void SBdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -33784,7 +33784,7 @@ t -= tt;
 
 static void SBdySUBAAp(B * df, B * sf)
 {
-L n; B * restrict s; S * restrict d;
+UL n; B * restrict s; S * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -33864,7 +33864,7 @@ t -= tt;
 
 static void SBdySUBAAs(B * df, B * sf)
 {
-L n; B * s; S * d;
+UL n; B * s; S * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -33959,7 +33959,7 @@ t *= tt;
 
 static void SBdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -34021,7 +34021,7 @@ t *= tt;
 
 static void SBdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -34067,7 +34067,7 @@ t *= tt;
 
 static void SBdyMULAAp(B * df, B * sf)
 {
-L n; B * restrict s; S * restrict d;
+UL n; B * restrict s; S * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -34147,7 +34147,7 @@ t *= tt;
 
 static void SBdyMULAAs(B * df, B * sf)
 {
-L n; B * s; S * d;
+UL n; B * s; S * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -34242,7 +34242,7 @@ t /= tt;
 
 static void SBdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -34304,7 +34304,7 @@ t /= tt;
 
 static void SBdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -34350,7 +34350,7 @@ t /= tt;
 
 static void SBdyDIVAAp(B * df, B * sf)
 {
-L n; B * restrict s; S * restrict d;
+UL n; B * restrict s; S * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -34430,7 +34430,7 @@ t /= tt;
 
 static void SBdyDIVAAs(B * df, B * sf)
 {
-L n; B * s; S * d;
+UL n; B * s; S * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -34525,7 +34525,7 @@ t = pow(t,tt);
 
 static void SBdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -34587,7 +34587,7 @@ t = pow(t,tt);
 
 static void SBdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -34633,7 +34633,7 @@ t = pow(t,tt);
 
 static void SBdyPWRAAp(B * df, B * sf)
 {
-L n; B * restrict s; S * restrict d;
+UL n; B * restrict s; S * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -34713,7 +34713,7 @@ t = pow(t,tt);
 
 static void SBdyPWRAAs(B * df, B * sf)
 {
-L n; B * s; S * d;
+UL n; B * s; S * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -34808,7 +34808,7 @@ t = fmod(t,tt);
 
 static void SBdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -34870,7 +34870,7 @@ t = fmod(t,tt);
 
 static void SBdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -34916,7 +34916,7 @@ t = fmod(t,tt);
 
 static void SBdyMODAAp(B * df, B * sf)
 {
-L n; B * restrict s; S * restrict d;
+UL n; B * restrict s; S * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -34996,7 +34996,7 @@ t = fmod(t,tt);
 
 static void SBdyMODAAs(B * df, B * sf)
 {
-L n; B * s; S * d;
+UL n; B * s; S * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -35091,7 +35091,7 @@ t = thearc(t,tt);
 
 static void SBdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -35153,7 +35153,7 @@ t = thearc(t,tt);
 
 static void SBdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -35199,7 +35199,7 @@ t = thearc(t,tt);
 
 static void SBdyTHEARCAAp(B * df, B * sf)
 {
-L n; B * restrict s; S * restrict d;
+UL n; B * restrict s; S * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -35279,7 +35279,7 @@ t = thearc(t,tt);
 
 static void SBdyTHEARCAAs(B * df, B * sf)
 {
-L n; B * s; S * d;
+UL n; B * s; S * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -35374,7 +35374,7 @@ t += tt;
 
 static void SWdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -35436,7 +35436,7 @@ t += tt;
 
 static void SWdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -35482,7 +35482,7 @@ t += tt;
 
 static void SWdyADDAAp(B * df, B * sf)
 {
-L n; W * restrict s; S * restrict d;
+UL n; W * restrict s; S * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -35562,7 +35562,7 @@ t += tt;
 
 static void SWdyADDAAs(B * df, B * sf)
 {
-L n; W * s; S * d;
+UL n; W * s; S * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -35657,7 +35657,7 @@ t -= tt;
 
 static void SWdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -35719,7 +35719,7 @@ t -= tt;
 
 static void SWdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -35765,7 +35765,7 @@ t -= tt;
 
 static void SWdySUBAAp(B * df, B * sf)
 {
-L n; W * restrict s; S * restrict d;
+UL n; W * restrict s; S * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -35845,7 +35845,7 @@ t -= tt;
 
 static void SWdySUBAAs(B * df, B * sf)
 {
-L n; W * s; S * d;
+UL n; W * s; S * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -35940,7 +35940,7 @@ t *= tt;
 
 static void SWdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -36002,7 +36002,7 @@ t *= tt;
 
 static void SWdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -36048,7 +36048,7 @@ t *= tt;
 
 static void SWdyMULAAp(B * df, B * sf)
 {
-L n; W * restrict s; S * restrict d;
+UL n; W * restrict s; S * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -36128,7 +36128,7 @@ t *= tt;
 
 static void SWdyMULAAs(B * df, B * sf)
 {
-L n; W * s; S * d;
+UL n; W * s; S * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -36223,7 +36223,7 @@ t /= tt;
 
 static void SWdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -36285,7 +36285,7 @@ t /= tt;
 
 static void SWdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -36331,7 +36331,7 @@ t /= tt;
 
 static void SWdyDIVAAp(B * df, B * sf)
 {
-L n; W * restrict s; S * restrict d;
+UL n; W * restrict s; S * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -36411,7 +36411,7 @@ t /= tt;
 
 static void SWdyDIVAAs(B * df, B * sf)
 {
-L n; W * s; S * d;
+UL n; W * s; S * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -36506,7 +36506,7 @@ t = pow(t,tt);
 
 static void SWdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -36568,7 +36568,7 @@ t = pow(t,tt);
 
 static void SWdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -36614,7 +36614,7 @@ t = pow(t,tt);
 
 static void SWdyPWRAAp(B * df, B * sf)
 {
-L n; W * restrict s; S * restrict d;
+UL n; W * restrict s; S * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -36694,7 +36694,7 @@ t = pow(t,tt);
 
 static void SWdyPWRAAs(B * df, B * sf)
 {
-L n; W * s; S * d;
+UL n; W * s; S * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -36789,7 +36789,7 @@ t = fmod(t,tt);
 
 static void SWdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -36851,7 +36851,7 @@ t = fmod(t,tt);
 
 static void SWdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -36897,7 +36897,7 @@ t = fmod(t,tt);
 
 static void SWdyMODAAp(B * df, B * sf)
 {
-L n; W * restrict s; S * restrict d;
+UL n; W * restrict s; S * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -36977,7 +36977,7 @@ t = fmod(t,tt);
 
 static void SWdyMODAAs(B * df, B * sf)
 {
-L n; W * s; S * d;
+UL n; W * s; S * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -37072,7 +37072,7 @@ t = thearc(t,tt);
 
 static void SWdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -37134,7 +37134,7 @@ t = thearc(t,tt);
 
 static void SWdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -37180,7 +37180,7 @@ t = thearc(t,tt);
 
 static void SWdyTHEARCAAp(B * df, B * sf)
 {
-L n; W * restrict s; S * restrict d;
+UL n; W * restrict s; S * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -37260,7 +37260,7 @@ t = thearc(t,tt);
 
 static void SWdyTHEARCAAs(B * df, B * sf)
 {
-L n; W * s; S * d;
+UL n; W * s; S * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -37355,7 +37355,7 @@ t += tt;
 
 static void SLdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -37417,7 +37417,7 @@ t += tt;
 
 static void SLdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -37463,7 +37463,7 @@ t += tt;
 
 static void SLdyADDAAp(B * df, B * sf)
 {
-L n; L * restrict s; S * restrict d;
+UL n; L * restrict s; S * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -37543,7 +37543,7 @@ t += tt;
 
 static void SLdyADDAAs(B * df, B * sf)
 {
-L n; L * s; S * d;
+UL n; L * s; S * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -37638,7 +37638,7 @@ t -= tt;
 
 static void SLdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -37700,7 +37700,7 @@ t -= tt;
 
 static void SLdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -37746,7 +37746,7 @@ t -= tt;
 
 static void SLdySUBAAp(B * df, B * sf)
 {
-L n; L * restrict s; S * restrict d;
+UL n; L * restrict s; S * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -37826,7 +37826,7 @@ t -= tt;
 
 static void SLdySUBAAs(B * df, B * sf)
 {
-L n; L * s; S * d;
+UL n; L * s; S * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -37921,7 +37921,7 @@ t *= tt;
 
 static void SLdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -37983,7 +37983,7 @@ t *= tt;
 
 static void SLdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -38029,7 +38029,7 @@ t *= tt;
 
 static void SLdyMULAAp(B * df, B * sf)
 {
-L n; L * restrict s; S * restrict d;
+UL n; L * restrict s; S * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -38109,7 +38109,7 @@ t *= tt;
 
 static void SLdyMULAAs(B * df, B * sf)
 {
-L n; L * s; S * d;
+UL n; L * s; S * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -38204,7 +38204,7 @@ t /= tt;
 
 static void SLdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -38266,7 +38266,7 @@ t /= tt;
 
 static void SLdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -38312,7 +38312,7 @@ t /= tt;
 
 static void SLdyDIVAAp(B * df, B * sf)
 {
-L n; L * restrict s; S * restrict d;
+UL n; L * restrict s; S * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -38392,7 +38392,7 @@ t /= tt;
 
 static void SLdyDIVAAs(B * df, B * sf)
 {
-L n; L * s; S * d;
+UL n; L * s; S * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -38487,7 +38487,7 @@ t = pow(t,tt);
 
 static void SLdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -38549,7 +38549,7 @@ t = pow(t,tt);
 
 static void SLdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -38595,7 +38595,7 @@ t = pow(t,tt);
 
 static void SLdyPWRAAp(B * df, B * sf)
 {
-L n; L * restrict s; S * restrict d;
+UL n; L * restrict s; S * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -38675,7 +38675,7 @@ t = pow(t,tt);
 
 static void SLdyPWRAAs(B * df, B * sf)
 {
-L n; L * s; S * d;
+UL n; L * s; S * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -38770,7 +38770,7 @@ t = fmod(t,tt);
 
 static void SLdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -38832,7 +38832,7 @@ t = fmod(t,tt);
 
 static void SLdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -38878,7 +38878,7 @@ t = fmod(t,tt);
 
 static void SLdyMODAAp(B * df, B * sf)
 {
-L n; L * restrict s; S * restrict d;
+UL n; L * restrict s; S * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -38958,7 +38958,7 @@ t = fmod(t,tt);
 
 static void SLdyMODAAs(B * df, B * sf)
 {
-L n; L * s; S * d;
+UL n; L * s; S * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -39053,7 +39053,7 @@ t = thearc(t,tt);
 
 static void SLdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -39115,7 +39115,7 @@ t = thearc(t,tt);
 
 static void SLdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -39161,7 +39161,7 @@ t = thearc(t,tt);
 
 static void SLdyTHEARCAAp(B * df, B * sf)
 {
-L n; L * restrict s; S * restrict d;
+UL n; L * restrict s; S * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -39241,7 +39241,7 @@ t = thearc(t,tt);
 
 static void SLdyTHEARCAAs(B * df, B * sf)
 {
-L n; L * s; S * d;
+UL n; L * s; S * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -39336,7 +39336,7 @@ t += tt;
 
 static void SSdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -39398,7 +39398,7 @@ t += tt;
 
 static void SSdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -39444,7 +39444,7 @@ t += tt;
 
 static void SSdyADDAAp(B * df, B * sf)
 {
-L n; S * restrict s; S * restrict d;
+UL n; S * restrict s; S * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -39524,7 +39524,7 @@ t += tt;
 
 static void SSdyADDAAs(B * df, B * sf)
 {
-L n; S * s; S * d;
+UL n; S * s; S * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -39619,7 +39619,7 @@ t -= tt;
 
 static void SSdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -39681,7 +39681,7 @@ t -= tt;
 
 static void SSdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -39727,7 +39727,7 @@ t -= tt;
 
 static void SSdySUBAAp(B * df, B * sf)
 {
-L n; S * restrict s; S * restrict d;
+UL n; S * restrict s; S * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -39807,7 +39807,7 @@ t -= tt;
 
 static void SSdySUBAAs(B * df, B * sf)
 {
-L n; S * s; S * d;
+UL n; S * s; S * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -39902,7 +39902,7 @@ t *= tt;
 
 static void SSdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -39964,7 +39964,7 @@ t *= tt;
 
 static void SSdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -40010,7 +40010,7 @@ t *= tt;
 
 static void SSdyMULAAp(B * df, B * sf)
 {
-L n; S * restrict s; S * restrict d;
+UL n; S * restrict s; S * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -40090,7 +40090,7 @@ t *= tt;
 
 static void SSdyMULAAs(B * df, B * sf)
 {
-L n; S * s; S * d;
+UL n; S * s; S * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -40185,7 +40185,7 @@ t /= tt;
 
 static void SSdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -40247,7 +40247,7 @@ t /= tt;
 
 static void SSdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -40293,7 +40293,7 @@ t /= tt;
 
 static void SSdyDIVAAp(B * df, B * sf)
 {
-L n; S * restrict s; S * restrict d;
+UL n; S * restrict s; S * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -40373,7 +40373,7 @@ t /= tt;
 
 static void SSdyDIVAAs(B * df, B * sf)
 {
-L n; S * s; S * d;
+UL n; S * s; S * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -40468,7 +40468,7 @@ t = pow(t,tt);
 
 static void SSdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -40530,7 +40530,7 @@ t = pow(t,tt);
 
 static void SSdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -40576,7 +40576,7 @@ t = pow(t,tt);
 
 static void SSdyPWRAAp(B * df, B * sf)
 {
-L n; S * restrict s; S * restrict d;
+UL n; S * restrict s; S * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -40656,7 +40656,7 @@ t = pow(t,tt);
 
 static void SSdyPWRAAs(B * df, B * sf)
 {
-L n; S * s; S * d;
+UL n; S * s; S * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -40751,7 +40751,7 @@ t = fmod(t,tt);
 
 static void SSdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -40813,7 +40813,7 @@ t = fmod(t,tt);
 
 static void SSdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -40859,7 +40859,7 @@ t = fmod(t,tt);
 
 static void SSdyMODAAp(B * df, B * sf)
 {
-L n; S * restrict s; S * restrict d;
+UL n; S * restrict s; S * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -40939,7 +40939,7 @@ t = fmod(t,tt);
 
 static void SSdyMODAAs(B * df, B * sf)
 {
-L n; S * s; S * d;
+UL n; S * s; S * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -41034,7 +41034,7 @@ t = thearc(t,tt);
 
 static void SSdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -41096,7 +41096,7 @@ t = thearc(t,tt);
 
 static void SSdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -41142,7 +41142,7 @@ t = thearc(t,tt);
 
 static void SSdyTHEARCAAp(B * df, B * sf)
 {
-L n; S * restrict s; S * restrict d;
+UL n; S * restrict s; S * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -41222,7 +41222,7 @@ t = thearc(t,tt);
 
 static void SSdyTHEARCAAs(B * df, B * sf)
 {
-L n; S * s; S * d;
+UL n; S * s; S * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -41317,7 +41317,7 @@ t += tt;
 
 static void SDdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -41379,7 +41379,7 @@ t += tt;
 
 static void SDdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -41425,7 +41425,7 @@ t += tt;
 
 static void SDdyADDAAp(B * df, B * sf)
 {
-L n; D * restrict s; S * restrict d;
+UL n; D * restrict s; S * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -41505,7 +41505,7 @@ t += tt;
 
 static void SDdyADDAAs(B * df, B * sf)
 {
-L n; D * s; S * d;
+UL n; D * s; S * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -41600,7 +41600,7 @@ t -= tt;
 
 static void SDdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -41662,7 +41662,7 @@ t -= tt;
 
 static void SDdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -41708,7 +41708,7 @@ t -= tt;
 
 static void SDdySUBAAp(B * df, B * sf)
 {
-L n; D * restrict s; S * restrict d;
+UL n; D * restrict s; S * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -41788,7 +41788,7 @@ t -= tt;
 
 static void SDdySUBAAs(B * df, B * sf)
 {
-L n; D * s; S * d;
+UL n; D * s; S * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -41883,7 +41883,7 @@ t *= tt;
 
 static void SDdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -41945,7 +41945,7 @@ t *= tt;
 
 static void SDdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -41991,7 +41991,7 @@ t *= tt;
 
 static void SDdyMULAAp(B * df, B * sf)
 {
-L n; D * restrict s; S * restrict d;
+UL n; D * restrict s; S * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -42071,7 +42071,7 @@ t *= tt;
 
 static void SDdyMULAAs(B * df, B * sf)
 {
-L n; D * s; S * d;
+UL n; D * s; S * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -42166,7 +42166,7 @@ t /= tt;
 
 static void SDdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -42228,7 +42228,7 @@ t /= tt;
 
 static void SDdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -42274,7 +42274,7 @@ t /= tt;
 
 static void SDdyDIVAAp(B * df, B * sf)
 {
-L n; D * restrict s; S * restrict d;
+UL n; D * restrict s; S * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -42354,7 +42354,7 @@ t /= tt;
 
 static void SDdyDIVAAs(B * df, B * sf)
 {
-L n; D * s; S * d;
+UL n; D * s; S * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -42449,7 +42449,7 @@ t = pow(t,tt);
 
 static void SDdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -42511,7 +42511,7 @@ t = pow(t,tt);
 
 static void SDdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -42557,7 +42557,7 @@ t = pow(t,tt);
 
 static void SDdyPWRAAp(B * df, B * sf)
 {
-L n; D * restrict s; S * restrict d;
+UL n; D * restrict s; S * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -42637,7 +42637,7 @@ t = pow(t,tt);
 
 static void SDdyPWRAAs(B * df, B * sf)
 {
-L n; D * s; S * d;
+UL n; D * s; S * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -42732,7 +42732,7 @@ t = fmod(t,tt);
 
 static void SDdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -42794,7 +42794,7 @@ t = fmod(t,tt);
 
 static void SDdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -42840,7 +42840,7 @@ t = fmod(t,tt);
 
 static void SDdyMODAAp(B * df, B * sf)
 {
-L n; D * restrict s; S * restrict d;
+UL n; D * restrict s; S * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -42920,7 +42920,7 @@ t = fmod(t,tt);
 
 static void SDdyMODAAs(B * df, B * sf)
 {
-L n; D * s; S * d;
+UL n; D * s; S * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -43015,7 +43015,7 @@ t = thearc(t,tt);
 
 static void SDdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; S *d;
+D t,tt; UL n; S *d;
 d = (S *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -43077,7 +43077,7 @@ t = thearc(t,tt);
 
 static void SDdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 t = *((S *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -43123,7 +43123,7 @@ t = thearc(t,tt);
 
 static void SDdyTHEARCAAp(B * df, B * sf)
 {
-L n; D * restrict s; S * restrict d;
+UL n; D * restrict s; S * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -43203,7 +43203,7 @@ t = thearc(t,tt);
 
 static void SDdyTHEARCAAs(B * df, B * sf)
 {
-L n; D * s; S * d;
+UL n; D * s; S * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (S *)VALUE_BASE(df);
@@ -43298,7 +43298,7 @@ t += tt;
 
 static void DBdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -43360,7 +43360,7 @@ t += tt;
 
 static void DBdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -43406,7 +43406,7 @@ t += tt;
 
 static void DBdyADDAAp(B * df, B * sf)
 {
-L n; B * restrict s; D * restrict d;
+UL n; B * restrict s; D * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -43486,7 +43486,7 @@ t += tt;
 
 static void DBdyADDAAs(B * df, B * sf)
 {
-L n; B * s; D * d;
+UL n; B * s; D * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -43581,7 +43581,7 @@ t -= tt;
 
 static void DBdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -43643,7 +43643,7 @@ t -= tt;
 
 static void DBdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -43689,7 +43689,7 @@ t -= tt;
 
 static void DBdySUBAAp(B * df, B * sf)
 {
-L n; B * restrict s; D * restrict d;
+UL n; B * restrict s; D * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -43769,7 +43769,7 @@ t -= tt;
 
 static void DBdySUBAAs(B * df, B * sf)
 {
-L n; B * s; D * d;
+UL n; B * s; D * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -43864,7 +43864,7 @@ t *= tt;
 
 static void DBdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -43926,7 +43926,7 @@ t *= tt;
 
 static void DBdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -43972,7 +43972,7 @@ t *= tt;
 
 static void DBdyMULAAp(B * df, B * sf)
 {
-L n; B * restrict s; D * restrict d;
+UL n; B * restrict s; D * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -44052,7 +44052,7 @@ t *= tt;
 
 static void DBdyMULAAs(B * df, B * sf)
 {
-L n; B * s; D * d;
+UL n; B * s; D * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -44147,7 +44147,7 @@ t /= tt;
 
 static void DBdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -44209,7 +44209,7 @@ t /= tt;
 
 static void DBdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -44255,7 +44255,7 @@ t /= tt;
 
 static void DBdyDIVAAp(B * df, B * sf)
 {
-L n; B * restrict s; D * restrict d;
+UL n; B * restrict s; D * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -44335,7 +44335,7 @@ t /= tt;
 
 static void DBdyDIVAAs(B * df, B * sf)
 {
-L n; B * s; D * d;
+UL n; B * s; D * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -44430,7 +44430,7 @@ t = pow(t,tt);
 
 static void DBdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -44492,7 +44492,7 @@ t = pow(t,tt);
 
 static void DBdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -44538,7 +44538,7 @@ t = pow(t,tt);
 
 static void DBdyPWRAAp(B * df, B * sf)
 {
-L n; B * restrict s; D * restrict d;
+UL n; B * restrict s; D * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -44618,7 +44618,7 @@ t = pow(t,tt);
 
 static void DBdyPWRAAs(B * df, B * sf)
 {
-L n; B * s; D * d;
+UL n; B * s; D * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -44713,7 +44713,7 @@ t = fmod(t,tt);
 
 static void DBdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -44775,7 +44775,7 @@ t = fmod(t,tt);
 
 static void DBdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -44821,7 +44821,7 @@ t = fmod(t,tt);
 
 static void DBdyMODAAp(B * df, B * sf)
 {
-L n; B * restrict s; D * restrict d;
+UL n; B * restrict s; D * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -44901,7 +44901,7 @@ t = fmod(t,tt);
 
 static void DBdyMODAAs(B * df, B * sf)
 {
-L n; B * s; D * d;
+UL n; B * s; D * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -44996,7 +44996,7 @@ t = thearc(t,tt);
 
 static void DBdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -45058,7 +45058,7 @@ t = thearc(t,tt);
 
 static void DBdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; B *s;
+D t,tt; UL n; B *s;
 s = (B *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -45104,7 +45104,7 @@ t = thearc(t,tt);
 
 static void DBdyTHEARCAAp(B * df, B * sf)
 {
-L n; B * restrict s; D * restrict d;
+UL n; B * restrict s; D * restrict d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -45184,7 +45184,7 @@ t = thearc(t,tt);
 
 static void DBdyTHEARCAAs(B * df, B * sf)
 {
-L n; B * s; D * d;
+UL n; B * s; D * d;
 D t, tt;
 s = (B *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -45279,7 +45279,7 @@ t += tt;
 
 static void DWdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -45341,7 +45341,7 @@ t += tt;
 
 static void DWdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -45387,7 +45387,7 @@ t += tt;
 
 static void DWdyADDAAp(B * df, B * sf)
 {
-L n; W * restrict s; D * restrict d;
+UL n; W * restrict s; D * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -45467,7 +45467,7 @@ t += tt;
 
 static void DWdyADDAAs(B * df, B * sf)
 {
-L n; W * s; D * d;
+UL n; W * s; D * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -45562,7 +45562,7 @@ t -= tt;
 
 static void DWdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -45624,7 +45624,7 @@ t -= tt;
 
 static void DWdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -45670,7 +45670,7 @@ t -= tt;
 
 static void DWdySUBAAp(B * df, B * sf)
 {
-L n; W * restrict s; D * restrict d;
+UL n; W * restrict s; D * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -45750,7 +45750,7 @@ t -= tt;
 
 static void DWdySUBAAs(B * df, B * sf)
 {
-L n; W * s; D * d;
+UL n; W * s; D * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -45845,7 +45845,7 @@ t *= tt;
 
 static void DWdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -45907,7 +45907,7 @@ t *= tt;
 
 static void DWdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -45953,7 +45953,7 @@ t *= tt;
 
 static void DWdyMULAAp(B * df, B * sf)
 {
-L n; W * restrict s; D * restrict d;
+UL n; W * restrict s; D * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -46033,7 +46033,7 @@ t *= tt;
 
 static void DWdyMULAAs(B * df, B * sf)
 {
-L n; W * s; D * d;
+UL n; W * s; D * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -46128,7 +46128,7 @@ t /= tt;
 
 static void DWdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -46190,7 +46190,7 @@ t /= tt;
 
 static void DWdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -46236,7 +46236,7 @@ t /= tt;
 
 static void DWdyDIVAAp(B * df, B * sf)
 {
-L n; W * restrict s; D * restrict d;
+UL n; W * restrict s; D * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -46316,7 +46316,7 @@ t /= tt;
 
 static void DWdyDIVAAs(B * df, B * sf)
 {
-L n; W * s; D * d;
+UL n; W * s; D * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -46411,7 +46411,7 @@ t = pow(t,tt);
 
 static void DWdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -46473,7 +46473,7 @@ t = pow(t,tt);
 
 static void DWdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -46519,7 +46519,7 @@ t = pow(t,tt);
 
 static void DWdyPWRAAp(B * df, B * sf)
 {
-L n; W * restrict s; D * restrict d;
+UL n; W * restrict s; D * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -46599,7 +46599,7 @@ t = pow(t,tt);
 
 static void DWdyPWRAAs(B * df, B * sf)
 {
-L n; W * s; D * d;
+UL n; W * s; D * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -46694,7 +46694,7 @@ t = fmod(t,tt);
 
 static void DWdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -46756,7 +46756,7 @@ t = fmod(t,tt);
 
 static void DWdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -46802,7 +46802,7 @@ t = fmod(t,tt);
 
 static void DWdyMODAAp(B * df, B * sf)
 {
-L n; W * restrict s; D * restrict d;
+UL n; W * restrict s; D * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -46882,7 +46882,7 @@ t = fmod(t,tt);
 
 static void DWdyMODAAs(B * df, B * sf)
 {
-L n; W * s; D * d;
+UL n; W * s; D * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -46977,7 +46977,7 @@ t = thearc(t,tt);
 
 static void DWdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -47039,7 +47039,7 @@ t = thearc(t,tt);
 
 static void DWdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; W *s;
+D t,tt; UL n; W *s;
 s = (W *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -47085,7 +47085,7 @@ t = thearc(t,tt);
 
 static void DWdyTHEARCAAp(B * df, B * sf)
 {
-L n; W * restrict s; D * restrict d;
+UL n; W * restrict s; D * restrict d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -47165,7 +47165,7 @@ t = thearc(t,tt);
 
 static void DWdyTHEARCAAs(B * df, B * sf)
 {
-L n; W * s; D * d;
+UL n; W * s; D * d;
 D t, tt;
 s = (W *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -47260,7 +47260,7 @@ t += tt;
 
 static void DLdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -47322,7 +47322,7 @@ t += tt;
 
 static void DLdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -47368,7 +47368,7 @@ t += tt;
 
 static void DLdyADDAAp(B * df, B * sf)
 {
-L n; L * restrict s; D * restrict d;
+UL n; L * restrict s; D * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -47448,7 +47448,7 @@ t += tt;
 
 static void DLdyADDAAs(B * df, B * sf)
 {
-L n; L * s; D * d;
+UL n; L * s; D * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -47543,7 +47543,7 @@ t -= tt;
 
 static void DLdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -47605,7 +47605,7 @@ t -= tt;
 
 static void DLdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -47651,7 +47651,7 @@ t -= tt;
 
 static void DLdySUBAAp(B * df, B * sf)
 {
-L n; L * restrict s; D * restrict d;
+UL n; L * restrict s; D * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -47731,7 +47731,7 @@ t -= tt;
 
 static void DLdySUBAAs(B * df, B * sf)
 {
-L n; L * s; D * d;
+UL n; L * s; D * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -47826,7 +47826,7 @@ t *= tt;
 
 static void DLdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -47888,7 +47888,7 @@ t *= tt;
 
 static void DLdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -47934,7 +47934,7 @@ t *= tt;
 
 static void DLdyMULAAp(B * df, B * sf)
 {
-L n; L * restrict s; D * restrict d;
+UL n; L * restrict s; D * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -48014,7 +48014,7 @@ t *= tt;
 
 static void DLdyMULAAs(B * df, B * sf)
 {
-L n; L * s; D * d;
+UL n; L * s; D * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -48109,7 +48109,7 @@ t /= tt;
 
 static void DLdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -48171,7 +48171,7 @@ t /= tt;
 
 static void DLdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -48217,7 +48217,7 @@ t /= tt;
 
 static void DLdyDIVAAp(B * df, B * sf)
 {
-L n; L * restrict s; D * restrict d;
+UL n; L * restrict s; D * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -48297,7 +48297,7 @@ t /= tt;
 
 static void DLdyDIVAAs(B * df, B * sf)
 {
-L n; L * s; D * d;
+UL n; L * s; D * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -48392,7 +48392,7 @@ t = pow(t,tt);
 
 static void DLdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -48454,7 +48454,7 @@ t = pow(t,tt);
 
 static void DLdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -48500,7 +48500,7 @@ t = pow(t,tt);
 
 static void DLdyPWRAAp(B * df, B * sf)
 {
-L n; L * restrict s; D * restrict d;
+UL n; L * restrict s; D * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -48580,7 +48580,7 @@ t = pow(t,tt);
 
 static void DLdyPWRAAs(B * df, B * sf)
 {
-L n; L * s; D * d;
+UL n; L * s; D * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -48675,7 +48675,7 @@ t = fmod(t,tt);
 
 static void DLdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -48737,7 +48737,7 @@ t = fmod(t,tt);
 
 static void DLdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -48783,7 +48783,7 @@ t = fmod(t,tt);
 
 static void DLdyMODAAp(B * df, B * sf)
 {
-L n; L * restrict s; D * restrict d;
+UL n; L * restrict s; D * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -48863,7 +48863,7 @@ t = fmod(t,tt);
 
 static void DLdyMODAAs(B * df, B * sf)
 {
-L n; L * s; D * d;
+UL n; L * s; D * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -48958,7 +48958,7 @@ t = thearc(t,tt);
 
 static void DLdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -49020,7 +49020,7 @@ t = thearc(t,tt);
 
 static void DLdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; L *s;
+D t,tt; UL n; L *s;
 s = (L *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -49066,7 +49066,7 @@ t = thearc(t,tt);
 
 static void DLdyTHEARCAAp(B * df, B * sf)
 {
-L n; L * restrict s; D * restrict d;
+UL n; L * restrict s; D * restrict d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -49146,7 +49146,7 @@ t = thearc(t,tt);
 
 static void DLdyTHEARCAAs(B * df, B * sf)
 {
-L n; L * s; D * d;
+UL n; L * s; D * d;
 D t, tt;
 s = (L *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -49241,7 +49241,7 @@ t += tt;
 
 static void DSdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -49303,7 +49303,7 @@ t += tt;
 
 static void DSdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -49349,7 +49349,7 @@ t += tt;
 
 static void DSdyADDAAp(B * df, B * sf)
 {
-L n; S * restrict s; D * restrict d;
+UL n; S * restrict s; D * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -49429,7 +49429,7 @@ t += tt;
 
 static void DSdyADDAAs(B * df, B * sf)
 {
-L n; S * s; D * d;
+UL n; S * s; D * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -49524,7 +49524,7 @@ t -= tt;
 
 static void DSdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -49586,7 +49586,7 @@ t -= tt;
 
 static void DSdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -49632,7 +49632,7 @@ t -= tt;
 
 static void DSdySUBAAp(B * df, B * sf)
 {
-L n; S * restrict s; D * restrict d;
+UL n; S * restrict s; D * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -49712,7 +49712,7 @@ t -= tt;
 
 static void DSdySUBAAs(B * df, B * sf)
 {
-L n; S * s; D * d;
+UL n; S * s; D * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -49807,7 +49807,7 @@ t *= tt;
 
 static void DSdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -49869,7 +49869,7 @@ t *= tt;
 
 static void DSdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -49915,7 +49915,7 @@ t *= tt;
 
 static void DSdyMULAAp(B * df, B * sf)
 {
-L n; S * restrict s; D * restrict d;
+UL n; S * restrict s; D * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -49995,7 +49995,7 @@ t *= tt;
 
 static void DSdyMULAAs(B * df, B * sf)
 {
-L n; S * s; D * d;
+UL n; S * s; D * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -50090,7 +50090,7 @@ t /= tt;
 
 static void DSdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -50152,7 +50152,7 @@ t /= tt;
 
 static void DSdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -50198,7 +50198,7 @@ t /= tt;
 
 static void DSdyDIVAAp(B * df, B * sf)
 {
-L n; S * restrict s; D * restrict d;
+UL n; S * restrict s; D * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -50278,7 +50278,7 @@ t /= tt;
 
 static void DSdyDIVAAs(B * df, B * sf)
 {
-L n; S * s; D * d;
+UL n; S * s; D * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -50373,7 +50373,7 @@ t = pow(t,tt);
 
 static void DSdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -50435,7 +50435,7 @@ t = pow(t,tt);
 
 static void DSdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -50481,7 +50481,7 @@ t = pow(t,tt);
 
 static void DSdyPWRAAp(B * df, B * sf)
 {
-L n; S * restrict s; D * restrict d;
+UL n; S * restrict s; D * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -50561,7 +50561,7 @@ t = pow(t,tt);
 
 static void DSdyPWRAAs(B * df, B * sf)
 {
-L n; S * s; D * d;
+UL n; S * s; D * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -50656,7 +50656,7 @@ t = fmod(t,tt);
 
 static void DSdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -50718,7 +50718,7 @@ t = fmod(t,tt);
 
 static void DSdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -50764,7 +50764,7 @@ t = fmod(t,tt);
 
 static void DSdyMODAAp(B * df, B * sf)
 {
-L n; S * restrict s; D * restrict d;
+UL n; S * restrict s; D * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -50844,7 +50844,7 @@ t = fmod(t,tt);
 
 static void DSdyMODAAs(B * df, B * sf)
 {
-L n; S * s; D * d;
+UL n; S * s; D * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -50939,7 +50939,7 @@ t = thearc(t,tt);
 
 static void DSdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 tt = *((S *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -51001,7 +51001,7 @@ t = thearc(t,tt);
 
 static void DSdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; S *s;
+D t,tt; UL n; S *s;
 s = (S *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -51047,7 +51047,7 @@ t = thearc(t,tt);
 
 static void DSdyTHEARCAAp(B * df, B * sf)
 {
-L n; S * restrict s; D * restrict d;
+UL n; S * restrict s; D * restrict d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -51127,7 +51127,7 @@ t = thearc(t,tt);
 
 static void DSdyTHEARCAAs(B * df, B * sf)
 {
-L n; S * s; D * d;
+UL n; S * s; D * d;
 D t, tt;
 s = (S *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -51222,7 +51222,7 @@ t += tt;
 
 static void DDdyADDAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -51284,7 +51284,7 @@ t += tt;
 
 static void DDdyADDSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -51330,7 +51330,7 @@ t += tt;
 
 static void DDdyADDAAp(B * df, B * sf)
 {
-L n; D * restrict s; D * restrict d;
+UL n; D * restrict s; D * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -51410,7 +51410,7 @@ t += tt;
 
 static void DDdyADDAAs(B * df, B * sf)
 {
-L n; D * s; D * d;
+UL n; D * s; D * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -51505,7 +51505,7 @@ t -= tt;
 
 static void DDdySUBAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -51567,7 +51567,7 @@ t -= tt;
 
 static void DDdySUBSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -51613,7 +51613,7 @@ t -= tt;
 
 static void DDdySUBAAp(B * df, B * sf)
 {
-L n; D * restrict s; D * restrict d;
+UL n; D * restrict s; D * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -51693,7 +51693,7 @@ t -= tt;
 
 static void DDdySUBAAs(B * df, B * sf)
 {
-L n; D * s; D * d;
+UL n; D * s; D * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -51788,7 +51788,7 @@ t *= tt;
 
 static void DDdyMULAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -51850,7 +51850,7 @@ t *= tt;
 
 static void DDdyMULSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -51896,7 +51896,7 @@ t *= tt;
 
 static void DDdyMULAAp(B * df, B * sf)
 {
-L n; D * restrict s; D * restrict d;
+UL n; D * restrict s; D * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -51976,7 +51976,7 @@ t *= tt;
 
 static void DDdyMULAAs(B * df, B * sf)
 {
-L n; D * s; D * d;
+UL n; D * s; D * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -52071,7 +52071,7 @@ t /= tt;
 
 static void DDdyDIVAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -52133,7 +52133,7 @@ t /= tt;
 
 static void DDdyDIVSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -52179,7 +52179,7 @@ t /= tt;
 
 static void DDdyDIVAAp(B * df, B * sf)
 {
-L n; D * restrict s; D * restrict d;
+UL n; D * restrict s; D * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -52259,7 +52259,7 @@ t /= tt;
 
 static void DDdyDIVAAs(B * df, B * sf)
 {
-L n; D * s; D * d;
+UL n; D * s; D * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -52354,7 +52354,7 @@ t = pow(t,tt);
 
 static void DDdyPWRAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -52416,7 +52416,7 @@ t = pow(t,tt);
 
 static void DDdyPWRSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -52462,7 +52462,7 @@ t = pow(t,tt);
 
 static void DDdyPWRAAp(B * df, B * sf)
 {
-L n; D * restrict s; D * restrict d;
+UL n; D * restrict s; D * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -52542,7 +52542,7 @@ t = pow(t,tt);
 
 static void DDdyPWRAAs(B * df, B * sf)
 {
-L n; D * s; D * d;
+UL n; D * s; D * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -52637,7 +52637,7 @@ t = fmod(t,tt);
 
 static void DDdyMODAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -52699,7 +52699,7 @@ t = fmod(t,tt);
 
 static void DDdyMODSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -52745,7 +52745,7 @@ t = fmod(t,tt);
 
 static void DDdyMODAAp(B * df, B * sf)
 {
-L n; D * restrict s; D * restrict d;
+UL n; D * restrict s; D * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -52825,7 +52825,7 @@ t = fmod(t,tt);
 
 static void DDdyMODAAs(B * df, B * sf)
 {
-L n; D * s; D * d;
+UL n; D * s; D * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -52920,7 +52920,7 @@ t = thearc(t,tt);
 
 static void DDdyTHEARCAS(B *df, B *sf)
 {
-D t,tt; L n; D *d;
+D t,tt; UL n; D *d;
 d = (D *)VALUE_BASE(df);
 tt = *((D *)NUM_VAL(sf));
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
@@ -52982,7 +52982,7 @@ t = thearc(t,tt);
 
 static void DDdyTHEARCSA(B *df, B *sf)
 {
-D t,tt; L n; D *s;
+D t,tt; UL n; D *s;
 s = (D *)VALUE_BASE(sf);
 t = *((D *)NUM_VAL(df));
 for (n = (ARRAY_SIZE(sf)>>4); n>0; n--) {
@@ -53028,7 +53028,7 @@ t = thearc(t,tt);
 
 static void DDdyTHEARCAAp(B * df, B * sf)
 {
-L n; D * restrict s; D * restrict d;
+UL n; D * restrict s; D * restrict d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -53108,7 +53108,7 @@ t = thearc(t,tt);
 
 static void DDdyTHEARCAAs(B * df, B * sf)
 {
-L n; D * s; D * d;
+UL n; D * s; D * d;
 D t, tt;
 s = (D *)VALUE_BASE(sf);
 d = (D *)VALUE_BASE(df);
@@ -53400,7 +53400,7 @@ t = -t;
 
 static void BmoNEGA(B *df)
 {
-D t; B *d; L n;
+D t; B *d; UL n;
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((B *)d)) == BINF) t = DINF;
@@ -53469,7 +53469,7 @@ t = fabs(t);
 
 static void BmoABSA(B *df)
 {
-D t; B *d; L n;
+D t; B *d; UL n;
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((B *)d)) == BINF) t = DINF;
@@ -53538,7 +53538,7 @@ t = sqrt(t);
 
 static void BmoSQRTA(B *df)
 {
-D t; B *d; L n;
+D t; B *d; UL n;
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((B *)d)) == BINF) t = DINF;
@@ -53607,7 +53607,7 @@ t = exp(t);
 
 static void BmoEXPA(B *df)
 {
-D t; B *d; L n;
+D t; B *d; UL n;
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((B *)d)) == BINF) t = DINF;
@@ -53676,7 +53676,7 @@ t = log(t);
 
 static void BmoLNA(B *df)
 {
-D t; B *d; L n;
+D t; B *d; UL n;
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((B *)d)) == BINF) t = DINF;
@@ -53745,7 +53745,7 @@ t = log10(t);
 
 static void BmoLGA(B *df)
 {
-D t; B *d; L n;
+D t; B *d; UL n;
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((B *)d)) == BINF) t = DINF;
@@ -53814,7 +53814,7 @@ t = floor(t);
 
 static void BmoFLOORA(B *df)
 {
-D t; B *d; L n;
+D t; B *d; UL n;
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((B *)d)) == BINF) t = DINF;
@@ -53883,7 +53883,7 @@ t = ceil(t);
 
 static void BmoCEILA(B *df)
 {
-D t; B *d; L n;
+D t; B *d; UL n;
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((B *)d)) == BINF) t = DINF;
@@ -53952,7 +53952,7 @@ t = sin(t);
 
 static void BmoSINA(B *df)
 {
-D t; B *d; L n;
+D t; B *d; UL n;
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((B *)d)) == BINF) t = DINF;
@@ -54021,7 +54021,7 @@ t = cos(t);
 
 static void BmoCOSA(B *df)
 {
-D t; B *d; L n;
+D t; B *d; UL n;
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((B *)d)) == BINF) t = DINF;
@@ -54090,7 +54090,7 @@ t = tan(t);
 
 static void BmoTANA(B *df)
 {
-D t; B *d; L n;
+D t; B *d; UL n;
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((B *)d)) == BINF) t = DINF;
@@ -54159,7 +54159,7 @@ t = asin(t);
 
 static void BmoASINA(B *df)
 {
-D t; B *d; L n;
+D t; B *d; UL n;
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((B *)d)) == BINF) t = DINF;
@@ -54228,7 +54228,7 @@ t = acos(t);
 
 static void BmoACOSA(B *df)
 {
-D t; B *d; L n;
+D t; B *d; UL n;
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((B *)d)) == BINF) t = DINF;
@@ -54297,7 +54297,7 @@ t = atan(t);
 
 static void BmoATANA(B *df)
 {
-D t; B *d; L n;
+D t; B *d; UL n;
 d = (B *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((B *)d)) == BINF) t = DINF;
@@ -54366,7 +54366,7 @@ t = -t;
 
 static void WmoNEGA(B *df)
 {
-D t; W *d; L n;
+D t; W *d; UL n;
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((W *)d)) == WINF) t = DINF;
@@ -54435,7 +54435,7 @@ t = fabs(t);
 
 static void WmoABSA(B *df)
 {
-D t; W *d; L n;
+D t; W *d; UL n;
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((W *)d)) == WINF) t = DINF;
@@ -54504,7 +54504,7 @@ t = sqrt(t);
 
 static void WmoSQRTA(B *df)
 {
-D t; W *d; L n;
+D t; W *d; UL n;
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((W *)d)) == WINF) t = DINF;
@@ -54573,7 +54573,7 @@ t = exp(t);
 
 static void WmoEXPA(B *df)
 {
-D t; W *d; L n;
+D t; W *d; UL n;
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((W *)d)) == WINF) t = DINF;
@@ -54642,7 +54642,7 @@ t = log(t);
 
 static void WmoLNA(B *df)
 {
-D t; W *d; L n;
+D t; W *d; UL n;
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((W *)d)) == WINF) t = DINF;
@@ -54711,7 +54711,7 @@ t = log10(t);
 
 static void WmoLGA(B *df)
 {
-D t; W *d; L n;
+D t; W *d; UL n;
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((W *)d)) == WINF) t = DINF;
@@ -54780,7 +54780,7 @@ t = floor(t);
 
 static void WmoFLOORA(B *df)
 {
-D t; W *d; L n;
+D t; W *d; UL n;
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((W *)d)) == WINF) t = DINF;
@@ -54849,7 +54849,7 @@ t = ceil(t);
 
 static void WmoCEILA(B *df)
 {
-D t; W *d; L n;
+D t; W *d; UL n;
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((W *)d)) == WINF) t = DINF;
@@ -54918,7 +54918,7 @@ t = sin(t);
 
 static void WmoSINA(B *df)
 {
-D t; W *d; L n;
+D t; W *d; UL n;
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((W *)d)) == WINF) t = DINF;
@@ -54987,7 +54987,7 @@ t = cos(t);
 
 static void WmoCOSA(B *df)
 {
-D t; W *d; L n;
+D t; W *d; UL n;
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((W *)d)) == WINF) t = DINF;
@@ -55056,7 +55056,7 @@ t = tan(t);
 
 static void WmoTANA(B *df)
 {
-D t; W *d; L n;
+D t; W *d; UL n;
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((W *)d)) == WINF) t = DINF;
@@ -55125,7 +55125,7 @@ t = asin(t);
 
 static void WmoASINA(B *df)
 {
-D t; W *d; L n;
+D t; W *d; UL n;
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((W *)d)) == WINF) t = DINF;
@@ -55194,7 +55194,7 @@ t = acos(t);
 
 static void WmoACOSA(B *df)
 {
-D t; W *d; L n;
+D t; W *d; UL n;
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((W *)d)) == WINF) t = DINF;
@@ -55263,7 +55263,7 @@ t = atan(t);
 
 static void WmoATANA(B *df)
 {
-D t; W *d; L n;
+D t; W *d; UL n;
 d = (W *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((W *)d)) == WINF) t = DINF;
@@ -55332,7 +55332,7 @@ t = -t;
 
 static void LmoNEGA(B *df)
 {
-D t; L *d; L n;
+D t; L *d; UL n;
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((L *)d)) == LINF) t = DINF;
@@ -55401,7 +55401,7 @@ t = fabs(t);
 
 static void LmoABSA(B *df)
 {
-D t; L *d; L n;
+D t; L *d; UL n;
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((L *)d)) == LINF) t = DINF;
@@ -55470,7 +55470,7 @@ t = sqrt(t);
 
 static void LmoSQRTA(B *df)
 {
-D t; L *d; L n;
+D t; L *d; UL n;
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((L *)d)) == LINF) t = DINF;
@@ -55539,7 +55539,7 @@ t = exp(t);
 
 static void LmoEXPA(B *df)
 {
-D t; L *d; L n;
+D t; L *d; UL n;
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((L *)d)) == LINF) t = DINF;
@@ -55608,7 +55608,7 @@ t = log(t);
 
 static void LmoLNA(B *df)
 {
-D t; L *d; L n;
+D t; L *d; UL n;
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((L *)d)) == LINF) t = DINF;
@@ -55677,7 +55677,7 @@ t = log10(t);
 
 static void LmoLGA(B *df)
 {
-D t; L *d; L n;
+D t; L *d; UL n;
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((L *)d)) == LINF) t = DINF;
@@ -55746,7 +55746,7 @@ t = floor(t);
 
 static void LmoFLOORA(B *df)
 {
-D t; L *d; L n;
+D t; L *d; UL n;
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((L *)d)) == LINF) t = DINF;
@@ -55815,7 +55815,7 @@ t = ceil(t);
 
 static void LmoCEILA(B *df)
 {
-D t; L *d; L n;
+D t; L *d; UL n;
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((L *)d)) == LINF) t = DINF;
@@ -55884,7 +55884,7 @@ t = sin(t);
 
 static void LmoSINA(B *df)
 {
-D t; L *d; L n;
+D t; L *d; UL n;
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((L *)d)) == LINF) t = DINF;
@@ -55953,7 +55953,7 @@ t = cos(t);
 
 static void LmoCOSA(B *df)
 {
-D t; L *d; L n;
+D t; L *d; UL n;
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((L *)d)) == LINF) t = DINF;
@@ -56022,7 +56022,7 @@ t = tan(t);
 
 static void LmoTANA(B *df)
 {
-D t; L *d; L n;
+D t; L *d; UL n;
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((L *)d)) == LINF) t = DINF;
@@ -56091,7 +56091,7 @@ t = asin(t);
 
 static void LmoASINA(B *df)
 {
-D t; L *d; L n;
+D t; L *d; UL n;
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((L *)d)) == LINF) t = DINF;
@@ -56160,7 +56160,7 @@ t = acos(t);
 
 static void LmoACOSA(B *df)
 {
-D t; L *d; L n;
+D t; L *d; UL n;
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((L *)d)) == LINF) t = DINF;
@@ -56229,7 +56229,7 @@ t = atan(t);
 
 static void LmoATANA(B *df)
 {
-D t; L *d; L n;
+D t; L *d; UL n;
 d = (L *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 if ((t = *((L *)d)) == LINF) t = DINF;
@@ -56298,7 +56298,7 @@ t = -t;
 
 static void SmoNEGA(B *df)
 {
-D t; S *d; L n;
+D t; S *d; UL n;
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((S *)d);
@@ -56367,7 +56367,7 @@ t = fabs(t);
 
 static void SmoABSA(B *df)
 {
-D t; S *d; L n;
+D t; S *d; UL n;
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((S *)d);
@@ -56436,7 +56436,7 @@ t = sqrt(t);
 
 static void SmoSQRTA(B *df)
 {
-D t; S *d; L n;
+D t; S *d; UL n;
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((S *)d);
@@ -56505,7 +56505,7 @@ t = exp(t);
 
 static void SmoEXPA(B *df)
 {
-D t; S *d; L n;
+D t; S *d; UL n;
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((S *)d);
@@ -56574,7 +56574,7 @@ t = log(t);
 
 static void SmoLNA(B *df)
 {
-D t; S *d; L n;
+D t; S *d; UL n;
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((S *)d);
@@ -56643,7 +56643,7 @@ t = log10(t);
 
 static void SmoLGA(B *df)
 {
-D t; S *d; L n;
+D t; S *d; UL n;
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((S *)d);
@@ -56712,7 +56712,7 @@ t = floor(t);
 
 static void SmoFLOORA(B *df)
 {
-D t; S *d; L n;
+D t; S *d; UL n;
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((S *)d);
@@ -56781,7 +56781,7 @@ t = ceil(t);
 
 static void SmoCEILA(B *df)
 {
-D t; S *d; L n;
+D t; S *d; UL n;
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((S *)d);
@@ -56850,7 +56850,7 @@ t = sin(t);
 
 static void SmoSINA(B *df)
 {
-D t; S *d; L n;
+D t; S *d; UL n;
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((S *)d);
@@ -56919,7 +56919,7 @@ t = cos(t);
 
 static void SmoCOSA(B *df)
 {
-D t; S *d; L n;
+D t; S *d; UL n;
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((S *)d);
@@ -56988,7 +56988,7 @@ t = tan(t);
 
 static void SmoTANA(B *df)
 {
-D t; S *d; L n;
+D t; S *d; UL n;
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((S *)d);
@@ -57057,7 +57057,7 @@ t = asin(t);
 
 static void SmoASINA(B *df)
 {
-D t; S *d; L n;
+D t; S *d; UL n;
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((S *)d);
@@ -57126,7 +57126,7 @@ t = acos(t);
 
 static void SmoACOSA(B *df)
 {
-D t; S *d; L n;
+D t; S *d; UL n;
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((S *)d);
@@ -57195,7 +57195,7 @@ t = atan(t);
 
 static void SmoATANA(B *df)
 {
-D t; S *d; L n;
+D t; S *d; UL n;
 d = (S *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((S *)d);
@@ -57264,7 +57264,7 @@ t = -t;
 
 static void DmoNEGA(B *df)
 {
-D t; D *d; L n;
+D t; D *d; UL n;
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((D *)d);
@@ -57333,7 +57333,7 @@ t = fabs(t);
 
 static void DmoABSA(B *df)
 {
-D t; D *d; L n;
+D t; D *d; UL n;
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((D *)d);
@@ -57402,7 +57402,7 @@ t = sqrt(t);
 
 static void DmoSQRTA(B *df)
 {
-D t; D *d; L n;
+D t; D *d; UL n;
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((D *)d);
@@ -57471,7 +57471,7 @@ t = exp(t);
 
 static void DmoEXPA(B *df)
 {
-D t; D *d; L n;
+D t; D *d; UL n;
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((D *)d);
@@ -57540,7 +57540,7 @@ t = log(t);
 
 static void DmoLNA(B *df)
 {
-D t; D *d; L n;
+D t; D *d; UL n;
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((D *)d);
@@ -57609,7 +57609,7 @@ t = log10(t);
 
 static void DmoLGA(B *df)
 {
-D t; D *d; L n;
+D t; D *d; UL n;
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((D *)d);
@@ -57678,7 +57678,7 @@ t = floor(t);
 
 static void DmoFLOORA(B *df)
 {
-D t; D *d; L n;
+D t; D *d; UL n;
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((D *)d);
@@ -57747,7 +57747,7 @@ t = ceil(t);
 
 static void DmoCEILA(B *df)
 {
-D t; D *d; L n;
+D t; D *d; UL n;
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((D *)d);
@@ -57816,7 +57816,7 @@ t = sin(t);
 
 static void DmoSINA(B *df)
 {
-D t; D *d; L n;
+D t; D *d; UL n;
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((D *)d);
@@ -57885,7 +57885,7 @@ t = cos(t);
 
 static void DmoCOSA(B *df)
 {
-D t; D *d; L n;
+D t; D *d; UL n;
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((D *)d);
@@ -57954,7 +57954,7 @@ t = tan(t);
 
 static void DmoTANA(B *df)
 {
-D t; D *d; L n;
+D t; D *d; UL n;
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((D *)d);
@@ -58023,7 +58023,7 @@ t = asin(t);
 
 static void DmoASINA(B *df)
 {
-D t; D *d; L n;
+D t; D *d; UL n;
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((D *)d);
@@ -58092,7 +58092,7 @@ t = acos(t);
 
 static void DmoACOSA(B *df)
 {
-D t; D *d; L n;
+D t; D *d; UL n;
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((D *)d);
@@ -58161,7 +58161,7 @@ t = atan(t);
 
 static void DmoATANA(B *df)
 {
-D t; D *d; L n;
+D t; D *d; UL n;
 d = (D *)VALUE_BASE(df);
 for (n = (ARRAY_SIZE(df)>>4); n>0; n--) {
 t = *((D *)d);
