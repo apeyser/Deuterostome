@@ -570,8 +570,8 @@ end def  | of xtext_dict
 |
 |  untagged         - the phrase contains D code to be submitted to the
 |                     target
-|  *                - the phrase contains D code to be submiited to the
-|                     localhost
+|  %                - the phrase contains D code to be submited to the
+|                     dvt
 |  !                - the phrase contains D code to be submitted to the
 |                     target regardless of the ready/busy status of the
 |                     target
@@ -612,7 +612,7 @@ end def  | of xtext_dict
 
 /consoleline {
   dup /line name length 0 gt {
-      (*!$#@) line 0 1 getinterval search { 
+      (%!$#@) line 0 1 getinterval search { 
         length 1 add /linetag name pop pop
         /line line 1 line length 1 sub getinterval def
       } { pop 0 /linetag name } ifelse

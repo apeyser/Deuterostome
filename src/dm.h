@@ -392,6 +392,7 @@ DLL_SCOPE B* TOPvm;
 DLL_SCOPE B* errsource;
 
 DLL_SCOPE B locked;
+DLL_SCOPE B serialed;
 
 DLL_SCOPE fd_set sock_fds;
 DLL_SCOPE BOOLEAN timeout;             /* for I/O operations          */
@@ -520,6 +521,7 @@ void ATAN(B *frame);
 void DECREMENT(B *frame);
 
 /*----------------------- system operators */
+L op_serial(void);
 L op_lock(void);
 L op_syshi(void);
 L op_syslibnum(void);

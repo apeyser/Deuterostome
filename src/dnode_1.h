@@ -51,6 +51,45 @@ L op_lock(void) {
 	return OK;
 }
 
+L x_op_serial(void) {
+	if (o_1 < FLOORopds) return OPDS_UNF;
+	if (x_1 < FLOORexecs) return EXECS_UNF;
+	if (TAG(o_1) != BOOL) return OPD_CLA;
+	if (TAG(x_1) != BOOL) return EXECS_COR;
+	
+	serialed = BOOL_VAL(x_1);
+	if (! BOOL_VAL(o_1)) FREEexecs = x_1;
+	else {
+		TAG(x_1) = OP; ATTR(x_1) = ACTIVE;
+		OP_NAME(x_1) = (L) "stop"; OP_CODE(x_1) = (L) op_stop;
+	}
+	FREEopds = o_1;
+	return OK;
+}
+
+/* ~active | -- */
+L op_serial(void) {
+	if (o_1 < FLOORopds) return OPDS_UNF;
+	if (CEILexecs < x5) return EXECS_OVF;
+	if (! (ATTR(o_1) & ACTIVE)) return OPD_ATR;
+
+	TAG(x1) = BOOL; ATTR(x1) = 0;
+	BOOL_VAL(x1) = serialed;
+
+	TAG(x2) = OP; ATTR(x2) = ACTIVE;
+	OP_NAME(x2) = (L) "x_serial"; OP_CODE(x2) = (L) x_op_serial;
+
+	TAG(x3) = BOOL; ATTR(x3) = (STOPMARK | ACTIVE);
+	BOOL_VAL(x3) = FALSE;
+
+	moveframe(o_1, x4);
+	FREEexecs = x5;
+	FREEopds = o_1;
+	serialed = TRUE;
+
+	return OK;
+}
+
 /*------------------------------------- 'halt' 
    - pushes 'x_halt' frame on the execution stack and directs phrases
      received from the console to the execution stack

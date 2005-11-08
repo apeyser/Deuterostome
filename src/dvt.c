@@ -120,6 +120,8 @@ L nb, retc,tnb;
 B *sysdict, *userdict, *Dmemory, *p;
 int sufd;
 
+serialed = TRUE; // no serial operator
+
 /*---------------- time out settings for 'nextevent' */
 zerosec.tv_sec = 0; zerosec.tv_usec = 0;
 somesec.tv_sec = 0; somesec.tv_usec = 200000;

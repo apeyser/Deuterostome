@@ -6,12 +6,13 @@
 
 1000 dict dup begin
 
+/ROLLBITS @ROLLBITS@ def
+
 /__   { * exch text} def
 /st__ { st mkact __ } def
 /dt__ { dt mkact __ } def
-/op__ { op mkact __ } def
 /n__  { * exch * number} def
-/rep__ {exch 1 sub exch __ } def
+/op__ { op mkact __ } def
 /NL   { * (\n) text} def
 
 
@@ -26,6 +27,18 @@
 
 /popA {
   /A_free A_free 1 sub def A_stack A_free get
+} bind def
+
+/peekA {
+    A_stack A_free 1 sub get
+} bind def
+
+/exchA {
+    popA popA exch pushA pushA
+} bind def
+
+/indexA {
+    1 add neg A_free add A_stack exch get
 } bind def
 
 |----------------------------- macros: make object value pointer
@@ -45,7 +58,7 @@
 /GETCV_d 6 dict dup begin
 
 /B { NL (if \(\()__ popA __ ( = *\(\(B *\))__ popA exec (\)\) == BINF\) )__
-        popA __ ( = DINF;)__  
+        popA __ ( = DINF;)__ 
    } def
 /W { NL (if \(\()__ popA __ ( = *\(\(W *\))__ popA exec (\)\) == WINF\) )__
         popA __ ( = DINF;)__  
@@ -99,6 +112,16 @@ end def
 NL (for \(n = ARRAY_SIZE\()__ popA __ (\); n>0; n--\) {)__
 popA exec
 NL (})__
+} def
+
+| (framename) {body_construct} log_2-iterations | --
+/FOR_modn {pushA pushA pushA
+    NL (for \(n = \(ARRAY_SIZE\()__ peekA __ (\)>>)__ 2 indexA n__  (\); n>0; n--\) {)__
+    exchA 2 2 indexA pwr {peekA exec} repeat exchA
+    NL (})__
+    NL (for \(n = \(ARRAY_SIZE\()__ popA __(\)&)__ 2 exchA popA pwr 1 sub n__ (\); n>0; n--\) {)__
+    popA exec
+    NL (})__
 } def
 
 /FOR_mod4 { pushA pushA
@@ -179,7 +202,7 @@ NL ({)__
 NL (D t; L n; )__ dt__ ( *d;)__
 NL (d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
 st { (sf) SCALAR } (t) GETCV
-(df) { dt { (d++)__ } (t) CVPUT } FOR
+(df) { dt { (d++)__ } (t) CVPUT } ROLLBITS FOR_modn
 NL (})__
 NL 
 } def
@@ -204,14 +227,30 @@ NL
 
 /XYmoveAA {
 
-NL (static void )__ st__ dt__ (moveAA\(B *sf, B *df\))__
+NL (static void )__ st__ dt__ (moveAAp\(B *sf, B *df\))__
 NL ({)__
-NL (D t; L n; )__ st__ ( *s; )__ dt__ ( *d;)__
+NL (D t; L n; )__ st__ ( * restrict s; )__ dt__ ( * restrict d;)__
 NL (s = \()__ st__ ( *\))__ (sf) ARRAY (;)__
 NL (d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
 (df) { st { (s++)__ } (t) GETCV
        dt { (d++)__ } (t) CVPUT
-     } FOR
+     } ROLLBITS FOR_modn
+NL (})__
+NL 
+NL (static void )__ st__ dt__ (moveAAs\(B *sf, B *df\))__
+NL ({)__
+NL (D t; L n; )__ st__ ( * s; )__ dt__ ( * d;)__
+NL (s = \()__ st__ ( *\))__ (sf) ARRAY (;)__
+NL (d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
+(df) { st { (s++)__ } (t) GETCV
+       dt { (d++)__ } (t) CVPUT
+     } ROLLBITS FOR_modn
+NL (})__
+NL 
+NL (static void )__ st__ dt__ (moveAA\(B *sf, B *df\))__
+NL ({)__
+NL (if \(serialed\) )__ st__ dt__ (moveAAs\(sf,df\);)__
+NL (else )__ st__ dt__ (moveAAp\(sf,df\);)__
 NL (})__
 NL 
 } def
@@ -276,7 +315,7 @@ st { (sf) SCALAR } (tt) GETCV
 (df) { dt { (d)__ } (t) GETCV
        dyadic_d op get exec
        dt { (d++)__ } (t) CVPUT
-     } FOR
+     } ROLLBITS FOR_modn
 NL (})__
 NL 
 } def
@@ -298,7 +337,7 @@ NL (s = \()__ st__ ( *\))__ (sf) ARRAY (;)__
 dt { (df) SCALAR } (t) GETCV
 (sf) { st { (s++)__ } (tt) GETCV
        dyadic_d op get exec
-     } FOR
+     } ROLLBITS FOR_modn
 dt { (df) SCALAR } (t) CVPUT
 NL (})__
 NL 
@@ -315,13 +354,11 @@ NL
 |
 
 /XYdyOPAA {
-
 NL (static void )__ dt__ st__ (dy)__ op__
-  (AA\(B * restrict df, B * restrict sf\))__
+    (AAp\(B * df, B * sf\))__
 NL ({)__
-NL (L n; )__  st__ ( * s; )__ dt__ ( * d;)__
-|NL (register D t1,t2,t3,t4,tt1,tt2,tt3,tt4; )__
-NL (D t, tt;)  
+NL (L n; )__  st__ ( * restrict s; )__ dt__ ( * restrict d;)__
+NL (D t, tt;)__
 NL (s = \()__ st__ ( *\))__ (sf) ARRAY (;)__
 NL (d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
 (df) {
@@ -329,30 +366,29 @@ NL (d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
   dt {(d)__} (t) GETCV
   () dyadic_d_x op get exec
   dt {(d++)__} (t) CVPUT
-} FOR
-
-|  (df) { st { (s++)__ } (tt1) GETCV
-|         dt { (d)__ } (t1) GETCV
-|         (1) dyadic_d_x op get exec
-|         st { (s++)__ } (tt2) GETCV
-|         dt { (\(d+1\))__ } (t2) GETCV
-|         (2) dyadic_d_x op get exec
-|         st { (s++)__ } (tt3) GETCV
-|         dt { (\(d+2\))__ } (t3) GETCV
-|         (3) dyadic_d_x op get exec
-|         st { (s++)__ } (tt4) GETCV
-|         dt { (\(d+3\))__ } (t4) GETCV
-|         (4) dyadic_d_x op get exec
-|         dt { (d++)__ } (t1) CVPUT
-|         dt { (d++)__ } (t2) CVPUT
-|         dt { (d++)__ } (t3) CVPUT
-|         dt { (d++)__ } (t4) CVPUT
-|       } FOR_mod4
-| (df) { st { (s++)__ } (tt1) GETCV
-|        dt { (d)__ } (t1) GETCV
-|        (1) dyadic_d_x op get exec
-|        dt { (d++)__ } (t1) CVPUT
-|      } FOR_mod1
+} ROLLBITS FOR_modn
+NL (})__
+NL 
+NL (static void )__ dt__ st__ (dy)__ op__
+    (AAs\(B * df, B * sf\))__
+NL ({)__
+NL (L n; )__  st__ ( * s; )__ dt__ ( * d;)__
+NL (D t, tt;)__
+NL (s = \()__ st__ ( *\))__ (sf) ARRAY (;)__
+NL (d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
+(df) {
+   st {(s++)__} (tt) GETCV
+   dt {(d)__} (t) GETCV
+   () dyadic_d_x op get exec
+   dt {(d++)__} (t) CVPUT
+} ROLLBITS FOR_modn
+NL (})__
+NL 
+NL (static void )__ dt__ st__ (dy)__ op__
+    (AA\(B * df, B * sf\))__
+NL ({)__
+NL (if \(serialed\) )__ dt__ st__ (dy)__ op__ (AAs\(df,sf\);)__
+NL (else )__ dt__ st__ (dy)__ op__ (AAp\(df,sf\);)__
 NL (})__
 NL 
 } def
@@ -408,7 +444,7 @@ NL (d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
 (df) { dt { (d)__ } (t) GETCV
        monadic_d op get exec
        dt { (d++)__ } (t) CVPUT
-     } FOR
+     } ROLLBITS FOR_modn
 NL (})__
 NL 
 } def
@@ -588,7 +624,7 @@ NL
     
 |------------ save the file
 }
-save /dmsave name /dmfile 400000 /b array def dmsave capsave 
+save /dmsave name /dmfile 2000000 /b array def dmsave capsave 
 dmfile 0 3 -1 roll exec
 0 exch getinterval dirname filename writefile
 dmsave restore 

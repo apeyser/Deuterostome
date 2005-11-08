@@ -11,10 +11,16 @@ CF_IF_ENABLED([plugins], [
   CF_AM_ENABLE([process], [compile or install process plugin], [yes])
 ])
 
+CF_AM_ENABLE([setuid], [compile or install setuid wrapper], [yes])
+
 CF_AC_ARG_ENABLE([sysdictsize], 
 		 [system dictionary size], 
 		 [SYSDICTSIZE], 
 		 [500])
+CF_AC_ARG_ENABLE([rollbits],
+		[unroll math loops to 2^rollbits],
+		[ROLLBITS],
+		[4])
 CF_AC_ARG_WITH_DIR([dmbindir], 
                    [location for dm binary], 
 	           [${bindir}/${PACKAGE}])
@@ -73,6 +79,7 @@ CF_AC_CHECK_SIZEOF([void*], [4])
 CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([pid_t], [4])])
 CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([int], [4])])
 CF_IF_ENABLED([process], [CF_AC_CHECK_HEADER([sys/wait.h])])
+CF_IF_ENABLED([setuid],  [CF_AC_CHECK_HEADER([sys/wait.h])])
 CF_IF_ENABLED([plugins], [
   AC_DEFINE([PLUGINS_ENABLED], [1], [Define to 1 if plugins are compiled])
 ])
@@ -132,7 +139,8 @@ CF_SUBST_DEFINE([NAMEBYTES],
 								[18])
 
 AC_CONFIG_FILES([Makefile 
-		 src/Makefile src/codegen/Makefile src/codegen/startup_dgen.d
+		 src/Makefile 
+		 src/codegen/Makefile src/codegen/startup_dgen.d src/codegen/dmnuminc.d
 		 plugins/Makefile 
 		 ps/Makefile 
 		 sh/Makefile

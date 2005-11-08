@@ -342,6 +342,7 @@
   '("loadlib"
     "nextlib"
 	"lock"
+	"serial"
     "readboxfile"
     "writeboxfile"
     "getstartupdir"

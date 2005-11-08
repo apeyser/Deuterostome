@@ -1,7 +1,7 @@
 dist_noinst_DATA = dmnuminc.d dsp1f.d
 dist_noinst_SCRIPTS = buildh
 
-AM_CPPFLAGS = $(GCC_OPT) -DSTARTUP_DIR="\"$(top_builddir)/src/codegen/\""
+AM_CPPFLAGS = $(GCC_OPT) -DSTARTUP_DIR="\"$(top_builddir)/src/codegen/\"" -DPLUGIN_DIR="\"\""
 AM_LDFLAGS = -no-undefined
 INCLUDE = @INCLTDL@
 MAINTAINERCLEANFILES = *.built

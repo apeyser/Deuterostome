@@ -16,6 +16,7 @@ B* TOPvm;
 B* errsource;
 
 B locked = FALSE;
+B serialed = FALSE;
 
 fd_set sock_fds;
 BOOLEAN timeout;             /* for I/O operations          */

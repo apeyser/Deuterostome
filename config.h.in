@@ -63,6 +63,9 @@
 /* Define to 1 if plugins are compiled */
 #undef PLUGINS_ENABLED
 
+/* unroll math loops to 2^rollbits */
+#undef ROLLBITS
+
 /* The size of a `int', as computed by sizeof. */
 #undef SIZEOF_INT
 
