@@ -1,0 +1,46 @@
+#include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <errno.h>
+
+int main(int argc, char* argv[]) {
+  long port;
+  long renice;
+  char* endptr;
+
+  if (argc != 3) {
+	fprintf(stderr, "Arguments: port renice-number\nParams: %d", argc-1);
+	return 1;
+  }
+  
+  port = strtol(argv[1], &endptr, 0);
+  if (! *(argv[1]) || *endptr) {
+	fprintf(stderr, "Port argument must be an integer: `%s'\n", argv[1]);
+	return 1;
+  }
+  renice = strtol(argv[2], &endptr, 0);
+  if (! *(argv[2]) || *endptr) {
+	fprintf(stderr, "Renice argument must be an integer: `%s'\n", argv[2]);
+	return 1;
+  }
+
+  if (geteuid() != 0) {
+	fprintf(stderr, "Not installed setuid\nNot trying to renice\n");
+  }
+  else {
+	errno = 0;
+	if (nice(renice) == -1 && errno) {
+	  perror("Unable to renice");
+	}
+	if (setuid(getuid())) {
+	  perror("Unable to drop privileges");
+	  return 1;
+	}
+  }
+
+  execl("@bindir@/dnode", "@bindir@/dnode", argv[1], NULL);
+  perror("Unable to run `@bindir@/dnode'");
+  return 1;
+}
+  
