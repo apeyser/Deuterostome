@@ -2,7 +2,9 @@
 
 if ENABLE_setuid
 
+dnode_nice_SOURCE = dnode-nice.c
 DNODENICEBIN = dnode-nice
+
 edit = sed \
 	-e 's,[@]bindir[@],$(bindir),g'
 
@@ -10,6 +12,9 @@ dnode-nice.c: Makefile $(srcdir)/dnode-nice.c.in
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/dnode-nice.c.in > $@.tmp
 	mv $@.tmp $@
+
+install-exec-hook:
+	-chown root $(bindir)/dnode-nice && chmod u+s $(bindir)/dnode-nice
 
 endif ENABLE_setuid
 
@@ -43,13 +48,6 @@ PLUGIN_LD = @LIBLTDL@
 endif ENABLE_plugins
 
 pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h
-
-if ENABLE_setuid
-dnode_nice_SOURCE = dnode-nice.c
-install-exec-hook:
-	chown root $(bindir)/dnode-nice
-	chmod u+s $(bindir)/dnode-nice
-endif ENABLE_setuid
 
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h
 dvt_LDADD = libdmglobals.la

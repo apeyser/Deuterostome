@@ -294,7 +294,7 @@ property."
 	(setq dm-server-name (format "dm-server-%d" (emacs-pid)))
 	(dm-server-start)))
 
-(defun dvt (&optional buffer)
+(defun dvt (&optional buffer override)
   "Run an inferior shell, with I/O through BUFFER (which defaults to `*shell*').
 Interactively, a prefix arg means to prompt for BUFFER.
 If BUFFER exists but shell process is not running, make new shell.
@@ -308,6 +308,8 @@ If a file `~/.emacs_SHELLNAME' exists, it is given as initial input
 The buffer is put in Shell mode, giving commands for sending input
 and controlling the subjobs of the shell.  See `shell-mode'.
 See also the variable `shell-prompt-pattern'.
+If OVERRIDE is non-nil, pop up a special frame 
+  even if `d-comint-mode-keep-focus' is nil.
 
 To specify a coding system for converting non-ASCII characters
 in the input and output to the shell, use \\[universal-coding-system-argument]
@@ -354,6 +356,8 @@ Otherwise, one argument `-i' is passed to the shell.
 			  "Xwindows {(" (d-comint-mode-shell-quote dm-server-name) ") ("
 			  (d-comint-mode-shell-quote (buffer-name dvt-buffer)) 
 			  ") take_input_setup} if\n"))))
+		(when (or d-comint-mode-keep-focus override)
+		  (dvt-special-frame (buffer-name dvt-buffer)))
 		(switch-to-buffer dvt-buffer))
     (switch-to-buffer buffer)))
 
@@ -399,13 +403,19 @@ even if `d-comint-mode-keep-focus' is nil.
 			   (when window (window-frame (select-window window)))))
 
 			(t 
-			 (window-frame (special-display-popup-frame
-							buffer-name 
-							(append
-							 (list (cons 'height d-comint-mode-window-size))
-							 d-comint-mode-frame-alist)))))))
+			 (window-frame (dvt-special-frame buffer-name))))))
 	  (select-frame buffer-frame)
 	  (when (eq window-system 'x) (x-focus-frame buffer-frame)))))
+
+(defun dvt-special-frame (&optional buffer-name)
+  (interactive
+   (list
+    (and current-prefix-arg (read-buffer "DVT buffer name: " "*dvt*"))))
+  (special-display-popup-frame
+   buffer-name 
+   (append
+	(list (cons 'height d-comint-mode-window-size))
+	d-comint-mode-frame-alist)))
 
 (defun d-comint-mode-focus-raise (&optional buffer-name)
   "Set input focus to dvt buffer, and raise frame in X.
