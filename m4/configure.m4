@@ -54,6 +54,16 @@ AC_DEFUN([CF_ON_TARGET], [dnl
   esac dnl
 ])
 
+AC_DEFUN([CF_UNDEF], [dnl
+  AC_MSG_CHECKING([if $1 is set])
+  if test "${$1-set}" == set ; then
+    AC_MSG_RESULT([no])
+    $2
+  else
+    AC_MSG_RESULT([yes])
+  fi
+])
+
 AC_DEFUN([CF_GCC_COMPILER_OPTION], [dnl
   AC_REQUIRE([AC_PROG_CC])dnl
   AC_REQUIRE([AC_PROG_LIBTOOL])dnl

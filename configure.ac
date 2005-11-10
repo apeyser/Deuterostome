@@ -104,8 +104,10 @@ AC_CHECK_HEADER([error.h], [
   AC_DEFINE([HAVE_ERROR_H], [1], [Define to 1 if you have <error.h>])
 ])
 
-CF_GCC_COMPILER_OPTION([GCC_OPT], [-g])
-CF_GCC_COMPILER_OPTION([GCC_OPT], [-O2])
+CF_UNDEF([CFLAGS], [
+  CF_GCC_COMPILER_OPTION([CFLAGS], [-g])
+  CF_GCC_COMPILER_OPTION([CFLAGS], [-O2])
+])
 CF_GCC_COMPILER_OPTION([GCC_OPT], [-pipe])
 #CF_GCC_COMPILER_OPTION([GCC_OPT], [-fno-math-errno])
 #CF_GCC_COMPILER_OPTION([GCC_OPT], [-fno-trapping-math])
