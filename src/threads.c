@@ -187,7 +187,7 @@ L thread_share_lock(UL id, thread_func func, B* data) {
 L op_threads(void) {
   if (o2 > CEILopds) return OPDS_OVF;
   TAG(o1) = NUM | LONGTYPE; ATTR(o1) = 0;
-  LONG_VAL(o_1) = thread_num;
+  LONG_VAL(o1) = thread_num;
   FREEopds = o2;
   return OK;
 }
@@ -200,10 +200,12 @@ L op_threads(void) {
  *
  */
 L op_makethreads(void) {
-  L n;
+  L n; L ret;
   if (FLOORopds > o_1) return OPDS_UNF;
   if (CLASS(o_1) != NUM) return OPD_CLA;
   if (! VALUE(o_1, &n)) return UNDF_VAL;
 
-  return threads_fin() || threads_init(n);
+  if ((ret = threads_fin() || threads_init(n)) == OK)
+	FREEopds = o_1;
+  return ret;
 }
