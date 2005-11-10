@@ -4,9 +4,9 @@ if EMACS_ENABLED
 EMACS_DIR=emacs
 endif EMACS_ENABLED
 
-if ENABLE_plugins
+if ENABLE_PLUGINS
 PLUGINS_DIR=plugins
-endif ENABLE_plugins
+endif ENABLE_PLUGINS
 
 if BASH_ENABLED
 if ENV_ENABLED

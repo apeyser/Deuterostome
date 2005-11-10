@@ -6,11 +6,11 @@ CLEANFILES = $(nodist_dmstart_DATA)
 
 PLUGIN_START = /^[[:space:]]*[@]pluginstart[@][[:space:]]*$$/
 PLUGIN_END = /^[[:space:]]*[@]pluginend[@][[:space:]]*$$/
-if ENABLE_plugins
+if ENABLE_PLUGINS
 PLUGIN_DELETE = -e '$(PLUGIN_START) d' -e '$(PLUGIN_END) d'
-else !ENABLE_plugins
+else !ENABLE_PLUGINS
 PLUGIN_DELETE = -e '$(PLUGIN_START),$(PLUGIN_END) d'
-endif !ENABLE_plugins
+endif !ENABLE_PLUGINS
 
 edit = sed -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \

@@ -66,11 +66,15 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
+am__libdmglobals_la_SOURCES_DIST = dmglobals.c dm1.c dm2.c dm3.c dm4.c \
+	dm5.c dm6.c dm7.c dm8.c dm9.c dmnum.c dsp1.c dsp2.c dmnuminc.h \
+	dsp1f.h error.h plugin.c pluginlib.h threads.c
+@ENABLE_THREADS_TRUE@am__objects_1 = threads.lo
 am_libdmglobals_la_OBJECTS = dmglobals.lo dm1.lo dm2.lo dm3.lo dm4.lo \
 	dm5.lo dm6.lo dm7.lo dm8.lo dm9.lo dmnum.lo dsp1.lo dsp2.lo \
-	plugin.lo
+	plugin.lo $(am__objects_1)
 libdmglobals_la_OBJECTS = $(am_libdmglobals_la_OBJECTS)
-@ENABLE_setuid_TRUE@am__EXEEXT_1 = dnode-nice$(EXEEXT)
+@ENABLE_SETUID_TRUE@am__EXEEXT_1 = dnode-nice$(EXEEXT)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_dnode_OBJECTS = dnode-dnode.$(OBJEXT)
@@ -98,9 +102,9 @@ LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(libdmglobals_la_SOURCES) $(dnode_SOURCES) dnode-nice.c \
 	$(dvt_SOURCES) $(testwordorder_SOURCES)
-DIST_SOURCES = $(libdmglobals_la_SOURCES) $(dnode_SOURCES) \
+DIST_SOURCES = $(am__libdmglobals_la_SOURCES_DIST) $(dnode_SOURCES) \
 	dnode-nice.c $(dvt_SOURCES) $(testwordorder_SOURCES)
-am__pkginclude_HEADERS_DIST = dm.h plugin.h dmx.h
+am__pkginclude_HEADERS_DIST = dm.h plugin.h dmx.h threads.h
 pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(pkginclude_HEADERS)
 ETAGS = etags
@@ -132,6 +136,8 @@ CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
+DMBINDIR = @DMBINDIR@
+DMSTARTDIR = @DMSTARTDIR@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -141,12 +147,14 @@ EMACS = @EMACS@
 EMACSLOADPATH = @EMACSLOADPATH@
 EMACS_ENABLED_FALSE = @EMACS_ENABLED_FALSE@
 EMACS_ENABLED_TRUE = @EMACS_ENABLED_TRUE@
-ENABLE_plugins_FALSE = @ENABLE_plugins_FALSE@
-ENABLE_plugins_TRUE = @ENABLE_plugins_TRUE@
-ENABLE_process_FALSE = @ENABLE_process_FALSE@
-ENABLE_process_TRUE = @ENABLE_process_TRUE@
-ENABLE_setuid_FALSE = @ENABLE_setuid_FALSE@
-ENABLE_setuid_TRUE = @ENABLE_setuid_TRUE@
+ENABLE_PLUGINS_FALSE = @ENABLE_PLUGINS_FALSE@
+ENABLE_PLUGINS_TRUE = @ENABLE_PLUGINS_TRUE@
+ENABLE_PROCESS_FALSE = @ENABLE_PROCESS_FALSE@
+ENABLE_PROCESS_TRUE = @ENABLE_PROCESS_TRUE@
+ENABLE_SETUID_FALSE = @ENABLE_SETUID_FALSE@
+ENABLE_SETUID_TRUE = @ENABLE_SETUID_TRUE@
+ENABLE_THREADS_FALSE = @ENABLE_THREADS_FALSE@
+ENABLE_THREADS_TRUE = @ENABLE_THREADS_TRUE@
 ENV_ENABLED = @ENV_ENABLED@
 ENV_ENABLED_FALSE = @ENV_ENABLED_FALSE@
 ENV_ENABLED_TRUE = @ENV_ENABLED_TRUE@
@@ -154,6 +162,7 @@ EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 GCC_OPT = @GCC_OPT@
+GUIPDF = @GUIPDF@
 INCLTDL = @INCLTDL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -183,12 +192,16 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKGLISPDIR = @PKGLISPDIR@
+PKGPSDATADIR = @PKGPSDATADIR@
 RANLIB = @RANLIB@
 ROLLBITS = @ROLLBITS@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 SYSDICTSIZE = @SYSDICTSIZE@
+THREADMUL = @THREADMUL@
+THREADNUM = @THREADNUM@
 VERSION = @VERSION@
 X_CFLAGS = @X_CFLAGS@
 X_DISPLAY_MISSING = @X_DISPLAY_MISSING@
@@ -255,11 +268,14 @@ target_alias = @target_alias@
 target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
-@ENABLE_setuid_TRUE@dnode_nice_SOURCE = dnode-nice.c
-@ENABLE_setuid_TRUE@DNODENICEBIN = dnode-nice
-@ENABLE_setuid_TRUE@edit = sed \
-@ENABLE_setuid_TRUE@	-e 's,[@]bindir[@],$(bindir),g'
+@ENABLE_SETUID_TRUE@dnode_nice_SOURCE = dnode-nice.c
+@ENABLE_SETUID_TRUE@DNODENICEBIN = dnode-nice
+@ENABLE_SETUID_TRUE@edit = sed \
+@ENABLE_SETUID_TRUE@	-e 's,[@]bindir[@],$(bindir),g'
 
+@ENABLE_THREADS_TRUE@THREAD_HDR = threads.h
+@ENABLE_THREADS_TRUE@THREADSRC = threads.c
+@ENABLE_THREADS_TRUE@THREADSLIB = -lpthread
 EXTRA_DIST = codegen/buildh codegen/dgen_0.h codegen/dgen_1.h codegen/dgen.c \
 	codegen/dm1.c codegen/dm2.c codegen/dm3.c codegen/dm4.c codegen/dm5.c \
 	codegen/dm6.c codegen/dm7.c codegen/dm8.c codegen/dmglobals.c \
@@ -270,16 +286,16 @@ EXTRA_DIST = codegen/buildh codegen/dgen_0.h codegen/dgen_1.h codegen/dgen.c \
 	dnode-nice.c.in
 
 DISTCLEANFILES = codegen/Makefile codegen/startup_dgen.d
-AM_CFLAGS = $(X_CFLAGS)
-AM_CPPFLAGS = $(GCC_OPT) \
+AM_CFLAGS = $(GCC_OPT) $(X_CFLAGS)
+AM_CPPFLAGS = \
 	-DSTARTUP_DIR="\"$(dmstartdir)\"" \
 	-DPLUGIN_DIR="\"$(pkglibdir)\""
 
-AM_LDFLAGS = -no-undefined $(X_LDFLAGS)
+AM_LDFLAGS = -no-undefined $(X_LDFLAGS) $(THREADSLIB)
 INCLUDE = @INCLTDL@
-@ENABLE_plugins_TRUE@PLUGIN_HDR = plugin.h
-@ENABLE_plugins_TRUE@PLUGIN_LD = @LIBLTDL@
-pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h
+@ENABLE_PLUGINS_TRUE@PLUGIN_HDR = plugin.h
+@ENABLE_PLUGINS_TRUE@PLUGIN_LD = @LIBLTDL@
+pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR)
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h
 dvt_LDADD = libdmglobals.la
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
@@ -292,7 +308,7 @@ libdmglobals_la_LIBADD = $(PLUGIN_LD)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h error.h \
-	plugin.c pluginlib.h
+	plugin.c pluginlib.h $(THREADSRC)
 
 all: all-am
 
@@ -428,6 +444,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvt-dvt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-word-order.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/threads.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -615,7 +632,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-@ENABLE_setuid_FALSE@install-exec-hook:
+@ENABLE_SETUID_FALSE@install-exec-hook:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
@@ -687,13 +704,13 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
 	uninstall-pkgincludeHEADERS
 
 
-@ENABLE_setuid_TRUE@dnode-nice.c: Makefile $(srcdir)/dnode-nice.c.in
-@ENABLE_setuid_TRUE@	rm -f $@ $@.tmp
-@ENABLE_setuid_TRUE@	$(edit) $(srcdir)/dnode-nice.c.in > $@.tmp
-@ENABLE_setuid_TRUE@	mv $@.tmp $@
+@ENABLE_SETUID_TRUE@dnode-nice.c: Makefile $(srcdir)/dnode-nice.c.in
+@ENABLE_SETUID_TRUE@	rm -f $@ $@.tmp
+@ENABLE_SETUID_TRUE@	$(edit) $(srcdir)/dnode-nice.c.in > $@.tmp
+@ENABLE_SETUID_TRUE@	mv $@.tmp $@
 
-@ENABLE_setuid_TRUE@install-exec-hook:
-@ENABLE_setuid_TRUE@	-chown root $(bindir)/dnode-nice && chmod u+s $(bindir)/dnode-nice
+@ENABLE_SETUID_TRUE@install-exec-hook:
+@ENABLE_SETUID_TRUE@	-chown root $(bindir)/dnode-nice && chmod u+s $(bindir)/dnode-nice
 distclean-local:
 	-rm -rf codegen/.deps
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

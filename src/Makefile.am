@@ -1,6 +1,6 @@
 #DIST_SUBDIRS = codegen
 
-if ENABLE_setuid
+if ENABLE_SETUID
 
 dnode_nice_SOURCE = dnode-nice.c
 DNODENICEBIN = dnode-nice
@@ -16,7 +16,13 @@ dnode-nice.c: Makefile $(srcdir)/dnode-nice.c.in
 install-exec-hook:
 	-chown root $(bindir)/dnode-nice && chmod u+s $(bindir)/dnode-nice
 
-endif ENABLE_setuid
+endif ENABLE_SETUID
+
+if ENABLE_THREADS
+  THREAD_HDR=threads.h
+  THREADSRC=threads.c
+  THREADSLIB=-lpthread
+endif ENABLE_THREADS
 
 EXTRA_DIST = codegen/buildh codegen/dgen_0.h codegen/dgen_1.h codegen/dgen.c \
 	codegen/dm1.c codegen/dm2.c codegen/dm3.c codegen/dm4.c codegen/dm5.c \
@@ -31,23 +37,22 @@ DISTCLEANFILES = codegen/Makefile codegen/startup_dgen.d
 distclean-local:
 	-rm -rf codegen/.deps
 
-
-AM_CFLAGS = $(X_CFLAGS)
-AM_CPPFLAGS = $(GCC_OPT) \
+AM_CFLAGS = $(GCC_OPT) $(X_CFLAGS)
+AM_CPPFLAGS = \
 	-DSTARTUP_DIR="\"$(dmstartdir)\"" \
 	-DPLUGIN_DIR="\"$(pkglibdir)\""
-AM_LDFLAGS = -no-undefined $(X_LDFLAGS)
+AM_LDFLAGS = -no-undefined $(X_LDFLAGS) $(THREADSLIB)
 INCLUDE = @INCLTDL@
 
 bin_PROGRAMS = dvt dnode $(DNODENICEBIN)
 noinst_PROGRAMS = testwordorder
 
-if ENABLE_plugins
+if ENABLE_PLUGINS
 PLUGIN_HDR = plugin.h
 PLUGIN_LD = @LIBLTDL@
-endif ENABLE_plugins
+endif ENABLE_PLUGINS
 
-pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h
+pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR)
 
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h
 dvt_LDADD = libdmglobals.la
@@ -64,6 +69,6 @@ libdmglobals_la_LIBADD = $(PLUGIN_LD)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h error.h \
-	plugin.c pluginlib.h
+	plugin.c pluginlib.h $(THREADSRC)
 
 

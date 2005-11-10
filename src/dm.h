@@ -695,6 +695,8 @@ L op_mattranspose(void);
 L op_dilute_add(void);
 L op_matvecmul(void);
 
+#include "threads.h"
+
 #define ERRLEN (1000)
 
 #include "error.h"

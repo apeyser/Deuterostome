@@ -1,14 +1,17 @@
-AM_CPPFLAGS = -DSTARTUP_DIR="\"$(dmstartdir)\"" $(GCC_OPT)
-AM_CFLAGS =  $(GCC_CPU) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
-AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
+if ENABLE_THREADS
+  THREADSLIB=-lpthread
+endif ENABLE_THREADS
+
+AM_CFLAGS =  $(GCC_OPT) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
+AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS) $(THREADSLIB)
 #@LIBPLUGIN_DLL_IMPORT@
 INCLUDE = @INCLTDL@ 
 LIBS += $(LTLIBOBJS) $(top_builddir)/src/libdmglobals.la
 
-if ENABLE_process
+if ENABLE_PROCESS
 PROCESS_LIB=process.la
 process_la_SOURCES = process.c process.h
-endif ENABLE_process
+endif ENABLE_PROCESS
 
 pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la
 
