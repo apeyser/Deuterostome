@@ -205,7 +205,7 @@ L op_makethreads(void) {
   if (CLASS(o_1) != NUM) return OPD_CLA;
   if (! VALUE(o_1, &n)) return UNDF_VAL;
 
-  if ((ret = threads_fin() || threads_init(n)) == OK)
+  if ((ret = (threads_fin() || threads_init(n))) == OK)
 	FREEopds = o_1;
   return ret;
 }
