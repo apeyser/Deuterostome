@@ -231,9 +231,15 @@ AC_DEFUN([CF_AC_ENABLE], [dnl
 ])
 
 AC_DEFUN([CF_IF_ENABLED], [dnl
-  if test x"$enable_$1" = x"yes" ; then 
+  if test x"${enable_$1}" = x"yes" ; then 
 	  $2
 	fi dnl
+])
+
+AC_DEFUN([CF_IF_DISABLED], [dnl
+  if test x"${enable_$1}" != x"yes" ; then
+    $2
+  fi dnl
 ])
 
 AC_DEFUN([CF_AM_PROG], [dnl
@@ -282,4 +288,29 @@ AC_DEFUN([CF_AC_PATH_XTRA], [dnl
   AC_SUBST(X_DISPLAY_MISSING) 
 	AC_SUBST(X_LDFLAGS) dnl
 ])
+    
+AC_DEFUN([CF_ACX_PTHREAD], [dnl
+  NO_PTHREAD_CFLAGS="${CFLAGS}"
+  AC_SUBST([NO_PTHREAD_CFLAGS])
+  NO_PTHREAD_CC="${CC}"
+  AC_SUBST([NO_PTHREAD_CC])
+  NO_PTHREAD_LIBS="${LIBS}"
+  AC_SUBST([NO_PTHREAD_LIBS])
+  CF_IF_ENABLED([$1], [
+    ACX_PTHREAD([
+	  AC_MSG_CHECKING([flags for pthreads])
+      CFLAGS="${CFLAGS} ${PTHREAD_CFLAGS}"
+	  CC="${PTHREAD_CC}"
+      LIBS="${PTHREAD_LIBS} ${LIBS}"
+      AC_MSG_RESULT([found])
+    ], [  
+	  AC_MSG_CHECKING([flags for pthreads])
+      AC_MSG_ERROR([No threads found, disable threads])])
+  ])
+  CF_IF_DISABLED([$1], [
+   AC_MSG_CHECKING([flags for pthreads])
+   AC_MSG_RESULT([$1 disabled])
+  ])
+])
+
     

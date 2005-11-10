@@ -26,7 +26,6 @@ endif ENABLE_SETUID
 if ENABLE_THREADS
   THREAD_HDR=threads.h
   THREADSRC=threads.c
-  THREADSLIB=-lpthread
 endif ENABLE_THREADS
 
 EXTRA_DIST = codegen/buildh codegen/dgen_0.h codegen/dgen_1.h codegen/dgen.c \
@@ -46,7 +45,7 @@ AM_CFLAGS = $(GCC_OPT) $(X_CFLAGS)
 AM_CPPFLAGS = \
 	-DSTARTUP_DIR="\"$(dmstartdir)\"" \
 	-DPLUGIN_DIR="\"$(pkglibdir)\""
-AM_LDFLAGS = -no-undefined $(X_LDFLAGS) $(THREADSLIB)
+AM_LDFLAGS = -no-undefined $(PTHREAD_LIBS) $(X_LDFLAGS)
 INCLUDE = @INCLTDL@
 
 bin_PROGRAMS = dvt dnode 
