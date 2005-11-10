@@ -16,3 +16,8 @@ endif BASH_ENABLED
 
 SUBDIRS = libltdl src $(PLUGINS_DIR) $(BASH_DIR) ps $(EMACS_DIR) dcode
 ACLOCAL_AMFLAGS = -I m4
+
+@SET_MAKE@
+codegen-all: codegen all
+codegen: 
+	cd src/codegen && $(MAKE) $(AM_MAKEFLAGS) all

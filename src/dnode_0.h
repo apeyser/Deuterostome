@@ -14,6 +14,7 @@ B *sysop[] =
 	  "serialize",   (B*) op_serialize,
 #if THREADS_ENABLED
 	  "threads",     (B*) op_threads,
+	  "makethreads", (B*) op_makethreads,
 #endif //THREAD_ENABLED
 
 /*-- hi */

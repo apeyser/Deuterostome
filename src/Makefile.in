@@ -41,8 +41,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-bin_PROGRAMS = dvt$(EXEEXT) dnode$(EXEEXT) $(am__EXEEXT_1)
-noinst_PROGRAMS = testwordorder$(EXEEXT)
+bin_PROGRAMS = dvt$(EXEEXT) dnode$(EXEEXT)
+noinst_PROGRAMS = testwordorder$(EXEEXT) $(am__EXEEXT_1)
 subdir = src
 DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -74,8 +74,8 @@ am_libdmglobals_la_OBJECTS = dmglobals.lo dm1.lo dm2.lo dm3.lo dm4.lo \
 	dm5.lo dm6.lo dm7.lo dm8.lo dm9.lo dmnum.lo dsp1.lo dsp2.lo \
 	plugin.lo $(am__objects_1)
 libdmglobals_la_OBJECTS = $(am_libdmglobals_la_OBJECTS)
-@ENABLE_SETUID_TRUE@am__EXEEXT_1 = dnode-nice$(EXEEXT)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
+@ENABLE_SETUID_TRUE@am__EXEEXT_1 = dnode-nice$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_dnode_OBJECTS = dnode-dnode.$(OBJEXT)
 dnode_OBJECTS = $(am_dnode_OBJECTS)
@@ -632,7 +632,8 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-@ENABLE_SETUID_FALSE@install-exec-hook:
+@ENABLE_SETUID_FALSE@uninstall-local:
+@ENABLE_SETUID_FALSE@install-exec-local:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
@@ -656,9 +657,8 @@ info-am:
 
 install-data-am: install-pkgincludeHEADERS
 
-install-exec-am: install-binPROGRAMS install-libLTLIBRARIES
-	@$(NORMAL_INSTALL)
-	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
+install-exec-am: install-binPROGRAMS install-exec-local \
+	install-libLTLIBRARIES
 
 install-info: install-info-am
 
@@ -685,7 +685,8 @@ ps: ps-am
 ps-am:
 
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
-	uninstall-libLTLIBRARIES uninstall-pkgincludeHEADERS
+	uninstall-libLTLIBRARIES uninstall-local \
+	uninstall-pkgincludeHEADERS
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
 	clean-generic clean-libLTLIBRARIES clean-libtool \
@@ -693,24 +694,30 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
 	distclean-generic distclean-libtool distclean-local \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-binPROGRAMS install-data \
-	install-data-am install-exec install-exec-am install-exec-hook \
-	install-info install-info-am install-libLTLIBRARIES \
-	install-man install-pkgincludeHEADERS install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-info-am uninstall-libLTLIBRARIES \
+	install-data-am install-exec install-exec-am \
+	install-exec-local install-info install-info-am \
+	install-libLTLIBRARIES install-man install-pkgincludeHEADERS \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-info-am \
+	uninstall-libLTLIBRARIES uninstall-local \
 	uninstall-pkgincludeHEADERS
 
 
 @ENABLE_SETUID_TRUE@dnode-nice.c: Makefile $(srcdir)/dnode-nice.c.in
 @ENABLE_SETUID_TRUE@	rm -f $@ $@.tmp
-@ENABLE_SETUID_TRUE@	$(edit) $(srcdir)/dnode-nice.c.in > $@.tmp
+@ENABLE_SETUID_TRUE@	$(edit) "$(srcdir)/dnode-nice.c.in" > $@.tmp
 @ENABLE_SETUID_TRUE@	mv $@.tmp $@
 
-@ENABLE_SETUID_TRUE@install-exec-hook:
-@ENABLE_SETUID_TRUE@	-chown root $(bindir)/dnode-nice && chmod u+s $(bindir)/dnode-nice
+@ENABLE_SETUID_TRUE@install-exec-local:
+@ENABLE_SETUID_TRUE@	$(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install \
+@ENABLE_SETUID_TRUE@		$(INSTALL) -m 4755 "dnode-nice$(EXEEXT)" \
+@ENABLE_SETUID_TRUE@			"$(DESTDIR)$(bindir)/dnode-nice$(EXEEXT)" 
+
+@ENABLE_SETUID_TRUE@uninstall-local:
+@ENABLE_SETUID_TRUE@	rm -f "$(DESTDIR)$(bindir)/dnode-nice$(EXEEXT)"
 distclean-local:
 	-rm -rf codegen/.deps
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

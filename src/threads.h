@@ -2,19 +2,18 @@
 #define THREADS_H
 
 #if THREADS_ENABLED
+
+L op_makethreads(void);
+L op_threads(void);
+
 typedef L (*thread_func)(UL id, B* data);
 
 L threads_do(UL nways, thread_func func, B* data);
-L op_threads(void);
-extern UL thread_num;
+L thread_share_lock(UL id, thread_func func, B* data);
 
-typedef struct {
-  B* sf_start;
-  B* df_start;
-  UL perthread;
-  UL leftover;
-} thread_array_data;
+extern UL thread_num;
+extern UL thread_max;
 
 #endif //THREADS_ENABLED
 
-#endif
+#endif //THREADS_H

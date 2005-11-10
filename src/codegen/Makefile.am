@@ -22,6 +22,9 @@ dgen_LDADD = libdmbootstrap.la
 dmnuminc.h.built: dmnuminc.d dgen buildh
 	"$(srcdir)/buildh" \
 		"$(top_builddir)/src/codegen" "$(srcdir)" "dmnuminc.d" "$@"
+	(cd "$(srcdir)/.." ; \
+	 rm dmnuminc.h ; \
+	 $(LN_S) codegen/dmnuminc.h.built dmnuminc.h)
 
 dsp1f.h.built: dsp1f.d dgen buildh
 	"$(srcdir)/buildh" "\

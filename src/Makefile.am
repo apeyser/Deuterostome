@@ -10,11 +10,16 @@ edit = sed \
 
 dnode-nice.c: Makefile $(srcdir)/dnode-nice.c.in
 	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/dnode-nice.c.in > $@.tmp
+	$(edit) "$(srcdir)/dnode-nice.c.in" > $@.tmp
 	mv $@.tmp $@
 
-install-exec-hook:
-	-chown root $(bindir)/dnode-nice && chmod u+s $(bindir)/dnode-nice
+install-exec-local:
+	$(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install \
+		$(INSTALL) -m 4755 "dnode-nice$(EXEEXT)" \
+			"$(DESTDIR)$(bindir)/dnode-nice$(EXEEXT)" 
+
+uninstall-local:
+	rm -f "$(DESTDIR)$(bindir)/dnode-nice$(EXEEXT)"
 
 endif ENABLE_SETUID
 
@@ -44,8 +49,8 @@ AM_CPPFLAGS = \
 AM_LDFLAGS = -no-undefined $(X_LDFLAGS) $(THREADSLIB)
 INCLUDE = @INCLTDL@
 
-bin_PROGRAMS = dvt dnode $(DNODENICEBIN)
-noinst_PROGRAMS = testwordorder
+bin_PROGRAMS = dvt dnode 
+noinst_PROGRAMS = testwordorder $(DNODENICEBIN)
 
 if ENABLE_PLUGINS
 PLUGIN_HDR = plugin.h

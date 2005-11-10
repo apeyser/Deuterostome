@@ -344,6 +344,7 @@
 	"lock"
 	"serialize"
 	"threads"
+	"makethreads"
     "readboxfile"
     "writeboxfile"
     "getstartupdir"

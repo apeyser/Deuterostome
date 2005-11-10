@@ -7,6 +7,7 @@
 1000 dict dup begin
 
 /ROLLBITS @ROLLBITS@ def
+/UNROLLS  2 ROLLBITS pwr def
 
 /__   { * exch text} def
 /st__ { st mkact __ } def
@@ -267,7 +268,8 @@ NL
     {
        thread_array_data* data = \(thread_array_data*\) indata;
        D t; L n, n_; )__ st__ ( * restrict s; )__ dt__ ( * restrict d;
-       n_ = \(thread_num != id+1\) ? data->perthread : data->leftover;
+       n_ = data->perthread;
+       if \(thread_max == id\) n_ += data->leftover;
        s = \(\()__ st__ ( *\) data->sf_start\)+data->perthread*id;
        d = \(\()__ dt__ ( *\) data->df_start\)+data->perthread*id;)__
        { 
@@ -275,22 +277,24 @@ NL
            dt {(d++)__} (t) CVPUT
        } ROLLBITS FOR_modnp
 (
-       return 0;
+       return OK;
     }
 
     static void )__ st__ dt__ (moveAAc\(B *sf, B *df\)
     {
       UL nways; thread_array_data data;
-      if \(!thread_num || ARRAY_SIZE\(df\)/\(THREADMUL*)__ 
-        2 ROLLBITS pwr n__ (\) < 1\)
+      if \(thread_num == 1 || ARRAY_SIZE\(df\)/\(THREADMUL*)__ 
+        UNROLLS n__ (\) < 1\)
         )__ st__ dt__ (moveAAp\(sf, df\);
     else {
-      nways = 1 + ARRAY_SIZE\(df\) /\(THREADMUL*)__ 2 ROLLBITS pwr n__ (\);
+      nways = ARRAY_SIZE\(df\) /\(THREADMUL*)__ UNROLLS n__ (\)
+              + \(ARRAY_SIZE\(df\)%\(THREADMUL*)__ UNROLLS n__ (\) ?
+                 1 : 0\);
       if \(nways > thread_num\) nways = thread_num;
       data.sf_start = VALUE_PTR\(sf\);
       data.df_start = VALUE_PTR\(df\);
-      data.perthread = ARRAY_SIZE\(df\) / \(nways-1\);
-      data.leftover = ARRAY_SIZE\(df\) % \(nways-1\);
+      data.perthread = ARRAY_SIZE\(df\) / nways;
+      data.leftover = ARRAY_SIZE\(df\) % nways;
       threads_do\(nways, )__ st__ dt__ (moveAAt, \(B*\) &data\);
      }
    }
@@ -444,7 +448,8 @@ NL
     {
       thread_array_data* data = \(thread_array_data*\) indata;
       D t, tt; L n, n_; )__ st__ ( * s; )__ dt__ ( * d;
-      n_ = \(thread_num != id+1\) ? data->perthread : data->leftover;
+      n_ = data->perthread;
+      if \(thread_max == id\) n_ += data->leftover;
       s = \(\()__ st__ ( *\) data->sf_start\)+data->perthread*id;
       d = \(\()__ dt__ ( *\) data->df_start\)+data->perthread*id;)__
       {
@@ -454,22 +459,24 @@ NL
           dt {(d++)__} (t) CVPUT
       } ROLLBITS FOR_modnp
 (
-      return 0;
+      return OK;
     }
 
     static void )__ dt__ st__ (dy)__ op__ (AAc\(B* df, B* sf\)
     {
        UL nways; thread_array_data data;
-       if \(!thread_num || ARRAY_SIZE\(df\)/\(THREADMUL*)__
-          2 ROLLBITS pwr n__ (\) < 1\)
+       if \(thread_num == 1 || ARRAY_SIZE\(df\)/\(THREADMUL*)__
+          UNROLLS n__ (\) < 1\)
           )__ dt__ st__ (dy)__ op__ (AAp\(df, sf\);
        else {
-         nways = 1 + ARRAY_SIZE\(df\)/\(THREADMUL*)__ 2 ROLLBITS pwr n__ (\);
+         nways = ARRAY_SIZE\(df\)/\(THREADMUL*)__ UNROLLS n__ (\)
+                 + \(ARRAY_SIZE\(df\)%\(THREADMUL*)__ UNROLLS n__ (\) ?
+                     1 : 0\);
          if \(nways > thread_num\) nways = thread_num;
          data.sf_start = VALUE_PTR\(sf\);
          data.df_start = VALUE_PTR\(df\);
-         data.perthread = ARRAY_SIZE\(df\)/\(nways-1\);
-         data.leftover = ARRAY_SIZE\(df\)%\(nways-1\);
+         data.perthread = ARRAY_SIZE\(df\) / nways;
+         data.leftover = ARRAY_SIZE\(df\) % nways;
          threads_do\(nways, )__ dt__ st__ (dy)__ op__ (AAt, \(B*\) &data\);
        }
      }
