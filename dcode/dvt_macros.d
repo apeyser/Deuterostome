@@ -26,11 +26,11 @@
      (#\(emacsclient -n -s \) fax emacs_server_name fax \( \) fax faxRpage\n)
      (getRpage dup 0 get exch 1 get {exch dup 3 -1 roll loadlib} forall pop\n)
 |-- Dnodes
-     (* dvt begin dnode_resize end\n)
-     (* dvt begin ~_cx ~_ccx dnode_up end\n)
-     (* dvt begin ~_c ~_cc dnode_up end\n)
-     (* dvt begin {knode _dx} fornodes end\n)
-     (* dvt begin {knode _kill} fornodes end\n)
+     (% dvt begin dnode_resize end\n)
+     (% dvt begin ~_cx ~_ccx dnode_up end\n)
+     (% dvt begin ~_c ~_cc dnode_up end\n)
+     (% dvt begin {knode _dx} fornodes end\n)
+     (% dvt begin {knode _kill} fornodes end\n)
 |-- PrintFrom
       (#getstartupdir fax \(print.sh talk \) fax )
       (#getstartupdir fax \(print.sh ascii \) fax )
