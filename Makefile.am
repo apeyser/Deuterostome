@@ -21,3 +21,6 @@ ACLOCAL_AMFLAGS = -I m4
 codegen-all: codegen all
 codegen: 
 	cd src/codegen && $(MAKE) $(AM_MAKEFLAGS) all
+
+distclean-local:
+	-rm -f src/codegen/dmnuminc.d

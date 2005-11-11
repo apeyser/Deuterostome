@@ -19,7 +19,10 @@ install-exec-local:
 			"$(DESTDIR)$(bindir)/dnode-nice$(EXEEXT)" 
 
 uninstall-local:
-	rm -f "$(DESTDIR)$(bindir)/dnode-nice$(EXEEXT)"
+	-rm -f "$(DESTDIR)$(bindir)/dnode-nice$(EXEEXT)"
+
+clean-local:
+	-rm -f dnode-nice.c
 
 endif ENABLE_SETUID
 
