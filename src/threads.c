@@ -7,6 +7,8 @@
 // thread[0] is the main thread in all arrays
 // Therefore, elements 0 is empty.
 pthread_t threads[THREADNUM] = {};
+BOOLEAN thread_start[THREADNUM] = {};
+UL thread_end = 0;
 UL thread_num = 1;
 UL thread_max = 0;
 pthread_cond_t thread_wait[THREADNUM] = {};
@@ -57,13 +59,17 @@ void* thread_routine(void* arg) {
   pthread_cleanup_push(thread_unlock_lock, (void*) thread_id);
 
   while (TRUE) {
-	THREADERR(pthread_cond_wait, 
-			 thread_wait+thread_id, 
-			 thread_lock+thread_id);
+        thread_start[thread_id] = FALSE;
+        do {          
+          THREADERR(pthread_cond_wait, 
+                    thread_wait+thread_id, 
+                    thread_lock+thread_id);
+        } while (! thread_start[thread_id]);
 
 	ret = thread_function(thread_id, thread_data);
 	THREADERR(pthread_mutex_lock, &main_lock);
 	if (! thread_error) thread_error = ret;
+        --thread_end;
 	THREADERR(pthread_cond_signal, &main_wait);
 	THREADERR(pthread_mutex_unlock, &main_lock);
   }
@@ -79,23 +85,27 @@ L threads_do(UL nways, thread_func func, B* data) {
   UL i;
   if (nways > thread_num) return RNG_CHK;
 
-  MAINERR(pthread_mutex_lock, &main_lock);
-
   thread_max = nways-1;
   //thread_error = OK;
   thread_function = func;
   thread_data = data;
 
+  MAINERR(pthread_mutex_lock, &main_lock);
+  
   for (i = 1; i < nways; ++i) {
 	MAINERR(pthread_mutex_lock, thread_lock+i);
+        thread_start[i] = TRUE;
 	MAINERR(pthread_cond_signal, thread_wait+i);
 	MAINERR(pthread_mutex_unlock, thread_lock+i);
   }
 
   thread_error = thread_function(0, thread_data);
 
-  for (--nways; nways; --nways)
-	MAINERR(pthread_cond_wait, &main_wait, &main_lock);
+  thread_end = thread_max;
+  do {        
+      MAINERR(pthread_cond_wait, &main_wait, &main_lock);
+  } while (thread_end);
+  
 
   MAINERR(pthread_mutex_unlock, &main_lock);
   return thread_error;
