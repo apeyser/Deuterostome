@@ -24,7 +24,7 @@
     } stopped /mem _layer ~stop if
 } bind def
 
-/addtestl {
+/addl {
     /mem layer {
       /DA1 len /l array def
       /DA2 len /l array def
@@ -32,12 +32,26 @@
     } stopped /mem _layer ~stop if
 } bind def
 
-/addtestb {
+/addb {
     /mem layer {
       /DA1 len /b array def
       /DA2 len /b array def
       addtest
     } stopped /mem _layer ~stop if
+} bind def
+
+/movetest {
+  DA1 0 len 0 1 ramp pop pop
+  DA2 0 len 0 1 ramp pop pop
+  {DA1 reps {DA2 copy} repeat} timed _ pop
+} bind def
+
+/moveb  {
+  /mem layer {
+    /DA1 len /b array def
+    /DA2 len /b array def
+    movetest
+  } stopped /mem _layer ~stop if
 } bind def
 
 end _module

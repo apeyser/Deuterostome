@@ -4295,7 +4295,7 @@ t += tt;
     static L BBdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; B * d;
+      D t, tt; L n, n_; B * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -4550,7 +4550,7 @@ t -= tt;
     static L BBdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; B * d;
+      D t, tt; L n, n_; B * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -4805,7 +4805,7 @@ t *= tt;
     static L BBdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; B * d;
+      D t, tt; L n, n_; B * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -5060,7 +5060,7 @@ t /= tt;
     static L BBdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; B * d;
+      D t, tt; L n, n_; B * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -5315,7 +5315,7 @@ t = pow(t,tt);
     static L BBdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; B * d;
+      D t, tt; L n, n_; B * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -5570,7 +5570,7 @@ t = fmod(t,tt);
     static L BBdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; B * d;
+      D t, tt; L n, n_; B * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -5825,7 +5825,7 @@ t = thearc(t,tt);
     static L BBdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; B * d;
+      D t, tt; L n, n_; B * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -6080,7 +6080,7 @@ t += tt;
     static L BWdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; B * d;
+      D t, tt; L n, n_; W * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -6335,7 +6335,7 @@ t -= tt;
     static L BWdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; B * d;
+      D t, tt; L n, n_; W * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -6590,7 +6590,7 @@ t *= tt;
     static L BWdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; B * d;
+      D t, tt; L n, n_; W * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -6845,7 +6845,7 @@ t /= tt;
     static L BWdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; B * d;
+      D t, tt; L n, n_; W * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -7100,7 +7100,7 @@ t = pow(t,tt);
     static L BWdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; B * d;
+      D t, tt; L n, n_; W * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -7355,7 +7355,7 @@ t = fmod(t,tt);
     static L BWdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; B * d;
+      D t, tt; L n, n_; W * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -7610,7 +7610,7 @@ t = thearc(t,tt);
     static L BWdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; B * d;
+      D t, tt; L n, n_; W * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -7865,7 +7865,7 @@ t += tt;
     static L BLdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; B * d;
+      D t, tt; L n, n_; L * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -8120,7 +8120,7 @@ t -= tt;
     static L BLdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; B * d;
+      D t, tt; L n, n_; L * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -8375,7 +8375,7 @@ t *= tt;
     static L BLdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; B * d;
+      D t, tt; L n, n_; L * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -8630,7 +8630,7 @@ t /= tt;
     static L BLdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; B * d;
+      D t, tt; L n, n_; L * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -8885,7 +8885,7 @@ t = pow(t,tt);
     static L BLdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; B * d;
+      D t, tt; L n, n_; L * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -9140,7 +9140,7 @@ t = fmod(t,tt);
     static L BLdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; B * d;
+      D t, tt; L n, n_; L * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -9395,7 +9395,7 @@ t = thearc(t,tt);
     static L BLdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; B * d;
+      D t, tt; L n, n_; L * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -9650,7 +9650,7 @@ t += tt;
     static L BSdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; B * d;
+      D t, tt; L n, n_; S * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -9905,7 +9905,7 @@ t -= tt;
     static L BSdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; B * d;
+      D t, tt; L n, n_; S * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -10160,7 +10160,7 @@ t *= tt;
     static L BSdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; B * d;
+      D t, tt; L n, n_; S * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -10415,7 +10415,7 @@ t /= tt;
     static L BSdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; B * d;
+      D t, tt; L n, n_; S * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -10670,7 +10670,7 @@ t = pow(t,tt);
     static L BSdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; B * d;
+      D t, tt; L n, n_; S * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -10925,7 +10925,7 @@ t = fmod(t,tt);
     static L BSdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; B * d;
+      D t, tt; L n, n_; S * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -11180,7 +11180,7 @@ t = thearc(t,tt);
     static L BSdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; B * d;
+      D t, tt; L n, n_; S * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -11435,7 +11435,7 @@ t += tt;
     static L BDdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; B * d;
+      D t, tt; L n, n_; D * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -11690,7 +11690,7 @@ t -= tt;
     static L BDdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; B * d;
+      D t, tt; L n, n_; D * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -11945,7 +11945,7 @@ t *= tt;
     static L BDdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; B * d;
+      D t, tt; L n, n_; D * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -12200,7 +12200,7 @@ t /= tt;
     static L BDdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; B * d;
+      D t, tt; L n, n_; D * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -12455,7 +12455,7 @@ t = pow(t,tt);
     static L BDdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; B * d;
+      D t, tt; L n, n_; D * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -12710,7 +12710,7 @@ t = fmod(t,tt);
     static L BDdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; B * d;
+      D t, tt; L n, n_; D * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -12965,7 +12965,7 @@ t = thearc(t,tt);
     static L BDdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; B * d;
+      D t, tt; L n, n_; D * restrict s; B * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -13220,7 +13220,7 @@ t += tt;
     static L WBdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; W * d;
+      D t, tt; L n, n_; B * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -13475,7 +13475,7 @@ t -= tt;
     static L WBdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; W * d;
+      D t, tt; L n, n_; B * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -13730,7 +13730,7 @@ t *= tt;
     static L WBdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; W * d;
+      D t, tt; L n, n_; B * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -13985,7 +13985,7 @@ t /= tt;
     static L WBdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; W * d;
+      D t, tt; L n, n_; B * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -14240,7 +14240,7 @@ t = pow(t,tt);
     static L WBdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; W * d;
+      D t, tt; L n, n_; B * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -14495,7 +14495,7 @@ t = fmod(t,tt);
     static L WBdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; W * d;
+      D t, tt; L n, n_; B * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -14750,7 +14750,7 @@ t = thearc(t,tt);
     static L WBdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; W * d;
+      D t, tt; L n, n_; B * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -15005,7 +15005,7 @@ t += tt;
     static L WWdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; W * d;
+      D t, tt; L n, n_; W * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -15260,7 +15260,7 @@ t -= tt;
     static L WWdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; W * d;
+      D t, tt; L n, n_; W * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -15515,7 +15515,7 @@ t *= tt;
     static L WWdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; W * d;
+      D t, tt; L n, n_; W * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -15770,7 +15770,7 @@ t /= tt;
     static L WWdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; W * d;
+      D t, tt; L n, n_; W * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -16025,7 +16025,7 @@ t = pow(t,tt);
     static L WWdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; W * d;
+      D t, tt; L n, n_; W * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -16280,7 +16280,7 @@ t = fmod(t,tt);
     static L WWdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; W * d;
+      D t, tt; L n, n_; W * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -16535,7 +16535,7 @@ t = thearc(t,tt);
     static L WWdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; W * d;
+      D t, tt; L n, n_; W * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -16790,7 +16790,7 @@ t += tt;
     static L WLdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; W * d;
+      D t, tt; L n, n_; L * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -17045,7 +17045,7 @@ t -= tt;
     static L WLdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; W * d;
+      D t, tt; L n, n_; L * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -17300,7 +17300,7 @@ t *= tt;
     static L WLdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; W * d;
+      D t, tt; L n, n_; L * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -17555,7 +17555,7 @@ t /= tt;
     static L WLdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; W * d;
+      D t, tt; L n, n_; L * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -17810,7 +17810,7 @@ t = pow(t,tt);
     static L WLdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; W * d;
+      D t, tt; L n, n_; L * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -18065,7 +18065,7 @@ t = fmod(t,tt);
     static L WLdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; W * d;
+      D t, tt; L n, n_; L * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -18320,7 +18320,7 @@ t = thearc(t,tt);
     static L WLdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; W * d;
+      D t, tt; L n, n_; L * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -18575,7 +18575,7 @@ t += tt;
     static L WSdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; W * d;
+      D t, tt; L n, n_; S * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -18830,7 +18830,7 @@ t -= tt;
     static L WSdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; W * d;
+      D t, tt; L n, n_; S * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -19085,7 +19085,7 @@ t *= tt;
     static L WSdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; W * d;
+      D t, tt; L n, n_; S * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -19340,7 +19340,7 @@ t /= tt;
     static L WSdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; W * d;
+      D t, tt; L n, n_; S * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -19595,7 +19595,7 @@ t = pow(t,tt);
     static L WSdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; W * d;
+      D t, tt; L n, n_; S * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -19850,7 +19850,7 @@ t = fmod(t,tt);
     static L WSdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; W * d;
+      D t, tt; L n, n_; S * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -20105,7 +20105,7 @@ t = thearc(t,tt);
     static L WSdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; W * d;
+      D t, tt; L n, n_; S * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -20360,7 +20360,7 @@ t += tt;
     static L WDdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; W * d;
+      D t, tt; L n, n_; D * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -20615,7 +20615,7 @@ t -= tt;
     static L WDdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; W * d;
+      D t, tt; L n, n_; D * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -20870,7 +20870,7 @@ t *= tt;
     static L WDdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; W * d;
+      D t, tt; L n, n_; D * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -21125,7 +21125,7 @@ t /= tt;
     static L WDdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; W * d;
+      D t, tt; L n, n_; D * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -21380,7 +21380,7 @@ t = pow(t,tt);
     static L WDdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; W * d;
+      D t, tt; L n, n_; D * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -21635,7 +21635,7 @@ t = fmod(t,tt);
     static L WDdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; W * d;
+      D t, tt; L n, n_; D * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -21890,7 +21890,7 @@ t = thearc(t,tt);
     static L WDdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; W * d;
+      D t, tt; L n, n_; D * restrict s; W * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -22145,7 +22145,7 @@ t += tt;
     static L LBdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; L * d;
+      D t, tt; L n, n_; B * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -22400,7 +22400,7 @@ t -= tt;
     static L LBdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; L * d;
+      D t, tt; L n, n_; B * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -22655,7 +22655,7 @@ t *= tt;
     static L LBdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; L * d;
+      D t, tt; L n, n_; B * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -22910,7 +22910,7 @@ t /= tt;
     static L LBdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; L * d;
+      D t, tt; L n, n_; B * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -23165,7 +23165,7 @@ t = pow(t,tt);
     static L LBdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; L * d;
+      D t, tt; L n, n_; B * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -23420,7 +23420,7 @@ t = fmod(t,tt);
     static L LBdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; L * d;
+      D t, tt; L n, n_; B * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -23675,7 +23675,7 @@ t = thearc(t,tt);
     static L LBdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; L * d;
+      D t, tt; L n, n_; B * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -23930,7 +23930,7 @@ t += tt;
     static L LWdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; L * d;
+      D t, tt; L n, n_; W * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -24185,7 +24185,7 @@ t -= tt;
     static L LWdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; L * d;
+      D t, tt; L n, n_; W * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -24440,7 +24440,7 @@ t *= tt;
     static L LWdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; L * d;
+      D t, tt; L n, n_; W * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -24695,7 +24695,7 @@ t /= tt;
     static L LWdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; L * d;
+      D t, tt; L n, n_; W * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -24950,7 +24950,7 @@ t = pow(t,tt);
     static L LWdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; L * d;
+      D t, tt; L n, n_; W * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -25205,7 +25205,7 @@ t = fmod(t,tt);
     static L LWdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; L * d;
+      D t, tt; L n, n_; W * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -25460,7 +25460,7 @@ t = thearc(t,tt);
     static L LWdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; L * d;
+      D t, tt; L n, n_; W * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -25715,7 +25715,7 @@ t += tt;
     static L LLdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; L * d;
+      D t, tt; L n, n_; L * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -25970,7 +25970,7 @@ t -= tt;
     static L LLdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; L * d;
+      D t, tt; L n, n_; L * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -26225,7 +26225,7 @@ t *= tt;
     static L LLdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; L * d;
+      D t, tt; L n, n_; L * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -26480,7 +26480,7 @@ t /= tt;
     static L LLdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; L * d;
+      D t, tt; L n, n_; L * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -26735,7 +26735,7 @@ t = pow(t,tt);
     static L LLdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; L * d;
+      D t, tt; L n, n_; L * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -26990,7 +26990,7 @@ t = fmod(t,tt);
     static L LLdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; L * d;
+      D t, tt; L n, n_; L * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -27245,7 +27245,7 @@ t = thearc(t,tt);
     static L LLdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; L * d;
+      D t, tt; L n, n_; L * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -27500,7 +27500,7 @@ t += tt;
     static L LSdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; L * d;
+      D t, tt; L n, n_; S * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -27755,7 +27755,7 @@ t -= tt;
     static L LSdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; L * d;
+      D t, tt; L n, n_; S * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -28010,7 +28010,7 @@ t *= tt;
     static L LSdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; L * d;
+      D t, tt; L n, n_; S * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -28265,7 +28265,7 @@ t /= tt;
     static L LSdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; L * d;
+      D t, tt; L n, n_; S * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -28520,7 +28520,7 @@ t = pow(t,tt);
     static L LSdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; L * d;
+      D t, tt; L n, n_; S * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -28775,7 +28775,7 @@ t = fmod(t,tt);
     static L LSdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; L * d;
+      D t, tt; L n, n_; S * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -29030,7 +29030,7 @@ t = thearc(t,tt);
     static L LSdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; L * d;
+      D t, tt; L n, n_; S * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -29285,7 +29285,7 @@ t += tt;
     static L LDdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; L * d;
+      D t, tt; L n, n_; D * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -29540,7 +29540,7 @@ t -= tt;
     static L LDdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; L * d;
+      D t, tt; L n, n_; D * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -29795,7 +29795,7 @@ t *= tt;
     static L LDdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; L * d;
+      D t, tt; L n, n_; D * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -30050,7 +30050,7 @@ t /= tt;
     static L LDdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; L * d;
+      D t, tt; L n, n_; D * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -30305,7 +30305,7 @@ t = pow(t,tt);
     static L LDdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; L * d;
+      D t, tt; L n, n_; D * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -30560,7 +30560,7 @@ t = fmod(t,tt);
     static L LDdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; L * d;
+      D t, tt; L n, n_; D * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -30815,7 +30815,7 @@ t = thearc(t,tt);
     static L LDdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; L * d;
+      D t, tt; L n, n_; D * restrict s; L * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -31070,7 +31070,7 @@ t += tt;
     static L SBdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; S * d;
+      D t, tt; L n, n_; B * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -31325,7 +31325,7 @@ t -= tt;
     static L SBdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; S * d;
+      D t, tt; L n, n_; B * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -31580,7 +31580,7 @@ t *= tt;
     static L SBdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; S * d;
+      D t, tt; L n, n_; B * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -31835,7 +31835,7 @@ t /= tt;
     static L SBdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; S * d;
+      D t, tt; L n, n_; B * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -32090,7 +32090,7 @@ t = pow(t,tt);
     static L SBdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; S * d;
+      D t, tt; L n, n_; B * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -32345,7 +32345,7 @@ t = fmod(t,tt);
     static L SBdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; S * d;
+      D t, tt; L n, n_; B * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -32600,7 +32600,7 @@ t = thearc(t,tt);
     static L SBdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; S * d;
+      D t, tt; L n, n_; B * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -32855,7 +32855,7 @@ t += tt;
     static L SWdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; S * d;
+      D t, tt; L n, n_; W * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -33110,7 +33110,7 @@ t -= tt;
     static L SWdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; S * d;
+      D t, tt; L n, n_; W * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -33365,7 +33365,7 @@ t *= tt;
     static L SWdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; S * d;
+      D t, tt; L n, n_; W * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -33620,7 +33620,7 @@ t /= tt;
     static L SWdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; S * d;
+      D t, tt; L n, n_; W * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -33875,7 +33875,7 @@ t = pow(t,tt);
     static L SWdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; S * d;
+      D t, tt; L n, n_; W * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -34130,7 +34130,7 @@ t = fmod(t,tt);
     static L SWdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; S * d;
+      D t, tt; L n, n_; W * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -34385,7 +34385,7 @@ t = thearc(t,tt);
     static L SWdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; S * d;
+      D t, tt; L n, n_; W * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -34640,7 +34640,7 @@ t += tt;
     static L SLdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; S * d;
+      D t, tt; L n, n_; L * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -34895,7 +34895,7 @@ t -= tt;
     static L SLdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; S * d;
+      D t, tt; L n, n_; L * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -35150,7 +35150,7 @@ t *= tt;
     static L SLdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; S * d;
+      D t, tt; L n, n_; L * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -35405,7 +35405,7 @@ t /= tt;
     static L SLdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; S * d;
+      D t, tt; L n, n_; L * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -35660,7 +35660,7 @@ t = pow(t,tt);
     static L SLdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; S * d;
+      D t, tt; L n, n_; L * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -35915,7 +35915,7 @@ t = fmod(t,tt);
     static L SLdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; S * d;
+      D t, tt; L n, n_; L * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -36170,7 +36170,7 @@ t = thearc(t,tt);
     static L SLdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; S * d;
+      D t, tt; L n, n_; L * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -36425,7 +36425,7 @@ t += tt;
     static L SSdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; S * d;
+      D t, tt; L n, n_; S * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -36680,7 +36680,7 @@ t -= tt;
     static L SSdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; S * d;
+      D t, tt; L n, n_; S * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -36935,7 +36935,7 @@ t *= tt;
     static L SSdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; S * d;
+      D t, tt; L n, n_; S * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -37190,7 +37190,7 @@ t /= tt;
     static L SSdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; S * d;
+      D t, tt; L n, n_; S * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -37445,7 +37445,7 @@ t = pow(t,tt);
     static L SSdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; S * d;
+      D t, tt; L n, n_; S * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -37700,7 +37700,7 @@ t = fmod(t,tt);
     static L SSdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; S * d;
+      D t, tt; L n, n_; S * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -37955,7 +37955,7 @@ t = thearc(t,tt);
     static L SSdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; S * d;
+      D t, tt; L n, n_; S * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -38210,7 +38210,7 @@ t += tt;
     static L SDdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; S * d;
+      D t, tt; L n, n_; D * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -38465,7 +38465,7 @@ t -= tt;
     static L SDdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; S * d;
+      D t, tt; L n, n_; D * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -38720,7 +38720,7 @@ t *= tt;
     static L SDdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; S * d;
+      D t, tt; L n, n_; D * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -38975,7 +38975,7 @@ t /= tt;
     static L SDdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; S * d;
+      D t, tt; L n, n_; D * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -39230,7 +39230,7 @@ t = pow(t,tt);
     static L SDdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; S * d;
+      D t, tt; L n, n_; D * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -39485,7 +39485,7 @@ t = fmod(t,tt);
     static L SDdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; S * d;
+      D t, tt; L n, n_; D * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -39740,7 +39740,7 @@ t = thearc(t,tt);
     static L SDdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; S * d;
+      D t, tt; L n, n_; D * restrict s; S * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -39995,7 +39995,7 @@ t += tt;
     static L DBdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; D * d;
+      D t, tt; L n, n_; B * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -40250,7 +40250,7 @@ t -= tt;
     static L DBdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; D * d;
+      D t, tt; L n, n_; B * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -40505,7 +40505,7 @@ t *= tt;
     static L DBdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; D * d;
+      D t, tt; L n, n_; B * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -40760,7 +40760,7 @@ t /= tt;
     static L DBdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; D * d;
+      D t, tt; L n, n_; B * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -41015,7 +41015,7 @@ t = pow(t,tt);
     static L DBdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; D * d;
+      D t, tt; L n, n_; B * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -41270,7 +41270,7 @@ t = fmod(t,tt);
     static L DBdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; D * d;
+      D t, tt; L n, n_; B * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -41525,7 +41525,7 @@ t = thearc(t,tt);
     static L DBdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; B * s; D * d;
+      D t, tt; L n, n_; B * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((B *) data->sf_start)+data->perthread*id;
@@ -41780,7 +41780,7 @@ t += tt;
     static L DWdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; D * d;
+      D t, tt; L n, n_; W * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -42035,7 +42035,7 @@ t -= tt;
     static L DWdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; D * d;
+      D t, tt; L n, n_; W * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -42290,7 +42290,7 @@ t *= tt;
     static L DWdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; D * d;
+      D t, tt; L n, n_; W * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -42545,7 +42545,7 @@ t /= tt;
     static L DWdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; D * d;
+      D t, tt; L n, n_; W * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -42800,7 +42800,7 @@ t = pow(t,tt);
     static L DWdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; D * d;
+      D t, tt; L n, n_; W * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -43055,7 +43055,7 @@ t = fmod(t,tt);
     static L DWdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; D * d;
+      D t, tt; L n, n_; W * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -43310,7 +43310,7 @@ t = thearc(t,tt);
     static L DWdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; W * s; D * d;
+      D t, tt; L n, n_; W * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((W *) data->sf_start)+data->perthread*id;
@@ -43565,7 +43565,7 @@ t += tt;
     static L DLdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; D * d;
+      D t, tt; L n, n_; L * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -43820,7 +43820,7 @@ t -= tt;
     static L DLdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; D * d;
+      D t, tt; L n, n_; L * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -44075,7 +44075,7 @@ t *= tt;
     static L DLdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; D * d;
+      D t, tt; L n, n_; L * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -44330,7 +44330,7 @@ t /= tt;
     static L DLdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; D * d;
+      D t, tt; L n, n_; L * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -44585,7 +44585,7 @@ t = pow(t,tt);
     static L DLdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; D * d;
+      D t, tt; L n, n_; L * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -44840,7 +44840,7 @@ t = fmod(t,tt);
     static L DLdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; D * d;
+      D t, tt; L n, n_; L * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -45095,7 +45095,7 @@ t = thearc(t,tt);
     static L DLdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; L * s; D * d;
+      D t, tt; L n, n_; L * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((L *) data->sf_start)+data->perthread*id;
@@ -45350,7 +45350,7 @@ t += tt;
     static L DSdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; D * d;
+      D t, tt; L n, n_; S * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -45605,7 +45605,7 @@ t -= tt;
     static L DSdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; D * d;
+      D t, tt; L n, n_; S * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -45860,7 +45860,7 @@ t *= tt;
     static L DSdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; D * d;
+      D t, tt; L n, n_; S * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -46115,7 +46115,7 @@ t /= tt;
     static L DSdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; D * d;
+      D t, tt; L n, n_; S * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -46370,7 +46370,7 @@ t = pow(t,tt);
     static L DSdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; D * d;
+      D t, tt; L n, n_; S * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -46625,7 +46625,7 @@ t = fmod(t,tt);
     static L DSdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; D * d;
+      D t, tt; L n, n_; S * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -46880,7 +46880,7 @@ t = thearc(t,tt);
     static L DSdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; S * s; D * d;
+      D t, tt; L n, n_; S * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((S *) data->sf_start)+data->perthread*id;
@@ -47135,7 +47135,7 @@ t += tt;
     static L DDdyADDAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; D * d;
+      D t, tt; L n, n_; D * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -47390,7 +47390,7 @@ t -= tt;
     static L DDdySUBAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; D * d;
+      D t, tt; L n, n_; D * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -47645,7 +47645,7 @@ t *= tt;
     static L DDdyMULAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; D * d;
+      D t, tt; L n, n_; D * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -47900,7 +47900,7 @@ t /= tt;
     static L DDdyDIVAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; D * d;
+      D t, tt; L n, n_; D * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -48155,7 +48155,7 @@ t = pow(t,tt);
     static L DDdyPWRAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; D * d;
+      D t, tt; L n, n_; D * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -48410,7 +48410,7 @@ t = fmod(t,tt);
     static L DDdyMODAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; D * d;
+      D t, tt; L n, n_; D * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
@@ -48665,7 +48665,7 @@ t = thearc(t,tt);
     static L DDdyTHEARCAAt(UL id, B* indata) 
     {
       thread_array_data* data = (thread_array_data*) indata;
-      D t, tt; L n, n_; D * s; D * d;
+      D t, tt; L n, n_; D * restrict s; D * restrict d;
       n_ = data->perthread;
       if (thread_max == id) n_ += data->leftover;
       s = ((D *) data->sf_start)+data->perthread*id;
