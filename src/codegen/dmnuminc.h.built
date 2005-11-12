@@ -186,7 +186,7 @@ if ((data.in = *((B *)NUM_VAL(sf))) == BINF) data.in = DINF;
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       BBmoveSAc(sf, df);
 #if ENABLE_THREADS
     else BBmoveSAc(sf,df);
@@ -399,7 +399,7 @@ if ((data.in = *((B *)NUM_VAL(sf))) == BINF) data.in = DINF;
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       BWmoveSAc(sf, df);
 #if ENABLE_THREADS
     else BWmoveSAc(sf,df);
@@ -612,7 +612,7 @@ if ((data.in = *((B *)NUM_VAL(sf))) == BINF) data.in = DINF;
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       BLmoveSAc(sf, df);
 #if ENABLE_THREADS
     else BLmoveSAc(sf,df);
@@ -825,7 +825,7 @@ if ((data.in = *((B *)NUM_VAL(sf))) == BINF) data.in = DINF;
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       BSmoveSAc(sf, df);
 #if ENABLE_THREADS
     else BSmoveSAc(sf,df);
@@ -1038,7 +1038,7 @@ if ((data.in = *((B *)NUM_VAL(sf))) == BINF) data.in = DINF;
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       BDmoveSAc(sf, df);
 #if ENABLE_THREADS
     else BDmoveSAc(sf,df);
@@ -1251,7 +1251,7 @@ if ((data.in = *((W *)NUM_VAL(sf))) == WINF) data.in = DINF;
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       WBmoveSAc(sf, df);
 #if ENABLE_THREADS
     else WBmoveSAc(sf,df);
@@ -1464,7 +1464,7 @@ if ((data.in = *((W *)NUM_VAL(sf))) == WINF) data.in = DINF;
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       WWmoveSAc(sf, df);
 #if ENABLE_THREADS
     else WWmoveSAc(sf,df);
@@ -1677,7 +1677,7 @@ if ((data.in = *((W *)NUM_VAL(sf))) == WINF) data.in = DINF;
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       WLmoveSAc(sf, df);
 #if ENABLE_THREADS
     else WLmoveSAc(sf,df);
@@ -1890,7 +1890,7 @@ if ((data.in = *((W *)NUM_VAL(sf))) == WINF) data.in = DINF;
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       WSmoveSAc(sf, df);
 #if ENABLE_THREADS
     else WSmoveSAc(sf,df);
@@ -2103,7 +2103,7 @@ if ((data.in = *((W *)NUM_VAL(sf))) == WINF) data.in = DINF;
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       WDmoveSAc(sf, df);
 #if ENABLE_THREADS
     else WDmoveSAc(sf,df);
@@ -2316,7 +2316,7 @@ if ((data.in = *((L *)NUM_VAL(sf))) == LINF) data.in = DINF;
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       LBmoveSAc(sf, df);
 #if ENABLE_THREADS
     else LBmoveSAc(sf,df);
@@ -2529,7 +2529,7 @@ if ((data.in = *((L *)NUM_VAL(sf))) == LINF) data.in = DINF;
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       LWmoveSAc(sf, df);
 #if ENABLE_THREADS
     else LWmoveSAc(sf,df);
@@ -2742,7 +2742,7 @@ if ((data.in = *((L *)NUM_VAL(sf))) == LINF) data.in = DINF;
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       LLmoveSAc(sf, df);
 #if ENABLE_THREADS
     else LLmoveSAc(sf,df);
@@ -2955,7 +2955,7 @@ if ((data.in = *((L *)NUM_VAL(sf))) == LINF) data.in = DINF;
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       LSmoveSAc(sf, df);
 #if ENABLE_THREADS
     else LSmoveSAc(sf,df);
@@ -3168,7 +3168,7 @@ if ((data.in = *((L *)NUM_VAL(sf))) == LINF) data.in = DINF;
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       LDmoveSAc(sf, df);
 #if ENABLE_THREADS
     else LDmoveSAc(sf,df);
@@ -3381,7 +3381,7 @@ data.in = *((S *)NUM_VAL(sf));
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       SBmoveSAc(sf, df);
 #if ENABLE_THREADS
     else SBmoveSAc(sf,df);
@@ -3594,7 +3594,7 @@ data.in = *((S *)NUM_VAL(sf));
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       SWmoveSAc(sf, df);
 #if ENABLE_THREADS
     else SWmoveSAc(sf,df);
@@ -3807,7 +3807,7 @@ data.in = *((S *)NUM_VAL(sf));
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       SLmoveSAc(sf, df);
 #if ENABLE_THREADS
     else SLmoveSAc(sf,df);
@@ -4020,7 +4020,7 @@ data.in = *((S *)NUM_VAL(sf));
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       SSmoveSAc(sf, df);
 #if ENABLE_THREADS
     else SSmoveSAc(sf,df);
@@ -4233,7 +4233,7 @@ data.in = *((S *)NUM_VAL(sf));
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       SDmoveSAc(sf, df);
 #if ENABLE_THREADS
     else SDmoveSAc(sf,df);
@@ -4446,7 +4446,7 @@ data.in = *((D *)NUM_VAL(sf));
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       DBmoveSAc(sf, df);
 #if ENABLE_THREADS
     else DBmoveSAc(sf,df);
@@ -4659,7 +4659,7 @@ data.in = *((D *)NUM_VAL(sf));
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       DWmoveSAc(sf, df);
 #if ENABLE_THREADS
     else DWmoveSAc(sf,df);
@@ -4872,7 +4872,7 @@ data.in = *((D *)NUM_VAL(sf));
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       DLmoveSAc(sf, df);
 #if ENABLE_THREADS
     else DLmoveSAc(sf,df);
@@ -5085,7 +5085,7 @@ data.in = *((D *)NUM_VAL(sf));
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       DSmoveSAc(sf, df);
 #if ENABLE_THREADS
     else DSmoveSAc(sf,df);
@@ -5298,7 +5298,7 @@ data.in = *((D *)NUM_VAL(sf));
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       DDmoveSAc(sf, df);
 #if ENABLE_THREADS
     else DDmoveSAc(sf,df);
@@ -5577,13 +5577,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, BBdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BBdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BBdyADDASs(df, sf);
 #if ENABLE_THREADS
     else BBdyADDASc(df, sf);
@@ -5985,13 +5985,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, BBdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BBdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BBdySUBASs(df, sf);
 #if ENABLE_THREADS
     else BBdySUBASc(df, sf);
@@ -6393,13 +6393,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, BBdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BBdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BBdyMULASs(df, sf);
 #if ENABLE_THREADS
     else BBdyMULASc(df, sf);
@@ -6801,13 +6801,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, BBdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BBdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BBdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else BBdyDIVASc(df, sf);
@@ -7209,13 +7209,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, BBdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BBdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BBdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else BBdyPWRASc(df, sf);
@@ -7545,13 +7545,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, BBdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BBdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BBdyMODASs(df, sf);
 #if ENABLE_THREADS
     else BBdyMODASc(df, sf);
@@ -7881,13 +7881,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, BBdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BBdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BBdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else BBdyTHEARCASc(df, sf);
@@ -8217,13 +8217,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, BWdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BWdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BWdyADDASs(df, sf);
 #if ENABLE_THREADS
     else BWdyADDASc(df, sf);
@@ -8625,13 +8625,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, BWdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BWdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BWdySUBASs(df, sf);
 #if ENABLE_THREADS
     else BWdySUBASc(df, sf);
@@ -9033,13 +9033,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, BWdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BWdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BWdyMULASs(df, sf);
 #if ENABLE_THREADS
     else BWdyMULASc(df, sf);
@@ -9441,13 +9441,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, BWdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BWdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BWdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else BWdyDIVASc(df, sf);
@@ -9849,13 +9849,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, BWdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BWdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BWdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else BWdyPWRASc(df, sf);
@@ -10185,13 +10185,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, BWdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BWdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BWdyMODASs(df, sf);
 #if ENABLE_THREADS
     else BWdyMODASc(df, sf);
@@ -10521,13 +10521,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, BWdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BWdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BWdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else BWdyTHEARCASc(df, sf);
@@ -10857,13 +10857,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, BLdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BLdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BLdyADDASs(df, sf);
 #if ENABLE_THREADS
     else BLdyADDASc(df, sf);
@@ -11265,13 +11265,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, BLdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BLdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BLdySUBASs(df, sf);
 #if ENABLE_THREADS
     else BLdySUBASc(df, sf);
@@ -11673,13 +11673,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, BLdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BLdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BLdyMULASs(df, sf);
 #if ENABLE_THREADS
     else BLdyMULASc(df, sf);
@@ -12081,13 +12081,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, BLdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BLdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BLdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else BLdyDIVASc(df, sf);
@@ -12489,13 +12489,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, BLdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BLdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BLdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else BLdyPWRASc(df, sf);
@@ -12825,13 +12825,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, BLdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BLdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BLdyMODASs(df, sf);
 #if ENABLE_THREADS
     else BLdyMODASc(df, sf);
@@ -13161,13 +13161,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, BLdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BLdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BLdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else BLdyTHEARCASc(df, sf);
@@ -13497,13 +13497,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, BSdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BSdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BSdyADDASs(df, sf);
 #if ENABLE_THREADS
     else BSdyADDASc(df, sf);
@@ -13905,13 +13905,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, BSdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BSdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BSdySUBASs(df, sf);
 #if ENABLE_THREADS
     else BSdySUBASc(df, sf);
@@ -14313,13 +14313,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, BSdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BSdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BSdyMULASs(df, sf);
 #if ENABLE_THREADS
     else BSdyMULASc(df, sf);
@@ -14721,13 +14721,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, BSdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BSdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BSdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else BSdyDIVASc(df, sf);
@@ -15129,13 +15129,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, BSdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BSdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BSdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else BSdyPWRASc(df, sf);
@@ -15465,13 +15465,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, BSdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BSdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BSdyMODASs(df, sf);
 #if ENABLE_THREADS
     else BSdyMODASc(df, sf);
@@ -15801,13 +15801,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, BSdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BSdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BSdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else BSdyTHEARCASc(df, sf);
@@ -16137,13 +16137,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, BDdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BDdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BDdyADDASs(df, sf);
 #if ENABLE_THREADS
     else BDdyADDASc(df, sf);
@@ -16545,13 +16545,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, BDdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BDdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BDdySUBASs(df, sf);
 #if ENABLE_THREADS
     else BDdySUBASc(df, sf);
@@ -16953,13 +16953,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, BDdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BDdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BDdyMULASs(df, sf);
 #if ENABLE_THREADS
     else BDdyMULASc(df, sf);
@@ -17361,13 +17361,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, BDdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BDdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BDdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else BDdyDIVASc(df, sf);
@@ -17769,13 +17769,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, BDdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BDdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BDdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else BDdyPWRASc(df, sf);
@@ -18105,13 +18105,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, BDdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BDdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BDdyMODASs(df, sf);
 #if ENABLE_THREADS
     else BDdyMODASc(df, sf);
@@ -18441,13 +18441,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, BDdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BDdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     BDdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else BDdyTHEARCASc(df, sf);
@@ -18777,13 +18777,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, WBdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WBdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WBdyADDASs(df, sf);
 #if ENABLE_THREADS
     else WBdyADDASc(df, sf);
@@ -19185,13 +19185,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, WBdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WBdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WBdySUBASs(df, sf);
 #if ENABLE_THREADS
     else WBdySUBASc(df, sf);
@@ -19593,13 +19593,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, WBdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WBdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WBdyMULASs(df, sf);
 #if ENABLE_THREADS
     else WBdyMULASc(df, sf);
@@ -20001,13 +20001,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, WBdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WBdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WBdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else WBdyDIVASc(df, sf);
@@ -20409,13 +20409,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, WBdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WBdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WBdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else WBdyPWRASc(df, sf);
@@ -20745,13 +20745,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, WBdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WBdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WBdyMODASs(df, sf);
 #if ENABLE_THREADS
     else WBdyMODASc(df, sf);
@@ -21081,13 +21081,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, WBdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WBdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WBdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else WBdyTHEARCASc(df, sf);
@@ -21417,13 +21417,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, WWdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WWdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WWdyADDASs(df, sf);
 #if ENABLE_THREADS
     else WWdyADDASc(df, sf);
@@ -21825,13 +21825,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, WWdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WWdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WWdySUBASs(df, sf);
 #if ENABLE_THREADS
     else WWdySUBASc(df, sf);
@@ -22233,13 +22233,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, WWdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WWdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WWdyMULASs(df, sf);
 #if ENABLE_THREADS
     else WWdyMULASc(df, sf);
@@ -22641,13 +22641,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, WWdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WWdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WWdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else WWdyDIVASc(df, sf);
@@ -23049,13 +23049,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, WWdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WWdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WWdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else WWdyPWRASc(df, sf);
@@ -23385,13 +23385,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, WWdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WWdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WWdyMODASs(df, sf);
 #if ENABLE_THREADS
     else WWdyMODASc(df, sf);
@@ -23721,13 +23721,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, WWdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WWdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WWdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else WWdyTHEARCASc(df, sf);
@@ -24057,13 +24057,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, WLdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WLdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WLdyADDASs(df, sf);
 #if ENABLE_THREADS
     else WLdyADDASc(df, sf);
@@ -24465,13 +24465,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, WLdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WLdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WLdySUBASs(df, sf);
 #if ENABLE_THREADS
     else WLdySUBASc(df, sf);
@@ -24873,13 +24873,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, WLdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WLdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WLdyMULASs(df, sf);
 #if ENABLE_THREADS
     else WLdyMULASc(df, sf);
@@ -25281,13 +25281,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, WLdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WLdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WLdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else WLdyDIVASc(df, sf);
@@ -25689,13 +25689,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, WLdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WLdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WLdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else WLdyPWRASc(df, sf);
@@ -26025,13 +26025,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, WLdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WLdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WLdyMODASs(df, sf);
 #if ENABLE_THREADS
     else WLdyMODASc(df, sf);
@@ -26361,13 +26361,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, WLdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WLdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WLdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else WLdyTHEARCASc(df, sf);
@@ -26697,13 +26697,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, WSdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WSdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WSdyADDASs(df, sf);
 #if ENABLE_THREADS
     else WSdyADDASc(df, sf);
@@ -27105,13 +27105,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, WSdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WSdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WSdySUBASs(df, sf);
 #if ENABLE_THREADS
     else WSdySUBASc(df, sf);
@@ -27513,13 +27513,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, WSdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WSdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WSdyMULASs(df, sf);
 #if ENABLE_THREADS
     else WSdyMULASc(df, sf);
@@ -27921,13 +27921,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, WSdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WSdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WSdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else WSdyDIVASc(df, sf);
@@ -28329,13 +28329,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, WSdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WSdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WSdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else WSdyPWRASc(df, sf);
@@ -28665,13 +28665,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, WSdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WSdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WSdyMODASs(df, sf);
 #if ENABLE_THREADS
     else WSdyMODASc(df, sf);
@@ -29001,13 +29001,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, WSdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WSdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WSdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else WSdyTHEARCASc(df, sf);
@@ -29337,13 +29337,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, WDdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WDdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WDdyADDASs(df, sf);
 #if ENABLE_THREADS
     else WDdyADDASc(df, sf);
@@ -29745,13 +29745,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, WDdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WDdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WDdySUBASs(df, sf);
 #if ENABLE_THREADS
     else WDdySUBASc(df, sf);
@@ -30153,13 +30153,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, WDdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WDdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WDdyMULASs(df, sf);
 #if ENABLE_THREADS
     else WDdyMULASc(df, sf);
@@ -30561,13 +30561,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, WDdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WDdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WDdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else WDdyDIVASc(df, sf);
@@ -30969,13 +30969,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, WDdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WDdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WDdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else WDdyPWRASc(df, sf);
@@ -31305,13 +31305,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, WDdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WDdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WDdyMODASs(df, sf);
 #if ENABLE_THREADS
     else WDdyMODASc(df, sf);
@@ -31641,13 +31641,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, WDdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WDdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     WDdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else WDdyTHEARCASc(df, sf);
@@ -31977,13 +31977,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, LBdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LBdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LBdyADDASs(df, sf);
 #if ENABLE_THREADS
     else LBdyADDASc(df, sf);
@@ -32385,13 +32385,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, LBdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LBdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LBdySUBASs(df, sf);
 #if ENABLE_THREADS
     else LBdySUBASc(df, sf);
@@ -32793,13 +32793,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, LBdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LBdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LBdyMULASs(df, sf);
 #if ENABLE_THREADS
     else LBdyMULASc(df, sf);
@@ -33201,13 +33201,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, LBdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LBdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LBdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else LBdyDIVASc(df, sf);
@@ -33609,13 +33609,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, LBdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LBdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LBdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else LBdyPWRASc(df, sf);
@@ -33945,13 +33945,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, LBdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LBdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LBdyMODASs(df, sf);
 #if ENABLE_THREADS
     else LBdyMODASc(df, sf);
@@ -34281,13 +34281,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, LBdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LBdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LBdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else LBdyTHEARCASc(df, sf);
@@ -34617,13 +34617,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, LWdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LWdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LWdyADDASs(df, sf);
 #if ENABLE_THREADS
     else LWdyADDASc(df, sf);
@@ -35025,13 +35025,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, LWdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LWdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LWdySUBASs(df, sf);
 #if ENABLE_THREADS
     else LWdySUBASc(df, sf);
@@ -35433,13 +35433,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, LWdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LWdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LWdyMULASs(df, sf);
 #if ENABLE_THREADS
     else LWdyMULASc(df, sf);
@@ -35841,13 +35841,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, LWdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LWdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LWdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else LWdyDIVASc(df, sf);
@@ -36249,13 +36249,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, LWdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LWdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LWdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else LWdyPWRASc(df, sf);
@@ -36585,13 +36585,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, LWdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LWdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LWdyMODASs(df, sf);
 #if ENABLE_THREADS
     else LWdyMODASc(df, sf);
@@ -36921,13 +36921,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, LWdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LWdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LWdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else LWdyTHEARCASc(df, sf);
@@ -37257,13 +37257,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, LLdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LLdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LLdyADDASs(df, sf);
 #if ENABLE_THREADS
     else LLdyADDASc(df, sf);
@@ -37665,13 +37665,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, LLdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LLdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LLdySUBASs(df, sf);
 #if ENABLE_THREADS
     else LLdySUBASc(df, sf);
@@ -38073,13 +38073,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, LLdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LLdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LLdyMULASs(df, sf);
 #if ENABLE_THREADS
     else LLdyMULASc(df, sf);
@@ -38481,13 +38481,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, LLdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LLdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LLdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else LLdyDIVASc(df, sf);
@@ -38889,13 +38889,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, LLdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LLdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LLdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else LLdyPWRASc(df, sf);
@@ -39225,13 +39225,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, LLdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LLdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LLdyMODASs(df, sf);
 #if ENABLE_THREADS
     else LLdyMODASc(df, sf);
@@ -39561,13 +39561,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, LLdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LLdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LLdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else LLdyTHEARCASc(df, sf);
@@ -39897,13 +39897,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, LSdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LSdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LSdyADDASs(df, sf);
 #if ENABLE_THREADS
     else LSdyADDASc(df, sf);
@@ -40305,13 +40305,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, LSdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LSdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LSdySUBASs(df, sf);
 #if ENABLE_THREADS
     else LSdySUBASc(df, sf);
@@ -40713,13 +40713,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, LSdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LSdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LSdyMULASs(df, sf);
 #if ENABLE_THREADS
     else LSdyMULASc(df, sf);
@@ -41121,13 +41121,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, LSdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LSdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LSdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else LSdyDIVASc(df, sf);
@@ -41529,13 +41529,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, LSdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LSdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LSdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else LSdyPWRASc(df, sf);
@@ -41865,13 +41865,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, LSdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LSdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LSdyMODASs(df, sf);
 #if ENABLE_THREADS
     else LSdyMODASc(df, sf);
@@ -42201,13 +42201,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, LSdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LSdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LSdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else LSdyTHEARCASc(df, sf);
@@ -42537,13 +42537,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, LDdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LDdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LDdyADDASs(df, sf);
 #if ENABLE_THREADS
     else LDdyADDASc(df, sf);
@@ -42945,13 +42945,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, LDdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LDdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LDdySUBASs(df, sf);
 #if ENABLE_THREADS
     else LDdySUBASc(df, sf);
@@ -43353,13 +43353,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, LDdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LDdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LDdyMULASs(df, sf);
 #if ENABLE_THREADS
     else LDdyMULASc(df, sf);
@@ -43761,13 +43761,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, LDdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LDdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LDdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else LDdyDIVASc(df, sf);
@@ -44169,13 +44169,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, LDdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LDdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LDdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else LDdyPWRASc(df, sf);
@@ -44505,13 +44505,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, LDdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LDdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LDdyMODASs(df, sf);
 #if ENABLE_THREADS
     else LDdyMODASc(df, sf);
@@ -44841,13 +44841,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, LDdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LDdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     LDdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else LDdyTHEARCASc(df, sf);
@@ -45177,13 +45177,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, SBdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SBdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SBdyADDASs(df, sf);
 #if ENABLE_THREADS
     else SBdyADDASc(df, sf);
@@ -45585,13 +45585,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, SBdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SBdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SBdySUBASs(df, sf);
 #if ENABLE_THREADS
     else SBdySUBASc(df, sf);
@@ -45993,13 +45993,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, SBdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SBdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SBdyMULASs(df, sf);
 #if ENABLE_THREADS
     else SBdyMULASc(df, sf);
@@ -46401,13 +46401,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, SBdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SBdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SBdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else SBdyDIVASc(df, sf);
@@ -46809,13 +46809,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, SBdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SBdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SBdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else SBdyPWRASc(df, sf);
@@ -47145,13 +47145,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, SBdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SBdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SBdyMODASs(df, sf);
 #if ENABLE_THREADS
     else SBdyMODASc(df, sf);
@@ -47481,13 +47481,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, SBdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SBdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SBdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else SBdyTHEARCASc(df, sf);
@@ -47817,13 +47817,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, SWdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SWdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SWdyADDASs(df, sf);
 #if ENABLE_THREADS
     else SWdyADDASc(df, sf);
@@ -48225,13 +48225,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, SWdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SWdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SWdySUBASs(df, sf);
 #if ENABLE_THREADS
     else SWdySUBASc(df, sf);
@@ -48633,13 +48633,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, SWdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SWdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SWdyMULASs(df, sf);
 #if ENABLE_THREADS
     else SWdyMULASc(df, sf);
@@ -49041,13 +49041,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, SWdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SWdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SWdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else SWdyDIVASc(df, sf);
@@ -49449,13 +49449,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, SWdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SWdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SWdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else SWdyPWRASc(df, sf);
@@ -49785,13 +49785,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, SWdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SWdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SWdyMODASs(df, sf);
 #if ENABLE_THREADS
     else SWdyMODASc(df, sf);
@@ -50121,13 +50121,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, SWdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SWdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SWdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else SWdyTHEARCASc(df, sf);
@@ -50457,13 +50457,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, SLdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SLdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SLdyADDASs(df, sf);
 #if ENABLE_THREADS
     else SLdyADDASc(df, sf);
@@ -50865,13 +50865,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, SLdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SLdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SLdySUBASs(df, sf);
 #if ENABLE_THREADS
     else SLdySUBASc(df, sf);
@@ -51273,13 +51273,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, SLdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SLdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SLdyMULASs(df, sf);
 #if ENABLE_THREADS
     else SLdyMULASc(df, sf);
@@ -51681,13 +51681,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, SLdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SLdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SLdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else SLdyDIVASc(df, sf);
@@ -52089,13 +52089,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, SLdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SLdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SLdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else SLdyPWRASc(df, sf);
@@ -52425,13 +52425,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, SLdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SLdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SLdyMODASs(df, sf);
 #if ENABLE_THREADS
     else SLdyMODASc(df, sf);
@@ -52761,13 +52761,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, SLdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SLdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SLdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else SLdyTHEARCASc(df, sf);
@@ -53097,13 +53097,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, SSdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SSdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SSdyADDASs(df, sf);
 #if ENABLE_THREADS
     else SSdyADDASc(df, sf);
@@ -53505,13 +53505,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, SSdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SSdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SSdySUBASs(df, sf);
 #if ENABLE_THREADS
     else SSdySUBASc(df, sf);
@@ -53913,13 +53913,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, SSdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SSdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SSdyMULASs(df, sf);
 #if ENABLE_THREADS
     else SSdyMULASc(df, sf);
@@ -54321,13 +54321,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, SSdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SSdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SSdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else SSdyDIVASc(df, sf);
@@ -54729,13 +54729,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, SSdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SSdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SSdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else SSdyPWRASc(df, sf);
@@ -55065,13 +55065,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, SSdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SSdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SSdyMODASs(df, sf);
 #if ENABLE_THREADS
     else SSdyMODASc(df, sf);
@@ -55401,13 +55401,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, SSdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SSdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SSdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else SSdyTHEARCASc(df, sf);
@@ -55737,13 +55737,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, SDdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SDdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SDdyADDASs(df, sf);
 #if ENABLE_THREADS
     else SDdyADDASc(df, sf);
@@ -56145,13 +56145,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, SDdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SDdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SDdySUBASs(df, sf);
 #if ENABLE_THREADS
     else SDdySUBASc(df, sf);
@@ -56553,13 +56553,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, SDdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SDdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SDdyMULASs(df, sf);
 #if ENABLE_THREADS
     else SDdyMULASc(df, sf);
@@ -56961,13 +56961,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, SDdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SDdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SDdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else SDdyDIVASc(df, sf);
@@ -57369,13 +57369,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, SDdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SDdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SDdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else SDdyPWRASc(df, sf);
@@ -57705,13 +57705,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, SDdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SDdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SDdyMODASs(df, sf);
 #if ENABLE_THREADS
     else SDdyMODASc(df, sf);
@@ -58041,13 +58041,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, SDdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SDdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     SDdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else SDdyTHEARCASc(df, sf);
@@ -58377,13 +58377,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, DBdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DBdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DBdyADDASs(df, sf);
 #if ENABLE_THREADS
     else DBdyADDASc(df, sf);
@@ -58785,13 +58785,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, DBdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DBdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DBdySUBASs(df, sf);
 #if ENABLE_THREADS
     else DBdySUBASc(df, sf);
@@ -59193,13 +59193,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, DBdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DBdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DBdyMULASs(df, sf);
 #if ENABLE_THREADS
     else DBdyMULASc(df, sf);
@@ -59601,13 +59601,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, DBdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DBdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DBdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else DBdyDIVASc(df, sf);
@@ -60009,13 +60009,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, DBdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DBdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DBdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else DBdyPWRASc(df, sf);
@@ -60345,13 +60345,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, DBdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DBdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DBdyMODASs(df, sf);
 #if ENABLE_THREADS
     else DBdyMODASc(df, sf);
@@ -60681,13 +60681,13 @@ if ((tt = *((B *)NUM_VAL(sf))) == BINF) tt = DINF;
       threads_do(nways, DBdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DBdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DBdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else DBdyTHEARCASc(df, sf);
@@ -61017,13 +61017,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, DWdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DWdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DWdyADDASs(df, sf);
 #if ENABLE_THREADS
     else DWdyADDASc(df, sf);
@@ -61425,13 +61425,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, DWdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DWdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DWdySUBASs(df, sf);
 #if ENABLE_THREADS
     else DWdySUBASc(df, sf);
@@ -61833,13 +61833,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, DWdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DWdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DWdyMULASs(df, sf);
 #if ENABLE_THREADS
     else DWdyMULASc(df, sf);
@@ -62241,13 +62241,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, DWdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DWdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DWdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else DWdyDIVASc(df, sf);
@@ -62649,13 +62649,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, DWdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DWdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DWdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else DWdyPWRASc(df, sf);
@@ -62985,13 +62985,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, DWdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DWdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DWdyMODASs(df, sf);
 #if ENABLE_THREADS
     else DWdyMODASc(df, sf);
@@ -63321,13 +63321,13 @@ if ((tt = *((W *)NUM_VAL(sf))) == WINF) tt = DINF;
       threads_do(nways, DWdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DWdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DWdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else DWdyTHEARCASc(df, sf);
@@ -63657,13 +63657,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, DLdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DLdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DLdyADDASs(df, sf);
 #if ENABLE_THREADS
     else DLdyADDASc(df, sf);
@@ -64065,13 +64065,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, DLdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DLdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DLdySUBASs(df, sf);
 #if ENABLE_THREADS
     else DLdySUBASc(df, sf);
@@ -64473,13 +64473,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, DLdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DLdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DLdyMULASs(df, sf);
 #if ENABLE_THREADS
     else DLdyMULASc(df, sf);
@@ -64881,13 +64881,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, DLdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DLdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DLdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else DLdyDIVASc(df, sf);
@@ -65289,13 +65289,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, DLdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DLdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DLdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else DLdyPWRASc(df, sf);
@@ -65625,13 +65625,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, DLdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DLdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DLdyMODASs(df, sf);
 #if ENABLE_THREADS
     else DLdyMODASc(df, sf);
@@ -65961,13 +65961,13 @@ if ((tt = *((L *)NUM_VAL(sf))) == LINF) tt = DINF;
       threads_do(nways, DLdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DLdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DLdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else DLdyTHEARCASc(df, sf);
@@ -66297,13 +66297,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, DSdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DSdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DSdyADDASs(df, sf);
 #if ENABLE_THREADS
     else DSdyADDASc(df, sf);
@@ -66705,13 +66705,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, DSdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DSdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DSdySUBASs(df, sf);
 #if ENABLE_THREADS
     else DSdySUBASc(df, sf);
@@ -67113,13 +67113,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, DSdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DSdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DSdyMULASs(df, sf);
 #if ENABLE_THREADS
     else DSdyMULASc(df, sf);
@@ -67521,13 +67521,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, DSdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DSdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DSdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else DSdyDIVASc(df, sf);
@@ -67929,13 +67929,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, DSdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DSdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DSdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else DSdyPWRASc(df, sf);
@@ -68265,13 +68265,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, DSdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DSdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DSdyMODASs(df, sf);
 #if ENABLE_THREADS
     else DSdyMODASc(df, sf);
@@ -68601,13 +68601,13 @@ tt = *((S *)NUM_VAL(sf));
       threads_do(nways, DSdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DSdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DSdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else DSdyTHEARCASc(df, sf);
@@ -68937,13 +68937,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, DDdyADDASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DDdyADDAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DDdyADDASs(df, sf);
 #if ENABLE_THREADS
     else DDdyADDASc(df, sf);
@@ -69345,13 +69345,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, DDdySUBASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DDdySUBAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DDdySUBASs(df, sf);
 #if ENABLE_THREADS
     else DDdySUBASc(df, sf);
@@ -69753,13 +69753,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, DDdyMULASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DDdyMULAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DDdyMULASs(df, sf);
 #if ENABLE_THREADS
     else DDdyMULASc(df, sf);
@@ -70161,13 +70161,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, DDdyDIVASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DDdyDIVAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DDdyDIVASs(df, sf);
 #if ENABLE_THREADS
     else DDdyDIVASc(df, sf);
@@ -70569,13 +70569,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, DDdyPWRASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DDdyPWRAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DDdyPWRASs(df, sf);
 #if ENABLE_THREADS
     else DDdyPWRASc(df, sf);
@@ -70905,13 +70905,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, DDdyMODASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DDdyMODAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DDdyMODASs(df, sf);
 #if ENABLE_THREADS
     else DDdyMODASc(df, sf);
@@ -71241,13 +71241,13 @@ tt = *((D *)NUM_VAL(sf));
       threads_do(nways, DDdyTHEARCASt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DDdyTHEARCAS(B *df, B *sf)
   {
 #if ENABLE_THREADS
     if (serialized)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     DDdyTHEARCASs(df, sf);
 #if ENABLE_THREADS
     else DDdyTHEARCASc(df, sf);
@@ -71768,7 +71768,7 @@ t = -t;
       threads_do(nways, BmoNEGAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BmoNEGA(B *df)
   {
@@ -71882,7 +71882,7 @@ t = fabs(t);
       threads_do(nways, BmoABSAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BmoABSA(B *df)
   {
@@ -71996,7 +71996,7 @@ t = sqrt(t);
       threads_do(nways, BmoSQRTAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BmoSQRTA(B *df)
   {
@@ -72110,7 +72110,7 @@ t = exp(t);
       threads_do(nways, BmoEXPAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BmoEXPA(B *df)
   {
@@ -72224,7 +72224,7 @@ t = log(t);
       threads_do(nways, BmoLNAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BmoLNA(B *df)
   {
@@ -72338,7 +72338,7 @@ t = log10(t);
       threads_do(nways, BmoLGAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BmoLGA(B *df)
   {
@@ -72452,7 +72452,7 @@ t = floor(t);
       threads_do(nways, BmoFLOORAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BmoFLOORA(B *df)
   {
@@ -72566,7 +72566,7 @@ t = ceil(t);
       threads_do(nways, BmoCEILAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BmoCEILA(B *df)
   {
@@ -72680,7 +72680,7 @@ t = sin(t);
       threads_do(nways, BmoSINAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BmoSINA(B *df)
   {
@@ -72794,7 +72794,7 @@ t = cos(t);
       threads_do(nways, BmoCOSAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BmoCOSA(B *df)
   {
@@ -72908,7 +72908,7 @@ t = tan(t);
       threads_do(nways, BmoTANAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BmoTANA(B *df)
   {
@@ -73022,7 +73022,7 @@ t = asin(t);
       threads_do(nways, BmoASINAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BmoASINA(B *df)
   {
@@ -73136,7 +73136,7 @@ t = acos(t);
       threads_do(nways, BmoACOSAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BmoACOSA(B *df)
   {
@@ -73250,7 +73250,7 @@ t = atan(t);
       threads_do(nways, BmoATANAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void BmoATANA(B *df)
   {
@@ -73364,7 +73364,7 @@ t = -t;
       threads_do(nways, WmoNEGAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WmoNEGA(B *df)
   {
@@ -73478,7 +73478,7 @@ t = fabs(t);
       threads_do(nways, WmoABSAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WmoABSA(B *df)
   {
@@ -73592,7 +73592,7 @@ t = sqrt(t);
       threads_do(nways, WmoSQRTAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WmoSQRTA(B *df)
   {
@@ -73706,7 +73706,7 @@ t = exp(t);
       threads_do(nways, WmoEXPAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WmoEXPA(B *df)
   {
@@ -73820,7 +73820,7 @@ t = log(t);
       threads_do(nways, WmoLNAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WmoLNA(B *df)
   {
@@ -73934,7 +73934,7 @@ t = log10(t);
       threads_do(nways, WmoLGAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WmoLGA(B *df)
   {
@@ -74048,7 +74048,7 @@ t = floor(t);
       threads_do(nways, WmoFLOORAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WmoFLOORA(B *df)
   {
@@ -74162,7 +74162,7 @@ t = ceil(t);
       threads_do(nways, WmoCEILAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WmoCEILA(B *df)
   {
@@ -74276,7 +74276,7 @@ t = sin(t);
       threads_do(nways, WmoSINAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WmoSINA(B *df)
   {
@@ -74390,7 +74390,7 @@ t = cos(t);
       threads_do(nways, WmoCOSAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WmoCOSA(B *df)
   {
@@ -74504,7 +74504,7 @@ t = tan(t);
       threads_do(nways, WmoTANAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WmoTANA(B *df)
   {
@@ -74618,7 +74618,7 @@ t = asin(t);
       threads_do(nways, WmoASINAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WmoASINA(B *df)
   {
@@ -74732,7 +74732,7 @@ t = acos(t);
       threads_do(nways, WmoACOSAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WmoACOSA(B *df)
   {
@@ -74846,7 +74846,7 @@ t = atan(t);
       threads_do(nways, WmoATANAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void WmoATANA(B *df)
   {
@@ -74960,7 +74960,7 @@ t = -t;
       threads_do(nways, LmoNEGAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LmoNEGA(B *df)
   {
@@ -75074,7 +75074,7 @@ t = fabs(t);
       threads_do(nways, LmoABSAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LmoABSA(B *df)
   {
@@ -75188,7 +75188,7 @@ t = sqrt(t);
       threads_do(nways, LmoSQRTAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LmoSQRTA(B *df)
   {
@@ -75302,7 +75302,7 @@ t = exp(t);
       threads_do(nways, LmoEXPAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LmoEXPA(B *df)
   {
@@ -75416,7 +75416,7 @@ t = log(t);
       threads_do(nways, LmoLNAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LmoLNA(B *df)
   {
@@ -75530,7 +75530,7 @@ t = log10(t);
       threads_do(nways, LmoLGAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LmoLGA(B *df)
   {
@@ -75644,7 +75644,7 @@ t = floor(t);
       threads_do(nways, LmoFLOORAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LmoFLOORA(B *df)
   {
@@ -75758,7 +75758,7 @@ t = ceil(t);
       threads_do(nways, LmoCEILAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LmoCEILA(B *df)
   {
@@ -75872,7 +75872,7 @@ t = sin(t);
       threads_do(nways, LmoSINAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LmoSINA(B *df)
   {
@@ -75986,7 +75986,7 @@ t = cos(t);
       threads_do(nways, LmoCOSAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LmoCOSA(B *df)
   {
@@ -76100,7 +76100,7 @@ t = tan(t);
       threads_do(nways, LmoTANAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LmoTANA(B *df)
   {
@@ -76214,7 +76214,7 @@ t = asin(t);
       threads_do(nways, LmoASINAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LmoASINA(B *df)
   {
@@ -76328,7 +76328,7 @@ t = acos(t);
       threads_do(nways, LmoACOSAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LmoACOSA(B *df)
   {
@@ -76442,7 +76442,7 @@ t = atan(t);
       threads_do(nways, LmoATANAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void LmoATANA(B *df)
   {
@@ -76556,7 +76556,7 @@ t = -t;
       threads_do(nways, SmoNEGAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SmoNEGA(B *df)
   {
@@ -76670,7 +76670,7 @@ t = fabs(t);
       threads_do(nways, SmoABSAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SmoABSA(B *df)
   {
@@ -76784,7 +76784,7 @@ t = sqrt(t);
       threads_do(nways, SmoSQRTAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SmoSQRTA(B *df)
   {
@@ -76898,7 +76898,7 @@ t = exp(t);
       threads_do(nways, SmoEXPAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SmoEXPA(B *df)
   {
@@ -77012,7 +77012,7 @@ t = log(t);
       threads_do(nways, SmoLNAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SmoLNA(B *df)
   {
@@ -77126,7 +77126,7 @@ t = log10(t);
       threads_do(nways, SmoLGAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SmoLGA(B *df)
   {
@@ -77240,7 +77240,7 @@ t = floor(t);
       threads_do(nways, SmoFLOORAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SmoFLOORA(B *df)
   {
@@ -77354,7 +77354,7 @@ t = ceil(t);
       threads_do(nways, SmoCEILAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SmoCEILA(B *df)
   {
@@ -77468,7 +77468,7 @@ t = sin(t);
       threads_do(nways, SmoSINAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SmoSINA(B *df)
   {
@@ -77582,7 +77582,7 @@ t = cos(t);
       threads_do(nways, SmoCOSAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SmoCOSA(B *df)
   {
@@ -77696,7 +77696,7 @@ t = tan(t);
       threads_do(nways, SmoTANAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SmoTANA(B *df)
   {
@@ -77810,7 +77810,7 @@ t = asin(t);
       threads_do(nways, SmoASINAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SmoASINA(B *df)
   {
@@ -77924,7 +77924,7 @@ t = acos(t);
       threads_do(nways, SmoACOSAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SmoACOSA(B *df)
   {
@@ -78038,7 +78038,7 @@ t = atan(t);
       threads_do(nways, SmoATANAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void SmoATANA(B *df)
   {
@@ -78152,7 +78152,7 @@ t = -t;
       threads_do(nways, DmoNEGAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DmoNEGA(B *df)
   {
@@ -78266,7 +78266,7 @@ t = fabs(t);
       threads_do(nways, DmoABSAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DmoABSA(B *df)
   {
@@ -78380,7 +78380,7 @@ t = sqrt(t);
       threads_do(nways, DmoSQRTAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DmoSQRTA(B *df)
   {
@@ -78494,7 +78494,7 @@ t = exp(t);
       threads_do(nways, DmoEXPAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DmoEXPA(B *df)
   {
@@ -78608,7 +78608,7 @@ t = log(t);
       threads_do(nways, DmoLNAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DmoLNA(B *df)
   {
@@ -78722,7 +78722,7 @@ t = log10(t);
       threads_do(nways, DmoLGAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DmoLGA(B *df)
   {
@@ -78836,7 +78836,7 @@ t = floor(t);
       threads_do(nways, DmoFLOORAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DmoFLOORA(B *df)
   {
@@ -78950,7 +78950,7 @@ t = ceil(t);
       threads_do(nways, DmoCEILAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DmoCEILA(B *df)
   {
@@ -79064,7 +79064,7 @@ t = sin(t);
       threads_do(nways, DmoSINAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DmoSINA(B *df)
   {
@@ -79178,7 +79178,7 @@ t = cos(t);
       threads_do(nways, DmoCOSAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DmoCOSA(B *df)
   {
@@ -79292,7 +79292,7 @@ t = tan(t);
       threads_do(nways, DmoTANAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DmoTANA(B *df)
   {
@@ -79406,7 +79406,7 @@ t = asin(t);
       threads_do(nways, DmoASINAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DmoASINA(B *df)
   {
@@ -79520,7 +79520,7 @@ t = acos(t);
       threads_do(nways, DmoACOSAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DmoACOSA(B *df)
   {
@@ -79634,7 +79634,7 @@ t = atan(t);
       threads_do(nways, DmoATANAt, (B*) &data);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void DmoATANA(B *df)
   {

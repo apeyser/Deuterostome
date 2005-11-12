@@ -254,7 +254,7 @@ NL
   {
 #if ENABLE_THREADS
     if \(serialized\)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
       )__ st__ dt__ (moveSAc\(sf, df\);
 #if ENABLE_THREADS
     else )__ st__ dt__ (moveSAc\(sf,df\);
@@ -468,13 +468,13 @@ end def
       threads_do\(nways, )__ dt__ st__ (dy)__ op__ (ASt, \(B*\) &data\);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void )__ dt__ st__ (dy)__ op__ (AS\(B *df, B *sf\)
   {
 #if ENABLE_THREADS
     if \(serialized\)
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
     )__ dt__ st__ (dy)__ op__ (ASs\(df, sf\);
 #if ENABLE_THREADS
     else )__ dt__ st__ (dy)__ op__ (ASc\(df, sf\);
@@ -751,7 +751,7 @@ end def
       threads_do\(nways, )__ dt__ (mo)__ op__ (At, \(B*\) &data\);
     }
   }
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
   static void )__ dt__ (mo)__ op__ (A\(B *df\)
   {
