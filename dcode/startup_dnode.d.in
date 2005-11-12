@@ -626,15 +626,16 @@ Xwindows_ {
     end
   } bind def
 } if
+
+@ENABLE_THREADS_START@
+(Starting up threads: @ENABLE_THREADS@\n) toconsole  
+@ENABLE_THREADS@ makethreads
+@ENABLE_THREADS_END@  
   
-(Using startup_dnode.d $Id$ V@PACKAGE_VERSION@\n) toconsole_
-(Home:  ) toconsole_ gethomedir toconsole_ (\n) toconsole_
-(Startup: ) toconsole getstartupdir toconsole_ (\n) toconsole_
-(Plugins: ) toconsole getplugindir toconsole_ (\n) toconsole_
-
-/TYPE 61440L def
-/DIRTYPE 16384L def
-
+(Using startup_dnode.d $Id$ V@PACKAGE_VERSION@\n) toconsole
+(Home:  ) toconsole gethomedir toconsole (\n) toconsole
+(Startup: ) toconsole getstartupdir toconsole (\n) toconsole
+(Plugins: ) toconsole getplugindir toconsole (\n) toconsole
 
 (Trying ~/.dnode ...\n) toconsole
 gethomedir (.dnode) fromxfiles {(Read ~/.dnode\n) toconsole_} if

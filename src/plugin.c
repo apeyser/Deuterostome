@@ -1,14 +1,14 @@
 #include <stdarg.h>
 #include "pluginlib.h"
 
-#ifndef PLUGINS_ENABLED
+#if ! ENABLE_PLUGINS
 
 L op_nextlib(void) {return NO_PLUGINS;}
 L op_loadlib(void) {return NO_PLUGINS;}
 void closealllibs(void) {}
 void initialize_plugins(void) {}
 
-#else //PLUGINS_ENABLED
+#else //ENABLE_PLUGINS
 
 #include <ltdl.h>
 #include <stdio.h>
@@ -274,4 +274,4 @@ B* make_opaque_frame(L n, B* pluginnameframe, ...) {
   return dict-FRAMEBYTES;
 }
 
-#endif //PLUGINS_ENABLED
+#endif //ENABLE_PLUGINS

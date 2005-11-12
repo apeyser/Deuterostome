@@ -6,7 +6,7 @@ void closealllibs(void);
 
 #include "dm.h"
 
-#ifdef PLUGINS_ENABLED
+#if ENABLE_PLUGINS
 
 BOOLEAN check_opaque_name(B* nameframe, B* dict);
 // ... = null terminated list of nameframes to insert
@@ -21,6 +21,6 @@ extern B initname[FRAMEBYTES];
 // name frame for allocated buffer with opaque object
 extern B buffernameframe[FRAMEBYTES];
 
-#endif //PLUGINS_ENABLED
+#endif //ENABLE_PLUGINS
 
 #endif //PLUGINLIB_H

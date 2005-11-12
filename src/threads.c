@@ -170,24 +170,14 @@ L threads_fin(void) {
 						 &share_lock, &main_lock, &main_wait, 0);
 }
 
-static void thread_share_unlock(void* ignore) {
+void thread_share_unlock_f(void) {
   THREADERR(pthread_mutex_unlock, &share_lock);
 }
 
-L thread_share_lock(UL id, thread_func func, B* data) {
-  L ret; 
-  THREADERR(pthread_mutex_lock, &share_lock);
-  if (id) {
-	pthread_cleanup_push(thread_share_unlock, NULL);
-	ret = func(id, data);
-	pthread_cleanup_pop(1);
-  } 
-  else {
-	ret = func(id, data);
-	thread_share_unlock(NULL);
-  }
-  return ret;
+void thread_share_lock_f(void) {
+    THREADERR(pthread_mutex_lock, &share_lock);
 }
+
 
 /**************************************** op_threads
  *

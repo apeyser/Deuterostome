@@ -1,7 +1,10 @@
 dist_noinst_DATA = dmnuminc.d dsp1f.d
 dist_noinst_SCRIPTS = buildh
 
-AM_CPPFLAGS = $(GCC_OPT) -DSTARTUP_DIR="\"$(top_builddir)/src/codegen/\"" -DPLUGIN_DIR="\"\""
+AM_CPPFLAGS = $(GCC_OPT) \
+	-DSTARTUP_DIR="\"$(top_builddir)/src/codegen/\"" \
+	-DPLUGIN_DIR="\"\"" \
+	-DDISABLE_THREADS=1
 AM_LDFLAGS = -no-undefined
 INCLUDE = @INCLTDL@
 MAINTAINERCLEANFILES = *.built
@@ -29,5 +32,4 @@ dmnuminc.h.built: dmnuminc.d dgen buildh
 dsp1f.h.built: dsp1f.d dgen buildh
 	"$(srcdir)/buildh" "\
 		$(top_builddir)/src/codegen" "$(srcdir)" "dsp1f.d" "$@"
-
 

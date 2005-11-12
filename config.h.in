@@ -1,5 +1,11 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* compile or install plugins */
+#undef ENABLE_PLUGINS
+
+/* compile and install threads, value is default number */
+#undef ENABLE_THREADS
+
 /* Header for endianness */
 #undef ENDIAN_HDR
 
@@ -67,9 +73,6 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
-/* compile or install plugins */
-#undef PLUGINS_ENABLED
-
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */
 #undef PTHREAD_CREATE_JOINABLE
@@ -100,9 +103,6 @@
 
 /* max number of threads */
 #undef THREADNUM
-
-/* compile and install threads */
-#undef THREADS_ENABLED
 
 /* Version number of package */
 #undef VERSION

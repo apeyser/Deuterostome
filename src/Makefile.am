@@ -21,9 +21,6 @@ install-exec-local:
 uninstall-local:
 	-rm -f "$(DESTDIR)$(bindir)/dnode-nice$(EXEEXT)"
 
-clean-local:
-	-rm -f dnode-nice.c
-
 endif ENABLE_SETUID
 
 if ENABLE_THREADS
@@ -40,9 +37,15 @@ EXTRA_DIST = codegen/buildh codegen/dgen_0.h codegen/dgen_1.h codegen/dgen.c \
 	codegen/Makefile.am codegen/Makefile.in codegen/startup_dgen.d.in \
 	dnode-nice.c.in
 
-DISTCLEANFILES = codegen/Makefile codegen/startup_dgen.d
 distclean-local:
-	-rm -rf codegen/.deps
+	cd codegen && $(MAKE) $(AM_MAKEFLAGS) distclean
+
+clean-local:
+if ENABLE_SETUID
+	-rm -f dnode-nice.c
+endif ENABLE_SETUID
+	cd codegen && $(MAKE) $(AM_MAKEFLAGS) clean
+
 
 AM_CFLAGS = $(GCC_OPT) $(X_CFLAGS)
 AM_CPPFLAGS = \
@@ -79,3 +82,8 @@ libdmglobals_la_SOURCES = dmglobals.c \
 	plugin.c pluginlib.h $(THREADSRC)
 
 
+@SET_MAKE@
+
+gencode-all: gencode all
+gencode:
+	cd codegen && $(MAKE) $(AM_MAKEFLAGS) all

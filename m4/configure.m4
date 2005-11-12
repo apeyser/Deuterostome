@@ -54,7 +54,7 @@ AC_DEFUN([CF_ON_TARGET], [dnl
   esac dnl
 ])
 
-AC_DEFUN([CF_UNDEF], [dnl
+AC_DEFUN([CF_IF_UNDEF], [dnl
   AC_MSG_CHECKING([if $1 is set])
   if test "${$1-set}" == set ; then
     AC_MSG_RESULT([no])
@@ -187,27 +187,8 @@ AC_DEFUN([CF_UNSAVE_VAR], [dnl
   $1="$cf_save_var_$1" dnl
 ])
 
-AC_DEFUN([CF_VAR_COLLAPSED], [dnl
-  CF_SAVE_VAR([prefix])
-  CF_SAVE_VAR([exec_prefix])
-  if test x"$prefix" = xNONE ; then
-    prefix="$ac_default_prefix"
-  fi
-  if test x"$exec_prefix" = xNONE ; then
-    exec_prefix="$prefix"
-  fi
-dnl
-  AC_MSG_CHECKING([value of \${$2}])
-  eval eval eval eval eval $1_$2="$$2"
-  AC_SUBST([$1_$2])dnl
-  AC_MSG_RESULT([setting \${$1_$2} to ${$1_$2}])
-dnl
-  CF_UNSAVE_VAR([exec_prefix])
-  CF_UNSAVE_VAR([prefix])dnl
-])
-
-AC_DEFUN([CF_AM_ENABLE_CONDITIONAL], [
-  AM_CONDITIONAL([ENABLE_$2], [test x"$enable_$1" = x"yes"])
+AC_DEFUN([CF_AM_CONDITIONAL], [dnl
+  AM_CONDITIONAL([ENABLE_$1], [$2]) dnl
 ])
 
 AC_DEFUN([CF_AM_ENABLE], [dnl
@@ -216,30 +197,59 @@ AC_DEFUN([CF_AM_ENABLE], [dnl
   define(<<CF_AM_CV_ENABLE>>, translit($1, [a-z], [A-Z]))dnl
   changequote([, ])dnl
   if test "${enable_$1-set}" == set ; then enable_$1='$3'; fi
+  if test x"${enable_$1}" == x"yes" ; then enable_$1='$3'; fi
   AC_ARG_ENABLE([$1], [AC_HELP_STRING([--enable-$1], [$2 ($3)])])
-  CF_AM_ENABLE_CONDITIONAL([$1], CF_AM_CV_ENABLE)
-  if test "${enable_$1-set}" == set ; then 
+  CF_AM_CONDITIONAL(CF_AM_CV_ENABLE, [test "${enable_$1-no}" != "no"])
+  if test "${enable_$1-no}" == "no" ; then 
     AC_MSG_RESULT([no, not enabled])
   else
-    AC_MSG_RESULT(yes, enabled)
+    AC_MSG_RESULT([yes, enabled (${enable_$1})])
+  fi dnl
+])
+
+AC_DEFUN([CF_AC_DEFINE_IF_ENABLED_DEFINE], [dnl
+  case "${enable_$2-no}" in
+    yes) cf_ac_define_if_enabled_define=1 ;;
+	*) cf_ac_define_if_enabled_define="${enable_$2-no}" ;;
+  esac
+  dnl
+  if test "${cf_ac_define_if_enabled_define}" != "no" ; then
+    AC_DEFINE_UNQUOTED([ENABLE_$1], [${cf_ac_define_if_enabled_define}], [$3])
   fi
+  dnl
+])
+
+AC_DEFUN([CF_AC_DEFINE_IF_ENABLED_SUBST], [dnl
+  AC_SUBST([ENABLE_$1])
+  ENABLE_$1="${enable_$2-no}"
+])
+
+AC_DEFUN([CF_AC_DEFINE_IF_ENABLED], [dnl
+  changequote(<<, >>)dnl
+  define(<<CF_AC_DEFINE_IF_ENABLED_CV>>, translit($1, [a-z], [A-Z]))dnl
+  changequote([, ])dnl
+  CF_IF_ENABLED([$1], [
+	CF_AC_DEFINE_IF_ENABLED_DEFINE(CF_AC_DEFINE_IF_ENABLED_CV, [$1], [$2])
+  ])
+  CF_AC_DEFINE_IF_ENABLED_SUBST(CF_AC_DEFINE_IF_ENABLED_CV, [$1])
 ])
 
 AC_DEFUN([CF_AC_ENABLE], [dnl
   CF_AM_ENABLE([$1], [$2], [$3])
-  CF_IF_ENABLED([$1], [AC_DEFINE([$4], [1], [$2])])
+  CF_AC_DEFINE_IF_ENABLED([$1], [$2])
 ])
 
 AC_DEFUN([CF_IF_ENABLED], [dnl
-  if test x"${enable_$1}" = x"yes" ; then 
-	  $2
-	fi dnl
-])
-
-AC_DEFUN([CF_IF_DISABLED], [dnl
-  if test x"${enable_$1}" != x"yes" ; then
-    $2
-  fi dnl
+  ifelse([$2],[],,[dnl
+    if test x"${enable_$1-no}" != x"no" ; then 
+       $2 
+    fi
+  ]) dnl
+  ifelse([$3],[],,[dnl 
+    if test x"${enable_$1-no}" == x"no" ; then 
+      $3 
+    fi
+  ])dnl
 ])
 
 AC_DEFUN([CF_AM_PROG], [dnl
@@ -251,10 +261,10 @@ AC_DEFUN([CF_EMACS_ENABLED], [dnl
   AC_REQUIRE([AM_PATH_LISPDIR])
   AC_MSG_CHECKING([if emacs is enabled (\$EMACS != no)])
   if test x"$EMACS" = xno ; then 
-  AM_CONDITIONAL([EMACS_ENABLED], [false])
+  AM_CONDITIONAL([ENABLE_EMACS], [false])
     AC_MSG_RESULT([emacs NOT enabled])
   else
-	AM_CONDITIONAL([EMACS_ENABLED], [:])
+	AM_CONDITIONAL([ENABLE_EMACS], [:])
 	AC_MSG_RESULT([emacs enabled])
   fi dnl
 ])
@@ -306,8 +316,7 @@ AC_DEFUN([CF_ACX_PTHREAD], [dnl
     ], [  
 	  AC_MSG_CHECKING([flags for pthreads])
       AC_MSG_ERROR([No threads found, disable threads])])
-  ])
-  CF_IF_DISABLED([$1], [
+  ], [
    AC_MSG_CHECKING([flags for pthreads])
    AC_MSG_RESULT([$1 disabled])
   ])

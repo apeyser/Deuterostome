@@ -1,9 +1,5 @@
-if ENABLE_THREADS
-  THREADSLIB=-lpthread
-endif ENABLE_THREADS
-
 AM_CFLAGS =  $(GCC_OPT) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
-AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS) $(THREADSLIB)
+AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 #@LIBPLUGIN_DLL_IMPORT@
 INCLUDE = @INCLTDL@ 
 LIBS += $(LTLIBOBJS) $(top_builddir)/src/libdmglobals.la

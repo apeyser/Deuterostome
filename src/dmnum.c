@@ -54,14 +54,16 @@ static D thearc(D x, D y)
     return (y > 0) ? phi : 2*Pi-phi;
 }
 
-#if THREADS_ENABLED
+#if ENABLE_THREADS
 typedef struct {
   B* sf_start;
   B* df_start;
   UL perthread;
   UL leftover;
+  D in;
+  D out;
 } thread_array_data;
-#endif //THREADS_ENABLED
+#endif //ENABLE_THREADS
 
 #include "dmnuminc.h"
 

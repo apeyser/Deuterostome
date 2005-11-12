@@ -209,15 +209,58 @@ NL
 | constructs C code to spread a scalar into an array (see XYmoveSS)
 
 /XYmoveSA {
+(
+  static void )__ st__ dt__ (moveSAs\(B *sf, B *df\)
+  {
+    D t; L n; )__ dt__ ( * restrict d;
+    d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
+    st { (sf) SCALAR } (t) GETCV
+    (df) { dt { (d++)__ } (t) CVPUT } ROLLBITS FOR_modn (
+  }
 
-NL (static void )__ st__ dt__ (moveSA\(B *sf, B *df\))__
-NL ({)__
-NL (D t; L n; )__ dt__ ( *d;)__
-NL (d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
-st { (sf) SCALAR } (t) GETCV
-(df) { dt { (d++)__ } (t) CVPUT } ROLLBITS FOR_modn
-NL (})__
-NL 
+#if ENABLE_THREADS
+  static L )__ st__ dt__ (moveSAt\(UL id, B* indata\)
+  {
+    thread_array_data* data = \(thread_array_data*\) indata;
+    D t; L n, n_; )__ dt__ ( * restrict d;
+    n_ = data->perthread;
+    if \(thread_max == id\) n += data->leftover;
+    d = \(\()__ dt__ ( *\) data->df_start\)+data->perthread*id;)__
+    {dt {(d++)__} (data->in) CVPUT} ROLLBITS FOR_modnp (
+    return OK;
+  }
+
+  static void )__ st__ dt__ (moveSAc\(B* sf, B* df\)
+  {
+    UL nways; thread_array_data data; D t;
+    if \(thread_num == 1 || ARRAY_SIZE\(df\)/\(THREADMUL*)__
+      UNROLLS n__ (\) < 1\)
+    )__ st__ dt__ (moveSAs\(sf, df\);
+    else {
+      nways = ARRAY_SIZE\(df\) /\(THREADMUL*)__ UNROLLS n__ (\)
+              + \(ARRAY_SIZE\(df\)%\(THREADMUL*)__ UNROLLS n__(\) ?
+              1 : 0\);
+      if \(nways > thread_num\) nways = thread_num;
+      data.df_start = VALUE_PTR\(df\);)__
+      st {(sf) SCALAR} (data.in) GETCV (
+      data.perthread = ARRAY_SIZE\(df\) / nways;
+      data.leftover = ARRAY_SIZE\(df\) % nways;
+      threads_do\(nways, )__ st__ dt__ (moveSAt, \(B*\) &data\);
+    }
+  }
+#endif //ENABLE_THREADS
+
+  static void )__ st__ dt__ (moveSA\(B* sf, B* df\)
+  {
+#if ENABLE_THREADS
+    if \(serialized\)
+#endif ENABLE_THREADS
+      )__ st__ dt__ (moveSAc\(sf, df\);
+#if ENABLE_THREADS
+    else )__ st__ dt__ (moveSAc\(sf,df\);
+#endif 
+  }
+)__
 } def
 
 |-------------------------------------------- XYmoveAS function:
@@ -263,7 +306,7 @@ NL
     }
 
 
-#if THREADS_ENABLED
+#if ENABLE_THREADS
     static L )__ st__ dt__ (moveAAt\(UL id, B* indata\)
     {
        thread_array_data* data = \(thread_array_data*\) indata;
@@ -298,16 +341,16 @@ NL
       threads_do\(nways, )__ st__ dt__ (moveAAt, \(B*\) &data\);
      }
    }
-#endif //THREADS_ENABLED
+#endif //ENABLE_THREADS
 
    static void )__ st__ dt__ (moveAA\(B *sf, B *df\)
    {
     if \(serialized\) )__ st__ dt__ (moveAAs\(sf,df\);
-#if THREADS_ENABLED
+#if ENABLE_THREADS
     else )__ st__ dt__ (moveAAc\(sf, df\);
-#else //!THREADS_ENABLED
+#else //!ENABLE_THREADS
     else )__ st__ dt__ (moveAAp\(sf,df\);
-#endif //!THREADS_ENABLED
+#endif //!ENABLE_THREADS
    }
 )__
 } def
@@ -341,6 +384,20 @@ NL
 /THEARC {NL (t = thearc\(t,tt\);)__} def
 end def
 
+/dyadic_d_unseed 4 dict dup begin
+/ADD {NL (t += tt;)__} def
+/SUB {NL (t += tt;)__} def
+/MUL {NL (t *= tt;)__} def
+/DIV {NL (t *= tt;)__} def
+end def
+
+/dyadic_d_pseed 4 dict dup begin
+/ADD {(0)__} def
+/SUB {(0)__} def
+/MUL {(1)__} def
+/DIV {(1)__} def
+end def
+
 /dyadic_d_x 7 dict dup begin
 /ADD { pushA NL (t)__ popA dup pushA __ ( += tt)__ popA __ (;)__ } def
 /SUB { pushA NL (t)__ popA dup pushA __ ( -= tt)__ popA __ (;)__ } def
@@ -363,18 +420,67 @@ end def
 | destination array.
 
 /XYdyOPAS {
+(
+  static void )__ dt__ st__ (dy)__ op__ (ASs\(B *df, B *sf\)
+  {
+    D t,tt; L n; )__ dt__ ( * restrict d;
+    d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
+    st { (sf) SCALAR } (tt) GETCV
+    (df) { dt { (d)__ } (t) GETCV
+      dyadic_d op get exec
+      dt { (d++)__ } (t) CVPUT
+    } ROLLBITS FOR_modn (
+  }
 
-NL (static void )__ dt__ st__ (dy)__ op__ (AS\(B *df, B *sf\))__
-NL ({)__
-NL (D t,tt; L n; )__ dt__ ( *d;)__
-NL (d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
-st { (sf) SCALAR } (tt) GETCV
-(df) { dt { (d)__ } (t) GETCV
-       dyadic_d op get exec
-       dt { (d++)__ } (t) CVPUT
-     } ROLLBITS FOR_modn
-NL (})__
-NL 
+#if ENABLE_THREADS
+  static L )__ dt__ st__ (dy)__ op__ (ASt\(UL id, B* indata\)
+  {
+    thread_array_data* data = \(thread_array_data*\) indata;
+    D t, tt; L n, n_; )__ dt__ ( * restrict d;
+    n_ = data->perthread;
+    if \(thread_max == id\) n += data->leftover;
+    d = \(\()__ dt__ ( *\) data->df_start\)+data->perthread*id;
+    tt = data->in;
+    )__ {
+      dt {(d)__} (t) GETCV
+      dyadic_d op get exec
+      dt {(d++)__} (t) CVPUT
+    } ROLLBITS FOR_modnp (
+    return OK;
+  }
+
+  static void )__ dt__ st__ (dy)__ op__ (ASc\(B* df, B *sf\)
+  {
+    UL nways; thread_array_data data; D tt;
+    if \(thread_num == 1 || ARRAY_SIZE\(df\)/\(THREADMUL*)__
+      UNROLLS n__ (\) < 1\)
+      )__ dt__ st__ (dy)__ op__ (ASs\(df, sf\);
+    else {
+      nways = ARRAY_SIZE\(df\)/\(THREADMUL*)__ UNROLLS n__ (\)
+              + \(ARRAY_SIZE\(df\)%\(THREADMUL*)__ UNROLLS n__ (\) ?
+              1 : 0\);
+      if \(nways > thread_num\) nways = thread_num;
+      data.df_start = VALUE_PTR\(df\);
+      )__ st {(sf) SCALAR} (tt) GETCV (
+      data.in = tt;
+      data.perthread = ARRAY_SIZE\(df\) / nways;
+      data.leftover = ARRAY_SIZE\(df\) % nways;
+      threads_do\(nways, )__ dt__ st__ (dy)__ op__ (ASt, \(B*\) &data\);
+    }
+  }
+#endif ENABLE_THREADS
+
+  static void )__ dt__ st__ (dy)__ op__ (AS\(B *df, B *sf\)
+  {
+#if ENABLE_THREADS
+    if \(serialized\)
+#endif ENABLE_THREADS
+    )__ dt__ st__ (dy)__ op__ (ASs\(df, sf\);
+#if ENABLE_THREADS
+    else )__ dt__ st__ (dy)__ op__ (ASc\(df, sf\);
+#endif //ENABLE_THREADS
+  }
+)__
 } def
 
 |-------------------------------------------- XYdyOPSA function:
@@ -386,18 +492,82 @@ NL
 | destination type and to store it in the destination scalar.
 
 /XYdyOPSA {
+(
+  static void )__ dt__ st__ (dy)__ op__ (SAs\(B *df, B *sf\)
+  {
+    D t,tt; L n; )__ st__ ( * restrict s;
+    s = \()__ st__ ( *\))__ (sf) ARRAY (;)__
+    dt { (df) SCALAR } (t) GETCV
+    (sf) { st { (s++)__ } (tt) GETCV
+      dyadic_d op get exec
+    } ROLLBITS FOR_modn
+    dt { (df) SCALAR } (t) CVPUT (
+   }
+)__
+dyadic_d_pseed op known {(
+#if ENABLE_THREADS
+ static L )__ dt__ st__ (dy)__ op__ (SAt\(UL id, B* indata\)
+ {
+    thread_array_data* data = \(thread_array_data*\) indata;
+    D t,tt; L n, n_; )__ st__ ( * restrict s;
+    n_ = data->perthread;
+    if \(thread_max == id\) n += data->leftover;
+    s = \(\()__ st__ ( *\) data->sf_start\)+data->perthread*id;
+    t = data->in;
+    )__ { 
+      st {(s++)__} (tt) GETCV
+      dyadic_d op get exec
+    } ROLLBITS FOR_modnp (
+    thread_share_lock\(\);
+     tt = data->out;
+      )__ dyadic_d op get exec (
+      data->out = t;
+    thread_share_unlock\(\);
+    return OK;
+  }  
+    
+  static void )__ dt__ st__ (dy)__ op__ (SAc\(B* df, B* sf\)
+  {
+    UL nways; thread_array_data data; D t,tt;
+    if \(thread_num == 1 || ARRAY_SIZE\(sf\)/\(THREADMUL*)__ 
+      UNROLLS n__ (\) < 1\)
+      )__ dt__ st__ (dy)__ op__ (SAs\(df, sf\);
+    else {
+      nways = ARRAY_SIZE\(sf\)/\(THREADMUL*)__ UNROLLS n__ (\)
+              + \(ARRAY_SIZE\(sf\)%\(THREADMUL*)__ UNROLLS n__ (\) ?
+                 1 : 0\);
+      if \(nways > thread_num\) nways = thread_num;
+      data.sf_start = VALUE_PTR\(sf\);
+      data.out = data.in = )__ dyadic_d_pseed op get exec (;
+      data.perthread = ARRAY_SIZE\(sf\) / nways;
+      data.leftover = ARRAY_SIZE\(sf\) % nways;
+      threads_do\(nways, )__ dt__ st__ (dy)__ op__ (SAt, \(B*\) &data\);
+      )__  dt {(df) SCALAR} (t) GETCV (
+      tt = data.out;
+      )__ dyadic_d_unseed op get exec
+      dt {(df) SCALAR} (t) CVPUT (
+    }
+  }
+#endif //ENABLE_THREADS
 
-NL (static void )__ dt__ st__ (dy)__ op__ (SA\(B *df, B *sf\))__
-NL ({)__
-NL (D t,tt; L n; )__ st__ ( *s;)__
-NL (s = \()__ st__ ( *\))__ (sf) ARRAY (;)__
-dt { (df) SCALAR } (t) GETCV
-(sf) { st { (s++)__ } (tt) GETCV
-       dyadic_d op get exec
-     } ROLLBITS FOR_modn
-dt { (df) SCALAR } (t) CVPUT
-NL (})__
-NL 
+  static void )__ dt__ st__ (dy)__ op__ (SA\(B* df, B *sf\)
+  {
+#if ENABLE_THREADS
+    if \(serialized\)
+#endif //ENABLE_THREADS
+      )__ dt__ st__ (dy)__ op__ (SAs\(df, sf\);
+#if ENABLE_THREADS
+    else )__ dt__ st__ (dy)__ op__ (SAc\(df, sf\);
+#endif //ENABLE_THREADS
+  }
+)__
+} {(
+  static void )__ dt__ st__ (dy)__ op__ (SA\(B* df, B *sf\)
+  {
+    )__ dt__ st__ (dy)__ op__ (SAs\(df, sf\);
+  }
+)__
+} ifelse
 } def
 
 |-------------------------------------------- XYdyOPAA function:
@@ -443,7 +613,7 @@ NL
     }
 
 
-#ifdef THREADS_ENABLED
+#ifdef ENABLE_THREADS
     static L )__ dt__ st__ (dy)__ op__ (AAt\(UL id, B* indata\) 
     {
       thread_array_data* data = \(thread_array_data*\) indata;
@@ -480,16 +650,16 @@ NL
          threads_do\(nways, )__ dt__ st__ (dy)__ op__ (AAt, \(B*\) &data\);
        }
      }
-#endif //THREADS_ENABLED
+#endif //ENABLE_THREADS
 
     static void )__ dt__ st__ (dy)__ op__ (AA\(B * df, B * sf\)
     {
       if \(serialized\) )__ dt__ st__ (dy)__ op__ (AAs\(df,sf\);
-#if THREADS_ENABLED
+#if ENABLE_THREADS
       else )__ dt__ st__ (dy)__ op__ (AAc\(df,sf\);
-#else //!THREADS_ENABLED
+#else //!ENABLE_THREADS
       else )__ dt__ st__ (dy)__ op__ (AAp\(df,sf\);
-#endif //!THREADS_ENABLED
+#endif //!ENABLE_THREADS
     }
 )__
 } def
@@ -537,17 +707,61 @@ end def
 | the original.
 
 /YmoOPA {
-
-NL (static void )__ dt__ (mo)__ op__ (A\(B *df\))__
-NL ({)__
-NL (D t; )__ dt__ ( *d; L n;)__
-NL (d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
-(df) { dt { (d)__ } (t) GETCV
+(
+   static void )__ dt__ (mo)__ op__ (As\(B *df\)
+   {
+     D t; )__ dt__ ( *d; L n;
+     d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
+     (df) { dt { (d)__ } (t) GETCV
        monadic_d op get exec
        dt { (d++)__ } (t) CVPUT
-     } ROLLBITS FOR_modn
-NL (})__
-NL 
+     } ROLLBITS FOR_modn (
+   }
+
+#if ENABLE_THREADS
+  static L )__ dt__ (mo)__ op__ (At\(UL id, B* indata\)
+  {
+    thread_array_data* data = \(thread_array_data*\) indata;
+    D t; L n, n_; )__ st__ ( * s; )__ dt__ ( * d;
+    n_ = data->perthread;
+    if \(thread_max == id\) n_ += data->leftover;
+    d = \(\()__ dt__ ( *\) data->df_start\)+data->perthread*id;)__
+    {
+      dt {(d)__} (t) GETCV
+      monadic_d op get exec
+      dt {(d++)__} (t) CVPUT
+    } ROLLBITS FOR_modnp (
+    return OK;
+  }
+    
+  static void )__ dt__ (mo)__ op__ (Ac\(B * df\)
+  {
+    UL nways; thread_array_data data;
+    if \(thread_num == 1 || ARRAY_SIZE\(df\)/\(THREADMUL*)__
+      UNROLLS n__ (\) < 1\)
+      )__ dt__ (mo)__ op__ (As\(df\);
+    else {
+      nways = ARRAY_SIZE\(df\)/\(THREADMUL*)__ UNROLLS n__ (\)
+              + \(ARRAY_SIZE\(df\)%\(THREADMUL*)__ UNROLLS n__ (\) ?
+              1 : 0\);
+      if \(nways > thread_num\) nways = thread_num;
+      data.df_start = VALUE_PTR\(df\);
+      data.perthread = ARRAY_SIZE\(df\) / nways;
+      data.leftover = ARRAY_SIZE\(df\) % nways;
+      threads_do\(nways, )__ dt__ (mo)__ op__ (At, \(B*\) &data\);
+    }
+  }
+#endif ENABLE_THREADS
+
+  static void )__ dt__ (mo)__ op__ (A\(B *df\)
+  {
+#if !ENABLE_THREADS
+    )__ dt__ (mo)__ op__ (As\(df\);
+#else //ENABLE_THREADS
+    )__ dt__ (mo)__ op__ (Ac\(df\);
+#endif //ENABLE_THREADS
+  }
+)__
 } def
 
 |-------------------------------------------- Ydecr function

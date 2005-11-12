@@ -6,7 +6,7 @@ AM_INIT_AUTOMAKE
 AM_PATH_LISPDIR
 AM_MAINTAINER_MODE
 
-CF_AC_ENABLE([plugins], [compile or install plugins], [yes], [PLUGINS_ENABLED])
+CF_AC_ENABLE([plugins], [compile or install plugins], [yes])
 CF_IF_ENABLED([plugins], [
   CF_AM_ENABLE([process], [compile or install process plugin], [yes])
 ])
@@ -15,8 +15,9 @@ CF_AC_ARG_VAR([SYSDICTSIZE], [system dictionary size], [500])
 CF_AC_ARG_VAR([ROLLBITS], [unroll math loops to 2^rollbits], [3])
 
 CF_AM_ENABLE([setuid], [compile or install setuid wrapper], [yes])
-CF_AC_ENABLE([threads], [compile and install threads], 
-  [yes], [THREADS_ENABLED])
+CF_AC_ENABLE([threads], 
+             [compile and install threads, value is default number], 
+             [1])
 CF_IF_ENABLED([threads], [
   CF_AC_ARG_VAR([THREADNUM], [max number of threads], [8])
   CF_AC_ARG_VAR([THREADMUL], [min unrolls per thread], [4])
@@ -39,8 +40,8 @@ AC_CHECK_PROG([guipdf], [xpdf], [xpdf])
 AC_CHECK_PROG([guipdf], [gv], [gv])
 AC_CHECK_PROG([guipdf], [gs], [gs])
 
-CF_AM_PROG([BASH_ENABLED], [bash])
-CF_AM_PROG([ENV_ENABLED], [env], [/usr/bin])
+CF_AM_PROG([ENABLE_BASH], [bash])
+CF_AM_PROG([ENABLE_ENV], [env], [/usr/bin])
 
 CF_AC_ARG_VAR_QUOTE([guipdf],
  [name of program to display pdf's, eg gnome-open or launch -i com.apple.Preview],
@@ -105,7 +106,7 @@ AC_CHECK_HEADER([error.h], [
   AC_DEFINE([HAVE_ERROR_H], [1], [Define to 1 if you have <error.h>])
 ])
 
-CF_UNDEF([CFLAGS], [
+CF_IF_UNDEF([CFLAGS], [
   CF_GCC_COMPILER_OPTION([CFLAGS], [-g])
   CF_GCC_COMPILER_OPTION([CFLAGS], [-O2])
 ])
@@ -141,7 +142,7 @@ AC_CONFIG_FILES([Makefile
 		 ps/Makefile 
 		 sh/Makefile
 		 emacs/Makefile emacs/d-mode.el
-		 dcode/Makefile dcode/startup_dvt.d dcode/startup_dnode.d
+		 dcode/Makefile dcode/startup_dvt.d
 ])
 
 AC_OUTPUT

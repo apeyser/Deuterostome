@@ -39,8 +39,7 @@ host_triplet = @host@
 target_triplet = @target@
 subdir = dcode
 DIST_COMMON = $(dist_dmstart_DATA) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/startup_dnode.d.in \
-	$(srcdir)/startup_dvt.d.in
+	$(srcdir)/Makefile.in $(srcdir)/startup_dvt.d.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/configure.m4 $(top_srcdir)/m4/libtool.m4 \
@@ -49,7 +48,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = startup_dvt.d startup_dnode.d
+CONFIG_CLEAN_FILES = startup_dvt.d
 SOURCES =
 DIST_SOURCES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -73,9 +72,6 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BASH_ENABLED = @BASH_ENABLED@
-BASH_ENABLED_FALSE = @BASH_ENABLED_FALSE@
-BASH_ENABLED_TRUE = @BASH_ENABLED_TRUE@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -98,19 +94,24 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EMACS = @EMACS@
 EMACSLOADPATH = @EMACSLOADPATH@
-EMACS_ENABLED_FALSE = @EMACS_ENABLED_FALSE@
-EMACS_ENABLED_TRUE = @EMACS_ENABLED_TRUE@
+ENABLE_BASH = @ENABLE_BASH@
+ENABLE_BASH_FALSE = @ENABLE_BASH_FALSE@
+ENABLE_BASH_TRUE = @ENABLE_BASH_TRUE@
+ENABLE_EMACS_FALSE = @ENABLE_EMACS_FALSE@
+ENABLE_EMACS_TRUE = @ENABLE_EMACS_TRUE@
+ENABLE_ENV = @ENABLE_ENV@
+ENABLE_ENV_FALSE = @ENABLE_ENV_FALSE@
+ENABLE_ENV_TRUE = @ENABLE_ENV_TRUE@
+ENABLE_PLUGINS = @ENABLE_PLUGINS@
 ENABLE_PLUGINS_FALSE = @ENABLE_PLUGINS_FALSE@
 ENABLE_PLUGINS_TRUE = @ENABLE_PLUGINS_TRUE@
 ENABLE_PROCESS_FALSE = @ENABLE_PROCESS_FALSE@
 ENABLE_PROCESS_TRUE = @ENABLE_PROCESS_TRUE@
 ENABLE_SETUID_FALSE = @ENABLE_SETUID_FALSE@
 ENABLE_SETUID_TRUE = @ENABLE_SETUID_TRUE@
+ENABLE_THREADS = @ENABLE_THREADS@
 ENABLE_THREADS_FALSE = @ENABLE_THREADS_FALSE@
 ENABLE_THREADS_TRUE = @ENABLE_THREADS_TRUE@
-ENV_ENABLED = @ENV_ENABLED@
-ENV_ENABLED_FALSE = @ENV_ENABLED_FALSE@
-ENV_ENABLED_TRUE = @ENV_ENABLED_TRUE@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
@@ -234,13 +235,21 @@ dist_dmstart_DATA = color.d dvt_macros.d master.d sched.d startup_dnode.d \
 nodist_dmstart_DATA = theeye.d
 EXTRA_DIST = theeye.d.in
 CLEANFILES = $(nodist_dmstart_DATA)
-PLUGIN_START = /^[[:space:]]*[@]pluginstart[@][[:space:]]*$$/
-PLUGIN_END = /^[[:space:]]*[@]pluginend[@][[:space:]]*$$/
+PLUGIN_START = /^[[:space:]]*[@]ENABLE_PLUGINS_START[@][[:space:]]*$$/
+PLUGIN_END = /^[[:space:]]*[@]ENABLE_PLUGINS_END[@][[:space:]]*$$/
 @ENABLE_PLUGINS_FALSE@PLUGIN_DELETE = -e '$(PLUGIN_START),$(PLUGIN_END) d'
 @ENABLE_PLUGINS_TRUE@PLUGIN_DELETE = -e '$(PLUGIN_START) d' -e '$(PLUGIN_END) d'
-edit = sed -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
+THREADS_START = /^[[:space:]]*[@]ENABLE_THREADS_START[@][[:space:]]*$$/
+THREADS_END = /^[[:space:]]*[@]ENABLE_THREADS_END[@][[:space:]]*$$/
+@ENABLE_THREADS_FALSE@THREADS_EDIT = -e '$(THREADS_START),$(THREADS_END) d'
+@ENABLE_THREADS_TRUE@THREADS_EDIT = -e '$(THREADS_START) d' \
+@ENABLE_THREADS_TRUE@			   -e '$(THREADS_END) d' \
+@ENABLE_THREADS_TRUE@			   -e 's,[@]ENABLE_THREADS[@],$(ENABLE_THREADS),g'
+
+edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
-			$(PLUGIN_DELETE)
+			$(PLUGIN_DELETE) \
+			$(THREADS_EDIT)
 
 all: all-am
 
@@ -275,8 +284,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 startup_dvt.d: $(top_builddir)/config.status $(srcdir)/startup_dvt.d.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-startup_dnode.d: $(top_builddir)/config.status $(srcdir)/startup_dnode.d.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
@@ -451,6 +458,11 @@ uninstall-am: uninstall-dist_dmstartDATA uninstall-info-am \
 theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/theeye.d.in >$@.tmp
+	mv $@.tmp $@
+
+startup_dnode.d: $(srcdir)/Makefile $(srcdir)/startup_dnode.d.in
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/startup_dnode.d.in >$@.tmp
 	mv $@.tmp $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

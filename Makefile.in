@@ -85,9 +85,6 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BASH_ENABLED = @BASH_ENABLED@
-BASH_ENABLED_FALSE = @BASH_ENABLED_FALSE@
-BASH_ENABLED_TRUE = @BASH_ENABLED_TRUE@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -110,19 +107,24 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EMACS = @EMACS@
 EMACSLOADPATH = @EMACSLOADPATH@
-EMACS_ENABLED_FALSE = @EMACS_ENABLED_FALSE@
-EMACS_ENABLED_TRUE = @EMACS_ENABLED_TRUE@
+ENABLE_BASH = @ENABLE_BASH@
+ENABLE_BASH_FALSE = @ENABLE_BASH_FALSE@
+ENABLE_BASH_TRUE = @ENABLE_BASH_TRUE@
+ENABLE_EMACS_FALSE = @ENABLE_EMACS_FALSE@
+ENABLE_EMACS_TRUE = @ENABLE_EMACS_TRUE@
+ENABLE_ENV = @ENABLE_ENV@
+ENABLE_ENV_FALSE = @ENABLE_ENV_FALSE@
+ENABLE_ENV_TRUE = @ENABLE_ENV_TRUE@
+ENABLE_PLUGINS = @ENABLE_PLUGINS@
 ENABLE_PLUGINS_FALSE = @ENABLE_PLUGINS_FALSE@
 ENABLE_PLUGINS_TRUE = @ENABLE_PLUGINS_TRUE@
 ENABLE_PROCESS_FALSE = @ENABLE_PROCESS_FALSE@
 ENABLE_PROCESS_TRUE = @ENABLE_PROCESS_TRUE@
 ENABLE_SETUID_FALSE = @ENABLE_SETUID_FALSE@
 ENABLE_SETUID_TRUE = @ENABLE_SETUID_TRUE@
+ENABLE_THREADS = @ENABLE_THREADS@
 ENABLE_THREADS_FALSE = @ENABLE_THREADS_FALSE@
 ENABLE_THREADS_TRUE = @ENABLE_THREADS_TRUE@
-ENV_ENABLED = @ENV_ENABLED@
-ENV_ENABLED_FALSE = @ENV_ENABLED_FALSE@
-ENV_ENABLED_TRUE = @ENV_ENABLED_TRUE@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
@@ -241,9 +243,9 @@ target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
 EXTRA_DIST = bootstrap
-@EMACS_ENABLED_TRUE@EMACS_DIR = emacs
+@ENABLE_EMACS_TRUE@EMACS_DIR = emacs
 @ENABLE_PLUGINS_TRUE@PLUGINS_DIR = plugins
-@BASH_ENABLED_TRUE@@ENV_ENABLED_TRUE@BASH_DIR = sh
+@ENABLE_BASH_TRUE@@ENABLE_ENV_TRUE@BASH_DIR = sh
 SUBDIRS = libltdl src $(PLUGINS_DIR) $(BASH_DIR) ps $(EMACS_DIR) dcode
 ACLOCAL_AMFLAGS = -I m4
 all: config.h
@@ -622,7 +624,7 @@ distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -f Makefile
 distclean-am: clean-am distclean-generic distclean-hdr \
-	distclean-libtool distclean-local distclean-tags
+	distclean-libtool distclean-tags
 
 dvi: dvi-recursive
 
@@ -671,25 +673,21 @@ uninstall-info: uninstall-info-recursive
 	ctags ctags-recursive dist dist-all dist-bzip2 dist-gzip \
 	dist-shar dist-tarZ dist-zip distcheck distclean \
 	distclean-generic distclean-hdr distclean-libtool \
-	distclean-local distclean-recursive distclean-tags \
-	distcleancheck distdir distuninstallcheck dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-man install-strip installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic maintainer-clean-recursive \
-	mostlyclean mostlyclean-generic mostlyclean-libtool \
-	mostlyclean-recursive pdf pdf-am ps ps-am tags tags-recursive \
-	uninstall uninstall-am uninstall-info-am
+	distclean-recursive distclean-tags distcleancheck distdir \
+	distuninstallcheck dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-exec \
+	install-exec-am install-info install-info-am install-man \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am maintainer-clean maintainer-clean-generic \
+	maintainer-clean-recursive mostlyclean mostlyclean-generic \
+	mostlyclean-libtool mostlyclean-recursive pdf pdf-am ps ps-am \
+	tags tags-recursive uninstall uninstall-am uninstall-info-am
 
 
 @SET_MAKE@
 codegen-all: codegen all
 codegen: 
-	cd src/codegen && $(MAKE) $(AM_MAKEFLAGS) all
-
-distclean-local:
-	-rm -f src/codegen/dmnuminc.d
+	cd src && $(MAKE) $(AM_MAKEFLAGS) codegen
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -1,26 +1,24 @@
 EXTRA_DIST = bootstrap
 
-if EMACS_ENABLED
+if ENABLE_EMACS
 EMACS_DIR=emacs
-endif EMACS_ENABLED
+endif ENABLE_EMACS
 
 if ENABLE_PLUGINS
 PLUGINS_DIR=plugins
 endif ENABLE_PLUGINS
 
-if BASH_ENABLED
-if ENV_ENABLED
+if ENABLE_BASH
+if ENABLE_ENV
 BASH_DIR=sh
-endif ENV_ENABLED
-endif BASH_ENABLED
+endif ENABLE_ENV
+endif ENABLE_BASH
 
 SUBDIRS = libltdl src $(PLUGINS_DIR) $(BASH_DIR) ps $(EMACS_DIR) dcode
 ACLOCAL_AMFLAGS = -I m4
 
 @SET_MAKE@
-codegen-all: codegen all
-codegen: 
-	cd src/codegen && $(MAKE) $(AM_MAKEFLAGS) all
+gencode-all: gencode all
+gencode: 
+	cd src && $(MAKE) $(AM_MAKEFLAGS) gencode
 
-distclean-local:
-	-rm -f src/codegen/dmnuminc.d
