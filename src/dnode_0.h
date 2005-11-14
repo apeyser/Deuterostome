@@ -8,6 +8,10 @@ L op_loadlib(void);
 L op_nextlib(void);
 L op_getplugindir(void);
 
+/*--- threads */
+L op_makethreads(void);
+L op_threads(void);
+
 B *sysop[] =
 {
       "lock",        (B*) op_lock,

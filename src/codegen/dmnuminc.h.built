@@ -1,3 +1,5 @@
+#include "threads.h"
+
 #if ENABLE_THREADS
 
 typedef struct {

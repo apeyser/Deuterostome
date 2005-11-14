@@ -573,6 +573,9 @@ dmnuminc.h.built: dmnuminc.d dgen buildh
 dsp1f.h.built: dsp1f.d dgen buildh
 	"$(srcdir)/buildh" "\
 		$(top_builddir)/src/codegen" "$(srcdir)" "dsp1f.d" "$@"
+	(cd "$(srcdir)/.." ; \
+	 rm dsp1f.h ; \
+	 $(LN_S) codegen/dsp1f.h.built dsp1f.h)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

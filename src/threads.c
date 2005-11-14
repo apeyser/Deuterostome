@@ -3,6 +3,10 @@
 #include <errno.h>
 
 #include "dm.h"
+#include "threads.h"
+
+L op_makethreads(void);
+L op_threads(void);
 
 // thread[0] is the main thread in all arrays
 // Therefore, elements 0 is empty.
@@ -83,7 +87,8 @@ void* thread_routine(void* arg) {
   return NULL;
 }
 
-L threads_do_int(UL nways, thread_func func, void* global,
+L threads_do_int(UL nways, thread_func func,
+                 const void* global,
                  void* local, size_t s) {
   UL i;
   if (nways > thread_num) return RNG_CHK;

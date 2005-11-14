@@ -32,4 +32,7 @@ dmnuminc.h.built: dmnuminc.d dgen buildh
 dsp1f.h.built: dsp1f.d dgen buildh
 	"$(srcdir)/buildh" "\
 		$(top_builddir)/src/codegen" "$(srcdir)" "dsp1f.d" "$@"
+	(cd "$(srcdir)/.." ; \
+	 rm dsp1f.h ; \
+	 $(LN_S) codegen/dsp1f.h.built dsp1f.h)
 
