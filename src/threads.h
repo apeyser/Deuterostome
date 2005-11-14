@@ -1,7 +1,7 @@
 #ifndef THREADS_H
 #define THREADS_H
 
-#ifdef ENABLE_THREADS
+#ifdef ENABLE_THREADS //intentional ifdef for undef
 #if DISABLE_THREAD
 #undef ENABLE_THREADS
 #endif //DISABLE_THREADS

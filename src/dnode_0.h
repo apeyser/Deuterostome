@@ -16,7 +16,7 @@ B *sysop[] =
 {
       "lock",        (B*) op_lock,
 	  "serialize",   (B*) op_serialize,
-#if ENABLED_THREADS
+#if ENABLE_THREADS
 	  "threads",     (B*) op_threads,
 	  "makethreads", (B*) op_makethreads,
 #endif //ENABLE_THREADS
