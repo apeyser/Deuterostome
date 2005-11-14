@@ -22,7 +22,7 @@ pthread_mutex_t main_lock;
 pthread_mutex_t share_lock;
 thread_func thread_function = NULL;
 L thread_error[THREADNUM] = {};
-void* thread_data_global = NULL;
+const void* thread_data_global = NULL;
 void* thread_data_local[THREADNUM] = {};
 
 #define THREAD_ERROR_EXIT(func, msg, ...) do {							\
