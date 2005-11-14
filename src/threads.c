@@ -17,8 +17,9 @@ pthread_cond_t main_wait;
 pthread_mutex_t main_lock;
 pthread_mutex_t share_lock;
 thread_func thread_function = NULL;
-L thread_error = OK;
-B* thread_data = NULL;
+L thread_error[THREADNUM] = {};
+void* thread_data_global = NULL;
+void* thread_data_local[THREADNUM] = {};
 
 #define THREAD_ERROR_EXIT(func, msg, ...) do {							\
 	if (func(__VA_ARGS__))												\
@@ -66,9 +67,10 @@ void* thread_routine(void* arg) {
                     thread_lock+thread_id);
         } while (! thread_start[thread_id]);
 
-	ret = thread_function(thread_id, thread_data);
+	thread_error[thread_id]
+            = thread_function(thread_id, thread_data_global,
+                              thread_data_local[thread_id]);
 	THREADERR(pthread_mutex_lock, &main_lock);
-	if (! thread_error) thread_error = ret;
         --thread_end;
 	THREADERR(pthread_cond_signal, &main_wait);
 	THREADERR(pthread_mutex_unlock, &main_lock);
@@ -81,17 +83,19 @@ void* thread_routine(void* arg) {
   return NULL;
 }
 
-L threads_do(UL nways, thread_func func, B* data) {
+L threads_do_int(UL nways, thread_func func, void* global,
+                 void* local, size_t s) {
   UL i;
   if (nways > thread_num) return RNG_CHK;
 
   thread_max = nways-1;
   //thread_error = OK;
   thread_function = func;
-  thread_data = data;
+  thread_data_global = global;
+  if (local) for (i = nways; i--;) thread_data_local[i] = local+s*i;
+  else       for (i = nways; i--;) thread_data_local[i] = NULL;
 
   MAINERR(pthread_mutex_lock, &main_lock);
-  
   for (i = 1; i < nways; ++i) {
 	MAINERR(pthread_mutex_lock, thread_lock+i);
         thread_start[i] = TRUE;
@@ -99,16 +103,18 @@ L threads_do(UL nways, thread_func func, B* data) {
 	MAINERR(pthread_mutex_unlock, thread_lock+i);
   }
 
-  thread_error = thread_function(0, thread_data);
+  thread_error[0] = thread_function(0, thread_data_global, thread_data_local[0]);
 
   thread_end = thread_max;
   do {        
       MAINERR(pthread_cond_wait, &main_wait, &main_lock);
   } while (thread_end);
-  
-
   MAINERR(pthread_mutex_unlock, &main_lock);
-  return thread_error;
+
+  for (i = 0; i < nways; ++i)
+      if (thread_error[i]) return thread_error[i];
+
+  return OK;
 }
 
 L threads_destroy(L i, 
