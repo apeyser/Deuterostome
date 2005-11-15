@@ -40,19 +40,22 @@
           } {
             {A1 A3 A5} {exec 0 1 index length 2 1 ramp pop pop} forall
             /style (AS) def
-            err 0 (Starting AS for op ) fax * op text
-            ( for type ) fax * typ text (\n) fax
-            0 exch getinterval toconsole
-
-            A1 3 op mkact exec pop
-            {A3 3 op mkact exec pop} serialize
-            1 makethreads A5 3 op mkact exec pop t makethreads
-
-            err 0 (Ending AS for op ) fax * op text
-            ( for type ) fax * typ text (\n) fax
-            0 exch getinterval toconsole
+            /copy op ne {
+              err 0 (Starting AS for op ) fax * op text
+              ( for type ) fax * typ text (\n) fax
+              0 exch getinterval toconsole
+              
+              A1 3 op mkact exec pop
+              {A3 3 op mkact exec pop} serialize
+              1 makethreads A5 3 op mkact exec pop t makethreads
+            
+              err 0 (Ending AS for op ) fax * op text
+              ( for type ) fax * typ text (\n) fax
+              0 exch getinterval toconsole
+            } if
           }
-        } {exec
+        } {
+          exec
           0 1 A1 length 1 sub {/i name
             A1 i get A3 i get ne A1 i get A5 i get ne or {
               err 0 (In ) fax style fax (-) fax * op text
@@ -78,13 +81,25 @@
         ( for type ) fax * typ text (\n) fax
         0 exch getinterval toconsole
 
-        a1 a2 ne a1 a3 ne or {
-          err 0 (In SA-) fax * op text
-          ( t = ) fax * a1 * number
-          ( p = ) fax * a2 * number
-          ( s = ) fax * A3 i get * number
-        } if
-
+        /copy op ne {
+          a1 a2 ne a1 a3 ne or {
+            err 0 (In SA-) fax * op text
+            ( t = ) fax * a1 * number
+            ( p = ) fax * a2 * number
+            ( s = ) fax * a3 * number
+          } if
+        } {
+          0 1 A1 length 1 sub {/i name
+            a1 i get 3 ne a2 i get 3 ne a3 i get 3 ne or or {
+              err 0 (In SA-copy[) fax * i * number (]:) fax
+              ( t = ) fax * a1 i get * number
+              ( p = ) fax * a2 i get * number
+              ( s = ) fax * a3 i get * number
+              (\n) fax 0 exch getinterval
+            } if
+          } for
+        } ifelse
+        
         err 0 (Ending tests for op ) fax * op text
         ( for type ) fax * typ text (\n) fax
         0 exch getinterval toconsole
@@ -121,12 +136,13 @@
         0 exch getinterval toconsole
 
         {
-          {(threaded) {A1 A2 op mkact exec}}
-          {(parallel) {{A3 A4 op mkact exec pop} serialize}}
-          {(serial) {1 makethreads A5 A6 op mkact exec pop t makethreads}}
+          {(threaded) {reps {A1 A2 op mkact exec} repeat}}
+          {(parallel) {{reps {A3 A4 op mkact exec pop} repeat} serialize}}
+          {(serial) {
+            1 makethreads reps {A5 A6 op mkact exec pop} repeat t makethreads
+          }}
         } {
-          exec
-          ~[reps 3 -1 roll ~repeat] timed /time name /threading name
+          exec timed /time name /threading name
           err 0 (Time for ) fax style fax (, ) fax threading fax ( = ) fax
           * time * number (\n) fax
           0 exch getinterval toconsole
@@ -143,12 +159,13 @@
         0 exch getinterval toconsole
 
         {
-          {(threaded) {A1 3 op mkact exec}}
-          {(parallel) {{A3 3 op mkact exec} serialize}}
-          {(serial) {1 makethreads A5 3 op mkact exec t makethreads}}
+          {(threaded) {reps {A1 3 op mkact exec} repeat}}
+          {(parallel) {{reps {A3 3 op mkact exec} repeat} serialize}}
+          {(serial) {
+            1 makethreads reps {A5 3 op mkact exec} repeat t makethreads
+          }}
         } {
-          exec
-          ~[reps 3 -1 roll ~repeat] timed /time name /threading name
+          exec timed /time name /threading name
           err 0 (Time for ) fax style fax (, ) fax threading fax ( = ) fax
           * time * number (\n) fax
           0 exch getinterval toconsole
@@ -164,12 +181,13 @@
         
         {A1 A2 A3} {exec 0 1 index length 2 1 ramp pop pop} forall
         {
-          {(threaded) {3 A1 op mkact exec}}
-          {(parallel) {{3 A2 op mkact exec} serialize}}
-          {(serial) 1 makethreads 3 A3 op mkact exec /a3 name t makethreads}
+          {(threaded) {reps {3 A1 op mkact exec} repeat}}
+          {(parallel) {{reps {3 A2 op mkact exec} repeat} serialize}}
+          {(serial) {
+            1 makethreads 3 reps {A3 op mkact exec} repeat t makethreads
+          }}
         } {
-          exec
-          ~[reps 3 -1 roll ~repeat] timed /time name /threading name
+          exec timed /time name /threading name
           err 0 (Time for SS, ) fax threading fax ( = ) fax
           * time * number (\n) fax
           0 exch getinterval toconsole

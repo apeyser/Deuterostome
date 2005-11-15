@@ -110,6 +110,7 @@ CF_IF_UNDEF([CFLAGS], [
   CF_GCC_COMPILER_OPTION([CFLAGS], [-g])
   CF_GCC_COMPILER_OPTION([CFLAGS], [-O2])
 ])
+CF_GCC_COMPILER_OPTION([CFLAGS], [-ftree-vectorize])
 CF_GCC_COMPILER_OPTION([CFLAGS], [-fno-strict-aliasing])
 
 CF_GCC_COMPILER_OPTION([GCC_OPT], [-pipe])
@@ -121,6 +122,7 @@ CF_GCC_COMPILER_OPTION([GCC_OPT], [-ffast-math])
 #CF_GCC_COMPILER_OPTION([GCC_OPT], [-fno-finite-math-only])
 #CF_GCC_COMPILER_OPTION([GCC_OPT], [-fcx-limited-range])
 CF_GCC_COMPILER_OPTION([GCC_OPT], [-Wno-pointer-sign])
+CF_GCC_COMPILER_OPTION([GCC_OPT], [-fprefetch-loop-arrays])
 AC_SUBST([GCC_OPT])
 
 AC_SUBST([INCLTDL])

@@ -30168,6 +30168,54 @@ echo "${ECHO_T}yes" >&6
   fi
 
       if test "x$GCC" == "xyes" ; then
+        echo "$as_me:$LINENO: checking for compiler options -ftree-vectorize" >&5
+echo $ECHO_N "checking for compiler options -ftree-vectorize... $ECHO_C" >&6
+    ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+    CF_GCO_S=
+    lt_simple_compile_test_code="int some_variable = 0;\n"
+    printf "$lt_simple_compile_test_code" > conftest.$ac_ext
+    lt_compiler_flag="-ftree-vectorize"
+    lt_compile=`echo "$ac_compile" | $SED \
+      -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
+      -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
+      -e 's:$: $lt_compiler_flag:'`
+    (eval echo "\"\$as_me:30187: $lt_compile\"" >&5)
+    (eval "$lt_compile" 2>conftest.err)
+    ac_status=$?
+    cat conftest.err >&5
+    echo "$as_me:30191: \$? = $ac_status" >&5
+    if (exit $ac_status) && test -s "$ac_outfile"; then
+      # The compiler can only warn and ignore the option if not recognized
+      # So say no if there are warnings other than the usual output.
+      $echo "X$_lt_compiler_boilerplate" | $Xsed >conftest.exp
+      $SED '/^$/d' conftest.err >conftest.er2
+      if test ! -s conftest.err || diff conftest.exp conftest.er2 >/dev/null; then
+        CF_GCO_S=yes
+      fi
+    fi
+    $rm conftest*
+
+    if test x"$CF_GCO_S" = xyes ; then
+        echo "$as_me:$LINENO: result: Adding -ftree-vectorize" >&5
+echo "${ECHO_T}Adding -ftree-vectorize" >&6
+        CFLAGS="$CFLAGS -ftree-vectorize"
+    else
+        echo "$as_me:$LINENO: result: Failed, not adding -ftree-vectorize" >&5
+echo "${ECHO_T}Failed, not adding -ftree-vectorize" >&6
+    fi
+    ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+  fi
+      if test "x$GCC" == "xyes" ; then
         echo "$as_me:$LINENO: checking for compiler options -fno-strict-aliasing" >&5
 echo $ECHO_N "checking for compiler options -fno-strict-aliasing... $ECHO_C" >&6
     ac_ext=c
@@ -30184,11 +30232,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:30187: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:30235: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:30191: \$? = $ac_status" >&5
+    echo "$as_me:30239: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -30233,11 +30281,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:30236: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:30284: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:30240: \$? = $ac_status" >&5
+    echo "$as_me:30288: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -30284,11 +30332,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:30287: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:30335: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:30291: \$? = $ac_status" >&5
+    echo "$as_me:30339: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -30332,11 +30380,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:30335: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:30383: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:30339: \$? = $ac_status" >&5
+    echo "$as_me:30387: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -30382,11 +30430,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:30385: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:30433: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:30389: \$? = $ac_status" >&5
+    echo "$as_me:30437: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -30405,6 +30453,54 @@ echo "${ECHO_T}Adding -Wno-pointer-sign" >&6
     else
         echo "$as_me:$LINENO: result: Failed, not adding -Wno-pointer-sign" >&5
 echo "${ECHO_T}Failed, not adding -Wno-pointer-sign" >&6
+    fi
+    ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+  fi
+      if test "x$GCC" == "xyes" ; then
+        echo "$as_me:$LINENO: checking for compiler options -fprefetch-loop-arrays" >&5
+echo $ECHO_N "checking for compiler options -fprefetch-loop-arrays... $ECHO_C" >&6
+    ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+    CF_GCO_S=
+    lt_simple_compile_test_code="int some_variable = 0;\n"
+    printf "$lt_simple_compile_test_code" > conftest.$ac_ext
+    lt_compiler_flag="-fprefetch-loop-arrays"
+    lt_compile=`echo "$ac_compile" | $SED \
+      -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
+      -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
+      -e 's:$: $lt_compiler_flag:'`
+    (eval echo "\"\$as_me:30481: $lt_compile\"" >&5)
+    (eval "$lt_compile" 2>conftest.err)
+    ac_status=$?
+    cat conftest.err >&5
+    echo "$as_me:30485: \$? = $ac_status" >&5
+    if (exit $ac_status) && test -s "$ac_outfile"; then
+      # The compiler can only warn and ignore the option if not recognized
+      # So say no if there are warnings other than the usual output.
+      $echo "X$_lt_compiler_boilerplate" | $Xsed >conftest.exp
+      $SED '/^$/d' conftest.err >conftest.er2
+      if test ! -s conftest.err || diff conftest.exp conftest.er2 >/dev/null; then
+        CF_GCO_S=yes
+      fi
+    fi
+    $rm conftest*
+
+    if test x"$CF_GCO_S" = xyes ; then
+        echo "$as_me:$LINENO: result: Adding -fprefetch-loop-arrays" >&5
+echo "${ECHO_T}Adding -fprefetch-loop-arrays" >&6
+        GCC_OPT="$GCC_OPT -fprefetch-loop-arrays"
+    else
+        echo "$as_me:$LINENO: result: Failed, not adding -fprefetch-loop-arrays" >&5
+echo "${ECHO_T}Failed, not adding -fprefetch-loop-arrays" >&6
     fi
     ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
