@@ -284,7 +284,7 @@ NL
       )__ st__ dt__ (moveSAs\(sf, df\);
 #if ENABLE_THREADS
     else )__ st__ dt__ (moveSAc\(sf,df\);
-#endif 
+#endif //ENABLE_THREADS
   }
 )__
 } def
@@ -355,7 +355,7 @@ NL
     if \(serialized\) )__ st__ dt__ (moveAAs\(sf,df\);
 #if ENABLE_THREADS
     else if \(thread_num != 1\) )__ st__ dt__ (moveAAc\(sf, df\);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else )__ st__ dt__ (moveAAp\(sf,df\);
    }
 )__
@@ -625,7 +625,7 @@ dyadic_dp_seed op known {(
       if \(serialized\) )__ dt__ st__ (dy)__ op__ (AAs\(df,sf\);
 #if ENABLE_THREADS
       else if \(thread_num != 1\) )__ dt__ st__ (dy)__ op__ (AAc\(df,sf\);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else )__ dt__ st__ (dy)__ op__ (AAp\(df,sf\);
     }
 )__
@@ -748,7 +748,7 @@ typedef struct {
   L leftover;
   D in;
 } thread_array_data;
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 )__
 |----- generate ENCODE function definitions
 [ /B /W /L  /S /D ] { /dt name DYencode } forall

@@ -136,7 +136,7 @@
         0 exch getinterval toconsole
 
         {
-          {(threaded) {reps {A1 A2 op mkact exec} repeat}}
+          {(threaded) {reps {A1 A2 op mkact exec pop} repeat}}
           {(parallel) {{reps {A3 A4 op mkact exec pop} repeat} serialize}}
           {(serial) {
             1 makethreads reps {A5 A6 op mkact exec pop} repeat t makethreads
@@ -152,28 +152,30 @@
         ( for type ) fax * typ text (\n) fax
         0 exch getinterval toconsole
 
-        {A1 A3 A5} {exec 0 1 index length 2 1 ramp pop pop} forall
-        /style (AS) def
-        err 0 (Starting AS for op ) fax * op text
-        ( for type ) fax * typ text (\n) fax
-        0 exch getinterval toconsole
-
-        {
-          {(threaded) {reps {A1 3 op mkact exec} repeat}}
-          {(parallel) {{reps {A3 3 op mkact exec} repeat} serialize}}
-          {(serial) {
-            1 makethreads reps {A5 3 op mkact exec} repeat t makethreads
-          }}
-        } {
-          exec timed /time name /threading name
-          err 0 (Time for ) fax style fax (, ) fax threading fax ( = ) fax
-          * time * number (\n) fax
+        op /copy ne {
+          {A1 A3 A5} {exec 0 1 index length 2 1 ramp pop pop} forall
+          /style (AS) def
+          err 0 (Starting AS for op ) fax * op text
+          ( for type ) fax * typ text (\n) fax
           0 exch getinterval toconsole
-        } forall
+          
+          {
+            {(threaded) {reps {A1 3 op mkact exec} repeat}}
+            {(parallel) {{reps {A3 3 op mkact exec} repeat} serialize}}
+            {(serial) {
+              1 makethreads reps {A5 3 op mkact exec} repeat t makethreads
+            }}
+          } {
+            exec timed /time name /threading name
+            err 0 (Time for ) fax style fax (, ) fax threading fax ( = ) fax
+            * time * number (\n) fax
+            0 exch getinterval toconsole
+          } forall
         
-        err 0 (Ending AS for op ) fax * op text
-        ( for type ) fax * typ text (\n) fax
-        0 exch getinterval toconsole
+          err 0 (Ending AS for op ) fax * op text
+          ( for type ) fax * typ text (\n) fax
+          0 exch getinterval toconsole
+        } if
 
         err 0 (Starting SA for op ) fax * op text
         ( for type ) fax * typ text (\n) fax
@@ -188,7 +190,7 @@
           }}
         } {
           exec timed /time name /threading name
-          err 0 (Time for SS, ) fax threading fax ( = ) fax
+          err 0 (Time for SA, ) fax threading fax ( = ) fax
           * time * number (\n) fax
           0 exch getinterval toconsole
         } forall
