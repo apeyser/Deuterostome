@@ -439,21 +439,21 @@ Used by dvt to signal to emacs that it should pop up and take focus"
   (interactive)
   (process-send-string 
    (get-buffer-process (current-buffer))
-   "* userdict begin raise_thehorses\n"))
+   "% userdict begin raise_thehorses\n"))
 
 (defun d-comint-mode-raise-all ()
   "Tell dvt to raise all dvt windows"
   (interactive)
   (process-send-string
    (get-buffer-process (current-buffer))
-   "* userdict begin raise_all\n"))
+   "% userdict begin raise_all\n"))
 
 (defun d-comint-mode-hide-all ()
   "Tell dvt to hide all dvt windows"
   (interactive)
   (process-send-string
    (get-buffer-process (current-buffer))
-   "* userdict begin hide_all\n"))
+   "% userdict begin hide_all\n"))
 
 (defcustom d-comint-dnode-mode-dnode-args nil 
   "Options to dnode program"
