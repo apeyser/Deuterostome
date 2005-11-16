@@ -8,7 +8,7 @@ typedef struct {
   L leftover;
   D in;
 } thread_array_data;
-#endif ENABLE_THREADS
+#endif //ENABLE_THREADS
 
 static void DBencode(D t, B *dp)
 {
@@ -199,7 +199,7 @@ if ((data.in = *((B *)NUM_VAL(sf))) == BINF) data.in = DINF;
       BBmoveSAs(sf, df);
 #if ENABLE_THREADS
     else BBmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void BBmoveAS(B *sf, B *df)
@@ -330,7 +330,7 @@ if ((t = *((B *)s++)) == BINF) t = DINF;
     if (serialized) BBmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) BBmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else BBmoveAAp(sf,df);
    }
 
@@ -411,7 +411,7 @@ if ((data.in = *((B *)NUM_VAL(sf))) == BINF) data.in = DINF;
       BWmoveSAs(sf, df);
 #if ENABLE_THREADS
     else BWmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void BWmoveAS(B *sf, B *df)
@@ -542,7 +542,7 @@ if ((t = *((B *)s++)) == BINF) t = DINF;
     if (serialized) BWmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) BWmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else BWmoveAAp(sf,df);
    }
 
@@ -623,7 +623,7 @@ if ((data.in = *((B *)NUM_VAL(sf))) == BINF) data.in = DINF;
       BLmoveSAs(sf, df);
 #if ENABLE_THREADS
     else BLmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void BLmoveAS(B *sf, B *df)
@@ -754,7 +754,7 @@ if ((t = *((B *)s++)) == BINF) t = DINF;
     if (serialized) BLmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) BLmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else BLmoveAAp(sf,df);
    }
 
@@ -835,7 +835,7 @@ if ((data.in = *((B *)NUM_VAL(sf))) == BINF) data.in = DINF;
       BSmoveSAs(sf, df);
 #if ENABLE_THREADS
     else BSmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void BSmoveAS(B *sf, B *df)
@@ -966,7 +966,7 @@ if ((t = *((B *)s++)) == BINF) t = DINF;
     if (serialized) BSmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) BSmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else BSmoveAAp(sf,df);
    }
 
@@ -1047,7 +1047,7 @@ if ((data.in = *((B *)NUM_VAL(sf))) == BINF) data.in = DINF;
       BDmoveSAs(sf, df);
 #if ENABLE_THREADS
     else BDmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void BDmoveAS(B *sf, B *df)
@@ -1178,7 +1178,7 @@ if ((t = *((B *)s++)) == BINF) t = DINF;
     if (serialized) BDmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) BDmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else BDmoveAAp(sf,df);
    }
 
@@ -1259,7 +1259,7 @@ if ((data.in = *((W *)NUM_VAL(sf))) == WINF) data.in = DINF;
       WBmoveSAs(sf, df);
 #if ENABLE_THREADS
     else WBmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void WBmoveAS(B *sf, B *df)
@@ -1390,7 +1390,7 @@ if ((t = *((W *)s++)) == WINF) t = DINF;
     if (serialized) WBmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) WBmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else WBmoveAAp(sf,df);
    }
 
@@ -1471,7 +1471,7 @@ if ((data.in = *((W *)NUM_VAL(sf))) == WINF) data.in = DINF;
       WWmoveSAs(sf, df);
 #if ENABLE_THREADS
     else WWmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void WWmoveAS(B *sf, B *df)
@@ -1602,7 +1602,7 @@ if ((t = *((W *)s++)) == WINF) t = DINF;
     if (serialized) WWmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) WWmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else WWmoveAAp(sf,df);
    }
 
@@ -1683,7 +1683,7 @@ if ((data.in = *((W *)NUM_VAL(sf))) == WINF) data.in = DINF;
       WLmoveSAs(sf, df);
 #if ENABLE_THREADS
     else WLmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void WLmoveAS(B *sf, B *df)
@@ -1814,7 +1814,7 @@ if ((t = *((W *)s++)) == WINF) t = DINF;
     if (serialized) WLmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) WLmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else WLmoveAAp(sf,df);
    }
 
@@ -1895,7 +1895,7 @@ if ((data.in = *((W *)NUM_VAL(sf))) == WINF) data.in = DINF;
       WSmoveSAs(sf, df);
 #if ENABLE_THREADS
     else WSmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void WSmoveAS(B *sf, B *df)
@@ -2026,7 +2026,7 @@ if ((t = *((W *)s++)) == WINF) t = DINF;
     if (serialized) WSmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) WSmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else WSmoveAAp(sf,df);
    }
 
@@ -2107,7 +2107,7 @@ if ((data.in = *((W *)NUM_VAL(sf))) == WINF) data.in = DINF;
       WDmoveSAs(sf, df);
 #if ENABLE_THREADS
     else WDmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void WDmoveAS(B *sf, B *df)
@@ -2238,7 +2238,7 @@ if ((t = *((W *)s++)) == WINF) t = DINF;
     if (serialized) WDmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) WDmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else WDmoveAAp(sf,df);
    }
 
@@ -2319,7 +2319,7 @@ if ((data.in = *((L *)NUM_VAL(sf))) == LINF) data.in = DINF;
       LBmoveSAs(sf, df);
 #if ENABLE_THREADS
     else LBmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void LBmoveAS(B *sf, B *df)
@@ -2450,7 +2450,7 @@ if ((t = *((L *)s++)) == LINF) t = DINF;
     if (serialized) LBmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) LBmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else LBmoveAAp(sf,df);
    }
 
@@ -2531,7 +2531,7 @@ if ((data.in = *((L *)NUM_VAL(sf))) == LINF) data.in = DINF;
       LWmoveSAs(sf, df);
 #if ENABLE_THREADS
     else LWmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void LWmoveAS(B *sf, B *df)
@@ -2662,7 +2662,7 @@ if ((t = *((L *)s++)) == LINF) t = DINF;
     if (serialized) LWmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) LWmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else LWmoveAAp(sf,df);
    }
 
@@ -2743,7 +2743,7 @@ if ((data.in = *((L *)NUM_VAL(sf))) == LINF) data.in = DINF;
       LLmoveSAs(sf, df);
 #if ENABLE_THREADS
     else LLmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void LLmoveAS(B *sf, B *df)
@@ -2874,7 +2874,7 @@ if ((t = *((L *)s++)) == LINF) t = DINF;
     if (serialized) LLmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) LLmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else LLmoveAAp(sf,df);
    }
 
@@ -2955,7 +2955,7 @@ if ((data.in = *((L *)NUM_VAL(sf))) == LINF) data.in = DINF;
       LSmoveSAs(sf, df);
 #if ENABLE_THREADS
     else LSmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void LSmoveAS(B *sf, B *df)
@@ -3086,7 +3086,7 @@ if ((t = *((L *)s++)) == LINF) t = DINF;
     if (serialized) LSmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) LSmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else LSmoveAAp(sf,df);
    }
 
@@ -3167,7 +3167,7 @@ if ((data.in = *((L *)NUM_VAL(sf))) == LINF) data.in = DINF;
       LDmoveSAs(sf, df);
 #if ENABLE_THREADS
     else LDmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void LDmoveAS(B *sf, B *df)
@@ -3298,7 +3298,7 @@ if ((t = *((L *)s++)) == LINF) t = DINF;
     if (serialized) LDmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) LDmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else LDmoveAAp(sf,df);
    }
 
@@ -3379,7 +3379,7 @@ data.in = *((S *)NUM_VAL(sf));
       SBmoveSAs(sf, df);
 #if ENABLE_THREADS
     else SBmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void SBmoveAS(B *sf, B *df)
@@ -3510,7 +3510,7 @@ t = *((S *)s++);
     if (serialized) SBmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) SBmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else SBmoveAAp(sf,df);
    }
 
@@ -3591,7 +3591,7 @@ data.in = *((S *)NUM_VAL(sf));
       SWmoveSAs(sf, df);
 #if ENABLE_THREADS
     else SWmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void SWmoveAS(B *sf, B *df)
@@ -3722,7 +3722,7 @@ t = *((S *)s++);
     if (serialized) SWmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) SWmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else SWmoveAAp(sf,df);
    }
 
@@ -3803,7 +3803,7 @@ data.in = *((S *)NUM_VAL(sf));
       SLmoveSAs(sf, df);
 #if ENABLE_THREADS
     else SLmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void SLmoveAS(B *sf, B *df)
@@ -3934,7 +3934,7 @@ t = *((S *)s++);
     if (serialized) SLmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) SLmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else SLmoveAAp(sf,df);
    }
 
@@ -4015,7 +4015,7 @@ data.in = *((S *)NUM_VAL(sf));
       SSmoveSAs(sf, df);
 #if ENABLE_THREADS
     else SSmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void SSmoveAS(B *sf, B *df)
@@ -4146,7 +4146,7 @@ t = *((S *)s++);
     if (serialized) SSmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) SSmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else SSmoveAAp(sf,df);
    }
 
@@ -4227,7 +4227,7 @@ data.in = *((S *)NUM_VAL(sf));
       SDmoveSAs(sf, df);
 #if ENABLE_THREADS
     else SDmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void SDmoveAS(B *sf, B *df)
@@ -4358,7 +4358,7 @@ t = *((S *)s++);
     if (serialized) SDmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) SDmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else SDmoveAAp(sf,df);
    }
 
@@ -4439,7 +4439,7 @@ data.in = *((D *)NUM_VAL(sf));
       DBmoveSAs(sf, df);
 #if ENABLE_THREADS
     else DBmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void DBmoveAS(B *sf, B *df)
@@ -4570,7 +4570,7 @@ t = *((D *)s++);
     if (serialized) DBmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) DBmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else DBmoveAAp(sf,df);
    }
 
@@ -4651,7 +4651,7 @@ data.in = *((D *)NUM_VAL(sf));
       DWmoveSAs(sf, df);
 #if ENABLE_THREADS
     else DWmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void DWmoveAS(B *sf, B *df)
@@ -4782,7 +4782,7 @@ t = *((D *)s++);
     if (serialized) DWmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) DWmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else DWmoveAAp(sf,df);
    }
 
@@ -4863,7 +4863,7 @@ data.in = *((D *)NUM_VAL(sf));
       DLmoveSAs(sf, df);
 #if ENABLE_THREADS
     else DLmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void DLmoveAS(B *sf, B *df)
@@ -4994,7 +4994,7 @@ t = *((D *)s++);
     if (serialized) DLmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) DLmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else DLmoveAAp(sf,df);
    }
 
@@ -5075,7 +5075,7 @@ data.in = *((D *)NUM_VAL(sf));
       DSmoveSAs(sf, df);
 #if ENABLE_THREADS
     else DSmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void DSmoveAS(B *sf, B *df)
@@ -5206,7 +5206,7 @@ t = *((D *)s++);
     if (serialized) DSmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) DSmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else DSmoveAAp(sf,df);
    }
 
@@ -5287,7 +5287,7 @@ data.in = *((D *)NUM_VAL(sf));
       DDmoveSAs(sf, df);
 #if ENABLE_THREADS
     else DDmoveSAc(sf,df);
-#endif 
+#endif //ENABLE_THREADS
   }
 
 static void DDmoveAS(B *sf, B *df)
@@ -5418,7 +5418,7 @@ t = *((D *)s++);
     if (serialized) DDmoveAAs(sf,df);
 #if ENABLE_THREADS
     else if (thread_num != 1) DDmoveAAc(sf, df);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
     else DDmoveAAp(sf,df);
    }
 
@@ -5869,7 +5869,7 @@ t += tt;
       if (serialized) BBdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BBdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BBdyADDAAp(df,sf);
     }
 
@@ -6290,7 +6290,7 @@ t -= tt;
       if (serialized) BBdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BBdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BBdySUBAAp(df,sf);
     }
 
@@ -6711,7 +6711,7 @@ t *= tt;
       if (serialized) BBdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BBdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BBdyMULAAp(df,sf);
     }
 
@@ -7132,7 +7132,7 @@ t /= tt;
       if (serialized) BBdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BBdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BBdyDIVAAp(df,sf);
     }
 
@@ -7553,7 +7553,7 @@ t = pow(t,tt);
       if (serialized) BBdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BBdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BBdyPWRAAp(df,sf);
     }
 
@@ -7887,7 +7887,7 @@ t = fmod(t,tt);
       if (serialized) BBdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BBdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BBdyMODAAp(df,sf);
     }
 
@@ -8221,7 +8221,7 @@ t = thearc(t,tt);
       if (serialized) BBdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BBdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BBdyTHEARCAAp(df,sf);
     }
 
@@ -8642,7 +8642,7 @@ t += tt;
       if (serialized) BWdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BWdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BWdyADDAAp(df,sf);
     }
 
@@ -9063,7 +9063,7 @@ t -= tt;
       if (serialized) BWdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BWdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BWdySUBAAp(df,sf);
     }
 
@@ -9484,7 +9484,7 @@ t *= tt;
       if (serialized) BWdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BWdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BWdyMULAAp(df,sf);
     }
 
@@ -9905,7 +9905,7 @@ t /= tt;
       if (serialized) BWdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BWdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BWdyDIVAAp(df,sf);
     }
 
@@ -10326,7 +10326,7 @@ t = pow(t,tt);
       if (serialized) BWdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BWdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BWdyPWRAAp(df,sf);
     }
 
@@ -10660,7 +10660,7 @@ t = fmod(t,tt);
       if (serialized) BWdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BWdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BWdyMODAAp(df,sf);
     }
 
@@ -10994,7 +10994,7 @@ t = thearc(t,tt);
       if (serialized) BWdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BWdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BWdyTHEARCAAp(df,sf);
     }
 
@@ -11415,7 +11415,7 @@ t += tt;
       if (serialized) BLdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BLdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BLdyADDAAp(df,sf);
     }
 
@@ -11836,7 +11836,7 @@ t -= tt;
       if (serialized) BLdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BLdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BLdySUBAAp(df,sf);
     }
 
@@ -12257,7 +12257,7 @@ t *= tt;
       if (serialized) BLdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BLdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BLdyMULAAp(df,sf);
     }
 
@@ -12678,7 +12678,7 @@ t /= tt;
       if (serialized) BLdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BLdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BLdyDIVAAp(df,sf);
     }
 
@@ -13099,7 +13099,7 @@ t = pow(t,tt);
       if (serialized) BLdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BLdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BLdyPWRAAp(df,sf);
     }
 
@@ -13433,7 +13433,7 @@ t = fmod(t,tt);
       if (serialized) BLdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BLdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BLdyMODAAp(df,sf);
     }
 
@@ -13767,7 +13767,7 @@ t = thearc(t,tt);
       if (serialized) BLdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BLdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BLdyTHEARCAAp(df,sf);
     }
 
@@ -14188,7 +14188,7 @@ t += tt;
       if (serialized) BSdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BSdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BSdyADDAAp(df,sf);
     }
 
@@ -14609,7 +14609,7 @@ t -= tt;
       if (serialized) BSdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BSdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BSdySUBAAp(df,sf);
     }
 
@@ -15030,7 +15030,7 @@ t *= tt;
       if (serialized) BSdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BSdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BSdyMULAAp(df,sf);
     }
 
@@ -15451,7 +15451,7 @@ t /= tt;
       if (serialized) BSdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BSdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BSdyDIVAAp(df,sf);
     }
 
@@ -15872,7 +15872,7 @@ t = pow(t,tt);
       if (serialized) BSdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BSdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BSdyPWRAAp(df,sf);
     }
 
@@ -16206,7 +16206,7 @@ t = fmod(t,tt);
       if (serialized) BSdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BSdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BSdyMODAAp(df,sf);
     }
 
@@ -16540,7 +16540,7 @@ t = thearc(t,tt);
       if (serialized) BSdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BSdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BSdyTHEARCAAp(df,sf);
     }
 
@@ -16961,7 +16961,7 @@ t += tt;
       if (serialized) BDdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BDdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BDdyADDAAp(df,sf);
     }
 
@@ -17382,7 +17382,7 @@ t -= tt;
       if (serialized) BDdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BDdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BDdySUBAAp(df,sf);
     }
 
@@ -17803,7 +17803,7 @@ t *= tt;
       if (serialized) BDdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BDdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BDdyMULAAp(df,sf);
     }
 
@@ -18224,7 +18224,7 @@ t /= tt;
       if (serialized) BDdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BDdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BDdyDIVAAp(df,sf);
     }
 
@@ -18645,7 +18645,7 @@ t = pow(t,tt);
       if (serialized) BDdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BDdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BDdyPWRAAp(df,sf);
     }
 
@@ -18979,7 +18979,7 @@ t = fmod(t,tt);
       if (serialized) BDdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BDdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BDdyMODAAp(df,sf);
     }
 
@@ -19313,7 +19313,7 @@ t = thearc(t,tt);
       if (serialized) BDdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) BDdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else BDdyTHEARCAAp(df,sf);
     }
 
@@ -19734,7 +19734,7 @@ t += tt;
       if (serialized) WBdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WBdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WBdyADDAAp(df,sf);
     }
 
@@ -20155,7 +20155,7 @@ t -= tt;
       if (serialized) WBdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WBdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WBdySUBAAp(df,sf);
     }
 
@@ -20576,7 +20576,7 @@ t *= tt;
       if (serialized) WBdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WBdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WBdyMULAAp(df,sf);
     }
 
@@ -20997,7 +20997,7 @@ t /= tt;
       if (serialized) WBdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WBdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WBdyDIVAAp(df,sf);
     }
 
@@ -21418,7 +21418,7 @@ t = pow(t,tt);
       if (serialized) WBdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WBdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WBdyPWRAAp(df,sf);
     }
 
@@ -21752,7 +21752,7 @@ t = fmod(t,tt);
       if (serialized) WBdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WBdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WBdyMODAAp(df,sf);
     }
 
@@ -22086,7 +22086,7 @@ t = thearc(t,tt);
       if (serialized) WBdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WBdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WBdyTHEARCAAp(df,sf);
     }
 
@@ -22507,7 +22507,7 @@ t += tt;
       if (serialized) WWdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WWdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WWdyADDAAp(df,sf);
     }
 
@@ -22928,7 +22928,7 @@ t -= tt;
       if (serialized) WWdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WWdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WWdySUBAAp(df,sf);
     }
 
@@ -23349,7 +23349,7 @@ t *= tt;
       if (serialized) WWdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WWdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WWdyMULAAp(df,sf);
     }
 
@@ -23770,7 +23770,7 @@ t /= tt;
       if (serialized) WWdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WWdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WWdyDIVAAp(df,sf);
     }
 
@@ -24191,7 +24191,7 @@ t = pow(t,tt);
       if (serialized) WWdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WWdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WWdyPWRAAp(df,sf);
     }
 
@@ -24525,7 +24525,7 @@ t = fmod(t,tt);
       if (serialized) WWdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WWdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WWdyMODAAp(df,sf);
     }
 
@@ -24859,7 +24859,7 @@ t = thearc(t,tt);
       if (serialized) WWdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WWdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WWdyTHEARCAAp(df,sf);
     }
 
@@ -25280,7 +25280,7 @@ t += tt;
       if (serialized) WLdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WLdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WLdyADDAAp(df,sf);
     }
 
@@ -25701,7 +25701,7 @@ t -= tt;
       if (serialized) WLdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WLdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WLdySUBAAp(df,sf);
     }
 
@@ -26122,7 +26122,7 @@ t *= tt;
       if (serialized) WLdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WLdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WLdyMULAAp(df,sf);
     }
 
@@ -26543,7 +26543,7 @@ t /= tt;
       if (serialized) WLdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WLdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WLdyDIVAAp(df,sf);
     }
 
@@ -26964,7 +26964,7 @@ t = pow(t,tt);
       if (serialized) WLdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WLdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WLdyPWRAAp(df,sf);
     }
 
@@ -27298,7 +27298,7 @@ t = fmod(t,tt);
       if (serialized) WLdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WLdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WLdyMODAAp(df,sf);
     }
 
@@ -27632,7 +27632,7 @@ t = thearc(t,tt);
       if (serialized) WLdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WLdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WLdyTHEARCAAp(df,sf);
     }
 
@@ -28053,7 +28053,7 @@ t += tt;
       if (serialized) WSdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WSdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WSdyADDAAp(df,sf);
     }
 
@@ -28474,7 +28474,7 @@ t -= tt;
       if (serialized) WSdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WSdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WSdySUBAAp(df,sf);
     }
 
@@ -28895,7 +28895,7 @@ t *= tt;
       if (serialized) WSdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WSdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WSdyMULAAp(df,sf);
     }
 
@@ -29316,7 +29316,7 @@ t /= tt;
       if (serialized) WSdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WSdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WSdyDIVAAp(df,sf);
     }
 
@@ -29737,7 +29737,7 @@ t = pow(t,tt);
       if (serialized) WSdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WSdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WSdyPWRAAp(df,sf);
     }
 
@@ -30071,7 +30071,7 @@ t = fmod(t,tt);
       if (serialized) WSdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WSdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WSdyMODAAp(df,sf);
     }
 
@@ -30405,7 +30405,7 @@ t = thearc(t,tt);
       if (serialized) WSdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WSdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WSdyTHEARCAAp(df,sf);
     }
 
@@ -30826,7 +30826,7 @@ t += tt;
       if (serialized) WDdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WDdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WDdyADDAAp(df,sf);
     }
 
@@ -31247,7 +31247,7 @@ t -= tt;
       if (serialized) WDdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WDdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WDdySUBAAp(df,sf);
     }
 
@@ -31668,7 +31668,7 @@ t *= tt;
       if (serialized) WDdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WDdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WDdyMULAAp(df,sf);
     }
 
@@ -32089,7 +32089,7 @@ t /= tt;
       if (serialized) WDdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WDdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WDdyDIVAAp(df,sf);
     }
 
@@ -32510,7 +32510,7 @@ t = pow(t,tt);
       if (serialized) WDdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WDdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WDdyPWRAAp(df,sf);
     }
 
@@ -32844,7 +32844,7 @@ t = fmod(t,tt);
       if (serialized) WDdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WDdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WDdyMODAAp(df,sf);
     }
 
@@ -33178,7 +33178,7 @@ t = thearc(t,tt);
       if (serialized) WDdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) WDdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else WDdyTHEARCAAp(df,sf);
     }
 
@@ -33599,7 +33599,7 @@ t += tt;
       if (serialized) LBdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LBdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LBdyADDAAp(df,sf);
     }
 
@@ -34020,7 +34020,7 @@ t -= tt;
       if (serialized) LBdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LBdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LBdySUBAAp(df,sf);
     }
 
@@ -34441,7 +34441,7 @@ t *= tt;
       if (serialized) LBdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LBdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LBdyMULAAp(df,sf);
     }
 
@@ -34862,7 +34862,7 @@ t /= tt;
       if (serialized) LBdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LBdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LBdyDIVAAp(df,sf);
     }
 
@@ -35283,7 +35283,7 @@ t = pow(t,tt);
       if (serialized) LBdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LBdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LBdyPWRAAp(df,sf);
     }
 
@@ -35617,7 +35617,7 @@ t = fmod(t,tt);
       if (serialized) LBdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LBdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LBdyMODAAp(df,sf);
     }
 
@@ -35951,7 +35951,7 @@ t = thearc(t,tt);
       if (serialized) LBdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LBdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LBdyTHEARCAAp(df,sf);
     }
 
@@ -36372,7 +36372,7 @@ t += tt;
       if (serialized) LWdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LWdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LWdyADDAAp(df,sf);
     }
 
@@ -36793,7 +36793,7 @@ t -= tt;
       if (serialized) LWdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LWdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LWdySUBAAp(df,sf);
     }
 
@@ -37214,7 +37214,7 @@ t *= tt;
       if (serialized) LWdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LWdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LWdyMULAAp(df,sf);
     }
 
@@ -37635,7 +37635,7 @@ t /= tt;
       if (serialized) LWdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LWdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LWdyDIVAAp(df,sf);
     }
 
@@ -38056,7 +38056,7 @@ t = pow(t,tt);
       if (serialized) LWdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LWdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LWdyPWRAAp(df,sf);
     }
 
@@ -38390,7 +38390,7 @@ t = fmod(t,tt);
       if (serialized) LWdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LWdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LWdyMODAAp(df,sf);
     }
 
@@ -38724,7 +38724,7 @@ t = thearc(t,tt);
       if (serialized) LWdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LWdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LWdyTHEARCAAp(df,sf);
     }
 
@@ -39145,7 +39145,7 @@ t += tt;
       if (serialized) LLdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LLdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LLdyADDAAp(df,sf);
     }
 
@@ -39566,7 +39566,7 @@ t -= tt;
       if (serialized) LLdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LLdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LLdySUBAAp(df,sf);
     }
 
@@ -39987,7 +39987,7 @@ t *= tt;
       if (serialized) LLdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LLdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LLdyMULAAp(df,sf);
     }
 
@@ -40408,7 +40408,7 @@ t /= tt;
       if (serialized) LLdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LLdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LLdyDIVAAp(df,sf);
     }
 
@@ -40829,7 +40829,7 @@ t = pow(t,tt);
       if (serialized) LLdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LLdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LLdyPWRAAp(df,sf);
     }
 
@@ -41163,7 +41163,7 @@ t = fmod(t,tt);
       if (serialized) LLdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LLdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LLdyMODAAp(df,sf);
     }
 
@@ -41497,7 +41497,7 @@ t = thearc(t,tt);
       if (serialized) LLdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LLdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LLdyTHEARCAAp(df,sf);
     }
 
@@ -41918,7 +41918,7 @@ t += tt;
       if (serialized) LSdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LSdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LSdyADDAAp(df,sf);
     }
 
@@ -42339,7 +42339,7 @@ t -= tt;
       if (serialized) LSdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LSdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LSdySUBAAp(df,sf);
     }
 
@@ -42760,7 +42760,7 @@ t *= tt;
       if (serialized) LSdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LSdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LSdyMULAAp(df,sf);
     }
 
@@ -43181,7 +43181,7 @@ t /= tt;
       if (serialized) LSdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LSdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LSdyDIVAAp(df,sf);
     }
 
@@ -43602,7 +43602,7 @@ t = pow(t,tt);
       if (serialized) LSdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LSdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LSdyPWRAAp(df,sf);
     }
 
@@ -43936,7 +43936,7 @@ t = fmod(t,tt);
       if (serialized) LSdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LSdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LSdyMODAAp(df,sf);
     }
 
@@ -44270,7 +44270,7 @@ t = thearc(t,tt);
       if (serialized) LSdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LSdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LSdyTHEARCAAp(df,sf);
     }
 
@@ -44691,7 +44691,7 @@ t += tt;
       if (serialized) LDdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LDdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LDdyADDAAp(df,sf);
     }
 
@@ -45112,7 +45112,7 @@ t -= tt;
       if (serialized) LDdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LDdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LDdySUBAAp(df,sf);
     }
 
@@ -45533,7 +45533,7 @@ t *= tt;
       if (serialized) LDdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LDdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LDdyMULAAp(df,sf);
     }
 
@@ -45954,7 +45954,7 @@ t /= tt;
       if (serialized) LDdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LDdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LDdyDIVAAp(df,sf);
     }
 
@@ -46375,7 +46375,7 @@ t = pow(t,tt);
       if (serialized) LDdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LDdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LDdyPWRAAp(df,sf);
     }
 
@@ -46709,7 +46709,7 @@ t = fmod(t,tt);
       if (serialized) LDdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LDdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LDdyMODAAp(df,sf);
     }
 
@@ -47043,7 +47043,7 @@ t = thearc(t,tt);
       if (serialized) LDdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) LDdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else LDdyTHEARCAAp(df,sf);
     }
 
@@ -47464,7 +47464,7 @@ t += tt;
       if (serialized) SBdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SBdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SBdyADDAAp(df,sf);
     }
 
@@ -47885,7 +47885,7 @@ t -= tt;
       if (serialized) SBdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SBdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SBdySUBAAp(df,sf);
     }
 
@@ -48306,7 +48306,7 @@ t *= tt;
       if (serialized) SBdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SBdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SBdyMULAAp(df,sf);
     }
 
@@ -48727,7 +48727,7 @@ t /= tt;
       if (serialized) SBdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SBdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SBdyDIVAAp(df,sf);
     }
 
@@ -49148,7 +49148,7 @@ t = pow(t,tt);
       if (serialized) SBdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SBdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SBdyPWRAAp(df,sf);
     }
 
@@ -49482,7 +49482,7 @@ t = fmod(t,tt);
       if (serialized) SBdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SBdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SBdyMODAAp(df,sf);
     }
 
@@ -49816,7 +49816,7 @@ t = thearc(t,tt);
       if (serialized) SBdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SBdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SBdyTHEARCAAp(df,sf);
     }
 
@@ -50237,7 +50237,7 @@ t += tt;
       if (serialized) SWdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SWdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SWdyADDAAp(df,sf);
     }
 
@@ -50658,7 +50658,7 @@ t -= tt;
       if (serialized) SWdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SWdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SWdySUBAAp(df,sf);
     }
 
@@ -51079,7 +51079,7 @@ t *= tt;
       if (serialized) SWdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SWdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SWdyMULAAp(df,sf);
     }
 
@@ -51500,7 +51500,7 @@ t /= tt;
       if (serialized) SWdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SWdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SWdyDIVAAp(df,sf);
     }
 
@@ -51921,7 +51921,7 @@ t = pow(t,tt);
       if (serialized) SWdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SWdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SWdyPWRAAp(df,sf);
     }
 
@@ -52255,7 +52255,7 @@ t = fmod(t,tt);
       if (serialized) SWdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SWdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SWdyMODAAp(df,sf);
     }
 
@@ -52589,7 +52589,7 @@ t = thearc(t,tt);
       if (serialized) SWdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SWdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SWdyTHEARCAAp(df,sf);
     }
 
@@ -53010,7 +53010,7 @@ t += tt;
       if (serialized) SLdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SLdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SLdyADDAAp(df,sf);
     }
 
@@ -53431,7 +53431,7 @@ t -= tt;
       if (serialized) SLdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SLdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SLdySUBAAp(df,sf);
     }
 
@@ -53852,7 +53852,7 @@ t *= tt;
       if (serialized) SLdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SLdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SLdyMULAAp(df,sf);
     }
 
@@ -54273,7 +54273,7 @@ t /= tt;
       if (serialized) SLdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SLdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SLdyDIVAAp(df,sf);
     }
 
@@ -54694,7 +54694,7 @@ t = pow(t,tt);
       if (serialized) SLdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SLdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SLdyPWRAAp(df,sf);
     }
 
@@ -55028,7 +55028,7 @@ t = fmod(t,tt);
       if (serialized) SLdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SLdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SLdyMODAAp(df,sf);
     }
 
@@ -55362,7 +55362,7 @@ t = thearc(t,tt);
       if (serialized) SLdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SLdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SLdyTHEARCAAp(df,sf);
     }
 
@@ -55783,7 +55783,7 @@ t += tt;
       if (serialized) SSdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SSdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SSdyADDAAp(df,sf);
     }
 
@@ -56204,7 +56204,7 @@ t -= tt;
       if (serialized) SSdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SSdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SSdySUBAAp(df,sf);
     }
 
@@ -56625,7 +56625,7 @@ t *= tt;
       if (serialized) SSdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SSdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SSdyMULAAp(df,sf);
     }
 
@@ -57046,7 +57046,7 @@ t /= tt;
       if (serialized) SSdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SSdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SSdyDIVAAp(df,sf);
     }
 
@@ -57467,7 +57467,7 @@ t = pow(t,tt);
       if (serialized) SSdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SSdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SSdyPWRAAp(df,sf);
     }
 
@@ -57801,7 +57801,7 @@ t = fmod(t,tt);
       if (serialized) SSdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SSdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SSdyMODAAp(df,sf);
     }
 
@@ -58135,7 +58135,7 @@ t = thearc(t,tt);
       if (serialized) SSdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SSdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SSdyTHEARCAAp(df,sf);
     }
 
@@ -58556,7 +58556,7 @@ t += tt;
       if (serialized) SDdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SDdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SDdyADDAAp(df,sf);
     }
 
@@ -58977,7 +58977,7 @@ t -= tt;
       if (serialized) SDdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SDdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SDdySUBAAp(df,sf);
     }
 
@@ -59398,7 +59398,7 @@ t *= tt;
       if (serialized) SDdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SDdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SDdyMULAAp(df,sf);
     }
 
@@ -59819,7 +59819,7 @@ t /= tt;
       if (serialized) SDdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SDdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SDdyDIVAAp(df,sf);
     }
 
@@ -60240,7 +60240,7 @@ t = pow(t,tt);
       if (serialized) SDdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SDdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SDdyPWRAAp(df,sf);
     }
 
@@ -60574,7 +60574,7 @@ t = fmod(t,tt);
       if (serialized) SDdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SDdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SDdyMODAAp(df,sf);
     }
 
@@ -60908,7 +60908,7 @@ t = thearc(t,tt);
       if (serialized) SDdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) SDdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else SDdyTHEARCAAp(df,sf);
     }
 
@@ -61329,7 +61329,7 @@ t += tt;
       if (serialized) DBdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DBdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DBdyADDAAp(df,sf);
     }
 
@@ -61750,7 +61750,7 @@ t -= tt;
       if (serialized) DBdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DBdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DBdySUBAAp(df,sf);
     }
 
@@ -62171,7 +62171,7 @@ t *= tt;
       if (serialized) DBdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DBdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DBdyMULAAp(df,sf);
     }
 
@@ -62592,7 +62592,7 @@ t /= tt;
       if (serialized) DBdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DBdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DBdyDIVAAp(df,sf);
     }
 
@@ -63013,7 +63013,7 @@ t = pow(t,tt);
       if (serialized) DBdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DBdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DBdyPWRAAp(df,sf);
     }
 
@@ -63347,7 +63347,7 @@ t = fmod(t,tt);
       if (serialized) DBdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DBdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DBdyMODAAp(df,sf);
     }
 
@@ -63681,7 +63681,7 @@ t = thearc(t,tt);
       if (serialized) DBdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DBdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DBdyTHEARCAAp(df,sf);
     }
 
@@ -64102,7 +64102,7 @@ t += tt;
       if (serialized) DWdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DWdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DWdyADDAAp(df,sf);
     }
 
@@ -64523,7 +64523,7 @@ t -= tt;
       if (serialized) DWdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DWdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DWdySUBAAp(df,sf);
     }
 
@@ -64944,7 +64944,7 @@ t *= tt;
       if (serialized) DWdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DWdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DWdyMULAAp(df,sf);
     }
 
@@ -65365,7 +65365,7 @@ t /= tt;
       if (serialized) DWdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DWdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DWdyDIVAAp(df,sf);
     }
 
@@ -65786,7 +65786,7 @@ t = pow(t,tt);
       if (serialized) DWdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DWdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DWdyPWRAAp(df,sf);
     }
 
@@ -66120,7 +66120,7 @@ t = fmod(t,tt);
       if (serialized) DWdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DWdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DWdyMODAAp(df,sf);
     }
 
@@ -66454,7 +66454,7 @@ t = thearc(t,tt);
       if (serialized) DWdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DWdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DWdyTHEARCAAp(df,sf);
     }
 
@@ -66875,7 +66875,7 @@ t += tt;
       if (serialized) DLdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DLdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DLdyADDAAp(df,sf);
     }
 
@@ -67296,7 +67296,7 @@ t -= tt;
       if (serialized) DLdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DLdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DLdySUBAAp(df,sf);
     }
 
@@ -67717,7 +67717,7 @@ t *= tt;
       if (serialized) DLdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DLdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DLdyMULAAp(df,sf);
     }
 
@@ -68138,7 +68138,7 @@ t /= tt;
       if (serialized) DLdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DLdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DLdyDIVAAp(df,sf);
     }
 
@@ -68559,7 +68559,7 @@ t = pow(t,tt);
       if (serialized) DLdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DLdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DLdyPWRAAp(df,sf);
     }
 
@@ -68893,7 +68893,7 @@ t = fmod(t,tt);
       if (serialized) DLdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DLdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DLdyMODAAp(df,sf);
     }
 
@@ -69227,7 +69227,7 @@ t = thearc(t,tt);
       if (serialized) DLdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DLdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DLdyTHEARCAAp(df,sf);
     }
 
@@ -69648,7 +69648,7 @@ t += tt;
       if (serialized) DSdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DSdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DSdyADDAAp(df,sf);
     }
 
@@ -70069,7 +70069,7 @@ t -= tt;
       if (serialized) DSdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DSdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DSdySUBAAp(df,sf);
     }
 
@@ -70490,7 +70490,7 @@ t *= tt;
       if (serialized) DSdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DSdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DSdyMULAAp(df,sf);
     }
 
@@ -70911,7 +70911,7 @@ t /= tt;
       if (serialized) DSdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DSdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DSdyDIVAAp(df,sf);
     }
 
@@ -71332,7 +71332,7 @@ t = pow(t,tt);
       if (serialized) DSdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DSdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DSdyPWRAAp(df,sf);
     }
 
@@ -71666,7 +71666,7 @@ t = fmod(t,tt);
       if (serialized) DSdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DSdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DSdyMODAAp(df,sf);
     }
 
@@ -72000,7 +72000,7 @@ t = thearc(t,tt);
       if (serialized) DSdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DSdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DSdyTHEARCAAp(df,sf);
     }
 
@@ -72421,7 +72421,7 @@ t += tt;
       if (serialized) DDdyADDAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DDdyADDAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DDdyADDAAp(df,sf);
     }
 
@@ -72842,7 +72842,7 @@ t -= tt;
       if (serialized) DDdySUBAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DDdySUBAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DDdySUBAAp(df,sf);
     }
 
@@ -73263,7 +73263,7 @@ t *= tt;
       if (serialized) DDdyMULAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DDdyMULAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DDdyMULAAp(df,sf);
     }
 
@@ -73684,7 +73684,7 @@ t /= tt;
       if (serialized) DDdyDIVAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DDdyDIVAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DDdyDIVAAp(df,sf);
     }
 
@@ -74105,7 +74105,7 @@ t = pow(t,tt);
       if (serialized) DDdyPWRAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DDdyPWRAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DDdyPWRAAp(df,sf);
     }
 
@@ -74439,7 +74439,7 @@ t = fmod(t,tt);
       if (serialized) DDdyMODAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DDdyMODAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DDdyMODAAp(df,sf);
     }
 
@@ -74773,7 +74773,7 @@ t = thearc(t,tt);
       if (serialized) DDdyTHEARCAAs(df,sf);
 #if ENABLE_THREADS
       else if (thread_num != 1) DDdyTHEARCAAc(df,sf);
-#endif //!ENABLE_THREADS
+#endif //ENABLE_THREADS
       else DDdyTHEARCAAp(df,sf);
     }
 
