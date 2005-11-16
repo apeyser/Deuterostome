@@ -111,7 +111,7 @@ current directory.
 
 */
 
-int main()
+int main(void)
 {
     B* startup_dvt;
     

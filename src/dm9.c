@@ -196,7 +196,7 @@ FREEopds = o_2; return(OK);
 
 /*------- evaluate color operand */
 
-L coloropd()
+L coloropd(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -218,7 +218,7 @@ L coloropd()
     will return the error NO_XWINDOWS)
 */
 
-L op_Xwindows()
+L op_Xwindows(void)
 {
   if (o1 >= CEILopds) return(OPDS_OVF);
   TAG(o1) = BOOL; ATTR(o1) = 0;
@@ -238,7 +238,7 @@ L op_Xwindows()
    - reports the screen dimensions
 */
 
-L op_screensize()
+L op_screensize(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -263,7 +263,7 @@ L op_screensize()
    - 'nextevent' will identify window by the window#
 */
 
-L op_makewindow()
+L op_makewindow(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -372,7 +372,7 @@ L op_makewindowtop(void) {
    - does nothing if the window does not exist
 */
 
-L op_deletewindow()
+L op_deletewindow(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -425,7 +425,7 @@ void mapraisewindow(L win) {
 }
 #endif //! X_DISPLAY_MISSING
 
-L op_mapwindow()
+L op_mapwindow(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -464,7 +464,7 @@ L op_mapwindow()
    window# width height | --
 */
 
-L op_resizewindow()
+L op_resizewindow(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -495,7 +495,7 @@ L op_resizewindow()
    Flushes buffered graphics instruction, thus rendering their effects.
 */
 
-L op_Xsync()
+L op_Xsync(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -513,7 +513,7 @@ L op_Xsync()
    Translates an RGB color into a color map index.
 */
 
-L op_mapcolor()
+L op_mapcolor(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -549,7 +549,7 @@ L op_mapcolor()
    - does nothing but consume the operands if window# does not exist 
 */
 
-L op_fillrectangle()
+L op_fillrectangle(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -584,7 +584,7 @@ L op_fillrectangle()
    - the line is solid and covers previously drawn items 
 */
 
-L op_drawline()
+L op_drawline(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -644,12 +644,12 @@ L op_drawline()
 */
 
 #if ! X_DISPLAY_MISSING
-static void DOTsymbol()
+static void DOTsymbol(void)
 {
   XDrawPoint(dvtdisplay,wid,dvtgc,(L)x,(L)y);
 }
 
-static void DIAMONDsymbol()
+static void DIAMONDsymbol(void)
 {
   W d = s>>1;
   W p[] = { x-d, y,
@@ -660,64 +660,64 @@ static void DIAMONDsymbol()
  XDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,5,CoordModeOrigin);   
 }
 
-static void fSQUAREsymbol()
+static void fSQUAREsymbol(void)
 {
   W d = s>>1;
   XFillRectangle(dvtdisplay,wid,dvtgc,(L)(x-d),(L)(y-d),(UL)s,(UL)(s));
 }
 
-static void sSQUAREsymbol()
+static void sSQUAREsymbol(void)
 {
   W d = s>>1;
   XDrawRectangle(dvtdisplay,wid,dvtgc,(L)(x-d),(L)(y-d),(UL)s,(UL)(s));
 }
 
-static void hsSQUAREsymbol()
+static void hsSQUAREsymbol(void)
 {
   W d = s>>1;
   XDrawRectangle(dvtdisplay,wid,dvtgc,(L)(x-d),(L)(y-d),(UL)s,(UL)(s));
   XDrawLine(dvtdisplay,wid,dvtgc,(L)(x-d),(L)y,(L)(x+d),(L)y);
 }
 
-static void PLUSsymbol()
+static void PLUSsymbol(void)
 {
   W d = s>>1;
   W p[] = { x-d, y, x+d, y, x, y-d, x, y+d };
   XDrawSegments(dvtdisplay,wid,dvtgc,(XSegment *)p,2);
 }
 
-static void Xsymbol()
+static void Xsymbol(void)
 {
   W d = s>>1;
   W p[] = { x-d, y-d, x+d, y+d, x-d, y+d, x+d, y-d };
   XDrawSegments(dvtdisplay,wid,dvtgc,(XSegment *)p,2);
 }
 
-static void fCIRCLEsymbol()
+static void fCIRCLEsymbol(void)
 {
   W d = s>>1;
   XFillArc(dvtdisplay,wid,dvtgc,(L)(x-d),(L)(y-d),(UL)s,(UL)s,0L,360L<<6);
 }
 
-static void sCIRCLEsymbol()
+static void sCIRCLEsymbol(void)
 {
   W d = s>>1;
   XDrawArc(dvtdisplay,wid,dvtgc,(L)(x-d),(L)(y-d),(UL)s,(UL)s,0L,360L<<6);
 }
 
-static void hsCIRCLEsymbol()
+static void hsCIRCLEsymbol(void)
 {
   W d = s>>1;
   XDrawArc(dvtdisplay,wid,dvtgc,(L)(x-d),(L)(y-d),(UL)s,(UL)s,0L,360L<<6);
   XDrawLine(dvtdisplay,wid,dvtgc,(L)(x-d),(L)y,(L)(x+d),(L)y);
 }
 
-static void ASTERsymbol()
+static void ASTERsymbol(void)
 {
   PLUSsymbol(); Xsymbol();
 }
 
-static void usTRIsymbol()
+static void usTRIsymbol(void)
 {
   W d = s>>1;
   W p[] = { x-d, y+d,
@@ -727,7 +727,7 @@ static void usTRIsymbol()
  XDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,4,CoordModeOrigin);
 }
 
-static void dsTRIsymbol()
+static void dsTRIsymbol(void)
 {
   W d = s>>1;
   W p[] = { x-d, y-d,
@@ -737,7 +737,7 @@ static void dsTRIsymbol()
  XDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,4,CoordModeOrigin);
 }
 
-static void rsTRIsymbol()
+static void rsTRIsymbol(void)
 {
   W d = s>>1;
   W p[] = { x-d, y-d,
@@ -747,7 +747,7 @@ static void rsTRIsymbol()
  XDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,4,CoordModeOrigin);
 }
 
-static void lsTRIsymbol()
+static void lsTRIsymbol(void)
 {
   W d = s>>1;
   W p[] = { x-d, y,
@@ -757,39 +757,39 @@ static void lsTRIsymbol()
  XDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,4,CoordModeOrigin);
 }
 
-static void vcBARsymbol()
+static void vcBARsymbol(void)
 {
   W d = s>>1;
   XDrawLine(dvtdisplay,wid,dvtgc,(L)x,(L)(y-d),(L)x,(L)(y+d));
 }
 
-static void vdBARsymbol()
+static void vdBARsymbol(void)
 {
   XDrawLine(dvtdisplay,wid,dvtgc,(L)x,(L)y,(L)x,(L)(y+s));
 }
 
-static void vuBARsymbol()
+static void vuBARsymbol(void)
 {
   XDrawLine(dvtdisplay,wid,dvtgc,(L)x,(L)y,(L)x,(L)(y-s));
 }
 
-static void hcBARsymbol()
+static void hcBARsymbol(void)
 {
   W d = s>>1;
   XDrawLine(dvtdisplay,wid,dvtgc,(L)(x-d),(L)y,(L)x+d,(L)y);
 }
 
-static void hlBARsymbol()
+static void hlBARsymbol(void)
 {
   XDrawLine(dvtdisplay,wid,dvtgc,(L)x,(L)y,(L)(x+s),(L)y);
 }
 
-static void hrBARsymbol()
+static void hrBARsymbol(void)
 {
   XDrawLine(dvtdisplay,wid,dvtgc,(L)x,(L)y,(L)(x-s),(L)y);
 }
 
-typedef void (*SYMBfunction)();
+typedef void (*SYMBfunction)(void);
 
 static SYMBfunction SYMBlist[] = {
   DOTsymbol, DIAMONDsymbol, fSQUAREsymbol, sSQUAREsymbol, hsSQUAREsymbol,
@@ -799,7 +799,7 @@ static SYMBfunction SYMBlist[] = {
   hlBARsymbol };
 #endif //! X_DISPLAY_MISSING
 
-L op_drawsymbols()
+L op_drawsymbols(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -871,7 +871,7 @@ L op_setinputfocus(void) {
     to the position following the last written character
 */
 
-L op_drawtext()
+L op_drawtext(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
