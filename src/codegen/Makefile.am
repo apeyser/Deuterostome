@@ -1,7 +1,7 @@
 dist_noinst_DATA = dmnuminc.d dsp1f.d
 dist_noinst_SCRIPTS = buildh
 
-AM_CPPFLAGS = $(GCC_OPT) \
+AM_CPPFLAGS = $(GCC_CFLAGS) \
 	-DSTARTUP_DIR="\"$(top_builddir)/src/codegen/\"" \
 	-DDISABLE_THREADS=1
 AM_LDFLAGS = -no-undefined

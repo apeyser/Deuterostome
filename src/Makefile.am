@@ -47,7 +47,7 @@ endif ENABLE_SETUID
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS) clean
 
 
-AM_CFLAGS = $(GCC_OPT) $(X_CFLAGS)
+AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
 AM_CPPFLAGS = \
 	-DSTARTUP_DIR="\"$(dmstartdir)\"" \
 	-DPLUGIN_DIR="\"$(pkglibdir)\"" \

@@ -41,6 +41,7 @@ subdir = sh
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
+	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
 	$(top_srcdir)/m4/configure.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -108,7 +109,7 @@ ENABLE_THREADS_TRUE = @ENABLE_THREADS_TRUE@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
-GCC_OPT = @GCC_OPT@
+GCC_CFLAGS = @GCC_CFLAGS@
 GUIPDF = @GUIPDF@
 INCLTDL = @INCLTDL@
 INSTALL_DATA = @INSTALL_DATA@

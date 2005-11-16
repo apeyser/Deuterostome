@@ -48,6 +48,7 @@ DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
+	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
 	$(top_srcdir)/m4/configure.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -165,7 +166,7 @@ ENABLE_THREADS_TRUE = @ENABLE_THREADS_TRUE@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
-GCC_OPT = @GCC_OPT@
+GCC_CFLAGS = @GCC_CFLAGS@
 GUIPDF = @GUIPDF@
 INCLTDL = @INCLTDL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -296,7 +297,7 @@ EXTRA_DIST = codegen/buildh codegen/dgen_0.h codegen/dgen_1.h codegen/dgen.c \
 	codegen/Makefile.am codegen/Makefile.in codegen/startup_dgen.d.in \
 	dnode-nice.c.in
 
-AM_CFLAGS = $(GCC_OPT) $(X_CFLAGS)
+AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
 AM_CPPFLAGS = \
 	-DSTARTUP_DIR="\"$(dmstartdir)\"" \
 	-DPLUGIN_DIR="\"$(pkglibdir)\"" \

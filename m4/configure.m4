@@ -67,14 +67,19 @@ AC_DEFUN([CF_IF_UNDEF], [dnl
 AC_DEFUN([CF_GCC_COMPILER_OPTION], [dnl
   AC_REQUIRE([AC_PROG_CC])dnl
   AC_REQUIRE([AC_PROG_LIBTOOL])dnl
+  CF_GCC_COMPILER_OPTION_INT([$1],ifelse([$2],[],[CFLAGS],[$2]))
+])
+
+AC_DEFUN([CF_GCC_COMPILER_OPTION_INT], [
+  AC_SUBST([$2])
   if test "x$GCC" == "xyes" ; then
     AC_REQUIRE([LT_AC_PROG_SED])dnl
-    AC_MSG_CHECKING([for compiler options $2])
+    AC_MSG_CHECKING([for compiler options $1])
     AC_LANG_PUSH(C)
     CF_GCO_S=
     lt_simple_compile_test_code="int some_variable = 0;\n"
     printf "$lt_simple_compile_test_code" > conftest.$ac_ext
-    lt_compiler_flag="$2"
+    lt_compiler_flag="$1"
     lt_compile=`echo "$ac_compile" | $SED \
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [[^ ]]*conftest\.: $lt_compiler_flag&:; t' \
@@ -96,10 +101,10 @@ AC_DEFUN([CF_GCC_COMPILER_OPTION], [dnl
     $rm conftest*
  
     if test x"$CF_GCO_S" = xyes ; then
-        AC_MSG_RESULT([Adding $2])
-        $1="$$1 $2"
+        AC_MSG_RESULT([Adding])
+        $2="$$2 $1"
     else
-        AC_MSG_RESULT([Failed, not adding $2])
+        AC_MSG_RESULT([Failed, not adding])
     fi
     AC_LANG_POP(C)
   fi dnl
