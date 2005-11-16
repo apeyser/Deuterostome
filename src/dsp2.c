@@ -18,6 +18,7 @@
 
 */
 #include "dm.h"
+#include "threads.h"
 #include <math.h>
 #define nTYPES  ((W)5)
 #include <stdio.h>
@@ -535,6 +536,29 @@ if (ludcmp(((D **)FREEvm)-1, N, idxp, &d, vec))
      number of columns is the same as that in b
 */
 
+#if ENABLE_THREADS
+typedef struct {
+  L Ncolc, Ncola;
+  D *restrict *restrict ap, 
+	*restrict *restrict bp, 
+	*restrict *restrict cp;
+} matmult;
+
+L thread_matmul(UL id, const void* global, void* local) {
+  L i = *(L*) local;
+  const matmult* restrict m = (const matmult*) global;
+  L j, k;
+  D sum;
+  for (j = 0; j < m->Ncolc; j++) {
+	sum = 0.0;
+	for (k = 0; k < m->Ncola; k++)
+	  sum += m->ap[i][k] * m->bp[j][k];
+	m->cp[i][j] = sum;
+  }
+  return OK;
+}
+#endif
+
 L op_matmul(void)
 {
 
@@ -585,12 +609,23 @@ for (k=0; k<Nrowb; k++)
   
  if ((Ncola != Nrowb) || (Nrowa != Nrowc) || (Ncolb != Ncolc)) return(RNG_CHK);
  
- for (i=0; i<Nrowc; i++)
-    for (j=0; j<Ncolc; j++)
-        { sum = 0.0;
-          for (k=0; k<Ncola; k++) sum += ap[i][k] * bp[k][j];
-          cp[i][j] = sum;
-        }
+ if (thread_num == 1 || serialized) {
+   for (i=0; i<Nrowc; i++)
+	 for (j=0; j<Ncolc; j++) { 
+	   sum = 0.0;
+	   for (k=0; k<Ncola; k++) sum += ap[i][k] * bp[k][j];
+	   cp[i][j] = sum;
+	 }
+ }
+#if ENABLE_THREADS
+ else {
+   matmult m;
+   m.Ncolc = Ncolc; m.Ncola = Ncola;
+   m.ap = ap; m.bp = bp; m.cp = cp;
+   threads_do_pool(Nrowc, thread_matmul, &m);
+ }
+#endif //ENABLE_THREADS
+   
         
  FREEopds = o_2;
  return(OK);
@@ -604,6 +639,22 @@ for (k=0; k<Nrowb; k++)
    - number of rows in a equals number of colums in b
 
 */
+
+#if ENABLE_THREADS
+typedef struct {
+  L Ncola;
+  D *restrict *restrict ap, *restrict *restrict bp;
+} mattransposet;
+
+L thread_mattranspose(UL id, const void* global, void* local) {
+  L i = *(L*) local;
+  const mattransposet* restrict m = (const mattransposet*) global;
+  L j;
+  for (j = 0; j < m->Ncola; j++)
+	m->bp[j][i] = m->ap[i][j];
+  return OK;
+}
+#endif //ENABLE_THREADS
 
 L op_mattranspose(void)
 {
@@ -643,8 +694,17 @@ for (k=0; k<Nrowa; k++)
   
  if ((Ncola != Nrowb) || (Nrowa != Ncolb)) return(RNG_CHK);
  
- for (i=0; i<Nrowa; i++)
-    for (j=0; j<Ncola; j++) bp[j][i] = ap[i][j];
+ if (thread_num == 1 || serialized)
+   for (i=0; i<Nrowa; i++)
+	 for (j=0; j<Ncola; j++) bp[j][i] = ap[i][j];
+#if ENABLE_THREADS
+ else {
+   mattransposet m;
+   m.Ncola = Ncola;
+   m.bp = bp; m.ap = ap;
+   threads_do_pool(Nrowa, thread_mattranspose, &m);
+ }
+#endif //ENABLE_THREADS
         
  FREEopds = o_1;
  return(OK);
@@ -658,6 +718,26 @@ for (k=0; k<Nrowa; k++)
    - c is a column vector
    - if a is n*m, then b is m in length, and c is n
 */
+
+#if ENABLE_THREADS
+typedef struct {
+  L Ncola;
+  D *restrict *restrict ap,
+	*restrict bp,
+	*restrict cp;
+} matvecmult;
+
+L thread_matvecmul(UL id, const void* global, void* local) {
+  L i = *(L*) local;
+  const matvecmult *restrict m = (const matvecmult*) global;
+  D sum = 0.0;
+  L k;
+  for (k = 0; k < m->Ncola; k++) 
+	sum += m->ap[i][k] * m->bp[k];
+  m->cp[i] = sum;
+  return OK;
+}
+#endif //ENABLE_THREADS
 
 L op_matvecmul(void)
 {
@@ -691,11 +771,20 @@ for (k=0; k<Nrowa; k++)
  if ((Ncola != Nrowb) || (Nrowa != Nrowc)) return(RNG_CHK);
  
  bp = (D*) VALUE_BASE(o_1); cp = (D*) VALUE_BASE(o_3);
- for (i=0; i<Nrowc; i++)
-   { sum = 0.0;
+ if (thread_num == 1 || serialized)
+   for (i=0; i<Nrowc; i++) { 
+	 sum = 0.0;
      for (k=0; k<Ncola; k++) sum += ap[i][k] * bp[k];
      cp[i] = sum;
    }
+#if ENABLE_THREADS
+ else {
+   matvecmult m;
+   m.Ncola = Ncola;
+   m.ap = ap; m.bp = bp; m.cp = cp;
+   threads_do_pool(Nrowc, thread_matvecmul, &m);
+ }
+#endif
         
  FREEopds = o_2;
  return(OK);

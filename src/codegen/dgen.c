@@ -68,6 +68,8 @@ int main()
   B *sysdict, *userdict, *Dmemory, *p;
   int sufd;
 
+  serialized = TRUE; // no serialize operator
+
 /*----------------- SIGNALS that we wish to handle -------------------*/
 
 /* FPU indigestion is recorded in the numovf flag;

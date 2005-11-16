@@ -41,6 +41,17 @@ typedef L (*thread_func)(UL id, const void * global, void* local);
 L threads_do_int(UL nways, thread_func func, const void* global,
                  void* local, size_t size_per_local);
 
+/**************************************************** threads_do_pool_int
+ *
+ * Just like threads_do_int, but nways can be > thread_num
+ * Func is called in serialized chunks less than thread_num.
+ * local is the size of nways, and gets passed in chunks of thread_num,
+ *   starting with the passed local.
+ *
+ */
+L threads_do_pool_int(UL nways, thread_func func, const void* global,
+					  void* local, size_t size_per_local);
+
 /**************************************************** threads_do_local
  * 
  * Calls threads_do_int with local array
@@ -50,7 +61,14 @@ L threads_do_int(UL nways, thread_func func, const void* global,
  *
  */
 #define threads_do_local(nways, func, global, local) \
-    threads_do_int(nways, func, (void*) global, (void*) local, sizeof(local[0]))
+    threads_do_int(nways, func, global, local, sizeof(local[0]))
+
+/*************************************************** threads_do_pool_local
+ * Calls threads_do_pool_int with local array.
+ * Just like threads_do_local, but nways > thread_num.
+ */
+#define threads_do_pool_local(nways, func, global, local) \\
+  threads_do_pool_int(nways, func, global, local, sizeof(local[0]))
 
 /*********************************************************** threads_do
  *
@@ -59,7 +77,19 @@ L threads_do_int(UL nways, thread_func func, const void* global,
  * 
  */
 #define threads_do(nways, func, global) \
-    threads_do_int(nways, func, (void*) global, NULL, 0)
+    threads_do_int(nways, func, global, NULL, 0)
+
+/********************************************************** threads_do_pool
+ *
+ * Wrapper for threads_do_pool with no local data array, like threads_do.
+ * Since thread_id doesn't give a serialization number,
+ *   in this case a `local' parameter is created of type UL*,
+ *   which points to a serialization paramter (0...nways-1)
+ *
+ * Can return VM_OVF if not enough VM left for UL array[nways]
+ */
+#define threads_do_pool(nways, func, global) \
+  threads_do_pool_int(nways, func, global, NULL, 0)
 
 void thread_share_lock_f(void);
 void thread_share_unlock_f(void);

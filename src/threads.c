@@ -122,6 +122,28 @@ L threads_do_int(UL nways, thread_func func,
   return OK;
 }
 
+L threads_do_pool_int(UL nways, thread_func func, 
+					  const void* global, 
+					  void* local, size_t s) {
+  UL i; L r; void* alloc = NULL;
+  if (! local) {
+	if (! (local = alloc = malloc(sizeof(UL)*nways))) return MEM_OVF;
+	for (i = 0; i < nways; i++) ((UL*) local)[i] = i;
+	s = sizeof(UL);
+  }
+
+  for (i = nways; i > 0; i -= thread_num, local += s*thread_num) {
+	if ((r = threads_do_int((i < thread_num) ? i : thread_num, 
+							func, global, local, s)) != OK) {
+	  free(alloc);
+	  return r;
+	}
+  }
+
+  free(alloc);
+  return OK;
+}
+
 L threads_destroy(L i, 
 				  pthread_attr_t* attr, 
 				  pthread_mutex_t* share_lock, 
