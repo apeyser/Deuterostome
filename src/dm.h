@@ -325,6 +325,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define VMR_ERR     0x00000210L /* couldn't allocate memory              */
 #define VMR_STATE   0x00000211L /* vm already tiny                       */
 #define KILL_SOCKS  0x00000212L /* dvt must kill all non-server socks    */
+#define MEM_OVF     0x00000213L /* failed memory allocation              */
 
 #define BAD_TOK     0x00000300L /* bad D token in source string          */
 #define BAD_ASC     0x00000301L /* bad ASCII character in source string  */

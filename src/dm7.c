@@ -465,7 +465,7 @@ L op_findfiles(void)
 
  if (o_1 < FLOORopds) return(OPDS_UNF);
  if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
- if ((dirn = malloc(1024)) == 0) perror("Memory exhausted");
+ if ((dirn = malloc(1024)) == 0) return MEM_OVF;
 
  /*-- we need dirname as null-terminated string */
  ndirn = ARRAY_SIZE(o_1);
