@@ -350,6 +350,7 @@
     "getstartupdir"
     "gethomedir"
 	"getplugindir"
+	"getconfdir"
     "hi"
     "libnum"
     "def" 

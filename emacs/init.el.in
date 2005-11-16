@@ -21,4 +21,5 @@
 ;; (setenv "DVTSCRIPTPATH" "some-path-to-scripts") ; overrides dmstartdir
 ;; (setenv "DMLISPDIR" "some-path-to-emacs-code") ; overrides pkglispdir
 ;; (setq explicit-dmlispdir "some-path-to-emacs-code") ; overrides pkglispdir
+;; (setq "DMCONFDIR" "some-path-to-dmconf") ; overrides dmconfdir
 

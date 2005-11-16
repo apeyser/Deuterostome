@@ -38,8 +38,9 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 subdir = dcode
-DIST_COMMON = $(dist_dmstart_DATA) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/startup_dvt.d.in
+DIST_COMMON = $(dist_dmconf_DATA) $(dist_dmstart_DATA) \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/startup_dnode.d.in $(srcdir)/startup_dvt.d.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/configure.m4 $(top_srcdir)/m4/libtool.m4 \
@@ -48,7 +49,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = startup_dvt.d
+CONFIG_CLEAN_FILES = startup_dvt.d startup_dnode.d
 SOURCES =
 DIST_SOURCES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -57,10 +58,14 @@ am__vpath_adj = case $$p in \
     *) f=$$p;; \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-am__installdirs = "$(DESTDIR)$(dmstartdir)" "$(DESTDIR)$(dmstartdir)"
+am__installdirs = "$(DESTDIR)$(dmconfdir)" "$(DESTDIR)$(dmstartdir)" \
+	"$(DESTDIR)$(dmconfdir)" "$(DESTDIR)$(dmstartdir)"
+dist_dmconfDATA_INSTALL = $(INSTALL_DATA)
 dist_dmstartDATA_INSTALL = $(INSTALL_DATA)
+nodist_dmconfDATA_INSTALL = $(INSTALL_DATA)
 nodist_dmstartDATA_INSTALL = $(INSTALL_DATA)
-DATA = $(dist_dmstart_DATA) $(nodist_dmstart_DATA)
+DATA = $(dist_dmconf_DATA) $(dist_dmstart_DATA) $(nodist_dmconf_DATA) \
+	$(nodist_dmstart_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMDEP_FALSE = @AMDEP_FALSE@
@@ -86,6 +91,7 @@ DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 DMBINDIR = @DMBINDIR@
+DMCONFDIR = @DMCONFDIR@
 DMSTARTDIR = @DMSTARTDIR@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
@@ -198,6 +204,7 @@ build_os = @build_os@
 build_vendor = @build_vendor@
 datadir = @datadir@
 dmbindir = @dmbindir@
+dmconfdir = @dmconfdir@
 dmstartdir = @dmstartdir@
 exec_prefix = @exec_prefix@
 guipdf = @guipdf@
@@ -229,10 +236,10 @@ target_alias = @target_alias@
 target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
-dist_dmstart_DATA = color.d dvt_macros.d master.d sched.d startup_dnode.d \
-	startup_dvt.d
-
-nodist_dmstart_DATA = theeye.d
+dist_dmstart_DATA = color.d dvt_macros.d master.d sched.d 
+nodist_dmstart_DATA = theeye.d startup_dnode.d startup_dvt.d
+dist_dmconf_DATA = dvt.d
+nodist_dmconf_DATA = dnode.d
 EXTRA_DIST = theeye.d.in
 CLEANFILES = $(nodist_dmstart_DATA)
 PLUGIN_START = /^[[:space:]]*[@]ENABLE_PLUGINS_START[@][[:space:]]*$$/
@@ -285,6 +292,8 @@ $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 startup_dvt.d: $(top_builddir)/config.status $(srcdir)/startup_dvt.d.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+startup_dnode.d: $(top_builddir)/config.status $(srcdir)/startup_dnode.d.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -295,6 +304,23 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 uninstall-info-am:
+install-dist_dmconfDATA: $(dist_dmconf_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(dmconfdir)" || $(mkdir_p) "$(DESTDIR)$(dmconfdir)"
+	@list='$(dist_dmconf_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(dist_dmconfDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(dmconfdir)/$$f'"; \
+	  $(dist_dmconfDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(dmconfdir)/$$f"; \
+	done
+
+uninstall-dist_dmconfDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(dist_dmconf_DATA)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(dmconfdir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(dmconfdir)/$$f"; \
+	done
 install-dist_dmstartDATA: $(dist_dmstart_DATA)
 	@$(NORMAL_INSTALL)
 	test -z "$(dmstartdir)" || $(mkdir_p) "$(DESTDIR)$(dmstartdir)"
@@ -311,6 +337,23 @@ uninstall-dist_dmstartDATA:
 	  f=$(am__strip_dir) \
 	  echo " rm -f '$(DESTDIR)$(dmstartdir)/$$f'"; \
 	  rm -f "$(DESTDIR)$(dmstartdir)/$$f"; \
+	done
+install-nodist_dmconfDATA: $(nodist_dmconf_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(dmconfdir)" || $(mkdir_p) "$(DESTDIR)$(dmconfdir)"
+	@list='$(nodist_dmconf_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(nodist_dmconfDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(dmconfdir)/$$f'"; \
+	  $(nodist_dmconfDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(dmconfdir)/$$f"; \
+	done
+
+uninstall-nodist_dmconfDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(nodist_dmconf_DATA)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(dmconfdir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(dmconfdir)/$$f"; \
 	done
 install-nodist_dmstartDATA: $(nodist_dmstart_DATA)
 	@$(NORMAL_INSTALL)
@@ -367,7 +410,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(dmstartdir)" "$(DESTDIR)$(dmstartdir)"; do \
+	for dir in "$(DESTDIR)$(dmconfdir)" "$(DESTDIR)$(dmstartdir)" "$(DESTDIR)$(dmconfdir)" "$(DESTDIR)$(dmstartdir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
 install: install-am
@@ -413,7 +456,8 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dist_dmstartDATA install-nodist_dmstartDATA
+install-data-am: install-dist_dmconfDATA install-dist_dmstartDATA \
+	install-nodist_dmconfDATA install-nodist_dmstartDATA
 
 install-exec-am:
 
@@ -439,20 +483,23 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-dist_dmstartDATA uninstall-info-am \
+uninstall-am: uninstall-dist_dmconfDATA uninstall-dist_dmstartDATA \
+	uninstall-info-am uninstall-nodist_dmconfDATA \
 	uninstall-nodist_dmstartDATA
 
 .PHONY: all all-am check check-am clean clean-generic clean-libtool \
 	distclean distclean-generic distclean-libtool distdir dvi \
 	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dist_dmstartDATA \
-	install-exec install-exec-am install-info install-info-am \
-	install-man install-nodist_dmstartDATA install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
+	install-data install-data-am install-dist_dmconfDATA \
+	install-dist_dmstartDATA install-exec install-exec-am \
+	install-info install-info-am install-man \
+	install-nodist_dmconfDATA install-nodist_dmstartDATA \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	uninstall uninstall-am uninstall-dist_dmconfDATA \
 	uninstall-dist_dmstartDATA uninstall-info-am \
-	uninstall-nodist_dmstartDATA
+	uninstall-nodist_dmconfDATA uninstall-nodist_dmstartDATA
 
 
 theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in
@@ -460,9 +507,9 @@ theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in
 	$(edit) $(srcdir)/theeye.d.in >$@.tmp
 	mv $@.tmp $@
 
-startup_dnode.d: $(srcdir)/Makefile $(srcdir)/startup_dnode.d.in
+dnode.d: $(srcdir)/Makefile $(srcdir)/dnode.d.in
 	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/startup_dnode.d.in >$@.tmp
+	$(edit) $(srcdir)/dnode.d.in >$@.tmp
 	mv $@.tmp $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

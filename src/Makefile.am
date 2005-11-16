@@ -50,7 +50,8 @@ endif ENABLE_SETUID
 AM_CFLAGS = $(GCC_OPT) $(X_CFLAGS)
 AM_CPPFLAGS = \
 	-DSTARTUP_DIR="\"$(dmstartdir)\"" \
-	-DPLUGIN_DIR="\"$(pkglibdir)\""
+	-DPLUGIN_DIR="\"$(pkglibdir)\"" \
+	-DCONF_DIR="\"$(dmconfdir)\""
 AM_LDFLAGS = -no-undefined $(PTHREAD_LIBS) $(X_LDFLAGS)
 INCLUDE = @INCLTDL@
 

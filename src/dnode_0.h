@@ -215,6 +215,7 @@ B *sysop[] =
       "dilute_add",     (B *)op_dilute_add,
       "matvecmul",      (B *)op_matvecmul,
       "getstartupdir",  (B *)op_getstartupdir,
+      "getconfdir",     (B *)op_getconfdir,
       "gethomedir",     (B *)op_gethomedir,
 	  "getplugindir",   (B *)op_getplugindir,
       "",               (B *)0L, 

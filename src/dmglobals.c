@@ -34,6 +34,7 @@ B* startup_dir_frame; // points the frame holding ^^^, at the bottom of the vm
                       // make server port accessible from outside of main
 B* home_dir_frame; //points to the frame holding $HOME
 B* plugin_dir_frame; //points to the frame holding the plugindir
+B* conf_dir_frame; //points to the frame holding confdir
 
 
 /*---------------------------- ASCII character classification table

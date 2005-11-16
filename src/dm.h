@@ -409,6 +409,7 @@ DLL_SCOPE B* startup_dir_frame; // points the frame holding ^^^,
                                 // at the bottom of the vm
 DLL_SCOPE B* home_dir_frame; //points to the frame holding $HOME
 DLL_SCOPE B* plugin_dir_frame; //points to the frame holding plugindir
+DLL_SCOPE B* conf_dir_frame; //points to frame holding confdir
 DLL_SCOPE UW ascii[];
 
 /*----------------------- operator hands ------------------------------*/
@@ -544,6 +545,7 @@ L op_nextevent(void);
 L op_vmresize(void);
 L op_killsockets(void);
 L op_getstartupdir(void);
+L op_getconfdir(void);
 L op_gethomedir(void);
 L op_getsocket(void);
 L op_getmyname(void);

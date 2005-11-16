@@ -1,6 +1,8 @@
-dist_dmstart_DATA = color.d dvt_macros.d master.d sched.d startup_dnode.d \
-	startup_dvt.d
-nodist_dmstart_DATA =  theeye.d
+dist_dmstart_DATA = color.d dvt_macros.d master.d sched.d 
+nodist_dmstart_DATA =  theeye.d startup_dnode.d startup_dvt.d
+dist_dmconf_DATA = dvt.d
+nodist_dmconf_DATA = dnode.d
+
 EXTRA_DIST = theeye.d.in
 CLEANFILES = $(nodist_dmstart_DATA)
 
@@ -33,7 +35,7 @@ theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in
 	$(edit) $(srcdir)/theeye.d.in >$@.tmp
 	mv $@.tmp $@
 
-startup_dnode.d: $(srcdir)/Makefile $(srcdir)/startup_dnode.d.in
+dnode.d: $(srcdir)/Makefile $(srcdir)/dnode.d.in
 	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/startup_dnode.d.in >$@.tmp
+	$(edit) $(srcdir)/dnode.d.in >$@.tmp
 	mv $@.tmp $@

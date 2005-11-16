@@ -1976,6 +1976,10 @@ Xwindows {
 
 | Read ~/.dvt, if it exists    
 end {
+    (Trying ) toconsole getconfdir toconsole (dvt.d...\n) toconsole
+    getconfdir (dvt.d) fromxfiles {
+      (Read ) toconsole getconfdir toconsole (dvt.d\n) toconsole
+    } if
     (Trying ~/.dvt ...\n) toconsole
     gethomedir (.dvt) fromxfiles {(Read ~/.dvt\n) toconsole} if
 } aborted {

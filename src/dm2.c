@@ -1048,6 +1048,19 @@ L op_getplugindir(void)
 	return OK;
 }
 
+/*--------------------------------------------------- getconfdir
+ * -- | string
+ * returns the hardcoded path to the per-host configuration directory
+ */
+L op_getconfdir(void) 
+{
+    if (CEILopds < o2) return OPDS_OVF;
+    if (! conf_dir_frame) return CORR_OBJ;
+    moveframe(conf_dir_frame, o1);
+    FREEopds = o2;
+    return OK;
+}
+
 /*---------------------------------------------------- gethomedir
    -- | string
    - returns $HOME
@@ -1079,19 +1092,31 @@ static void setupdir(B** frame, const char* string) {
 	(*frame)[FRAMEBYTES+lenapp-1] = '/';
 }
 
+#ifndef PLUGIN_DIR
+#define PLUGIN_DIR ""
+#endif
+
+#ifndef CONF_DIR
+#define CONF_DIR ""
+#endif
+
 void setupdirs(void) {
   const char* home_env = getenv("HOME");
   const char* home_dir = "/";
   const char* plugin_env = getenv("DNODEPLUGINPATH");
   const char* plugin_dir = PLUGIN_DIR;
   const char* startup_env = getenv("DVTSCRIPTPATH");
+  const char* conf_dir = CONF_DIR;
+  const char* conf_env = getenv("DMCONFDIR");
 
-  if (home_env) home_dir = home_env;
-  if (plugin_env) plugin_dir = plugin_env;
-  if (startup_env) startup_dir = startup_env;
+  if (home_env && *home_env) home_dir = home_env;
+  if (plugin_env && *plugin_env) plugin_dir = plugin_env;
+  if (startup_env && *startup_env) startup_dir = startup_env;
   else startup_dir = STARTUP_DIR;
+  if (conf_env && *conf_env) conf_dir = conf_env;
 
   setupdir(&home_dir_frame, home_dir);
   setupdir(&startup_dir_frame, startup_dir);
   setupdir(&plugin_dir_frame, plugin_dir);
+  setupdir(&conf_dir_frame, conf_dir);
 }

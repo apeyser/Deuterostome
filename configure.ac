@@ -26,6 +26,8 @@ CF_ACX_PTHREAD([threads])
 
 CF_AC_ARG_DIR([dmbindir], [location for dm binary], [${bindir}/${PACKAGE}])
 CF_AC_ARG_DIR([dmstartdir], [location for dm scripts], [${datadir}/${PACKAGE}])
+CF_AC_ARG_DIR([dmconfdir], [locations for per-host configuration],
+  [${sysconfdir}/${PACKAGE}])
 CF_AC_ARG_DIR([pkgpsdatadir], [location for ps files], 
   [${datadir}/${PACKAGE}/ps])
 CF_AC_ARG_DIR([pkglispdir], [location for lisp files],
@@ -144,7 +146,7 @@ AC_CONFIG_FILES([Makefile
 		 ps/Makefile 
 		 sh/Makefile
 		 emacs/Makefile emacs/d-mode.el
-		 dcode/Makefile dcode/startup_dvt.d
+		 dcode/Makefile dcode/startup_dvt.d dcode/startup_dnode.d
 ])
 
 AC_OUTPUT
