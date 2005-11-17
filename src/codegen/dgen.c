@@ -59,7 +59,7 @@ abortflag = TRUE;
 signal(sig, SIGINThandler);
 }
 
-int main()
+int main(void)
 {
   L memsetup[5] = { 1000, 100, 20, 10, 200 };
   B* startup_dvt;    

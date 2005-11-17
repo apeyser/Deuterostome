@@ -2,7 +2,7 @@
 #define THREADS_H
 
 #ifdef ENABLE_THREADS //intentional ifdef for undef
-#if DISABLE_THREAD
+#if DISABLE_THREADS
 #undef ENABLE_THREADS
 #endif //DISABLE_THREADS
 #endif //ENABLE_THREADS
@@ -114,6 +114,8 @@ extern UL thread_num;
 extern UL thread_max;
 
 #else //!ENABLE_THREADS
+
+//minimize the number of ifdefs by testing thread_num
 
 #define thread_num (1)
 

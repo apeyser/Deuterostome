@@ -552,7 +552,7 @@ L thread_matmul(UL id, const void* global, void* local) {
   for (j = 0; j < m->Ncolc; j++) {
 	sum = 0.0;
 	for (k = 0; k < m->Ncola; k++)
-	  sum += m->ap[i][k] * m->bp[j][k];
+	  sum += m->ap[i][k] * m->bp[k][j];
 	m->cp[i][j] = sum;
   }
   return OK;
