@@ -94,7 +94,11 @@ The lower nipple of a numeral type specifies one of:
      4 - double float
 */
 
-#define RET_BAD_TOK {fprintf(stderr, "Bad Char: %hx, %hc\n", c, c); return 3;}
+#define RET_BAD_TOK do {                                                \
+        fprintf(stderr, "Bad Char: %hhx, %c\n",                       \
+                (unsigned char) c, (unsigned char) c);                  \
+        return 3;                                                       \
+    } while (0)
 
 static W scan(void)
 {

@@ -375,13 +375,13 @@ L op_nextevent(void)
      moreX = QLength(dvtdisplay);
      switch(event.type) {
 	   case ClientMessage:
-		 if (event.xclient.message_type 
+                  if ((Atom) event.xclient.message_type 
 			 == XInternAtom(dvtdisplay, "WM_PROTOCOLS", False)) {
-		   if (event.xclient.data.l[0] 
+                  if ((Atom) event.xclient.data.l[0] 
 			   == XInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False))
 			 XBell(dvtdisplay, 0);
-		   else if (event.xclient.data.l[0]
-					== XInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False)) {
+                  else if ((Atom) event.xclient.data.l[0]
+                           == XInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False)) {
 			 wid = event.xclient.window;
 			 snprintf(namestring, sizeof(namestring), "w%d", wid);
 			 makename(namestring, namef); ATTR(namef) = ACTIVE;

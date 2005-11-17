@@ -58,16 +58,16 @@ NOTE: month[1...12], day[1...31], hour[0...23], min,sec[0...59]
 
 L op_localtime(void)
 {
-time_t dt;
-struct tm *ldt;
+time_t dt; L dt_; struct tm *ldt;
 L *p;
 
 if (o_2 < FLOORopds) return(OPDS_UNF);
 if (CLASS(o_2) != NUM) return(OPD_CLA);
-if (!VALUE(o_2,(L*) &dt)) return(UNDF_VAL);
+if (!VALUE(o_2, &dt_)) return(UNDF_VAL);
 if (TAG(o_1) != (ARRAY | LONGTYPE)) return(OPD_ERR);
 if (ATTR(o_1) & READONLY) return(OPD_ATR);
 if (ARRAY_SIZE(o_1) < 6) return(RNG_CHK);
+dt = (time_t) dt_;
 ldt = localtime(&dt);
 p = (L *)VALUE_BASE(o_1);
 p[0] = ldt->tm_year + 1900; p[1] = ldt->tm_mon + 1; p[2] = ldt->tm_mday;
@@ -550,7 +550,6 @@ L op_findfiles(void)
 */
 
 L op_findfile(void) {
-  L s1, s2;
   struct stat buf;
 
   if (o_2 < FLOORopds) return OPDS_UNF;

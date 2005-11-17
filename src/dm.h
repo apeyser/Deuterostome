@@ -25,6 +25,10 @@
 #ifndef DM_H
 #define DM_H
 
+#ifndef __GNUC__
+#define __attribute__(att)
+#endif
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif

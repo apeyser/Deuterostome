@@ -3,7 +3,6 @@
 200 dict dup begin
 
 /len 1024 1024 mul 5 mul def
-/reps 500 def
 
 /dy_ops [/add /sub /mul /div /pwr /mod /thearc] def
 /dyc_ops [dy_ops {} forall /copy] def
@@ -305,6 +304,25 @@ end def
   } forall
 } bind def
 
+/base_reps 5 def
+/reps_tp_st_op types length dict dup begin
+  types {
+    styles length dict dup begin
+    styles {
+      ops length dict dup begin
+      dyc_ops {
+        2 index dup /d eq exch /s eq or {{base_reps 100 mul}} {
+          {base_reps 20 mul}
+        } ifelse def
+      } forall
+      mat_ops {{base_reps 100 mul} def} forall
+      /matmul {base_reps} def
+      end def
+    } forall
+    end def
+  } forall
+end def
+
 /timed {
   gettime neg [ 3 -1 roll exec cleartomark |]
   gettime add
@@ -336,9 +354,11 @@ end def
               {/thread /serial /parallel} {/test name
                 style_op_test style get op get test get /func name
                 test_wrap test get /tw name
+                /reps reps_tp_st_op typ get style get op get exec def
                 {reps {{func} tw} repeat} timed /time name
                 err 0 (Time for ) fax * style text (, ) fax
-                * test text ( = ) fax * time * number (\n) fax
+                * test text ([) fax * reps * number (] = ) fax
+                * time * number (\n) fax
                 0 exch getinterval toconsole
               } forall
 

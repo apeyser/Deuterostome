@@ -101,7 +101,8 @@ void thread_share_unlock_f(void);
  * 1 <= thread_num <= THREADMAX
  * 
  * */
-extern UL thread_num;
+extern UL thread_num_;
+static UL thread_num(void) {return thread_num_;};
 
 /*********************************************************** thread_max
  *
@@ -111,13 +112,14 @@ extern UL thread_num;
  * 0 <= thread_max < thread_num.
  * Equal to nways passed in threads_do_int
  */
-extern UL thread_max;
+extern UL thread_max_;
+static UL thread_max(void) {return thread_max_;};
 
 #else //!ENABLE_THREADS
 
 //minimize the number of ifdefs by testing thread_num
 
-#define thread_num (1)
+#define thread_num() (1)
 
 #endif //!ENABLE_THREADS
 

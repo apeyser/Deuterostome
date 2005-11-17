@@ -149,9 +149,8 @@ L op_waitproc(void) {
 		}
 	}
  
-	if (PROCESS_STATE(o_1) = (ret ? PROCESS_BUFFD : 0)) {
-		PROCESS_BUFFC(o_1) = nextchar;
-	}
+	if ((PROCESS_STATE(o_1) = (ret ? PROCESS_BUFFD : 0)))
+            PROCESS_BUFFC(o_1) = nextchar;
 	FREEopds = o_1;
 	return OK;
 }
@@ -220,8 +219,6 @@ L op_unwaitproc(void) {
 
 L op_killproc(void) {
 	pid_t pid;
-	int status;
-	L ret;
 	int errno_ = 0;
 
 	if (o_1 < FLOORopds) return OPDS_UNF;
@@ -271,7 +268,7 @@ L op_liveproc(void) {
 	if (timeout) return TIMER;
 	if (ret == -1) return -errno;
 
-	if (PROCESS_STATE(o_1) = (ret ? PROCESS_BUFFD : 0)) {
+	if ((PROCESS_STATE(o_1) = (ret ? PROCESS_BUFFD : 0))) {
 		PROCESS_BUFFC(o_1) = nextchar;
 		TAG(o_1) = BOOL; ATTR(o_1) = 0;
 		BOOL_VAL(o_1) = TRUE;
@@ -298,7 +295,8 @@ L op_liveproc(void) {
 		if (errno_) return -errno_;
 		
 		if (o2 > CEILopds) return OPDS_OVF;
-		ret = WIFEXITED(status) ? WEXITSTATUS(status) : 0xFFFF0000L;
+		ret = WIFEXITED(status) ?
+                    WEXITSTATUS(status) : (L) 0xFFFF0000L;
 		TAG(o1) = BOOL; ATTR(o1) = 0;
 		BOOL_VAL(o1) = FALSE;
 		TAG(o_1) = NUM | LONGTYPE; ATTR(o_1) = 0;
@@ -318,169 +316,168 @@ static void senderrno_(int line) {
 }
 
 L op_makeproc(void) {
-	pid_t pid;
-	B* param;
-	L filedes_stdout[2];
-	L filedes_stdin[2];
-	char buf[1];
-	int ret;
-	int errno_;
-	size_t p;
-	B* procframe;
-	B initframe[FRAMEBYTES];
+    pid_t pid;
+    B* param;
+    L filedes_stdout[2];
+    L filedes_stdin[2];
+    ssize_t ret;
+    int errno_;
+    size_t p;
+    B* procframe;
+    B initframe[FRAMEBYTES];
+    
+    if (FREEvm + 2*FRAMEBYTES > CEILvm) return VM_OVF;
+    
+    if (o_1 < FLOORopds) return OPDS_UNF;
+    switch (TAG(o_1)) {
+        case STRING: break;
+        case LIST:
+            if (((LIST_CEIL(o_1)-VALUE_BASE(o_1))/FRAMEBYTES) == 0)
+                return RNG_CHK;
+            for (param = VALUE_PTR(o_1); 
+                 param < (B*) LIST_CEIL(o_1); 
+                 param += FRAMEBYTES) {
+                if (TAG(param) != STRING)
+                    RETURN_ERROR(PROC_ARGS);
+                if (ARRAY_SIZE(param) == 0)
+                    RETURN_ERROR(PROC_SIZE);
+            };
+            break;
+        default:
+            return OPD_TYP;
+    };
 
-	if (FREEvm + 2*FRAMEBYTES > CEILvm) return VM_OVF;
+    if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
+        RETURN_ERROR(PROC_SIG);
+    
+    if (pipe(filedes_stdin) || pipe(filedes_stdout)) {
+        errno_ = errno;
+        close(filedes_stdin[0]);
+        close(filedes_stdin[1]);
+        close(filedes_stdout[0]);
+        close(filedes_stdout[1]);		
+        return -errno_;
+    }
 
-	if (o_1 < FLOORopds) return OPDS_UNF;
-	switch (TAG(o_1)) {
-		case STRING: break;
-		case LIST:
-			if (((LIST_CEIL(o_1)-VALUE_BASE(o_1))/FRAMEBYTES) == 0)
-				return RNG_CHK;
-			for (param = VALUE_PTR(o_1); 
-					 param < (B*) LIST_CEIL(o_1); 
-					 param += FRAMEBYTES) {
-				if (TAG(param) != STRING)
-					RETURN_ERROR(PROC_ARGS);
-				if (ARRAY_SIZE(param) == 0)
-					RETURN_ERROR(PROC_SIZE);
-			};
-			break;
-		default:
-			return OPD_TYP;
-	};
+    if (fcntl(filedes_stdin[0], F_SETFD, 0) == -1
+        || fcntl(filedes_stdout[1], F_SETFD, 0) == -1
+        || fcntl(filedes_stdin[1], F_SETFD, FD_CLOEXEC) 
+        || fcntl(filedes_stdout[0], F_SETFD, FD_CLOEXEC)) {
+        errno_ = errno;
+        close(filedes_stdin[0]);
+        close(filedes_stdin[1]);
+        close(filedes_stdout[0]);
+        close(filedes_stdout[1]);		
+        return -errno_;
+    }
 
-	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
-		RETURN_ERROR(PROC_SIG);
-			
-	if (pipe(filedes_stdin) || pipe(filedes_stdout)) {
-		errno_ = errno;
-		close(filedes_stdin[0]);
-		close(filedes_stdin[1]);
-		close(filedes_stdout[0]);
-		close(filedes_stdout[1]);		
-		return -errno_;
-	}
+    if ((pid = fork()) == -1) {
+        errno_ = errno;
+        close(filedes_stdin[0]);
+        close(filedes_stdin[1]);
+        close(filedes_stdout[0]);
+        close(filedes_stdout[1]);
+        return -errno_;
+    }
 
-	if (fcntl(filedes_stdin[0], F_SETFD, 0) == -1
-			|| fcntl(filedes_stdout[1], F_SETFD, 0) == -1
-			|| fcntl(filedes_stdin[1], F_SETFD, FD_CLOEXEC) 
-			|| fcntl(filedes_stdout[0], F_SETFD, FD_CLOEXEC)) {
-		errno_ = errno;
-		close(filedes_stdin[0]);
-		close(filedes_stdin[1]);
-		close(filedes_stdout[0]);
-		close(filedes_stdout[1]);		
-		return -errno_;
-	}
+    if (! pid) {
+        char* prog;
+        char** args;
+        char** arg;
 
-	if ((pid = fork()) == -1) {
-		errno_ = errno;
-		close(filedes_stdin[0]);
-		close(filedes_stdin[1]);
-		close(filedes_stdout[0]);
-		close(filedes_stdout[1]);
-		return -errno_;
-	}
-
-	if (! pid) {
-		char* prog;
-		char** args;
-		char** arg;
-
-		if (close(0) || close(1)) senderrno();
-		if (dup2(filedes_stdin[0], 0) == -1 
-				|| dup2(filedes_stdout[1], 1) == -1) 
-			senderrno();
-		if (close(filedes_stdin[0]) || close(filedes_stdout[1])) senderrno();
-		
-		if (TAG(o_1) == STRING) {
-			if (! (prog = malloc(ARRAY_SIZE(o_1)+1))) senderrno();
-			strncpy(prog, VALUE_PTR(o_1), ARRAY_SIZE(o_1));
-			prog[ARRAY_SIZE(o_1)] = '\0';
-			args = NULL;
-		} else {
-			if (! (args = malloc(1+(LIST_CEIL(o_1)-VALUE_BASE(o_1))/FRAMEBYTES)))
-				senderrno();
-			for (arg = args, param = VALUE_PTR(o_1);
-					 param < (B*) LIST_CEIL(o_1);
-					 (param += FRAMEBYTES), arg++) {
-				if (! (*arg = malloc(ARRAY_SIZE(param)+1))) senderrno();
-				strncpy(*arg, VALUE_PTR(param), ARRAY_SIZE(param));
-				(*arg)[ARRAY_SIZE(param)] = '\0';
-			}
-			*arg = NULL;
-			prog = args[0];
-		};
-
-		errno_ = 0;
-		if (write(1, &errno_, sizeof(errno_)) == -1) exit(1);
-
-		execve(prog, args, environ);
-		perror("process plugin, execve failure in makeproc");
-		prog = strerror(errno);
-		write(1, "process plugin, execve failure in makeproc: ", 
-					strlen("process plugin, execve failure in makeproc: "));
-		write(1, prog, strlen(prog));
-		exit(127);
-	}
-
-	if (close(filedes_stdin[0]) || close(filedes_stdout[1])) {
-		errno_ = errno;
-		close(filedes_stdin[1]);
-		close(filedes_stdout[0]);
-		close(filedes_stdout[1]);
-		kill(pid, SIGKILL);
-		waitpid(pid, NULL, 0);
-		return -errno;
-	};
-
-	p = 0;
-	while (1) {
-		ret = read(filedes_stdout[0], ((B*)&errno_)+p, sizeof(errno_)-p);
-		if (ret == -1) {
-			if (errno != EINTR) {
-				errno_ = errno;
-				close(filedes_stdin[1]);
-				close(filedes_stdout[0]);
-				kill(pid, SIGKILL);
-				waitpid(pid, NULL, 0);
-				return -errno;
-			}
-		} 
-		else if (ret == 0) {
-			close(filedes_stdin[1]);
-			close(filedes_stdout[0]);
-			kill(pid, SIGKILL);
-			waitpid(pid, NULL, 0);
-			RETURN_ERROR(PROC_EOF);
-		}
-		else {
-			if (ret == sizeof(errno_)-p) break;
-			p += ret;
-		};
-	};
+        if (close(0) || close(1)) senderrno();
+        if (dup2(filedes_stdin[0], 0) == -1 
+            || dup2(filedes_stdout[1], 1) == -1) 
+            senderrno();
+        if (close(filedes_stdin[0]) || close(filedes_stdout[1])) senderrno();
 	
-	if (! (procframe = MAKE_OPAQUE_DICT(0,
-										PROCESS_PID_N,
-										PROCESS_STDOUT_N,
-										PROCESS_STDIN_N,
-										PROCESS_STATE_N,
-										PROCESS_BUFFC_N))) 
-	  return VM_OVF;
-	
-	TAG(initframe) = (NUM | LONGTYPE); ATTR(initframe) = 0;
-	LONG_VAL(initframe) = pid;
-	OPAQUE_MEM_SET(procframe, PROCESS_PID_N, initframe);
-	LONG_VAL(initframe) = filedes_stdin[1];
-	OPAQUE_MEM_SET(procframe, PROCESS_STDIN_N, initframe);
-	LONG_VAL(initframe) = filedes_stdout[0];
-	OPAQUE_MEM_SET(procframe, PROCESS_STDOUT_N, initframe);
-	TAG(initframe) = (NUM | BYTETYPE);
-	*(NUM_VAL(initframe)) = 0;
-	OPAQUE_MEM_SET(procframe, PROCESS_STATE_N, initframe);
-	OPAQUE_MEM_SET(procframe, PROCESS_BUFFC_N, initframe);
+        if (TAG(o_1) == STRING) {
+            if (! (prog = malloc(ARRAY_SIZE(o_1)+1))) senderrno();
+            strncpy(prog, VALUE_PTR(o_1), ARRAY_SIZE(o_1));
+            prog[ARRAY_SIZE(o_1)] = '\0';
+            args = NULL;
+        } else {
+            if (! (args = malloc(1+(LIST_CEIL(o_1)-VALUE_BASE(o_1))/FRAMEBYTES)))
+                senderrno();
+            for (arg = args, param = VALUE_PTR(o_1);
+                 param < (B*) LIST_CEIL(o_1);
+                 (param += FRAMEBYTES), arg++) {
+                if (! (*arg = malloc(ARRAY_SIZE(param)+1))) senderrno();
+                strncpy(*arg, VALUE_PTR(param), ARRAY_SIZE(param));
+                (*arg)[ARRAY_SIZE(param)] = '\0';
+            }
+            *arg = NULL;
+            prog = args[0];
+        };
+        
+        errno_ = 0;
+        if (write(1, &errno_, sizeof(errno_)) == -1) exit(1);
+        
+        execve(prog, args, environ);
+        perror("process plugin, execve failure in makeproc");
+        prog = strerror(errno);
+        write(1, "process plugin, execve failure in makeproc: ", 
+              strlen("process plugin, execve failure in makeproc: "));
+        write(1, prog, strlen(prog));
+        exit(127);
+    }
 
-	moveframe(procframe, o_1);	
-	return OK;
+    if (close(filedes_stdin[0]) || close(filedes_stdout[1])) {
+        errno_ = errno;
+        close(filedes_stdin[1]);
+        close(filedes_stdout[0]);
+        close(filedes_stdout[1]);
+        kill(pid, SIGKILL);
+        waitpid(pid, NULL, 0);
+        return -errno;
+    };
+
+    p = 0;
+    while (1) {
+        ret = read(filedes_stdout[0], ((B*)&errno_)+p, sizeof(errno_)-p);
+        if (ret == -1) {
+            if (errno != EINTR) {
+                errno_ = errno;
+                close(filedes_stdin[1]);
+                close(filedes_stdout[0]);
+                kill(pid, SIGKILL);
+                waitpid(pid, NULL, 0);
+                return -errno;
+            }
+        } 
+        else if (ret == 0) {
+            close(filedes_stdin[1]);
+            close(filedes_stdout[0]);
+            kill(pid, SIGKILL);
+            waitpid(pid, NULL, 0);
+            RETURN_ERROR(PROC_EOF);
+        }
+        else {
+            if (ret == (ssize_t) sizeof(errno_) - (ssize_t) p) break;
+            p += ret;
+        };
+    };
+    
+    if (! (procframe = MAKE_OPAQUE_DICT(0,
+                                        PROCESS_PID_N,
+                                        PROCESS_STDOUT_N,
+                                        PROCESS_STDIN_N,
+                                        PROCESS_STATE_N,
+                                        PROCESS_BUFFC_N))) 
+        return VM_OVF;
+    
+    TAG(initframe) = (NUM | LONGTYPE); ATTR(initframe) = 0;
+    LONG_VAL(initframe) = pid;
+    OPAQUE_MEM_SET(procframe, PROCESS_PID_N, initframe);
+    LONG_VAL(initframe) = filedes_stdin[1];
+    OPAQUE_MEM_SET(procframe, PROCESS_STDIN_N, initframe);
+    LONG_VAL(initframe) = filedes_stdout[0];
+    OPAQUE_MEM_SET(procframe, PROCESS_STDOUT_N, initframe);
+    TAG(initframe) = (NUM | BYTETYPE);
+    *(NUM_VAL(initframe)) = 0;
+    OPAQUE_MEM_SET(procframe, PROCESS_STATE_N, initframe);
+    OPAQUE_MEM_SET(procframe, PROCESS_BUFFC_N, initframe);
+
+    moveframe(procframe, o_1);	
+    return OK;
 }

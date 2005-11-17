@@ -165,7 +165,7 @@ return(OK);
 */
 
 L x_op_abort(void) {return ABORT;}
-static rabort = FALSE;
+static BOOLEAN rabort = FALSE;
 L op_abort(void)
 {
     fprintf(stderr, "Aborting..\n");

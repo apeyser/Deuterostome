@@ -47,8 +47,9 @@ void closealllibs(void)
   B* frame;
   
   while((lib = nextlib(lib)) !=  NULL)
-	if ((handle = (void*) LIB_HANDLE(lib)) != NULL) {
-	  if (frame = lookup(fininame, VALUE_PTR(lib))) ((OPER)OP_CODE(frame))();
+      if ((handle = (void*) LIB_HANDLE(lib)) != NULL) {
+          if ((frame =
+               lookup(fininame, VALUE_PTR(lib)))) ((OPER)OP_CODE(frame))();
 	  if (lt_dlclose((lt_dlhandle)handle)) {
 		e = lt_dlerror();
 		fprintf(stderr, "dlclose: %s\n", e ? e : "--");
@@ -223,11 +224,11 @@ B* make_opaque_frame(L n, B* pluginnameframe, ...) {
   B* dict;
   B nullframe[FRAMEBYTES];
   B* oldFREEvm = FREEvm;
-  B* buffer;
+  B* buffer = NULL;
   TAG(nullframe) = NULLOBJ; ATTR(nullframe) = READONLY;
 
   va_start(nameframes, pluginnameframe);
-  while (nameframe = va_arg(nameframes, B*)) ++len;
+  while ((nameframe = va_arg(nameframes, B*))) ++len;
   va_end(nameframes);
   
   if (op_save() != OK) return NULL;
@@ -259,7 +260,7 @@ B* make_opaque_frame(L n, B* pluginnameframe, ...) {
   insert(opaquename, dict, pluginnameframe);
   if (n) insert(buffernameframe, dict, buffer);
   va_start(nameframes, pluginnameframe);
-  while (nameframe = va_arg(nameframes, B*))
+  while ((nameframe = va_arg(nameframes, B*)))
 	insert(nameframe, dict, nullframe);
   va_end(nameframes);
 

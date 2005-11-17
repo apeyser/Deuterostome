@@ -13,8 +13,8 @@ L op_threads(void);
 pthread_t threads[THREADNUM] = {};
 BOOLEAN thread_start[THREADNUM] = {};
 UL thread_end = 0;
-UL thread_num = 1;
-UL thread_max = 0;
+UL thread_num_ = 1;
+UL thread_max_ = 0;
 pthread_cond_t thread_wait[THREADNUM] = {};
 pthread_mutex_t thread_lock[THREADNUM] = {};
 pthread_cond_t main_wait;
@@ -52,7 +52,6 @@ void thread_destroy_wait(void* arg) {
 
 void* thread_routine(void* arg) {
   UL thread_id = (UL) arg;
-  L ret;
 
   THREADERR(pthread_cond_init, thread_wait+thread_id, NULL);
   pthread_cleanup_push(thread_destroy_wait, (void*) thread_id);
@@ -91,10 +90,9 @@ L threads_do_int(UL nways, thread_func func,
                  const void* global,
                  void* local, size_t s) {
   UL i;
-  if (nways > thread_num) return RNG_CHK;
+  if (nways > thread_num()) return RNG_CHK;
 
-  thread_max = nways-1;
-  //thread_error = OK;
+  thread_max_ = nways-1;
   thread_function = func;
   thread_data_global = global;
   if (local) for (i = nways; i--;) thread_data_local[i] = local+s*i;
@@ -108,9 +106,10 @@ L threads_do_int(UL nways, thread_func func,
 	MAINERR(pthread_mutex_unlock, thread_lock+i);
   }
 
-  thread_error[0] = thread_function(0, thread_data_global, thread_data_local[0]);
+  thread_error[0] = thread_function(0, thread_data_global,
+                                    thread_data_local[0]);
 
-  thread_end = thread_max;
+  thread_end = thread_max();
   do {        
       MAINERR(pthread_cond_wait, &main_wait, &main_lock);
   } while (thread_end);
@@ -122,34 +121,39 @@ L threads_do_int(UL nways, thread_func func,
   return OK;
 }
 
+static L threads_do_pool_int_(UL nways, thread_func func, 
+                              const void* global, 
+                              void* local, size_t s) {
+    UL i; L r;
+    for (i = nways; i > 0; i -= thread_num()) {
+	if ((r = threads_do_int((i < thread_num()) ? i : thread_num(), 
+                                func, global, local, s)) != OK)
+            return r;
+        local += s*thread_num();
+    }
+    return OK;
+}
+
 L threads_do_pool_int(UL nways, thread_func func, 
-					  const void* global, 
-					  void* local, size_t s) {
+                      const void* global, 
+                      void* local, size_t s) {
   UL i; L r; void* alloc = NULL;
   if (! local) {
-	if (! (local = alloc = malloc(sizeof(UL)*nways))) return MEM_OVF;
-	for (i = 0; i < nways; i++) ((UL*) local)[i] = i;
-	s = sizeof(UL);
+      if (! (local = alloc = malloc(sizeof(UL)*nways))) return MEM_OVF;
+      for (i = nways; i--;) ((UL*) local)[i] = i;
+      s = sizeof(UL);
   }
-
-  for (i = nways; i > 0; i -= thread_num, local += s*thread_num) {
-	if ((r = threads_do_int((i < thread_num) ? i : thread_num, 
-							func, global, local, s)) != OK) {
-	  free(alloc);
-	  return r;
-	}
-  }
-
+  r = threads_do_pool_int_(nways, func, global, local, s);
   free(alloc);
-  return OK;
+  return r;
 }
 
 L threads_destroy(L i, 
-				  pthread_attr_t* attr, 
-				  pthread_mutex_t* share_lock, 
-				  pthread_mutex_t* main_lock,
-				  pthread_cond_t* main_wait,
-				  L errno_) {
+                  pthread_attr_t* attr, 
+                  pthread_mutex_t* share_lock, 
+                  pthread_mutex_t* main_lock,
+                  pthread_cond_t* main_wait,
+                  L errno_) {
   for (--i; i; --i)
 	if (pthread_cancel(threads[i]) && ! errno_) 
 	  errno_ = errno;
@@ -166,11 +170,13 @@ L threads_destroy(L i,
   if (main_wait && pthread_cond_destroy(main_wait))
 	errno_ = errno;
 
+  thread_num_ = 1;
+
   return -errno_;
 }
 
 L threads_init(L num) {
-  L i, errno_;
+  L i;
   pthread_attr_t attr;
   if (num < 1 || num > THREADNUM) return RNG_CHK;
 
@@ -194,13 +200,13 @@ L threads_init(L num) {
   if (pthread_attr_destroy(&attr))
 	return threads_destroy(num, NULL, NULL, NULL, NULL, errno);
 
-  thread_num = num;
+  thread_num_ = num;
   return OK;
 }
 
 L threads_fin(void) {
-  return threads_destroy(thread_num, NULL, 
-						 &share_lock, &main_lock, &main_wait, 0);
+    return threads_destroy(thread_num(), NULL, 
+                         &share_lock, &main_lock, &main_wait, 0);
 }
 
 void thread_share_unlock_f(void) {
@@ -220,7 +226,7 @@ void thread_share_lock_f(void) {
 L op_threads(void) {
   if (o2 > CEILopds) return OPDS_OVF;
   TAG(o1) = NUM | LONGTYPE; ATTR(o1) = 0;
-  LONG_VAL(o1) = thread_num;
+  LONG_VAL(o1) = thread_num();
   FREEopds = o2;
   return OK;
 }

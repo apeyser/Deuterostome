@@ -269,8 +269,8 @@ L op_makewindow(void)
 	return NO_XWINDOWS;
 #else
   static XClassHint classhint = {"d_machine", "d_machine"};
-	static XWMHints xwmhints = {InputHint, False};
-	static Atom atom[2];
+  static XWMHints xwmhints = {InputHint, False};
+  static Atom atom[2];
   L retc; W *pxy;
   B *xyf, *freevm, nstr[31], icstr[13],
     *pn[1] = { nstr }, *pic[1] = { icstr };

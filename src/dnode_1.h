@@ -420,8 +420,7 @@ static L VMRESIZE_ERR(L err, BOOLEAN bool) {
 L op_vmresize(void)
 {
   L nb; B *userdict, *sysdict;
-	L retc = OK;
-	B* newDmemory;
+  B* newDmemory;
 
   if (o_1 < FLOORopds) return VMRESIZE_ERR(OPDS_UNF, FALSE);
 	FREEopds = o_1;

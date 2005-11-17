@@ -38,30 +38,28 @@ L op_thrown(void) {
  * any | <any true <<go up stack to catch>>
  */
 L op_throw(void) {
-	B* xframe;
+    if (o_1 < FLOORopds) return OPDS_UNF;
+    if (o2 > CEILopds) return OPDS_OVF;
+    
+    while ((FREEexecs-=FRAMEBYTES) >= FLOORexecs) {
+        if (ATTR(x1) & ABORTMARK) {
+            FREEexecs += FRAMEBYTES;
+            RETURN_ERROR(INV_THROW);
+        }
+        if (ATTR(x1) & STOPMARK) {
+            FREEexecs += FRAMEBYTES;
+            RETURN_ERROR(INV_THROW);
+        }
 
-	if (o_1 < FLOORopds) return OPDS_UNF;
-	if (o2 > CEILopds) return OPDS_OVF;
-
-	while ((FREEexecs-=FRAMEBYTES) >= FLOORexecs) {
-		if (ATTR(x1) & ABORTMARK) {
-			FREEexecs += FRAMEBYTES;
-			RETURN_ERROR(INV_THROW);
-		}
-		if (ATTR(x1) & STOPMARK) {
-			FREEexecs += FRAMEBYTES;
-			RETURN_ERROR(INV_THROW);
-		}
-
-		if ((TAG(x1) == OP) && (OP_NAME(x1) == (L) x_op_thrown_name)) {
-		  TAG(o1) = BOOL; ATTR(o1) = 0;
-		  BOOL_VAL(o1) = TRUE;
-		  FREEopds = o2;
-		  return OK;
-		}
-	}
-
-	return EXECS_UNF;
+        if ((TAG(x1) == OP) && (OP_NAME(x1) == (L) x_op_thrown_name)) {
+            TAG(o1) = BOOL; ATTR(o1) = 0;
+            BOOL_VAL(o1) = TRUE;
+            FREEopds = o2;
+            return OK;
+        }
+    }
+    
+    return EXECS_UNF;
 }
 	
 /*-------------------------------------------- x_unthrown

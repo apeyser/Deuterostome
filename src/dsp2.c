@@ -544,7 +544,8 @@ typedef struct {
 	*restrict *restrict cp;
 } matmult;
 
-L thread_matmul(UL id, const void* global, void* local) {
+L thread_matmul(UL id __attribute__ ((__unused__)),
+                const void* global, void* local) {
   L i = *(L*) local;
   const matmult* restrict m = (const matmult*) global;
   L j, k;
@@ -609,7 +610,7 @@ for (k=0; k<Nrowb; k++)
   
  if ((Ncola != Nrowb) || (Nrowa != Nrowc) || (Ncolb != Ncolc)) return(RNG_CHK);
  
- if (thread_num == 1 || serialized) {
+ if (thread_num() == 1 || serialized) {
    for (i=0; i<Nrowc; i++)
 	 for (j=0; j<Ncolc; j++) { 
 	   sum = 0.0;
@@ -646,7 +647,8 @@ typedef struct {
   D *restrict *restrict ap, *restrict *restrict bp;
 } mattransposet;
 
-L thread_mattranspose(UL id, const void* global, void* local) {
+L thread_mattranspose(UL id __attribute__ ((__unused__)),
+                      const void* global, void* local) {
   L i = *(L*) local;
   const mattransposet* restrict m = (const mattransposet*) global;
   L j;
@@ -694,7 +696,7 @@ for (k=0; k<Nrowa; k++)
   
  if ((Ncola != Nrowb) || (Nrowa != Ncolb)) return(RNG_CHK);
  
- if (thread_num == 1 || serialized)
+ if (thread_num() == 1 || serialized)
    for (i=0; i<Nrowa; i++)
 	 for (j=0; j<Ncola; j++) bp[j][i] = ap[i][j];
 #if ENABLE_THREADS
@@ -727,7 +729,8 @@ typedef struct {
 	*restrict cp;
 } matvecmult;
 
-L thread_matvecmul(UL id, const void* global, void* local) {
+L thread_matvecmul(UL id __attribute__ ((__unused__)),
+                   const void* global, void* local) {
   L i = *(L*) local;
   const matvecmult *restrict m = (const matvecmult*) global;
   D sum = 0.0;
@@ -771,7 +774,7 @@ for (k=0; k<Nrowa; k++)
  if ((Ncola != Nrowb) || (Nrowa != Nrowc)) return(RNG_CHK);
  
  bp = (D*) VALUE_BASE(o_1); cp = (D*) VALUE_BASE(o_3);
- if (thread_num == 1 || serialized)
+ if (thread_num() == 1 || serialized)
    for (i=0; i<Nrowc; i++) { 
 	 sum = 0.0;
      for (k=0; k<Ncola; k++) sum += ap[i][k] * bp[k];

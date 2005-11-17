@@ -164,7 +164,7 @@ NL (})__
     UL nways = ARRAY_SIZE\()__ peekA __ (\)/\(THREADMUL*)__ UNROLLS n__ (\)
                + \(ARRAY_SIZE\()__ peekA __ (\)%\(THREADMUL*)__ UNROLLS n__ (\) ?
                1 : 0\);
-    if \(nways > thread_num\) nways = thread_num;
+    if \(nways > thread_num\(\)\) nways = thread_num\(\);
     data.perthread = ARRAY_SIZE\()__ peekA __ (\) / nways;
     data.leftover = ARRAY_SIZE\()__ popA __ (\) % nways; )__
     popA {(\n   data.df_start = VALUE_PTR\(df\);)__} if
@@ -179,7 +179,7 @@ NL (})__
 /THREAD {pushA pushA pushA
 (
   const thread_array_data* restrict data = \(const thread_array_data*\) indata;
-  UL n, n_ = data->perthread + \(thread_max == id ? data->leftover : 0\);)__
+  UL n, n_ = data->perthread + \(thread_max\(\) == id ? data->leftover : 0\);)__
   popA {(\n  )__ dt__ ( * restrict d = \(\()__
     dt__ ( *\) data->df_start\)+data->perthread*id;)__
   } if
@@ -261,7 +261,9 @@ NL
   }
 
 #if ENABLE_THREADS
-  static L )__ st__ dt__ (moveSAt\(UL id, const void* indata, void* ignore\)
+  static L )__ st__ dt__ (moveSAt\(UL id, const void* indata,
+                                   void* ignore
+                                   __attribute__ \(\(__unused__\)\)\)
   {)__
     true false {(
       D t = data->in;)__ 
@@ -280,7 +282,7 @@ NL
 
   static void )__ st__ dt__ (moveSA\(B* sf, B* df\)
   {
-    if \(thread_num == 1\)
+    if \(thread_num\(\) == 1\)
       )__ st__ dt__ (moveSAs\(sf, df\);
 #if ENABLE_THREADS
     else )__ st__ dt__ (moveSAc\(sf,df\);
@@ -332,7 +334,9 @@ NL
 
 
 #if ENABLE_THREADS
-    static L )__ st__ dt__ (moveAAt\(UL id, const void* indata, void* ignore\)
+    static L )__ st__ dt__ (moveAAt\(UL id, const void* indata,
+                                     void* ignore
+                                     __attribute__ \(\(__unused__\)\)\)
     {)__
       true true {(
        D t;)__ { 
@@ -353,10 +357,10 @@ NL
    static void )__ st__ dt__ (moveAA\(B *sf, B *df\)
    {
     if \(serialized\) )__ st__ dt__ (moveAAs\(sf,df\);
+    else if \(thread_num\(\) == 1\) )__ st__ dt__ (moveAAp\(sf,df\);
 #if ENABLE_THREADS
-    else if \(thread_num != 1\) )__ st__ dt__ (moveAAc\(sf, df\);
+    else )__ st__ dt__ (moveAAc\(sf, df\);
 #endif //ENABLE_THREADS
-    else )__ st__ dt__ (moveAAp\(sf,df\);
    }
 )__
 } def
@@ -450,7 +454,8 @@ end def
 
 #if ENABLE_THREADS
   static L )__ dt__ st__ (dy)__ op__ (ASt\(UL id, const void* indata,
-                                           void* ignore\)
+                                           void* ignore
+                                           __attribute__ \(\(__unused__\)\)\)
   {)__
     true false {(
       D t, tt = data->in;
@@ -473,7 +478,7 @@ end def
 
   static void )__ dt__ st__ (dy)__ op__ (AS\(B *df, B *sf\)
   {
-    if \(thread_num == 1\)
+    if \(thread_num\(\) == 1\)
     )__ dt__ st__ (dy)__ op__ (ASs\(df, sf\);
 #if ENABLE_THREADS
     else )__ dt__ st__ (dy)__ op__ (ASc\(df, sf\);
@@ -538,7 +543,7 @@ dyadic_dp_seed op known {(
 
   static void )__ dt__ st__ (dy)__ op__ (SA\(B* df, B *sf\)
   {
-    if \(thread_num == 1 || serialized\)
+    if \(thread_num\(\) == 1 || serialized\)
       )__ dt__ st__ (dy)__ op__ (SAs\(df, sf\);
 #if ENABLE_THREADS
     else )__ dt__ st__ (dy)__ op__ (SAc\(df, sf\);
@@ -599,7 +604,8 @@ dyadic_dp_seed op known {(
 
 #if ENABLE_THREADS
     static L )__ dt__ st__ (dy)__ op__ (AAt\(UL id, const void* indata,
-                                             void* ignore\) 
+                                             void* ignore
+                                             __attribute__ \(\(__unused__\)\)\)
     {)__
       true true {(
         D t, tt;)__
@@ -623,10 +629,10 @@ dyadic_dp_seed op known {(
     static void )__ dt__ st__ (dy)__ op__ (AA\(B * df, B * sf\)
     {
       if \(serialized\) )__ dt__ st__ (dy)__ op__ (AAs\(df,sf\);
+      else if \(thread_num\(\) == 1\) )__ dt__ st__ (dy)__ op__ (AAp\(df,sf\);
 #if ENABLE_THREADS
-      else if \(thread_num != 1\) )__ dt__ st__ (dy)__ op__ (AAc\(df,sf\);
+      else )__ dt__ st__ (dy)__ op__ (AAc\(df,sf\);
 #endif //ENABLE_THREADS
-      else )__ dt__ st__ (dy)__ op__ (AAp\(df,sf\);
     }
 )__
 } def
@@ -686,7 +692,9 @@ end def
    }
 
 #if ENABLE_THREADS
-  static L )__ dt__ (mo)__ op__ (At\(UL id, const void* indata, void* ignore\)
+  static L )__ dt__ (mo)__ op__ (At\(UL id, const void* indata,
+                                     void* ignore
+                                     __attribute__ \(\(__unused__\)\)\)
   {)__
     true false {(
       D t;)__
@@ -708,7 +716,7 @@ end def
 
   static void )__ dt__ (mo)__ op__ (A\(B *df\)
   {
-    if \(thread_num == 1\) )__ dt__ (mo)__ op__ (As\(df\);
+    if \(thread_num\(\) == 1\) )__ dt__ (mo)__ op__ (As\(df\);
 #if ENABLE_THREADS
     else )__ dt__ (mo)__ op__ (Ac\(df\);
 #endif //ENABLE_THREADS
@@ -744,8 +752,8 @@ NL
 typedef struct {
   B* df_start;
   B* sf_start;
-  L perthread;
-  L leftover;
+  UL perthread;
+  UL leftover;
   D in;
 } thread_array_data;
 #endif //ENABLE_THREADS
