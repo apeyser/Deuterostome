@@ -113,7 +113,8 @@ static UL thread_num(void) {return thread_num_;};
  * Equal to nways passed in threads_do_int
  */
 extern UL thread_max_;
-static UL thread_max(void) {return thread_max_;};
+__attribute__ ((__unused__)) 
+  static UL thread_max(void)  {return thread_max_;};
 
 #else //!ENABLE_THREADS
 

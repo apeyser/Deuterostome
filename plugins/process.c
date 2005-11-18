@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <signal.h>
 #include <time.h>

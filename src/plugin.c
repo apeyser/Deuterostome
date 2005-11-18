@@ -1,4 +1,5 @@
 #include <stdarg.h>
+#include <string.h>
 #include "pluginlib.h"
 
 #if ! ENABLE_PLUGINS

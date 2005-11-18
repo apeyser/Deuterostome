@@ -25,9 +25,9 @@
 #ifndef DM_H
 #define DM_H
 
-#ifndef __GNUC__
-#define __attribute__(att)
-#endif
+#if ! defined __GNUC__ && ! defined __attribute__
+#define __attribute__(attr)
+#endif // ! defined __GNUC__ && ! defined __attribute__
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -704,6 +704,6 @@ L op_matvecmul(void);
 
 #define ERRLEN (1000)
 
-#include "error.h"
+#include "error-local.h"
 
 #endif //DM_H
