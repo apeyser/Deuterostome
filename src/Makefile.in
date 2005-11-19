@@ -106,7 +106,8 @@ SOURCES = $(libdmglobals_la_SOURCES) $(dnode_SOURCES) dnode-nice.c \
 	$(dvt_SOURCES) $(testwordorder_SOURCES)
 DIST_SOURCES = $(am__libdmglobals_la_SOURCES_DIST) $(dnode_SOURCES) \
 	dnode-nice.c $(dvt_SOURCES) $(testwordorder_SOURCES)
-am__pkginclude_HEADERS_DIST = dm.h plugin.h dmx.h threads.h
+am__pkginclude_HEADERS_DIST = dm.h plugin.h dmx.h threads.h \
+	../config.h
 pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(pkginclude_HEADERS)
 ETAGS = etags
@@ -160,6 +161,8 @@ ENABLE_PROCESS_FALSE = @ENABLE_PROCESS_FALSE@
 ENABLE_PROCESS_TRUE = @ENABLE_PROCESS_TRUE@
 ENABLE_SETUID_FALSE = @ENABLE_SETUID_FALSE@
 ENABLE_SETUID_TRUE = @ENABLE_SETUID_TRUE@
+ENABLE_SSH_FALSE = @ENABLE_SSH_FALSE@
+ENABLE_SSH_TRUE = @ENABLE_SSH_TRUE@
 ENABLE_THREADS = @ENABLE_THREADS@
 ENABLE_THREADS_FALSE = @ENABLE_THREADS_FALSE@
 ENABLE_THREADS_TRUE = @ENABLE_THREADS_TRUE@
@@ -307,7 +310,7 @@ AM_LDFLAGS = -no-undefined $(PTHREAD_LIBS) $(X_LDFLAGS)
 INCLUDE = @INCLTDL@
 @ENABLE_PLUGINS_TRUE@PLUGIN_HDR = plugin.h
 @ENABLE_PLUGINS_TRUE@PLUGIN_LD = @LIBLTDL@
-pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR)
+pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) ../config.h
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h
 dvt_LDADD = libdmglobals.la
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
@@ -583,7 +586,7 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
-	$(mkdir_p) $(distdir)/codegen
+	$(mkdir_p) $(distdir)/.. $(distdir)/codegen
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

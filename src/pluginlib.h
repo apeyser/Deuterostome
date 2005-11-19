@@ -6,6 +6,9 @@ void closealllibs(void);
 
 #include "dm.h"
 
+// for LL
+L op_getplugindir(void);
+
 #if ENABLE_PLUGINS
 
 BOOLEAN check_opaque_name(B* nameframe, B* dict);

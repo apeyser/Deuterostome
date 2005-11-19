@@ -14,6 +14,7 @@
 
 @SET_MAKE@
 
+
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -38,7 +39,8 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 subdir = plugins
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = $(am__dist_pkglib_DATA_DIST) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
@@ -55,7 +57,7 @@ am__vpath_adj = case $$p in \
     *) f=$$p;; \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-am__installdirs = "$(DESTDIR)$(pkglibdir)"
+am__installdirs = "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(pkglibdir)"
 pkglibLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(pkglib_LTLIBRARIES)
 process_la_LIBADD =
@@ -63,6 +65,10 @@ am__process_la_SOURCES_DIST = process.c process.h
 @ENABLE_PROCESS_TRUE@am_process_la_OBJECTS = process.lo
 process_la_OBJECTS = $(am_process_la_OBJECTS)
 @ENABLE_PROCESS_TRUE@am_process_la_rpath = -rpath $(pkglibdir)
+ssh_la_LIBADD =
+ssh_la_SOURCES = ssh.c
+ssh_la_OBJECTS = ssh.lo
+@ENABLE_SSH_TRUE@am_ssh_la_rpath = -rpath $(pkglibdir)
 test_la_LIBADD =
 am_test_la_OBJECTS = test.lo
 test_la_OBJECTS = $(am_test_la_OBJECTS)
@@ -83,10 +89,13 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(process_la_SOURCES) $(test_la_SOURCES) $(test2_la_SOURCES) \
-	$(throw_la_SOURCES)
-DIST_SOURCES = $(am__process_la_SOURCES_DIST) $(test_la_SOURCES) \
+SOURCES = $(process_la_SOURCES) ssh.c $(test_la_SOURCES) \
 	$(test2_la_SOURCES) $(throw_la_SOURCES)
+DIST_SOURCES = $(am__process_la_SOURCES_DIST) ssh.c $(test_la_SOURCES) \
+	$(test2_la_SOURCES) $(throw_la_SOURCES)
+am__dist_pkglib_DATA_DIST = ssh.d
+dist_pkglibDATA_INSTALL = $(INSTALL_DATA)
+DATA = $(dist_pkglib_DATA)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -138,6 +147,8 @@ ENABLE_PROCESS_FALSE = @ENABLE_PROCESS_FALSE@
 ENABLE_PROCESS_TRUE = @ENABLE_PROCESS_TRUE@
 ENABLE_SETUID_FALSE = @ENABLE_SETUID_FALSE@
 ENABLE_SETUID_TRUE = @ENABLE_SETUID_TRUE@
+ENABLE_SSH_FALSE = @ENABLE_SSH_FALSE@
+ENABLE_SSH_TRUE = @ENABLE_SSH_TRUE@
 ENABLE_THREADS = @ENABLE_THREADS@
 ENABLE_THREADS_FALSE = @ENABLE_THREADS_FALSE@
 ENABLE_THREADS_TRUE = @ENABLE_THREADS_TRUE@
@@ -265,7 +276,12 @@ AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 INCLUDE = @INCLTDL@ 
 @ENABLE_PROCESS_TRUE@PROCESS_LIB = process.la
 @ENABLE_PROCESS_TRUE@process_la_SOURCES = process.c process.h
-pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la
+@ENABLE_SSH_TRUE@SSH_LIB = ssh.la
+@ENABLE_SSH_TRUE@SSH_D = ssh.d
+@ENABLE_SSH_TRUE@ssh_la_SOURCE = ssh.c ssh.h
+@ENABLE_SSH_TRUE@ssh_la_LIBS = $(LIBS) sshlib.so
+dist_pkglib_DATA = $(SSH_D)
+pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(SSH_LIB)
 test_la_SOURCES = test.c test.h
 test2_la_SOURCES = test2.c test2.h
 throw_la_SOURCES = throw.c throw.h
@@ -331,6 +347,8 @@ clean-pkglibLTLIBRARIES:
 	done
 process.la: $(process_la_OBJECTS) $(process_la_DEPENDENCIES) 
 	$(LINK) $(am_process_la_rpath) $(process_la_LDFLAGS) $(process_la_OBJECTS) $(process_la_LIBADD) $(LIBS)
+ssh.la: $(ssh_la_OBJECTS) $(ssh_la_DEPENDENCIES) 
+	$(LINK) $(am_ssh_la_rpath) $(ssh_la_LDFLAGS) $(ssh_la_OBJECTS) $(ssh_la_LIBADD) $(LIBS)
 test.la: $(test_la_OBJECTS) $(test_la_DEPENDENCIES) 
 	$(LINK) -rpath $(pkglibdir) $(test_la_LDFLAGS) $(test_la_OBJECTS) $(test_la_LIBADD) $(LIBS)
 test2.la: $(test2_la_OBJECTS) $(test2_la_DEPENDENCIES) 
@@ -345,6 +363,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ssh.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/throw.Plo@am__quote@
@@ -379,6 +398,23 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 uninstall-info-am:
+install-dist_pkglibDATA: $(dist_pkglib_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(pkglibdir)" || $(mkdir_p) "$(DESTDIR)$(pkglibdir)"
+	@list='$(dist_pkglib_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(dist_pkglibDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(pkglibdir)/$$f'"; \
+	  $(dist_pkglibDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(pkglibdir)/$$f"; \
+	done
+
+uninstall-dist_pkglibDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(dist_pkglib_DATA)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(pkglibdir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(pkglibdir)/$$f"; \
+	done
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -457,9 +493,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES)
+all-am: Makefile $(LTLIBRARIES) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(pkglibdir)"; do \
+	for dir in "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(pkglibdir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
 install: install-am
@@ -509,7 +545,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am: install-pkglibLTLIBRARIES
+install-exec-am: install-dist_pkglibDATA install-pkglibLTLIBRARIES
 
 install-info: install-info-am
 
@@ -535,20 +571,22 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-info-am uninstall-pkglibLTLIBRARIES
+uninstall-am: uninstall-dist_pkglibDATA uninstall-info-am \
+	uninstall-pkglibLTLIBRARIES
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
 	clean-libtool clean-pkglibLTLIBRARIES ctags distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-exec \
-	install-exec-am install-info install-info-am install-man \
+	install install-am install-data install-data-am \
+	install-dist_pkglibDATA install-exec install-exec-am \
+	install-info install-info-am install-man \
 	install-pkglibLTLIBRARIES install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-info-am \
-	uninstall-pkglibLTLIBRARIES
+	tags uninstall uninstall-am uninstall-dist_pkglibDATA \
+	uninstall-info-am uninstall-pkglibLTLIBRARIES
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -276,4 +276,20 @@ B* make_opaque_frame(L n, B* pluginnameframe, ...) {
   return dict-FRAMEBYTES;
 }
 
+L wrap_readcode(const char* file) {
+  L ret;
+  if ((ret = op_getplugindir()) != OK) return ret;
+  if (x2 > CEILexecs) return EXECS_OVF;
+  if (o2 > CEILopds) return OPDS_OVF;
+  
+  TAG(x1) = (ARRAY | BYTETYPE); ATTR(x1) = ACTIVE | READONLY;
+  ARRAY_SIZE(x1) =  strlen(VALUE_PTR(x1) = "fromfiles");
+  FREEexecs = x2;
+
+  TAG(o1) = (ARRAY | BYTETYPE); ATTR(o1) = READONLY;
+  ARRAY_SIZE(o1) = strlen(VALUE_PTR(o1) = (B*) file);
+  FREEexecs = o2;
+  return OK;
+}
+
 #endif //ENABLE_PLUGINS

@@ -26,6 +26,8 @@ char libPLUGIN_is_dll(void) {return 1;}
 
 #include "dm.h"
 
+L wrap_readcode(const char* file);
+
 #define EXPORTNAME(name) PLUGIN_JOIN(PLUGIN_NAME, _LTX_##name)
 
 #define PRIVATEPLUGIN PLUGIN_JOIN(_, PLUGIN_NAME)
@@ -57,6 +59,7 @@ L op_FINI_(void);
 
 #define opaquename PRIVATENAME(opaquename)
 extern B opaquename[FRAMEBYTES];
+extern B buffernameframe[FRAMEBYTES];
 
 #define TEST_OPAQUE(frame)	do {										\
 	if (TAG(frame) != (DICT | OPAQUETYPE)) return OPD_TYP;				\

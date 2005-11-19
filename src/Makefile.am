@@ -63,7 +63,7 @@ PLUGIN_HDR = plugin.h
 PLUGIN_LD = @LIBLTDL@
 endif ENABLE_PLUGINS
 
-pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR)
+pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) ../config.h
 
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h
 dvt_LDADD = libdmglobals.la

@@ -29,9 +29,9 @@
 #define __attribute__(attr)
 #endif // ! defined __GNUC__ && ! defined __attribute__
 
-#ifdef HAVE_CONFIG_H
+//#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
+//#endif
 
 // Need to be here because we define things such as x1
 #if ! X_DISPLAY_MISSING
@@ -232,6 +232,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define DICT_CURR(frame)           (*((L *)(((B*)(frame))+8)))
 #define BOX_NB(frame)              (*((L *)(((B*)(frame))+8)))
 #define VALUE_PTR(frame)           (*((B**)(((B*)(frame))+4)))
+#define LIST_CEIL_PTR(frame)       (*((B**)(((B*)(frame))+8)))
 /* #define HANDLE_ID(frame)           (*((L *)(((B*)(frame))+12))) */
 /* #define HANDLE_CEIL(frame)         (*((B**)(((B*)(frame))+8))) */
 
