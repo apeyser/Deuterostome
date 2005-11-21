@@ -14,7 +14,12 @@ BASH_DIR=sh
 endif ENABLE_ENV
 endif ENABLE_BASH
 
-SUBDIRS = libltdl src $(PLUGINS_DIR) $(BASH_DIR) ps $(EMACS_DIR) dcode
+if ENABLE_UTILS
+UTILS_DIR=utils
+endif ENABLE_UTILS
+
+SUBDIRS = libltdl src $(PLUGINS_DIR) $(BASH_DIR) ps $(EMACS_DIR) dcode \
+	$(UTILS_DIR)
 ACLOCAL_AMFLAGS = -I m4
 
 @SET_MAKE@

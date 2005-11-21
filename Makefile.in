@@ -64,7 +64,7 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	uninstall-recursive
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = libltdl src plugins sh ps emacs dcode
+DIST_SUBDIRS = libltdl src plugins sh ps emacs dcode utils
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -129,6 +129,8 @@ ENABLE_SSH_TRUE = @ENABLE_SSH_TRUE@
 ENABLE_THREADS = @ENABLE_THREADS@
 ENABLE_THREADS_FALSE = @ENABLE_THREADS_FALSE@
 ENABLE_THREADS_TRUE = @ENABLE_THREADS_TRUE@
+ENABLE_UTILS_FALSE = @ENABLE_UTILS_FALSE@
+ENABLE_UTILS_TRUE = @ENABLE_UTILS_TRUE@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
@@ -251,7 +253,10 @@ EXTRA_DIST = bootstrap
 @ENABLE_EMACS_TRUE@EMACS_DIR = emacs
 @ENABLE_PLUGINS_TRUE@PLUGINS_DIR = plugins
 @ENABLE_BASH_TRUE@@ENABLE_ENV_TRUE@BASH_DIR = sh
-SUBDIRS = libltdl src $(PLUGINS_DIR) $(BASH_DIR) ps $(EMACS_DIR) dcode
+@ENABLE_UTILS_TRUE@UTILS_DIR = utils
+SUBDIRS = libltdl src $(PLUGINS_DIR) $(BASH_DIR) ps $(EMACS_DIR) dcode \
+	$(UTILS_DIR)
+
 ACLOCAL_AMFLAGS = -I m4
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive

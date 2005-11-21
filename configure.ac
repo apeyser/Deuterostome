@@ -17,6 +17,11 @@ CF_IF_ENABLED([plugins], [
   ])
 ])
 
+CF_AM_ENABLE([utils], [compile or install utils], [yes])
+CF_IF_ENABLED([utils], [
+  CF_AC_CHECK_HEADER([forms.h])
+])
+
 CF_AC_ARG_VAR([SYSDICTSIZE], [system dictionary size], [500])
 CF_AC_ARG_VAR([ROLLBITS], [unroll math loops to 2^rollbits], [3])
 
@@ -152,6 +157,7 @@ AC_CONFIG_FILES([Makefile
 		 sh/Makefile
 		 emacs/Makefile emacs/d-mode.el
 		 dcode/Makefile dcode/startup_dvt.d dcode/startup_dnode.d
+		 utils/Makefile
 ])
 
 AC_OUTPUT
