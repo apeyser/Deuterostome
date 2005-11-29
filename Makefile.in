@@ -45,7 +45,8 @@ subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
-	$(top_srcdir)/m4/configure.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -101,6 +102,7 @@ DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 DMBINDIR = @DMBINDIR@
 DMCONFDIR = @DMCONFDIR@
+DMSOCKDIR = @DMSOCKDIR@
 DMSTARTDIR = @DMSTARTDIR@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
@@ -179,6 +181,7 @@ STRIP = @STRIP@
 SYSDICTSIZE = @SYSDICTSIZE@
 THREADMUL = @THREADMUL@
 THREADNUM = @THREADNUM@
+TMP = @TMP@
 VERSION = @VERSION@
 X_CFLAGS = @X_CFLAGS@
 X_DISPLAY_MISSING = @X_DISPLAY_MISSING@
@@ -216,6 +219,7 @@ build_vendor = @build_vendor@
 datadir = @datadir@
 dmbindir = @dmbindir@
 dmconfdir = @dmconfdir@
+dmsockdir = @dmsockdir@
 dmstartdir = @dmstartdir@
 exec_prefix = @exec_prefix@
 guipdf = @guipdf@
@@ -247,6 +251,7 @@ target_alias = @target_alias@
 target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
+tmp = @tmp@
 EXTRA_DIST = bootstrap
 @ENABLE_EMACS_TRUE@EMACS_DIR = emacs
 @ENABLE_PLUGINS_TRUE@PLUGINS_DIR = plugins

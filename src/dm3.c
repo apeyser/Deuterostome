@@ -13,6 +13,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
+#include <sys/un.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <netinet/in.h>
 #include <errno.h>
 #include <netdb.h>
@@ -20,6 +23,7 @@
 #include "dm.h"
 #include <unistd.h>
 #include <string.h>
+#include "paths.h"
 
 extern int h_errno;
 
@@ -43,6 +47,34 @@ TOPvm = CEILvm  = FLOORvm + specs[3] * 1000000;
 }
 
 
+/*--------------------------- initialize a socket address */
+
+L init_sockaddr(struct sockaddr_in *name, const char *hostname,
+		L port)
+{
+  struct hostent *hostinfo;
+  memset(name, 0, sizeof(struct sockaddr_in));
+  name->sin_family = AF_INET;
+  name->sin_port = htons((UW)port);
+  hostinfo = gethostbyname(hostname);
+  if (hostinfo == 0) return(-h_errno);
+  name->sin_addr = *(struct in_addr *) hostinfo->h_addr;
+  return(OK);
+}
+
+L init_unix_sockaddr(struct sockaddr_un *name, L port) {
+  char* sock_path = getenv("DMSOCKDIR");
+  memset(name, 0, sizeof(struct sockaddr_un));
+  if (! sock_path || ! *sock_path) sock_path = DMSOCKDIR;
+  if (sock_path[strlen(sock_path)-1] == '/')
+    sock_path[strlen(sock_path)-1] = '\0';
+
+  name->sun_family = AF_UNIX;
+  snprintf(name->sun_path, sizeof(name->sun_path)-1, "%s/dnode-%i",
+           sock_path, port - IPPORT_USERRESERVED);
+  return OK;
+}
+
 /*--------------------------- make a server socket */
 
 L make_socket(L port)
@@ -61,19 +93,71 @@ L make_socket(L port)
   return(sock);
 }
 
-/*--------------------------- initialize a socket address */
+typedef struct port_list {
+  L port;
+  struct port_list* next;
+} port_list;
+static port_list* ports_first = NULL;
+static port_list* ports_last = NULL;
 
-L init_sockaddr(struct sockaddr_in *name, const char *hostname,
-		L port)
-{
-  struct hostent *hostinfo;
-  memset(name, 0, sizeof(struct sockaddr_in));
-  name->sin_family = AF_INET;
-  name->sin_port = htons((UW)port);
-  hostinfo = gethostbyname(hostname);
-  if (hostinfo == 0) return(-h_errno);
-  name->sin_addr = *(struct in_addr *) hostinfo->h_addr;
-  return(OK);
+static void unlink_socketfile(void) {
+  struct sockaddr_un name;
+  port_list* i;
+  for (i = ports_first; i; i = i->next)
+    if (init_unix_sockaddr(&name, i->port) >= 0)
+      unlink(name.sun_path);
+}
+
+void set_atexit_socks(L port) {
+  if (! ports_first) {
+    if (atexit(unlink_socketfile))
+      error(EXIT_FAILURE, 0, "Can't set exit function");
+    ports_last = ports_first = malloc(sizeof(port_list));
+  }
+  else {
+    if (! (ports_last->next = malloc(sizeof(port_list))))
+      error(EXIT_FAILURE, errno, "Mem alloc error");
+    ports_last = ports_last->next;
+  };
+  ports_last->port = port;
+  ports_last->next = NULL;
+}
+
+L make_unix_socket(L port) {
+  char* sock_dir; char* i;
+  L sock;
+  struct sockaddr_un name;
+  
+  if (init_unix_sockaddr(&name, port) != OK) return -1;
+  if ((sock = socket(PF_UNIX, SOCK_STREAM, 0)) < 0) return -1;
+
+  if (! (i = sock_dir = strdup(name.sun_path))) return -1;
+  while ((i = strchr(++i, '/'))) {
+    struct stat buf;
+    *i = '\0';
+    if (stat(sock_dir, &buf)) {
+      if ((errno != ENOTDIR && errno != ENOENT)
+          || mkdir(sock_dir, ~(mode_t) 0)) {
+        free(sock_dir);
+        return -1;
+      }
+    }
+    else if (! S_ISDIR(buf.st_mode)) {
+      errno = ENOTDIR;
+      free(sock_dir);
+      return -1;
+    }
+    *i = '/';
+  }
+  free(sock_dir);
+    
+  if (bind(sock, (struct sockaddr *) &name, 
+           sizeof(name.sun_family)+strlen(name.sun_path))
+      < 0)
+    return -1;
+  set_atexit_socks(port);
+
+  return sock;
 }
 
 /*--------------------------- read a message from a socket
@@ -249,7 +333,6 @@ L tosocket(L sock, B *sf, B *cf)
 L op_connect(void)
 {
   L port, sock, retc, size = PACKET_SIZE;
-  struct sockaddr_in serveraddr;
 
   if (o_2 < FLOORopds) return(OPDS_UNF);
   if (TAG(o_2) != (ARRAY | BYTETYPE)) return(OPD_ERR);
@@ -259,18 +342,31 @@ L op_connect(void)
   if ((FREEvm + ARRAY_SIZE(o_2) + 1) > CEILvm) return(VM_OVF);
   moveB((B *)VALUE_BASE(o_2),FREEvm,ARRAY_SIZE(o_2));
   FREEvm[ARRAY_SIZE(o_2)] = '\000';
-  
-  if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) return(-errno);
-  if ((retc =                              /* set packet buffers size  */
-      setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &size, sizeof(L))) == -1)
-        return(-errno);
-  if ((retc =
-      setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &size, sizeof(L))) == -1)
-        return(-errno);
-  if ((retc = init_sockaddr(&serveraddr, FREEvm, port)) != OK)
-    return(retc);
-  if (connect(sock, (struct sockaddr *)&serveraddr,sizeof(serveraddr)) < 0)
-    return(-errno);
+
+  if (! strcmp("localhost", FREEvm)) {
+    struct sockaddr_un unixserveraddr;
+    if ((sock = socket(PF_UNIX, SOCK_STREAM, 0)) < 0) return -errno;
+    if ((retc = init_unix_sockaddr(&unixserveraddr, port)) != OK)
+      return retc;
+    if (connect(sock, (struct sockaddr *) &unixserveraddr, 
+                sizeof(unixserveraddr.sun_family)
+                + strlen(unixserveraddr.sun_path)))
+      return -errno;
+  }
+  else {
+    struct sockaddr_in serveraddr;
+    if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) return(-errno);
+    if ((retc =                              /* set packet buffers size  */
+         setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &size, sizeof(L))) == -1)
+      return(-errno);
+    if ((retc =
+         setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &size, sizeof(L))) == -1)
+      return(-errno);
+    if ((retc = init_sockaddr(&serveraddr, FREEvm, port)) != OK)
+      return(retc);
+    if (connect(sock, (struct sockaddr *)&serveraddr,sizeof(serveraddr)) < 0)
+      return(-errno);
+  }
   if (fcntl(sock, F_SETFL, O_NONBLOCK) == -1)   /* make non-blocking  */
     error(EXIT_FAILURE, errno, "fcntl");
   FD_SET(sock, &sock_fds);                      /* register the socket */

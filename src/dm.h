@@ -29,9 +29,9 @@
 #define __attribute__(attr)
 #endif // ! defined __GNUC__ && ! defined __attribute__
 
-//#ifdef HAVE_CONFIG_H
-#include <config.h>
-//#endif
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 // Need to be here because we define things such as x1
 #if ! X_DISPLAY_MISSING
@@ -492,6 +492,7 @@ void setupdirs(void);
 
 /*--- DM3 */
 L make_socket(L port);
+L make_unix_socket(L port);
 L fromsocket(L socket, B *msf);
 L tosocket(L socket, B *sf, B *cf);
 L toconsole( B *string, L stringlength);

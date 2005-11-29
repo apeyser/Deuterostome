@@ -38,6 +38,10 @@ CF_AC_ARG_DIR([pkgpsdatadir], [location for ps files],
   [${datadir}/${PACKAGE}/ps])
 CF_AC_ARG_DIR([pkglispdir], [location for lisp files],
   [${lispdir}/${PACKAGE}])
+CF_AC_ARG_DIR([tmp], [location of temp dir], [/tmp])
+CF_AC_ARG_DIR([dmsockdir], 
+  [location for dm unix sockets], 
+  [${TMP}/${PACKAGE}/sockets])
 
 CF_ON_TARGET([*-*-darwin*], [
   AC_CHECK_PROG([guipdf], [launch], [launch -i com.apple.Preview])
@@ -92,6 +96,7 @@ CF_AC_CHECK_HEADER([math.h])
 CF_AC_CHECK_HEADER([stdlib.h])
 CF_AC_CHECK_HEADER([stdio.h])
 CF_AC_CHECK_HEADER([sys/socket.h])
+CF_AC_CHECK_HEADER([sys/un.h])
 CF_AC_CHECK_HEADER([sys/select.h])
 CF_AC_CHECK_HEADER([netinet/in.h])
 CF_AC_CHECK_HEADER([errno.h])
@@ -143,6 +148,8 @@ CF_SUBST_DEFINE([NAMEBYTES],
 				[18L], 
 				[Number of bytes in a d name, without terminating '\0'],
 				[18])
+
+LIB_SOCKET_NSL
 
 AC_CONFIG_FILES([Makefile 
 		 src/Makefile 

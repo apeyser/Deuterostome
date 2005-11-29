@@ -43,7 +43,8 @@ DIST_COMMON = $(dist_pkglisp_LISP) $(srcdir)/Makefile.am \
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
-	$(top_srcdir)/m4/configure.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -92,6 +93,7 @@ DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 DMBINDIR = @DMBINDIR@
 DMCONFDIR = @DMCONFDIR@
+DMSOCKDIR = @DMSOCKDIR@
 DMSTARTDIR = @DMSTARTDIR@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
@@ -170,6 +172,7 @@ STRIP = @STRIP@
 SYSDICTSIZE = @SYSDICTSIZE@
 THREADMUL = @THREADMUL@
 THREADNUM = @THREADNUM@
+TMP = @TMP@
 VERSION = @VERSION@
 X_CFLAGS = @X_CFLAGS@
 X_DISPLAY_MISSING = @X_DISPLAY_MISSING@
@@ -207,6 +210,7 @@ build_vendor = @build_vendor@
 datadir = @datadir@
 dmbindir = @dmbindir@
 dmconfdir = @dmconfdir@
+dmsockdir = @dmsockdir@
 dmstartdir = @dmstartdir@
 exec_prefix = @exec_prefix@
 guipdf = @guipdf@
@@ -238,6 +242,7 @@ target_alias = @target_alias@
 target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
+tmp = @tmp@
 dist_pkglisp_LISP = dm-server.el
 nodist_pkglisp_LISP = d-comint-mode.el d-mode.el init.el
 EXTRA_DIST = d-comint-mode.el.in init.el.in
@@ -498,12 +503,12 @@ uninstall-am: uninstall-dist_pkglispLISP uninstall-info-am \
 
 d-comint-mode.el: Makefile $(srcdir)/d-comint-mode.el.in
 	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/d-comint-mode.el.in >$@.tmp
+	$(edit) $(srcdir)/$@.in >$@.tmp
 	mv $@.tmp $@
 
 init.el: Makefile $(srcdir)/init.el.in
 	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/init.el.in >$@.tmp
+	$(edit) $(srcdir)/$@.in >$@.tmp
 	mv $@.tmp $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

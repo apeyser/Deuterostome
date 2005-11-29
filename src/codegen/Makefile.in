@@ -49,7 +49,8 @@ DIST_COMMON = $(dist_noinst_DATA) $(dist_noinst_SCRIPTS) \
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
-	$(top_srcdir)/m4/configure.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -63,7 +64,8 @@ am_libdmbootstrap_la_OBJECTS = dmglobals.lo dm1.lo dm2.lo dm3.lo \
 libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
 am_dgen_OBJECTS = dgen-dgen.$(OBJEXT)
-dgen_OBJECTS = $(am_dgen_OBJECTS)
+nodist_dgen_OBJECTS =
+dgen_OBJECTS = $(am_dgen_OBJECTS) $(nodist_dgen_OBJECTS)
 dgen_DEPENDENCIES = libdmbootstrap.la
 SCRIPTS = $(dist_noinst_SCRIPTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -77,7 +79,8 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libdmbootstrap_la_SOURCES) $(dgen_SOURCES)
+SOURCES = $(libdmbootstrap_la_SOURCES) $(dgen_SOURCES) \
+	$(nodist_dgen_SOURCES)
 DIST_SOURCES = $(libdmbootstrap_la_SOURCES) $(dgen_SOURCES)
 DATA = $(dist_noinst_DATA)
 HEADERS = $(noinst_HEADERS)
@@ -109,6 +112,7 @@ DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 DMBINDIR = @DMBINDIR@
 DMCONFDIR = @DMCONFDIR@
+DMSOCKDIR = @DMSOCKDIR@
 DMSTARTDIR = @DMSTARTDIR@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
@@ -187,6 +191,7 @@ STRIP = @STRIP@
 SYSDICTSIZE = @SYSDICTSIZE@
 THREADMUL = @THREADMUL@
 THREADNUM = @THREADNUM@
+TMP = @TMP@
 VERSION = @VERSION@
 X_CFLAGS = @X_CFLAGS@
 X_DISPLAY_MISSING = @X_DISPLAY_MISSING@
@@ -224,6 +229,7 @@ build_vendor = @build_vendor@
 datadir = @datadir@
 dmbindir = @dmbindir@
 dmconfdir = @dmconfdir@
+dmsockdir = @dmsockdir@
 dmstartdir = @dmstartdir@
 exec_prefix = @exec_prefix@
 guipdf = @guipdf@
@@ -255,26 +261,35 @@ target_alias = @target_alias@
 target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
+tmp = @tmp@
 dist_noinst_DATA = dmnuminc.d dsp1f.d
 dist_noinst_SCRIPTS = buildh
-AM_CPPFLAGS = $(GCC_CFLAGS) \
-	-DSTARTUP_DIR="\"$(top_builddir)/src/codegen/\"" \
-	-DDISABLE_THREADS=1
-
+AM_CFLAGS = $(GCC_CFLAGS)
+AM_CPPFLAGS = -DDISABLE_THREADS=1
 AM_LDFLAGS = -no-undefined
 INCLUDE = @INCLTDL@
 MAINTAINERCLEANFILES = *.built
+BUILT_SOURCES = paths.h
+CLEANFILES = paths.h
 noinst_LTLIBRARIES = libdmbootstrap.la
 noinst_HEADERS = dmnuminc.h.built dsp1f.h.built dm.h
 libdmbootstrap_la_SOURCES = dmglobals.c dm1.c dm2.c dm3.c dm4.c dm5.c \
 	dm6.c dm7.c dm8.c dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h \
-	error.h threads.h
+	error.h threads.h paths.h
 
 dgen_SOURCES = dgen.c dgen_0.h dgen_1.h
+nodist_dgen_SOURCES = paths.h
 dgen_CPPFLAGS = $(AM_CPPFLAGS)
 dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dgen_LDADD = libdmbootstrap.la
-all: all-am
+edit = sed \
+	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
+	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \
+	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
+	-e 's,[@]dmconfdir[@],$(dmconfdir),g'
+
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
@@ -474,11 +489,13 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: check-am
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(SCRIPTS) $(DATA) \
 		$(HEADERS)
 installdirs:
-install: install-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -495,6 +512,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -502,6 +520,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 clean: clean-am
 
@@ -580,6 +599,11 @@ dsp1f.h.built: dsp1f.d dgen buildh
 	(cd "$(srcdir)/.." ; \
 	 rm dsp1f.h ; \
 	 $(LN_S) codegen/dsp1f.h.built dsp1f.h)
+
+paths.h: paths.h.in
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/$@.in >$@.tmp
+	mv $@.tmp $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

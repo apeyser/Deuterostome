@@ -18,6 +18,7 @@
 #include "dmx.h"
 
 L init_sockaddr(struct sockaddr_in *name, const char *hostname, L port);
+L init_unix_sockaddr(struct sockaddr_un *name, L port);
 
 /*----------------- DM global variables -----------------------------*/
 
@@ -95,9 +96,6 @@ static void makequithandler(void)
     sa.sa_flags = 0;
     for (i = quitsigs; *i; i++) sigaction(*i, &sa, NULL);
 }
-
-
-
 
 /*------------------------------ main ----------------------------------
 
@@ -219,7 +217,7 @@ int main(L argc, char *argv[])
 {
 B errorframe[FRAMEBYTES];
 L nb, retc;
-L serversocket, nact, i, kr;
+L serversocket, unixserversocket, ssocket, nact, i, kr;
 B *userdict;
 fd_set read_fds;
 B hostname[256];
@@ -313,6 +311,11 @@ if ((serversocket = make_socket(serverport)) < 0)
   error(EXIT_FAILURE,errno,"making server socket");
 FD_SET(serversocket, &sock_fds);
 if (listen(serversocket,5) < 0) error(EXIT_FAILURE,errno,"listen");
+
+if ((unixserversocket = make_unix_socket(serverport)) < 0) 
+  error(EXIT_FAILURE,errno,"making server socket");
+FD_SET(unixserversocket, &sock_fds);
+if (listen(unixserversocket,5) < 0) error(EXIT_FAILURE,errno,"listen");
 
 /*--------------------- set up the tiny D machine -------------------*/
 
@@ -475,24 +478,14 @@ if (running) goto tuwat; else goto theloop;
 
 /*--- look first for a connection request and service it */
 nextmsg:
+ if (FD_ISSET(unixserversocket, &read_fds)) {
+   ssocket = unixserversocket;
+   goto nextserver;
+ }
+
  if (FD_ISSET(serversocket, &read_fds)) {
-   socklen_t size;
-   L new; L psize;
-   size = sizeof(clientname);
-   new = accept(serversocket, &clientname, &size);
-   if (new < 0) error(EXIT_FAILURE,errno,"accept");
-   psize = PACKET_SIZE;
-   if ((retc =                           /* set packet buffers size  */
-        setsockopt(new, SOL_SOCKET, SO_SNDBUF, (B *)&psize, sizeof(L)) == -1))
-        error(EXIT_FAILURE,errno,"setsockopt");
-   if ((retc =
-        setsockopt(new, SOL_SOCKET, SO_RCVBUF, (B *)&psize, sizeof(L)) == -1))
-       error(EXIT_FAILURE,errno,"setsockopt");            
-   FD_SET(new, &sock_fds);              /* register the client socket */
-   if (fcntl(new, F_SETFL, O_NONBLOCK) == -1)   /* make non-blocking  */
-      error(EXIT_FAILURE, errno, "fcntl");
-   FD_CLR(serversocket, &read_fds);  /* to prevent double service */
-   nact--; goto tuwat;
+   ssocket = serversocket;
+   goto nextserver;
  }
 
 /*--- else look for a normal message and service the first one seen */
@@ -544,7 +537,9 @@ switch(retc = exec(100))
 	 nact = 0;
 	 op_Xdisconnect();
 	 for (i = 0; i < FD_SETSIZE; ++i)
-		 if (FD_ISSET(i, &sock_fds) && (i != serversocket)) {
+		 if (FD_ISSET(i, &sock_fds) 
+             && (i != serversocket)
+             && (i != unixserversocket)) {
 			 FD_CLR(i, &sock_fds);
 			 close(i);
 		 }
@@ -594,6 +589,27 @@ TAG(o4) = NUM | LONGTYPE; ATTR(o4) = 0; LONG_VAL(o4) = retc;
 moveframe(errorframe,x1);
 FREEopds = o5; FREEexecs = x2;
 running = TRUE; goto tuwat;
+
+nextserver: {
+  socklen_t size;
+  L new; L psize;
+  size = sizeof(clientname);
+  new = accept(ssocket, &clientname, &size);
+  if (new < 0) error(EXIT_FAILURE,errno,"accept");
+  psize = PACKET_SIZE;
+  if ((retc =                           /* set packet buffers size  */
+       setsockopt(new, SOL_SOCKET, SO_SNDBUF, (B *)&psize, sizeof(L)) == -1))
+    error(EXIT_FAILURE,errno,"setsockopt");
+  if ((retc =
+       setsockopt(new, SOL_SOCKET, SO_RCVBUF, (B *)&psize, sizeof(L)) == -1))
+    error(EXIT_FAILURE,errno,"setsockopt");            
+  FD_SET(new, &sock_fds);              /* register the client socket */
+  if (fcntl(new, F_SETFL, O_NONBLOCK) == -1)   /* make non-blocking  */
+    error(EXIT_FAILURE, errno, "fcntl");
+  FD_CLR(ssocket, &read_fds);  /* to prevent double service */
+  nact--; goto tuwat;
+}
+
 
 }  /* we never return */
 

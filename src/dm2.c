@@ -11,6 +11,7 @@
 */
 
 #include "dm.h"
+#include "paths.h"
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>

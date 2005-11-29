@@ -1,6 +1,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <signal.h>
 
 #include "dm.h"
 #include "threads.h"
@@ -24,6 +25,7 @@ thread_func thread_function = NULL;
 L thread_error[THREADNUM] = {};
 const void* thread_data_global = NULL;
 void* thread_data_local[THREADNUM] = {};
+sigset_t sigmask;
 
 #define THREAD_ERROR_EXIT(func, msg, ...) do {							\
 	if (func(__VA_ARGS__))												\
@@ -61,6 +63,8 @@ void* thread_routine(void* arg) {
 
   THREADERR(pthread_mutex_lock, thread_lock+thread_id);
   pthread_cleanup_push(thread_unlock_lock, (void*) thread_id);
+
+  THREADERR(pthread_sigmask, SIG_BLOCK, &sigmask, NULL);
 
   while (TRUE) {
         thread_start[thread_id] = FALSE;
@@ -179,6 +183,8 @@ L threads_init(L num) {
   L i;
   pthread_attr_t attr;
   if (num < 1 || num > THREADNUM) return RNG_CHK;
+
+  if (sigfillset(&sigmask)) return -errno;
 
   if (pthread_attr_init(&attr)) return -errno;
   if (pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED))

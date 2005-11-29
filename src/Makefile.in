@@ -49,7 +49,8 @@ DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(srcdir)/Makefile.am \
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
-	$(top_srcdir)/m4/configure.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -75,7 +76,9 @@ am__libdmglobals_la_SOURCES_DIST = dmglobals.c dm1.c dm2.c dm3.c dm4.c \
 am_libdmglobals_la_OBJECTS = dmglobals.lo dm1.lo dm2.lo dm3.lo dm4.lo \
 	dm5.lo dm6.lo dm7.lo dm8.lo dm9.lo dmnum.lo dsp1.lo dsp2.lo \
 	plugin.lo $(am__objects_1)
-libdmglobals_la_OBJECTS = $(am_libdmglobals_la_OBJECTS)
+nodist_libdmglobals_la_OBJECTS =
+libdmglobals_la_OBJECTS = $(am_libdmglobals_la_OBJECTS) \
+	$(nodist_libdmglobals_la_OBJECTS)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 @ENABLE_SETUID_TRUE@am__EXEEXT_1 = dnode-nice$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
@@ -102,8 +105,9 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libdmglobals_la_SOURCES) $(dnode_SOURCES) dnode-nice.c \
-	$(dvt_SOURCES) $(testwordorder_SOURCES)
+SOURCES = $(libdmglobals_la_SOURCES) $(nodist_libdmglobals_la_SOURCES) \
+	$(dnode_SOURCES) dnode-nice.c $(dvt_SOURCES) \
+	$(testwordorder_SOURCES)
 DIST_SOURCES = $(am__libdmglobals_la_SOURCES_DIST) $(dnode_SOURCES) \
 	dnode-nice.c $(dvt_SOURCES) $(testwordorder_SOURCES)
 am__pkginclude_HEADERS_DIST = dm.h plugin.h dmx.h threads.h \
@@ -138,6 +142,7 @@ DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 DMBINDIR = @DMBINDIR@
 DMCONFDIR = @DMCONFDIR@
+DMSOCKDIR = @DMSOCKDIR@
 DMSTARTDIR = @DMSTARTDIR@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
@@ -216,6 +221,7 @@ STRIP = @STRIP@
 SYSDICTSIZE = @SYSDICTSIZE@
 THREADMUL = @THREADMUL@
 THREADNUM = @THREADNUM@
+TMP = @TMP@
 VERSION = @VERSION@
 X_CFLAGS = @X_CFLAGS@
 X_DISPLAY_MISSING = @X_DISPLAY_MISSING@
@@ -253,6 +259,7 @@ build_vendor = @build_vendor@
 datadir = @datadir@
 dmbindir = @dmbindir@
 dmconfdir = @dmconfdir@
+dmsockdir = @dmsockdir@
 dmstartdir = @dmstartdir@
 exec_prefix = @exec_prefix@
 guipdf = @guipdf@
@@ -284,6 +291,7 @@ target_alias = @target_alias@
 target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
+tmp = @tmp@
 @ENABLE_SETUID_TRUE@dnode_nice_SOURCE = dnode-nice.c
 @ENABLE_SETUID_TRUE@DNODENICEBIN = dnode-nice
 @ENABLE_SETUID_TRUE@edit = sed \
@@ -301,11 +309,6 @@ EXTRA_DIST = codegen/buildh codegen/dgen_0.h codegen/dgen_1.h codegen/dgen.c \
 	dnode-nice.c.in
 
 AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
-AM_CPPFLAGS = \
-	-DSTARTUP_DIR="\"$(dmstartdir)\"" \
-	-DPLUGIN_DIR="\"$(pkglibdir)\"" \
-	-DCONF_DIR="\"$(dmconfdir)\""
-
 AM_LDFLAGS = -no-undefined $(PTHREAD_LIBS) $(X_LDFLAGS)
 INCLUDE = @INCLTDL@
 @ENABLE_PLUGINS_TRUE@PLUGIN_HDR = plugin.h
@@ -318,6 +321,8 @@ dnode_SOURCES = dnode.c dnode_0.h dnode_1.h dmx.h
 dnode_LDADD = libdmglobals.la
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 testwordorder_SOURCES = test-word-order.c
+BUILT_SOURCES = paths.h
+CLEANFILES = paths.h
 lib_LTLIBRARIES = libdmglobals.la
 libdmglobals_la_LIBADD = $(PLUGIN_LD)
 libdmglobals_la_SOURCES = dmglobals.c \
@@ -325,7 +330,15 @@ libdmglobals_la_SOURCES = dmglobals.c \
 	dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h error.h \
 	plugin.c pluginlib.h $(THREADSRC)
 
-all: all-am
+nodist_libdmglobals_la_SOURCES = paths.h
+editpaths = sed \
+	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
+	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \
+	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
+	-e 's,[@]dmconfdir[@],$(dmconfdir),g'
+
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
@@ -614,7 +627,8 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: check-am
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS)
 install-binPROGRAMS: install-libLTLIBRARIES
 
@@ -622,7 +636,8 @@ installdirs:
 	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgincludedir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
-install: install-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -639,6 +654,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -646,6 +662,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 @ENABLE_SETUID_FALSE@uninstall-local:
 @ENABLE_SETUID_FALSE@install-exec-local:
 clean: clean-am
@@ -739,6 +756,11 @@ distclean-local:
 clean-local:
 @ENABLE_SETUID_TRUE@	-rm -f dnode-nice.c
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS) clean
+
+paths.h: paths.h.in Makefile
+	-rm -f $@ $@.tmp
+	$(editpaths) $(srcdir)/$@.in >$@.tmp
+	mv $@.tmp $@
 
 @SET_MAKE@
 

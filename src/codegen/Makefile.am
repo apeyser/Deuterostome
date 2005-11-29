@@ -1,12 +1,13 @@
 dist_noinst_DATA = dmnuminc.d dsp1f.d
 dist_noinst_SCRIPTS = buildh
 
-AM_CPPFLAGS = $(GCC_CFLAGS) \
-	-DSTARTUP_DIR="\"$(top_builddir)/src/codegen/\"" \
-	-DDISABLE_THREADS=1
+AM_CFLAGS = $(GCC_CFLAGS)
+AM_CPPFLAGS = -DDISABLE_THREADS=1
 AM_LDFLAGS = -no-undefined
 INCLUDE = @INCLTDL@
 MAINTAINERCLEANFILES = *.built
+BUILT_SOURCES = paths.h
+CLEANFILES = paths.h
 
 noinst_LTLIBRARIES = libdmbootstrap.la
 noinst_PROGRAMS = dgen
@@ -14,9 +15,10 @@ noinst_HEADERS = dmnuminc.h.built dsp1f.h.built dm.h
 
 libdmbootstrap_la_SOURCES = dmglobals.c dm1.c dm2.c dm3.c dm4.c dm5.c \
 	dm6.c dm7.c dm8.c dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h \
-	error.h threads.h
+	error.h threads.h paths.h
 
 dgen_SOURCES = dgen.c dgen_0.h dgen_1.h
+nodist_dgen_SOURCES = paths.h
 dgen_CPPFLAGS = $(AM_CPPFLAGS)
 dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dgen_LDADD = libdmbootstrap.la
@@ -35,3 +37,13 @@ dsp1f.h.built: dsp1f.d dgen buildh
 	 rm dsp1f.h ; \
 	 $(LN_S) codegen/dsp1f.h.built dsp1f.h)
 
+edit = sed \
+	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
+	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \
+	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
+	-e 's,[@]dmconfdir[@],$(dmconfdir),g'
+
+paths.h: paths.h.in
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/$@.in >$@.tmp
+	mv $@.tmp $@

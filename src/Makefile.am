@@ -46,12 +46,7 @@ if ENABLE_SETUID
 endif ENABLE_SETUID
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS) clean
 
-
 AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
-AM_CPPFLAGS = \
-	-DSTARTUP_DIR="\"$(dmstartdir)\"" \
-	-DPLUGIN_DIR="\"$(pkglibdir)\"" \
-	-DCONF_DIR="\"$(dmconfdir)\""
 AM_LDFLAGS = -no-undefined $(PTHREAD_LIBS) $(X_LDFLAGS)
 INCLUDE = @INCLTDL@
 
@@ -75,13 +70,26 @@ dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 
 testwordorder_SOURCES = test-word-order.c
 
+BUILT_SOURCES = paths.h
+CLEANFILES = paths.h
 lib_LTLIBRARIES = libdmglobals.la
 libdmglobals_la_LIBADD = $(PLUGIN_LD)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h error.h \
 	plugin.c pluginlib.h $(THREADSRC)
+nodist_libdmglobals_la_SOURCES = paths.h
 
+editpaths = sed \
+	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
+	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \
+	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
+	-e 's,[@]dmconfdir[@],$(dmconfdir),g'
+
+paths.h: paths.h.in Makefile
+	-rm -f $@ $@.tmp
+	$(editpaths) $(srcdir)/$@.in >$@.tmp
+	mv $@.tmp $@
 
 @SET_MAKE@
 

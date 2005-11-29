@@ -9,12 +9,12 @@ edit = sed \
 
 d-comint-mode.el: Makefile $(srcdir)/d-comint-mode.el.in
 	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/d-comint-mode.el.in >$@.tmp
+	$(edit) $(srcdir)/$@.in >$@.tmp
 	mv $@.tmp $@
 
 init.el: Makefile $(srcdir)/init.el.in
 	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/init.el.in >$@.tmp
+	$(edit) $(srcdir)/$@.in >$@.tmp
 	mv $@.tmp $@
 
 
