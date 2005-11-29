@@ -62,6 +62,7 @@ L init_sockaddr(struct sockaddr_in *name, const char *hostname,
   return(OK);
 }
 
+#if ENABLE_UNIX_SOCKETS
 L init_unix_sockaddr(struct sockaddr_un *name, L port) {
   char* sock_path = getenv("DMSOCKDIR");
   memset(name, 0, sizeof(struct sockaddr_un));
@@ -74,6 +75,7 @@ L init_unix_sockaddr(struct sockaddr_un *name, L port) {
            sock_path, port - IPPORT_USERRESERVED);
   return OK;
 }
+#endif //ENABLE_UNIX_SOCKETS
 
 /*--------------------------- make a server socket */
 
@@ -93,6 +95,7 @@ L make_socket(L port)
   return(sock);
 }
 
+#if ENABLE_UNIX_SOCKETS
 typedef struct port_list {
   L port;
   struct port_list* next;
@@ -159,6 +162,7 @@ L make_unix_socket(L port) {
 
   return sock;
 }
+#endif
 
 /*--------------------------- read a message from a socket
  
@@ -343,6 +347,7 @@ L op_connect(void)
   moveB((B *)VALUE_BASE(o_2),FREEvm,ARRAY_SIZE(o_2));
   FREEvm[ARRAY_SIZE(o_2)] = '\000';
 
+#if ENABLE_UNIX_SOCKETS
   if (! strcmp("localhost", FREEvm)) {
     struct sockaddr_un unixserveraddr;
     if ((sock = socket(PF_UNIX, SOCK_STREAM, 0)) < 0) return -errno;
@@ -353,7 +358,9 @@ L op_connect(void)
                 + strlen(unixserveraddr.sun_path)))
       return -errno;
   }
-  else {
+  else 
+#endif //ENABLE_UNIX_SOCKETS
+  {
     struct sockaddr_in serveraddr;
     if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) return(-errno);
     if ((retc =                              /* set packet buffers size  */

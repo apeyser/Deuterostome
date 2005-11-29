@@ -17,9 +17,6 @@
 #include "dm.h"
 #include "dmx.h"
 
-L init_sockaddr(struct sockaddr_in *name, const char *hostname, L port);
-L init_unix_sockaddr(struct sockaddr_un *name, L port);
-
 /*----------------- DM global variables -----------------------------*/
 
 
@@ -217,7 +214,10 @@ int main(L argc, char *argv[])
 {
 B errorframe[FRAMEBYTES];
 L nb, retc;
-L serversocket, unixserversocket, ssocket, nact, i, kr;
+L serversocket, ssocket, nact, i, kr;
+#if ENABLE_UNIX_SOCKETS
+L unixserversocket;
+#endif
 B *userdict;
 fd_set read_fds;
 B hostname[256];
@@ -312,10 +312,12 @@ if ((serversocket = make_socket(serverport)) < 0)
 FD_SET(serversocket, &sock_fds);
 if (listen(serversocket,5) < 0) error(EXIT_FAILURE,errno,"listen");
 
+#if ENABLE_UNIX_SOCKETS
 if ((unixserversocket = make_unix_socket(serverport)) < 0) 
   error(EXIT_FAILURE,errno,"making server socket");
 FD_SET(unixserversocket, &sock_fds);
 if (listen(unixserversocket,5) < 0) error(EXIT_FAILURE,errno,"listen");
+#endif //ENABLE_UNIX_SOCKETS
 
 /*--------------------- set up the tiny D machine -------------------*/
 
@@ -478,10 +480,12 @@ if (running) goto tuwat; else goto theloop;
 
 /*--- look first for a connection request and service it */
 nextmsg:
+#if ENABLE_UNIX_SOCKETS
  if (FD_ISSET(unixserversocket, &read_fds)) {
    ssocket = unixserversocket;
    goto nextserver;
  }
+#endif //ENABLE_UNIX_SOCKETS
 
  if (FD_ISSET(serversocket, &read_fds)) {
    ssocket = serversocket;
@@ -538,8 +542,10 @@ switch(retc = exec(100))
 	 op_Xdisconnect();
 	 for (i = 0; i < FD_SETSIZE; ++i)
 		 if (FD_ISSET(i, &sock_fds) 
-             && (i != serversocket)
-             && (i != unixserversocket)) {
+#if ENABLE_UNIX_SOCKETS
+             && (i != unixserversocket)
+#endif //ENABLE_UNIX_SOCKETS
+             && (i != serversocket)) {
 			 FD_CLR(i, &sock_fds);
 			 close(i);
 		 }

@@ -196,20 +196,26 @@ AC_DEFUN([CF_AM_CONDITIONAL], [dnl
   AM_CONDITIONAL([ENABLE_$1], [$2]) dnl
 ])
 
+AC_DEFUN([CF_AM_ENABLE_DO], [dnl
+  if test "${enable_$4-set}" == set ; then enable_$4='$3'; fi
+  if test x"${enable_$4}" == x"yes" ; then enable_$4='$3'; fi
+  AC_ARG_ENABLE([$1], [AC_HELP_STRING([--enable-$1], [$2 ($3)])])
+  CF_AM_CONDITIONAL($5, [test "${enable_$4-no}" != "no"])
+  if test "${enable_$4-no}" == "no" ; then 
+    AC_MSG_RESULT([no, not enabled])
+  else
+    AC_MSG_RESULT([yes, enabled (${enable_$4})])
+  fi dnl
+])
+
 AC_DEFUN([CF_AM_ENABLE], [dnl
   AC_MSG_CHECKING([if $1 is enabled])
   changequote(<<, >>)dnl
-  define(<<CF_AM_CV_ENABLE>>, translit($1, [a-z], [A-Z]))dnl
+  define(<<CF_AM_CV_ENABLE>>, 
+    patsubst(translit($1, [a-z], [A-Z]), <<->>, <<_>>))dnl
+  define(<<CF_AM_CVS_ENABLE>>, patsubst($1, <<->>, <<_>>))dnl
   changequote([, ])dnl
-  if test "${enable_$1-set}" == set ; then enable_$1='$3'; fi
-  if test x"${enable_$1}" == x"yes" ; then enable_$1='$3'; fi
-  AC_ARG_ENABLE([$1], [AC_HELP_STRING([--enable-$1], [$2 ($3)])])
-  CF_AM_CONDITIONAL(CF_AM_CV_ENABLE, [test "${enable_$1-no}" != "no"])
-  if test "${enable_$1-no}" == "no" ; then 
-    AC_MSG_RESULT([no, not enabled])
-  else
-    AC_MSG_RESULT([yes, enabled (${enable_$1})])
-  fi dnl
+  CF_AM_ENABLE_DO([$1], [$2], [$3], CF_AM_CVS_ENABLE, CF_AM_CV_ENABLE, )dnl
 ])
 
 AC_DEFUN([CF_AC_DEFINE_IF_ENABLED_DEFINE], [dnl
@@ -231,12 +237,16 @@ AC_DEFUN([CF_AC_DEFINE_IF_ENABLED_SUBST], [dnl
 
 AC_DEFUN([CF_AC_DEFINE_IF_ENABLED], [dnl
   changequote(<<, >>)dnl
-  define(<<CF_AC_DEFINE_IF_ENABLED_CV>>, translit($1, [a-z], [A-Z]))dnl
+  define(<<CF_AC_DEFINE_IF_ENABLED_CV>>, 
+    patsubst(translit($1, [a-z], [A-Z]), <<->>, <<_>>))dnl
+  define(<<CF_AC_DEFINE_IF_ENABLED_CVS>>, patsubst($1, <<->>, <<_>>))dnl
   changequote([, ])dnl
   CF_IF_ENABLED([$1], [
-	CF_AC_DEFINE_IF_ENABLED_DEFINE(CF_AC_DEFINE_IF_ENABLED_CV, [$1], [$2])
+	CF_AC_DEFINE_IF_ENABLED_DEFINE(CF_AC_DEFINE_IF_ENABLED_CV, 
+      CF_AC_DEFINE_IF_ENABLED_CVS, [$2])
   ])
-  CF_AC_DEFINE_IF_ENABLED_SUBST(CF_AC_DEFINE_IF_ENABLED_CV, [$1])
+  CF_AC_DEFINE_IF_ENABLED_SUBST(CF_AC_DEFINE_IF_ENABLED_CV, 
+    CF_AC_DEFINE_IF_ENABLED_CVS)
 ])
 
 AC_DEFUN([CF_AC_ENABLE], [dnl
@@ -244,7 +254,7 @@ AC_DEFUN([CF_AC_ENABLE], [dnl
   CF_AC_DEFINE_IF_ENABLED([$1], [$2])
 ])
 
-AC_DEFUN([CF_IF_ENABLED], [dnl
+AC_DEFUN([CF_IF_ENABLED_DO], [
   ifelse([$2],[],,[dnl
     if test x"${enable_$1-no}" != x"no" ; then 
        $2 
@@ -255,6 +265,13 @@ AC_DEFUN([CF_IF_ENABLED], [dnl
       $3 
     fi
   ])dnl
+])
+
+AC_DEFUN([CF_IF_ENABLED], [dnl
+  changequote(<<, >>)dnl
+  define(<<CF_IF_ENABLED_CVS>>, patsubst($1, <<->>, <<_>>))dnl
+  changequote([, ])dnl
+  CF_IF_ENABLED_DO(CF_IF_ENABLED_CVS, [$2], [$3])
 ])
 
 AC_DEFUN([CF_AM_PROG], [dnl

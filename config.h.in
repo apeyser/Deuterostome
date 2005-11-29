@@ -6,6 +6,9 @@
 /* compile and install threads, value is default number */
 #undef ENABLE_THREADS
 
+/* compile and install unix domain sockets */
+#undef ENABLE_UNIX_SOCKETS
+
 /* Header for endianness */
 #undef ENDIAN_HDR
 
