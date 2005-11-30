@@ -4,7 +4,7 @@ dist_dmconf_DATA = dvt.d
 nodist_dmconf_DATA = dnode.d
 
 EXTRA_DIST = theeye.d.in dnode.d.in
-CLEANFILES = $(nodist_dmstart_DATA)
+CLEANFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
 
 PLUGIN_START = /^[[:space:]]*[@]ENABLE_PLUGINS_START[@][[:space:]]*$$/
 PLUGIN_END = /^[[:space:]]*[@]ENABLE_PLUGINS_END[@][[:space:]]*$$/
