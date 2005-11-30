@@ -36,7 +36,7 @@ EXTRA_DIST = codegen/buildh codegen/dgen_0.h codegen/dgen_1.h codegen/dgen.c \
 	codegen/dmnuminc.d.in codegen/dmnuminc.h codegen/dmnuminc.h.built \
 	codegen/dsp1f.d codegen/dsp1f.h codegen/dsp1f.h.built \
 	codegen/Makefile.am codegen/Makefile.in codegen/startup_dgen.d.in \
-	dnode-nice.c.in
+	dnode-nice.c.in paths.h.in
 
 distclean-local:
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS) distclean
