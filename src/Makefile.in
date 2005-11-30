@@ -71,7 +71,7 @@ am__DEPENDENCIES_1 =
 libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am__libdmglobals_la_SOURCES_DIST = dmglobals.c dm1.c dm2.c dm3.c dm4.c \
 	dm5.c dm6.c dm7.c dm8.c dm9.c dmnum.c dsp1.c dsp2.c dmnuminc.h \
-	dsp1f.h error.h plugin.c pluginlib.h threads.c
+	dsp1f.h error-local.h plugin.c pluginlib.h threads.c
 @ENABLE_THREADS_TRUE@am__objects_1 = threads.lo
 am_libdmglobals_la_OBJECTS = dmglobals.lo dm1.lo dm2.lo dm3.lo dm4.lo \
 	dm5.lo dm6.lo dm7.lo dm8.lo dm9.lo dmnum.lo dsp1.lo dsp2.lo \
@@ -305,7 +305,8 @@ tmp = @tmp@
 EXTRA_DIST = codegen/buildh codegen/dgen_0.h codegen/dgen_1.h codegen/dgen.c \
 	codegen/dm1.c codegen/dm2.c codegen/dm3.c codegen/dm4.c codegen/dm5.c \
 	codegen/dm6.c codegen/dm7.c codegen/dm8.c codegen/dmglobals.c \
-	codegen/dm.h codegen/dmnum.c codegen/dsp1.c codegen/dsp2.c error.h\
+	codegen/dm.h codegen/dmnum.c codegen/dsp1.c codegen/dsp2.c \
+	codegen/error-local.h \
 	codegen/dmnuminc.d.in codegen/dmnuminc.h codegen/dmnuminc.h.built \
 	codegen/dsp1f.d codegen/dsp1f.h codegen/dsp1f.h.built \
 	codegen/Makefile.am codegen/Makefile.in codegen/startup_dgen.d.in \
@@ -330,7 +331,7 @@ lib_LTLIBRARIES = libdmglobals.la
 libdmglobals_la_LIBADD = $(PLUGIN_LD)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
-	dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h error.h \
+	dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h error-local.h \
 	plugin.c pluginlib.h $(THREADSRC)
 
 nodist_libdmglobals_la_SOURCES = paths.h
