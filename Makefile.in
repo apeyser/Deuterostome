@@ -261,6 +261,7 @@ EXTRA_DIST = bootstrap
 @ENABLE_BASH_TRUE@@ENABLE_ENV_TRUE@BASH_DIR = sh
 SUBDIRS = libltdl src $(PLUGINS_DIR) $(BASH_DIR) ps $(EMACS_DIR) dcode
 ACLOCAL_AMFLAGS = -I m4
+DISTCHECK_CONFIGURE_FLAGS = --disable-ssh --disable-process
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
