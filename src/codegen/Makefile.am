@@ -39,11 +39,11 @@ dsp1f.h.built: dsp1f.d dgen buildh
 
 edit = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
-	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \
+	-e 's,[@]dmstartdir[@],$(srcdir),g' \
 	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 	-e 's,[@]dmconfdir[@],$(dmconfdir),g'
 
-paths.h: paths.h.in
+paths.h: paths.h.in Makefile
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/$@.in >$@.tmp
 	mv $@.tmp $@

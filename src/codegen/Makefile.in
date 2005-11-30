@@ -287,7 +287,7 @@ dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dgen_LDADD = libdmbootstrap.la
 edit = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
-	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \
+	-e 's,[@]dmstartdir[@],$(srcdir),g' \
 	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 	-e 's,[@]dmconfdir[@],$(dmconfdir),g'
 
@@ -603,7 +603,7 @@ dsp1f.h.built: dsp1f.d dgen buildh
 	 rm dsp1f.h ; \
 	 $(LN_S) codegen/dsp1f.h.built dsp1f.h)
 
-paths.h: paths.h.in
+paths.h: paths.h.in Makefile
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/$@.in >$@.tmp
 	mv $@.tmp $@
