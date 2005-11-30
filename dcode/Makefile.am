@@ -3,7 +3,7 @@ nodist_dmstart_DATA =  theeye.d startup_dnode.d startup_dvt.d
 dist_dmconf_DATA = dvt.d
 nodist_dmconf_DATA = dnode.d
 
-EXTRA_DIST = theeye.d.in
+EXTRA_DIST = theeye.d.in dnode.d.in
 CLEANFILES = $(nodist_dmstart_DATA)
 
 PLUGIN_START = /^[[:space:]]*[@]ENABLE_PLUGINS_START[@][[:space:]]*$$/
