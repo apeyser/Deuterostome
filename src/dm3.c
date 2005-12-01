@@ -337,6 +337,7 @@ L tosocket(L sock, B *sf, B *cf)
 L op_connect(void)
 {
   L port, sock, retc, size = PACKET_SIZE;
+  struct sockaddr_in serveraddr;
 
   if (o_2 < FLOORopds) return(OPDS_UNF);
   if (TAG(o_2) != (ARRAY | BYTETYPE)) return(OPD_ERR);
@@ -348,39 +349,39 @@ L op_connect(void)
   FREEvm[ARRAY_SIZE(o_2)] = '\000';
 
 #if ENABLE_UNIX_SOCKETS
-  if (! strcmp("localhost", FREEvm)) {
-    struct sockaddr_un unixserveraddr;
-    if ((sock = socket(PF_UNIX, SOCK_STREAM, 0)) < 0) return -errno;
-    if ((retc = init_unix_sockaddr(&unixserveraddr, port)) != OK)
-      return retc;
-    if (connect(sock, (struct sockaddr *) &unixserveraddr, 
-                sizeof(unixserveraddr.sun_family)
-                + strlen(unixserveraddr.sun_path)))
-      return -errno;
-  }
-  else 
-#endif //ENABLE_UNIX_SOCKETS
   {
-    struct sockaddr_in serveraddr;
-    if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) return(-errno);
-    if ((retc =                              /* set packet buffers size  */
-         setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &size, sizeof(L))) == -1)
-      return(-errno);
-    if ((retc =
-         setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &size, sizeof(L))) == -1)
-      return(-errno);
-    if ((retc = init_sockaddr(&serveraddr, FREEvm, port)) != OK)
-      return(retc);
-    if (connect(sock, (struct sockaddr *)&serveraddr,sizeof(serveraddr)) < 0)
-      return(-errno);
-  }
+    struct sockaddr_un unixserveraddr;
+    if (! strcmp("localhost", FREEvm)
+        && init_unix_sockaddr(&unixserveraddr, port) == OK
+        && (sock = socket(PF_UNIX, SOCK_STREAM, 0)) != -1) {
+      if (connect(sock, (struct sockaddr *) &unixserveraddr, 
+                  sizeof(unixserveraddr.sun_family)
+                  + strlen(unixserveraddr.sun_path)))
+        close(sock);
+      else goto goodsocket;
+    };
+  };
+#endif //ENABLE_UNIX_SOCKETS
+
+  if ((retc = init_sockaddr(&serveraddr, FREEvm, port)) != OK) return retc;
+  if ((sock = socket(PF_INET, SOCK_STREAM, 0)) == -1) return -errno;
+  if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &size, sizeof(L)) == -1
+      || setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &size, sizeof(L)) == -1
+      || connect(sock, (struct sockaddr *)&serveraddr,
+                 sizeof(serveraddr)) == -1) {
+    int errno_ = errno;
+    close(sock);
+    return -errno_;
+  };
+  
+  goodsocket:
   if (fcntl(sock, F_SETFL, O_NONBLOCK) == -1)   /* make non-blocking  */
     error(EXIT_FAILURE, errno, "fcntl");
   FD_SET(sock, &sock_fds);                      /* register the socket */
   TAG(o_2) = NULLOBJ | SOCKETTYPE; ATTR(o_2) = 0;
   LONG_VAL(o_2) = sock;
   FREEopds = o_1;
-  return(OK);
+  return OK;
 }
 
 
