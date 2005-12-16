@@ -335,6 +335,8 @@ AC_DEFUN([CF_ACX_PTHREAD], [dnl
 	  CC="${PTHREAD_CC}"
       LIBS="${PTHREAD_LIBS} ${LIBS}"
       AC_MSG_RESULT([found])
+      AC_DEFINE([HAVE_PTHREAD], [1], 
+        [Define if you have POSIX threads libraries and header files.])
     ], [  
 	  AC_MSG_CHECKING([flags for pthreads])
       AC_MSG_ERROR([No threads found, disable threads])])
