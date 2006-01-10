@@ -16,6 +16,7 @@ B* TOPvm;
 B* errsource;
 
 B locked = FALSE;
+B serialized = FALSE;
 
 fd_set sock_fds;
 BOOLEAN timeout;             /* for I/O operations          */
@@ -32,6 +33,8 @@ const char* startup_dir; // setup by makefile in main
 B* startup_dir_frame; // points the frame holding ^^^, at the bottom of the vm
                       // make server port accessible from outside of main
 B* home_dir_frame; //points to the frame holding $HOME
+B* plugin_dir_frame; //points to the frame holding the plugindir
+B* conf_dir_frame; //points to the frame holding confdir
 
 
 /*---------------------------- ASCII character classification table
@@ -68,8 +71,8 @@ UW ascii[128] =
      {
 /*                                                                     */
      0x0000, 0x0000, 0x0000, 0x0000,  0x0000, 0x0000, 0x0000, 0x0000,
-/*                     LF                       CR                     */
-     0x0000, 0x0000, 0x8002, 0x0000,  0x0000, 0x8002, 0x0000, 0x0000,
+/*             TAB     LF                       CR                     */
+     0x0000, 0x8000, 0x8002, 0x0000,  0x0000, 0x8002, 0x0000, 0x0000,
 /*                                                                     */
      0x0000, 0x0000, 0x0000, 0x0000,  0x0000, 0x0000, 0x0000, 0x0000,
 /*                                                                     */

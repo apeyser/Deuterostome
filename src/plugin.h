@@ -26,9 +26,12 @@ char libPLUGIN_is_dll(void) {return 1;}
 
 #include "dm.h"
 
+L wrap_readcode(const char* file);
+
 #define EXPORTNAME(name) PLUGIN_JOIN(PLUGIN_NAME, _LTX_##name)
 
-#define PRIVATENAME(name) PLUGIN_JOIN(_, PLUGIN_JOIN(PLUGIN_NAME,_##name))
+#define PRIVATEPLUGIN PLUGIN_JOIN(_, PLUGIN_NAME)
+#define PRIVATENAME(name) PLUGIN_JOIN(PRIVATEPLUGIN,_##name)
 
 #define PLUGIN_JOIN(name1,name2) PREPLUGIN_JOIN(name1,name2)
 #define PREPLUGIN_JOIN(name1,name2) name1##name2
@@ -38,9 +41,6 @@ PLUGIN_SCOPE L ll_errc[];
 PLUGIN_SCOPE B* ll_errm[];
 PLUGIN_SCOPE B* ll_export[];
 
-L op_hi(void);
-L op_libnum(void);
-
 #define RETURN_ERROR(err) return (ll_type | (err))
 
 #define ll_type   EXPORTNAME(ll_type)
@@ -49,5 +49,42 @@ L op_libnum(void);
 #define ll_export EXPORTNAME(ll_export)
 #define op_hi     EXPORTNAME(op_hi)
 #define op_libnum EXPORTNAME(op_libnum)
+#define op_INIT_  EXPORTNAME(op_INIT_)
+#define op_FINI_  EXPORTNAME(op_FINI_)
+
+L op_hi(void);
+L op_libnum(void);
+L op_INIT_(void);
+L op_FINI_(void);
+
+#define opaquename PRIVATENAME(opaquename)
+extern B opaquename[FRAMEBYTES];
+extern B buffernameframe[FRAMEBYTES];
+
+#define TEST_OPAQUE(frame)	do {										\
+	if (TAG(frame) != (DICT | OPAQUETYPE)) return OPD_TYP;				\
+	if (! check_opaque_name(opaquename, VALUE_PTR(frame))) return ILL_OPAQUE; \
+  } while (0)
+
+#define OPAQUE_MEM(frame, nameframe) (lookup(nameframe, VALUE_PTR(frame)))
+#define OPAQUE_MEM_SET(frame, nameframe, newframe) do {	\
+	ATTR(newframe) |= READONLY;							\
+	moveframe(newframe, OPAQUE_MEM(frame, nameframe));	\
+  } while (0)
+	
+  
+#define MAKE_OPAQUE_DICT(n, ...) \
+  (make_opaque_frame(n, opaquename, __VA_ARGS__, NULL))
+
+// frame must be removed from the stack before call
+#define KILL_OPAQUE(frame) do {					   \
+	L ret;										   \
+	if (o1 >= CEILopds) return OPDS_OVF;		   \
+	moveframe(OPAQUE_MEM(frame, saveboxname), o1); \
+	FREEopds = o2;								   \
+	if ((ret = op_restore()) != OK) return ret;	   \
+  } while (0)
+
+#include "pluginlib.h"
 
 #endif //PLUGIN_H

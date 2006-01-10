@@ -25,8 +25,12 @@
 #ifndef DM_H
 #define DM_H
 
+#if ! defined __GNUC__ && ! defined __attribute__
+#define __attribute__(attr)
+#endif // ! defined __GNUC__ && ! defined __attribute__
+
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#include "config.h"
 #endif
 
 // Need to be here because we define things such as x1
@@ -138,17 +142,21 @@ NOTE: all objects that can populate the D machine's workspace must
 #define PROC                       ((UB) 0x70)
 #define DICT                       ((UB) 0x80)
 #define BOX                        ((UB) 0x90)
+//#define HANDLE                     ((UB) 0xA0)
 	
 #define COMPOSITE(frame)           ((UB)(CLASS(frame)) > (UB)(MARK))
 
-#define BYTETYPE                   ((UB) 0x00)       /* numeral types */     
+#define BYTETYPE                   ((UB) 0x00)       /* numeral types */
 #define WORDTYPE                   ((UB) 0x01)
 #define LONGTYPE                   ((UB) 0x02)
 #define SINGLETYPE                 ((UB) 0x03)
 #define DOUBLETYPE                 ((UB) 0x04)      
 #define SOCKETTYPE                 ((UB) 0x01)      /* null types */
+#define SIMPLETYPE                 ((UB) 0x00)      /* handle types */
+#define COMPLEXTYPE                ((UB) 0x00)      
 #define CMACHINE                   ((UB) 0x00)      /* operator types */
 #define OPLIBTYPE                  ((UB) 0x01)      /* operator lib type */
+#define OPAQUETYPE                 ((UB) 0x02)      /* opaque dictionary */
 
 /* attributes qualify a frame, not an object value: */
 
@@ -187,8 +195,8 @@ NOTE: all objects that can populate the D machine's workspace must
 #if __FLOAT_WORD_ORDER != __BYTE_ORDER
 #error "Can't handle float word order __FLOAT_WORD_ORDER"
 #endif //__FLOAT_WORD_ORDER
-#else
-#warning "Confirm that float word order = word order"
+//#else //! NO_ENDIAN_HDR
+//#warning "Confirm that float word order = word order"
 #endif //! NO_ENDIAN_HDR
 
 #define GETNATIVEFORMAT(frame) \
@@ -215,7 +223,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define BOOL_VAL(frame)            (*((BOOLEAN *)((frame)+2)))
 #define NAME_KEY(frame)            (*((W *)((frame)+2)))
 
-#define OP_CODE(frame)             (*((L *)(((B*)frame)+4)))
+#define OP_CODE(frame)             (*((L *)(((B*)(frame))+4)))
 #define OP_NAME(frame)             (*((L *)(((B*)(frame))+8)))
 #define VALUE_BASE(frame)          (*((L *)(((B*)(frame))+4)))
 #define ARRAY_SIZE(frame)          (*((L *)(((B*)(frame))+8)))
@@ -223,7 +231,23 @@ NOTE: all objects that can populate the D machine's workspace must
 #define DICT_NB(frame)             (*((L *)(((B*)(frame))+8)))
 #define DICT_CURR(frame)           (*((L *)(((B*)(frame))+8)))
 #define BOX_NB(frame)              (*((L *)(((B*)(frame))+8)))
-#define VALUE_PTR(frame)           (*((B**) (((B*)(frame))+4)))
+#define VALUE_PTR(frame)           (*((B**)(((B*)(frame))+4)))
+#define LIST_CEIL_PTR(frame)       (*((B**)(((B*)(frame))+8)))
+/* #define HANDLE_ID(frame)           (*((L *)(((B*)(frame))+12))) */
+/* #define HANDLE_CEIL(frame)         (*((B**)(((B*)(frame))+8))) */
+
+/* static void SET_HANDLE_ID(B* frame, B* string) { */
+/* 	HANDLE_ID(frame) = *(L*)(string); */
+/* } */
+/* static void GET_HANDLE_ID(B* frame, B* string) { */
+/* 	*(L*)(string) = HANDLE_ID(frame); */
+/* } */
+/* static BOOLEAN EQ_HANDLE_ID(B* frame1, B* frame2) { */
+/* 	return HANDLE_ID(frame1) == HANDLE_ID(frame2); */
+/* } */
+/* static BOOLEAN EQ_HANDLE_ID_STRING(B* frame, B string[5]) { */
+/* 	return HANDLE_ID(frame) == *(L*)string; */
+/* } */
 
 /* NB: Attention to moveframe & moveframes in dm2.c whenever
    framebytes is changed */
@@ -281,7 +305,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define TIMER       0x00000002L /*                                       */
 #define WAIT        0x00000003L /*                                       */
 #define MORE        0x00000004L /*                                       */
-#define ABORT       0x00000005L /* control_c pressed on console          */
+#define ABORT       0x00000005L /* ABORT signal sent from console        */
 #define QUIT        0x00000006L /*                                       */
 
 #define CORR_OBJ    0x00000101L /* corrupted object                      */
@@ -300,9 +324,13 @@ NOTE: all objects that can populate the D machine's workspace must
 #define SAVE_OVF    0x0000020AL /* save stack overflow                   */
 #define INV_REST    0x0000020BL /* invalid restore                       */
 #define SAVE_UNF    0x0000020DL /* save stack underflow                  */
-#define VMR_ERR     0x0000020EL /* couldn't allocate memory              */
-#define VMR_STATE   0x0000020FL /* vm already tiny                       */
-#define KILL_SOCKS  0x00000210L /* dvt must kill all non-server socks    */
+#define ILL_OPAQUE  0x0000020EL /* Opaque dict type mismatch             */
+#define FOLD_OPAQUE 0x0000020FL /* Illegal attempt to box opaque object  */
+
+#define VMR_ERR     0x00000210L /* couldn't allocate memory              */
+#define VMR_STATE   0x00000211L /* vm already tiny                       */
+#define KILL_SOCKS  0x00000212L /* dvt must kill all non-server socks    */
+#define MEM_OVF     0x00000213L /* failed memory allocation              */
 
 #define BAD_TOK     0x00000300L /* bad D token in source string          */
 #define BAD_ASC     0x00000301L /* bad ASCII character in source string  */
@@ -337,6 +365,8 @@ NOTE: all objects that can populate the D machine's workspace must
 #define LIB_LOADED  0x0000090BL /* lib already loaded                    */
 #define LIB_OVF     0x0000090CL /* malloc in lib overflowed              */
 #define LIB_MERGE   0x0000090DL /* out of space in sysdict for merge     */
+#define LIB_INIT    0x0000090EL /* __init failed for lib */
+#define NOPLUGINS   0x0000090FL /* compiled without plugins */
 
 #define NO_XWINDOWS 0x00000A01L /* X windows unavailable                 */
 #define X_ERR       0x00000A02L /* X lib error                           */
@@ -368,6 +398,7 @@ DLL_SCOPE B* TOPvm;
 DLL_SCOPE B* errsource;
 
 DLL_SCOPE B locked;
+DLL_SCOPE B serialized;
 
 DLL_SCOPE fd_set sock_fds;
 DLL_SCOPE BOOLEAN timeout;             /* for I/O operations          */
@@ -383,6 +414,8 @@ DLL_SCOPE const char* startup_dir; // setup by makefile,
 DLL_SCOPE B* startup_dir_frame; // points the frame holding ^^^,
                                 // at the bottom of the vm
 DLL_SCOPE B* home_dir_frame; //points to the frame holding $HOME
+DLL_SCOPE B* plugin_dir_frame; //points to the frame holding plugindir
+DLL_SCOPE B* conf_dir_frame; //points to frame holding confdir
 DLL_SCOPE UW ascii[];
 
 /*----------------------- operator hands ------------------------------*/
@@ -459,6 +492,7 @@ void setupdirs(void);
 
 /*--- DM3 */
 L make_socket(L port);
+L make_unix_socket(L port);
 L fromsocket(L socket, B *msf);
 L tosocket(L socket, B *sf, B *cf);
 L toconsole( B *string, L stringlength);
@@ -495,8 +529,8 @@ void ATAN(B *frame);
 void DECREMENT(B *frame);
 
 /*----------------------- system operators */
-L op_setlock(void);
-L op_getlock(void);
+L op_serialize(void);
+L op_lock(void);
 L op_syshi(void);
 L op_syslibnum(void);
 L op_error(void);
@@ -518,6 +552,7 @@ L op_nextevent(void);
 L op_vmresize(void);
 L op_killsockets(void);
 L op_getstartupdir(void);
+L op_getconfdir(void);
 L op_gethomedir(void);
 L op_getsocket(void);
 L op_getmyname(void);
@@ -634,6 +669,7 @@ L op_setwdir(void);
 L op_writefile(void);
 L op_readfile(void);
 L op_findfiles(void);
+L op_findfile(void);
 L op_readboxfile(void);
 L op_writeboxfile(void); 
 L op_tosystem(void);
@@ -670,6 +706,6 @@ L op_matvecmul(void);
 
 #define ERRLEN (1000)
 
-#include "error.h"
+#include "error-local.h"
 
 #endif //DM_H

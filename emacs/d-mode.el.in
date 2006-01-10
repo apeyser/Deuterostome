@@ -220,7 +220,8 @@
 	(and consider-comment-start (eq (char-after) ?\|)))))
 
 (define-minor-mode d-mode-magic-delete "" nil "-d"
-  '(("\d" . d-mode-magic-delete-key)))
+  '(("\d" . d-mode-magic-delete-key)
+	([backspace] . d-mode-magic-delete-key)))
   
 (defun d-mode-backspace-function (arg)
   "Redirect to backward-delete-char-untabify."
@@ -233,19 +234,19 @@
   "Delete over all space."
   (interactive "*P")
   (if (or arg
-	  (d-mode-in-literal t)
-	  (and delete-selection-mode mark-active))
+					(d-mode-in-literal t)
+					(and delete-selection-mode mark-active))
       (d-mode-backspace-function arg)
-    (let ((here (point))
-	  (leave-a-space (not (looking-at "[ \t\n\r\f]"))))
-      (skip-chars-backward " \t\n\r\f")
-      (let ((now (point)))
-	(if (= now (1- here)) (setq leave-a-space nil))
-	(if (< now here)
-	    (progn
-	      (goto-char here)
-	      (delete-region now (if leave-a-space (1- here) here)))
-	  (d-mode-backspace-function 1))))))
+    (let* ((here (point))
+					 (leave-a-space (not (looking-at "[\]\} \t\n\r\f]")))
+					 (now (+ here (skip-chars-backward " \t\n\r\f")))
+					 (leave-a-space (and leave-a-space (/= now (1- here)) 
+															 (looking-back "[^\[\{/~]" (1- now)))))
+			(if (< now here)
+					(progn
+						(goto-char here)
+						(delete-region now (if leave-a-space (1- here) here)))
+				(d-mode-backspace-function 1)))))
 
 (defun d-mode-insert-tab (arg)
   (interactive "*p")
@@ -340,10 +341,16 @@
 (defconst d-mode-ops
   '("loadlib"
     "nextlib"
+	"lock"
+	"serialize"
+	"threads"
+	"makethreads"
     "readboxfile"
     "writeboxfile"
     "getstartupdir"
     "gethomedir"
+	"getplugindir"
+	"getconfdir"
     "hi"
     "libnum"
     "def" 
@@ -434,7 +441,9 @@
     "halt"
     "continue"
     "error"
+	"errormessage"
     "abort"
+	"aborted"
     "countexecstack"
     "execstack"
     "quit"
@@ -460,6 +469,7 @@
     "update"
     "toconsole"
     "findfiles"
+	"findfile"
     "readfile"
     "writefile"
     "gettime"
@@ -507,6 +517,8 @@
     "drawsymbols"
     "fillrectangle"
     "drawtext"
+	"makewindowtop"
+	"setinputfocus"
     "getsocket"
     "vmresize"
     "transcribe"
@@ -535,7 +547,8 @@
 					 '(1 d-mode-oref-face) 
 					 '(2 d-mode-oref-face)
 					 '(3 d-mode-oref-xtra-face)))
-		d-mode-font-lock-keywords-2)))
+		d-mode-font-lock-keywords-2
+		'(("[^ \r\n\t]+" 0 'font-lock-warning-face)))))
 
 (if (not d-mode-font-lock-keywords-3)
     (d-mode-font-lock-keywords-3))
@@ -618,7 +631,6 @@
   (interactive)
   (save-excursion
     (let ((coding (coding-system-eol-type buffer-file-coding-system)))
-      (print coding)
       (when (and 
 	     (not (and
 		   (vectorp coding)
@@ -627,7 +639,8 @@
 	     (not (eq coding 0))
 	     (y-or-n-p "Convert to unix line ends? "))
 	(set-buffer-file-coding-system 'unix)))
-    (beginning-of-buffer)
+		(goto-char (point-min))
+    ;(beginning-of-buffer)
     (when (and (re-search-forward "\r+\n?" nil t)
 	       (y-or-n-p "Eliminate carriage returns? "))
       (replace-match "\n")
@@ -669,11 +682,19 @@
 
 (defun d-mode-comment-region (beg end &optional arg)
   (interactive "*r\nP")
-	(save-excursion (replace-regexp "^" "|" nil beg end)))
+	(save-excursion 
+		(goto-char beg)
+		(while (re-search-forward "^" end t)
+			(replace-match "|" t t))))
+;(save-excursion (replace-regexp "^" "|" nil beg end)))
 
 (defun d-mode-uncomment-region (beg end &optional arg)
   (interactive "*r\nP")
-	(save-excursion (replace-regexp "^\\(\\s *\\)|" "\\1" nil beg end)))
+	(save-excursion
+		(goto-char beg)
+		(while (re-search-forward "^\\s *\\(|\\)" end t)
+			(replace-match "" t t nil 1))))
+;;	(save-excursion (replace-regexp "^\\(\\s *\\)|" "\\1" nil beg end)))
 
 (defun d-mode-font-lock-block-function ()
 	(let ((p (point)) (isset nil))
@@ -692,6 +713,8 @@
 			(push-mark nil t)
 			(beginning-of-line))))
 		
+(defvar comment-region)
+(defvar uncomment-region)
 
 (defun d-mode ()
   "Major mode for editing d code."

@@ -33,6 +33,8 @@ B *sysop[] =
       "drawsymbols",    (B *)op_drawsymbols,
       "fillrectangle",  (B *)op_fillrectangle,
       "drawtext",       (B *)op_drawtext,
+      "makewindowtop",  (B *)op_makewindowtop,
+      "setinputfocus",  (B *)op_setinputfocus,
 /*-- operand stack */
       "pop",            (B *)op_pop,
       "exch",           (B *)op_exch,
@@ -144,6 +146,7 @@ B *sysop[] =
       "readfile",       (B *)op_readfile,
       "writefile",      (B *)op_writefile,
       "findfiles",      (B *)op_findfiles,
+	  "findfile",       (B *)op_findfile,
       "readboxfile",    (B *)op_readboxfile,
       "writeboxfile",   (B *)op_writeboxfile,
       "tosystem",       (B *)op_tosystem,
@@ -177,6 +180,7 @@ B *sysop[] =
       "dilute_add",     (B *)op_dilute_add,
       "matvecmul",      (B *)op_matvecmul,
       "getstartupdir",  (B *)op_getstartupdir,
+      "getconfdir",     (B *)op_getconfdir,
       "gethomedir",     (B *)op_gethomedir,
 
       "",               (B *)0L, 
@@ -197,6 +201,7 @@ L syserrc[] =
      CORR_OP, BADBOX, BAD_MSG, NOSYSTEM, INV_MSG, NOT_HOST, BAD_FMT,
      LIB_LOAD, LIB_EXPORT, LIB_LINK, LIB_ADD, LIB_LOADED, LIB_OVF,
      NO_XWINDOWS, X_ERR, X_BADFONT, X_BADHOST,
+	 MEM_OVF,
      0L,
      };
 
@@ -251,5 +256,6 @@ B *syserrm[] =
      "** Error in X windows",
      "** Bad X windows font",
      "** Cannot connect to X server",
+	 "** Memory exhausted",
      };
 

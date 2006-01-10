@@ -17,8 +17,6 @@
 #include "dm.h"
 #include "dmx.h"
 
-L init_sockaddr(struct sockaddr_in *name, const char *hostname, L port);
-
 /*----------------- DM global variables -----------------------------*/
 
 
@@ -95,9 +93,6 @@ static void makequithandler(void)
     sa.sa_flags = 0;
     for (i = quitsigs; *i; i++) sigaction(*i, &sa, NULL);
 }
-
-
-
 
 /*------------------------------ main ----------------------------------
 
@@ -215,12 +210,15 @@ If the mouse has more than one button (up to 5), these are reported
 
 */
 
-int main(L argc, B *argv[])
+int main(L argc, char *argv[])
 {
 B errorframe[FRAMEBYTES];
 L nb, retc;
-L serversocket, nact, i, kr;
-B *sysdict, *userdict;
+L serversocket, ssocket, nact, i, kr;
+#if ENABLE_UNIX_SOCKETS
+L unixserversocket;
+#endif
+B *userdict;
 fd_set read_fds;
 B hostname[256];
 struct timeval zerosec = {0,0}, zerosec_;   /* constant: zero time interval */
@@ -232,9 +230,9 @@ XEvent event;
 L wid, mod;
 B namef[FRAMEBYTES], *dictf, namestring[20];
 
-#if X_DISPLAY_MISSING
-const
-#endif
+//#if X_DISPLAY_MISSING
+//const 
+//#endif
 
 #if ! X_DISPLAY_MISSING
 dvtdisplay = NULL;
@@ -314,6 +312,15 @@ if ((serversocket = make_socket(serverport)) < 0)
 FD_SET(serversocket, &sock_fds);
 if (listen(serversocket,5) < 0) error(EXIT_FAILURE,errno,"listen");
 
+#if ENABLE_UNIX_SOCKETS
+ if ((unixserversocket = make_unix_socket(serverport)) < 0)
+   error(0,errno,"making server socket");
+ else {
+   FD_SET(unixserversocket, &sock_fds);
+   if (listen(unixserversocket,5) < 0) error(EXIT_FAILURE,errno,"listen");
+ }
+#endif //ENABLE_UNIX_SOCKETS
+
 /*--------------------- set up the tiny D machine -------------------*/
 
 nb = FRAMEBYTES * (tinysetup[0] + tinysetup[1] + tinysetup[2])
@@ -374,17 +381,38 @@ if (moreX) {
   XNextEvent(dvtdisplay, &event);
   moreX = QLength(dvtdisplay) ? TRUE : FALSE;
   switch(event.type) {
-	  case ClientMessage:
-			if ((event.xclient.message_type 
-					 == XInternAtom(dvtdisplay, "WM_PROTOCOLS", False))
-					&& (event.xclient.data.l[0] 
-							== XInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False))) {
-				if (x2 > CEILexecs) {retc = EXECS_OVF; goto Xderror;}
-				makename("Xdisconnect", x1); ATTR(x1) = ACTIVE;
-				FREEexecs = x2;
-				running = TRUE;
-			}
-			goto tuwat;
+      case ClientMessage:
+          if (event.xclient.message_type 
+              != XInternAtom(dvtdisplay, "WM_PROTOCOLS", False))
+              break;
+          if ((Atom)event.xclient.data.l[0] 
+              == XInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False)) {
+              if (x2 > CEILexecs) {retc = EXECS_OVF; goto Xderror;}
+              makename("Xdisconnect", x1); ATTR(x1) = ACTIVE;
+              FREEexecs = x2;
+              running = TRUE;
+              goto tuwat;
+          }
+          else if ((Atom) event.xclient.data.l[0]
+                   == XInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False)) {
+              wid = event.xclient.window;
+              snprintf(namestring, sizeof(namestring), "w%d", wid);
+              makename(namestring, namef); ATTR(namef) = ACTIVE;
+              userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
+              if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
+              if (x1 >= CEILexecs) return EXECS_OVF;
+              if (o1 >= CEILopds) return OPDS_OVF;
+              if (FREEdicts >= CEILdicts) return DICTS_OVF;
+              moveframe(dictf, FREEdicts); FREEdicts += FRAMEBYTES;
+              makename("take_input_focus", o1); ATTR(o1) = ACTIVE;
+              FREEopds = o2;
+              TAG(x1) = OP; ATTR(x1) = ACTIVE;
+              OP_NAME(x1) = (L) "lock"; OP_CODE(x1) = (L) op_lock;
+              FREEexecs = x2;
+              running = TRUE;
+              goto tuwat;
+          }
+          break;
 
     case ConfigureNotify: wid = event.xconfigure.window;
       snprintf(namestring, sizeof(namestring), "w%d", wid);
@@ -394,14 +422,17 @@ if (moreX) {
         { retc = UNDF; goto Xderror; }
       if (FREEdicts >= CEILdicts) { retc = DICTS_OVF; goto Xderror; }
       if (x1 >= CEILexecs) { retc = EXECS_OVF; goto Xderror; }
-      if (o2 >= CEILopds) { retc = OPDS_OVF; goto Xderror; }
+      if (o3 >= CEILopds) { retc = OPDS_OVF; goto Xderror; }
       moveframe(dictf, FREEdicts); FREEdicts += FRAMEBYTES;
-      makename("windowsize",x1); ATTR(x1) = ACTIVE; FREEexecs = x2;
       TAG(o1) = (NUM | LONGTYPE); ATTR(o1) = 0;
       LONG_VAL(o1) = event.xconfigure.width;
       TAG(o2) = (NUM | LONGTYPE); ATTR(o2) = 0;
       LONG_VAL(o2) = event.xconfigure.height;       
-      FREEopds = o3;
+      makename("windowsize",o3); ATTR(o3) = ACTIVE; 
+      FREEopds = o4;
+			TAG(x1) = OP; ATTR(x1) = ACTIVE;
+			OP_NAME(x1) = (L) "lock"; OP_CODE(x1) = (L) op_lock;
+			FREEexecs = x2;
       running = TRUE; goto tuwat;
     case Expose: if (event.xexpose.count != 0) break;
       wid = event.xexpose.window;
@@ -411,29 +442,37 @@ if (moreX) {
       if ((dictf = lookup(namef, userdict)) == 0L) 
         { retc = UNDF; goto Xderror; }
       if (FREEdicts >= CEILdicts) { retc = DICTS_OVF; goto Xderror; }
+			if (o1 >= CEILopds) {retc = OPDS_OVF; goto Xderror;}
       if (x1 >= CEILexecs) { retc = EXECS_OVF; goto Xderror; }
       moveframe(dictf, FREEdicts); FREEdicts += FRAMEBYTES;
-      makename("drawwindow",x1); ATTR(x1) = ACTIVE; FREEexecs = x2;
+      makename("drawwindow",o1); ATTR(o1) = ACTIVE; 
+			FREEopds = o2;
+			TAG(x1) = OP; ATTR(x1) = ACTIVE;
+			OP_NAME(x1) = (L) "lock"; OP_CODE(x1) = (L) op_lock;
+			FREEexecs = x2;
       running = TRUE; goto tuwat;
     case ButtonPress: wid = event.xbutton.window;
       mod = (event.xbutton.state & 0xFF) | (event.xbutton.button << 16);
       if (FREEdicts >= CEILdicts) { retc = DICTS_OVF; goto Xderror; }
       if (x1 >= CEILexecs) { retc = EXECS_OVF; goto Xderror; }
-      if (o3 >= CEILopds) { retc = OPDS_OVF; goto Xderror; }
+      if (o4 >= CEILopds) { retc = OPDS_OVF; goto Xderror; }
       snprintf(namestring, sizeof(namestring), "w%d", wid);
       makename(namestring, namef); ATTR(namef) = ACTIVE;
       userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
       if ((dictf = lookup(namef, userdict)) == 0L) 
 				{ retc = UNDF; goto Xderror; }
       moveframe(dictf, FREEdicts); FREEdicts += FRAMEBYTES;
-      makename("mouseclick",x1); ATTR(x1) = ACTIVE; FREEexecs = x2;
       TAG(o1) = (NUM | LONGTYPE); ATTR(o1) = 0;
       LONG_VAL(o1) = event.xbutton.x;
       TAG(o2) = (NUM | LONGTYPE); ATTR(o2) = 0;
       LONG_VAL(o2) = event.xbutton.y;
       TAG(o3) = (NUM | LONGTYPE); ATTR(o3) = 0;
       LONG_VAL(o3) = mod;
-      FREEopds = o4;
+      makename("mouseclick",o4); ATTR(o4) = ACTIVE;
+      FREEopds = o5;
+			TAG(x1) = OP; ATTR(x1) = ACTIVE;
+			OP_NAME(x1) = (L) "lock"; OP_CODE(x1) = (L) op_lock;
+			FREEexecs = x2;
       running = TRUE; goto tuwat;
   }
 } 
@@ -443,24 +482,16 @@ if (running) goto tuwat; else goto theloop;
 
 /*--- look first for a connection request and service it */
 nextmsg:
+#if ENABLE_UNIX_SOCKETS
+ if (FD_ISSET(unixserversocket, &read_fds)) {
+   ssocket = unixserversocket;
+   goto nextserver;
+ }
+#endif //ENABLE_UNIX_SOCKETS
+
  if (FD_ISSET(serversocket, &read_fds)) {
-   socklen_t size;
-   L new; L psize;
-   size = sizeof(clientname);
-   new = accept(serversocket, &clientname, &size);
-   if (new < 0) error(EXIT_FAILURE,errno,"accept");
-   psize = PACKET_SIZE;
-   if ((retc =                           /* set packet buffers size  */
-        setsockopt(new, SOL_SOCKET, SO_SNDBUF, (B *)&psize, sizeof(L)) == -1))
-        error(EXIT_FAILURE,errno,"setsockopt");
-   if ((retc =
-        setsockopt(new, SOL_SOCKET, SO_RCVBUF, (B *)&psize, sizeof(L)) == -1))
-       error(EXIT_FAILURE,errno,"setsockopt");            
-   FD_SET(new, &sock_fds);              /* register the client socket */
-   if (fcntl(new, F_SETFL, O_NONBLOCK) == -1)   /* make non-blocking  */
-      error(EXIT_FAILURE, errno, "fcntl");
-   FD_CLR(serversocket, &read_fds);  /* to prevent double service */
-   nact--; goto tuwat;
+   ssocket = serversocket;
+   goto nextserver;
  }
 
 /*--- else look for a normal message and service the first one seen */
@@ -507,19 +538,28 @@ switch(retc = exec(100))
  case MORE: 
 	 if (locked) goto more; else goto theloop;
 
- case DONE: running = FALSE; locked = FALSE;
-	          if (FREEexecs == FLOORexecs) moveframe(msf,cmsf);
-						goto theloop;
-
  case KILL_SOCKS: 
-	 running = FALSE; locked = FALSE;
+	 // kill all socket connections
+	 nact = 0;
 	 op_Xdisconnect();
 	 for (i = 0; i < FD_SETSIZE; ++i)
-		 if (FD_ISSET(i, &sock_fds) && (i != serversocket)) {
+		 if (FD_ISSET(i, &sock_fds) 
+#if ENABLE_UNIX_SOCKETS
+             && (i != unixserversocket)
+#endif //ENABLE_UNIX_SOCKETS
+             && (i != serversocket)) {
 			 FD_CLR(i, &sock_fds);
 			 close(i);
 		 }
-	 goto sel1;
+	 if (x1 >= CEILexecs) {retc = EXECS_OVF; goto derror;};
+	 TAG(x1) = OP; ATTR(x1) = ACTIVE;
+	 OP_NAME(x1) = (L) "abort"; OP_CODE(x1) = (L) op_abort;
+	 FREEexecs = x2;
+	 goto more;
+
+ case DONE: running = FALSE; locked = FALSE; serialized = FALSE;
+	          if (FREEexecs == FLOORexecs) moveframe(msf,cmsf);
+						goto theloop;
 
  default:   goto derror;
 }
@@ -545,7 +585,6 @@ derror:
      hostname string
    and push active name 'error' on execution stack
 */
-locked = FALSE;
 if (o4 >= CEILopds) FREEopds = FLOORopds;
 if (x1 >= CEILexecs) FREEexecs = FLOORexecs;
 TAG(o1) = ARRAY | BYTETYPE; ATTR(o1) = READONLY;
@@ -558,6 +597,27 @@ TAG(o4) = NUM | LONGTYPE; ATTR(o4) = 0; LONG_VAL(o4) = retc;
 moveframe(errorframe,x1);
 FREEopds = o5; FREEexecs = x2;
 running = TRUE; goto tuwat;
+
+nextserver: {
+  socklen_t size;
+  L new; L psize;
+  size = sizeof(clientname);
+  new = accept(ssocket, &clientname, &size);
+  if (new < 0) error(EXIT_FAILURE,errno,"accept");
+  psize = PACKET_SIZE;
+  if ((retc =                           /* set packet buffers size  */
+       setsockopt(new, SOL_SOCKET, SO_SNDBUF, (B *)&psize, sizeof(L)) == -1))
+    error(EXIT_FAILURE,errno,"setsockopt");
+  if ((retc =
+       setsockopt(new, SOL_SOCKET, SO_RCVBUF, (B *)&psize, sizeof(L)) == -1))
+    error(EXIT_FAILURE,errno,"setsockopt");            
+  FD_SET(new, &sock_fds);              /* register the client socket */
+  if (fcntl(new, F_SETFL, O_NONBLOCK) == -1)   /* make non-blocking  */
+    error(EXIT_FAILURE, errno, "fcntl");
+  FD_CLR(ssocket, &read_fds);  /* to prevent double service */
+  nact--; goto tuwat;
+}
+
 
 }  /* we never return */
 

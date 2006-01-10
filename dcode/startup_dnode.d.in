@@ -21,6 +21,7 @@
 getsocket setconsole
 /toconsole_ ~toconsole def
 
+| ///////// INTERNALIZED ////////////
 |-------------------------- lock -------------------
 |
 | This requires the convention that no one set a lock
@@ -30,14 +31,14 @@ getsocket setconsole
 |
 | ~active | -- <<active executed>>
 |
-/lock {
-  getlock {exec} {
-    true setlock
-    stopped
-    false setlock
-    {stop} if
-  } ifelse
-} bind def
+| /lock {
+|   getlock {exec} {
+|     true setlock
+|     stopped
+|     false setlock
+|     {stop} if
+|   } ifelse
+| } bind def
 
 |------------------------ low-level information -------------------------
 | For debugging and quick information about objects, stacks, and system
@@ -63,8 +64,9 @@ getsocket setconsole
 /line 100 /b array def
 /consolebuf 1000 /b array def
 
-/oclasses 10 dict dup begin                      | object
+/oclasses 11 dict dup begin                      | object
    /nullclass  { * (null) text } bind def
+   /handleclass {(handle:) fax * object handleid mkact text} bind def
    /numclass   { * object * number } bind def
    /opclass    { * (op: ) text * /object find text } bind def
    /nameclass  { /object find active not { * (/) text } if
@@ -83,8 +85,9 @@ getsocket setconsole
                  * object length * number * ( bytes) text } bind def
 end mkread def
 
-/vclasses 10 dict dup begin                  | value
+/vclasses 11 dict dup begin                  | value
    /nullclass  /_ mkact def
+   /handleclass ~_ def
    /numclass   /_ mkact def
    /opclass    /_ mkact def
    /nameclass  /_ mkact def
@@ -229,6 +232,7 @@ dup dup class /arrayclass eq exch type /B eq and
 /objstr 40 /b array def
 
 /nullclass  { pop (null) ftext } bind def
+/handleclass {pop (null) ftext } bind def
 /numclass   { dup type mkact exec } bind def
 /opclass    { objstr 0 * 4 -1 roll text 0 exch getinterval ftext
             } bind def
@@ -272,15 +276,19 @@ end mkread def
               }
               ifelse
             } bind def
-/dictclass  { mkpass /obj name newline 
-              obj length 
-              objstr 0 * 4 -1 roll * number 0 exch getinterval
-              ftext (dict dup begin) ftext
-              2 indent
-              obj { 4 -2 roll newline
-                    4 -1 roll inword 3 -1 roll inword (def) ftext
+/dictclass  { mkpass /obj name
+              obj type /X ne {
+                  newline
+                  obj length 
+                  objstr 0 * 4 -1 roll * number 0 exch getinterval
+                  ftext (dict dup begin) ftext
+                  2 indent
+                  obj {
+                      4 -2 roll newline
+                      4 -1 roll inword 3 -1 roll inword (def) ftext
                   } forall
-              -2 indent (end) ftext
+                  -2 indent (end) ftext
+              } if
             } bind def
 /boxclass   { pop (null) ftext} bind def | discard a box object
 /markclass  { pop * ([) text } bind def
@@ -341,6 +349,23 @@ end def  | of xtext_dict
    readfile mkact exec
  } stopped pop fromfilessave restore
 } bind def
+
+| fromxfiles does the same as fromfiles, but first checks that the file
+| exists.
+
+/FTYPEMASK 61440L def
+/DIRTYPE 16384L def
+/FUSERREAD 256 def
+
+/fromxfiles {
+    2 copy findfile not {pop pop false} {
+        3 1 roll pop pop
+        dup FTYPEMASK and DIRTYPE eq {pop pop pop false} {
+            FUSERREAD and 0 eq {pop pop false} {fromfiles true} ifelse
+        } ifelse
+    } ifelse
+} bind def
+
 
 |====================== Support for toolboxes and projects =====================
 |
@@ -590,6 +615,28 @@ end def  | of xtext_dict
   (\n) fax
   0 exch getinterval toconsole_
 } bind def
+
+Xwindows_ {
+  /take_input_focus {
+    {[
+      console dup null eq {pop} {
+        (Xwindows {userdict begin take_input_focus} if) send
+      } ifelse |]
+    } stopped cleartomark
+    end
+  } bind def
+} if
+
+(Using startup_dnode.d $Id$ V@PACKAGE_VERSION@\n) toconsole
   
-(Using startup_dnode.d $Id$ V@PACKAGE_VERSION@\n) toconsole_
+(Home:  ) toconsole gethomedir toconsole (\n) toconsole
+(Startup: ) toconsole getstartupdir toconsole (\n) toconsole
+(Plugins: ) toconsole getplugindir toconsole (\n) toconsole
+
+(Trying ) toconsole getconfdir toconsole (dnode.d...\n) toconsole
+getconfdir (dnode.d) fromxfiles {
+  (Read ) toconsole getconfdir toconsole (dnode.d\n) toconsole
+} if
+(Trying ~/.dnode ...\n) toconsole
+gethomedir (.dnode) fromxfiles {(Read ~/.dnode\n) toconsole_} if
   

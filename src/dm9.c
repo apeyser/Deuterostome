@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#include <time.h>
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -196,7 +197,7 @@ FREEopds = o_2; return(OK);
 
 /*------- evaluate color operand */
 
-L coloropd()
+L coloropd(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -218,7 +219,7 @@ L coloropd()
     will return the error NO_XWINDOWS)
 */
 
-L op_Xwindows()
+L op_Xwindows(void)
 {
   if (o1 >= CEILopds) return(OPDS_OVF);
   TAG(o1) = BOOL; ATTR(o1) = 0;
@@ -238,7 +239,7 @@ L op_Xwindows()
    - reports the screen dimensions
 */
 
-L op_screensize()
+L op_screensize(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -263,18 +264,19 @@ L op_screensize()
    - 'nextevent' will identify window by the window#
 */
 
-L op_makewindow()
+L op_makewindow(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
 #else
   static XClassHint classhint = {"d_machine", "d_machine"};
+  static XWMHints xwmhints = {InputHint, False};
+  static Atom atom[2];
   L retc; W *pxy;
   B *xyf, *freevm, nstr[31], icstr[13],
     *pn[1] = { nstr }, *pic[1] = { icstr };
   XSetWindowAttributes attr;
   XTextProperty wname, icname;
-	Atom atom;
 
   if (dvtdisplay == NULL) return(NO_XWINDOWS);
   attr.event_mask = ButtonPressMask | ExposureMask |
@@ -309,8 +311,10 @@ L op_makewindow()
   XSetWMName(dvtdisplay,wid,&wname);
   XSetWMIconName(dvtdisplay,wid,&icname);
   XSetClassHint(dvtdisplay,wid,&classhint);
-	atom = XInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False);
-	XSetWMProtocols(dvtdisplay, wid, &atom, 1);
+	atom[0] = XInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False);
+	atom[1] = XInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False);
+	XSetWMProtocols(dvtdisplay, wid, atom, 2);
+	XSetWMHints(dvtdisplay, wid, &xwmhints);
   dvtwindows[ndvtwindows++] = wid;
   TAG(o1) = NUM | LONGTYPE; ATTR(o1) = 0;
   LONG_VAL(o1) = wid;
@@ -318,6 +322,48 @@ L op_makewindow()
   return(OK);    
 #endif
 }
+
+/*------------------------------------------------ topwindow
+ * 
+ * window# true | --
+ *
+ * make window float above other iff true
+ */
+L op_makewindowtop(void) {
+#if X_DISPLAY_MISSING
+	return NO_XWINDOWS;
+#else
+	L k;
+	XEvent event;
+
+	if (dvtdisplay == NULL) return NO_XWINDOWS;
+	if (o_2 < FLOORopds) return OPDS_UNF;
+	if (CLASS(o_1) != BOOL || CLASS(o_2) != NUM) return OPD_CLA;
+	if (!VALUE(o_2, &wid)) return UNDF_VAL;
+
+	FREEopds = o_2;
+	for (k = 0; k < ndvtwindows && dvtwindows[k] != wid; k++);
+	if (k == ndvtwindows) return OK;
+
+	event.xclient.type = ClientMessage;
+	event.xclient.display = dvtdisplay;
+	event.xclient.window = wid;
+	event.xclient.message_type 
+		= XInternAtom(dvtdisplay, "_NET_WM_STATE", False);
+	event.xclient.format = 32;
+	event.xclient.data.l[0] = (BOOL_VAL(o2) ? 1 : 0);
+	event.xclient.data.l[1] 
+		= XInternAtom(dvtdisplay, "_NET_WM_STATE_ABOVE", False);
+	event.xclient.data.l[2] = 0;
+	event.xclient.data.l[3] = 2;
+	event.xclient.data.l[4] = 0;
+	XSendEvent(dvtdisplay, XRootWindowOfScreen(dvtscreen),
+						 False, (SubstructureNotifyMask|SubstructureRedirectMask),
+						 &event);
+	return OK;
+#endif
+}
+	
 
 /*------------------------------------------------ deletewindow
 
@@ -327,7 +373,7 @@ L op_makewindow()
    - does nothing if the window does not exist
 */
 
-L op_deletewindow()
+L op_deletewindow(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -351,14 +397,36 @@ L op_deletewindow()
 
 /*------------------------------------------------ mapwindow
 
-   window# bool | --
+   <window#|null> bool | --
 
    - true: shows the window as the top window on the screen 
    - false: hides the window
    - does nothing if window does not exist 
+	 - if window# == null then map and raise or unmap all windows.
 */
+#if ! X_DISPLAY_MISSING
+void mapraisewindow(L win) {
+	XEvent event;
+/* 	XWindowChanges changes; */
+	XMapRaised(dvtdisplay, win);
+	event.xclient.type = ClientMessage;
+	event.xclient.display = dvtdisplay;
+	event.xclient.window = win;
+	event.xclient.message_type 
+		= XInternAtom(dvtdisplay, "_NET_ACTIVE_WINDOW", False);
+	event.xclient.format = 32;
+	event.xclient.data.l[0] = 2;
+	event.xclient.data.l[1] = time(NULL);
+	event.xclient.data.l[2] = 0;
+	event.xclient.data.l[3] = 0;
+	event.xclient.data.l[4] = 0;
+	XSendEvent(dvtdisplay, XRootWindowOfScreen(dvtscreen), 
+						 False, (SubstructureNotifyMask|SubstructureRedirectMask), 
+						 &event);
+}
+#endif //! X_DISPLAY_MISSING
 
-L op_mapwindow()
+L op_mapwindow(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -366,19 +434,30 @@ L op_mapwindow()
   L k;
   if (dvtdisplay == NULL) return(NO_XWINDOWS);
   if (o_2 < FLOORopds) return(OPDS_UNF);
-  if (CLASS(o_2) != NUM) return(OPD_CLA);
-  if (!VALUE(o_2,&wid)) return(UNDF_VAL);
   if (CLASS(o_1) != BOOL) return(OPD_CLA);
-  k = 0;
-  while (1) { if (k >= ndvtwindows) { FREEopds = o_2; return(OK); }
-              if (dvtwindows[k] == wid) break; k++;
-            }
-  if (BOOL_VAL(o_1))
-    XMapRaised(dvtdisplay,wid);
-  else
-    XUnmapWindow(dvtdisplay,wid);
-  FREEopds = o_2;
-  return(OK);
+
+	switch (CLASS(o_2)) {
+		case NULLOBJ:
+			for (k = 0; k < ndvtwindows; k++)
+				if (BOOL_VAL(o_1)) mapraisewindow(dvtwindows[k]);
+				else XUnmapWindow(dvtdisplay, dvtwindows[k]);
+			break;
+
+		case NUM:
+			if (!VALUE(o_2,&wid)) return UNDF_VAL;
+			for (k = 0; k < ndvtwindows && dvtwindows[k] != wid; k++);
+			if (k == ndvtwindows) break;
+
+			if (BOOL_VAL(o_1)) mapraisewindow(wid);
+			else XUnmapWindow(dvtdisplay,wid);
+			break;
+
+		default:
+			return(OPD_CLA);
+	};
+
+	FREEopds = o_2;
+	return OK;
 #endif
 }
 
@@ -386,7 +465,7 @@ L op_mapwindow()
    window# width height | --
 */
 
-L op_resizewindow()
+L op_resizewindow(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -417,7 +496,7 @@ L op_resizewindow()
    Flushes buffered graphics instruction, thus rendering their effects.
 */
 
-L op_Xsync()
+L op_Xsync(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -435,7 +514,7 @@ L op_Xsync()
    Translates an RGB color into a color map index.
 */
 
-L op_mapcolor()
+L op_mapcolor(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -471,7 +550,7 @@ L op_mapcolor()
    - does nothing but consume the operands if window# does not exist 
 */
 
-L op_fillrectangle()
+L op_fillrectangle(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -506,7 +585,7 @@ L op_fillrectangle()
    - the line is solid and covers previously drawn items 
 */
 
-L op_drawline()
+L op_drawline(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -566,12 +645,12 @@ L op_drawline()
 */
 
 #if ! X_DISPLAY_MISSING
-static void DOTsymbol()
+static void DOTsymbol(void)
 {
   XDrawPoint(dvtdisplay,wid,dvtgc,(L)x,(L)y);
 }
 
-static void DIAMONDsymbol()
+static void DIAMONDsymbol(void)
 {
   W d = s>>1;
   W p[] = { x-d, y,
@@ -582,64 +661,64 @@ static void DIAMONDsymbol()
  XDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,5,CoordModeOrigin);   
 }
 
-static void fSQUAREsymbol()
+static void fSQUAREsymbol(void)
 {
   W d = s>>1;
   XFillRectangle(dvtdisplay,wid,dvtgc,(L)(x-d),(L)(y-d),(UL)s,(UL)(s));
 }
 
-static void sSQUAREsymbol()
+static void sSQUAREsymbol(void)
 {
   W d = s>>1;
   XDrawRectangle(dvtdisplay,wid,dvtgc,(L)(x-d),(L)(y-d),(UL)s,(UL)(s));
 }
 
-static void hsSQUAREsymbol()
+static void hsSQUAREsymbol(void)
 {
   W d = s>>1;
   XDrawRectangle(dvtdisplay,wid,dvtgc,(L)(x-d),(L)(y-d),(UL)s,(UL)(s));
   XDrawLine(dvtdisplay,wid,dvtgc,(L)(x-d),(L)y,(L)(x+d),(L)y);
 }
 
-static void PLUSsymbol()
+static void PLUSsymbol(void)
 {
   W d = s>>1;
   W p[] = { x-d, y, x+d, y, x, y-d, x, y+d };
   XDrawSegments(dvtdisplay,wid,dvtgc,(XSegment *)p,2);
 }
 
-static void Xsymbol()
+static void Xsymbol(void)
 {
   W d = s>>1;
   W p[] = { x-d, y-d, x+d, y+d, x-d, y+d, x+d, y-d };
   XDrawSegments(dvtdisplay,wid,dvtgc,(XSegment *)p,2);
 }
 
-static void fCIRCLEsymbol()
+static void fCIRCLEsymbol(void)
 {
   W d = s>>1;
   XFillArc(dvtdisplay,wid,dvtgc,(L)(x-d),(L)(y-d),(UL)s,(UL)s,0L,360L<<6);
 }
 
-static void sCIRCLEsymbol()
+static void sCIRCLEsymbol(void)
 {
   W d = s>>1;
   XDrawArc(dvtdisplay,wid,dvtgc,(L)(x-d),(L)(y-d),(UL)s,(UL)s,0L,360L<<6);
 }
 
-static void hsCIRCLEsymbol()
+static void hsCIRCLEsymbol(void)
 {
   W d = s>>1;
   XDrawArc(dvtdisplay,wid,dvtgc,(L)(x-d),(L)(y-d),(UL)s,(UL)s,0L,360L<<6);
   XDrawLine(dvtdisplay,wid,dvtgc,(L)(x-d),(L)y,(L)(x+d),(L)y);
 }
 
-static void ASTERsymbol()
+static void ASTERsymbol(void)
 {
   PLUSsymbol(); Xsymbol();
 }
 
-static void usTRIsymbol()
+static void usTRIsymbol(void)
 {
   W d = s>>1;
   W p[] = { x-d, y+d,
@@ -649,7 +728,7 @@ static void usTRIsymbol()
  XDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,4,CoordModeOrigin);
 }
 
-static void dsTRIsymbol()
+static void dsTRIsymbol(void)
 {
   W d = s>>1;
   W p[] = { x-d, y-d,
@@ -659,7 +738,7 @@ static void dsTRIsymbol()
  XDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,4,CoordModeOrigin);
 }
 
-static void rsTRIsymbol()
+static void rsTRIsymbol(void)
 {
   W d = s>>1;
   W p[] = { x-d, y-d,
@@ -669,7 +748,7 @@ static void rsTRIsymbol()
  XDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,4,CoordModeOrigin);
 }
 
-static void lsTRIsymbol()
+static void lsTRIsymbol(void)
 {
   W d = s>>1;
   W p[] = { x-d, y,
@@ -679,39 +758,39 @@ static void lsTRIsymbol()
  XDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,4,CoordModeOrigin);
 }
 
-static void vcBARsymbol()
+static void vcBARsymbol(void)
 {
   W d = s>>1;
   XDrawLine(dvtdisplay,wid,dvtgc,(L)x,(L)(y-d),(L)x,(L)(y+d));
 }
 
-static void vdBARsymbol()
+static void vdBARsymbol(void)
 {
   XDrawLine(dvtdisplay,wid,dvtgc,(L)x,(L)y,(L)x,(L)(y+s));
 }
 
-static void vuBARsymbol()
+static void vuBARsymbol(void)
 {
   XDrawLine(dvtdisplay,wid,dvtgc,(L)x,(L)y,(L)x,(L)(y-s));
 }
 
-static void hcBARsymbol()
+static void hcBARsymbol(void)
 {
   W d = s>>1;
   XDrawLine(dvtdisplay,wid,dvtgc,(L)(x-d),(L)y,(L)x+d,(L)y);
 }
 
-static void hlBARsymbol()
+static void hlBARsymbol(void)
 {
   XDrawLine(dvtdisplay,wid,dvtgc,(L)x,(L)y,(L)(x+s),(L)y);
 }
 
-static void hrBARsymbol()
+static void hrBARsymbol(void)
 {
   XDrawLine(dvtdisplay,wid,dvtgc,(L)x,(L)y,(L)(x-s),(L)y);
 }
 
-typedef void (*SYMBfunction)();
+typedef void (*SYMBfunction)(void);
 
 static SYMBfunction SYMBlist[] = {
   DOTsymbol, DIAMONDsymbol, fSQUAREsymbol, sSQUAREsymbol, hsSQUAREsymbol,
@@ -721,7 +800,7 @@ static SYMBfunction SYMBlist[] = {
   hlBARsymbol };
 #endif //! X_DISPLAY_MISSING
 
-L op_drawsymbols()
+L op_drawsymbols(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;
@@ -759,6 +838,24 @@ L op_drawsymbols()
 #endif
 }
 
+/*--------------------------------------- setinputfocus
+ * window# | --
+ * window# gets keyboard focus
+ */
+L op_setinputfocus(void) {
+#if X_DISPLAY_MISSING
+	return NO_XWINDOWS;
+#else
+	if (dvtdisplay == NULL) return NO_XWINDOWS;
+	if (o_1 < FLOORopds) return OPDS_UNF;
+	if (CLASS(o_1) != NUM) return OPD_CLA;
+	if (! VALUE(o_1, &wid)) return UNDF_VAL;
+	
+	XSetInputFocus(dvtdisplay, wid, RevertToParent, CurrentTime);
+	return OK;
+#endif
+}
+
 /*-------------------------------------- drawtext
    window# x y (text) [ (font_spec) col_idx h_align v_align ] | window# x y 
 
@@ -775,7 +872,7 @@ L op_drawsymbols()
     to the position following the last written character
 */
 
-L op_drawtext()
+L op_drawtext(void)
 {
 #if X_DISPLAY_MISSING
 	return NO_XWINDOWS;

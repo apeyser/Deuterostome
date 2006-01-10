@@ -5,7 +5,7 @@
 |   - viewed objects are made available to other D code
 
 200 dict dup begin  | of eyedict
-(Loading TheEye.d  WN 15/4/03\n) toconsole
+(Loading TheEye.d  $Id$ V@PACKAGE_VERSION@\n) toconsole
 
 |=========================== window layout =================================
 |  - horizontal:
@@ -176,7 +176,7 @@
 | following meaningful entries:
 |
 |  [ /VMclass                           ]
-|  [ /FSclass                           ]
+|  [ /FSclass    (path) [(infoname) (leftname)]]
 |  [ /dirclass   (path) (dirname)       ]
 |  [ /dictclass  dict name/index        ]
 |  [ /listclass  list name/index        ]
@@ -220,13 +220,22 @@
 /leftpageMin 0 def
 
 [ /VMclass userdict /userdict ] leftpageadd | VM entry
+
 userdict /dnode_setup known {
   [ /dictclass dnode_setup /dnode_setup] leftpageadd | dnode_setup dict
 } if
 
-[ /FSclass (/) () ] leftpageadd             | FS entry
-gethomedir length 0 ne {[/dirclass () gethomedir] leftpageadd} if | home dir
-[ /dirclass () (@pkglibdir@)] leftpageadd   | plugins
+[ /FSclass (/) [(/ - root of Linux filesystem) (/)]] leftpageadd | FS entry
+
+gethomedir length 0 ne {
+  [/FSclass gethomedir [gethomedir (home)]] leftpageadd | home dir
+} if
+
+@ENABLE_PLUGINS_START@
+userdict /dnode_setup known not {
+  [ /FSclass getplugindir [getplugindir (plugins)]] leftpageadd   | plugins
+} if
+@ENABLE_PLUGINS_END@
 
 |/leftpageU 2 def               | current used length of object list
 /leftpageT 0 def               | index of top displayed object
@@ -234,6 +243,8 @@ gethomedir length 0 ne {[/dirclass () gethomedir] leftpageadd} if | home dir
 
 /leftpageSB 10000 /b array def | for path and dirnames of leftpage objects
 /leftpagesb leftpageSB def
+/leftpageLB 100 list def | for FSclass info for leftpage
+/leftpagelb leftpageLB def
 
 |----------------- right page
 
@@ -250,6 +261,8 @@ gethomedir length 0 ne {[/dirclass () gethomedir] leftpageadd} if | home dir
 /infoline 160 /b array def
 /pathbuf 1024 /b array def
 /theobj [ /nullclass null null ] def
+/thesubobj 5 list def
+/thesubitem 5 list def
 /fde <l 0 0 0 0 0 0 > def
 
 |-- file attribute templates
@@ -307,11 +320,9 @@ gethomedir length 0 ne {[/dirclass () gethomedir] leftpageadd} if | home dir
 |--------------------------------------------- resist resizing
 
 /windowsize {
-  wH ne exch wW ne or {
-    { [
-      wid wW wH resizewindow
-    } stopped cleartomark
-  } if end
+  wH ne exch wW ne or { {
+    [wid wW wH resizewindow | ]
+  } stopped cleartomark} if end
 } bind def
 
 |--------------------------------------------- draw the screen
@@ -323,7 +334,7 @@ gethomedir length 0 ne {[/dirclass () gethomedir] leftpageadd} if | home dir
 | - shows the left page
 
 /drawwindow {
-{ [ {    | stop capsule + reentry prevention
+ [ {    | stop capsule + reentry prevention
 
 |-- show structural elements
   wid woutline BLACK drawline
@@ -342,7 +353,7 @@ gethomedir length 0 ne {[/dirclass () gethomedir] leftpageadd} if | home dir
   wid inforect BG fillrectangle
   wid ritepagerect BG fillrectangle
   showRpage
-} lock} stopped cleartomark
+} stopped cleartomark | ]
 end
 } bind def
 
@@ -358,7 +369,7 @@ end
 |     - shift clicking a left page item removes the item from the display
  
 /mouseclick {
-  {[ 4 1 roll { | stopped and reentry lock
+   [ 4 1 roll { | stopped and reentry lock
       dup -16 bitshift /mB name
           255 and      /mM name
       /mY name /mX name 
@@ -393,8 +404,8 @@ end
       } if
     /mL mY 15 sub 13 div def
     mX wW 3 sub 2 div 1 add le { hitL } { hitR } ifelse
-  } lock} stopped cleartomark
-  end 
+  } stopped cleartomark | ]
+    end 
 } bind def
 
 |============================ shared machinery ===========================
@@ -436,7 +447,7 @@ end
 /VMclass     { * (VM: ) text vmstatus /bused name Kb
                * ( total Kb, ) text bused Kb * ( used) text
              } def
-/FSclass     { * (/ - root of Linux filesystem) text } def
+/FSclass     { theobj 2 get 0 get fax} def
 /dirclass    { theobj 1 get fax theobj 2 get dup
                length 0 eq { pop } { fax (/) fax } ifelse
              } def
@@ -448,6 +459,7 @@ end
                * fde 1 get * number * (/) text
                * fde 2 get * number * (/) text
                * fde 0 get * number * (   ) text 
+               fde 3 get 9 le {* 0 * number} if
                * fde 3 get * number * (:) text
                * fde 4 get * number (   ) fax
                fd 3 get 256 and 0 ne { (r) } { (-) } ifelse fax
@@ -464,7 +476,7 @@ end
                * ( array) text
                * ( of ) text * /theobj find 1 get length * number
                /theobj find 1 get type /B eq {
-                 ( () fax
+                 ( \() fax
                  1 index length 1 index sub 1 sub
                    /theobj find 1 get length 2 copy gt ~exch if pop
                    /theobj find 1 get 0 3 -1 roll getinterval fax
@@ -474,8 +486,7 @@ end
 /listclass   { * theobj 1 get active { (proc) } { (list) } ifelse text
                * ( of ) text * theobj 1 get length * number
              } def
-/dictclass   { * (dict) text
-               * ( of ) text * theobj 1 get length * number
+/dictclass   { * (dict) text               * ( of ) text * theobj 1 get length * number
                * ( total, ) text * theobj 1 get used * number
                * ( used) text
              } def
@@ -484,6 +495,7 @@ end
 /numclass    { * theobj 1 get * number * theobj 1 get type mkact text
              } def
 /nullclass   { } def
+/handleclass { } def  
 /opclass     { } def
 /nameclass   { } def
 /boolclass   { } def
@@ -521,6 +533,30 @@ end mkread /infoclasses name
      }
      ifelse
 } def
+
+|-------- opening file system
+/open_fs {
+  pathbuf 0 theobj 1 get fax 0 exch getinterval
+  save /tempcbs name {
+    findfiles dup length /b array
+    theobj 1 get dup length /b array copy
+    [
+      theobj 2 get 0 get dup length /b array copy
+      theobj 2 get 1 get dup length /b array copy
+    ]
+  } stopped tempcbs capsave {tempcbs restore stop} if
+  
+  theopen 2 put theopen 1 put 
+  0 exch copy /checkmarks name
+  /thefilelist name
+  theobj 0 get theopen 0 put
+  TheEye /currentbuffers known { currentbuffers restore } if
+  /currentbuffers tempcbs def
+  /ritepageT 0 def /ritepageU thefilelist length def
+  /showRpage /show_dir find def /fromRpage /from_fs find def
+  showRpage 
+} def
+
 
 |-------- opening dictionary
 /open_dict {
@@ -562,16 +598,22 @@ end mkread /infoclasses name
 | - error messages are intercepted and displayed on the info line
 | - stacks are cleaned up and 'stop' is executed
 
+/errordict 1 dict dup begin | {
+  /error {error} bind def   | }
+end mkread def
+
 /error {
-  dup 3 1 roll
-  wid inforect BG fillrectangle
-  infoline errormessage dup length 1 sub 0 exch getinterval
-  wid 2 12 4 -1 roll INFOTEXT drawtext
-  208 ne {stop} {
-    (Illegal stop in the eye\n) toconsole
-    countdictstack 2 sub {end} repeat
-    abort
-  } ifelse
+  errordict begin {                                     | for both dvt and dnode:
+    dup 3 userdict /dvt known not {2 add} if 1 roll     | copy error #
+    wid inforect BG fillrectangle                       | under error stack
+    infoline errormessage dup length 1 sub 0 exch getinterval
+    wid 2 12 4 -1 roll INFOTEXT drawtext           | put err -newline in eye
+    208 ne {stop} {                                | avoid loop of illegal stops
+      (Illegal stop in the eye\n) toconsole
+      countdictstack 2 sub {end} repeat            | avoid redef of abort
+      abort                                        | drop all
+    } ifelse
+  } stopped end ~stop if
 } bind def
 
 |========================= left page machinery ============================
@@ -598,7 +640,9 @@ end mkread /infoclasses name
               leftpage k get leftpage k 1 sub get copy pop
             } for
           /leftpageU k def
-          leftpageU 2 eq { /leftpagesb leftpageSB def } if
+          leftpageU 2 eq {
+            /leftpagesb leftpageSB def /leftpagelb leftpageLB def
+          } if
           showLpage stop 
           } if
       } if
@@ -653,6 +697,9 @@ end /keeps name
   /vidx 0 def /pidx leftpageT def
   { vidx nL ge pidx leftpageU ge or { exit } if
     leftpage pidx get theobj copy pop
+    theobj 2 get class /listclass eq {
+      theobj 2 get thesubobj copy theobj 2 put
+    } if
     /textpar pidx leftchecked eq
          { LEFTCHECKED }
          { LEFTNORMAL } 
@@ -684,7 +731,7 @@ end /keeps name
                { * (userdict) text } show_id
              } bind def
 /FSclass    { dir_icon (FS) icon_text 
-               { * (/) text } show_id
+               { theobj 2 get 1 get fax } show_id
              } bind def
 /dirclass    { dir_icon  (DIR) icon_text
                { * theobj 2 get text } show_id
@@ -733,7 +780,7 @@ end mkread /objpresenters name
 
 6 dict dup begin
 /VMclass     { open_dict } def
-/FSclass     { open_dir } def
+/FSclass     { open_fs } def
 /dirclass    { open_dir } bind def
 /arrayclass  { open_array } bind def
 /listclass   { open_list } bind def
@@ -765,35 +812,47 @@ end mkread /openLclasses name
         checkmarks theidx get 0 eq { -1 } { 0 } ifelse checkmarks theidx put
         showRpage stop
       } if
-   ctrl1_plain3 |-- 'control': open object
-     { fromRpage 
-       openRclasses theobj 0 get get exec
-       { leftpage 0 leftpageU getinterval
-          { /theitem name theitem 0 get theopen 0 get eq {
-                theopen 0 get dupchecks exch get exec { stop } if 
-                } if        
-          } forall
-       } stopped not 
-         { rebuildLpage pop leftpageU leftpage length lt
-               { theopen 0 get /dirclass eq
-                   { /theitem leftpage leftpageU get def
-                     leftpagesb theopen 1 get length /b parcel
-                       theopen 1 get exch copy theitem 1 put 
-                     theopen 2 get length /b parcel
-                       theopen 2 get exch copy theitem 2 put
-                     /leftpagesb name
-                     theopen 0 get theitem 0 put
-                   }
-                   { theopen leftpage leftpageU get copy pop
-                   }
-                   ifelse
-                 /leftpageU leftpageU 1 add def
-                 showLpage
-               } if
+   ctrl1_plain3 {|-- 'control': open object
+     fromRpage 
+     openRclasses theobj 0 get get exec {
+       leftpage 0 leftpageU getinterval {
+         /theitem name theitem 0 get theopen 0 get eq {
+           theopen 0 get dupchecks exch get exec { stop } if 
+         } if        
+       } forall
+     } stopped not {
+         rebuildLpage pop leftpageU leftpage length lt {
+           theopen 0 get /dirclass eq {
+             /theitem leftpage leftpageU get def
+             leftpagesb theopen 1 get length /b parcel
+             theopen 1 get exch copy theitem 1 put 
+             theopen 2 get length /b parcel
+             theopen 2 get exch copy theitem 2 put
+             /leftpagesb name
+             theopen 0 get theitem 0 put
+           } {
+             theopen 0 get /FSclass eq {
+               /theitem leftpage leftpageU get def
+               leftpagesb theopen 1 get length /b parcel
+               theopen 1 get exch copy theitem 1 put
+               leftpagelb 0 2 getinterval theitem 2 put
+               /leftpagelb leftpagelb 2 leftpagelb length 2 sub getinterval def
+               theopen 2 get 0 get length /b parcel
+               theopen 2 get 0 get exch copy theitem 2 get 0 put
+               theopen 2 get 1 get length /b parcel
+               theopen 2 get 1 get exch copy theitem 2 get 1 put
+               /leftpagesb name
+               theopen 0 get theitem 0 put
+             } {
+               theopen leftpage leftpageU get copy pop
+             } ifelse
+           } ifelse
+           /leftpageU leftpageU 1 add def
+           showLpage
          } if
-       stop
-     }
-     if
+     } if
+     stop
+   } if
    plain1 |-- plain click: show object info
      { fromRpage toinfo } if
    scrollUp {scrolls 8 get exec stop} if
@@ -816,18 +875,24 @@ end mkread /openLclasses name
 
 |--------------- opening rightpage object (by control/click)
 
-11 dict dup begin
+12 dict dup begin
+  
 /dirclass    { open_dir } bind def
 /fileclass   { stop } def
 /arrayclass  { open_array } def
 /listclass   { open_list } def
 /dictclass   { open_dict } def
+  
 /boxclass    { stop } def 
 /nullclass   { stop } def
+/handleclass { stop } def
 /opclass     { stop } def
 /boolclass   { stop } def
+  
 /numclass    { stop } def
+    
 /nameclass   { stop } def
+    
 end mkread /openRclasses name
 
 |-- duplication checks (for left page items)
@@ -845,10 +910,15 @@ end mkread /dupchecks name
 |------------- representing a right-page D object value
 | expects 'Rvaluerect' to be established for placing value
 
-10 dict dup begin
-/nullclass   { { * (null) text theitem type /T eq {(:socket) fax} if}
-                BG show_value
-             } bind def
+11 dict dup begin
+/nullclass   {
+  {(null) fax theitem type /T eq {(:socket) fax} if} BG show_value
+} bind def
+
+/handleclass {
+  {(handle:) fax * theitem handleid mkact text} BG show_value
+} bind def
+  
 /numclass    { { * theitem dup type /D eq { 7 } { * } ifelse number }
                BG show_value
              } bind def
@@ -875,7 +945,9 @@ end mkread /dupchecks name
                } LISTCOLOR show_value
              } bind def
 /dictclass   { { * (~|~ of ) text * theitem length * number
-                 theitem type /O eq {(:oplib) fax} if
+                 theitem type dup /O eq {pop (:oplib) fax} {
+                     /X eq {(:opaque) fax} if
+                 }ifelse
                } DICTCOLOR show_value
              } bind def
 /boxclass    { { * (|_| of ) text * theitem length * number
@@ -1033,6 +1105,19 @@ end mkread /valuepresenters name
    theitem 0 get theobj 2 put
 } def
 
+|------- picking item from a fs
+| merges thedirname of the directory into thepath and sets
+| thename of the clicked element
+
+/from_fs {
+   thefilelist theidx get /theitem name
+   theitem 3 get TYPE and DIRTYPE eq
+   { /dirclass } { /fileclass } ifelse theobj 0 put
+   pathbuf 0 theopen 1 get fax
+     0 exch getinterval theobj 1 put
+   theitem 0 get theobj 2 put
+} def
+
 |-------------------- extraction tools ---------------------------------
 
 |--- faxLpage and faxRpage
@@ -1045,12 +1130,16 @@ end mkread /valuepresenters name
 | nothing is faxed.
 
 /faxLpage {
-  TheEye begin
-  { leftchecked -1 ne
-    { leftpage leftchecked get 0 get /dirclass eq
-       { (') fax leftpage leftchecked get 1 get fax
+  TheEye begin {
+    leftchecked -1 ne {
+      leftpage leftchecked get 0 get /dirclass eq {
+        (') fax leftpage leftchecked get 1 get fax
          leftpage leftchecked get 2 get fax (/') fax 
-       } if  
+       } {
+         leftpage leftchecked get 0 get /FSclass eq {
+           (') fax leftpage leftcheck get 1 get fax (') fax
+         } if
+       } ifelse
     } if
   } stopped pop end
 } bind def  
@@ -1073,13 +1162,15 @@ end mkread /valuepresenters name
    0 1 checkmarks length 1 sub { /kR name
        checkmarks kR get 0 ne {
           firstcheck {
-              nchecked 2 ge { ('/'{) } { ('/') } ifelse fax
-              /firstcheck false def
-            } { (,) fax } ifelse
+            (') fax theopen 1 get fax
+            nchecked 2 ge { ('{) } { (/') } ifelse fax
+            /firstcheck false def
+          } { (,) fax } ifelse
           (') fax thefilelist kR get 0 get fax (') fax
         } if
     } for
   firstcheck not nchecked 2 ge and { (}) fax } if
+  
 } bind def
 
 /dirclass {
@@ -1115,14 +1206,19 @@ end def
 | The returned boolean indicates whether an object is selected.
 
 /getLpage {
-  TheEye begin
-  { leftchecked -1 ne
-    { leftpage leftchecked get 0 get /dirclass eq
-       { leftpage leftchecked get dup 1 get length exch
-         2 get length add 1 add /b array 0
-         leftpage leftchecked get 1 get fax
-         leftpage leftchecked get 2 get fax (/) fax pop true
-       } { false } ifelse  
+  TheEye begin {
+    leftchecked -1 ne {
+      leftpage leftchecked get 0 get /dirclass eq {
+        leftpage leftchecked get dup 1 get length exch
+        2 get length add 1 add /b array 0
+        leftpage leftchecked get 1 get fax
+        leftpage leftchecked get 2 get fax (/) fax pop true
+      } {
+        leftpage leftchecked get 0 get /FSclass eq {
+          leftpage leftchecked get dup 1 get length /b array copy
+          true
+        } {false} ifelse
+      } ifelse
     } if
   } stopped pop end
 } bind def 
@@ -1152,12 +1248,13 @@ end def
 } bind def
 
 /FSclass {
-  0 1 checkmarks length 1 sub { /kR name
-      checkmarks kR get 0 ne
-        { thefilelist kR get 0 get length 1 add /b array 0
-          (/)fax thefilelist kR get 0 get fax pop
-        } if
+  theopen 1 get dup length /b array copy [
+    0 1 checkmarks length 1 sub { /kR name
+      checkmarks kR get 0 ne {
+        thefilelist kR get 0 get dup length /b array copy
+      } if
     } for
+  ]
 } bind def
 
 /dirclass {
@@ -1199,6 +1296,7 @@ end userdict /TheEye put
 
 |------------------------- fire it up --------------------------------
 
+  
 TheEye begin
   screensize /scrH name /scrW name
   [ [ scrW wW sub 10 sub 50 wW wH ]
@@ -1213,6 +1311,7 @@ TheEye begin
      { dup find userdict 3 -1 roll put } forall
   wid true mapwindow
 end
+    
 
 | Not yet done:
 | - clip excessively long fs strings

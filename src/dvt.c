@@ -111,7 +111,7 @@ current directory.
 
 */
 
-int main()
+int main(void)
 {
     B* startup_dvt;
     
@@ -119,6 +119,8 @@ B errorframe[FRAMEBYTES], abortframe[FRAMEBYTES], *sf;
 L nb, retc,tnb;
 B *sysdict, *userdict, *Dmemory, *p;
 int sufd;
+
+serialized = TRUE; // no serialize operator
 
 /*---------------- time out settings for 'nextevent' */
 zerosec.tv_sec = 0; zerosec.tv_usec = 0;

@@ -3,31 +3,91 @@
   Include module for dnode.c: specific operators of dnode
 */
 
-#include <ltdl.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "pluginlib.h"
 
 BOOLEAN moreX = FALSE;
 
 /*-------------------------- Dnode operators -------------------------*/
 
-L op_getlock(void)
-{
-    if (CEILopds < o2) return (OPDS_OVF);
-    TAG(o1) = BOOL;
-    BOOL_VAL(o1) = locked;
-    FREEopds = o2;
-    return OK;
+L x_op_lock(void) {
+	if (o_1 < FLOORopds) return OPDS_UNF;
+	if (x_1 < FLOORexecs) return EXECS_UNF;
+	if (TAG(o_1) != BOOL) return OPD_CLA;
+	if (TAG(x_1) != BOOL) return EXECS_COR;
+	
+	locked = BOOL_VAL(x_1);
+	if (! BOOL_VAL(o_1)) FREEexecs = x_1;
+	else {
+		TAG(x_1) = OP; ATTR(x_1) = ACTIVE;
+		OP_NAME(x_1) = (L) "stop"; OP_CODE(x_1) = (L) op_stop;
+	}
+	FREEopds = o_1;
+	return OK;
 }
 
-    
-L op_setlock(void) 
-{
-    if (o_1 < FLOORopds) return (OPDS_UNF);
-    if (TAG(o_1) != BOOL) return (OPD_TYP);
-    locked = BOOL_VAL(o_1);
-    FREEopds = o_1;
-    return OK;
+/* ~active | -- */
+L op_lock(void) {
+	if (o_1 < FLOORopds) return OPDS_UNF;
+	if (CEILexecs < x5) return EXECS_OVF;
+	if (! (ATTR(o_1) & ACTIVE)) return OPD_ATR;
+
+	TAG(x1) = BOOL; ATTR(x1) = 0;
+	BOOL_VAL(x1) = locked;
+
+	TAG(x2) = OP; ATTR(x2) = ACTIVE;
+	OP_NAME(x2) = (L) "x_lock"; OP_CODE(x2) = (L) x_op_lock;
+
+	TAG(x3) = BOOL; ATTR(x3) = (STOPMARK | ACTIVE);
+	BOOL_VAL(x3) = FALSE;
+
+	moveframe(o_1, x4);
+	FREEexecs = x5;
+	FREEopds = o_1;
+	locked = TRUE;
+
+	return OK;
+}
+
+L x_op_serialize(void) {
+	if (o_1 < FLOORopds) return OPDS_UNF;
+	if (x_1 < FLOORexecs) return EXECS_UNF;
+	if (TAG(o_1) != BOOL) return OPD_CLA;
+	if (TAG(x_1) != BOOL) return EXECS_COR;
+	
+	serialized = BOOL_VAL(x_1);
+	if (! BOOL_VAL(o_1)) FREEexecs = x_1;
+	else {
+		TAG(x_1) = OP; ATTR(x_1) = ACTIVE;
+		OP_NAME(x_1) = (L) "stop"; OP_CODE(x_1) = (L) op_stop;
+	}
+	FREEopds = o_1;
+	return OK;
+}
+
+/* ~active | -- */
+L op_serialize(void) {
+	if (o_1 < FLOORopds) return OPDS_UNF;
+	if (CEILexecs < x5) return EXECS_OVF;
+	if (! (ATTR(o_1) & ACTIVE)) return OPD_ATR;
+
+	TAG(x1) = BOOL; ATTR(x1) = 0;
+	BOOL_VAL(x1) = serialized;
+
+	TAG(x2) = OP; ATTR(x2) = ACTIVE;
+	OP_NAME(x2) = (L) "x_serialize"; OP_CODE(x2) = (L) x_op_serialize;
+
+	TAG(x3) = BOOL; ATTR(x3) = (STOPMARK | ACTIVE);
+	BOOL_VAL(x3) = FALSE;
+
+	moveframe(o_1, x4);
+	FREEexecs = x5;
+	FREEopds = o_1;
+	serialized = TRUE;
+
+	return OK;
 }
 
 /*------------------------------------- 'halt' 
@@ -40,17 +100,25 @@ L op_setlock(void)
 
 static L x_op_halt(void)
 {
+	if (x_1 < FLOORexecs) return EXECS_UNF;
+	if (TAG(x_1) != BOOL) return EXECS_COR;
   if (halt_flag) { FREEexecs = x2; return(DONE); }
-return(OK);
+	locked = BOOL_VAL(x_1);
+	FREEexecs = x_1;
+	return(OK);
 }
 
 L op_halt(void)
 {
-TAG(x1) = OP; ATTR(x1) = ACTIVE;
-OP_NAME(x1) = (L)"x_halt"; OP_CODE(x1) = (L)x_op_halt;
-FREEexecs = x2;
-halt_flag = TRUE;
-return(DONE);
+	if (x2 >= CEILexecs) return EXECS_OVF;
+
+	TAG(x1) = BOOL; ATTR(x1) = 0;
+	BOOL_VAL(x1) = locked;
+	TAG(x2) = OP; ATTR(x2) = ACTIVE;
+	OP_NAME(x2) = (L)"x_halt"; OP_CODE(x2) = (L)x_op_halt;
+	FREEexecs = x3;
+	halt_flag = TRUE;
+	return DONE;
 }
 
 /*------------------------------------- 'continue'
@@ -83,17 +151,19 @@ L op_setconsole(void)
 }
 
 /*-------------------------------------- 'console'
-    -- | consolesocket
+    -- | consolesocket or null (if stderr)
 
   - returns a null object of type 'socket' that refers to
     the current console socket (or 'stderr' for default)
 */
 
-L op_console(void)
-{
+L op_console(void) {
   if (o1 > CEILopds) return (OPDS_OVF);
-  TAG(o1) = NULLOBJ | SOCKETTYPE; 
-  LONG_VAL(o1) = consolesocket;
+  TAG(o1) = NULLOBJ;
+  if (consolesocket != LINF) {
+      TAG(o1) |= SOCKETTYPE;
+      LONG_VAL(o1) = consolesocket;
+  }
   FREEopds = o2;
   return(OK);
 }
@@ -184,6 +254,7 @@ L op_toconsole(void)
 L op_error(void)
 {
 L e, nb, atmost; B *m, strb[256], *p;
+L ret;
 
 p = strb; atmost = 255;
 if (o_4 < FLOORopds) goto baderror;
@@ -213,17 +284,21 @@ if (!VALUE(o_1,&e)) goto baderror;
  VALUE_BASE(o_4) = (L)strb; ARRAY_SIZE(o_4) = nb;
  FREEopds = o_3;
  op_toconsole();
- return(op_halt());
+ if ((ret = op_halt()) == DONE) return DONE;
+
+ nb = snprintf(p, atmost, "** Error in internal halt!\n");
+ goto baderror2;
 
 baderror: 
-nb = snprintf(p,atmost,
-   "**Error with corrupted error info on operand stack!\n");
-op_abort();
+ nb = snprintf(p,atmost,
+			   "**Error with corrupted error info on operand stack!\n");
+baderror2:
+ op_abort();
  nb += (L)(p - strb);
  TAG(o1) = ARRAY | BYTETYPE; ATTR(o1) = READONLY;
  VALUE_BASE(o1) = (L)strb; ARRAY_SIZE(o1) = nb;
  FREEopds = o2;
-return(op_toconsole());
+ return(op_toconsole());
 }
 
 /*-------------------------------------- 'errormessage'
@@ -323,29 +398,6 @@ static void maketinysetup(void)
   moveframe(msf,cmsf);
 }
 
-/*------------------------------------------------closealllibs
- * walks through the libs at over the vm ceil and closes
- * the associated shared library handle
- */
-static void closealllibs(void)
-{
-    const char * e;
-    void* handle;  
-    B* lib = NULL;
-    while((lib = nextlib(lib)) !=  NULL)
-      if ((handle = (void*) LIB_HANDLE(lib)) != NULL) {
-	if (lt_dlclose((lt_dlhandle)handle)) {
-	  e = lt_dlerror();
-	  fprintf(stderr, "dlclose: %s\n", e ? e : "--");
-        }
-      }
-
-    if (lt_dlexit()) {
-      e = lt_dlerror();
-      fprintf(stderr, "dlexit: %s\n", e ? e : "--");
-    }
-}
-
 /*-------------------------------------------- vmresize
     <L nopds ndicts nexecs nVM/MB userdictsize > | bool
                                             null | true
@@ -368,8 +420,7 @@ static L VMRESIZE_ERR(L err, BOOLEAN bool) {
 L op_vmresize(void)
 {
   L nb; B *userdict, *sysdict;
-	L retc = OK;
-	B* newDmemory;
+  B* newDmemory;
 
   if (o_1 < FLOORopds) return VMRESIZE_ERR(OPDS_UNF, FALSE);
 	FREEopds = o_1;
@@ -413,13 +464,8 @@ L op_vmresize(void)
       moveframe(userdict-FRAMEBYTES,FREEdicts);
       FREEdicts += FRAMEBYTES;
 
+	  initialize_plugins();
       setupdirs();
-
-      if (lt_dlinit()) {
-				const char* e = lt_dlerror();
-				fprintf(stderr, "dlinit: %s\n", e ? e: "--");
-				error(EXIT_FAILURE, 0, "Can't dlinit");
-      }
     }
 
   if (chdir(original_dir)) error(EXIT_FAILURE,errno,"chdir");
@@ -437,157 +483,6 @@ L op_vmresize(void)
  * --- | --- <<all non-server sockets closed>>
  */
 L op_killsockets(void) {return KILL_SOCKS;}
-
-/***************************************************nextlib
- * dict or null | nextdict true
- *              | false
- * takes a dictionary (of a lib or sysdict) that lives
- * over the ceiling and walks up the tree searching for the next
- * one.  False if no further dicts, and null finds the first
- * one over ceiling.  Dicts are ordered in reverse of loading,
- * i.e., sysdict is last, null returns last lib loaded.
- * */
-L op_nextlib(void)
-{
-    B* lastlib;
-    
-    if (o_1 < FLOORopds) return OPDS_UNF;
-    
-    switch (TAG(o_1))
-    {
-        case (DICT | OPLIBTYPE):
-            lastlib = VALUE_PTR(o_1) - FRAMEBYTES;
-            if (! LIB_TYPE(lastlib))
-            {
-                TAG(o_1) = BOOL;
-                ATTR(o_1) = 0;
-                BOOL_VAL(o_1) = FALSE;
-                return OK;
-            }
-            break;
-            
-        case NULLOBJ: lastlib = NULL; break;
-        default: return OPD_TYP;
-    }
-
-    if (CEILopds < o2) return OPDS_OVF;
-    if (! (lastlib = nextlib(lastlib))) return CORR_OBJ;
-
-    moveframe(lastlib, o_1);
-
-    TAG(o1) = BOOL;
-    ATTR(o1) = 0;
-    BOOL_VAL(o1) = TRUE;
-    FREEopds = o2;
-
-    return OK;
-}
-
-    
-    
-/******************************************************loadlib
- * The library loading mechanism
- * (dir) (file) |
- * loads the shared library, via its ll_export variable
- * and creates an opdict containing all exported ops
- * placed above the vm ceiling
- * a library can only be loaded once between vmresize's
- * or an error will be signalled
- * */
-
-void* libsym(void* handle, const char* symbol) 
-{
-    void* r;
-    const char* e;
-    
-    if (! (r = (void*) lt_dlsym((lt_dlhandle) handle, symbol))) {
-        e = lt_dlerror(); if (! e) e = "??";
-        lt_dlclose((lt_dlhandle) handle);
-        fprintf(stderr, "Symbol not found: %s: %s\n", symbol, e);
-    }
-    return r;
-}
-
-#define LIB_IMPORT(var, type, name)				\
-  if (! (var = (type) lt_dlsym((lt_dlhandle)handle, #name))) {	\
-    fprintf(stderr, "Symbol not found: %s in %s\n",		\
-	    #name, FREEvm);					\
-    return LIB_EXPORT;						\
-  }
-
-L op_loadlib(void)
-{
-    UL type;
-    void *handle;
-    B** ops;
-    L* errc;
-    B** errm;
-    UL* libtype;
-    B* oldCEILvm;
-    B* oldFREEvm;
-    B* sysdict;
-
-    B* frame;
-    B* dict;
-
-    oldCEILvm = CEILvm;
-    oldFREEvm = FREEvm;
-    
-    if (o_2 < FLOORopds) return OPDS_UNF;
-    if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
-    if (TAG(o_2) != (ARRAY | BYTETYPE)) return OPD_ERR;
-
-    if (FREEvm + ARRAY_SIZE(o_1) + ARRAY_SIZE(o_2) + 1 > CEILvm)
-      return VM_OVF;
-    
-    strncpy(FREEvm, VALUE_PTR(o_2), ARRAY_SIZE(o_2));
-    strncpy(FREEvm + ARRAY_SIZE(o_2), VALUE_PTR(o_1), ARRAY_SIZE(o_1));
-    FREEvm[ARRAY_SIZE(o_2) + ARRAY_SIZE(o_1)] = '\0';
-    
-    if (! (handle = (void*) lt_dlopen(FREEvm)))
-    {                                          
-        const char* e;                         
-        fprintf(stderr, "%s\n", (e = lt_dlerror()) ? e : "??");
-        return LIB_LOAD;
-    }
-
-        // loop over super ceil region, looking for first dict for type
-        // and looking for sysop to stop
-        // check handles on all libs but sysdict
-        // assumed that sysdict has already been placed
-    type = 0;
-    frame = NULL;
-  ll_type:
-    if (! (frame = nextlib(frame))) return CORR_OBJ;
-    if (! type) type = LIB_TYPE(frame) + 1;
-    if (LIB_TYPE(frame))
-    {
-        if ((L) handle == LIB_HANDLE(frame)) return LIB_LOADED;
-        goto ll_type;
-    }
-    
-    LIB_IMPORT(ops, B**, ll_export);
-    LIB_IMPORT(errc, L*, ll_errc);
-    LIB_IMPORT(errm, B**, ll_errm);
-    LIB_IMPORT(libtype, UL*, ll_type);
-
-    *libtype = type << 16;
-    if ((dict = makeopdict((B*) ops, errc, errm)) == (B*) -1L)
-    {
-        lt_dlclose((lt_dlhandle)handle);
-        FREEvm = oldFREEvm;
-        CEILvm = oldCEILvm;
-        return VM_OVF;
-    }
-
-    LIB_TYPE(dict - FRAMEBYTES) = type;
-    LIB_HANDLE(dict - FRAMEBYTES) = (L) handle;
-    FREEopds = o_2;
-
-    sysdict = VALUE_PTR(FLOORdicts);
-    if (! mergedict(dict, sysdict)) return LIB_MERGE;
-    return OK;
-}
 
 /*------------------------------------------- Xconnect
      (hostname:screen#) | --
@@ -619,28 +514,34 @@ L op_Xconnect(void)
   if (o_1 < FLOORopds) return(OPDS_UNF);
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
   if (ARRAY_SIZE(o_1) > 79) return(RNG_CHK);
-  moveB((B *)VALUE_BASE(o_1), displayname, ARRAY_SIZE(o_1));
-  displayname[ARRAY_SIZE(o_1)] = '\000';
-
-  dvtdisplay = XOpenDisplay(displayname);
-  if (dvtdisplay != NULL)
-  {
-      setenv("DISPLAY", displayname, 1);
-      dvtscreen = XDefaultScreenOfDisplay(dvtdisplay);
-      dvtrootwindow = XDefaultRootWindow(dvtdisplay);
-      if (XGetWindowAttributes(dvtdisplay,dvtrootwindow,&rootwindowattr) == 0)
-          error(EXIT_FAILURE,0,"Xwindows: no root window attributes");
-      ndvtwindows = 0; ncachedfonts = 0;
-      dvtgc = XCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
-      xsocket = ConnectionNumber(dvtdisplay);
-      FD_SET(xsocket, &sock_fds);
-      FREEopds = o_1; 
-			XSetErrorHandler(xerrorhandler);
-			//XSetIOErrorHandler(xerrorhandler);
-			return(OK);
+  if (ARRAY_SIZE(o_1) > 0) {
+    moveB((B *)VALUE_BASE(o_1), displayname, ARRAY_SIZE(o_1));
+    displayname[ARRAY_SIZE(o_1)] = '\000';
+    dvtdisplay = XOpenDisplay(displayname);
   }
-  *displayname = '\0';
-  return(X_BADHOST);
+  else if ((dvtdisplay = XOpenDisplay(NULL))) {
+    strncpy(displayname, DisplayString(dvtdisplay), sizeof(displayname)-1);
+    displayname[sizeof(displayname)-1] = '\000';
+  };
+
+  if (! dvtdisplay) {
+    *displayname = '\0';
+    return X_BADHOST;
+  };
+
+  setenv("DISPLAY", displayname, 1);
+  dvtscreen = XDefaultScreenOfDisplay(dvtdisplay);
+  dvtrootwindow = XDefaultRootWindow(dvtdisplay);
+  if (XGetWindowAttributes(dvtdisplay,dvtrootwindow,&rootwindowattr) == 0)
+    error(EXIT_FAILURE,0,"Xwindows: no root window attributes");
+  ndvtwindows = 0; ncachedfonts = 0;
+  dvtgc = XCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
+  xsocket = ConnectionNumber(dvtdisplay);
+  FD_SET(xsocket, &sock_fds);
+  FREEopds = o_1; 
+  XSetErrorHandler(xerrorhandler);
+  //XSetIOErrorHandler(xerrorhandler);
+  return OK;
 #endif
 }
 

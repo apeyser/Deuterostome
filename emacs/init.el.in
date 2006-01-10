@@ -6,11 +6,13 @@
   (setq load-path (append (list nil dmlispdir) load-path)))
 (setenv "TERM" "ansi")
 
-(setq init-el-compile nil)
-(eval-when-compile (setq init-el-compile t))
-(eval-and-compile (if (not init-el-compile) (require 'd-mode)))
+;(setq init-el-compile nil)
+;(eval-when-compile (setq init-el-compile t))
+;(eval-and-compile (if (not init-el-compile) (require 'd-mode)))
 
-(eval-and-compile (if (not init-el-compile) (require 'd-comint-mode)))
+;(eval-and-compile (if (not init-el-compile) (require 'd-comint-mode)))
+(require 'd-mode)
+(require 'd-comint-mode)
 
 ;; (setenv "DVT" "some-dvt-path") ; overrides bindir/dvt
 ;; (setenv "EDVT" "some-dvt-path") ; overrides bindir/dvt
@@ -19,4 +21,5 @@
 ;; (setenv "DVTSCRIPTPATH" "some-path-to-scripts") ; overrides dmstartdir
 ;; (setenv "DMLISPDIR" "some-path-to-emacs-code") ; overrides pkglispdir
 ;; (setq explicit-dmlispdir "some-path-to-emacs-code") ; overrides pkglispdir
+;; (setq "DMCONFDIR" "some-path-to-dmconf") ; overrides dmconfdir
 

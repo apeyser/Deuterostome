@@ -31,18 +31,6 @@ AC_DEFUN([CF_AC_CHECK_SIZEOF], [dnl
   undefine([AC_CV_NAME])dnl
 ])
 
-AC_DEFUN([CF_AC_ARG_ENABLE], [dnl
-  AC_ARG_ENABLE([$1], [  --enable-$1=[$2]     Sets $2 (default $4)], 
-	[dnl
-		case "$enableval" in
-		  no|yes) $3="$4";;
-			*) $3="$enableval";;
-		esac dnl
-		], [$3="$4"])
-  AC_SUBST([$3])dnl
-  AC_DEFINE_UNQUOTED([$3], [$$3], [$2])dnl
-])
-
 dnl
 dnl CF_DEF_TARGET([target-pattern], [var-to-define])
 dnl wildcard matches target-pattern to target, and if matches, var is defined
@@ -66,17 +54,32 @@ AC_DEFUN([CF_ON_TARGET], [dnl
   esac dnl
 ])
 
+AC_DEFUN([CF_IF_UNDEF], [dnl
+  AC_MSG_CHECKING([if $1 is set])
+  if test "${$1-set}" == set ; then
+    AC_MSG_RESULT([no])
+    $2
+  else
+    AC_MSG_RESULT([yes])
+  fi
+])
+
 AC_DEFUN([CF_GCC_COMPILER_OPTION], [dnl
   AC_REQUIRE([AC_PROG_CC])dnl
   AC_REQUIRE([AC_PROG_LIBTOOL])dnl
+  CF_GCC_COMPILER_OPTION_INT([$1],ifelse([$2],[],[CFLAGS],[$2]))
+])
+
+AC_DEFUN([CF_GCC_COMPILER_OPTION_INT], [
+  AC_SUBST([$2])
   if test "x$GCC" == "xyes" ; then
     AC_REQUIRE([LT_AC_PROG_SED])dnl
-    AC_MSG_CHECKING([for compiler options $2])
+    AC_MSG_CHECKING([for compiler options $1])
     AC_LANG_PUSH(C)
     CF_GCO_S=
     lt_simple_compile_test_code="int some_variable = 0;\n"
     printf "$lt_simple_compile_test_code" > conftest.$ac_ext
-    lt_compiler_flag="$2"
+    lt_compiler_flag="$1"
     lt_compile=`echo "$ac_compile" | $SED \
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [[^ ]]*conftest\.: $lt_compiler_flag&:; t' \
@@ -98,43 +101,60 @@ AC_DEFUN([CF_GCC_COMPILER_OPTION], [dnl
     $rm conftest*
  
     if test x"$CF_GCO_S" = xyes ; then
-        AC_MSG_RESULT([Adding $2 to $1])
-        $1="$$1 $2"
+        AC_MSG_RESULT([Adding])
+        $2="$$2 $1"
     else
-        AC_MSG_RESULT([Failed, not adding $2 to $1])
+        AC_MSG_RESULT([Failed, not adding])
     fi
     AC_LANG_POP(C)
   fi dnl
 ])
 
-AC_DEFUN([CF_AC_ARG_WITH], [dnl
-  AC_ARG_WITH([$1],
-              [  --with-$1=[$4]    $2 ($3)],
-              [dnl
-							  case "$withval" in
-								  no|yes) $1='$3';;
-									*) eval $1="'$withval'";;
-							  esac dnl
-							],
-              [$1='$3'])
-  AC_SUBST([$1])dnl
+AC_DEFUN([CF_AC_ARG_VAR], [dnl
+  changequote(<<, >>)dnl
+  define(<<CF_AC_CV_ARG>>, translit($1, [a-z], [A-Z]))dnl
+  changequote([, ])
+  cf_ac_cv_arg_val="CF_AC_CV_ARG"
+  AC_MSG_CHECKING([if ${cf_ac_cv_arg_val} is set])
+  AC_ARG_VAR(CF_AC_CV_ARG, [$2, default=$3])
+  if test "${CF_AC_CV_ARG-set}" == set ; then $1="$3"; fi
+  AC_SUBST($1)
+  AC_DEFINE_UNQUOTED(CF_AC_CV_ARG, [${$1}], [$2])
+  AC_MSG_RESULT([setting to ${$1}])dnl
 ])
 
-AC_DEFUN([CF_AC_ARG_WITH_IF], [dnl
-  AC_ARG_WITH([$1],
-              [  --with-$1=[$4]    $2 ($3)],
-              [dnl
-							  case "$withval" in
-								  no|yes) $1='$3';;
-									*) eval $1="'$withval'";;
-							  esac dnl
-							],
-              [if test X"${$1}" = X ; then $1='$3' ; fi])
-  AC_SUBST([$1])dnl
+AC_DEFUN([CF_AC_ARG_VAR_QUOTE], [dnl
+  changequote(<<, >>)dnl
+  define(<<CF_AC_CV_ARG>>, translit($1, [a-z], [A-Z]))dnl
+  changequote([, ])
+  cf_ac_cv_arg_val="CF_AC_CV_ARG"
+  AC_MSG_CHECKING([if ${cf_ac_cv_arg_val} is set])
+  AC_ARG_VAR(CF_AC_CV_ARG, [$2, default=$3])
+  if test "${CF_AC_CV_ARG+set}" == set ; then 
+     $1="${CF_AC_CV_ARG}"
+  else
+     CF_AC_CV_ARG="$3"
+  fi
+  if test "${$1-set}" == set ; then $1="${CF_AC_CV_ARG}" ; fi
+  AC_SUBST($1)
+  AC_DEFINE_UNQUOTED(CF_AC_CV_ARG, ["${$1}"], [$2])dnl
+  AC_MSG_RESULT([setting to ${$1}])dnl
 ])
 
-AC_DEFUN([CF_AC_ARG_WITH_DIR], [dnl
-  CF_AC_ARG_WITH([$1], [$2], [$3], [dir])dnl
+AC_DEFUN([CF_AC_ARG_DIR], [dnl
+  changequote(<<, >>)dnl
+  define(<<CF_AC_CV_DIR>>, translit($1, [a-z], [A-Z]))dnl
+  changequote([, ])dnl
+  cf_ac_cv_dir_val="CF_AC_CV_DIR"
+  AC_MSG_CHECKING([if ${cf_ac_cv_dir_val} is set])
+  AC_ARG_VAR(CF_AC_CV_DIR, [$2, default=$3])
+  if test "${CF_AC_CV_DIR-set}" == set ; then 
+    $1="$3"
+  else
+    $1="${CF_AC_CV_DIR}"
+  fi
+  AC_SUBST([$1])
+  AC_MSG_RESULT([setting to ${$1}])dnl
 ])
 
 AC_DEFUN([CF_WIN_DLL_IMPORT], [dnl
@@ -172,29 +192,86 @@ AC_DEFUN([CF_UNSAVE_VAR], [dnl
   $1="$cf_save_var_$1" dnl
 ])
 
-AC_DEFUN([CF_VAR_COLLAPSED], [dnl
-  CF_SAVE_VAR([prefix])
-  CF_SAVE_VAR([exec_prefix])
-  if test x"$prefix" = xNONE ; then
-    prefix="$ac_default_prefix"
-  fi
-  if test x"$exec_prefix" = xNONE ; then
-    exec_prefix="$prefix"
-  fi
-dnl
-  AC_MSG_CHECKING([value of \${$2}])
-  eval eval eval eval eval $1_$2="$$2"
-  AC_SUBST([$1_$2])dnl
-  AC_MSG_RESULT([setting \${$1_$2} to ${$1_$2}])
-dnl
-  CF_UNSAVE_VAR([exec_prefix])
-  CF_UNSAVE_VAR([prefix])dnl
+AC_DEFUN([CF_AM_CONDITIONAL], [dnl
+  AM_CONDITIONAL([ENABLE_$1], [$2]) dnl
+])
+
+AC_DEFUN([CF_AM_ENABLE_DO], [dnl
+  if test "${enable_$4-set}" == set ; then enable_$4='$3'; fi
+  if test x"${enable_$4}" == x"yes" ; then enable_$4='$3'; fi
+  AC_ARG_ENABLE([$1], [AC_HELP_STRING([--enable-$1], [$2 ($3)])])
+  CF_AM_CONDITIONAL($5, [test "${enable_$4-no}" != "no"])
+  if test "${enable_$4-no}" == "no" ; then 
+    AC_MSG_RESULT([no, not enabled])
+  else
+    AC_MSG_RESULT([yes, enabled (${enable_$4})])
+  fi dnl
 ])
 
 AC_DEFUN([CF_AM_ENABLE], [dnl
-	if test x"$enable_$1" = x ; then enable_$1='$3'; fi
-  AC_ARG_ENABLE([$1], [  --enable-$1     $2 ($3)])
-	AM_CONDITIONAL([$1], [test x"$enable_$1" = x"yes"])dnl
+  AC_MSG_CHECKING([if $1 is enabled])
+  changequote(<<, >>)dnl
+  define(<<CF_AM_CV_ENABLE>>, 
+    patsubst(translit($1, [a-z], [A-Z]), <<->>, <<_>>))dnl
+  define(<<CF_AM_CVS_ENABLE>>, patsubst($1, <<->>, <<_>>))dnl
+  changequote([, ])dnl
+  CF_AM_ENABLE_DO([$1], [$2], [$3], CF_AM_CVS_ENABLE, CF_AM_CV_ENABLE, )dnl
+])
+
+AC_DEFUN([CF_AC_DEFINE_IF_ENABLED_DEFINE], [dnl
+  case "${enable_$2-no}" in
+    yes) cf_ac_define_if_enabled_define=1 ;;
+	*) cf_ac_define_if_enabled_define="${enable_$2-no}" ;;
+  esac
+  dnl
+  if test "${cf_ac_define_if_enabled_define}" != "no" ; then
+    AC_DEFINE_UNQUOTED([ENABLE_$1], [${cf_ac_define_if_enabled_define}], [$3])
+  fi
+  dnl
+])
+
+AC_DEFUN([CF_AC_DEFINE_IF_ENABLED_SUBST], [dnl
+  AC_SUBST([ENABLE_$1])
+  ENABLE_$1="${enable_$2-no}"
+])
+
+AC_DEFUN([CF_AC_DEFINE_IF_ENABLED], [dnl
+  changequote(<<, >>)dnl
+  define(<<CF_AC_DEFINE_IF_ENABLED_CV>>, 
+    patsubst(translit($1, [a-z], [A-Z]), <<->>, <<_>>))dnl
+  define(<<CF_AC_DEFINE_IF_ENABLED_CVS>>, patsubst($1, <<->>, <<_>>))dnl
+  changequote([, ])dnl
+  CF_IF_ENABLED([$1], [
+	CF_AC_DEFINE_IF_ENABLED_DEFINE(CF_AC_DEFINE_IF_ENABLED_CV, 
+      CF_AC_DEFINE_IF_ENABLED_CVS, [$2])
+  ])
+  CF_AC_DEFINE_IF_ENABLED_SUBST(CF_AC_DEFINE_IF_ENABLED_CV, 
+    CF_AC_DEFINE_IF_ENABLED_CVS)
+])
+
+AC_DEFUN([CF_AC_ENABLE], [dnl
+  CF_AM_ENABLE([$1], [$2], [$3])
+  CF_AC_DEFINE_IF_ENABLED([$1], [$2])
+])
+
+AC_DEFUN([CF_IF_ENABLED_DO], [
+  ifelse([$2],[],,[dnl
+    if test x"${enable_$1-no}" != x"no" ; then 
+       $2 
+    fi
+  ]) dnl
+  ifelse([$3],[],,[dnl 
+    if test x"${enable_$1-no}" == x"no" ; then 
+      $3 
+    fi
+  ])dnl
+])
+
+AC_DEFUN([CF_IF_ENABLED], [dnl
+  changequote(<<, >>)dnl
+  define(<<CF_IF_ENABLED_CVS>>, patsubst($1, <<->>, <<_>>))dnl
+  changequote([, ])dnl
+  CF_IF_ENABLED_DO(CF_IF_ENABLED_CVS, [$2], [$3])
 ])
 
 AC_DEFUN([CF_AM_PROG], [dnl
@@ -204,31 +281,31 @@ AC_DEFUN([CF_AM_PROG], [dnl
 
 AC_DEFUN([CF_EMACS_ENABLED], [dnl
   AC_REQUIRE([AM_PATH_LISPDIR])
-	AC_MSG_CHECKING([if emacs is enabled (\$EMACS != no)])
-	if test x"$EMACS" = xno ; then 
-    AM_CONDITIONAL([EMACS_ENABLED], [false])
-		AC_MSG_RESULT([emacs NOT enabled])
+  AC_MSG_CHECKING([if emacs is enabled (\$EMACS != no)])
+  if test x"$EMACS" = xno ; then 
+  AM_CONDITIONAL([ENABLE_EMACS], [false])
+    AC_MSG_RESULT([emacs NOT enabled])
   else
-	  AM_CONDITIONAL([EMACS_ENABLED], [:])
-		AC_MSG_RESULT([emacs enabled])
+	AM_CONDITIONAL([ENABLE_EMACS], [:])
+	AC_MSG_RESULT([emacs enabled])
   fi dnl
 ])
 
 AC_DEFUN([CF_SET_EXPR], [dnl
-	AC_SUBST([$1])
+  AC_SUBST([$1])
   $1=`expr $2` dnl
 ])
 
 AC_DEFUN([CF_SUBST_DEFINE], [dnl
   AC_DEFINE([$1], [$2], [$3])
-	AC_SUBST([$1])
-	$1='ifelse([$4], ,[$2],[$4])'dnl
+  AC_SUBST([$1])
+  $1='ifelse([$4], ,[$2],[$4])'dnl
 ])
 
 AC_DEFUN([CF_SUBST_DEFINE_UNQUOTED], [dnl
   AC_DEFINE_UNQUOTED([$1], [$2], [$3])
-	AC_SUBST([$1])
-	$1="ifelse([$4], ,[$2],[$4])" dnl
+  AC_SUBST([$1])
+  $1="ifelse([$4], ,[$2],[$4])" dnl
 ])
 
 AC_DEFUN([CF_AC_PATH_XTRA], [dnl
@@ -243,4 +320,30 @@ AC_DEFUN([CF_AC_PATH_XTRA], [dnl
   AC_SUBST(X_DISPLAY_MISSING) 
 	AC_SUBST(X_LDFLAGS) dnl
 ])
+    
+AC_DEFUN([CF_ACX_PTHREAD], [dnl
+  NO_PTHREAD_CFLAGS="${CFLAGS}"
+  AC_SUBST([NO_PTHREAD_CFLAGS])
+  NO_PTHREAD_CC="${CC}"
+  AC_SUBST([NO_PTHREAD_CC])
+  NO_PTHREAD_LIBS="${LIBS}"
+  AC_SUBST([NO_PTHREAD_LIBS])
+  CF_IF_ENABLED([$1], [
+    ACX_PTHREAD([
+	  AC_MSG_CHECKING([flags for pthreads])
+      CFLAGS="${CFLAGS} ${PTHREAD_CFLAGS}"
+	  CC="${PTHREAD_CC}"
+      LIBS="${PTHREAD_LIBS} ${LIBS}"
+      AC_MSG_RESULT([found])
+      AC_DEFINE([HAVE_PTHREAD], [1], 
+        [Define if you have POSIX threads libraries and header files.])
+    ], [  
+	  AC_MSG_CHECKING([flags for pthreads])
+      AC_MSG_ERROR([No threads found, disable threads])])
+  ], [
+   AC_MSG_CHECKING([flags for pthreads])
+   AC_MSG_RESULT([$1 disabled])
+  ])
+])
+
     

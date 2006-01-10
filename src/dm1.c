@@ -5,6 +5,7 @@
 
 #include "dm.h"
 #include <math.h>
+#include <stdio.h>
 
 /* NOTE: the '~' enjoys some fortuitous encoding */
 
@@ -93,6 +94,12 @@ The lower nipple of a numeral type specifies one of:
      4 - double float
 */
 
+#define RET_BAD_TOK do {                                                \
+        fprintf(stderr, "Bad Char: %hhx, %c\n",                       \
+                (unsigned char) c, (unsigned char) c);                  \
+        return 3;                                                       \
+    } while (0)
+
 static W scan(void)
 {
 W kk,type,num;  UW k;
@@ -127,7 +134,7 @@ if ((k & 0x401E) == 0x4000)                       /* numeral          */
         *(vm_token++) = c; vm_bytes++;
         if (0 == (c = GETC())) goto num_1;
         k = ascii[c];
-        if (k == 0) return(3);
+        if (k == 0) RET_BAD_TOK;
         } while (k & 0x4000);
      UNGETC();
 num_1:
@@ -140,7 +147,7 @@ else if ((k & 0x1003) == 0x1000)                 /* /name            */
      type = 0x05;
      if (0 == (c = GETC())) return(2);
      k = ascii[c];
-     if (k == 0) return(3);
+     if (k == 0) RET_BAD_TOK;
      if (((k & 0x0800) == 0) || ((k & 0x403F) == 4000)) return(2);
      goto name_1; 
      }
@@ -149,7 +156,7 @@ else if ((k & 0x1003) == 0x1002)                 /* ~                */
      type = 0x0105;
      if (0 == (c = GETC())) return(2);
      k = ascii[c];
-     if (k == 0) return(3);
+     if (k == 0) RET_BAD_TOK;
      if ((k & 0x0404) == 0x0404) return(0x010C); /* ~[               */
      if (((k & 0x0800) == 0) || ((k & 0x403F) == 4000)) return(2);
      goto name_1;                                /* ~name            */
@@ -163,7 +170,7 @@ name_1:
         *(vm_token++) = c; vm_bytes++;
         if (0 == (c = GETC())) goto name_2;;
         k = ascii[c];
-        if (k == 0) return(3);
+        if (k == 0) RET_BAD_TOK;
         } while (k & 0x0800);
      UNGETC();
 name_2:
@@ -189,25 +196,25 @@ else if ((k & 0x0103)  == 0x0100)               /* string  */
 string_1:
      if (0 == (c = GETC())) return(2);
      k = ascii[c];
-     if (k == 0) return(3);
+     if (k == 0) RET_BAD_TOK;
      if (k == 0x0101) goto string_2;
      if ((k & 0x1001) == 0x1001)              /* control sequence   */
         {
         if (0 == (c = GETC())) return(2);
         k = ascii[c];
-        if (k == 0) return(3);
+        if (k == 0) RET_BAD_TOK;
         if ((k & 0x4040) == 0x4040)
           {
           num = c - '0';
           if (0 == (c = GETC())) return(2);
           k = ascii[c];
-          if (k == 0) return(3);
+          if (k == 0) RET_BAD_TOK;
           if ((k & 0x4040) == 0x4040)
                {
                num = 8 * num + c - '0';
                if (0 == (c = GETC())) return(2);
                k = ascii[c];
-               if (k == 0) return(3);
+               if (k == 0) RET_BAD_TOK;
                if ((k & 0x4040) == 0x4040)
                   num = 8 * num + c - '0';
                   else  UNGETC();
@@ -235,7 +242,7 @@ string_2:
      *(vm_token++) = '\000'; vm_bytes++;
      return(7);
      }
-else return(3);                               /* garbage            */     
+else RET_BAD_TOK;                               /* garbage            */     
 }  /* of scanner */
 
 /*--------------------------- Tokenizer ---------------------------------

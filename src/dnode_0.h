@@ -6,12 +6,21 @@
 /*--- LL */
 L op_loadlib(void);
 L op_nextlib(void);
+L op_getplugindir(void);
+
+/*--- threads */
+L op_makethreads(void);
+L op_threads(void);
 
 B *sysop[] =
 {
-      "getlock",     (B*) op_getlock, 
-      "setlock",     (B*) op_setlock,
-      
+      "lock",        (B*) op_lock,
+	  "serialize",   (B*) op_serialize,
+#if ENABLE_THREADS
+	  "threads",     (B*) op_threads,
+	  "makethreads", (B*) op_makethreads,
+#endif //ENABLE_THREADS
+
 /*-- hi */
       "hi",            (B*) op_syshi,
       "libnum",        (B*) op_syslibnum,
@@ -31,7 +40,7 @@ B *sysop[] =
       "halt",           (B *)op_halt,
       "continue",       (B *)op_continue,
       "vmresize",       (B *)op_vmresize,
-			"killsockets",    (B *)op_killsockets,
+	  "killsockets",    (B *)op_killsockets,
       "getmyport",      (B *)op_getmyport,
 
 /*-- network */
@@ -42,8 +51,8 @@ B *sysop[] =
       "getmyname",      (B *)op_getmyname,
 
 /*-- X windows */
-			"Xwindows",       (B *)op_Xwindows,
-			"Xwindows_",      (B *)op_Xwindows_,
+	  "Xwindows",       (B *)op_Xwindows,
+	  "Xwindows_",      (B *)op_Xwindows_,
       "Xconnect",       (B *)op_Xconnect,
       "Xdisplayname",   (B *)op_Xdisplayname,
       "Xdisconnect",    (B *)op_Xdisconnect,
@@ -58,6 +67,8 @@ B *sysop[] =
       "drawsymbols",    (B *)op_drawsymbols,
       "fillrectangle",  (B *)op_fillrectangle,
       "drawtext",       (B *)op_drawtext,
+      "makewindowtop",  (B *)op_makewindowtop,
+      "setinputfocus",  (B *)op_setinputfocus,
 
 /*-- operand stack */
       "pop",            (B *)op_pop,
@@ -170,6 +181,7 @@ B *sysop[] =
       "readfile",       (B *)op_readfile,
       "writefile",      (B *)op_writefile,
       "findfiles",      (B *)op_findfiles,
+	  "findfile",       (B *)op_findfile,
       "readboxfile",    (B *)op_readboxfile,
       "writeboxfile",   (B *)op_writeboxfile,
       "tosystem",       (B *)op_tosystem,
@@ -203,8 +215,9 @@ B *sysop[] =
       "dilute_add",     (B *)op_dilute_add,
       "matvecmul",      (B *)op_matvecmul,
       "getstartupdir",  (B *)op_getstartupdir,
+      "getconfdir",     (B *)op_getconfdir,
       "gethomedir",     (B *)op_gethomedir,
-
+	  "getplugindir",   (B *)op_getplugindir,
       "",               (B *)0L, 
  };     
    
@@ -229,7 +242,8 @@ L syserrc[] =
     CORR_OP, BADBOX, BAD_MSG, NOSYSTEM, INV_MSG, NOT_HOST, BAD_FMT,
     LIB_LOAD, LIB_EXPORT, LIB_LINK, LIB_ADD, LIB_LOADED, LIB_OVF, LIB_MERGE,
     NO_XWINDOWS, X_ERR, X_BADFONT, X_BADHOST,
-		VMR_ERR, VMR_STATE,
+	VMR_ERR, VMR_STATE, ILL_OPAQUE, FOLD_OPAQUE, NOPLUGINS,
+	MEM_OVF,
     0L,
 };
 
@@ -281,12 +295,17 @@ B* syserrm[] =
     "** Library already loaded",
     "** Overflow in malloc while loading library",
     "** Unable to merge library into sysdict",
+		"** Unable to initialize loaded library",
     "** X windows unavailable",
     "** Error in X windows",
     "** Bad X windows font",
     "** Cannot connect to X server",
-		"** Cannot allocate D memory",
-		"** Memory already minimized"
+	"** Cannot allocate D memory",
+	"** Memory already minimized",
+	"** Opaque dict type mismatch",
+	"** Illegal attempt to fold opaque object",
+	"** Compiled without plugin support",
+	"** Memory exhausted",
 };
 
 // original directory for vmresize

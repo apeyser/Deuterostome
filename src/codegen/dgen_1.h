@@ -111,13 +111,13 @@ if (e < 0)
  nb += (L) (p - strb);
  toconsole(strb, nb);
 FREEopds = o_2;
-//return(op_abort());
-return ABORT;
+return(op_abort());
+//return ABORT;
 
 baderror: 
 toconsole("Error with corrupted error info on operand stack!\n", -1L);
-//return(op_abort());
-return ABORT;
+return(op_abort());
+//return ABORT;
 }
 
 /*-------------------------------------- 'errormessage'
@@ -164,9 +164,35 @@ return(OK);
    - sets the boolean object that carries ABORTMARK to TRUE
 */
 
+L x_op_abort(void) {return ABORT;}
+static BOOLEAN rabort = FALSE;
 L op_abort(void)
 {
-  return(ABORT);
+    fprintf(stderr, "Aborting..\n");
+    if (rabort) {
+        fprintf(stderr, "Recursive abort\n");
+        return ABORT;
+    }
+    if (x2 > CEILexecs) {
+        fprintf(stderr, "exec ovf abort\n");
+        return ABORT;
+    }    
+    if (FREEvm+2 >= CEILvm) {
+        fprintf(stderr, "mem ovf abort\n");
+        return ABORT;
+    }
+    
+    TAG(x1) = OP; ATTR(x1) = ACTIVE;
+    OP_NAME(x1) = (L) "x_op_abort"; OP_CODE(x1) = (L) x_op_abort;
+    TAG(x2) = ARRAY | BYTETYPE; ATTR(x2) = ACTIVE;
+    VALUE_PTR(x2) = FREEvm;
+    strncpy(FREEvm, "a_", 2);
+    ARRAY_SIZE(x2) = 2;
+    FREEvm += 2;
+
+    FREEexecs = x3;
+    rabort = TRUE;
+    return OK;
 }
 
 /*---------------------------------------------------- toconsole

@@ -415,18 +415,14 @@ L op_eq(void)
 BOOLEAN t;
 
 if (o_2 < FLOORopds) return(OPDS_UNF);
-if (CLASS(o_2) == CLASS(o_1))
-   { switch(CLASS(o_2))
-      {
+if (CLASS(o_2) == CLASS(o_1)) { 
+	switch(CLASS(o_2)) {
       case MARK: t=TRUE; break;
       case NULLOBJ: 
-				if (TYPE(o_1) != TYPE(o_2)) {t = FALSE; break;};
-				switch (TYPE(o_1)) {
-				  case SOCKETTYPE: 
+				if (TYPE(o_1) != TYPE(o_2)) t = FALSE;
+				else if (TYPE(o_1) == SOCKETTYPE)
 						t = (LONG_VAL(o_1) == LONG_VAL(o_2)) ? TRUE : FALSE;
-						break;
-				  default: t=TRUE; break;
-				};
+				else t=TRUE;
 				break;
       case NUM: t = COMPARE(o_2,o_1);
                 if (t == UN) { t = ((TEST(o_2) == UN) && (TEST(o_1) == UN));
@@ -467,19 +463,16 @@ L op_ne(void)
 BOOLEAN t;
 
 if (o_2 < FLOORopds) return(OPDS_UNF);
-if (CLASS(o_2) == CLASS(o_1))
-   { switch(CLASS(o_2))
-      {
+if (CLASS(o_2) == CLASS(o_1)) { 
+	switch(CLASS(o_2)) {
       case MARK: t=FALSE; break;
-      case NULLOBJ: 
-				if (TYPE(o_1) != TYPE(o_2)) {t = TRUE; break;};
-				switch (TYPE(o_1)) {
-				  case SOCKETTYPE:
-						t = (LONG_VAL(o_1) != LONG_VAL(o_2)) ? TRUE : FALSE;
-						break;
-				  default: t=FALSE; break;
-				};
-				break;
+	  case NULLOBJ: 
+		if (TYPE(o_1) != TYPE(o_2)) 
+		  t = TRUE;
+		else if (TYPE(o_1) == SOCKETTYPE)
+		  t = (LONG_VAL(o_1) != LONG_VAL(o_2)) ? TRUE : FALSE;
+		else t=FALSE;
+		break;
       case NUM: t = COMPARE(o_2,o_1);
                 if (t == UN) { t = ((TEST(o_2) != UN) || (TEST(o_1) != UN));
                                break; }

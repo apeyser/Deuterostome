@@ -1,11 +1,108 @@
-(defvar d-comint-mode-server t)
-(defvar d-comint-mode-compile nil)
-(eval-when-compile (setq d-comint-mode-compile t))
-(eval-and-compile (if (not d-comint-mode-compile) (require 'd-mode)))
+(require 'd-mode)
+(require 'dm-server)
 (require 'comint)
 
-(defvar explicit-dvt-file-name nil "dvt program name")
-(defvar comint-last-output-start)
+(defgroup d-comint-mode nil "Major mode for DVT shell"
+  :prefix "d-comint-mode-"
+  :group 'd-mode)
+
+(defcustom d-comint-mode-server t
+  "Startup server for emacs when loading init"
+  :type '(boolean)
+  :group 'd-comint-mode)
+
+(defcustom d-comint-mode-keep-focus t 
+  "If true, tell dvt to return input focus to dvt buffer in emacs"
+  :type '(boolean)
+  :group 'd-comint-mode)
+
+(defcustom d-comint-mode-window-size 10
+  "Number of lines for popped up dvt window"
+  :type '(integer)
+  :group 'd-comint-mode)
+
+(defcustom explicit-dvt-file-name nil "dvt program name"
+  :group 'd-comint-mode
+  :type '(choice (const nil) file))
+;;(defvar comint-last-output-start)
+(require 'comint)
+
+(defvar d-comint-mode-highlight-output 
+  'd-comint-mode-highlight-output 
+  "Face for comint output")
+(defface d-comint-mode-highlight-output
+  '((t (:foreground "black" :weight normal)))
+	"Face for comint output"
+	:group 'd-comint-mode)
+
+(defcustom d-comint-mode-activate-highlight-input nil
+  "Recolor input to a fixed face"
+  :type '(boolean)
+  :group 'd-comint-mode)
+
+(defvar d-comint-mode-highlight-input
+  'd-comint-mode-highlight-input
+  "Face for comint input")
+(defface d-comint-mode-highlight-input
+  '((t (:inherit comint-highlight-input :foreground "blue" :weight bold)))
+  "Face for comint input"
+  :group 'd-comint-mode)
+
+(defcustom d-comint-mode-frame-alist '((auto-raise . nil)
+									   (tool-bar-lines . nil)
+									   (menu-bar-lines . nil)
+									   (minibuffer . nil)
+									   (fullscreen . nil))
+  "Alist of frame properties for mini dvt window."
+  :group 'd-comint-mode
+  :type '(alist)
+  :options '((title string)
+			 (name string)
+			 (left (choice integer (list (choice (const +) (const '- )) 
+										 integer)))
+			 (top (choice integer (list (choice (const +) (const '- )) 
+										integer)))
+			 (icon-left integer)
+			 (icon-top integer)
+			 (user-position boolean)
+			 (height integer)
+			 (width integer)
+			 (user-size boolean)
+			 (fullscreen (choice 
+							(const fullwidth) 
+							(const fullheight) 
+							(const fullboth)
+							(const nil)))
+			 (minibuffer boolean)
+			 (auto-raise boolean)
+			 (auto-lower boolean)
+			 (vertical-scroll-bars boolean)
+			 (horizontal-scroll-bars boolean)
+			 (scroll-bar-width (choice integer (const nil)))
+			 (icon-type (choice boolean string))
+			 (icon-name (choice (const nil) string))
+			 (background-mode (choice (const dark) (const light)))
+			 (tty-color-mode (choice integer symbol))
+			 (display-type (choice (const color) 
+									 (const grayscale) 
+									 (const mono)))
+			 (cursor-type (choice (const box)
+									(const hollow)
+									(const nil)
+									(const bar)
+									(cons :tag "(bar . integer)" 
+										  (const bar) integer)
+									(const hbar)
+									(cons :tag "(hbar . integer)"
+										  (const hbar) integer)))
+			 (border-width integer)
+			 (internal-border-width integer)
+			 (left-fringe integer)
+			 (right-fringe integer)
+			 (unsplittable boolean)
+			 (menu-bar-lines (choice (const nil) integer))
+			 (tool-bar-lines (choice (const nil) integer))
+			 (line-spacing integer)))
 
 (defun d-comint-mode-freeze-overlay (overlay is-after begin end &optional len)
   "Prevent OVERLAY from being extended.
@@ -18,66 +115,46 @@ property."
     ;; reset the end of the overlay
     (move-overlay overlay (overlay-start overlay) begin)))
 
-(make-face 'd-comint-mode-highlight-output "Face for d-comint-output")
-(copy-face 'font-lock-type-face 'd-comint-mode-highlight-output)
-(set-face-foreground 'd-comint-mode-highlight-output "black")
-
 (defun d-comint-mode-prefilter (s)
-  (put-text-property 0 (1- (length s)) 'font-lock-face 'comint-highlight-output s)
-  s)
- 
-;; (defun d-comint-mode-filter (s)
-;;   (let ((start-marker (or comint-last-output-start (point-min-marker)))
-;; 	(end-marker (process-mark (get-buffer-process (current-buffer)))))
-;;     (save-excursion
-;;       (goto-char start-marker)
-;;       (let ((overlay (make-overlay start-marker end-marker)))
-;; 	(overlay-put overlay 
-;; 	  'modification-hooks '(d-comint-mode-freeze-overlay))
-;; 	(overlay-put overlay
-;; 	  'face 'd-comint-mode-highlight-output))
-;; ;;      (put-text-property (1- end-marker) end-marker 'face 'comint-highlight-input)
-;; )))
-
-;;       (set-extent-face make-extent
-;;   (let* ((start-marker (or comint-last-output-start (point-min-marker)))
-;; 	 (end-marker (1- (process-mark (get-buffer-process (current-buffer)))))
-;; 	 (overlay (make-overlay start-marker end-marker)))
-;;     (save-excursion
-;;       (goto-char start-marker)
-;;       (overlay-put overlay 'modification-hooks '(d-comint-mode-freeze-overlay))
-;;       (overlay-put overlay 'face 'd-comint-mode-highlight-output)
-;;       (put-text-property end-marker (1+ end-marker) 
-;; 	'face 'comint-highlight-input)
-;; )))
+  (put-text-property 0 (1- (length s)) 'font-lock-face 
+					 'd-comint-mode-highlight-output s)
+  s) 
 
 (defvar d-comint-mode-redirect-ignore nil)
 (defvar d-comint-mode-redirect-process nil)
+(defvar d-comint-mode-redirect-mode)
 (defun d-comint-mode-redirect (string)
   (if (or (not d-comint-mode-redirect-mode) d-comint-mode-redirect-ignore)
       string
     (process-send-string d-comint-mode-redirect-process string) ""))
 
+(defun d-comint-mode-highlight-input (string)
+  (when (string= string "")
+	(if d-comint-mode-activate-highlight-input
+		(put-text-property comint-last-input-start comint-last-input-end 
+						   'font-lock-face 'd-comint-mode-highlight-input)
+	  (remove-text-properties comint-last-input-start comint-last-input-end
+							  '(font-lock-face nil)))))
+
 ;;;###autoload
 (define-derived-mode d-comint-mode comint-mode "DVT"
   "Major mode for handling d-machine"
-  (if d-comint-mode-server (server-start))
-  (setq comint-prompt-regexp "^")
-  (setq comint-input-ring-file-name "~/.dvt_history")
+  (set (make-local-variable 'comint-prompt-regexp) "^")
+  (set (make-local-variable 'comint-input-ring-file-name) "~/.dvt_history")
 
   (require 'd-mode)
   (d-mode-shared)
   (ansi-color-for-comint-mode-on)
-  (make-variable-buffer-local 'd-comint-mode-redirect-process)
-  (make-variable-buffer-local 'd-comint-mode-redirect-ignore)
+  (make-local-variable 'd-comint-mode-redirect-process)
+  (make-local-variable 'd-comint-mode-redirect-ignore)
 
-  (set-face-foreground 'comint-highlight-input "blue")
-  (make-face-unbold 'comint-highlight-input)
+  ;;(set-face-foreground 'comint-highlight-input "blue")
+  ;;(make-face-unbold 'comint-highlight-input)
   
 ;;  (add-hook 'comint-output-filter-functions 'd-comint-mode-filter)
-  (add-hook 'comint-preoutput-filter-functions 'd-comint-mode-prefilter)
-  (add-hook 'comint-preoutput-filter-functions 'd-comint-mode-redirect)
-)
+  (add-hook 'comint-preoutput-filter-functions 'd-comint-mode-prefilter nil t)
+  (add-hook 'comint-preoutput-filter-functions 'd-comint-mode-redirect nil t)
+  (add-hook 'comint-output-filter-functions 'd-comint-mode-highlight-input nil t))
 
 (defun d-comint-mode-send (&rest strings)
   (insert (mapconcat (lambda (s) s) strings ""))
@@ -131,6 +208,9 @@ property."
   (kill-process d-comint-mode-redirect-process)
   (setq d-comint-mode-redirect-process nil))
 
+(defvar d-comint-mode-redirect-command 
+  "{ echo 'New process: '; echo \"$(date)\" ; echo '-------------' ; exec cat ; } >> ")
+
 (defun d-comint-mode-redirect-process-open ()
   (let ((d-comint-mode-redirect-ignore t)
 	(string1 (concat "[31m"
@@ -147,7 +227,8 @@ property."
 	  (start-process (concat (buffer-name) "-redirect") nil
 	    "/bin/bash" "-c" (concat d-comint-mode-redirect-command 
 				     "\'" (buffer-name) "\'")))
-    (process-kill-without-query d-comint-mode-redirect-process)
+		(set-process-query-on-exit-flag d-comint-mode-redirect-process nil)
+    ;;(process-kill-without-query d-comint-mode-redirect-process)
     (add-hook 'kill-buffer-hook 'd-comint-mode-redirect-kill-process
 	      nil t))
 
@@ -157,9 +238,6 @@ property."
 
 (define-minor-mode d-comint-mode-redirect-mode "" nil " >"
   '() (d-comint-mode-redirect-process-open))
-
-(defvar d-comint-mode-redirect-command 
-  "{ echo 'New process: '; echo \"$(date)\" ; echo '-------------' ; exec cat ; } >> ")
 
 (defun d-comint-mode-invert ()
   (interactive)
@@ -193,6 +271,12 @@ property."
   (define-key d-comint-mode-map [f2] 'd-comint-mode-continue)
   (define-key d-comint-mode-map [f3] 'd-comint-mode-stop)
   (define-key d-comint-mode-map [f4] 'd-comint-mode-abort)
+  (define-key d-comint-mode-map [f5] 'd-comint-mode-raise-thehorses)
+  (define-key d-comint-mode-map [f6] 'd-comint-mode-raise-all)
+  (define-key d-comint-mode-map [(shift f6)] 'd-comint-mode-hide-all)
+  (define-key d-comint-mode-map [f7] 'd-comint-mode-focus-raise)
+  (define-key d-comint-mode-map [f8] 'dnode)
+  (define-key d-comint-mode-map [?\C-h ?d] 'd-comint-mode-help)
   (define-key d-comint-mode-map [(control !)] 'd-comint-mode-scream)
   (define-key d-comint-mode-map [?\C-1] 'd-comint-mode-scream)
   ;;(define-key d-comint-mode-map [?\C-c ?\C-c] 'd-comint-mode-clear)
@@ -204,8 +288,13 @@ property."
 )
 (if (not d-comint-mode-map-setup) (d-comint-mode-setup-map))
 
-;;;###autoload
-(defun dvt (&optional buffer)
+(defun d-comint-mode-server ()
+  "Start d-comint-mode-server"
+  (when (and d-comint-mode-server (not dm-server-process))
+	(setq dm-server-name (format "dm-server-%d" (emacs-pid)))
+	(dm-server-start)))
+
+(defun dvt (&optional buffer override)
   "Run an inferior shell, with I/O through BUFFER (which defaults to `*shell*').
 Interactively, a prefix arg means to prompt for BUFFER.
 If BUFFER exists but shell process is not running, make new shell.
@@ -219,6 +308,8 @@ If a file `~/.emacs_SHELLNAME' exists, it is given as initial input
 The buffer is put in Shell mode, giving commands for sending input
 and controlling the subjobs of the shell.  See `shell-mode'.
 See also the variable `shell-prompt-pattern'.
+If OVERRIDE is non-nil, pop up a special frame 
+  even if `d-comint-mode-keep-focus' is nil.
 
 To specify a coding system for converting non-ASCII characters
 in the input and output to the shell, use \\[universal-coding-system-argument]
@@ -232,13 +323,12 @@ such as `explicit-csh-args'.  If that symbol is a variable,
 its value is used as a list of arguments when invoking the shell.
 Otherwise, one argument `-i' is passed to the shell.
 
-\(Type \\[describe-mode] in the shell buffer for a list of commands.)"
+\(Type \\[describe-mode] in the shell buffer for a list of commands.)
+\\{d-comint-mode-map}"
   (interactive
    (list
-    (and current-prefix-arg
-	 (read-buffer "DVT buffer: " "*dvt*"))))
-  (when (null buffer)
-    (setq buffer "*dvt*"))
+    (and current-prefix-arg (read-buffer "DVT buffer name: " "*dvt*"))))
+  (when (null buffer) (setq buffer "*dvt*"))
   (if (not (comint-check-proc buffer))
       (let* ((prog (or explicit-dvt-file-name
 		       (getenv "EDVT")
@@ -250,20 +340,192 @@ Otherwise, one argument `-i' is passed to the shell.
 	     (xargs-name 'dvt-args)
 	     (cdir default-directory)
 	     dvt-buffer)
-	(save-excursion
-	  (cd dir)
-	  (setq dvt-buffer (apply 'make-comint-in-buffer "dvt" buffer prog
-				  (if (file-exists-p startfile) startfile)
-				  (when (and xargs-name (boundp xargs-name))
-				    (symbol-value xargs-name))))
-	  (cd cdir)
-	  (set-buffer dvt-buffer)
-	  (d-comint-mode))
-	;(pop-to-buffer dvt-buffer))
-	(switch-to-buffer dvt-buffer))
-    ;;(pop-to-buffer buffer)))
+		(save-excursion
+		  (set-buffer
+		   (setq dvt-buffer 
+				 (apply 'make-comint-in-buffer "dvt" buffer prog
+						(when (file-exists-p startfile) startfile)
+						(when (and xargs-name (boundp xargs-name))
+						  (symbol-value xargs-name)))))
+		  (d-comint-mode)
+		  (d-comint-mode-server)
+		  (when dm-server-process
+			(process-send-string 
+			 (get-buffer-process dvt-buffer)
+			 (concat 
+			  "Xwindows {(" (d-comint-mode-shell-quote dm-server-name) ") ("
+			  (d-comint-mode-shell-quote (buffer-name dvt-buffer)) 
+			  ") take_input_setup} if\n"))))
+		(when (or d-comint-mode-keep-focus override)
+		  (dvt-special-frame (buffer-name dvt-buffer)))
+		(switch-to-buffer dvt-buffer))
     (switch-to-buffer buffer)))
+
+(defun d-comint-mode-quote (string)
+  "Quote a string to be sent to and interpreted by the dvt.
+This would apply to the body of a string between ( and ).
+Parens and backslashes are quoted"
+  (interactive "s")
+  (let ((start 1))
+	(while (string-match "[()\\\\]" string start)
+	  (setq start (1+ (match-end 0)))
+	  (setq string (replace-match "\\\\\\&" t nil string)))
+	string))
+
+(defun d-comint-mode-shell-quote (string)
+  "Quote a string which will be used by the dvt as a word in a shell command.
+This quotes per \\[shell-quote-argument], then requotes per \\[d-comint-mode-quote]"
+  (interactive "s")
+  (d-comint-mode-quote (shell-quote-argument string)))
+
+(defun d-comint-mode-focus (buffer-name &optional override)
+  "Set input focus to dvt buffer. 
+Used by dvt to signal to emacs that it should re-take focus.
+The BUFFER-NAME is the name of the buffer to focus.
+if OVERRIDE then set keyboard input focus,
+even if `d-comint-mode-keep-focus' is nil.
+"
+  (when (or d-comint-mode-keep-focus override)
+	(let ((buffer-frame 
+		   (cond 
+			((get-buffer-window buffer-name)
+			 (pop-to-buffer buffer-name) 
+			 (selected-frame))
+
+			((catch 'dedicated-window-found
+			  (dolist (window (get-buffer-window-list buffer-name 
+													  'no-minibuf 'visible))
+				(when (window-dedicated-p window)
+				  (throw 'dedicated-window-found 
+						 (window-frame (select-window window)))))))
+
+			((let ((window (get-buffer-window buffer-name 'visible)))
+			   (when window (window-frame (select-window window)))))
+
+			(t 
+			 (window-frame (dvt-special-frame buffer-name))))))
+	  (select-frame buffer-frame)
+	  (when (eq window-system 'x) (x-focus-frame buffer-frame)))))
+
+(defun dvt-special-frame (&optional buffer-name)
+  (interactive
+   (list
+    (and current-prefix-arg (read-buffer "DVT buffer name: " "*dvt*"))))
+  (special-display-popup-frame
+   buffer-name 
+   (append
+	(list (cons 'height d-comint-mode-window-size))
+	d-comint-mode-frame-alist)))
+
+(defun d-comint-mode-focus-raise (&optional buffer-name)
+  "Set input focus to dvt buffer, and raise frame in X.
+Used by dvt to signal to emacs that it should pop up and take focus"
+  (interactive
+   (list (and current-prefix-arg (read-buffer "DVT buffer: " "*dvt*"))))
+  (when (null buffer-name) (setq buffer-name "*dvt*"))
+  (d-comint-mode-focus (buffer-name) t)
+  (make-frame-invisible nil t)
+  (raise-frame))
+
+(defun d-comint-mode-help ()
+  "Tell dvt to output help info"
+  (interactive)
+  (process-send-string
+   (get-buffer-process (current-buffer))
+   "hk_\nh_\n"))
+
+(defun d-comint-mode-raise-thehorses ()
+  "Tell dvt to raise TheHorses window."
+  (interactive)
+  (process-send-string 
+   (get-buffer-process (current-buffer))
+   "% userdict begin raise_thehorses\n"))
+
+(defun d-comint-mode-raise-all ()
+  "Tell dvt to raise all dvt windows"
+  (interactive)
+  (process-send-string
+   (get-buffer-process (current-buffer))
+   "% userdict begin raise_all\n"))
+
+(defun d-comint-mode-hide-all ()
+  "Tell dvt to hide all dvt windows"
+  (interactive)
+  (process-send-string
+   (get-buffer-process (current-buffer))
+   "% userdict begin hide_all\n"))
+
+(defcustom d-comint-dnode-mode-dnode-args nil 
+  "Options to dnode program"
+  :group 'd-comint-mode
+  :type '(repeat string))
+
+(defvar d-comint-dnode-mode-dnode-buffer nil)
+(defvar d-comint-dnode-mode-prog nil)
+(define-derived-mode d-comint-dnode-mode comint-mode "dnode"
+	"Major mode for handling dnodes.
+\\{d-comint-dnode-mode-map}"
+	(insert "Starting at " (current-time-string) ": " d-comint-dnode-mode-prog)
+	(dolist (dnode-arg d-comint-dnode-mode-dnode-args) (insert " " dnode-arg))
+	(insert "\n")
+	(goto-char (point-max))
+	(apply 'make-comint-in-buffer 
+		   name 
+		   d-comint-dnode-mode-dnode-buffer
+		   d-comint-dnode-mode-prog 
+		   nil 
+		   d-comint-dnode-mode-dnode-args)
+	(set-marker comint-last-output-start (point-max)))
+
+(defvar d-comint-dnode-mode-map-setup nil "")
+(defun d-comint-dnode-mode-setup-map ()
+	(interactive)
+	(setq d-comint-dnode-mode-map-setup t)
+	(define-key d-comint-dnode-mode-map [f8] 'dnode))
+(if (not d-comint-dnode-mode-map-setup) (d-comint-dnode-mode-setup-map))
+
+(defcustom explicit-dnode-file-name nil
+  "Name of programe to run dnode"
+  :group 'd-comint-mode
+  :type '(choice (const nil) file))
+
+(defun dnode (port &optional buffer-pre)
+	(interactive (list
+		(read-number "Port number: ")
+		(and current-prefix-arg (read-buffer "Dnode buffer prefix: " "*dnode*"))))
+  (when (null buffer-pre) (setq buffer-pre "*dnode*"))
+  
+	(let* ((buffer-name (concat buffer-pre (format "<%d>" port)))
+		   (d-comint-dnode-mode-dnode-buffer (get-buffer buffer-name)))
+
+	  (when (or (null d-comint-dnode-mode-dnode-buffer) 
+				(not (comint-check-proc d-comint-dnode-mode-dnode-buffer)))
+		(let* ((d-comint-dnode-mode-prog (or explicit-dnode-file-name
+											 (getenv "EDNODE")
+											 (getenv "DNODE")
+											 "@bindir@/dnode"))
+			   (port-string (format "%d" port))
+			   (name (format "%s-%d" 
+							 (file-name-nondirectory d-comint-dnode-mode-prog) 
+							 port))
+			   (d-comint-dnode-mode-dnode-args 
+				(append d-comint-dnode-mode-dnode-args (list port-string))))
+		  (save-excursion
+			(set-buffer 
+			 (setq d-comint-dnode-mode-dnode-buffer 
+				   (get-buffer-create buffer-name)))
+			(d-comint-dnode-mode))))
+
+	  (if (eq major-mode 'd-comint-dnode-mode)
+		  (switch-to-buffer d-comint-dnode-mode-dnode-buffer)
+		(let (old-windows (get-buffer-window-list 
+						   d-comint-dnode-mode-dnode-buffer))
+		  (pop-to-buffer d-comint-dnode-mode-dnode-buffer)
+		  (unless (catch 'find-window
+					(dolist (old-window old-windows)
+					  (when (eq old-window (selected-window))
+						(throw 'find-window t))))
+			(shrink-window (- (window-height) d-comint-mode-window-size)))))))
 
 (require 'ansi-color)
 (provide 'd-comint-mode)
-

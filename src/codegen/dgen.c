@@ -59,7 +59,7 @@ abortflag = TRUE;
 signal(sig, SIGINThandler);
 }
 
-int main()
+int main(void)
 {
   L memsetup[5] = { 1000, 100, 20, 10, 200 };
   B* startup_dvt;    
@@ -67,6 +67,8 @@ int main()
   L nb, retc,tnb;
   B *sysdict, *userdict, *Dmemory, *p;
   int sufd;
+
+  serialized = TRUE; // no serialize operator
 
 /*----------------- SIGNALS that we wish to handle -------------------*/
 

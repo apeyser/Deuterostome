@@ -12,6 +12,7 @@
           - writeboxfile
           - readboxfile
           - findfiles
+		  - findfile
           - tosystem
           - transcribe
 */
@@ -57,16 +58,16 @@ NOTE: month[1...12], day[1...31], hour[0...23], min,sec[0...59]
 
 L op_localtime(void)
 {
-time_t dt;
-struct tm *ldt;
+time_t dt; L dt_; struct tm *ldt;
 L *p;
 
 if (o_2 < FLOORopds) return(OPDS_UNF);
 if (CLASS(o_2) != NUM) return(OPD_CLA);
-if (!VALUE(o_2,(L*) &dt)) return(UNDF_VAL);
+if (!VALUE(o_2, &dt_)) return(UNDF_VAL);
 if (TAG(o_1) != (ARRAY | LONGTYPE)) return(OPD_ERR);
 if (ATTR(o_1) & READONLY) return(OPD_ATR);
 if (ARRAY_SIZE(o_1) < 6) return(RNG_CHK);
+dt = (time_t) dt_;
 ldt = localtime(&dt);
 p = (L *)VALUE_BASE(o_1);
 p[0] = ldt->tm_year + 1900; p[1] = ldt->tm_mon + 1; p[2] = ldt->tm_mday;
@@ -464,7 +465,7 @@ L op_findfiles(void)
 
  if (o_1 < FLOORopds) return(OPDS_UNF);
  if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
- if ((dirn = malloc(1024)) == 0) perror("Memory exhausted");
+ if ((dirn = malloc(1024)) == 0) return MEM_OVF;
 
  /*-- we need dirname as null-terminated string */
  ndirn = ARRAY_SIZE(o_1);
@@ -537,6 +538,61 @@ L op_findfiles(void)
  moveframe(vmp, o_1);
  free(dirn);
  return(OK);
+}
+
+/**************************************************** findfile
+ *
+ * (dir) (file) | false : filesize datetime attribute-bits true
+ *
+ * see findfiles for description of output
+ *
+ **************************************************************
+*/
+
+L op_findfile(void) {
+  struct stat buf;
+
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if ((TAG(o_1) != (ARRAY | BYTETYPE)) || (TAG(o_2) != (ARRAY | BYTETYPE)))
+	return OPD_ERR;
+
+  // make null terminated file string
+  if (FREEvm+ARRAY_SIZE(o_1)+ARRAY_SIZE(o_2)+1 >= CEILvm)
+	return VM_OVF;
+  moveB(VALUE_PTR(o_2), FREEvm, ARRAY_SIZE(o_2));
+  moveB(VALUE_PTR(o_1), FREEvm + ARRAY_SIZE(o_2), ARRAY_SIZE(o_1));
+  FREEvm[ARRAY_SIZE(o_2)+ARRAY_SIZE(o_1)] = 0;
+
+  if (stat(FREEvm, &buf)) {
+	if (errno == ENOENT) { // non-existent returns false
+	  TAG(o_2) = BOOL; ATTR(o_2) = 0;
+	  BOOL_VAL(o_2) = FALSE;
+	  FREEopds = o_1;
+	  return OK;
+	}
+	return -errno;
+  }
+
+  // unhandled type return false
+  if (! S_ISDIR(buf.st_mode) && ! S_ISREG(buf.st_mode)) {
+	TAG(o_2) = BOOL; ATTR(o_2) = 0;
+	BOOL_VAL(o_2) = FALSE;
+	FREEopds = o_1;
+	return OK;
+  }
+
+  if (o3 > CEILopds) return OPDS_OVF;
+  TAG(o_2) = (NUM | LONGTYPE); ATTR(o_2) = 0;
+  LONG_VAL(o_2) = buf.st_size;
+  TAG(o_1) = (NUM | LONGTYPE); ATTR(o_1) = 0;
+  LONG_VAL(o_1) = buf.st_mtime;
+  TAG(o1) = (NUM | LONGTYPE); ATTR(o1) = 0;
+  LONG_VAL(o1) = buf.st_mode;
+  TAG(o2) = BOOL; ATTR(o2) = 0;
+  BOOL_VAL(o2) = TRUE;
+  FREEopds = o3;
+
+  return OK;
 }
 
 /*------------------------------------- transcribe

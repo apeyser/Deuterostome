@@ -6,9 +6,13 @@
 
 1000 dict dup begin
 
+/ROLLBITS @ROLLBITS@ def
+/UNROLLS  2 ROLLBITS pwr def
+
 /__   { * exch text} def
 /st__ { st mkact __ } def
 /dt__ { dt mkact __ } def
+/n__  { * exch * number} def
 /op__ { op mkact __ } def
 /NL   { * (\n) text} def
 
@@ -24,6 +28,18 @@
 
 /popA {
   /A_free A_free 1 sub def A_stack A_free get
+} bind def
+
+/peekA {
+    A_stack A_free 1 sub get
+} bind def
+
+/exchA {
+    popA popA exch pushA pushA
+} bind def
+
+/indexA {
+    1 add neg A_free add A_stack exch get
 } bind def
 
 |----------------------------- macros: make object value pointer
@@ -43,7 +59,7 @@
 /GETCV_d 6 dict dup begin
 
 /B { NL (if \(\()__ popA __ ( = *\(\(B *\))__ popA exec (\)\) == BINF\) )__
-        popA __ ( = DINF;)__  
+        popA __ ( = DINF;)__ 
    } def
 /W { NL (if \(\()__ popA __ ( = *\(\(W *\))__ popA exec (\)\) == WINF\) )__
         popA __ ( = DINF;)__  
@@ -67,17 +83,17 @@ end def
 
 /CVPUT_d 6 dict dup begin
 /B { NL (*\(\(B *\))__ popA exec (\) = \(\(\()__
-        popA dup pushA __ (\) > BMAX\) || \(\(-)__
+        popA dup pushA __ (\) > BMAX\) || \(\()__
         popA dup pushA __ (\) < -BMAX\) || \()__
         popA dup pushA __ ( == DINF\)\)? BINF : )__ popA __ (;)__
    } def
 /W { NL (*\(\(W *\))__ popA exec (\) = \(\(\()__
-        popA dup pushA __ (\) > WMAX\) || \(\(-)__
+        popA dup pushA __ (\) > WMAX\) || \(\()__
         popA dup pushA __ (\) < -WMAX\) || \()__
         popA dup pushA __ ( == DINF\)\)? WINF : )__ popA __ (;)__
    } def
 /L { NL (*\(\(L *\))__ popA exec (\) = \(\(\()__
-        popA dup pushA __ (\) > LMAX\) || \(\(-)__
+        popA dup pushA __ (\) > LMAX\) || \(\()__
         popA dup pushA __ (\) < -LMAX\) || \()__
         popA dup pushA __ ( == DINF\)\)? LINF : )__ popA __ (;)__
    } def
@@ -99,6 +115,28 @@ popA exec
 NL (})__
 } def
 
+| (framename) {body_construct} log_2-iterations | --
+/FOR_modn {pushA pushA pushA
+    NL (for \(n = \(ARRAY_SIZE\()__ peekA __ (\)>>)__ 2 indexA n__  (\); n>0; n--\) {)__
+    exchA 2 2 indexA pwr {peekA exec} repeat exchA
+    NL (})__
+    NL (for \(n = \(ARRAY_SIZE\()__ popA __(\)&)__ 2 exchA popA pwr 1 sub n__ (\); n>0; n--\) {)__
+    popA exec
+    NL (})__
+} def
+
+| {body_construct} log_2-iterations | --
+/FOR_modnp {pushA pushA
+    NL (for \(n = \(n_ >> )__ 1 indexA n__ (\); n>0; n--\) {)__
+    2 1 indexA pwr {peekA exec} repeat
+    NL (})__
+    exchA
+    NL (for \(n = \(n_ & )__ 2 popA pwr 1 sub n__ (\); n>0; n--\) {)__
+    popA exec
+    NL (})__
+} def
+
+
 /FOR_mod4 { pushA pushA
 NL (for \(n = \(ARRAY_SIZE\()__ popA __ (\)>>2\); n>0; n--\) {)__
 popA exec
@@ -110,6 +148,48 @@ NL (for \(n = \(ARRAY_SIZE\()__ popA __ (\)&3\); n>0; n--\) {)__
 popA exec
 NL (})__
 } def
+
+|--------------------------------------------- THREAD functions
+|
+| {serial-constructor} 
+| set-destination-array set-source-array
+| {parallel constructor} | --
+|
+/THREAD_SU {pushA pushA pushA pushA
+  1 indexA {(df) pushA} {(sf) pushA} ifelse (
+  if \(ARRAY_SIZE\()__ peekA __ (\) < THREADMUL*)__ UNROLLS n__ (\)
+    )__ exchA popA exec (;
+  else {
+    thread_array_data data;
+    UL nways = ARRAY_SIZE\()__ peekA __ (\)/\(THREADMUL*)__ UNROLLS n__ (\)
+               + \(ARRAY_SIZE\()__ peekA __ (\)%\(THREADMUL*)__ UNROLLS n__ (\) ?
+               1 : 0\);
+    if \(nways > thread_num\(\)\) nways = thread_num\(\);
+    data.perthread = ARRAY_SIZE\()__ peekA __ (\) / nways;
+    data.leftover = ARRAY_SIZE\()__ popA __ (\) % nways; )__
+    popA {(\n   data.df_start = VALUE_PTR\(df\);)__} if
+    popA {(\n   data.sf_start = VALUE_PTR\(sf\);)__} if (
+    {)__
+      popA exec (
+    }
+  })__
+} bind def
+
+| get-destination-array get-source-array {body-constructor} | --
+/THREAD {pushA pushA pushA
+(
+  const thread_array_data* restrict data = \(const thread_array_data*\) indata;
+  UL n, n_ = data->perthread + \(thread_max\(\) == id ? data->leftover : 0\);)__
+  popA {(\n  )__ dt__ ( * restrict d = \(\()__
+    dt__ ( *\) data->df_start\)+data->perthread*id;)__
+  } if
+  popA {(\n  )__ st__ ( * restrict s = \(\()__
+    st__ ( *\) data->sf_start\)+data->perthread*id;)__
+  } if
+  popA exec (
+  return OK;)__
+} bind def
+  
 
 |-------------------------------------------- DYencode function:
 | constructs C code to convert a double value into destination type
@@ -171,15 +251,44 @@ NL
 | constructs C code to spread a scalar into an array (see XYmoveSS)
 
 /XYmoveSA {
+(
+  static void )__ st__ dt__ (moveSAs\(B *sf, B *df\)
+  {
+    D t; L n; )__ dt__ ( * restrict d;
+    d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
+    st { (sf) SCALAR } (t) GETCV
+    (df) { dt { (d++)__ } (t) CVPUT } ROLLBITS FOR_modn (
+  }
 
-NL (static void )__ st__ dt__ (moveSA\(B *sf, B *df\))__
-NL ({)__
-NL (D t; L n; )__ dt__ ( *d;)__
-NL (d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
-st { (sf) SCALAR } (t) GETCV
-(df) { dt { (d++)__ } (t) CVPUT } FOR
-NL (})__
-NL 
+#if ENABLE_THREADS
+  static L )__ st__ dt__ (moveSAt\(UL id, const void* indata,
+                                   void* ignore
+                                   __attribute__ \(\(__unused__\)\)\)
+  {)__
+    true false {(
+      D t = data->in;)__ 
+      {dt {(d++)__} (t) CVPUT} ROLLBITS FOR_modnp
+    } THREAD (
+  }
+
+  static void )__ st__ dt__ (moveSAc\(B* sf, B* df\)
+  {)__
+    {st__ dt__ (moveSAs\(sf, df\))__} true false {
+      st {(sf) SCALAR} (data.in) GETCV (
+      threads_do\(nways, )__ st__ dt__ (moveSAt, &data\);)__
+    } THREAD_SU (
+  }
+#endif //ENABLE_THREADS
+
+  static void )__ st__ dt__ (moveSA\(B* sf, B* df\)
+  {
+    if \(thread_num\(\) == 1\)
+      )__ st__ dt__ (moveSAs\(sf, df\);
+#if ENABLE_THREADS
+    else )__ st__ dt__ (moveSAc\(sf,df\);
+#endif //ENABLE_THREADS
+  }
+)__
 } def
 
 |-------------------------------------------- XYmoveAS function:
@@ -201,17 +310,59 @@ NL
 | constructs C code to copy an array into an array (see XYmoveSS)
 
 /XYmoveAA {
+(
+    static void )__ st__ dt__ (moveAAp\(B *sf, B *df\)
+    {
+      D t; L n; )__ st__ ( * restrict s; )__ dt__ ( * restrict d;
+      s = \()__ st__ ( *\))__ (sf) ARRAY (;
+      d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
+      (df) { st { (s++)__ } (t) GETCV
+          dt { (d++)__ } (t) CVPUT
+      } ROLLBITS FOR_modn
+(
+    }
 
-NL (static void )__ st__ dt__ (moveAA\(B *sf, B *df\))__
-NL ({)__
-NL (D t; L n; )__ st__ ( *s; )__ dt__ ( *d;)__
-NL (s = \()__ st__ ( *\))__ (sf) ARRAY (;)__
-NL (d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
-(df) { st { (s++)__ } (t) GETCV
-       dt { (d++)__ } (t) CVPUT
-     } FOR
-NL (})__
-NL 
+    static void )__ st__ dt__ (moveAAs\(B *sf, B *df\)
+    {
+       D t; L n; )__ st__ ( * s; )__ dt__ ( * d;
+       s = \()__ st__ ( *\))__ (sf) ARRAY (;
+       d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
+      (df) { st { (s++)__ } (t) GETCV
+          dt { (d++)__ } (t) CVPUT
+      } ROLLBITS FOR_modn (
+    }
+
+
+#if ENABLE_THREADS
+    static L )__ st__ dt__ (moveAAt\(UL id, const void* indata,
+                                     void* ignore
+                                     __attribute__ \(\(__unused__\)\)\)
+    {)__
+      true true {(
+       D t;)__ { 
+         st {(s++)__} (t) GETCV
+         dt {(d++)__} (t) CVPUT
+       } ROLLBITS FOR_modnp
+      } THREAD (
+    }
+
+    static void )__ st__ dt__ (moveAAc\(B *sf, B *df\)
+    {)__
+      {st__ dt__ (moveAAp\(sf, df\))__} true true {(
+        threads_do\(nways, )__ st__ dt__ (moveAAt, &data\);)__
+      } THREAD_SU (
+    }
+#endif //ENABLE_THREADS
+
+   static void )__ st__ dt__ (moveAA\(B *sf, B *df\)
+   {
+    if \(serialized\) )__ st__ dt__ (moveAAs\(sf,df\);
+    else if \(thread_num\(\) == 1\) )__ st__ dt__ (moveAAp\(sf,df\);
+#if ENABLE_THREADS
+    else )__ st__ dt__ (moveAAc\(sf, df\);
+#endif //ENABLE_THREADS
+   }
+)__
 } def
 
 |-------------------------------------------- XYdyOPSS function:
@@ -243,6 +394,30 @@ NL
 /THEARC {NL (t = thearc\(t,tt\);)__} def
 end def
 
+/dyadic_dp_unseed 5 dict dup begin
+/ADD {NL (t += tt;)__} def
+/SUB {NL (t -= tt;)__} def
+/MUL {NL (t *= tt;)__} def
+/DIV {NL (t /= tt;)__} def
+/PWR {NL (t = pow\(t,tt\);)__} def
+end def
+
+/dyadic_dp_op 5 dict dup begin
+/ADD {NL (t += tt;)__} def
+/SUB {NL (t += tt;)__} def
+/MUL {NL (t *= tt;)__} def
+/DIV {NL (t *= tt;)__} def
+/PWR {NL (t *= tt;)__} def
+end def
+
+/dyadic_dp_seed 5 dict dup begin
+/ADD {(0)__} def
+/SUB {(0)__} def
+/MUL {(1)__} def
+/DIV {(1)__} def
+/PWR {(1)__} def
+end def
+
 /dyadic_d_x 7 dict dup begin
 /ADD { pushA NL (t)__ popA dup pushA __ ( += tt)__ popA __ (;)__ } def
 /SUB { pushA NL (t)__ popA dup pushA __ ( -= tt)__ popA __ (;)__ } def
@@ -265,18 +440,51 @@ end def
 | destination array.
 
 /XYdyOPAS {
+(
+  static void )__ dt__ st__ (dy)__ op__ (ASs\(B *df, B *sf\)
+  {
+    D t,tt; L n; )__ dt__ ( * restrict d;
+    d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
+    st { (sf) SCALAR } (tt) GETCV
+    (df) { dt { (d)__ } (t) GETCV
+      dyadic_d op get exec
+      dt { (d++)__ } (t) CVPUT
+    } ROLLBITS FOR_modn (
+  }
 
-NL (static void )__ dt__ st__ (dy)__ op__ (AS\(B *df, B *sf\))__
-NL ({)__
-NL (D t,tt; L n; )__ dt__ ( *d;)__
-NL (d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
-st { (sf) SCALAR } (tt) GETCV
-(df) { dt { (d)__ } (t) GETCV
-       dyadic_d op get exec
-       dt { (d++)__ } (t) CVPUT
-     } FOR
-NL (})__
-NL 
+#if ENABLE_THREADS
+  static L )__ dt__ st__ (dy)__ op__ (ASt\(UL id, const void* indata,
+                                           void* ignore
+                                           __attribute__ \(\(__unused__\)\)\)
+  {)__
+    true false {(
+      D t, tt = data->in;
+      )__ {
+        dt {(d)__} (t) GETCV
+        dyadic_d op get exec
+        dt {(d++)__} (t) CVPUT
+      } ROLLBITS FOR_modnp
+    } THREAD (
+  }
+
+  static void )__ dt__ st__ (dy)__ op__ (ASc\(B* df, B *sf\)
+  {)__
+    {dt__ st__ (dy)__ op__ (ASs\(df, sf\))__} true false {
+      st {(sf) SCALAR} (data.in) GETCV (
+      threads_do\(nways, )__ dt__ st__ (dy)__ op__ (ASt, &data\);)__
+    } THREAD_SU (
+  }
+#endif //ENABLE_THREADS
+
+  static void )__ dt__ st__ (dy)__ op__ (AS\(B *df, B *sf\)
+  {
+    if \(thread_num\(\) == 1\)
+    )__ dt__ st__ (dy)__ op__ (ASs\(df, sf\);
+#if ENABLE_THREADS
+    else )__ dt__ st__ (dy)__ op__ (ASc\(df, sf\);
+#endif //ENABLE_THREADS
+  }
+)__
 } def
 
 |-------------------------------------------- XYdyOPSA function:
@@ -288,18 +496,67 @@ NL
 | destination type and to store it in the destination scalar.
 
 /XYdyOPSA {
+(
+  static void )__ dt__ st__ (dy)__ op__ (SAs\(B *df, B *sf\)
+  {
+    D t,tt; L n; )__ st__ ( * restrict s;
+    s = \()__ st__ ( *\))__ (sf) ARRAY (;)__
+    dt { (df) SCALAR } (t) GETCV
+    (sf) { st { (s++)__ } (tt) GETCV
+      dyadic_d op get exec
+    } ROLLBITS FOR_modn
+    dt { (df) SCALAR } (t) CVPUT (
+   }
+)__
+dyadic_dp_seed op known {(
+#if ENABLE_THREADS
+ static L )__ dt__ st__ (dy)__ op__ (SAt\(UL id, const void* indata,
+                                          void* outdata\)
+ {)__
+   false true {(
+     D *restrict ret = \(D*\) outdata;
+     D t = )__ dyadic_dp_seed op get exec (, tt;)__ 
+     { 
+       st {(s++)__} (tt) GETCV
+       dyadic_dp_op op get exec
+     } ROLLBITS FOR_modnp (
+     *ret = t;)__
+   } THREAD (
+  }
+    
+  static void )__ dt__ st__ (dy)__ op__ (SAc\(B* df, B* sf\)
+  {)__
+    {dt__ st__ (dy)__ op__ (SAs\(df, sf\))__} false true {(
+      UL n, n_ = nways;
+      D t,tt, ret[THREADNUM];
+      D* r = ret;
+      threads_do_local\(nways, )__ dt__ st__ (dy)__ op__ (SAt, &data, ret\);
+      )__  
+      dt {(df) SCALAR} (t) GETCV {(
+        tt = *\(r++\);)__
+        dyadic_dp_unseed op get exec
+      } ROLLBITS FOR_modnp
+      dt {(df) SCALAR} (t) CVPUT
+    } THREAD_SU (
+  }
+#endif //ENABLE_THREADS
 
-NL (static void )__ dt__ st__ (dy)__ op__ (SA\(B *df, B *sf\))__
-NL ({)__
-NL (D t,tt; L n; )__ st__ ( *s;)__
-NL (s = \()__ st__ ( *\))__ (sf) ARRAY (;)__
-dt { (df) SCALAR } (t) GETCV
-(sf) { st { (s++)__ } (tt) GETCV
-       dyadic_d op get exec
-     } FOR
-dt { (df) SCALAR } (t) CVPUT
-NL (})__
-NL 
+  static void )__ dt__ st__ (dy)__ op__ (SA\(B* df, B *sf\)
+  {
+    if \(thread_num\(\) == 1 || serialized\)
+      )__ dt__ st__ (dy)__ op__ (SAs\(df, sf\);
+#if ENABLE_THREADS
+    else )__ dt__ st__ (dy)__ op__ (SAc\(df, sf\);
+#endif //ENABLE_THREADS
+  }
+)__
+} {(
+  static void )__ dt__ st__ (dy)__ op__ (SA\(B* df, B *sf\)
+  {
+    )__ dt__ st__ (dy)__ op__ (SAs\(df, sf\);
+  }
+)__
+} ifelse
 } def
 
 |-------------------------------------------- XYdyOPAA function:
@@ -313,38 +570,71 @@ NL
 |
 
 /XYdyOPAA {
+(
+    static void )__ dt__ st__ (dy)__ op__ (AAp\(B * df, B * sf\)
+    {
+      L n; )__  st__ ( * restrict s; )__ dt__ ( * restrict d;
+      D t, tt;
+      s = \()__ st__ ( *\))__ (sf) ARRAY (;
+      d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
+      (df) {
+          st {(s++)__} (tt) GETCV
+          dt {(d)__} (t) GETCV
+          () dyadic_d_x op get exec
+          dt {(d++)__} (t) CVPUT
+      } ROLLBITS FOR_modn
+(
+    }
 
-NL (static void )__ dt__ st__ (dy)__ op__ (AA\(B *df, B *sf\))__
-NL ({)__
-NL (register L n; register )__  st__ ( *s; register )__ dt__ ( *d;)__
-NL (register D t1,t2,t3,t4,tt1,tt2,tt3,tt4; )__ 
-NL (s = \()__ st__ ( *\))__ (sf) ARRAY (;)__
-NL (d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
+    static void )__ dt__ st__ (dy)__ op__ (AAs\(B * df, B * sf\)
+    {
+       L n; )__  st__ ( * s; )__ dt__ ( * d;
+       D t, tt;
+       s = \()__ st__ ( *\))__ (sf) ARRAY (;
+       d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
+       (df) {
+           st {(s++)__} (tt) GETCV
+           dt {(d)__} (t) GETCV
+           () dyadic_d_x op get exec
+           dt {(d++)__} (t) CVPUT
+       } ROLLBITS FOR_modn
+(
+    }
 
- (df) { st { (s++)__ } (tt1) GETCV
-        dt { (d)__ } (t1) GETCV
-        (1) dyadic_d_x op get exec
-        st { (s++)__ } (tt2) GETCV
-        dt { (\(d+1\))__ } (t2) GETCV
-        (2) dyadic_d_x op get exec
-        st { (s++)__ } (tt3) GETCV
-        dt { (\(d+2\))__ } (t3) GETCV
-        (3) dyadic_d_x op get exec
-        st { (s++)__ } (tt4) GETCV
-        dt { (\(d+3\))__ } (t4) GETCV
-        (4) dyadic_d_x op get exec
-        dt { (d++)__ } (t1) CVPUT
-        dt { (d++)__ } (t2) CVPUT
-        dt { (d++)__ } (t3) CVPUT
-        dt { (d++)__ } (t4) CVPUT
-      } FOR_mod4
- (df) { st { (s++)__ } (tt1) GETCV
-        dt { (d)__ } (t1) GETCV
-        (1) dyadic_d_x op get exec
-        dt { (d++)__ } (t1) CVPUT
-      } FOR_mod1
-NL (})__
-NL 
+
+#if ENABLE_THREADS
+    static L )__ dt__ st__ (dy)__ op__ (AAt\(UL id, const void* indata,
+                                             void* ignore
+                                             __attribute__ \(\(__unused__\)\)\)
+    {)__
+      true true {(
+        D t, tt;)__
+        {
+          st {(s++)__} (tt) GETCV
+          dt {(d)__} (t) GETCV
+          () dyadic_d_x op get exec
+          dt {(d++)__} (t) CVPUT
+        } ROLLBITS FOR_modnp
+      } THREAD (
+    }
+
+    static void )__ dt__ st__ (dy)__ op__ (AAc\(B* df, B* sf\)
+    {)__
+      {dt__ st__ (dy)__ op__ (AAp\(df, sf\))__} true true {(
+         threads_do\(nways, )__ dt__ st__ (dy)__ op__ (AAt, &data\);)__
+      } THREAD_SU (
+    }
+#endif //ENABLE_THREADS
+
+    static void )__ dt__ st__ (dy)__ op__ (AA\(B * df, B * sf\)
+    {
+      if \(serialized\) )__ dt__ st__ (dy)__ op__ (AAs\(df,sf\);
+      else if \(thread_num\(\) == 1\) )__ dt__ st__ (dy)__ op__ (AAp\(df,sf\);
+#if ENABLE_THREADS
+      else )__ dt__ st__ (dy)__ op__ (AAc\(df,sf\);
+#endif //ENABLE_THREADS
+    }
+)__
 } def
 
 |-------------------------------------------- YmoOPS function:
@@ -390,17 +680,48 @@ end def
 | the original.
 
 /YmoOPA {
-
-NL (static void )__ dt__ (mo)__ op__ (A\(B *df\))__
-NL ({)__
-NL (D t; )__ dt__ ( *d; L n;)__
-NL (d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
-(df) { dt { (d)__ } (t) GETCV
+(
+   static void )__ dt__ (mo)__ op__ (As\(B *df\)
+   {
+     D t; )__ dt__ ( *d; L n;
+     d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
+     (df) { dt { (d)__ } (t) GETCV
        monadic_d op get exec
        dt { (d++)__ } (t) CVPUT
-     } FOR
-NL (})__
-NL 
+     } ROLLBITS FOR_modn (
+   }
+
+#if ENABLE_THREADS
+  static L )__ dt__ (mo)__ op__ (At\(UL id, const void* indata,
+                                     void* ignore
+                                     __attribute__ \(\(__unused__\)\)\)
+  {)__
+    true false {(
+      D t;)__
+      {
+        dt {(d)__} (t) GETCV
+        monadic_d op get exec
+        dt {(d++)__} (t) CVPUT
+      } ROLLBITS FOR_modnp
+    } THREAD (
+  }
+    
+  static void )__ dt__ (mo)__ op__ (Ac\(B * df\)
+  {)__
+    {dt__ (mo)__ op__ (As\(df\))__} true false {(
+      threads_do\(nways, )__ dt__ (mo)__ op__ (At, &data\);)__
+    } THREAD_SU (
+  }
+#endif //ENABLE_THREADS
+
+  static void )__ dt__ (mo)__ op__ (A\(B *df\)
+  {
+    if \(thread_num\(\) == 1\) )__ dt__ (mo)__ op__ (As\(df\);
+#if ENABLE_THREADS
+    else )__ dt__ (mo)__ op__ (Ac\(df\);
+#endif //ENABLE_THREADS
+  }
+)__
 } def
 
 |-------------------------------------------- Ydecr function
@@ -425,9 +746,18 @@ NL
 
 /all {  /filename name /dirname name
   {
+(#include "threads.h"
 
-NL
-
+#if ENABLE_THREADS
+typedef struct {
+  B* df_start;
+  B* sf_start;
+  UL perthread;
+  UL leftover;
+  D in;
+} thread_array_data;
+#endif //ENABLE_THREADS
+)__
 |----- generate ENCODE function definitions
 [ /B /W /L  /S /D ] { /dt name DYencode } forall
 
@@ -578,7 +908,7 @@ NL
     
 |------------ save the file
 }
-save /dmsave name /dmfile 400000 /b array def dmsave capsave 
+save /dmsave name /dmfile 2500000 /b array def dmsave capsave 
 dmfile 0 3 -1 roll exec
 0 exch getinterval dirname filename writefile
 dmsave restore 
