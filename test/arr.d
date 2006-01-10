@@ -98,7 +98,7 @@ end def
 
 /A_dy_check {
   0 1 A1 length 1 sub {/i name
-    A1 i get A3 i get ne A1 i get A5 i get ne or {
+    A1 i get A3 i get roundne A1 i get A5 i get roundne or {
       err 0 (In ) fax * style text (-) fax * op text
       ([) fax * i * number (]:) fax
       ( t = ) fax * A1 i get * number
@@ -113,7 +113,8 @@ end def
 /mat_check {
   0 1 A1 length 1 sub {/i name
     0 1 A1 i get length 1 sub {/j name
-      A1 i get j get A4 i get j get ne A1 i get j get A7 i get j get ne or {
+      A1 i get j get A4 i get j get roundne
+      A1 i get j get A7 i get j get roundne or {
         err 0 (In ) fax * style text (-) fax * op text
         ([) fax * i * number (,) fax * j * number (]:) fax
         ( t = ) fax * A1 i get j get * number
@@ -126,9 +127,47 @@ end def
   } for
 } bind def
 
+/log {ln 10d ln div} def
+/antilog {10d exch pwr} def
+
+/setdig10 {
+  10d exch 1d sub pwr /dig10 name
+} def
+6d setdig10
+
+/round {
+  /dig10 10d rounddig 1d sub pwr def
+  /val name
+  val dup 0 lt {abs} if
+  log dup floor /expo name
+  1d mod 10d exch pwr expo 0 lt {10d mul} if dig10 mul floor dig10 div
+  log 10d exch expo add pwr
+  val 0 lt {-1d mul} if
+} bind def
+
+/roundne {
+  dup type dup /S ne exch /D ne and {ne} {
+    2 copy eq {pop pop false} {
+      /v1 name /v2 name
+
+      v1 dup 0 lt {neg} if
+      log dup floor /exp1 name
+      1d mod 10d exch pwr exp1 0 lt {10d mul} if dig10 mul floor
+      v1 0 lt {neg} if /man1 name
+      
+      v2 dup 0 lt {neg} if
+      log dup floor /exp2 name
+      1d mod 10d exch pwr exp2 0 lt {10d mul} if dig10 mul floor
+      v2 0 lt {neg} if /man2 name
+      
+      exp1 exp2 ne man1 man2 ne or
+    } ifelse
+  } ifelse
+} bind def
+
 /vec_check {
   0 1 A1 length 1 sub {/i name
-    A1 i get A4 i get ne A1 i get A7 i get ne or {
+    A1 i get A4 i get roundne A1 i get A7 i get roundne or {
       err 0 (In ) fax * style text (-) fax * op text
       ([) fax * i * number (]:) fax
       ( t = ) fax * A1 i get * number
@@ -141,7 +180,7 @@ end def
 } bind def
 
 /S_dy_check {
-  a1 a2 ne a1 a3 ne or {
+  a1 a2 roundne a1 a3 roundne or {
     err 0 (In ) fax
     * style text (-) fax * op text
     ( t = ) fax * a1 * number
