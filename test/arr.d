@@ -130,14 +130,12 @@ end def
 /log {ln 10d ln div} def
 /antilog {10d exch pwr} def
 
-/setdig10 {
+/setdig10 {/d ctype
   10d exch 1d sub pwr /dig10 name
 } def
-6d setdig10
+15d setdig10
 
-/round {
-  /dig10 10d rounddig 1d sub pwr def
-  /val name
+/round {/val name
   val dup 0 lt {abs} if
   log dup floor /expo name
   1d mod 10d exch pwr expo 0 lt {10d mul} if dig10 mul floor dig10 div
