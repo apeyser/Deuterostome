@@ -18,21 +18,28 @@ UL thread_num_ = 1;
 UL thread_max_ = 0;
 pthread_cond_t thread_wait[THREADNUM] = {};
 pthread_mutex_t thread_lock[THREADNUM] = {};
-pthread_cond_t main_wait;
-pthread_mutex_t main_lock;
-pthread_mutex_t share_lock;
 thread_func thread_function = NULL;
 L thread_error[THREADNUM] = {};
 const void* thread_data_global = NULL;
 void* thread_data_local[THREADNUM] = {};
 sigset_t sigmask;
 
-#define THREAD_ERROR_EXIT(func, msg, ...) do {							\
-	if (func(__VA_ARGS__))												\
-	  error(EXIT_FAILURE, errno,										\
-			"%s in %s:%d with %s(%s)",									\
-			msg, __FILE__, __LINE__, #func, #__VA_ARGS__);				\
-  } while (0)
+pthread_attr_t attr;
+BOOLEAN attr_i = FALSE;
+pthread_cond_t main_wait;
+BOOLEAN main_wait_i = FALSE;
+pthread_mutex_t main_lock;
+BOOLEAN main_lock_i = FALSE;
+pthread_mutex_t share_lock;
+BOOLEAN share_lock_i = FALSE;
+
+#define THREAD_ERROR_EXIT(func, msg, ...) do {                          \
+        int err;                                                        \
+	if ((err = func(__VA_ARGS__)))                                  \
+            error(EXIT_FAILURE, err,                                    \
+                  "%s in %s:%d with %s(%s)",                            \
+                  msg, __FILE__, __LINE__, #func, #__VA_ARGS__);        \
+    } while (0)
 
 #define THREADERR(func, ...) THREAD_ERROR_EXIT(func, "thread", __VA_ARGS__)
 #define MAINERR(func, ...) THREAD_ERROR_EXIT(func, "main", __VA_ARGS__)
@@ -152,67 +159,75 @@ L threads_do_pool_int(UL nways, thread_func func,
   return r;
 }
 
-L threads_destroy(L i, 
-                  pthread_attr_t* attr, 
-                  pthread_mutex_t* share_lock, 
-                  pthread_mutex_t* main_lock,
-                  pthread_cond_t* main_wait,
-                  L errno_) {
-  for (--i; i; --i)
-	if (pthread_cancel(threads[i]) && ! errno_) 
-	  errno_ = errno;
+#define THREADS_DESTROY(func, ...) do {                       \
+        int _errno;                                           \
+        if ((_errno = func(__VA_ARGS__))) {                   \
+            if (! errno_) errno_ = _errno;                    \
+        }                                                     \
+    } while (0)
 
-  if (attr && pthread_attr_destroy(attr) && ! errno_) 
-	errno_ = errno;
+#define THREADS_DESTROY_TEST(p, func) do {                 \
+        if (p##_i) {                                       \
+            int _errno;                                    \
+            if ((_errno = func(&p))) {                     \
+                if (! errno_) errno_ = _errno;             \
+            }                                              \
+            else p##_i = FALSE;                            \
+        }                                                  \
+    } while (0)
+        
+L threads_destroy(L errno_) {
+    while (thread_num_ > 1)
+        THREADS_DESTROY(pthread_cancel, threads[--thread_num_]);
 
-  if (share_lock && pthread_mutex_destroy(share_lock))
-	errno_ = errno;
-  
-  if (main_lock && pthread_mutex_destroy(main_lock))
-	errno_ = errno;
-  
-  if (main_wait && pthread_cond_destroy(main_wait))
-	errno_ = errno;
-
-  thread_num_ = 1;
-
-  return -errno_;
+    THREADS_DESTROY_TEST(attr, pthread_attr_destroy);
+    THREADS_DESTROY_TEST(share_lock, pthread_mutex_destroy);
+    THREADS_DESTROY_TEST(main_lock, pthread_mutex_destroy);
+    THREADS_DESTROY_TEST(main_wait, pthread_cond_destroy);
+    
+    return -errno_;
 }
+
+#define THREADS_INIT_TEST(p, func, ...) do {     \
+        int _errno;                              \
+        if ((_errno = func(&p, __VA_ARGS__)))    \
+            return threads_destroy(_errno);      \
+        p##_i = TRUE;                            \
+    } while (0)
+
+#define THREADS_INIT_TEST1(p, func) do {         \
+        int _errno;                              \
+        if ((_errno = func(&p)))                 \
+            return threads_destroy(_errno);      \
+        p##_i = TRUE;                            \
+    } while(0)
+
+#define THREADS_INIT(func, ...) do {            \
+        int _errno;                             \
+        if ((_errno = func(__VA_ARGS__)))       \
+            return threads_destroy(_errno);      \
+    } while (0)
 
 L threads_init(L num) {
   L i;
-  pthread_attr_t attr;
   if (num < 1 || num > THREADNUM) return RNG_CHK;
 
   if (sigfillset(&sigmask)) return -errno;
 
-  if (pthread_attr_init(&attr)) return -errno;
-  if (pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED))
-	return threads_destroy(0, &attr, NULL, NULL, NULL, errno);
-
-  if (pthread_mutex_init(&share_lock, NULL))
-	return threads_destroy(0, &attr, NULL, NULL, NULL, errno);
-  if (pthread_mutex_init(&main_lock, NULL))
-	return threads_destroy(0, &attr, &share_lock, NULL, NULL, errno);
-  if (pthread_cond_init(&main_wait, NULL)) 
-	return threads_destroy(0, &attr, &share_lock, &main_lock, NULL, errno);
+  THREADS_INIT_TEST1(attr, pthread_attr_init);
+  THREADS_INIT(pthread_attr_setdetachstate, &attr, PTHREAD_CREATE_DETACHED);
+  THREADS_INIT_TEST(share_lock, pthread_mutex_init, NULL);
+  THREADS_INIT_TEST(main_lock, pthread_mutex_init, NULL);
+  THREADS_INIT_TEST(main_wait, pthread_cond_init, NULL);
   
-  for (i = 1; i < num; ++i)
-	if (pthread_create(threads+i, &attr, thread_routine, (void*) i))
-	  return threads_destroy(i, &attr, &share_lock, 
-							 &main_lock, &main_wait, errno);
+  for (; thread_num_ < num; ++thread_num_)
+      THREADS_INIT(pthread_create,
+                   threads+thread_num_,
+                   &attr,
+                   thread_routine,
+                   (void*) thread_num_);
 
-
-  if (pthread_attr_destroy(&attr))
-	return threads_destroy(num, NULL, NULL, NULL, NULL, errno);
-
-  thread_num_ = num;
   return OK;
-}
-
-L threads_fin(void) {
-    return threads_destroy(thread_num(), NULL, 
-                         &share_lock, &main_lock, &main_wait, 0);
 }
 
 void thread_share_unlock_f(void) {
@@ -250,8 +265,7 @@ L op_makethreads(void) {
   if (CLASS(o_1) != NUM) return OPD_CLA;
   if (! VALUE(o_1, &n)) return UNDF_VAL;
 
-  if ((ret = threads_fin()) == OK
-      && (ret = threads_init(n)) == OK)
+  if ((ret = threads_destroy(0)) == OK && (ret = threads_init(n)) == OK)
       FREEopds = o_1;
   
   return ret;

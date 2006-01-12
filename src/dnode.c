@@ -483,7 +483,7 @@ if (running) goto tuwat; else goto theloop;
 /*--- look first for a connection request and service it */
 nextmsg:
 #if ENABLE_UNIX_SOCKETS
- if (FD_ISSET(unixserversocket, &read_fds)) {
+ if (unixserversocket != -1 && FD_ISSET(unixserversocket, &read_fds)) {
    ssocket = unixserversocket;
    goto nextserver;
  }
