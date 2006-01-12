@@ -394,7 +394,9 @@ end def
                 /reps reps_tp_st_op typ get style get op get exec def
                 {reps {{func} tw} repeat} timed /time name
                 err 0 (Time for ) fax * style text (, ) fax
-                * test text ([) fax * reps * number (] = ) fax
+                * test text
+                test /thread eq {([) fax * threads * number (]) fax} if
+                ([) fax * reps * number (] = ) fax
                 * time * number (\n) fax
                 0 exch getinterval toconsole
               } forall
@@ -463,4 +465,17 @@ end def
   } stopped /mem _layer ~stop if
 } bind def
 
+/threadreps 1e6 def
+/fulltest {
+  (\nTesting makethreads...\n) toconsole
+  (Number of threads: ) toconsole threads _ pop
+  threadreps {threads 1 makethreads makethreads} repeat
+  (\nTesting ops:\n) toconsole
+  (Number of threads: ) toconsole threads _ pop
+  testops
+  (\nTesting time:\n) toconsole
+  (Number of threads: ) toconsole threads _ pop
+  testtime
+} bind def
+  
 end _module

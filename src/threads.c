@@ -24,8 +24,8 @@ const void* thread_data_global = NULL;
 void* thread_data_local[THREADNUM] = {};
 sigset_t sigmask;
 
-pthread_attr_t attr;
-BOOLEAN attr_i = FALSE;
+//pthread_attr_t attr;
+//BOOLEAN attr_i = FALSE;
 pthread_cond_t main_wait;
 BOOLEAN main_wait_i = FALSE;
 pthread_mutex_t main_lock;
@@ -73,12 +73,19 @@ void* thread_routine(void* arg) {
 
   THREADERR(pthread_sigmask, SIG_BLOCK, &sigmask, NULL);
 
+  THREADERR(pthread_mutex_lock, &main_lock);
+  --thread_end;
+  THREADERR(pthread_cond_signal, &main_wait);
+  THREADERR(pthread_mutex_unlock, &main_lock);
+
   while (TRUE) {
         thread_start[thread_id] = FALSE;
         do {          
           THREADERR(pthread_cond_wait, 
                     thread_wait+thread_id, 
                     thread_lock+thread_id);
+          // The following is due to fucked up osx pthread_cancel
+          pthread_testcancel();
         } while (! thread_start[thread_id]);
 
 	thread_error[thread_id]
@@ -159,73 +166,85 @@ L threads_do_pool_int(UL nways, thread_func func,
   return r;
 }
 
+#define PRINT_ERRNO(func, ...)                             \
+    error(0, _errno, "At %s:%d with %s(%s)",               \
+          __FILE__, __LINE__, #func, #__VA_ARGS__)
+
+
 #define THREADS_DESTROY(func, ...) do {                       \
         int _errno;                                           \
         if ((_errno = func(__VA_ARGS__))) {                   \
             if (! errno_) errno_ = _errno;                    \
+            PRINT_ERRNO(func, __VA_ARGS__);                   \
         }                                                     \
     } while (0)
 
-#define THREADS_DESTROY_TEST(p, func) do {                 \
-        if (p##_i) {                                       \
-            int _errno;                                    \
-            if ((_errno = func(&p))) {                     \
-                if (! errno_) errno_ = _errno;             \
-            }                                              \
-            else p##_i = FALSE;                            \
-        }                                                  \
-    } while (0)
-        
 L threads_destroy(L errno_) {
-    while (thread_num_ > 1)
-        THREADS_DESTROY(pthread_cancel, threads[--thread_num_]);
+    L n = thread_num_-1;
+    if (thread_num_ == 1) return OK;
+    
+    while (thread_num_ > 1) {
+        --thread_num_;
+        // The following is due to fucked up osx pthread_cancel
+        MAINERR(pthread_mutex_lock, thread_lock+thread_num_);
+        THREADS_DESTROY(pthread_cancel, threads[thread_num_]);
+        MAINERR(pthread_cond_signal, thread_wait+thread_num_);
+        MAINERR(pthread_mutex_unlock, thread_lock+thread_num_);
+    }
 
-    THREADS_DESTROY_TEST(attr, pthread_attr_destroy);
-    THREADS_DESTROY_TEST(share_lock, pthread_mutex_destroy);
-    THREADS_DESTROY_TEST(main_lock, pthread_mutex_destroy);
-    THREADS_DESTROY_TEST(main_wait, pthread_cond_destroy);
+    for (; n; --n)
+        THREADS_DESTROY(pthread_join, threads[n], NULL);
     
     return -errno_;
 }
 
-#define THREADS_INIT_TEST(p, func, ...) do {     \
-        int _errno;                              \
-        if ((_errno = func(&p, __VA_ARGS__)))    \
-            return threads_destroy(_errno);      \
-        p##_i = TRUE;                            \
+#define THREADS_INIT_TEST(p, func, ...) do {             \
+        if (! p##_i) {                                   \
+            int _errno;                                  \
+            if ((_errno = func(&p, __VA_ARGS__))) {      \
+                PRINT_ERRNO(func, &p, __VA_ARGS__);      \
+                return threads_destroy(_errno);          \
+            }                                            \
+            p##_i = TRUE;                                \
+        }                                                \
     } while (0)
 
-#define THREADS_INIT_TEST1(p, func) do {         \
-        int _errno;                              \
-        if ((_errno = func(&p)))                 \
-            return threads_destroy(_errno);      \
-        p##_i = TRUE;                            \
-    } while(0)
-
-#define THREADS_INIT(func, ...) do {            \
-        int _errno;                             \
-        if ((_errno = func(__VA_ARGS__)))       \
-            return threads_destroy(_errno);      \
+#define THREADS_INITD() do {                                            \
+        thread_end = thread_num_-1;                                     \
+        while(thread_end)                                               \
+            MAINERR(pthread_cond_wait, &main_wait, &main_lock);         \
+        MAINERR(pthread_mutex_unlock, &main_lock);                      \
     } while (0)
+
+#define THREADS_INIT(func, ...) do {              \
+        int _errno;                               \
+        if ((_errno = func(__VA_ARGS__))) {       \
+            PRINT_ERRNO(func, __VA_ARGS__);       \
+            THREADS_INITD();                      \
+            return threads_destroy(_errno);       \
+        }                                         \
+    } while (0)
+
+
 
 L threads_init(L num) {
   L i;
   if (num < 1 || num > THREADNUM) return RNG_CHK;
+  if (num == 1) return OK;
 
   if (sigfillset(&sigmask)) return -errno;
-
-  THREADS_INIT_TEST1(attr, pthread_attr_init);
-  THREADS_INIT(pthread_attr_setdetachstate, &attr, PTHREAD_CREATE_DETACHED);
   THREADS_INIT_TEST(share_lock, pthread_mutex_init, NULL);
   THREADS_INIT_TEST(main_lock, pthread_mutex_init, NULL);
   THREADS_INIT_TEST(main_wait, pthread_cond_init, NULL);
-  
-  for (; thread_num_ < num; ++thread_num_)
+
+  MAINERR(pthread_mutex_lock, &main_lock);
+  for (; thread_num_ < num; thread_num_++)
       THREADS_INIT(pthread_create,
-                   threads+thread_num_,
-                   &attr,
+                   threads + thread_num_,
+                   NULL, //&attr,
                    thread_routine,
                    (void*) thread_num_);
+  THREADS_INITD();
 
   return OK;
 }

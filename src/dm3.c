@@ -131,13 +131,13 @@ L make_unix_socket(L port) {
   char* sock_dir; char* i;
   L sock;
   struct sockaddr_un name;
+  struct stat buf;
   
   if (init_unix_sockaddr(&name, port) != OK) return -1;
   if ((sock = socket(PF_UNIX, SOCK_STREAM, 0)) < 0) return -1;
 
   if (! (i = sock_dir = strdup(name.sun_path))) return -1;
   while ((i = strchr(++i, '/'))) {
-    struct stat buf;
     *i = '\0';
     if (stat(sock_dir, &buf)) {
       if ((errno != ENOTDIR && errno != ENOENT)
@@ -154,6 +154,9 @@ L make_unix_socket(L port) {
     *i = '/';
   }
   free(sock_dir);
+
+  if (! stat(name.sun_path, &buf) && unlink(name.sun_path))
+      return -1;
     
   if (bind(sock, (struct sockaddr *) &name, 
            sizeof(name.sun_family)+strlen(name.sun_path)+1)
