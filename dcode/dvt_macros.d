@@ -8,8 +8,8 @@
          (  Copy) KEY (  Save) KEY (  Load) KEY (  Open) KEY NL
       11 GAP () PRE (Lib) KEY NL
     
-      (Dnodes:) PRE (  Setup) KEY (  Connect) KEY (  Talk) KEY
-         (  Disconnect) KEY (  Kill) KEY NL
+      (Dnode:) PRE (  Setup) KEY (  Connect) KEY (  Talk) KEY
+         (  Disconnect) KEY (  Shrink) KEY NL
 
       (PrintFrom:) PRE (  Talk) KEY (  Ascii) KEY (  PS) KEY
          ( xPS) KEY ( pdf) KEY ( dvi) KEY ( tex) KEY NL      
