@@ -128,9 +128,8 @@ L threads_do_int(UL nways, thread_func func,
                                     thread_data_local[0]);
 
   thread_end = thread_max();
-  do {        
+  while (thread_end)    
       MAINERR(pthread_cond_wait, &main_wait, &main_lock);
-  } while (thread_end);
   MAINERR(pthread_mutex_unlock, &main_lock);
 
   for (i = 0; i < nways; ++i)
@@ -142,8 +141,10 @@ L threads_do_int(UL nways, thread_func func,
 static L threads_do_pool_int_(UL nways, thread_func func, 
                               const void* global, 
                               void* local, size_t s) {
-    UL i; L r;
-    for (i = nways; i > 0; i -= thread_num()) {
+    L i; L r;
+    if ((L) nways < 0) return RNG_CHK;
+    
+    for (i = (L) nways; i > 0; i -= thread_num()) {
 	if ((r = threads_do_int((i < thread_num()) ? i : thread_num(), 
                                 func, global, local, s)) != OK)
             return r;
