@@ -643,17 +643,24 @@ for (k=0; k<Nrowb; k++)
 
 #if ENABLE_THREADS
 typedef struct {
-  L Ncola;
-  D *restrict *restrict ap, *restrict *restrict bp;
+    L Ncola;
+    UL perthread;
+    UL leftover;
+    D *restrict *restrict ap, *restrict *restrict bp;
 } mattransposet;
 
-L thread_mattranspose(UL id __attribute__ ((__unused__)),
-                      const void* global, void* local) {
-  L i = *(L*) local;
+L thread_mattranspose(UL id,
+                      const void* global,
+                      void* local __attribute__ ((__unused__))) {
   const mattransposet* restrict m = (const mattransposet*) global;
-  L j;
-  for (j = 0; j < m->Ncola; j++)
-	m->bp[j][i] = m->ap[i][j];
+  UL n = m->perthread + (thread_max() == id ? m->leftover : 0);
+  const UL i_ = m->perthread*id;
+  UL i, j;
+  
+  for (i = i_; i < i_ + n; ++i) {
+      for (j = 0; j < m->Ncola; j++)
+          m->bp[j][i] = m->ap[i][j];
+  }
   return OK;
 }
 #endif //ENABLE_THREADS
@@ -696,15 +703,18 @@ for (k=0; k<Nrowa; k++)
   
  if ((Ncola != Nrowb) || (Nrowa != Ncolb)) return(RNG_CHK);
  
- if (thread_num() == 1 || serialized)
+ if (thread_num() == 1 || serialized || Nrowa == 1 || Ncola < THREADMUL*8)
    for (i=0; i<Nrowa; i++)
 	 for (j=0; j<Ncola; j++) bp[j][i] = ap[i][j];
 #if ENABLE_THREADS
  else {
    mattransposet m;
+   UL nways = (Nrowa > thread_num()) ? thread_num() : Nrowa;
+   m.perthread = Nrowa / nways;
+   m.leftover = Nrowa % nways;
    m.Ncola = Ncola;
    m.bp = bp; m.ap = ap;
-   threads_do_pool(Nrowa, thread_mattranspose, &m);
+   threads_do(nways, thread_mattranspose, &m);
  }
 #endif //ENABLE_THREADS
         
@@ -723,21 +733,31 @@ for (k=0; k<Nrowa; k++)
 
 #if ENABLE_THREADS
 typedef struct {
-  L Ncola;
-  D *restrict *restrict ap,
-	*restrict bp,
-	*restrict cp;
+    D *restrict *restrict ap,
+        *restrict bp,
+        *restrict cp;
+    UL perthread;
+    UL leftover;
+    L Ncola;
 } matvecmult;
 
-L thread_matvecmul(UL id __attribute__ ((__unused__)),
-                   const void* global, void* local) {
-  L i = *(L*) local;
+L thread_matvecmul(UL id,
+                   const void* global,
+                   void* local __attribute__ ((__unused__))) {
   const matvecmult *restrict m = (const matvecmult*) global;
-  D sum = 0.0;
-  L k;
-  for (k = 0; k < m->Ncola; k++) 
-	sum += m->ap[i][k] * m->bp[k];
-  m->cp[i] = sum;
+  const UL n = m->perthread + (thread_max() == id ? m->leftover : 0);
+  const UL i_ = m->perthread * id;
+  UL i;
+  UL k;
+  D sum;
+  
+  for (i = i_;  i < i_ + n; ++i) {
+      sum = 0.0;
+      for (k = 0; k < m->Ncola; ++k)
+          sum += m->ap[i][k] * m->bp[k];
+      m->cp[i] = sum;
+  }
+  
   return OK;
 }
 #endif //ENABLE_THREADS
@@ -774,7 +794,7 @@ for (k=0; k<Nrowa; k++)
  if ((Ncola != Nrowb) || (Nrowa != Nrowc)) return(RNG_CHK);
  
  bp = (D*) VALUE_BASE(o_1); cp = (D*) VALUE_BASE(o_3);
- if (thread_num() == 1 || serialized)
+ if (thread_num() == 1 || serialized || Nrowc == 1 || Ncola < THREADMUL*8)
    for (i=0; i<Nrowc; i++) { 
 	 sum = 0.0;
      for (k=0; k<Ncola; k++) sum += ap[i][k] * bp[k];
@@ -783,9 +803,12 @@ for (k=0; k<Nrowa; k++)
 #if ENABLE_THREADS
  else {
    matvecmult m;
+   UL nways = (Nrowc > thread_num()) ? thread_num() : Ncola;
+   m.perthread = Nrowc / nways;
+   m.leftover = Nrowc % nways;
    m.Ncola = Ncola;
    m.ap = ap; m.bp = bp; m.cp = cp;
-   threads_do_pool(Nrowc, thread_matvecmul, &m);
+   threads_do(nways, thread_matvecmul, &m);
  }
 #endif
         

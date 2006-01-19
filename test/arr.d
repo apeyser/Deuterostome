@@ -19,13 +19,19 @@
 
 /matsize 1023 def
 
+/dosmall true def
+
 /dyadic_ts {
   style /SA eq {
     {/A1 /A3 /A5} {matsize typ array def} forall
     {A1 A3 A5} {exec 1.1d exch copy pop} forall
   } {
     {/A1 /A2 /A3 /A4 /A5 /A6} {matsize typ array def} forall
-    {A1 A2 A3 A4 A5 A6} {exec 0 1 index length 2 1 ramp pop pop} forall
+    dosmall {
+      {A1 A2 A3 A4 A5 A6} {exec 1.01d exch copy pop} forall
+    } {
+      {A1 A2 A3 A4 A5 A6} {exec 0 1 index length 2 1 ramp pop pop} forall
+    } ifelse
   } ifelse
 } bind def
 
@@ -56,7 +62,7 @@ end def
   /parallel {A5 A6 op mkact exec pop} def
 end def
 
-/n 3d def
+/n 1.01d def
 /AS_dy_test tests length dict dup begin
   /thread {A1 n op mkact exec pop} def
   /serial {A3 n op mkact exec pop} def
@@ -97,8 +103,11 @@ end def
 end def
 
 /A_dy_check {
+  /starred true def
+  
   0 1 A1 length 1 sub {/i name
     A1 i get A3 i get roundne A1 i get A5 i get roundne or {
+      /starred false def
       err 0 (In ) fax * style text (-) fax * op text
       ([) fax * i * number (]:) fax
       ( t = ) fax * A1 i get * number
@@ -106,15 +115,22 @@ end def
       ( s = ) fax * A5 i get * number
       (\n) fax 0 exch getinterval toconsole
       stop
-    } if
+    } {
+      starred {A1 i get * ne {/starred false def} if} if
+    } ifelse
   } for
+
+  starred {(All ************\n) toconsole} if
 } def
 
 /mat_check {
+  /starred true def
+  
   0 1 A1 length 1 sub {/i name
     0 1 A1 i get length 1 sub {/j name
       A1 i get j get A4 i get j get roundne
       A1 i get j get A7 i get j get roundne or {
+        /starred false def
         err 0 (In ) fax * style text (-) fax * op text
         ([) fax * i * number (,) fax * j * number (]:) fax
         ( t = ) fax * A1 i get j get * number
@@ -122,9 +138,13 @@ end def
         ( s = ) fax * A7 i get j get * number
         (\n) fax 0 exch getinterval toconsole
         stop
-      } if
+      } {
+        starred {A1 i get j get * ne {/starred false def} if} if
+      } ifelse
     } for
   } for
+
+  starred {(All ************\n) toconsole} if
 } bind def
 
 /log {ln 10d ln div} def
@@ -164,8 +184,11 @@ end def
 } bind def
 
 /vec_check {
+  /starred true def
+  
   0 1 A1 length 1 sub {/i name
     A1 i get A4 i get roundne A1 i get A7 i get roundne or {
+      /starred false def
       err 0 (In ) fax * style text (-) fax * op text
       ([) fax * i * number (]:) fax
       ( t = ) fax * A1 i get * number
@@ -173,12 +196,19 @@ end def
       ( s = ) fax * A7 i get * number
       (\n) fax 0 exch getinterval toconsole
       stop
-    } if
+    } {
+      starred {A1 i get * ne {/starred false def} if} if
+    } ifelse
   } for
+
+  starred {(All ************\n) toconsole} if
 } bind def
 
 /S_dy_check {
+  /starred true def
+  
   a1 a2 roundne a1 a3 roundne or {
+    /starred false def
     err 0 (In ) fax
     * style text (-) fax * op text
     ( t = ) fax * a1 * number
@@ -186,7 +216,11 @@ end def
     ( s = ) fax * a3 * number
     (\n) fax 0 exch getinterval toconsole
     stop
-  } if
+  } {
+    starred {a1 * ne {/starred false def} if} if
+  } ifelse
+
+  starred {(All ************\n) toconsole} if
 } bind def
 
 /style_op_check styles length dict dup begin
