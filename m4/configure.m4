@@ -23,12 +23,30 @@ AC_DEFUN([CF_AC_CHECK_SIZEOF], [dnl
   changequote(<<, >>)dnl
   define(<<AC_CV_NAME>>, translit(ac_cv_sizeof_$1, [ *], [_p]))dnl
   changequote([, ])dnl
-  if test "$AC_CV_NAME" == "0" ; then
+  if test $AC_CV_NAME -eq 0 ; then
     AC_MSG_WARN([sizeof($1) is unknown, confirm that it is $2 on target])
-  elif test "$AC_CV_NAME" != "$2" ; then
+  elif test $AC_CV_NAME -ne $2 ; then
     AC_MSG_ERROR([sizeof($1) = $AC_CV_NAME, must be $2])
   fi
   undefine([AC_CV_NAME])dnl
+])
+
+AC_DEFUN([CF_AC_CHECK_SIZEOFS], [dnl
+  AC_CHECK_SIZEOF([$1], [0])dnl
+  changequote(<<, >>)dnl
+  define(<<AC_CV_NAME>>, translit(ac_cv_sizeof_$1, [ *], [_p]))dnl
+  changequote([, ])dnl   
+  if test $AC_CV_NAME -eq 0 ; then
+    AC_MSG_WARN([sizeof($1) is unknown, confirm that it is in ($2) on target])
+  else
+    cf_ac_check_sizeofs=false
+    for i in $2 ; do
+      if test $i -eq $AC_CV_NAME ; then cf_ac_check_sizeofs=: ; break; fi
+    done
+    if ! $cf_ac_check_sizeofs ; then
+       AC_MSG_ERROR([sizeof($1) == $AC_CV_NAME, not in ($2)])
+    fi
+  fi dnl
 ])
 
 dnl

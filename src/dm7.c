@@ -288,7 +288,8 @@ L op_readboxfile(void)
 
 int fd;
 L nb, atmost, npath, retc;
-B *p;
+B *p; B* oldFREEvm = FREEvm;
+BOOLEAN isnative, isnative_endian, isnative_bits;
 DECLARE_ALARM;
 
 if (o_2 < FLOORopds) return(OPDS_UNF);
@@ -326,15 +327,25 @@ rb3:
  if (close(fd) == -1) {if ((errno == EINTR) || (errno == EAGAIN)) goto rb3;
    else return(-errno);}
  
- nb = DALIGN(p - FREEvm);
- if (! GETNATIVEFORMAT(FREEvm) || ! GETNATIVEUNDEF(FREEvm)) return BAD_FMT;
- if (! GETNATIVEENDIAN(FREEvm) && ((retc = deendian_frame(FREEvm)) != OK))
-     return retc;
- if ((retc = unfoldobj(FREEvm,(L)FREEvm, GETNATIVE(FREEvm))) != OK) 
+ if (! GETNATIVEFORMAT(FREEvm)) return BAD_FMT;
+
+ FREEvm += DALIGN(nb);
+ isnative_endian = GETNATIVEENDIAN(oldFREEvm);
+ isnative_bits = GETNATIVEBITS(oldFREEvm);
+ isnative = GETNATIVE(oldFREEvm);
+ if (! isnative
+     && ((retc = deendian_frame(oldFREEvm, isnative_endian, isnative_bits)) 
+         != OK)) {
+   FREEvm = oldFREEvm;
+   return retc;
+ };
+ if ((retc = unfoldobj(oldFREEvm,(L)oldFREEvm, isnative_endian, isnative_bits)) 
+     != OK) {
+   FREEvm = oldFREEvm;
    return(retc);
- FORMAT(FREEvm) = 0;
- moveframe(FREEvm,o_2);
- FREEvm += nb;
+ };
+ FORMAT(oldFREEvm) = 0;
+ moveframe(oldFREEvm,o_2);
  FREEopds = o_1;
  return(OK);
 }

@@ -62,10 +62,23 @@
 
 typedef int8_t B;
 typedef int16_t W;
-typedef int32_t L;
 typedef uint8_t UB;
 typedef uint16_t UW;
+
+typedef int32_t M;
+typedef int32_t UM;
+
+#if SIZEOF_VOIDP == 4
+#define BITS_SIZE_32
+typedef int32_t L;
 typedef uint32_t UL;
+#elif SIZEOF_VOIDP == 8
+#define BITS_SIZE_64
+typedef int64_t L;
+typedef uint64_t UL;
+#else
+#error "SIZEOF_VOIDP is " #SIZEOF_VOIDP
+#endif //SIZEOF_VOIDP
 
 typedef W BOOLEAN;
 typedef L INT;
@@ -150,7 +163,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define WORDTYPE                   ((UB) 0x01)
 #define LONGTYPE                   ((UB) 0x02)
 #define SINGLETYPE                 ((UB) 0x03)
-#define DOUBLETYPE                 ((UB) 0x04)      
+#define DOUBLETYPE                 ((UB) 0x04)
 #define SOCKETTYPE                 ((UB) 0x01)      /* null types */
 #define SIMPLETYPE                 ((UB) 0x00)      /* handle types */
 #define COMPLEXTYPE                ((UB) 0x00)      
@@ -169,8 +182,12 @@ NOTE: all objects that can populate the D machine's workspace must
 #define BIGENDIAN                  ((UB) 0x00)
 #define LITTLEENDIAN               ((UB) 0x01)
 #define ENDIANMASK                 ((UB) 0x01)
+#define BITS32                     ((UB) 0x00)
+#define BITS64                     ((UB) 0x02)
+#define BITSMASK                   ((UB) 0x02)
 /* Format specifier */
 #define FORMAT32                   ((UB) 0x10)
+#define FORMAT64                   ((UB) 0x20)
 #define FORMATMASK                 ((UB) 0xF0)
 
 // make BSD and Linux look alike
@@ -200,17 +217,27 @@ NOTE: all objects that can populate the D machine's workspace must
 #endif //! NO_ENDIAN_HDR
 
 #define GETNATIVEFORMAT(frame) \
-  ((BOOLEAN) ((FORMAT(frame) & FORMATMASK) == FORMAT32))
-#define SETNATIVEFORMAT(frame) FORMAT(frame) |= FORMAT32
+  ((BOOLEAN) ((FORMAT(frame) & FORMATMASK) == FORMAT64))
+#define SETNATIVEFORMAT(frame) FORMAT(frame) |= FORMAT64
 
-#define GETNATIVE(frame) (GETNATIVEFORMAT(frame) && GETNATIVEENDIAN(frame))
-#define SETNATIVE(frame) \
-  FORMAT(frame) = 0; \
-  SETNATIVEFORMAT(frame); \
-  SETNATIVEENDIAN(frame)
+#ifdef BITS_SIZE_32
+#define GETNATIVEBITS(frame) \
+  ((BOOLEAN) ((FORMAT(frame) & BITSMASK) == BITS32))
+#define SETNATIVEBITS(frame) FORMAT(frame) |= BITS32
+#else //BITS_SIZE_64
+#define GETNATIVEBITES(frame) \
+  ((BOOLEAN) ((FORMAT(frame) & BITSMASK) == BITS64))
+#define SETNATIVEBITS(frame) FORMAT(frame) |= BITS64
+#endif //BITS_SIZE
 
-#define GETNATIVEUNDEF(frame) \
-  ((BOOLEAN) ! (FORMAT(frame) & ~(FORMATMASK | ENDIANMASK)))
+#define GETNATIVE(frame) \
+  (GETNATIVEFORMAT(frame) && GETNATIVEENDIAN(frame) && GETNATIVEBITS(frame))
+#define SETNATIVE(frame) do {                   \
+    FORMAT(frame) = 0;                          \
+    SETNATIVEFORMAT(frame);                     \
+    SETNATIVEENDIAN(frame);                     \
+    SETNATIVEBITS(frame);                       \
+  } while(0)
 
 #define EXITMARK                   ((UB)0x10)   /* execstack marks */
 #define STOPMARK                   ((UB)0x20)
@@ -218,40 +245,29 @@ NOTE: all objects that can populate the D machine's workspace must
 #define XMARK                      ((UB)0x70)
 #define BIND                       ((UB)0x80)   /* box op housekeeping */
 
-#define NUM_VAL(frame)             ( ((B *)(((B*)(frame))+4)))
-#define LONG_VAL(frame)            (*((L *)((frame)+4)))
+#define FRAMEL1 (8)
+#define FRAMEL2 (16)
+#define FRAMEL3 (24)
+
+#define NUM_VAL(frame)             ( ((B *)(((B*)(frame))+FRAMEL1)))
+#define LONG_VAL(frame)            (*((L *)((frame)+FRAMEL1)))
 #define BOOL_VAL(frame)            (*((BOOLEAN *)((frame)+2)))
 #define NAME_KEY(frame)            (*((W *)((frame)+2)))
 
-#define OP_CODE(frame)             (*((L *)(((B*)(frame))+4)))
-#define OP_NAME(frame)             (*((L *)(((B*)(frame))+8)))
-#define VALUE_BASE(frame)          (*((L *)(((B*)(frame))+4)))
-#define ARRAY_SIZE(frame)          (*((L *)(((B*)(frame))+8)))
-#define LIST_CEIL(frame)           (*((L *)(((B*)(frame))+8)))
-#define DICT_NB(frame)             (*((L *)(((B*)(frame))+8)))
-#define DICT_CURR(frame)           (*((L *)(((B*)(frame))+8)))
-#define BOX_NB(frame)              (*((L *)(((B*)(frame))+8)))
-#define VALUE_PTR(frame)           (*((B**)(((B*)(frame))+4)))
-#define LIST_CEIL_PTR(frame)       (*((B**)(((B*)(frame))+8)))
-/* #define HANDLE_ID(frame)           (*((L *)(((B*)(frame))+12))) */
-/* #define HANDLE_CEIL(frame)         (*((B**)(((B*)(frame))+8))) */
-
-/* static void SET_HANDLE_ID(B* frame, B* string) { */
-/* 	HANDLE_ID(frame) = *(L*)(string); */
-/* } */
-/* static void GET_HANDLE_ID(B* frame, B* string) { */
-/* 	*(L*)(string) = HANDLE_ID(frame); */
-/* } */
-/* static BOOLEAN EQ_HANDLE_ID(B* frame1, B* frame2) { */
-/* 	return HANDLE_ID(frame1) == HANDLE_ID(frame2); */
-/* } */
-/* static BOOLEAN EQ_HANDLE_ID_STRING(B* frame, B string[5]) { */
-/* 	return HANDLE_ID(frame) == *(L*)string; */
-/* } */
+#define OP_CODE(frame)             (*((L *)(((B*)(frame))+FRAMEL1)))
+#define OP_NAME(frame)             (*((L *)(((B*)(frame))+FRAMEL2)))
+#define VALUE_BASE(frame)          (*((L *)(((B*)(frame))+FRAMEL1)))
+#define ARRAY_SIZE(frame)          (*((L *)(((B*)(frame))+FRAMEL2)))
+#define LIST_CEIL(frame)           (*((L *)(((B*)(frame))+FRAMEL2)))
+#define DICT_NB(frame)             (*((L *)(((B*)(frame))+FRAMEL2)))
+#define DICT_CURR(frame)           (*((L *)(((B*)(frame))+FRAMEL2)))
+#define BOX_NB(frame)              (*((L *)(((B*)(frame))+FRAMEL2)))
+#define VALUE_PTR(frame)           (*((B**)(((B*)(frame))+FRAMEL1)))
+#define LIST_CEIL_PTR(frame)       (*((B**)(((B*)(frame))+FRAMEL2)))
 
 /* NB: Attention to moveframe & moveframes in dm2.c whenever
    framebytes is changed */
-#define FRAMEBYTES                 16L
+#define FRAMEBYTES                 24L
 
 // NAMEBYTES is defined in ../config.h
 // To change, update ../configure.ac
@@ -267,36 +283,36 @@ NOTE: all objects that can populate the D machine's workspace must
 #define ENTRYBYTES  (8+2*FRAMEBYTES)
 
 #define DICT_ENTRIES(dict)         (*((L *)(dict)))
-#define DICT_FREE(dict)            (*((L *)(((B*)(dict))+4)))
-#define DICT_CEIL(dict)            (*((L *)(((B*)(dict))+8)))
-#define DICT_CONHASH(dict)         (*((W *)(((B*)(dict))+12)))
-#define DICT_TABHASH(dict)         (*((L *)(((B*)(dict))+8)))
+#define DICT_FREE(dict)            (*((L *)(((B*)(dict))+FRAMEL1)))
+#define DICT_CEIL(dict)            (*((L *)(((B*)(dict))+FRAMEL2)))
+#define DICT_CONHASH(dict)         (*((W *)(((B*)(dict))+FRAMEL3)))
+#define DICT_TABHASH(dict)         (*((L *)(((B*)(dict))+FRAMEL2)))
 
 
-#define DICTBYTES                  16L
+#define DICTBYTES                  32L
 
 #define LIB_DATA(frame)            ((B*)(VALUE_BASE(frame) + DICT_NB(frame)))
 
 #define LIB_TYPE(frame)            (*(L*) (LIB_DATA(frame)))
-#define LIB_HANDLE(frame)          (*(L*) (LIB_DATA(frame) + 4))
-#define LIB_ERRC(frame)            (*(L**)(LIB_DATA(frame) + 8))
-#define LIB_ERRM(frame)            (*(B***)(LIB_DATA(frame) + 12))
+#define LIB_HANDLE(frame)          (*(L*) (LIB_DATA(frame) + FRAMEL1))
+#define LIB_ERRC(frame)            (*(L**)(LIB_DATA(frame) + FRAMEL2))
+#define LIB_ERRM(frame)            (*(B***)(LIB_DATA(frame) + FRAMEL3))
 
-#define LIBBYTES                   16L
+#define LIBBYTES                   32L
 
 /*---------------------------------- C Operator definition */
 
 #define OPDEF_NAME(operator)       (*((L *)(operator)))
-#define OPDEF_CODE(operator)       (*((L *)(((B*)operator)+4)))
+#define OPDEF_CODE(operator)       (*((L *)(((B*)operator)+FRAMEL1)))
 
-#define OPDEFBYTES                 8L
+#define OPDEFBYTES                 16L
 
 /*---------------------------------------- save box */
 #define SBOX_NOPDS(box)          (*(L *)(box))
-#define SBOX_NDICTS(box)         (*(L *)(((B*)(box))+4))
-#define SBOX_CAP(box)            (*(B **)(((B*)(box))+8))
+#define SBOX_NDICTS(box)         (*(L *)(((B*)(box))+FRAMEL1))
+#define SBOX_CAP(box)            (*(B **)(((B*)(box))+FRAMEL2))
 
-#define SBOXBYTES                16
+#define SBOXBYTES                24L
 
 /*--------------------------------------------- Internal message codes */
 
@@ -331,6 +347,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define VMR_STATE   0x00000211L /* vm already tiny                       */
 #define KILL_SOCKS  0x00000212L /* dvt must kill all non-server socks    */
 #define MEM_OVF     0x00000213L /* failed memory allocation              */
+#define LONG_OVF    0x00000214L /* attempt to read 64 bit long           */
 
 #define BAD_TOK     0x00000300L /* bad D token in source string          */
 #define BAD_ASC     0x00000301L /* bad ASCII character in source string  */
@@ -482,8 +499,8 @@ BOOLEAN insert(B *nameframe, B *dict, B *framedef);
 BOOLEAN mergedict(B *source, B *sink);
 L exec(L turns);
 L foldobj(B *frame, L base, W *depth);
-L unfoldobj(B *frame, L base, BOOLEAN isnative);
-L deendian_frame(B *frame);
+L unfoldobj(B *frame, L base, BOOLEAN isnative_endian, BOOLEAN isnative_bits);
+L deendian_frame(B *frame, BOOLEAN isnative_endian, BOOLEAN isnative_bits);
 //L deendian_array(B* frame);
 //L deendian_list(B* frame);
 //L deendian_dict(B* dict);

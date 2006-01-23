@@ -84,7 +84,7 @@ CF_AC_PATH_XTRA
 CF_PREPEND_VARS([LIBS], [XLIB LIBM])
 AC_C_BIGENDIAN
 CF_AC_CHECK_SIZEOF([time_t], [4])
-CF_AC_CHECK_SIZEOF([void*], [4])
+CF_AC_CHECK_SIZEOFS([void*], [4 8])
 
 # check pid_t for plugins/process.c
 CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([pid_t], [4])])

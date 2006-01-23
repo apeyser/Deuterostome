@@ -191,7 +191,8 @@ L fromsocket(L sock, B *bsf)
 {
   L nb, nsbuf, atmost, retc;
   B *p, sf[2*FRAMEBYTES], *bf, *sbuf, sbsf[FRAMEBYTES];
-  BOOLEAN isnative;
+  BOOLEAN isnative, isnative_endian, isnative_bits;
+  B* oldFREEvm = FREEvm;
 
   moveframe(bsf,sbsf);
   nsbuf = ARRAY_SIZE(sbsf);
@@ -216,10 +217,15 @@ rd1:
   p += nb;
   if ((atmost -= nb) > 0) goto rd1;
   
-  if (! GETNATIVEFORMAT(sf) || ! GETNATIVEUNDEF(sf)) return BAD_FMT;
-  if (! (isnative = GETNATIVEENDIAN(sf))) {
-    if ((retc = deendian_frame(sf)) != OK) return retc; 
-    if ((retc = deendian_frame(bf)) != OK) return retc;
+  if (! GETNATIVEFORMAT(sf)) return BAD_FMT;
+  isnative_endian = GETNATIVEENDIAN(sf);
+  isnative_bits = GETNATIVEBITS(sf);
+  isnative = GETNATIVE(sf);
+  if (! isnative) {
+    if ((retc = deendian_frame(sf, isnative_endian, isnative_bits)) != OK) 
+      return retc; 
+    if ((retc = deendian_frame(bf, isnative_endian, isnative_bits)) != OK) 
+      return retc;
   };
   FORMAT(sf) = 0;
 
@@ -260,11 +266,17 @@ rd3:
 /*----- relocate object tree of box and push root object on operand
         stack
 */
-  if (! isnative && ((retc = deendian_frame(FREEvm)) != OK)) return retc;
-  if ((retc = unfoldobj(FREEvm,(L)FREEvm, isnative)) != OK) return retc;
+  FREEvm += DALIGN(nb);
+  if ((! isnative 
+      && ((retc = deendian_frame(FREEvm, isnative_endian, isnative_bits)) != OK))
+      || ((retc 
+           = unfoldobj(FREEvm,(L)FREEvm, isnative_endian, isnative_bits)) 
+          != OK)) {
+    FREEvm = oldFREEvm;
+    return retc;
+  }
   if (o2 >= CEILopds) return(OPDS_OVF);
-  moveframe(FREEvm,o1);                    /* root obj of box -> opds */
-  FREEvm += BOX_NB(bf); 
+  moveframe(oldFREEvm,o1);                    /* root obj of box -> opds */
   FREEopds = o2;
 ev3:  /* push frame for substring in buffer on operand stack */
   moveframe(sbsf,o1); ARRAY_SIZE(o1) = ARRAY_SIZE(sf);

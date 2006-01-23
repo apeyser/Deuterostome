@@ -420,19 +420,36 @@ BOOLEAN matchname(B *nameframe1, B *nameframe2)
 
 void moveframe(B *source, B *dest)
 {
-D *s,*d;
-
-s = (D *)source; d = (D *)dest;
-*(d++) = *(s++); *(d++) = *(s++);
-
+#ifdef BITS_SIZE_64
+  uint64_t *s,*d;
+  s = (uint64_t *)source; d = (uint64_t *)dest;
+  *(d++) = *(s++); *(d++) = *(s++); *(d++) = *(s++);
+#else //!BIT_SIZE_64
+  uint32_t *s, *d;
+  s = (uint32_t *)source; d = (uint32_t *)dest;
+  *(d++) = *(s++); *(d++) = *(s++); *(d++) = *(s++);
+  *(d++) = *(s++); *(d++) = *(s++); *(d++) = *(s++);
+#endif //BITS_SIZE_64
 }
 
 void moveframes(B *source, B *dest, L n)
 {
-D *s,*d;
+#ifdef BITS_SIZE_64
+  uint64_t *s,*d;
+  s = (uint64_t *)source; d = (uint64_t *)dest;
+#else //!BIT_SIZE_64
+  uint32_t *s, *d;
+  s = (uint32_t *)source; d = (uint32_t *)dest;
+#endif //BITS_SIZE_64
 
-s = (D *)source; d = (D *)dest;
-for (; n>0; n--) { *(d++) = *(s++); *(d++) = *(s++); }
+  for (; n>0; n--) {
+#ifdef BITS_SIZE_64
+  *(d++) = *(s++); *(d++) = *(s++); *(d++) = *(s++);
+#else //!BIT_SIZE_64
+  *(d++) = *(s++); *(d++) = *(s++); *(d++) = *(s++);
+  *(d++) = *(s++); *(d++) = *(s++); *(d++) = *(s++);
+#endif //BITS_SIZE_64
+  }
 }
 
 /* ========================== move block ==============================
@@ -656,38 +673,107 @@ static void swapbytes(B* arr, B n1, B n2) {
   arr[n1] = temp;
 }
 
-static void swap2bytes(B* arr) {swapbytes(arr, 0, 1);}
+static void swap2bytes_(B* arr) {swapbytes(arr, 0, 1);}
 
-static void swap4bytes(B* arr) {
+static void swap4bytes_(B* arr) {
   swapbytes(arr, 0, 3);
   swapbytes(arr, 1 ,2);
 }
 
-static void swap8bytes(B* arr) {
+static void swap8bytes_(B* arr) {
   swapbytes(arr, 0, 7);
   swapbytes(arr, 1, 6);
   swapbytes(arr, 2, 5);
   swapbytes(arr, 3, 4);
 }
 
-L deendian_frame(B *frame) {
+#define swapPbytes(ptr) do {                                            \
+    L retc;                                                             \
+    if (! isnative_bits                                                 \
+        && (retc = shiftPbytes(isnative_endian, ptr)) != OK)            \
+      return retc;                                                      \
+    swapPbytes_(ptr);                                                   \
+  } while (0)
+
+#define swap2bytes(ptr) do { if (! isnative_endian) swap2bytes_(ptr); } while (0)
+#define swap4bytes(ptr) do { if (! isnative_endian) swap4bytes_(ptr); } while (0)
+#define swap8bytes(ptr) do { if (! isnative_endian) swap8bytes_(ptr); } while (0)
+
+#ifdef BITS_SIZE_32
+
+#define swapPbytes_ swap4bytes
+
+#ifdef WORDS_BIGENDIAN
+static L shiftPbytes(BOOLEAN isnative_endian, B* arr) {
+  uint32_t* arr32 = (uint32_t*) arr;
+  if (isnative_endian) {
+    if (arr32[0]) return LONG_OVF;
+    arr32[0] = arr32[1];
+  }
+  else if (arr32[1]) return LONG_OVF;
+  
+  return OK;
+}
+#else //!WORDS_BIGENDIAN
+static L shiftPbytes(BOOLEAN isnative_endian, B* arr) {
+  uint_32t* arr32 = (uint_32t*) arr;
+  if (isnative_endian) {
+    if (arr32[1]) return LONG_OVF;
+  }
+  else {
+    if (arr32[0]) return LONG_OVF;
+    arr32[0] = arr32[1];
+  };
+  
+  return OK;
+} 
+#endif //!WORDS_BIGENDIAN
+
+#else //BITS_SIZE_64
+#define swapPbytes_ swap8bytes
+
+#ifdef WORDS_BIGENDIAN
+static L shiftPbytes(BOOLEAN isnative_endian, B* arr) {
+  uint_32t* arr32 = (uint_32t*) arr;
+  if (isnative_endian) arr32[1] = arr32[0];
+  return OK;
+}
+#else //!WORDS_BIGENDIAN
+static L shiftPbytes(BOOLEAN isnative_endian, B* arr) {
+  uint_32t* arr32 = (uint_32t*) arr;
+  if (! isnative_endian) arr32[1] = arr32[0];
+  return OK;
+}
+#endif //!WORDS_BIGENDIAN
+
+#endif //BITS_SIZE
+
+static void movehead(B* frame) {
+  if (frame != VALUE_PTR(frame) - FRAMEBYTES)
+    moveframe(frame, VALUE_PTR(frame) - FRAMEBYTES);
+}
+
+L deendian_frame(B *frame, BOOLEAN isnative_endian, BOOLEAN isnative_bits) {
   switch (CLASS(frame)) {
     case NULLOBJ: case BOOL: case MARK:
       return OK;
 
     case NUM:
       switch (TYPE(frame)) {
-	case BYTETYPE:
-	  return OK;
-	case WORDTYPE:
-	  swap2bytes(NUM_VAL(frame));
-	  return OK;
-	case LONGTYPE: case SINGLETYPE:
-	  swap4bytes(NUM_VAL(frame));
-	  return OK;
-	case DOUBLETYPE:
-	  swap8bytes(NUM_VAL(frame));
-	  return OK;
+        case BYTETYPE:
+          return OK;
+        case WORDTYPE:
+          swap2bytes(NUM_VAL(frame));
+          return OK;
+        case SINGLETYPE:
+          swap4bytes(NUM_VAL(frame));
+          return OK;
+        case LONGTYPE:
+          swapPbytes(NUM_VAL(frame));
+          return OK;
+        case DOUBLETYPE:
+          swap8bytes(NUM_VAL(frame));
+          return OK;
       };
       return OPD_TYP;
 
@@ -705,19 +791,22 @@ L deendian_frame(B *frame) {
       return OK;
 
     case ARRAY: case LIST:
-      swap4bytes((B*) &VALUE_BASE(frame));
-      swap4bytes((B*) &ARRAY_SIZE(frame));
+      swapPbytes((B*) &VALUE_BASE(frame));
+      swapPbytes((B*) &ARRAY_SIZE(frame));
+      movehead(frame);
       return OK;
 
     case DICT:
-      swap4bytes((B*) &VALUE_BASE(frame));
-      swap4bytes((B*) &DICT_NB(frame));
+      swapPbytes((B*) &VALUE_BASE(frame));
+      swapPbytes((B*) &DICT_NB(frame));
       //CURR=NB
+      movehead(frame);
       return OK;
 
     case BOX:
-      swap4bytes((B*) &VALUE_BASE(frame));
-      swap4bytes((B*) &BOX_NB(frame));
+      swapPbytes((B*) &VALUE_BASE(frame));
+      swapPbytes((B*) &BOX_NB(frame));
+      movehead(frame);
       return OK;
 
     default:
@@ -725,85 +814,177 @@ L deendian_frame(B *frame) {
   };
 }
 
-static L deendian_array(B* frame) {
+static L debit_longarray(B* frame, BOOLEAN isnative_endian) {
+  L retc;
+  B* nframe;
+  B* f; B* f_;
+
+#ifdef BITS_SIZE_64
+  int32_t* ls; int64_t* ld;
+  if (VALUE_PTR(frame) + DALIGN(sizeof(int32_t)*ARRAY_SIZE(frame)) < FREEvm) {
+    nframe = FREEvm;
+    FREEvm += DALIGN(FRAMEBYTES+sizeof(ld)*ARRAY_SIZE(frame));
+    f = VALUE_PTR(frame)-FRAMEBYTES;
+    f_ = VALUE_PTR(frame)+sizeof(ls)*ARRAY_SIZE(frame);
+  }
+  else {
+    nframe = VALUE_PTR(frame)-FRAMEBYTES;
+    f = NULL;
+  };
+
+  if (nframe + FRAMEBYTES + sizeof(L)*ARRAY_SIZE(frame) >= CEILvm)
+    return VM_OVF;
+
+  moveframe(frame, nframe);
+  VALUE_PTR(nframe) = nframe + FRAMEBYTES;
+  
+  for (ls = (int32_t*) VALUE_PTR(frame), ld = VALUE_PTR(nframe);
+       ls < ((int32_t*) VALUE_PTR(frame)) + ARRAY_SIZE(frame);
+       ++ls, ++ld) {
+    *(int32_t*) ld = *ls;
+    *(((int32_t*) ld)+1) = 0;
+    if ((retc = shiftPbytes(isnative_endian, (B*) ld)) != OK) return retc;
+  }
+
+#else // !BITS_SIZE_64
+  int32_t* ls_ = malloc(sizeof(int32_t)*2*ARRAY_SIZE(frame)); 
+  int32_t* ls;
+  int32_t* ld;
+  if (! ls_) return MEM_OVF;
+  nframe = VALUE_PTR(frame)-FRAMEBYTES;
+  f  = nframe+DALIGN(FRAMEBYTES+sizeof(ld)*ARRAY_SIZE(frame));
+  f_ = nframe+DALIGN(FRAMEBYTES+sizeof(ld)*2*ARRAY_SIZE(frame));
+
+  for (ls = (int32_t*) VALUE_PTR(frame), ld = ls_;
+       ls < ((int32_t*) VALUE_PTR(frame))+2*ARRAY_SIZE(frame);
+       ls += 2, ld += 2) {
+    ld[0] = ls[0];
+    ld[1] = ls[1];
+    if ((retc = shiftPbytes(isnative_endian, (B*) ld)) != OK) {
+      free(ls_);
+      return retc;
+    };
+  };
+
+  for (ls = ls_, ld = (int32_t*) VALUE_PTR(frame);
+       ld < ((int32_t*) VALUE_PTR(frame))+ARRAY_SIZE(frame);
+       ls += 2, ++ld)
+    *ld = *ls;
+
+  free(ls_);
+  
+#endif //BITS_SIZE_64
+
+  while (f < f_) {
+    TAG(f) = NULLOBJ; ATTR(f) = 0;
+    f += FRAMEBYTES;
+  }
+
+  moveframe(nframe, frame);
+  return OK;
+}
+
+static L deendian_array(B* frame, 
+                        BOOLEAN isnative_endian, 
+                        BOOLEAN isnative_bits) {
   switch (TYPE(frame)) {
     case BYTETYPE:
       return OK;
 
-    case WORDTYPE: {
-      W* w;
-      for (w = (W*)VALUE_BASE(frame); 
-	   w < ((W*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
-	   ++w) {
-	swap2bytes((B*) w);
-      };
+    case WORDTYPE: 
+      if (! isnative_endian) {
+        W* w;
+        for (w = (W*)VALUE_BASE(frame); 
+             w < ((W*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
+             ++w)
+          swap2bytes((B*) w);
+      }
       return OK;
-    };
 
-    case LONGTYPE: case SINGLETYPE: {
-      L* l;
-      for (l = (L*)VALUE_BASE(frame); 
-	   l < ((L*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
-	   ++l) {
-	swap4bytes((B*) l);
+    case SINGLETYPE: 
+      if (! isnative_endian) {
+        L* l;
+        for (l = (L*)VALUE_BASE(frame); 
+             l < ((L*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
+             ++l)
+          swap4bytes((B*) l);
       };
       return OK;
-    };
 
-    case DOUBLETYPE: {
-      D* d;
-      for (d = (D*)VALUE_BASE(frame); 
-	   d < ((D*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
-	   ++d) {
-	swap8bytes((B*) d);
+    case LONGTYPE: 
+      if (! isnative_bits) {
+        L retc;
+        if ((retc = debit_longarray(frame, isnative_endian)) != OK) return retc;
+      };
+
+      if (! isnative_endian) {
+        L* l;
+        for (l = (L*)VALUE_BASE(frame); 
+             l < ((L*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
+             ++l)
+          swapPbytes((B*) l);
       };
       return OK;
-    };
+
+    case DOUBLETYPE: 
+      if (! isnative_endian) {
+        D* d;
+        for (d = (D*)VALUE_BASE(frame); 
+             d < ((D*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
+             ++d)
+          swap8bytes((B*) d);
+      };
+      return OK;
 
     default:
       return OPD_TYP;
   }
 }
 
-static L deendian_list(B* frame) {
+static L deendian_list(B* frame, BOOLEAN isnative_endian, BOOLEAN isnative_bits) {
   B* lframe;
   L retc;
 
   for (lframe = (B*)VALUE_BASE(frame);
        lframe < (B*)LIST_CEIL(frame);
        lframe += FRAMEBYTES)
-    if ((retc = deendian_frame(lframe)) != OK)
+    if ((retc = deendian_frame(lframe, isnative_endian, isnative_bits)) != OK)
       return retc;
 
   return OK;
 }
     
 
-static L deendian_dict(B* dict) {
-  swap4bytes((B*) &DICT_ENTRIES(dict));
-  swap4bytes((B*) &DICT_FREE(dict));
-  swap4bytes((B*) &DICT_CEIL(dict));
+static L deendian_dict(B* dict, BOOLEAN isnative_endian, BOOLEAN isnative_bits) {
+  swapPbytes((B*) &DICT_ENTRIES(dict));
+  swapPbytes((B*) &DICT_FREE(dict));
+  swapPbytes((B*) &DICT_CEIL(dict));
   swap2bytes((B*) &DICT_CONHASH(dict));
   //TABHASH==CEIL
   return OK;
 }
 
-static L deendian_entries(B* dict) {
+static L deendian_entries(B* dict, 
+                          BOOLEAN isnative_endian, BOOLEAN isnative_bits) {
   L retc, i, *link;
   B* entry;
 
   for (i = 0, link = (L*)DICT_TABHASH(dict);
        i < DICT_CONHASH(dict); 
        i++, link++)
-    swap4bytes((B*) link);
+    swapPbytes((B*) link);
 
   for (entry = (B*) DICT_ENTRIES(dict);
        entry < (B*) DICT_FREE(dict);
        entry += ENTRYBYTES) {
-    if ((retc = deendian_frame(ASSOC_NAME(entry))) != OK) 
+    if ((retc 
+         = deendian_frame(ASSOC_NAME(entry), isnative_endian, isnative_bits))
+        != OK) 
       return retc;
-    swap4bytes((B*) &ASSOC_NEXT(entry));
-    if ((retc = deendian_frame(ASSOC_FRAME(entry))) != OK)
+    swapPbytes((B*) &ASSOC_NEXT(entry));
+    if ((retc 
+         = deendian_frame(ASSOC_FRAME(entry), isnative_endian, isnative_bits)) 
+        != OK)
       return retc;
   }
 
@@ -933,22 +1114,27 @@ return(OK);
 */
   
 
-L unfoldobj(B *frame, L base, BOOLEAN isnative)
+L unfoldobj(B *frame, L base, 
+            BOOLEAN isnative_endian, BOOLEAN isnative_bits)
 {
 B *lframe, *dict, *entry, *dframe, *xframe, *ldict;
 L retc, k, *link;
+BOOLEAN isnative = isnative_endian && isnative_bits;
 
 switch(CLASS(frame)) {
  case ARRAY: 
    VALUE_BASE(frame) += base; 
-   if (! isnative && ((retc = deendian_array(frame)) != OK))
+   if (! isnative 
+       && ((retc = deendian_array(frame, isnative_endian, isnative_bits)) 
+           != OK))
      return retc;
    break;
 
  case LIST: 
    VALUE_BASE(frame) += base; 
    LIST_CEIL(frame) += base;
-   if (! isnative && ((retc = deendian_list(frame)) != OK))
+   if (! isnative 
+       && ((retc = deendian_list(frame, isnative_endian, isnative_bits)) != OK))
      return retc;
 
    for (lframe = (B *)VALUE_BASE(frame);
@@ -969,7 +1155,8 @@ switch(CLASS(frame)) {
        continue;
      }   
      if (!COMPOSITE(lframe)) continue;
-     if ((retc = unfoldobj(lframe, base, isnative)) != OK) return(retc);
+     if ((retc = unfoldobj(lframe, base, isnative_endian, isnative_bits)) != OK) 
+       return(retc);
    }
    break;
    
@@ -977,12 +1164,14 @@ switch(CLASS(frame)) {
    VALUE_BASE(frame) += base;
    
    dict = (B *)VALUE_BASE(frame);
-   if (! isnative && ((retc = deendian_dict(dict)) != OK)) 
+   if (! isnative 
+       && ((retc = deendian_dict(dict, isnative_endian, isnative_bits)) != OK)) 
      return retc;
 
    DICT_ENTRIES(dict) += base; DICT_FREE(dict) += base;
    DICT_CEIL(dict) += base;
-   if (! isnative && ((retc = deendian_entries(dict)) != OK))
+   if (! isnative 
+       && ((retc = deendian_entries(dict, isnative_endian, isnative_bits)) != OK))
      return retc;
 
    for (k = 0, link = (L *)DICT_TABHASH(dict); 
@@ -1010,7 +1199,8 @@ switch(CLASS(frame)) {
        continue;
      }   
      if (!COMPOSITE(lframe)) continue;
-     if ((retc = unfoldobj(lframe,base,isnative)) != OK) return(retc);
+     if ((retc = unfoldobj(lframe,base,isnative_endian,isnative_bits)) != OK)
+       return(retc);
    }
    break;
 	 

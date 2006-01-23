@@ -243,7 +243,7 @@ L syserrc[] =
     LIB_LOAD, LIB_EXPORT, LIB_LINK, LIB_ADD, LIB_LOADED, LIB_OVF, LIB_MERGE,
     NO_XWINDOWS, X_ERR, X_BADFONT, X_BADHOST,
 	VMR_ERR, VMR_STATE, ILL_OPAQUE, FOLD_OPAQUE, NOPLUGINS,
-	MEM_OVF,
+	MEM_OVF, LONG_OVF,
     0L,
 };
 
@@ -306,6 +306,7 @@ B* syserrm[] =
 	"** Illegal attempt to fold opaque object",
 	"** Compiled without plugin support",
 	"** Memory exhausted",
+    "** 64 bit long read in 32 bit vm",
 };
 
 // original directory for vmresize
