@@ -308,15 +308,17 @@ thus lead to termination of this process.
 */
 
 if ((serversocket = make_socket(serverport)) < 0) 
-  error(EXIT_FAILURE,errno,"making server socket");
+  error(EXIT_FAILURE, errno, "making internet server socket");
 FD_SET(serversocket, &sock_fds);
 if (listen(serversocket,5) < 0) error(EXIT_FAILURE,errno,"listen");
 
 #if ENABLE_UNIX_SOCKETS
-if ((unixserversocket = make_unix_socket(serverport)) < 0) 
-  error(EXIT_FAILURE,errno,"making server socket");
-FD_SET(unixserversocket, &sock_fds);
-if (listen(unixserversocket,5) < 0) error(EXIT_FAILURE,errno,"listen");
+ if ((unixserversocket = make_unix_socket(serverport)) < 0)
+   error(0, errno, "making unix server socket");
+ else {
+   FD_SET(unixserversocket, &sock_fds);
+   if (listen(unixserversocket,5) < 0) error(EXIT_FAILURE,errno,"listen");
+ }
 #endif //ENABLE_UNIX_SOCKETS
 
 /*--------------------- set up the tiny D machine -------------------*/
@@ -481,7 +483,7 @@ if (running) goto tuwat; else goto theloop;
 /*--- look first for a connection request and service it */
 nextmsg:
 #if ENABLE_UNIX_SOCKETS
- if (FD_ISSET(unixserversocket, &read_fds)) {
+ if (unixserversocket != -1 && FD_ISSET(unixserversocket, &read_fds)) {
    ssocket = unixserversocket;
    goto nextserver;
  }

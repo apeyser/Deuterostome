@@ -9,10 +9,6 @@ AM_MAINTAINER_MODE
 CF_AC_ENABLE([plugins], [compile or install plugins], [yes])
 CF_IF_ENABLED([plugins], [
   CF_AM_ENABLE([process], [compile or install process plugin], [yes])
-  CF_AM_ENABLE([ssh], [compile or install ssh plugin], [yes])
-  CF_IF_ENABLED([ssh], [
-   CF_AC_CHECK_HEADER([libssh/libssh.h])
-  ])
 ])
 
 CF_AC_ARG_VAR([SYSDICTSIZE], [system dictionary size], [500])
@@ -42,7 +38,7 @@ CF_AC_ENABLE([unix-sockets], [compile and install unix domain sockets], [yes])
 CF_IF_ENABLED([unix-sockets], [
   CF_AC_ARG_DIR([dmsockdir], 
     [location for dm unix sockets], 
-    [${TMP}/${PACKAGE}/sockets])
+    [${tmp}/${PACKAGE}/sockets])
 ])
 
 CF_ON_TARGET([*-*-darwin*], [

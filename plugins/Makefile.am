@@ -9,15 +9,7 @@ PROCESS_LIB=process.la
 process_la_SOURCES = process.c process.h
 endif ENABLE_PROCESS
 
-if ENABLE_SSH
-SSH_LIB=ssh.la
-SSH_D = ssh.d
-ssh_la_SOURCE = ssh.c ssh.h
-ssh_la_LDFLAGS = $(AM_LDFLAGS) -lssh
-endif ENABLE_SSH
-
-dist_pkglib_DATA = $(SSH_D)
-pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(SSH_LIB)
+pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la
 
 test_la_SOURCES = test.c test.h
 test2_la_SOURCES = test2.c test2.h

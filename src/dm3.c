@@ -73,6 +73,7 @@ L init_unix_sockaddr(struct sockaddr_un *name, L port) {
   name->sun_family = AF_UNIX;
   snprintf(name->sun_path, sizeof(name->sun_path)-1, "%s/dnode-%i",
            sock_path, port - IPPORT_USERRESERVED);
+
   return OK;
 }
 #endif //ENABLE_UNIX_SOCKETS
@@ -130,36 +131,49 @@ L make_unix_socket(L port) {
   char* sock_dir; char* i;
   L sock;
   struct sockaddr_un name;
+  struct stat buf;
+  mode_t mask;
   
   if (init_unix_sockaddr(&name, port) != OK) return -1;
   if ((sock = socket(PF_UNIX, SOCK_STREAM, 0)) < 0) return -1;
 
+  mask = umask(0);
   if (! (i = sock_dir = strdup(name.sun_path))) return -1;
   while ((i = strchr(++i, '/'))) {
-    struct stat buf;
     *i = '\0';
     if (stat(sock_dir, &buf)) {
       if ((errno != ENOTDIR && errno != ENOENT)
           || mkdir(sock_dir, ~(mode_t) 0)) {
         free(sock_dir);
+        umask(mask);
         return -1;
       }
     }
     else if (! S_ISDIR(buf.st_mode)) {
       errno = ENOTDIR;
       free(sock_dir);
+      umask(mask);
       return -1;
     }
     *i = '/';
   }
   free(sock_dir);
+
+  if (! stat(name.sun_path, &buf) && unlink(name.sun_path)) {
+      umask(mask);
+      return -1;
+  }
     
   if (bind(sock, (struct sockaddr *) &name, 
-           sizeof(name.sun_family)+strlen(name.sun_path))
-      < 0)
-    return -1;
+           sizeof(name.sun_family)+strlen(name.sun_path)+1)
+      < 0) {
+      umask(mask);
+      return -1;
+  }
+  
   set_atexit_socks(port);
 
+  umask(mask);
   return sock;
 }
 #endif

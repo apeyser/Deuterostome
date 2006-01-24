@@ -514,28 +514,34 @@ L op_Xconnect(void)
   if (o_1 < FLOORopds) return(OPDS_UNF);
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
   if (ARRAY_SIZE(o_1) > 79) return(RNG_CHK);
-  moveB((B *)VALUE_BASE(o_1), displayname, ARRAY_SIZE(o_1));
-  displayname[ARRAY_SIZE(o_1)] = '\000';
-
-  dvtdisplay = XOpenDisplay(displayname);
-  if (dvtdisplay != NULL)
-  {
-      setenv("DISPLAY", displayname, 1);
-      dvtscreen = XDefaultScreenOfDisplay(dvtdisplay);
-      dvtrootwindow = XDefaultRootWindow(dvtdisplay);
-      if (XGetWindowAttributes(dvtdisplay,dvtrootwindow,&rootwindowattr) == 0)
-          error(EXIT_FAILURE,0,"Xwindows: no root window attributes");
-      ndvtwindows = 0; ncachedfonts = 0;
-      dvtgc = XCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
-      xsocket = ConnectionNumber(dvtdisplay);
-      FD_SET(xsocket, &sock_fds);
-      FREEopds = o_1; 
-			XSetErrorHandler(xerrorhandler);
-			//XSetIOErrorHandler(xerrorhandler);
-			return(OK);
+  if (ARRAY_SIZE(o_1) > 0) {
+    moveB((B *)VALUE_BASE(o_1), displayname, ARRAY_SIZE(o_1));
+    displayname[ARRAY_SIZE(o_1)] = '\000';
+    dvtdisplay = XOpenDisplay(displayname);
   }
-  *displayname = '\0';
-  return(X_BADHOST);
+  else if ((dvtdisplay = XOpenDisplay(NULL))) {
+    strncpy(displayname, DisplayString(dvtdisplay), sizeof(displayname)-1);
+    displayname[sizeof(displayname)-1] = '\000';
+  };
+
+  if (! dvtdisplay) {
+    *displayname = '\0';
+    return X_BADHOST;
+  };
+
+  setenv("DISPLAY", displayname, 1);
+  dvtscreen = XDefaultScreenOfDisplay(dvtdisplay);
+  dvtrootwindow = XDefaultRootWindow(dvtdisplay);
+  if (XGetWindowAttributes(dvtdisplay,dvtrootwindow,&rootwindowattr) == 0)
+    error(EXIT_FAILURE,0,"Xwindows: no root window attributes");
+  ndvtwindows = 0; ncachedfonts = 0;
+  dvtgc = XCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
+  xsocket = ConnectionNumber(dvtdisplay);
+  FD_SET(xsocket, &sock_fds);
+  FREEopds = o_1; 
+  XSetErrorHandler(xerrorhandler);
+  //XSetIOErrorHandler(xerrorhandler);
+  return OK;
 #endif
 }
 

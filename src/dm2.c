@@ -794,6 +794,7 @@ L deendian_frame(B *frame, BOOLEAN isnative_endian, BOOLEAN isnative_bits) {
       swapPbytes((B*) &VALUE_BASE(frame));
       swapPbytes((B*) &ARRAY_SIZE(frame));
       movehead(frame);
+      movehead(frame);
       return OK;
 
     case DICT:
@@ -806,6 +807,7 @@ L deendian_frame(B *frame, BOOLEAN isnative_endian, BOOLEAN isnative_bits) {
     case BOX:
       swapPbytes((B*) &VALUE_BASE(frame));
       swapPbytes((B*) &BOX_NB(frame));
+      movehead(frame);
       movehead(frame);
       return OK;
 
