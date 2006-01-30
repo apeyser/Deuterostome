@@ -34,9 +34,9 @@
 |-- fonts
 
   /NORMALFONT 
-    (-b&h-lucida-medium-r-normal-sans-0-0-75-75-p-0-iso8859-1) def
+    (-b&h-lucida-medium-r-normal-sans-14-*-75-75-p-*-iso8859-1) def
   /BOLDFONT 
-    (-b&h-lucida-bold-r-normal-sans-0-0-75-75-p-0-iso8859-1) def
+    (-b&h-lucida-bold-r-normal-sans-14-*-75-75-p-*-iso8859-1) def
 
 |-- color templates
 
@@ -371,7 +371,7 @@ end
 /mouseclick {
    [ 4 1 roll { | stopped and reentry lock
       dup -16 bitshift /mB name
-          255 and      /mM name
+          255 and 16 not and /mM name
       /mY name /mX name 
       mY 14 le { wid inforect BG fillrectangle stop } if
       mY wH 15 sub ge {
