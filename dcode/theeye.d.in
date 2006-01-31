@@ -33,10 +33,8 @@
 
 |-- fonts
 
-  /NORMALFONT 
-    (-b&h-lucida-medium-r-normal-sans-14-*-75-75-p-*-iso8859-1) def
-  /BOLDFONT 
-    (-b&h-lucida-bold-r-normal-sans-14-*-75-75-p-*-iso8859-1) def
+  /NORMALFONT {fontdict /NORMALFONT get} bind def
+  /BOLDFONT {fontdict /BOLDFONT get} bind def
 
 |-- color templates
 
@@ -371,7 +369,7 @@ end
 /mouseclick {
    [ 4 1 roll { | stopped and reentry lock
       dup -16 bitshift /mB name
-          255 and 16 not and /mM name
+          15 and /mM name
       /mY name /mX name 
       mY 14 le { wid inforect BG fillrectangle stop } if
       mY wH 15 sub ge {
@@ -430,7 +428,8 @@ end
 
 |------------------- presenting info on (simple-) clicked object
 
-/INFOTEXT [ NORMALFONT BLACK -1 -1 ] def
+/INFOTEXT ~NORMALFONT [null BLACK -1 -1] makefont def
+|/INFOTEXT [ NORMALFONT BLACK -1 -1 ] def
 
 /toinfo { 
   wid inforect BG fillrectangle
@@ -709,8 +708,10 @@ end /keeps name
   } loop
 } bind def
 
-/LEFTCHECKED [ BOLDFONT RED -1 0 ] def
-/LEFTNORMAL  [ NORMALFONT BLACK -1 0 ] def
+/LEFTCHECKED ~BOLDFONT [null RED -1 0] makefont def
+|/LEFTCHECKED [ BOLDFONT RED -1 0 ] def
+/LEFTNORMAL ~NORMALFONT [null BLACK -1 0] makefont def
+|/LEFTNORMAL  [ NORMALFONT BLACK -1 0 ] def
 
 
 |-------------- scrolling left page
@@ -757,7 +758,8 @@ end mkread /objpresenters name
 /box_icon    { wid iconrects vidx get BOXCOLOR fillrectangle } bind def
 
 
-/ICONTEXT [ NORMALFONT <d 0 0 0 > mapcolor 0 0 ] def
+/ICONTEXT ~NORMALFONT [ null <d 0 0 0> mapcolor 0 0] makefont def
+|/ICONTEXT [ NORMALFONT <d 0 0 0 > mapcolor 0 0 ] def
 
 /icon_text  { wid iconlocs vidx get exec 4 -1 roll 
               ICONTEXT drawtext pop pop pop
@@ -959,8 +961,10 @@ end mkread /valuepresenters name
 |----------- showing a value field in the right page
 | text_generator fillpar | --
 
-/VALUETEXT [ NORMALFONT BLACK -1 0 ] def
-/RITEHIGH [ BOLDFONT BLUE -1 0 ] def
+/VALUETEXT ~NORMALFONT [null BLACK -1 0] makefont def
+|/VALUETEXT [ NORMALFONT BLACK -1 0 ] def
+/RITEHIGH ~BOLDFONT [null BLUE -1 0] makefont def
+|/RITEHIGH [ BOLDFONT BLUE -1 0 ] def
 
 /show_value { /fill name /textgen name
    wid valuerects vidx get fill fillrectangle

@@ -21,6 +21,10 @@
 getsocket setconsole
 /toconsole_ ~toconsole def
 
+/makefont {
+    ~[exch 3 -1 roll 1 ~index 0 ~put] bind
+} bind def
+
 | ///////// INTERNALIZED ////////////
 |-------------------------- lock -------------------
 |
