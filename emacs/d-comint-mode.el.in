@@ -282,7 +282,7 @@ property."
   (define-key d-comint-mode-map [f7] 'd-comint-mode-focus-raise)
   (if d-comint-mode-focus-raise-global
       (global-set-key (vconcat d-comint-mode-focus-raise-global) 
-                      'd-comint-mode-focus-raise))
+                      'd-comint-mode-focus-raise-switch))
   (define-key d-comint-mode-map [f8] 'dnode)
   (define-key d-comint-mode-map [?\C-h ?d] 'd-comint-mode-help)
   (define-key d-comint-mode-map [(control !)] 'd-comint-mode-scream)
@@ -388,6 +388,21 @@ This quotes per \\[shell-quote-argument], then requotes per \\[d-comint-mode-quo
   (interactive "s")
   (d-comint-mode-quote (shell-quote-argument string)))
 
+(defun d-comint-mode-find-dvt-frame (dvt-buffer-name)
+  (save-excursion
+    (cond 
+     ((get-buffer-window dvt-buffer-name)
+      (selected-frame))
+     ((catch 'dedicated-window-found
+        (dolist (window (get-buffer-window-list dvt-buffer-name 
+                                                'no-minibuf 'visible))
+          (when (window-dedicated-p window)
+            (throw 'dedicated-window-found (window-frame window))))))
+     ((let ((window (get-buffer-window dvt-buffer-name 'visible)))
+        (when window (window-frame window))))
+     (t 
+      (window-frame (dvt-special-frame dvt-buffer-name))))))
+
 (defun d-comint-mode-focus (dvt-buffer-name &optional override)
   "Set input focus to dvt buffer. 
 Used by dvt to signal to emacs that it should re-take focus.
@@ -396,27 +411,9 @@ if OVERRIDE then set keyboard input focus,
 even if `d-comint-mode-keep-focus' is nil.
 "
   (when (or d-comint-mode-keep-focus override)
-	(let ((buffer-frame 
-		   (cond 
-			((get-buffer-window dvt-buffer-name)
-			 (pop-to-buffer dvt-buffer-name) 
-			 (selected-frame))
-
-			((catch 'dedicated-window-found
-			  (dolist (window (get-buffer-window-list dvt-buffer-name 
-													  'no-minibuf 'visible))
-				(when (window-dedicated-p window)
-				  (throw 'dedicated-window-found 
-						 (window-frame (select-window window)))))))
-
-			((let ((window (get-buffer-window dvt-buffer-name 'visible)))
-			   (when window (window-frame (select-window window)))))
-
-			(t 
-			 (window-frame (dvt-special-frame dvt-buffer-name))))))
-	  (select-frame buffer-frame)
-	  (when (eq window-system 'x) (x-focus-frame buffer-frame))
-      buffer-frame)))
+    (select-frame (d-comint-mode-find-dvt-frame dvt-buffer-name))
+    (select-window (get-buffer-window dvt-buffer-name))
+    (when (eq window-system 'x) (x-focus-frame (selected-frame)))))
 
 (defun dvt-special-frame (&optional dvt-buffer-name)
   (interactive
@@ -428,15 +425,37 @@ even if `d-comint-mode-keep-focus' is nil.
 	(list (cons 'height d-comint-mode-window-size))
 	d-comint-mode-frame-alist)))
 
+(defun d-comint-mode-outside-focus (frame-to-be)
+  "Check if mouse outside current frame, and if-so, make the frame-to-be
+invisible. Used to guarantee that frames go to top of screen when 
+requested."
+  (if (not (cadr (mouse-position))) (make-frame-invisible frame-to-be t)))
+
 (defun d-comint-mode-focus-raise (&optional dvt-buffer-name)
   "Set input focus to dvt buffer, and raise frame in X.
 Used by dvt to signal to emacs that it should pop up and take focus"
   (interactive
    (list (and current-prefix-arg (read-buffer "DVT buffer: " "*dvt*"))))
   (when (null dvt-buffer-name) (setq dvt-buffer-name "*dvt*"))
-  (let ((buffer-frame (d-comint-mode-focus dvt-buffer-name t)))
-    (make-frame-invisible buffer-frame t)
-    (raise-frame buffer-frame)))
+  (let ((focus-follows-mouse nil)
+        (dvt-frame (d-comint-mode-find-dvt-frame dvt-buffer-name)))
+    (d-comint-mode-outside-focus dvt-frame)
+    (select-frame-set-input-focus dvt-frame)
+    (select-window (get-buffer-window dvt-buffer-name))))
+
+(defun d-comint-mode-focus-raise-switch (&optional dvt-buffer-name)
+   "Set input focus to dvt buffer, and raise frame in X, or pop back from
+dvt buffer. Used from global key-binding"
+   (interactive
+    (list (and current-prefix-arg (read-buffer "DVT buffer: " "*dvt*"))))
+   (when (null dvt-buffer-name) (setq dvt-buffer-name "*dvt*"))
+   (cond 
+    ((get-buffer-window dvt-buffer-name) 
+     (let ((focus-follows-mouse (not (cadr (mouse-position)))))
+       (other-frame -1)
+       (raise-frame)))
+    (t
+     (d-comint-mode-focus-raise dvt-buffer-name))))
 
 (defun d-comint-mode-help ()
   "Tell dvt to output help info"
