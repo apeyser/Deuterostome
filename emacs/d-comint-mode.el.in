@@ -25,6 +25,11 @@
   :group 'd-comint-mode
   :type '(choice (const nil) file))
 ;;(defvar comint-last-output-start)
+
+(defcustom d-comint-mode-focus-raise-global nil "global sequence to pop *dvt*"
+  :group 'd-comint-mode
+  :type '(repeat character))
+
 (require 'comint)
 
 (defvar d-comint-mode-highlight-output 
@@ -275,6 +280,9 @@ property."
   (define-key d-comint-mode-map [f6] 'd-comint-mode-raise-all)
   (define-key d-comint-mode-map [(shift f6)] 'd-comint-mode-hide-all)
   (define-key d-comint-mode-map [f7] 'd-comint-mode-focus-raise)
+  (if d-comint-mode-focus-raise-global
+      (global-set-key (vconcat d-comint-mode-focus-raise-global) 
+                      'd-comint-mode-focus-raise))
   (define-key d-comint-mode-map [f8] 'dnode)
   (define-key d-comint-mode-map [?\C-h ?d] 'd-comint-mode-help)
   (define-key d-comint-mode-map [(control !)] 'd-comint-mode-scream)
@@ -286,7 +294,8 @@ property."
   (define-key d-comint-mode-map [?\C-c ?\C-n] 'd-comint-mode-narrow)
   (define-key d-comint-mode-map [?\C-c ?\C-w] 'd-comint-mode-widen)
 )
-(if (not d-comint-mode-map-setup) (d-comint-mode-setup-map))
+;;(eval-when-compile (setq d-comint-mode-map-setup t))
+;;(if (not d-comint-mode-map-setup) (d-comint-mode-setup-map))
 
 (defun d-comint-mode-server ()
   "Start d-comint-mode-server"
@@ -328,6 +337,7 @@ Otherwise, one argument `-i' is passed to the shell.
   (interactive
    (list
     (and current-prefix-arg (read-buffer "DVT buffer name: " "*dvt*"))))
+  (if (not d-comint-mode-map-setup) (d-comint-mode-setup-map))
   (when (null buffer) (setq buffer "*dvt*"))
   (if (not (comint-check-proc buffer))
       (let* ((prog (or explicit-dvt-file-name
@@ -378,54 +388,55 @@ This quotes per \\[shell-quote-argument], then requotes per \\[d-comint-mode-quo
   (interactive "s")
   (d-comint-mode-quote (shell-quote-argument string)))
 
-(defun d-comint-mode-focus (buffer-name &optional override)
+(defun d-comint-mode-focus (dvt-buffer-name &optional override)
   "Set input focus to dvt buffer. 
 Used by dvt to signal to emacs that it should re-take focus.
-The BUFFER-NAME is the name of the buffer to focus.
+The DVT-BUFFER-NAME is the name of the buffer to focus.
 if OVERRIDE then set keyboard input focus,
 even if `d-comint-mode-keep-focus' is nil.
 "
   (when (or d-comint-mode-keep-focus override)
 	(let ((buffer-frame 
 		   (cond 
-			((get-buffer-window buffer-name)
-			 (pop-to-buffer buffer-name) 
+			((get-buffer-window dvt-buffer-name)
+			 (pop-to-buffer dvt-buffer-name) 
 			 (selected-frame))
 
 			((catch 'dedicated-window-found
-			  (dolist (window (get-buffer-window-list buffer-name 
+			  (dolist (window (get-buffer-window-list dvt-buffer-name 
 													  'no-minibuf 'visible))
 				(when (window-dedicated-p window)
 				  (throw 'dedicated-window-found 
 						 (window-frame (select-window window)))))))
 
-			((let ((window (get-buffer-window buffer-name 'visible)))
+			((let ((window (get-buffer-window dvt-buffer-name 'visible)))
 			   (when window (window-frame (select-window window)))))
 
 			(t 
-			 (window-frame (dvt-special-frame buffer-name))))))
+			 (window-frame (dvt-special-frame dvt-buffer-name))))))
 	  (select-frame buffer-frame)
-	  (when (eq window-system 'x) (x-focus-frame buffer-frame)))))
+	  (when (eq window-system 'x) (x-focus-frame buffer-frame))
+      buffer-frame)))
 
-(defun dvt-special-frame (&optional buffer-name)
+(defun dvt-special-frame (&optional dvt-buffer-name)
   (interactive
    (list
     (and current-prefix-arg (read-buffer "DVT buffer name: " "*dvt*"))))
   (special-display-popup-frame
-   buffer-name 
+   dvt-buffer-name 
    (append
 	(list (cons 'height d-comint-mode-window-size))
 	d-comint-mode-frame-alist)))
 
-(defun d-comint-mode-focus-raise (&optional buffer-name)
+(defun d-comint-mode-focus-raise (&optional dvt-buffer-name)
   "Set input focus to dvt buffer, and raise frame in X.
 Used by dvt to signal to emacs that it should pop up and take focus"
   (interactive
    (list (and current-prefix-arg (read-buffer "DVT buffer: " "*dvt*"))))
-  (when (null buffer-name) (setq buffer-name "*dvt*"))
-  (d-comint-mode-focus (buffer-name) t)
-  (make-frame-invisible nil t)
-  (raise-frame))
+  (when (null dvt-buffer-name) (setq dvt-buffer-name "*dvt*"))
+  (let ((buffer-frame (d-comint-mode-focus dvt-buffer-name t)))
+    (make-frame-invisible buffer-frame t)
+    (raise-frame buffer-frame)))
 
 (defun d-comint-mode-help ()
   "Tell dvt to output help info"
@@ -495,8 +506,8 @@ Used by dvt to signal to emacs that it should pop up and take focus"
 		(and current-prefix-arg (read-buffer "Dnode buffer prefix: " "*dnode*"))))
   (when (null buffer-pre) (setq buffer-pre "*dnode*"))
   
-	(let* ((buffer-name (concat buffer-pre (format "<%d>" port)))
-		   (d-comint-dnode-mode-dnode-buffer (get-buffer buffer-name)))
+	(let* ((dnode-buffer-name (concat buffer-pre (format "<%d>" port)))
+		   (d-comint-dnode-mode-dnode-buffer (get-buffer dnode-buffer-name)))
 
 	  (when (or (null d-comint-dnode-mode-dnode-buffer) 
 				(not (comint-check-proc d-comint-dnode-mode-dnode-buffer)))
@@ -513,7 +524,7 @@ Used by dvt to signal to emacs that it should pop up and take focus"
 		  (save-excursion
 			(set-buffer 
 			 (setq d-comint-dnode-mode-dnode-buffer 
-				   (get-buffer-create buffer-name)))
+				   (get-buffer-create dnode-buffer-name)))
 			(d-comint-dnode-mode))))
 
 	  (if (eq major-mode 'd-comint-dnode-mode)
