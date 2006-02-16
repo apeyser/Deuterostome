@@ -314,7 +314,8 @@
 (defconst d-mode-constants-regexp
   (concat "\\B\\*\\B\\|\\<\\(null\\|true\\|false"
 	  "\\|[-+]?[0-9]+\\("
-	  "\\(\\.[0-9]+\\)?\\(e[-+]?[0-9]+\\)?[sdSD]?\\|[sdbwlSDBWL]?\\)\\)\\>")
+	  "\\(\\.[0-9]+\\)?\\([eE][-+]?[0-9]+\\)?[sdSD]?"
+      "\\|[sdbwlSDBWL]?\\)\\)\\>")
   "Regular expression for a constant in d-mode.")
 
 (defconst d-mode-marks-regexp
