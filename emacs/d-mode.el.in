@@ -274,7 +274,7 @@
 	  (define-key mode-map "\e\t"
 	    'd-mode-insert-tab)
       (define-key mode-map [?~] 'd-mode-insert-squiggle)
-      (define-key mode-map [?/] 'd-mode-insert-slash)
+      (define-key mode-map [?/] 'd-mode-insert-squiggle)
 	  ;(define-key mode-map [(control tab)]
 	  ;  'indent-regions)
 	  mode-map)))
@@ -550,67 +550,24 @@
 					 '(2 d-mode-oref-face)
 					 '(3 d-mode-oref-xtra-face)))
 		d-mode-font-lock-keywords-2
- 		'(("[^[:space:]]" 0 'font-lock-warning-face)))))
+ 		'(("[^[:space:]]" 0 'font-lock-warning-face)
+          ("[~/]" 0 
+           (list 
+            'face
+             (let* ((start (match-beginning 0))
+                    (face (get-text-property start 'face)))
+               (if (and (eq face 'font-lock-warning-face)
+                        (get-text-property start 'd-mode-pointer-location))
+                   'bold face))
+            'point-entered 'd-mode-squiggly-enter
+            'point-left 'd-mode-squiggly-leave)
+           t)))))
 
-(defun d-mode-font-lock-fontify-region (beg end loudly)
-  (font-lock-default-fontify-region beg end loudly)
-  (d-mode-squiggly-fontify-region beg end))
-
-(eval-when-compile
-  ;;
-  ;; We don't do this at the top-level as we only use non-autoloaded macros.
-  (require 'cl)
-  ;;
-  ;; Borrowed from lazy-lock.el.
-  ;; We use this to preserve or protect things when modifying text properties.
-  (defmacro save-buffer-state (varlist &rest body)
-    "Bind variables according to VARLIST and eval BODY restoring buffer state."
-    (declare (indent 1) (debug let))
-    (let ((modified (make-symbol "modified")))
-      `(let* ,(append varlist
-		      `((,modified (buffer-modified-p))
-			(buffer-undo-list t)
-			(inhibit-read-only t)
-			(inhibit-point-motion-hooks t)
-			(inhibit-modification-hooks t)
-			deactivate-mark
-			buffer-file-name
-			buffer-file-truename))
-	 (progn
-	   ,@body)
-	 (unless ,modified
-	   (restore-buffer-modified-p nil))))))
-
-(defun d-mode-squiggly-fontify-region (beg end)
-  (save-buffer-state
-      ((parse-sexp-lookup-properties
-        (or parse-sexp-lookup-properties font-lock-syntactic-keywords))
-       (old-syntax-table (syntax-table)))
-      (unwind-protect
-          (save-restriction
-            (unless font-lock-dont-widen (widen))
-            (goto-char beg)
-            (while (re-search-forward "[~/]" end t)
-              (when (not (get-text-property (1- (point)) 'point-entered))
-                (add-text-properties (1- (point)) (point)
-                                     '(point-entered d-mode-squiggly-enter
-                                       point-left    d-mode-squiggly-leave))))
-            (let ((p (text-property-any beg end 'd-mode-pointer-location t)))
-              (when (and p
-                     (eq (get-text-property p 'face) 'font-lock-warning-face))
-                (put-text-property p (1+ p) 'face 'bold)))))))
-
-
-(defun d-mode-font-lock-defontify ()
-  (let ((modp (buffer-modified-p))
-        (inhibit-read-only t))
-    (save-restriction
-      (widen)
-      (remove-list-of-text-properties (point-min) (point-max)
-       '(d-mode-pointer-location point-left point-entered)))
-      (unless modp (restore-buffer-modified-p nil))))
+(defvar d-mode-point nil "Last known location of point in d-mode buffer")
+(make-variable-buffer-local 'd-mode-point)
 
 (defun d-mode-squiggly-enter (old new)
+  (setq d-mode-point new)
   (when (and (> new (point-min))
              (get-text-property (1- new) 'point-entered))
     (let ((modp (buffer-modified-p))
@@ -621,6 +578,7 @@
       (unless modp (restore-buffer-modified-p nil)))))
 
 (defun d-mode-squiggly-leave (old new)
+  (when (eq d-mode-point old) (setq d-mode-point nil))
   (when (and (> old (point-min))
              (get-text-property (1- old) 'point-left))
     (let ((modp (buffer-modified-p))
@@ -630,21 +588,32 @@
       (put-text-property (1- old) old 'd-mode-pointer-location nil)
       (unless modp (restore-buffer-modified-p nil)))))
 
-(defun d-mode-insert-squiggle ()
-    (interactive)
-    (insert ?~)
-    (d-mode-insert-squiggle-type))
+(defun d-mode-check-point ()
+  (when (and d-mode-point (not (eq d-mode-point (point))))
+    (d-mode-squiggly-leave d-mode-point (point))))
 
-(defun d-mode-insert-slash ()
-    (interactive)
-    (insert ?/)
-    (d-mode-insert-squiggle-type))
+(defun d-mode-insert-squiggle (n)
+    (interactive "p")
+    (self-insert-command n)
+    (put-text-property (1- (point)) (point) 'd-mode-pointer-location t))
 
-(defun d-mode-insert-squiggle-type ()
-  (add-text-properties (1- (point)) (point) 
-                       '(point-entered d-mode-squiggly-enter
-                         point-left    d-mode-squiggly-leave
-                         d-mode-pointer-location t)))
+(defun d-mode-font-lock-unfontify-region (beg end)
+  (font-lock-default-unfontify-region beg end)
+  (let ((modp (buffer-modified-p))
+        (inhibit-read-only t)
+        (p (text-property-any beg end 'd-mode-pointer-location t)))
+    (when p (put-text-property p (1+ p) 'point-left 'd-mode-squiggly-leave))
+    (unless modp (restore-buffer-modified-p nil))))
+
+(defun d-mode-font-lock-unfontify-buffer ()
+  (font-lock-default-unfontify-buffer)
+  (let ((modp (buffer-modified-p))
+        (inhibit-read-only t))
+    (save-restriction
+      (widen)
+      (remove-list-of-text-properties 
+       (point-min) (point-max) '(point-left 'd-mode-pointer-location))
+      (unless modp (restore-buffer-modified-p nil)))))
 
 (defun d-mode-add-op (ops)
   (interactive "xList of keywords to add (\"x\" \"y\"):  ")
@@ -746,9 +715,9 @@
 	 (re-search-backward "\\s(" nil t (or arg 1))
 	 (progn
 		 (while (and (re-search-backward "\\s|" nil 'move (or arg 1))
-								 (or
-									(\= (char-after) ?\()
-									(= (char-before) ?\\))))
+                     (or
+                      (\= (char-after) ?\()
+                      (= (char-before) ?\\))))
 		 (= (char-after) ?\())))
 
 (if (not d-mode-syntax-table) (d-mode-setup-syntax-table))
@@ -757,6 +726,7 @@
 (if (not d-mode-font-lock-keywords)
     (setq d-mode-font-lock-keywords d-mode-font-lock-keywords-3))
 
+(defvar d-mode-timer nil "Has the d-mode-timer been started?")
 (defun d-mode-shared (&rest args)
   ""
   (interactive)
@@ -765,29 +735,30 @@
                '((d-mode-pointer-location . t)
                  (point-entered . t)
                  (point-left . t))))
-  (add-hook 'change-major-mode-hook 'd-mode-font-lock-defontify nil t)
 
-  (set 
-	 (make-local-variable 'font-lock-defaults)
-	 '((d-mode-font-lock-keywords-1 
-			d-mode-font-lock-keywords-2
-			d-mode-font-lock-keywords-3)
-		 nil nil nil nil
- 		 (font-lock-multiline . t)
- 		 (syntax-begin-function . d-mode-syntax-begin-function)
- 		 (comment-use-syntax . nil)
- 		 (comment-start . "|")
- 		 (comment-end . "")
-		 (d-mode-font-lock-past-paren . nil)
-         (font-lock-fontify-region-function 
-          . d-mode-font-lock-fontify-region)
-         ;;(font-lock-extra-manage-props point-entered point-left)
-         ))
-
-	(nconc font-lock-defaults args)
-
+  (setq font-lock-defaults
+        '((d-mode-font-lock-keywords-1 
+           d-mode-font-lock-keywords-2
+           d-mode-font-lock-keywords-3)
+          nil nil nil nil
+          (font-lock-multiline . t)
+          (syntax-begin-function . d-mode-syntax-begin-function)
+          (comment-use-syntax . nil)
+          (comment-start . "|")
+          (comment-end . "")
+          (d-mode-font-lock-past-paren . nil)
+          (font-lock-unfontify-region-function 
+           . d-mode-font-lock-unfontify-region)
+          (font-lock-unfontify-buffer-function
+           . d-mode-font-lock-unfontify-buffer)
+          (font-lock-extra-manage-props point-entered point-left)
+          ))
+  (nconc font-lock-defaults args)
   (set-syntax-table d-mode-syntax-table)
-  ;(add-hook 'fontification-functions 'd-mode-squiggly-function t t)
+
+  (unless d-mode-timer
+    (setq d-mode-timer t)
+    (run-with-idle-timer 1 t 'd-mode-check-point))
 )
 
 (defun d-mode-comment-region (beg end &optional arg)

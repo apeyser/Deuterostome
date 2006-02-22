@@ -300,7 +300,7 @@ property."
   (define-key d-comint-mode-map [?\C-c ?\C-n] 'd-comint-mode-narrow)
   (define-key d-comint-mode-map [?\C-c ?\C-w] 'd-comint-mode-widen)
   (define-key d-comint-mode-map [?~] 'd-mode-insert-squiggle)
-  (define-key d-comint-mode-map [?/] 'd-mode-insert-slash)
+  (define-key d-comint-mode-map [?/] 'd-mode-insert-squiggle)
 )
 ;;(eval-when-compile (setq d-comint-mode-map-setup t))
 ;;(if (not d-comint-mode-map-setup) (d-comint-mode-setup-map))
@@ -423,15 +423,48 @@ even if `d-comint-mode-keep-focus' is nil.
     (select-window (get-buffer-window dvt-buffer-name))
     (when (eq window-system 'x) (x-focus-frame (selected-frame)))))
 
+(defvar d-comint-mode-minibuffer-frames nil)
 (defun dvt-special-frame (&optional dvt-buffer-name)
+  "returns window"
   (interactive
    (list
     (and current-prefix-arg (read-buffer "DVT buffer name: " "*dvt*"))))
-  (special-display-popup-frame
-   dvt-buffer-name 
-   (append
-	(list (cons 'height d-comint-mode-window-size))
-	d-comint-mode-frame-alist)))
+  (let ((dvt-window (special-display-popup-frame
+                     dvt-buffer-name 
+                     (append
+                      (list (cons 'height d-comint-mode-window-size))
+                      d-comint-mode-frame-alist))))
+    (setq d-comint-mode-minibuffer-frames
+          (append d-comint-mode-minibuffer-frames 
+                  (list (cons default-minibuffer-frame 
+                              (window-frame dvt-window)))))
+    dvt-window))
+
+(defadvice delete-frame (around
+                         d-comint-mode-delete-frame (&optional frame force)
+                         activate compile)
+  (when (not frame) (setq frame (selected-frame)))
+  (let ((m (assq frame d-comint-mode-minibuffer-frames)))
+    (while m
+      (delete-frame (cdr m) force)
+      (setq d-comint-mode-minibuffer-frames 
+            (delq m d-comint-mode-minibuffer-frames))
+      (setq m (assq frame d-comint-mode-minibuffer-frames))))
+  ad-do-it
+  (let ((m (rassq frame d-comint-mode-minibuffer-frames)))
+    (while m
+      (setq d-comint-mode-minibuffer-frames
+            (delq m d-comint-mode-minibuffer-frames))
+      (setq m (rassq frame d-comint-mode-minibuffer-frames)))))
+
+(defadvice handle-delete-frame (before 
+                                d-comint-mode-handle-delete-frame (event)
+                                activate compile)
+  (let* ((frame (posn-window (event-start event)))
+         (m (assq frame d-comint-mode-minibuffer-frames)))
+    (while m
+      (delete-frame (cdr m))
+      (setq m (assq frame d-comint-mode-minibuffer-frames)))))
 
 (defun d-comint-mode-outside-focus (frame-to-be)
   "Check if mouse outside current frame, and if-so, make the frame-to-be
