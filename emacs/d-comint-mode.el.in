@@ -2,31 +2,39 @@
 (require 'dm-server)
 (require 'comint)
 
-(defgroup d-comint-mode nil "Major mode for DVT shell"
+(defgroup d-comint-mode nil 
+  "Major mode for DVT shell"
   :prefix "d-comint-mode-"
   :group 'd-mode)
 
+(defgroup d-comint-dnode-mode nil 
+  "Major mode for dnode shell"
+  :prefix "d-comint-dnode-mode-"
+  :group 'd-comint-mode)
+
 (defcustom d-comint-mode-server t
-  "Startup server for emacs when loading init"
+  "*Startup server for emacs when loading init"
   :type '(boolean)
   :group 'd-comint-mode)
 
 (defcustom d-comint-mode-keep-focus t 
-  "If true, tell dvt to return input focus to dvt buffer in emacs"
+  "*If true, tell dvt to return input focus to dvt buffer in emacs"
   :type '(boolean)
   :group 'd-comint-mode)
 
 (defcustom d-comint-mode-window-size 10
-  "Number of lines for popped up dvt window"
+  "*Number of lines for popped up dvt window"
   :type '(integer)
   :group 'd-comint-mode)
 
-(defcustom explicit-dvt-file-name nil "dvt program name"
+(defcustom explicit-dvt-file-name nil 
+  "*dvt program name"
   :group 'd-comint-mode
   :type '(choice (const nil) file))
 ;;(defvar comint-last-output-start)
 
-(defcustom d-comint-mode-focus-raise-global nil "global sequence to pop *dvt*"
+(defcustom d-comint-mode-focus-raise-global nil 
+  "*Global sequence to pop *dvt*"
   :group 'd-comint-mode
   :type '(repeat character))
 
@@ -41,7 +49,7 @@
 	:group 'd-comint-mode)
 
 (defcustom d-comint-mode-activate-highlight-input nil
-  "Recolor input to a fixed face"
+  "*Recolor input to a fixed face"
   :type '(boolean)
   :group 'd-comint-mode)
 
@@ -58,7 +66,7 @@
 									   (menu-bar-lines . nil)
 									   (minibuffer . nil)
 									   (fullscreen . nil))
-  "Alist of frame properties for mini dvt window."
+  "*Alist of frame properties for mini dvt window."
   :group 'd-comint-mode
   :type '(alist)
   :options '((title string)
@@ -109,6 +117,11 @@
 			 (tool-bar-lines (choice (const nil) integer))
 			 (line-spacing integer)))
 
+(defcustom d-comint-mode-hook nil
+  "Hooks for d-comint-mode"
+  :type 'hook
+  :group 'd-comint-mode)
+
 (defun d-comint-mode-freeze-overlay (overlay is-after begin end &optional len)
   "Prevent OVERLAY from being extended.
 This function can be used for the `modification-hooks' overlay
@@ -142,9 +155,11 @@ property."
 							  '(font-lock-face nil)))))
 
 (require 'd-mode)
-;;;###autoload
 (define-derived-mode d-comint-mode comint-mode "DVT"
-  "Major mode for handling d-machine"
+  "Major mode for handling d-machine.
+\\{d-comint-mode-map}"
+  :group 'd-comint-mode
+
   (set (make-local-variable 'comint-prompt-regexp) "^")
   (set (make-local-variable 'comint-input-ring-file-name) "~/.dvt_history")
 
@@ -152,7 +167,8 @@ property."
 ;;        (append d-mode-font-lock-keywords-3
 ;;                '(("\\([~/]\\)\\(\\s-\\|$\\)+" 1 'bold t))))
 ;;  (print d-mode-font-lock-keywords-3)
-  (d-mode-shared)
+  (d-mode-shared t)
+
 ;;  (print d-mode-font-lock-keywords-3)
   (ansi-color-for-comint-mode-on)
   (make-local-variable 'd-comint-mode-redirect-process)
@@ -424,6 +440,7 @@ even if `d-comint-mode-keep-focus' is nil.
     (when (eq window-system 'x) (x-focus-frame (selected-frame)))))
 
 (defvar d-comint-mode-minibuffer-frames nil)
+
 (defun dvt-special-frame (&optional dvt-buffer-name)
   "returns window"
   (interactive
@@ -527,15 +544,29 @@ dvt buffer. Used from global key-binding"
    "% userdict begin hide_all\n"))
 
 (defcustom d-comint-dnode-mode-dnode-args nil 
-  "Options to dnode program"
-  :group 'd-comint-mode
+  "*Options to dnode program"
+  :group 'd-comint-dnode-mode
   :type '(repeat string))
 
+(defcustom explicit-dnode-file-name nil
+  "*Name of programe to run dnode"
+  :group 'd-comint-dnode-mode
+  :type '(choice (const nil) file))
+
+(defcustom d-comint-dnode-mode-hook nil
+  "Hooks for d-comint-dnode-mode"
+  :group 'd-comint-dnode-mode
+  :type 'hook)
+
 (defvar d-comint-dnode-mode-dnode-buffer nil)
+
 (defvar d-comint-dnode-mode-prog nil)
+
 (define-derived-mode d-comint-dnode-mode comint-mode "dnode"
 	"Major mode for handling dnodes.
 \\{d-comint-dnode-mode-map}"
+    :group 'd-comint-dnode-mode
+
 	(insert "Starting at " (current-time-string) ": " d-comint-dnode-mode-prog)
 	(dolist (dnode-arg d-comint-dnode-mode-dnode-args) (insert " " dnode-arg))
 	(insert "\n")
@@ -549,16 +580,12 @@ dvt buffer. Used from global key-binding"
 	(set-marker comint-last-output-start (point-max)))
 
 (defvar d-comint-dnode-mode-map-setup nil "")
+
 (defun d-comint-dnode-mode-setup-map ()
 	(interactive)
 	(setq d-comint-dnode-mode-map-setup t)
 	(define-key d-comint-dnode-mode-map [f8] 'dnode))
 (if (not d-comint-dnode-mode-map-setup) (d-comint-dnode-mode-setup-map))
-
-(defcustom explicit-dnode-file-name nil
-  "Name of programe to run dnode"
-  :group 'd-comint-mode
-  :type '(choice (const nil) file))
 
 (defun dnode (port &optional buffer-pre)
 	(interactive (list

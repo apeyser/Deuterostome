@@ -94,6 +94,26 @@
 (defvar d-mode-syntax-table nil
   "Syntax table used in d-mode.")
 
+(defcustom d-mode-use-timer t
+  "*Use timer hooks"
+  :type '(boolean)
+  :group 'd-mode)
+
+(defcustom d-mode-timer-hooks '(d-mode-check-point)
+  "Hooks for timer"
+  :type 'hook
+  :group 'd-mode)
+
+(defvar d-mode-timer nil "Has the d-mode-timer been started?")
+
+(defvar d-mode-font-lock-keywords ()
+  "Font lock keyword sym.")
+
+(defcustom d-mode-hook nil
+  "Hooks for d-mode."
+  :type 'hook
+  :group 'd-mode)
+
 (defun d-mode-setup-syntax-table ()
   (setq d-mode-syntax-table 
         (let ((table (make-syntax-table)))
@@ -623,12 +643,6 @@
     (font-lock-mode)
     (font-lock-mode)))
 
-(defvar d-mode-font-lock-keywords ()
-  "Font lock keyword sym.")
-
-(defvar d-mode-hook nil
-  "Hooks for d-mode.")
-
 (defun d-mode-find-comment-column ()
   "Return the column of the last comment, not including the current one."
   (interactive)
@@ -726,8 +740,7 @@
 (if (not d-mode-font-lock-keywords)
     (setq d-mode-font-lock-keywords d-mode-font-lock-keywords-3))
 
-(defvar d-mode-timer nil "Has the d-mode-timer been started?")
-(defun d-mode-shared (&rest args)
+(defun d-mode-shared (&optional do-syntax-table &rest args)
   ""
   (interactive)
   (set (make-local-variable 'text-property-default-nonsticky)
@@ -754,11 +767,14 @@
           (font-lock-extra-manage-props point-entered point-left)
           ))
   (nconc font-lock-defaults args)
-  (set-syntax-table d-mode-syntax-table)
+
+  (when do-syntax-table
+    (set-syntax-table d-mode-syntax-table))
+
 
   (unless d-mode-timer
     (setq d-mode-timer t)
-    (run-with-idle-timer 1 t 'd-mode-check-point))
+    (run-with-idle-timer 1 t (lambda () (run-hooks 'd-mode-timer-hooks))))
 )
 
 (defun d-mode-comment-region (beg end &optional arg)
@@ -779,32 +795,30 @@
 
 (defun d-mode-font-lock-block-function ()
 	(let ((p (point)) (isset nil))
-		(when (re-search-backward "\\(?:^\\|[^\\\\]\\)\\\\\\{2\\}*\(" nil t)
-			(backward-char)
-			(push-mark nil t)
-			(if (not (and (re-search-forward
-										 "\\(?:^\\|\\=\\|[^\\\\]\\)\\\\\\{2\\}*\)" nil t)
-										(<= p (point))))
-					(pop-mark)
-				(setq isset t)
-				(exchange-point-and-mark)))
-		(when (not isset)
-			(goto-char p)
-			(end-of-line)
-			(push-mark nil t)
-			(beginning-of-line))))
-		
+      (when (re-search-backward "\\(?:^\\|[^\\\\]\\)\\\\\\{2\\}*\(" nil t)
+        (backward-char)
+        (push-mark nil t)
+        (if (not (and (re-search-forward
+                       "\\(?:^\\|\\=\\|[^\\\\]\\)\\\\\\{2\\}*\)" nil t)
+                      (<= p (point))))
+            (pop-mark)
+          (setq isset t)
+          (exchange-point-and-mark)))
+      (when (not isset)
+        (goto-char p)
+        (end-of-line)
+        (push-mark nil t)
+        (beginning-of-line))))
+
+;; shut up the compiler
 (defvar comment-region)
 (defvar uncomment-region)
 
-(defvar d-mode-timer nil)
+(define-derived-mode d-mode nil "D Machine"
+  "Major mode for editing d code.
+\\{d-mode-map}"
+  :group 'd-mode
 
-(defun d-mode ()
-  "Major mode for editing d code."
-  (interactive)
-
-  (kill-all-local-variables)
-  
   (set (make-local-variable 'parse-sexp-lookup-properties) t)
 
   (set (make-local-variable 'indent-line-function)
@@ -817,22 +831,15 @@
   (set (make-local-variable 'uncomment-region)
        'd-mode-uncomment-region)
 
-  (use-local-map d-mode-map)
-
-  (d-mode-shared 
+  (d-mode-shared nil
 	 '(font-lock-mark-block-function . d-mode-font-lock-mark-block-function))
-
-  (setq major-mode 'd-mode)
-  (setq mode-name "D Machine")
 
   (d-mode-replace-cr)
 
-	(if d-mode-magic-newline-on (d-mode-magic-newline))
-	(if d-mode-magic-parens-on (d-mode-magic-parens))
-	(if d-mode-magic-delete-on (d-mode-magic-delete))
-	(if d-mode-magic-comment-on (d-mode-magic-comment))
-
-  (run-hooks 'd-mode-hook)
+  (if d-mode-magic-newline-on (d-mode-magic-newline))
+  (if d-mode-magic-parens-on (d-mode-magic-parens))
+  (if d-mode-magic-delete-on (d-mode-magic-delete))
+  (if d-mode-magic-comment-on (d-mode-magic-comment))
 )
 
 
