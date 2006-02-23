@@ -301,14 +301,13 @@ tmp = @tmp@
 @ENABLE_THREADS_TRUE@THREAD_HDR = threads.h
 @ENABLE_THREADS_TRUE@THREADSRC = threads.c
 EXTRA_DIST = codegen/buildh codegen/dgen_0.h codegen/dgen_1.h codegen/dgen.c \
-	codegen/dm1.c codegen/dm2.c codegen/dm3.c codegen/dm4.c codegen/dm5.c \
-	codegen/dm6.c codegen/dm7.c codegen/dm8.c codegen/dmglobals.c \
-	codegen/dm.h codegen/dmnum.c codegen/dsp1.c codegen/dsp2.c \
-	codegen/error-local.h \
 	codegen/dmnuminc.d.in codegen/dmnuminc.h codegen/dmnuminc.h.built \
 	codegen/dsp1f.d codegen/dsp1f.h codegen/dsp1f.h.built \
 	codegen/Makefile.am codegen/Makefile.in codegen/startup_dgen.d.in \
 	dnode-nice.c.in paths.h.in
+
+DISTCLEANFILES = \
+	dmnuminc.h dsp1f.h
 
 AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
 AM_LDFLAGS = -no-undefined $(PTHREAD_LIBS) $(X_LDFLAGS)
@@ -660,6 +659,7 @@ clean-generic:
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"

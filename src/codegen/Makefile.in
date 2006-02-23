@@ -272,6 +272,12 @@ INCLUDE = @INCLTDL@
 MAINTAINERCLEANFILES = *.built
 BUILT_SOURCES = paths.h
 CLEANFILES = paths.h
+DISTCLEANFILES = \
+	dm1.c dm2.c dm3.c dm4.c dm5.c \
+	dm6.c dm7.c dm8.c dmglobals.c \
+	dm.h dmnum.c dsp1.c dsp2.c \
+	error-local.h paths.h.in threads.c threads.h
+
 noinst_LTLIBRARIES = libdmbootstrap.la
 noinst_HEADERS = dmnuminc.h.built dsp1f.h.built dm.h
 libdmbootstrap_la_SOURCES = dmglobals.c dm1.c dm2.c dm3.c dm4.c dm5.c \
@@ -517,6 +523,7 @@ clean-generic:
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"

@@ -346,4 +346,34 @@ AC_DEFUN([CF_ACX_PTHREAD], [dnl
   ])
 ])
 
+dnl
+dnl CF_MAKE_SYMLINK([subdir-to-workin], [src], [dest])
+dnl
+AC_DEFUN([CF_MAKE_SYMLINK], [dnl
+  AC_REQUIRE([AC_PROG_LN_S])
+  AC_MSG_CHECKING([symlink in $1 from $2 to $3])
+  if (cd "$1" \
+      && (if test -e "$3" || test -L "$3" ; then rm -f "$3" ; else : ; fi) \
+      && ${LN_S} "$2" "$3") ; then 
+    AC_MSG_RESULT([linked])
+  else
+    AC_MSG_ERROR([Unable to link])
+  fi
+])
+
+AC_DEFUN([_CF_MAKE_SYMLINKS], [
+  CF_MAKE_SYMLINK(CF_MAKE_SYMLINKS_DIR, [$1], [$2])
+  ifelse([$3],,, [_CF_MAKE_SYMLINKS(m4_shift(m4_shift($@)))])
+])
+
+dnl
+dnl CF_MAKE_SYMLINKS([subdir-to-workin], [src1], [dest1], ..., [srcn], [destn])
+dnl where n>=1
+dnl
+AC_DEFUN([CF_MAKE_SYMLINKS], [dnl
+  pushdef([CF_MAKE_SYMLINKS_DIR], [$1])
+  _CF_MAKE_SYMLINKS(m4_shift($@))
+  popdef([CF_MAKE_SYMLINKS_DIR])
+])
+  
     

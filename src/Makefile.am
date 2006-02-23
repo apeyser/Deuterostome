@@ -29,14 +29,13 @@ if ENABLE_THREADS
 endif ENABLE_THREADS
 
 EXTRA_DIST = codegen/buildh codegen/dgen_0.h codegen/dgen_1.h codegen/dgen.c \
-	codegen/dm1.c codegen/dm2.c codegen/dm3.c codegen/dm4.c codegen/dm5.c \
-	codegen/dm6.c codegen/dm7.c codegen/dm8.c codegen/dmglobals.c \
-	codegen/dm.h codegen/dmnum.c codegen/dsp1.c codegen/dsp2.c \
-	codegen/error-local.h \
 	codegen/dmnuminc.d.in codegen/dmnuminc.h codegen/dmnuminc.h.built \
 	codegen/dsp1f.d codegen/dsp1f.h codegen/dsp1f.h.built \
 	codegen/Makefile.am codegen/Makefile.in codegen/startup_dgen.d.in \
 	dnode-nice.c.in paths.h.in
+
+DISTCLEANFILES = \
+	dmnuminc.h dsp1f.h
 
 distclean-local:
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS) distclean

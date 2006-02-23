@@ -149,6 +149,30 @@ CF_SUBST_DEFINE([NAMEBYTES],
 
 LIB_SOCKET_NSL
 
+CF_MAKE_SYMLINKS([src], 
+  [codegen/dsp1f.h.built], [disp1f.h],
+  [codegen/dmnuminc.h.built], [dmnuminc.h])
+
+CF_MAKE_SYMLINKS([src/codegen],
+  [../dm.h], [dm.h],
+  [../dmglobals.c], [dmglobals.c],
+  [../dsp1.c], [dsp1.c],
+  [../dsp2.c], [dsp2.c],
+  [../dm1.c], [dm1.c],
+  [../dm2.c], [dm2.c],
+  [../dm3.c], [dm3.c],
+  [../dm4.c], [dm4.c],
+  [../dm5.c], [dm5.c],
+  [../dm6.c], [dm6.c],
+  [../dm7.c], [dm7.c],
+  [../dm8.c], [dm8.c],
+  [../dmnum.c], [dmnum.c],
+  [../error-local.h], [error-local.h],
+  [../paths.h.in], [paths.h.in],
+  [../threads.c], [threads.c],
+  [../threads.h], [threads.h])
+
+
 AC_CONFIG_FILES([Makefile 
 		 src/Makefile 
 		 src/codegen/Makefile src/codegen/startup_dgen.d src/codegen/dmnuminc.d

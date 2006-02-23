@@ -8,6 +8,11 @@ INCLUDE = @INCLTDL@
 MAINTAINERCLEANFILES = *.built
 BUILT_SOURCES = paths.h
 CLEANFILES = paths.h
+DISTCLEANFILES = \
+	dm1.c dm2.c dm3.c dm4.c dm5.c \
+	dm6.c dm7.c dm8.c dmglobals.c \
+	dm.h dmnum.c dsp1.c dsp2.c \
+	error-local.h paths.h.in threads.c threads.h
 
 noinst_LTLIBRARIES = libdmbootstrap.la
 noinst_PROGRAMS = dgen

@@ -31817,6 +31817,321 @@ fi
 
 
 
+
+
+
+  echo "$as_me:$LINENO: checking symlink in src from codegen/dsp1f.h.built to disp1f.h" >&5
+echo $ECHO_N "checking symlink in src from codegen/dsp1f.h.built to disp1f.h... $ECHO_C" >&6
+  if (cd "src" \
+      && (if test -e "disp1f.h" || test -L "disp1f.h" ; then rm -f "disp1f.h" ; else : ; fi) \
+      && ${LN_S} "codegen/dsp1f.h.built" "disp1f.h") ; then
+    echo "$as_me:$LINENO: result: linked" >&5
+echo "${ECHO_T}linked" >&6
+  else
+    { { echo "$as_me:$LINENO: error: Unable to link" >&5
+echo "$as_me: error: Unable to link" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+
+  echo "$as_me:$LINENO: checking symlink in src from codegen/dmnuminc.h.built to dmnuminc.h" >&5
+echo $ECHO_N "checking symlink in src from codegen/dmnuminc.h.built to dmnuminc.h... $ECHO_C" >&6
+  if (cd "src" \
+      && (if test -e "dmnuminc.h" || test -L "dmnuminc.h" ; then rm -f "dmnuminc.h" ; else : ; fi) \
+      && ${LN_S} "codegen/dmnuminc.h.built" "dmnuminc.h") ; then
+    echo "$as_me:$LINENO: result: linked" >&5
+echo "${ECHO_T}linked" >&6
+  else
+    { { echo "$as_me:$LINENO: error: Unable to link" >&5
+echo "$as_me: error: Unable to link" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+
+
+
+
+
+
+
+
+  echo "$as_me:$LINENO: checking symlink in src/codegen from ../dm.h to dm.h" >&5
+echo $ECHO_N "checking symlink in src/codegen from ../dm.h to dm.h... $ECHO_C" >&6
+  if (cd "src/codegen" \
+      && (if test -e "dm.h" || test -L "dm.h" ; then rm -f "dm.h" ; else : ; fi) \
+      && ${LN_S} "../dm.h" "dm.h") ; then
+    echo "$as_me:$LINENO: result: linked" >&5
+echo "${ECHO_T}linked" >&6
+  else
+    { { echo "$as_me:$LINENO: error: Unable to link" >&5
+echo "$as_me: error: Unable to link" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+
+  echo "$as_me:$LINENO: checking symlink in src/codegen from ../dmglobals.c to dmglobals.c" >&5
+echo $ECHO_N "checking symlink in src/codegen from ../dmglobals.c to dmglobals.c... $ECHO_C" >&6
+  if (cd "src/codegen" \
+      && (if test -e "dmglobals.c" || test -L "dmglobals.c" ; then rm -f "dmglobals.c" ; else : ; fi) \
+      && ${LN_S} "../dmglobals.c" "dmglobals.c") ; then
+    echo "$as_me:$LINENO: result: linked" >&5
+echo "${ECHO_T}linked" >&6
+  else
+    { { echo "$as_me:$LINENO: error: Unable to link" >&5
+echo "$as_me: error: Unable to link" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+
+  echo "$as_me:$LINENO: checking symlink in src/codegen from ../dsp1.c to dsp1.c" >&5
+echo $ECHO_N "checking symlink in src/codegen from ../dsp1.c to dsp1.c... $ECHO_C" >&6
+  if (cd "src/codegen" \
+      && (if test -e "dsp1.c" || test -L "dsp1.c" ; then rm -f "dsp1.c" ; else : ; fi) \
+      && ${LN_S} "../dsp1.c" "dsp1.c") ; then
+    echo "$as_me:$LINENO: result: linked" >&5
+echo "${ECHO_T}linked" >&6
+  else
+    { { echo "$as_me:$LINENO: error: Unable to link" >&5
+echo "$as_me: error: Unable to link" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+
+  echo "$as_me:$LINENO: checking symlink in src/codegen from ../dsp2.c to dsp2.c" >&5
+echo $ECHO_N "checking symlink in src/codegen from ../dsp2.c to dsp2.c... $ECHO_C" >&6
+  if (cd "src/codegen" \
+      && (if test -e "dsp2.c" || test -L "dsp2.c" ; then rm -f "dsp2.c" ; else : ; fi) \
+      && ${LN_S} "../dsp2.c" "dsp2.c") ; then
+    echo "$as_me:$LINENO: result: linked" >&5
+echo "${ECHO_T}linked" >&6
+  else
+    { { echo "$as_me:$LINENO: error: Unable to link" >&5
+echo "$as_me: error: Unable to link" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+
+  echo "$as_me:$LINENO: checking symlink in src/codegen from ../dm1.c to dm1.c" >&5
+echo $ECHO_N "checking symlink in src/codegen from ../dm1.c to dm1.c... $ECHO_C" >&6
+  if (cd "src/codegen" \
+      && (if test -e "dm1.c" || test -L "dm1.c" ; then rm -f "dm1.c" ; else : ; fi) \
+      && ${LN_S} "../dm1.c" "dm1.c") ; then
+    echo "$as_me:$LINENO: result: linked" >&5
+echo "${ECHO_T}linked" >&6
+  else
+    { { echo "$as_me:$LINENO: error: Unable to link" >&5
+echo "$as_me: error: Unable to link" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+
+  echo "$as_me:$LINENO: checking symlink in src/codegen from ../dm2.c to dm2.c" >&5
+echo $ECHO_N "checking symlink in src/codegen from ../dm2.c to dm2.c... $ECHO_C" >&6
+  if (cd "src/codegen" \
+      && (if test -e "dm2.c" || test -L "dm2.c" ; then rm -f "dm2.c" ; else : ; fi) \
+      && ${LN_S} "../dm2.c" "dm2.c") ; then
+    echo "$as_me:$LINENO: result: linked" >&5
+echo "${ECHO_T}linked" >&6
+  else
+    { { echo "$as_me:$LINENO: error: Unable to link" >&5
+echo "$as_me: error: Unable to link" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+
+  echo "$as_me:$LINENO: checking symlink in src/codegen from ../dm3.c to dm3.c" >&5
+echo $ECHO_N "checking symlink in src/codegen from ../dm3.c to dm3.c... $ECHO_C" >&6
+  if (cd "src/codegen" \
+      && (if test -e "dm3.c" || test -L "dm3.c" ; then rm -f "dm3.c" ; else : ; fi) \
+      && ${LN_S} "../dm3.c" "dm3.c") ; then
+    echo "$as_me:$LINENO: result: linked" >&5
+echo "${ECHO_T}linked" >&6
+  else
+    { { echo "$as_me:$LINENO: error: Unable to link" >&5
+echo "$as_me: error: Unable to link" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+
+  echo "$as_me:$LINENO: checking symlink in src/codegen from ../dm4.c to dm4.c" >&5
+echo $ECHO_N "checking symlink in src/codegen from ../dm4.c to dm4.c... $ECHO_C" >&6
+  if (cd "src/codegen" \
+      && (if test -e "dm4.c" || test -L "dm4.c" ; then rm -f "dm4.c" ; else : ; fi) \
+      && ${LN_S} "../dm4.c" "dm4.c") ; then
+    echo "$as_me:$LINENO: result: linked" >&5
+echo "${ECHO_T}linked" >&6
+  else
+    { { echo "$as_me:$LINENO: error: Unable to link" >&5
+echo "$as_me: error: Unable to link" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+
+  echo "$as_me:$LINENO: checking symlink in src/codegen from ../dm5.c to dm5.c" >&5
+echo $ECHO_N "checking symlink in src/codegen from ../dm5.c to dm5.c... $ECHO_C" >&6
+  if (cd "src/codegen" \
+      && (if test -e "dm5.c" || test -L "dm5.c" ; then rm -f "dm5.c" ; else : ; fi) \
+      && ${LN_S} "../dm5.c" "dm5.c") ; then
+    echo "$as_me:$LINENO: result: linked" >&5
+echo "${ECHO_T}linked" >&6
+  else
+    { { echo "$as_me:$LINENO: error: Unable to link" >&5
+echo "$as_me: error: Unable to link" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+
+  echo "$as_me:$LINENO: checking symlink in src/codegen from ../dm6.c to dm6.c" >&5
+echo $ECHO_N "checking symlink in src/codegen from ../dm6.c to dm6.c... $ECHO_C" >&6
+  if (cd "src/codegen" \
+      && (if test -e "dm6.c" || test -L "dm6.c" ; then rm -f "dm6.c" ; else : ; fi) \
+      && ${LN_S} "../dm6.c" "dm6.c") ; then
+    echo "$as_me:$LINENO: result: linked" >&5
+echo "${ECHO_T}linked" >&6
+  else
+    { { echo "$as_me:$LINENO: error: Unable to link" >&5
+echo "$as_me: error: Unable to link" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+
+  echo "$as_me:$LINENO: checking symlink in src/codegen from ../dm7.c to dm7.c" >&5
+echo $ECHO_N "checking symlink in src/codegen from ../dm7.c to dm7.c... $ECHO_C" >&6
+  if (cd "src/codegen" \
+      && (if test -e "dm7.c" || test -L "dm7.c" ; then rm -f "dm7.c" ; else : ; fi) \
+      && ${LN_S} "../dm7.c" "dm7.c") ; then
+    echo "$as_me:$LINENO: result: linked" >&5
+echo "${ECHO_T}linked" >&6
+  else
+    { { echo "$as_me:$LINENO: error: Unable to link" >&5
+echo "$as_me: error: Unable to link" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+
+  echo "$as_me:$LINENO: checking symlink in src/codegen from ../dm8.c to dm8.c" >&5
+echo $ECHO_N "checking symlink in src/codegen from ../dm8.c to dm8.c... $ECHO_C" >&6
+  if (cd "src/codegen" \
+      && (if test -e "dm8.c" || test -L "dm8.c" ; then rm -f "dm8.c" ; else : ; fi) \
+      && ${LN_S} "../dm8.c" "dm8.c") ; then
+    echo "$as_me:$LINENO: result: linked" >&5
+echo "${ECHO_T}linked" >&6
+  else
+    { { echo "$as_me:$LINENO: error: Unable to link" >&5
+echo "$as_me: error: Unable to link" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+
+  echo "$as_me:$LINENO: checking symlink in src/codegen from ../dmnum.c to dmnum.c" >&5
+echo $ECHO_N "checking symlink in src/codegen from ../dmnum.c to dmnum.c... $ECHO_C" >&6
+  if (cd "src/codegen" \
+      && (if test -e "dmnum.c" || test -L "dmnum.c" ; then rm -f "dmnum.c" ; else : ; fi) \
+      && ${LN_S} "../dmnum.c" "dmnum.c") ; then
+    echo "$as_me:$LINENO: result: linked" >&5
+echo "${ECHO_T}linked" >&6
+  else
+    { { echo "$as_me:$LINENO: error: Unable to link" >&5
+echo "$as_me: error: Unable to link" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+
+  echo "$as_me:$LINENO: checking symlink in src/codegen from ../error-local.h to error-local.h" >&5
+echo $ECHO_N "checking symlink in src/codegen from ../error-local.h to error-local.h... $ECHO_C" >&6
+  if (cd "src/codegen" \
+      && (if test -e "error-local.h" || test -L "error-local.h" ; then rm -f "error-local.h" ; else : ; fi) \
+      && ${LN_S} "../error-local.h" "error-local.h") ; then
+    echo "$as_me:$LINENO: result: linked" >&5
+echo "${ECHO_T}linked" >&6
+  else
+    { { echo "$as_me:$LINENO: error: Unable to link" >&5
+echo "$as_me: error: Unable to link" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+
+  echo "$as_me:$LINENO: checking symlink in src/codegen from ../paths.h.in to paths.h.in" >&5
+echo $ECHO_N "checking symlink in src/codegen from ../paths.h.in to paths.h.in... $ECHO_C" >&6
+  if (cd "src/codegen" \
+      && (if test -e "paths.h.in" || test -L "paths.h.in" ; then rm -f "paths.h.in" ; else : ; fi) \
+      && ${LN_S} "../paths.h.in" "paths.h.in") ; then
+    echo "$as_me:$LINENO: result: linked" >&5
+echo "${ECHO_T}linked" >&6
+  else
+    { { echo "$as_me:$LINENO: error: Unable to link" >&5
+echo "$as_me: error: Unable to link" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+
+  echo "$as_me:$LINENO: checking symlink in src/codegen from ../threads.c to threads.c" >&5
+echo $ECHO_N "checking symlink in src/codegen from ../threads.c to threads.c... $ECHO_C" >&6
+  if (cd "src/codegen" \
+      && (if test -e "threads.c" || test -L "threads.c" ; then rm -f "threads.c" ; else : ; fi) \
+      && ${LN_S} "../threads.c" "threads.c") ; then
+    echo "$as_me:$LINENO: result: linked" >&5
+echo "${ECHO_T}linked" >&6
+  else
+    { { echo "$as_me:$LINENO: error: Unable to link" >&5
+echo "$as_me: error: Unable to link" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+
+  echo "$as_me:$LINENO: checking symlink in src/codegen from ../threads.h to threads.h" >&5
+echo $ECHO_N "checking symlink in src/codegen from ../threads.h to threads.h... $ECHO_C" >&6
+  if (cd "src/codegen" \
+      && (if test -e "threads.h" || test -L "threads.h" ; then rm -f "threads.h" ; else : ; fi) \
+      && ${LN_S} "../threads.h" "threads.h") ; then
+    echo "$as_me:$LINENO: result: linked" >&5
+echo "${ECHO_T}linked" >&6
+  else
+    { { echo "$as_me:$LINENO: error: Unable to link" >&5
+echo "$as_me: error: Unable to link" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                                                                                                                                   ac_config_files="$ac_config_files Makefile src/Makefile src/codegen/Makefile src/codegen/startup_dgen.d src/codegen/dmnuminc.d plugins/Makefile ps/Makefile sh/Makefile emacs/Makefile emacs/d-mode.el dcode/Makefile dcode/startup_dvt.d dcode/startup_dnode.d"
 
 
