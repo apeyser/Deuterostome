@@ -14,17 +14,17 @@
 
 (defcustom d-comint-mode-server t
   "*Startup server for emacs when loading init"
-  :type '(boolean)
+  :type 'boolean
   :group 'd-comint-mode)
 
 (defcustom d-comint-mode-keep-focus t 
   "*If true, tell dvt to return input focus to dvt buffer in emacs"
-  :type '(boolean)
+  :type 'boolean
   :group 'd-comint-mode)
 
 (defcustom d-comint-mode-window-size 10
   "*Number of lines for popped up dvt window"
-  :type '(integer)
+  :type 'integer
   :group 'd-comint-mode)
 
 (defcustom explicit-dvt-file-name nil 
@@ -50,7 +50,7 @@
 
 (defcustom d-comint-mode-activate-highlight-input nil
   "*Recolor input to a fixed face"
-  :type '(boolean)
+  :type 'boolean
   :group 'd-comint-mode)
 
 (defvar d-comint-mode-highlight-input
@@ -68,7 +68,7 @@
 									   (fullscreen . nil))
   "*Alist of frame properties for mini dvt window."
   :group 'd-comint-mode
-  :type '(alist)
+  :type 'alist
   :options '((title string)
 			 (name string)
 			 (left (choice integer (list (choice (const +) (const '- )) 
@@ -122,6 +122,18 @@
   :type 'hook
   :group 'd-comint-mode)
 
+(defcustom d-comint-mode-redirect-command
+  "{ echo 'New process: '; echo \"$(date)\" ; echo '-------------' ; exec cat ; } >> "
+  "*Command to handle redirects.
+It is run under bash -c, with a filename concatenated to the command string."
+  :type 'string
+  :group 'd-comint-mode)
+
+(defcustom d-comint-mode-narrow-lines (* 50 2) 
+  "*Number of lines for d-comint-mode-narrow'ing, above current point"
+  :type 'integer
+  :group 'd-comint-mode)
+
 (defun d-comint-mode-freeze-overlay (overlay is-after begin end &optional len)
   "Prevent OVERLAY from being extended.
 This function can be used for the `modification-hooks' overlay
@@ -157,6 +169,7 @@ property."
 (require 'd-mode)
 (define-derived-mode d-comint-mode comint-mode "DVT"
   "Major mode for handling d-machine.
+Derived from `comint-mode' with font-lock from `d-mode'.
 \\{d-comint-mode-map}"
   :group 'd-comint-mode
 
@@ -235,9 +248,6 @@ property."
   (kill-process d-comint-mode-redirect-process)
   (setq d-comint-mode-redirect-process nil))
 
-(defvar d-comint-mode-redirect-command 
-  "{ echo 'New process: '; echo \"$(date)\" ; echo '-------------' ; exec cat ; } >> ")
-
 (defun d-comint-mode-redirect-process-open ()
   (let ((d-comint-mode-redirect-ignore t)
 	(string1 (concat "[31m"
@@ -278,17 +288,31 @@ property."
   (interactive)
   (delete-region 1 (point)))
 
-(defvar d-comint-mode-window (* 80 50 5) "")
+(add-minor-mode 'd-comint-mode-narrowed " Narrow")
+
+(defvar d-comint-mode-narrowed nil "Toggle for Narrow mode")
+
+(defun d-comint-mode-narrowed () "Toggle function for Narrow mode"
+  (if d-comint-mode-narrowed (d-comint-mode-widen) (d-comint-mode-narrow)))
 
 (defun d-comint-mode-narrow ()
+  "Narrows d-comint-mode window to `d-comint-mode-narrow-lines' lines"
   (interactive)
-  (narrow-to-region 
-   (let 
-       ((d-comint-mode-window-start (- (point-max) d-comint-mode-window)))
-     (if (> d-comint-mode-window-start 0) d-comint-mode-window-start 0))
-   (point-max)))
+  (let ((start 
+         (save-excursion
+           (let ((inhibit-point-motion-hooks t))
+             (forward-line (- d-comint-mode-narrow-lines))
+             (point)))))
+    (when (eq start (point-min))
+      (error "Pointless narrowing to beginning of buffer"))
+    (narrow-to-region start (point-max))
+    (setq d-comint-mode-narrowed t)))
 
-(defun d-comint-mode-widen () (interactive) (widen))
+(defun d-comint-mode-widen () 
+  "Undoes `d-comint-mode-narrow'"
+  (interactive) 
+  (widen)
+  (setq d-comint-mode-narrowed nil))
 
 (defvar d-comint-mode-map-setup nil "")
 (defun d-comint-mode-setup-map ()
@@ -313,8 +337,8 @@ property."
   (define-key d-comint-mode-map [?\C-c ?c] 'd-comint-mode-clear)
   (define-key d-comint-mode-map [?\C-c ?\C-a] 'd-comint-mode-dabort)
   (define-key d-comint-mode-map [(control >)] 'd-comint-mode-redirect-mode)
-  (define-key d-comint-mode-map [?\C-c ?\C-n] 'd-comint-mode-narrow)
-  (define-key d-comint-mode-map [?\C-c ?\C-w] 'd-comint-mode-widen)
+  (define-key d-comint-mode-map [?\C-x ?n ?p] 'd-comint-mode-narrow)
+  (define-key d-comint-mode-map [?\C-x ?n ?w] 'd-comint-mode-widen)
   (define-key d-comint-mode-map [?~] 'd-mode-insert-squiggle)
   (define-key d-comint-mode-map [?/] 'd-mode-insert-squiggle)
 )
@@ -408,7 +432,7 @@ Parens and backslashes are quoted"
 
 (defun d-comint-mode-shell-quote (string)
   "Quote a string which will be used by the dvt as a word in a shell command.
-This quotes per \\[shell-quote-argument], then requotes per \\[d-comint-mode-quote]"
+This quotes per `shell-quote-argument', then requotes per `d-comint-mode-quote'"
   (interactive "s")
   (d-comint-mode-quote (shell-quote-argument string)))
 

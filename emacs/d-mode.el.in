@@ -96,7 +96,7 @@
 
 (defcustom d-mode-use-timer t
   "*Use timer hooks"
-  :type '(boolean)
+  :type 'boolean
   :group 'd-mode)
 
 (defcustom d-mode-timer-hooks '(d-mode-check-point)
@@ -112,6 +112,12 @@
 (defcustom d-mode-hook nil
   "Hooks for d-mode."
   :type 'hook
+  :group 'd-mode)
+
+(defcustom d-mode-replace-cr-do t
+  "*If true, when opening a new file run `d-mode-replace-cr', 
+and check/try to convert to unix line-ends."
+  :type 'boolean
   :group 'd-mode)
 
 (defun d-mode-setup-syntax-table ()
@@ -834,7 +840,7 @@
   (d-mode-shared nil
 	 '(font-lock-mark-block-function . d-mode-font-lock-mark-block-function))
 
-  (d-mode-replace-cr)
+  (when d-mode-replace-cr-do (d-mode-replace-cr))
 
   (if d-mode-magic-newline-on (d-mode-magic-newline))
   (if d-mode-magic-parens-on (d-mode-magic-parens))
