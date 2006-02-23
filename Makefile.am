@@ -16,7 +16,7 @@ endif ENABLE_BASH
 
 SUBDIRS = libltdl src $(PLUGINS_DIR) $(BASH_DIR) ps $(EMACS_DIR) dcode
 ACLOCAL_AMFLAGS = -I m4
-DISTCHECK_CONFIGURE_FLAGS = --disable-ssh --disable-process
+DISTCHECK_CONFIGURE_FLAGS = --disable-process
 
 @SET_MAKE@
 gencode-all: gencode all
