@@ -149,31 +149,30 @@ CF_SUBST_DEFINE([NAMEBYTES],
 
 LIB_SOCKET_NSL
 
-CF_MAKE_SYMLINKS([src], 
-  [codegen/dsp1f.h.built], [disp1f.h],
-  [codegen/dmnuminc.h.built], [dmnuminc.h])
+AC_CONFIG_LINKS([
+		src/dsp1f.h:src/codegen/dsp1f.h.built
+		src/dmnuminc.h:src/codegen/dmnuminc.h.built
+  		src/codegen/dm.h:src/dm.h
+		src/codegen/dmglobals.c:src/dmglobals.c
+		src/codegen/dsp1.c:src/dsp1.c
+		src/codegen/dsp2.c:src/dsp2.c
+		src/codegen/dm1.c:src/dm1.c
+		src/codegen/dm2.c:src/dm2.c
+		src/codegen/dm3.c:src/dm3.c
+		src/codegen/dm4.c:src/dm4.c
+		src/codegen/dm5.c:src/dm5.c
+		src/codegen/dm6.c:src/dm6.c
+		src/codegen/dm7.c:src/dm7.c
+		src/codegen/dm8.c:src/dm8.c
+		src/codegen/dmnum.c:src/dmnum.c
+		src/codegen/error-local.h:src/error-local.h
+		src/codegen/paths.h.in:src/paths.h.in
+		src/codegen/threads.c:src/threads.c
+		src/codegen/threads.h:src/threads.h
+])
 
-CF_MAKE_SYMLINKS([src/codegen],
-  [../dm.h], [dm.h],
-  [../dmglobals.c], [dmglobals.c],
-  [../dsp1.c], [dsp1.c],
-  [../dsp2.c], [dsp2.c],
-  [../dm1.c], [dm1.c],
-  [../dm2.c], [dm2.c],
-  [../dm3.c], [dm3.c],
-  [../dm4.c], [dm4.c],
-  [../dm5.c], [dm5.c],
-  [../dm6.c], [dm6.c],
-  [../dm7.c], [dm7.c],
-  [../dm8.c], [dm8.c],
-  [../dmnum.c], [dmnum.c],
-  [../error-local.h], [error-local.h],
-  [../paths.h.in], [paths.h.in],
-  [../threads.c], [threads.c],
-  [../threads.h], [threads.h])
-
-
-AC_CONFIG_FILES([Makefile 
+AC_CONFIG_FILES([
+		 Makefile 
 		 src/Makefile 
 		 src/codegen/Makefile src/codegen/startup_dgen.d src/codegen/dmnuminc.d
 		 plugins/Makefile 
@@ -184,3 +183,4 @@ AC_CONFIG_FILES([Makefile
 ])
 
 AC_OUTPUT
+

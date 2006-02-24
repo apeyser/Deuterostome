@@ -21,5 +21,6 @@ DISTCHECK_CONFIGURE_FLAGS = --disable-process
 @SET_MAKE@
 gencode-all: gencode all
 gencode: 
+	cd libltdl && $(MAKE) $(AM_MAKEFLAGS) all
 	cd src && $(MAKE) $(AM_MAKEFLAGS) gencode
 

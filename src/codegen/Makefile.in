@@ -45,7 +45,8 @@ noinst_PROGRAMS = dgen$(EXEEXT)
 subdir = src/codegen
 DIST_COMMON = $(dist_noinst_DATA) $(dist_noinst_SCRIPTS) \
 	$(noinst_HEADERS) $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/dmnuminc.d.in $(srcdir)/startup_dgen.d.in
+	$(srcdir)/dmnuminc.d.in $(srcdir)/dmnuminc.h.built \
+	$(srcdir)/dsp1f.h.built $(srcdir)/startup_dgen.d.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
@@ -56,7 +57,9 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = startup_dgen.d dmnuminc.d
+CONFIG_CLEAN_FILES = startup_dgen.d dmnuminc.d dm.h dmglobals.c dsp1.c \
+	dsp2.c dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dmnum.c \
+	error-local.h paths.h.in threads.c threads.h
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libdmbootstrap_la_LIBADD =
 am_libdmbootstrap_la_OBJECTS = dmglobals.lo dm1.lo dm2.lo dm3.lo \
@@ -272,12 +275,6 @@ INCLUDE = @INCLTDL@
 MAINTAINERCLEANFILES = *.built
 BUILT_SOURCES = paths.h
 CLEANFILES = paths.h
-DISTCLEANFILES = \
-	dm1.c dm2.c dm3.c dm4.c dm5.c \
-	dm6.c dm7.c dm8.c dmglobals.c \
-	dm.h dmnum.c dsp1.c dsp2.c \
-	error-local.h paths.h.in threads.c threads.h
-
 noinst_LTLIBRARIES = libdmbootstrap.la
 noinst_HEADERS = dmnuminc.h.built dsp1f.h.built dm.h
 libdmbootstrap_la_SOURCES = dmglobals.c dm1.c dm2.c dm3.c dm4.c dm5.c \
@@ -523,7 +520,6 @@ clean-generic:
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
-	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"

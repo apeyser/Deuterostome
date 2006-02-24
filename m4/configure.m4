@@ -351,14 +351,23 @@ dnl CF_MAKE_SYMLINK([subdir-to-workin], [src], [dest])
 dnl
 AC_DEFUN([CF_MAKE_SYMLINK], [dnl
   AC_REQUIRE([AC_PROG_LN_S])
-  AC_MSG_CHECKING([symlink in $1 from $2 to $3])
-  if (cd "$1" \
-      && (if test -e "$3" || test -L "$3" ; then rm -f "$3" ; else : ; fi) \
-      && ${LN_S} "$2" "$3") ; then 
-    AC_MSG_RESULT([linked])
-  else
-    AC_MSG_ERROR([Unable to link])
-  fi
+  AC_OUTPUT_COMMANDS([
+  	echo ${ECHO_N} "creating symlink in $1 from $2 to $3... ${ECHO_C}"
+	if test -z "${ac_abs_top_builddir}" || test -z "${ac_abs_top_srcdir}" ; then
+       echo "[CF_MAKE_SYMLINK] called too early, ac_abs_top_builddir or ac_abs_top_srddir not defined"
+	   exit 1
+	fi
+	if (if test -e "${ac_abs_top_builddir}/$1/$3" \
+        || test -L "${ac_abs_top_builddir}/$1/$3" ; then \
+		  rm -f "${ac_abs_top_builddir}/$1/$3" ; else : ; \
+	   fi) \
+	   && ${LN_S} "${ac_abs_top_srcdir}/$1/$2" "${ac_abs_top_builddir}/$1/$3" ; then 
+		 echo "linked"
+	else
+      echo "Unable to link"
+	  echo "${LN_S} \"${ac_abs_top_srcdir}/$1/$2\" \"${ac_abs_top_builddir}/$1/$3\""
+	  exit 1
+  fi], [LN_S="$LN_S"])
 ])
 
 AC_DEFUN([_CF_MAKE_SYMLINKS], [

@@ -460,7 +460,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/dcode $(distdir)/emacs $(distdir)/m4 $(distdir)/src/codegen
+	$(mkdir_p) $(distdir)/dcode $(distdir)/emacs $(distdir)/m4 $(distdir)/src $(distdir)/src/codegen
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -699,6 +699,7 @@ uninstall-info: uninstall-info-recursive
 @SET_MAKE@
 gencode-all: gencode all
 gencode: 
+	cd libltdl && $(MAKE) $(AM_MAKEFLAGS) all
 	cd src && $(MAKE) $(AM_MAKEFLAGS) gencode
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

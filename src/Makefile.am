@@ -1,5 +1,3 @@
-#DIST_SUBDIRS = codegen
-
 if ENABLE_SETUID
 
 dnode_nice_SOURCE = dnode-nice.c
@@ -34,8 +32,7 @@ EXTRA_DIST = codegen/buildh codegen/dgen_0.h codegen/dgen_1.h codegen/dgen.c \
 	codegen/Makefile.am codegen/Makefile.in codegen/startup_dgen.d.in \
 	dnode-nice.c.in paths.h.in
 
-DISTCLEANFILES = \
-	dmnuminc.h dsp1f.h
+# DISTCLEANFILES = dmnuminc.h dsp1f.h
 
 distclean-local:
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS) distclean
