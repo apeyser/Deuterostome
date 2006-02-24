@@ -29,12 +29,21 @@
 #define __attribute__(attr)
 #endif // ! defined __GNUC__ && ! defined __attribute__
 
-#ifdef HAVE_CONFIG_H
+#include "dm-config.h"
+#ifdef DM_HAVE_CONFIG_H
 #include "config.h"
 #endif
 
+#ifndef _dm_const
+#define _dm_const const
+#endif //_dm_const
+
+#ifndef _dm_restrict
+#define _dm_restrict restrict
+#endif //_dm_restrict
+
 // Need to be here because we define things such as x1
-#if ! X_DISPLAY_MISSING
+#if ! DM_X_DISPLAY_MISSING
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #endif
@@ -56,9 +65,9 @@
 #include <inttypes.h>
 #include <sys/socket.h>
 #include <sys/select.h>
-#if ! NO_ENDIAN_HDR
-#include ENDIAN_HDR
-#endif //NO_ENDIAN_HDR
+#if ! DM_NO_ENDIAN_HDR
+#include DM_ENDIAN_HDR
+#endif //DM_NO_ENDIAN_HDR
 
 typedef int8_t B;
 typedef int16_t W;
@@ -85,8 +94,8 @@ typedef double D;
 #define BINF    ((B) 0x80)
 #define WINF    ((W) 0x8000)
 #define LINF    ((L) 0x80000000)
-static const S SINF __attribute__ ((unused)) = 1.0/0.0;  
-static const D DINF __attribute__ ((unused)) = 1.0/0.0;
+static _dm_const S SINF __attribute__ ((unused)) = 1.0/0.0;  
+static _dm_const D DINF __attribute__ ((unused)) = 1.0/0.0;
 
 #define BMAX 0x7F
 #define WMAX 0x7FFF
@@ -181,15 +190,15 @@ NOTE: all objects that can populate the D machine's workspace must
 #define BIG_ENDIAN __BIG_ENDIAN
 #endif // ! NO_ENDIAN_HDR && ! BYTE_ORDER
 
-#ifndef WORDS_BIGENDIAN
+#ifndef DM_WORDS_BIGENDIAN
 #define GETNATIVEENDIAN(frame)  \
   ((BOOLEAN) ((FORMAT(frame) & ENDIANMASK) == LITTLEENDIAN))
 #define SETNATIVEENDIAN(frame)  FORMAT(frame) |= LITTLEENDIAN
-#else //! WORDS_BIGENDIAN
+#else //! DM_WORDS_BIGENDIAN
 #define GETNATIVEENDIAN(frame)  \
   ((BOOLEAN) ((FORMAT(frame) & ENDIANMASK) == BIGENDIAN))
 #define SETNATIVEENDIAN(frame)  FORMAT(frame) |= BIGENDIAN
-#endif //WORDS_BIGENDIAN
+#endif //DM_WORDS_BIGENDIAN
 
 #if ! NO_ENDIAN_HDR && __FLOAT_WORD_ORDER
 #if __FLOAT_WORD_ORDER != __BYTE_ORDER
@@ -408,7 +417,7 @@ DLL_SCOPE BOOLEAN tinymemory;
 DLL_SCOPE L recsocket;
 DLL_SCOPE L consolesocket;
 DLL_SCOPE fd_set sock_fds;            /* active sockets                 */
-DLL_SCOPE const char* startup_dir; // setup by makefile,
+DLL_SCOPE _dm_const char* startup_dir; // setup by makefile,
                                    // defines which directory
                                    // to use for the startup file
 DLL_SCOPE B* startup_dir_frame; // points the frame holding ^^^,

@@ -42,6 +42,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
+	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
 	$(top_srcdir)/m4/configure.m4 \
 	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/configure.ac
@@ -270,7 +271,7 @@ tmp = @tmp@
 AM_CFLAGS = $(GCC_CFLAGS) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
 AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 #@LIBPLUGIN_DLL_IMPORT@
-INCLUDE = @INCLTDL@ 
+AM_CPPFLAGS = @INCLTDL@
 @ENABLE_PROCESS_TRUE@PROCESS_LIB = process.la
 @ENABLE_PROCESS_TRUE@process_la_SOURCES = process.c process.h
 pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la

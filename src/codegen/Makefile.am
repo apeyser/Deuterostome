@@ -2,7 +2,7 @@ dist_noinst_DATA = dmnuminc.d dsp1f.d
 dist_noinst_SCRIPTS = buildh
 
 AM_CFLAGS = $(GCC_CFLAGS)
-AM_CPPFLAGS = -DDISABLE_THREADS=1
+AM_CPPFLAGS = -DDM_DISABLE_THREADS=1 -DDM_HAVE_CONFIG_H
 AM_LDFLAGS = -no-undefined
 INCLUDE = @INCLTDL@
 MAINTAINERCLEANFILES = *.built
@@ -11,7 +11,7 @@ CLEANFILES = paths.h
 
 noinst_LTLIBRARIES = libdmbootstrap.la
 noinst_PROGRAMS = dgen
-noinst_HEADERS = dmnuminc.h.built dsp1f.h.built dm.h
+noinst_HEADERS = dmnuminc.h.built dsp1f.h.built dm.h 
 
 libdmbootstrap_la_SOURCES = dmglobals.c dm1.c dm2.c dm3.c dm4.c dm5.c \
 	dm6.c dm7.c dm8.c dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h \

@@ -9,7 +9,7 @@ void closealllibs(void);
 // for LL
 L op_getplugindir(void);
 
-#if ENABLE_PLUGINS
+#if DM_ENABLE_PLUGINS
 
 BOOLEAN check_opaque_name(B* nameframe, B* dict);
 // ... = null terminated list of nameframes to insert
@@ -24,6 +24,6 @@ extern B initname[FRAMEBYTES];
 // name frame for allocated buffer with opaque object
 extern B buffernameframe[FRAMEBYTES];
 
-#endif //ENABLE_PLUGINS
+#endif //DM_ENABLE_PLUGINS
 
 #endif //PLUGINLIB_H

@@ -43,6 +43,7 @@ if ENABLE_SETUID
 endif ENABLE_SETUID
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS) clean
 
+AM_CPPFLAGS = -DDM_HAVE_CONFIG_H
 AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
 AM_LDFLAGS = -no-undefined $(PTHREAD_LIBS) $(X_LDFLAGS)
 INCLUDE = @INCLTDL@
@@ -51,11 +52,12 @@ bin_PROGRAMS = dvt dnode
 noinst_PROGRAMS = testwordorder $(DNODENICEBIN)
 
 if ENABLE_PLUGINS
-PLUGIN_HDR = plugin.h
+PLUGIN_HDR = plugin.h pluginlib.h
 PLUGIN_LD = @LIBLTDL@
 endif ENABLE_PLUGINS
 
-pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) ../config.h
+pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) dm-config.h \
+	error-local.h paths.h
 
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h
 dvt_LDADD = libdmglobals.la

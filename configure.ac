@@ -1,8 +1,9 @@
 AC_INIT([D-Machine], [3.2], [Alexander Peyser <a.peyser@umiami.edu>], [dm])
 AC_CONFIG_MACRO_DIR(m4)
 AC_CANONICAL_SYSTEM
-AM_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE
+AC_CONFIG_HEADER([config.h])
+AX_PREFIX_CONFIG_H([src/dm-config.h])
 AM_PATH_LISPDIR
 AM_MAINTAINER_MODE
 
@@ -152,7 +153,6 @@ LIB_SOCKET_NSL
 AC_CONFIG_LINKS([
 		src/dsp1f.h:src/codegen/dsp1f.h.built
 		src/dmnuminc.h:src/codegen/dmnuminc.h.built
-  		src/codegen/dm.h:src/dm.h
 		src/codegen/dmglobals.c:src/dmglobals.c
 		src/codegen/dsp1.c:src/dsp1.c
 		src/codegen/dsp2.c:src/dsp2.c
@@ -165,10 +165,7 @@ AC_CONFIG_LINKS([
 		src/codegen/dm7.c:src/dm7.c
 		src/codegen/dm8.c:src/dm8.c
 		src/codegen/dmnum.c:src/dmnum.c
-		src/codegen/error-local.h:src/error-local.h
-		src/codegen/paths.h.in:src/paths.h.in
 		src/codegen/threads.c:src/threads.c
-		src/codegen/threads.h:src/threads.h
 ])
 
 AC_CONFIG_FILES([
@@ -183,4 +180,3 @@ AC_CONFIG_FILES([
 ])
 
 AC_OUTPUT
-

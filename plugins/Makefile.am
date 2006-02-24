@@ -1,7 +1,7 @@
 AM_CFLAGS =  $(GCC_CFLAGS) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
 AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 #@LIBPLUGIN_DLL_IMPORT@
-INCLUDE = @INCLTDL@ 
+AM_CPPFLAGS = @INCLTDL@
 LIBS += $(LTLIBOBJS) $(top_builddir)/src/libdmglobals.la
 
 if ENABLE_PROCESS

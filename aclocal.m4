@@ -340,18 +340,6 @@ AC_DEFUN([AM_OUTPUT_DEPENDENCY_COMMANDS],
      [AMDEP_TRUE="$AMDEP_TRUE" ac_aux_dir="$ac_aux_dir"])
 ])
 
-# Copyright (C) 1996, 1997, 2000, 2001, 2003, 2005
-# Free Software Foundation, Inc.
-#
-# This file is free software; the Free Software Foundation
-# gives unlimited permission to copy and/or distribute it,
-# with or without modifications, as long as this notice is preserved.
-
-# serial 8
-
-# AM_CONFIG_HEADER is obsolete.  It has been replaced by AC_CONFIG_HEADERS.
-AU_DEFUN([AM_CONFIG_HEADER], [AC_CONFIG_HEADERS($@)])
-
 # Do all the work for Automake.                             -*- Autoconf -*-
 
 # Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
@@ -941,6 +929,7 @@ AC_SUBST([am__untar])
 
 m4_include([m4/acx_pthread.m4])
 m4_include([m4/ax_cflags_strict_prototypes.m4])
+m4_include([m4/ax_prefix_config_h.m4])
 m4_include([m4/configure.m4])
 m4_include([m4/lib_socket_nsl.m4])
 m4_include([m4/libtool.m4])

@@ -1,13 +1,16 @@
 #ifndef THREADS_H
 #define THREADS_H
 
-#ifdef ENABLE_THREADS //intentional ifdef for undef
-#if DISABLE_THREADS
+#ifdef DM_ENABLE_THREADS //intentional ifdef for undef
+#if DM_DISABLE_THREADS
+#undef DM_ENABLE_THREADS
+#ifdef DM_HAVE_CONFIG_H
 #undef ENABLE_THREADS
-#endif //DISABLE_THREADS
-#endif //ENABLE_THREADS
+#endif //DM_HAVE_CONFIG_H
+#endif //DM_DISABLE_THREADS
+#endif //DM_ENABLE_THREADS
 
-#if ENABLE_THREADS
+#if DM_ENABLE_THREADS
 
 /***************************************************** thread_func
  *
@@ -116,12 +119,12 @@ extern UL thread_max_;
 __attribute__ ((__unused__)) 
   static UL thread_max(void)  {return thread_max_;};
 
-#else //!ENABLE_THREADS
+#else //!DM_ENABLE_THREADS
 
 //minimize the number of ifdefs by testing thread_num
 
 #define thread_num() (1)
 
-#endif //!ENABLE_THREADS
+#endif //!DM_ENABLE_THREADS
 
 #endif //THREADS_H

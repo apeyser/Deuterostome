@@ -50,6 +50,7 @@ DIST_COMMON = $(dist_noinst_DATA) $(dist_noinst_SCRIPTS) \
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
+	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
 	$(top_srcdir)/m4/configure.m4 \
 	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/configure.ac
@@ -57,9 +58,9 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = startup_dgen.d dmnuminc.d dm.h dmglobals.c dsp1.c \
+CONFIG_CLEAN_FILES = startup_dgen.d dmnuminc.d dmglobals.c dsp1.c \
 	dsp2.c dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dmnum.c \
-	error-local.h paths.h.in threads.c threads.h
+	threads.c
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libdmbootstrap_la_LIBADD =
 am_libdmbootstrap_la_OBJECTS = dmglobals.lo dm1.lo dm2.lo dm3.lo \
@@ -269,14 +270,14 @@ tmp = @tmp@
 dist_noinst_DATA = dmnuminc.d dsp1f.d
 dist_noinst_SCRIPTS = buildh
 AM_CFLAGS = $(GCC_CFLAGS)
-AM_CPPFLAGS = -DDISABLE_THREADS=1
+AM_CPPFLAGS = -DDM_DISABLE_THREADS=1 -DDM_HAVE_CONFIG_H
 AM_LDFLAGS = -no-undefined
 INCLUDE = @INCLTDL@
 MAINTAINERCLEANFILES = *.built
 BUILT_SOURCES = paths.h
 CLEANFILES = paths.h
 noinst_LTLIBRARIES = libdmbootstrap.la
-noinst_HEADERS = dmnuminc.h.built dsp1f.h.built dm.h
+noinst_HEADERS = dmnuminc.h.built dsp1f.h.built dm.h 
 libdmbootstrap_la_SOURCES = dmglobals.c dm1.c dm2.c dm3.c dm4.c dm5.c \
 	dm6.c dm7.c dm8.c dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h \
 	error-local.h threads.h paths.h

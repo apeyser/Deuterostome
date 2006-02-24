@@ -5,7 +5,7 @@
 
 DLL_SCOPE int xsocket;
 
-#if ! X_DISPLAY_MISSING
+#if ! DM_X_DISPLAY_MISSING
 
 #define MAXDVTWINDOWS  ((L)20)
 #define MAXCACHEDFONTS ((L)10)
