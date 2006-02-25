@@ -68,8 +68,7 @@ am_libdmbootstrap_la_OBJECTS = dmglobals.lo dm1.lo dm2.lo dm3.lo \
 libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
 am_dgen_OBJECTS = dgen-dgen.$(OBJEXT)
-nodist_dgen_OBJECTS =
-dgen_OBJECTS = $(am_dgen_OBJECTS) $(nodist_dgen_OBJECTS)
+dgen_OBJECTS = $(am_dgen_OBJECTS)
 dgen_DEPENDENCIES = libdmbootstrap.la
 SCRIPTS = $(dist_noinst_SCRIPTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -83,8 +82,7 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libdmbootstrap_la_SOURCES) $(dgen_SOURCES) \
-	$(nodist_dgen_SOURCES)
+SOURCES = $(libdmbootstrap_la_SOURCES) $(dgen_SOURCES)
 DIST_SOURCES = $(libdmbootstrap_la_SOURCES) $(dgen_SOURCES)
 DATA = $(dist_noinst_DATA)
 HEADERS = $(noinst_HEADERS)
@@ -279,14 +277,11 @@ MAINTAINERCLEANFILES = *.built
 BUILT_SOURCES = paths.h
 CLEANFILES = paths.h
 noinst_LTLIBRARIES = libdmbootstrap.la
-noinst_HEADERS = dmnuminc.h.built dsp1f.h.built $(top_srcdir)/src/dm.h 
+noinst_HEADERS = dmnuminc.h.built dsp1f.h.built
 libdmbootstrap_la_SOURCES = dmglobals.c dm1.c dm2.c dm3.c dm4.c dm5.c \
-	dm6.c dm7.c dm8.c dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h \
-	$(top_srcdir)/src/error-local.h $(top_srcdir)/src/threads.h \
-	paths.h 
+	dm6.c dm7.c dm8.c dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h 
 
 dgen_SOURCES = dgen.c dgen_0.h dgen_1.h
-nodist_dgen_SOURCES = paths.h
 dgen_CPPFLAGS = $(AM_CPPFLAGS)
 dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dgen_LDADD = libdmbootstrap.la
@@ -470,7 +465,6 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
-	$(mkdir_p) $(distdir)/../../src
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
