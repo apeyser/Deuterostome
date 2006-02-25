@@ -47,7 +47,7 @@ DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/dm3.c $(srcdir)/dm4.c $(srcdir)/dm5.c \
 	$(srcdir)/dm6.c $(srcdir)/dm7.c $(srcdir)/dm8.c \
 	$(srcdir)/dmglobals.c $(srcdir)/dmnum.c $(srcdir)/dsp1.c \
-	$(srcdir)/dsp2.c $(srcdir)/threads.c
+	$(srcdir)/dsp2.c $(srcdir)/paths.h.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
@@ -67,29 +67,27 @@ am__vpath_adj = case $$p in \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
-	"$(DESTDIR)$(pkgincludedir)"
+	"$(DESTDIR)$(pkgincludedir)" "$(DESTDIR)$(pkgincludedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am__libdmglobals_la_SOURCES_DIST = dmglobals.c dm1.c dm2.c dm3.c dm4.c \
-	dm5.c dm6.c dm7.c dm8.c dm9.c dmnum.c dsp1.c dsp2.c dmnuminc.h \
-	dsp1f.h error-local.h plugin.c pluginlib.h threads.c
+	dm5.c dm6.c dm7.c dm8.c dm9.c dmnum.c dsp1.c dsp2.c \
+	error-local.h plugin.c pluginlib.h threads.c
 @ENABLE_THREADS_TRUE@am__objects_1 = threads.lo
 am_libdmglobals_la_OBJECTS = dmglobals.lo dm1.lo dm2.lo dm3.lo dm4.lo \
 	dm5.lo dm6.lo dm7.lo dm8.lo dm9.lo dmnum.lo dsp1.lo dsp2.lo \
 	plugin.lo $(am__objects_1)
-nodist_libdmglobals_la_OBJECTS =
-libdmglobals_la_OBJECTS = $(am_libdmglobals_la_OBJECTS) \
-	$(nodist_libdmglobals_la_OBJECTS)
+libdmglobals_la_OBJECTS = $(am_libdmglobals_la_OBJECTS)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 @ENABLE_SETUID_TRUE@am__EXEEXT_1 = dnode-nice$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_dnode_OBJECTS = dnode-dnode.$(OBJEXT)
 dnode_OBJECTS = $(am_dnode_OBJECTS)
 dnode_DEPENDENCIES = libdmglobals.la
-dnode_nice_SOURCES = dnode-nice.c
-dnode_nice_OBJECTS = dnode-nice.$(OBJEXT)
+@ENABLE_SETUID_TRUE@nodist_dnode_nice_OBJECTS = dnode-nice.$(OBJEXT)
+dnode_nice_OBJECTS = $(nodist_dnode_nice_OBJECTS)
 dnode_nice_LDADD = $(LDADD)
 am_dvt_OBJECTS = dvt-dvt.$(OBJEXT)
 dvt_OBJECTS = $(am_dvt_OBJECTS)
@@ -108,15 +106,16 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libdmglobals_la_SOURCES) $(nodist_libdmglobals_la_SOURCES) \
-	$(dnode_SOURCES) dnode-nice.c $(dvt_SOURCES) \
+SOURCES = $(libdmglobals_la_SOURCES) $(dnode_SOURCES) \
+	$(nodist_dnode_nice_SOURCES) $(dvt_SOURCES) \
 	$(testwordorder_SOURCES)
 DIST_SOURCES = $(am__libdmglobals_la_SOURCES_DIST) $(dnode_SOURCES) \
-	dnode-nice.c $(dvt_SOURCES) $(testwordorder_SOURCES)
+	$(dvt_SOURCES) $(testwordorder_SOURCES)
+nodist_pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 am__pkginclude_HEADERS_DIST = dm.h plugin.h pluginlib.h dmx.h \
-	threads.h dm-config.h error-local.h paths.h
+	threads.h error-local.h
 pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
-HEADERS = $(pkginclude_HEADERS)
+HEADERS = $(nodist_pkginclude_HEADERS) $(pkginclude_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -296,7 +295,7 @@ target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
 tmp = @tmp@
-@ENABLE_SETUID_TRUE@dnode_nice_SOURCE = dnode-nice.c
+@ENABLE_SETUID_TRUE@nodist_dnode_nice_SOURCES = dnode-nice.c
 @ENABLE_SETUID_TRUE@DNODENICEBIN = dnode-nice
 @ENABLE_SETUID_TRUE@edit = sed \
 @ENABLE_SETUID_TRUE@	-e 's,[@]bindir[@],$(bindir),g'
@@ -309,15 +308,17 @@ EXTRA_DIST = codegen/buildh codegen/dgen_0.h codegen/dgen_1.h codegen/dgen.c \
 	codegen/Makefile.am codegen/Makefile.in codegen/startup_dgen.d.in \
 	dnode-nice.c.in paths.h.in
 
+DISTCLEANFILES = dm-config.h
 AM_CPPFLAGS = -DDM_HAVE_CONFIG_H
 AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
 AM_LDFLAGS = -no-undefined $(PTHREAD_LIBS) $(X_LDFLAGS)
 INCLUDE = @INCLTDL@
 @ENABLE_PLUGINS_TRUE@PLUGIN_HDR = plugin.h pluginlib.h
 @ENABLE_PLUGINS_TRUE@PLUGIN_LD = @LIBLTDL@
-pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) dm-config.h \
-	error-local.h paths.h
+pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
+	error-local.h
 
+nodist_pkginclude_HEADERS = dm-config.h  paths.h
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h
 dvt_LDADD = libdmglobals.la
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
@@ -325,16 +326,15 @@ dnode_SOURCES = dnode.c dnode_0.h dnode_1.h dmx.h
 dnode_LDADD = libdmglobals.la
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 testwordorder_SOURCES = test-word-order.c
-BUILT_SOURCES = paths.h
-CLEANFILES = paths.h
+BUILT_SOURCES = paths.h dnode-nice.c
+CLEANFILES = paths.h dnode-nice.c
 lib_LTLIBRARIES = libdmglobals.la
 libdmglobals_la_LIBADD = $(PLUGIN_LD)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
-	dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h error-local.h \
+	dmnum.c dsp1.c dsp2.c error-local.h \
 	plugin.c pluginlib.h $(THREADSRC)
 
-nodist_libdmglobals_la_SOURCES = paths.h
 editpaths = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
 	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \
@@ -536,6 +536,23 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 uninstall-info-am:
+install-nodist_pkgincludeHEADERS: $(nodist_pkginclude_HEADERS)
+	@$(NORMAL_INSTALL)
+	test -z "$(pkgincludedir)" || $(mkdir_p) "$(DESTDIR)$(pkgincludedir)"
+	@list='$(nodist_pkginclude_HEADERS)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(nodist_pkgincludeHEADERS_INSTALL) '$$d$$p' '$(DESTDIR)$(pkgincludedir)/$$f'"; \
+	  $(nodist_pkgincludeHEADERS_INSTALL) "$$d$$p" "$(DESTDIR)$(pkgincludedir)/$$f"; \
+	done
+
+uninstall-nodist_pkgincludeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(nodist_pkginclude_HEADERS)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(pkgincludedir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(pkgincludedir)/$$f"; \
+	done
 install-pkgincludeHEADERS: $(pkginclude_HEADERS)
 	@$(NORMAL_INSTALL)
 	test -z "$(pkgincludedir)" || $(mkdir_p) "$(DESTDIR)$(pkgincludedir)"
@@ -637,7 +654,7 @@ all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS)
 install-binPROGRAMS: install-libLTLIBRARIES
 
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgincludedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgincludedir)" "$(DESTDIR)$(pkgincludedir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -662,6 +679,7 @@ clean-generic:
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -690,7 +708,8 @@ info: info-am
 
 info-am:
 
-install-data-am: install-pkgincludeHEADERS
+install-data-am: install-nodist_pkgincludeHEADERS \
+	install-pkgincludeHEADERS
 
 install-exec-am: install-binPROGRAMS install-exec-local \
 	install-libLTLIBRARIES
@@ -721,7 +740,7 @@ ps-am:
 
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
 	uninstall-libLTLIBRARIES uninstall-local \
-	uninstall-pkgincludeHEADERS
+	uninstall-nodist_pkgincludeHEADERS uninstall-pkgincludeHEADERS
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
 	clean-generic clean-libLTLIBRARIES clean-libtool clean-local \
@@ -731,14 +750,15 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
 	install install-am install-binPROGRAMS install-data \
 	install-data-am install-exec install-exec-am \
 	install-exec-local install-info install-info-am \
-	install-libLTLIBRARIES install-man install-pkgincludeHEADERS \
+	install-libLTLIBRARIES install-man \
+	install-nodist_pkgincludeHEADERS install-pkgincludeHEADERS \
 	install-strip installcheck installcheck-am installdirs \
 	maintainer-clean maintainer-clean-generic mostlyclean \
 	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
 	pdf pdf-am ps ps-am tags uninstall uninstall-am \
 	uninstall-binPROGRAMS uninstall-info-am \
 	uninstall-libLTLIBRARIES uninstall-local \
-	uninstall-pkgincludeHEADERS
+	uninstall-nodist_pkgincludeHEADERS uninstall-pkgincludeHEADERS
 
 
 @ENABLE_SETUID_TRUE@dnode-nice.c: Makefile $(srcdir)/dnode-nice.c.in
@@ -754,13 +774,10 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
 @ENABLE_SETUID_TRUE@uninstall-local:
 @ENABLE_SETUID_TRUE@	-rm -f "$(DESTDIR)$(bindir)/dnode-nice$(EXEEXT)"
 
-# DISTCLEANFILES = dmnuminc.h dsp1f.h
-
 distclean-local:
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS) distclean
 
 clean-local:
-@ENABLE_SETUID_TRUE@	-rm -f dnode-nice.c
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS) clean
 
 paths.h: paths.h.in Makefile

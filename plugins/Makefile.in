@@ -271,7 +271,7 @@ tmp = @tmp@
 AM_CFLAGS = $(GCC_CFLAGS) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
 AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 #@LIBPLUGIN_DLL_IMPORT@
-AM_CPPFLAGS = @INCLTDL@
+AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 @ENABLE_PROCESS_TRUE@PROCESS_LIB = process.la
 @ENABLE_PROCESS_TRUE@process_la_SOURCES = process.c process.h
 pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la

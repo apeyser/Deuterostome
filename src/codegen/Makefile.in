@@ -60,7 +60,7 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = startup_dgen.d dmnuminc.d dmglobals.c dsp1.c \
 	dsp2.c dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dmnum.c \
-	threads.c
+	paths.h.in
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libdmbootstrap_la_LIBADD =
 am_libdmbootstrap_la_OBJECTS = dmglobals.lo dm1.lo dm2.lo dm3.lo \
@@ -270,17 +270,20 @@ tmp = @tmp@
 dist_noinst_DATA = dmnuminc.d dsp1f.d
 dist_noinst_SCRIPTS = buildh
 AM_CFLAGS = $(GCC_CFLAGS)
-AM_CPPFLAGS = -DDM_DISABLE_THREADS=1 -DDM_HAVE_CONFIG_H
+AM_CPPFLAGS = -DDM_DISABLE_THREADS=1 -DDM_HAVE_CONFIG_H \
+	-I"$(top_srcdir)/src" -I"$(top_builddir)/src"
+
 AM_LDFLAGS = -no-undefined
 INCLUDE = @INCLTDL@
 MAINTAINERCLEANFILES = *.built
 BUILT_SOURCES = paths.h
 CLEANFILES = paths.h
 noinst_LTLIBRARIES = libdmbootstrap.la
-noinst_HEADERS = dmnuminc.h.built dsp1f.h.built dm.h 
+noinst_HEADERS = dmnuminc.h.built dsp1f.h.built $(top_srcdir)/src/dm.h 
 libdmbootstrap_la_SOURCES = dmglobals.c dm1.c dm2.c dm3.c dm4.c dm5.c \
 	dm6.c dm7.c dm8.c dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h \
-	error-local.h threads.h paths.h
+	$(top_srcdir)/src/error-local.h $(top_srcdir)/src/threads.h \
+	paths.h 
 
 dgen_SOURCES = dgen.c dgen_0.h dgen_1.h
 nodist_dgen_SOURCES = paths.h
@@ -467,6 +470,7 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
+	$(mkdir_p) $(distdir)/../../src
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

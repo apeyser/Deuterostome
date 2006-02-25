@@ -31820,7 +31820,7 @@ fi
 
 
 
-                                                                                                                                                      ac_config_links="$ac_config_links src/dsp1f.h:src/codegen/dsp1f.h.built src/dmnuminc.h:src/codegen/dmnuminc.h.built src/codegen/dmglobals.c:src/dmglobals.c src/codegen/dsp1.c:src/dsp1.c src/codegen/dsp2.c:src/dsp2.c src/codegen/dm1.c:src/dm1.c src/codegen/dm2.c:src/dm2.c src/codegen/dm3.c:src/dm3.c src/codegen/dm4.c:src/dm4.c src/codegen/dm5.c:src/dm5.c src/codegen/dm6.c:src/dm6.c src/codegen/dm7.c:src/dm7.c src/codegen/dm8.c:src/dm8.c src/codegen/dmnum.c:src/dmnum.c src/codegen/threads.c:src/threads.c"
+                                                                                                                                                      ac_config_links="$ac_config_links src/dsp1f.h:src/codegen/dsp1f.h.built src/dmnuminc.h:src/codegen/dmnuminc.h.built src/codegen/dmglobals.c:src/dmglobals.c src/codegen/dsp1.c:src/dsp1.c src/codegen/dsp2.c:src/dsp2.c src/codegen/dm1.c:src/dm1.c src/codegen/dm2.c:src/dm2.c src/codegen/dm3.c:src/dm3.c src/codegen/dm4.c:src/dm4.c src/codegen/dm5.c:src/dm5.c src/codegen/dm6.c:src/dm6.c src/codegen/dm7.c:src/dm7.c src/codegen/dm8.c:src/dm8.c src/codegen/dmnum.c:src/dmnum.c src/codegen/paths.h.in:src/paths.h.in"
 
 
                                                                                                                                   ac_config_files="$ac_config_files Makefile src/Makefile src/codegen/Makefile src/codegen/startup_dgen.d src/codegen/dmnuminc.d plugins/Makefile ps/Makefile sh/Makefile emacs/Makefile emacs/d-mode.el dcode/Makefile dcode/startup_dvt.d dcode/startup_dnode.d"
@@ -32504,7 +32504,7 @@ do
   "src/codegen/dm7.c" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/dm7.c:src/dm7.c" ;;
   "src/codegen/dm8.c" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/dm8.c:src/dm8.c" ;;
   "src/codegen/dmnum.c" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/dmnum.c:src/dmnum.c" ;;
-  "src/codegen/threads.c" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/threads.c:src/threads.c" ;;
+  "src/codegen/paths.h.in" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/paths.h.in:src/paths.h.in" ;;
   "src/dm-config.h" ) CONFIG_COMMANDS="$CONFIG_COMMANDS src/dm-config.h" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
@@ -33574,7 +33574,8 @@ echo "$as_me: error: cannot create directory \"$ac_dir\"" >&2;}
       rm -f "$ac_prefix_conf_OUT"
       mv $tmp/pconfig.h "$ac_prefix_conf_OUT"
     fi
-    cp conftest.prefix _configs.sed
+    #cp _script _configs.sed
+	rm conftest.prefix
   else
     { { echo "$as_me:$LINENO: error: input file $ac_prefix_conf_INP does not exist - skip generating $ac_prefix_conf_OUT" >&5
 echo "$as_me: error: input file $ac_prefix_conf_INP does not exist - skip generating $ac_prefix_conf_OUT" >&2;}

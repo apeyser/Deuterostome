@@ -1,6 +1,6 @@
 if ENABLE_SETUID
 
-dnode_nice_SOURCE = dnode-nice.c
+nodist_dnode_nice_SOURCES = dnode-nice.c
 DNODENICEBIN = dnode-nice
 
 edit = sed \
@@ -32,15 +32,12 @@ EXTRA_DIST = codegen/buildh codegen/dgen_0.h codegen/dgen_1.h codegen/dgen.c \
 	codegen/Makefile.am codegen/Makefile.in codegen/startup_dgen.d.in \
 	dnode-nice.c.in paths.h.in
 
-# DISTCLEANFILES = dmnuminc.h dsp1f.h
+DISTCLEANFILES = dm-config.h
 
 distclean-local:
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS) distclean
 
 clean-local:
-if ENABLE_SETUID
-	-rm -f dnode-nice.c
-endif ENABLE_SETUID
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS) clean
 
 AM_CPPFLAGS = -DDM_HAVE_CONFIG_H
@@ -56,8 +53,9 @@ PLUGIN_HDR = plugin.h pluginlib.h
 PLUGIN_LD = @LIBLTDL@
 endif ENABLE_PLUGINS
 
-pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) dm-config.h \
-	error-local.h paths.h
+pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
+	error-local.h
+nodist_pkginclude_HEADERS = dm-config.h  paths.h
 
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h
 dvt_LDADD = libdmglobals.la
@@ -69,15 +67,14 @@ dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 
 testwordorder_SOURCES = test-word-order.c
 
-BUILT_SOURCES = paths.h
-CLEANFILES = paths.h
+BUILT_SOURCES = paths.h dnode-nice.c
+CLEANFILES = paths.h dnode-nice.c
 lib_LTLIBRARIES = libdmglobals.la
 libdmglobals_la_LIBADD = $(PLUGIN_LD)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
-	dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h error-local.h \
+	dmnum.c dsp1.c dsp2.c error-local.h \
 	plugin.c pluginlib.h $(THREADSRC)
-nodist_libdmglobals_la_SOURCES = paths.h
 
 editpaths = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \

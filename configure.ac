@@ -165,7 +165,7 @@ AC_CONFIG_LINKS([
 		src/codegen/dm7.c:src/dm7.c
 		src/codegen/dm8.c:src/dm8.c
 		src/codegen/dmnum.c:src/dmnum.c
-		src/codegen/threads.c:src/threads.c
+		src/codegen/paths.h.in:src/paths.h.in
 ])
 
 AC_CONFIG_FILES([
