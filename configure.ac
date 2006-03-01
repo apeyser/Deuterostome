@@ -7,9 +7,22 @@ AX_PREFIX_CONFIG_H([src/dm-config.h])
 AM_PATH_LISPDIR
 AM_MAINTAINER_MODE
 
+CF_SUBST_DEFINE([NAMEBYTES], 
+				[18L], 
+				[Number of bytes in a d name, without terminating '\0'],
+				[18])
+
 CF_AC_ENABLE([plugins], [compile or install plugins], [yes])
 CF_IF_ENABLED([plugins], [
   CF_AM_ENABLE([process], [compile or install process plugin], [yes])
+  CF_AM_ENABLE([dmflex], [compile or install dmflex plugin], [yes])
+  CF_IF_ENABLED([dmflex], [
+    AM_PROG_LEX
+    CF_AC_ARG_VAR_SUBST_EVAL([STRINGBUF], 
+      [Max buffer size for dmflex, must be at least $NAMEBYTES + 2], 
+      [8092])
+    CF_AC_SUBST_EVAL([NAMEBYTES_1], [`expr $NAMEBYTES - 1`])
+  ])
 ])
 
 CF_AC_ARG_VAR([SYSDICTSIZE], [system dictionary size], [500])
@@ -143,11 +156,6 @@ AC_CONFIG_SUBDIRS([libltdl])
 CF_WIN_DLL_IMPORT(DM)
 CF_WIN_DLL_IMPORT(PLUGIN)
 
-CF_SUBST_DEFINE([NAMEBYTES], 
-				[18L], 
-				[Number of bytes in a d name, without terminating '\0'],
-				[18])
-
 LIB_SOCKET_NSL
 
 AC_CONFIG_LINKS([
@@ -172,7 +180,7 @@ AC_CONFIG_FILES([
 		 Makefile 
 		 src/Makefile 
 		 src/codegen/Makefile src/codegen/startup_dgen.d src/codegen/dmnuminc.d
-		 plugins/Makefile 
+		 plugins/Makefile plugins/dmflex.l
 		 ps/Makefile 
 		 sh/Makefile
 		 emacs/Makefile emacs/d-mode.el

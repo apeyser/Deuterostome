@@ -123,6 +123,30 @@ AC_DEFUN([CF_AC_ARG_VAR], [dnl
   AC_MSG_RESULT([setting to ${$1}])dnl
 ])
 
+AC_DEFUN([CF_AC_ARG_VAR_SUBST], [dnl
+  changequote(<<, >>)dnl
+  define(<<CF_AC_CV_ARG>>, translit($1, [a-z], [A-Z]))dnl
+  changequote([, ])
+  cf_ac_cv_arg_val="CF_AC_CV_ARG"
+  AC_MSG_CHECKING([if ${cf_ac_cv_arg_val} is set])
+  AC_ARG_VAR(CF_AC_CV_ARG, [$2, default=$3])
+  if test "${CF_AC_CV_ARG-set}" == set ; then $1="$3"; fi
+  CF_AC_SUBST([$1])
+  AC_MSG_RESULT([setting to ${$1}])dnl
+])
+
+AC_DEFUN([CF_AC_ARG_VAR_SUBST_EVAL], [dnl
+  changequote(<<, >>)dnl
+  define(<<CF_AC_CV_ARG>>, translit($1, [a-z], [A-Z]))dnl
+  changequote([, ])
+  cf_ac_cv_arg_val="CF_AC_CV_ARG"
+  AC_MSG_CHECKING([if ${cf_ac_cv_arg_val} is set])
+  AC_ARG_VAR(CF_AC_CV_ARG, [$2, default=$3])
+  if test "${CF_AC_CV_ARG-set}" == set ; then $1="$3"; fi
+  CF_AC_SUBST_EVAL([$1])
+  AC_MSG_RESULT([setting to ${$1}])dnl
+])
+
 AC_DEFUN([CF_AC_ARG_VAR_QUOTE], [dnl
   changequote(<<, >>)dnl
   define(<<CF_AC_CV_ARG>>, translit($1, [a-z], [A-Z]))dnl
@@ -346,3 +370,12 @@ AC_DEFUN([CF_ACX_PTHREAD], [dnl
   ])
 ])
 
+AC_DEFUN([CF_AC_SUBST], [dnl
+  AC_SUBST([$1])
+  ifelse([$2], , , [$1="$2"])
+])
+
+AC_DEFUN([CF_AC_SUBST_EVAL], [dnl
+  AC_SUBST([$1])
+  ifelse([$2], , [eval $1="${$1}"], [eval $1="$2"])
+])

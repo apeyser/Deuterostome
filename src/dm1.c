@@ -423,7 +423,7 @@ arrend:
 moveframes(FREEopds,FREEvm,1L);              /* master frame */
 vm_bytes = (L)(DALIGN(nb * ARRAY_SIZE(FREEopds))) + FRAMEBYTES; 
 if ((FREEvm + vm_bytes) >= CEILvm) { FREEopds = oldfree; return(VM_OVF); }
-ARRAY_SIZE(FREEvm) = (vm_bytes - FRAMEBYTES) / nb;
+//ARRAY_SIZE(FREEvm) = (vm_bytes - FRAMEBYTES) / nb;
 FREEvm += vm_bytes;                          /* update VM */
 FREEopds += FRAMEBYTES;
 goto next;

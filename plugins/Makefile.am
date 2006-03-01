@@ -9,7 +9,12 @@ PROCESS_LIB=process.la
 process_la_SOURCES = process.c process.h
 endif ENABLE_PROCESS
 
-pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la
+if ENABLE_DMFLEX
+DMFLEX_LIB=dmflex.la
+dmflex_la_SOURCES = dmflex.l dmflex.h
+endif ENABLE_DMFLEX
+
+pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB)
 
 test_la_SOURCES = test.c test.h
 test2_la_SOURCES = test2.c test2.h

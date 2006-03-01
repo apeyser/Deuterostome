@@ -38,7 +38,8 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 subdir = plugins
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/dmflex.l.in dmflex.c
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
@@ -50,7 +51,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = dmflex.l
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -60,6 +61,11 @@ am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(pkglibdir)"
 pkglibLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(pkglib_LTLIBRARIES)
+dmflex_la_LIBADD =
+am__dmflex_la_SOURCES_DIST = dmflex.l dmflex.h
+@ENABLE_DMFLEX_TRUE@am_dmflex_la_OBJECTS = dmflex.lo
+dmflex_la_OBJECTS = $(am_dmflex_la_OBJECTS)
+@ENABLE_DMFLEX_TRUE@am_dmflex_la_rpath = -rpath $(pkglibdir)
 process_la_LIBADD =
 am__process_la_SOURCES_DIST = process.c process.h
 @ENABLE_PROCESS_TRUE@am_process_la_OBJECTS = process.lo
@@ -85,9 +91,12 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(process_la_SOURCES) $(test_la_SOURCES) $(test2_la_SOURCES) \
-	$(throw_la_SOURCES)
-DIST_SOURCES = $(am__process_la_SOURCES_DIST) $(test_la_SOURCES) \
+LEXCOMPILE = $(LEX) $(LFLAGS) $(AM_LFLAGS)
+LTLEXCOMPILE = $(LIBTOOL) --mode=compile $(LEX) $(LFLAGS) $(AM_LFLAGS)
+SOURCES = $(dmflex_la_SOURCES) $(process_la_SOURCES) \
+	$(test_la_SOURCES) $(test2_la_SOURCES) $(throw_la_SOURCES)
+DIST_SOURCES = $(am__dmflex_la_SOURCES_DIST) \
+	$(am__process_la_SOURCES_DIST) $(test_la_SOURCES) \
 	$(test2_la_SOURCES) $(throw_la_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -129,6 +138,8 @@ EMACSLOADPATH = @EMACSLOADPATH@
 ENABLE_BASH = @ENABLE_BASH@
 ENABLE_BASH_FALSE = @ENABLE_BASH_FALSE@
 ENABLE_BASH_TRUE = @ENABLE_BASH_TRUE@
+ENABLE_DMFLEX_FALSE = @ENABLE_DMFLEX_FALSE@
+ENABLE_DMFLEX_TRUE = @ENABLE_DMFLEX_TRUE@
 ENABLE_EMACS_FALSE = @ENABLE_EMACS_FALSE@
 ENABLE_EMACS_TRUE = @ENABLE_EMACS_TRUE@
 ENABLE_ENV = @ENABLE_ENV@
@@ -158,6 +169,9 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
+LEX = @LEX@
+LEXLIB = @LEXLIB@
+LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
 LIBDM_DLL_IMPORT = @LIBDM_DLL_IMPORT@
 LIBLTDL = @LIBLTDL@
 LIBOBJS = @LIBOBJS@
@@ -172,6 +186,7 @@ MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
 MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
 NAMEBYTES = @NAMEBYTES@
+NAMEBYTES_1 = @NAMEBYTES_1@
 NO_PTHREAD_CC = @NO_PTHREAD_CC@
 NO_PTHREAD_CFLAGS = @NO_PTHREAD_CFLAGS@
 NO_PTHREAD_LIBS = @NO_PTHREAD_LIBS@
@@ -193,6 +208,7 @@ RANLIB = @RANLIB@
 ROLLBITS = @ROLLBITS@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+STRINGBUF = @STRINGBUF@
 STRIP = @STRIP@
 SYSDICTSIZE = @SYSDICTSIZE@
 THREADMUL = @THREADMUL@
@@ -274,14 +290,16 @@ AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 @ENABLE_PROCESS_TRUE@PROCESS_LIB = process.la
 @ENABLE_PROCESS_TRUE@process_la_SOURCES = process.c process.h
-pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la
+@ENABLE_DMFLEX_TRUE@DMFLEX_LIB = dmflex.la
+@ENABLE_DMFLEX_TRUE@dmflex_la_SOURCES = dmflex.l dmflex.h
+pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB)
 test_la_SOURCES = test.c test.h
 test2_la_SOURCES = test2.c test2.h
 throw_la_SOURCES = throw.c throw.h
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
+.SUFFIXES: .c .l .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -311,6 +329,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+dmflex.l: $(top_builddir)/config.status $(srcdir)/dmflex.l.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-pkglibLTLIBRARIES: $(pkglib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
 	test -z "$(pkglibdir)" || $(mkdir_p) "$(DESTDIR)$(pkglibdir)"
@@ -338,6 +358,8 @@ clean-pkglibLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
+dmflex.la: $(dmflex_la_OBJECTS) $(dmflex_la_DEPENDENCIES) 
+	$(LINK) $(am_dmflex_la_rpath) $(dmflex_la_LDFLAGS) $(dmflex_la_OBJECTS) $(dmflex_la_LIBADD) $(LIBS)
 process.la: $(process_la_OBJECTS) $(process_la_DEPENDENCIES) 
 	$(LINK) $(am_process_la_rpath) $(process_la_LDFLAGS) $(process_la_OBJECTS) $(process_la_LIBADD) $(LIBS)
 test.la: $(test_la_OBJECTS) $(test_la_DEPENDENCIES) 
@@ -353,6 +375,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmflex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test2.Plo@am__quote@
@@ -378,6 +401,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+.l.c:
+	$(LEXCOMPILE) $<
+	sed '/^#/ s|$(LEX_OUTPUT_ROOT)\.c|$@|' $(LEX_OUTPUT_ROOT).c >$@
+	rm -f $(LEX_OUTPUT_ROOT).c
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -495,6 +523,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-rm -f dmflex.c
 clean: clean-am
 
 clean-am: clean-generic clean-libtool clean-pkglibLTLIBRARIES \
