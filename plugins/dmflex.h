@@ -2,7 +2,7 @@
 #define DMFLEX_H
 
 #define PLUGIN_NAME dmflex
-#include "src/plugin.h"
+#include "../src/plugin.h"
 
 #define op_makestream  EXPORTNAME(op_makestream)
 #define op_writestream EXPORTNAME(op_writestream)

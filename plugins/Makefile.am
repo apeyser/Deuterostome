@@ -9,6 +9,7 @@ PROCESS_LIB=process.la
 process_la_SOURCES = process.c process.h
 endif ENABLE_PROCESS
 
+DISTCLEANFILES = dmflex.c
 if ENABLE_DMFLEX
 DMFLEX_LIB=dmflex.la
 dmflex_la_SOURCES = dmflex.l dmflex.h

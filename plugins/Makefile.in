@@ -290,6 +290,7 @@ AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 @ENABLE_PROCESS_TRUE@PROCESS_LIB = process.la
 @ENABLE_PROCESS_TRUE@process_la_SOURCES = process.c process.h
+DISTCLEANFILES = dmflex.c
 @ENABLE_DMFLEX_TRUE@DMFLEX_LIB = dmflex.la
 @ENABLE_DMFLEX_TRUE@dmflex_la_SOURCES = dmflex.l dmflex.h
 pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB)
@@ -519,6 +520,7 @@ clean-generic:
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
