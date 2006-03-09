@@ -608,7 +608,7 @@ L op_execstream(void) {
   if (CEILopds < o2) return OPDS_OVF;
   TEST_OPAQUE(o_1);
 
-  if (DM_STATE(o_1) != DMFLEX_OPEN)
+  if (DMFLEX_STATE(o_1) != DMFLEX_OPEN)
     RETURN_ERROR(DMFLEX_STATE_ERR);
 
   
