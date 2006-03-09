@@ -1,4 +1,4 @@
-EXTRA_DIST = bootstrap
+EXTRA_DIST = bootstrap autom4te.cfg
 
 if ENABLE_EMACS
 EMACS_DIR=emacs
@@ -17,6 +17,7 @@ endif ENABLE_BASH
 SUBDIRS = libltdl src $(PLUGINS_DIR) $(BASH_DIR) ps $(EMACS_DIR) dcode
 ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS = --disable-process
+
 
 @SET_MAKE@
 gencode-all: gencode all

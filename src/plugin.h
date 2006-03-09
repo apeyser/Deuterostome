@@ -85,6 +85,23 @@ extern B buffernameframe[FRAMEBYTES];
 	if ((ret = op_restore()) != OK) return ret;	   \
   } while (0)
 
+#define PLUGIN_INTRO(version) PLUGIN_INTRO_(version, PLUGIN_NAME)
+#define PLUGIN_INTRO_(version, name)                 \
+  UL ll_type = 0; \
+  L op_hi(void) {return wrap_hi(#name " V" #version);} \
+  L op_libnum(void) {return wrap_libnum(ll_type);}
+
+#define PLUGIN_OP(name) #name, (B*) op_##name
+
+#define PLUGIN_OPS PLUGIN_OP(hi), PLUGIN_OP(libnum)
+
+#define PLUGIN_DEC_NAME(name) \
+  static B name##_frame[FRAMEBYTES]; \
+  static B* name##_string = #name
+
+#define PLUGIN_DEF_NAME(name) \
+  makename(name##_string, name##_frame)
+
 #include "pluginlib.h"
 
 #endif //PLUGIN_H

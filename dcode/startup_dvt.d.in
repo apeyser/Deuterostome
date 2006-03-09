@@ -844,7 +844,7 @@ _cc        [/color..] hostname port# group | -- \(connect & color text\)
 _ccx       [/color..] hostname port# group | -- \(connect w/ eye & color text\)
 _csu       hostname port# group <l opds dicts execs vm/M userdict > | --
    \(connect to a dnode and set up new resources\)
-_ccsu      [/color..] hostname port# grop <l opds dicts execs vm/M userdict>
+_ccsu      [/color..] hostname port# group <l opds dicts execs vm/M userdict>
            | --
    \(connect, setup resource, and color text\)
 _dc        node# | --  \(disconnect from a dnode\)
@@ -1038,9 +1038,9 @@ Xwindows {
     null node 6 put
 
     node 2 get [
-      [Xwindows knode {
-          3 -1 roll not {killsockets abort} if
-          /knode name Xwindows_ and /otherXwindows name
+      [getmydisplay_ Xwindows knode {
+          4 -1 roll not {killsockets abort} if
+          /knode name Xwindows_ and /otherXwindows name /getmydisplay name
           /filesave save def
           /fbuf vmstatus sub 10 div /b array def
           filesave capsave
@@ -1067,9 +1067,8 @@ Xwindows {
     node 2 get [ [
       debug_dict /line1 get 0 node 0 get fax (:) fax * node 1 get * number
       0 exch getinterval 
-      getmydisplay_
       knode {/knode name
-        Xconnect
+        getmydisplay Xconnect
         userdict /myid put
         console [[knode] (0 get dvt begin _csu2x)] send
       }] ( {} forall exec )]  send
