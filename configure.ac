@@ -25,7 +25,13 @@ CF_IF_ENABLED([plugins], [
   ])
 ])
 
-CF_AC_ARG_VAR([SYSDICTSIZE], [system dictionary size], [500])
+CF_AC_ARG_VAR([SYS_DICT_SIZE], [system dictionary size], [500])
+CF_AC_ARG_VAR([MAX_NUM_OPDS], [maximum operand stack size in frames], [100000])
+CF_AC_ARG_VAR([MAX_NUM_DICTS], [maximum dict stack size in frames], [10000])
+CF_AC_ARG_VAR([MAX_NUM_EXECS], [maximum exec stack size in frame], [5000])
+CF_AC_ARG_VAR([MAX_MEM_SIZE], [maximum vm allocation size in mb], [1000])
+CF_AC_ARG_VAR([MAX_USER_DICT_SIZE], [maximum user dict size], [5000])
+
 CF_AC_ARG_VAR([ROLLBITS], [unroll math loops to 2^rollbits], [3])
 
 CF_AM_ENABLE([setuid], [compile or install setuid wrapper], [yes])

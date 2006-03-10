@@ -1231,7 +1231,7 @@ Xwindows {
     /getmydisplay_ dnode_setup /display get def
     dnode_setup begin
       color dup null eq {pop ~_csu} {
-        dup class /lisclass ne {[exch]} if
+        dup class /listclass ne {[exch]} if
         ~_ccsu
       } ifelse
       host port group dnode_memory_
@@ -1454,7 +1454,7 @@ Xwindows {
   /on_red     {/nodebackcolor {( Br) REDTEXT     ~drawtext} bind def} bind def
   /on_black   {/nodebackcolor {( Bb) BLACKTEXT   ~drawtext} bind def} bind def
   /on_green   {/nodebackcolor {( Bg) GREENTEXT   ~drawtext} bind def} bind def
-  /on_yellow  {/nodebackcolor {( By) REDTEXT     ~drawtext} bind def} bind def
+  /on_yellow  {/nodebackcolor {( By) YELLOWTEXT  ~drawtext} bind def} bind def
   /on_blue    {/nodebackcolor {( Bl) BLUETEXT    ~drawtext} bind def} bind def
   /on_magenta {/nodebackcolor {( Bm) MAGENTATEXT ~drawtext} bind def} bind def
   /on_cyan    {/nodebackcolor {( Bc) CYANTEXT    ~drawtext} bind def} bind def

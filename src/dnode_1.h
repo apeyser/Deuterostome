@@ -438,9 +438,9 @@ L op_vmresize(void)
            || (setup[2] < 50) || (setup[3] < 1)
 					|| (setup[4] < 200))
 				return VMRESIZE_ERR(RNG_CHK, FALSE);
-      if ((setup[0] > 100000) || (setup[1] > 10000)
-           || (setup[2] > 5000) || (setup[3] > 1000)
-           || (setup[4] > 5000))
+      if ((setup[0] > MAX_NUM_OPDS) || (setup[1] > MAX_NUM_DICTS)
+           || (setup[2] > MAX_NUM_EXECS) || (setup[3] > MAX_MEM_SIZE)
+           || (setup[4] > MAX_USER_DICT_SIZE))
 				return VMRESIZE_ERR(RNG_CHK, FALSE);
 
       if (!tinymemory) {closealllibs(); maketinysetup();}
@@ -452,7 +452,7 @@ L op_vmresize(void)
 			Dmemory = newDmemory;
       makeDmemory(Dmemory,setup);
 
-      if ((sysdict = makeopdictbase((B*) sysop,syserrc,syserrm,SYSDICTSIZE)) 
+      if ((sysdict = makeopdictbase((B*) sysop,syserrc,syserrm,SYS_DICT_SIZE))
 					== (B*) -1L)
 				error(EXIT_FAILURE, 0, "systemdict > vm");
       if ((userdict = makedict(setup[4])) == (B *)(-1L))
