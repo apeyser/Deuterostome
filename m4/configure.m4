@@ -381,13 +381,17 @@ AC_DEFUN([CF_AC_SUBST_EVAL], [dnl
 ])
 
 AC_DEFUN([CF_M4_PLUGIN_], [dnl
+  AC_SUBST([CONFIG_STATUS_DEPENDENCIES])
+  CONFIG_STATUS_DEPENDENCIES=\
+    "$CONFIG_STATUS_DEPENDENCIES '$(top_srcdir)/$2/$4' '$7/plugin.m4'"
   AC_CONFIG_COMMANDS([$2/$3], [dnl
-    if m4 -P "-I${srcdir}/$2" \
+    if ( top_srcdir="${src_dir}" ; \
+       m4 -P "-I${srcdir}/$2" \
       -DPLUGIN_NAME="$1" \
       -DPLUGIN_HEADER=$5 \
       -DPLUGIN_LOCAL=$6 \
       "$7/plugin.m4" >"$2/$3.tmp" \
-      && mv "$2/$3.tmp" "$2/$3"  ; then
+      && mv "$2/$3.tmp" "$2/$3"  ) ; then
       :
     else
       rm "$2/$3.tmp" 
@@ -397,8 +401,8 @@ AC_DEFUN([CF_M4_PLUGIN_], [dnl
 ])
 
 AC_DEFUN([CF_M4_PLUGIN], [dnl
-  CF_M4_PLUGIN_([$1], [plugins], [$1.c], dnl
-                [$1.plugin], [no], [yes], [${srcdir}/plugins])
-  CF_M4_PLUGIN_([$1], [plugins], [$1.h], dnl
-                [$1.plugin], [yes], [yes], [${srcdir}/plugins])
+  CF_M4_PLUGIN_([$1], [plugins], [$1.c], 
+                [$1.plugin], [no], [yes], [${top_srcdir}/plugins])
+  CF_M4_PLUGIN_([$1], [plugins], [$1.h],
+                [$1.plugin], [yes], [yes], [${top_srcdir}/plugins])
 ])
