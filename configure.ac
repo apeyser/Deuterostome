@@ -182,6 +182,10 @@ AC_CONFIG_LINKS([
 		src/codegen/paths.h.in:src/paths.h.in
 ])
 
+CF_IF_ENABLED([plugins], [
+  CF_IF_ENABLED([process], [CF_M4_PLUGIN([process2])])
+])
+
 AC_CONFIG_FILES([
 		 Makefile 
 		 src/Makefile 

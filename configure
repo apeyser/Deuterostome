@@ -32256,6 +32256,24 @@ fi
                                                                                                                                                       ac_config_links="$ac_config_links src/dsp1f.h:src/codegen/dsp1f.h.built src/dmnuminc.h:src/codegen/dmnuminc.h.built src/codegen/dmglobals.c:src/dmglobals.c src/codegen/dsp1.c:src/dsp1.c src/codegen/dsp2.c:src/dsp2.c src/codegen/dm1.c:src/dm1.c src/codegen/dm2.c:src/dm2.c src/codegen/dm3.c:src/dm3.c src/codegen/dm4.c:src/dm4.c src/codegen/dm5.c:src/dm5.c src/codegen/dm6.c:src/dm6.c src/codegen/dm7.c:src/dm7.c src/codegen/dm8.c:src/dm8.c src/codegen/dmnum.c:src/dmnum.c src/codegen/paths.h.in:src/paths.h.in"
 
 
+
+      if test x"${enable_plugins-no}" != x"no" ; then
+
+
+      if test x"${enable_process-no}" != x"no" ; then
+                     ac_config_commands="$ac_config_commands plugins/process2.c"
+
+              ac_config_commands="$ac_config_commands plugins/process2.h"
+
+
+    fi
+
+
+
+    fi
+
+
+
                                                                                                                                             ac_config_files="$ac_config_files Makefile src/Makefile src/codegen/Makefile src/codegen/startup_dgen.d src/codegen/dmnuminc.d plugins/Makefile plugins/dmflex.l ps/Makefile sh/Makefile emacs/Makefile emacs/d-mode.el dcode/Makefile dcode/startup_dvt.d dcode/startup_dnode.d"
 
 
@@ -32948,6 +32966,8 @@ do
   "src/codegen/paths.h.in" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/paths.h.in:src/paths.h.in" ;;
   "src/dm-config.h" ) CONFIG_COMMANDS="$CONFIG_COMMANDS src/dm-config.h" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
+  "plugins/process2.c" ) CONFIG_COMMANDS="$CONFIG_COMMANDS plugins/process2.c" ;;
+  "plugins/process2.h" ) CONFIG_COMMANDS="$CONFIG_COMMANDS plugins/process2.h" ;;
   "config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
@@ -34122,6 +34142,34 @@ echo "$as_me: error: cannot create directory $dirpart/$fdir" >&2;}
   done
 done
  ;;
+    plugins/process2.c )     if m4 -P "-I${srcdir}/plugins" \
+      -DPLUGIN_NAME="process2" \
+      -DPLUGIN_HEADER=no \
+      -DPLUGIN_LOCAL=yes \
+      "${srcdir}/plugins/plugin.m4" >"plugins/process2.c.tmp" \
+      && mv "plugins/process2.c.tmp" "plugins/process2.c"  ; then
+      :
+    else
+      rm "plugins/process2.c.tmp"
+      { { echo "$as_me:$LINENO: error: Unable to build \"plugins/process2.c\"" >&5
+echo "$as_me: error: Unable to build \"plugins/process2.c\"" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+   ;;
+    plugins/process2.h )     if m4 -P "-I${srcdir}/plugins" \
+      -DPLUGIN_NAME="process2" \
+      -DPLUGIN_HEADER=yes \
+      -DPLUGIN_LOCAL=yes \
+      "${srcdir}/plugins/plugin.m4" >"plugins/process2.h.tmp" \
+      && mv "plugins/process2.h.tmp" "plugins/process2.h"  ; then
+      :
+    else
+      rm "plugins/process2.h.tmp"
+      { { echo "$as_me:$LINENO: error: Unable to build \"plugins/process2.h\"" >&5
+echo "$as_me: error: Unable to build \"plugins/process2.h\"" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+   ;;
   esac
 done
 _ACEOF

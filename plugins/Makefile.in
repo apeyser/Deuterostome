@@ -71,6 +71,9 @@ am__process_la_SOURCES_DIST = process.c process.h
 @ENABLE_PROCESS_TRUE@am_process_la_OBJECTS = process.lo
 process_la_OBJECTS = $(am_process_la_OBJECTS)
 @ENABLE_PROCESS_TRUE@am_process_la_rpath = -rpath $(pkglibdir)
+process2_la_LIBADD =
+am_process2_la_OBJECTS = process2.lo
+process2_la_OBJECTS = $(am_process2_la_OBJECTS)
 test_la_LIBADD =
 am_test_la_OBJECTS = test.lo
 test_la_OBJECTS = $(am_test_la_OBJECTS)
@@ -94,10 +97,11 @@ LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 LEXCOMPILE = $(LEX) $(LFLAGS) $(AM_LFLAGS)
 LTLEXCOMPILE = $(LIBTOOL) --mode=compile $(LEX) $(LFLAGS) $(AM_LFLAGS)
 SOURCES = $(dmflex_la_SOURCES) $(process_la_SOURCES) \
-	$(test_la_SOURCES) $(test2_la_SOURCES) $(throw_la_SOURCES)
+	$(process2_la_SOURCES) $(test_la_SOURCES) $(test2_la_SOURCES) \
+	$(throw_la_SOURCES)
 DIST_SOURCES = $(am__dmflex_la_SOURCES_DIST) \
-	$(am__process_la_SOURCES_DIST) $(test_la_SOURCES) \
-	$(test2_la_SOURCES) $(throw_la_SOURCES)
+	$(am__process_la_SOURCES_DIST) $(process2_la_SOURCES) \
+	$(test_la_SOURCES) $(test2_la_SOURCES) $(throw_la_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -298,10 +302,14 @@ AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 DISTCLEANFILES = dmflex.c
 @ENABLE_DMFLEX_TRUE@DMFLEX_LIB = dmflex.la
 @ENABLE_DMFLEX_TRUE@dmflex_la_SOURCES = dmflex.l dmflex.h
-pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB)
+pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB) \
+	process2.la
+
 test_la_SOURCES = test.c test.h
 test2_la_SOURCES = test2.c test2.h
 throw_la_SOURCES = throw.c throw.h
+process2_la_SOURCES = process2.c process2.h
+EXTRA_DIST = process2.plugin
 all: all-am
 
 .SUFFIXES:
@@ -368,6 +376,8 @@ dmflex.la: $(dmflex_la_OBJECTS) $(dmflex_la_DEPENDENCIES)
 	$(LINK) $(am_dmflex_la_rpath) $(dmflex_la_LDFLAGS) $(dmflex_la_OBJECTS) $(dmflex_la_LIBADD) $(LIBS)
 process.la: $(process_la_OBJECTS) $(process_la_DEPENDENCIES) 
 	$(LINK) $(am_process_la_rpath) $(process_la_LDFLAGS) $(process_la_OBJECTS) $(process_la_LIBADD) $(LIBS)
+process2.la: $(process2_la_OBJECTS) $(process2_la_DEPENDENCIES) 
+	$(LINK) -rpath $(pkglibdir) $(process2_la_LDFLAGS) $(process2_la_OBJECTS) $(process2_la_LIBADD) $(LIBS)
 test.la: $(test_la_OBJECTS) $(test_la_DEPENDENCIES) 
 	$(LINK) -rpath $(pkglibdir) $(test_la_LDFLAGS) $(test_la_OBJECTS) $(test_la_LIBADD) $(LIBS)
 test2.la: $(test2_la_OBJECTS) $(test2_la_DEPENDENCIES) 
@@ -383,6 +393,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmflex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/throw.Plo@am__quote@
@@ -595,6 +606,7 @@ uninstall-am: uninstall-info-am uninstall-pkglibLTLIBRARIES
 	tags uninstall uninstall-am uninstall-info-am \
 	uninstall-pkglibLTLIBRARIES
 
+# DISTCLEANFILES = $(process2_la_sources)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

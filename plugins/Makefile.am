@@ -15,9 +15,13 @@ DMFLEX_LIB=dmflex.la
 dmflex_la_SOURCES = dmflex.l dmflex.h
 endif ENABLE_DMFLEX
 
-pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB)
+pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB) \
+	process2.la
 
 test_la_SOURCES = test.c test.h
 test2_la_SOURCES = test2.c test2.h
 throw_la_SOURCES = throw.c throw.h
 
+process2_la_SOURCES = process2.c process2.h
+EXTRA_DIST = process2.plugin
+# DISTCLEANFILES = $(process2_la_sources)
