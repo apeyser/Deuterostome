@@ -72,8 +72,10 @@ am__process_la_SOURCES_DIST = process.c process.h
 process_la_OBJECTS = $(am_process_la_OBJECTS)
 @ENABLE_PROCESS_TRUE@am_process_la_rpath = -rpath $(pkglibdir)
 process2_la_LIBADD =
-am_process2_la_OBJECTS = process2.lo
+am__process2_la_SOURCES_DIST = process2.c process2.h
+@ENABLE_PROCESS_TRUE@am_process2_la_OBJECTS = process2.lo
 process2_la_OBJECTS = $(am_process2_la_OBJECTS)
+@ENABLE_PROCESS_TRUE@am_process2_la_rpath = -rpath $(pkglibdir)
 test_la_LIBADD =
 am_test_la_OBJECTS = test.lo
 test_la_OBJECTS = $(am_test_la_OBJECTS)
@@ -100,7 +102,7 @@ SOURCES = $(dmflex_la_SOURCES) $(process_la_SOURCES) \
 	$(process2_la_SOURCES) $(test_la_SOURCES) $(test2_la_SOURCES) \
 	$(throw_la_SOURCES)
 DIST_SOURCES = $(am__dmflex_la_SOURCES_DIST) \
-	$(am__process_la_SOURCES_DIST) $(process2_la_SOURCES) \
+	$(am__process_la_SOURCES_DIST) $(am__process2_la_SOURCES_DIST) \
 	$(test_la_SOURCES) $(test2_la_SOURCES) $(throw_la_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -297,18 +299,16 @@ AM_CFLAGS = $(GCC_CFLAGS) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
 AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 #@LIBPLUGIN_DLL_IMPORT@
 AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
-@ENABLE_PROCESS_TRUE@PROCESS_LIB = process.la
+@ENABLE_PROCESS_TRUE@PROCESS_LIB = process.la process2.la
 @ENABLE_PROCESS_TRUE@process_la_SOURCES = process.c process.h
-DISTCLEANFILES = dmflex.c
+@ENABLE_PROCESS_TRUE@process2_la_SOURCES = process2.c process2.h
+DISTCLEANFILES = dmflex.c $(process2_la_sources)
 @ENABLE_DMFLEX_TRUE@DMFLEX_LIB = dmflex.la
 @ENABLE_DMFLEX_TRUE@dmflex_la_SOURCES = dmflex.l dmflex.h
-pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB) \
-	process2.la
-
+pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB) 
 test_la_SOURCES = test.c test.h
 test2_la_SOURCES = test2.c test2.h
 throw_la_SOURCES = throw.c throw.h
-process2_la_SOURCES = process2.c process2.h
 EXTRA_DIST = process2.plugin
 all: all-am
 
@@ -377,7 +377,7 @@ dmflex.la: $(dmflex_la_OBJECTS) $(dmflex_la_DEPENDENCIES)
 process.la: $(process_la_OBJECTS) $(process_la_DEPENDENCIES) 
 	$(LINK) $(am_process_la_rpath) $(process_la_LDFLAGS) $(process_la_OBJECTS) $(process_la_LIBADD) $(LIBS)
 process2.la: $(process2_la_OBJECTS) $(process2_la_DEPENDENCIES) 
-	$(LINK) -rpath $(pkglibdir) $(process2_la_LDFLAGS) $(process2_la_OBJECTS) $(process2_la_LIBADD) $(LIBS)
+	$(LINK) $(am_process2_la_rpath) $(process2_la_LDFLAGS) $(process2_la_OBJECTS) $(process2_la_LIBADD) $(LIBS)
 test.la: $(test_la_OBJECTS) $(test_la_DEPENDENCIES) 
 	$(LINK) -rpath $(pkglibdir) $(test_la_LDFLAGS) $(test_la_OBJECTS) $(test_la_LIBADD) $(LIBS)
 test2.la: $(test2_la_OBJECTS) $(test2_la_DEPENDENCIES) 
@@ -606,7 +606,6 @@ uninstall-am: uninstall-info-am uninstall-pkglibLTLIBRARIES
 	tags uninstall uninstall-am uninstall-info-am \
 	uninstall-pkglibLTLIBRARIES
 
-# DISTCLEANFILES = $(process2_la_sources)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

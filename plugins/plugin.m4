@@ -67,7 +67,7 @@ $1
 m4_define(<%PLUGIN_OUTPUT_HEADER%>, <%
   m4_define(<%PLUGIN_HEADER_INCLUDE%>,
     m4_ifelse(PLUGIN_LOCAL, <%yes%>, 
-      <%<%"src/plugin.h"%>%>,
+      <%<%"../src/plugin.h"%>%>,
       <%<%<dm/plugin.h%>%>>)
   )
   m4_define(<%PLUGIN_OPS%>, m4_defn(<%PLUGIN_HEADER_OPS%>))

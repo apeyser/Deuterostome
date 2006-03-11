@@ -5,8 +5,9 @@ AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 LIBS += $(LTLIBOBJS) $(top_builddir)/src/libdmglobals.la
 
 if ENABLE_PROCESS
-PROCESS_LIB=process.la
+PROCESS_LIB=process.la process2.la
 process_la_SOURCES = process.c process.h
+process2_la_SOURCES = process2.c process2.h
 endif ENABLE_PROCESS
 
 DISTCLEANFILES = dmflex.c
@@ -15,13 +16,11 @@ DMFLEX_LIB=dmflex.la
 dmflex_la_SOURCES = dmflex.l dmflex.h
 endif ENABLE_DMFLEX
 
-pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB) \
-	process2.la
+pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB) 
 
 test_la_SOURCES = test.c test.h
 test2_la_SOURCES = test2.c test2.h
 throw_la_SOURCES = throw.c throw.h
 
-process2_la_SOURCES = process2.c process2.h
 EXTRA_DIST = process2.plugin
-# DISTCLEANFILES = $(process2_la_sources)
+DISTCLEANFILES += $(process2_la_sources)

@@ -2,7 +2,7 @@
 #define PROCESS_H
 
 #define PLUGIN_NAME process
-#include "src/plugin.h"
+#include "../src/plugin.h"
 
 #define op_makeproc   EXPORTNAME(op_makeproc)
 #define op_writeproc  EXPORTNAME(op_writeproc)
