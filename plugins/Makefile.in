@@ -70,7 +70,7 @@ am_process_la_OBJECTS = process.lo
 process_la_OBJECTS = $(am_process_la_OBJECTS)
 @ENABLE_PROCESS_TRUE@am_process_la_rpath = -rpath $(pkglibdir)
 process2_la_LIBADD =
-am_process2_la_OBJECTS = process2.lo
+am_process2_la_OBJECTS =
 process2_la_OBJECTS = $(am_process2_la_OBJECTS)
 @ENABLE_PROCESS_TRUE@am_process2_la_rpath = -rpath $(pkglibdir)
 test_la_LIBADD =
@@ -312,7 +312,7 @@ all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .h .l .lo .o .obj .plugin
+.SUFFIXES: .c .l .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -392,7 +392,6 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmflex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/throw.Plo@am__quote@
@@ -611,15 +610,7 @@ uninstall-am: uninstall-info-am uninstall-pkglibLTLIBRARIES
 
 @SET_MAKE@
 
-.plugin.c: 
-	cd $(top_builddir) \
-	  && $(SHELL) ./config.status $(subdir)/$@ \
-		$(am__depfiles_maybe)
-
-.plugin.h: 
-	cd $(top_builddir) \
-	  && $(SHELL) ./config.status $(subdir)/$@ \
-		$(am__depfiles_maybe)
+@SET_MAKE_PLUGIN@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

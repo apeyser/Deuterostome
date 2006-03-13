@@ -30,13 +30,4 @@ DISTCLEANFILES = $(BUILT_SOURCES)
 
 @SET_MAKE@
 
-.plugin.c: 
-	cd $(top_builddir) \
-	  && $(SHELL) ./config.status $(subdir)/$@ \
-		$(am__depfiles_maybe)
-
-.plugin.h: 
-	cd $(top_builddir) \
-	  && $(SHELL) ./config.status $(subdir)/$@ \
-		$(am__depfiles_maybe)
-
+@SET_MAKE_PLUGIN@

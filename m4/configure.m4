@@ -381,8 +381,10 @@ AC_DEFUN([CF_AC_SUBST_EVAL], [dnl
 ])
 
 AC_DEFUN([CF_M4_PLUGIN_], [dnl
+  CONFIG_STATUS_DEPENDENCIES="$CONFIG_STATUS_DEPENDENCIES ${srcdir}/m4/Makefile.plugin"
+  SET_MAKE_PLUGIN="${srcdir}/m4/Makefile.plugin"
+  AC_SUBST_FILE([SET_MAKE_PLUGIN])
   AC_CONFIG_COMMANDS([$2/$3], [
-    echo "Here I am `pwd`"
     if ( top_srcdir="${srcdir}" ; \
        m4 -P "-I${srcdir}/$2" \
       -DPLUGIN_NAME="$1" \
@@ -394,7 +396,6 @@ AC_DEFUN([CF_M4_PLUGIN_], [dnl
     else
       rm "$2/$3.tmp" 
       AC_MSG_ERROR([Unable to build "$2/$3"])
-	  exit 1
     fi
   ])dnl
 ])
