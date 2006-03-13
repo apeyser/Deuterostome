@@ -37,9 +37,10 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-subdir = plugins
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/dmflex.l.in dmflex.c
+	$(srcdir)/dmflex.l.in $(top_srcdir)/m4/Makefile.plugin \
+	dmflex.c
+subdir = plugins
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
@@ -70,7 +71,7 @@ am_process_la_OBJECTS = process.lo
 process_la_OBJECTS = $(am_process_la_OBJECTS)
 @ENABLE_PROCESS_TRUE@am_process_la_rpath = -rpath $(pkglibdir)
 process2_la_LIBADD =
-am_process2_la_OBJECTS =
+am_process2_la_OBJECTS = process2.lo
 process2_la_OBJECTS = $(am_process2_la_OBJECTS)
 @ENABLE_PROCESS_TRUE@am_process2_la_rpath = -rpath $(pkglibdir)
 test_la_LIBADD =
@@ -301,19 +302,29 @@ EXTRA_DIST = plugin.m4
 BUILT_SOURCES = process2.c process2.h dmflex.c
 process_la_SOURCES = process.c process.h
 process2_la_SOURCES = process2.plugin
+
+# .plugin.c: 
+# 	cd $(top_builddir) \
+# 	  && $(SHELL) ./config.status $(subdir)/$@ \
+# 		$(am__depfiles_maybe)
+
+# .plugin.h: 
+# 	cd $(top_builddir) \
+# 	  && $(SHELL) ./config.status $(subdir)/$@ \
+# 		$(am__depfiles_maybe)
 @ENABLE_DMFLEX_TRUE@DMFLEX_LIB = dmflex.la
 dmflex_la_SOURCES = dmflex.l dmflex.h
 pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB) 
 test_la_SOURCES = test.c test.h
 test2_la_SOURCES = test2.c test2.h
 throw_la_SOURCES = throw.c throw.h
-DISTCLEANFILES = $(BUILT_SOURCES)
+CLEANFILES = $(BUILT_SOURCES)
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .l .lo .o .obj
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
+.SUFFIXES: .c .h .l .lo .o .obj .plugin
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/Makefile.plugin $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -326,14 +337,6 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  plugins/Makefile
 .PRECIOUS: Makefile
-Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
-	@case '$?' in \
-	  *config.status*) \
-	    cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh;; \
-	  *) \
-	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)'; \
-	    cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe);; \
-	esac;
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
@@ -392,6 +395,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmflex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/throw.Plo@am__quote@
@@ -481,6 +485,7 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
+	$(mkdir_p) $(distdir)/../m4
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -533,10 +538,10 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
-	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -607,10 +612,17 @@ uninstall-am: uninstall-info-am uninstall-pkglibLTLIBRARIES
 	tags uninstall uninstall-am uninstall-info-am \
 	uninstall-pkglibLTLIBRARIES
 
+.plugin.c: 
+	cd $(top_builddir) \
+	  && $(SHELL) ./config.status $(subdir)/$@ \
+		$(am__depfiles_maybe)
 
-@SET_MAKE@
+.plugin.h: 
+	cd $(top_builddir) \
+	  && $(SHELL) ./config.status $(subdir)/$@ \
+		$(am__depfiles_maybe)
 
-@SET_MAKE_PLUGIN@
+Makefile: $(top_srcdir)/m4/Makefile.plugin
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

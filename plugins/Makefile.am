@@ -14,6 +14,20 @@ BUILT_SOURCES = process2.c process2.h
 process_la_SOURCES = process.c process.h
 process2_la_SOURCES = process2.plugin
 
+include $(top_srcdir)/m4/Makefile.plugin
+
+# .plugin.c: 
+# 	cd $(top_builddir) \
+# 	  && $(SHELL) ./config.status $(subdir)/$@ \
+# 		$(am__depfiles_maybe)
+
+# .plugin.h: 
+# 	cd $(top_builddir) \
+# 	  && $(SHELL) ./config.status $(subdir)/$@ \
+# 		$(am__depfiles_maybe)
+
+
+
 if ENABLE_DMFLEX
 DMFLEX_LIB=dmflex.la
 endif ENABLE_DMFLEX
@@ -26,8 +40,5 @@ test_la_SOURCES = test.c test.h
 test2_la_SOURCES = test2.c test2.h
 throw_la_SOURCES = throw.c throw.h
 
-DISTCLEANFILES = $(BUILT_SOURCES)
+CLEANFILES = $(BUILT_SOURCES)
 
-@SET_MAKE@
-
-@SET_MAKE_PLUGIN@
