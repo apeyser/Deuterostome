@@ -32274,7 +32274,7 @@ fi
 
 
 
-                                                                                                                                            ac_config_files="$ac_config_files Makefile src/Makefile src/codegen/Makefile src/codegen/startup_dgen.d src/codegen/dmnuminc.d plugins/Makefile plugins/dmflex.l ps/Makefile sh/Makefile emacs/Makefile emacs/d-mode.el dcode/Makefile dcode/startup_dvt.d dcode/startup_dnode.d"
+                                                                                                                                                      ac_config_files="$ac_config_files Makefile src/Makefile src/codegen/Makefile src/codegen/startup_dgen.d src/codegen/dmnuminc.d plugins/Makefile plugins/dmflex.l ps/Makefile sh/Makefile emacs/Makefile emacs/d-mode.el dcode/Makefile dcode/startup_dvt.d dcode/startup_dnode.d test/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -32949,6 +32949,7 @@ do
   "dcode/Makefile" ) CONFIG_FILES="$CONFIG_FILES dcode/Makefile" ;;
   "dcode/startup_dvt.d" ) CONFIG_FILES="$CONFIG_FILES dcode/startup_dvt.d" ;;
   "dcode/startup_dnode.d" ) CONFIG_FILES="$CONFIG_FILES dcode/startup_dnode.d" ;;
+  "test/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
   "src/dsp1f.h" ) CONFIG_LINKS="$CONFIG_LINKS src/dsp1f.h:src/codegen/dsp1f.h.built" ;;
   "src/dmnuminc.h" ) CONFIG_LINKS="$CONFIG_LINKS src/dmnuminc.h:src/codegen/dmnuminc.h.built" ;;
   "src/codegen/dmglobals.c" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/dmglobals.c:src/dmglobals.c" ;;
@@ -34143,6 +34144,7 @@ echo "$as_me: error: cannot create directory $dirpart/$fdir" >&2;}
 done
  ;;
     plugins/process2.c )
+    echo "Here I am `pwd`"
     if ( top_srcdir="${srcdir}" ; \
        m4 -P "-I${srcdir}/plugins" \
       -DPLUGIN_NAME="process2" \
@@ -34156,9 +34158,11 @@ done
       { { echo "$as_me:$LINENO: error: Unable to build \"plugins/process2.c\"" >&5
 echo "$as_me: error: Unable to build \"plugins/process2.c\"" >&2;}
    { (exit 1); exit 1; }; }
+	  exit 1
     fi
    ;;
     plugins/process2.h )
+    echo "Here I am `pwd`"
     if ( top_srcdir="${srcdir}" ; \
        m4 -P "-I${srcdir}/plugins" \
       -DPLUGIN_NAME="process2" \
@@ -34172,6 +34176,7 @@ echo "$as_me: error: Unable to build \"plugins/process2.c\"" >&2;}
       { { echo "$as_me:$LINENO: error: Unable to build \"plugins/process2.h\"" >&5
 echo "$as_me: error: Unable to build \"plugins/process2.h\"" >&2;}
    { (exit 1); exit 1; }; }
+	  exit 1
     fi
    ;;
   esac

@@ -195,6 +195,7 @@ AC_CONFIG_FILES([
 		 sh/Makefile
 		 emacs/Makefile emacs/d-mode.el
 		 dcode/Makefile dcode/startup_dvt.d dcode/startup_dnode.d
+		 test/Makefile
 ])
 
 AC_OUTPUT

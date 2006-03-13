@@ -7,6 +7,7 @@ LIBS += $(LTLIBOBJS) $(top_builddir)/src/libdmglobals.la
 EXTRA_DIST = plugin.m4
 
 if ENABLE_PROCESS
+
 PROCESS_LIB=process.la process2.la
 endif ENABLE_PROCESS
 BUILT_SOURCES = process2.c process2.h

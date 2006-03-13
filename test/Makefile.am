@@ -1,1 +1,1 @@
-dist_noinst_DATA = benchmarks.d arr.d
+dist_noinst_DATA = benchmark.d arr.d
