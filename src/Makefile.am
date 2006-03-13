@@ -87,8 +87,6 @@ paths.h: paths.h.in Makefile
 	$(editpaths) $(srcdir)/$@.in >$@.tmp
 	mv $@.tmp $@
 
-@SET_MAKE@
-
 gencode-all: gencode all
 gencode:
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS) all

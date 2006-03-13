@@ -381,9 +381,6 @@ AC_DEFUN([CF_AC_SUBST_EVAL], [dnl
 ])
 
 AC_DEFUN([CF_M4_PLUGIN_], [dnl
-  CONFIG_STATUS_DEPENDENCIES="$CONFIG_STATUS_DEPENDENCIES ${srcdir}/m4/Makefile.plugin"
-  SET_MAKE_PLUGIN="${srcdir}/m4/Makefile.plugin"
-  AC_SUBST_FILE([SET_MAKE_PLUGIN])
   AC_CONFIG_COMMANDS([$2/$3], [
     if ( top_srcdir="${srcdir}" ; \
        m4 -P "-I${srcdir}/$2" \
