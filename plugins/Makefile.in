@@ -120,7 +120,6 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
-CONFIG_STATUS_DEPENDENCIES = @CONFIG_STATUS_DEPENDENCIES@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -314,7 +313,7 @@ EXTRA_DIST = process2.plugin
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .l .lo .o .obj
+.SUFFIXES: .c .h .l .lo .o .obj .plugin
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -607,6 +606,18 @@ uninstall-am: uninstall-info-am uninstall-pkglibLTLIBRARIES
 	tags uninstall uninstall-am uninstall-info-am \
 	uninstall-pkglibLTLIBRARIES
 
+
+@SET_MAKE@
+
+.plugin.c: 
+	cd $(top_builddir) \
+	  && $(SHELL) ./config.status $(subdir)/$@ \
+		$(am__depfiles_maybe)
+
+.plugin.h: 
+	cd $(top_builddir) \
+	  && $(SHELL) ./config.status $(subdir)/$@ \
+		$(am__depfiles_maybe)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

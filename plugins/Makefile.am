@@ -24,3 +24,16 @@ throw_la_SOURCES = throw.c throw.h
 
 EXTRA_DIST = process2.plugin
 DISTCLEANFILES += $(process2_la_sources)
+
+@SET_MAKE@
+
+.plugin.c: 
+	cd $(top_builddir) \
+	  && $(SHELL) ./config.status $(subdir)/$@ \
+		$(am__depfiles_maybe)
+
+.plugin.h: 
+	cd $(top_builddir) \
+	  && $(SHELL) ./config.status $(subdir)/$@ \
+		$(am__depfiles_maybe)
+

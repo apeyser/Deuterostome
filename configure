@@ -465,7 +465,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all libltdl"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar EMACS EMACSLOADPATH lispdir MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT NAMEBYTES ENABLE_PLUGINS_TRUE ENABLE_PLUGINS_FALSE ENABLE_PLUGINS ENABLE_PROCESS_TRUE ENABLE_PROCESS_FALSE ENABLE_DMFLEX_TRUE ENABLE_DMFLEX_FALSE LEX CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE LEXLIB LEX_OUTPUT_ROOT STRINGBUF NAMEBYTES_1 SYS_DICT_SIZE MAX_NUM_OPDS MAX_NUM_DICTS MAX_NUM_EXECS MAX_MEM_SIZE MAX_USER_DICT_SIZE ROLLBITS ENABLE_SETUID_TRUE ENABLE_SETUID_FALSE ENABLE_THREADS_TRUE ENABLE_THREADS_FALSE ENABLE_THREADS THREADNUM THREADMUL NO_PTHREAD_CFLAGS NO_PTHREAD_CC NO_PTHREAD_LIBS acx_pthread_config PTHREAD_CC PTHREAD_LIBS PTHREAD_CFLAGS DMBINDIR dmbindir DMSTARTDIR dmstartdir DMCONFDIR dmconfdir PKGPSDATADIR pkgpsdatadir PKGLISPDIR pkglispdir TMP tmp ENABLE_UNIX_SOCKETS_TRUE ENABLE_UNIX_SOCKETS_FALSE ENABLE_UNIX_SOCKETS DMSOCKDIR dmsockdir guipdf ENABLE_BASH ENABLE_BASH_TRUE ENABLE_BASH_FALSE ENABLE_ENV ENABLE_ENV_TRUE ENABLE_ENV_FALSE GUIPDF ENABLE_EMACS_TRUE ENABLE_EMACS_FALSE CPP EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB DLLTOOL ac_ct_DLLTOOL AS ac_ct_AS OBJDUMP ac_ct_OBJDUMP CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CXXCPP F77 FFLAGS ac_ct_F77 LIBTOOL LIBTOOL_DEP X_CFLAGS X_PRE_LIBS X_LIBS X_EXTRA_LIBS X_DISPLAY_MISSING_TRUE X_DISPLAY_MISSING_FALSE X_DISPLAY_MISSING X_LDFLAGS GCC_CFLAGS INCLTDL LIBLTDL subdirs LIBDM_DLL_IMPORT LIBPLUGIN_DLL_IMPORT CONFIG_STATUS_DEPENDENCIES LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar EMACS EMACSLOADPATH lispdir MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT NAMEBYTES ENABLE_PLUGINS_TRUE ENABLE_PLUGINS_FALSE ENABLE_PLUGINS ENABLE_PROCESS_TRUE ENABLE_PROCESS_FALSE ENABLE_DMFLEX_TRUE ENABLE_DMFLEX_FALSE LEX CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE LEXLIB LEX_OUTPUT_ROOT STRINGBUF NAMEBYTES_1 SYS_DICT_SIZE MAX_NUM_OPDS MAX_NUM_DICTS MAX_NUM_EXECS MAX_MEM_SIZE MAX_USER_DICT_SIZE ROLLBITS ENABLE_SETUID_TRUE ENABLE_SETUID_FALSE ENABLE_THREADS_TRUE ENABLE_THREADS_FALSE ENABLE_THREADS THREADNUM THREADMUL NO_PTHREAD_CFLAGS NO_PTHREAD_CC NO_PTHREAD_LIBS acx_pthread_config PTHREAD_CC PTHREAD_LIBS PTHREAD_CFLAGS DMBINDIR dmbindir DMSTARTDIR dmstartdir DMCONFDIR dmconfdir PKGPSDATADIR pkgpsdatadir PKGLISPDIR pkglispdir TMP tmp ENABLE_UNIX_SOCKETS_TRUE ENABLE_UNIX_SOCKETS_FALSE ENABLE_UNIX_SOCKETS DMSOCKDIR dmsockdir guipdf ENABLE_BASH ENABLE_BASH_TRUE ENABLE_BASH_FALSE ENABLE_ENV ENABLE_ENV_TRUE ENABLE_ENV_FALSE GUIPDF ENABLE_EMACS_TRUE ENABLE_EMACS_FALSE CPP EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB DLLTOOL ac_ct_DLLTOOL AS ac_ct_AS OBJDUMP ac_ct_OBJDUMP CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CXXCPP F77 FFLAGS ac_ct_F77 LIBTOOL LIBTOOL_DEP X_CFLAGS X_PRE_LIBS X_LIBS X_EXTRA_LIBS X_DISPLAY_MISSING_TRUE X_DISPLAY_MISSING_FALSE X_DISPLAY_MISSING X_LDFLAGS GCC_CFLAGS INCLTDL LIBLTDL subdirs LIBDM_DLL_IMPORT LIBPLUGIN_DLL_IMPORT LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -32261,15 +32261,9 @@ fi
 
 
       if test x"${enable_process-no}" != x"no" ; then
+                     ac_config_commands="$ac_config_commands plugins/process2.c"
 
-  CONFIG_STATUS_DEPENDENCIES=\
-    "$CONFIG_STATUS_DEPENDENCIES '$(top_srcdir)/plugins/process2.plugin' '${top_srcdir}/plugins/plugin.m4'"
-            ac_config_commands="$ac_config_commands plugins/process2.c"
-
-
-  CONFIG_STATUS_DEPENDENCIES=\
-    "$CONFIG_STATUS_DEPENDENCIES '$(top_srcdir)/plugins/process2.plugin' '${top_srcdir}/plugins/plugin.m4'"
-            ac_config_commands="$ac_config_commands plugins/process2.h"
+              ac_config_commands="$ac_config_commands plugins/process2.h"
 
 
     fi
@@ -33218,7 +33212,6 @@ s,@LIBLTDL@,$LIBLTDL,;t t
 s,@subdirs@,$subdirs,;t t
 s,@LIBDM_DLL_IMPORT@,$LIBDM_DLL_IMPORT,;t t
 s,@LIBPLUGIN_DLL_IMPORT@,$LIBPLUGIN_DLL_IMPORT,;t t
-s,@CONFIG_STATUS_DEPENDENCIES@,$CONFIG_STATUS_DEPENDENCIES,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF
@@ -34149,7 +34142,8 @@ echo "$as_me: error: cannot create directory $dirpart/$fdir" >&2;}
   done
 done
  ;;
-    plugins/process2.c )     if ( top_srcdir="${src_dir}" ; \
+    plugins/process2.c )
+    if ( top_srcdir="${srcdir}" ; \
        m4 -P "-I${srcdir}/plugins" \
       -DPLUGIN_NAME="process2" \
       -DPLUGIN_HEADER=no \
@@ -34164,7 +34158,8 @@ echo "$as_me: error: Unable to build \"plugins/process2.c\"" >&2;}
    { (exit 1); exit 1; }; }
     fi
    ;;
-    plugins/process2.h )     if ( top_srcdir="${src_dir}" ; \
+    plugins/process2.h )
+    if ( top_srcdir="${srcdir}" ; \
        m4 -P "-I${srcdir}/plugins" \
       -DPLUGIN_NAME="process2" \
       -DPLUGIN_HEADER=yes \

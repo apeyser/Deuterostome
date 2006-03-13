@@ -381,11 +381,8 @@ AC_DEFUN([CF_AC_SUBST_EVAL], [dnl
 ])
 
 AC_DEFUN([CF_M4_PLUGIN_], [dnl
-  AC_SUBST([CONFIG_STATUS_DEPENDENCIES])
-  CONFIG_STATUS_DEPENDENCIES=\
-    "$CONFIG_STATUS_DEPENDENCIES '$(top_srcdir)/$2/$4' '$7/plugin.m4'"
-  AC_CONFIG_COMMANDS([$2/$3], [dnl
-    if ( top_srcdir="${src_dir}" ; \
+  AC_CONFIG_COMMANDS([$2/$3], [
+    if ( top_srcdir="${srcdir}" ; \
        m4 -P "-I${srcdir}/$2" \
       -DPLUGIN_NAME="$1" \
       -DPLUGIN_HEADER=$5 \
