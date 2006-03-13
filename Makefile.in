@@ -66,7 +66,7 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	uninstall-recursive
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = libltdl src plugins sh ps emacs dcode
+DIST_SUBDIRS = libltdl src plugins sh ps emacs dcode test
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -270,7 +270,7 @@ EXTRA_DIST = bootstrap autom4te.cfg
 @ENABLE_EMACS_TRUE@EMACS_DIR = emacs
 @ENABLE_PLUGINS_TRUE@PLUGINS_DIR = plugins
 @ENABLE_BASH_TRUE@@ENABLE_ENV_TRUE@BASH_DIR = sh
-SUBDIRS = libltdl src $(PLUGINS_DIR) $(BASH_DIR) ps $(EMACS_DIR) dcode
+SUBDIRS = libltdl src $(PLUGINS_DIR) $(BASH_DIR) ps $(EMACS_DIR) dcode test
 ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS = 
 all: config.h

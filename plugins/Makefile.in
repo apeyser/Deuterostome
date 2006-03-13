@@ -62,18 +62,15 @@ am__installdirs = "$(DESTDIR)$(pkglibdir)"
 pkglibLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(pkglib_LTLIBRARIES)
 dmflex_la_LIBADD =
-am__dmflex_la_SOURCES_DIST = dmflex.l dmflex.h
-@ENABLE_DMFLEX_TRUE@am_dmflex_la_OBJECTS = dmflex.lo
+am_dmflex_la_OBJECTS = dmflex.lo
 dmflex_la_OBJECTS = $(am_dmflex_la_OBJECTS)
 @ENABLE_DMFLEX_TRUE@am_dmflex_la_rpath = -rpath $(pkglibdir)
 process_la_LIBADD =
-am__process_la_SOURCES_DIST = process.c process.h
-@ENABLE_PROCESS_TRUE@am_process_la_OBJECTS = process.lo
+am_process_la_OBJECTS = process.lo
 process_la_OBJECTS = $(am_process_la_OBJECTS)
 @ENABLE_PROCESS_TRUE@am_process_la_rpath = -rpath $(pkglibdir)
 process2_la_LIBADD =
-am__process2_la_SOURCES_DIST = process2.c process2.h
-@ENABLE_PROCESS_TRUE@am_process2_la_OBJECTS = process2.lo
+am_process2_la_OBJECTS = process2.lo
 process2_la_OBJECTS = $(am_process2_la_OBJECTS)
 @ENABLE_PROCESS_TRUE@am_process2_la_rpath = -rpath $(pkglibdir)
 test_la_LIBADD =
@@ -101,9 +98,9 @@ LTLEXCOMPILE = $(LIBTOOL) --mode=compile $(LEX) $(LFLAGS) $(AM_LFLAGS)
 SOURCES = $(dmflex_la_SOURCES) $(process_la_SOURCES) \
 	$(process2_la_SOURCES) $(test_la_SOURCES) $(test2_la_SOURCES) \
 	$(throw_la_SOURCES)
-DIST_SOURCES = $(am__dmflex_la_SOURCES_DIST) \
-	$(am__process_la_SOURCES_DIST) $(am__process2_la_SOURCES_DIST) \
-	$(test_la_SOURCES) $(test2_la_SOURCES) $(throw_la_SOURCES)
+DIST_SOURCES = $(dmflex_la_SOURCES) $(process_la_SOURCES) \
+	$(process2_la_SOURCES) $(test_la_SOURCES) $(test2_la_SOURCES) \
+	$(throw_la_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -299,18 +296,20 @@ AM_CFLAGS = $(GCC_CFLAGS) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
 AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 #@LIBPLUGIN_DLL_IMPORT@
 AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
+EXTRA_DIST = plugin.m4
 @ENABLE_PROCESS_TRUE@PROCESS_LIB = process.la process2.la
-@ENABLE_PROCESS_TRUE@process_la_SOURCES = process.c process.h
-@ENABLE_PROCESS_TRUE@process2_la_SOURCES = process2.c process2.h
-DISTCLEANFILES = dmflex.c $(process2_la_sources)
+BUILT_SOURCES = process2.c process2.h dmflex.c
+process_la_SOURCES = process.c process.h
+process2_la_SOURCES = process2.plugin
 @ENABLE_DMFLEX_TRUE@DMFLEX_LIB = dmflex.la
-@ENABLE_DMFLEX_TRUE@dmflex_la_SOURCES = dmflex.l dmflex.h
+dmflex_la_SOURCES = dmflex.l dmflex.h
 pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB) 
 test_la_SOURCES = test.c test.h
 test2_la_SOURCES = test2.c test2.h
 throw_la_SOURCES = throw.c throw.h
-EXTRA_DIST = process2.plugin
-all: all-am
+DISTCLEANFILES = $(BUILT_SOURCES)
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .h .l .lo .o .obj .plugin
@@ -510,13 +509,15 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: check-am
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(LTLIBRARIES)
 installdirs:
 	for dir in "$(DESTDIR)$(pkglibdir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
-install: install-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -542,6 +543,7 @@ maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
 	-rm -f dmflex.c
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-generic clean-libtool clean-pkglibLTLIBRARIES \
