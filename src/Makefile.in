@@ -16,6 +16,7 @@
 
 
 
+
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -67,7 +68,8 @@ am__vpath_adj = case $$p in \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
-	"$(DESTDIR)$(pkgincludedir)" "$(DESTDIR)$(pkgincludedir)"
+	"$(DESTDIR)$(pkgconfiglibdir)" "$(DESTDIR)$(pkgincludedir)" \
+	"$(DESTDIR)$(pkgincludedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
@@ -111,6 +113,8 @@ SOURCES = $(libdmglobals_la_SOURCES) $(dnode_SOURCES) \
 	$(testwordorder_SOURCES)
 DIST_SOURCES = $(am__libdmglobals_la_SOURCES_DIST) $(dnode_SOURCES) \
 	$(dvt_SOURCES) $(testwordorder_SOURCES)
+nodist_pkgconfiglibDATA_INSTALL = $(INSTALL_DATA)
+DATA = $(nodist_pkgconfiglib_DATA)
 nodist_pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 am__pkginclude_HEADERS_DIST = dm.h plugin.h pluginlib.h dmx.h \
 	threads.h error-local.h
@@ -222,6 +226,7 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKGCONFIGLIBDIR = @PKGCONFIGLIBDIR@
 PKGLISPDIR = @PKGLISPDIR@
 PKGPSDATADIR = @PKGPSDATADIR@
 PTHREAD_CC = @PTHREAD_CC@
@@ -293,6 +298,7 @@ localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
+pkgconfiglibdir = @pkgconfiglibdir@
 pkglispdir = @pkglispdir@
 pkgpsdatadir = @pkgpsdatadir@
 prefix = @prefix@
@@ -314,12 +320,11 @@ tmp = @tmp@
 
 @ENABLE_THREADS_TRUE@THREAD_HDR = threads.h
 @ENABLE_THREADS_TRUE@THREADSRC = threads.c
-EXTRA_DIST = codegen/buildh codegen/dgen_0.h codegen/dgen_1.h codegen/dgen.c \
-	codegen/dmnuminc.d.in codegen/dmnuminc.h codegen/dmnuminc.h.built \
-	codegen/dsp1f.d codegen/dsp1f.h codegen/dsp1f.h.built \
-	codegen/Makefile.am codegen/Makefile.in codegen/startup_dgen.d.in \
-	dnode-nice.c.in paths.h.in
-
+EXTRA_DIST = codegen/buildh codegen/dgen_0.h codegen/dgen_1.h \
+	codegen/dgen.c codegen/dmnuminc.d.in codegen/dmnuminc.h \
+	codegen/dmnuminc.h.built codegen/dsp1f.d codegen/dsp1f.h \
+	codegen/dsp1f.h.built codegen/Makefile.am codegen/Makefile.in \
+	codegen/startup_dgen.d.in dnode-nice.c.in paths.h.in dm.pc.in
 DISTCLEANFILES = dm-config.h
 AM_CPPFLAGS = -DDM_HAVE_CONFIG_H
 AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
@@ -339,7 +344,7 @@ dnode_LDADD = libdmglobals.la
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 testwordorder_SOURCES = test-word-order.c
 BUILT_SOURCES = paths.h dnode-nice.c
-CLEANFILES = paths.h dnode-nice.c
+CLEANFILES = paths.h dnode-nice.c dm.pc
 lib_LTLIBRARIES = libdmglobals.la
 libdmglobals_la_LIBADD = $(PLUGIN_LD)
 libdmglobals_la_SOURCES = dmglobals.c \
@@ -353,6 +358,25 @@ editpaths = sed \
 	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 	-e 's,[@]dmconfdir[@],$(dmconfdir),g'
 
+pgkconfiglibdir = @pkgconfiglibdir@
+PCCFLAGS = $(GCC_CFLAGS) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
+PCLIBS = -ldmglobals
+PCLDFLAGS = -module -no-undefined
+editpkgconfig = sed \
+	-e 's,[@]prefix[@],$(prefix),g' \
+	-e 's,[@]exec_prefix[@],$(exec_prefix),g' \
+	-e 's,[@]pkgincludedir[@],$(pkgincludedir),g' \
+	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
+	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \
+	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
+	-e 's,[@]dmconfdir[@],$(dmconfdir),g' \
+	-e 's,[@]PACKAGE_NAME[@],$(PACKAGE_NAME),g' \
+	-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
+	-e 's,[@]LIBS[@],$(PCLIBS),g' \
+	-e 's,[@]CFLAGS[@],$(PCCFLAGS),g' \
+	-e 's,[@]LDFLAGS[@],$(PCLDFLAGS),g'
+
+nodist_pkgconfiglib_DATA = dm.pc
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -548,6 +572,23 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 uninstall-info-am:
+install-nodist_pkgconfiglibDATA: $(nodist_pkgconfiglib_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(pkgconfiglibdir)" || $(mkdir_p) "$(DESTDIR)$(pkgconfiglibdir)"
+	@list='$(nodist_pkgconfiglib_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(nodist_pkgconfiglibDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(pkgconfiglibdir)/$$f'"; \
+	  $(nodist_pkgconfiglibDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(pkgconfiglibdir)/$$f"; \
+	done
+
+uninstall-nodist_pkgconfiglibDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(nodist_pkgconfiglib_DATA)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(pkgconfiglibdir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(pkgconfiglibdir)/$$f"; \
+	done
 install-nodist_pkgincludeHEADERS: $(nodist_pkginclude_HEADERS)
 	@$(NORMAL_INSTALL)
 	test -z "$(pkgincludedir)" || $(mkdir_p) "$(DESTDIR)$(pkgincludedir)"
@@ -662,11 +703,11 @@ distdir: $(DISTFILES)
 check-am: all-am
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(DATA) $(HEADERS)
 install-binPROGRAMS: install-libLTLIBRARIES
 
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgincludedir)" "$(DESTDIR)$(pkgincludedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgconfiglibdir)" "$(DESTDIR)$(pkgincludedir)" "$(DESTDIR)$(pkgincludedir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -720,8 +761,8 @@ info: info-am
 
 info-am:
 
-install-data-am: install-nodist_pkgincludeHEADERS \
-	install-pkgincludeHEADERS
+install-data-am: install-nodist_pkgconfiglibDATA \
+	install-nodist_pkgincludeHEADERS install-pkgincludeHEADERS
 
 install-exec-am: install-binPROGRAMS install-exec-local \
 	install-libLTLIBRARIES
@@ -752,6 +793,7 @@ ps-am:
 
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
 	uninstall-libLTLIBRARIES uninstall-local \
+	uninstall-nodist_pkgconfiglibDATA \
 	uninstall-nodist_pkgincludeHEADERS uninstall-pkgincludeHEADERS
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
@@ -763,6 +805,7 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
 	install-data-am install-exec install-exec-am \
 	install-exec-local install-info install-info-am \
 	install-libLTLIBRARIES install-man \
+	install-nodist_pkgconfiglibDATA \
 	install-nodist_pkgincludeHEADERS install-pkgincludeHEADERS \
 	install-strip installcheck installcheck-am installdirs \
 	maintainer-clean maintainer-clean-generic mostlyclean \
@@ -770,6 +813,7 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
 	pdf pdf-am ps ps-am tags uninstall uninstall-am \
 	uninstall-binPROGRAMS uninstall-info-am \
 	uninstall-libLTLIBRARIES uninstall-local \
+	uninstall-nodist_pkgconfiglibDATA \
 	uninstall-nodist_pkgincludeHEADERS uninstall-pkgincludeHEADERS
 
 
@@ -800,6 +844,11 @@ paths.h: paths.h.in Makefile
 gencode-all: gencode all
 gencode:
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS) all
+
+dm.pc: dm.pc.in Makefile
+	-rm -f $@ $@.tmp
+	$(editpkgconfig) $(srcdir)/$@.in > $@.tmp
+	mv $@.tmp $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

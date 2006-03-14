@@ -53,6 +53,8 @@ CF_AC_ARG_DIR([pkgpsdatadir], [location for ps files],
 CF_AC_ARG_DIR([pkglispdir], [location for lisp files],
   [${lispdir}/${PACKAGE}])
 CF_AC_ARG_DIR([tmp], [location of temp dir], [/tmp])
+CF_AC_ARG_DIR([pkgconfiglibdir], [location for pkg-config pc files],
+  [${libdir}/pkgconfig])
 
 CF_AC_ENABLE([unix-sockets], [compile and install unix domain sockets], [yes])
 CF_IF_ENABLED([unix-sockets], [

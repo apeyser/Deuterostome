@@ -90,3 +90,31 @@ paths.h: paths.h.in Makefile
 gencode-all: gencode all
 gencode:
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS) all
+
+pgkconfiglibdir=@pkgconfiglibdir@
+PCCFLAGS = $(GCC_CFLAGS) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
+PCLIBS=-ldmglobals
+PCLDFLAGS=-module -no-undefined
+
+editpkgconfig = sed \
+	-e 's,[@]prefix[@],$(prefix),g' \
+	-e 's,[@]exec_prefix[@],$(exec_prefix),g' \
+	-e 's,[@]pkgincludedir[@],$(pkgincludedir),g' \
+	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
+	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \
+	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
+	-e 's,[@]dmconfdir[@],$(dmconfdir),g' \
+	-e 's,[@]PACKAGE_NAME[@],$(PACKAGE_NAME),g' \
+	-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
+	-e 's,[@]LIBS[@],$(PCLIBS),g' \
+	-e 's,[@]CFLAGS[@],$(PCCFLAGS),g' \
+	-e 's,[@]LDFLAGS[@],$(PCLDFLAGS),g'
+
+nodist_pkgconfiglib_DATA = dm.pc
+EXTRA_DIST += dm.pc.in
+CLEANFILES += dm.pc
+
+dm.pc: dm.pc.in Makefile
+	-rm -f $@ $@.tmp
+	$(editpkgconfig) $(srcdir)/$@.in > $@.tmp
+	mv $@.tmp $@
