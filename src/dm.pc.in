@@ -1,0 +1,16 @@
+# pkg-config file for dm
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+pkgincludedir=@pkgincludedir@
+dmsockdir=@dmsockdir@
+startup_dir=@dmstartdir@
+plugin_dir=@pkglibdir@
+conf_dir=@dmconfdir@
+ldflags=@LDFLAGS@
+
+Name: @PACKAGE_NAME@
+Description: D-machine info for building plugins
+Version: @PACKAGE_VERSION@
+Libs: @LIBS@
+Cflags: @CFLAGS@
