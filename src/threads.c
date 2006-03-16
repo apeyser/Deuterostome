@@ -145,10 +145,10 @@ static L threads_do_pool_int_(UL nways, thread_func func,
     if ((L) nways < 0) return RNG_CHK;
     
     for (i = (L) nways; i > 0; i -= thread_num()) {
-	if ((r = threads_do_int((i < thread_num()) ? i : thread_num(), 
-                                func, global, local, s)) != OK)
-            return r;
-        local += s*thread_num();
+      if ((r = threads_do_int((i < thread_num()) ? i : thread_num(), 
+                              func, global, local, s)) != OK)
+        return r;
+      local += s*thread_num();
     }
     return OK;
 }

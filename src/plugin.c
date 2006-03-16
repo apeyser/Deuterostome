@@ -112,7 +112,7 @@ L op_nextlib(void)
     
 /******************************************************loadlib
  * The library loading mechanism
- * (dir) (file) |
+ * (dir) (file) | library-dict
  * loads the shared library, via its ll_export variable
  * and creates an opdict containing all exported ops
  * placed above the vm ceiling
@@ -164,18 +164,26 @@ L op_loadlib(void)
         return LIB_LOAD;
     }
 
-		// loop over super ceil region, looking for first dict for type
-		// and looking for sysop to stop
-		// check handles on all libs but sysdict
-		// assumed that sysdict has already been placed
+    // loop over super ceil region, looking for first dict for type
+    // and looking for sysop to stop
+    // check handles on all libs but sysdict
+    // assumed that sysdict has already been placed
     type = 0;
     frame = NULL;
-		while (1) {
-			if (! (frame = nextlib(frame))) return CORR_OBJ;
-			if (! type) type = LIB_TYPE(frame) + 1;
-			if (! LIB_TYPE(frame)) break;
-			if ((L) handle == LIB_HANDLE(frame)) return LIB_LOADED;
-		}
+    while (1) {
+      if (! (frame = nextlib(frame))) {
+        lt_dlclose((lt_dlhandle) handle);
+        return CORR_OBJ;
+      }
+      if (! type) type = LIB_TYPE(frame) + 1;
+      if (! LIB_TYPE(frame)) break;
+      if ((L) handle == LIB_HANDLE(frame)) {
+        lt_dlclose((lt_dlhandle) handle);
+        moveframe(frame, o_2);
+        FREEopds = o_1;
+        return OK;
+      }
+    }
     
     LIB_IMPORT(ops, B**, ll_export);
     LIB_IMPORT(errc, L*, ll_errc);
@@ -199,10 +207,11 @@ L op_loadlib(void)
 	  return LIB_INIT;
 	}
 
-    FREEopds = o_2;
 
     LIB_TYPE(dict - FRAMEBYTES) = type;
     LIB_HANDLE(dict - FRAMEBYTES) = (L) handle;
+    moveframe(dict - FRAMEBYTES, o_2);
+    FREEopds = o_1;
 
     sysdict = VALUE_PTR(FLOORdicts);
     if (! mergedict(dict, sysdict)) return LIB_MERGE;

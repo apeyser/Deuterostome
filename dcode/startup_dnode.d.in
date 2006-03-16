@@ -561,17 +561,6 @@ end def  | of xtext_dict
     userdict /d_dictstack put
 } bind def
 
-|-------------------------------------- libdict
-| wrapper for loadlib
-| loads a shared library in dir/lib
-| and returns the associated dictionary
-| the library must not have been loaded
-| previously since the last vmresize
-/libdict { | (dir) (lib) --> << dict >>
-  loadlib
-  null nextlib pop
-} bind def
-
 |-------------------------------------------- libs_
 | Print out shared libraries in order
 | that they wre loaded
