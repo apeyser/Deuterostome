@@ -68,11 +68,12 @@ m4_define(<%PLUGIN_OUTPUT_HEADER%>, <%
   m4_define(<%PLUGIN_HEADER_INCLUDE%>,
     m4_ifelse(PLUGIN_LOCAL, <%yes%>, 
       <%<%"../src/plugin.h"%>%>,
-      <%<%<dm/plugin.h%>%>>)
+      <%<%<dm/plugin.h>%>%>)
   )
   m4_define(<%PLUGIN_OPS%>, m4_defn(<%PLUGIN_HEADER_OPS%>))
   m4_define(<%PLUGIN_ERRS%>, m4_defn(<%PLUGIN_HEADER_ERRS%>))
   m4_define(<%PLUGIN_HANDLES%>, m4_defn(<%PLUGIN_HEADER_HANDLES%>))
+  m4_define(<%PLUGIN_NAMES%>, <%%>)
   m4_define(<%PLUGIN_HEADER_CODE%>, m4_defn(<%PLUGIN_HEADER_CODE_%>))
   m4_define(<%PLUGIN_BODY_CODE%>, <%%>)
   m4_define(<%PLUGIN_VERSION%>, <%%>)
@@ -101,10 +102,12 @@ m4_define(<%PLUGIN_BODY_OPS%>, <%
   m4_pushdef(<%gethandle%>, m4_defn(<%PLUGIN_HANDLE_%>))
   m4_pushdef(<%error%>, m4_defn(<%PLUGIN_ERROR_%>))
   m4_pushdef(<%build_handle%>, m4_defn(<%PLUGIN_DEFINE_HANDLES_%>))
+  m4_pushdef(<%name%>, m4_defn(<%PLUGIN_BODY_NAME%>))
   m4_divert(90)<%
 L op_$1(void) {
      %>$2<%
 }%>m4_divert(-1)
+  m4_popdef(<%name%>)
   m4_popdef(<%build_handle%>)
   m4_popdef(<%error%>)
   m4_popdef(<%gethandle%>)
@@ -152,6 +155,16 @@ B opaquename[FRAMEBYTES];%>m4_divert(-1)
   PLUGIN_BODY_HANDLES_($@)
 %>)
 
+m4_define(<%PLUGIN_BODY_NAMES%>, <%
+  m4_divert(70)<%
+static B %>PLUGIN_NAME_UPPER<%_$1_N[FRAMEBYTES];%>m4_divert(-1)
+  m4_divert(76)<%
+    makename("$1", %>PLUGIN_NAME_UPPER<%_$1_N);%>m4_divert(-1)
+  m4_ifelse(<%$2%>, , , <%PLUGIN_BODY_NAMES(m4_shift($@))%>)
+%>)
+
+m4_define(<%PLUGIN_BODY_NAME%>, <%PLUGIN_NAME_UPPER<%_$1_N%>%>)
+
 m4_define(<%PLUGIN_BODY_ERRS%>, <%
   m4_divert(15)<%
     %>PLUGIN_NAME_UPPER<%_$1,%>m4_divert(-1)
@@ -161,8 +174,10 @@ m4_define(<%PLUGIN_BODY_ERRS%>, <%
 %>)
 
 m4_define(<%PLUGIN_BODY_HEADERS_%>, <%m4_divert(2)<%$1%>%>)
-m4_define(<%PLUGIN_BODY_CODE_%>,<%
+m4_define(<%PLUGIN_BODY_CODE_%>, <%
+  m4_pushdef(<%name%>, m4_defn(<%PLUGIN_BODY_NAME%>))
   m4_divert(71)$1 m4_divert(-1)
+  m4_popdef(<%name%>)
 %>)
 
 m4_define(<%PLUGIN_BODY_INIT%>, <%m4_divert(75)$1 m4_divert(-1)%>)
@@ -172,6 +187,7 @@ m4_define(<%PLUGIN_OUTPUT_BODY%>, <%
   m4_define(<%PLUGIN_OPS%>, m4_defn(<%PLUGIN_BODY_OPS%>))
   m4_define(<%PLUGIN_ERRS%>, m4_defn(<%PLUGIN_BODY_ERRS%>))
   m4_define(<%PLUGIN_HANDLES%>, m4_defn(<%PLUGIN_BODY_HANDLES%>))
+  m4_define(<%PLUGIN_NAMES%>, m4_defn(<%PLUGIN_BODY_NAMES%>))
   m4_define(<%PLUGIN_HEADER_CODE%>, <%%>)
   m4_define(<%PLUGIN_BODY_CODE%>, m4_defn(<%PLUGIN_BODY_CODE_%>))
   m4_define(<%PLUGIN_VERSION%>, m4_defn(<%PLUGIN_VERSION__%>))

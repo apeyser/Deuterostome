@@ -379,27 +379,3 @@ AC_DEFUN([CF_AC_SUBST_EVAL], [dnl
   AC_SUBST([$1])
   ifelse([$2], , [eval $1="${$1}"], [eval $1="$2"])
 ])
-
-AC_DEFUN([CF_M4_PLUGIN_], [dnl
-  AC_CONFIG_COMMANDS([$2/$3], [
-    if ( top_srcdir="${srcdir}" ; \
-       m4 -P "-I${srcdir}/$2" \
-      -DPLUGIN_NAME="$1" \
-      -DPLUGIN_HEADER=$5 \
-      -DPLUGIN_LOCAL=$6 \
-      "$7/plugin.m4" >"$2/$3.tmp" \
-      && mv "$2/$3.tmp" "$2/$3"  ) ; then
-      :
-    else
-      rm "$2/$3.tmp" 
-      AC_MSG_ERROR([Unable to build "$2/$3"])
-    fi
-  ])dnl
-])
-
-AC_DEFUN([CF_M4_PLUGIN], [dnl
-  CF_M4_PLUGIN_([$1], [plugins], [$1.c], 
-                [$1.plugin], [no], [yes], [${top_srcdir}/plugins])
-  CF_M4_PLUGIN_([$1], [plugins], [$1.h],
-                [$1.plugin], [yes], [yes], [${top_srcdir}/plugins])
-])

@@ -14,7 +14,8 @@ BASH_DIR=sh
 endif ENABLE_ENV
 endif ENABLE_BASH
 
-SUBDIRS = libltdl src $(PLUGINS_DIR) $(BASH_DIR) ps $(EMACS_DIR) dcode test
+SUBDIRS = libltdl src $(PLUGINS_DIR) $(BASH_DIR) ps $(EMACS_DIR) dcode test \
+	m4
 ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS = 
 #--disable-process

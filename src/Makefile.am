@@ -108,7 +108,10 @@ editpkgconfig = sed \
 	-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
 	-e 's,[@]LIBS[@],$(PCLIBS),g' \
 	-e 's,[@]CFLAGS[@],$(PCCFLAGS),g' \
-	-e 's,[@]LDFLAGS[@],$(PCLDFLAGS),g'
+	-e 's,[@]LDFLAGS[@],$(PCLDFLAGS),g' \
+	-e 's,[@]pkgdatadir[@],$(pkgdatadir),g' \
+	-e 's,[@]m4datadir[@],$(m4datadir),g' \
+	-e 's,[@]plugindatadir[@],$(plugindatadir),g' 
 
 nodist_pkgconfiglib_DATA = dm.pc
 EXTRA_DIST += dm.pc.in

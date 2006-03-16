@@ -7,6 +7,9 @@ dmsockdir=@dmsockdir@
 startup_dir=@dmstartdir@
 plugin_dir=@pkglibdir@
 conf_dir=@dmconfdir@
+pkgdata_dir=@pkgdatadir@
+m4data_dir=@m4datadir@
+plugindata_dir=@plugindatadir@
 ldflags=@LDFLAGS@
 
 Name: @PACKAGE_NAME@

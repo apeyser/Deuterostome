@@ -45,11 +45,17 @@ CF_IF_ENABLED([threads], [
 CF_ACX_PTHREAD([threads])
 
 CF_AC_ARG_DIR([dmbindir], [location for dm binary], [${bindir}/${PACKAGE}])
-CF_AC_ARG_DIR([dmstartdir], [location for dm scripts], [${datadir}/${PACKAGE}])
+CF_AC_ARG_DIR([pkgdatadir], [location for data files], 
+  [${datadir}/${PACKAGE}])
+CF_AC_ARG_DIR([dmstartdir], [location for dm scripts], [${pkgdatadir}])
 CF_AC_ARG_DIR([dmconfdir], [locations for per-host configuration],
   [${sysconfdir}/${PACKAGE}])
+CF_AC_ARG_DIR([m4datadir], [location for m4 files],
+  [${pkgdatadir}/m4])
+CF_AC_ARG_DIR([plugindatadir], [location for plugin compile files],
+  [${pkgdatadir}/plugin])
 CF_AC_ARG_DIR([pkgpsdatadir], [location for ps files], 
-  [${datadir}/${PACKAGE}/ps])
+  [${pkgdatadir}/ps])
 CF_AC_ARG_DIR([pkglispdir], [location for lisp files],
   [${lispdir}/${PACKAGE}])
 CF_AC_ARG_DIR([tmp], [location of temp dir], [/tmp])
@@ -184,10 +190,6 @@ AC_CONFIG_LINKS([
 		src/codegen/paths.h.in:src/paths.h.in
 ])
 
-CF_IF_ENABLED([plugins], [
-  CF_IF_ENABLED([process], [CF_M4_PLUGIN([process2])])
-])
-
 AC_CONFIG_FILES([
 		 Makefile 
 		 src/Makefile 
@@ -198,6 +200,7 @@ AC_CONFIG_FILES([
 		 emacs/Makefile emacs/d-mode.el
 		 dcode/Makefile dcode/startup_dvt.d dcode/startup_dnode.d
 		 test/Makefile
+         m4/Makefile
 ])
 
 AC_OUTPUT

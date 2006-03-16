@@ -4,29 +4,18 @@ AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 LIBS += $(LTLIBOBJS) $(top_builddir)/src/libdmglobals.la
 
-EXTRA_DIST = plugin.m4
+plugindata_DATA = plugin.m4 Makefile.plugin
 
 if ENABLE_PROCESS
-
 PROCESS_LIB=process.la process2.la
+PLUGIN_LOCAL=yes
+DM_PLUGINDATA_DIR = $(srcdir)
+include $(srcdir)/Makefile.plugin
 endif ENABLE_PROCESS
+
 BUILT_SOURCES = process2.c process2.h
 process_la_SOURCES = process.c process.h
 process2_la_SOURCES = process2.plugin
-
-include $(top_srcdir)/m4/Makefile.plugin
-
-# .plugin.c: 
-# 	cd $(top_builddir) \
-# 	  && $(SHELL) ./config.status $(subdir)/$@ \
-# 		$(am__depfiles_maybe)
-
-# .plugin.h: 
-# 	cd $(top_builddir) \
-# 	  && $(SHELL) ./config.status $(subdir)/$@ \
-# 		$(am__depfiles_maybe)
-
-
 
 if ENABLE_DMFLEX
 DMFLEX_LIB=dmflex.la
