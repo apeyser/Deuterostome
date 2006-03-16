@@ -6,7 +6,7 @@ AC_DEFUN([CF_PKG_CHECK_MODULES_], [dnl
            [$1_]translit(<<$3>>, [a-z], [A-Z])) dnl
     changequote([, ])
     AC_MSG_CHECKING([for pkg-config value of $3 in $2])
-    if test "${CF_PKG_CHECK_MODULES_VAR+set}" == set ; then
+    if test "${CF_PKG_CHECK_MODULES_VAR+set}" = set ; then
       AC_MSG_WARN([$3 set from command line])
       pkg_failed=no
     elif CF_PKG_CHECK_MODULES_VAR[=`$PKG_CONFIG --variable="$3" "$2"`] ; then
