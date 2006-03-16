@@ -37,8 +37,9 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/Makefile.plugin $(srcdir)/dmflex.l.in dmflex.c
+DIST_COMMON = $(dist_plugindata_DATA) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in $(srcdir)/Makefile.plugin \
+	$(srcdir)/dmflex.l.in dmflex.c
 subdir = plugins
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
@@ -102,8 +103,8 @@ SOURCES = $(dmflex_la_SOURCES) $(process_la_SOURCES) \
 DIST_SOURCES = $(dmflex_la_SOURCES) $(process_la_SOURCES) \
 	$(process2_la_SOURCES) $(test_la_SOURCES) $(test2_la_SOURCES) \
 	$(throw_la_SOURCES)
-plugindataDATA_INSTALL = $(INSTALL_DATA)
-DATA = $(plugindata_DATA)
+dist_plugindataDATA_INSTALL = $(INSTALL_DATA)
+DATA = $(dist_plugindata_DATA)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -307,7 +308,7 @@ AM_CFLAGS = $(GCC_CFLAGS) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
 AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 #@LIBPLUGIN_DLL_IMPORT@
 AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
-plugindata_DATA = plugin.m4 Makefile.plugin
+dist_plugindata_DATA = plugin.m4 Makefile.plugin
 @ENABLE_PROCESS_TRUE@PROCESS_LIB = process.la process2.la
 @ENABLE_PROCESS_TRUE@PLUGIN_LOCAL = yes
 @ENABLE_PROCESS_TRUE@DM_PLUGINDATA_DIR = $(srcdir)
@@ -445,19 +446,19 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 uninstall-info-am:
-install-plugindataDATA: $(plugindata_DATA)
+install-dist_plugindataDATA: $(dist_plugindata_DATA)
 	@$(NORMAL_INSTALL)
 	test -z "$(plugindatadir)" || $(mkdir_p) "$(DESTDIR)$(plugindatadir)"
-	@list='$(plugindata_DATA)'; for p in $$list; do \
+	@list='$(dist_plugindata_DATA)'; for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  f=$(am__strip_dir) \
-	  echo " $(plugindataDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(plugindatadir)/$$f'"; \
-	  $(plugindataDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(plugindatadir)/$$f"; \
+	  echo " $(dist_plugindataDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(plugindatadir)/$$f'"; \
+	  $(dist_plugindataDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(plugindatadir)/$$f"; \
 	done
 
-uninstall-plugindataDATA:
+uninstall-dist_plugindataDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(plugindata_DATA)'; for p in $$list; do \
+	@list='$(dist_plugindata_DATA)'; for p in $$list; do \
 	  f=$(am__strip_dir) \
 	  echo " rm -f '$(DESTDIR)$(plugindatadir)/$$f'"; \
 	  rm -f "$(DESTDIR)$(plugindatadir)/$$f"; \
@@ -595,7 +596,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-plugindataDATA
+install-data-am: install-dist_plugindataDATA
 
 install-exec-am: install-pkglibLTLIBRARIES
 
@@ -623,21 +624,22 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-info-am uninstall-pkglibLTLIBRARIES \
-	uninstall-plugindataDATA
+uninstall-am: uninstall-dist_plugindataDATA uninstall-info-am \
+	uninstall-pkglibLTLIBRARIES
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
 	clean-libtool clean-pkglibLTLIBRARIES ctags distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-exec \
-	install-exec-am install-info install-info-am install-man \
-	install-pkglibLTLIBRARIES install-plugindataDATA install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
+	install install-am install-data install-data-am \
+	install-dist_plugindataDATA install-exec install-exec-am \
+	install-info install-info-am install-man \
+	install-pkglibLTLIBRARIES install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-info-am \
-	uninstall-pkglibLTLIBRARIES uninstall-plugindataDATA
+	tags uninstall uninstall-am uninstall-dist_plugindataDATA \
+	uninstall-info-am uninstall-pkglibLTLIBRARIES
 
 @ENABLE_PROCESS_TRUE@.plugin.c:
 @ENABLE_PROCESS_TRUE@	m4 $(M4DEBUG) -P "-I$(srcdir)" \

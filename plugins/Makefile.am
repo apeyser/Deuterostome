@@ -4,7 +4,7 @@ AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 LIBS += $(LTLIBOBJS) $(top_builddir)/src/libdmglobals.la
 
-plugindata_DATA = plugin.m4 Makefile.plugin
+dist_plugindata_DATA = plugin.m4 Makefile.plugin
 
 if ENABLE_PROCESS
 PROCESS_LIB=process.la process2.la
