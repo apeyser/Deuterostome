@@ -632,7 +632,7 @@ L op_execstream(void) {
   OPAQUE_MEM_SET(streamstate, DMFLEX_ATBOL_N, initframe);
 
   moveframe(OPAQUE_MEM(streamstate, buffernameframe), initframe);
-  DMFLEX_BUFSIZE(initframe) -= 2;
+  ARRAY_SIZE(initframe) -= 2;
   OPAQUE_MEM_SET(streamstate, DMFLEX_CHBUF_N, initframe);
   OPAQUE_MEM_SET(streamstate, DMFLEX_BUFPOS_N, initframe);
 

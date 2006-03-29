@@ -1,5 +1,5 @@
-dist_dmstart_DATA = color.d dvt_macros.d master.d sched.d 
-nodist_dmstart_DATA =  theeye.d startup_dnode.d startup_dvt.d
+dist_dmstart_DATA = color.d dvt_macros.d master.d sched.d plugin.d
+nodist_dmstart_DATA =  theeye.d startup_dnode.d startup_dvt.d startup_dgen.d
 dist_dmconf_DATA = dvt.d
 nodist_dmconf_DATA = dnode.d
 

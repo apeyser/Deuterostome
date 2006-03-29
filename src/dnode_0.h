@@ -244,7 +244,7 @@ L syserrc[] =
     LIB_INIT,
     NO_XWINDOWS, X_ERR, X_BADFONT, X_BADHOST,
 	VMR_ERR, VMR_STATE, ILL_OPAQUE, FOLD_OPAQUE, NOPLUGINS,
-	MEM_OVF,
+	MEM_OVF, BAD_ARR,
     0L,
 };
 
@@ -296,7 +296,7 @@ B* syserrm[] =
     "** Library already loaded",
     "** Overflow in malloc while loading library",
     "** Unable to merge library into sysdict",
-		"** Unable to initialize loaded library",
+    "** Unable to initialize loaded library",
     "** X windows unavailable",
     "** Error in X windows",
     "** Bad X windows font",
@@ -307,6 +307,7 @@ B* syserrm[] =
 	"** Illegal attempt to fold opaque object",
 	"** Compiled without plugin support",
 	"** Memory exhausted",
+    "** dmnuminc debug error",
 };
 
 // original directory for vmresize

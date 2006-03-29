@@ -21,16 +21,26 @@
 
 /dosmall true def
 
+| array | array-first-element
+/offset {
+  dup length 1 sub 1 exch getinterval
+} bind def
+
+| length type | sub-array-of-length
+/offarr {
+  exch 1 add exch array offset
+} bind def
+
 /dyadic_ts {
   style /SA eq {
-    {/A1 /A3 /A5} {matsize typ array def} forall
-    {A1 A3 A5} {exec 1.1d exch copy pop} forall
+    {/A1 /A3 /A5 /A7} {matsize typ offarr def} forall
+    {A1 A3 A5 A7} {exec 1.1d exch copy pop} forall
   } {
-    {/A1 /A2 /A3 /A4 /A5 /A6} {matsize typ array def} forall
+    {/A1 /A2 /A3 /A4 /A5 /A6 /A7 /A8} {matsize typ offarr def} forall
     dosmall {
-      {A1 A2 A3 A4 A5 A6} {exec 1.01d exch copy pop} forall
+      {A1 A2 A3 A4 A5 A6 A7 A8} {exec 1.01d exch copy pop} forall
     } {
-      {A1 A2 A3 A4 A5 A6} {exec 0 1 index length 2 1 ramp pop pop} forall
+      {A1 A2 A3 A4 A5 A6 A7 A8} {exec 0 1 index length 2 1 ramp pop pop} forall
     } ifelse
   } ifelse
 } bind def
@@ -54,44 +64,94 @@ end def
   } forall
 end def
 
-/tests [/thread /parallel /serial] def
+/tests [/thread /parallel /serial /byhand] def
 
 /AA_dy_test tests length dict dup begin
-  /thread {A1 A2 op mkact exec pop} def
-  /serial {A3 A4 op mkact exec pop} def
-  /parallel {A5 A6 op mkact exec pop} def
+  /thread {A1 A2 op mkact exec pop} bind def
+  /serial {A3 A4 op mkact exec pop} bind def
+  /parallel {A5 A6 op mkact exec pop} bind def
+  /byhand {
+    op /copy eq {
+      0 1 A7 length 1 sub {/i name
+        A7 i get A8 i put
+      } for
+    } {
+      0 1 A7 length 1 sub {/i name
+        A7 i get A8 i get op mkact exec A7 i put
+      } for
+    } ifelse
+  } bind def
 end def
 
-/n 1.01d def
+/n 1.02d def
 /AS_dy_test tests length dict dup begin
-  /thread {A1 n op mkact exec pop} def
-  /serial {A3 n op mkact exec pop} def
-  /parallel {A5 n op mkact exec pop} def
+  /thread {A1 n op mkact exec pop} bind def
+  /serial {A3 n op mkact exec pop} bind def
+  /parallel {A5 n op mkact exec pop} bind def
+  /byhand {
+    0 1 A7 length 1 sub {/i name
+      A7 i get n op mkact exec A7 i put
+    } for
+  } bind def
 end def
 
 /SA_dy_test tests length dict dup begin
-  /thread {n A1 op mkact exec /a1 name} def
-  /serial {n A3 op mkact exec /a2 name} def
-  /parallel {n A5 op mkact exec /a3 name} def
+  /thread {n A1 op mkact exec /a1 name} bind def
+  /serial {n A3 op mkact exec /a2 name} bind def
+  /parallel {n A5 op mkact exec /a3 name} bind def
+  /byhand {
+    op /copy eq {
+      0 1 A7 length 1 sub {n A7 3 -1 roll put} for
+    } {
+      n 0 1 A7 length 1 sub {A7 exch get op mkact exec} for /a4 name
+    } ifelse
+  } bind def
 end def
 
 /style_op_test styles length dict dup begin
   /AA ops length dict dup begin
     dyc_ops {AA_dy_test def} forall
-    /matmul 3 dict dup begin
-      /thread {A1 A2 A3 matmul pop} def
-      /serial {A4 A5 A6 matmul pop} def
-      /parallel {A7 A8 A9 matmul pop} def
+    /matmul 4 dict dup begin
+      /thread {A1 A2 A3 matmul pop} bind def
+      /serial {A4 A5 A6 matmul pop} bind def
+      /parallel {A7 A8 A9 matmul pop} bind def
+      /byhand {
+        0 1 A10 length 1 sub {/i name
+          0 1 A10 0 get length 1 sub {/j name
+            0 typ ctype
+            0 1 A11 0 get length 1 sub {/k name
+              A11 i get k get A12 k get j get mul add
+            } for
+            A10 i get j put
+          } for
+        } for
+      } bind def
     end def
-    /mattranspose 3 dict dup begin
-      /thread {A1 A2 mattranspose pop} def
-      /serial {A4 A5 mattranspose pop} def
-      /parallel {A7 A8 mattranspose pop} def
+    /mattranspose 4 dict dup begin
+      /thread {A1 A2 mattranspose pop} bind def
+      /serial {A4 A5 mattranspose pop} bind def
+      /parallel {A7 A8 mattranspose pop} bind def
+      /byhand {
+        0 1 A11 length 1 sub {/i name
+          0 1 A11 0 get length 1 sub {/j name
+            A11 i get j get A10 j get i put
+          } for
+        } for
+      } bind def
     end def
-    /matvecmul 3 dict dup begin
-      /thread {A1 A2 A3 matvecmul pop} def
-      /serial {A4 A5 A6 matvecmul pop} def
-      /parallel {A7 A8 A9 matvecmul pop} def
+    /matvecmul 4 dict dup begin
+      /thread {A1 A2 A3 matvecmul pop} bind def
+      /serial {A4 A5 A6 matvecmul pop} bind def
+      /parallel {A7 A8 A9 matvecmul pop} bind def
+      /byhand {
+        0 1 A11 length 1 sub {/i name
+          0 typ ctype
+          0 1 A12 length 1 sub {/j name
+            A11 i get j get A12 j get mul add
+          } for
+          A10 i put
+        } for
+      } bind def
    end def
   end def
   /SA ops length dict dup begin
@@ -109,11 +169,11 @@ end def
     A1 i get A3 i get roundne A1 i get A5 i get roundne or {
       /starred false def
       err 0 (In ) fax * style text (-) fax * op text
-      ([) fax * i * number (]:) fax
-      ( t = ) fax * A1 i get * number
-      ( p = ) fax * A3 i get * number
-      ( s = ) fax * A5 i get * number
-      (\n) fax 0 exch getinterval toconsole
+      ([) fax * i * number (]:\n) fax
+      ( t = ) fax * A1 i get * number (\n) fax
+      ( p = ) fax * A3 i get * number (\n) fax
+      ( s = ) fax * A5 i get * number (\n) fax
+      0 exch getinterval toconsole
       stop
     } {
       starred {A1 i get * ne {/starred false def} if} if
@@ -121,7 +181,31 @@ end def
   } for
 
   starred {(All ************\n) toconsole} if
-} def
+} bind def
+
+/A_dy_check_math {
+  /starred true def
+  
+  0 1 A1 length 1 sub {/i name
+    A1 i get A3 i get roundne
+    A1 i get A5 i get roundne or
+    A1 i get A7 i get roundne or {
+      /starred false def
+      err 0 (In ) fax * style text (-) fax * op text
+      ([) fax * i * number (]:\n) fax
+      ( t = ) fax * A1 i get * number (\n) fax
+      ( p = ) fax * A3 i get * number (\n) fax
+      ( s = ) fax * A5 i get * number (\n) fax
+      ( b = ) fax * A7 i get * number (\n) fax
+      0 exch getinterval toconsole
+      stop
+    } {
+      starred {A1 i get * ne {/starred false def} if} if
+    } ifelse
+  } for
+
+  starred {(All ************\n) toconsole} if
+} bind def
 
 /mat_check {
   /starred true def
@@ -132,11 +216,11 @@ end def
       A1 i get j get A7 i get j get roundne or {
         /starred false def
         err 0 (In ) fax * style text (-) fax * op text
-        ([) fax * i * number (,) fax * j * number (]:) fax
-        ( t = ) fax * A1 i get j get * number
-        ( p = ) fax * A4 i get j get * number
-        ( s = ) fax * A7 i get j get * number
-        (\n) fax 0 exch getinterval toconsole
+        ([) fax * i * number (,) fax * j * number (]:\n) fax
+        ( t = ) fax * A1 i get j get * number (\n) fax
+        ( p = ) fax * A4 i get j get * number (\n) fax
+        ( s = ) fax * A7 i get j get * number (\n) fax
+        0 exch getinterval toconsole
         stop
       } {
         starred {A1 i get j get * ne {/starred false def} if} if
@@ -147,13 +231,41 @@ end def
   starred {(All ************\n) toconsole} if
 } bind def
 
-/log {ln 10d ln div} def
-/antilog {10d exch pwr} def
+/mat_check_math {
+  /starred true def
+  
+  0 1 A1 length 1 sub {/i name
+    0 1 A1 i get length 1 sub {/j name
+      A1 i get j get A4 i get j get roundne
+      A1 i get j get A7 i get j get roundne or
+      A1 i get j get A10 i get j get roundne or {
+        /starred false def
+        err 0 (In ) fax * style text (-) fax * op text
+        ([) fax * i * number (,) fax * j * number (]:\n) fax
+        ( t = ) fax * A1 i get j get * number (\n) fax
+        ( p = ) fax * A4 i get j get * number (\n) fax
+        ( s = ) fax * A7 i get j get * number (\n) fax
+        ( b = ) fax * A10 i get j get * number (\n) fax
+        0 exch getinterval toconsole
+        stop
+      } {
+        starred {A1 i get j get * ne {/starred false def} if} if
+      } ifelse
+    } for
+  } for
+
+  starred {(All ************\n) toconsole} if
+} bind def
+
+
+/log {ln 10d ln div} bind def
+/antilog {10d exch pwr} bind def
 
 /setdig10 {/d ctype
   10d exch 1d sub pwr /dig10 name
-} def
-15d setdig10
+} bind def
+14d setdig10
+/eps 1e-100 def
 
 /round {/val name
   val dup 0 lt {abs} if
@@ -166,19 +278,22 @@ end def
 /roundne {
   dup type dup /S ne exch /D ne and {ne} {
     2 copy eq {pop pop false} {
-      /v1 name /v2 name
+        /v1 name /v2 name
+        eps v1 lt eps neg v1 gt and
+        eps v2 lt eps neg v2 gt and 2 copy or {and not} {pop pop
 
-      v1 dup 0 lt {neg} if
-      log dup floor /exp1 name
-      1d mod 10d exch pwr exp1 0 lt {10d mul} if dig10 mul floor
-      v1 0 lt {neg} if /man1 name
-      
-      v2 dup 0 lt {neg} if
-      log dup floor /exp2 name
-      1d mod 10d exch pwr exp2 0 lt {10d mul} if dig10 mul floor
-      v2 0 lt {neg} if /man2 name
-      
-      exp1 exp2 ne man1 man2 ne or
+            v1 dup 0 lt {neg} if
+            log dup floor /exp1 name
+            1d mod 10d exch pwr exp1 0 lt {10d mul} if dig10 mul floor
+            v1 0 lt {neg} if /man1 name
+            
+            v2 dup 0 lt {neg} if
+            log dup floor /exp2 name
+            1d mod 10d exch pwr exp2 0 lt {10d mul} if dig10 mul floor
+            v2 0 lt {neg} if /man2 name
+            
+            exp1 exp2 ne man1 man2 ne or
+        } ifelse
     } ifelse
   } ifelse
 } bind def
@@ -190,11 +305,35 @@ end def
     A1 i get A4 i get roundne A1 i get A7 i get roundne or {
       /starred false def
       err 0 (In ) fax * style text (-) fax * op text
-      ([) fax * i * number (]:) fax
-      ( t = ) fax * A1 i get * number
-      ( p = ) fax * A4 i get * number
-      ( s = ) fax * A7 i get * number
-      (\n) fax 0 exch getinterval toconsole
+      ([) fax * i * number (]:\n) fax
+      ( t = ) fax * A1 i get * number (\n) fax
+      ( p = ) fax * A4 i get * number (\n) fax
+      ( s = ) fax * A7 i get * number (\n) fax
+      0 exch getinterval toconsole
+      stop
+    } {
+      starred {A1 i get * ne {/starred false def} if} if
+    } ifelse
+  } for
+
+  starred {(All ************\n) toconsole} if
+} bind def
+
+/vec_check_math {
+  /starred true def
+  
+  0 1 A1 length 1 sub {/i name
+    A1 i get A4 i get roundne
+    A1 i get A7 i get roundne or
+    A1 i get A10 i get roundne or {
+      /starred false def
+      err 0 (In ) fax * style text (-) fax * op text
+      ([) fax * i * number (]:\n) fax
+      ( t = ) fax * A1 i get * number (\n) fax
+      ( p = ) fax * A4 i get * number (\n) fax
+      ( s = ) fax * A7 i get * number (\n) fax
+      ( b = ) fax * A10 i get * number (\n) fax
+      0 exch getinterval toconsole
       stop
     } {
       starred {A1 i get * ne {/starred false def} if} if
@@ -210,11 +349,33 @@ end def
   a1 a2 roundne a1 a3 roundne or {
     /starred false def
     err 0 (In ) fax
-    * style text (-) fax * op text
-    ( t = ) fax * a1 * number
-    ( p = ) fax * a2 * number
-    ( s = ) fax * a3 * number
-    (\n) fax 0 exch getinterval toconsole
+    * style text (-) fax * op text (\n) fax
+    ( t = ) fax * a1 * number (\n) fax
+    ( p = ) fax * a2 * number (\n) fax
+    ( s = ) fax * a3 * number (\n) fax
+    0 exch getinterval toconsole
+    stop
+  } {
+    starred {a1 * ne {/starred false def} if} if
+  } ifelse
+
+  starred {(All ************\n) toconsole} if
+} bind def
+
+/S_dy_check_math {
+  /starred true def
+  
+  a1 a2 roundne
+  a1 a3 roundne or
+  a1 a4 roundne or {
+    /starred false def
+    err 0 (In ) fax
+    * style text (-) fax * op text  (\n) fax
+    ( t = ) fax * a1 * number (\n) fax
+    ( p = ) fax * a2 * number (\n) fax
+    ( s = ) fax * a3 * number (\n) fax
+    ( b = ) fax * a4 * number (\n) fax
+    0 exch getinterval toconsole
     stop
   } {
     starred {a1 * ne {/starred false def} if} if
@@ -239,10 +400,27 @@ end def
   end def
 end def
 
-/test_wrap 3 dict dup begin
-  /thread {exec} def
-  /serial {serialize} def
-  /parallel {1 makethreads exec t makethreads} def
+/style_op_check_math styles length dict dup begin
+  /AA ops length dict dup begin
+    dyc_ops {~A_dy_check_math def} forall
+    /matmul ~mat_check_math def
+    /mattranspose ~mat_check_math def
+    /matvecmul ~vec_check_math def
+  end def
+  /AS ops length dict dup begin
+    dy_ops {~A_dy_check_math def} forall
+  end def
+  /SA ops length dict dup begin
+    dy_ops {~S_dy_check_math def} forall
+    /copy ~A_dy_check_math def
+  end def
+end def
+
+/test_wrap 4 dict dup begin
+  /thread {exec} bind def
+  /serial {serialize} bind def
+  /parallel {1 makethreads ~exec stopped t makethreads ~stop if} bind def
+  /byhand {exec} bind def
 end def
 
 /rowsa 1023 def
@@ -250,28 +428,28 @@ end def
 /colsb 1025 def
 
 /matmul_ts {
-  {/A1 /A4 /A7} {/c name
+  {/A1 /A4 /A7 /A10} {/c name
     c rowsa list def
     0 1 rowsa 1 sub {/i name
-      colsb typ array c mkact exec i put
+      colsb typ offarr c mkact exec i put
     } for
   } forall
 
-  {/A2 /A5 /A8} {/a name
+  {/A2 /A5 /A8 /A11} {/a name
     a rowsa list def
     /rm 0 def
     0 1 rowsa 1 sub {/i name
-      colsa typ array
+      colsa typ offarr
       dup a mkact exec i put
       0 colsa rm 1 ramp rm add /rm name pop
     } for
   } forall
 
-  {/A3 /A6 /A9} {/b name
+  {/A3 /A6 /A9 /A12} {/b name
     b colsa list def
     /rm 0 def
     0 1 colsa 1 sub {/i name
-      colsb typ array
+      colsb typ offarr
       dup b mkact exec i put
       0 colsb rm 1 ramp rm add /rm name pop
     } for
@@ -279,18 +457,18 @@ end def
 } bind def
 
 /mattranspose_ts {
-  {/A1 /A4 /A7} {/b name
+  {/A1 /A4 /A7 /A10} {/b name
     b colsa list def
     0 1 colsa 1 sub {/i name
-      rowsa typ array b mkact exec i put
+      rowsa typ offarr b mkact exec i put
     } for
   } forall
 
-  {/A2 /A5 /A8} {/a name
+  {/A2 /A5 /A8 /A11} {/a name
     a rowsa list def
     /rm 0 def
     0 1 rowsa 1 sub {/i name
-      colsa typ array
+      colsa typ offarr
       dup a mkact exec i put
       0 colsa rm 1 ramp rm add /rm name pop
     } for
@@ -298,22 +476,22 @@ end def
 } bind def
 
 /matvecmul_ts {
-  {/A1 /A4 /A7} {
-    rowsa typ array def
+  {/A1 /A4 /A7 /A10} {
+    rowsa typ offarr def
   } forall
   
-  {/A2 /A5 /A8} {/a name
+  {/A2 /A5 /A8 /A11} {/a name
     a rowsa list def
     /rm 0 def
     0 1 rowsa 1 sub {/i name
-      colsa typ array
+      colsa typ offarr
       dup a mkact exec i put
       0 colsa rm 1 ramp rm add /rm name pop
     } for
   } forall
 
-  {/A3 /A6 /A9} {/b name
-    b colsa typ array def
+  {/A3 /A6 /A9 /A12} {/b name
+    b colsa typ offarr def
     b mkact exec 0 colsa 0 1 ramp pop pop
   } forall
 } bind def
@@ -371,6 +549,56 @@ end def
     } forall
 
     err 0 (Ending tests for type ) fax * typ text (\n) fax
+    0 exch getinterval toconsole
+  } forall
+} bind def
+
+/testmath {
+  /t threads def
+  types {/typ name
+    err 0 (Starting math tests for type ) fax * typ text (\n) fax
+    0 exch getinterval toconsole
+    
+    ops {/op name
+      type_op typ get op get {
+        err 0 (Starting math tests for op ) fax * op text
+        ( for type ) fax * typ text (\n) fax
+        0 exch getinterval toconsole
+
+        styles {/style name
+          style_op style get op get {
+            /ts_ layer {
+              err 0 (Starting ) fax * style text
+              ( for op ) fax * op text
+              ( for type ) fax * typ text (\n) fax
+              0 exch getinterval toconsole
+              
+              ts op get exec
+              {/thread /serial /parallel /byhand} {/test name
+                style_op_test style get op get test get
+                test_wrap test get exec
+              } forall
+              
+              
+              {style_op_check_math style get op get exec} stopped {
+                (Halting\n) toconsole halt
+              } if
+
+              err 0 (Ending ) fax * style text
+              ( for op ) fax * op text
+              ( for type ) fax * typ text (\n) fax
+              0 exch getinterval toconsole
+            } stopped /ts_ _layer ~stop if
+          } if
+        } forall
+
+        err 0 (Ending math tests for op ) fax * op text
+        ( for type ) fax * typ text (\n) fax
+        0 exch getinterval toconsole
+      } if
+    } forall
+
+    err 0 (Ending math tests for type ) fax * typ text (\n) fax
     0 exch getinterval toconsole
   } forall
 } bind def
@@ -506,7 +734,7 @@ end def
   threadreps {threads 1 makethreads makethreads} repeat
   (\nTesting ops:\n) toconsole
   (Number of threads: ) toconsole threads _ pop
-  testops
+  testmath |testops
   (\nTesting time:\n) toconsole
   (Number of threads: ) toconsole threads _ pop
   testtime

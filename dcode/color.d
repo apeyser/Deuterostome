@@ -67,7 +67,7 @@ userdict /dvt known {/dvt} {/dnode} ifelse userdict /dnode_escape put
 } bind def
 
 /dvt    {(\033[   )  2 escape_} def
-/dnode  {(\\033[   ) 5 escape_} def
+/dnode  {(\033[   ) 2 escape_} def
 /escape {(^[[   )    3 escape_} def
 /none   {pop ()}                def
 

@@ -382,6 +382,8 @@ NOTE: all objects that can populate the D machine's workspace must
 #define X_BADFONT   0x00000A03L /* X font does not exist                 */
 #define X_BADHOST   0x00000A04L /* X server cannot be connected          */
 
+#define BAD_ARR     0x00000B00L /* dmnuminc debug error */
+
 /* compare results */
 
 #define LT                         (-1)
@@ -716,5 +718,6 @@ L op_matvecmul(void);
 #define ERRLEN (1000)
 
 #include "error-local.h"
+#include "dm-snprintf.h"
 
 #endif //DM_H

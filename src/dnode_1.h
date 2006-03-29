@@ -205,36 +205,61 @@ L op_toconsole(void)
 {
   B *p, nf[FRAMEBYTES], sf[FRAMEBYTES], *oldFREEvm;
   L nb, atmost, retc;
+  B *p_;
 
   if (o_1 < FLOORopds) return(OPDS_UNF);
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
-  if (consolesocket != LINF)
-    { TAG(nf) = NULLOBJ;
-      if ((FREEvm + ARRAY_SIZE(o_1) + 25) > CEILvm) return(VM_OVF);
-      p = FREEvm; moveB("save (", p, 6); p += 6;
-      moveB((B *)VALUE_BASE(o_1),p,ARRAY_SIZE(o_1));
-      p += ARRAY_SIZE(o_1);
+  if (consolesocket != LINF) { 
+    B* max_ = VALUE_PTR(o_1) + ARRAY_SIZE(o_1);
+    TAG(nf) = NULLOBJ;
+    if ((FREEvm + ARRAY_SIZE(o_1) + 25) > CEILvm) return(VM_OVF);
+    p_ = VALUE_PTR(o_1);
+    do {
+      B* max = FREEvm + 8192 - 20;
+      if (max > CEILvm) max = CEILvm;
+
+      p = FREEvm; moveB("save (", p, 6); p += 6;    
+      for (; p_ <  max_ && p < max; p_++) {
+        switch (*p_) {
+          case ')': case '\\': 
+            p += dm_snprintf(p, max - p, "\\%c", (unsigned int) *p_);
+            break;
+          case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
+          case 9: case 10: case 11: case 12: case 13: case 14: case 15: case 16:
+          case 17: case 18: case 19: case 20: case 21: case 22: case 23: case 24:
+          case 25: case 26: case 27: case 28: case 29: case 30: case 31: case 127:
+            p += dm_snprintf(p, max - p, "\\%.3o", (unsigned int) *p_);
+            break;
+          default:
+            *(p++) = *p_;
+            break;
+        }
+        if (p == CEILvm) return VM_OVF;
+      }
+      if (p + 19 > CEILvm) return VM_OVF;
       moveB(") toconsole restore",p,19); p += 19;
       TAG(sf) = ARRAY | BYTETYPE; ATTR(sf) = READONLY;
       VALUE_BASE(sf) = (L)FREEvm; ARRAY_SIZE(sf) = (L)(p - FREEvm);
       oldFREEvm = FREEvm; FREEvm = (B*)DALIGN(p);
-      if ((retc = tosocket(consolesocket,sf,nf)) != OK)
+      if ((retc = tosocket(consolesocket,sf,nf)) != OK) {
         consolesocket = LINF;
+        FREEvm = oldFREEvm;
+        return retc;
+      }
       FREEvm = oldFREEvm;
+    } while (p_ < max_);
+  }
+  else {
+    p = (B *)VALUE_BASE(o_1); atmost = ARRAY_SIZE(o_1);
+    while (atmost > 0) { 
+    tc1:
+      if ((nb = write(2, p, atmost)) < 0) { 
+        if ((errno == EINTR) || (errno == EAGAIN)) goto tc1;
+        else return(op_abort());  /* we drop dead */
+      }
+      atmost -= nb; p += nb;
     }
-  if (consolesocket == LINF)
-    {
-      p = (B *)VALUE_BASE(o_1); atmost = ARRAY_SIZE(o_1);
-      while (atmost > 0)
-       { tc1:
-         if ((nb = write(2, p, atmost)) < 0)
-           { 
-						 if ((errno == EINTR) || (errno == EAGAIN)) goto tc1;
-						 else return(op_abort());  /* we drop dead */
-           }
-         atmost -= nb; p += nb;
-       }
-    }
+  }
   FREEopds = o_1;
   return(OK);
 }
@@ -264,21 +289,22 @@ if (TAG(o_2) != (ARRAY | BYTETYPE)) goto baderror;
 if (CLASS(o_1) != NUM) goto baderror;
 if (!VALUE(o_1,&e)) goto baderror;
 
- nb = snprintf(p,atmost,"\\033[31mOn %*s port %d: ",
-        (L) ARRAY_SIZE(o_4), (B *)VALUE_BASE(o_4), LONG_VAL(o_3));
+ nb = dm_snprintf(p,atmost,"\033[31mOn %*s port %d: ",
+                  (L) ARRAY_SIZE(o_4), (B *)VALUE_BASE(o_4), LONG_VAL(o_3));
+
  p += nb; atmost -= nb;
  if (e < 0) 
    { /*Clib error */
-     nb = snprintf(p,atmost,(B *)strerror(-e));
+     nb = dm_snprintf(p,atmost,(B *)strerror(-e));
    }
 
  else
    { /* one of our error codes: decode */
        m = geterror(e);
-       nb = snprintf(p,atmost,m);
+       nb = dm_snprintf(p,atmost,m);
    }
  p += nb; atmost -= nb;
- nb = snprintf(p,atmost," in %s\\033[0m\n", (B *)VALUE_BASE(o_2));
+ nb = dm_snprintf(p,atmost," in %s\033[0m\n", (B *)VALUE_BASE(o_2));
  nb += (L)(p - strb);
  TAG(o_4) = ARRAY | BYTETYPE; ATTR(o_4) = READONLY;
  VALUE_BASE(o_4) = (L)strb; ARRAY_SIZE(o_4) = nb;
@@ -286,11 +312,11 @@ if (!VALUE(o_1,&e)) goto baderror;
  op_toconsole();
  if ((ret = op_halt()) == DONE) return DONE;
 
- nb = snprintf(p, atmost, "** Error in internal halt!\n");
+ nb = dm_snprintf(p, atmost, "** Error in internal halt!\n");
  goto baderror2;
 
 baderror: 
- nb = snprintf(p,atmost,
+ nb = dm_snprintf(p,atmost,
 			   "**Error with corrupted error info on operand stack!\n");
 baderror2:
  op_abort();
@@ -324,15 +350,13 @@ if (!VALUE(o_2,&e)) goto baderror;
 if (TAG(o_1) != (ARRAY | BYTETYPE)) goto baderror;
 
 s = (B *)VALUE_BASE(o_1); tnb = ARRAY_SIZE(o_1);
-nb = snprintf(s,tnb,"On %*s port %d: ", (L) ARRAY_SIZE(o_5),
+nb = dm_snprintf(s,tnb,"On %*s port %d: ", (L) ARRAY_SIZE(o_5),
 	      (B *)VALUE_BASE(o_5), LONG_VAL(o_4));
- if (nb > tnb) nb = tnb;
 s += nb; tnb -= nb;
 
 if (e < 0) 
    { /*Clib error */
-     nb = snprintf(s,tnb,(B *)strerror(-e));
-     if (nb > tnb) nb = tnb;
+     nb = dm_snprintf(s,tnb,(B *)strerror(-e));
    }
  else
  { /* one of our error codes: decode */
@@ -342,8 +366,7 @@ if (e < 0)
      moveB(m,s,nb);
  }
 s += nb; tnb -= nb;
-nb = snprintf(s,tnb," in %s\n", (B *)VALUE_BASE(o_3));
- if (nb > tnb) nb = tnb;
+nb = dm_snprintf(s,tnb," in %s\n", (B *)VALUE_BASE(o_3));
 ARRAY_SIZE(o_1) = (L)(s + nb) - VALUE_BASE(o_1);
 moveframe(o_1,o_5);
 FREEopds = o_4;

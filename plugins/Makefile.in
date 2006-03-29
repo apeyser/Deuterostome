@@ -18,8 +18,6 @@
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
-pkglibdir = $(libdir)/@PACKAGE@
-pkgincludedir = $(includedir)/@PACKAGE@
 top_builddir = ..
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 INSTALL = @INSTALL@
@@ -37,10 +35,10 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-DIST_COMMON = $(dist_plugindata_DATA) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/Makefile.plugin \
-	$(srcdir)/dmflex.l.in dmflex.c
 subdir = plugins
+DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in $(srcdir)/dmflex.l.in \
+	$(top_srcdir)/dcode/startup_dgen.d.in dmflex.c
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
@@ -52,15 +50,14 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = dmflex.l
+CONFIG_CLEAN_FILES = dmflex.l startup_dgen.d plugin.d
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
     *) f=$$p;; \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-am__installdirs = "$(DESTDIR)$(pkglibdir)" \
-	"$(DESTDIR)$(plugindatadir)"
+am__installdirs = "$(DESTDIR)$(pkglibdir)"
 pkglibLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(pkglib_LTLIBRARIES)
 dmflex_la_LIBADD =
@@ -103,12 +100,13 @@ SOURCES = $(dmflex_la_SOURCES) $(process_la_SOURCES) \
 DIST_SOURCES = $(dmflex_la_SOURCES) $(process_la_SOURCES) \
 	$(process2_la_SOURCES) $(test_la_SOURCES) $(test2_la_SOURCES) \
 	$(throw_la_SOURCES)
-dist_plugindataDATA_INSTALL = $(INSTALL_DATA)
-DATA = $(dist_plugindata_DATA)
+DATA = $(dist_noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 pkgdatadir = @pkgdatadir@
+pkglibdir = @pkglibdir@
+pkgincludedir = @pkgincludedir@
 ACLOCAL = @ACLOCAL@
 AMDEP_FALSE = @AMDEP_FALSE@
 AMDEP_TRUE = @AMDEP_TRUE@
@@ -119,6 +117,7 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BYTECORRECT = @BYTECORRECT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -146,6 +145,9 @@ EMACSLOADPATH = @EMACSLOADPATH@
 ENABLE_BASH = @ENABLE_BASH@
 ENABLE_BASH_FALSE = @ENABLE_BASH_FALSE@
 ENABLE_BASH_TRUE = @ENABLE_BASH_TRUE@
+ENABLE_DEBUG_DMNUM = @ENABLE_DEBUG_DMNUM@
+ENABLE_DEBUG_DMNUM_FALSE = @ENABLE_DEBUG_DMNUM_FALSE@
+ENABLE_DEBUG_DMNUM_TRUE = @ENABLE_DEBUG_DMNUM_TRUE@
 ENABLE_DMFLEX_FALSE = @ENABLE_DMFLEX_FALSE@
 ENABLE_DMFLEX_TRUE = @ENABLE_DMFLEX_TRUE@
 ENABLE_EMACS_FALSE = @ENABLE_EMACS_FALSE@
@@ -213,6 +215,9 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PCCFLAGS = @PCCFLAGS@
+PCLDFLAGS = @PCLDFLAGS@
+PCLIBS = @PCLIBS@
 PKGCONFIGLIBDIR = @PKGCONFIGLIBDIR@
 PKGDATADIR = @PKGDATADIR@
 PKGLISPDIR = @PKGLISPDIR@
@@ -306,28 +311,25 @@ target_vendor = @target_vendor@
 tmp = @tmp@
 AM_CFLAGS = $(GCC_CFLAGS) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
 AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
-#@LIBPLUGIN_DLL_IMPORT@
 AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
-dist_plugindata_DATA = plugin.m4 Makefile.plugin
 @ENABLE_PROCESS_TRUE@PROCESS_LIB = process.la process2.la
-@ENABLE_PROCESS_TRUE@PLUGIN_LOCAL = yes
-@ENABLE_PROCESS_TRUE@DM_PLUGINDATA_DIR = $(srcdir)
 BUILT_SOURCES = process2.c process2.h dmflex.c
 process_la_SOURCES = process.c process.h
-process2_la_SOURCES = process2.plugin
+process2_la_SOURCES = process2.c process2.h
 @ENABLE_DMFLEX_TRUE@DMFLEX_LIB = dmflex.la
 dmflex_la_SOURCES = dmflex.l dmflex.h
 pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB) 
 test_la_SOURCES = test.c test.h
 test2_la_SOURCES = test2.c test2.h
 throw_la_SOURCES = throw.c throw.h
+dist_noinst_DATA = process2.d
 CLEANFILES = $(BUILT_SOURCES)
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .h .l .lo .o .obj .plugin
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/Makefile.plugin $(am__configure_deps)
+.SUFFIXES: .c .l .lo .o .obj
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -357,6 +359,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 dmflex.l: $(top_builddir)/config.status $(srcdir)/dmflex.l.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+startup_dgen.d: $(top_builddir)/config.status $(top_srcdir)/dcode/startup_dgen.d.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-pkglibLTLIBRARIES: $(pkglib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
@@ -446,23 +450,6 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 uninstall-info-am:
-install-dist_plugindataDATA: $(dist_plugindata_DATA)
-	@$(NORMAL_INSTALL)
-	test -z "$(plugindatadir)" || $(mkdir_p) "$(DESTDIR)$(plugindatadir)"
-	@list='$(dist_plugindata_DATA)'; for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  f=$(am__strip_dir) \
-	  echo " $(dist_plugindataDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(plugindatadir)/$$f'"; \
-	  $(dist_plugindataDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(plugindatadir)/$$f"; \
-	done
-
-uninstall-dist_plugindataDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(dist_plugindata_DATA)'; for p in $$list; do \
-	  f=$(am__strip_dir) \
-	  echo " rm -f '$(DESTDIR)$(plugindatadir)/$$f'"; \
-	  rm -f "$(DESTDIR)$(plugindatadir)/$$f"; \
-	done
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -513,6 +500,7 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
+	$(mkdir_p) $(distdir)/../dcode
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -544,7 +532,7 @@ check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(LTLIBRARIES) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(plugindatadir)"; do \
+	for dir in "$(DESTDIR)$(pkglibdir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -596,7 +584,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dist_plugindataDATA
+install-data-am:
 
 install-exec-am: install-pkglibLTLIBRARIES
 
@@ -624,38 +612,29 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-dist_plugindataDATA uninstall-info-am \
-	uninstall-pkglibLTLIBRARIES
+uninstall-am: uninstall-info-am uninstall-pkglibLTLIBRARIES
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
 	clean-libtool clean-pkglibLTLIBRARIES ctags distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am \
-	install-dist_plugindataDATA install-exec install-exec-am \
-	install-info install-info-am install-man \
+	install install-am install-data install-data-am install-exec \
+	install-exec-am install-info install-info-am install-man \
 	install-pkglibLTLIBRARIES install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-dist_plugindataDATA \
-	uninstall-info-am uninstall-pkglibLTLIBRARIES
+	tags uninstall uninstall-am uninstall-info-am \
+	uninstall-pkglibLTLIBRARIES
 
-@ENABLE_PROCESS_TRUE@.plugin.c:
-@ENABLE_PROCESS_TRUE@	m4 $(M4DEBUG) -P "-I$(srcdir)" \
-@ENABLE_PROCESS_TRUE@		-DPLUGIN_NAME=`echo "$@" | sed -e 's,.c$$,,'` \
-@ENABLE_PROCESS_TRUE@		-DPLUGIN_HEADER=no \
-@ENABLE_PROCESS_TRUE@		-DPLUGIN_LOCAL=$(PLUGIN_LOCAL) \
-@ENABLE_PROCESS_TRUE@		"$(DM_PLUGINDATA_DIR)/plugin.m4" > "$@.tmp"
-@ENABLE_PROCESS_TRUE@	mv "$@.tmp" "$@"
 
-@ENABLE_PROCESS_TRUE@.plugin.h:
-@ENABLE_PROCESS_TRUE@	m4 $(M4DEBUG) -P "-I$(srcdir)" \
-@ENABLE_PROCESS_TRUE@		-DPLUGIN_NAME=`echo "$@" | sed -e 's,.h$$,,'` \
-@ENABLE_PROCESS_TRUE@		-DPLUGIN_HEADER=yes \
-@ENABLE_PROCESS_TRUE@		-DPLUGIN_LOCAL=$(PLUGIN_LOCAL) \
-@ENABLE_PROCESS_TRUE@		"$(DM_PLUGINDATA_DIR)/plugin.m4" > "$@.tmp"
-@ENABLE_PROCESS_TRUE@	mv "$@.tmp" "$@"
+process2.c: process2.d plugin.d
+	"$(top_srcdir)/src/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "process2.d" "$@" true true
+
+process2.h: process2.d plugin.d
+	"$(top_srcdir)/src/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "process2.d" "$@" false true
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -1,5 +1,11 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* align to this many bytes */
+#undef BYTECORRECT
+
+/* enable extra debug in dmnum */
+#undef ENABLE_DEBUG_DMNUM
+
 /* compile or install plugins */
 #undef ENABLE_PLUGINS
 

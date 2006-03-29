@@ -17,11 +17,10 @@
 
 
 
+
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
-pkglibdir = $(libdir)/@PACKAGE@
-pkgincludedir = $(includedir)/@PACKAGE@
 top_builddir = ..
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 INSTALL = @INSTALL@
@@ -39,15 +38,17 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-bin_PROGRAMS = dvt$(EXEEXT) dnode$(EXEEXT)
+bin_PROGRAMS = dvt$(EXEEXT) dnode$(EXEEXT) dgen$(EXEEXT)
 noinst_PROGRAMS = testwordorder$(EXEEXT) $(am__EXEEXT_1)
 subdir = src
-DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/dm1.c $(srcdir)/dm2.c \
-	$(srcdir)/dm3.c $(srcdir)/dm4.c $(srcdir)/dm5.c \
-	$(srcdir)/dm6.c $(srcdir)/dm7.c $(srcdir)/dm8.c \
-	$(srcdir)/dmglobals.c $(srcdir)/dmnum.c $(srcdir)/dsp1.c \
-	$(srcdir)/dsp2.c $(srcdir)/paths.h.in
+DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(dist_pkgdata_SCRIPTS) \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/dgen-build $(srcdir)/dgen.c $(srcdir)/dgen_0.h \
+	$(srcdir)/dgen_1.h $(srcdir)/dm.pc.in $(srcdir)/dm1.c \
+	$(srcdir)/dm2.c $(srcdir)/dm3.c $(srcdir)/dm4.c \
+	$(srcdir)/dm5.c $(srcdir)/dm6.c $(srcdir)/dm7.c \
+	$(srcdir)/dm8.c $(srcdir)/dmglobals.c $(srcdir)/dmnum.c \
+	$(srcdir)/dsp1.c $(srcdir)/dsp2.c $(srcdir)/paths.h.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
@@ -59,7 +60,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = dsp1f.h dmnuminc.h
+CONFIG_CLEAN_FILES = dm.pc dsp1f.h dmnuminc.h
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -67,10 +68,19 @@ am__vpath_adj = case $$p in \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
-	"$(DESTDIR)$(pkgconfiglibdir)" "$(DESTDIR)$(pkgincludedir)" \
-	"$(DESTDIR)$(pkgincludedir)"
+	"$(DESTDIR)$(pkgdatadir)" "$(DESTDIR)$(pkgconfiglibdir)" \
+	"$(DESTDIR)$(pkgincludedir)" "$(DESTDIR)$(pkgincludedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
+libdmbootstrap_la_LIBADD =
+am_libdmbootstrap_la_OBJECTS = libdmbootstrap_la-dmglobals.lo \
+	libdmbootstrap_la-dm1.lo libdmbootstrap_la-dm2.lo \
+	libdmbootstrap_la-dm3.lo libdmbootstrap_la-dm4.lo \
+	libdmbootstrap_la-dm5.lo libdmbootstrap_la-dm6.lo \
+	libdmbootstrap_la-dm7.lo libdmbootstrap_la-dm8.lo \
+	libdmbootstrap_la-dmnum.lo libdmbootstrap_la-dsp1.lo \
+	libdmbootstrap_la-dsp2.lo
+libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
 am__DEPENDENCIES_1 =
 libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am__libdmglobals_la_SOURCES_DIST = dmglobals.c dm1.c dm2.c dm3.c dm4.c \
@@ -84,6 +94,9 @@ libdmglobals_la_OBJECTS = $(am_libdmglobals_la_OBJECTS)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 @ENABLE_SETUID_TRUE@am__EXEEXT_1 = dnode-nice$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+am_dgen_OBJECTS = dgen-dgen.$(OBJEXT)
+dgen_OBJECTS = $(am_dgen_OBJECTS)
+dgen_DEPENDENCIES = libdmbootstrap.la
 am_dnode_OBJECTS = dnode-dnode.$(OBJEXT)
 dnode_OBJECTS = $(am_dnode_OBJECTS)
 dnode_DEPENDENCIES = libdmglobals.la
@@ -96,6 +109,8 @@ dvt_DEPENDENCIES = libdmglobals.la
 am_testwordorder_OBJECTS = test-word-order.$(OBJEXT)
 testwordorder_OBJECTS = $(am_testwordorder_OBJECTS)
 testwordorder_LDADD = $(LDADD)
+dist_pkgdataSCRIPT_INSTALL = $(INSTALL_SCRIPT)
+SCRIPTS = $(dist_pkgdata_SCRIPTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -107,22 +122,32 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libdmglobals_la_SOURCES) $(dnode_SOURCES) \
-	$(nodist_dnode_nice_SOURCES) $(dvt_SOURCES) \
-	$(testwordorder_SOURCES)
-DIST_SOURCES = $(am__libdmglobals_la_SOURCES_DIST) $(dnode_SOURCES) \
+SOURCES = $(libdmbootstrap_la_SOURCES) $(libdmglobals_la_SOURCES) \
+	$(dgen_SOURCES) $(dnode_SOURCES) $(nodist_dnode_nice_SOURCES) \
 	$(dvt_SOURCES) $(testwordorder_SOURCES)
+DIST_SOURCES = $(libdmbootstrap_la_SOURCES) \
+	$(am__libdmglobals_la_SOURCES_DIST) $(dgen_SOURCES) \
+	$(dnode_SOURCES) $(dvt_SOURCES) $(testwordorder_SOURCES)
+RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
+	html-recursive info-recursive install-data-recursive \
+	install-exec-recursive install-info-recursive \
+	install-recursive installcheck-recursive installdirs-recursive \
+	pdf-recursive ps-recursive uninstall-info-recursive \
+	uninstall-recursive
 nodist_pkgconfiglibDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(nodist_pkgconfiglib_DATA)
 nodist_pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 am__pkginclude_HEADERS_DIST = dm.h plugin.h pluginlib.h dmx.h \
-	threads.h error-local.h
+	threads.h error-local.h dm-snprintf.h
 pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(nodist_pkginclude_HEADERS) $(pkginclude_HEADERS)
 ETAGS = etags
 CTAGS = ctags
+DIST_SUBDIRS = $(SUBDIRS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 pkgdatadir = @pkgdatadir@
+pkglibdir = @pkglibdir@
+pkgincludedir = @pkgincludedir@
 ACLOCAL = @ACLOCAL@
 AMDEP_FALSE = @AMDEP_FALSE@
 AMDEP_TRUE = @AMDEP_TRUE@
@@ -133,6 +158,7 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BYTECORRECT = @BYTECORRECT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -160,6 +186,9 @@ EMACSLOADPATH = @EMACSLOADPATH@
 ENABLE_BASH = @ENABLE_BASH@
 ENABLE_BASH_FALSE = @ENABLE_BASH_FALSE@
 ENABLE_BASH_TRUE = @ENABLE_BASH_TRUE@
+ENABLE_DEBUG_DMNUM = @ENABLE_DEBUG_DMNUM@
+ENABLE_DEBUG_DMNUM_FALSE = @ENABLE_DEBUG_DMNUM_FALSE@
+ENABLE_DEBUG_DMNUM_TRUE = @ENABLE_DEBUG_DMNUM_TRUE@
 ENABLE_DMFLEX_FALSE = @ENABLE_DMFLEX_FALSE@
 ENABLE_DMFLEX_TRUE = @ENABLE_DMFLEX_TRUE@
 ENABLE_EMACS_FALSE = @ENABLE_EMACS_FALSE@
@@ -227,6 +256,9 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PCCFLAGS = @PCCFLAGS@
+PCLDFLAGS = @PCLDFLAGS@
+PCLIBS = @PCLIBS@
 PKGCONFIGLIBDIR = @PKGCONFIGLIBDIR@
 PKGDATADIR = @PKGDATADIR@
 PKGLISPDIR = @PKGLISPDIR@
@@ -318,6 +350,7 @@ target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
 tmp = @tmp@
+SUBDIRS = codegen
 @ENABLE_SETUID_TRUE@nodist_dnode_nice_SOURCES = dnode-nice.c
 @ENABLE_SETUID_TRUE@DNODENICEBIN = dnode-nice
 @ENABLE_SETUID_TRUE@edit = sed \
@@ -325,11 +358,7 @@ tmp = @tmp@
 
 @ENABLE_THREADS_TRUE@THREAD_HDR = threads.h
 @ENABLE_THREADS_TRUE@THREADSRC = threads.c
-EXTRA_DIST = codegen/buildh codegen/dgen_0.h codegen/dgen_1.h \
-	codegen/dgen.c codegen/dmnuminc.d.in codegen/dmnuminc.h \
-	codegen/dmnuminc.h.built codegen/dsp1f.d codegen/dsp1f.h \
-	codegen/dsp1f.h.built codegen/Makefile.am codegen/Makefile.in \
-	codegen/startup_dgen.d.in dnode-nice.c.in paths.h.in dm.pc.in
+EXTRA_DIST = dnode-nice.c.in paths.h.in
 DISTCLEANFILES = dm-config.h
 AM_CPPFLAGS = -DDM_HAVE_CONFIG_H
 AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
@@ -338,7 +367,7 @@ INCLUDE = @INCLTDL@
 @ENABLE_PLUGINS_TRUE@PLUGIN_HDR = plugin.h pluginlib.h
 @ENABLE_PLUGINS_TRUE@PLUGIN_LD = @LIBLTDL@
 pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
-	error-local.h
+	error-local.h dm-snprintf.h
 
 nodist_pkginclude_HEADERS = dm-config.h  paths.h
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h
@@ -349,13 +378,13 @@ dnode_LDADD = libdmglobals.la
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 testwordorder_SOURCES = test-word-order.c
 BUILT_SOURCES = paths.h dnode-nice.c
-CLEANFILES = paths.h dnode-nice.c dm.pc
-lib_LTLIBRARIES = libdmglobals.la
+CLEANFILES = paths.h dnode-nice.c
+lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la
 libdmglobals_la_LIBADD = $(PLUGIN_LD)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	dmnum.c dsp1.c dsp2.c error-local.h \
-	plugin.c pluginlib.h $(THREADSRC)
+	plugin.c pluginlib.h $(THREADSRC) 
 
 editpaths = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
@@ -363,30 +392,17 @@ editpaths = sed \
 	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 	-e 's,[@]dmconfdir[@],$(dmconfdir),g'
 
-pgkconfiglibdir = @pkgconfiglibdir@
-PCCFLAGS = $(GCC_CFLAGS) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
-PCLIBS = -ldmglobals
-PCLDFLAGS = -module -no-undefined
-editpkgconfig = sed \
-	-e 's,[@]prefix[@],$(prefix),g' \
-	-e 's,[@]exec_prefix[@],$(exec_prefix),g' \
-	-e 's,[@]pkgincludedir[@],$(pkgincludedir),g' \
-	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
-	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \
-	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
-	-e 's,[@]dmconfdir[@],$(dmconfdir),g' \
-	-e 's,[@]PACKAGE_NAME[@],$(PACKAGE_NAME),g' \
-	-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
-	-e 's,[@]LIBS[@],$(PCLIBS),g' \
-	-e 's,[@]CFLAGS[@],$(PCCFLAGS),g' \
-	-e 's,[@]LDFLAGS[@],$(PCLDFLAGS),g' \
-	-e 's,[@]pkgdatadir[@],$(pkgdatadir),g' \
-	-e 's,[@]m4datadir[@],$(m4datadir),g' \
-	-e 's,[@]plugindatadir[@],$(plugindatadir),g' 
-
 nodist_pkgconfiglib_DATA = dm.pc
+dist_pkgdata_SCRIPTS = dgen-build
+libdmbootstrap_la_SOURCES = dmglobals.c dm1.c dm2.c dm3.c dm4.c dm5.c \
+	dm6.c dm7.c dm8.c dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h  paths.h
+
+libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) -DDM_DISABLE_THREADS=1
+dgen_SOURCES = dgen.c dgen_0.h dgen_1.h
+dgen_CFLAGS = $(AM_CPPFLAGS) @LIBDM_DLL_IMPORT@
+dgen_LDADD = libdmbootstrap.la
 all: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) all-am
+	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
@@ -419,6 +435,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+dm.pc: $(top_builddir)/config.status $(srcdir)/dm.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
 	test -z "$(libdir)" || $(mkdir_p) "$(DESTDIR)$(libdir)"
@@ -446,6 +464,8 @@ clean-libLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
+libdmbootstrap.la: $(libdmbootstrap_la_OBJECTS) $(libdmbootstrap_la_DEPENDENCIES) 
+	$(LINK) -rpath $(libdir) $(libdmbootstrap_la_LDFLAGS) $(libdmbootstrap_la_OBJECTS) $(libdmbootstrap_la_LIBADD) $(LIBS)
 libdmglobals.la: $(libdmglobals_la_OBJECTS) $(libdmglobals_la_DEPENDENCIES) 
 	$(LINK) -rpath $(libdir) $(libdmglobals_la_LDFLAGS) $(libdmglobals_la_OBJECTS) $(libdmglobals_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
@@ -483,6 +503,9 @@ clean-noinstPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+dgen$(EXEEXT): $(dgen_OBJECTS) $(dgen_DEPENDENCIES) 
+	@rm -f dgen$(EXEEXT)
+	$(LINK) $(dgen_LDFLAGS) $(dgen_OBJECTS) $(dgen_LDADD) $(LIBS)
 dnode$(EXEEXT): $(dnode_OBJECTS) $(dnode_DEPENDENCIES) 
 	@rm -f dnode$(EXEEXT)
 	$(LINK) $(dnode_LDFLAGS) $(dnode_OBJECTS) $(dnode_LDADD) $(LIBS)
@@ -495,6 +518,25 @@ dvt$(EXEEXT): $(dvt_OBJECTS) $(dvt_DEPENDENCIES)
 testwordorder$(EXEEXT): $(testwordorder_OBJECTS) $(testwordorder_DEPENDENCIES) 
 	@rm -f testwordorder$(EXEEXT)
 	$(LINK) $(testwordorder_LDFLAGS) $(testwordorder_OBJECTS) $(testwordorder_LDADD) $(LIBS)
+install-dist_pkgdataSCRIPTS: $(dist_pkgdata_SCRIPTS)
+	@$(NORMAL_INSTALL)
+	test -z "$(pkgdatadir)" || $(mkdir_p) "$(DESTDIR)$(pkgdatadir)"
+	@list='$(dist_pkgdata_SCRIPTS)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  if test -f $$d$$p; then \
+	    f=`echo "$$p" | sed 's|^.*/||;$(transform)'`; \
+	    echo " $(dist_pkgdataSCRIPT_INSTALL) '$$d$$p' '$(DESTDIR)$(pkgdatadir)/$$f'"; \
+	    $(dist_pkgdataSCRIPT_INSTALL) "$$d$$p" "$(DESTDIR)$(pkgdatadir)/$$f"; \
+	  else :; fi; \
+	done
+
+uninstall-dist_pkgdataSCRIPTS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(dist_pkgdata_SCRIPTS)'; for p in $$list; do \
+	  f=`echo "$$p" | sed 's|^.*/||;$(transform)'`; \
+	  echo " rm -f '$(DESTDIR)$(pkgdatadir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(pkgdatadir)/$$f"; \
+	done
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -502,6 +544,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dgen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm3.Plo@am__quote@
@@ -518,6 +561,18 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsp1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsp2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvt-dvt.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm1.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm3.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm4.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm5.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm6.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm7.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm8.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dmglobals.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dmnum.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dsp1.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dsp2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-word-order.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/threads.Plo@am__quote@
@@ -542,6 +597,104 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+libdmbootstrap_la-dmglobals.lo: dmglobals.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dmglobals.lo -MD -MP -MF "$(DEPDIR)/libdmbootstrap_la-dmglobals.Tpo" -c -o libdmbootstrap_la-dmglobals.lo `test -f 'dmglobals.c' || echo '$(srcdir)/'`dmglobals.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libdmbootstrap_la-dmglobals.Tpo" "$(DEPDIR)/libdmbootstrap_la-dmglobals.Plo"; else rm -f "$(DEPDIR)/libdmbootstrap_la-dmglobals.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dmglobals.c' object='libdmbootstrap_la-dmglobals.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dmglobals.lo `test -f 'dmglobals.c' || echo '$(srcdir)/'`dmglobals.c
+
+libdmbootstrap_la-dm1.lo: dm1.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dm1.lo -MD -MP -MF "$(DEPDIR)/libdmbootstrap_la-dm1.Tpo" -c -o libdmbootstrap_la-dm1.lo `test -f 'dm1.c' || echo '$(srcdir)/'`dm1.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libdmbootstrap_la-dm1.Tpo" "$(DEPDIR)/libdmbootstrap_la-dm1.Plo"; else rm -f "$(DEPDIR)/libdmbootstrap_la-dm1.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm1.c' object='libdmbootstrap_la-dm1.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dm1.lo `test -f 'dm1.c' || echo '$(srcdir)/'`dm1.c
+
+libdmbootstrap_la-dm2.lo: dm2.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dm2.lo -MD -MP -MF "$(DEPDIR)/libdmbootstrap_la-dm2.Tpo" -c -o libdmbootstrap_la-dm2.lo `test -f 'dm2.c' || echo '$(srcdir)/'`dm2.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libdmbootstrap_la-dm2.Tpo" "$(DEPDIR)/libdmbootstrap_la-dm2.Plo"; else rm -f "$(DEPDIR)/libdmbootstrap_la-dm2.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm2.c' object='libdmbootstrap_la-dm2.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dm2.lo `test -f 'dm2.c' || echo '$(srcdir)/'`dm2.c
+
+libdmbootstrap_la-dm3.lo: dm3.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dm3.lo -MD -MP -MF "$(DEPDIR)/libdmbootstrap_la-dm3.Tpo" -c -o libdmbootstrap_la-dm3.lo `test -f 'dm3.c' || echo '$(srcdir)/'`dm3.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libdmbootstrap_la-dm3.Tpo" "$(DEPDIR)/libdmbootstrap_la-dm3.Plo"; else rm -f "$(DEPDIR)/libdmbootstrap_la-dm3.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm3.c' object='libdmbootstrap_la-dm3.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dm3.lo `test -f 'dm3.c' || echo '$(srcdir)/'`dm3.c
+
+libdmbootstrap_la-dm4.lo: dm4.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dm4.lo -MD -MP -MF "$(DEPDIR)/libdmbootstrap_la-dm4.Tpo" -c -o libdmbootstrap_la-dm4.lo `test -f 'dm4.c' || echo '$(srcdir)/'`dm4.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libdmbootstrap_la-dm4.Tpo" "$(DEPDIR)/libdmbootstrap_la-dm4.Plo"; else rm -f "$(DEPDIR)/libdmbootstrap_la-dm4.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm4.c' object='libdmbootstrap_la-dm4.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dm4.lo `test -f 'dm4.c' || echo '$(srcdir)/'`dm4.c
+
+libdmbootstrap_la-dm5.lo: dm5.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dm5.lo -MD -MP -MF "$(DEPDIR)/libdmbootstrap_la-dm5.Tpo" -c -o libdmbootstrap_la-dm5.lo `test -f 'dm5.c' || echo '$(srcdir)/'`dm5.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libdmbootstrap_la-dm5.Tpo" "$(DEPDIR)/libdmbootstrap_la-dm5.Plo"; else rm -f "$(DEPDIR)/libdmbootstrap_la-dm5.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm5.c' object='libdmbootstrap_la-dm5.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dm5.lo `test -f 'dm5.c' || echo '$(srcdir)/'`dm5.c
+
+libdmbootstrap_la-dm6.lo: dm6.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dm6.lo -MD -MP -MF "$(DEPDIR)/libdmbootstrap_la-dm6.Tpo" -c -o libdmbootstrap_la-dm6.lo `test -f 'dm6.c' || echo '$(srcdir)/'`dm6.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libdmbootstrap_la-dm6.Tpo" "$(DEPDIR)/libdmbootstrap_la-dm6.Plo"; else rm -f "$(DEPDIR)/libdmbootstrap_la-dm6.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm6.c' object='libdmbootstrap_la-dm6.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dm6.lo `test -f 'dm6.c' || echo '$(srcdir)/'`dm6.c
+
+libdmbootstrap_la-dm7.lo: dm7.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dm7.lo -MD -MP -MF "$(DEPDIR)/libdmbootstrap_la-dm7.Tpo" -c -o libdmbootstrap_la-dm7.lo `test -f 'dm7.c' || echo '$(srcdir)/'`dm7.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libdmbootstrap_la-dm7.Tpo" "$(DEPDIR)/libdmbootstrap_la-dm7.Plo"; else rm -f "$(DEPDIR)/libdmbootstrap_la-dm7.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm7.c' object='libdmbootstrap_la-dm7.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dm7.lo `test -f 'dm7.c' || echo '$(srcdir)/'`dm7.c
+
+libdmbootstrap_la-dm8.lo: dm8.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dm8.lo -MD -MP -MF "$(DEPDIR)/libdmbootstrap_la-dm8.Tpo" -c -o libdmbootstrap_la-dm8.lo `test -f 'dm8.c' || echo '$(srcdir)/'`dm8.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libdmbootstrap_la-dm8.Tpo" "$(DEPDIR)/libdmbootstrap_la-dm8.Plo"; else rm -f "$(DEPDIR)/libdmbootstrap_la-dm8.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm8.c' object='libdmbootstrap_la-dm8.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dm8.lo `test -f 'dm8.c' || echo '$(srcdir)/'`dm8.c
+
+libdmbootstrap_la-dmnum.lo: dmnum.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dmnum.lo -MD -MP -MF "$(DEPDIR)/libdmbootstrap_la-dmnum.Tpo" -c -o libdmbootstrap_la-dmnum.lo `test -f 'dmnum.c' || echo '$(srcdir)/'`dmnum.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libdmbootstrap_la-dmnum.Tpo" "$(DEPDIR)/libdmbootstrap_la-dmnum.Plo"; else rm -f "$(DEPDIR)/libdmbootstrap_la-dmnum.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dmnum.c' object='libdmbootstrap_la-dmnum.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dmnum.lo `test -f 'dmnum.c' || echo '$(srcdir)/'`dmnum.c
+
+libdmbootstrap_la-dsp1.lo: dsp1.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dsp1.lo -MD -MP -MF "$(DEPDIR)/libdmbootstrap_la-dsp1.Tpo" -c -o libdmbootstrap_la-dsp1.lo `test -f 'dsp1.c' || echo '$(srcdir)/'`dsp1.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libdmbootstrap_la-dsp1.Tpo" "$(DEPDIR)/libdmbootstrap_la-dsp1.Plo"; else rm -f "$(DEPDIR)/libdmbootstrap_la-dsp1.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dsp1.c' object='libdmbootstrap_la-dsp1.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dsp1.lo `test -f 'dsp1.c' || echo '$(srcdir)/'`dsp1.c
+
+libdmbootstrap_la-dsp2.lo: dsp2.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dsp2.lo -MD -MP -MF "$(DEPDIR)/libdmbootstrap_la-dsp2.Tpo" -c -o libdmbootstrap_la-dsp2.lo `test -f 'dsp2.c' || echo '$(srcdir)/'`dsp2.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libdmbootstrap_la-dsp2.Tpo" "$(DEPDIR)/libdmbootstrap_la-dsp2.Plo"; else rm -f "$(DEPDIR)/libdmbootstrap_la-dsp2.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dsp2.c' object='libdmbootstrap_la-dsp2.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dsp2.lo `test -f 'dsp2.c' || echo '$(srcdir)/'`dsp2.c
+
+dgen-dgen.o: dgen.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -MT dgen-dgen.o -MD -MP -MF "$(DEPDIR)/dgen-dgen.Tpo" -c -o dgen-dgen.o `test -f 'dgen.c' || echo '$(srcdir)/'`dgen.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dgen-dgen.Tpo" "$(DEPDIR)/dgen-dgen.Po"; else rm -f "$(DEPDIR)/dgen-dgen.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dgen.c' object='dgen-dgen.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dgen.o `test -f 'dgen.c' || echo '$(srcdir)/'`dgen.c
+
+dgen-dgen.obj: dgen.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -MT dgen-dgen.obj -MD -MP -MF "$(DEPDIR)/dgen-dgen.Tpo" -c -o dgen-dgen.obj `if test -f 'dgen.c'; then $(CYGPATH_W) 'dgen.c'; else $(CYGPATH_W) '$(srcdir)/dgen.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dgen-dgen.Tpo" "$(DEPDIR)/dgen-dgen.Po"; else rm -f "$(DEPDIR)/dgen-dgen.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dgen.c' object='dgen-dgen.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dgen.obj `if test -f 'dgen.c'; then $(CYGPATH_W) 'dgen.c'; else $(CYGPATH_W) '$(srcdir)/dgen.c'; fi`
 
 dnode-dnode.o: dnode.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dnode.o -MD -MP -MF "$(DEPDIR)/dnode-dnode.Tpo" -c -o dnode-dnode.o `test -f 'dnode.c' || echo '$(srcdir)/'`dnode.c; \
@@ -632,6 +785,77 @@ uninstall-pkgincludeHEADERS:
 	  rm -f "$(DESTDIR)$(pkgincludedir)/$$f"; \
 	done
 
+# This directory's subdirectories are mostly independent; you can cd
+# into them and run `make' without going through this Makefile.
+# To change the values of `make' variables: instead of editing Makefiles,
+# (1) if the variable is set in `config.status', edit `config.status'
+#     (which will cause the Makefiles to be regenerated when you run `make');
+# (2) otherwise, pass the desired values on the `make' command line.
+$(RECURSIVE_TARGETS):
+	@failcom='exit 1'; \
+	for f in x $$MAKEFLAGS; do \
+	  case $$f in \
+	    *=* | --[!k]*);; \
+	    *k*) failcom='fail=yes';; \
+	  esac; \
+	done; \
+	dot_seen=no; \
+	target=`echo $@ | sed s/-recursive//`; \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  echo "Making $$target in $$subdir"; \
+	  if test "$$subdir" = "."; then \
+	    dot_seen=yes; \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
+	  || eval $$failcom; \
+	done; \
+	if test "$$dot_seen" = "no"; then \
+	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
+	fi; test -z "$$fail"
+
+mostlyclean-recursive clean-recursive distclean-recursive \
+maintainer-clean-recursive:
+	@failcom='exit 1'; \
+	for f in x $$MAKEFLAGS; do \
+	  case $$f in \
+	    *=* | --[!k]*);; \
+	    *k*) failcom='fail=yes';; \
+	  esac; \
+	done; \
+	dot_seen=no; \
+	case "$@" in \
+	  distclean-* | maintainer-clean-*) list='$(DIST_SUBDIRS)' ;; \
+	  *) list='$(SUBDIRS)' ;; \
+	esac; \
+	rev=''; for subdir in $$list; do \
+	  if test "$$subdir" = "."; then :; else \
+	    rev="$$subdir $$rev"; \
+	  fi; \
+	done; \
+	rev="$$rev ."; \
+	target=`echo $@ | sed s/-recursive//`; \
+	for subdir in $$rev; do \
+	  echo "Making $$target in $$subdir"; \
+	  if test "$$subdir" = "."; then \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
+	  || eval $$failcom; \
+	done && test -z "$$fail"
+tags-recursive:
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  test "$$subdir" = . || (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) tags); \
+	done
+ctags-recursive:
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  test "$$subdir" = . || (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) ctags); \
+	done
+
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
@@ -642,10 +866,23 @@ ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	mkid -fID $$unique
 tags: TAGS
 
-TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+TAGS: tags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	tags=; \
 	here=`pwd`; \
+	if ($(ETAGS) --etags-include --version) >/dev/null 2>&1; then \
+	  include_option=--etags-include; \
+	  empty_fix=.; \
+	else \
+	  include_option=--include; \
+	  empty_fix=; \
+	fi; \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  if test "$$subdir" = .; then :; else \
+	    test ! -f $$subdir/TAGS || \
+	      tags="$$tags $$include_option=$$here/$$subdir/TAGS"; \
+	  fi; \
+	done; \
 	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
 	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
@@ -658,7 +895,7 @@ TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 	    $$tags $$unique; \
 	fi
 ctags: CTAGS
-CTAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+CTAGS: ctags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	tags=; \
 	here=`pwd`; \
@@ -681,7 +918,6 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
-	$(mkdir_p) $(distdir)/codegen
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -708,26 +944,43 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
+	list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
+	  if test "$$subdir" = .; then :; else \
+	    test -d "$(distdir)/$$subdir" \
+	    || $(mkdir_p) "$(distdir)/$$subdir" \
+	    || exit 1; \
+	    distdir=`$(am__cd) $(distdir) && pwd`; \
+	    top_distdir=`$(am__cd) $(top_distdir) && pwd`; \
+	    (cd $$subdir && \
+	      $(MAKE) $(AM_MAKEFLAGS) \
+	        top_distdir="$$top_distdir" \
+	        distdir="$$distdir/$$subdir" \
+	        distdir) \
+	      || exit 1; \
+	  fi; \
+	done
 check-am: all-am
 check: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) check-am
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(DATA) $(HEADERS)
+	$(MAKE) $(AM_MAKEFLAGS) check-recursive
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(SCRIPTS) $(DATA) \
+		$(HEADERS)
 install-binPROGRAMS: install-libLTLIBRARIES
 
-installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgconfiglibdir)" "$(DESTDIR)$(pkgincludedir)" "$(DESTDIR)$(pkgincludedir)"; do \
+installdirs: installdirs-recursive
+installdirs-am:
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgdatadir)" "$(DESTDIR)$(pkgconfiglibdir)" "$(DESTDIR)$(pkgincludedir)" "$(DESTDIR)$(pkgincludedir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) install-am
-install-exec: install-exec-am
-install-data: install-data-am
-uninstall: uninstall-am
+	$(MAKE) $(AM_MAKEFLAGS) install-recursive
+install-exec: install-exec-recursive
+install-data: install-data-recursive
+uninstall: uninstall-recursive
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 
-installcheck: installcheck-am
+installcheck: installcheck-recursive
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
 	  install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
@@ -748,79 +1001,84 @@ maintainer-clean-generic:
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 @ENABLE_SETUID_FALSE@uninstall-local:
 @ENABLE_SETUID_FALSE@install-exec-local:
-clean: clean-am
+clean: clean-recursive
 
 clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
 	clean-libtool clean-local clean-noinstPROGRAMS mostlyclean-am
 
-distclean: distclean-am
+distclean: distclean-recursive
 	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-libtool distclean-local distclean-tags
 
-dvi: dvi-am
+dvi: dvi-recursive
 
 dvi-am:
 
-html: html-am
+html: html-recursive
 
-info: info-am
+info: info-recursive
 
 info-am:
 
-install-data-am: install-nodist_pkgconfiglibDATA \
+install-data-am: install-dist_pkgdataSCRIPTS \
+	install-nodist_pkgconfiglibDATA \
 	install-nodist_pkgincludeHEADERS install-pkgincludeHEADERS
 
 install-exec-am: install-binPROGRAMS install-exec-local \
 	install-libLTLIBRARIES
 
-install-info: install-info-am
+install-info: install-info-recursive
 
 install-man:
 
 installcheck-am:
 
-maintainer-clean: maintainer-clean-am
+maintainer-clean: maintainer-clean-recursive
 	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
-mostlyclean: mostlyclean-am
+mostlyclean: mostlyclean-recursive
 
 mostlyclean-am: mostlyclean-compile mostlyclean-generic \
 	mostlyclean-libtool
 
-pdf: pdf-am
+pdf: pdf-recursive
 
 pdf-am:
 
-ps: ps-am
+ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
-	uninstall-libLTLIBRARIES uninstall-local \
+uninstall-am: uninstall-binPROGRAMS uninstall-dist_pkgdataSCRIPTS \
+	uninstall-info-am uninstall-libLTLIBRARIES uninstall-local \
 	uninstall-nodist_pkgconfiglibDATA \
 	uninstall-nodist_pkgincludeHEADERS uninstall-pkgincludeHEADERS
 
-.PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
-	clean-generic clean-libLTLIBRARIES clean-libtool clean-local \
-	clean-noinstPROGRAMS ctags distclean distclean-compile \
+uninstall-info: uninstall-info-recursive
+
+.PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am check check-am \
+	clean clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool clean-local clean-noinstPROGRAMS clean-recursive \
+	ctags ctags-recursive distclean distclean-compile \
 	distclean-generic distclean-libtool distclean-local \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-binPROGRAMS install-data \
-	install-data-am install-exec install-exec-am \
-	install-exec-local install-info install-info-am \
-	install-libLTLIBRARIES install-man \
+	distclean-recursive distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-dist_pkgdataSCRIPTS \
+	install-exec install-exec-am install-exec-local install-info \
+	install-info-am install-libLTLIBRARIES install-man \
 	install-nodist_pkgconfiglibDATA \
 	install-nodist_pkgincludeHEADERS install-pkgincludeHEADERS \
 	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-info-am \
-	uninstall-libLTLIBRARIES uninstall-local \
+	installdirs-am maintainer-clean maintainer-clean-generic \
+	maintainer-clean-recursive mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool mostlyclean-recursive \
+	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-dist_pkgdataSCRIPTS \
+	uninstall-info-am uninstall-libLTLIBRARIES uninstall-local \
 	uninstall-nodist_pkgconfiglibDATA \
 	uninstall-nodist_pkgincludeHEADERS uninstall-pkgincludeHEADERS
 
@@ -851,12 +1109,7 @@ paths.h: paths.h.in Makefile
 
 gencode-all: gencode all
 gencode:
-	cd codegen && $(MAKE) $(AM_MAKEFLAGS) all
-
-dm.pc: dm.pc.in Makefile
-	-rm -f $@ $@.tmp
-	$(editpkgconfig) $(srcdir)/$@.in > $@.tmp
-	mv $@.tmp $@
+	cd codegen && $(MAKE) $(AM_MAKEFLAGS) gencode
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

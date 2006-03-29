@@ -465,7 +465,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all libltdl"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar EMACS EMACSLOADPATH lispdir MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT NAMEBYTES ENABLE_PLUGINS_TRUE ENABLE_PLUGINS_FALSE ENABLE_PLUGINS ENABLE_PROCESS_TRUE ENABLE_PROCESS_FALSE ENABLE_DMFLEX_TRUE ENABLE_DMFLEX_FALSE LEX CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE LEXLIB LEX_OUTPUT_ROOT STRINGBUF NAMEBYTES_1 SYS_DICT_SIZE MAX_NUM_OPDS MAX_NUM_DICTS MAX_NUM_EXECS MAX_MEM_SIZE MAX_USER_DICT_SIZE ROLLBITS ENABLE_SETUID_TRUE ENABLE_SETUID_FALSE ENABLE_THREADS_TRUE ENABLE_THREADS_FALSE ENABLE_THREADS THREADNUM THREADMUL NO_PTHREAD_CFLAGS NO_PTHREAD_CC NO_PTHREAD_LIBS acx_pthread_config PTHREAD_CC PTHREAD_LIBS PTHREAD_CFLAGS DMBINDIR dmbindir PKGDATADIR pkgdatadir DMSTARTDIR dmstartdir DMCONFDIR dmconfdir M4DATADIR m4datadir PLUGINDATADIR plugindatadir PKGPSDATADIR pkgpsdatadir PKGLISPDIR pkglispdir TMP tmp PKGCONFIGLIBDIR pkgconfiglibdir ENABLE_UNIX_SOCKETS_TRUE ENABLE_UNIX_SOCKETS_FALSE ENABLE_UNIX_SOCKETS DMSOCKDIR dmsockdir guipdf ENABLE_BASH ENABLE_BASH_TRUE ENABLE_BASH_FALSE ENABLE_ENV ENABLE_ENV_TRUE ENABLE_ENV_FALSE GUIPDF ENABLE_EMACS_TRUE ENABLE_EMACS_FALSE CPP EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB DLLTOOL ac_ct_DLLTOOL AS ac_ct_AS OBJDUMP ac_ct_OBJDUMP CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CXXCPP F77 FFLAGS ac_ct_F77 LIBTOOL LIBTOOL_DEP X_CFLAGS X_PRE_LIBS X_LIBS X_EXTRA_LIBS X_DISPLAY_MISSING_TRUE X_DISPLAY_MISSING_FALSE X_DISPLAY_MISSING X_LDFLAGS GCC_CFLAGS INCLTDL LIBLTDL subdirs LIBDM_DLL_IMPORT LIBPLUGIN_DLL_IMPORT LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar EMACS EMACSLOADPATH lispdir MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT NAMEBYTES ENABLE_PLUGINS_TRUE ENABLE_PLUGINS_FALSE ENABLE_PLUGINS ENABLE_PROCESS_TRUE ENABLE_PROCESS_FALSE ENABLE_DMFLEX_TRUE ENABLE_DMFLEX_FALSE LEX CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE LEXLIB LEX_OUTPUT_ROOT STRINGBUF NAMEBYTES_1 SYS_DICT_SIZE MAX_NUM_OPDS MAX_NUM_DICTS MAX_NUM_EXECS MAX_MEM_SIZE MAX_USER_DICT_SIZE ROLLBITS BYTECORRECT ENABLE_DEBUG_DMNUM_TRUE ENABLE_DEBUG_DMNUM_FALSE ENABLE_DEBUG_DMNUM ENABLE_SETUID_TRUE ENABLE_SETUID_FALSE ENABLE_THREADS_TRUE ENABLE_THREADS_FALSE ENABLE_THREADS THREADNUM THREADMUL NO_PTHREAD_CFLAGS NO_PTHREAD_CC NO_PTHREAD_LIBS acx_pthread_config PTHREAD_CC PTHREAD_LIBS PTHREAD_CFLAGS DMBINDIR dmbindir PKGDATADIR pkgdatadir DMSTARTDIR dmstartdir DMCONFDIR dmconfdir M4DATADIR m4datadir PLUGINDATADIR plugindatadir PKGPSDATADIR pkgpsdatadir PKGLISPDIR pkglispdir TMP tmp PKGCONFIGLIBDIR pkgconfiglibdir ENABLE_UNIX_SOCKETS_TRUE ENABLE_UNIX_SOCKETS_FALSE ENABLE_UNIX_SOCKETS DMSOCKDIR dmsockdir guipdf ENABLE_BASH ENABLE_BASH_TRUE ENABLE_BASH_FALSE ENABLE_ENV ENABLE_ENV_TRUE ENABLE_ENV_FALSE GUIPDF ENABLE_EMACS_TRUE ENABLE_EMACS_FALSE CPP EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB DLLTOOL ac_ct_DLLTOOL AS ac_ct_AS OBJDUMP ac_ct_OBJDUMP CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CXXCPP F77 FFLAGS ac_ct_F77 LIBTOOL LIBTOOL_DEP X_CFLAGS X_PRE_LIBS X_LIBS X_EXTRA_LIBS X_DISPLAY_MISSING_TRUE X_DISPLAY_MISSING_FALSE X_DISPLAY_MISSING X_LDFLAGS GCC_CFLAGS INCLTDL LIBLTDL subdirs LIBDM_DLL_IMPORT LIBPLUGIN_DLL_IMPORT pkglibdir pkgincludedir PCLIBS PCCFLAGS PCLDFLAGS LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -962,6 +962,10 @@ ac_env_ROLLBITS_set=${ROLLBITS+set}
 ac_env_ROLLBITS_value=$ROLLBITS
 ac_cv_env_ROLLBITS_set=${ROLLBITS+set}
 ac_cv_env_ROLLBITS_value=$ROLLBITS
+ac_env_BYTECORRECT_set=${BYTECORRECT+set}
+ac_env_BYTECORRECT_value=$BYTECORRECT
+ac_cv_env_BYTECORRECT_set=${BYTECORRECT+set}
+ac_cv_env_BYTECORRECT_value=$BYTECORRECT
 ac_env_THREADNUM_set=${THREADNUM+set}
 ac_env_THREADNUM_value=$THREADNUM
 ac_cv_env_THREADNUM_set=${THREADNUM+set}
@@ -1135,6 +1139,7 @@ Optional Features:
   --enable-dmflex         compile or install dmflex plugin (yes)
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
+  --enable-debug-dmnum    enable extra debug in dmnum (no)
   --enable-setuid         compile or install setuid wrapper (yes)
   --enable-threads        compile and install threads, value is default number
                           (1)
@@ -1183,6 +1188,7 @@ Some influential environment variables:
   MAX_USER_DICT_SIZE
               maximum user dict size, default=5000
   ROLLBITS    unroll math loops to 2^rollbits, default=3
+  BYTECORRECT align to this many bytes, default=8
   THREADNUM   max number of threads, default=8
   THREADMUL   min unrolls per thread, default=4
   DMBINDIR    location for dm binary, default=${bindir}/${PACKAGE}
@@ -2192,6 +2198,9 @@ am__tar='${AMTAR} chof - "$$tardir"'; am__untar='${AMTAR} xf -'
 
 
           ac_config_commands="$ac_config_commands src/dm-config.h"
+
+
+          ac_config_commands="$ac_config_commands src/codegen/dm-config.h"
 
  # If set to t, that means we are running in a shell under Emacs.
  # If you have an Emacs named "t", then use the full path.
@@ -3931,6 +3940,70 @@ _ACEOF
 
   echo "$as_me:$LINENO: result: setting to ${ROLLBITS}" >&5
 echo "${ECHO_T}setting to ${ROLLBITS}" >&6
+
+  cf_ac_cv_arg_val="BYTECORRECT"
+  echo "$as_me:$LINENO: checking if ${cf_ac_cv_arg_val} is set" >&5
+echo $ECHO_N "checking if ${cf_ac_cv_arg_val} is set... $ECHO_C" >&6
+
+  if test "${BYTECORRECT-set}" == set ; then BYTECORRECT="8"; fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define BYTECORRECT ${BYTECORRECT}
+_ACEOF
+
+  echo "$as_me:$LINENO: result: setting to ${BYTECORRECT}" >&5
+echo "${ECHO_T}setting to ${BYTECORRECT}" >&6
+    echo "$as_me:$LINENO: checking if debug-dmnum is enabled" >&5
+echo $ECHO_N "checking if debug-dmnum is enabled... $ECHO_C" >&6
+            if test "${enable_debug_dmnum-set}" == set ; then enable_debug_dmnum='no'; fi
+  if test x"${enable_debug_dmnum}" == x"yes" ; then enable_debug_dmnum='yes'; fi
+  # Check whether --enable-debug-dmnum or --disable-debug-dmnum was given.
+if test "${enable_debug_dmnum+set}" = set; then
+  enableval="$enable_debug_dmnum"
+
+fi;
+
+
+if test "${enable_debug_dmnum-no}" != "no"; then
+  ENABLE_DEBUG_DMNUM_TRUE=
+  ENABLE_DEBUG_DMNUM_FALSE='#'
+else
+  ENABLE_DEBUG_DMNUM_TRUE='#'
+  ENABLE_DEBUG_DMNUM_FALSE=
+fi
+
+  if test "${enable_debug_dmnum-no}" == "no" ; then
+    echo "$as_me:$LINENO: result: no, not enabled" >&5
+echo "${ECHO_T}no, not enabled" >&6
+  else
+    echo "$as_me:$LINENO: result: yes, enabled (${enable_debug_dmnum})" >&5
+echo "${ECHO_T}yes, enabled (${enable_debug_dmnum})" >&6
+  fi
+
+      if test x"${enable_debug_dmnum-no}" != x"no" ; then
+
+	  case "${enable_debug_dmnum-no}" in
+    yes) cf_ac_define_if_enabled_define=1 ;;
+	*) cf_ac_define_if_enabled_define="${enable_debug_dmnum-no}" ;;
+  esac
+    if test "${cf_ac_define_if_enabled_define}" != "no" ; then
+
+cat >>confdefs.h <<_ACEOF
+#define ENABLE_DEBUG_DMNUM ${cf_ac_define_if_enabled_define}
+_ACEOF
+
+  fi
+
+
+    fi
+
+
+
+  ENABLE_DEBUG_DMNUM="${enable_debug_dmnum-no}"
+
+
+
 
   echo "$as_me:$LINENO: checking if setuid is enabled" >&5
 echo $ECHO_N "checking if setuid is enabled... $ECHO_C" >&6
@@ -7364,7 +7437,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7367 "configure"' > conftest.$ac_ext
+  echo '#line 7440 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8730,7 +8803,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:8733:" \
+echo "$as_me:8806:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -9873,11 +9946,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9876: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9949: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9880: \$? = $ac_status" >&5
+   echo "$as_me:9953: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10135,11 +10208,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10138: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10211: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10142: \$? = $ac_status" >&5
+   echo "$as_me:10215: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10197,11 +10270,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10200: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10273: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10204: \$? = $ac_status" >&5
+   echo "$as_me:10277: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11628,7 +11701,7 @@ linux*)
   libsuff=
   case "$host_cpu" in
   x86_64*)
-    echo '#line 11631 "configure"' > conftest.$ac_ext
+    echo '#line 11704 "configure"' > conftest.$ac_ext
     if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -12492,7 +12565,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12495 "configure"
+#line 12568 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12590,7 +12663,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12593 "configure"
+#line 12666 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14842,11 +14915,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14845: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14918: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14849: \$? = $ac_status" >&5
+   echo "$as_me:14922: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14904,11 +14977,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14907: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14980: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14911: \$? = $ac_status" >&5
+   echo "$as_me:14984: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15464,7 +15537,7 @@ linux*)
   libsuff=
   case "$host_cpu" in
   x86_64*)
-    echo '#line 15467 "configure"' > conftest.$ac_ext
+    echo '#line 15540 "configure"' > conftest.$ac_ext
     if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -16328,7 +16401,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 16331 "configure"
+#line 16404 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16426,7 +16499,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 16429 "configure"
+#line 16502 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -17311,11 +17384,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17314: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17387: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17318: \$? = $ac_status" >&5
+   echo "$as_me:17391: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17373,11 +17446,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17376: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17449: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17380: \$? = $ac_status" >&5
+   echo "$as_me:17453: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18784,7 +18857,7 @@ linux*)
   libsuff=
   case "$host_cpu" in
   x86_64*)
-    echo '#line 18787 "configure"' > conftest.$ac_ext
+    echo '#line 18860 "configure"' > conftest.$ac_ext
     if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -19554,11 +19627,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19557: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19630: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:19561: \$? = $ac_status" >&5
+   echo "$as_me:19634: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -19816,11 +19889,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19819: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19892: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:19823: \$? = $ac_status" >&5
+   echo "$as_me:19896: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -19878,11 +19951,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19881: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19954: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:19885: \$? = $ac_status" >&5
+   echo "$as_me:19958: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -21309,7 +21382,7 @@ linux*)
   libsuff=
   case "$host_cpu" in
   x86_64*)
-    echo '#line 21312 "configure"' > conftest.$ac_ext
+    echo '#line 21385 "configure"' > conftest.$ac_ext
     if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -22173,7 +22246,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 22176 "configure"
+#line 22249 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -22271,7 +22344,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 22274 "configure"
+#line 22347 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -31322,11 +31395,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:31325: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:31398: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:31329: \$? = $ac_status" >&5
+    echo "$as_me:31402: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -31373,11 +31446,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:31376: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:31449: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:31380: \$? = $ac_status" >&5
+    echo "$as_me:31453: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -31430,11 +31503,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:31433: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:31506: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:31437: \$? = $ac_status" >&5
+    echo "$as_me:31510: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -31481,11 +31554,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:31484: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:31557: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:31488: \$? = $ac_status" >&5
+    echo "$as_me:31561: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -31533,11 +31606,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:31536: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:31609: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:31540: \$? = $ac_status" >&5
+    echo "$as_me:31613: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -31584,11 +31657,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:31587: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:31660: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:31591: \$? = $ac_status" >&5
+    echo "$as_me:31664: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -31635,11 +31708,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:31638: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:31711: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:31642: \$? = $ac_status" >&5
+    echo "$as_me:31715: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -31686,11 +31759,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:31689: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:31762: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:31693: \$? = $ac_status" >&5
+    echo "$as_me:31766: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -31737,11 +31810,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:31740: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:31813: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:31744: \$? = $ac_status" >&5
+    echo "$as_me:31817: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -31788,11 +31861,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:31791: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:31864: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:31795: \$? = $ac_status" >&5
+    echo "$as_me:31868: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -31839,11 +31912,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:31842: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:31915: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:31846: \$? = $ac_status" >&5
+    echo "$as_me:31919: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -32323,10 +32396,26 @@ fi
 
 
 
-                                                                                                                                                      ac_config_links="$ac_config_links src/dsp1f.h:src/codegen/dsp1f.h.built src/dmnuminc.h:src/codegen/dmnuminc.h.built src/codegen/dmglobals.c:src/dmglobals.c src/codegen/dsp1.c:src/dsp1.c src/codegen/dsp2.c:src/dsp2.c src/codegen/dm1.c:src/dm1.c src/codegen/dm2.c:src/dm2.c src/codegen/dm3.c:src/dm3.c src/codegen/dm4.c:src/dm4.c src/codegen/dm5.c:src/dm5.c src/codegen/dm6.c:src/dm6.c src/codegen/dm7.c:src/dm7.c src/codegen/dm8.c:src/dm8.c src/codegen/dmnum.c:src/dmnum.c src/codegen/paths.h.in:src/paths.h.in"
+
+  pkglibdir="\${libdir}/${PACKAGE}"
 
 
-                                                                                                                                                                ac_config_files="$ac_config_files Makefile src/Makefile src/codegen/Makefile src/codegen/startup_dgen.d src/codegen/dmnuminc.d plugins/Makefile plugins/dmflex.l ps/Makefile sh/Makefile emacs/Makefile emacs/d-mode.el dcode/Makefile dcode/startup_dvt.d dcode/startup_dnode.d test/Makefile m4/Makefile"
+  pkgincludedir="\${includedir}/${PACKAGE}"
+
+
+  PCLIBS=" ${LTLIBOBJS} -ldmglobals"
+
+
+  PCCFLAGS="${GCC_CFLAGS} ${LIBDM_DLL_IMPORT} ${X_CFLAGS}"
+
+
+  PCLDFLAGS="-module -no-undefined"
+
+
+                                                                                                                                                                                                        ac_config_links="$ac_config_links src/dsp1f.h:src/codegen/dsp1f.h.built src/dmnuminc.h:src/codegen/dmnuminc.h.built src/codegen/dmglobals.c:src/dmglobals.c src/codegen/dsp1.c:src/dsp1.c src/codegen/dsp2.c:src/dsp2.c src/codegen/dm1.c:src/dm1.c src/codegen/dm2.c:src/dm2.c src/codegen/dm3.c:src/dm3.c src/codegen/dm4.c:src/dm4.c src/codegen/dm5.c:src/dm5.c src/codegen/dm6.c:src/dm6.c src/codegen/dm7.c:src/dm7.c src/codegen/dm8.c:src/dm8.c src/codegen/dmnum.c:src/dmnum.c src/codegen/paths.h.in:src/paths.h.in src/codegen/dgen.c:src/dgen.c src/codegen/dgen_0.h:src/dgen_0.h src/codegen/dgen_1.h:src/dgen_1.h src/codegen/dgen-build:src/dgen-build plugins/plugin.d:dcode/plugin.d"
+
+
+                                                                                                                                                                                              ac_config_files="$ac_config_files Makefile src/Makefile src/codegen/Makefile src/codegen/dmnuminc.d src/dm.pc plugins/Makefile plugins/dmflex.l ps/Makefile sh/Makefile emacs/Makefile emacs/d-mode.el dcode/Makefile dcode/startup_dvt.d dcode/startup_dnode.d dcode/startup_dgen.d src/codegen/startup_dgen.d:dcode/startup_dgen.d.in plugins/startup_dgen.d:dcode/startup_dgen.d.in test/Makefile m4/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -32459,6 +32548,13 @@ if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"am__fastdepCC\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 echo "$as_me: error: conditional \"am__fastdepCC\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${ENABLE_DEBUG_DMNUM_TRUE}" && test -z "${ENABLE_DEBUG_DMNUM_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"ENABLE_DEBUG_DMNUM\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"ENABLE_DEBUG_DMNUM\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -32976,6 +33072,7 @@ cat >>$CONFIG_STATUS <<_ACEOF
 #
 
 PACKAGE="$PACKAGE"
+PACKAGE="$PACKAGE"
 AMDEP_TRUE="$AMDEP_TRUE" ac_aux_dir="$ac_aux_dir"
 
 _ACEOF
@@ -32990,8 +33087,8 @@ do
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
   "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
   "src/codegen/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/codegen/Makefile" ;;
-  "src/codegen/startup_dgen.d" ) CONFIG_FILES="$CONFIG_FILES src/codegen/startup_dgen.d" ;;
   "src/codegen/dmnuminc.d" ) CONFIG_FILES="$CONFIG_FILES src/codegen/dmnuminc.d" ;;
+  "src/dm.pc" ) CONFIG_FILES="$CONFIG_FILES src/dm.pc" ;;
   "plugins/Makefile" ) CONFIG_FILES="$CONFIG_FILES plugins/Makefile" ;;
   "plugins/dmflex.l" ) CONFIG_FILES="$CONFIG_FILES plugins/dmflex.l" ;;
   "ps/Makefile" ) CONFIG_FILES="$CONFIG_FILES ps/Makefile" ;;
@@ -33001,6 +33098,9 @@ do
   "dcode/Makefile" ) CONFIG_FILES="$CONFIG_FILES dcode/Makefile" ;;
   "dcode/startup_dvt.d" ) CONFIG_FILES="$CONFIG_FILES dcode/startup_dvt.d" ;;
   "dcode/startup_dnode.d" ) CONFIG_FILES="$CONFIG_FILES dcode/startup_dnode.d" ;;
+  "dcode/startup_dgen.d" ) CONFIG_FILES="$CONFIG_FILES dcode/startup_dgen.d" ;;
+  "src/codegen/startup_dgen.d" ) CONFIG_FILES="$CONFIG_FILES src/codegen/startup_dgen.d:dcode/startup_dgen.d.in" ;;
+  "plugins/startup_dgen.d" ) CONFIG_FILES="$CONFIG_FILES plugins/startup_dgen.d:dcode/startup_dgen.d.in" ;;
   "test/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
   "m4/Makefile" ) CONFIG_FILES="$CONFIG_FILES m4/Makefile" ;;
   "src/dsp1f.h" ) CONFIG_LINKS="$CONFIG_LINKS src/dsp1f.h:src/codegen/dsp1f.h.built" ;;
@@ -33018,7 +33118,13 @@ do
   "src/codegen/dm8.c" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/dm8.c:src/dm8.c" ;;
   "src/codegen/dmnum.c" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/dmnum.c:src/dmnum.c" ;;
   "src/codegen/paths.h.in" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/paths.h.in:src/paths.h.in" ;;
+  "src/codegen/dgen.c" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/dgen.c:src/dgen.c" ;;
+  "src/codegen/dgen_0.h" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/dgen_0.h:src/dgen_0.h" ;;
+  "src/codegen/dgen_1.h" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/dgen_1.h:src/dgen_1.h" ;;
+  "src/codegen/dgen-build" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/dgen-build:src/dgen-build" ;;
+  "plugins/plugin.d" ) CONFIG_LINKS="$CONFIG_LINKS plugins/plugin.d:dcode/plugin.d" ;;
   "src/dm-config.h" ) CONFIG_COMMANDS="$CONFIG_COMMANDS src/dm-config.h" ;;
+  "src/codegen/dm-config.h" ) CONFIG_COMMANDS="$CONFIG_COMMANDS src/codegen/dm-config.h" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
@@ -33183,6 +33289,10 @@ s,@MAX_NUM_EXECS@,$MAX_NUM_EXECS,;t t
 s,@MAX_MEM_SIZE@,$MAX_MEM_SIZE,;t t
 s,@MAX_USER_DICT_SIZE@,$MAX_USER_DICT_SIZE,;t t
 s,@ROLLBITS@,$ROLLBITS,;t t
+s,@BYTECORRECT@,$BYTECORRECT,;t t
+s,@ENABLE_DEBUG_DMNUM_TRUE@,$ENABLE_DEBUG_DMNUM_TRUE,;t t
+s,@ENABLE_DEBUG_DMNUM_FALSE@,$ENABLE_DEBUG_DMNUM_FALSE,;t t
+s,@ENABLE_DEBUG_DMNUM@,$ENABLE_DEBUG_DMNUM,;t t
 s,@ENABLE_SETUID_TRUE@,$ENABLE_SETUID_TRUE,;t t
 s,@ENABLE_SETUID_FALSE@,$ENABLE_SETUID_FALSE,;t t
 s,@ENABLE_THREADS_TRUE@,$ENABLE_THREADS_TRUE,;t t
@@ -33272,6 +33382,11 @@ s,@LIBLTDL@,$LIBLTDL,;t t
 s,@subdirs@,$subdirs,;t t
 s,@LIBDM_DLL_IMPORT@,$LIBDM_DLL_IMPORT,;t t
 s,@LIBPLUGIN_DLL_IMPORT@,$LIBPLUGIN_DLL_IMPORT,;t t
+s,@pkglibdir@,$pkglibdir,;t t
+s,@pkgincludedir@,$pkgincludedir,;t t
+s,@PCLIBS@,$PCLIBS,;t t
+s,@PCCFLAGS@,$PCCFLAGS,;t t
+s,@PCLDFLAGS@,$PCLDFLAGS,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF
@@ -34010,6 +34125,114 @@ esac
 echo "$as_me: executing $ac_dest commands" >&6;}
   case $ac_dest in
     src/dm-config.h ) ac_prefix_conf_OUT=`printf '%s\n' src/dm-config.h`
+ac_prefix_conf_DEF=`printf '%s\n' _$ac_prefix_conf_OUT | sed -e "y:abcdefghijklmnopqrstuvwxyz:ABCDEFGHIJKLMNOPQRSTUVWXYZ:" -e "s/[^abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]/_/g"`
+ac_prefix_conf_PKG=`printf '%s\n' $PACKAGE`
+ac_prefix_conf_LOW=`printf '%s\n' _$ac_prefix_conf_PKG | sed -e "y:ABCDEFGHIJKLMNOPQRSTUVWXYZ-:abcdefghijklmnopqrstuvwxyz_:"`
+ac_prefix_conf_UPP=`printf '%s\n' $ac_prefix_conf_PKG | sed -e "y:abcdefghijklmnopqrstuvwxyz-:ABCDEFGHIJKLMNOPQRSTUVWXYZ_:"  -e "/^[0123456789]/s/^/_/"`
+ac_prefix_conf_INP=`printf '%s\n' "" | sed -e 's/ *//'`
+if test ".$ac_prefix_conf_INP" = "."; then
+   for ac_file in : $CONFIG_HEADERS; do test "_$ac_file" = _: && continue
+     case "$ac_file" in
+        *.h) ac_prefix_conf_INP=$ac_file ;;
+        *)
+     esac
+     test ".$ac_prefix_conf_INP" != "." && break
+   done
+fi
+if test ".$ac_prefix_conf_INP" = "."; then
+   case "$ac_prefix_conf_OUT" in
+      */*) ac_prefix_conf_INP=`basename "$ac_prefix_conf_OUT"`
+      ;;
+      *-*) ac_prefix_conf_INP=`printf '%s\n' "$ac_prefix_conf_OUT" | sed -e "s/[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_]*-//"`
+      ;;
+      *) ac_prefix_conf_INP=config.h
+      ;;
+   esac
+fi
+if test -z "$ac_prefix_conf_PKG" ; then
+   { { echo "$as_me:$LINENO: error: no prefix for _PREFIX_PKG_CONFIG_H" >&5
+echo "$as_me: error: no prefix for _PREFIX_PKG_CONFIG_H" >&2;}
+   { (exit 1); exit 1; }; }
+else
+  if test ! -f "$ac_prefix_conf_INP" ; then if test -f "$srcdir/$ac_prefix_conf_INP" ; then
+     ac_prefix_conf_INP="$srcdir/$ac_prefix_conf_INP"
+  fi fi
+  { echo "$as_me:$LINENO: creating $ac_prefix_conf_OUT - prefix $ac_prefix_conf_UPP for $ac_prefix_conf_INP defines" >&5
+echo "$as_me: creating $ac_prefix_conf_OUT - prefix $ac_prefix_conf_UPP for $ac_prefix_conf_INP defines" >&6;}
+  if test -f $ac_prefix_conf_INP ; then
+    printf '%s\n' "s/#undef  *\\([ABCDEFGHIJKLMNOPQRSTUVWXYZ_]\\)/#undef $ac_prefix_conf_UPP""_\\1/" > conftest.prefix
+    printf '%s\n' "s/#undef  *\\([abcdefghijklmnopqrstuvwxyz]\\)/#undef $ac_prefix_conf_LOW""_\\1/" >> conftest.prefix
+    printf '%s\n' "s/#define  *\\([ABCDEFGHIJKLMNOPQRSTUVWXYZ_][abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_]*\\)\\(.*\\)/#ifndef $ac_prefix_conf_UPP""_\\1 \\" >> conftest.prefix
+    printf '%s\n' "#define $ac_prefix_conf_UPP""_\\1 \\2 \\" >> conftest.prefix
+    printf '%s\n' "#endif/" >>conftest.prefix
+    printf '%s\n' "s/#define  *\\([abcdefghijklmnopqrstuvwxyz][abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_]*\\)\\(.*\\)/#ifndef $ac_prefix_conf_LOW""_\\1 \\" >> conftest.prefix
+    printf '%s\n' "#define $ac_prefix_conf_LOW""_\\1 \\2 \\" >> conftest.prefix
+    printf '%s\n' "#endif/" >> conftest.prefix
+    # now executing _script on _DEF input to create _OUT output file
+    printf '%s\n' "#ifndef $ac_prefix_conf_DEF"      >$tmp/pconfig.h
+    printf '%s\n' "#define $ac_prefix_conf_DEF 1" >>$tmp/pconfig.h
+    printf '%s\n' ' ' >>$tmp/pconfig.h
+    printf '%s\n' /'*' $ac_prefix_conf_OUT. Generated automatically at end of configure. '*'/ >>$tmp/pconfig.h
+
+    sed -f conftest.prefix $ac_prefix_conf_INP >>$tmp/pconfig.h
+    printf '%s\n' ' ' >>$tmp/pconfig.h
+    printf '%s\n' '/* once:' $ac_prefix_conf_DEF '*/' >>$tmp/pconfig.h
+    printf '%s\n' "#endif" >>$tmp/pconfig.h
+    if cmp -s $ac_prefix_conf_OUT $tmp/pconfig.h 2>/dev/null; then
+      { echo "$as_me:$LINENO: $ac_prefix_conf_OUT is unchanged" >&5
+echo "$as_me: $ac_prefix_conf_OUT is unchanged" >&6;}
+    else
+      ac_dir=`(dirname "$ac_prefix_conf_OUT") 2>/dev/null ||
+$as_expr X"$ac_prefix_conf_OUT" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$ac_prefix_conf_OUT" : 'X\(//\)[^/]' \| \
+	 X"$ac_prefix_conf_OUT" : 'X\(//\)$' \| \
+	 X"$ac_prefix_conf_OUT" : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X"$ac_prefix_conf_OUT" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+      { if $as_mkdir_p; then
+    mkdir -p "$ac_dir"
+  else
+    as_dir="$ac_dir"
+    as_dirs=
+    while test ! -d "$as_dir"; do
+      as_dirs="$as_dir $as_dirs"
+      as_dir=`(dirname "$as_dir") 2>/dev/null ||
+$as_expr X"$as_dir" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$as_dir" : 'X\(//\)[^/]' \| \
+	 X"$as_dir" : 'X\(//\)$' \| \
+	 X"$as_dir" : 'X\(/\)' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X"$as_dir" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+    done
+    test ! -n "$as_dirs" || mkdir $as_dirs
+  fi || { { echo "$as_me:$LINENO: error: cannot create directory \"$ac_dir\"" >&5
+echo "$as_me: error: cannot create directory \"$ac_dir\"" >&2;}
+   { (exit 1); exit 1; }; }; }
+
+      rm -f "$ac_prefix_conf_OUT"
+      mv $tmp/pconfig.h "$ac_prefix_conf_OUT"
+    fi
+    #cp _script _configs.sed
+	rm conftest.prefix
+  else
+    { { echo "$as_me:$LINENO: error: input file $ac_prefix_conf_INP does not exist - skip generating $ac_prefix_conf_OUT" >&5
+echo "$as_me: error: input file $ac_prefix_conf_INP does not exist - skip generating $ac_prefix_conf_OUT" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+  rm -f conftest.*
+fi
+ ;;
+    src/codegen/dm-config.h ) ac_prefix_conf_OUT=`printf '%s\n' src/codegen/dm-config.h`
 ac_prefix_conf_DEF=`printf '%s\n' _$ac_prefix_conf_OUT | sed -e "y:abcdefghijklmnopqrstuvwxyz:ABCDEFGHIJKLMNOPQRSTUVWXYZ:" -e "s/[^abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]/_/g"`
 ac_prefix_conf_PKG=`printf '%s\n' $PACKAGE`
 ac_prefix_conf_LOW=`printf '%s\n' _$ac_prefix_conf_PKG | sed -e "y:ABCDEFGHIJKLMNOPQRSTUVWXYZ-:abcdefghijklmnopqrstuvwxyz_:"`

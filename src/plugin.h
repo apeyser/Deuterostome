@@ -61,17 +61,22 @@ L op_FINI_(void);
 extern B opaquename[FRAMEBYTES];
 extern B buffernameframe[FRAMEBYTES];
 
-#define TEST_OPAQUE(frame)	do {										\
-	if (TAG(frame) != (DICT | OPAQUETYPE)) return OPD_TYP;				\
-	if (! check_opaque_name(opaquename, VALUE_PTR(frame))) return ILL_OPAQUE; \
+#define TEST_OPAQUE(frame)	do {                                        \
+    if (TAG(frame) != (DICT | OPAQUETYPE)) return OPD_TYP;              \
+    if (! check_opaque_name(opaquename, VALUE_PTR(frame))) return ILL_OPAQUE; \
   } while (0)
 
 #define OPAQUE_MEM(frame, nameframe) (lookup(nameframe, VALUE_PTR(frame)))
+
 #define OPAQUE_MEM_SET(frame, nameframe, newframe) do {	\
-	ATTR(newframe) |= READONLY;							\
-	moveframe(newframe, OPAQUE_MEM(frame, nameframe));	\
+    ATTR(newframe) |= READONLY;                         \
+    moveframe(newframe, OPAQUE_MEM(frame, nameframe));	\
   } while (0)
-	
+
+#define OPAQUE_MEM_SET_NR(frame, nameframe, newframe) do {	\
+    ATTR(newframe) &= ~READONLY;                            \
+    moveframe(newframe, OPAQUE_MEM(frame, nameframe));      \
+  } while (0)
   
 #define MAKE_OPAQUE_DICT(n, ...) \
   (make_opaque_frame(n, opaquename, __VA_ARGS__, NULL))

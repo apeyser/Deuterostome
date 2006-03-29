@@ -222,7 +222,7 @@ AC_DEFUN([CF_AM_CONDITIONAL], [dnl
 
 AC_DEFUN([CF_AM_ENABLE_DO], [dnl
   if test "${enable_$4-set}" == set ; then enable_$4='$3'; fi
-  if test x"${enable_$4}" == x"yes" ; then enable_$4='$3'; fi
+  if test x"${enable_$4}" == x"yes" ; then enable_$4='$6'; fi
   AC_ARG_ENABLE([$1], [AC_HELP_STRING([--enable-$1], [$2 ($3)])])
   CF_AM_CONDITIONAL($5, [test "${enable_$4-no}" != "no"])
   if test "${enable_$4-no}" == "no" ; then 
@@ -232,6 +232,10 @@ AC_DEFUN([CF_AM_ENABLE_DO], [dnl
   fi dnl
 ])
 
+dnl $1 = feauture
+dnl $2 = comment
+dnl $3 = default
+dnl $4 = value if value passed is yes (defaults to $3)
 AC_DEFUN([CF_AM_ENABLE], [dnl
   AC_MSG_CHECKING([if $1 is enabled])
   changequote(<<, >>)dnl
@@ -239,7 +243,8 @@ AC_DEFUN([CF_AM_ENABLE], [dnl
     patsubst(translit($1, [a-z], [A-Z]), <<->>, <<_>>))dnl
   define(<<CF_AM_CVS_ENABLE>>, patsubst($1, <<->>, <<_>>))dnl
   changequote([, ])dnl
-  CF_AM_ENABLE_DO([$1], [$2], [$3], CF_AM_CVS_ENABLE, CF_AM_CV_ENABLE, )dnl
+  CF_AM_ENABLE_DO([$1], [$2], [$3], CF_AM_CVS_ENABLE, CF_AM_CV_ENABLE, 
+    ifelse([$4], , [[$3]], [[$4]]))dnl
 ])
 
 AC_DEFUN([CF_AC_DEFINE_IF_ENABLED_DEFINE], [dnl
@@ -273,8 +278,12 @@ AC_DEFUN([CF_AC_DEFINE_IF_ENABLED], [dnl
     CF_AC_DEFINE_IF_ENABLED_CVS)
 ])
 
+dnl $1 = feauture
+dnl $2 = comment
+dnl $3 = default
+dnl $4 = value if value passed is yes (defaults to $3)
 AC_DEFUN([CF_AC_ENABLE], [dnl
-  CF_AM_ENABLE([$1], [$2], [$3])
+  CF_AM_ENABLE([$1], [$2], [$3], [$4])
   CF_AC_DEFINE_IF_ENABLED([$1], [$2])
 ])
 

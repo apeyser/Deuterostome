@@ -93,21 +93,21 @@ if (CLASS(o_1) != NUM) goto baderror;
 if (!VALUE(o_1,&e)) goto baderror;
 
  p = strb; atmost = 255;
- nb = snprintf(p,atmost,"\033[31m");
+ nb = dm_snprintf(p,atmost,"\033[31m");
  p += nb; atmost -= nb;
  
 if (e < 0) 
    { /*Clib error */
-       nb = snprintf(p,atmost,(B*)strerror(-e));
+       nb = dm_snprintf(p,atmost,(B*)strerror(-e));
    }
  else
    { /* one of our error codes: decode */
        m = geterror(e);
-       nb = snprintf(p,atmost,m);
+       nb = dm_snprintf(p,atmost,m);
    }
 
  p += nb; atmost -= nb;
- nb = snprintf(p,atmost," in %s\033[0m\n", (B*)VALUE_BASE(o_2));
+ nb = dm_snprintf(p,atmost," in %s\033[0m\n", (B*)VALUE_BASE(o_2));
  nb += (L) (p - strb);
  toconsole(strb, nb);
 FREEopds = o_2;
@@ -138,8 +138,7 @@ if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
 s = (B *)VALUE_BASE(o_1); tnb = ARRAY_SIZE(o_1);
 if (e < 0) 
    { /*Clib error */
-     nb = snprintf(s,tnb,(B *)strerror(-e));
-     if (nb > tnb) nb = tnb;
+     nb = dm_snprintf(s,tnb,(B *)strerror(-e));
    }
  else
  { /* one of our error codes: decode */
@@ -186,9 +185,9 @@ L op_abort(void)
     OP_NAME(x1) = (L) "x_op_abort"; OP_CODE(x1) = (L) x_op_abort;
     TAG(x2) = ARRAY | BYTETYPE; ATTR(x2) = ACTIVE;
     VALUE_PTR(x2) = FREEvm;
-    strncpy(FREEvm, "a_", 2);
-    ARRAY_SIZE(x2) = 2;
-    FREEvm += 2;
+    strncpy(FREEvm, "a__", 3);
+    ARRAY_SIZE(x2) = 3;
+    FREEvm += 3;
 
     FREEexecs = x3;
     rabort = TRUE;

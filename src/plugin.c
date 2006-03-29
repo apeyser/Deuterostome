@@ -122,6 +122,8 @@ L op_nextlib(void)
 
 #define LIB_IMPORT(var, type, name)															\
   if (! (var = (type) lt_dlsym((lt_dlhandle)handle, #name))) {	\
+    const char* e = lt_dlerror();                               \
+    if (e) fprintf(stderr, "%s\n", e);                          \
     fprintf(stderr, "Symbol not found: %s in %s\n",							\
 						#name, FREEvm);																			\
     return LIB_EXPORT;																					\
@@ -244,40 +246,40 @@ B* make_opaque_frame(L n, B* pluginnameframe, ...) {
   if (op_save() != OK) return NULL;
 
   if (n) {
-	n = DALIGN(n);
-	if (FREEvm + FRAMEBYTES + n >= CEILvm) {
-	  FREEvm = oldFREEvm;
-	  FREEopds = o_1;
-	  return NULL;
-	}
-	buffer = FREEvm;
-	FREEvm += FRAMEBYTES + n;
+    n = DALIGN(n);
+    if (FREEvm + FRAMEBYTES + n >= CEILvm) {
+      FREEopds = o_1;
+      return NULL;
+    }
 
-	TAG(buffer) = (ARRAY | BYTETYPE); ATTR(buffer) = READONLY;
-	VALUE_PTR(buffer) = FREEvm + FRAMEBYTES;
-	ARRAY_SIZE(buffer) = n;
+    buffer = FREEvm;
+    TAG(FREEvm) = (ARRAY | BYTETYPE); ATTR(FREEvm) = READONLY;
+    VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
+    ARRAY_SIZE(FREEvm) = n;
+    FREEvm += FRAMEBYTES + n;
   }
 
-  if ((dict = makedict(len+ 2 + (n ? 1 : 0))) == (B*) -1L) {
-	FREEvm = oldFREEvm;
-	FREEopds = o_1;
-	return NULL;
+  if ((dict = makedict(len + 2 + (n ? 1 : 0))) == (B*) -1L) {
+    FREEvm = oldFREEvm;
+    FREEopds = o_1;
+    return NULL;
   }
   
   ATTR(o_1) |= READONLY;
   insert(saveboxname, dict, o_1);
   ATTR(pluginnameframe) |= READONLY;
   insert(opaquename, dict, pluginnameframe);
-  if (n) insert(buffernameframe, dict, buffer);
+  if (buffer) insert(buffernameframe, dict, buffer);
+
   va_start(nameframes, pluginnameframe);
   while ((nameframe = va_arg(nameframes, B*)))
-	insert(nameframe, dict, nullframe);
+    insert(nameframe, dict, nullframe);
   va_end(nameframes);
 
   if (op_capsave() != OK) {
-	FREEvm = oldFREEvm;
-	FREEopds = o_1;
-	return NULL;
+    FREEvm = oldFREEvm;
+    FREEopds = o_1;
+    return NULL;
   }
 
   ATTR(dict-FRAMEBYTES) |= READONLY;

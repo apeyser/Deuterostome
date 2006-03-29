@@ -21,7 +21,8 @@
 
 /setlock {pop} bind def  | null ops to parallel dnode
 /getlock {true} bind def |
-/lock {exec} bind def    | 
+/lock {exec} bind def    |
+/dmnumincerror {(dmnuminc) 2816 error} def
 
 /fontdict1 4 dict dup begin
   /NORMALFONT 
@@ -1445,7 +1446,7 @@ Xwindows {
   /red     {/nodeforecolor {( Fr) REDTEXT     ~drawtext} bind def} bind def
   /black   {/nodeforecolor {( Fb) BLACKTEXT   ~drawtext} bind def} bind def
   /green   {/nodeforecolor {( Fg) GREENTEXT   ~drawtext} bind def} bind def
-  /yellow  {/nodeforecolor {( Fy) REDTEXT     ~drawtext} bind def} bind def
+  /yellow  {/nodeforecolor {( Fy) YELLOWTEXT  ~drawtext} bind def} bind def
   /blue    {/nodeforecolor {( Fl) BLUETEXT    ~drawtext} bind def} bind def
   /magenta {/nodeforecolor {( Fm) MAGENTATEXT ~drawtext} bind def} bind def
   /cyan    {/nodeforecolor {( Fc) CYANTEXT    ~drawtext} bind def} bind def

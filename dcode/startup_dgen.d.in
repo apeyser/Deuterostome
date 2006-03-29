@@ -125,6 +125,17 @@ end def                            | of debug_dict
    end
 } bind def
 
+/a__ { debug_dict begin              | show entire opd stack
+   count 1 sub 0 1 3 -1 roll { index _ pop } for
+   dup class /arrayclass eq {
+       (top:\n) toconsole
+       dup type /B eq {dup s_} {dup v_} ifelse
+   } {
+       dup class /listclass eq {(top:\n) toconsole dup v_} if
+   } ifelse
+   end
+} bind def
+
 /a_ { debug_dict begin              | show entire opd stack
    count 1 sub 0 1 3 -1 roll { index _ pop } for
    end

@@ -17,12 +17,9 @@
 
 
 
-
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
-pkglibdir = $(libdir)/@PACKAGE@
-pkgincludedir = $(includedir)/@PACKAGE@
 top_builddir = ../..
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 INSTALL = @INSTALL@
@@ -43,9 +40,9 @@ target_triplet = @target@
 noinst_PROGRAMS = dgen$(EXEEXT)
 subdir = src/codegen
 DIST_COMMON = $(dist_noinst_DATA) $(dist_noinst_SCRIPTS) \
-	$(noinst_HEADERS) $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/dmnuminc.d.in $(srcdir)/dmnuminc.h.built \
-	$(srcdir)/dsp1f.h.built $(srcdir)/startup_dgen.d.in
+	$(srcdir)/dsp1f.h.built $(top_srcdir)/dcode/startup_dgen.d.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
@@ -57,9 +54,9 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = startup_dgen.d dmnuminc.d dmglobals.c dsp1.c \
+CONFIG_CLEAN_FILES = dmnuminc.d startup_dgen.d dmglobals.c dsp1.c \
 	dsp2.c dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dmnum.c \
-	paths.h.in
+	paths.h.in dgen.c dgen_0.h dgen_1.h dgen-build
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libdmbootstrap_la_LIBADD =
 am_libdmbootstrap_la_OBJECTS = dmglobals.lo dm1.lo dm2.lo dm3.lo \
@@ -84,11 +81,12 @@ LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 SOURCES = $(libdmbootstrap_la_SOURCES) $(dgen_SOURCES)
 DIST_SOURCES = $(libdmbootstrap_la_SOURCES) $(dgen_SOURCES)
 DATA = $(dist_noinst_DATA)
-HEADERS = $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 pkgdatadir = @pkgdatadir@
+pkglibdir = @pkglibdir@
+pkgincludedir = @pkgincludedir@
 ACLOCAL = @ACLOCAL@
 AMDEP_FALSE = @AMDEP_FALSE@
 AMDEP_TRUE = @AMDEP_TRUE@
@@ -99,6 +97,7 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BYTECORRECT = @BYTECORRECT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -126,6 +125,9 @@ EMACSLOADPATH = @EMACSLOADPATH@
 ENABLE_BASH = @ENABLE_BASH@
 ENABLE_BASH_FALSE = @ENABLE_BASH_FALSE@
 ENABLE_BASH_TRUE = @ENABLE_BASH_TRUE@
+ENABLE_DEBUG_DMNUM = @ENABLE_DEBUG_DMNUM@
+ENABLE_DEBUG_DMNUM_FALSE = @ENABLE_DEBUG_DMNUM_FALSE@
+ENABLE_DEBUG_DMNUM_TRUE = @ENABLE_DEBUG_DMNUM_TRUE@
 ENABLE_DMFLEX_FALSE = @ENABLE_DMFLEX_FALSE@
 ENABLE_DMFLEX_TRUE = @ENABLE_DMFLEX_TRUE@
 ENABLE_EMACS_FALSE = @ENABLE_EMACS_FALSE@
@@ -193,6 +195,9 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PCCFLAGS = @PCCFLAGS@
+PCLDFLAGS = @PCLDFLAGS@
+PCLIBS = @PCLIBS@
 PKGCONFIGLIBDIR = @PKGCONFIGLIBDIR@
 PKGDATADIR = @PKGDATADIR@
 PKGLISPDIR = @PKGLISPDIR@
@@ -285,7 +290,7 @@ target_os = @target_os@
 target_vendor = @target_vendor@
 tmp = @tmp@
 dist_noinst_DATA = dmnuminc.d dsp1f.d
-dist_noinst_SCRIPTS = buildh
+dist_noinst_SCRIPTS = dgen-build
 AM_CFLAGS = $(GCC_CFLAGS)
 AM_CPPFLAGS = -DDM_DISABLE_THREADS=1 -DDM_HAVE_CONFIG_H \
 	-I"$(top_srcdir)/src" -I"$(top_builddir)/src"
@@ -294,19 +299,19 @@ AM_LDFLAGS = -no-undefined
 INCLUDE = @INCLTDL@
 MAINTAINERCLEANFILES = *.built
 BUILT_SOURCES = paths.h
-CLEANFILES = paths.h
+CLEANFILES = $(BUILT_SOURCES)
+DISTCLEANFILES = dm-config.h
 noinst_LTLIBRARIES = libdmbootstrap.la
-noinst_HEADERS = dmnuminc.h.built dsp1f.h.built
+EXTRA_DIST = dmnuminc.h.built dsp1f.h.built dmnuminc.d.in paths.h.in
 libdmbootstrap_la_SOURCES = dmglobals.c dm1.c dm2.c dm3.c dm4.c dm5.c \
-	dm6.c dm7.c dm8.c dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h 
+	dm6.c dm7.c dm8.c dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h
 
 dgen_SOURCES = dgen.c dgen_0.h dgen_1.h
-dgen_CPPFLAGS = $(AM_CPPFLAGS)
 dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dgen_LDADD = libdmbootstrap.la
 edit = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
-	-e 's,[@]dmstartdir[@],$(srcdir),g' \
+	-e 's,[@]dmstartdir[@],.,g' \
 	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 	-e 's,[@]dmconfdir[@],$(dmconfdir),g'
 
@@ -344,9 +349,9 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-startup_dgen.d: $(top_builddir)/config.status $(srcdir)/startup_dgen.d.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 dmnuminc.d: $(top_builddir)/config.status $(srcdir)/dmnuminc.d.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+startup_dgen.d: $(top_builddir)/config.status $(top_srcdir)/dcode/startup_dgen.d.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-noinstLTLIBRARIES:
@@ -412,18 +417,18 @@ distclean-compile:
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
 dgen-dgen.o: dgen.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dgen_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -MT dgen-dgen.o -MD -MP -MF "$(DEPDIR)/dgen-dgen.Tpo" -c -o dgen-dgen.o `test -f 'dgen.c' || echo '$(srcdir)/'`dgen.c; \
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -MT dgen-dgen.o -MD -MP -MF "$(DEPDIR)/dgen-dgen.Tpo" -c -o dgen-dgen.o `test -f 'dgen.c' || echo '$(srcdir)/'`dgen.c; \
 @am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dgen-dgen.Tpo" "$(DEPDIR)/dgen-dgen.Po"; else rm -f "$(DEPDIR)/dgen-dgen.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dgen.c' object='dgen-dgen.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dgen_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dgen.o `test -f 'dgen.c' || echo '$(srcdir)/'`dgen.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dgen.o `test -f 'dgen.c' || echo '$(srcdir)/'`dgen.c
 
 dgen-dgen.obj: dgen.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dgen_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -MT dgen-dgen.obj -MD -MP -MF "$(DEPDIR)/dgen-dgen.Tpo" -c -o dgen-dgen.obj `if test -f 'dgen.c'; then $(CYGPATH_W) 'dgen.c'; else $(CYGPATH_W) '$(srcdir)/dgen.c'; fi`; \
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -MT dgen-dgen.obj -MD -MP -MF "$(DEPDIR)/dgen-dgen.Tpo" -c -o dgen-dgen.obj `if test -f 'dgen.c'; then $(CYGPATH_W) 'dgen.c'; else $(CYGPATH_W) '$(srcdir)/dgen.c'; fi`; \
 @am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dgen-dgen.Tpo" "$(DEPDIR)/dgen-dgen.Po"; else rm -f "$(DEPDIR)/dgen-dgen.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dgen.c' object='dgen-dgen.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dgen_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dgen.obj `if test -f 'dgen.c'; then $(CYGPATH_W) 'dgen.c'; else $(CYGPATH_W) '$(srcdir)/dgen.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dgen.obj `if test -f 'dgen.c'; then $(CYGPATH_W) 'dgen.c'; else $(CYGPATH_W) '$(srcdir)/dgen.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -484,6 +489,7 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
+	$(mkdir_p) $(distdir)/../../dcode
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -513,8 +519,7 @@ distdir: $(DISTFILES)
 check-am: all-am
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(SCRIPTS) $(DATA) \
-		$(HEADERS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(SCRIPTS) $(DATA)
 installdirs:
 install: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) install-am
@@ -538,6 +543,7 @@ clean-generic:
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -608,23 +614,25 @@ uninstall-am: uninstall-info-am
 	tags uninstall uninstall-am uninstall-info-am
 
 
-dmnuminc.h.built: dmnuminc.d dgen buildh
-	"$(srcdir)/buildh" \
-		"$(top_builddir)/src/codegen" "$(srcdir)" "dmnuminc.d" "$@"
+gencode: all dmnuminc.h.built dsp1f.h.built
+
+dmnuminc.h.built: dmnuminc.d ldgen dgen-build
+	"$(srcdir)/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dmnuminc.d" "$@" 
 	(cd "$(srcdir)/.." ; \
 	 rm dmnuminc.h ; \
 	 $(LN_S) codegen/dmnuminc.h.built dmnuminc.h)
 
-dsp1f.h.built: dsp1f.d dgen buildh
-	"$(srcdir)/buildh" "\
-		$(top_builddir)/src/codegen" "$(srcdir)" "dsp1f.d" "$@"
+dsp1f.h.built: dsp1f.d ldgen dgen-build
+	"$(srcdir)/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dsp1f.d" "$@"
 	(cd "$(srcdir)/.." ; \
 	 rm dsp1f.h ; \
 	 $(LN_S) codegen/dsp1f.h.built dsp1f.h)
 
 paths.h: paths.h.in Makefile
 	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/$@.in >$@.tmp
+	$(edit) $(srcdir)/paths.h.in >$@.tmp
 	mv $@.tmp $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

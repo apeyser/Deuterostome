@@ -1,0 +1,17 @@
+#! /usr/bin/env sh
+
+dgen="$1" ; shift
+dirin="$1" ; shift
+basein="$1" ; shift
+baseout="$1" ; shift
+baseboot="`basename ${baseout} .built`"
+
+dictin=`basename "$basein" .d`
+
+${dgen} <<EOF
+(${dirin}/) (${basein}) fromfiles 
+${dictin} begin 
+  (${dirin}/) (${baseout}) $@ all 
+end 
+quit
+EOF

@@ -4,6 +4,7 @@ AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADER([config.h])
 AX_PREFIX_CONFIG_H([src/dm-config.h])
+AX_PREFIX_CONFIG_H([src/codegen/dm-config.h])
 AM_PATH_LISPDIR
 AM_MAINTAINER_MODE
 
@@ -33,6 +34,8 @@ CF_AC_ARG_VAR([MAX_MEM_SIZE], [maximum vm allocation size in mb], [1000])
 CF_AC_ARG_VAR([MAX_USER_DICT_SIZE], [maximum user dict size], [5000])
 
 CF_AC_ARG_VAR([ROLLBITS], [unroll math loops to 2^rollbits], [3])
+CF_AC_ARG_VAR([BYTECORRECT], [align to this many bytes], [8])
+CF_AC_ENABLE([debug-dmnum], [enable extra debug in dmnum], [no], [yes])
 
 CF_AM_ENABLE([setuid], [compile or install setuid wrapper], [yes])
 CF_AC_ENABLE([threads], 
@@ -172,6 +175,12 @@ CF_WIN_DLL_IMPORT([PLUGIN])
 
 LIB_SOCKET_NSL
 
+CF_AC_SUBST([pkglibdir], [\${libdir}/${PACKAGE}])
+CF_AC_SUBST([pkgincludedir], [\${includedir}/${PACKAGE}])
+CF_AC_SUBST([PCLIBS], [ ${LTLIBOBJS} -ldmglobals])
+CF_AC_SUBST([PCCFLAGS], [${GCC_CFLAGS} ${LIBDM_DLL_IMPORT} ${X_CFLAGS}])
+CF_AC_SUBST([PCLDFLAGS], [-module -no-undefined])
+
 AC_CONFIG_LINKS([
 		src/dsp1f.h:src/codegen/dsp1f.h.built
 		src/dmnuminc.h:src/codegen/dmnuminc.h.built
@@ -188,19 +197,28 @@ AC_CONFIG_LINKS([
 		src/codegen/dm8.c:src/dm8.c
 		src/codegen/dmnum.c:src/dmnum.c
 		src/codegen/paths.h.in:src/paths.h.in
+    src/codegen/dgen.c:src/dgen.c
+    src/codegen/dgen_0.h:src/dgen_0.h
+    src/codegen/dgen_1.h:src/dgen_1.h
+    src/codegen/dgen-build:src/dgen-build
+    plugins/plugin.d:dcode/plugin.d
 ])
 
 AC_CONFIG_FILES([
 		 Makefile 
 		 src/Makefile 
-		 src/codegen/Makefile src/codegen/startup_dgen.d src/codegen/dmnuminc.d
+		 src/codegen/Makefile src/codegen/dmnuminc.d
+     src/dm.pc
 		 plugins/Makefile plugins/dmflex.l
 		 ps/Makefile 
 		 sh/Makefile
 		 emacs/Makefile emacs/d-mode.el
-		 dcode/Makefile dcode/startup_dvt.d dcode/startup_dnode.d
+		 dcode/Makefile dcode/startup_dvt.d dcode/startup_dnode.d 
+     dcode/startup_dgen.d 
+     src/codegen/startup_dgen.d:dcode/startup_dgen.d.in
+     plugins/startup_dgen.d:dcode/startup_dgen.d.in
 		 test/Makefile
-         m4/Makefile
+     m4/Makefile
 ])
 
 AC_OUTPUT
