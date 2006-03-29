@@ -1190,7 +1190,7 @@ Some influential environment variables:
   ROLLBITS    unroll math loops to 2^rollbits, default=3
   BYTECORRECT align to this many bytes, default=8
   THREADNUM   max number of threads, default=8
-  THREADMUL   min unrolls per thread, default=280
+  THREADMUL   min unrolls per thread, default=560
   DMBINDIR    location for dm binary, default=${bindir}/${PACKAGE}
   PKGDATADIR  location for data files, default=${datadir}/${PACKAGE}
   DMSTARTDIR  location for dm scripts, default=${pkgdatadir}
@@ -4105,7 +4105,7 @@ echo "${ECHO_T}setting to ${THREADNUM}" >&6
   echo "$as_me:$LINENO: checking if ${cf_ac_cv_arg_val} is set" >&5
 echo $ECHO_N "checking if ${cf_ac_cv_arg_val} is set... $ECHO_C" >&6
 
-  if test "${THREADMUL-set}" == set ; then THREADMUL="280"; fi
+  if test "${THREADMUL-set}" == set ; then THREADMUL="560"; fi
 
 
 cat >>confdefs.h <<_ACEOF
@@ -4121,7 +4121,7 @@ echo "${ECHO_T}setting to ${THREADMUL}" >&6
   echo "$as_me:$LINENO: checking if ${cf_ac_cv_arg_val} is set" >&5
 echo $ECHO_N "checking if ${cf_ac_cv_arg_val} is set... $ECHO_C" >&6
 
-  if test "${THREADMUL-set}" == set ; then THREADMUL="28"; fi
+  if test "${THREADMUL-set}" == set ; then THREADMUL="56"; fi
 
 
 cat >>confdefs.h <<_ACEOF

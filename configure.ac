@@ -44,9 +44,9 @@ CF_AC_ENABLE([threads],
 CF_IF_ENABLED([threads], [
   CF_AC_ARG_VAR([THREADNUM], [max number of threads], [8])
   CF_ON_TARGET([*-*-darwin*], [
-    CF_AC_ARG_VAR([THREADMUL], [min unrolls per thread], [280])
+    CF_AC_ARG_VAR([THREADMUL], [min unrolls per thread], [560])
   ], [
-    CF_AC_ARG_VAR([THREADMUL], [min unrolls per thread], [28])
+    CF_AC_ARG_VAR([THREADMUL], [min unrolls per thread], [56])
   ])
 ])
 CF_ACX_PTHREAD([threads])
