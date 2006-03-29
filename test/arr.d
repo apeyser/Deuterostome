@@ -75,7 +75,10 @@ end def
   /thread {(thread[) fax * threads * number (]) fax} bind def
   /serial {(serial) fax} bind def
   /parallel {(parallel) fax} bind def
-  /tiny {(tiny[) fax * matsize mattiny div * number (]) fax} bind def
+  /tiny {
+    (tiny[) fax * threads * number
+    (][) fax * matsize mattiny div * number (]) fax
+  } bind def
 end def
 
 /AA_dy_test tests length dict dup begin
