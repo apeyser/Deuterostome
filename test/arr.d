@@ -18,6 +18,7 @@
 /styles [/AS /AA /SA] def
 
 /matsize 1023 def
+/mattiny 100 def
 
 /dosmall true def
 
@@ -35,12 +36,16 @@
   style /SA eq {
     {/A1 /A3 /A5 /A7} {matsize typ offarr def} forall
     {A1 A3 A5 A7} {exec 1.1d exch copy pop} forall
+    {/A9} {mattiny typ array def} forall
   } {
     {/A1 /A2 /A3 /A4 /A5 /A6 /A7 /A8} {matsize typ offarr def} forall
+    {/A9 /A10} {mattiny typ array def} forall
     dosmall {
       {A1 A2 A3 A4 A5 A6 A7 A8} {exec 1.01d exch copy pop} forall
+      {A9 A10} {exec 1.01d exch copy pop} forall
     } {
       {A1 A2 A3 A4 A5 A6 A7 A8} {exec 0 1 index length 2 1 ramp pop pop} forall
+      {A9 A10} {exec 0 1 index length 2 1 ramp pop pop} forall
     } ifelse
   } ifelse
 } bind def
@@ -64,12 +69,13 @@ end def
   } forall
 end def
 
-/tests [/thread /parallel /serial /byhand] def
+/tests [/thread /parallel /serial /byhand /tiny] def
 
 /AA_dy_test tests length dict dup begin
   /thread {A1 A2 op mkact exec pop} bind def
   /serial {A3 A4 op mkact exec pop} bind def
   /parallel {A5 A6 op mkact exec pop} bind def
+  /tiny {A9 A10 op mkact exec pop} bind def
   /byhand {
     op /copy eq {
       0 1 A7 length 1 sub {/i name
@@ -88,6 +94,7 @@ end def
   /thread {A1 n op mkact exec pop} bind def
   /serial {A3 n op mkact exec pop} bind def
   /parallel {A5 n op mkact exec pop} bind def
+  /tiny {A9 n op mkact exec pop} bind def
   /byhand {
     0 1 A7 length 1 sub {/i name
       A7 i get n op mkact exec A7 i put
@@ -99,6 +106,7 @@ end def
   /thread {n A1 op mkact exec /a1 name} bind def
   /serial {n A3 op mkact exec /a2 name} bind def
   /parallel {n A5 op mkact exec /a3 name} bind def
+  /tiny {n A9 op mkact exec pop} bind def
   /byhand {
     op /copy eq {
       0 1 A7 length 1 sub {n A7 3 -1 roll put} for
@@ -115,6 +123,7 @@ end def
       /thread {A1 A2 A3 matmul pop} bind def
       /serial {A4 A5 A6 matmul pop} bind def
       /parallel {A7 A8 A9 matmul pop} bind def
+      /tiny {A13 A14 A15 matmul pop} bind def
       /byhand {
         0 1 A10 length 1 sub {/i name
           0 1 A10 0 get length 1 sub {/j name
@@ -131,6 +140,7 @@ end def
       /thread {A1 A2 mattranspose pop} bind def
       /serial {A4 A5 mattranspose pop} bind def
       /parallel {A7 A8 mattranspose pop} bind def
+      /tiny {A13 A14 mattranspose pop} bind def
       /byhand {
         0 1 A11 length 1 sub {/i name
           0 1 A11 0 get length 1 sub {/j name
@@ -143,6 +153,7 @@ end def
       /thread {A1 A2 A3 matvecmul pop} bind def
       /serial {A4 A5 A6 matvecmul pop} bind def
       /parallel {A7 A8 A9 matvecmul pop} bind def
+      /tiny {A13 A14 A15 matvecmul pop} bind def
       /byhand {
         0 1 A11 length 1 sub {/i name
           0 typ ctype
@@ -421,6 +432,7 @@ end def
   /serial {serialize} bind def
   /parallel {1 makethreads ~exec stopped t makethreads ~stop if} bind def
   /byhand {exec} bind def
+  /tiny {100 {dup exec} repeat pop} bind def
 end def
 
 /rowsa 1023 def
@@ -428,6 +440,13 @@ end def
 /colsb 1025 def
 
 /matmul_ts {
+  {/A13 /A14 /A15} {/c name
+    c mattiny list def
+    0 1 mattiny 1 sub {/i name
+      mattiny typ array c mkact exec i put
+    } for
+  } forall
+  
   {/A1 /A4 /A7 /A10} {/c name
     c rowsa list def
     0 1 rowsa 1 sub {/i name
@@ -457,6 +476,13 @@ end def
 } bind def
 
 /mattranspose_ts {
+  {/A13 /A14} {/c name
+    c mattiny list def
+    0 1 mattiny 1 sub {/i name
+      mattiny type array c mkact exec i put
+    } for
+  } forall
+  
   {/A1 /A4 /A7 /A10} {/b name
     b colsa list def
     0 1 colsa 1 sub {/i name
@@ -476,8 +502,19 @@ end def
 } bind def
 
 /matvecmul_ts {
+  {/A13 /A15} {/c name
+    c 1 mattiny typ array copy def
+  } forall
+  
   {/A1 /A4 /A7 /A10} {
     rowsa typ offarr def
+  } forall
+
+  {/A14} {/a name
+    a mattiny list def
+    0 1 mattiny 1 sub {/i name
+      1 mattiny typ array copy a mkact exec i put
+    } for
   } forall
   
   {/A2 /A5 /A8 /A11} {/a name
@@ -650,7 +687,7 @@ end def
               0 exch getinterval toconsole
 
               ts op get exec
-              {/thread /serial /parallel} {/test name
+              {/thread /serial /parallel /tiny} {/test name
                 style_op_test style get op get test get /func name
                 test_wrap test get /tw name
                 /reps reps_tp_st_op typ get style get op get exec def
