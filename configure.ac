@@ -219,6 +219,7 @@ AC_CONFIG_FILES([
      plugins/startup_dgen.d:dcode/startup_dgen.d.in
 		 test/Makefile
      m4/Makefile
+     test/arr.d
 ])
 
 AC_OUTPUT

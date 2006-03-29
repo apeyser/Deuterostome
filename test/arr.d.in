@@ -18,7 +18,7 @@
 /styles [/AS /AA /SA] def
 
 /matsize 1023 def
-/mattiny 8 4 mul threads mul def
+/mattiny 8 @THREADMUL@ mul threads mul def
 
 /dosmall true def
 

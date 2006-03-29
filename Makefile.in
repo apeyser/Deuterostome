@@ -489,7 +489,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/dcode $(distdir)/emacs $(distdir)/m4 $(distdir)/plugins $(distdir)/src $(distdir)/src/codegen
+	$(mkdir_p) $(distdir)/dcode $(distdir)/emacs $(distdir)/m4 $(distdir)/plugins $(distdir)/src $(distdir)/src/codegen $(distdir)/test
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
