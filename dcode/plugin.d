@@ -260,7 +260,7 @@ B opaquename[FRAMEBYTES];
 #define ) fax package fax (_H
 
 #define PLUGIN_NAME ) fax package_ fax (
-#include ) fax islocal {("src/plugin.h")} {(<dm/plugin.h>)} ifelse fax (
+#include ) fax islocal {("../src/plugin.h")} {(<dm/plugin.h>)} ifelse fax (
 
 ) fax
 
