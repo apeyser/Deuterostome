@@ -32,12 +32,6 @@ EXTRA_DIST = dnode-nice.c.in paths.h.in
 
 DISTCLEANFILES = dm-config.h
 
-distclean-local:
-	cd codegen && $(MAKE) $(AM_MAKEFLAGS) distclean
-
-clean-local:
-	cd codegen && $(MAKE) $(AM_MAKEFLAGS) clean
-
 AM_CPPFLAGS = -DDM_HAVE_CONFIG_H
 AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
 AM_LDFLAGS = -no-undefined $(PTHREAD_LIBS) $(X_LDFLAGS)

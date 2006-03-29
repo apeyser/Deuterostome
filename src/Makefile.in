@@ -1004,13 +1004,13 @@ maintainer-clean-generic:
 clean: clean-recursive
 
 clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
-	clean-libtool clean-local clean-noinstPROGRAMS mostlyclean-am
+	clean-libtool clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
-	distclean-libtool distclean-local distclean-tags
+	distclean-libtool distclean-tags
 
 dvi: dvi-recursive
 
@@ -1062,14 +1062,14 @@ uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am check check-am \
 	clean clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
-	clean-libtool clean-local clean-noinstPROGRAMS clean-recursive \
-	ctags ctags-recursive distclean distclean-compile \
-	distclean-generic distclean-libtool distclean-local \
-	distclean-recursive distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-binPROGRAMS \
-	install-data install-data-am install-dist_pkgdataSCRIPTS \
-	install-exec install-exec-am install-exec-local install-info \
-	install-info-am install-libLTLIBRARIES install-man \
+	clean-libtool clean-noinstPROGRAMS clean-recursive ctags \
+	ctags-recursive distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-recursive distclean-tags distdir \
+	dvi dvi-am html html-am info info-am install install-am \
+	install-binPROGRAMS install-data install-data-am \
+	install-dist_pkgdataSCRIPTS install-exec install-exec-am \
+	install-exec-local install-info install-info-am \
+	install-libLTLIBRARIES install-man \
 	install-nodist_pkgconfiglibDATA \
 	install-nodist_pkgincludeHEADERS install-pkgincludeHEADERS \
 	install-strip installcheck installcheck-am installdirs \
@@ -1095,12 +1095,6 @@ uninstall-info: uninstall-info-recursive
 
 @ENABLE_SETUID_TRUE@uninstall-local:
 @ENABLE_SETUID_TRUE@	-rm -f "$(DESTDIR)$(bindir)/dnode-nice$(EXEEXT)"
-
-distclean-local:
-	cd codegen && $(MAKE) $(AM_MAKEFLAGS) distclean
-
-clean-local:
-	cd codegen && $(MAKE) $(AM_MAKEFLAGS) clean
 
 paths.h: paths.h.in Makefile
 	-rm -f $@ $@.tmp
