@@ -119,7 +119,7 @@ end def
 /style_op_test styles length dict dup begin
   /AA ops length dict dup begin
     dyc_ops {AA_dy_test def} forall
-    /matmul 4 dict dup begin
+    /matmul tests length dict dup begin
       /thread {A1 A2 A3 matmul pop} bind def
       /serial {A4 A5 A6 matmul pop} bind def
       /parallel {A7 A8 A9 matmul pop} bind def
@@ -136,7 +136,7 @@ end def
         } for
       } bind def
     end def
-    /mattranspose 4 dict dup begin
+    /mattranspose tests length dict dup begin
       /thread {A1 A2 mattranspose pop} bind def
       /serial {A4 A5 mattranspose pop} bind def
       /parallel {A7 A8 mattranspose pop} bind def
@@ -149,7 +149,7 @@ end def
         } for
       } bind def
     end def
-    /matvecmul 4 dict dup begin
+    /matvecmul tests length dict dup begin
       /thread {A1 A2 A3 matvecmul pop} bind def
       /serial {A4 A5 A6 matvecmul pop} bind def
       /parallel {A7 A8 A9 matvecmul pop} bind def
@@ -427,7 +427,7 @@ end def
   end def
 end def
 
-/test_wrap 4 dict dup begin
+/test_wrap tests length dict dup begin
   /thread {exec} bind def
   /serial {serialize} bind def
   /parallel {1 makethreads ~exec stopped t makethreads ~stop if} bind def
