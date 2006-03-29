@@ -18,7 +18,7 @@
 /styles [/AS /AA /SA] def
 
 /matsize 1023 def
-/mattiny 100 def
+/mattiny 64 def
 
 /dosmall true def
 
@@ -70,6 +70,13 @@ end def
 end def
 
 /tests [/thread /parallel /serial /byhand /tiny] def
+
+/text_tests tests length dict dup begin
+  /thread {(thread[) fax * threads * number (]) fax} bind def
+  /serial {(serial) fax} bind def
+  /parallel {(parallel) fax} bind def
+  /tiny {(tiny[) fax * matsize mattiny div * number (]) fax} bind def
+end def
 
 /AA_dy_test tests length dict dup begin
   /thread {A1 A2 op mkact exec pop} bind def
@@ -693,8 +700,7 @@ end def
                 /reps reps_tp_st_op typ get style get op get exec def
                 {reps {{func} tw} repeat} timed /time name
                 err 0 (Time for ) fax * style text (, ) fax
-                * test text
-                test /thread eq {([) fax * threads * number (]) fax} if
+                text_tests test get exec
                 ([) fax * reps * number (] = ) fax
                 * time * number (\n) fax
                 0 exch getinterval toconsole
