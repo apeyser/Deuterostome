@@ -432,7 +432,7 @@ end def
   /serial {serialize} bind def
   /parallel {1 makethreads ~exec stopped t makethreads ~stop if} bind def
   /byhand {exec} bind def
-  /tiny {100 {dup exec} repeat pop} bind def
+  /tiny {matsize mattiny div {dup exec} repeat pop} bind def
 end def
 
 /rowsa 1023 def
