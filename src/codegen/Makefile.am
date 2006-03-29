@@ -25,14 +25,14 @@ dgen_SOURCES = dgen.c dgen_0.h dgen_1.h
 dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dgen_LDADD = libdmbootstrap.la
 
-dmnuminc.h.built: dmnuminc.d ldgen dgen-build
+dmnuminc.h.built: dmnuminc.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dmnuminc.d" "$@" 
 	(cd "$(srcdir)/.." ; \
 	 rm dmnuminc.h ; \
 	 $(LN_S) codegen/dmnuminc.h.built dmnuminc.h)
 
-dsp1f.h.built: dsp1f.d ldgen dgen-build
+dsp1f.h.built: dsp1f.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dsp1f.d" "$@"
 	(cd "$(srcdir)/.." ; \

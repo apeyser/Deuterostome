@@ -616,14 +616,14 @@ uninstall-am: uninstall-info-am
 
 gencode: all dmnuminc.h.built dsp1f.h.built
 
-dmnuminc.h.built: dmnuminc.d ldgen dgen-build
+dmnuminc.h.built: dmnuminc.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dmnuminc.d" "$@" 
 	(cd "$(srcdir)/.." ; \
 	 rm dmnuminc.h ; \
 	 $(LN_S) codegen/dmnuminc.h.built dmnuminc.h)
 
-dsp1f.h.built: dsp1f.d ldgen dgen-build
+dsp1f.h.built: dsp1f.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dsp1f.d" "$@"
 	(cd "$(srcdir)/.." ; \
