@@ -18,7 +18,7 @@
 /styles [/AS /AA /SA] def
 
 /matsize 1023 def
-/mattiny 64 def
+/mattiny 8 4 mul def
 
 /dosmall true def
 
