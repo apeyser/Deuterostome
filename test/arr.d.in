@@ -19,6 +19,8 @@
 
 /matsize 1023 def
 /mattiny 8 @THREADMUL@ mul threads mul def
+/mattiny_sqrt mattiny sqrt def
+matsize mattiny le {/matsize 10 mattiny mul def} if
 
 /dosmall true def
 
@@ -33,6 +35,8 @@
 } bind def
 
 /dyadic_ts {
+  /inner_reps matsize mattiny div def
+  
   style /SA eq {
     {/A1 /A3 /A5 /A7} {matsize typ offarr def} forall
     {A1 A3 A5 A7} {exec 1.1d exch copy pop} forall
@@ -77,7 +81,7 @@ end def
   /parallel {(parallel) fax} bind def
   /tiny {
     (tiny[) fax * threads * number
-    (][) fax * matsize mattiny div * number (]) fax
+    (][) fax * inner_reps * number (]) fax
   } bind def
 end def
 
@@ -285,7 +289,7 @@ end def
 /setdig10 {/d ctype
   10d exch 1d sub pwr /dig10 name
 } bind def
-14d setdig10
+12d setdig10
 /eps 1e-100 def
 
 /round {/val name
@@ -300,8 +304,8 @@ end def
   dup type dup /S ne exch /D ne and {ne} {
     2 copy eq {pop pop false} {
         /v1 name /v2 name
-        eps v1 lt eps neg v1 gt and
-        eps v2 lt eps neg v2 gt and 2 copy or {and not} {pop pop
+        v1 eps le v1 eps neg ge and
+        v2 eps le v2 eps neg ge and 2 copy or {and not} {pop pop
 
             v1 dup 0 lt {neg} if
             log dup floor /exp1 name
@@ -442,18 +446,25 @@ end def
   /serial {serialize} bind def
   /parallel {1 makethreads ~exec stopped t makethreads ~stop if} bind def
   /byhand {exec} bind def
-  /tiny {matsize mattiny div {dup exec} repeat pop} bind def
+  /tiny {inner_reps {dup exec} repeat pop} bind def
 end def
 
 /rowsa 1023 def
 /colsa 1027 def
 /colsb 1025 def
+rowsa 3 mattiny_sqrt mul le {
+  {/rows /colsa /colsb} {
+    dup mkact exec 3 mattiny_sqrt mul add def
+  } forall
+} if
 
 /matmul_ts {
+  /inner_reps rowsa colsa mul colsb mul mattiny_sqrt 3 pwr div def
+  
   {/A13 /A14 /A15} {/c name
-    c mattiny list def
-    0 1 mattiny 1 sub {/i name
-      mattiny typ array c mkact exec i put
+    c mattiny_sqrt list def
+    0 1 mattiny_sqrt 1 sub {/i name
+      mattiny_sqrt typ array c mkact exec i put
     } for
   } forall
   
@@ -486,10 +497,12 @@ end def
 } bind def
 
 /mattranspose_ts {
+  /inner_reps colsa rowsa mul mattiny_sqrt dup mul div def
+  
   {/A13 /A14} {/c name
-    c mattiny list def
-    0 1 mattiny 1 sub {/i name
-      mattiny type array c mkact exec i put
+    c mattiny_sqrt list def
+    0 1 mattiny_sqrt 1 sub {/i name
+      mattiny_sqrt typ array c mkact exec i put
     } for
   } forall
   
@@ -512,8 +525,10 @@ end def
 } bind def
 
 /matvecmul_ts {
+  /inner_reps rowsa colsa mul mattiny_sqrt dup mul div def
+  
   {/A13 /A15} {/c name
-    c 1 mattiny typ array copy def
+    c 1 mattiny_sqrt typ array copy def
   } forall
   
   {/A1 /A4 /A7 /A10} {
@@ -521,9 +536,9 @@ end def
   } forall
 
   {/A14} {/a name
-    a mattiny list def
-    0 1 mattiny 1 sub {/i name
-      1 mattiny typ array copy a mkact exec i put
+    a mattiny_sqrt list def
+    0 1 mattiny_sqrt 1 sub {/i name
+      1 mattiny_sqrt typ array copy a mkact exec i put
     } for
   } forall
   
@@ -773,6 +788,145 @@ end def
   } stopped /mem _layer ~stop if
 } bind def
 
+/testmatrix_op mat_ops length dict dup begin
+  /mattranspose {
+    {/A /B /A_} {/nm name
+      nm mattiny_sqrt list def
+      0 1 mattiny_sqrt 1 sub {/i name
+        mattiny_sqrt /d array nm mkact exec i put
+      } for
+    } forall
+
+    /rm 0 def
+    0 1 mattiny_sqrt 1 sub {/i name
+      A i get 0 mattiny_sqrt rm 1 ramp rm add /rm name pop
+      A i get A_ i get copy pop
+      0 B i get copy pop
+    } for
+    B A mattranspose pop
+
+    0 1 mattiny_sqrt 1 sub {/i name
+      0 1 mattiny_sqrt 1 sub {/j name
+        A i get j get B j get i get ne
+        A i get j get A_ i get j get ne or {
+          err 0 (mattranspose: A[) fax * i * number (, ) fax * j * number
+          (]=) fax
+          * A i get j get * number
+          (, B[) fax * j * number (, ) fax * i * number (]=) fax
+          * B j get i get * number
+          (, A_[) fax * i * number (, ) fax * j * number (]=) fax
+          * A_ i get j get * number
+          (\n) fax 0 exch getinterval toconsole
+          stop
+        } if
+      } for
+    } for
+  } bind def
+
+  /matmul {
+    {/A /I /C /A_ /I_} {/nm name
+      nm mattiny_sqrt list def
+      0 1 mattiny_sqrt 1 sub {/i name
+        0 mattiny_sqrt /d array copy nm mkact exec i put
+      } for
+    } forall
+
+    /rm 1 def
+    0 1 mattiny_sqrt 1 sub {/i name
+      1 I i get i put
+      I i get I_ i get copy pop
+      A i get 0 mattiny_sqrt rm 1 ramp rm add /rm name pop
+      A i get A_ i get copy pop
+      0 C i get copy pop
+    } for
+
+    C A I matmul pop
+
+    0 1 mattiny_sqrt 1 sub {/i name
+      0 1 mattiny_sqrt 1 sub {/j name
+        A i get j get C i get j get ne
+        A i get j get A_ i get j get ne or
+        I i get j get I_ i get j get ne or {
+          err 0 (matmul: A[) fax * i * number (, ) fax * j * number (]=) fax
+          * A i get j get * number
+          (, C[) fax * i * number (, ) fax * j * number (]=) fax
+          * B i get j get * number
+          (, A_[) fax * i * number (, ) fax * j * number (]=) fax
+          * A_ i get j get * number
+          (, I[) fax * i * number (, ) fax * j * number (]=) fax
+          * I i get j get * number
+          (, I_[) fax * i * number (, ) fax * j * number (]=) fax
+          * I_ i get j get * number
+          (\n) fax 0 exch getinterval toconsole
+          stop
+        } if
+      } for
+    } for
+  } bind def
+
+  /matvecmul {
+    {/C /B /B_} {/nm name
+      nm 1 mattiny_sqrt /d array copy def
+    } forall
+    
+    {/I /I_} {/nm name
+      nm mattiny_sqrt list def
+      0 1 mattiny_sqrt 1 sub {/i name
+        0 mattiny_sqrt /d array copy nm mkact exec i put
+      } for
+    } forall
+
+    0 C copy pop
+    B 0 mattiny_sqrt 1 1 ramp pop pop
+    B B_ copy pop
+    0 1 mattiny_sqrt 1 sub {/i name
+      1 I i get i put
+      I i get I_ i get copy pop
+    } for
+
+    C I B matvecmul pop
+    
+    0 1 mattiny_sqrt 1 sub {/i name
+      B i get B_ i get ne
+      B i get C i get ne or {
+        err 0 (matvecmul: B[) fax * i * number  (]=) fax
+        * B i get * number
+        (, C[) fax * i * number (]=) fax
+        * C i get * number
+        (, B_[) fax * i * number (]=) fax
+        * B_ i get * number
+        (\n) fax 0 exch getinterval toconsole
+        stop
+      } if
+        
+      0 1 mattiny_sqrt 1 sub {/j name
+        I i get j get I_ i get j get ne {
+          err 0 (matvecmul: I[) fax * i * number (, ) fax * j * number (]=) fax
+          * I i get j get * number
+          (, I_[) fax * i * number (, ) fax * j * number (]=) fax
+          * I_ i get j get * number
+          (\n) fax 0 exch getinterval toconsole
+          stop
+        } if
+      } for
+    } for
+  } bind def
+end def
+
+/testmatrix {
+  mat_ops {/op name
+    err 0 (Starting test for op ) fax * op mkact text (\n) fax
+    0 exch getinterval toconsole
+    
+    /ts_ layer {
+      testmatrix_op op get exec
+    } stopped /ts_ _layer ~stop if
+
+    err 0 (Ending test for op ) fax * op mkact text (\n) fax
+    0 exch getinterval toconsole    
+  } forall
+} bind def
+
 /threadreps 1e6 def
 /fulltest {
   (\nTesting makethreads...\n) toconsole
@@ -781,6 +935,9 @@ end def
   (\nTesting ops:\n) toconsole
   (Number of threads: ) toconsole threads _ pop
   testmath |testops
+  (\nTesting matrices:\n) toconsole
+  (Number of threads: ) toconsole threads _ pop
+  testmatrix
   (\nTesting time:\n) toconsole
   (Number of threads: ) toconsole threads _ pop
   testtime

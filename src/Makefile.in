@@ -48,7 +48,7 @@ DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(dist_pkgdata_SCRIPTS) \
 	$(srcdir)/dm2.c $(srcdir)/dm3.c $(srcdir)/dm4.c \
 	$(srcdir)/dm5.c $(srcdir)/dm6.c $(srcdir)/dm7.c \
 	$(srcdir)/dm8.c $(srcdir)/dmglobals.c $(srcdir)/dmnum.c \
-	$(srcdir)/dsp1.c $(srcdir)/dsp2.c $(srcdir)/paths.h.in
+	$(srcdir)/dsp1.c $(srcdir)/paths.h.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
@@ -60,7 +60,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = dm.pc dsp1f.h dmnuminc.h
+CONFIG_CLEAN_FILES = dm.pc dsp1f.h dmnuminc.h dsp2def.h
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \

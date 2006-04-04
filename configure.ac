@@ -188,9 +188,9 @@ CF_AC_SUBST([PCLDFLAGS], [-module -no-undefined])
 AC_CONFIG_LINKS([
 		src/dsp1f.h:src/codegen/dsp1f.h.built
 		src/dmnuminc.h:src/codegen/dmnuminc.h.built
+    src/dsp2def.h:src/codegen/dsp2def.h.built
 		src/codegen/dmglobals.c:src/dmglobals.c
 		src/codegen/dsp1.c:src/dsp1.c
-		src/codegen/dsp2.c:src/dsp2.c
 		src/codegen/dm1.c:src/dm1.c
 		src/codegen/dm2.c:src/dm2.c
 		src/codegen/dm3.c:src/dm3.c
@@ -211,7 +211,7 @@ AC_CONFIG_LINKS([
 AC_CONFIG_FILES([
 		 Makefile 
 		 src/Makefile 
-		 src/codegen/Makefile src/codegen/dmnuminc.d
+		 src/codegen/Makefile src/codegen/dmnuminc.d src/codegen/dsp2def.d
      src/dm.pc
 		 plugins/Makefile plugins/dmflex.l
 		 ps/Makefile 

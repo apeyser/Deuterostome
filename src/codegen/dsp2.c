@@ -22,7 +22,6 @@
 #include <math.h>
 #define nTYPES  ((W)5)
 #include <stdio.h>
-#include "dsp2def.h"
 
 /*------------------------------ internal library ---------------------------*/
 
@@ -543,21 +542,20 @@ typedef struct {
   D *restrict *restrict ap, 
 	*restrict *restrict bp, 
 	*restrict *restrict cp;
-  UL perthread;
-  UL leftover;
 } matmult;
 
-L thread_matmul(UL id, const void* global, 
-                void* local __attribute__ ((__unused__))) {
+L thread_matmul(UL id __attribute__ ((__unused__)),
+                const void* global, void* local) {
+  L i = *(L*) local;
   const matmult* restrict m = (const matmult*) global;
-  UL n = m->perthread + (thread_max() == id ? m->leftover : 0);
-  L i_ = m->perthread*id;
-  L i, j;
-
-  for (i = i_; i < i_ + n; i++)
-    for (j = 0; j < m->Ncolc; j++)
-      MATMUL_INNER(m->Ncola, m->ap, m->bp, m->cp);
-  
+  L j, k;
+  D sum;
+  for (j = 0; j < m->Ncolc; j++) {
+	sum = 0.0;
+	for (k = 0; k < m->Ncola; k++)
+	  sum += m->ap[i][k] * m->bp[k][j];
+	m->cp[i][j] = sum;
+  }
   return OK;
 }
 #endif
@@ -567,10 +565,7 @@ L op_matmul(void)
 
 L Nrowa, Nrowb, Nrowc, Ncola , Ncolb, Ncolc, i, j, k;
 B *fp;
-D **p, **ap, **bp, **cp;
-#if ENABLE_THREADS
- UL nways;
-#endif
+D **p, **ap, **bp, **cp, sum;
 
 if (o_3 < FLOORopds) return(OPDS_UNF);
 if ( CLASS(o_3) != LIST) return(OPD_CLA);
@@ -615,30 +610,20 @@ for (k=0; k<Nrowb; k++)
   
  if ((Ncola != Nrowb) || (Nrowa != Nrowc) || (Ncolb != Ncolc)) return(RNG_CHK);
  
-#if ENABLE_THREADS
- if (thread_num() > 1 && ! serialized && Nrowc > 1) {
-   nways = Nrowc*Ncolc*Ncola/(THREADMUL << ROLLBITS)
-     + ((Nrowc*Ncolc*Ncola%(THREADMUL << ROLLBITS)) ? 1: 0);
-   if (nways > Nrowc) nways = Nrowc;
- }
- else nways = 1;
-
- if (nways == 1) {
-#endif
+ if (thread_num() == 1 || serialized) {
    for (i=0; i<Nrowc; i++)
-     for (j=0; j<Ncolc; j++)
-       MATMUL_INNER(Ncola, ap, bp, cp);
-#if ENABLE_THREADS
+	 for (j=0; j<Ncolc; j++) { 
+	   sum = 0.0;
+	   for (k=0; k<Ncola; k++) sum += ap[i][k] * bp[k][j];
+	   cp[i][j] = sum;
+	 }
  }
+#if ENABLE_THREADS
  else {
    matmult m;
-   if (nways > thread_num()) nways = thread_num();
-   m.perthread = Nrowc / nways;
-   m.leftover = Nrowc % nways;
-   
    m.Ncolc = Ncolc; m.Ncola = Ncola;
    m.ap = ap; m.bp = bp; m.cp = cp;
-   threads_do(nways, thread_matmul, &m);
+   threads_do_pool(Nrowc, thread_matmul, &m);
  }
 #endif //ENABLE_THREADS
    
@@ -670,11 +655,12 @@ L thread_mattranspose(UL id,
   const mattransposet* restrict m = (const mattransposet*) global;
   UL n = m->perthread + (thread_max() == id ? m->leftover : 0);
   const UL i_ = m->perthread*id;
-  UL i;
+  UL i, j;
   
-  for (i = i_; i < i_ + n; ++i) 
-    MATTRANSPOSE_INNER(m->Ncola, m->ap, m->bp);
-
+  for (i = i_; i < i_ + n; ++i) {
+      for (j = 0; j < m->Ncola; j++)
+          m->bp[j][i] = m->ap[i][j];
+  }
   return OK;
 }
 #endif //ENABLE_THREADS
@@ -682,18 +668,15 @@ L thread_mattranspose(UL id,
 L op_mattranspose(void)
 {
 
-L Nrowa, Nrowb, Ncola , Ncolb, i, k;
+L Nrowa, Nrowb, Ncola , Ncolb, i, j, k;
 B *fp;
 D **p, **ap, **bp;
-#if ENABLE_THREADS
-UL nways;
-#endif //ENABLE_THREADS
 
 if (o_2 < FLOORopds) return(OPDS_UNF);
-if (CLASS(o_2) != LIST) return(OPD_CLA);
+if ( CLASS(o_2) != LIST) return(OPD_CLA);
 if (ATTR(o_2) & READONLY) return(OPD_ATR);
 Nrowb = (LIST_CEIL(o_2) - VALUE_BASE(o_2)) / FRAMEBYTES;
-if (CLASS(o_1) != LIST) return(OPD_CLA);
+if ( CLASS(o_1) != LIST) return(OPD_CLA);
 Nrowa = (LIST_CEIL(o_1) - VALUE_BASE(o_1)) / FRAMEBYTES;
 
 if ((FREEvm + (Nrowa + Nrowb) *  sizeof(D *)) > CEILvm) return(VM_OVF);
@@ -720,23 +703,13 @@ for (k=0; k<Nrowa; k++)
   
  if ((Ncola != Nrowb) || (Nrowa != Ncolb)) return(RNG_CHK);
  
-#if ENABLE_THREADS
- if (thread_num() > 1 && ! serialized && Nrowa > 1) {
-   nways = Nrowa*Ncola/(THREADMUL << ROLLBITS)
-     + ((Nrowa*Ncola%(THREADMUL << ROLLBITS)) ? 1 : 0);
-   if (nways > Nrowa) nways = Nrowa;
- }
- else nways = 1;
-
- if (nways == 1) {
-#endif //ENABLE_THREADS
+ if (thread_num() == 1 || serialized || Nrowa == 1 || Ncola < THREADMUL*8)
    for (i=0; i<Nrowa; i++)
-     MATTRANSPOSE_INNER(Ncola, ap, bp);
+	 for (j=0; j<Ncola; j++) bp[j][i] = ap[i][j];
 #if ENABLE_THREADS
- }
  else {
    mattransposet m;
-   if (nways > thread_num()) nways = thread_num();
+   UL nways = (Nrowa > thread_num()) ? thread_num() : Nrowa;
    m.perthread = Nrowa / nways;
    m.leftover = Nrowa % nways;
    m.Ncola = Ncola;
@@ -775,9 +748,15 @@ L thread_matvecmul(UL id,
   const UL n = m->perthread + (thread_max() == id ? m->leftover : 0);
   const UL i_ = m->perthread * id;
   UL i;
+  UL k;
+  D sum;
   
-  for (i = i_;  i < i_ + n; ++i)
-    MATVECMUL_INNER(m->Ncola, m->ap, m->bp, m->cp);
+  for (i = i_;  i < i_ + n; ++i) {
+      sum = 0.0;
+      for (k = 0; k < m->Ncola; ++k)
+          sum += m->ap[i][k] * m->bp[k];
+      m->cp[i] = sum;
+  }
   
   return OK;
 }
@@ -788,10 +767,7 @@ L op_matvecmul(void)
 
 L Nrowa, Nrowb, Nrowc, Ncola, i, k;
 B *fp;
-D **p, **ap, *bp, *cp;
-#if ENABLE_THREADS
-UL nways;
-#endif //ENABLE_THREADS
+D **p, **ap, *bp, *cp, sum;
 
 if (o_3 < FLOORopds) return(OPDS_UNF);
 if ( CLASS(o_3) != ARRAY) return(OPD_CLA);
@@ -818,34 +794,25 @@ for (k=0; k<Nrowa; k++)
  if ((Ncola != Nrowb) || (Nrowa != Nrowc)) return(RNG_CHK);
  
  bp = (D*) VALUE_BASE(o_1); cp = (D*) VALUE_BASE(o_3);
-
+ if (thread_num() == 1 || serialized || Nrowc == 1 || Ncola < THREADMUL*8)
+   for (i=0; i<Nrowc; i++) { 
+	 sum = 0.0;
+     for (k=0; k<Ncola; k++) sum += ap[i][k] * bp[k];
+     cp[i] = sum;
+   }
 #if ENABLE_THREADS
- if (thread_num() > 1 && ! serialized && Nrowc > 1) {
-   nways = Nrowc*Ncola/(THREADMUL << ROLLBITS)
-     + ((Nrowc*Ncola % (THREADMUL << ROLLBITS)) ? 1 : 0);
-   if (nways > Nrowc) nways = Nrowc;
- }
- else nways = 1;
-
- if (nways == 1) {
-#endif //ENABLE_THREADS
-   for (i=0; i<Nrowc; i++) 
-     MATVECMUL_INNER(Ncola, ap, bp, cp);
-#if ENABLE_THREADS
- }
  else {
    matvecmult m;
-   if (nways > thread_num()) nways = thread_num();
+   UL nways = (Nrowc > thread_num()) ? thread_num() : Ncola;
    m.perthread = Nrowc / nways;
    m.leftover = Nrowc % nways;
-
    m.Ncola = Ncola;
    m.ap = ap; m.bp = bp; m.cp = cp;
    threads_do(nways, thread_matvecmul, &m);
  }
-#endif //ENABLE_THREADS
+#endif
         
  FREEopds = o_2;
  return(OK);
-}
+ }
  

@@ -1,0 +1,63 @@
+#ifndef DSP2DEF_H
+#define DSP2DEF_h
+
+
+#define MATMUL_INNER(cols, ap, bp, cp) do { \
+  UL k_;\
+  UL k = 0;\
+  D sum = 0;\
+  for (k_ = cols >> 3; k_; k_--) {\
+    sum += ap[i][k] * bp[k][j]; k++;\
+    sum += ap[i][k] * bp[k][j]; k++;\
+    sum += ap[i][k] * bp[k][j]; k++;\
+    sum += ap[i][k] * bp[k][j]; k++;\
+    sum += ap[i][k] * bp[k][j]; k++;\
+    sum += ap[i][k] * bp[k][j]; k++;\
+    sum += ap[i][k] * bp[k][j]; k++;\
+    sum += ap[i][k] * bp[k][j]; k++;\
+  }\
+  for (k_ = (cols & 7); k_; k_--) {\
+    sum += ap[i][k] * bp[k][j]; k++;\
+  }\
+  cp[i][j] = sum;\
+} while (0)
+
+#define MATTRANSPOSE_INNER(cols, ap, bp) do { \
+  UL j_;\
+  UL j = 0;\
+  for (j_ = cols >> 3; j_; j_--) {\
+    bp[j][i] = ap[i][j]; j++;\
+    bp[j][i] = ap[i][j]; j++;\
+    bp[j][i] = ap[i][j]; j++;\
+    bp[j][i] = ap[i][j]; j++;\
+    bp[j][i] = ap[i][j]; j++;\
+    bp[j][i] = ap[i][j]; j++;\
+    bp[j][i] = ap[i][j]; j++;\
+    bp[j][i] = ap[i][j]; j++;\
+  }\
+  for (j_ = (cols & 7); j_; j_--) {\
+    bp[j][i] = ap[i][j]; j++;\
+  }\
+} while (0)
+
+#define MATVECMUL_INNER(cols, ap, bp, cp) do { \
+  UL k_;\
+  UL k = 0;\
+  D sum = 0;\
+  for (k_ = cols >> 3; k_; k_--) {\
+    sum += ap[i][k] * bp[k]; k++;\
+    sum += ap[i][k] * bp[k]; k++;\
+    sum += ap[i][k] * bp[k]; k++;\
+    sum += ap[i][k] * bp[k]; k++;\
+    sum += ap[i][k] * bp[k]; k++;\
+    sum += ap[i][k] * bp[k]; k++;\
+    sum += ap[i][k] * bp[k]; k++;\
+    sum += ap[i][k] * bp[k]; k++;\
+  }\
+  for (k_ = (cols & 7); k_; k_--) {\
+    sum += ap[i][k] * bp[k]; k++;\
+  }\
+  cp[i] = sum;\
+} while (0)
+
+#endif //DSP2DEF_H

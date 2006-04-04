@@ -42,7 +42,9 @@ subdir = src/codegen
 DIST_COMMON = $(dist_noinst_DATA) $(dist_noinst_SCRIPTS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/dmnuminc.d.in $(srcdir)/dmnuminc.h.built \
-	$(srcdir)/dsp1f.h.built $(top_srcdir)/dcode/startup_dgen.d.in
+	$(srcdir)/dsp1f.h.built $(srcdir)/dsp2def.d.in \
+	$(srcdir)/dsp2def.h.built \
+	$(top_srcdir)/dcode/startup_dgen.d.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
@@ -54,8 +56,8 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = dmnuminc.d startup_dgen.d dmglobals.c dsp1.c \
-	dsp2.c dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dmnum.c \
+CONFIG_CLEAN_FILES = dmnuminc.d dsp2def.d startup_dgen.d dmglobals.c \
+	dsp1.c dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dmnum.c \
 	paths.h.in dgen.c dgen_0.h dgen_1.h dgen-build
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libdmbootstrap_la_LIBADD =
@@ -289,7 +291,7 @@ target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
 tmp = @tmp@
-dist_noinst_DATA = dmnuminc.d dsp1f.d
+dist_noinst_DATA = dmnuminc.d dsp1f.d dsp2def.d
 dist_noinst_SCRIPTS = dgen-build
 AM_CFLAGS = $(GCC_CFLAGS)
 AM_CPPFLAGS = -DDM_DISABLE_THREADS=1 -DDM_HAVE_CONFIG_H \
@@ -302,7 +304,9 @@ BUILT_SOURCES = paths.h
 CLEANFILES = $(BUILT_SOURCES)
 DISTCLEANFILES = dm-config.h
 noinst_LTLIBRARIES = libdmbootstrap.la
-EXTRA_DIST = dmnuminc.h.built dsp1f.h.built dmnuminc.d.in paths.h.in
+EXTRA_DIST = dmnuminc.h.built dsp1f.h.built dmnuminc.d.in paths.h.in \
+	dsp2def.h.built dsp2def.d.in
+
 libdmbootstrap_la_SOURCES = dmglobals.c dm1.c dm2.c dm3.c dm4.c dm5.c \
 	dm6.c dm7.c dm8.c dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h
 
@@ -350,6 +354,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 dmnuminc.d: $(top_builddir)/config.status $(srcdir)/dmnuminc.d.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+dsp2def.d: $(top_builddir)/config.status $(srcdir)/dsp2def.d.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 startup_dgen.d: $(top_builddir)/config.status $(top_srcdir)/dcode/startup_dgen.d.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
@@ -614,7 +620,14 @@ uninstall-am: uninstall-info-am
 	tags uninstall uninstall-am uninstall-info-am
 
 
-gencode: all dmnuminc.h.built dsp1f.h.built
+gencode: all dmnuminc.h.built dsp1f.h.built dsp2def.h.built
+
+dsp2def.h.built: dsp2def.d dgen dgen-build
+	"$(srcdir)/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dsp2def.d" "$@" 
+	(cd "$(srcdir)/.." ; \
+	 rm dsp2def.h ; \
+	 $(LN_S) codegen/dsp2def.h.built dsp2def.h)
 
 dmnuminc.h.built: dmnuminc.d dgen dgen-build
 	"$(srcdir)/dgen-build" \

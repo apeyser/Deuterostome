@@ -32432,10 +32432,10 @@ fi
   PCLDFLAGS="-module -no-undefined"
 
 
-                                                                                                                                                                                                        ac_config_links="$ac_config_links src/dsp1f.h:src/codegen/dsp1f.h.built src/dmnuminc.h:src/codegen/dmnuminc.h.built src/codegen/dmglobals.c:src/dmglobals.c src/codegen/dsp1.c:src/dsp1.c src/codegen/dsp2.c:src/dsp2.c src/codegen/dm1.c:src/dm1.c src/codegen/dm2.c:src/dm2.c src/codegen/dm3.c:src/dm3.c src/codegen/dm4.c:src/dm4.c src/codegen/dm5.c:src/dm5.c src/codegen/dm6.c:src/dm6.c src/codegen/dm7.c:src/dm7.c src/codegen/dm8.c:src/dm8.c src/codegen/dmnum.c:src/dmnum.c src/codegen/paths.h.in:src/paths.h.in src/codegen/dgen.c:src/dgen.c src/codegen/dgen_0.h:src/dgen_0.h src/codegen/dgen_1.h:src/dgen_1.h src/codegen/dgen-build:src/dgen-build plugins/plugin.d:dcode/plugin.d"
+                                                                                                                                                                                                        ac_config_links="$ac_config_links src/dsp1f.h:src/codegen/dsp1f.h.built src/dmnuminc.h:src/codegen/dmnuminc.h.built src/dsp2def.h:src/codegen/dsp2def.h.built src/codegen/dmglobals.c:src/dmglobals.c src/codegen/dsp1.c:src/dsp1.c src/codegen/dm1.c:src/dm1.c src/codegen/dm2.c:src/dm2.c src/codegen/dm3.c:src/dm3.c src/codegen/dm4.c:src/dm4.c src/codegen/dm5.c:src/dm5.c src/codegen/dm6.c:src/dm6.c src/codegen/dm7.c:src/dm7.c src/codegen/dm8.c:src/dm8.c src/codegen/dmnum.c:src/dmnum.c src/codegen/paths.h.in:src/paths.h.in src/codegen/dgen.c:src/dgen.c src/codegen/dgen_0.h:src/dgen_0.h src/codegen/dgen_1.h:src/dgen_1.h src/codegen/dgen-build:src/dgen-build plugins/plugin.d:dcode/plugin.d"
 
 
-                                                                                                                                                                                                        ac_config_files="$ac_config_files Makefile src/Makefile src/codegen/Makefile src/codegen/dmnuminc.d src/dm.pc plugins/Makefile plugins/dmflex.l ps/Makefile sh/Makefile emacs/Makefile emacs/d-mode.el dcode/Makefile dcode/startup_dvt.d dcode/startup_dnode.d dcode/startup_dgen.d src/codegen/startup_dgen.d:dcode/startup_dgen.d.in plugins/startup_dgen.d:dcode/startup_dgen.d.in test/Makefile m4/Makefile test/arr.d"
+                                                                                                                                                                                                                  ac_config_files="$ac_config_files Makefile src/Makefile src/codegen/Makefile src/codegen/dmnuminc.d src/codegen/dsp2def.d src/dm.pc plugins/Makefile plugins/dmflex.l ps/Makefile sh/Makefile emacs/Makefile emacs/d-mode.el dcode/Makefile dcode/startup_dvt.d dcode/startup_dnode.d dcode/startup_dgen.d src/codegen/startup_dgen.d:dcode/startup_dgen.d.in plugins/startup_dgen.d:dcode/startup_dgen.d.in test/Makefile m4/Makefile test/arr.d"
 
 
 cat >confcache <<\_ACEOF
@@ -33108,6 +33108,7 @@ do
   "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
   "src/codegen/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/codegen/Makefile" ;;
   "src/codegen/dmnuminc.d" ) CONFIG_FILES="$CONFIG_FILES src/codegen/dmnuminc.d" ;;
+  "src/codegen/dsp2def.d" ) CONFIG_FILES="$CONFIG_FILES src/codegen/dsp2def.d" ;;
   "src/dm.pc" ) CONFIG_FILES="$CONFIG_FILES src/dm.pc" ;;
   "plugins/Makefile" ) CONFIG_FILES="$CONFIG_FILES plugins/Makefile" ;;
   "plugins/dmflex.l" ) CONFIG_FILES="$CONFIG_FILES plugins/dmflex.l" ;;
@@ -33126,9 +33127,9 @@ do
   "test/arr.d" ) CONFIG_FILES="$CONFIG_FILES test/arr.d" ;;
   "src/dsp1f.h" ) CONFIG_LINKS="$CONFIG_LINKS src/dsp1f.h:src/codegen/dsp1f.h.built" ;;
   "src/dmnuminc.h" ) CONFIG_LINKS="$CONFIG_LINKS src/dmnuminc.h:src/codegen/dmnuminc.h.built" ;;
+  "src/dsp2def.h" ) CONFIG_LINKS="$CONFIG_LINKS src/dsp2def.h:src/codegen/dsp2def.h.built" ;;
   "src/codegen/dmglobals.c" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/dmglobals.c:src/dmglobals.c" ;;
   "src/codegen/dsp1.c" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/dsp1.c:src/dsp1.c" ;;
-  "src/codegen/dsp2.c" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/dsp2.c:src/dsp2.c" ;;
   "src/codegen/dm1.c" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/dm1.c:src/dm1.c" ;;
   "src/codegen/dm2.c" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/dm2.c:src/dm2.c" ;;
   "src/codegen/dm3.c" ) CONFIG_LINKS="$CONFIG_LINKS src/codegen/dm3.c:src/dm3.c" ;;
