@@ -6,7 +6,7 @@
   [
     [
       /combinations {(
-  L n, k, num_min, denom_max, i, j;
+  L n, k, num_min, denom_max, i, j, m;
   D v; L* num;
 
   if \(o_2 < FLOORopds\) return OPDS_UNF;
@@ -31,10 +31,16 @@
     num[j] = j;
 
   for \(i = 2; i <= denom_max; i++\) {
-    for \(j = \(i < num_min\) ? num_min : i; j <= n; j++\) {
-      if \(! \(num[j] % i\)\) {
-        num[j] /= i;
-        break;
+    L i_ = i;
+    for \(m = 2; m <= i; m++\) {
+      while \(! \(i_ % m\)\) {
+        i_ /= m;
+        for \(j = \(m < num_min\) ? num_min : m; j <= n; j++\) {
+          if \(! \(num[j] % m\)\) {
+             num[j] /= m;
+            break;
+          }
+        }
       }
     }
   }
