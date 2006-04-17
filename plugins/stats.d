@@ -2,10 +2,20 @@
 
 /version 1 def
 
+/bodycode
+(
+static L max_n = 1;
+#define max_kn \(1000\)
+static D binom[max_kn+1][max_kn+1] = {1};
+static D binom_[max_kn+1] = {1};
+) def
+
+
 /makeops {
   [
     [
       /combinations {(
+  // n k | \(n/k\)
   L n, k, num_min, denom_max, i, j, m;
   D v; L* num;
 
@@ -15,43 +25,36 @@
   if \(! VALUE\(o_2, &n\)\) return UNDF_VAL;
   if \(! VALUE\(o_1, &k\)\) return UNDF_VAL;
   if \(n < 0 || k < 0 || n < k\) return RNG_CHK;
-
-  if \(n-k+1 <= k\) {
-    num_min = k+1;
-    denom_max = n-k;
-  }
-  else {
-    num_min = n-k+1;
-    denom_max = k > 1 ? k : 1;
-  }
-
-  if \(FREEvm + sizeof\(L\)*\(n - num_min + 1\) >= CEILvm\) return VM_OVF;
-  num = \(L*\) FREEvm;
-  for \(j = num_min; j <= n; ++j\)
-    num[j] = j;
-
-  for \(i = 2; i <= denom_max; i++\) {
-    L i_ = i;
-    for \(m = 2; m <= i; m++\) {
-      while \(! \(i_ % m\)\) {
-        i_ /= m;
-        for \(j = \(m < num_min\) ? num_min : m; j <= n; j++\) {
-          if \(! \(num[j] % m\)\) {
-             num[j] /= m;
-            break;
-          }
-        }
-      }
-    }
-  }
-
-  v = 1.0;
-  for \(j = num_min; j <= n; ++j\)
-    v *= num[j];
+  if \(n > max_kn\) return RNG_CHK;
 
   TAG\(o_2\) = \(NUM | DOUBLETYPE\);
   ATTR\(o_2\) = 0;
-  *\(D*\) NUM_VAL\(o_2\) = v;
+  FREEopds = o_1;
+  if \(n == k || k == 0\) {
+    *\(D*\) NUM_VAL\(o_2\) = 1;
+    return OK;
+  }
+
+  if \(n <= max_n\) {
+    *\(D*\) NUM_VAL\(o_2\) = binom[n][k];
+    return OK;
+  }
+
+  if \(n != max_n+1\)
+    for \(i = 0; i <= max_n; ++i\)
+      binom_[i] = binom[max_n][i];
+
+  for \(i = max_n+1; i <= n; ++i\) {
+    binom_[i] = 1;
+    for \(j = i-1; j; --j\) {
+      binom_[j] += binom_[j-1];
+    }
+    for \(j = 0; j <= n; ++j\)
+      binom[i][j] = binom_[j];
+  }
+  max_n = n;
+
+  *\(D*\) NUM_VAL\(o_2\) = binom_[n];
   FREEopds = o_1;
   return OK;
 )}
