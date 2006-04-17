@@ -12,8 +12,8 @@
   if \(o_2 < FLOORopds\) return OPDS_UNF;
   if \(CLASS\(o_1\) != NUM\) return OPD_CLA;
   if \(CLASS\(o_2\) != NUM\) return OPD_CLA;
-  if \(! VALUE\(o_1, &n\)\) return UNDF_VAL;
-  if \(! VALUE\(o_2, &k\)\) return UNDF_VAL;
+  if \(! VALUE\(o_2, &n\)\) return UNDF_VAL;
+  if \(! VALUE\(o_1, &k\)\) return UNDF_VAL;
   if \(n < 0 || k < 0 || n < k\) return RNG_CHK;
 
   if \(n-k+1 <= k\) {
