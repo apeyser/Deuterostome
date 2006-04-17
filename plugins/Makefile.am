@@ -18,6 +18,19 @@ process2.h: process2.d plugin.d
 BUILT_SOURCES = process2.c process2.h
 process_la_SOURCES = process.c process.h
 process2_la_SOURCES = process2.c process2.h
+dist_noinst_DATA = process2.d
+
+stats.c: stats.d plugin.d
+	"$(top_srcdir)/src/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "stats.d" "$@" true true
+
+stats.h: stats.d plugin.d
+	"$(top_srcdir)/src/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "stats.d" "$@" false true
+
+BUILT_SOURCES += stats.c stats.h
+stats_la_SOURCES = stats.h stats.c
+dist_noinst_DATA += stats.d
 
 if ENABLE_DMFLEX
 DMFLEX_LIB=dmflex.la
@@ -25,13 +38,12 @@ endif ENABLE_DMFLEX
 BUILT_SOURCES += dmflex.c
 dmflex_la_SOURCES = dmflex.l dmflex.h
 
-pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB) 
+pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB) \
+	stats.la
 
 test_la_SOURCES = test.c test.h
 test2_la_SOURCES = test2.c test2.h
 throw_la_SOURCES = throw.c throw.h
-
-dist_noinst_DATA = process2.d
 
 CLEANFILES = $(BUILT_SOURCES)
 
