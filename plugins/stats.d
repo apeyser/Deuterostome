@@ -31,12 +31,12 @@ static D binom_[max_kn+1] = {1};
   ATTR\(o_2\) = 0;
   FREEopds = o_1;
   if \(n == k || k == 0\) {
-    *\(D*\) NUM_VAL\(o_2\) = 1;
+    *\(D*\) NUM_VAL\(o_1\) = 1;
     return OK;
   }
 
   if \(n <= max_n\) {
-    *\(D*\) NUM_VAL\(o_2\) = binom[n][k];
+    *\(D*\) NUM_VAL\(o_1\) = binom[n][k];
     return OK;
   }
 
@@ -54,8 +54,7 @@ static D binom_[max_kn+1] = {1};
   }
   max_n = n;
 
-  *\(D*\) NUM_VAL\(o_2\) = binom_[n];
-  FREEopds = o_1;
+  *\(D*\) NUM_VAL\(o_1\) = binom_[n];
   return OK;
 )}
     ]
