@@ -22,7 +22,7 @@
   }
   else {
     num_min = n-k+1;
-    denom_max = k > 1 ? k : 2;
+    denom_max = k > 1 ? k : 1;
   }
 
   if \(FREEvm + sizeof\(L\)*\(n - num_min + 1\) >= CEILvm\) return VM_OVF;
