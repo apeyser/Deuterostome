@@ -7,7 +7,7 @@
 static L max_n = 1;
 #define max_kn \(1000\)
 static D binom[max_kn+1][max_kn+1] = {1};
-static D binom_[max_kn+1] = {1};
+static D binom_[max_kn+1] = {1, 1};
 ) def
 
 
