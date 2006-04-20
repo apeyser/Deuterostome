@@ -51,6 +51,36 @@ static D binom[max_kn+1][max_kn+1] = {1};
   return OK;
 )}
     ]
+    [
+      /legendre {(
+  // x l | Pl\(x\)
+  L l, i;
+  D x, Px, Px_1, Px_2;
+  if \(o_2 < FLOORopds\) return OPDS_UNF;
+  if \(CLASS\(o_1\) != NUM\) return OPD_CLA;
+  if \(! VALUE\(o_1, &l\)\) return UNDF_VAL;
+  if \(l < 0\) return RNG_CHK;
+  if \(TAG\(o_2\) != \(NUM | DOUBLETYPE\)\) return OPD_TYP;
+
+  FREEopds = o_1;
+  if \(l == 0\) {
+    *\(D*\) NUM_VAL\(o_1\) = 1;
+    return OK;
+  }
+
+  x = *\(D*\) NUM_VAL\(o_2\);
+  Px_1 = 1;
+  Px = x;
+  for \(i = 2; i <= l; ++i\) {
+    Px_2 = Px_1;
+    Px_1 = Px;
+    Px = \(\(D\)\(2*i-1\)\)/i*x*Px_1 - \(\(D\)\(i-1\)\)/i*Px_2;
+  }
+
+  *\(D*\) NUM_VAL\(o_1\) = Px;
+  return OK;
+)} 
+    ]
   ]
 } bind def
 
