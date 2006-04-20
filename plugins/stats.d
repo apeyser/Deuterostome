@@ -68,9 +68,8 @@ static D binom[max_kn+1][max_kn+1] = {1};
     return OK;
   }
 
-  x = *\(D*\) NUM_VAL\(o_2\);
+  Px = x = *\(D*\) NUM_VAL\(o_1\);
   Px_1 = 1;
-  Px = x;
   for \(i = 2; i <= l; ++i\) {
     Px_2 = Px_1;
     Px_1 = Px;
