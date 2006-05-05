@@ -265,7 +265,7 @@ B* syserrm[] =
     "** Invalid exit",
     "** Invalid stop",
     "** Execution stack corrupted",
-    "** Execution stack holds discardable object",
+    "** Stack holds discardable object",
     "** Bad token",
     "** Bad ASCII character",
     "** Unmatched array closure",

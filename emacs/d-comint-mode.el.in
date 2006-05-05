@@ -146,9 +146,10 @@ property."
     (move-overlay overlay (overlay-start overlay) begin)))
 
 (defun d-comint-mode-prefilter (s)
-  (put-text-property 0 (1- (length s)) 'font-lock-face 
-					 'd-comint-mode-highlight-output s)
-  s) 
+  (when (> (length s) 0)
+    (put-text-property 0 (1- (length s)) 'font-lock-face 
+                       'd-comint-mode-highlight-output s))
+  s)
 
 (defvar d-comint-mode-redirect-ignore nil)
 (defvar d-comint-mode-redirect-process nil)
