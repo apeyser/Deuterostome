@@ -295,7 +295,8 @@ end def
 /round {/val name
   val dup 0 lt {abs} if
   log dup floor /expo name
-  1d mod 10d exch pwr expo 0 lt {10d mul} if dig10 mul floor dig10 div
+  1d mod 10d exch pwr expo 0 lt {10d mul} if
+  dig10 mul dup 1d mod 0.5 gt {ceil} {floor} ifelse dig10 div
   log 10d exch expo add pwr
   val 0 lt {-1d mul} if
 } bind def
