@@ -293,7 +293,7 @@ end def
 /eps 1e-100 def
 
 /round {/val name
-  val dup 0 lt {abs} if
+  val dup 0 lt {neg} if
   log dup floor /expo name
   1d mod 10d exch pwr expo 0 lt {10d mul} if
   dig10 mul dup 1d mod 0.5 gt {ceil} {floor} ifelse dig10 div
@@ -310,12 +310,14 @@ end def
 
             v1 dup 0 lt {neg} if
             log dup floor /exp1 name
-            1d mod 10d exch pwr exp1 0 lt {10d mul} if dig10 mul floor
+            1d mod 10d exch pwr exp1 0 lt {10d mul} if
+            dig10 mul dup 1d mod 0.5 gt {ceil} {floor} ifelse
             v1 0 lt {neg} if /man1 name
             
             v2 dup 0 lt {neg} if
             log dup floor /exp2 name
-            1d mod 10d exch pwr exp2 0 lt {10d mul} if dig10 mul floor
+            1d mod 10d exch pwr exp2 0 lt {10d mul} if
+            dig10 mul dup 1d mod 0.5 gt {ceil} {floor} ifelse
             v2 0 lt {neg} if /man2 name
             
             exp1 exp2 ne man1 man2 ne or
