@@ -43,13 +43,13 @@
 /GETCV_d 6 dict dup begin
 
 /B { NL (if \(\()__ popA __ ( = *\(\(B *\))__ popA exec (\)\) == BINF\) )__
-        popA __ ( = DINF;)__  
+        popA __ ( = HUGE_VAL;)__  
    } def
 /W { NL (if \(\()__ popA __ ( = *\(\(W *\))__ popA exec (\)\) == WINF\) )__
-        popA __ ( = DINF;)__  
+        popA __ ( = HUGE_VAL;)__  
    } def
 /L { NL (if \(\()__ popA __ ( = *\(\(L *\))__ popA exec (\)\) == LINF\) )__
-        popA __ ( = DINF;)__  
+        popA __ ( = HUGE_VAL;)__  
    } def
 /S { NL popA __ ( = *\(\(S *\))__ popA exec (\);)__ popA pop
    } def
@@ -67,16 +67,16 @@ end def
 
 /CVPUT_d 6 dict dup begin
 /B { NL (*\(\(B *\))__ popA exec (\) = \(\(abs\()__
-        popA dup pushA __ (\) > BMAX\) || \()__
-        popA dup pushA __ ( == DINF\)\)? BINF : )__ popA __ (;)__
+        popA dup pushA __ (\) > BMAX\) || isinf\()__
+        popA dup pushA __ (\)\)? BINF : )__ popA __ (;)__
    } def
 /W { NL (*\(\(W *\))__ popA exec (\) = \(\(abs\()__
-        popA dup pushA __ (\) > WMAX\) || \()__
-        popA dup pushA __ ( == DINF\)\)? WINF : )__ popA __ (;)__
+        popA dup pushA __ (\) > WMAX\) || isinf\()__
+        popA dup pushA __ (\)\)? WINF : )__ popA __ (;)__
    } def
 /L { NL (*\(\(L *\))__ popA exec (\) = \(\(abs\()__
-        popA dup pushA __ (\) > LMAX\) || \()__
-        popA dup pushA __ ( == DINF\)\)? LINF : )__ popA __ (;)__
+        popA dup pushA __ (\) > LMAX\) || isinf\()__
+        popA dup pushA __ (\)\)? LINF : )__ popA __ (;)__
    } def
 /S { NL (*\(\(S *\))__ popA exec (\) = )__ popA __ (;)__ 
    } def

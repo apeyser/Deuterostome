@@ -1,16 +1,17 @@
-
+static S SINF = 1.0/0.0;  
+static D DINF = 1.0/0.0;
 
 static void DBencode(D t, B *dp)
 {
-*((B *)dp) = (((t) > BMAX) || ((-t) < -BMAX) || (t == DINF))? BINF : t;
+*((B *)dp) = (((t) > BMAX) || ((-t) < -BMAX) || isinf(t))? BINF : t;
 }
 static void DWencode(D t, B *dp)
 {
-*((W *)dp) = (((t) > WMAX) || ((-t) < -WMAX) || (t == DINF))? WINF : t;
+*((W *)dp) = (((t) > WMAX) || ((-t) < -WMAX) || isinf(t))? WINF : t;
 }
 static void DLencode(D t, B *dp)
 {
-*((L *)dp) = (((t) > LMAX) || ((-t) < -LMAX) || (t == DINF))? LINF : t;
+*((L *)dp) = (((t) > LMAX) || ((-t) < -LMAX) || isinf(t))? LINF : t;
 }
 static void DSencode(D t, B *dp)
 {

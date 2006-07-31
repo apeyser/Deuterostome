@@ -54,13 +54,25 @@ AC_DEFUN([CF_ON_TARGET], [dnl
   esac dnl
 ])
 
+AC_DEFUN([CF_CLEAR_DEF], [dnl
+  if "${$1-set}" == set ; then 
+     $1=""
+     cf_cleared_$1=:
+  else
+     cf_cleared_$1=false 
+  fi
+])
+
 AC_DEFUN([CF_IF_UNDEF], [dnl
   AC_MSG_CHECKING([if $1 is set])
-  if test "${$1-set}" == set ; then
+  if test "${$1-set}" == set \
+     || test "${$1}" == "" \
+     && test "$ac_cv_env_$1_set" == "" \
+     || test "${cf_cleared_$1-set}" == ":" ; then
     AC_MSG_RESULT([no])
     $2
   else
-    AC_MSG_RESULT([yes])
+    AC_MSG_RESULT([yes, `${$1}'])
   fi
 ])
 

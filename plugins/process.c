@@ -319,8 +319,8 @@ static void senderrno_(int line) {
 L op_makeproc(void) {
     pid_t pid;
     B* param;
-    L filedes_stdout[2];
-    L filedes_stdin[2];
+    int filedes_stdout[2];
+    int filedes_stdin[2];
     ssize_t ret;
     int errno_;
     size_t p;

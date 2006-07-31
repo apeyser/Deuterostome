@@ -73,7 +73,7 @@ switch(TYPE(frame))
      case LONGTYPE: if (*((L *)NUM_VAL(frame)) == LINF) break;
                       sprintf(buf,"%d",*((L *)NUM_VAL(frame)));
                     return;
-     case SINGLETYPE: if (fabs(*((S *)NUM_VAL(frame))) == SINF) break;
+     case SINGLETYPE: if (ISUNDEF(*((S *)NUM_VAL(frame)))) break;
                        else if (fauto)
                          sprintf(buf,"%.6e",*((S *)NUM_VAL(frame)));
                          else if (prec < 0)
@@ -83,7 +83,7 @@ switch(TYPE(frame))
                            sprintf(buf,"%.*e",prec,
                                    (D)(*((S *)NUM_VAL(frame))));
                       return;
-     case DOUBLETYPE: if (fabs(*((D *)NUM_VAL(frame))) == DINF) break;
+     case DOUBLETYPE: if (ISUNDEF(*((D *)NUM_VAL(frame)))) break;
                        else if (fauto)
                          sprintf(buf,"%.15e",*((D *)NUM_VAL(frame)));
                          else if (prec < 0)
@@ -119,7 +119,7 @@ B ENCODE(W type, B *string, B *dnum)
 {
 D num;
 
-num = (type & Ubit)? DINF : atof(string);
+num = (type & Ubit)? HUGE_VAL : atof(string);
 if (type & Tbit)
   { (*(ENCODElist[type & 0xF]))(num,dnum); return(type & 0xF); }
   else
@@ -158,25 +158,12 @@ return( (*val = (*(VALUElist[TYPE(frame)]))(NUM_VAL(frame))) != LINF);
   Note: uses function list provided by DMNUMINC
 */
 
-/*--- isDINF 
-  returns 'true' if the argument is of value DINF 
-*/
-
-static BOOLEAN isDINF(D t)
-{
-L tt[2]; //D x;
-//x = t;
-//moveL((L *)(&x),tt,1);
-memcpy(tt, &t, sizeof(D));
-return((tt[0] & 0x7FF00000) == (0x7FF00000));
-}
-
 W TEST(B *frame)
 {
 D t; 
 
 t = (*(TESTlist[TYPE(frame)]))(NUM_VAL(frame));
-if (isDINF(t)) return(UN);
+if (ISUNDEF(t)) return(UN);
 if (t) return( (t>0)? GT : LT );
 return(EQ);
 }
@@ -192,7 +179,7 @@ D t;
 
 t = (*(TESTlist[TYPE(frame1)]))(NUM_VAL(frame1)) - 
     (*(TESTlist[TYPE(frame2)]))(NUM_VAL(frame2));
-if (isDINF(t)) return(UN);
+if (ISUNDEF(t)) return(UN);
 if (t) return( (t>0)? GT : LT );
 return(EQ);
 }

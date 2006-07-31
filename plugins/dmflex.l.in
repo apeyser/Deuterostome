@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <math.h>
+#include <ctype.h>
 
   UL ll_type = 0;
   L op_hi(void) {return wrap_hi("dmflex V1");}
@@ -42,13 +44,13 @@
 
   static L vmfree;
 
-  static D toD(char* s) {return (*s == '*') ? DINF : atof(s);}
+  static D toD(char* s) {return (*s == '*') ? HUGE_VAL : atof(s);}
   static S toS(char* s) {return (S) toD(s);}
 
 #define totype(type)                                                    \
-  static to##type(char* s) {                                            \
+  static type to##type(char* s) {                                            \
     D n = toD(s);                                                       \
-    return (type) ((n > type##MAX || n < -type##MAX || n == DINF)       \
+    return (type) ((n > type##MAX || n < -type##MAX || isinf(n))       \
                    ? type##MAX : n);                                    \
   }
   

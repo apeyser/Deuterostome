@@ -61,13 +61,13 @@
 /GETCV_d 6 dict dup begin
 
 /B { NL (if \(\()__ popA __ ( = *\(\(B *\))__ popA exec (\)\) == BINF\) )__
-        popA __ ( = DINF;)__ 
+        popA __ ( = HUGE_VAL;)__ 
    } def
 /W { NL (if \(\()__ popA __ ( = *\(\(W *\))__ popA exec (\)\) == WINF\) )__
-        popA __ ( = DINF;)__  
+        popA __ ( = HUGE_VAL;)__  
    } def
 /L { NL (if \(\()__ popA __ ( = *\(\(L *\))__ popA exec (\)\) == LINF\) )__
-        popA __ ( = DINF;)__  
+        popA __ ( = HUGE_VAL;)__  
    } def
 /S { NL popA __ ( = *\(\(S *\))__ popA exec (\);)__ popA pop
    } def
@@ -86,18 +86,18 @@ end def
 /CVPUT_d 6 dict dup begin
 /B { NL (*\(\(B *\))__ popA exec (\) = \(\(\()__
         popA dup pushA __ (\) > BMAX\) || \(\()__
-        popA dup pushA __ (\) < -BMAX\) || \()__
-        popA dup pushA __ ( == DINF\)\)? BINF : )__ popA __ (;)__
+        popA dup pushA __ (\) < -BMAX\) || ISUNDEF\()__
+        popA dup pushA __ (\)\)? BINF : )__ popA __ (;)__
    } def
 /W { NL (*\(\(W *\))__ popA exec (\) = \(\(\()__
         popA dup pushA __ (\) > WMAX\) || \(\()__
-        popA dup pushA __ (\) < -WMAX\) || \()__
-        popA dup pushA __ ( == DINF\)\)? WINF : )__ popA __ (;)__
+        popA dup pushA __ (\) < -WMAX\) || ISUNDEF\()__
+        popA dup pushA __ (\)\)? WINF : )__ popA __ (;)__
    } def
 /L { NL (*\(\(L *\))__ popA exec (\) = \(\(\()__
         popA dup pushA __ (\) > LMAX\) || \(\()__
-        popA dup pushA __ (\) < -LMAX\) || \()__
-        popA dup pushA __ ( == DINF\)\)? LINF : )__ popA __ (;)__
+        popA dup pushA __ (\) < -LMAX\) || ISUNDEF\()__
+        popA dup pushA __ (\)\)? LINF : )__ popA __ (;)__
    } def
 /S { NL (*\(\(S *\))__ popA exec (\) = )__ popA __ (;)__ 
    } def
@@ -117,14 +117,14 @@ popA exec
 NL (})__
 } def
 
-| arraytype (framename) {body_construct} | --
-/FOR_modn {pushA pushA pushA
-    NL ({ UL n__ = VALUE_BASE\()__ 1 indexA __ (\) % )__ BYTECORRECT n__ (;
+| arraytype (framename) returnsL/bool {body_construct} | --
+/FOR_modn {pushA exch pushA exch pushA pushA
+    NL ({ UL n__ = VALUE_BASE\()__ 2 indexA __ (\) % )__ BYTECORRECT n__ (;
         if \(n__\) {
           n__ = )__ BYTECORRECT n__ ( - n__;
-          if \(DEBUG_DMNUM && \(n__ % sizeof\()__ peekA __ (\)\)\) {
+          if \(DEBUG_DMNUM && \(n__ % sizeof\()__ 1 indexA __ (\)\)\) {
             handleerr\(\);
-            return;
+            return)__ popA {( BAD_ARR)__} if (;
           }
           n__ /= sizeof\()__  popA __ (\);
           if \(n__ > ARRAY_SIZE\()__ peekA __(\)\)
@@ -143,14 +143,14 @@ NL (})__
     NL (}})__
 } def
 
-| {body_construct} | --
-/FOR_modnp {pushA
+| returnsL/bool {body_construct} | --
+/FOR_modnp {pushA pushA
     NL ({ UL n__ = \(UL\))__ fixsource __ ( % )__ BYTECORRECT n__ (;
       if \(n__\) {
       n__ = )__ BYTECORRECT n__ ( - n__;
       if \(DEBUG_DMNUM && \(n__ % sizeof\(*)__ fixsource __ (\)\)\) {
         handleerr\(\);
-        return;
+        return)__ popA {( BAD_ARR)__} if (;
       }
       n__ /= sizeof\(*)__ fixsource __ (\);
       if \(n__ > n_\) n__ = n_;
@@ -291,7 +291,7 @@ NL
     D t; L n; )__ dt__ ( * d;
     d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
     st { (sf) SCALAR } (t) GETCV
-    _dt (df) { dt { (d++)__ } (t) CVPUT } FOR_modn (
+    _dt (df) false { dt { (d++)__ } (t) CVPUT } FOR_modn (
   }
 
 #if ENABLE_THREADS
@@ -301,7 +301,7 @@ NL
   {)__
     true false {(
       D t = data->in;)__ 
-      {dt {(d++)__} (t) CVPUT} FOR_modnp
+      true {dt {(d++)__} (t) CVPUT} FOR_modnp
     } THREAD (
   }
 
@@ -350,7 +350,7 @@ NL
        D t; L n; )__ st__ ( * s; )__ dt__ ( * d;
        s = \()__ st__ ( *\))__ (sf) ARRAY (;
        d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
-      _st (df) { st { (s++)__ } (t) GETCV
+      _st (df) false { st { (s++)__ } (t) GETCV
           dt { (d++)__ } (t) CVPUT
       } FOR_modn (
     }
@@ -362,7 +362,7 @@ NL
                                      __attribute__ \(\(__unused__\)\)\)
     {)__
       true true {(
-       D t;)__ { 
+       D t;)__ true { 
          st {(s++)__} (t) GETCV
          dt {(d++)__} (t) CVPUT
        } FOR_modnp
@@ -468,7 +468,7 @@ end def
     D t,tt; L n; )__ dt__ ( * d;
     d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
     st { (sf) SCALAR } (tt) GETCV
-    _dt (df) { dt { (d)__ } (t) GETCV
+    _dt (df) false { dt { (d)__ } (t) GETCV
       dyadic_d op get exec
       dt { (d++)__ } (t) CVPUT
     } FOR_modn (
@@ -481,7 +481,7 @@ end def
   {)__
     true false {(
       D t, tt = data->in;
-      )__ {
+      )__ true {
         dt {(d)__} (t) GETCV
         dyadic_d op get exec
         dt {(d++)__} (t) CVPUT
@@ -524,7 +524,7 @@ end def
     D t,tt; L n; )__ st__ ( * s;
     s = \()__ st__ ( *\))__ (sf) ARRAY (;)__
     dt { (df) SCALAR } (t) GETCV
-    _st (sf) { st { (s++)__ } (tt) GETCV
+    _st (sf) false { st { (s++)__ } (tt) GETCV
       dyadic_d op get exec
     } FOR_modn
     dt { (df) SCALAR } (t) CVPUT (
@@ -538,7 +538,7 @@ dyadic_dp_seed op known {(
    false true {(
      D * ret = \(D*\) outdata;
      D t = )__ dyadic_dp_seed op get exec (, tt;)__ 
-     { 
+     true { 
        st {(s++)__} (tt) GETCV
        dyadic_dp_op op get exec
      } FOR_modnp (
@@ -554,7 +554,7 @@ dyadic_dp_seed op known {(
       D* r = ret;
       threads_do_local\(nways, )__ dt__ st__ (dy)__ op__ (SAt, &data, ret\);
       )__  
-      dt {(df) SCALAR} (t) GETCV {(
+      dt {(df) SCALAR} (t) GETCV false {(
         tt = *\(r++\);)__
         dyadic_dp_unseed op get exec
       } FOR_modnp
@@ -599,7 +599,7 @@ dyadic_dp_seed op known {(
        D t, tt;
        s = \()__ st__ ( *\))__ (sf) ARRAY (;
        d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
-       _st (df) {
+       _st (df) false {
            st {(s++)__} (tt) GETCV
            dt {(d)__} (t) GETCV
            () dyadic_d_x op get exec
@@ -616,7 +616,7 @@ dyadic_dp_seed op known {(
     {)__
       true true {(
         D t, tt;)__
-        {
+        true {
           st {(s++)__} (tt) GETCV
           dt {(d)__} (t) GETCV
           () dyadic_d_x op get exec
@@ -691,7 +691,7 @@ end def
    {
      D t; )__ dt__ ( *d; L n;
      d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
-     _dt (df) { dt { (d)__ } (t) GETCV
+     _dt (df) false { dt { (d)__ } (t) GETCV
        monadic_d op get exec
        dt { (d++)__ } (t) CVPUT
      } FOR_modn (
@@ -704,7 +704,7 @@ end def
   {)__
     true false {(
       D t;)__
-      {
+      true {
         dt {(d)__} (t) GETCV
         monadic_d op get exec
         dt {(d++)__} (t) CVPUT

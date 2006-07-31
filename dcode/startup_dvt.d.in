@@ -24,30 +24,6 @@
 /lock {exec} bind def    |
 /dmnumincerror {(dmnuminc) 2816 error} def
 
-/fontdict1 4 dict dup begin
-  /NORMALFONT 
-     (-b&h-lucida-medium-r-normal-sans-0-0-75-75-p-0-iso8859-1) def
-  /BOLDFONT 
-     (-b&h-lucida-bold-r-normal-sans-0-0-75-75-p-0-iso8859-1) def
-  /ITALICFONT 
-    (-b&h-lucida-medium-i-normal-sans-0-0-75-75-p-0-iso8859-1) def
-  /BOLDITALICFONT 
-    (-b&h-lucida-bold-i-normal-sans-0-0-75-75-p-0-iso8859-1) def
-end def
-
-/fontdict2 4 dict dup begin
-  /NORMALFONT 
-     (-b&h-lucida-medium-r-normal-sans-14-*-75-75-p-*-iso8859-1) def
-  /BOLDFONT 
-     (-b&h-lucida-bold-r-normal-sans-14-*-75-75-p-*-iso8859-1) def
-  /ITALICFONT 
-    (-b&h-lucida-medium-i-normal-sans-14-*-75-75-p-*-iso8859-1) def
-  /BOLDITALICFONT 
-    (-b&h-lucida-bold-i-normal-sans-14-*-75-75-p-*-iso8859-1) def
-end def
-
-/fontdict fontdict1 def
-
 /makefont {
     ~[exch 3 -1 roll 1 ~index 0 ~put] bind
 } bind def
@@ -1974,6 +1950,71 @@ Xwindows {
   } bind def
 } if
 
+/basefontdesc 8 dict dup begin
+  /family (lucida) def
+  /weight (medium) def
+  /slant (r) def
+  /points (140) def
+  /BOLDFONT 2 dict dup begin /weight (bold) def /slant (r) def end def
+  /ITALICFONT 1 dict dup begin /slant (i) def end def
+  /BOLDITALICFONT 2 dict dup begin /weight (bold) def /slant (i) def end def
+end def
+
+/mkfontdict {/fontdesc name
+  4 dict {
+    /NORMALFONT /BOLDFONT /ITALICFONT /BOLDITALICFONT
+  } {/fontname name
+    /fontlength 0 def [
+      {
+        /foundry /family /weight /slant /width /style /pixels /points
+        /resx /resy /space /avgwidth /registry /encoding
+      } {/fontvalue name
+        (-) (*) {
+          fontdesc fontname known {
+            fontdesc fontname get fontvalue known {
+              pop fontdesc fontname get fontvalue get
+              exit
+            } if
+          } if
+          
+          fontdesc fontvalue known {pop fontdesc fontvalue get exit} if
+          
+          basefontdesc fontname known {
+            basefontdesc fontname get fontvalue known {
+              pop basefontdesc fontname get fontvalue get exit} if
+          } if
+          
+          basefontdesc fontvalue known {pop basefontdesc fontvalue get} if
+          exit
+        } loop
+
+        dup length fontlength add 1 add /fontlength name
+      } forall
+    ] fontlength /b array 0 3 -1 roll {fax} forall pop
+    1 index fontname put
+  } forall
+  mkread
+} bind def
+
+/fontdict1 1 dict mkfontdict def
+/fontdict2 3 dict dup begin
+  /family (helvetica) def
+  /ITALICFONT 1 dict dup begin /slant (o) def end def
+  /BOLDITALICFONT 1 dict dup begin /slant (o) def end def
+end mkfontdict def
+/fontdict fontdict1 def
+
+| /fontdict1 4 dict dup begin
+|   /NORMALFONT 
+|      (-b&h-lucida-medium-r-normal-sans-0-0-75-75-p-0-iso8859-1) def
+|   /BOLDFONT 
+|      (-b&h-lucida-bold-r-normal-sans-0-0-75-75-p-0-iso8859-1) def
+|   /ITALICFONT 
+|     (-b&h-lucida-medium-i-normal-sans-0-0-75-75-p-0-iso8859-1) def
+|   /BOLDITALICFONT 
+|     (-b&h-lucida-bold-i-normal-sans-0-0-75-75-p-0-iso8859-1) def
+| end def
+
 |----------------------------- start the dvt ------------------------------
 | A 'save' representing a clean dvt is associated with the name cleanDVT in
 | userdict.
@@ -1995,7 +2036,6 @@ Xwindows {
 } aborted {
     countdictstack 2 sub ~end repeat clear
 } if
-    
 
 dvt begin
 save /cleanDVT name

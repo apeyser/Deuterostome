@@ -94,12 +94,12 @@ typedef double D;
 #define BINF    ((B) 0x80)
 #define WINF    ((W) 0x8000)
 #define LINF    ((L) 0x80000000)
-static _dm_const S SINF __attribute__ ((unused)) = 1.0/0.0;  
-static _dm_const D DINF __attribute__ ((unused)) = 1.0/0.0;
 
 #define BMAX 0x7F
 #define WMAX 0x7FFF
 #define LMAX 0x7FFFFFFF
+
+#define ISUNDEF(n) (isinf(n) || isnan(n))
 
 /*-------------------------- VM alignment ----------------------------
 

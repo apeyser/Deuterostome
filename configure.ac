@@ -8,6 +8,8 @@ AX_PREFIX_CONFIG_H([src/codegen/dm-config.h])
 AM_PATH_LISPDIR
 AM_MAINTAINER_MODE
 
+CF_CLEAR_DEF([CFLAGS])
+
 CF_SUBST_DEFINE([NAMEBYTES], 
 				[18L], 
 				[Number of bytes in a d name, without terminating '\0'],
@@ -49,7 +51,6 @@ CF_IF_ENABLED([threads], [
     CF_AC_ARG_VAR([THREADMUL], [min unrolls per thread], [56])
   ])
 ])
-CF_ACX_PTHREAD([threads])
 
 CF_AC_ARG_DIR([dmbindir], [location for dm binary], [${bindir}/${PACKAGE}])
 CF_AC_ARG_DIR([pkgdatadir], [location for data files], 
@@ -95,6 +96,7 @@ CF_AC_ARG_VAR_QUOTE([guipdf],
 CF_EMACS_ENABLED
 
 AC_PROG_CC
+
 AC_PROG_CC_STDC
 AC_C_CONST
 AC_C_RESTRICT
@@ -104,6 +106,7 @@ AC_PROG_MAKE_SET
 AC_PROG_LN_S
 
 CF_SET_TOP_DIR
+CF_ACX_PTHREAD([threads])
 AC_LIBTOOL_WIN32_DLL
 AC_LIBTOOL_DLOPEN
 AC_LIBLTDL_CONVENIENCE
@@ -154,11 +157,15 @@ AC_CHECK_HEADER([error.h], [
   AC_DEFINE([HAVE_ERROR_H], [1], [Define to 1 if you have <error.h>])
 ])
 
-AX_CFLAGS_STRICT_PROTOTYPES()
 CF_IF_UNDEF([CFLAGS], [
-  CF_GCC_COMPILER_OPTION([-g])
+  CF_ON_TARGET([*-pc-cygwin], [], [
+    CF_GCC_COMPILER_OPTION([-g])
+  ])
   CF_GCC_COMPILER_OPTION([-O2])
 ])
+
+AX_CFLAGS_STRICT_PROTOTYPES()
+
 CF_GCC_COMPILER_OPTION([-ftree-vectorize])
 CF_GCC_COMPILER_OPTION([-fno-strict-aliasing])
 
@@ -169,6 +176,7 @@ CF_GCC_COMPILER_OPTION([-fno-finite-math-only], [GCC_CFLAGS])
 CF_GCC_COMPILER_OPTION([-fno-unsafe-math-optimizations], [GCC_CFLAGS])
 CF_GCC_COMPILER_OPTION([-Wno-pointer-sign], [GCC_CFLAGS])
 CF_GCC_COMPILER_OPTION([-fprefetch-loop-arrays], [GCC_CFLAGS])
+CF_GCC_COMPILER_OPTION([-std=gnu99])
 
 AC_SUBST([INCLTDL])
 AC_SUBST([LIBLTDL])
@@ -188,7 +196,7 @@ CF_AC_SUBST([PCLDFLAGS], [-module -no-undefined])
 AC_CONFIG_LINKS([
 		src/dsp1f.h:src/codegen/dsp1f.h.built
 		src/dmnuminc.h:src/codegen/dmnuminc.h.built
-    src/dsp2def.h:src/codegen/dsp2def.h.built
+		src/dsp2def.h:src/codegen/dsp2def.h.built
 		src/codegen/dmglobals.c:src/dmglobals.c
 		src/codegen/dsp1.c:src/dsp1.c
 		src/codegen/dm1.c:src/dm1.c
@@ -201,29 +209,29 @@ AC_CONFIG_LINKS([
 		src/codegen/dm8.c:src/dm8.c
 		src/codegen/dmnum.c:src/dmnum.c
 		src/codegen/paths.h.in:src/paths.h.in
-    src/codegen/dgen.c:src/dgen.c
-    src/codegen/dgen_0.h:src/dgen_0.h
-    src/codegen/dgen_1.h:src/dgen_1.h
-    src/codegen/dgen-build:src/dgen-build
-    plugins/plugin.d:dcode/plugin.d
+		src/codegen/dgen.c:src/dgen.c
+		src/codegen/dgen_0.h:src/dgen_0.h
+		src/codegen/dgen_1.h:src/dgen_1.h
+		src/codegen/dgen-build:src/dgen-build
+		plugins/plugin.d:dcode/plugin.d
 ])
 
 AC_CONFIG_FILES([
 		 Makefile 
 		 src/Makefile 
 		 src/codegen/Makefile src/codegen/dmnuminc.d src/codegen/dsp2def.d
-     src/dm.pc
+ 		 src/dm.pc
 		 plugins/Makefile plugins/dmflex.l
 		 ps/Makefile 
 		 sh/Makefile
 		 emacs/Makefile emacs/d-mode.el
 		 dcode/Makefile dcode/startup_dvt.d dcode/startup_dnode.d 
-     dcode/startup_dgen.d 
-     src/codegen/startup_dgen.d:dcode/startup_dgen.d.in
-     plugins/startup_dgen.d:dcode/startup_dgen.d.in
+		 dcode/startup_dgen.d 
+		 src/codegen/startup_dgen.d:dcode/startup_dgen.d.in
+		 plugins/startup_dgen.d:dcode/startup_dgen.d.in
 		 test/Makefile
-     m4/Makefile
-     test/arr.d
+		 m4/Makefile
+		 test/arr.d
 ])
 
 AC_OUTPUT
