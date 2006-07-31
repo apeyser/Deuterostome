@@ -55,7 +55,7 @@ AC_DEFUN([CF_ON_TARGET], [dnl
 ])
 
 AC_DEFUN([CF_CLEAR_DEF], [dnl
-  if "${$1-set}" == set ; then 
+  if test "${$1-set}" == set ; then 
      $1=""
      cf_cleared_$1=:
   else
