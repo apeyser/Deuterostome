@@ -72,16 +72,16 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(pkgincludedir)" "$(DESTDIR)$(pkgincludedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libdmbootstrap_la_LIBADD =
+am__DEPENDENCIES_1 =
+libdmbootstrap_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libdmbootstrap_la_OBJECTS = libdmbootstrap_la-dmglobals.lo \
 	libdmbootstrap_la-dm1.lo libdmbootstrap_la-dm2.lo \
 	libdmbootstrap_la-dm3.lo libdmbootstrap_la-dm4.lo \
 	libdmbootstrap_la-dm5.lo libdmbootstrap_la-dm6.lo \
 	libdmbootstrap_la-dm7.lo libdmbootstrap_la-dm8.lo \
 	libdmbootstrap_la-dmnum.lo libdmbootstrap_la-dsp1.lo \
-	libdmbootstrap_la-dsp2.lo
+	libdmbootstrap_la-dsp2.lo libdmbootstrap_la-plugin.lo
 libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
-am__DEPENDENCIES_1 =
 libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am__libdmglobals_la_SOURCES_DIST = dmglobals.c dm1.c dm2.c dm3.c dm4.c \
 	dm5.c dm6.c dm7.c dm8.c dm9.c dmnum.c dsp1.c dsp2.c \
@@ -394,8 +394,11 @@ editpaths = sed \
 
 nodist_pkgconfiglib_DATA = dm.pc
 dist_pkgdata_SCRIPTS = dgen-build
-libdmbootstrap_la_SOURCES = dmglobals.c dm1.c dm2.c dm3.c dm4.c dm5.c \
-	dm6.c dm7.c dm8.c dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h  paths.h
+libdmbootstrap_la_LIBADD = $(PLUGIN_LD)
+libdmbootstrap_la_SOURCES = dmglobals.c \
+	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c \
+	dmnum.c dsp1.c dsp2.c plugin.c  \
+	dmnuminc.h dsp1f.h  paths.h pluginlib.h
 
 libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) -DDM_DISABLE_THREADS=1
 dgen_SOURCES = dgen.c dgen_0.h dgen_1.h
@@ -573,6 +576,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dmnum.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dsp1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dsp2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-plugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-word-order.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/threads.Plo@am__quote@
@@ -681,6 +685,13 @@ libdmbootstrap_la-dsp2.lo: dsp2.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dsp2.c' object='libdmbootstrap_la-dsp2.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dsp2.lo `test -f 'dsp2.c' || echo '$(srcdir)/'`dsp2.c
+
+libdmbootstrap_la-plugin.lo: plugin.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-plugin.lo -MD -MP -MF "$(DEPDIR)/libdmbootstrap_la-plugin.Tpo" -c -o libdmbootstrap_la-plugin.lo `test -f 'plugin.c' || echo '$(srcdir)/'`plugin.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libdmbootstrap_la-plugin.Tpo" "$(DEPDIR)/libdmbootstrap_la-plugin.Plo"; else rm -f "$(DEPDIR)/libdmbootstrap_la-plugin.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='plugin.c' object='libdmbootstrap_la-plugin.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-plugin.lo `test -f 'plugin.c' || echo '$(srcdir)/'`plugin.c
 
 dgen-dgen.o: dgen.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -MT dgen-dgen.o -MD -MP -MF "$(DEPDIR)/dgen-dgen.Tpo" -c -o dgen-dgen.o `test -f 'dgen.c' || echo '$(srcdir)/'`dgen.c; \

@@ -3,6 +3,11 @@
   Include module for dvt.c: operator and error lists of the dvt.
 */
 
+/*--- LL */
+L op_loadlib(void);
+L op_nextlib(void);
+
+
 B *sysop[] =
    {
 /*-- dvt specific */
@@ -156,7 +161,10 @@ B *sysop[] =
       "dilute_add",     (B *)op_dilute_add,
       "matvecmul",      (B *)op_matvecmul,
       "getstartupdir",  (B *)op_getstartupdir,
-	  "gethomedir",     (B *)op_gethomedir,
+      "gethomedir",     (B *)op_gethomedir,
+/*-- load library */
+      "loadlib",       (B*) op_loadlib,
+      "nextlib",       (B*) op_nextlib,
 
       "",               (B *)0L, 
  };
@@ -176,6 +184,8 @@ L syserrc[] =
      CORR_OP, BADBOX, BAD_MSG, NOSYSTEM, INV_MSG, NOT_HOST, BAD_FMT,
      LIB_LOAD, LIB_EXPORT, LIB_LINK, LIB_ADD, LIB_LOADED, LIB_OVF,
      NO_XWINDOWS, X_ERR, X_BADFONT, X_BADHOST, MEM_OVF, BAD_ARR,
+     LIB_LOAD, LIB_EXPORT, LIB_LINK, LIB_ADD, LIB_LOADED, LIB_OVF, LIB_MERGE,
+     LIB_INIT,
      0L,
      };
 
@@ -230,7 +240,15 @@ B *syserrm[] =
      "** Error in X windows",
      "** Bad X windows font",
      "** Cannot connect to X server",
-	 "** Memory exhausted",
+     "** Memory exhausted",
      "** dmnuminc debug error",
+     "** Unable to load dynamically linked shared library",
+     "** Unable to find object in shared library",
+     "** Library has not been loaded",
+     "** Unable to add operation to library dictionary",
+     "** Library already loaded",
+     "** Overflow in malloc while loading library",
+     "** Unable to merge library into sysdict",
+     "** Unable to initialize loaded library",
      };
 
