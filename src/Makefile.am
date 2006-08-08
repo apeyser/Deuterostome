@@ -61,8 +61,7 @@ testwordorder_SOURCES = test-word-order.c
 
 BUILT_SOURCES = paths.h dnode-nice.c
 CLEANFILES = paths.h dnode-nice.c
-lib_LTLIBRARIES = libdmglobals.la 
-#libdmbootstrap.la
+lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la
 libdmglobals_la_LIBADD = $(PLUGIN_LD)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
@@ -90,20 +89,14 @@ nodist_pkgconfiglib_DATA = dm.pc
 
 dist_pkgdata_SCRIPTS = dgen-build
 
-dgen_SOURCES = dgen.c dgen_0.h dgen_1.h \
-	dmglobals.c \
+dgen_SOURCES = dgen.c dgen_0.h dgen_1.h 
+dgen_CFLAGS = $(AM_CPPFLAGS) -DBOOTSTRAP_PLUGIN=1 @LIBDM_DLL_IMPORT@ 
+dgen_LDADD = $(PLUGIN_LD) libdmbootstrap.la 
+
+libdmbootstrap_la_LIBADD = $(PLUGIN_LD)
+libdmbootstrap_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c \
 	dmnum.c dsp1.c dsp2.c plugin.c  \
 	dmnuminc.h dsp1f.h  paths.h pluginlib.h
-dgen_CPPFLAGS = $(AM_CPPFLAGS) -DDM_DISABLE_THREADS=1
-dgen_CFLAGS = $(AM_CPPFLAGS) @LIBDM_DLL_IMPORT@ 
-dgen_LDADD = $(PLUGIN_LD) 
-# libdmbootstrap.la 
-
-#libdmbootstrap_la_LIBADD = $(PLUGIN_LD)
-#libdmbootstrap_la_SOURCES = dmglobals.c \
-#	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c \
-#	dmnum.c dsp1.c dsp2.c plugin.c  \
-#	dmnuminc.h dsp1f.h  paths.h pluginlib.h
-#libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) -DDM_DISABLE_THREADS=1
-#libdmbootstrap_la_CFLAGS = $(AM_CFLAGS)
+libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) -DDM_DISABLE_THREADS=1
+libdmbootstrap_la_CFLAGS = $(AM_CFLAGS)

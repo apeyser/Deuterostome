@@ -3,9 +3,11 @@
   Include module for dvt.c: operator and error lists of the dvt.
 */
 
+#if BOOTSTRAP_PLUGIN
 /*--- LL */
 L op_loadlib(void);
 L op_nextlib(void);
+#endif
 
 
 B *sysop[] =
@@ -162,10 +164,11 @@ B *sysop[] =
       "matvecmul",      (B *)op_matvecmul,
       "getstartupdir",  (B *)op_getstartupdir,
       "gethomedir",     (B *)op_gethomedir,
+#if BOOTSTRAP_PLUGIN
 /*-- load library */
       "loadlib",       (B*) op_loadlib,
       "nextlib",       (B*) op_nextlib,
-
+#endif
       "",               (B *)0L, 
  };
 
