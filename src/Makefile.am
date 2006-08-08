@@ -90,7 +90,7 @@ nodist_pkgconfiglib_DATA = dm.pc
 dist_pkgdata_SCRIPTS = dgen-build
 
 dgen_SOURCES = dgen.c dgen_0.h dgen_1.h 
-dgen_CFLAGS = $(AM_CPPFLAGS) -DBOOTSTRAP_PLUGIN=1 @LIBDM_DLL_IMPORT@ 
+dgen_CPPFLAGS = $(AM_CPPFLAGS) -DBOOTSTRAP_PLUGIN=1 @LIBDM_DLL_IMPORT@ 
 dgen_LDADD = $(PLUGIN_LD) libdmbootstrap.la 
 
 libdmbootstrap_la_LIBADD = $(PLUGIN_LD)
