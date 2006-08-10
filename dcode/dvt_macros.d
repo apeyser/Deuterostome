@@ -12,7 +12,8 @@
          (  Disconnect) KEY (  Shrink) KEY NL
 
       (PrintFrom:) PRE (  Talk) KEY (  Ascii) KEY (  PS) KEY
-         ( x1PS) KEY ( x2PS) KEY ( pdf) KEY ( dvi) KEY ( tex) KEY NL      
+         ( xPS) KEY
+         ( pdf) KEY ( dvi) KEY ( tex) KEY NL      
       (PrintTo:) PRE (  gs) KEY (  paper) KEY (  pdf) KEY (  dvi) KEY 10 GAP
     } def
 
@@ -35,7 +36,6 @@
      (@getstartupdir fax \(print.sh talk \) fax )
      (@getstartupdir fax \(print.sh ascii \) fax )
      (@getstartupdir fax \(print.sh ps \) fax )
-     (@getstartupdir fax \(print.sh x1ps \) fax )
      (@getstartupdir fax \(print.sh x2ps \) fax )
      (@getstartupdir fax \(print.sh pdf \) fax )
      (@getstartupdir fax \(print.sh dvi \) fax )

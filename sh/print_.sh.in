@@ -143,6 +143,37 @@ function ps_xdvi()
     notransform ps xdvi
 }
 
+function xps_gs()
+{
+    #xterm $pin -e 
+    gs "$GSDVTPSPATH" -sPAPERSIZE=letter -dBATCH $pout \
+	      "$DVTPSPATH"/{form_2,text,graf_1,struct}.ps \
+	      "$@"
+}
+
+function xps_lw()
+{
+    for i ; do
+	      cat "$DVTPSPATH"/{form_2,text,graf_1,struct}.ps "$i" \
+	          | ps2pdf13 "$GSDVTPSPATH" -dEmbedAllFonts=true - "$i.pdf"
+	      xpdfprint "$i.pdf" &
+    done
+}
+
+function xps_xpdf()
+{
+    for i ; do
+	      cat "$DVTPSPATH"/{form_2,text,graf_1,struct}.ps "$i" \
+	          | ps2pdf13 "$GSDVTPSPATH" -dEmbedAllFonts=true - "$i.pdf"
+	      xpdf_ "$i.pdf" &
+    done
+}
+
+function xps_xdvi()
+{
+    notransform xps xdvi
+}
+
 function x2ps_gs()
 {
     #xterm $pin -e 
@@ -191,7 +222,7 @@ function x1ps_lw()
     done
 }
 
-function xps_xpdf()
+function x1ps_xpdf()
 {
     for i ; do
 	      cat "$DVTPSPATH"/{form_1,text,graf_1,struct}.ps "$i" \

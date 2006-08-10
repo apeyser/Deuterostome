@@ -1668,7 +1668,7 @@ end userdict /dvt put
     [ [ macros /pass0 get begin keywords end ] ] /rowlist name
     commands length nkeys ne
       { (Macros: keys do not match commands!\n) toconsole stop } if
-    /wW scrW 3 div def /wH nrows rowH mul 6 add def
+    /wW scrW 2.75 div def /wH nrows rowH mul 6 add def
     [ [ 2 scrH wH sub 2 sub wW wH ]
       myname myshortname makewindow /wid name pop
     /woutline [ 0 0 wW 1 sub 0 wW 1 sub wH 1 sub 0 wH 1 sub 0 0 ] def

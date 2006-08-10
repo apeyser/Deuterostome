@@ -15,6 +15,8 @@ CF_SUBST_DEFINE([NAMEBYTES],
 				[Number of bytes in a d name, without terminating '\0'],
 				[18])
 
+CF_AC_ENABLE([xps], [compile or install only new xps], [yes])
+
 CF_AC_ENABLE([plugins], [compile or install plugins], [yes])
 CF_IF_ENABLED([plugins], [
   CF_AM_ENABLE([process], [compile or install process plugin], [yes])

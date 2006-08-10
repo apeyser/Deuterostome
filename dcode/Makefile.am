@@ -1,10 +1,20 @@
-dist_dmstart_DATA = color.d dvt_macros.d master.d sched.d plugin.d
-nodist_dmstart_DATA =  theeye.d startup_dnode.d startup_dvt.d startup_dgen.d
+dist_dmstart_DATA = color.d master.d sched.d plugin.d
+nodist_dmstart_DATA =  theeye.d startup_dnode.d \
+	startup_dvt.d startup_dgen.d dvt_macros.d 
 dist_dmconf_DATA = dvt.d
 nodist_dmconf_DATA = dnode.d
 
-EXTRA_DIST = theeye.d.in dnode.d.in
+EXTRA_DIST = theeye.d.in dnode.d.in dvt_macros.d.in
 CLEANFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
+
+XPS_START = /^[[:space:]]*[@]ENABLE_XPS_START[@][[:space:]]*$$/
+XPS_ELSE = /^[[:space:]]*[@]ENABLE_XPS_ELSE[@][[:space:]]*$$/
+XPS_END = /^[[:space:]]*[@]ENABLE_XPS_END[@][[:space:]]*$$/
+if ENABLE_XPS
+XPS_DELETE = -e '$(XPS_START) d' -e '$(XPS_ELSE),$(XPS_END) d'
+else !ENABLE_XPS
+XPS_DELETE = -e '$(XPS_START),$(XPS_ELSE) d' -e '$(XPS_END) d'
+endif !ENABLE_XPS
 
 PLUGIN_START = /^[[:space:]]*[@]ENABLE_PLUGINS_START[@][[:space:]]*$$/
 PLUGIN_END = /^[[:space:]]*[@]ENABLE_PLUGINS_END[@][[:space:]]*$$/
@@ -28,7 +38,8 @@ endif !ENABLE_THREADS
 edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
 			$(PLUGIN_DELETE) \
-			$(THREADS_EDIT)
+			$(THREADS_EDIT) \
+			$(XPS_DELETE)
 
 theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in
 	rm -f $@ $@.tmp
@@ -38,4 +49,9 @@ theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in
 dnode.d: $(srcdir)/Makefile $(srcdir)/dnode.d.in
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/dnode.d.in >$@.tmp
+	mv $@.tmp $@
+
+dvt_macros.d: $(srcdir)/Makefile $(srcdir)/dvt_macros.d.in 
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/dvt_macros.d.in >$@.tmp
 	mv $@.tmp $@
