@@ -12,7 +12,7 @@
          (  Disconnect) KEY (  Shrink) KEY NL
 
       (PrintFrom:) PRE (  Talk) KEY (  Ascii) KEY (  PS) KEY
-         ( xPS) KEY ( pdf) KEY ( dvi) KEY ( tex) KEY NL      
+         ( x1PS) KEY ( x2PS) KEY ( pdf) KEY ( dvi) KEY ( tex) KEY NL      
       (PrintTo:) PRE (  gs) KEY (  paper) KEY (  pdf) KEY (  dvi) KEY 10 GAP
     } def
 
@@ -32,18 +32,18 @@
      (% dvt begin {knode _dx} fornodes end\n)
      (% dvt begin {knode _kill} fornodes end\n)
 |-- PrintFrom
-      (@getstartupdir fax \(print.sh talk \) fax )
-      (@getstartupdir fax \(print.sh ascii \) fax )
-      (@getstartupdir fax \(print.sh ps \) fax )
-      (@getstartupdir fax \(print.sh xps \) fax )
-      (@getstartupdir fax \(print.sh pdf \) fax )
-      (@getstartupdir fax \(print.sh dvi \) fax )
-      (@getstartupdir fax \(print.sh tex \) fax )
+     (@getstartupdir fax \(print.sh talk \) fax )
+     (@getstartupdir fax \(print.sh ascii \) fax )
+     (@getstartupdir fax \(print.sh ps \) fax )
+     (@getstartupdir fax \(print.sh x1ps \) fax )
+     (@getstartupdir fax \(print.sh x2ps \) fax )
+     (@getstartupdir fax \(print.sh pdf \) fax )
+     (@getstartupdir fax \(print.sh dvi \) fax )
+     (@getstartupdir fax \(print.sh tex \) fax )
 |-- PrintTo
-      (\(gs \) fax faxRpage\n)
-      (\(lw \) fax faxRpage\n)
-      (\(xpdf \) fax faxRpage\n)
-      (\(xdvi \) fax faxRpage\n)
-
+     (\(gs \) fax faxRpage\n)
+     (\(lw \) fax faxRpage\n)
+     (\(xpdf \) fax faxRpage\n)
+     (\(xdvi \) fax faxRpage\n)
     ] def
 end makemacros

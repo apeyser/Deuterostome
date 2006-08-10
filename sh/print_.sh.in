@@ -48,8 +48,7 @@ function concat()
 {
     tmp=$(tempfile)
     #{ cat "$@" ; echo "clear /a arct"; }  \
-    cat "$@" \
-	>$tmp
+    cat "$@" >$tmp
 }
 
 function talk_gs()
@@ -79,12 +78,12 @@ function ascii_gs()
 {
     #xterm -e 
     gs -sPAPERSIZE=letter -dBATCH $pout \
-	<(a2ps -o- -2 --print-anyway=1 --medium=Letter $pin "$@")
+	      <(a2ps -o- -2 --print-anyway=1 --medium=Letter $pin "$@")
 }
 
 function xpdf_()
 {
-  @guipdf@ "$@"
+    @guipdf@ "$@"
 }
 
 function xpdfprint()
@@ -95,18 +94,18 @@ function xpdfprint()
 function ascii_xpdf()
 {
     for i ; do 
-	a2ps -o- -2 --print-anyway=1 --medium=Letter $pin "$i" \
-	    | ps2pdf - "$i.pdf"
-	xpdf_ "$i.pdf" &
+	      a2ps -o- -2 --print-anyway=1 --medium=Letter $pin "$i" \
+	          | ps2pdf - "$i.pdf"
+	      xpdf_ "$i.pdf" &
     done
 }   
 
 function ascii_lw()
 {
     for i ; do 
-	a2ps -o- -2 --print-anyway=1 --medium=Letter $pin "$i" \
-	    | ps2pdf - "$i.pdf"
-	xpdfprint "$i.pdf" &
+	      a2ps -o- -2 --print-anyway=1 --medium=Letter $pin "$i" \
+	          | ps2pdf - "$i.pdf"
+	      xpdfprint "$i.pdf" &
     done
 }
 
@@ -119,23 +118,23 @@ function ps_gs()
 {
     for i ; do 
 	#xterm $pin -e 
-	gs -sPAPERSIZE=letter -dBATCH $pout "$i" 
+	      gs -sPAPERSIZE=letter -dBATCH $pout "$i" 
     done
 }
 
 function ps_xpdf()
 {
     for i ; do 
-	ps2pdf "$i" "$i.pdf" 
-	xpdf_ "$i.pdf" & 
+	      ps2pdf "$i" "$i.pdf" 
+	      xpdf_ "$i.pdf" & 
     done
 }
 
 function ps_lw()
 {
     for i ; do 
-	ps2pdf "$i" "$i.pdf" 
-	xpdfprint "$i.pdf" & 
+	      ps2pdf "$i" "$i.pdf" 
+	      xpdfprint "$i.pdf" & 
     done
 }
 
@@ -144,33 +143,64 @@ function ps_xdvi()
     notransform ps xdvi
 }
 
-function xps_gs()
+function x2ps_gs()
 {
     #xterm $pin -e 
     gs "$GSDVTPSPATH" -sPAPERSIZE=letter -dBATCH $pout \
-	"$DVTPSPATH"/{form_2,text,graf_1,struct}.ps \
-	"$@"
+	      "$DVTPSPATH"/{form_2,text,graf_1,struct}.ps \
+	      "$@"
 }
 
-function xps_lw()
+function x2ps_lw()
 {
     for i ; do
-	cat "$DVTPSPATH"/{form_2,text,graf_1,struct}.ps "$i" \
-	    | ps2pdf13 "$GSDVTPSPATH" -dEmbedAllFonts=true - "$i.pdf"
-	xpdfprint "$i.pdf" &
+	      cat "$DVTPSPATH"/{form_2,text,graf_1,struct}.ps "$i" \
+	          | ps2pdf13 "$GSDVTPSPATH" -dEmbedAllFonts=true - "$i.pdf"
+	      xpdfprint "$i.pdf" &
+    done
+}
+
+function x2ps_xpdf()
+{
+    for i ; do
+	      cat "$DVTPSPATH"/{form_2,text,graf_1,struct}.ps "$i" \
+	          | ps2pdf13 "$GSDVTPSPATH" -dEmbedAllFonts=true - "$i.pdf"
+	      xpdf_ "$i.pdf" &
+    done
+}
+
+function x2ps_xdvi()
+{
+    notransform xps xdvi
+}
+
+function x1ps_gs()
+{
+    #xterm $pin -e 
+    gs "$GSDVTPSPATH" -sPAPERSIZE=letter -dBATCH $pout \
+	      "$DVTPSPATH"/{form_1,text,graf_1,struct}.ps \
+	      "$@"
+}
+
+function x1ps_lw()
+{
+    for i ; do
+	      cat "$DVTPSPATH"/{form_1,text,graf_1,struct}.ps "$i" \
+	          | ps2pdf13 "$GSDVTPSPATH" -dEmbedAllFonts=true - "$i.pdf"
+	      xpdfprint "$i.pdf" &
     done
 }
 
 function xps_xpdf()
 {
     for i ; do
-	cat "$DVTPSPATH"/{form_2,text,graf_1,struct}.ps "$i" \
-	    | ps2pdf13 "$GSDVTPSPATH" -dEmbedAllFonts=true - "$i.pdf"
-	xpdf_ "$i.pdf" &
+	      cat "$DVTPSPATH"/{form_1,text,graf_1,struct}.ps "$i" \
+	          | ps2pdf13 "$GSDVTPSPATH" -dEmbedAllFonts=true - "$i.pdf"
+	      xpdf_ "$i.pdf" &
     done
 }
 
-function xps_xdvi()
+function x1ps_xdvi()
 {
     notransform xps xdvi
 }
@@ -208,8 +238,8 @@ function dvi_gs()
 function dvi_lw()
 {
     for i ; do 
-	j[${#j[@]}]="$i.pdf"
-	dvipdf -sPAPERSIZE=letter $pin "$i" "$i.pdf"
+	      j[${#j[@]}]="$i.pdf"
+	      dvipdf -sPAPERSIZE=letter $pin "$i" "$i.pdf"
     done
     pdf_lw "${j[@]}"
 }
@@ -217,8 +247,8 @@ function dvi_lw()
 function dvi_xpdf()
 {
     for i ; do 
-	j[${#j[@]}]="$i.pdf"
-	dvipdf -sPAPERSIZE=letter $pin "$i" "$i.pdf" ; done
+	      j[${#j[@]}]="$i.pdf"
+	      dvipdf -sPAPERSIZE=letter $pin "$i" "$i.pdf" ; done
     pdf_xpdf "${j[@]}"
 }
 
@@ -230,11 +260,11 @@ function dvi_xdvi()
 function tex_gs()
 {
     for i ; do 
-	j[${#j[@]}]="${i%.tex}.dvi"
-	( 
-	    cd "$(dirname_)"
-	    latex "\\nonstopmode\\input{$(basename_)}" 
-	) 
+	      j[${#j[@]}]="${i%.tex}.dvi"
+	      ( 
+	          cd "$(dirname_)"
+	          latex "\\nonstopmode\\input{$(basename_)}" 
+	      ) 
     done
     dvi_gs "${j[@]}"
 }
@@ -242,11 +272,11 @@ function tex_gs()
 function tex_lw()
 {
     for i ; do 
-	j[${#j[@]}]="${i%.tex}.dvi"
-	(
-	    cd "$(dirname_)"
-	    latex "\\nonstopmode\\input{$(basename_)}" 
-	) 
+	      j[${#j[@]}]="${i%.tex}.dvi"
+	      (
+	          cd "$(dirname_)"
+	          latex "\\nonstopmode\\input{$(basename_)}" 
+	      ) 
     done
     dvi_lw "${j[@]}"
 }
@@ -254,11 +284,11 @@ function tex_lw()
 function tex_xpdf()
 {
     for i ; do 
-	j[${#j[@]}]="${i%.tex}.pdf"
-	(
-	    cd "$(dirname_)"
-	    pdflatex "\\nonstopmode\\input{$(basename_)}" 
-	) 
+	      j[${#j[@]}]="${i%.tex}.pdf"
+	      (
+	          cd "$(dirname_)"
+	          pdflatex "\\nonstopmode\\input{$(basename_)}" 
+	      ) 
     done
     pdf_xpdf "${j[@]}"
 }
@@ -266,11 +296,11 @@ function tex_xpdf()
 function tex_xdvi()
 {
     for i ; do 
-	j[${#j[@]}]="${i%.tex}.dvi"
-	(
-	    cd "$(dirname_)"
-	    latex "\\nonstopmode\\input{$(basename_)}"
-	)
+	      j[${#j[@]}]="${i%.tex}.dvi"
+	      (
+	          cd "$(dirname_)"
+	          latex "\\nonstopmode\\input{$(basename_)}"
+	      )
     done
     dvi_xdvi "${j[@]}"
 }
