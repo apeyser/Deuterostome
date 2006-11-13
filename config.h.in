@@ -107,16 +107,16 @@
 /* unroll math loops to 2^rollbits */
 #undef ROLLBITS
 
-/* The size of a `int', as computed by sizeof. */
+/* The size of `int', as computed by sizeof. */
 #undef SIZEOF_INT
 
-/* The size of a `pid_t', as computed by sizeof. */
+/* The size of `pid_t', as computed by sizeof. */
 #undef SIZEOF_PID_T
 
-/* The size of a `time_t', as computed by sizeof. */
+/* The size of `time_t', as computed by sizeof. */
 #undef SIZEOF_TIME_T
 
-/* The size of a `void*', as computed by sizeof. */
+/* The size of `void*', as computed by sizeof. */
 #undef SIZEOF_VOIDP
 
 /* Define to 1 if you have the ANSI C header files. */
