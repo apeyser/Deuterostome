@@ -1,6 +1,7 @@
 # pkg-config file for dm
 
 prefix=@prefix@
+datarootdir=@datarootdir@
 exec_prefix=@exec_prefix@
 bindir=@bindir@
 includedir=@includedir@
