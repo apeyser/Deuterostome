@@ -622,7 +622,12 @@ if (fclass > BOX) { retc = CORR_OBJ; goto e_er_1; }
 e_opd:                               /* push object on operand stack */
 if (FREEopds >= CEILopds) { retc = OPDS_OVF; goto e_er_1; }
 moveframe(f,o1);
- if ((CLASS(o1)== NAME) && ((ATTR(o1) & TILDE) != 0)) ATTR(o1) = ACTIVE;
+ATTR(o1) &= ~XMARK; // leave active alone -- might be procedure
+if ((CLASS(o1)== NAME) && ((ATTR(o1) & TILDE) != 0)) {
+		ATTR(o1) |= ACTIVE;
+		ATTR(o1) &= ~TILDE;
+}
+
 FREEopds = o2;
 goto x_t;
 
@@ -639,7 +644,7 @@ while ((dict -= FRAMEBYTES) >= FLOORdicts)
        { f = af;
          if (ATTR(af) & ACTIVE) 
           { if (FREEexecs >= CEILexecs) { retc = EXECS_OVF; goto e_er_1; }
-            moveframe(f,x1); FREEexecs = x2; goto x_t;
+							moveframe(f,x1); FREEexecs = x2; goto x_t;
           } else { goto e_opd; } 
         }
    }

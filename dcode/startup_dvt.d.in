@@ -560,11 +560,13 @@ end def  | of xtext_dict
 | and of an X window interface described subsequently.
 
 /supervisor
-{ {
-    { linebuf nextevent } aborted
-       { countdictstack 2 sub ~end repeat clear dvt begin
-         /kbdowner 0 def c_
-       } if
+{
+  {
+    { linebuf nextevent } aborted { 
+      countdictstack 2 sub ~end repeat
+      clear dvt begin
+      /kbdowner 0 def c_
+    } if
   } loop
 } bind def
 
@@ -783,8 +785,8 @@ end def  | of xtext_dict
 | machinery of the nodes window.
 
 /nodelist [
-   [ (dvt) null null false 0 {} null ]
-   9 { [ null null null false 0 {} null] } repeat
+  [ (dvt) null null false 0 {} null ]
+  9 { [ null null null false 0 {} null] } repeat
 ] def
 
 |------------------------------- front-end ------------------------------
@@ -1694,119 +1696,123 @@ end userdict /dvt put
 |---------------------------- macros ----------------------------------
 
 Xwindows {
-100 dict dup begin
+  100 dict dup begin
 
-/NORMALFONT {fontdict /NORMALFONT get} bind def
-/BOLDFONT {fontdict /BOLDFONT get} bind def
-/BLACK <d 0 0 0 > mapcolor def
-/GRAY  <d 0.5 0.5 0.5 > mapcolor def
-/BLUE  <d 0 0 1 > mapcolor def
-/RED   <d 1 0 0 > mapcolor def
-/BG <d 235 243 248 > 255 div mapcolor def
-/TEXT ~BOLDFONT [null BLACK -1 -1] makefont def
-|/TEXT [BOLDFONT BLACK -1 -1] bind def
-/rowH 20 def
+  /NORMALFONT {fontdict /NORMALFONT get} bind def
+  /BOLDFONT {fontdict /BOLDFONT get} bind def
+  /BLACK <d 0 0 0 > mapcolor def
+  /GRAY  <d 0.5 0.5 0.5 > mapcolor def
+  /BLUE  <d 0 0 1 > mapcolor def
+  /RED   <d 1 0 0 > mapcolor def
+  /BG <d 235 243 248 > 255 div mapcolor def
+  /TEXT ~BOLDFONT [null BLACK -1 -1] makefont def
+  |/TEXT [BOLDFONT BLACK -1 -1] bind def
+  /rowH 20 def
 
-|------------------ resist resizing of a macro window
+  |------------------ resist resizing of a macro window
 
-/windowsize {
-  wH ne exch wW ne or {
-    { [
-      wid wW wH resizewindow
+  /windowsize {
+    wH ne exch wW ne or {
+      { [ | ]
+        wid wW wH resizewindow
+      } stopped cleartomark
+    } if
+    end
+  } bind def
+
+  |------------------ draw a macro window
+
+  /drawwindow {
+    { [ | ]
+      wid woutline BLACK drawline
+      wid wpane BG fillrectangle
+      newmacros { [ [ } if
+        rowH 1 sub dup line 1 put line 3 put
+        /x 5 def /y rowH 2 sub def
+        macros /pass1 get begin keywords end
+        newmacros { ] ] /boxlist name } if
+      /newmacros false def
     } stopped cleartomark
-  } if end
-} bind def
+    end
+  } bind def
 
-|------------------ draw a macro window
-
-/drawwindow {
-  { [ 
-    wid woutline BLACK drawline
-    wid wpane BG fillrectangle
-    newmacros { [ [ } if
-    rowH 1 sub dup line 1 put line 3 put
-    /x 5 def /y rowH 2 sub def
-    macros /pass1 get begin keywords end
-    newmacros { ] ] /boxlist name } if
-    /newmacros false def
-  } stopped cleartomark
-  end
-} bind def
-
-|------------------ respond to a mouseclick into a macro window
-/outcolor [/blue /bold] def
+  |------------------ respond to a mouseclick into a macro window
+  /outcolor [/blue /bold] def
   
-/checkcolor {
-  userdict /color known {
-    /checkcolor {} def
-    0 1 rowlist length 1 sub {
-      dup rowlist exch get length 1 sub
-      0 1 3 -1 roll { | r# c#
-        outcolor rowlist 3 index get 2 index get color_string
-        rowlist 3 index get 3 -1 roll put
+  /checkcolor {
+    userdict /color known {
+      /checkcolor {} def
+      0 1 rowlist length 1 sub {
+        dup rowlist exch get length 1 sub
+        0 1 3 -1 roll { | r# c#
+          outcolor rowlist 3 index get 2 index get color_string
+          rowlist 3 index get 3 -1 roll put
+        } for
+        pop
       } for
-      pop
-    } for
-  } if
-} def
+    } if
+  } def
   
-/mouseclick { 
-    { [ 4 1 roll
+  /mouseclick { 
+    { [ 4 1 roll | ]
       16 not and /mM name /mY name /mX name
       /krow mY 1 sub rowH div def
       /kbox 0 def
       checkcolor
       false boxlist krow get { /box name
-           mX box 0 get ge mX box 1 get le and
-             { pop true exit }
-             { /kbox kbox 1 add def }
-             ifelse
-         } forall
-      { rowlist krow get kbox get toconsole
-      } if
+        mX box 0 get ge mX box 1 get le and
+        { pop true exit } { /kbox kbox 1 add def } ifelse
+      } forall
+      { rowlist krow get kbox get toconsole } if
     } stopped cleartomark
-  end 
-} bind def
+    end 
+  } bind def
 
-|------------------ pass0: count keywords, rows for window layout
+  |------------------ pass0: count keywords, rows for window layout
+  
+  4 dict dup begin
+  /NL  { ] [ /nrows nrows 1 add def } bind def
+  /PRE { pop } bind def
+  /KEY { pop commands nkeys get /nkeys nkeys 1 add def } bind def
+  /GAP { pop } bind def
+  end mkread /pass0 name
 
-4 dict dup begin
-/NL  { ] [ /nrows nrows 1 add def } bind def
-/PRE { pop } bind def
-/KEY { pop commands nkeys get /nkeys nkeys 1 add def } bind def
-/GAP { pop } bind def
-end mkread /pass0 name
+  |------------------ pass1: render (and measure) text and underlines;
+  |                          a box gives the left and right x of the
+  |                          keyword text
+  4 dict dup begin
+  /NL  {
+    ul { /ul false def x line 2 put
+      wid line GRAY drawline
+    } if
+    line 1 get rowH add dup line 1 put line 3 put
+    /x 5 def /y y rowH add def
+    newmacros { ] [ } if
+  } bind def
+  
+  /PRE { /s name x line 0 put /ul true def
+    wid x y s TEXT drawtext pop /x name pop
+  } bind def
+  
+  /KEY { /s name
+    /xl x def
+    wid x y s TEXT drawtext pop /x name pop
+    newmacros { /box 2 /l array def
+      xl box 0 put x box 1 put
+      box
+    } if
+  } bind def
+  
+  /GAP {
+    ul { /ul false def x line 2 put
+      wid line GRAY drawline
+    } if
+    { wid x y ( ) TEXT drawtext pop /x name pop } repeat
+  } bind def
+  
+  end mkread /pass1 name
 
-|------------------ pass1: render (and measure) text and underlines;
-|                          a box gives the left and right x of the
-|                          keyword text
-4 dict dup begin
-/NL  { ul { /ul false def x line 2 put
-            wid line GRAY drawline
-          } if
-       line 1 get rowH add dup line 1 put line 3 put
-       /x 5 def /y y rowH add def
-       newmacros { ] [ } if
-     } bind def
-/PRE { /s name x line 0 put /ul true def
-       wid x y s TEXT drawtext pop /x name pop
-     } bind def
-/KEY { /s name
-       /xl x def
-       wid x y s TEXT drawtext pop /x name pop
-       newmacros { /box 2 /l array def
-                   xl box 0 put x box 1 put
-                   box
-                 } if
-     } bind def
-/GAP { ul { /ul false def x line 2 put
-            wid line GRAY drawline
-          } if
-       { wid x y ( ) TEXT drawtext pop /x name pop } repeat
-     } bind def
-end mkread /pass1 name
-
-end userdict /macros put
+  end userdict /macros put
 } if
 
 |================= debug abort ==================
@@ -2033,9 +2039,7 @@ end mkfontdict def
     } if
     (Trying ~/.dvt ...\n) toconsole
     gethomedir (.dvt) fromxfiles {(Read ~/.dvt\n) toconsole} if
-} aborted {
-    countdictstack 2 sub ~end repeat clear
-} if
+} aborted {countdictstack 2 sub ~end repeat clear} if
 
 dvt begin
 save /cleanDVT name

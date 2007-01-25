@@ -114,6 +114,7 @@ if (COMPARE(x_4,x_2) == TEST(x_3)) /* i.e. GT/GT, LT/LT, EQ/EQ */
    else
    { if (o1 >= CEILopds) return(OPDS_OVF);
      moveframes(x_4, o1, 1L);
+		 ATTR(o1) &= ~XMARK;
      FREEopds = o2;
      moveframes(x_1,x2,1L);
      ADD(x_4,x_3);
@@ -177,6 +178,7 @@ t = TEST(x_2);
 if ((t == LT) || (t == EQ)) { FREEexecs = x_2; return(OK); }
 DECREMENT(x_2);
 moveframes(x_1, x2, 1L);
+ATTR(x2) &= ~XMARK;
 FREEexecs = x3;
 return(OK);
 }
@@ -246,8 +248,9 @@ switch(CLASS(x_2))
      case ARRAY: if (ARRAY_SIZE(x_2) <= 0)
                     { FREEexecs = x_2; return(OK); }
                  if (o1 >= CEILopds) return(OPDS_OVF);
-                 TAG(o1) = NUM | TYPE(x_2); ATTR(o1) = 0;
-                 MOVE(x_2,o1);
+                 MOVE(x_2,o1); 
+                 TAG(o1) = NUM | TYPE(x_2);
+								 ATTR(o1) = 0;
                  VALUE_BASE(x_2) +=  VALUEBYTES(TYPE(x_2));
                  ARRAY_SIZE(x_2)--; FREEopds = o2;
                  break;
@@ -327,7 +330,7 @@ while ((frame -= FRAMEBYTES) >= FLOORexecs)
      if ((m = ATTR(frame) & XMARK))
      {
         if (m == STOPMARK)
-           { BOOL_VAL(frame) = TRUE; ATTR(frame) &= (~XMARK);
+           { BOOL_VAL(frame) = TRUE; 
              FREEexecs = frame + FRAMEBYTES; return(OK); }
         else if (m == ABORTMARK) return(INV_STOP);
      }
@@ -347,7 +350,7 @@ L op_stopped(void)
 if (o_1 < FLOORopds) return(OPDS_UNF);
 if ((ATTR(o_1) & ACTIVE) == 0) return(OPD_ATR);
 if (x3 > CEILexecs) return(EXECS_OVF);
-TAG(x1) = BOOL; ATTR(x1) = (STOPMARK | ACTIVE);
+TAG(x1) = BOOL; ATTR(x1) |= STOPMARK;
 BOOL_VAL(x1) = FALSE;
 moveframes(o_1, x2, 1L); FREEexecs = x3;
 FREEopds = o_1;

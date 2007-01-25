@@ -199,7 +199,7 @@ L op_abort(void)
     {
       if ((ATTR(frame) & ABORTMARK) != 0)
 	{ 
-	  BOOL_VAL(frame) = TRUE; ATTR(frame) &= (~ABORTMARK);
+	  BOOL_VAL(frame) = TRUE;
 	  FREEexecs = frame + FRAMEBYTES; return(OK);
 	}
     }
