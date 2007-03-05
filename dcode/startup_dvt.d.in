@@ -1670,7 +1670,7 @@ end userdict /dvt put
     [ [ macros /pass0 get begin keywords end ] ] /rowlist name
     commands length nkeys ne
       { (Macros: keys do not match commands!\n) toconsole stop } if
-    /wW scrW 2.75 div def /wH nrows rowH mul 6 add def
+    /wW 1 def /wH nrows rowH mul 6 add def
     [ [ 2 scrH wH sub 2 sub wW wH ]
       myname myshortname makewindow /wid name pop
     /woutline [ 0 0 wW 1 sub 0 wW 1 sub wH 1 sub 0 wH 1 sub 0 0 ] def
@@ -1726,11 +1726,13 @@ Xwindows {
     { [ | ]
       wid woutline BLACK drawline
       wid wpane BG fillrectangle
-      newmacros { [ [ } if
-        rowH 1 sub dup line 1 put line 3 put
-        /x 5 def /y rowH 2 sub def
-        macros /pass1 get begin keywords end
-        newmacros { ] ] /boxlist name } if
+      newmacros { [ [ } if | ] ]
+      rowH 1 sub dup line 1 put line 3 put
+      /x_ 0 def /x 5 def /y rowH 2 sub def
+      macros /pass1 get begin keywords end
+      /wW x_ 5 add def
+      wid wW wH resizewindow | [ [
+      newmacros { ] ] /boxlist name} if
       /newmacros false def
     } stopped cleartomark
     end
@@ -1780,23 +1782,25 @@ Xwindows {
   |------------------ pass1: render (and measure) text and underlines;
   |                          a box gives the left and right x of the
   |                          keyword text
-  4 dict dup begin
+  5 dict dup begin
+  /xname {dup /x name dup x_ le ~pop {/x_ name} ifelse} bind def
+  
   /NL  {
     ul { /ul false def x line 2 put
       wid line GRAY drawline
     } if
     line 1 get rowH add dup line 1 put line 3 put
-    /x 5 def /y y rowH add def
+    5 xname /y y rowH add def
     newmacros { ] [ } if
   } bind def
   
   /PRE { /s name x line 0 put /ul true def
-    wid x y s TEXT drawtext pop /x name pop
+    wid x y s TEXT drawtext pop xname pop
   } bind def
   
   /KEY { /s name
     /xl x def
-    wid x y s TEXT drawtext pop /x name pop
+    wid x y s TEXT drawtext pop xname pop
     newmacros { /box 2 /l array def
       xl box 0 put x box 1 put
       box
@@ -1807,7 +1811,7 @@ Xwindows {
     ul { /ul false def x line 2 put
       wid line GRAY drawline
     } if
-    { wid x y ( ) TEXT drawtext pop /x name pop } repeat
+    { wid x y ( ) TEXT drawtext pop xname pop } repeat
   } bind def
   
   end mkread /pass1 name

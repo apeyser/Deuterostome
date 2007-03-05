@@ -6,7 +6,7 @@
   /keywords {
       (Files:) PRE (  MakeDir) KEY (  Remove) KEY
          (  Copy) KEY (  Save) KEY (  Load) KEY (  Open) KEY NL
-      11 GAP () PRE (Lib) KEY NL
+      11 GAP () PRE (Lib) KEY (  Rsync) KEY (  Rsync-del) KEY NL
     
       (Dnode:) PRE (  Setup) KEY (  Connect) KEY (  Talk) KEY
          (  Disconnect) KEY (  Shrink) KEY NL
@@ -30,6 +30,8 @@
       (getRpage dup 0 get exch 1 get { exch dup 3 -1 roll fromfiles } forall pop\n)
      (@\(emacsclient -n -s \) fax emacs_server_name fax \( \) fax faxRpage\n)
      (getRpage dup 0 get exch 1 get {exch dup 3 -1 roll loadlib pop} forall pop\n)
+     (@\(rsync -av \) fax faxRpage \(/. \) fax faxLpage \(/.\) fax\n)
+     (@\(rsync -av --delete \) fax faxRpage \(/. \) fax faxLpage \(/.\) fax\n)
 |-- Dnodes
      (% dvt begin dnode_resize end\n)
      (% dvt begin ~_cx ~_ccx dnode_up end\n)
@@ -50,9 +52,9 @@
      (@getstartupdir fax \(print.sh dvi \) fax )
      (@getstartupdir fax \(print.sh tex \) fax )
 |-- PrintTo
-     (\(gs \) fax faxRpage\n)
-     (\(lw \) fax faxRpage\n)
-     (\(xpdf \) fax faxRpage\n)
-     (\(xdvi \) fax faxRpage\n)
+     (\(gs \) fax faxRpage \n)
+     (\(lw \) fax faxRpage fax\n)
+     (\(xpdf \) fax faxRpage fax\n)
+     (\(xdvi \) fax faxRpage fax\n)
     ] def
 end makemacros
