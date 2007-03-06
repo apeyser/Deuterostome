@@ -52,9 +52,9 @@
      (@getstartupdir fax \(print.sh dvi \) fax )
      (@getstartupdir fax \(print.sh tex \) fax )
 |-- PrintTo
-     (\(gs \) fax faxRpage \n)
-     (\(lw \) fax faxRpage fax\n)
-     (\(xpdf \) fax faxRpage fax\n)
-     (\(xdvi \) fax faxRpage fax\n)
+     (\(gs \) fax faxRpage\n)
+     (\(lw \) fax faxRpage\n)
+     (\(xpdf \) fax faxRpage\n)
+     (\(xdvi \) fax faxRpage\n)
     ] def
 end makemacros
