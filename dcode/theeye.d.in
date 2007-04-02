@@ -351,7 +351,7 @@ userdict /dnode_setup known not {
   wid inforect BG fillrectangle
   wid ritepagerect BG fillrectangle
   showRpage
-} stopped cleartomark | ]
+} stopped pop cleartomark | ]
 end
 } bind def
 
@@ -402,7 +402,7 @@ end
       } if
     /mL mY 15 sub 13 div def
     mX wW 3 sub 2 div 1 add le { hitL } { hitR } ifelse
-  } stopped cleartomark | ]
+  } stopped pop cleartomark | ]
     end 
 } bind def
 
@@ -602,17 +602,19 @@ end mkread /infoclasses name
 end mkread def
 
 /error {
-  errordict begin {                                     | for both dvt and dnode:
-    dup 3 userdict /dvt known not {2 add} if 1 roll     | copy error #
-    wid inforect BG fillrectangle                       | under error stack
-    infoline errormessage dup length 1 sub 0 exch getinterval
-    wid 2 12 4 -1 roll INFOTEXT drawtext           | put err -newline in eye
-    208 ne {stop} {                                | avoid loop of illegal stops
+  errordict begin {                                | for both dvt and dnode:
+    dup 520 ne 1 index 518 ne and {                | avoid loop of illegal stops
+      wid inforect                                 | under error stack
+      infoline errormessage dup length 1 sub 0 exch getinterval
+      wid 2 12 4 -1 roll INFOTEXT drawtext         | put err -newline in eye
+      stop
+    } {
+      dstate_
       (Illegal stop in the eye\n) toconsole
       countdictstack 2 sub {end} repeat            | avoid redef of abort
       abort                                        | drop all
     } ifelse
-  } stopped end ~stop if
+  } stopped end {stop} if
 } bind def
 
 |========================= left page machinery ============================

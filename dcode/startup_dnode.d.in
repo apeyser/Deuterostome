@@ -559,8 +559,9 @@ end def  | of xtext_dict
   countexecstack list execstack dup length 1 sub 0 exch getinterval
     userdict /d_execstack put
 
-  [count 1 ne {count 1 roll} if]
+  [count 1 ne {count 1 roll} if] dup
     userdict /d_opstack put
+    {} forall
     
   countdictstack list dictstack dup length 2 sub 2 exch getinterval
     userdict /d_dictstack put
