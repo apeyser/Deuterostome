@@ -248,8 +248,8 @@ switch(CLASS(x_2))
      case ARRAY: if (ARRAY_SIZE(x_2) <= 0)
                     { FREEexecs = x_2; return(OK); }
                  if (o1 >= CEILopds) return(OPDS_OVF);
-                 MOVE(x_2,o1); 
                  TAG(o1) = NUM | TYPE(x_2);
+                 MOVE(x_2,o1); 
 								 ATTR(o1) = 0;
                  VALUE_BASE(x_2) +=  VALUEBYTES(TYPE(x_2));
                  ARRAY_SIZE(x_2)--; FREEopds = o2;
