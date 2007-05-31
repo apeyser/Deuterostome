@@ -220,7 +220,6 @@ L unixserversocket;
 #endif
 B *userdict;
 fd_set read_fds;
-B hostname[256];
 struct timeval zerosec = {0,0}, zerosec_;   /* constant: zero time interval */
 struct timeval *iv;
 struct sockaddr clientname;

@@ -351,7 +351,7 @@ userdict /dnode_setup known not {
   wid inforect BG fillrectangle
   wid ritepagerect BG fillrectangle
   showRpage
-} stopped pop cleartomark | ]
+} stopped cleartomark | ]
 end
 } bind def
 
@@ -402,7 +402,7 @@ end
       } if
     /mL mY 15 sub 13 div def
     mX wW 3 sub 2 div 1 add le { hitL } { hitR } ifelse
-  } stopped pop cleartomark | ]
+  } stopped cleartomark | ]
     end 
 } bind def
 

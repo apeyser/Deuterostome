@@ -264,6 +264,35 @@ L op_toconsole(void)
   return(OK);
 }
 
+/*-------------------------------------- 'gethostname'
+ * -- | (hostname)
+ */
+
+L op_gethostname(void) 
+{
+		if (o1 >= CEILopds) return OPDS_OVF;
+		TAG(o1) = ARRAY | BYTETYPE; ATTR(o1) = READONLY;
+		VALUE_PTR(o1) = (B*) hostname;
+		ARRAY_SIZE(o1) = strlen(hostname);
+		FREEopds = o2;
+
+		return OK;
+}
+
+/*------------------------------------- 'getportnumber'
+ * -- | portnumber
+ */
+L op_getportnumber(void) 
+{
+		if (o1 >= CEILopds) return OPDS_OVF;
+		TAG(o1) = NUM | LONGTYPE;
+		LONG_VAL(o1) = serverport - IPPORT_USERRESERVED;
+		FREEopds = o2;
+
+		return OK;
+}
+
+
 /*-------------------------------------- 'error'
   - expects on operand stack:
      error code    (top)

@@ -12,6 +12,11 @@ L op_getplugindir(void);
 L op_makethreads(void);
 L op_threads(void);
 
+/*--- error info */
+L op_gethostname(void);
+L op_getportnumber(void);
+
+
 B *sysop[] =
 {
       "lock",        (B*) op_lock,
@@ -217,7 +222,9 @@ B *sysop[] =
       "getstartupdir",  (B *)op_getstartupdir,
       "getconfdir",     (B *)op_getconfdir,
       "gethomedir",     (B *)op_gethomedir,
-	  "getplugindir",   (B *)op_getplugindir,
+			"getplugindir",   (B *)op_getplugindir,
+			"gethostname",    (B *)op_gethostname,
+			"getportnumber",  (B *)op_getportnumber,
       "",               (B *)0L, 
  };     
    
@@ -313,3 +320,4 @@ B* syserrm[] =
 // original directory for vmresize
 char* original_dir;
 L serverport;
+B hostname[256];

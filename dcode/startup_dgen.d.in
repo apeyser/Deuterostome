@@ -19,8 +19,6 @@
 2 list dictstack dup 0 get /systemdict name   | name the roots
                      1 get /userdict name
 
-/setlock {pop} bind def  | null ops to parallel dnode
-/getlock {true} bind def |
 /lock {exec} bind def    | 
 
 |------------------------ low-level information -------------------------

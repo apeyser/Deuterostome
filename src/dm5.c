@@ -301,6 +301,10 @@ return(OK);
 }
 
 /*---------------------------------------------- exit */
+// -- | --
+// exits inner loop
+// if not in loop or invalid exit, errors with EXECS_UNF.
+// if it jumps through another stop, abort errors with INV_EXT
 
 L op_exit(void)
 {
@@ -312,13 +316,18 @@ while ((frame -= FRAMEBYTES) >= FLOORexecs)
      if ((m = ATTR(frame) & XMARK))
      {
         if (m == EXITMARK) { FREEexecs = frame; return(OK); }
-        else return(INV_EXT);
+        else return INV_EXT;
      }     
  }
-return(EXECS_UNF);
+
+return EXECS_UNF;
 } 
 
 /*----------------------------------------------- stop */
+// -- | -- (leaves true on exec stack)
+// exits stopped
+// if not in stopped or invalid stop, errors with EXECS_UNF.
+// if it jumps through another loop, abort errors with INV_STOP
 
 L op_stop(void)
 {
@@ -332,11 +341,12 @@ while ((frame -= FRAMEBYTES) >= FLOORexecs)
         if (m == STOPMARK)
            { BOOL_VAL(frame) = TRUE; 
              FREEexecs = frame + FRAMEBYTES; return(OK); }
-        else if (m == ABORTMARK) return(INV_STOP);
+        else if (m == ABORTMARK) return INV_STOP;
      }
  }
-return(EXECS_UNF);
-} 
+
+return EXECS_UNF;
+}
 
 /*----------------------------------------------- stopped
    any_active | bool

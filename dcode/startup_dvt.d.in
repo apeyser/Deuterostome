@@ -19,8 +19,6 @@
 2 list dictstack dup 0 get /systemdict name   | name the roots
                      1 get /userdict name
 
-/setlock {pop} bind def  | null ops to parallel dnode
-/getlock {true} bind def |
 /lock {exec} bind def    |
 /dmnumincerror {(dmnuminc) 2816 error} def
 
@@ -1834,33 +1832,55 @@ Xwindows {
 
 /s_debug_abort {
   true userdict /debug_abort_c put
-  /debug_abort find userdict /abort put
-} def
+  debug_abort_su
+} bind def
 
 /e_debug_abort {
   false userdict /debug_abort_c put
-  /regular_abort find userdict /abort put
-} def
+  debug_abort_end
+} bind def
 
 |--------------------------------------------- dstate_
 | get current stacks state (see it in the eye)
+/reverse { | [ n1 .. nx ] | [ nx ... n1] 
+  [exch dup length 1 sub -1 0 { | \[ [] i
+    1 index exch get | \[ [] x
+    exch | \[ x []   
+  } for pop]
+} bind def
+  
 /dstate_ {
   countexecstack list execstack dup length 1 sub 0 exch getinterval
+    reverse
     userdict /d_execstack put
 
-  [count 1 ne {count 1 roll} if]
+  [count 1 ne {count 1 roll} if] dup
+    reverse
     userdict /d_opstack put
+    {} forall
     
   countdictstack list dictstack dup length 2 sub 2 exch getinterval
+    reverse
     userdict /d_dictstack put
 } bind def
+  
+/debug_abort_su {
+  /debug_abort find userdict /abort put
+} bind def
+
+/debug_abort_end {
+  debug_abort_c not {
+    /regular_abort find userdict /abort put
+  } if
+} bind def
+
 
 |-------------------- debug_abort
 | calls dstate_ to get debug info
 | fixes abort to normal
 | and continues aborting
 /debug_abort {
-  debug_abort_c not {/regular_abort find userdict /abort put} if
+  debug_abort_end
   dstate_
   abort
 } bind def
@@ -1870,11 +1890,7 @@ Xwindows {
 | and undoes it if no abort occurs
 | -- debug_abort undoes itself when called
 /debug_aborted { | {} --> ???
-  /debug_abort find userdict /abort put
-  
-  aborted {(abort\n) toconsole abort} {
-    debug_abort_c not {/regular_abort find userdict /abort put} if
-  } ifelse
+  debug_abort_su aborted debug_abort_end {(abort\n) toconsole abort} if
 } bind def
 
 |----------------------------------------- color_node

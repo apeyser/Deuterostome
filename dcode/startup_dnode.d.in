@@ -554,16 +554,25 @@ end def  | of xtext_dict
 | opstack in userdict->[d_opstack]
 | dictstack in userdict->[d_dictstack]
 | execstack in userdict->[d_execstack]
+/reverse { | [ n1 .. nx ] | [ nx ... n1] 
+  [exch dup length 1 sub -1 0 { | \[ [] i
+    1 index exch get | \[ [] x
+    exch | \[ x []   
+  } for pop]
+} bind def
 
 /dstate_ {
   countexecstack list execstack dup length 1 sub 0 exch getinterval
+    reverse
     userdict /d_execstack put
 
   [count 1 ne {count 1 roll} if] dup
+    reverse
     userdict /d_opstack put
     {} forall
     
   countdictstack list dictstack dup length 2 sub 2 exch getinterval
+    reverse
     userdict /d_dictstack put
 } bind def
 
