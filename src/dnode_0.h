@@ -12,11 +12,6 @@ L op_getplugindir(void);
 L op_makethreads(void);
 L op_threads(void);
 
-/*--- error info */
-L op_gethostname(void);
-L op_getportnumber(void);
-
-
 B *sysop[] =
 {
       "lock",        (B*) op_lock,
@@ -223,8 +218,6 @@ B *sysop[] =
       "getconfdir",     (B *)op_getconfdir,
       "gethomedir",     (B *)op_gethomedir,
 			"getplugindir",   (B *)op_getplugindir,
-			"gethostname",    (B *)op_gethostname,
-			"getportnumber",  (B *)op_getportnumber,
       "",               (B *)0L, 
  };     
    
