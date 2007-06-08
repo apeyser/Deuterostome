@@ -330,7 +330,7 @@ and check/try to convert to unix line-ends."
   "Regular expression for the simple name in d-mode.")
 
 (defconst d-mode-variables-regexp
-  (concat "\\s'?" d-mode-variable-name-regexp "\\>")
+  (concat "" d-mode-variable-name-regexp "\\>")
   "Regular expression for variables in d-mode.")
 
 (defconst d-mode-font-lock-keywords-1
@@ -338,9 +338,9 @@ and check/try to convert to unix line-ends."
   "Minimal set of font lock regexps for d-mode.")
 
 (defconst d-mode-constants-regexp
-  (concat "\\B\\*\\B\\|\\<\\(null\\|true\\|false"
-	  "\\|[-+]?[0-9]+\\("
-	  "\\(\\.[0-9]+\\)?\\([eE][-+]?[0-9]+\\)?[sdSD]?"
+  (concat "\\<\\(null\\|true\\|false"
+	  "\\|[-+]?[[:digit:]]+\\("
+	  "\\(\\.[[:digit:]]+\\)?\\([eE][-+]?[[:digit:]]+\\)?[sdSD]?"
       "\\|[bwlBWL]?\\)\\)\\>")
   "Regular expression for a constant in d-mode.")
 
@@ -353,7 +353,7 @@ and check/try to convert to unix line-ends."
    (list
     (list d-mode-constants-regexp 0 'font-lock-builtin-face)
     (list d-mode-variables-regexp '(1 font-lock-type-face) 
-					'(2 d-mode-variable-xtra-face))
+		  '(2 d-mode-variable-xtra-face))
     (list d-mode-marks-regexp     0 'font-lock-type-face)))
   "Middle level font lock.")
 
@@ -557,6 +557,19 @@ and check/try to convert to unix line-ends."
 (defvar d-mode-font-lock-keywords-3 nil
   "Extreme set of font lock regexps for d-mode.")
 
+(defun d-mode-unfontified (limit)
+  (let (end (start (point)))
+	(block ret
+	  (while (setq start (text-property-any start limit 'face nil))
+		(setq end (next-single-property-change start 'face 
+											   (current-buffer) limit))
+		(goto-char start)
+		(if (null (setq start (re-search-forward "[^[:space:]]+" end t)))
+			(setq start end)
+		  (goto-char start)
+		  (return-from ret))))
+	start))
+
 (defun d-mode-font-lock-keywords-3 ()
   (setq d-mode-font-lock-keywords-3
 	(append
@@ -577,8 +590,8 @@ and check/try to convert to unix line-ends."
 					 '(2 d-mode-oref-face)
 					 '(3 d-mode-oref-xtra-face)))
 		d-mode-font-lock-keywords-2
- 		'(("[^[:space:]]" 0 'font-lock-warning-face)
-          ("[~/]" 0 
+ 		'((d-mode-unfontified 0 'font-lock-warning-face)
+		  ("[~/]" 0 
            (list 
             'face
              (let* ((start (match-beginning 0))
@@ -732,14 +745,33 @@ and check/try to convert to unix line-ends."
 	(save-buffer))))
 
 (defun d-mode-syntax-begin-function (&optional arg)
-	(or
-	 (re-search-backward "\\s(" nil t (or arg 1))
-	 (progn
-		 (while (and (re-search-backward "\\s|" nil 'move (or arg 1))
-                     (or
-                      (\= (char-after) ?\()
-                      (= (char-before) ?\\))))
-		 (= (char-after) ?\())))
+  (let ((p (point)))
+	(block ret
+	  (when (and (looking-at "[[:alnum:]_]")
+				 (looking-back "[[:alpha:]]"))
+		(re-search-backward "[^[:alnum:]_~/]")
+		(setq p (point)))
+	  (when (and (re-search-backward "\\s|" nil t)
+				 (= (char-after) ?\())
+		(let ((p2 (point)))
+		  (forward-char)
+		  (when (or (not (re-search-forward "\\s|" nil t))
+					(< p (point)))
+			(goto-char p2)
+			(return-from ret))))
+	  (goto-char p)
+	  (when (and (re-search-backward "\\s$" nil t)
+				 (= (char-after) ?\<))
+		(let ((p2 (point)))
+		  (forward-char)
+		  (when (or (not (re-search-forward "\\s$" nil t))
+					(< p (point)))
+			(goto-char p2)
+			(return-from ret p2))))
+	  (goto-char p)
+	  (when (re-search-backward "\\s<" (line-beginning-position) t)
+		(return-from ret))
+	  (goto-char p))))
 
 (if (not d-mode-syntax-table) (d-mode-setup-syntax-table))
 (if (not d-mode-map) (d-mode-setup-map))
