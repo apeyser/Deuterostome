@@ -85,7 +85,7 @@ static void quithandler(int sig) {
 static void makequithandler(void) 
 {
     struct sigaction sa;
-    int quitsigs[] = {SIGHUP, SIGQUIT, SIGTERM, SIGINT, 0};
+    int quitsigs[] = {SIGQUIT, SIGTERM, SIGINT, 0};
     int* i;
     
     sa.sa_handler = quithandler;
@@ -93,6 +93,20 @@ static void makequithandler(void)
     sa.sa_flags = 0;
     for (i = quitsigs; *i; i++) sigaction(*i, &sa, NULL);
 }
+
+static void ignorequithandler(void)
+{
+		struct sigaction sa;
+		int quitsigs[] = {SIGHUP, 0};
+		int* i;
+
+		sa.sa_handler = SIG_IGN;
+		sigfillset(&sa.sa_mask);
+		sa.sa_flags = 0;
+		for (i = quitsigs; *i; i++) sigaction(*i, &sa, NULL);
+}
+
+		
 
 /*------------------------------ main ----------------------------------
 
@@ -290,6 +304,7 @@ signal(SIGALRM, SIGALRMhandler);
  signal(SIGABRT, SIGABRThandler);
 
  makequithandler();
+ ignorequithandler();
 
 /*-------------------- prime the socket table -----------------------
   We use a fd_set bit array to keep track of active sockets. Hence,
