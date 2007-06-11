@@ -271,8 +271,11 @@ Derived from `comint-mode' with font-lock from `d-mode'.
 	      nil t))
 
   (process-send-string d-comint-mode-redirect-process
-   (if d-comint-mode-redirect-mode "--- Start ---" "--- Stop ---"))
-)
+					   (format-time-string
+						(if d-comint-mode-redirect-mode
+						  "--- Start: %Y-%m-%d %T%z ---\n" 
+						  "--- Stop: %Y-%m-%d %T%z ---\n")))
+  )
 
 (define-minor-mode d-comint-mode-redirect-mode "" nil " >"
   '() (d-comint-mode-redirect-process-open))
