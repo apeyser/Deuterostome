@@ -338,7 +338,7 @@ and check/try to convert to unix line-ends."
   "Minimal set of font lock regexps for d-mode.")
 
 (defconst d-mode-constants-regexp
-  (concat "\\<\\(\\*\\|null\\|true\\|false"
+  (concat "\\*\\|\\<\\(null\\|true\\|false"
 	  "\\|[-+]?[[:digit:]]+\\("
 	  "\\(\\.[[:digit:]]+\\)?\\([eE][-+]?[[:digit:]]+\\)?[sdSD]?"
       "\\|[bwlBWL]?\\)\\)\\>")
@@ -564,9 +564,9 @@ and check/try to convert to unix line-ends."
 		(setq end (next-single-property-change start 'face 
 											   (current-buffer) limit))
 		(goto-char start)
-		(if (null (setq start (re-search-forward "[^[:space:]]+" end t)))
-			(setq start end)
-		  (goto-char start)
+		(skip-chars-forward "[:space:]" end)
+		(when (/= (setq start (point)) end)
+		  (re-search-forward "\\=[^[:space:]]+" end t)
 		  (return-from ret))))
 	start))
 
