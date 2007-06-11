@@ -338,7 +338,7 @@ and check/try to convert to unix line-ends."
   "Minimal set of font lock regexps for d-mode.")
 
 (defconst d-mode-constants-regexp
-  (concat "\\<\\(null\\|true\\|false"
+  (concat "\\<\\(\\*\\|null\\|true\\|false"
 	  "\\|[-+]?[[:digit:]]+\\("
 	  "\\(\\.[[:digit:]]+\\)?\\([eE][-+]?[[:digit:]]+\\)?[sdSD]?"
       "\\|[bwlBWL]?\\)\\)\\>")

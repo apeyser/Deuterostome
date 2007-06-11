@@ -888,6 +888,7 @@ end def
   /lineabscissa thelabel 0 get X_to_x def
   /lineordinate thelabel 1 get Y_to_y def
   /theline thelabel 2 get def
+  thelabel length 3 gt {thelabel 3 get exec} if
   /style 0 def 1 LineAdjust ShowLine
 } bind def
  
