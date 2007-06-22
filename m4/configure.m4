@@ -320,7 +320,7 @@ AC_DEFUN([CF_IF_ENABLED], [dnl
 ])
 
 AC_DEFUN([CF_AM_PROG], [dnl
-  AC_CHECK_PROG([$1], [$2], [$as_dir/$ac_word$ac_exec_ext], [], [$3])
+  AC_CHECK_PROG([$1], [$2], [$as_dir/$ac_word$ac_exec_ext], [$4], [$3])
   AM_CONDITIONAL([$1], [test "${$1+set}" = set]) dnl
 ])
 

@@ -90,6 +90,18 @@ AC_CHECK_PROG([guipdf], [gs], [gs])
 
 CF_AM_PROG([ENABLE_BASH], [bash])
 CF_AM_PROG([ENABLE_ENV], [env], [/usr/bin])
+CF_AM_PROG([ENABLE_PERL], [perl])
+CF_AM_PROG([ENABLE_TAIL], [tail])
+CF_AM_PROG([ENABLE_XTERM], [xterm])
+CF_AM_PROG([ENABLE_LP], [lp])
+CF_AM_PROG([ENABLE_ATPS], [a2ps])
+CF_AM_PROG([ENABLE_PSTPDF], [ps2pdf])
+CF_AM_PROG([ENABLE_PDFTPS], [pdf2ps])
+CF_AM_PROG([ENABLE_DVIPDF], [dvipdf])
+CF_AM_PROG([ENABLE_XDVI], [xdvi])
+CF_AM_PROG([ENABLE_GS], [gs])
+CF_AM_PROG([ENABLE_PDFLATEX], [pdflatex])
+CF_AM_PROG([ENABLE_LATEX], [latex])
 
 CF_AC_ARG_VAR_QUOTE([guipdf],
  [name of program to display pdf's, eg gnome-open or launch -i com.apple.Preview],

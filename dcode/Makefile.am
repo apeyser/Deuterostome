@@ -16,6 +16,14 @@ else !ENABLE_XPS
 XPS_DELETE = -e '$(XPS_START),$(XPS_ELSE) d' -e '$(XPS_END) d'
 endif !ENABLE_XPS
 
+PERL_START = /^[[:space:]]*[@]ENABLE_PERL_START[@][[:space:]]*$$/
+PERL_END = /^[[:space:]]*[@]ENABLE_PERL_END[@][[:space:]]*$$/
+if ENABLE_PERL
+PERL_DELETE = -e '$(PERL_START) d' -e '$(PERL_END) d'
+else !ENABLE_PERL
+PERL_DELETE = -e '$(PERL_START),$(PERL_END) d'
+endif !ENABLE_PERL
+
 PLUGIN_START = /^[[:space:]]*[@]ENABLE_PLUGINS_START[@][[:space:]]*$$/
 PLUGIN_END = /^[[:space:]]*[@]ENABLE_PLUGINS_END[@][[:space:]]*$$/
 if ENABLE_PLUGINS
@@ -39,7 +47,8 @@ edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
 			$(PLUGIN_DELETE) \
 			$(THREADS_EDIT) \
-			$(XPS_DELETE)
+			$(XPS_DELETE) \
+			$(PERL_DELETE)
 
 theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in
 	rm -f $@ $@.tmp

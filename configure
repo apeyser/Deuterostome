@@ -911,6 +911,42 @@ ENABLE_BASH_FALSE
 ENABLE_ENV
 ENABLE_ENV_TRUE
 ENABLE_ENV_FALSE
+ENABLE_PERL
+ENABLE_PERL_TRUE
+ENABLE_PERL_FALSE
+ENABLE_TAIL
+ENABLE_TAIL_TRUE
+ENABLE_TAIL_FALSE
+ENABLE_XTERM
+ENABLE_XTERM_TRUE
+ENABLE_XTERM_FALSE
+ENABLE_LP
+ENABLE_LP_TRUE
+ENABLE_LP_FALSE
+ENABLE_ATPS
+ENABLE_ATPS_TRUE
+ENABLE_ATPS_FALSE
+ENABLE_PSTPDF
+ENABLE_PSTPDF_TRUE
+ENABLE_PSTPDF_FALSE
+ENABLE_PDFTPS
+ENABLE_PDFTPS_TRUE
+ENABLE_PDFTPS_FALSE
+ENABLE_DVIPDF
+ENABLE_DVIPDF_TRUE
+ENABLE_DVIPDF_FALSE
+ENABLE_XDVI
+ENABLE_XDVI_TRUE
+ENABLE_XDVI_FALSE
+ENABLE_GS
+ENABLE_GS_TRUE
+ENABLE_GS_FALSE
+ENABLE_PDFLATEX
+ENABLE_PDFLATEX_TRUE
+ENABLE_PDFLATEX_FALSE
+ENABLE_LATEX
+ENABLE_LATEX_TRUE
+ENABLE_LATEX_FALSE
 GUIPDF
 ENABLE_EMACS_TRUE
 ENABLE_EMACS_FALSE
@@ -5335,6 +5371,570 @@ else
   ENABLE_ENV_FALSE=
 fi
 
+  # Extract the first word of "perl", so it can be a program name with args.
+set dummy perl; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_ENABLE_PERL+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$ENABLE_PERL"; then
+  ac_cv_prog_ENABLE_PERL="$ENABLE_PERL" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_ENABLE_PERL="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+ENABLE_PERL=$ac_cv_prog_ENABLE_PERL
+if test -n "$ENABLE_PERL"; then
+  { echo "$as_me:$LINENO: result: $ENABLE_PERL" >&5
+echo "${ECHO_T}$ENABLE_PERL" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+
+
+if test "${ENABLE_PERL+set}" = set; then
+  ENABLE_PERL_TRUE=
+  ENABLE_PERL_FALSE='#'
+else
+  ENABLE_PERL_TRUE='#'
+  ENABLE_PERL_FALSE=
+fi
+
+  # Extract the first word of "tail", so it can be a program name with args.
+set dummy tail; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_ENABLE_TAIL+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$ENABLE_TAIL"; then
+  ac_cv_prog_ENABLE_TAIL="$ENABLE_TAIL" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_ENABLE_TAIL="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+ENABLE_TAIL=$ac_cv_prog_ENABLE_TAIL
+if test -n "$ENABLE_TAIL"; then
+  { echo "$as_me:$LINENO: result: $ENABLE_TAIL" >&5
+echo "${ECHO_T}$ENABLE_TAIL" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+
+
+if test "${ENABLE_TAIL+set}" = set; then
+  ENABLE_TAIL_TRUE=
+  ENABLE_TAIL_FALSE='#'
+else
+  ENABLE_TAIL_TRUE='#'
+  ENABLE_TAIL_FALSE=
+fi
+
+  # Extract the first word of "xterm", so it can be a program name with args.
+set dummy xterm; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_ENABLE_XTERM+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$ENABLE_XTERM"; then
+  ac_cv_prog_ENABLE_XTERM="$ENABLE_XTERM" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_ENABLE_XTERM="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+ENABLE_XTERM=$ac_cv_prog_ENABLE_XTERM
+if test -n "$ENABLE_XTERM"; then
+  { echo "$as_me:$LINENO: result: $ENABLE_XTERM" >&5
+echo "${ECHO_T}$ENABLE_XTERM" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+
+
+if test "${ENABLE_XTERM+set}" = set; then
+  ENABLE_XTERM_TRUE=
+  ENABLE_XTERM_FALSE='#'
+else
+  ENABLE_XTERM_TRUE='#'
+  ENABLE_XTERM_FALSE=
+fi
+
+  # Extract the first word of "lp", so it can be a program name with args.
+set dummy lp; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_ENABLE_LP+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$ENABLE_LP"; then
+  ac_cv_prog_ENABLE_LP="$ENABLE_LP" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_ENABLE_LP="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+ENABLE_LP=$ac_cv_prog_ENABLE_LP
+if test -n "$ENABLE_LP"; then
+  { echo "$as_me:$LINENO: result: $ENABLE_LP" >&5
+echo "${ECHO_T}$ENABLE_LP" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+
+
+if test "${ENABLE_LP+set}" = set; then
+  ENABLE_LP_TRUE=
+  ENABLE_LP_FALSE='#'
+else
+  ENABLE_LP_TRUE='#'
+  ENABLE_LP_FALSE=
+fi
+
+  # Extract the first word of "a2ps", so it can be a program name with args.
+set dummy a2ps; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_ENABLE_ATPS+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$ENABLE_ATPS"; then
+  ac_cv_prog_ENABLE_ATPS="$ENABLE_ATPS" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_ENABLE_ATPS="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+ENABLE_ATPS=$ac_cv_prog_ENABLE_ATPS
+if test -n "$ENABLE_ATPS"; then
+  { echo "$as_me:$LINENO: result: $ENABLE_ATPS" >&5
+echo "${ECHO_T}$ENABLE_ATPS" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+
+
+if test "${ENABLE_ATPS+set}" = set; then
+  ENABLE_ATPS_TRUE=
+  ENABLE_ATPS_FALSE='#'
+else
+  ENABLE_ATPS_TRUE='#'
+  ENABLE_ATPS_FALSE=
+fi
+
+  # Extract the first word of "ps2pdf", so it can be a program name with args.
+set dummy ps2pdf; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_ENABLE_PSTPDF+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$ENABLE_PSTPDF"; then
+  ac_cv_prog_ENABLE_PSTPDF="$ENABLE_PSTPDF" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_ENABLE_PSTPDF="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+ENABLE_PSTPDF=$ac_cv_prog_ENABLE_PSTPDF
+if test -n "$ENABLE_PSTPDF"; then
+  { echo "$as_me:$LINENO: result: $ENABLE_PSTPDF" >&5
+echo "${ECHO_T}$ENABLE_PSTPDF" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+
+
+if test "${ENABLE_PSTPDF+set}" = set; then
+  ENABLE_PSTPDF_TRUE=
+  ENABLE_PSTPDF_FALSE='#'
+else
+  ENABLE_PSTPDF_TRUE='#'
+  ENABLE_PSTPDF_FALSE=
+fi
+
+  # Extract the first word of "pdf2ps", so it can be a program name with args.
+set dummy pdf2ps; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_ENABLE_PDFTPS+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$ENABLE_PDFTPS"; then
+  ac_cv_prog_ENABLE_PDFTPS="$ENABLE_PDFTPS" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_ENABLE_PDFTPS="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+ENABLE_PDFTPS=$ac_cv_prog_ENABLE_PDFTPS
+if test -n "$ENABLE_PDFTPS"; then
+  { echo "$as_me:$LINENO: result: $ENABLE_PDFTPS" >&5
+echo "${ECHO_T}$ENABLE_PDFTPS" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+
+
+if test "${ENABLE_PDFTPS+set}" = set; then
+  ENABLE_PDFTPS_TRUE=
+  ENABLE_PDFTPS_FALSE='#'
+else
+  ENABLE_PDFTPS_TRUE='#'
+  ENABLE_PDFTPS_FALSE=
+fi
+
+  # Extract the first word of "dvipdf", so it can be a program name with args.
+set dummy dvipdf; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_ENABLE_DVIPDF+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$ENABLE_DVIPDF"; then
+  ac_cv_prog_ENABLE_DVIPDF="$ENABLE_DVIPDF" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_ENABLE_DVIPDF="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+ENABLE_DVIPDF=$ac_cv_prog_ENABLE_DVIPDF
+if test -n "$ENABLE_DVIPDF"; then
+  { echo "$as_me:$LINENO: result: $ENABLE_DVIPDF" >&5
+echo "${ECHO_T}$ENABLE_DVIPDF" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+
+
+if test "${ENABLE_DVIPDF+set}" = set; then
+  ENABLE_DVIPDF_TRUE=
+  ENABLE_DVIPDF_FALSE='#'
+else
+  ENABLE_DVIPDF_TRUE='#'
+  ENABLE_DVIPDF_FALSE=
+fi
+
+  # Extract the first word of "xdvi", so it can be a program name with args.
+set dummy xdvi; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_ENABLE_XDVI+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$ENABLE_XDVI"; then
+  ac_cv_prog_ENABLE_XDVI="$ENABLE_XDVI" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_ENABLE_XDVI="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+ENABLE_XDVI=$ac_cv_prog_ENABLE_XDVI
+if test -n "$ENABLE_XDVI"; then
+  { echo "$as_me:$LINENO: result: $ENABLE_XDVI" >&5
+echo "${ECHO_T}$ENABLE_XDVI" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+
+
+if test "${ENABLE_XDVI+set}" = set; then
+  ENABLE_XDVI_TRUE=
+  ENABLE_XDVI_FALSE='#'
+else
+  ENABLE_XDVI_TRUE='#'
+  ENABLE_XDVI_FALSE=
+fi
+
+  # Extract the first word of "gs", so it can be a program name with args.
+set dummy gs; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_ENABLE_GS+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$ENABLE_GS"; then
+  ac_cv_prog_ENABLE_GS="$ENABLE_GS" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_ENABLE_GS="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+ENABLE_GS=$ac_cv_prog_ENABLE_GS
+if test -n "$ENABLE_GS"; then
+  { echo "$as_me:$LINENO: result: $ENABLE_GS" >&5
+echo "${ECHO_T}$ENABLE_GS" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+
+
+if test "${ENABLE_GS+set}" = set; then
+  ENABLE_GS_TRUE=
+  ENABLE_GS_FALSE='#'
+else
+  ENABLE_GS_TRUE='#'
+  ENABLE_GS_FALSE=
+fi
+
+  # Extract the first word of "pdflatex", so it can be a program name with args.
+set dummy pdflatex; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_ENABLE_PDFLATEX+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$ENABLE_PDFLATEX"; then
+  ac_cv_prog_ENABLE_PDFLATEX="$ENABLE_PDFLATEX" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_ENABLE_PDFLATEX="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+ENABLE_PDFLATEX=$ac_cv_prog_ENABLE_PDFLATEX
+if test -n "$ENABLE_PDFLATEX"; then
+  { echo "$as_me:$LINENO: result: $ENABLE_PDFLATEX" >&5
+echo "${ECHO_T}$ENABLE_PDFLATEX" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+
+
+if test "${ENABLE_PDFLATEX+set}" = set; then
+  ENABLE_PDFLATEX_TRUE=
+  ENABLE_PDFLATEX_FALSE='#'
+else
+  ENABLE_PDFLATEX_TRUE='#'
+  ENABLE_PDFLATEX_FALSE=
+fi
+
+  # Extract the first word of "latex", so it can be a program name with args.
+set dummy latex; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_ENABLE_LATEX+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$ENABLE_LATEX"; then
+  ac_cv_prog_ENABLE_LATEX="$ENABLE_LATEX" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_ENABLE_LATEX="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+ENABLE_LATEX=$ac_cv_prog_ENABLE_LATEX
+if test -n "$ENABLE_LATEX"; then
+  { echo "$as_me:$LINENO: result: $ENABLE_LATEX" >&5
+echo "${ECHO_T}$ENABLE_LATEX" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+
+
+if test "${ENABLE_LATEX+set}" = set; then
+  ENABLE_LATEX_TRUE=
+  ENABLE_LATEX_FALSE='#'
+else
+  ENABLE_LATEX_TRUE='#'
+  ENABLE_LATEX_FALSE=
+fi
+
 
 
   cf_ac_cv_arg_val="GUIPDF"
@@ -8858,7 +9458,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 8861 "configure"' > conftest.$ac_ext
+  echo '#line 9461 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -11654,11 +12254,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11657: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12257: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:11661: \$? = $ac_status" >&5
+   echo "$as_me:12261: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -11916,11 +12516,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11919: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12519: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:11923: \$? = $ac_status" >&5
+   echo "$as_me:12523: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -11978,11 +12578,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11981: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12581: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:11985: \$? = $ac_status" >&5
+   echo "$as_me:12585: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13437,7 +14037,7 @@ linux*)
   libsuff=
   case "$host_cpu" in
   x86_64*)
-    echo '#line 13440 "configure"' > conftest.$ac_ext
+    echo '#line 14040 "configure"' > conftest.$ac_ext
     if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -14380,7 +14980,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 14383 "configure"
+#line 14983 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14478,7 +15078,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 14481 "configure"
+#line 15081 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16758,11 +17358,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16761: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17361: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16765: \$? = $ac_status" >&5
+   echo "$as_me:17365: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16820,11 +17420,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16823: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17423: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16827: \$? = $ac_status" >&5
+   echo "$as_me:17427: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17380,7 +17980,7 @@ linux*)
   libsuff=
   case "$host_cpu" in
   x86_64*)
-    echo '#line 17383 "configure"' > conftest.$ac_ext
+    echo '#line 17983 "configure"' > conftest.$ac_ext
     if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -18323,7 +18923,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 18326 "configure"
+#line 18926 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -18421,7 +19021,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 18424 "configure"
+#line 19024 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -19306,11 +19906,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19309: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19909: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:19313: \$? = $ac_status" >&5
+   echo "$as_me:19913: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -19368,11 +19968,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19371: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19971: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:19375: \$? = $ac_status" >&5
+   echo "$as_me:19975: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -20807,7 +21407,7 @@ linux*)
   libsuff=
   case "$host_cpu" in
   x86_64*)
-    echo '#line 20810 "configure"' > conftest.$ac_ext
+    echo '#line 21410 "configure"' > conftest.$ac_ext
     if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -21576,11 +22176,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:21579: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:22179: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:21583: \$? = $ac_status" >&5
+   echo "$as_me:22183: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -21838,11 +22438,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:21841: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:22441: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:21845: \$? = $ac_status" >&5
+   echo "$as_me:22445: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -21900,11 +22500,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:21903: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:22503: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:21907: \$? = $ac_status" >&5
+   echo "$as_me:22507: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -23359,7 +23959,7 @@ linux*)
   libsuff=
   case "$host_cpu" in
   x86_64*)
-    echo '#line 23362 "configure"' > conftest.$ac_ext
+    echo '#line 23962 "configure"' > conftest.$ac_ext
     if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -24302,7 +24902,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 24305 "configure"
+#line 24905 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -24400,7 +25000,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 24403 "configure"
+#line 25003 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -34439,11 +35039,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:34442: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35042: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:34446: \$? = $ac_status" >&5
+    echo "$as_me:35046: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -34492,11 +35092,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:34495: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35095: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:34499: \$? = $ac_status" >&5
+    echo "$as_me:35099: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -34727,11 +35327,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:34730: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35330: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:34734: \$? = $ac_status" >&5
+    echo "$as_me:35334: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -34778,11 +35378,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:34781: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35381: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:34785: \$? = $ac_status" >&5
+    echo "$as_me:35385: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -34830,11 +35430,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:34833: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35433: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:34837: \$? = $ac_status" >&5
+    echo "$as_me:35437: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -34881,11 +35481,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:34884: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35484: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:34888: \$? = $ac_status" >&5
+    echo "$as_me:35488: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -34932,11 +35532,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:34935: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35535: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:34939: \$? = $ac_status" >&5
+    echo "$as_me:35539: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -34983,11 +35583,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:34986: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35586: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:34990: \$? = $ac_status" >&5
+    echo "$as_me:35590: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -35034,11 +35634,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:35037: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35637: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:35041: \$? = $ac_status" >&5
+    echo "$as_me:35641: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -35085,11 +35685,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:35088: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35688: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:35092: \$? = $ac_status" >&5
+    echo "$as_me:35692: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -35136,11 +35736,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:35139: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35739: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:35143: \$? = $ac_status" >&5
+    echo "$as_me:35743: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -35187,11 +35787,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:35190: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35790: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:35194: \$? = $ac_status" >&5
+    echo "$as_me:35794: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -35862,6 +36462,90 @@ if test -z "${ENABLE_ENV_TRUE}" && test -z "${ENABLE_ENV_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"ENABLE_ENV\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 echo "$as_me: error: conditional \"ENABLE_ENV\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${ENABLE_PERL_TRUE}" && test -z "${ENABLE_PERL_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"ENABLE_PERL\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"ENABLE_PERL\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${ENABLE_TAIL_TRUE}" && test -z "${ENABLE_TAIL_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"ENABLE_TAIL\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"ENABLE_TAIL\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${ENABLE_XTERM_TRUE}" && test -z "${ENABLE_XTERM_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"ENABLE_XTERM\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"ENABLE_XTERM\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${ENABLE_LP_TRUE}" && test -z "${ENABLE_LP_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"ENABLE_LP\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"ENABLE_LP\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${ENABLE_ATPS_TRUE}" && test -z "${ENABLE_ATPS_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"ENABLE_ATPS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"ENABLE_ATPS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${ENABLE_PSTPDF_TRUE}" && test -z "${ENABLE_PSTPDF_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"ENABLE_PSTPDF\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"ENABLE_PSTPDF\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${ENABLE_PDFTPS_TRUE}" && test -z "${ENABLE_PDFTPS_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"ENABLE_PDFTPS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"ENABLE_PDFTPS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${ENABLE_DVIPDF_TRUE}" && test -z "${ENABLE_DVIPDF_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"ENABLE_DVIPDF\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"ENABLE_DVIPDF\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${ENABLE_XDVI_TRUE}" && test -z "${ENABLE_XDVI_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"ENABLE_XDVI\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"ENABLE_XDVI\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${ENABLE_GS_TRUE}" && test -z "${ENABLE_GS_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"ENABLE_GS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"ENABLE_GS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${ENABLE_PDFLATEX_TRUE}" && test -z "${ENABLE_PDFLATEX_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"ENABLE_PDFLATEX\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"ENABLE_PDFLATEX\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${ENABLE_LATEX_TRUE}" && test -z "${ENABLE_LATEX_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"ENABLE_LATEX\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"ENABLE_LATEX\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -36673,42 +37357,42 @@ ENABLE_BASH_FALSE!$ENABLE_BASH_FALSE$ac_delim
 ENABLE_ENV!$ENABLE_ENV$ac_delim
 ENABLE_ENV_TRUE!$ENABLE_ENV_TRUE$ac_delim
 ENABLE_ENV_FALSE!$ENABLE_ENV_FALSE$ac_delim
-GUIPDF!$GUIPDF$ac_delim
-ENABLE_EMACS_TRUE!$ENABLE_EMACS_TRUE$ac_delim
-ENABLE_EMACS_FALSE!$ENABLE_EMACS_FALSE$ac_delim
-CPP!$CPP$ac_delim
-GREP!$GREP$ac_delim
-EGREP!$EGREP$ac_delim
-LN_S!$LN_S$ac_delim
-NO_PTHREAD_CFLAGS!$NO_PTHREAD_CFLAGS$ac_delim
-NO_PTHREAD_CC!$NO_PTHREAD_CC$ac_delim
-NO_PTHREAD_LIBS!$NO_PTHREAD_LIBS$ac_delim
-acx_pthread_config!$acx_pthread_config$ac_delim
-PTHREAD_CC!$PTHREAD_CC$ac_delim
-PTHREAD_LIBS!$PTHREAD_LIBS$ac_delim
-PTHREAD_CFLAGS!$PTHREAD_CFLAGS$ac_delim
-ECHO!$ECHO$ac_delim
-AR!$AR$ac_delim
-RANLIB!$RANLIB$ac_delim
-DLLTOOL!$DLLTOOL$ac_delim
-AS!$AS$ac_delim
-OBJDUMP!$OBJDUMP$ac_delim
-CXX!$CXX$ac_delim
-CXXFLAGS!$CXXFLAGS$ac_delim
-ac_ct_CXX!$ac_ct_CXX$ac_delim
-CXXDEPMODE!$CXXDEPMODE$ac_delim
-am__fastdepCXX_TRUE!$am__fastdepCXX_TRUE$ac_delim
-am__fastdepCXX_FALSE!$am__fastdepCXX_FALSE$ac_delim
-CXXCPP!$CXXCPP$ac_delim
-F77!$F77$ac_delim
-FFLAGS!$FFLAGS$ac_delim
-ac_ct_F77!$ac_ct_F77$ac_delim
-LIBTOOL!$LIBTOOL$ac_delim
-LIBTOOL_DEP!$LIBTOOL_DEP$ac_delim
-XMKMF!$XMKMF$ac_delim
-X_CFLAGS!$X_CFLAGS$ac_delim
-X_PRE_LIBS!$X_PRE_LIBS$ac_delim
-X_LIBS!$X_LIBS$ac_delim
+ENABLE_PERL!$ENABLE_PERL$ac_delim
+ENABLE_PERL_TRUE!$ENABLE_PERL_TRUE$ac_delim
+ENABLE_PERL_FALSE!$ENABLE_PERL_FALSE$ac_delim
+ENABLE_TAIL!$ENABLE_TAIL$ac_delim
+ENABLE_TAIL_TRUE!$ENABLE_TAIL_TRUE$ac_delim
+ENABLE_TAIL_FALSE!$ENABLE_TAIL_FALSE$ac_delim
+ENABLE_XTERM!$ENABLE_XTERM$ac_delim
+ENABLE_XTERM_TRUE!$ENABLE_XTERM_TRUE$ac_delim
+ENABLE_XTERM_FALSE!$ENABLE_XTERM_FALSE$ac_delim
+ENABLE_LP!$ENABLE_LP$ac_delim
+ENABLE_LP_TRUE!$ENABLE_LP_TRUE$ac_delim
+ENABLE_LP_FALSE!$ENABLE_LP_FALSE$ac_delim
+ENABLE_ATPS!$ENABLE_ATPS$ac_delim
+ENABLE_ATPS_TRUE!$ENABLE_ATPS_TRUE$ac_delim
+ENABLE_ATPS_FALSE!$ENABLE_ATPS_FALSE$ac_delim
+ENABLE_PSTPDF!$ENABLE_PSTPDF$ac_delim
+ENABLE_PSTPDF_TRUE!$ENABLE_PSTPDF_TRUE$ac_delim
+ENABLE_PSTPDF_FALSE!$ENABLE_PSTPDF_FALSE$ac_delim
+ENABLE_PDFTPS!$ENABLE_PDFTPS$ac_delim
+ENABLE_PDFTPS_TRUE!$ENABLE_PDFTPS_TRUE$ac_delim
+ENABLE_PDFTPS_FALSE!$ENABLE_PDFTPS_FALSE$ac_delim
+ENABLE_DVIPDF!$ENABLE_DVIPDF$ac_delim
+ENABLE_DVIPDF_TRUE!$ENABLE_DVIPDF_TRUE$ac_delim
+ENABLE_DVIPDF_FALSE!$ENABLE_DVIPDF_FALSE$ac_delim
+ENABLE_XDVI!$ENABLE_XDVI$ac_delim
+ENABLE_XDVI_TRUE!$ENABLE_XDVI_TRUE$ac_delim
+ENABLE_XDVI_FALSE!$ENABLE_XDVI_FALSE$ac_delim
+ENABLE_GS!$ENABLE_GS$ac_delim
+ENABLE_GS_TRUE!$ENABLE_GS_TRUE$ac_delim
+ENABLE_GS_FALSE!$ENABLE_GS_FALSE$ac_delim
+ENABLE_PDFLATEX!$ENABLE_PDFLATEX$ac_delim
+ENABLE_PDFLATEX_TRUE!$ENABLE_PDFLATEX_TRUE$ac_delim
+ENABLE_PDFLATEX_FALSE!$ENABLE_PDFLATEX_FALSE$ac_delim
+ENABLE_LATEX!$ENABLE_LATEX$ac_delim
+ENABLE_LATEX_TRUE!$ENABLE_LATEX_TRUE$ac_delim
+ENABLE_LATEX_FALSE!$ENABLE_LATEX_FALSE$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -36750,6 +37434,42 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+GUIPDF!$GUIPDF$ac_delim
+ENABLE_EMACS_TRUE!$ENABLE_EMACS_TRUE$ac_delim
+ENABLE_EMACS_FALSE!$ENABLE_EMACS_FALSE$ac_delim
+CPP!$CPP$ac_delim
+GREP!$GREP$ac_delim
+EGREP!$EGREP$ac_delim
+LN_S!$LN_S$ac_delim
+NO_PTHREAD_CFLAGS!$NO_PTHREAD_CFLAGS$ac_delim
+NO_PTHREAD_CC!$NO_PTHREAD_CC$ac_delim
+NO_PTHREAD_LIBS!$NO_PTHREAD_LIBS$ac_delim
+acx_pthread_config!$acx_pthread_config$ac_delim
+PTHREAD_CC!$PTHREAD_CC$ac_delim
+PTHREAD_LIBS!$PTHREAD_LIBS$ac_delim
+PTHREAD_CFLAGS!$PTHREAD_CFLAGS$ac_delim
+ECHO!$ECHO$ac_delim
+AR!$AR$ac_delim
+RANLIB!$RANLIB$ac_delim
+DLLTOOL!$DLLTOOL$ac_delim
+AS!$AS$ac_delim
+OBJDUMP!$OBJDUMP$ac_delim
+CXX!$CXX$ac_delim
+CXXFLAGS!$CXXFLAGS$ac_delim
+ac_ct_CXX!$ac_ct_CXX$ac_delim
+CXXDEPMODE!$CXXDEPMODE$ac_delim
+am__fastdepCXX_TRUE!$am__fastdepCXX_TRUE$ac_delim
+am__fastdepCXX_FALSE!$am__fastdepCXX_FALSE$ac_delim
+CXXCPP!$CXXCPP$ac_delim
+F77!$F77$ac_delim
+FFLAGS!$FFLAGS$ac_delim
+ac_ct_F77!$ac_ct_F77$ac_delim
+LIBTOOL!$LIBTOOL$ac_delim
+LIBTOOL_DEP!$LIBTOOL_DEP$ac_delim
+XMKMF!$XMKMF$ac_delim
+X_CFLAGS!$X_CFLAGS$ac_delim
+X_PRE_LIBS!$X_PRE_LIBS$ac_delim
+X_LIBS!$X_LIBS$ac_delim
 X_EXTRA_LIBS!$X_EXTRA_LIBS$ac_delim
 X_DISPLAY_MISSING_TRUE!$X_DISPLAY_MISSING_TRUE$ac_delim
 X_DISPLAY_MISSING_FALSE!$X_DISPLAY_MISSING_FALSE$ac_delim
@@ -36770,7 +37490,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 18; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 54; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

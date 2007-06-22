@@ -34,6 +34,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
+@ENABLE_BASH_TRUE@am__append_1 = dnode.sh
+@ENABLE_PERL_TRUE@am__append_2 = print.pl
 subdir = sh
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -92,6 +94,9 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EMACS = @EMACS@
 EMACSLOADPATH = @EMACSLOADPATH@
+ENABLE_ATPS = @ENABLE_ATPS@
+ENABLE_ATPS_FALSE = @ENABLE_ATPS_FALSE@
+ENABLE_ATPS_TRUE = @ENABLE_ATPS_TRUE@
 ENABLE_BASH = @ENABLE_BASH@
 ENABLE_BASH_FALSE = @ENABLE_BASH_FALSE@
 ENABLE_BASH_TRUE = @ENABLE_BASH_TRUE@
@@ -100,27 +105,60 @@ ENABLE_DEBUG_DMNUM_FALSE = @ENABLE_DEBUG_DMNUM_FALSE@
 ENABLE_DEBUG_DMNUM_TRUE = @ENABLE_DEBUG_DMNUM_TRUE@
 ENABLE_DMFLEX_FALSE = @ENABLE_DMFLEX_FALSE@
 ENABLE_DMFLEX_TRUE = @ENABLE_DMFLEX_TRUE@
+ENABLE_DVIPDF = @ENABLE_DVIPDF@
+ENABLE_DVIPDF_FALSE = @ENABLE_DVIPDF_FALSE@
+ENABLE_DVIPDF_TRUE = @ENABLE_DVIPDF_TRUE@
 ENABLE_EMACS_FALSE = @ENABLE_EMACS_FALSE@
 ENABLE_EMACS_TRUE = @ENABLE_EMACS_TRUE@
 ENABLE_ENV = @ENABLE_ENV@
 ENABLE_ENV_FALSE = @ENABLE_ENV_FALSE@
 ENABLE_ENV_TRUE = @ENABLE_ENV_TRUE@
+ENABLE_GS = @ENABLE_GS@
+ENABLE_GS_FALSE = @ENABLE_GS_FALSE@
+ENABLE_GS_TRUE = @ENABLE_GS_TRUE@
+ENABLE_LATEX = @ENABLE_LATEX@
+ENABLE_LATEX_FALSE = @ENABLE_LATEX_FALSE@
+ENABLE_LATEX_TRUE = @ENABLE_LATEX_TRUE@
+ENABLE_LP = @ENABLE_LP@
+ENABLE_LP_FALSE = @ENABLE_LP_FALSE@
+ENABLE_LP_TRUE = @ENABLE_LP_TRUE@
+ENABLE_PDFLATEX = @ENABLE_PDFLATEX@
+ENABLE_PDFLATEX_FALSE = @ENABLE_PDFLATEX_FALSE@
+ENABLE_PDFLATEX_TRUE = @ENABLE_PDFLATEX_TRUE@
+ENABLE_PDFTPS = @ENABLE_PDFTPS@
+ENABLE_PDFTPS_FALSE = @ENABLE_PDFTPS_FALSE@
+ENABLE_PDFTPS_TRUE = @ENABLE_PDFTPS_TRUE@
+ENABLE_PERL = @ENABLE_PERL@
+ENABLE_PERL_FALSE = @ENABLE_PERL_FALSE@
+ENABLE_PERL_TRUE = @ENABLE_PERL_TRUE@
 ENABLE_PLUGINS = @ENABLE_PLUGINS@
 ENABLE_PLUGINS_FALSE = @ENABLE_PLUGINS_FALSE@
 ENABLE_PLUGINS_TRUE = @ENABLE_PLUGINS_TRUE@
 ENABLE_PROCESS_FALSE = @ENABLE_PROCESS_FALSE@
 ENABLE_PROCESS_TRUE = @ENABLE_PROCESS_TRUE@
+ENABLE_PSTPDF = @ENABLE_PSTPDF@
+ENABLE_PSTPDF_FALSE = @ENABLE_PSTPDF_FALSE@
+ENABLE_PSTPDF_TRUE = @ENABLE_PSTPDF_TRUE@
 ENABLE_SETUID_FALSE = @ENABLE_SETUID_FALSE@
 ENABLE_SETUID_TRUE = @ENABLE_SETUID_TRUE@
+ENABLE_TAIL = @ENABLE_TAIL@
+ENABLE_TAIL_FALSE = @ENABLE_TAIL_FALSE@
+ENABLE_TAIL_TRUE = @ENABLE_TAIL_TRUE@
 ENABLE_THREADS = @ENABLE_THREADS@
 ENABLE_THREADS_FALSE = @ENABLE_THREADS_FALSE@
 ENABLE_THREADS_TRUE = @ENABLE_THREADS_TRUE@
 ENABLE_UNIX_SOCKETS = @ENABLE_UNIX_SOCKETS@
 ENABLE_UNIX_SOCKETS_FALSE = @ENABLE_UNIX_SOCKETS_FALSE@
 ENABLE_UNIX_SOCKETS_TRUE = @ENABLE_UNIX_SOCKETS_TRUE@
+ENABLE_XDVI = @ENABLE_XDVI@
+ENABLE_XDVI_FALSE = @ENABLE_XDVI_FALSE@
+ENABLE_XDVI_TRUE = @ENABLE_XDVI_TRUE@
 ENABLE_XPS = @ENABLE_XPS@
 ENABLE_XPS_FALSE = @ENABLE_XPS_FALSE@
 ENABLE_XPS_TRUE = @ENABLE_XPS_TRUE@
+ENABLE_XTERM = @ENABLE_XTERM@
+ENABLE_XTERM_FALSE = @ENABLE_XTERM_FALSE@
+ENABLE_XTERM_TRUE = @ENABLE_XTERM_TRUE@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
@@ -265,14 +303,33 @@ target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
 tmp = @tmp@
-nodist_dmstart_SCRIPTS = dnode.sh print_.sh print.sh
-EXTRA_DIST = dnode.sh.in print_.sh.in print.sh.in
+nodist_dmstart_SCRIPTS = runtool.sh $(am__append_1) $(am__append_2)
+EXTRA_DIST = dnode.sh.in print.pl.in runtool.sh.in
 CLEANFILES = $(nodist_dmstart_SCRIPTS)
+XTERM_START = /^[[:space:]]*[@]ENABLE_XTERM_START[@][[:space:]]*$$/
+XTERM_END = /^[[:space:]]*[@]ENABLE_XTERM_END[@][[:space:]]*$$/
+@ENABLE_TAIL_FALSE@XTERM_DELETE = -e '$(XTERM_START),$(XTERM_END) d'
+@ENABLE_TAIL_TRUE@@ENABLE_XTERM_FALSE@XTERM_DELETE = -e '$(XTERM_START),$(XTERM_END) d'
+@ENABLE_TAIL_TRUE@@ENABLE_XTERM_TRUE@XTERM_DELETE = -e '$(XTERM_START) d' -e '$(XTERM_END) d'
 edit = sed \
 	-e 's,[@]pkgpsdatadir[@],$(pkgpsdatadir),g' \
 	-e 's,[@]bindir[@],$(bindir),g' \
 	-e 's,[@]guipdf[@],$(guipdf),g' \
-	-e 's,[@]dmstartdir[@],$(dmstartdir),g'
+	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \
+	-e 's,[@]ENABLE_BASH[@],$(ENABLE_BASH),g' \
+	-e 's,[@]ENABLE_PERL[@],$(ENABLE_PERL),g' \
+	-e 's,[@]ENABLE_XTERM[@],$(ENABLE_XTERM),g' \
+	-e 's,[@]ENABLE_TAIL[@],$(ENABLE_TAIL),g' \
+	-e 's,[@]ENABLE_ATPS[@],$(ENABLE_ATPS),g' \
+	-e 's,[@]ENABLE_LP[@],$(ENABLE_LP),g' \
+	-e 's,[@]ENABLE_PSTPDF[@],$(ENABLE_PSTPDF),g' \
+	-e 's,[@]ENABLE_PDFTPS[@],$(ENABLE_PDFTPS),g' \
+	-e 's,[@]ENABLE_DVIPDF[@],$(ENABLE_DVIPDF),g' \
+	-e 's,[@]ENABLE_XDVI[@],$(ENABLE_XDVI),g' \
+	-e 's,[@]ENABLE_GS[@],$(ENABLE_GS),g' \
+	-e 's,[@]ENABLE_PDFLATEX[@],$(ENABLE_PDFLATEX),g' \
+	-e 's,[@]ENABLE_LATEX[@],$(ENABLE_LATEX),g' \
+	$(XTERM_DELETE)
 
 all: all-am
 
@@ -462,19 +519,19 @@ uninstall-am: uninstall-info-am uninstall-nodist_dmstartSCRIPTS
 clean-local:
 	-rm -f $(dmstart_SCRIPTS)
 
-dnode.sh: Makefile $(srcdir)/dnode.sh.in
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/dnode.sh.in >$@.tmp
-	mv $@.tmp $@
+@ENABLE_BASH_TRUE@dnode.sh: Makefile $(srcdir)/dnode.sh.in
+@ENABLE_BASH_TRUE@	rm -f $@ $@.tmp
+@ENABLE_BASH_TRUE@	$(edit) $(srcdir)/dnode.sh.in >$@.tmp
+@ENABLE_BASH_TRUE@	mv $@.tmp $@
 
-print_.sh: Makefile $(srcdir)/print_.sh.in
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/print_.sh.in >$@.tmp
-	mv $@.tmp $@
+@ENABLE_PERL_TRUE@print.pl: Makefile $(srcdir)/print.pl.in
+@ENABLE_PERL_TRUE@	rm -f $@ $@.tmp
+@ENABLE_PERL_TRUE@	$(edit) $(srcdir)/print.pl.in >$@.tmp
+@ENABLE_PERL_TRUE@	mv $@.tmp $@
 
-print.sh: Makefile $(srcdir)/print.sh.in
+runtool.sh: Makefile $(srcdir)/runtool.sh.in
 	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/print.sh.in >$@.tmp
+	$(edit) $(srcdir)/runtool.sh.in >$@.tmp
 	mv $@.tmp $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

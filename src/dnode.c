@@ -401,8 +401,20 @@ if (moreX) {
               break;
           if ((Atom)event.xclient.data.l[0] 
               == XInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False)) {
-              if (x2 > CEILexecs) {retc = EXECS_OVF; goto Xderror;}
-              makename("Xdisconnect", x1); ATTR(x1) = ACTIVE;
+							wid = event.xclient.window;
+							snprintf(namestring, sizeof(namestring), "w%d", wid);
+              makename(namestring, namef); ATTR(namef) = ACTIVE;
+              userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
+              if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
+              if (x1 >= CEILexecs) return EXECS_OVF;
+              if (o1 >= CEILopds) return OPDS_OVF;
+              if (FREEdicts >= CEILdicts) return DICTS_OVF;
+              moveframe(dictf, FREEdicts); FREEdicts += FRAMEBYTES;
+							if (x2 > CEILexecs) {retc = EXECS_OVF; goto Xderror;}
+              makename("delete_window", o1); ATTR(o1) = ACTIVE;
+              FREEopds = o2;
+              TAG(x1) = OP; ATTR(x1) = ACTIVE;
+              OP_NAME(x1) = (L) "lock"; OP_CODE(x1) = (L) op_lock;
               FREEexecs = x2;
               running = TRUE;
               goto tuwat;

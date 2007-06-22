@@ -1440,7 +1440,7 @@ Xwindows {
   /bold        {/nodebold   {( Sb) BOLDTEXT   ~drawtext} bind def} bind def
   /italic      {/nodeitalic {( Si) ITALICTEXT ~drawtext} bind def} bind def
   /faint       {/nodefaint  {( Sf) FAINTTEXT  ~drawtext} bind def} bind def
-  /underlined  {/nodeul     {( S_) UNDERTEXT  ~drawtext} bind def} bind def
+  /underlined  {/nodeul     {( S-) UNDERTEXT  ~drawtext} bind def} bind def
   /slow_blink  {/nodeblink  {( Ss) SLOWTEXT   ~drawtext} bind def} bind def
   /rapid_blink {/nodeblink  {( Sr) RAPIDTEXT  ~drawtext} bind def} bind def
   /negative    {/nodeneg    {( Sn) NEGTEXT    ~drawtext} bind def} bind def

@@ -633,6 +633,8 @@ Xwindows_ {
     } stopped cleartomark
     end
   } bind def
+
+  /delete_window {end} bind def | default delete action is nothing.
 } if
 
 (Using startup_dnode.d $Id$ V@PACKAGE_VERSION@\n) toconsole
