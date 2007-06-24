@@ -102,6 +102,7 @@ CF_AM_PROG([ENABLE_XDVI], [xdvi])
 CF_AM_PROG([ENABLE_GS], [gs])
 CF_AM_PROG([ENABLE_PDFLATEX], [pdflatex])
 CF_AM_PROG([ENABLE_LATEX], [latex])
+CF_AM_PROG([ENABLE_EMACSCLIENT], [emacsclient])
 
 CF_AC_ARG_VAR_QUOTE([guipdf],
  [name of program to display pdf's, eg gnome-open or launch -i com.apple.Preview],
@@ -239,7 +240,7 @@ AC_CONFIG_FILES([
 		 ps/Makefile 
 		 sh/Makefile
 		 emacs/Makefile emacs/d-mode.el
-		 dcode/Makefile dcode/startup_dvt.d dcode/startup_dnode.d 
+		 dcode/Makefile dcode/startup_dnode.d 
 		 dcode/startup_dgen.d 
 		 src/codegen/startup_dgen.d:dcode/startup_dgen.d.in
 		 plugins/startup_dgen.d:dcode/startup_dgen.d.in

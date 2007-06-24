@@ -4,7 +4,7 @@ nodist_dmstart_DATA =  theeye.d startup_dnode.d \
 dist_dmconf_DATA = dvt.d
 nodist_dmconf_DATA = dnode.d
 
-EXTRA_DIST = theeye.d.in dnode.d.in dvt_macros.d.in
+EXTRA_DIST = theeye.d.in dnode.d.in dvt_macros.d.in startup_dvt.d.in
 CLEANFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
 
 XPS_START = /^[[:space:]]*[@]ENABLE_XPS_START[@][[:space:]]*$$/
@@ -43,12 +43,27 @@ else !ENABLE_THREADS
 THREADS_EDIT = -e '$(THREADS_START),$(THREADS_END) d'
 endif !ENABLE_THREADS
 
+EMACSCLIENT_START = /^[[:space:]]*[@]ENABLE_EMACSCLIENT_START[@][[:space:]]*$$/
+EMACSCLIENT_END = /^[[:space:]]*[@]ENABLE_EMACSCLIENT_END[@][[:space:]]*$$/
+
+if ENABLE_EMACS
+if ENABLE_EMACSCLIENT
+EMACSCLIENT_EDIT =  -e '$(EMACSCLIENT_START) d' \
+					-e '$(EMACSCLIENT_END) d'
+else !ENABLE_EMACSCLIENT
+EMACSCLIENT_EDIT =  -e '$(EMACSCLIENT_START),$(EMACSCLIENT_END) d'
+endif !ENABLE_EMACSCLIENT
+else !ENABLE_EMACS
+EMACSCLIENT_EDIT =  -e '$(EMACSCLIENT_START),$(EMACSCLIENT_END) d'
+endif !ENABLE_EMACS
+
 edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
 			$(PLUGIN_DELETE) \
 			$(THREADS_EDIT) \
 			$(XPS_DELETE) \
-			$(PERL_DELETE)
+			$(PERL_DELETE) \
+			$(EMACSCLIENT_EDIT)
 
 theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in
 	rm -f $@ $@.tmp
@@ -63,4 +78,9 @@ dnode.d: $(srcdir)/Makefile $(srcdir)/dnode.d.in
 dvt_macros.d: $(srcdir)/Makefile $(srcdir)/dvt_macros.d.in 
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/dvt_macros.d.in >$@.tmp
+	mv $@.tmp $@
+
+startup_dvt.d: $(srcdir)/Makefile $(srcdir)/startup_dvt.d.in 
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/startup_dvt.d.in >$@.tmp
 	mv $@.tmp $@

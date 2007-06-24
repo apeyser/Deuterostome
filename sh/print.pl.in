@@ -6,6 +6,7 @@ use File::Temp qw(tempfile tempdir);
 use IO::Handle;
 use File::Basename;
 use POSIX qw(:sys_wait_h setsid);
+use File::Spec;
 
 END {
 	close(STDOUT);
@@ -263,7 +264,9 @@ $funcs = {
 @ENABLE_XTERM_START@
 # if DISPLAY, run output through xterm.
 if (exists $ENV{DISPLAY}) {
-	my ($out, $outfile) = tempfile('print-XXXXXX', UNLINK => 1);
+	my ($out, $outfile) = tempfile('print-XXXXXX', 
+								   DIR => File::Spec->tmpdir(), 
+								   UNLINK => 1);
 	$out->autoflush(1);
 	
 	my $pid = $$;

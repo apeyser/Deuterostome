@@ -36,6 +36,7 @@ host_triplet = @host@
 target_triplet = @target@
 @ENABLE_BASH_TRUE@am__append_1 = dnode.sh
 @ENABLE_PERL_TRUE@am__append_2 = print.pl
+@ENABLE_EMACSCLIENT_TRUE@@ENABLE_EMACS_TRUE@am__append_3 = emacsclient-run.sh
 subdir = sh
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -108,6 +109,9 @@ ENABLE_DMFLEX_TRUE = @ENABLE_DMFLEX_TRUE@
 ENABLE_DVIPDF = @ENABLE_DVIPDF@
 ENABLE_DVIPDF_FALSE = @ENABLE_DVIPDF_FALSE@
 ENABLE_DVIPDF_TRUE = @ENABLE_DVIPDF_TRUE@
+ENABLE_EMACSCLIENT = @ENABLE_EMACSCLIENT@
+ENABLE_EMACSCLIENT_FALSE = @ENABLE_EMACSCLIENT_FALSE@
+ENABLE_EMACSCLIENT_TRUE = @ENABLE_EMACSCLIENT_TRUE@
 ENABLE_EMACS_FALSE = @ENABLE_EMACS_FALSE@
 ENABLE_EMACS_TRUE = @ENABLE_EMACS_TRUE@
 ENABLE_ENV = @ENABLE_ENV@
@@ -303,8 +307,9 @@ target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
 tmp = @tmp@
-nodist_dmstart_SCRIPTS = runtool.sh $(am__append_1) $(am__append_2)
-EXTRA_DIST = dnode.sh.in print.pl.in runtool.sh.in
+nodist_dmstart_SCRIPTS = runtool.sh $(am__append_1) $(am__append_2) \
+	$(am__append_3)
+EXTRA_DIST = dnode.sh.in print.pl.in runtool.sh.in emacsclient-run.sh.in
 CLEANFILES = $(nodist_dmstart_SCRIPTS)
 XTERM_START = /^[[:space:]]*[@]ENABLE_XTERM_START[@][[:space:]]*$$/
 XTERM_END = /^[[:space:]]*[@]ENABLE_XTERM_END[@][[:space:]]*$$/
@@ -329,6 +334,7 @@ edit = sed \
 	-e 's,[@]ENABLE_GS[@],$(ENABLE_GS),g' \
 	-e 's,[@]ENABLE_PDFLATEX[@],$(ENABLE_PDFLATEX),g' \
 	-e 's,[@]ENABLE_LATEX[@],$(ENABLE_LATEX),g' \
+	-e 's,[@]ENABLE_EMACSCLIENT[@],$(ENABLE_EMACSCLIENT),g' \
 	$(XTERM_DELETE)
 
 all: all-am
@@ -533,6 +539,11 @@ runtool.sh: Makefile $(srcdir)/runtool.sh.in
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/runtool.sh.in >$@.tmp
 	mv $@.tmp $@
+
+@ENABLE_EMACSCLIENT_TRUE@@ENABLE_EMACS_TRUE@emacsclient-run.sh: Makefile $(srcdir)/emacsclient-run.sh.in
+@ENABLE_EMACSCLIENT_TRUE@@ENABLE_EMACS_TRUE@	rm -f $@ $@.tmp
+@ENABLE_EMACSCLIENT_TRUE@@ENABLE_EMACS_TRUE@	$(edit) $(srcdir)/emacsclient-run.sh.in >$@.tmp
+@ENABLE_EMACSCLIENT_TRUE@@ENABLE_EMACS_TRUE@	mv $@.tmp $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

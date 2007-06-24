@@ -250,25 +250,28 @@ Derived from `comint-mode' with font-lock from `d-mode'.
   (setq d-comint-mode-redirect-process nil))
 
 (defun d-comint-mode-redirect-process-open ()
-  (let ((d-comint-mode-redirect-ignore t)
-	(string1 (concat "[31m"
-	 (if d-comint-mode-redirect-mode 
-	     (concat "*** Emacs: Redirecting output from dvt terminal to file "
-		     (buffer-name) " ***")
-	   (concat "*** Emacs: Redirecting output from file " (buffer-name)
-		   " to dvt terminal ***"))
-	"[0m\n")))
-    (comint-output-filter (get-buffer-process (current-buffer)) string1))
+  (let ((log-name (if (string= (buffer-name) "*dvt*") "dvt.log" 
+					(concat (buffer-name) ".log"))))
+	(let ((d-comint-mode-redirect-ignore t)
+		  (string1 (concat "[31m" 
+			(if d-comint-mode-redirect-mode 
+				(concat "*** Emacs: Redirecting output from dvt terminal to file "
+						log-name " ***")
+			  (concat "*** Emacs: Redirecting output from file " log-name
+					  " to dvt terminal ***"))
+				  "[0m\n")))
+	  (comint-output-filter (get-buffer-process (current-buffer)) string1))
 
-  (when (and d-comint-mode-redirect-mode (not d-comint-mode-redirect-process))
-    (setq d-comint-mode-redirect-process
-	  (start-process (concat (buffer-name) "-redirect") nil
-	    "/bin/bash" "-c" (concat d-comint-mode-redirect-command 
-				     "\'" (buffer-name) "\'")))
-		(set-process-query-on-exit-flag d-comint-mode-redirect-process nil)
+	(when (and d-comint-mode-redirect-mode (not d-comint-mode-redirect-process))
+	  (setq d-comint-mode-redirect-process
+			(start-process (concat log-name "-redirect") nil
+						   "/bin/bash" "-c" 
+						   (concat d-comint-mode-redirect-command 
+								   "\'" log-name "\'")))
+	  (set-process-query-on-exit-flag d-comint-mode-redirect-process nil)
     ;;(process-kill-without-query d-comint-mode-redirect-process)
-    (add-hook 'kill-buffer-hook 'd-comint-mode-redirect-kill-process
-	      nil t))
+	  (add-hook 'kill-buffer-hook 'd-comint-mode-redirect-kill-process
+				nil t)))
 
   (process-send-string d-comint-mode-redirect-process
 					   (format-time-string

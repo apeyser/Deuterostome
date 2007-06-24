@@ -1,0 +1,12 @@
+#! @ENABLE_BASH@
+
+exec 1>/dev/null 2>&1
+
+step=0
+while [[ $step -lt 5 ]] && ! "@ENABLE_EMACSCLIENT@" -s "$1" -n --eval "$2" ; do 
+	sleep 1
+	((++step))
+done
+
+exit 0
+

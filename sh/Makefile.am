@@ -5,11 +5,14 @@ endif
 if ENABLE_PERL
 nodist_dmstart_SCRIPTS += print.pl
 endif
+if ENABLE_EMACS
+if ENABLE_EMACSCLIENT
+nodist_dmstart_SCRIPTS += emacsclient-run.sh
+endif ENABLE_EMACSCLIENT
+endif ENABLE_EMACS
 
-EXTRA_DIST = dnode.sh.in print.pl.in runtool.sh.in
+EXTRA_DIST = dnode.sh.in print.pl.in runtool.sh.in emacsclient-run.sh.in
 CLEANFILES = $(nodist_dmstart_SCRIPTS)
-
-
 
 clean-local:
 	-rm -f $(dmstart_SCRIPTS)
@@ -44,6 +47,7 @@ edit = sed \
 	-e 's,[@]ENABLE_GS[@],$(ENABLE_GS),g' \
 	-e 's,[@]ENABLE_PDFLATEX[@],$(ENABLE_PDFLATEX),g' \
 	-e 's,[@]ENABLE_LATEX[@],$(ENABLE_LATEX),g' \
+	-e 's,[@]ENABLE_EMACSCLIENT[@],$(ENABLE_EMACSCLIENT),g' \
 	$(XTERM_DELETE)
 
 if ENABLE_BASH
@@ -65,3 +69,11 @@ runtool.sh: Makefile $(srcdir)/runtool.sh.in
 	$(edit) $(srcdir)/runtool.sh.in >$@.tmp
 	mv $@.tmp $@
 
+if ENABLE_EMACS
+if ENABLE_EMACSCLIENT
+emacsclient-run.sh: Makefile $(srcdir)/emacsclient-run.sh.in
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/emacsclient-run.sh.in >$@.tmp
+	mv $@.tmp $@
+endif ENABLE_EMACSCLIENT
+endif ENABLE_EMACS

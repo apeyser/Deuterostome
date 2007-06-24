@@ -1921,17 +1921,21 @@ Xwindows {
 
 Xwindows {
   /take_input_focus {end} bind def
-  /pop_emacs {} def
-  
+  /raise_emacs {} def
+
+  /take_input_setup {pop pop} bind def
+@ENABLE_EMACSCLIENT_START@ 
   /take_input_setup {
     userdict begin
     /emacs_buffer_name name /emacs_server_name name
     
     /take_input_focus ~[
       1024 /b array 0 | {
-        (emacsclient -s ) fax
+        (exec ) fax
+        getstartupdir fax
+        (emacsclient-run.sh ) fax
         emacs_server_name fax
-        ( -n --eval "\(d-comint-mode-focus \") fax
+        ( "\(d-comint-mode-focus \") fax
         emacs_buffer_name fax
         (\"\)") fax
         0 exch getinterval | }
@@ -1941,9 +1945,11 @@ Xwindows {
 
     /raise_emacs ~[
       1024 /b array 0 | {
-        (emacsclient -s ) fax
+        (exec ) fax
+        getstartupdir fax
+        (emacsclient-run.sh ) fax
         emacs_server_name fax
-        ( -n --eval "\(d-comint-mode-focus-raise \") fax
+        ( "\(d-comint-mode-focus-raise \") fax
         emacs_buffer_name fax
         (\"\)") fax
         0 exch getinterval | }
@@ -1952,6 +1958,7 @@ Xwindows {
 
     end
   } bind def
+@ENABLE_EMACSCLIENT_END@  
 
   /raise_thehorses {TheHorsesWid true mapwindow end} bind def
   /raise_all {

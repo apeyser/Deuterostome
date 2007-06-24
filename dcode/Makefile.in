@@ -37,8 +37,7 @@ target_triplet = @target@
 subdir = dcode
 DIST_COMMON = $(dist_dmconf_DATA) $(dist_dmstart_DATA) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in $(srcdir)/plugin.d \
-	$(srcdir)/startup_dgen.d.in $(srcdir)/startup_dnode.d.in \
-	$(srcdir)/startup_dvt.d.in
+	$(srcdir)/startup_dgen.d.in $(srcdir)/startup_dnode.d.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
@@ -50,7 +49,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = startup_dvt.d startup_dnode.d startup_dgen.d
+CONFIG_CLEAN_FILES = startup_dnode.d startup_dgen.d
 SOURCES =
 DIST_SOURCES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -120,6 +119,9 @@ ENABLE_DMFLEX_TRUE = @ENABLE_DMFLEX_TRUE@
 ENABLE_DVIPDF = @ENABLE_DVIPDF@
 ENABLE_DVIPDF_FALSE = @ENABLE_DVIPDF_FALSE@
 ENABLE_DVIPDF_TRUE = @ENABLE_DVIPDF_TRUE@
+ENABLE_EMACSCLIENT = @ENABLE_EMACSCLIENT@
+ENABLE_EMACSCLIENT_FALSE = @ENABLE_EMACSCLIENT_FALSE@
+ENABLE_EMACSCLIENT_TRUE = @ENABLE_EMACSCLIENT_TRUE@
 ENABLE_EMACS_FALSE = @ENABLE_EMACS_FALSE@
 ENABLE_EMACS_TRUE = @ENABLE_EMACS_TRUE@
 ENABLE_ENV = @ENABLE_ENV@
@@ -321,7 +323,7 @@ nodist_dmstart_DATA = theeye.d startup_dnode.d \
 
 dist_dmconf_DATA = dvt.d
 nodist_dmconf_DATA = dnode.d
-EXTRA_DIST = theeye.d.in dnode.d.in dvt_macros.d.in
+EXTRA_DIST = theeye.d.in dnode.d.in dvt_macros.d.in startup_dvt.d.in
 CLEANFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
 XPS_START = /^[[:space:]]*[@]ENABLE_XPS_START[@][[:space:]]*$$/
 XPS_ELSE = /^[[:space:]]*[@]ENABLE_XPS_ELSE[@][[:space:]]*$$/
@@ -343,12 +345,20 @@ THREADS_END = /^[[:space:]]*[@]ENABLE_THREADS_END[@][[:space:]]*$$/
 @ENABLE_THREADS_TRUE@			   -e '$(THREADS_END) d' \
 @ENABLE_THREADS_TRUE@			   -e 's,[@]ENABLE_THREADS[@],$(ENABLE_THREADS),g'
 
+EMACSCLIENT_START = /^[[:space:]]*[@]ENABLE_EMACSCLIENT_START[@][[:space:]]*$$/
+EMACSCLIENT_END = /^[[:space:]]*[@]ENABLE_EMACSCLIENT_END[@][[:space:]]*$$/
+@ENABLE_EMACSCLIENT_FALSE@@ENABLE_EMACS_TRUE@EMACSCLIENT_EDIT = -e '$(EMACSCLIENT_START),$(EMACSCLIENT_END) d'
+@ENABLE_EMACSCLIENT_TRUE@@ENABLE_EMACS_TRUE@EMACSCLIENT_EDIT = -e '$(EMACSCLIENT_START) d' \
+@ENABLE_EMACSCLIENT_TRUE@@ENABLE_EMACS_TRUE@					-e '$(EMACSCLIENT_END) d'
+
+@ENABLE_EMACS_FALSE@EMACSCLIENT_EDIT = -e '$(EMACSCLIENT_START),$(EMACSCLIENT_END) d'
 edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
 			$(PLUGIN_DELETE) \
 			$(THREADS_EDIT) \
 			$(XPS_DELETE) \
-			$(PERL_DELETE)
+			$(PERL_DELETE) \
+			$(EMACSCLIENT_EDIT)
 
 all: all-am
 
@@ -382,8 +392,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-startup_dvt.d: $(top_builddir)/config.status $(srcdir)/startup_dvt.d.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 startup_dnode.d: $(top_builddir)/config.status $(srcdir)/startup_dnode.d.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 startup_dgen.d: $(top_builddir)/config.status $(srcdir)/startup_dgen.d.in
@@ -609,6 +617,11 @@ dnode.d: $(srcdir)/Makefile $(srcdir)/dnode.d.in
 dvt_macros.d: $(srcdir)/Makefile $(srcdir)/dvt_macros.d.in 
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/dvt_macros.d.in >$@.tmp
+	mv $@.tmp $@
+
+startup_dvt.d: $(srcdir)/Makefile $(srcdir)/startup_dvt.d.in 
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/startup_dvt.d.in >$@.tmp
 	mv $@.tmp $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
