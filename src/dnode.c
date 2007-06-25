@@ -244,7 +244,7 @@ L wid, mod;
 B namef[FRAMEBYTES], *dictf, namestring[20];
 
 #if HAVE_SETSID
-setsid();
+setsid(); // separate from current session - don't die if term closed.
 #endif
 
 #if ! X_DISPLAY_MISSING
