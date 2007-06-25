@@ -172,6 +172,8 @@ AC_CHECK_HEADER([error.h], [
   AC_DEFINE([HAVE_ERROR_H], [1], [Define to 1 if you have <error.h>])
 ])
 
+AC_CHECK_FUNCS(setsid)
+
 CF_IF_UNDEF([CFLAGS], [
   CF_ON_TARGET([*-pc-cygwin], [], [
     CF_GCC_COMPILER_OPTION([-g])

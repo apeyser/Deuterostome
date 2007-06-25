@@ -243,9 +243,9 @@ XEvent event;
 L wid, mod;
 B namef[FRAMEBYTES], *dictf, namestring[20];
 
-//#if X_DISPLAY_MISSING
-//const 
-//#endif
+#if HAVE_SETSID
+setsid();
+#endif
 
 #if ! X_DISPLAY_MISSING
 dvtdisplay = NULL;
