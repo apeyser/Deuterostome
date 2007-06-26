@@ -244,35 +244,39 @@ FREEopds = o_3;
 return(OK);
 }
 
-/******************************************* some macros for readboxfile
- * and writeboxfile
- * double time loops
- * they do declarations, returns and access local variables,
- * so they need to be macros rather than functions.
+/******************************************* some funcs for read/writeboxfile
+ * double time loops: 10 seconds for single operations
+ *                    and 3 minutes for the full thing.
  */
 
-#define DECLARE_ALARM \
-  clock_t endclock = clock() + 180*CLOCKS_PER_SEC; \
-  L chunk_size; UL ai = 0
+static clock_t endclock;
+static L chunk_size;
 
-#define START_ALARM {timeout = FALSE;}
+static void START_ALARM(void) {
+		endclock = clock() + 180*CLOCKS_PER_SEC;
+		timeout = FALSE;
+}
 
 #define MAX_CHUNK (32000)
 //100mbit/s*1/8mbyte/mbit*1024byte/mbyte*5s*1/2minrate*/
 
-#define CHECK_ALARM {\
-  alarm(0); \
-  if (clock() > endclock) {return(TIMER);}; \
-  if (timeout) {return(TIMER);}; \
-  chunk_size = MAX_CHUNK < atmost ? MAX_CHUNK : atmost; \
-  alarm(10); \
-  timeout = FALSE; ai++; \
-  if (abortflag) return ABORT;}
+static L CHECK_ALARM(void) {
+		int timeout_;
+		alarm(0);
 
-#define END_ALARM { \
-  alarm(0); \
-  timeout = FALSE;}
-      
+		timeout_ = timeout;
+		timeout = FALSE;
+		if (clock() > endclock || timeout_) return TIMER;
+		if (abortflag) return ABORT;
+		
+		alarm(10);
+		return OK;
+}
+
+static void END_ALARM(void) {
+		alarm(0);
+		timeout = FALSE;
+}
 
 /*---------------------------------------------------- readboxfile
    dir filename | root
@@ -289,7 +293,6 @@ L op_readboxfile(void)
 int fd;
 L nb, atmost, npath, retc;
 B *p;
-DECLARE_ALARM;
 
 if (o_2 < FLOORopds) return(OPDS_UNF);
 if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
@@ -300,31 +303,32 @@ moveB((B *)VALUE_BASE(o_2), FREEvm, ARRAY_SIZE(o_2));
 moveB((B *)VALUE_BASE(o_1), FREEvm + ARRAY_SIZE(o_2), ARRAY_SIZE(o_1));
 FREEvm[npath-1] = '\000';
 atmost = CEILvm - FREEvm;   
-START_ALARM;
+START_ALARM();
 rb1:
-  CHECK_ALARM;
+  if ((retc = CHECK_ALARM()) != OK) return retc;
   fd = open(FREEvm, O_RDONLY | O_NONBLOCK);
   if (fd == -1) {
     if ((errno == EINTR) || (errno == EAGAIN)) goto rb1; 
-    else {END_ALARM; return(-errno);};
+    else {END_ALARM(); return(-errno);};
   }
   p = FREEvm; 
 
 rb2:
- CHECK_ALARM;
+ if ((retc = CHECK_ALARM()) != OK) return retc;
+ chunk_size = MAX_CHUNK < atmost ? MAX_CHUNK : atmost;
  nb = read(fd, p, chunk_size);
  if (nb == -1) {if ((errno == EAGAIN) || (errno == EINTR)) goto rb2;
-   else {END_ALARM; return(-errno);};}
+ else {END_ALARM(); return(-errno);};}
  if (nb == 0) goto rb3;
  p += nb; atmost -= nb;
- if (atmost == 0) {END_ALARM; return(VM_OVF);};
+ if (atmost == 0) {END_ALARM(); return(VM_OVF);};
  goto rb2;
  
 rb3:
- CHECK_ALARM;
- END_ALARM;
+ if ((retc = CHECK_ALARM()) != OK) return retc;
  if (close(fd) == -1) {if ((errno == EINTR) || (errno == EAGAIN)) goto rb3;
    else return(-errno);}
+ END_ALARM();
  
  nb = DALIGN(p - FREEvm);
  if (! GETNATIVEFORMAT(FREEvm) || ! GETNATIVEUNDEF(FREEvm)) return BAD_FMT;
@@ -347,55 +351,77 @@ rb3:
     specified by the strings 'dir' and 'filename'
 */
 
-L op_writeboxfile(void)
-{
+L op_writeboxfile(void) {
+		int fd;
+		L nb, atmost, retc, npath;
+		B *oldFREEvm, *base, *top, *freemem;
+		B frame[FRAMEBYTES];
 
-int fd;
-L nb, atmost, retc, npath; W depth;
-B *p, *oldFREEvm;
-DECLARE_ALARM;
+		if (o_3 < FLOORopds) return(OPDS_UNF);
+		if (!((CLASS(o_3) == ARRAY)
+					|| (CLASS(o_3) == LIST)
+					|| (CLASS(o_3) == DICT)))
+				return(OPD_ERR);
+		if (TAG(o_2) != (ARRAY | BYTETYPE)) return(OPD_ERR);
+		if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
 
- if (o_3 < FLOORopds) return(OPDS_UNF);
- if (!((CLASS(o_3) == ARRAY) || (CLASS(o_3) == LIST) || (CLASS(o_3) == DICT)))
-   return(OPD_ERR);
- if (TAG(o_2) != (ARRAY | BYTETYPE)) return(OPD_ERR);
- if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
+		oldFREEvm = FREEvm;
+		moveframe(o_3, frame);
+		
+		npath = ARRAY_SIZE(o_2) + ARRAY_SIZE(o_1) + 1;
+		if ((retc = foldobj_ext(frame, npath)) != OK) {
+				FREEvm = oldFREEvm;
+				return(retc);
+		}
+		freemem = FREEvm;
+		foldobj_mem(&base, &top);
+		if (! base) {
+				base = oldFREEvm;
+				top = FREEvm;
+				FREEvm = oldFREEvm;
+		}
+ 
+		SETNATIVE(base);
+		atmost = top - base;
+ 
+		if (freemem + npath > CEILvm) {foldobj_free(); return(VM_OVF);}
+		moveB((B *)VALUE_BASE(o_2), freemem, ARRAY_SIZE(o_2));
+		moveB((B *)VALUE_BASE(o_1), freemem + ARRAY_SIZE(o_2), ARRAY_SIZE(o_1));
+		freemem[npath-1] = '\000';
 
- oldFREEvm = FREEvm; p = FREEvm; depth = 0;
- if ((retc = foldobj(o_3,(L)p,&depth)) != OK)
-   { FREEvm = oldFREEvm; return(retc); }
- SETNATIVE(oldFREEvm);
- atmost = FREEvm - p; p = FREEvm; FREEvm = oldFREEvm;
- npath = ARRAY_SIZE(o_2) + ARRAY_SIZE(o_1) + 1;
- if (p + npath > CEILvm) return(VM_OVF);
- moveB((B *)VALUE_BASE(o_2), p, ARRAY_SIZE(o_2));
- moveB((B *)VALUE_BASE(o_1), p + ARRAY_SIZE(o_2), ARRAY_SIZE(o_1));
- p[npath-1] = '\000';
-
- START_ALARM;
-wb1:
- CHECK_ALARM;
- fd = open(p, O_CREAT | O_NONBLOCK | O_RDWR | O_TRUNC,
-	   S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
- if (fd == -1) {if ((errno == EINTR) || (errno == EAGAIN))
-     goto wb1; else {END_ALARM; return(-errno);};}
- p = oldFREEvm;
+		START_ALARM();
+	wb1:
+		if ((retc = CHECK_ALARM()) != OK) {foldobj_free(); return retc;};
+		fd = open(freemem, O_CREAT | O_NONBLOCK | O_RDWR | O_TRUNC,
+							S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
+		if (fd == -1) {
+				if ((errno == EINTR) || (errno == EAGAIN)) goto wb1;
+				else {END_ALARM(); foldobj_free(); return(-errno);};
+		}
   
-wb2:
- CHECK_ALARM;
- nb = write(fd, p, chunk_size);
- if (nb == -1) {if ((errno == EAGAIN) || (errno == EINTR)) goto wb2;
-   else {END_ALARM; return(-errno);};}
- p += nb; atmost -= nb;
- if (atmost > 0) goto wb2;
+	wb2:
+		if ((retc = CHECK_ALARM()) != OK) {foldobj_free(); return retc;};
+		chunk_size = MAX_CHUNK < atmost ? MAX_CHUNK : atmost;
+		nb = write(fd, base, chunk_size);
+		if (nb == -1) {
+				if ((errno == EAGAIN) || (errno == EINTR)) goto wb2;
+				else {END_ALARM(); foldobj_free(); return(-errno);};
+		}
  
-wb3:
- CHECK_ALARM;
- END_ALARM;
- if (close(fd) == -1) {if (errno == EINTR) goto wb3; else return(-errno);}
+		base += nb; atmost -= nb;
+		if (atmost > 0) goto wb2;
+		
+		foldobj_free();
+	wb3:
+		if ((retc = CHECK_ALARM()) != OK) return retc;
+		if (close(fd) == -1) {
+				if (errno == EINTR) goto wb3;
+				else return(-errno);
+		}
+		END_ALARM();
  
- FREEopds = o_3;
- return(OK);
+		FREEopds = o_3;
+		return(OK);
 }
 
 /*---------------------------------------------- findfiles

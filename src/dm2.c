@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 static char sys_hi[] = "System Operators V" PACKAGE_VERSION;
 L op_syshi(void)   {return wrap_hi(sys_hi);}
@@ -863,7 +864,76 @@ static BOOLEAN foldsubframe(B* lframe) {
 	}
 }
 
-L foldobj(B *frame, L base, W *depth)
+static B** freemem = NULL;
+static B** ceilmem = NULL;
+static B* vmalloc = NULL;
+static L foldobj_int(B *frame, L base, W *depth);
+
+L foldobj(B *frame, L base, W *depth) 
+{
+		int retc;
+		
+		foldobj_free();
+		freemem = &FREEvm;
+		ceilmem = &CEILvm;
+		retc = foldobj_int(frame, base, depth);
+		foldobj_free();
+}
+
+L foldobj_ext(B* frame, L extra) 
+{
+		static B* freemem_ = NULL;
+		static B* ceilmem_ = NULL;
+		W depth = 0;
+		int retc;
+		
+		if (vmalloc) free(vmalloc);
+		vmalloc = NULL;
+		
+		if (CEILvm - FREEvm > FREEvm - FLOORvm + extra) {
+				freemem = &FREEvm;
+				ceilmem = &CEILvm;
+		}
+		else if (! (vmalloc = (B*) malloc((FREEvm - FLOORvm)*sizeof(B)))) {
+				retc = -errno;
+				foldobj_free();
+				return retc;
+		}
+		else {
+				freemem = &freemem_;
+				ceilmem = &ceilmem_;
+				freemem_ = vmalloc;
+				ceilmem_ = freemem_ + (FREEvm - FLOORvm);
+		}
+		
+		if ((retc = foldobj_int(frame, (L)*freemem, &depth)) != OK) foldobj_free();
+		return retc;
+}
+
+void foldobj_mem(B** base, B** top) 
+{
+		if (vmalloc) {
+				*base = vmalloc;
+				*top = *freemem;
+		}
+		else {
+				*base = NULL;
+				*top = NULL;
+		}
+}
+
+void foldobj_free(void) 
+{
+		if (vmalloc) {
+				free(vmalloc);
+				vmalloc = NULL;
+		}
+		
+		freemem = NULL;
+		ceilmem = NULL;
+}
+
+static L foldobj_int(B *frame, L base, W *depth)
 {
 B *tframe, *tvalue, *value, *lframe, *entry;
 L k, retc, *link, nb, offset;
@@ -872,20 +942,20 @@ if ((++(*depth)) > MAXDEPTH) return(RNG_CHK);
 
 switch(CLASS(frame)) {
   case ARRAY: 
-    tframe = FREEvm; 
+    tframe = *freemem; 
     tvalue = tframe + FRAMEBYTES;
     nb = (L)(DALIGN(ARRAY_SIZE(frame) * VALUEBYTES(TYPE(frame))));
-    if ((FREEvm+nb+FRAMEBYTES) > CEILvm) return(VM_OVF);
-    FREEvm += nb + FRAMEBYTES;
+    if ((*freemem+nb+FRAMEBYTES) > *ceilmem) return(VM_OVF);
+    *freemem += nb + FRAMEBYTES;
     value = (B*)VALUE_BASE(frame);
     VALUE_BASE(frame) = (L)tvalue - base;
     moveframes(frame,tframe,1L); moveL((L *)value,(L *)tvalue,nb>>2);
     break;
 
-  case LIST:  tframe = FREEvm; tvalue = tframe + FRAMEBYTES;
+  case LIST:  tframe = *freemem; tvalue = tframe + FRAMEBYTES;
               nb = LIST_CEIL(frame) - VALUE_BASE(frame);
-              if ((FREEvm+nb+FRAMEBYTES) > CEILvm) return(VM_OVF);
-              FREEvm += nb + FRAMEBYTES;
+              if ((*freemem+nb+FRAMEBYTES) > *ceilmem) return(VM_OVF);
+              *freemem += nb + FRAMEBYTES;
               value = (B *)VALUE_BASE(frame);
               VALUE_BASE(frame) = (L)tvalue - base;
               LIST_CEIL(frame) = VALUE_BASE(frame) + nb;
@@ -893,16 +963,16 @@ switch(CLASS(frame)) {
               for (lframe = tvalue; lframe < (tvalue + nb); 
                    lframe += FRAMEBYTES) { 
 								if (foldsubframe(lframe) 
-										&& (retc = foldobj(lframe,base,depth)) != OK)
+										&& (retc = foldobj_int(lframe,base,depth)) != OK)
 									return(retc);
 							}
               break;
   case DICT:  
 	          if (TYPE(frame) == OPAQUETYPE) return FOLD_OPAQUE;
-	          tframe = FREEvm; tvalue = tframe + FRAMEBYTES;
+	          tframe = *freemem; tvalue = tframe + FRAMEBYTES;
               nb = DICT_NB(frame); 
-              if ((FREEvm+nb+FRAMEBYTES) > CEILvm) return(VM_OVF);
-              FREEvm += nb + FRAMEBYTES;
+              if ((*freemem+nb+FRAMEBYTES) > *ceilmem) return(VM_OVF);
+              *freemem += nb + FRAMEBYTES;
               value = (B *)VALUE_BASE(frame);
               VALUE_BASE(frame) = (L)tvalue - base;
               moveframes(frame,tframe,1L); moveL((L *)value,(L *)tvalue,nb>>2);
@@ -921,7 +991,7 @@ switch(CLASS(frame)) {
 									ASSOC_NEXT(entry) += offset;
 								lframe = ASSOC_FRAME(entry);
 								if (foldsubframe(lframe) 
-										&& (retc = foldobj(lframe,base,depth)) != OK) 
+										&& (retc = foldobj_int(lframe,base,depth)) != OK) 
 									return(retc);
 							}
               DICT_ENTRIES(tvalue) -= base; DICT_FREE(tvalue) -= base;
