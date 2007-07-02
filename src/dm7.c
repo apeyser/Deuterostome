@@ -373,9 +373,9 @@ L op_writeboxfile(void) {
 				FREEvm = oldFREEvm;
 				return(retc);
 		}
+		
 		freemem = FREEvm;
-		foldobj_mem(&base, &top);
-		if (! base) {
+		if (! foldobj_mem(&base, &top)) {
 				base = oldFREEvm;
 				top = FREEvm;
 				FREEvm = oldFREEvm;

@@ -886,40 +886,37 @@ L foldobj_ext(B* frame, L extra)
 		static B* ceilmem_ = NULL;
 		W depth = 0;
 		int retc;
+		static B frame_[FRAMEBYTES];
+
+		foldobj_free();
+		freemem_ = FREEvm;
+		moveframe(frame, frame_);
 		
-		if (vmalloc) free(vmalloc);
-		vmalloc = NULL;
-		
-		if (CEILvm - FREEvm > FREEvm - FLOORvm + extra) {
-				freemem = &FREEvm;
-				ceilmem = &CEILvm;
+		freemem = &FREEvm;
+		ceilmem = &CEILvm;
+		if ((retc = foldobj_int(frame, (L)*freemem, &depth)) == VM_OVF) {
+				FREEvm = freemem_;
+				moveframe(frame_, frame);
+				if ((vmalloc = (B*) malloc((CEILvm - FLOORvm)))) {
+						freemem = &freemem_;
+						ceilmem = &ceilmem_;
+						freemem_ = vmalloc;
+						ceilmem_ = freemem_ + (CEILvm - FLOORvm);
+						retc = foldobj_int(frame, (L)*freemem, &depth);
+				}
+				else retc = -errno;
 		}
-		else if (! (vmalloc = (B*) malloc((FREEvm - FLOORvm)*sizeof(B)))) {
-				retc = -errno;
-				foldobj_free();
-				return retc;
-		}
-		else {
-				freemem = &freemem_;
-				ceilmem = &ceilmem_;
-				freemem_ = vmalloc;
-				ceilmem_ = freemem_ + (FREEvm - FLOORvm);
-		}
-		
-		if ((retc = foldobj_int(frame, (L)*freemem, &depth)) != OK) foldobj_free();
+
+		if (retc != OK) foldobj_free();
 		return retc;
 }
 
-void foldobj_mem(B** base, B** top) 
+BOOLEAN foldobj_mem(B** base, B** top) 
 {
-		if (vmalloc) {
-				*base = vmalloc;
-				*top = *freemem;
-		}
-		else {
-				*base = NULL;
-				*top = NULL;
-		}
+		if (! vmalloc) return FALSE;
+
+		*base = vmalloc;
+		*top = *freemem;
 }
 
 void foldobj_free(void) 

@@ -495,7 +495,7 @@ L exec(L turns);
 L foldobj(B *frame, L base, W *depth);
 L unfoldobj(B *frame, L base, BOOLEAN isnative);
 L foldobj_ext(B* frame, L extra);
-void foldobj_mem(B** base, B** top);
+BOOLEAN foldobj_mem(B** base, B** top);
 void foldobj_free(void);
 L deendian_frame(B *frame);
 //L deendian_array(B* frame);
