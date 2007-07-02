@@ -309,7 +309,7 @@ rb1:
   fd = open(FREEvm, O_RDONLY | O_NONBLOCK);
   if (fd == -1) {
     if ((errno == EINTR) || (errno == EAGAIN)) goto rb1; 
-    else {END_ALARM(); return(-errno);};
+    else {retc = -errno; END_ALARM(); return retc;};
   }
   p = FREEvm; 
 
@@ -318,7 +318,7 @@ rb2:
  chunk_size = MAX_CHUNK < atmost ? MAX_CHUNK : atmost;
  nb = read(fd, p, chunk_size);
  if (nb == -1) {if ((errno == EAGAIN) || (errno == EINTR)) goto rb2;
- else {END_ALARM(); return(-errno);};}
+ else {retc = -errno; END_ALARM(); return retc;};}
  if (nb == 0) goto rb3;
  p += nb; atmost -= nb;
  if (atmost == 0) {END_ALARM(); return(VM_OVF);};
@@ -396,7 +396,7 @@ L op_writeboxfile(void) {
 							S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
 		if (fd == -1) {
 				if ((errno == EINTR) || (errno == EAGAIN)) goto wb1;
-				else {END_ALARM(); foldobj_free(); return(-errno);};
+				else {retc = -errno; END_ALARM(); foldobj_free(); return retc;};
 		}
   
 	wb2:
@@ -405,7 +405,7 @@ L op_writeboxfile(void) {
 		nb = write(fd, base, chunk_size);
 		if (nb == -1) {
 				if ((errno == EAGAIN) || (errno == EINTR)) goto wb2;
-				else {END_ALARM(); foldobj_free(); return(-errno);};
+				else {retc = -errno; END_ALARM(); foldobj_free(); return retc;};
 		}
  
 		base += nb; atmost -= nb;
