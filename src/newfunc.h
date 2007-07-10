@@ -59,24 +59,7 @@ namespace Plugins
 						throw(bad_alloc);
 
 		protected:
-				struct Node; // defined later
-				// return a new Node from pool of size, with added size for Node
-				Node* getMem(size_t size) throw();
-				// return a new Node from the deleted pool of size, with added size
-				//   for Node
-				Node* splitNode(size_t size) throw();
-
-				// The current allocator used by new's
-				static Allocator* currAlloc;
-
-				// return offset to align Nodes at pos
-				static size_t prealign(void* pos) throw();
-				// return size of Node of size size, with padding added
-				//   - size should already include header size
-				static size_t postalign(void* pos, size_t size) throw();
-
-				// Our linked list of discarded but fragmented memory
-				//   - and of our active blocks allocated by new's
+				// Our linked list of memory
 				struct Node 
 				{
 						Node* p; // prev node in linked-list
@@ -95,6 +78,21 @@ namespace Plugins
 						void   setSize(size_t size)   {sz = size;};
 						void   setPrev(Node* prev)    {p = prev;};
 				};
+				// return a new Node from the deleted pool of size, with added size
+				//   -  for Node
+				Node* splitNode(size_t size) throw();
+				// defragment around inactive Node
+				void  fuseNode(Node*) throw();
+
+				// The current allocator used by new's
+				static Allocator* currAlloc;
+
+				// return offset to align Nodes at pos
+				static size_t prealign(void* pos) throw();
+				// return size of Node of size size, with padding added
+				//   - size should already include header size
+				static size_t postalign(void* pos, size_t size) throw();
+
 				Node* first;
 				Node* last;
 		};

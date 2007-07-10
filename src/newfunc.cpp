@@ -57,7 +57,6 @@ Allocator::Node* Allocator::splitNode(size_t size) throw()
 						else nn->next()->setPrev(nn);
 				}
 				
-				n->setActive(true);
 				return n;
 		}
 
@@ -78,7 +77,10 @@ Allocator* Allocator::get(void) throw() {return currAlloc;}
 void* Allocator::addNode(size_t size) throw()
 {
 		Node* n = splitNode(size);
-		return n ? (char*) n + sizeof(Node) : NULL;
+		if (! n) return NULL;
+		
+		n->setActive(true);
+		return n + sizeof(Node);
 }
 
 void* operator new(size_t size, const nothrow_t&) throw() 
@@ -104,13 +106,8 @@ void* operator new[](size_t size) throw(bad_alloc)
 		return operator new(size);
 }
 
-void Allocator::removeNode(void* ptr) throw()
+void Allocator::fuseNode(Node* n) throw()
 {
-		if (! ptr) return;
-		
-		Node* n = (Node*) ((char*) ptr - sizeof(Node));
-		n->setActive(false);
-		
 		Node* next = n->next();
 		Node* prev = n->prev();
 		if (next <= last && ! next->active()) {
@@ -124,6 +121,15 @@ void Allocator::removeNode(void* ptr) throw()
 				if (n == last) last = prev;
 				else n->next()->setPrev(prev);
 		}
+}
+
+void Allocator::removeNode(void* ptr) throw()
+{
+		if (! ptr) return;
+		
+		Node* n = (Node*) ((char*) ptr - sizeof(Node));
+		n->setActive(false);
+		fuseNode(n);
 }
 
 void operator delete(void* ptr, const nothrow_t&) throw() {
@@ -161,12 +167,8 @@ extern "C"
 {
 		void* makeAllocator(void* start, size_t size)
 		{
-				try {
-						return new(start, size) Allocator::Allocator(start, size);
-				}
-				catch (bad_alloc&) {
-						return NULL;
-				}
+				try {return new(start, size) Allocator::Allocator(start, size);}
+				catch (bad_alloc&) {return NULL;}
 		}
 		
 		void* setAllocator(void* alloc)
