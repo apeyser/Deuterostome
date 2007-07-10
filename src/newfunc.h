@@ -121,7 +121,6 @@ extern "C"
 		// set the current allocator (as returned by makeAllocator)
 		//   - and return any previous allocator.
 		Allocator*   setAllocator(Allocator* alloc);
-		// interface for d-machine dictionaries.
 #endif
 
 		// For the dm dictionaries (so that a single element array can see):
