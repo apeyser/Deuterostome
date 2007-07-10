@@ -82,6 +82,11 @@ am_libdmbootstrap_la_OBJECTS = libdmbootstrap_la-dmglobals.lo \
 	libdmbootstrap_la-dmnum.lo libdmbootstrap_la-dsp1.lo \
 	libdmbootstrap_la-dsp2.lo libdmbootstrap_la-plugin.lo
 libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
+libdmcppplugin_la_LIBADD =
+am__libdmcppplugin_la_SOURCES_DIST = newfunc.cpp
+@ENABLE_PLUGINS_TRUE@am_libdmcppplugin_la_OBJECTS = newfunc.lo
+libdmcppplugin_la_OBJECTS = $(am_libdmcppplugin_la_OBJECTS)
+@ENABLE_PLUGINS_TRUE@am_libdmcppplugin_la_rpath = -rpath $(libdir)
 libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am__libdmglobals_la_SOURCES_DIST = dmglobals.c dm1.c dm2.c dm3.c dm4.c \
 	dm5.c dm6.c dm7.c dm8.c dm9.c dmnum.c dsp1.c dsp2.c \
@@ -127,10 +132,20 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libdmbootstrap_la_SOURCES) $(libdmglobals_la_SOURCES) \
-	$(dgen_SOURCES) $(dnode_SOURCES) $(nodist_dnode_nice_SOURCES) \
-	$(dvt_SOURCES) $(testwordorder_SOURCES)
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+SOURCES = $(libdmbootstrap_la_SOURCES) $(libdmcppplugin_la_SOURCES) \
+	$(libdmglobals_la_SOURCES) $(dgen_SOURCES) $(dnode_SOURCES) \
+	$(nodist_dnode_nice_SOURCES) $(dvt_SOURCES) \
+	$(testwordorder_SOURCES)
 DIST_SOURCES = $(libdmbootstrap_la_SOURCES) \
+	$(am__libdmcppplugin_la_SOURCES_DIST) \
 	$(am__libdmglobals_la_SOURCES_DIST) $(dgen_SOURCES) \
 	$(dnode_SOURCES) $(dvt_SOURCES) $(testwordorder_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -142,8 +157,8 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 nodist_pkgconfiglibDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(nodist_pkgconfiglib_DATA)
 nodist_pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
-am__pkginclude_HEADERS_DIST = dm.h plugin.h pluginlib.h dmx.h \
-	threads.h error-local.h dm-snprintf.h
+am__pkginclude_HEADERS_DIST = dm.h plugin.h pluginlib.h newfunc.h \
+	dmx.h threads.h error-local.h dm-snprintf.h
 pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(nodist_pkginclude_HEADERS) $(pkginclude_HEADERS)
 ETAGS = etags
@@ -414,8 +429,10 @@ AM_CPPFLAGS = -DDM_HAVE_CONFIG_H
 AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
 AM_LDFLAGS = -no-undefined $(PTHREAD_LIBS) $(X_LDFLAGS)
 INCLUDE = @INCLTDL@
-@ENABLE_PLUGINS_TRUE@PLUGIN_HDR = plugin.h pluginlib.h
+@ENABLE_PLUGINS_TRUE@PLUGIN_HDR = plugin.h pluginlib.h newfunc.h
 @ENABLE_PLUGINS_TRUE@PLUGIN_LD = @LIBLTDL@
+@ENABLE_PLUGINS_TRUE@PLUGIN_LIB = libdmcppplugin.la
+@ENABLE_PLUGINS_TRUE@libdmcppplugin_la_SOURCES = newfunc.cpp
 pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
 	error-local.h dm-snprintf.h
 
@@ -429,7 +446,7 @@ dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 testwordorder_SOURCES = test-word-order.c
 BUILT_SOURCES = paths.h dnode-nice.c
 CLEANFILES = paths.h dnode-nice.c
-lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la
+lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la $(PLUGIN_LIB)
 libdmglobals_la_LIBADD = $(PLUGIN_LD)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
@@ -461,7 +478,7 @@ all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
+.SUFFIXES: .c .cpp .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -522,6 +539,8 @@ clean-libLTLIBRARIES:
 	done
 libdmbootstrap.la: $(libdmbootstrap_la_OBJECTS) $(libdmbootstrap_la_DEPENDENCIES) 
 	$(LINK) -rpath $(libdir) $(libdmbootstrap_la_LDFLAGS) $(libdmbootstrap_la_OBJECTS) $(libdmbootstrap_la_LIBADD) $(LIBS)
+libdmcppplugin.la: $(libdmcppplugin_la_OBJECTS) $(libdmcppplugin_la_DEPENDENCIES) 
+	$(CXXLINK) $(am_libdmcppplugin_la_rpath) $(libdmcppplugin_la_LDFLAGS) $(libdmcppplugin_la_OBJECTS) $(libdmcppplugin_la_LIBADD) $(LIBS)
 libdmglobals.la: $(libdmglobals_la_OBJECTS) $(libdmglobals_la_DEPENDENCIES) 
 	$(LINK) -rpath $(libdir) $(libdmglobals_la_LDFLAGS) $(libdmglobals_la_OBJECTS) $(libdmglobals_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
@@ -632,6 +651,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dsp2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-plugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-threads.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/newfunc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-word-order.Po@am__quote@
 
 .c.o:
@@ -892,6 +912,27 @@ dvt-dvt.obj: dvt.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dvt.c' object='dvt-dvt.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -c -o dvt-dvt.obj `if test -f 'dvt.c'; then $(CYGPATH_W) 'dvt.c'; else $(CYGPATH_W) '$(srcdir)/dvt.c'; fi`
+
+.cpp.o:
+@am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
+
+.cpp.obj:
+@am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.cpp.lo:
+@am__fastdepCXX_TRUE@	if $(LTCXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo

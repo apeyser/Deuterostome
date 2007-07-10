@@ -41,8 +41,10 @@ bin_PROGRAMS = dvt dnode dgen
 noinst_PROGRAMS = testwordorder $(DNODENICEBIN)
 
 if ENABLE_PLUGINS
-PLUGIN_HDR = plugin.h pluginlib.h
+PLUGIN_HDR = plugin.h pluginlib.h newfunc.h
 PLUGIN_LD = @LIBLTDL@
+PLUGIN_LIB = libdmcppplugin.la
+libdmcppplugin_la_SOURCES = newfunc.cpp
 endif ENABLE_PLUGINS
 
 pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
@@ -61,7 +63,7 @@ testwordorder_SOURCES = test-word-order.c
 
 BUILT_SOURCES = paths.h dnode-nice.c
 CLEANFILES = paths.h dnode-nice.c
-lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la
+lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la $(PLUGIN_LIB)
 libdmglobals_la_LIBADD = $(PLUGIN_LD)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
