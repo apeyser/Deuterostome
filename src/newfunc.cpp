@@ -3,10 +3,10 @@
 using namespace Plugins;
 using namespace std;
 
-size_t Allocator::prealign(void* pos, size_t size_n) throw()
+size_t Plugins::Allocator::prealign(void* pos, size_t size_n) throw()
 {
 		
-		switch (sizeof(Allocator::Node)) {
+		switch (sizeof(Plugins::Allocator::Node)) {
 				case 0: case 1: return 0;
 				case 2: return (size_t) pos % 2;
 				case 3: case 4: return (4 - (size_t) pos % 4) % 4;
@@ -16,10 +16,10 @@ size_t Allocator::prealign(void* pos, size_t size_n) throw()
 		};
 }
 
-size_t Allocator::postalign(void* pos, size_t size_n) throw()
+size_t Plugins::Allocator::postalign(void* pos, size_t size_n) throw()
 {
 		void* next = (char*) pos + size_n;
-		switch (sizeof(Allocator::Node)) {
+		switch (sizeof(Plugins::Allocator::Node)) {
 				case 0: case 1: return size_n; break;
 				case 2: return size_n +((size_t) next + size_n) % 2;
 				case 3: case 4: return size_n + (4 - ((size_t) next + size_n) % 4) % 4;
@@ -30,7 +30,7 @@ size_t Allocator::postalign(void* pos, size_t size_n) throw()
 		};
 }
 
-Allocator::Allocator(void* start_n, size_t size_n) throw()
+Plugins::Allocator::Allocator(void* start_n, size_t size_n) throw()
 		: start(start_n),
 			size(size_n),
 			curr(start),
@@ -42,7 +42,7 @@ Allocator::Allocator(void* start_n, size_t size_n) throw()
 }
 
 
-Allocator::Node* Allocator::getMem(size_t size_n) throw()
+Plugins::Allocator::Node* Plugins::Allocator::getMem(size_t size_n) throw()
 {
 		size_t size_n1 = postalign(curr, size_n + sizeof(Node));
 		void* end = (char*) start + size;
@@ -60,7 +60,7 @@ Allocator::Node* Allocator::getMem(size_t size_n) throw()
 		return new(next) Node(size_n);
 }
 
-Allocator::Node* Allocator::splitNode(size_t size_n) throw()
+Plugins::Allocator::Node* Plugins::Allocator::splitNode(size_t size_n) throw()
 {
 		Node* n = freed.n;
 		while (n) {
@@ -91,16 +91,16 @@ Allocator::Node* Allocator::splitNode(size_t size_n) throw()
 		return NULL;
 }						
 
-Allocator* Allocator::currAlloc = NULL;
-Allocator* Allocator::set(Allocator* alloc) throw() {
-		Allocator* old = currAlloc;
+Plugins::Allocator* Plugins::Allocator::currAlloc = NULL;
+Plugins::Allocator* Plugins::Allocator::set(Plugins::Allocator* alloc) throw() {
+		Plugins::Allocator* old = currAlloc;
 		currAlloc = alloc;
 		return old;
 };
 
-Allocator* Allocator::get(void) throw() {return currAlloc;}
+Plugins::Allocator* Plugins::Allocator::get(void) throw() {return currAlloc;}
 
-void* Allocator::addNode(size_t size_n) throw()
+void* Plugins::Allocator::addNode(size_t size_n) throw()
 {
 		Node* n = splitNode(size_n);
 		if (n) {
@@ -144,8 +144,8 @@ void* Allocator::addNode(size_t size_n) throw()
 
 void* operator new(size_t size, const nothrow_t&) throw() 
 {
-		if (! Allocator::get()) return NULL;
-		return Allocator::get()->addNode(size);
+		if (! Plugins::Allocator::get()) return NULL;
+		return Plugins::Allocator::get()->addNode(size);
 }
 
 void* operator new[](size_t size, const nothrow_t& t) throw() 
@@ -165,7 +165,7 @@ void* operator new[](size_t size) throw(bad_alloc)
 		return operator new(size);
 }
 
-void Allocator::removeNode(void* ptr) throw()
+void Plugins::Allocator::removeNode(void* ptr) throw()
 {
 		if (! ptr) return;
 		Node* n = (Node*) ((char*) ptr - sizeof(Node));
@@ -226,7 +226,7 @@ void Allocator::removeNode(void* ptr) throw()
 
 void operator delete(void* ptr, const nothrow_t&) throw() {
 		if (! ptr) return;
-		if (Allocator::get()) Allocator::get()->removeNode(ptr);
+		if (Plugins::Allocator::get()) Plugins::Allocator::get()->removeNode(ptr);
 };
 
 void operator delete[](void* ptr, const nothrow_t& t) throw() {
@@ -241,14 +241,14 @@ void operator delete[](void* ptr) throw() {
 		operator delete((char*) ptr);
 };
 
-void* Allocator::operator new(size_t s, void*& start, size_t& size) throw()
+void* Plugins::Allocator::operator new(size_t s, void*& start, size_t& size) throw()
 {
 		void* b = (char*) start
 				+ ((sizeof(void*) - ((size_t) start % sizeof(void*)))
 					 % sizeof(void*));
 		
 		if ((char*) b + s > (char*) start + size) return NULL;
-		size  = (char*) start + size - ((char*) b + s) ;
+		size  = (char*) start + size - ((char*) b + s);
 		start = (char*) b + s;
 		
 		return b;
@@ -258,27 +258,27 @@ extern "C"
 {
 		void* makeAllocator(void* start, size_t size)
 		{
-				return new(start, size) Allocator::Allocator(start, size);
+				return new(start, size) Plugins::Allocator::Allocator(start, size);
 		}
 		
 		void* setAllocator(void* alloc)
 		{
-				return Allocator::set((Allocator*) alloc);
+				return Plugins::Allocator::set((Plugins::Allocator*) alloc);
 		}
 		
 		void** getStart() {
-				if (! Allocator::get()) return NULL;
-				return Allocator::get()->getStart();
+				if (! Plugins::Allocator::get()) return NULL;
+				return Plugins::Allocator::get()->getStart();
 		}
 		
 		void** getCurr() {
-				if (! Allocator::get()) return NULL;
-				return Allocator::get()->getCurr();
+				if (! Plugins::Allocator::get()) return NULL;
+				return Plugins::Allocator::get()->getCurr();
 		}
 		
 		size_t* getSize() {
-				if (! Allocator::get()) return NULL;
-				return Allocator::get()->getSize();
+				if (! Plugins::Allocator::get()) return NULL;
+				return Plugins::Allocator::get()->getSize();
 		}
 };
 

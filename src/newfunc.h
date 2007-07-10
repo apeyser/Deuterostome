@@ -1,6 +1,16 @@
 #ifndef NEWFUNC_H
 #define NEWFUNC_H
 
+
+// This header is not intended to be included by cpp code, but by c-code.
+// -- newfunc.cpp includes it and redefines the global new operator
+// -- for cpp code, which then affects that code by being linked in
+// -- as a library.
+// The plugin C code includes this header to set the pool associated with
+// -- each opaque object which will be used by associated C functions that
+// -- then call into a cpp library.
+// The calls for C are makeAllocator and setAllocator.
+
 #if __cplusplus
 #include <new>
 
@@ -93,23 +103,33 @@ namespace Plugins
 };
 
 
-// Our C interface.
+// Our C interface
 extern "C" 
 {
+		// the versions for cpp compiler
+		void*   makeAllocator(void* start, size_t size);
+		void*   setAllocator(void* alloc);
 #else
 #include <stdlib.h>
-#endif
+		// a little sugar for the plugin library...
+		typedef void Allocator;
 		// create a new Allocator at start, of size bytes.
 		//   - The whole thing may get padding, then the
 		//   - allocator itself gets built, then a little more
 		//   - padding may be added.
-		void*   makeAllocator(void* start, size_t size);
+		Allocator*   makeAllocator(void* start, size_t size);
 		// set the current allocator (as returned by makeAllocator)
 		//   - and return any previous allocator.
-		void*   setAllocator(void* alloc);
+		Allocator*   setAllocator(Allocator* alloc);
 		// interface for d-machine dictionaries.
+#endif
+
+		// For the dm dictionaries (so that a single element array can see):
+		// pointer to address of start
 		void**  getStart();
+		// pointer to the address of curr
 		void**  getCurr();
+		// pointer to the maximum size allocated
 		size_t* getSize();
 #if __cplusplus
 }
