@@ -112,7 +112,7 @@ extern "C"
 #else
 #include <stdlib.h>
 		// a little sugar for the plugin library...
-		typedef void Allocator;
+		typedef struct Allocator {} Allocator;
 		// create a new Allocator at start, of size bytes.
 		//   - The whole thing may get padding, then the
 		//   - allocator itself gets built, then a little more
