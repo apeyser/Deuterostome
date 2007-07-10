@@ -37,13 +37,8 @@ namespace Plugins
 			public:
 				// Create an Allocator with a pool starting at start buffer
 				// with up to size bytes
-				Allocator(void* start, size_t size) throw();
+				Allocator(void* start, size_t size) throw(bad_alloc);
 				virtual ~Allocator(void) {};
-
-				// For D-machine dictionaries.
-				void**  getStart() throw() {return &start;};
-				void**  getCurr()  throw() {return &curr;};
-				size_t* getSize()  throw() {return &size;};
 
 				// set the current Allocator used for new's
 				//   and return previous one.
@@ -60,7 +55,8 @@ namespace Plugins
 				// new operator for allocator; shifts start and size to
 				// account for Allocator, and checks that that some size
 				// is left.
-				void* operator new(size_t s, void*& start, size_t& size) throw();
+				void* operator new(size_t s, void*& start, size_t& size)
+						throw(bad_alloc);
 
 		protected:
 				struct Node; // defined later
@@ -74,31 +70,33 @@ namespace Plugins
 				static Allocator* currAlloc;
 
 				// return offset to align Nodes at pos
-				static size_t prealign(void* pos, size_t size) throw();
+				static size_t prealign(void* pos) throw();
 				// return size of Node of size size, with padding added
 				//   - size should already include header size
 				static size_t postalign(void* pos, size_t size) throw();
-
-				// The padded start of the pool, after Allocator.
-				void* start;
-				// The current position for next node.
-				void* curr;
-				// The max total size of the pool, after padding and Allocator.
-				size_t size;
 
 				// Our linked list of discarded but fragmented memory
 				//   - and of our active blocks allocated by new's
 				struct Node 
 				{
-						Node* n; // next node in linked-list
-						Node* l; // last node in linked-list
+						Node* p; // prev node in linked-list
 						size_t sz; // size of node include header and padding
-				    Node(size_t sz): n(NULL), l(NULL), sz(sz) {};
-				} used, freed;
-				// used.n - head of active ll
-				// used.l - tail of active ll
-				// freed.n - head of discarded ll
-				// freed.l - tail of discarded ll
+						bool a; // actively used
+						
+				    Node(size_t sz, Node* p, bool active)
+								:p(p), sz(sz), a(active) {};
+						
+						Node*  prev(void)   {return p;};
+						Node*  next(void)   {return (Node*) ((char*) this + sz);};
+						bool   active(void) {return a;};
+						size_t size(void)   {return sz;}
+						
+						void   setActive(bool active) {a = active;};
+						void   setSize(size_t size)   {sz = size;};
+						void   setPrev(Node* prev)    {p = prev;};
+				};
+				Node* first;
+				Node* last;
 		};
 };
 
@@ -122,14 +120,6 @@ extern "C"
 		//   - and return any previous allocator.
 		Allocator*   setAllocator(Allocator* alloc);
 #endif
-
-		// For the dm dictionaries (so that a single element array can see):
-		// pointer to address of start
-		void**  getStart();
-		// pointer to the address of curr
-		void**  getCurr();
-		// pointer to the maximum size allocated
-		size_t* getSize();
 #if __cplusplus
 }
 #endif
