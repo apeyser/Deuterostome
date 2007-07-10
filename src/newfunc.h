@@ -64,7 +64,7 @@ namespace Plugins
 				{
 						Node* p; // prev node in linked-list
 						size_t sz; // size of node include header and padding
-						long a; // actively used
+						size_t a; // actively used
 						
 				    Node(size_t sz, Node* p, bool active)
 								:p(p), sz(sz), a(active) {};
