@@ -241,7 +241,8 @@ void operator delete[](void* ptr) throw() {
 		operator delete((char*) ptr);
 };
 
-void* Plugins::Allocator::operator new(size_t s, void*& start, size_t& size) throw()
+void* Plugins::Allocator::operator new(size_t s, void*& start, size_t& size)
+		throw()
 {
 		void* b = (char*) start
 				+ ((sizeof(void*) - ((size_t) start % sizeof(void*)))
