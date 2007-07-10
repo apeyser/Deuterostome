@@ -132,7 +132,7 @@ void* Allocator::addNode(size_t size_n) throw()
 				return (char*) n + sizeof(Node);
 		}
 						
-		n = getMem(size_n);
+		if (! (n = getMem(size_n))) return NULL;
 		if (! used.n) used.n = n;
 		if (used.l) {
 				used.l->n = n;
@@ -142,32 +142,29 @@ void* Allocator::addNode(size_t size_n) throw()
 		return (char*) n + sizeof(Node);
 }
 
-void* operator new(size_t size) throw(bad_alloc)
-{
-		if (! Allocator::get()) throw bad_alloc();
-		void* r = Allocator::get()->addNode(size);
-		if (! r) throw bad_alloc();
-		return r;
-}
-
-void* operator new(size_t size, const nothrow_t&) throw() 
-{
-		if (! Allocator::get()) return NULL;
-		return Allocator::get()->addNode(size);
-}
-
-void* operator new[](size_t size) throw(bad_alloc) 
-{
-		if (! Allocator::get()) throw bad_alloc();
-		void* r = Allocator::get()->addNode(size);
-		if (! r) throw bad_alloc();
-		return r;
-}
-
 void* operator new[](size_t size, const nothrow_t&) throw() 
 {
 		if (! Allocator::get()) return NULL;
 		return Allocator::get()->addNode(size);
+}
+
+void* operator new(size_t size, const nothrow_t& t) throw() 
+{
+		return new(t) char[size];
+}
+
+void* operator new(size_t size) throw(bad_alloc)
+{
+		void* r = new(nothrow_t()) char[size];
+		if (! r) throw bad_alloc();
+		return r;
+}
+
+void* operator new[](size_t size) throw(bad_alloc) 
+{
+		void* r = new (nothrow_t()) char[size];
+		if (! r) throw bad_alloc();
+		return r;
 }
 
 void Allocator::removeNode(void* ptr) throw()
@@ -229,19 +226,21 @@ void Allocator::removeNode(void* ptr) throw()
 		}
 }
 
-void operator delete(void* ptr) throw() {
+void operator delete(void* ptr, const nothrow_t&) throw() {
 		if (! ptr) return;
 		if (Allocator::get()) Allocator::get()->removeNode(ptr);
 };
 
-void operator delete(void* ptr, const nothrow_t&) throw() {
-		delete((char*) ptr);
+void operator delete(void* ptr) throw() {
+		operator delete((char*) ptr, nothrow_t());
 };
+
 void operator delete[](void* ptr) throw() {
-		delete((char*) ptr);
+		operator delete((char*) ptr, nothrow_t());
 };
-void operator delete[](void* ptr, const nothrow_t&) throw() {
-		delete((char*) ptr);
+
+void operator delete[](void* ptr, const nothrow_t& t) throw() {
+		operator delete((char*) ptr, t);
 };
 
 void* Allocator::operator new(size_t s, void*& start, size_t& size) throw()
