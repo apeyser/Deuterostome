@@ -36,12 +36,12 @@ namespace Plugins
 				
 			public:
 				// Create an Allocator with a pool starting at start buffer
-				// with up to size bytes
+				//   - with up to size bytes
 				Allocator(void* start, size_t size) throw(bad_alloc);
 				virtual ~Allocator(void) {};
 
 				// set the current Allocator used for new's
-				//   and return previous one.
+				//   - and return previous one.
 				static Allocator* set(Allocator* alloc) throw();
 				// get the current Allocator used for new's
 				static Allocator* get(void) throw();
@@ -49,12 +49,12 @@ namespace Plugins
 				// get memory block of at least size
 				void* addNode(size_t size) throw();
 				// discard the memory block at ptr; must have been created
-				//   by addNode
+				//   - by addNode
 				void  removeNode(void* ptr) throw();
 
 				// new operator for allocator; shifts start and size to
-				// account for Allocator, and checks that that some size
-				// is left.
+				//   - account for Allocator, and checks that that some size
+				//   - is left.
 				void* operator new(size_t s, void*& start, size_t& size)
 						throw(bad_alloc);
 
@@ -62,9 +62,9 @@ namespace Plugins
 				// Our linked list of memory
 				struct Node 
 				{
-						Node* p; // prev node in linked-list
+						Node* p;   // prev node in linked-list
 						size_t sz; // size of node include header and padding
-						size_t a; // actively used
+						size_t a;  // actively used
 						
 				    Node(size_t sz, Node* p, bool active)
 								:p(p), sz(sz), a(active) {};
