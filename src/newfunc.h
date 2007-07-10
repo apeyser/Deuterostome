@@ -14,6 +14,9 @@ namespace Plugins
 		// When global new and delete are called, they are redirected
 		//   - to addNode and removeNode.
 		// The C interface is defined at the end of the header.
+		// The associated new and delete operators are defined in
+		//   - newfunc.cpp; the library should be linked into the plugin
+		//   - to replace the standard operators.
 		class Allocator 
 		{
 			private:
