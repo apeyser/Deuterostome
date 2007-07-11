@@ -1,7 +1,11 @@
 #include "newfunc.h"
+#include <memory>
+#include <exception>
+#include <ext/new_allocator.h>
 
 using namespace Plugins;
 using namespace std;
+namespace gnu = __gnu_cxx;
 
 size_t Allocator::prealign(void* pos) throw()
 {
@@ -80,7 +84,7 @@ void* Allocator::addNode(size_t size) throw()
 		if (! n) return NULL;
 		
 		n->setActive(true);
-		return n + sizeof(Node);
+		return (char*) n + sizeof(Node);
 }
 
 void* operator new(size_t size, const nothrow_t&) throw() 
@@ -110,6 +114,7 @@ void Allocator::fuseNode(Node* n) throw()
 {
 		Node* next = n->next();
 		Node* prev = n->prev();
+		
 		if (next <= last && ! next->active()) {
 				n->setSize(n->size() + next->size());
 				if (next == last) last = n;
@@ -117,7 +122,7 @@ void Allocator::fuseNode(Node* n) throw()
 		}
 
 		if (prev && ! prev->active()) {
-				prev->setSize(last->size()+n->size());
+				prev->setSize(prev->size() + n->size());
 				if (n == last) last = prev;
 				else n->next()->setPrev(prev);
 		}
@@ -163,6 +168,11 @@ void* Allocator::operator new(size_t s, void*& start, size_t& size)
 		return b;
 }
 
+int Allocator::checkleak(void) 
+{
+		return (first == last && ! first->active());
+}
+
 extern "C"
 {
 		void* makeAllocator(void* start, size_t size)
@@ -175,6 +185,27 @@ extern "C"
 		{
 				return Allocator::set((Allocator*) alloc);
 		}
+
+		int checkleak(void) 
+		{
+				return Allocator::get()->checkleak();
+		}
 };
 
-
+static allocator<bool> std_allocator;
+static struct AllocatorChecker
+{
+		struct IllegalAllocator : public exception 
+		{
+				IllegalAllocator(void) {};
+				const char* what() const throw() {
+						return "The default allocator is not __gnu_cxx::new_allocator";
+				}
+				
+		};
+		
+		AllocatorChecker(void) {
+				if (! dynamic_cast<gnu::new_allocator<bool>*>(&std_allocator))
+						throw IllegalAllocator();
+		};
+} checker;

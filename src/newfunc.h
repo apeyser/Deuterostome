@@ -58,6 +58,8 @@ namespace Plugins
 				void* operator new(size_t s, void*& start, size_t& size)
 						throw(bad_alloc);
 
+				int checkleak(void);
+
 		protected:
 				// Our linked list of memory
 				struct Node 
@@ -117,6 +119,7 @@ extern "C"
 		// set the current allocator (as returned by makeAllocator)
 		//   - and return any previous allocator.
 		Allocator*   setAllocator(Allocator* alloc);
+		int checkleak(void);
 #endif
 #if __cplusplus
 }
