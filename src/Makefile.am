@@ -44,7 +44,7 @@ if ENABLE_PLUGINS
 PLUGIN_HDR = plugin.h pluginlib.h newfunc.h
 PLUGIN_LD = @LIBLTDL@
 PLUGIN_LIB = libdmcppplugin.la
-libdmcppplugin_la_SOURCES = newfunc.cpp
+libdmcppplugin_la_SOURCES = newfunc.cpp dmalloc.cpp dmalloc.h
 endif ENABLE_PLUGINS
 
 pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \

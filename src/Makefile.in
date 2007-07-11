@@ -38,7 +38,6 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-LIBOBJDIR =
 bin_PROGRAMS = dvt$(EXEEXT) dnode$(EXEEXT) dgen$(EXEEXT)
 noinst_PROGRAMS = testwordorder$(EXEEXT) $(am__EXEEXT_1)
 subdir = src
@@ -84,8 +83,9 @@ am_libdmbootstrap_la_OBJECTS = libdmbootstrap_la-dmglobals.lo \
 	libdmbootstrap_la-dsp2.lo libdmbootstrap_la-plugin.lo
 libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
 libdmcppplugin_la_LIBADD =
-am__libdmcppplugin_la_SOURCES_DIST = newfunc.cpp
-@ENABLE_PLUGINS_TRUE@am_libdmcppplugin_la_OBJECTS = newfunc.lo
+am__libdmcppplugin_la_SOURCES_DIST = newfunc.cpp dmalloc.cpp dmalloc.h
+@ENABLE_PLUGINS_TRUE@am_libdmcppplugin_la_OBJECTS = newfunc.lo \
+@ENABLE_PLUGINS_TRUE@	dmalloc.lo
 libdmcppplugin_la_OBJECTS = $(am_libdmcppplugin_la_OBJECTS)
 @ENABLE_PLUGINS_TRUE@am_libdmcppplugin_la_rpath = -rpath $(libdir)
 libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -433,7 +433,7 @@ INCLUDE = @INCLTDL@
 @ENABLE_PLUGINS_TRUE@PLUGIN_HDR = plugin.h pluginlib.h newfunc.h
 @ENABLE_PLUGINS_TRUE@PLUGIN_LD = @LIBLTDL@
 @ENABLE_PLUGINS_TRUE@PLUGIN_LIB = libdmcppplugin.la
-@ENABLE_PLUGINS_TRUE@libdmcppplugin_la_SOURCES = newfunc.cpp
+@ENABLE_PLUGINS_TRUE@libdmcppplugin_la_SOURCES = newfunc.cpp dmalloc.cpp dmalloc.h
 pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
 	error-local.h dm-snprintf.h
 
@@ -621,6 +621,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dgen.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmalloc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dnode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-nice.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvt-dvt.Po@am__quote@

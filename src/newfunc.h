@@ -1,7 +1,6 @@
 #ifndef NEWFUNC_H
 #define NEWFUNC_H
 
-
 // This header is not intended to be included by cpp code, but by c-code.
 // -- newfunc.cpp includes it and redefines the global new operator
 // -- for cpp code, which then affects that code by being linked in
@@ -37,66 +36,32 @@ namespace Plugins
 			public:
 				// Create an Allocator with a pool starting at start buffer
 				//   - with up to size bytes
-				Allocator(void* start, size_t size) throw(bad_alloc);
-				virtual ~Allocator(void) {};
+				Allocator(void* start, size_t size) throw();
+				virtual ~Allocator(void) throw();
 
 				// set the current Allocator used for new's
 				//   - and return previous one.
 				static Allocator* set(Allocator* alloc) throw();
 				// get the current Allocator used for new's
 				static Allocator* get(void) throw();
-
-				// get memory block of at least size
-				void* addNode(size_t size) throw();
-				// discard the memory block at ptr; must have been created
-				//   - by addNode
-				void  removeNode(void* ptr) throw();
-
+				
 				// new operator for allocator; shifts start and size to
 				//   - account for Allocator, and checks that that some size
 				//   - is left.
 				void* operator new(size_t s, void*& start, size_t& size)
 						throw(bad_alloc);
 
-				int checkleak(void);
+				int leaked(void);
+
+				void* malloc(size_t) throw();
+				void  free(void*) throw();
 
 		protected:
-				// Our linked list of memory
-				struct Node 
-				{
-						Node* p;   // prev node in linked-list
-						size_t sz; // size of node include header and padding
-						size_t a;  // actively used
-						
-				    Node(size_t sz, Node* p, bool active)
-								:p(p), sz(sz), a(active) {};
-						
-						Node*  prev(void)   {return p;};
-						Node*  next(void)   {return (Node*) ((char*) this + sz);};
-						bool   active(void) {return a;};
-						size_t size(void)   {return sz;}
-						
-						void   setActive(bool active) {a = active;};
-						void   setSize(size_t size)   {sz = size;};
-						void   setPrev(Node* prev)    {p = prev;};
-				};
-				// return a new Node from the deleted pool of size, with added size
-				//   -  for Node
-				Node* splitNode(size_t size) throw();
-				// defragment around inactive Node
-				void  fuseNode(Node*) throw();
-
 				// The current allocator used by new's
 				static Allocator* currAlloc;
 
-				// return offset to align Nodes at pos
-				static size_t prealign(void* pos) throw();
-				// return size of Node of size size, with padding added
-				//   - size should already include header size
-				static size_t postalign(void* pos, size_t size) throw();
-
-				Node* first;
-				Node* last;
+				void* space;
+				size_t init_footprint;
 		};
 };
 
@@ -119,7 +84,7 @@ extern "C"
 		// set the current allocator (as returned by makeAllocator)
 		//   - and return any previous allocator.
 		Allocator*   setAllocator(Allocator* alloc);
-		int checkleak(void);
+		int leaked(void);
 #endif
 #if __cplusplus
 }

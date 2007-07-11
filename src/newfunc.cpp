@@ -1,4 +1,5 @@
 #include "newfunc.h"
+#include "dmalloc.h"
 #include <memory>
 #include <exception>
 #include <ext/new_allocator.h>
@@ -7,64 +8,14 @@ using namespace Plugins;
 using namespace std;
 namespace gnu = __gnu_cxx;
 
-size_t Allocator::prealign(void* pos) throw()
+Allocator::Allocator(void* start, size_t size) throw()
+		: space(create_mspace_with_base(start, size, 0)),
+			init_footprint(mspace_mallinfo(space).uordblks)
+{}
+
+Allocator::~Allocator(void) throw()
 {
-		
-		switch (sizeof(Allocator::Node)) {
-				case 0: case 1: return 0;
-				case 2: return (size_t) pos % 2;
-				case 3: case 4: return (4 - (size_t) pos % 4) % 4;
-				default:
-						return (sizeof(void*) - (size_t) pos % sizeof(void*))
-								   % sizeof(void*);
-		};
-}
-
-size_t Allocator::postalign(void* pos, size_t size) throw()
-{
-		void* next = (char*) pos + size;
-		switch (sizeof(Allocator::Node)) {
-				case 0: case 1: return size; break;
-				case 2: return size +((size_t) next + size) % 2;
-				case 3: case 4: return size + (4 - ((size_t) next + size) % 4) % 4;
-				default:
-						return size + (sizeof(void*) - ((size_t) next + size)
-														 % sizeof(void*))
-								            % sizeof(void*);
-		};
-}
-
-Allocator::Allocator(void* start, size_t size) throw(bad_alloc)
-{
-		size_t pre = prealign(start);
-		size -= pre;
-		start = (char*) start + pre;
-		if (size <= sizeof(Node)) throw bad_alloc();
-		last = first = new(start) Node(size, NULL, false);
-}
-
-
-Allocator::Node* Allocator::splitNode(size_t size) throw()
-{
-		Node* n = first;
-		while (n <= last) {
-				if (n->active() || sizeof(Node) + size > n->size()) {
-						n = n->next();
-						continue;
-				}
-				
-				size = postalign(n, size + sizeof(Node));
-				if (size + sizeof(Node) <= n->size()) {
-						Node* nn = new((char*)n+size) Node(n->size() - size, n, false);
-						n->setSize(size);
-						if (n == last) last = nn;
-						else nn->next()->setPrev(nn);
-				}
-				
-				return n;
-		}
-
-		return NULL;
+		destroy_mspace(space);
 }
 
 Allocator* Allocator::currAlloc = NULL;
@@ -78,19 +29,21 @@ Allocator* Allocator::set(Allocator* alloc)
 
 Allocator* Allocator::get(void) throw() {return currAlloc;}
 
-void* Allocator::addNode(size_t size) throw()
+void* Allocator::malloc(size_t size) throw()
 {
-		Node* n = splitNode(size);
-		if (! n) return NULL;
-		
-		n->setActive(true);
-		return (char*) n + sizeof(Node);
+		return mspace_malloc(space, size);
 }
 
+void Allocator::free(void* ptr) throw() 
+{
+		mspace_free(space, ptr);
+}
+
+				
 void* operator new(size_t size, const nothrow_t&) throw() 
 {
 		if (! Allocator::get()) return NULL;
-		return Allocator::get()->addNode(size);
+		return Allocator::get()->malloc(size);
 }
 
 void* operator new[](size_t size, const nothrow_t& t) throw() 
@@ -110,36 +63,10 @@ void* operator new[](size_t size) throw(bad_alloc)
 		return operator new(size);
 }
 
-void Allocator::fuseNode(Node* n) throw()
-{
-		Node* next = n->next();
-		Node* prev = n->prev();
-		
-		if (next <= last && ! next->active()) {
-				n->setSize(n->size() + next->size());
-				if (next == last) last = n;
-				else next->next()->setPrev(n);
-		}
-
-		if (prev && ! prev->active()) {
-				prev->setSize(prev->size() + n->size());
-				if (n == last) last = prev;
-				else n->next()->setPrev(prev);
-		}
-}
-
-void Allocator::removeNode(void* ptr) throw()
-{
-		if (! ptr) return;
-		
-		Node* n = (Node*) ((char*) ptr - sizeof(Node));
-		n->setActive(false);
-		fuseNode(n);
-}
 
 void operator delete(void* ptr, const nothrow_t&) throw() {
 		if (! ptr) return;
-		if (Allocator::get()) Allocator::get()->removeNode(ptr);
+		if (Allocator::get()) Allocator::get()->free(ptr);
 };
 
 void operator delete[](void* ptr, const nothrow_t& t) throw() {
@@ -168,9 +95,9 @@ void* Allocator::operator new(size_t s, void*& start, size_t& size)
 		return b;
 }
 
-int Allocator::checkleak(void) 
+int Allocator::leaked(void) 
 {
-		return (first == last && ! first->active());
+		return mspace_mallinfo(space).uordblks != init_footprint;
 }
 
 extern "C"
@@ -186,9 +113,9 @@ extern "C"
 				return Allocator::set((Allocator*) alloc);
 		}
 
-		int checkleak(void) 
+		int leaked(void) 
 		{
-				return Allocator::get()->checkleak();
+				return Allocator::get()->leaked();
 		}
 };
 
