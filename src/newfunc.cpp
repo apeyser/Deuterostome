@@ -1,15 +1,13 @@
 #include "newfunc.h"
 #include "dmalloc.h"
 #include <memory>
-#include <exception>
-#include <ext/new_allocator.h>
 
-using namespace Plugins;
 using namespace std;
-namespace gnu = __gnu_cxx;
+using namespace Plugins;
 
-Allocator::Allocator(void* start, size_t size) throw()
-		: space(create_mspace_with_base(start, size, 0)),
+Allocator::Allocator(void* start, size_t size) throw(bad_alloc)
+		: SizeChecker(size),
+			space(create_mspace_with_base(start, size, 0)),
 			init_footprint(mspace_mallinfo(space).uordblks)
 {}
 
@@ -91,7 +89,7 @@ void* Allocator::operator new(size_t s, void*& start, size_t& size)
 		if ((char*) b + s > (char*) start + size) throw bad_alloc();
 		size  = (char*) start + size - ((char*) b + s);
 		start = (char*) b + s;
-		
+
 		return b;
 }
 
@@ -119,6 +117,13 @@ extern "C"
 		}
 };
 
+#if ENABLE_CHECK_ALLOCATOR
+
+#include <exception>
+#include <ext/new_allocator.h>
+
+namespace gnu = __gnu_cxx;
+
 static allocator<bool> std_allocator;
 static struct AllocatorChecker
 {
@@ -136,3 +141,5 @@ static struct AllocatorChecker
 						throw IllegalAllocator();
 		};
 } checker;
+
+#endif //ENABLE_CHECK_ALLOCATOR

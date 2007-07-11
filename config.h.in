@@ -3,6 +3,9 @@
 /* align to this many bytes */
 #undef BYTECORRECT
 
+/* Check that the default allocator is __gnu_cxx::new_allocator */
+#undef ENABLE_CHECK_ALLOCATOR
+
 /* enable extra debug in dmnum */
 #undef ENABLE_DEBUG_DMNUM
 

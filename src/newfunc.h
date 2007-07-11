@@ -17,6 +17,15 @@ namespace Plugins
 {
 		using namespace std;
 
+		class SizeChecker 
+		{
+			protected:
+				SizeChecker(size_t size) throw (bad_alloc) {
+						if (size <= 128*sizeof(size_t)) throw bad_alloc();
+				};
+		};
+		
+
 		// Allocator takes a chunk of buffer as defined by a d-machine,
 		//   - and then creates a mechanism for allocating it via C++ new.
 		// Each Allocator is a global object - the current one set statically.
@@ -26,7 +35,7 @@ namespace Plugins
 		// The associated new and delete operators are defined in
 		//   - newfunc.cpp; the library should be linked into the plugin
 		//   - to replace the standard operators.
-		class Allocator 
+		class Allocator : protected SizeChecker
 		{
 			private:
 				// Keep us from accidentally copying an Allocator
@@ -36,7 +45,7 @@ namespace Plugins
 			public:
 				// Create an Allocator with a pool starting at start buffer
 				//   - with up to size bytes
-				Allocator(void* start, size_t size) throw();
+				Allocator(void* start, size_t size) throw(bad_alloc);
 				virtual ~Allocator(void) throw();
 
 				// set the current Allocator used for new's

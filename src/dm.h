@@ -25,6 +25,11 @@
 #ifndef DM_H
 #define DM_H
 
+#if __cplusplus
+extern "C" {
+#endif
+		
+
 #if ! defined __GNUC__ && ! defined __attribute__
 #define __attribute__(attr)
 #endif // ! defined __GNUC__ && ! defined __attribute__
@@ -722,5 +727,9 @@ L op_matvecmul(void);
 
 #include "error-local.h"
 #include "dm-snprintf.h"
+
+#if __cplusplus
+}
+#endif		
 
 #endif //DM_H

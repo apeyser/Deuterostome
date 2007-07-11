@@ -1,6 +1,10 @@
 #ifndef PLUGINLIB_H
 #define PLUGINLIB_H
 
+#if __cplusplus
+extern "C" {
+#endif
+
 void initialize_plugins(void);
 void closealllibs(void);
 
@@ -25,5 +29,9 @@ extern B initname[FRAMEBYTES];
 extern B buffernameframe[FRAMEBYTES];
 
 #endif //DM_ENABLE_PLUGINS
+
+#if __cplusplus
+}
+#endif		
 
 #endif //PLUGINLIB_H

@@ -15,6 +15,8 @@ pkgdata_dir=@pkgdatadir@
 m4data_dir=@m4datadir@
 plugindata_dir=@plugindatadir@
 ldflags=@PCLDFLAGS@ @X_LIBS@ @X_PRE_LIBS@ -lX11 @X_EXTRA_LIBS@
+cxxflags=@PCCXXFLAGS@
+cxxlflags=@PCCXXLFLAGS@
 
 Name: @PACKAGE_NAME@
 Description: D-machine info for building plugins

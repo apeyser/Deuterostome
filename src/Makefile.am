@@ -34,6 +34,7 @@ DISTCLEANFILES = dm-config.h
 
 AM_CPPFLAGS = -DDM_HAVE_CONFIG_H
 AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
+AM_CXXFLAGS = $(GCC_CXXFLAGS)
 AM_LDFLAGS = -no-undefined $(PTHREAD_LIBS) $(X_LDFLAGS)
 INCLUDE = @INCLTDL@
 
@@ -41,10 +42,13 @@ bin_PROGRAMS = dvt dnode dgen
 noinst_PROGRAMS = testwordorder $(DNODENICEBIN)
 
 if ENABLE_PLUGINS
-PLUGIN_HDR = plugin.h pluginlib.h newfunc.h
-PLUGIN_LD = @LIBLTDL@
+if ENABLE_CPPPLUGIN
 PLUGIN_LIB = libdmcppplugin.la
-libdmcppplugin_la_SOURCES = newfunc.cpp dmalloc.cpp dmalloc.h
+libdmcppplugin_la_SOURCES = newfunc.cpp dmalloc.cpp dmalloc.h newfunc.h
+CPPPLUGIN_HDR = newfunc.h
+endif ENABLE_CPPPLUGIN
+PLUGIN_HDR = plugin.h pluginlib.h $(CPPPLUGIN_HDR)
+PLUGIN_LD = @LIBLTDL@
 endif ENABLE_PLUGINS
 
 pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \

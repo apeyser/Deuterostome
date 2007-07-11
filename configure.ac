@@ -20,6 +20,14 @@ CF_AC_ENABLE([xps], [compile or install only new xps], [yes])
 CF_AC_ENABLE([plugins], [compile or install plugins], [yes])
 CF_IF_ENABLED([plugins], [
   CF_AM_ENABLE([process], [compile or install process plugin], [yes])
+  CF_AM_ENABLE([cppplugin], 
+               [compile or install cpp memory library for plugins], 
+  			   [yes])
+  CF_IF_ENABLED([cppplugin], [
+    CF_AC_ENABLE([check_allocator], 
+                 [Check that the default allocator is __gnu_cxx::new_allocator], 
+				 [1])
+  ])
   CF_AM_ENABLE([dmflex], [compile or install dmflex plugin], [yes])
   CF_IF_ENABLED([dmflex], [
     AM_PROG_LEX
@@ -195,6 +203,26 @@ CF_GCC_COMPILER_OPTION([-Wno-pointer-sign], [GCC_CFLAGS])
 CF_GCC_COMPILER_OPTION([-fprefetch-loop-arrays], [GCC_CFLAGS])
 CF_GCC_COMPILER_OPTION([-std=gnu99])
 
+CF_IF_ENABLED([cppplugin], [
+  CF_IF_UNDEF([CXXFLAGS], [
+    CF_ON_TARGET([*-pc-cygwin], [], [
+      CF_GXX_COMPILER_OPTION([-g])
+    ])
+    CF_GXX_COMPILER_OPTION([-O2])
+  ])
+
+  CF_GXX_COMPILER_OPTION([-ftree-vectorize])
+  CF_GXX_COMPILER_OPTION([-fno-strict-aliasing])
+
+  CF_GXX_COMPILER_OPTION([-pipe], [GCC_CXXFLAGS])
+  CF_GXX_COMPILER_OPTION([-fno-unsigned-char], [GCC_CXXFLAGS])
+  CF_GXX_COMPILER_OPTION([-ffast-math], [GCC_CXXFLAGS])
+  CF_GXX_COMPILER_OPTION([-fno-finite-math-only], [GCC_CXXFLAGS])
+  CF_GXX_COMPILER_OPTION([-fno-unsafe-math-optimizations], [GCC_CXXFLAGS])
+  CF_GXX_COMPILER_OPTION([-Wno-pointer-sign], [GCC_CXXFLAGS])
+  CF_GXX_COMPILER_OPTION([-fprefetch-loop-arrays], [GCC_CXXFLAGS])
+])
+
 AC_SUBST([INCLTDL])
 AC_SUBST([LIBLTDL])
 AC_CONFIG_SUBDIRS([libltdl])
@@ -207,8 +235,18 @@ LIB_SOCKET_NSL
 CF_AC_SUBST([pkglibdir], [\${libdir}/${PACKAGE}])
 CF_AC_SUBST([pkgincludedir], [\${includedir}/${PACKAGE}])
 CF_AC_SUBST([PCLIBS], [ ${LTLIBOBJS} -ldmglobals])
-CF_AC_SUBST([PCCFLAGS], [${GCC_CFLAGS} ${LIBDM_DLL_IMPORT} ${X_CFLAGS}])
+CF_AC_SUBST([PCCFLAGS], [${CFLAGS} ${GCC_CFLAGS} ${LIBDM_DLL_IMPORT} ${X_CFLAGS}])
 CF_AC_SUBST([PCLDFLAGS], [-module -no-undefined])
+CF_IF_ENABLED([cppplugin], [
+  CF_AC_SUBST([PCCXXFLAGS], 
+    [${CXXFLAGS} ${GCC_CXXFLAGS} ${LIBDM_DLL_IMPORT} ${X_CFLAGS}])
+  CF_AC_SUBST([PCCXXLFLAGS], [-ldmcppplugin])
+], [
+  CF_AC_SUBST([PCCXXFLAGS])
+  PCCXXFLAGS=''
+  CF_AC_SUBST([PCCXXLFLAGS])
+  PCCXXLFLAGS=''
+])
 
 AC_CONFIG_LINKS([
 		src/dsp1f.h:src/codegen/dsp1f.h.built

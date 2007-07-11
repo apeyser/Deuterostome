@@ -21,10 +21,20 @@
 #endif
 
 #if defined _WIN32 && defined DLL_EXPORT
+#if __cplusplus
+extern "C" {
+#endif
 char libPLUGIN_is_dll(void) {return 1;}
+#if __cplusplus
+}
+#endif
 #endif
 
 #include "dm.h"
+
+#if __cplusplus
+extern "C" {
+#endif
 
 L wrap_readcode(const char* file);
 
@@ -107,6 +117,10 @@ extern B buffernameframe[FRAMEBYTES];
 #define PLUGIN_DEF_NAME(name) \
   makename(name##_string, name##_frame)
 
+#if __cplusplus
+}
+#endif		
+		
 #include "pluginlib.h"
 
 #endif //PLUGIN_H
