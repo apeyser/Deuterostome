@@ -26,14 +26,16 @@ static void srandomdev(void)
 				return;
 		}
 
-		while (off < sizeof(size))
-				if ((r = read(fd, (char*) &seed + off, sizeof(seed)) == -1) {
-						if (errno != EINTR) {
-								seed = time(NULL);
-								break;
-						}
-						off += r;
-				}
+		while (off < sizeof(seed)) {
+      if ((r = read(fd, (char*) &seed + off, sizeof(seed))) == -1) {
+        if (errno != EINTR) {
+          seed = time(NULL);
+          break;
+        }
+        r = 0;
+      }
+      off += r;
+    }
 				
 		while (close(fd) && errno == EINTR);
 		srandom(seed);
