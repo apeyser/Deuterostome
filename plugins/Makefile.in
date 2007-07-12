@@ -35,6 +35,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
+LIBOBJDIR =
 subdir = plugins
 DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/dmflex.l.in \
@@ -61,8 +62,7 @@ am__installdirs = "$(DESTDIR)$(pkglibdir)"
 pkglibLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(pkglib_LTLIBRARIES)
 cpptester_la_DEPENDENCIES = $(top_builddir)/src/libdmcppplugin.la
-am_cpptester_la_OBJECTS = cpptester.lo cpptestercode.lo \
-	cpptestermap.lo
+am_cpptester_la_OBJECTS = cpptester.lo cpptestercode.lo
 cpptester_la_OBJECTS = $(am_cpptester_la_OBJECTS)
 @ENABLE_CPPPLUGIN_TRUE@am_cpptester_la_rpath = -rpath $(pkglibdir)
 dmflex_la_LIBADD =
@@ -392,8 +392,7 @@ dist_noinst_DATA = process2.d stats.d
 stats_la_SOURCES = stats.h stats.c
 @ENABLE_CPPPLUGIN_TRUE@CPPPLUGIN_LIB = cpptester.la
 cpptester_la_SOURCES = cpptester.c cpptester.h \
-	cpptestercode.cpp cpptestercode.h \
-	cpptestermap.c cpptestermap.h
+	cpptestercode.cpp cpptestercode.h
 
 cpptester_la_LIBADD = $(top_builddir)/src/libdmcppplugin.la
 @ENABLE_DMFLEX_TRUE@DMFLEX_LIB = dmflex.la
@@ -495,7 +494,6 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpptester.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpptestercode.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpptestermap.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmflex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process2.Plo@am__quote@

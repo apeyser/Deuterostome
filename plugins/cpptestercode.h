@@ -1,38 +1,28 @@
-#ifndef CPP_H
-#define CPP_H
+#ifndef CPPTESTERCODE_H
+#define CPPTESTERCODE_H
 
 #if __cplusplus
 
-#include <deque>
-namespace Cpp 
-{
-		using namespace std;
+#include <cstddef>
 
-		class Tester
-		{
-		public:
-				Tester(void);
-				~Tester(void);
-				
-				static Tester* tester;
-				typedef deque<int> dq;
-				dq* l;
-		};
-}
-
+namespace Cpp {struct Tester;}
+using namespace Cpp;
 
 extern "C" 
 {
+#else
+  #include <stdlib.h>
+  typedef struct Tester {} Tester;
 #endif
-		int init(void);
-		int addElem(int v);
-		int getElem(int* i);
-		int removeElem(void);
-		int resetElems(void);
-		int create(void**);
-		int createSized(void**, size_t);
-		int destroy(void*);
-		int fini(void);
+  extern int (*init)(Tester**);
+  extern int (*addElem)(Tester*, int v);
+  extern int (*getElem)(Tester*, int* i);
+  extern int (*removeElem)(Tester*);
+  extern int (*resetElems)(Tester*);
+  extern int (*create)(void**);
+  extern int (*createSized)(void**, size_t);
+  extern int (*destroy)(void*);
+  extern int (*fini)(Tester*);
 #if __cplusplus
 }
 #endif

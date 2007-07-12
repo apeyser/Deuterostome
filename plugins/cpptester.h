@@ -4,6 +4,7 @@
 #define PLUGIN_NAME cpptester
 #include "../src/plugin.h"
 
+#define CPPTESTER_TESTER(frame) (LONG_VAL(OPAQUE_MEM(frame, CPPTESTER_TESTER_N)))
 
 
 #define CPPTESTER_BAD_ALLOC (1L)
@@ -16,5 +17,8 @@ L op_maketester(void);
 
 #define op_runtester EXPORTNAME(op_runtester)
 L op_runtester(void);
+
+#define op_killtester EXPORTNAME(op_killtester)
+L op_killtester(void);
 
 #endif

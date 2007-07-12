@@ -1,32 +1,45 @@
 #include "cpptestercode.h"
 #include "newfunc.h"
 
-using namespace Cpp;
 using namespace Plugins;
+#include <deque>
 
-Tester::Tester(void)
-		: l(new dq()) 
-{}
-
-Tester::~Tester(void) 
+namespace Cpp 
 {
-		delete l;
+  using namespace std;
+  
+  struct Tester
+  {
+    typedef deque<int> dq;
+    dq* l;
+
+    Tester(void) : l(new dq()) {};
+    ~Tester(void) {delete l;};
+    
+    static void init(Tester** t) {*t = new Tester();};
+    static void addElem(Tester* t, int i) {t->l->push_back(i);};
+    static void getElem(Tester* t, int* i) {*i = (*t->l)[*i];};
+    static void removeElem(Tester* t) {t->l->pop_back();};
+    static void resetElems(Tester* t) {
+      delete t->l;
+      t->l = new Tester::dq();
+    };
+    static void fini(Tester* t) {delete t;};
+    static void create(void** i) {*i = new int;};
+    static void destroy(void* i) {delete (int*) i;};
+    static void createSized(void** i, size_t s) {*i = new char[s];};
+  };
 }
 
-Tester* Tester::tester = NULL;
+using namespace Cpp;
 
-extern "C" 
-{
-		WrapperMF(init, Init,{Tester::tester = new Tester();});
-		Wrapper1MF(addElem, AddElem, int, {Tester::tester->l->push_back(a);});
-		Wrapper1MF(getElem, GetElem, int*, {*a = (*Tester::tester->l)[*a];});
-		WrapperMF(removeElem, RemoveElem, {Tester::tester->l->pop_back();});
-		WrapperMF(resetElems, ResetElems, {						\
-						delete Tester::tester->l;											\
-						Tester::tester->l = new Tester::dq();});
-		WrapperMF(fini, Fini, {delete Tester::tester;});
-		Wrapper1MF(create, Create, void**, {*a = new int;});
-		Wrapper1MF(destroy, Destroy, void*, {delete (int*) a;});
-		Wrapper2MF(createSized, CreateSized, void**, size_t, {*a = new char[b];});
-}
-
+int (*init)(Tester**) = wrapper1<Tester**, Tester::init>;
+int (*addElem)(Tester*,int) = wrapper2<Tester*, int, Tester::addElem>;
+int (*getElem)(Tester*,int*) = wrapper2<Tester*, int*, Tester::getElem> ;
+int (*removeElem)(Tester*) = wrapper1<Tester*, Tester::removeElem>;
+int (*resetElems)(Tester*) = wrapper1<Tester*, Tester::resetElems>;
+int (*create)(void**) = wrapper1<void**, Tester::create>;
+int (*createSized)(void**, size_t) 
+   = wrapper2<void**, size_t, Tester::createSized>;
+int (*destroy)(void*) = wrapper1<void*, Tester::destroy>;
+int (*fini)(Tester*) = wrapper1<Tester*, Tester::fini>;
