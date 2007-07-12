@@ -1,5 +1,4 @@
 #include "cpptestercode.h"
-#include "newfunc.h"
 
 using namespace Plugins;
 #include <deque>
@@ -33,13 +32,12 @@ namespace Cpp
 
 using namespace Cpp;
 
-int (*init)(Tester**) = wrapper1<Tester**, Tester::init>;
-int (*addElem)(Tester*,int) = wrapper2<Tester*, int, Tester::addElem>;
-int (*getElem)(Tester*,int*) = wrapper2<Tester*, int*, Tester::getElem> ;
-int (*removeElem)(Tester*) = wrapper1<Tester*, Tester::removeElem>;
-int (*resetElems)(Tester*) = wrapper1<Tester*, Tester::resetElems>;
-int (*create)(void**) = wrapper1<void**, Tester::create>;
-int (*createSized)(void**, size_t) 
-   = wrapper2<void**, size_t, Tester::createSized>;
-int (*destroy)(void*) = wrapper1<void*, Tester::destroy>;
-int (*fini)(Tester*) = wrapper1<Tester*, Tester::fini>;
+wrapperM1(Tester, init, Tester**);
+wrapperM2(Tester, addElem, Tester*, int);
+wrapperM2(Tester, getElem, Tester*, int*);
+wrapperM1(Tester, removeElem, Tester*);
+wrapperM1(Tester, resetElems, Tester*);
+wrapperM1(Tester, create, void**);
+wrapperM2(Tester, createSized, void**, size_t);
+wrapperM1(Tester, destroy, void*);
+wrapperM1(Tester, fini, Tester*);

@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "srandomdev-local.h"
 
 #include "cpptester.h"
 
@@ -33,6 +34,7 @@ B* ll_export[] = {
   "FINI_", (B*) op_FINI_,
 "maketester", (B*) op_maketester,
 "runtester", (B*) op_runtester,
+"randomtester", (B*) op_randomtester,
 "killtester", (B*) op_killtester,
   "", NULL
 };
@@ -66,6 +68,41 @@ int finalize(Tester* t) {
   int ret;
   if ((ret = fini(t))) return ret;
   if (leaked()) return 3;
+  return 0;
+}
+
+#define check_ret(ret)       switch (ret) { \
+        case 0: break; \
+        case 1: RETURN_ERROR(CPPTESTER_BAD_ALLOC); \
+        case 2: RETURN_ERROR(CPPTESTER_ABORT_ALLOC); \
+        case 3: RETURN_ERROR(CPPTESTER_LEAK_ALLOC); \
+        default: RETURN_ERROR(CPPTESTER_UNKNOWN_ALLOC); \
+      }
+
+int randomtester(int times, int inner, int max, Tester* t) {
+  static int initrand = 0;
+  size_t i, j, k;
+  int ret;
+  void** saved = (void**) alloca(sizeof(void*)*inner);
+  if (! initrand) {
+    srandomdev();
+    initrand = 1;
+  }
+
+  for (j = 0; j < times; j++) {
+    for (i = 0; i < inner; i++) saved[i] = NULL;
+
+    for (i = 0; i < inner; i++)
+      for (k = random()%inner; ! saved[k]; k = (k+1)%inner);
+        if ((ret = createSized(&saved[k], random()%max)))
+          return ret;
+
+    for (i = 0; i < inner; i++)
+      for (k = random()%inner; saved[k]; k = (k+1)%inner);
+        if ((ret = destroy(saved[k])))
+          return ret;
+  }
+      
   return 0;
 }
 
@@ -105,13 +142,7 @@ NULL);
       old = setAllocator(alloc);
       ret = init(&t);
       setAllocator(old);
-      switch (ret) {
-        case 0: break;
-        case 1: RETURN_ERROR(CPPTESTER_BAD_ALLOC);
-        case 2: RETURN_ERROR(CPPTESTER_ABORT_ALLOC);
-        case 3: RETURN_ERROR(CPPTESTER_LEAK_ALLOC);
-        default: RETURN_ERROR(CPPTESTER_UNKNOWN_ALLOC);
-      };
+      check_ret(ret);
       TAG(initframe)= (NUM | LONGTYPE); ATTR(initframe) = 0;
       LONG_VAL((initframe)) = (L) t;
      OPAQUE_MEM_SET(procframe, CPPTESTER_TESTER_N, initframe);
@@ -140,14 +171,37 @@ L op_runtester(void) {
       t = (Tester*) CPPTESTER_TESTER(o_1);
       ret = runtester(times, max, t);
       setAllocator(old);
-      switch (ret) {
-        case 0: FREEopds = o_3; return OK;
-        case 1: RETURN_ERROR(CPPTESTER_BAD_ALLOC);
-        case 2: RETURN_ERROR(CPPTESTER_ABORT_ALLOC);
-        case 3: RETURN_ERROR(CPPTESTER_LEAK_ALLOC);
-        default: RETURN_ERROR(CPPTESTER_UNKNOWN_ALLOC);
-      }
+      check_ret(ret);
 
+      FREEopds = o_3;
+      return OK;
+
+}
+
+L op_randomtester(void) {
+
+      Allocator* old;
+      Tester* t;
+      int ret;
+      L times, inner, max;
+      if (o_4 < FLOORopds) return OPDS_UNF;
+      TEST_OPAQUE(o_1);
+      if (CLASS(o_2) != NUM) return OPD_CLA;
+      if (!VALUE(o_2, &max)) return UNDF_VAL;
+      if (CLASS(o_3) != NUM) return OPD_CLA;
+      if (!VALUE(o_3, &inner)) return UNDF_VAL;
+      if (CLASS(o_4) != NUM) return OPD_CLA;
+      if (!VALUE(o_4, &times)) return UNDF_VAL;
+
+      old = setAllocator((Allocator*)OPAQUE_MEM(o_1, buffernameframe));
+      t = (Tester*) CPPTESTER_TESTER(o_1);
+      ret = randomtester(times, inner, max, t);
+      setAllocator(old);
+      check_ret(ret);
+
+      FREEopds = o_4;
+      return OK;
+ 
 }
 
 L op_killtester(void) {
@@ -162,16 +216,12 @@ L op_killtester(void) {
        old = setAllocator((Allocator*)OPAQUE_MEM(o_1, buffernameframe));
        t = (Tester*) CPPTESTER_TESTER(o_1);
        ret = finalize(t);
-       setAllocator(old); 
-       switch (ret) {
-        case 0: FREEopds = o_1; 
-                KILL_OPAQUE(o1); 
-                return OK;
-        case 1: RETURN_ERROR(CPPTESTER_BAD_ALLOC);
-        case 2: RETURN_ERROR(CPPTESTER_ABORT_ALLOC);
-        case 3: RETURN_ERROR(CPPTESTER_LEAK_ALLOC);
-        default: RETURN_ERROR(CPPTESTER_UNKNOWN_ALLOC);
-      };
+       setAllocator(old);
+       check_ret(ret);
+
+       FREEopds = o_1; 
+       KILL_OPAQUE(o1); 
+       return OK;
 
 }
 

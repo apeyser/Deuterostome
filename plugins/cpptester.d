@@ -20,9 +20,10 @@ end def
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "srandomdev-local.h"
 ) def
 
-/bodycode (
+/bodycode {(
 int runtester\(int times, int max, Tester* t\) 
 {
   int i, j;
@@ -49,7 +50,43 @@ int finalize\(Tester* t\) {
   if \(leaked\(\)\) return 3;
   return 0;
 }
-) def
+
+#define check_ret\(ret\) \
+      switch \(ret\) { \\
+        case 0: break; \\
+        case 1: ) /BAD_ALLOC error_ (; \\
+        case 2: ) /ABORT_ALLOC error_ (; \\
+        case 3: ) /LEAK_ALLOC error_ (; \\
+        default: ) /UNKNOWN_ALLOC error_ (; \\
+      }
+
+int randomtester\(int times, int inner, int max, Tester* t\) {
+  static int initrand = 0;
+  size_t i, j, k;
+  int ret;
+  void** saved = \(void**\) alloca\(sizeof\(void*\)*inner\);
+  if \(! initrand\) {
+    srandomdev\(\);
+    initrand = 1;
+  }
+
+  for \(j = 0; j < times; j++\) {
+    for \(i = 0; i < inner; i++\) saved[i] = NULL;
+
+    for \(i = 0; i < inner; i++\)
+      for \(k = random\(\)%inner; ! saved[k]; k = \(k+1\)%inner\);
+        if \(\(ret = createSized\(&saved[k], random\(\)%max\)\)\)
+          return ret;
+
+    for \(i = 0; i < inner; i++\)
+      for \(k = random\(\)%inner; saved[k]; k = \(k+1\)%inner\);
+        if \(\(ret = destroy\(saved[k]\)\)\)
+          return ret;
+  }
+      
+  return 0;
+}
+)} def
 
 /makehandles {[[/TESTER {(LONG_VAL\() handle (\))}]]} bind def
 
@@ -72,13 +109,7 @@ int finalize\(Tester* t\) {
       old = setAllocator\(alloc\);
       ret = init\(&t\);
       setAllocator\(old\);
-      switch \(ret\) {
-        case 0: break;
-        case 1: ) /BAD_ALLOC error_ (;
-        case 2: ) /ABORT_ALLOC error_ (;
-        case 3: ) /LEAK_ALLOC error_ (;
-        default: ) /UNKNOWN_ALLOC error_ (;
-      };
+      check_ret\(ret\);
       TAG) handle (= \(NUM | LONGTYPE\); ATTR) handle ( = 0;
       LONG_VAL\() handle (\) = \(L\) t;
      ) /TESTER make_handle (;
@@ -102,14 +133,35 @@ int finalize\(Tester* t\) {
       t = \(Tester*\) ) /TESTER (o_1) handle (;
       ret = runtester\(times, max, t\);
       setAllocator\(old\);
-      switch \(ret\) {
-        case 0: FREEopds = o_3; return OK;
-        case 1: ) /BAD_ALLOC error_ (;
-        case 2: ) /ABORT_ALLOC error_ (;
-        case 3: ) /LEAK_ALLOC error_ (;
-        default: ) /UNKNOWN_ALLOC error_ (;
-      }
+      check_ret\(ret\);
+
+      FREEopds = o_3;
+      return OK;
 )}
+    ][
+      /randomtester {(
+      Allocator* old;
+      Tester* t;
+      int ret;
+      L times, inner, max;
+      if \(o_4 < FLOORopds\) return OPDS_UNF;
+      TEST_OPAQUE\(o_1\);
+      if \(CLASS\(o_2\) != NUM\) return OPD_CLA;
+      if \(!VALUE\(o_2, &max\)\) return UNDF_VAL;
+      if \(CLASS\(o_3\) != NUM\) return OPD_CLA;
+      if \(!VALUE\(o_3, &inner\)\) return UNDF_VAL;
+      if \(CLASS\(o_4\) != NUM\) return OPD_CLA;
+      if \(!VALUE\(o_4, &times\)\) return UNDF_VAL;
+
+      old = setAllocator\(\(Allocator*\)) (o_1) getbufferfrom (\);
+      t = \(Tester*\) ) /TESTER (o_1) handle (;
+      ret = randomtester\(times, inner, max, t\);
+      setAllocator\(old\);
+      check_ret\(ret\);
+
+      FREEopds = o_4;
+      return OK;
+ )}
     ][
        /killtester {(
        Tester* t;
@@ -122,16 +174,12 @@ int finalize\(Tester* t\) {
        old = setAllocator\(\(Allocator*\)) (o_1) getbufferfrom (\);
        t = \(Tester*\) ) /TESTER (o_1) handle (;
        ret = finalize\(t\);
-       setAllocator\(old\); 
-       switch \(ret\) {
-        case 0: FREEopds = o_1; 
-                KILL_OPAQUE\(o1\); 
-                return OK;
-        case 1: ) /BAD_ALLOC error_ (;
-        case 2: ) /ABORT_ALLOC error_ (;
-        case 3: ) /LEAK_ALLOC error_ (;
-        default: ) /UNKNOWN_ALLOC error_ (;
-      };
+       setAllocator\(old\);
+       check_ret\(ret\);
+
+       FREEopds = o_1; 
+       KILL_OPAQUE\(o1\); 
+       return OK;
 )}
   ]
 ]} bind def

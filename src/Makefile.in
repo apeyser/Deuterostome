@@ -162,7 +162,8 @@ nodist_pkgconfiglibDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(nodist_pkgconfiglib_DATA)
 nodist_pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 am__pkginclude_HEADERS_DIST = dm.h plugin.h pluginlib.h newfunc.h \
-	dmalloc-abort.h dmx.h threads.h error-local.h dm-snprintf.h
+	dmalloc-abort.h dmx.h threads.h error-local.h dm-snprintf.h \
+	srandomdev-local.h
 pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(nodist_pkginclude_HEADERS) $(pkginclude_HEADERS)
 ETAGS = etags
@@ -450,7 +451,7 @@ INCLUDE = @INCLTDL@
 @ENABLE_PLUGINS_TRUE@PLUGIN_HDR = plugin.h pluginlib.h $(CPPPLUGIN_HDR)
 @ENABLE_PLUGINS_TRUE@PLUGIN_LD = @LIBLTDL@
 pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
-	error-local.h dm-snprintf.h
+	error-local.h dm-snprintf.h srandomdev-local.h
 
 nodist_pkginclude_HEADERS = dm-config.h  paths.h
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h

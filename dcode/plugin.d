@@ -211,7 +211,7 @@ B opaquename[FRAMEBYTES];
   } forall
   (\n) fax
   
-  bodycode fax
+  [bodycode] ~fax forall
 (
   L op_INIT_\(void\) {
 ) fax

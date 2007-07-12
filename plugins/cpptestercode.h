@@ -1,6 +1,8 @@
 #ifndef CPPTESTERCODE_H
 #define CPPTESTERCODE_H
 
+#include "newfunc.h"
+
 #if __cplusplus
 
 #include <cstddef>
@@ -14,15 +16,15 @@ extern "C"
   #include <stdlib.h>
   typedef struct Tester {} Tester;
 #endif
-  extern int (*init)(Tester**);
-  extern int (*addElem)(Tester*, int v);
-  extern int (*getElem)(Tester*, int* i);
-  extern int (*removeElem)(Tester*);
-  extern int (*resetElems)(Tester*);
-  extern int (*create)(void**);
-  extern int (*createSized)(void**, size_t);
-  extern int (*destroy)(void*);
-  extern int (*fini)(Tester*);
+	wrapperMHs(init, Tester**);
+	wrapperMHs(addElem, Tester*, int);
+	wrapperMHs(getElem, Tester*, int*);
+	wrapperMHs(removeElem, Tester*);
+	wrapperMHs(resetElems, Tester*);
+	wrapperMHs(create, void**);
+	wrapperMHs(createSized, void**, size_t);
+	wrapperMHs(destroy, void*);
+	wrapperMHs(fini, Tester*);
 #if __cplusplus
 }
 #endif

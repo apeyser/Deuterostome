@@ -18,6 +18,9 @@ L op_maketester(void);
 #define op_runtester EXPORTNAME(op_runtester)
 L op_runtester(void);
 
+#define op_randomtester EXPORTNAME(op_randomtester)
+L op_randomtester(void);
+
 #define op_killtester EXPORTNAME(op_killtester)
 L op_killtester(void);
 
