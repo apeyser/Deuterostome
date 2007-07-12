@@ -34,7 +34,6 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-LIBOBJDIR =
 subdir = emacs
 DIST_COMMON = $(dist_pkglisp_LISP) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/d-mode.el.in

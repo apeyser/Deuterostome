@@ -38,7 +38,6 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-LIBOBJDIR =
 bin_PROGRAMS = dvt$(EXEEXT) dnode$(EXEEXT) dgen$(EXEEXT)
 noinst_PROGRAMS = testwordorder$(EXEEXT) $(am__EXEEXT_1)
 subdir = src
