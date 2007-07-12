@@ -388,7 +388,7 @@ BUILT_SOURCES = process2.c process2.h stats.c stats.h cpptester.c \
 	cpptester.h dmflex.c
 process_la_SOURCES = process.c process.h
 process2_la_SOURCES = process2.c process2.h
-dist_noinst_DATA = process2.d stats.d
+dist_noinst_DATA = process2.d stats.d cpptester.d
 stats_la_SOURCES = stats.h stats.c
 @ENABLE_CPPPLUGIN_TRUE@CPPPLUGIN_LIB = cpptester.la
 cpptester_la_SOURCES = cpptester.c cpptester.h \
