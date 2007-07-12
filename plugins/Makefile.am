@@ -32,6 +32,26 @@ BUILT_SOURCES += stats.c stats.h
 stats_la_SOURCES = stats.h stats.c
 dist_noinst_DATA += stats.d
 
+if ENABLE_CPPPLUGIN
+CPPPLUGIN_LIB=cpptester.la
+endif ENABLE_CPPPLUGIN
+
+cpptester.c: cpptester.d plugin.d
+	"$(top_srcdir)/src/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "cpptester.d" "$@" true true
+
+
+cpptester.h: cpptester.d plugin.d
+	"$(top_srcdir)/src/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "cpptester.d" "$@" false true
+
+BUILT_SOURCES += cpptester.c cpptester.h
+cpptester_la_SOURCES = cpptester.c cpptester.h \
+	cpptestercode.cpp cpptestercode.h \
+	cpptestermap.c cpptestermap.h
+cpptester_la_LIBADD = $(top_builddir)/src/libdmcppplugin.la
+
+
 if ENABLE_DMFLEX
 DMFLEX_LIB=dmflex.la
 endif ENABLE_DMFLEX
@@ -39,7 +59,7 @@ BUILT_SOURCES += dmflex.c
 dmflex_la_SOURCES = dmflex.l dmflex.h
 
 pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB) \
-	stats.la
+	stats.la $(CPPPLUGIN_LIB)
 
 test_la_SOURCES = test.c test.h
 test2_la_SOURCES = test2.c test2.h

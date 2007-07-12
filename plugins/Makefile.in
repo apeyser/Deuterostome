@@ -60,6 +60,11 @@ am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(pkglibdir)"
 pkglibLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(pkglib_LTLIBRARIES)
+cpptester_la_DEPENDENCIES = $(top_builddir)/src/libdmcppplugin.la
+am_cpptester_la_OBJECTS = cpptester.lo cpptestercode.lo \
+	cpptestermap.lo
+cpptester_la_OBJECTS = $(am_cpptester_la_OBJECTS)
+@ENABLE_CPPPLUGIN_TRUE@am_cpptester_la_rpath = -rpath $(pkglibdir)
 dmflex_la_LIBADD =
 am_dmflex_la_OBJECTS = dmflex.lo
 dmflex_la_OBJECTS = $(am_dmflex_la_OBJECTS)
@@ -95,14 +100,24 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 LEXCOMPILE = $(LEX) $(LFLAGS) $(AM_LFLAGS)
 LTLEXCOMPILE = $(LIBTOOL) --mode=compile $(LEX) $(LFLAGS) $(AM_LFLAGS)
-SOURCES = $(dmflex_la_SOURCES) $(process_la_SOURCES) \
-	$(process2_la_SOURCES) $(stats_la_SOURCES) $(test_la_SOURCES) \
-	$(test2_la_SOURCES) $(throw_la_SOURCES)
-DIST_SOURCES = $(dmflex_la_SOURCES) $(process_la_SOURCES) \
-	$(process2_la_SOURCES) $(stats_la_SOURCES) $(test_la_SOURCES) \
-	$(test2_la_SOURCES) $(throw_la_SOURCES)
+SOURCES = $(cpptester_la_SOURCES) $(dmflex_la_SOURCES) \
+	$(process_la_SOURCES) $(process2_la_SOURCES) \
+	$(stats_la_SOURCES) $(test_la_SOURCES) $(test2_la_SOURCES) \
+	$(throw_la_SOURCES)
+DIST_SOURCES = $(cpptester_la_SOURCES) $(dmflex_la_SOURCES) \
+	$(process_la_SOURCES) $(process2_la_SOURCES) \
+	$(stats_la_SOURCES) $(test_la_SOURCES) $(test2_la_SOURCES) \
+	$(throw_la_SOURCES)
 DATA = $(dist_noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -369,15 +384,22 @@ AM_CFLAGS = $(GCC_CFLAGS) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
 AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 @ENABLE_PROCESS_TRUE@PROCESS_LIB = process.la process2.la
-BUILT_SOURCES = process2.c process2.h stats.c stats.h dmflex.c
+BUILT_SOURCES = process2.c process2.h stats.c stats.h cpptester.c \
+	cpptester.h dmflex.c
 process_la_SOURCES = process.c process.h
 process2_la_SOURCES = process2.c process2.h
 dist_noinst_DATA = process2.d stats.d
 stats_la_SOURCES = stats.h stats.c
+@ENABLE_CPPPLUGIN_TRUE@CPPPLUGIN_LIB = cpptester.la
+cpptester_la_SOURCES = cpptester.c cpptester.h \
+	cpptestercode.cpp cpptestercode.h \
+	cpptestermap.c cpptestermap.h
+
+cpptester_la_LIBADD = $(top_builddir)/src/libdmcppplugin.la
 @ENABLE_DMFLEX_TRUE@DMFLEX_LIB = dmflex.la
 dmflex_la_SOURCES = dmflex.l dmflex.h
 pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB) \
-	stats.la
+	stats.la $(CPPPLUGIN_LIB)
 
 test_la_SOURCES = test.c test.h
 test2_la_SOURCES = test2.c test2.h
@@ -387,7 +409,7 @@ all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .l .lo .o .obj
+.SUFFIXES: .c .cpp .l .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -448,6 +470,8 @@ clean-pkglibLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
+cpptester.la: $(cpptester_la_OBJECTS) $(cpptester_la_DEPENDENCIES) 
+	$(CXXLINK) $(am_cpptester_la_rpath) $(cpptester_la_LDFLAGS) $(cpptester_la_OBJECTS) $(cpptester_la_LIBADD) $(LIBS)
 dmflex.la: $(dmflex_la_OBJECTS) $(dmflex_la_DEPENDENCIES) 
 	$(LINK) $(am_dmflex_la_rpath) $(dmflex_la_LDFLAGS) $(dmflex_la_OBJECTS) $(dmflex_la_LIBADD) $(LIBS)
 process.la: $(process_la_OBJECTS) $(process_la_DEPENDENCIES) 
@@ -469,6 +493,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpptester.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpptestercode.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpptestermap.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmflex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process2.Plo@am__quote@
@@ -497,6 +524,27 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+.cpp.o:
+@am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
+
+.cpp.obj:
+@am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.cpp.lo:
+@am__fastdepCXX_TRUE@	if $(LTCXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
 .l.c:
 	$(LEXCOMPILE) $<
@@ -705,6 +753,14 @@ stats.c: stats.d plugin.d
 stats.h: stats.d plugin.d
 	"$(top_srcdir)/src/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "stats.d" "$@" false true
+
+cpptester.c: cpptester.d plugin.d
+	"$(top_srcdir)/src/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "cpptester.d" "$@" true true
+
+cpptester.h: cpptester.d plugin.d
+	"$(top_srcdir)/src/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "cpptester.d" "$@" false true
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

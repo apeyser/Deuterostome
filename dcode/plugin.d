@@ -30,6 +30,7 @@
 } bind def
 
 /getbufferframe {(OPAQUE_MEM\(procframe, buffernameframe\))} def
+/getbufferfrom  {(OPAQUE_MEM\() exch (, buffernameframe\))} def
 
 /build_handle {/dest name /size name /x name
   /handle (\(initframe\)) def

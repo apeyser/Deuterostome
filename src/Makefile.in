@@ -84,7 +84,7 @@ am_libdmbootstrap_la_OBJECTS = libdmbootstrap_la-dmglobals.lo \
 libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
 libdmcppplugin_la_LIBADD =
 am__libdmcppplugin_la_SOURCES_DIST = newfunc.cpp dmalloc.cpp dmalloc.h \
-	newfunc.h
+	newfunc.h dmalloc-abort.h
 @ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_TRUE@am_libdmcppplugin_la_OBJECTS =  \
 @ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_TRUE@	newfunc.lo \
 @ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_TRUE@	dmalloc.lo
@@ -162,7 +162,7 @@ nodist_pkgconfiglibDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(nodist_pkgconfiglib_DATA)
 nodist_pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 am__pkginclude_HEADERS_DIST = dm.h plugin.h pluginlib.h newfunc.h \
-	dmx.h threads.h error-local.h dm-snprintf.h
+	dmalloc-abort.h dmx.h threads.h error-local.h dm-snprintf.h
 pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(nodist_pkginclude_HEADERS) $(pkginclude_HEADERS)
 ETAGS = etags
@@ -443,8 +443,10 @@ AM_CXXFLAGS = $(GCC_CXXFLAGS)
 AM_LDFLAGS = -no-undefined $(PTHREAD_LIBS) $(X_LDFLAGS)
 INCLUDE = @INCLTDL@
 @ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_TRUE@PLUGIN_LIB = libdmcppplugin.la
-@ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_TRUE@libdmcppplugin_la_SOURCES = newfunc.cpp dmalloc.cpp dmalloc.h newfunc.h
-@ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_TRUE@CPPPLUGIN_HDR = newfunc.h
+@ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_TRUE@libdmcppplugin_la_SOURCES = newfunc.cpp dmalloc.cpp dmalloc.h newfunc.h \
+@ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_TRUE@	dmalloc-abort.h
+
+@ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_TRUE@CPPPLUGIN_HDR = newfunc.h dmalloc-abort.h
 @ENABLE_PLUGINS_TRUE@PLUGIN_HDR = plugin.h pluginlib.h $(CPPPLUGIN_HDR)
 @ENABLE_PLUGINS_TRUE@PLUGIN_LD = @LIBLTDL@
 pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \

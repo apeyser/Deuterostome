@@ -444,19 +444,7 @@ DEFAULT_MMAP_THRESHOLD       default: 256K
 #include <cstddef>
 #include <exception>
 
-namespace Dmalloc 
-{
-		using namespace std;
-		
-		struct Abort : public bad_exception 
-		{
-				Abort(void) {}
-				virtual const char* what(void) const throw()
-						{return "Abort in dmalloc.cpp";}
-		};
-		
-		static void abort(void) throw(Abort) {throw Abort();};
-};
+#include "dmalloc-abort.h"
 
 /* The maximum possible size_t value has all bits set */
 #define MAX_SIZE_T           (~(size_t)0)

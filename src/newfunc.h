@@ -12,10 +12,12 @@
 
 #if __cplusplus
 #include <new>
+#include "dmalloc-abort.h"
 
 namespace Plugins
 {
 		using namespace std;
+		using namespace Dmalloc;
 
 		class SizeChecker 
 		{
@@ -72,8 +74,65 @@ namespace Plugins
 				void* space;
 				size_t init_footprint;
 		};
-};
 
+		struct Wrapper 
+		{
+				Wrapper(void) {};
+				virtual ~Wrapper(void) {};
+
+				enum errs {OK = 0, BAD_ALLOC = 1, ABORT_ALLOC = 2};
+				
+				errs operator()(void) {
+						try {run();}
+						catch (bad_alloc&) {return BAD_ALLOC;}
+						catch (Abort&) {return ABORT_ALLOC;}
+						return OK;
+				};
+
+				virtual void run(void) = 0;
+		};
+		
+#define WrapperM(name, func)										\
+		struct name: public Wrapper									\
+		{																						\
+				void run(void) func;										\
+		}																						
+#define WrapperMF(name, Name, func)							\
+		int name(void) {WrapperM(Name, func); return (Name())();}
+				
+		template<typename A> struct Wrapper1 : public Wrapper
+		{
+				typedef Wrapper1<A> T;
+				A a;
+				Wrapper1(A a): a(a) {};
+		};
+
+#define Wrapper1M(name, type, func)												\
+		struct	name: public Wrapper1<type> {									\
+				name(type a): T(a) {};														\
+				void run(void) func;															\
+		}
+#define Wrapper1MF(name, Name, type, func)\
+		int name(type a) {Wrapper1M(Name, type, func); return (Name(a))();}
+		
+		template<typename A, typename B> struct Wrapper2 : public Wrapper
+		{
+				typedef Wrapper2<A, B> T;
+				A a;
+				B b;
+				Wrapper2(A a, B b): a(a), b(b) {};
+		};
+#define Wrapper2M(name, type1, type2, func)								\
+		struct	name: public Wrapper2<type1, type2> {					\
+				name(type1 a, type2 b): T(a, b) {};								\
+				void run(void) func;															\
+		}
+#define Wrapper2MF(name, Name, type1, type2, func)\
+		int name(type1 a, type2 b) {									\
+				Wrapper2M(Name, type1, type2, func);			\
+				return (Name(a, b))();										\
+		}
+};
 
 // Our C interface
 extern "C" 

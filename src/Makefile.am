@@ -44,8 +44,9 @@ noinst_PROGRAMS = testwordorder $(DNODENICEBIN)
 if ENABLE_PLUGINS
 if ENABLE_CPPPLUGIN
 PLUGIN_LIB = libdmcppplugin.la
-libdmcppplugin_la_SOURCES = newfunc.cpp dmalloc.cpp dmalloc.h newfunc.h
-CPPPLUGIN_HDR = newfunc.h
+libdmcppplugin_la_SOURCES = newfunc.cpp dmalloc.cpp dmalloc.h newfunc.h \
+	dmalloc-abort.h
+CPPPLUGIN_HDR = newfunc.h dmalloc-abort.h
 endif ENABLE_CPPPLUGIN
 PLUGIN_HDR = plugin.h pluginlib.h $(CPPPLUGIN_HDR)
 PLUGIN_LD = @LIBLTDL@
