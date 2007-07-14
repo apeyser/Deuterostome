@@ -132,7 +132,7 @@ L op_maketester(void) {
 
    {
       B initframe[FRAMEBYTES];
-      B* procframe = make_opaque_frame(size, opaquename, 
+      B* procframe = make_opaque_frame(size, FALSE, opaquename, 
 CPPTESTER_TESTER_N,
 NULL);
      if (! procframe) return VM_OVF;

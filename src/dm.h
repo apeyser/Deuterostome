@@ -112,8 +112,8 @@ NOTE: all objects that can populate the D machine's workspace must
       be aligned using the macro defined here.
 */
 
-#define DALIGN(bytes)         ((((UL)(bytes)+7)>>3)<<3)  /* 8 bytes */
-
+//#define DALIGN(bytes)         ((((UL)(bytes)+7)>>3)<<3)  /* 8 bytes */
+#define DALIGN(bytes)         (((UL)(bytes)+7) & ~((UL) 7)) /* 8 bytes */
 /*-------------------------- network packet size ----------------------*/
 
 #define PACKET_SIZE 8192
@@ -306,9 +306,12 @@ NOTE: all objects that can populate the D machine's workspace must
 #define OPDEFBYTES                 8L
 
 /*---------------------------------------- save box */
-#define SBOX_NOPDS(box)          (*(L *)(box))
-#define SBOX_NDICTS(box)         (*(L *)(((B*)(box))+4))
+#define SBOX_FLAGS(box)          (*(L *)(box))
+#define SBOX_UNUSED(box)         (*(L *)(((B*)(box))+4))
 #define SBOX_CAP(box)            (*(B **)(((B*)(box))+8))
+
+#define SBOX_FLAGS_NRELOC       ((UL) 0x01)
+#define SBOX_FLAGS_FREE         ((UL) 0x02)
 
 #define SBOXBYTES                16
 

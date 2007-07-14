@@ -113,7 +113,7 @@ int randomtester\(int times, int inner, int max, Tester* t\) {
       TAG) handle (= \(NUM | LONGTYPE\); ATTR) handle ( = 0;
       LONG_VAL\() handle (\) = \(L\) t;
      ) /TESTER make_handle (;
-)} (size) (o_1) build_handle (
+)} (size) false (o_1) build_handle (
       return OK;
 )}
     ][

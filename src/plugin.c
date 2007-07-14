@@ -229,7 +229,7 @@ BOOLEAN check_opaque_name(B* nameframe, B* dict) {
   return matchname(frame, nameframe);
 } 
 
-B* make_opaque_frame(L n, B* pluginnameframe, ...) {
+B* make_opaque_frame(L n, BOOLEAN relocatable, B* pluginnameframe, ...) {
   int len = 0;
   B* nameframe;
   va_list nameframes;
@@ -244,6 +244,7 @@ B* make_opaque_frame(L n, B* pluginnameframe, ...) {
   va_end(nameframes);
   
   if (op_save() != OK) return NULL;
+	if (! relocatable) SBOX_FLAGS(VALUE_PTR(o_1)) |= SBOX_FLAGS_NRELOC;
 
   if (n) {
     n = DALIGN(n);

@@ -382,7 +382,7 @@ B *bf, *bv;
 if (o1 >= CEILopds) return(OPDS_OVF);
 if ((FREEvm + FRAMEBYTES + SBOXBYTES) > CEILvm) return(VM_OVF);
 bf = FREEvm; bv = bf + FRAMEBYTES;
-SBOX_NOPDS(bv) = 0; SBOX_NDICTS(bv) = 0; SBOX_CAP(bv) = (B *)0;
+SBOX_FLAGS(bv) = 0; SBOX_UNUSED(bv) = 0; SBOX_CAP(bv) = (B *)0;
 TAG(bf) = BOX; ATTR(bf) = PARENT;
 VALUE_BASE(bf) = (L)bv; BOX_NB(bf) = SBOXBYTES;
 FREEvm = bv + SBOXBYTES;
@@ -431,28 +431,38 @@ return(OK);
   - NOTE: we no longer support restoration of operand and dictionary
     stacks from uncapped 'save' objects
  */
-L op_restore(void)
+L
+op_restore(void)
 {
 	B *cframe, *frame, *dict, *tdict, *entry, *box, *savebox,
-		*caplevel, *savefloor, *topframe;
+			*caplevel, *savefloor, *topframe, *savetop;
 	L nb, offset;
 	BOOLEAN capped;
+	B *firstfreebox, *lastfreebox;
 
 	if (o_1 < FLOORopds) return(OPDS_UNF);
 	if (CLASS(o_1) != BOX) return(OPD_CLA);
-	savefloor = (B *)VALUE_BASE(o_1) - FRAMEBYTES; savebox = (B *)VALUE_BASE(o_1);
+	savefloor = (B *)VALUE_BASE(o_1) - FRAMEBYTES;
+	savebox = (B *)VALUE_BASE(o_1);
 	if ((caplevel = SBOX_CAP(savebox)) == (B *)0) { 
 		capped = FALSE; caplevel = FREEvm; 
 	}
 	else capped = TRUE;
+	savetop = caplevel;
 	offset = caplevel - savefloor;
 	FREEopds = o_1;
 
+	// This is an internal recall
+	// I know that that everything above this is relocatable
+	// (including, by def, the actual box being dumped)
+	// and that there are no references on the stack.
+	if (SBOX_FLAGS(savebox) & SBOX_FLAGS_FREE) goto RELOC;
+	
 	topframe = cframe = FREEexecs - FRAMEBYTES;
 	while (cframe >= FLOORexecs) {
     if (COMPOSITE(cframe)
 				&& (VALUE_BASE(cframe) >= (L)savefloor)
-				&& (VALUE_BASE(cframe) < (L)caplevel)) {
+				&& (VALUE_BASE(cframe) < (L)savetop)) {
 			if (capped) return(INV_REST);
 			moveframes(cframe + FRAMEBYTES,
 								 cframe,
@@ -467,7 +477,7 @@ L op_restore(void)
 	while (cframe >= FLOORdicts) {
     if (COMPOSITE(cframe)
 				&& (VALUE_BASE(cframe) >= (L)savefloor)
-				&& (VALUE_BASE(cframe) < (L)caplevel)) {
+				&& (VALUE_BASE(cframe) < (L)savetop)) {
 			if (capped) return(INV_REST);
 			moveframes(cframe + FRAMEBYTES,
 								 cframe,
@@ -482,7 +492,7 @@ L op_restore(void)
 	while (cframe >= FLOORopds) {
     if (COMPOSITE(cframe)
 				&& (VALUE_BASE(cframe) >= (L)savefloor)
-				&& (VALUE_BASE(cframe) < (L)caplevel)) {
+				&& (VALUE_BASE(cframe) < (L)savetop)) {
 			if (capped) return(INV_REST);
 			moveframes(cframe + FRAMEBYTES,
 								 cframe,
@@ -492,9 +502,122 @@ L op_restore(void)
     }
     cframe -= FRAMEBYTES;
 	}
- 
+
+	// Do we have any NRELOC boxes above us?
+	cframe = caplevel;
+	while (cframe < FREEvm) {
+		switch (CLASS(cframe)) {
+			case ARRAY: 
+				nb = DALIGN(ARRAY_SIZE(cframe) * VALUEBYTES(TYPE(cframe)));
+				cframe += nb + FRAMEBYTES; 
+				break;
+			case LIST:  
+				cframe = (B *)LIST_CEIL(cframe); 
+				break;
+			case DICT:  
+				dict = (B *)VALUE_BASE(cframe);
+				cframe += DICT_NB(cframe) + FRAMEBYTES; 
+				break;
+			case BOX:  
+				box = (B *)VALUE_BASE(cframe);
+				if (SBOX_FLAGS(box) & SBOX_FLAGS_NRELOC) {
+						// if so, cap this box permanantly,
+						// but act in the rest of the code as if
+						// it is uncapped
+						if (! SBOX_CAP(savebox)) SBOX_CAP(savebox) = FREEvm;
+						else {
+								caplevel = FREEvm;
+								capped = FALSE;
+						}
+						
+						offset = 0; //nobody's being moved.
+						SBOX_FLAGS(savebox) = SBOX_FLAGS_FREE; //and discard later!
+						goto RELOC; // and skip free box cleanup.
+				}
+
+				cframe += BOX_NB(cframe) + FRAMEBYTES; 
+				break;
+			default:   return(CORR_OBJ);
+		};
+	};
+
+	// free the boxes below us if we are not relocatable
+	// -- we may have been holding up frees.
+	if (! (SBOX_FLAGS(savebox) & SBOX_FLAGS_NRELOC)) goto RELOC;
+	// first find the first freed box after the last nonrelocatable
+	// box preceding us.
+	firstfreebox = NULL;
+	cframe = FLOORvm;
+	while (cframe < savefloor) {
+			switch (CLASS(cframe)) {
+				case ARRAY:
+					nb = DALIGN(ARRAY_SIZE(cframe) * VALUEBYTES(TYPE(cframe)));
+					cframe += nb + FRAMEBYTES; 
+					break;
+				case LIST:  
+					cframe = (B *)LIST_CEIL(cframe); 
+					break;
+				case DICT:
+					dict = (B *)VALUE_BASE(cframe);
+					cframe += DICT_NB(cframe) + FRAMEBYTES; 
+					break;
+				case BOX:  
+					box = (B *)VALUE_BASE(cframe);
+					// if we find an nr, keep on looking for a starting point
+					if (firstfreebox) {
+							if (SBOX_FLAGS(box) & SBOX_FLAGS_NRELOC)
+									firstfreebox = NULL; // restart later
+							else if (SBOX_FLAGS(box) & SBOX_FLAGS_FREE)
+									lastfreebox = cframe;
+					}
+					else if (SBOX_FLAGS(box) & SBOX_FLAGS_FREE)
+							lastfreebox = firstfreebox = cframe;
+					   // Here's where we'll have to start
+				cframe += BOX_NB(cframe) + FRAMEBYTES; 
+				break;
+			default:   return(CORR_OBJ);
+		};
+	};
+
+	// If we found a freebox below us that is dumpable, do it.
+  if (! firstfreebox) goto RELOC;
+  cframe = firstfreebox;
+	while (cframe <= lastfreebox) {
+			switch (CLASS(cframe)) {
+				case ARRAY:
+					nb = DALIGN(ARRAY_SIZE(cframe) * VALUEBYTES(TYPE(cframe)));
+					cframe += nb + FRAMEBYTES; 
+					break;
+				case LIST:  
+					cframe = (B *)LIST_CEIL(cframe); 
+					break;
+				case DICT:
+					dict = (B *)VALUE_BASE(cframe);
+					cframe += DICT_NB(cframe) + FRAMEBYTES; 
+					break;
+				case BOX:  
+					box = VALUE_PTR(cframe);					
+					if (SBOX_FLAGS(box) & SBOX_FLAGS_FREE) {
+						L offset_ = SBOX_CAP(box) - (box - FRAMEBYTES);
+						savefloor -= 	offset_;
+						caplevel -= offset_;
+						savetop -= offset_;
+						lastfreebox -= offset_;
+						
+						moveframe(cframe, o1);
+						FREEopds = o2;
+						if (op_restore() == OK) break;
+					};
+					
+					cframe += BOX_NB(cframe) + FRAMEBYTES; 
+					break;
+			default:   return(CORR_OBJ);
+		};
+	};
+			
+	RELOC:
 	if (capped)
-		moveD((D *)caplevel, (D *)savefloor, (FREEvm - caplevel)/sizeof(D));
+			moveD((D *)caplevel, (D *)savefloor, (FREEvm - caplevel)/sizeof(D));
 
 	FREEvm -= offset;
 	cframe = FLOORvm;
@@ -520,9 +643,10 @@ L op_restore(void)
 							if (CLASS(frame) == LIST)
 								LIST_CEIL(frame) -= offset;
 						}
-						else if ((VALUE_BASE(frame) >= (L)savefloor) 
-										 && (VALUE_BASE(frame) < (L) caplevel)) { 
-							TAG(frame) = NULLOBJ; ATTR(frame) = 0; 
+						else if (savefloor <= VALUE_PTR(frame) 
+										 && VALUE_PTR(frame) < savetop) { 
+							TAG(frame) = NULLOBJ;
+							ATTR(frame) = 0; 
 						}
 					}
 				}
@@ -548,8 +672,9 @@ L op_restore(void)
 							if (CLASS(frame) == LIST)
 								LIST_CEIL(frame) -= offset;
 						}
-						else
-							if (VALUE_BASE(frame) >= (L)savefloor) continue;
+						else if (savefloor <= VALUE_PTR(frame)
+										 && VALUE_PTR(frame) < savetop)
+								continue;
 					}
 					insert(ASSOC_NAME(entry),tdict,frame);
 				} 
@@ -564,7 +689,8 @@ L op_restore(void)
 				box = (B *)VALUE_BASE(cframe);
 				if (SBOX_CAP(box)) { 
 					if (SBOX_CAP(box) >= caplevel) SBOX_CAP(box) -= offset;
-					else if (SBOX_CAP(box) > savefloor)
+					else if (savefloor < SBOX_CAP(box)
+									 && SBOX_CAP(box) < savetop)
 						SBOX_CAP(box) = savefloor;
 				}
 				cframe += BOX_NB(cframe) + FRAMEBYTES; 
@@ -608,6 +734,7 @@ L op_restore(void)
 			cframe -= FRAMEBYTES;
 		} 
 	}
+
 	return(OK);
 }
 

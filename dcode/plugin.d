@@ -32,12 +32,13 @@
 /getbufferframe {(OPAQUE_MEM\(procframe, buffernameframe\))} def
 /getbufferfrom  {(OPAQUE_MEM\() exch (, buffernameframe\))} def
 
-/build_handle {/dest name /size name /x name
+/build_handle {/dest name /reloc name /size name /x name
   /handle (\(initframe\)) def
 (
    {
       B initframe[FRAMEBYTES];
       B* procframe = make_opaque_frame\() size textit
+       (, ) reloc {(TRUE)} {(FALSE)} ifelse
        (, opaquename, \n)
        handledict null ne {
          handledict {pop textit /h name

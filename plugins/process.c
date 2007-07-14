@@ -460,6 +460,7 @@ L op_makeproc(void) {
     };
     
     if (! (procframe = MAKE_OPAQUE_DICT(0,
+																				TRUE,
                                         PROCESS_PID_N,
                                         PROCESS_STDOUT_N,
                                         PROCESS_STDIN_N,

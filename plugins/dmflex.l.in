@@ -455,7 +455,8 @@ L op_makestream(void) {
   if ((fd = open(fullname, flags)) == -1)
     return -errno;
 
-  if (! (streamframe = MAKE_OPAQUE_DICT(0,
+  if (! (streamframe = MAKE_OPAQUE_DICT(0, 
+                                        TRUE,
                                         DMFLEX_FD_N,
                                         DMFLEX_STATE_N)))
     return VM_OVF;
@@ -615,6 +616,7 @@ L op_execstream(void) {
 
   
   if (! (streamstate = MAKE_OPAQUE_DICT(@STRINGBUF@+8,
+										TRUE,
                                         DMFLEX_FD_N,
                                         DMFLEX_STATE_N,
                                         DMFLEX_CHBUF_N,

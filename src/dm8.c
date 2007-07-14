@@ -182,11 +182,11 @@ L op_nextobject(void)
 B framebuf[FRAMEBYTES], *next;
 
 if (o_1 < FLOORopds) return(OPDS_UNF);
-if (CLASS(o_1) == NULLOBJ)
-   { moveframe(FLOORvm,framebuf); goto n_pos; }
-   else  /* next */
-   { switch(CLASS(o_1))
-       {
+if (CLASS(o_1) == NULLOBJ) {
+		moveframe(FLOORvm,framebuf); goto n_pos;
+}
+else  {/* next */
+		switch(CLASS(o_1)) {
        case ARRAY: /* if ((ATTR(o_1) & PARENT) == 0) return(OPD_ATR);*/
                    next = (B *)VALUE_BASE(o_1) + DALIGN(ARRAY_SIZE(o_1) *
                    VALUEBYTES(TYPE(o_1))); break;
@@ -195,10 +195,13 @@ if (CLASS(o_1) == NULLOBJ)
        case DICT: next = (B *)VALUE_BASE(o_1) + DICT_NB(o_1); break;
        case BOX:  next = (B *)VALUE_BASE(o_1) + BOX_NB(o_1); break;
        default: return(OPD_CLA); 
-       }
-       if (next >= FREEvm) goto n_neg;
-       moveframes(next,framebuf,1L); goto n_pos;
-   }
+		}
+		if (next >= FREEvm) goto n_neg;
+		// skip freed boxes.
+		if (CLASS(next) == BOX && SBOX_FLAGS(VALUE_PTR(next)) == SBOX_FLAGS_FREE)
+				next = SBOX_CAP(VALUE_PTR(next));
+		moveframes(next,framebuf,1L); goto n_pos;
+}
 
 n_neg:
 TAG(o_1) = BOOL; ATTR(o_1) = 0; BOOL_VAL(o_1) = FALSE;

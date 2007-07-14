@@ -88,8 +88,8 @@ extern B buffernameframe[FRAMEBYTES];
     moveframe(newframe, OPAQUE_MEM(frame, nameframe));      \
   } while (0)
   
-#define MAKE_OPAQUE_DICT(n, ...) \
-  (make_opaque_frame(n, opaquename, __VA_ARGS__, NULL))
+#define MAKE_OPAQUE_DICT(n, r, ...)											\
+	(make_opaque_frame((n), (r), (opaquename), __VA_ARGS__, (NULL)))
 
 // frame must be removed from the stack before call
 #define KILL_OPAQUE(frame) do {					   \
