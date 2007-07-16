@@ -23,11 +23,6 @@ CF_IF_ENABLED([plugins], [
   CF_AM_ENABLE([cppplugin], 
                [compile or install cpp memory library for plugins], 
   			   [yes])
-  CF_IF_ENABLED([cppplugin], [
-    CF_AC_ENABLE([check_allocator], 
-                 [Check that the default allocator is __gnu_cxx::new_allocator], 
-				 [1])
-  ])
   CF_AM_ENABLE([dmflex], [compile or install dmflex plugin], [yes])
   CF_IF_ENABLED([dmflex], [
     AM_PROG_LEX

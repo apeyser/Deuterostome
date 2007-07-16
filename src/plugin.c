@@ -229,7 +229,7 @@ BOOLEAN check_opaque_name(B* nameframe, B* dict) {
   return matchname(frame, nameframe);
 } 
 
-B* make_opaque_frame(L n, BOOLEAN relocatable, B* pluginnameframe, ...) {
+B* make_opaque_frame(L n, B* destroyer, B* pluginnameframe, ...) {
   int len = 0;
   B* nameframe;
   va_list nameframes;
@@ -244,11 +244,22 @@ B* make_opaque_frame(L n, BOOLEAN relocatable, B* pluginnameframe, ...) {
   va_end(nameframes);
   
   if (op_save() != OK) return NULL;
-	if (! relocatable) SBOX_FLAGS(VALUE_PTR(o_1)) |= SBOX_FLAGS_NRELOC;
+	if (destroyer) {
+			B* box = VALUE_PTR(o_1);
+			SBOX_DATA(box) = destroyer;
+			SBOX_FLAGS(box) = SBOX_FLAGS_CLEANUP;
+	}
 
+  if ((dict = makedict(len + 2 + (n ? 1 : 0))) == (B*) -1L) {
+    FREEvm = oldFREEvm;
+    FREEopds = o_1;
+    return NULL;
+  }
+  
   if (n) {
     n = DALIGN(n);
     if (FREEvm + FRAMEBYTES + n >= CEILvm) {
+			FREEvm = oldFREEvm;
       FREEopds = o_1;
       return NULL;
     }
@@ -260,12 +271,6 @@ B* make_opaque_frame(L n, BOOLEAN relocatable, B* pluginnameframe, ...) {
     FREEvm += FRAMEBYTES + n;
   }
 
-  if ((dict = makedict(len + 2 + (n ? 1 : 0))) == (B*) -1L) {
-    FREEvm = oldFREEvm;
-    FREEopds = o_1;
-    return NULL;
-  }
-  
   ATTR(o_1) |= READONLY;
   insert(saveboxname, dict, o_1);
   ATTR(pluginnameframe) |= READONLY;

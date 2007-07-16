@@ -29,16 +29,27 @@
   (RETURN_ERROR\() package (_) 4 -1 roll textit (\))
 } bind def
 
+/get_op_ptr {
+  dup null ne {
+    4 opslist {
+      0 get 2 index eq ~exit if
+      1 add
+    } forall
+    exch pop
+    (\(B*\) &ll_export[) exch 2 mul textit (])
+  } if
+} bind def
+
 /getbufferframe {(OPAQUE_MEM\(procframe, buffernameframe\))} def
 /getbufferfrom  {(OPAQUE_MEM\() exch (, buffernameframe\))} def
 
-/build_handle {/dest name /reloc name /size name /x name
+/build_handle {/dest name /destroyer name /size name /x name
   /handle (\(initframe\)) def
 (
    {
       B initframe[FRAMEBYTES];
       B* procframe = make_opaque_frame\() size textit
-       (, ) reloc {(TRUE)} {(FALSE)} ifelse
+       (, ) destroyer get_op_ptr textit
        (, opaquename, \n)
        handledict null ne {
          handledict {pop textit /h name

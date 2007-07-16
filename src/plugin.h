@@ -88,17 +88,18 @@ extern B buffernameframe[FRAMEBYTES];
     moveframe(newframe, OPAQUE_MEM(frame, nameframe));      \
   } while (0)
   
-#define MAKE_OPAQUE_DICT(n, r, ...)											\
-	(make_opaque_frame((n), (r), (opaquename), __VA_ARGS__, (NULL)))
+#define MAKE_OPAQUE_DICT(n, d, ...)											\
+	(make_opaque_frame(n, d, opaquename, __VA_ARGS__, NULL))
 
 // frame must be removed from the stack before call
-#define KILL_OPAQUE(frame) do {					   \
-	L ret;										   \
-	if (o1 >= CEILopds) return OPDS_OVF;		   \
-	moveframe(OPAQUE_MEM(frame, saveboxname), o1); \
-	FREEopds = o2;								   \
-	if ((ret = op_restore()) != OK) return ret;	   \
-  } while (0)
+#define KILL_OPAQUE(frame) do {													\
+	L ret;																					      \
+	if (o1 >= CEILopds) return OPDS_OVF;									\
+	moveframe(OPAQUE_MEM(frame, saveboxname), o1);				\
+	FREEopds = o2;																				\
+	SBOX_FLAGS(VALUE_PTR(o_1)) &= ~SBOX_FLAGS_CLEANUP;		\
+	if ((ret = op_restore()) != OK) return ret;						\
+} while (0)
 
 #define PLUGIN_INTRO(version) PLUGIN_INTRO_(version, PLUGIN_NAME)
 #define PLUGIN_INTRO_(version, name)                 \

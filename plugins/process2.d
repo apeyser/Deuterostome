@@ -176,7 +176,7 @@ def
   *\(NUM_VAL) handle (\) = 0;
   ) /STATE make_handle (;
   ) /BUFFC make_handle (;
-)} 0 true (o_1) build_handle (
+)} 0 null (o_1) build_handle (
     return OK;
 )
       }

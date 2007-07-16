@@ -4,19 +4,11 @@
 
 /errsdict 4 dict dup begin | [
   /BAD_ALLOC (Out of memory) def
-  /ABORT_ALLOC (Error in memory allocator) def 
-  /LEAK_ALLOC (Leaking in memory allocator) def
   /UNKNOWN_ALLOC (??? Whah???) def | ]
 end def
 
 /bodyheaders (
-#include "newfunc.h"
 #include "cpptestercode.h"
-) def
-
-/bodyheaders (
-#include "cpptestercode.h"
-#include "newfunc.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,18 +37,13 @@ int runtester\(int times, int max, Tester* t\)
 }
 
 int finalize\(Tester* t\) {
-  int ret;
-  if \(\(ret = fini\(t\)\)\) return ret;
-  if \(leaked\(\)\) return 3;
-  return 0;
+  return fini\(t\);
 }
 
 #define check_ret\(ret\) \
       switch \(ret\) { \\
         case 0: break; \\
         case 1: ) /BAD_ALLOC error_ (; \\
-        case 2: ) /ABORT_ALLOC error_ (; \\
-        case 3: ) /LEAK_ALLOC error_ (; \\
         default: ) /UNKNOWN_ALLOC error_ (; \\
       }
 
@@ -94,33 +81,19 @@ int randomtester\(int times, int inner, int max, Tester* t\) {
   [
     [
       /maketester {(
-      L size;
-      Allocator* alloc;
-      Allocator* old;
       B* mem;
       Tester* t;
-      int ret;
-      if \(o_1 < FLOORopds\) return OPDS_UNF;
-      if \(CLASS\(o_1\) != NUM\) return OPD_CLA;
-      if \(VALUE\(o_1, &size\)\) return UNDF_VAL;
 ) {(
-      mem = ) getbufferframe (;
-      if \(! \(alloc = makeAllocator\(mem, size\)\)\) ) /BAD_ALLOC error_ (;
-      old = setAllocator\(alloc\);
-      ret = init\(&t\);
-      setAllocator\(old\);
-      check_ret\(ret\);
+      check_ret\(init\(&t\)\);
       TAG) handle (= \(NUM | LONGTYPE\); ATTR) handle ( = 0;
       LONG_VAL\() handle (\) = \(L\) t;
      ) /TESTER make_handle (;
-)} (size) false (o_1) build_handle (
+)} 0 /killtester (o_1) build_handle (
       return OK;
 )}
     ][
       /runtester {(
-      Allocator* old;
       Tester* t;
-      int ret;
       L times, max;
       if \(o_3 < FLOORopds\) return OPDS_UNF;
       TEST_OPAQUE\(o_1\);
@@ -129,20 +102,15 @@ int randomtester\(int times, int inner, int max, Tester* t\) {
       if \(CLASS\(o_3\) != NUM\) return OPD_CLA;
       if \(!VALUE\(o_3, &times\)\) return UNDF_VAL;
       
-      old = setAllocator\(\(Allocator*\)) (o_1) getbufferfrom (\);
       t = \(Tester*\) ) /TESTER (o_1) handle (;
-      ret = runtester\(times, max, t\);
-      setAllocator\(old\);
-      check_ret\(ret\);
+      check_ret\(runtester\(times, max, t\)\);
 
       FREEopds = o_3;
       return OK;
 )}
     ][
       /randomtester {(
-      Allocator* old;
       Tester* t;
-      int ret;
       L times, inner, max;
       if \(o_4 < FLOORopds\) return OPDS_UNF;
       TEST_OPAQUE\(o_1\);
@@ -153,11 +121,8 @@ int randomtester\(int times, int inner, int max, Tester* t\) {
       if \(CLASS\(o_4\) != NUM\) return OPD_CLA;
       if \(!VALUE\(o_4, &times\)\) return UNDF_VAL;
 
-      old = setAllocator\(\(Allocator*\)) (o_1) getbufferfrom (\);
       t = \(Tester*\) ) /TESTER (o_1) handle (;
-      ret = randomtester\(times, inner, max, t\);
-      setAllocator\(old\);
-      check_ret\(ret\);
+      check_ret\(randomtester\(times, inner, max, t\)\);
 
       FREEopds = o_4;
       return OK;
@@ -165,17 +130,11 @@ int randomtester\(int times, int inner, int max, Tester* t\) {
     ][
        /killtester {(
        Tester* t;
-       int ret;
-       Allocator* alloc;
-       Allocator* old;
        if \(o_1 < FLOORopds\) return OPDS_UNF;
        TEST_OPAQUE\(o_1\);
  
-       old = setAllocator\(\(Allocator*\)) (o_1) getbufferfrom (\);
        t = \(Tester*\) ) /TESTER (o_1) handle (;
-       ret = finalize\(t\);
-       setAllocator\(old\);
-       check_ret\(ret\);
+       check_ret\(finalize\(t\)\);
 
        FREEopds = o_1; 
        KILL_OPAQUE\(o1\); 

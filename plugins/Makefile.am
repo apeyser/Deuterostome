@@ -48,7 +48,6 @@ cpptester.h: cpptester.d plugin.d
 BUILT_SOURCES += cpptester.c cpptester.h
 cpptester_la_SOURCES = cpptester.c cpptester.h \
 	cpptestercode.cpp cpptestercode.h
-cpptester_la_LIBADD = $(top_builddir)/src/libdmcppplugin.la
 dist_noinst_DATA += cpptester.d
 
 

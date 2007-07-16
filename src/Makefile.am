@@ -43,10 +43,7 @@ noinst_PROGRAMS = testwordorder $(DNODENICEBIN)
 
 if ENABLE_PLUGINS
 if ENABLE_CPPPLUGIN
-PLUGIN_LIB = libdmcppplugin.la
-libdmcppplugin_la_SOURCES = newfunc.cpp dmalloc.cpp dmalloc.h newfunc.h \
-	dmalloc-abort.h
-CPPPLUGIN_HDR = newfunc.h dmalloc-abort.h
+CPPPLUGIN_HDR = cppplugin.h
 endif ENABLE_CPPPLUGIN
 PLUGIN_HDR = plugin.h pluginlib.h $(CPPPLUGIN_HDR)
 PLUGIN_LD = @LIBLTDL@
@@ -68,7 +65,7 @@ testwordorder_SOURCES = test-word-order.c
 
 BUILT_SOURCES = paths.h dnode-nice.c
 CLEANFILES = paths.h dnode-nice.c
-lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la $(PLUGIN_LIB)
+lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la
 libdmglobals_la_LIBADD = $(PLUGIN_LD)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \

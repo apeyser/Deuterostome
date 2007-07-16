@@ -307,11 +307,10 @@ NOTE: all objects that can populate the D machine's workspace must
 
 /*---------------------------------------- save box */
 #define SBOX_FLAGS(box)          (*(L *)(box))
-#define SBOX_UNUSED(box)         (*(L *)(((B*)(box))+4))
+#define SBOX_DATA(box)           (*(B **)(((B*)(box))+4))
 #define SBOX_CAP(box)            (*(B **)(((B*)(box))+8))
 
-#define SBOX_FLAGS_NRELOC       ((UL) 0x01)
-#define SBOX_FLAGS_FREE         ((UL) 0x02)
+#define SBOX_FLAGS_CLEANUP       ((UL) 0x01)
 
 #define SBOXBYTES                16
 

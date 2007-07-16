@@ -1,7 +1,7 @@
 #ifndef CPPTESTERCODE_H
 #define CPPTESTERCODE_H
 
-#include "newfunc.h"
+#include "cppplugin.h"
 
 #if __cplusplus
 
