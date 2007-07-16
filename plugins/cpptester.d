@@ -4,7 +4,9 @@
 
 /errsdict 4 dict dup begin | [
   /BAD_ALLOC (Out of memory) def
-  /UNKNOWN_ALLOC (??? Whah???) def | ]
+  /STD_EXCEPTION (Std exception thrown) def
+  /UNKNOWN_EXCEPTION (??? Whah??? Exception) def
+  /ILLEGAL_RETURN (??? Wha?? How'dat'appen?) def | ]
 end def
 
 /bodyheaders (
@@ -40,11 +42,13 @@ int finalize\(Tester* t\) {
   return fini\(t\);
 }
 
-#define check_ret\(ret\) \
+#define check_ret\(ret\) \\
       switch \(ret\) { \\
         case 0: break; \\
         case 1: ) /BAD_ALLOC error_ (; \\
-        default: ) /UNKNOWN_ALLOC error_ (; \\
+        case 2: ) /STD_EXCEPTION error_ (; \\
+        case 3: ) /UNKNOWN_EXCEPTION error_ (; \\
+        default: ) /ILLEGAL_RETURN error_ (; \\
       }
 
 int randomtester\(int times, int inner, int max, Tester* t\) {
