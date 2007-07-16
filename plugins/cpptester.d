@@ -74,6 +74,7 @@ int randomtester\(int times, int inner, int max, Tester* t\) {
       for \(k = random\(\)%inner; ! saved[k]; k = \(k+1\)%inner\);
       if \(\(ret = destroy\(saved[k]\)\)\)
         return ret;
+     saved[k] = NULL;
     }
   }
       
