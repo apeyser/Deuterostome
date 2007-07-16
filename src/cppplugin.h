@@ -4,6 +4,7 @@
 #if __cplusplus
 
 #include <memory>
+#include <iostream>
 
 namespace Plugins
 {
@@ -32,7 +33,10 @@ namespace Plugins
 	  int wrapper(void) {
 	    try {func();}
 	    catch (bad_alloc&) {return BAD_ALLOC;}
-			catch (exception&) {return EXCEPTION;}
+			catch (exception& e) {
+					cout << "Standard exception: " << e.what() << endl;
+					return EXCEPTION;
+			}
 			catch (...) {return UNKNOWN;};
 	    return OK;
 	  }
@@ -42,7 +46,10 @@ namespace Plugins
 	  int wrapper1(A a) {
 	    try {func(a);}
 	    catch (bad_alloc&) {return BAD_ALLOC;}
-			catch (exception&) {return EXCEPTION;}
+			catch (exception& e) {
+					cout << "Standard exception: " << e.what() << endl;
+					return EXCEPTION;
+			}
 			catch (...) {return UNKNOWN;};
 	    return OK;
 	  }
@@ -52,7 +59,10 @@ namespace Plugins
 	  int wrapper2(A a, B b) {
 	    try {func(a, b);}
 	    catch (bad_alloc&) {return BAD_ALLOC;}
-			catch (exception&) {return EXCEPTION;}
+			catch (exception& e) {
+					cout << "Standard exception: " << e.what() << endl;
+					return EXCEPTION;
+			}
 			catch (...) {return UNKNOWN;};
 	    return OK;
 	  }
@@ -62,7 +72,10 @@ namespace Plugins
 	  int wrapper3(A a, B b, C c) {
 	    try {func(a, b, c);}
 	    catch (bad_alloc&) {return BAD_ALLOC;}
-			catch (exception&) {return EXCEPTION;}
+			catch (exception& e) {
+					cout << "Standard exception: " << e.what() << endl;
+					return EXCEPTION;
+			}
 			catch (...) {return UNKNOWN;};
 	    return OK;
 	  }
@@ -72,7 +85,10 @@ namespace Plugins
 		int wrapper3(A a, B b, C c, D d) {
 			try {func(a, b, c, d);}
 	    catch (bad_alloc&) {return BAD_ALLOC;}
-			catch (exception&) {return EXCEPTION;}
+			catch (exception& e) {
+					cout << "Standard exception: " << e.what() << endl;
+					return EXCEPTION;
+			}
 			catch (...) {return UNKNOWN;};
 	    return OK;
 	  }
