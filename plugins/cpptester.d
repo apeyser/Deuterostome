@@ -87,12 +87,15 @@ int randomtester\(int times, int inner, int max, Tester* t\) {
       /maketester {(
       B* mem;
       Tester* t;
+
+      if \(CEILopds < o2\) return OPDS_OVF;
 ) {(
       check_ret\(init\(&t\)\);
       TAG) handle (= \(NUM | LONGTYPE\); ATTR) handle ( = 0;
       LONG_VAL\() handle (\) = \(L\) t;
      ) /TESTER make_handle (;
-)} 0 /killtester (o_1) build_handle (
+)} 0 /killtester (o1) build_handle (
+      FREEopds = o2;
       return OK;
 )}
     ][
