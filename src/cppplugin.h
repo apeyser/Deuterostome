@@ -36,7 +36,6 @@ namespace Plugins
 			catch (...) {return UNKNOWN;};
 	    return OK;
 	  }
-#define wrapperM(c, n) int (*n)(void) = wrapper<c::n>
                 
 	  template<typename A,
 				     void func(A)> 
@@ -47,7 +46,6 @@ namespace Plugins
 			catch (...) {return UNKNOWN;};
 	    return OK;
 	  }
-#define wrapperM1(c, n, A) int (*n)(A) = wrapper1<A, c::n>
 
 	  template<typename A, typename B,
 				     void func(A, B)> 
@@ -58,7 +56,6 @@ namespace Plugins
 			catch (...) {return UNKNOWN;};
 	    return OK;
 	  }
-#define wrapperM2(c, n, A, B) int (*n)(A, B) = wrapper2<A, B, c::n>
 
 		template<typename A, typename B, typename C,
 				     void func(A, B, C)> 
@@ -69,7 +66,6 @@ namespace Plugins
 			catch (...) {return UNKNOWN;};
 	    return OK;
 	  }
-#define wrapperM3(c, n, A, B, C) int (*n)(A, B, C) = wrapper3<A, B, C, c::n>
 
 		template<typename A, typename B, typename C, typename D,
 				     void func(A, B, C, D)> 
@@ -80,15 +76,24 @@ namespace Plugins
 			catch (...) {return UNKNOWN;};
 	    return OK;
 	  }
-#define wrapperM4(c, n, A, B, C, D) int (*n)(A, B, C, D)	\
-				= wrapper4<A, B, C, D, c::n>
 };
 
 #endif //__cplusplus
 
 #if !CPPPLUGIN_NO_WRAPPERS
+
+#if __cplusplus
+#define wrapperM(c, n) int (*n)(void) = wrapper<c::n>
+#define wrapperM1(c, n, A) int (*n)(A) = wrapper1<A, c::n>
+#define wrapperM2(c, n, A, B) int (*n)(A, B) = wrapper2<A, B, c::n>
+#define wrapperM3(c, n, A, B, C) int (*n)(A, B, C) = wrapper3<A, B, C, c::n>
+#define wrapperM4(c, n, A, B, C, D) int (*n)(A, B, C, D)	\
+				= wrapper4<A, B, C, D, c::n>
+#endif //__cplusplus
+
 #define wrapperMH(n) extern int (*n)(void)
 #define wrapperMHs(n, ...) extern int (*n)(__VA_ARGS__)
+
 #endif //!CPPPLUGIN_NO_WRAPPERS
 
 #endif // CPPPLUGIN_H
