@@ -64,15 +64,17 @@ int randomtester\(int times, int inner, int max, Tester* t\) {
   for \(j = 0; j < times; j++\) {
     for \(i = 0; i < inner; i++\) saved[i] = NULL;
 
-    for \(i = 0; i < inner; i++\)
-      for \(k = random\(\)%inner; ! saved[k]; k = \(k+1\)%inner\);
-        if \(\(ret = createSized\(&saved[k], random\(\)%max\)\)\)
-          return ret;
-
-    for \(i = 0; i < inner; i++\)
+    for \(i = 0; i < inner; i++\) {
       for \(k = random\(\)%inner; saved[k]; k = \(k+1\)%inner\);
-        if \(\(ret = destroy\(saved[k]\)\)\)
-          return ret;
+      if \(\(ret = createSized\(&saved[k], random\(\)%max\)\)\)
+        return ret;
+   }
+
+    for \(i = 0; i < inner; i++\) {
+      for \(k = random\(\)%inner; ! saved[k]; k = \(k+1\)%inner\);
+      if \(\(ret = destroy\(saved[k]\)\)\)
+        return ret;
+    }
   }
       
   return 0;
