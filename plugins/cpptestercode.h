@@ -25,6 +25,7 @@ extern "C"
 	wrapperMHs(createSized, void**, size_t);
 	wrapperMHs(destroy, void*);
 	wrapperMHs(fini, Tester*);
+	wrapperMHs(big, size_t, Tester*);
 #if __cplusplus
 }
 #endif

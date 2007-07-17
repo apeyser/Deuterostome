@@ -11,9 +11,10 @@ namespace Cpp
   {
     typedef deque<int> dq;
     dq* l;
+		char* buf;
 
-    Tester(void) : l(new dq()) {};
-    ~Tester(void) {delete l;};
+		Tester(void) : l(new dq()), buf(NULL) {};
+		~Tester(void) {delete l; delete buf;};
     
     static void init(Tester** t) {*t = new Tester();};
     static void addElem(Tester* t, int i) {t->l->push_back(i);};
@@ -27,6 +28,7 @@ namespace Cpp
     static void create(void** i) {*i = new int;};
     static void destroy(void* i) {delete (int*) i;};
     static void createSized(void** i, size_t s) {*i = new char[s];};
+		static void big(size_t size, Tester* t) {t->buf = new char[size];};
   };
 }
 
@@ -41,3 +43,4 @@ wrapperM1(Tester, create, void**);
 wrapperM2(Tester, createSized, void**, size_t);
 wrapperM1(Tester, destroy, void*);
 wrapperM1(Tester, fini, Tester*);
+wrapperM2(Tester, big, size_t, Tester*);

@@ -80,6 +80,10 @@ int randomtester\(int times, int inner, int max, Tester* t\) {
       
   return 0;
 }
+
+int bigtester\(L size, Tester* t\) {
+  return big\(size, t\);
+}
 )} def
 
 /makehandles {[[/TESTER {(LONG_VAL\() handle (\))}]]} bind def
@@ -137,6 +141,20 @@ int randomtester\(int times, int inner, int max, Tester* t\) {
       FREEopds = o_4;
       return OK;
  )}
+    ][
+      /bigtester {(
+      Tester* t;
+      L size;
+      if \(o_2 < FLOORopds\) return OPDS_UNF;
+      TEST_OPAQUE\(o_1\);
+      if \(CLASS\(o_2\) != NUM\) return OPD_CLA;
+      if \(!VALUE\(o_2, &size\)\) return UNDF_VAL;
+      t = \(Tester*\) ) /TESTER (o_1) handle (;
+      check_ret\(bigtester\(size, t\)\);
+
+      FREEopds = o_2;
+      return OK;
+)}
     ][
        /killtester {(
        Tester* t;
