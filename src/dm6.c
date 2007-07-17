@@ -622,8 +622,8 @@ L x_op_restore_it(void)
 		if (TAG(x_2) != (ARRAY | BYTETYPE)) return EXECS_COR;
 		FREEexecs = x2;
 
-		next = VALUE_PTR(x_2) + FRAMEBYTES;
-		top = VALUE_PTR(x_3);
+		next = VALUE_PTR(x_3) + FRAMEBYTES;
+		top = VALUE_PTR(x_2);
 		while (next < top) {
 				switch (CLASS(next)) {
 						case ARRAY:
@@ -641,7 +641,7 @@ L x_op_restore_it(void)
 								if (SBOX_FLAGS(box) & SBOX_FLAGS_CLEANUP) {
 										if (CEILexecs < x2) return EXECS_OVF;
 										if (CEILopds < o2) return OPDS_OVF;
-										VALUE_PTR(x_2) = next - FRAMEBYTES;
+										VALUE_PTR(x_3) = next - FRAMEBYTES;
 										
 										moveframe(next, o1);
 										FREEopds = o2;
