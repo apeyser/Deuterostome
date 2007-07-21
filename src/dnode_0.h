@@ -105,6 +105,7 @@ B *sysop[] =
       "save",           (B *)op_save,
       "capsave",        (B *)op_capsave,
       "restore",        (B *)op_restore,
+			"setcleanup",     (B *)op_setcleanup,
       "vmstatus",       (B *)op_vmstatus,
       "bind",           (B *)op_bind,
       "null",           (B *)op_null,
@@ -244,7 +245,7 @@ L syserrc[] =
     LIB_INIT,
     NO_XWINDOWS, X_ERR, X_BADFONT, X_BADHOST,
 	VMR_ERR, VMR_STATE, ILL_OPAQUE, FOLD_OPAQUE, NOPLUGINS,
-	MEM_OVF, BAD_ARR,
+		MEM_OVF, BAD_ARR, SBOX_SET,
     0L,
 };
 
@@ -308,6 +309,7 @@ B* syserrm[] =
 	"** Compiled without plugin support",
 	"** Memory exhausted",
     "** dmnuminc debug error",
+		"** Box already has a cleanup handler"
 };
 
 // original directory for vmresize

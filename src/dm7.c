@@ -577,17 +577,25 @@ L op_findfiles(void)
 
 L op_findfile(void) {
   struct stat buf;
+	BOOLEAN addslash;
+	L dirlen;
 
   if (o_2 < FLOORopds) return OPDS_UNF;
   if ((TAG(o_1) != (ARRAY | BYTETYPE)) || (TAG(o_2) != (ARRAY | BYTETYPE)))
-	return OPD_ERR;
+			return OPD_ERR;
+	if (ARRAY_SIZE(o_1) == 0 || ARRAY_SIZE(o_2) == 0)
+			return RNG_CHK;
 
+	dirlen = ARRAY_SIZE(o_2);
+	addslash = (VALUE_PTR(o_2)[dirlen-1] != '/');
   // make null terminated file string
-  if (FREEvm+ARRAY_SIZE(o_1)+ARRAY_SIZE(o_2)+1 >= CEILvm)
-	return VM_OVF;
-  moveB(VALUE_PTR(o_2), FREEvm, ARRAY_SIZE(o_2));
-  moveB(VALUE_PTR(o_1), FREEvm + ARRAY_SIZE(o_2), ARRAY_SIZE(o_1));
-  FREEvm[ARRAY_SIZE(o_2)+ARRAY_SIZE(o_1)] = 0;
+	if (FREEvm+ARRAY_SIZE(o_1)+ARRAY_SIZE(o_2)+1+(addslash ? 1 : 0) >= CEILvm)
+			return VM_OVF;
+
+  moveB(VALUE_PTR(o_2), FREEvm, dirlen);
+	if (addslash) FREEvm[dirlen++] = '/';
+  moveB(VALUE_PTR(o_1), FREEvm + dirlen, ARRAY_SIZE(o_1));
+  FREEvm[dirlen+ARRAY_SIZE(o_1)] = '\0';
 
   if (stat(FREEvm, &buf)) {
 	if (errno == ENOENT) { // non-existent returns false

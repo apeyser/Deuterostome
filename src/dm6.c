@@ -430,6 +430,14 @@ return(OK);
     exempted from address modifications made to shifted objects
   - NOTE: we no longer support restoration of operand and dictionary
     stacks from uncapped 'save' objects
+  - Added cleanup handlers. If the SBOX_FLAGS has SBOX_CLEANUP set,
+    SBOX_DATA points to an OPNAME and OPCODE pair. These are used to
+    construct an OP called with the first object in the box as operand.
+    This is done instead of the restore - the op should finish be calling
+    restore again (that time, a normal restore will be done).
+    All boxes are walked through prior to actually doing a restore, to find
+    save boxes inside that have SBOX_FLAGS_CLEANUP set (which is of course
+    checked recursively).
  */
 L x_op_restore(void) 
 {
@@ -675,9 +683,10 @@ L op_restore(void)
 		B *savebox, *caplevel;
 		if (o_1 < FLOORopds) return(OPDS_UNF);
 		if (CLASS(o_1) != BOX) return(OPD_CLA);
-		savebox = (B *)VALUE_BASE(o_1);
+		savebox = VALUE_PTR(o_1);
 		if (SBOX_FLAGS(savebox) & SBOX_FLAGS_CLEANUP) {
 				if (CEILexecs < x2) return EXECS_OVF;
+				SBOX_FLAGS(savebox) &= ~SBOX_FLAGS_CLEANUP;
 				TAG(x1) = OP;
 				ATTR(x1) = ACTIVE;
 				OP_NAME(x1) = OPDEF_NAME(SBOX_DATA(savebox));
@@ -703,6 +712,35 @@ L op_restore(void)
 		OP_NAME(x3) = (L) "x_op_restore_it";
 		OP_CODE(x3) = (L) x_op_restore_it;
 		FREEexecs = x4;
+		return OK;
+}
+
+//------------------- setcleanup ------------
+//
+// /name^op savebox | --
+// sets the savebox cleanup op to op, or the op
+//   pointed to by /name
+//
+L op_setcleanup(void) 
+{
+		B* box;
+		if (o_2 < FLOORopds) return OPDS_UNF;
+		if (CLASS(o_1) != BOX) return OPD_CLA;
+		box = VALUE_PTR(o_1);
+		if (SBOX_FLAGS(box) & SBOX_FLAGS_CLEANUP) return SBOX_SET;
+		FREEopds = o_1;
+		
+		if (CLASS(o_1) == NAME) {
+				int ret = op_find();
+				if (ret != OK) return ret;
+		}
+		if (CLASS(o_1) != OP) return OPD_CLA;
+
+		SBOX_FLAGS(box) |= SBOX_FLAGS_CLEANUP;
+		OPDEF_NAME(SBOX_DATA(box)) = OP_NAME(o_1);
+		OPDEF_CODE(SBOX_DATA(box)) = OP_CODE(o_1);
+
+		FREEopds = o_1;
 		return OK;
 }
 

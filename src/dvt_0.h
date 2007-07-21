@@ -70,6 +70,7 @@ B *sysop[] =
       "save",           (B *)op_save,
       "capsave",        (B *)op_capsave,
       "restore",        (B *)op_restore,
+			"setcleanup",     (B *)op_setcleanup,
       "vmstatus",       (B *)op_vmstatus,
       "bind",           (B *)op_bind,
       "null",           (B *)op_null,
@@ -201,7 +202,7 @@ L syserrc[] =
      CORR_OP, BADBOX, BAD_MSG, NOSYSTEM, INV_MSG, NOT_HOST, BAD_FMT,
      LIB_LOAD, LIB_EXPORT, LIB_LINK, LIB_ADD, LIB_LOADED, LIB_OVF,
      NO_XWINDOWS, X_ERR, X_BADFONT, X_BADHOST,
-	 MEM_OVF, BAD_ARR,
+		 MEM_OVF, BAD_ARR, SBOX_SET,
      0L,
      };
 
@@ -258,5 +259,6 @@ B *syserrm[] =
      "** Cannot connect to X server",
 	 "** Memory exhausted",
      "** dmnuminc debug error",
+		 "** Box already has a cleanup handler"
      };
 

@@ -97,7 +97,6 @@ extern B buffernameframe[FRAMEBYTES];
 	if (o1 >= CEILopds) return OPDS_OVF;									\
 	moveframe(OPAQUE_MEM(frame, saveboxname), o1);				\
 	FREEopds = o2;																				\
-	SBOX_FLAGS(VALUE_PTR(o_1)) &= ~SBOX_FLAGS_CLEANUP;		\
 	if ((ret = op_restore()) != OK) return ret;						\
 } while (0)
 

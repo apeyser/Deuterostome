@@ -29,6 +29,10 @@
   (RETURN_ERROR\() package (_) 4 -1 roll textit (\))
 } bind def
 
+/errorconst {
+  package (_) 3 -1 roll textit
+} bind def
+
 /get_op_ptr {
   dup null ne {
     4 opslist {

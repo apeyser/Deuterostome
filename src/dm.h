@@ -390,6 +390,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define X_BADHOST   0x00000A04L /* X server cannot be connected          */
 
 #define BAD_ARR     0x00000B00L /* dmnuminc debug error */
+#define SBOX_SET    0x00000B01L /* box already has a cleanup */		
 
 /* compare results */
 
@@ -613,6 +614,7 @@ L op_dictstack(void);
 L op_save(void);
 L op_capsave(void);
 L op_restore(void);
+L op_setcleanup(void);
 L op_vmstatus(void);
 L op_bind(void);
 L op_null(void);

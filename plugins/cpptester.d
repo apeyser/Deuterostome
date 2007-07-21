@@ -92,7 +92,6 @@ int bigtester\(L size, Tester* t\) {
   [
     [
       /maketester {(
-      B* mem;
       Tester* t;
 
       if \(CEILopds < o2\) return OPDS_OVF;

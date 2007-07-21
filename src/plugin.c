@@ -247,7 +247,7 @@ B* make_opaque_frame(L n, B* destroyer, B* pluginnameframe, ...) {
 	if (destroyer) {
 			B* box = VALUE_PTR(o_1);
 			SBOX_DATA(box) = destroyer;
-			SBOX_FLAGS(box) = SBOX_FLAGS_CLEANUP;
+			SBOX_FLAGS(box) |= SBOX_FLAGS_CLEANUP;
 	}
 
   if ((dict = makedict(len + 2 + (n ? 1 : 0))) == (B*) -1L) {
