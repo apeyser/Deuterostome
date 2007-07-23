@@ -34,13 +34,13 @@ namespace Cpp
 
 using namespace Cpp;
 
-wrapperM1(Tester, init, Tester**);
-wrapperM2(Tester, addElem, Tester*, int);
-wrapperM2(Tester, getElem, Tester*, int*);
-wrapperM1(Tester, removeElem, Tester*);
-wrapperM1(Tester, resetElems, Tester*);
-wrapperM1(Tester, create, void**);
-wrapperM2(Tester, createSized, void**, size_t);
-wrapperM1(Tester, destroy, void*);
-wrapperM1(Tester, fini, Tester*);
-wrapperM2(Tester, big, size_t, Tester*);
+wrapperMs(1, Tester, init, Tester**);
+wrapperMs(2, Tester, addElem, Tester*, int);
+wrapperMs(2, Tester, getElem, Tester*, int*);
+wrapperMs(1, Tester, removeElem, Tester*);
+wrapperMs(1, Tester, resetElems, Tester*);
+wrapperMs(1, Tester, create, void**);
+wrapperMs(2, Tester, createSized, void**, size_t);
+wrapperMs(1, Tester, destroy, void*);
+wrapperMs(1, Tester, fini, Tester*);
+wrapperMs(2, Tester, big, size_t, Tester*);

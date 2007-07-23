@@ -31,7 +31,7 @@ namespace Plugins
 
 		class ErrorCode : public exception 
 		{
-				const char* whatptr;
+				const char *const whatptr;
 				const int err;
 
 		public:
@@ -154,19 +154,12 @@ namespace Plugins
 
 #if __cplusplus
 #define wrapperM(c, n) int (*n)(void) = wrapper<c::n>
-#define wrapperM1(c, n, A) int (*n)(A) = wrapper1<A, c::n>
-#define wrapperM2(c, n, A, B) int (*n)(A, B) = wrapper2<A, B, c::n>
-#define wrapperM3(c, n, A, B, C) int (*n)(A, B, C) = wrapper3<A, B, C, c::n>
-#define wrapperM4(c, n, A, B, C, D) int (*n)(A, B, C, D)	\
-				= wrapper4<A, B, C, D, c::n>
-#define wrapperM5(c, n, A, B, C, D, E) int (*n)(A, B, C, D, E)	\
-		    = wrapper5<A, B, C, D, E, c::n>
-#define wrapperM6(c, n, A, B, C, D, E, F) int (*n)(A, B, C, D, E, F)	\
-		    = wrapper6<A, B, C, D, E, F, c::n>
+#define wrapperMs(i, c, n, ...) int (*n)(__VA_ARGS__) \
+		= wrapper##i<__VA_ARGS__, c::n>
 #endif //__cplusplus
 
-#define wrapperMH(n) extern int (*n)(void)
-#define wrapperMHs(n, ...) extern int (*n)(__VA_ARGS__)
+#define wrapperMH(c, n) extern int (*n)(void)
+#define wrapperMHs(i, c, n, ...) extern int (*n)(__VA_ARGS__)
 
 #define wrapperECI(name, plugin, err, msg)			\
 		char name##_Msg[] = msg;									\
