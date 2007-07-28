@@ -17,13 +17,14 @@ AC_DEFUN([CF_PKG_CHECK_MODULES_], [dnl
 		   :
         elif test "$3" != "prefix" && \
     	   CF_PKG_CHECK_MODULES_VAR[=`$PKG_CONFIG \
-		     --define-variable=prefix=\$prefix \
+		     --define-variable=prefix=\\${$1_PREFIX} \
 			 --variable="$3" "$2"`] ; then
     	   :
 		else
 		   AC_MSG_ERROR([Unable to get variable $3])
 		fi
     fi
+    CF_PKG_CHECK_MODULES_VAR[_BASE=${]CF_PACKAGE_MODULES_VAR[}]
     AC_MSG_RESULT([found, is \`${]CF_PKG_CHECK_MODULES_VAR[}\'])
     AC_SUBST(CF_PKG_CHECK_MODULES_VAR)
     CF_PKG_CHECK_MODULES_([$1], [$2], m4_shift(m4_shift(m4_shift($@))))
@@ -41,12 +42,13 @@ AC_DEFUN([CF_PKG_CHECK_FLAGS_], [dnl
       AC_MSG_WARN(CF_PKG_CHECK_MODULES_VAR [set from command line])
       pkg_failed=no
     elif CF_PKG_CHECK_MODULES_VAR[=`$PKG_CONFIG \
-			     --define-variable=prefix=\$prefix \
+			     --define-variable=prefix=\\${$1_PREFIX} \
 				 --$3 "$2"`] ; then
     :
     else
       AC_MSG_ERROR([Unable to get variable $3])
     fi
+    CF_PKG_CHECK_MODULES_VAR[_BASE=${]CF_PACKAGE_MODULES_VAR[}]
     AC_MSG_RESULT([found, is \`${]CF_PKG_CHECK_MODULES_VAR[}\'])
     AC_SUBST(CF_PKG_CHECK_MODULES_VAR)
     CF_PKG_CHECK_MODULES_([$1], [$2], m4_shift(m4_shift(m4_shift($@))))
