@@ -34,7 +34,6 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-LIBOBJDIR =
 @ENABLE_BASH_TRUE@am__append_1 = dnode.sh
 @ENABLE_PERL_TRUE@am__append_2 = print.pl
 @ENABLE_EMACSCLIENT_TRUE@@ENABLE_EMACS_TRUE@am__append_3 = emacsclient-run.sh

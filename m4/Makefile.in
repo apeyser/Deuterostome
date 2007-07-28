@@ -34,7 +34,6 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-LIBOBJDIR =
 subdir = m4
 DIST_COMMON = $(am__dist_m4data_DATA_DIST) \
 	$(am__dist_noinst_DATA_DIST) $(srcdir)/Makefile.am \

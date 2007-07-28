@@ -34,7 +34,6 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-LIBOBJDIR =
 subdir = ps
 DIST_COMMON = $(dist_pkgpsdata_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in

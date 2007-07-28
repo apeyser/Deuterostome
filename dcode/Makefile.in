@@ -34,7 +34,6 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-LIBOBJDIR =
 subdir = dcode
 DIST_COMMON = $(dist_dmconf_DATA) $(dist_dmstart_DATA) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in $(srcdir)/plugin.d \
