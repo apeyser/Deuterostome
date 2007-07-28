@@ -25,7 +25,7 @@ AC_DEFUN([CF_PKG_CHECK_MODULES_], [dnl
 		fi
     fi
     CF_PKG_CHECK_MODULES_VAR[_BASE=${]CF_PACKAGE_MODULES_VAR[}]
-    AC_MSG_RESULT([found, is \`${]CF_PKG_CHECK_MODULES_VAR[}\'])
+    AC_MSG_RESULT([found, is \`${]CF_PKG_CHECK_MODULES_VAR[}'])
     AC_SUBST(CF_PKG_CHECK_MODULES_VAR)
     CF_PKG_CHECK_MODULES_([$1], [$2], m4_shift(m4_shift(m4_shift($@))))
   ])
@@ -49,7 +49,7 @@ AC_DEFUN([CF_PKG_CHECK_FLAGS_], [dnl
       AC_MSG_ERROR([Unable to get variable $3])
     fi
     CF_PKG_CHECK_MODULES_VAR[_BASE=${]CF_PACKAGE_MODULES_VAR[}]
-    AC_MSG_RESULT([found, is \`${]CF_PKG_CHECK_MODULES_VAR[}\'])
+    AC_MSG_RESULT([found, is \`${]CF_PKG_CHECK_MODULES_VAR[}'])
     AC_SUBST(CF_PKG_CHECK_MODULES_VAR)
     CF_PKG_CHECK_MODULES_([$1], [$2], m4_shift(m4_shift(m4_shift($@))))
   ])
