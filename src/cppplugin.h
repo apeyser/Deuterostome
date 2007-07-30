@@ -10,6 +10,15 @@ namespace Plugins
 {
 		using namespace std;
 
+		class Uncopyable 
+		{
+		private:
+				Uncopyable& operator=(const Uncopyable&);
+				Uncopyable(const Uncopyable&);
+		public:
+				Uncopyable(void) {};
+		};
+
 		// To simply the interface to C, here we define some template
 		// -- functions and macros
 		// -- They map from int func(...) to void Class::func(...)
