@@ -52,12 +52,13 @@ namespace Plugins
 						pullname((B*) bframe, s);
 						return string((char*) s);
 				};
-		};
 
-		typedef bool (*NameComparator)(const NameFrame&, const NameFrame&);
-		bool nameComp(const NameFrame& a, const NameFrame& b) {
-				return compname((B*) a.bframe, (B*) b.bframe) < 0;
-		}
+				
+				typedef bool (*Comparator)(const NameFrame&, const NameFrame&);
+				static bool comparator(const NameFrame& a, const NameFrame& b) {
+						return compname((B*) a.bframe, (B*) b.bframe) < 0;
+				};
+		};
 
 #endif // DM_H
 								
