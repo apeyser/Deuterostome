@@ -300,6 +300,7 @@ DICT_CEIL(dict) += offs;
   makename(->namestring, ->nameframe) only first NAMEBYTES characters incl.
   pullname(->nameframe, ->namestring) namestring must be NAMEBYTES+1 long
   BOOLEAN matchname(->nameframe1, ->nameframe2)
+  L compname(->nameframe1, ->nameframe2) n1 < n2 : <0, n1 = n2 : 0, else >0
 
  Name strings need to be able to hold 15 bytes.
 */
@@ -407,12 +408,17 @@ void pullname(B *nameframe, B *namestring)
   namestring[NAMEBYTES] = 0;
 }
 
+L compname(B* nameframe1, B* nameframe2) 
+{
+  return (*(W *)(nameframe1+2) - *(W *)(nameframe2+2))
+    || (*(L *)(nameframe1+4) - *(L *)(nameframe2+4))
+    || (*(L *)(nameframe1+8) - *(L *)(nameframe2+8))
+    || (*(L *)(nameframe1+12) - *(L *)(nameframe2+12));
+}
+
 BOOLEAN matchname(B *nameframe1, B *nameframe2)
-{  
-  return (*(W *)(nameframe1+2) == *(W *)(nameframe2+2))
-    && (*(L *)(nameframe1+4) == *(L *)(nameframe2+4))
-    && (*(L *)(nameframe1+8) == *(L *)(nameframe2+8))
-    && (*(L *)(nameframe1+12) == *(L *)(nameframe2+12));
+{
+		return compname(nameframe1, nameframe2) == 0;
 }
 
 /* ======================== move frame(s) =============================

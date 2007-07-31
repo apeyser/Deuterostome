@@ -19,6 +19,49 @@ namespace Plugins
 				Uncopyable(void) {};
 		};
 
+#ifdef DM_H
+		struct Frame 
+		{
+				typedef B bftype[FRAMEBYTES];
+				bftype bframe;
+
+				Frame(const bftype f) {moveframe((B*)f, bframe);};
+				void getframe(bftype f) const {moveframe((B*)bframe, f);};
+		};
+
+		struct ValFrame: public Frame
+		{
+				ValFrame(const bftype f): Frame(f) {};
+				char* ptr(void) const {return (char*) VALUE_PTR(bframe);};
+		};
+
+		struct ArrFrame: public ValFrame 
+		{
+				ArrFrame(const bftype f): ValFrame(f) {};
+				size_t getlen(void) const {return ARRAY_SIZE(bframe);};
+				void setlen(size_t s) {ARRAY_SIZE(bframe) = s;};
+		};
+
+		typedef ArrFrame StringFrame;
+
+		struct NameFrame: public Frame
+		{
+				NameFrame(const bftype f): Frame(f) {};
+				string str(void) const {
+						B s[DM_NAMEBYTES+1];
+						pullname((B*) bframe, s);
+						return string((char*) s);
+				};
+		};
+
+		typedef bool (*NameComparator)(const NameFrame&, const NameFrame&);
+		bool nameComp(const NameFrame& a, const NameFrame& b) {
+				return compname((B*) a.bframe, (B*) b.bframe) < 0;
+		}
+
+#endif // DM_H
+								
+
 		// To simply the interface to C, here we define some template
 		// -- functions and macros
 		// -- They map from int func(...) to void Class::func(...)
@@ -36,7 +79,7 @@ namespace Plugins
 		// -- with wrapperM|N|(class, func, ...)
 		// -- and of course a definition for static void class::func(...)
 		
-	  enum MEM_ERRS {OK = 0, BAD_ALLOC, EXCEPTION, UNKNOWN};
+	  enum MEM_ERRS {NO_ERR = 0, BAD_ALLOC, EXCEPTION, UNKNOWN};
 
 		class ErrorCode : public exception 
 		{
@@ -69,7 +112,7 @@ namespace Plugins
 					return EXCEPTION;
 			}
 			catch (...) {return UNKNOWN;};
-	    return OK;
+	    return NO_ERR;
 	  }
                 
 	  template<typename A,
@@ -83,7 +126,7 @@ namespace Plugins
 					return EXCEPTION;
 			}
 			catch (...) {return UNKNOWN;};
-	    return OK;
+	    return NO_ERR;
 	  }
 
 	  template<typename A, typename B,
@@ -97,7 +140,7 @@ namespace Plugins
 					return EXCEPTION;
 			}
 			catch (...) {return UNKNOWN;};
-	    return OK;
+	    return NO_ERR;
 	  }
 
 		template<typename A, typename B, typename C,
@@ -111,7 +154,7 @@ namespace Plugins
 					return EXCEPTION;
 			}
 			catch (...) {return UNKNOWN;};
-	    return OK;
+	    return NO_ERR;
 	  }
 
 		template<typename A, typename B, typename C, typename D,
@@ -125,7 +168,7 @@ namespace Plugins
 					return EXCEPTION;
 			}
 			catch (...) {return UNKNOWN;};
-	    return OK;
+	    return NO_ERR;
 	  }
 
 		template<typename A, typename B, typename C, typename D, typename E,
@@ -139,7 +182,7 @@ namespace Plugins
 					return EXCEPTION;
 			}
 			catch (...) {return UNKNOWN;};
-	    return OK;
+	    return NO_ERR;
 	  }
 
 		template<typename A, typename B, typename C, typename D, typename E,
@@ -153,7 +196,7 @@ namespace Plugins
 					return EXCEPTION;
 			}
 			catch (...) {return UNKNOWN;};
-	    return OK;
+	    return NO_ERR;
 	  }
 };
 
@@ -170,8 +213,8 @@ namespace Plugins
 #define wrapperMH(c, n) extern int (*n)(void)
 #define wrapperMHs(i, c, n, ...) extern int (*n)(__VA_ARGS__)
 
-#define wrapperECI(name, plugin, err, msg)			\
-		char name##_Msg[] = msg;									\
+#define wrapperECI(name, plugin, err)							 \
+		char name##_Msg[] = "Plugin: " #plugin ", Error: " #name ", Number: " #err;	\
 		typedef ErrorCodeInst<plugin##_##err, name##_Msg> name
 
 #endif //!CPPPLUGIN_NO_WRAPPERS
