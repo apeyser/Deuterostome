@@ -326,8 +326,11 @@ AC_DEFUN([CF_IF_ENABLED], [dnl
 ])
 
 AC_DEFUN([CF_AM_PROG], [dnl
-  AC_CHECK_PROG([$1], [$2], [$as_dir/$ac_word$ac_exec_ext], [$4], [$3])
-  AM_CONDITIONAL([$1], [test "${$1+set}" = set]) dnl
+  AC_CHECK_PROG([ENABLE_$1], [$2], [$as_dir/$ac_word$ac_exec_ext], [$4], [$3])
+  if test -n "$ENABLE_$1" ; then
+    AC_DEFINE_UNQUOTED([ENABLE_$1], ["${ENABLE_$1}"], [Path to $1])
+  fi
+  AM_CONDITIONAL([ENABLE_$1], [test "${$1+set}" = set]) dnl
 ])
 
 AC_DEFUN([CF_EMACS_ENABLED], [dnl

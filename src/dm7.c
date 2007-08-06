@@ -129,14 +129,27 @@ L op_setwdir(void)
 L op_tosystem(void)
 {
   L nb, retc;
+	pid_t f, r;
+	int status;
+	
   if (o_1 < FLOORopds) return(OPDS_UNF);
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
   nb = ARRAY_SIZE(o_1) + 1;
   if (nb > (CEILvm - FREEvm)) return(VM_OVF);
   moveB((B *)VALUE_BASE(o_1),FREEvm, nb-1);
   FREEvm[nb-1] = '\000';
-  retc = system(FREEvm);
-  if (retc != 0) return(NOSYSTEM);
+
+	if ((f = fork()) == -1) return -errno;
+	if (! f) {
+			execl(ENABLE_BASH, ENABLE_BASH, "-c", FREEvm, (char*) NULL);
+			perror("Error exec'ing bash");
+			exit(-1);
+	}
+
+	while ((r = waitpid(f, &status, 0)) != -1 && r != f);
+	if (r == -1) return -errno;
+	if (status != 0) return NOSYSTEM;
+	
   FREEopds = o_1;
   return(OK);
 }

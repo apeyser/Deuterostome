@@ -3,11 +3,50 @@
 /* align to this many bytes */
 #undef BYTECORRECT
 
+/* Path to ATPS */
+#undef ENABLE_ATPS
+
+/* Path to BASH */
+#undef ENABLE_BASH
+
 /* enable extra debug in dmnum */
 #undef ENABLE_DEBUG_DMNUM
 
+/* Path to DVIPDF */
+#undef ENABLE_DVIPDF
+
+/* Path to EMACSCLIENT */
+#undef ENABLE_EMACSCLIENT
+
+/* Path to ENV */
+#undef ENABLE_ENV
+
+/* Path to GS */
+#undef ENABLE_GS
+
+/* Path to LATEX */
+#undef ENABLE_LATEX
+
+/* Path to LP */
+#undef ENABLE_LP
+
+/* Path to PDFLATEX */
+#undef ENABLE_PDFLATEX
+
+/* Path to PDFTPS */
+#undef ENABLE_PDFTPS
+
+/* Path to PERL */
+#undef ENABLE_PERL
+
 /* compile or install plugins */
 #undef ENABLE_PLUGINS
+
+/* Path to PSTPDF */
+#undef ENABLE_PSTPDF
+
+/* Path to TAIL */
+#undef ENABLE_TAIL
 
 /* compile and install threads, value is default number */
 #undef ENABLE_THREADS
@@ -15,8 +54,14 @@
 /* compile and install unix domain sockets */
 #undef ENABLE_UNIX_SOCKETS
 
+/* Path to XDVI */
+#undef ENABLE_XDVI
+
 /* compile or install only new xps */
 #undef ENABLE_XPS
+
+/* Path to XTERM */
+#undef ENABLE_XTERM
 
 /* Header for endianness */
 #undef ENDIAN_HDR
