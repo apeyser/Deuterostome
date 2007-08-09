@@ -358,6 +358,20 @@ Derived from `comint-mode' with font-lock from `d-mode'.
 	(setq dm-server-name (format "dm-server-%d" (emacs-pid)))
 	(dm-server-start)))
 
+(defun dvt-scroll-special (dvt-buffer-name)
+  (let ((selected-window (selected-window)))
+	(catch 'dedicated-window-found
+	  (dolist (window (get-buffer-window-list dvt-buffer-name 'no-mini t))
+		(when (window-dedicated-p window)
+		  (let* ((frame (window-frame window))
+				 (inv (null (frame-visible-p frame))))
+			(when inv (make-frame-visible frame))
+			(select-window window)
+			(goto-char (point-max))
+			(select-window selected-window)
+			(when inv (make-frame-invisible frame)))
+		  (throw 'dedicated-window-found window))))))
+
 (defun dvt (&optional buffer override)
   "Run an inferior shell, with I/O through BUFFER (which defaults to `*shell*').
 Interactively, a prefix arg means to prompt for BUFFER.
@@ -391,9 +405,9 @@ Otherwise, one argument `-i' is passed to the shell.
 \\{d-comint-mode-map}"
   (interactive
    (list
-    (and current-prefix-arg (read-buffer "DVT buffer name: " "*dvt*"))))
+    (or (and current-prefix-arg (read-buffer "DVT buffer name: " "*dvt*"))
+		"*dvt*")))
   (if (not d-comint-mode-map-setup) (d-comint-mode-setup-map))
-  (when (null buffer) (setq buffer "*dvt*"))
   (if (not (comint-check-proc buffer))
       (let* ((prog (or explicit-dvt-file-name
 		       (getenv "EDVT")
@@ -421,10 +435,14 @@ Otherwise, one argument `-i' is passed to the shell.
 			  "Xwindows {(" (d-comint-mode-shell-quote dm-server-name) ") ("
 			  (d-comint-mode-shell-quote (buffer-name dvt-buffer)) 
 			  ") take_input_setup} if\n"))))
+
 		(when (or d-comint-mode-keep-focus override)
-		  (dvt-special-frame (buffer-name dvt-buffer)))
-		(switch-to-buffer dvt-buffer))
-    (switch-to-buffer buffer)))
+		  (dvt-special-frame buffer)
+		  (dvt-scroll-special buffer))
+
+		(switch-to-buffer dvt-buffer)
+		(goto-char (point-max)))
+	(switch-to-buffer buffer)))
 
 (defun d-comint-mode-quote (string)
   "Quote a string to be sent to and interpreted by the dvt.
@@ -444,19 +462,18 @@ This quotes per `shell-quote-argument', then requotes per `d-comint-mode-quote'"
   (d-comint-mode-quote (shell-quote-argument string)))
 
 (defun d-comint-mode-find-dvt-frame (dvt-buffer-name)
-  (save-excursion
-    (cond 
-     ((get-buffer-window dvt-buffer-name)
-      (selected-frame))
-     ((catch 'dedicated-window-found
-        (dolist (window (get-buffer-window-list dvt-buffer-name 
-                                                'no-minibuf 'visible))
-          (when (window-dedicated-p window)
-            (throw 'dedicated-window-found (window-frame window))))))
-     ((let ((window (get-buffer-window dvt-buffer-name 'visible)))
-        (when window (window-frame window))))
-     (t 
-      (window-frame (dvt-special-frame dvt-buffer-name))))))
+  (let ((window
+		 (save-excursion
+		  (cond 
+		   ((get-buffer-window dvt-buffer-name))
+		   ((catch 'dedicated-window-found
+			  (dolist (window (get-buffer-window-list dvt-buffer-name 
+													  'no-minibuf 'visible))
+				(when (window-dedicated-p window)
+				  (throw 'dedicated-window-found window)))))
+		   ((get-buffer-window dvt-buffer-name 'visible))
+		   (t (dvt-special-frame dvt-buffer-name))))))
+	(window-frame window)))
 
 (defun d-comint-mode-focus (dvt-buffer-name &optional override)
   "Set input focus to dvt buffer. 
@@ -476,12 +493,14 @@ even if `d-comint-mode-keep-focus' is nil.
   "returns window"
   (interactive
    (list
-    (and current-prefix-arg (read-buffer "DVT buffer name: " "*dvt*"))))
+	(or
+	 (and current-prefix-arg (read-buffer "DVT buffer name: " "*dvt*"))
+	 "*dvt*")))
   (let ((dvt-window (special-display-popup-frame
-                     dvt-buffer-name 
-                     (append
-                      (list (cons 'height d-comint-mode-window-size))
-                      d-comint-mode-frame-alist))))
+					 dvt-buffer-name 
+					 (append
+					  (list (cons 'height d-comint-mode-window-size))
+					  d-comint-mode-frame-alist))))
     (setq d-comint-mode-minibuffer-frames
           (append d-comint-mode-minibuffer-frames 
                   (list (cons default-minibuffer-frame 
