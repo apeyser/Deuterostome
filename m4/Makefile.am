@@ -7,4 +7,4 @@ endif !ENABLE_PLUGINS
 dist_m4data_DATA = $(PLUGINDISTR)
 dist_noinst_DATA = acx_pthread.m4 ax_cflags_strict_prototypes.m4 \
 	ax_prefix_config_h.m4 configure.m4 lf_x11.m4 \
-	lib_socket_nsl.m4 libtool.m4 $(PLUGINNODISTR)
+	lib_socket_nsl.m4 $(PLUGINNODISTR)

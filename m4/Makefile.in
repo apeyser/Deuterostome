@@ -43,8 +43,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
 	$(top_srcdir)/m4/configure.m4 \
-	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -63,8 +62,7 @@ am__installdirs = "$(DESTDIR)$(m4datadir)"
 dist_m4dataDATA_INSTALL = $(INSTALL_DATA)
 am__dist_noinst_DATA_DIST = acx_pthread.m4 \
 	ax_cflags_strict_prototypes.m4 ax_prefix_config_h.m4 \
-	configure.m4 lf_x11.m4 lib_socket_nsl.m4 libtool.m4 \
-	plugin-config.m4
+	configure.m4 lf_x11.m4 lib_socket_nsl.m4 plugin-config.m4
 DATA = $(dist_m4data_DATA) $(dist_noinst_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 pkgdatadir = @pkgdatadir@
@@ -326,7 +324,7 @@ tmp = @tmp@
 dist_m4data_DATA = $(PLUGINDISTR)
 dist_noinst_DATA = acx_pthread.m4 ax_cflags_strict_prototypes.m4 \
 	ax_prefix_config_h.m4 configure.m4 lf_x11.m4 \
-	lib_socket_nsl.m4 libtool.m4 $(PLUGINNODISTR)
+	lib_socket_nsl.m4 $(PLUGINNODISTR)
 
 all: all-am
 
