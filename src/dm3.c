@@ -25,7 +25,9 @@
 #include <string.h>
 #include "paths.h"
 
+#ifndef h_errno
 extern int h_errno;
+#endif
 
 /*---------------------------- support -------------------------------------*/
 

@@ -141,8 +141,6 @@ CF_AC_CHECK_SIZEOF([void*], [4])
 # check pid_t for plugins/process.c
 CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([pid_t], [4])])
 CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([int], [4])])
-CF_IF_ENABLED([process], [CF_AC_CHECK_HEADER([sys/wait.h])])
-CF_IF_ENABLED([setuid],  [CF_AC_CHECK_HEADER([sys/wait.h])])
 
 CF_AC_CHECK_HEADERS([endian.h machine/endian.h], [ENDIAN_HDR], 
   [Header for endianness], [NO_ENDIAN_HDR])
@@ -170,6 +168,7 @@ AC_CHECK_HEADER([X11/Xlib.h])
 AC_CHECK_HEADER([X11/Xutil.h])
 CF_AC_CHECK_HEADER([strings.h])
 CF_AC_CHECK_HEADER([inttypes.h])
+CF_AC_CHECK_HEADER([sys/wait.h])
 CF_IF_ENABLED([plugins], [CF_AC_CHECK_HEADER([stdarg.h])])
 AC_CHECK_HEADER([error.h], [
   AC_DEFINE([HAVE_ERROR_H], [1], [Define to 1 if you have <error.h>])
