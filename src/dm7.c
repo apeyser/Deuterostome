@@ -124,7 +124,7 @@ L op_setwdir(void)
 /*---------------------------------------------------- tosystem
      string | --
 
-  - executes 'string' as a shell command
+  - executes 'string' as a bash shell command
 */
 
 L op_tosystem(void)
@@ -146,10 +146,15 @@ L op_tosystem(void)
 			perror("Error exec'ing bash");
 			exit(-1);
 	}
-
-	while ((r = waitpid(f, &status, 0)) != -1 && r != f);
-	if (r == -1) return -errno;
-	if (status != 0) return NOSYSTEM;
+  
+ wts:
+  if (abortflag) {alarm(0); return ABORT;};
+  alarm(30);
+  if ((r = waitpid(f, &status, 0)) == -1) {
+    if (errno == EINTR) goto wts;
+    return -errno;
+  } else if (r != f) goto wts;
+  if (status != 0) return NOSYSTEM;
 	
   FREEopds = o_1;
   return(OK);
