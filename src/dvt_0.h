@@ -151,6 +151,7 @@ B *sysop[] =
       "readboxfile",    (B *)op_readboxfile,
       "writeboxfile",   (B *)op_writeboxfile,
       "tosystem",       (B *)op_tosystem,
+			"fromsystem",     (B *)op_fromsystem,
       "transcribe",     (B *)op_transcribe,
 /*-- more ... */
       "fax",            (B *)op_fax,

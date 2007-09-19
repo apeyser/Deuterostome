@@ -12,8 +12,9 @@
           - writeboxfile
           - readboxfile
           - findfiles
-		  - findfile
+					- findfile
           - tosystem
+          - fromsystem
           - transcribe
 */
 
@@ -31,6 +32,7 @@
 #include <fnmatch.h>
 #include <math.h>
 #include <sys/wait.h>
+#include <signal.h>
 #include "dm.h"
 
 /*--------------------------------------------------- gettime
@@ -142,22 +144,210 @@ L op_tosystem(void)
 
 	if ((f = fork()) == -1) return -errno;
 	if (! f) {
+			int retc2;
+ 			while ((retc2 = open("/dev/null", O_RDWR, 0)) == -1 && errno == EINTR);
+			if (retc2 == -1) {
+					perror("Error opening /dev/null");
+					exit(-1);
+			}
+			
+			while ((status = dup2(retc2, STDIN_FILENO)) == -1 && errno == EINTR);
+			if (status == -1) {
+					perror("Error opening stdin into /dev/null");
+					exit(-1);
+			}
+			
+ 			while ((status = dup2(retc2, STDOUT_FILENO)) == -1 && errno == EINTR);
+			if (status == -1) {
+					perror("Error opening stdout into /dev/null");
+					exit(-1);
+			}
+
 			execl(ENABLE_BASH, ENABLE_BASH, "-c", FREEvm, (char*) NULL);
 			perror("Error exec'ing bash");
 			exit(-1);
 	}
   
  wts:
-  if (abortflag) {alarm(0); return ABORT;};
+  if (abortflag) {
+			alarm(0);
+			kill(f, SIGKILL);
+			return ABORT;
+	};
   alarm(30);
   if ((r = waitpid(f, &status, 0)) == -1) {
+		int errno_;
     if (errno == EINTR) goto wts;
-    return -errno;
-  } else if (r != f) goto wts;
+		errno_ = errno;
+		kill(f, SIGKILL);
+    return -errno_;
+  }
+	else if (r != f) goto wts;
   if (status != 0) return NOSYSTEM;
 	
   FREEopds = o_1;
   return(OK);
+}
+
+/*---------------------------------------------------- fromsystem
+ * string | string
+ *
+ * - executes 'string' as a bash shell command, and returns the output
+ * - the output is returned as a new string - remember to put it in a
+ * - box.
+ */
+
+L op_fromsystem(void) 
+{
+	L max, retc;
+	B* c;
+	pid_t f, r;
+	ssize_t rf;
+	int status;
+	int fd[2];
+	
+  if (o_1 < FLOORopds) return(OPDS_UNF);
+  if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
+  max = ARRAY_SIZE(o_1) + 1;
+  if (max > (CEILvm - FREEvm)) return(VM_OVF);
+  moveB((B *)VALUE_BASE(o_1),FREEvm, max-1);
+  FREEvm[max-1] = '\000';
+
+	if (pipe(fd)) return -errno;
+	
+	if ((f = fork()) == -1) {
+			retc = -errno;
+			close(fd[1]);
+			close(fd[0]);
+			return retc;
+	}
+	
+	if (! f) {
+			int retc2;
+ 			while ((retc2 = open("/dev/null", O_RDWR, 0)) == -1 && errno == EINTR);
+			if (retc2 == -1) {
+					perror("Error opening /dev/null");
+					exit(-1);
+			}
+			
+			while ((status = dup2(retc2, STDIN_FILENO)) == -1 && errno == EINTR);
+			if (status == -1) {
+					perror("Error opening stdin into /dev/null");
+					exit(-1);
+			}
+
+			while ((status = close(fd[0]))  && errno == EINTR);
+			if (status) {
+					perror("Error closing pipe in");
+					exit(-1);
+			}
+			
+			while ((status = dup2(fd[1], STDOUT_FILENO) == -1) && errno == EINTR);
+			if (status == -1) {
+					perror("Error duping pipe out to stdout");
+			}
+			
+			while ((status = close(fd[1])) && errno == EINTR);
+			if (status) {
+					perror("Error closing pipe out");
+					exit(-1);
+			}
+			
+			execl(ENABLE_BASH, ENABLE_BASH, "-c", FREEvm, (char*) NULL);
+			perror("Error exec'ing bash");
+			exit(-1);
+	}
+
+	alarm(30);
+	while ((status = close(fd[1])) == -1 && errno == EINTR) {
+			if (abortflag) {
+					retc = ABORT;
+					goto EXIT_FILE;
+			}
+	}
+	
+	if (status) {
+			retc = -errno;
+			goto EXIT_FILE;
+	}
+
+	if (FREEvm + FRAMEBYTES >= CEILvm) {
+			retc = VM_OVF;
+			goto EXIT_FILE;
+	}
+	
+	max = CEILvm - FREEvm - FRAMEBYTES;
+	TAG(FREEvm) = ARRAY | BYTETYPE;
+	ATTR(FREEvm) = PARENT;
+	c = VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
+
+	READ:
+	alarm(30);
+	while ((rf = read(fd[0], c, max)) > 0) {
+			c += rf;
+			if ((max -= rf) == 0) {
+					char c_;
+					if ((rf = read(fd[0], &c_, 1)) != 0) {
+							retc = VM_OVF;
+							goto EXIT_FILE;
+					}
+					break;
+			}
+	}
+	
+	if (rf == -1) {
+			if (abortflag) {
+					retc = ABORT;
+					goto EXIT_FILE;
+			}
+			
+			if (errno == EINTR) goto READ;
+			retc = -errno;
+			goto EXIT_FILE;
+	}
+	
+	if (close(fd[0])) {
+			retc = -errno;
+			goto EXIT_PID;
+	}
+
+	WAIT_PID:
+	alarm(0);
+  if (abortflag) {
+			retc = ABORT;
+			goto EXIT_PID;
+	};
+	
+	for (alarm(30); (r = waitpid(f, &status, 0)) != f; alarm(30)) {
+			if (r == -1) {
+					if (errno == EINTR) goto WAIT_PID;
+					retc = -errno;
+					goto EXIT_PID;
+			}
+	}
+
+	if (status != 0) {
+			retc = NOSYSTEM;
+			goto EXIT_NOW;
+	}
+
+	max = c - FREEvm - FRAMEBYTES;
+	if ((c = (B*) DALIGN(FREEvm + FRAMEBYTES + max)) > CEILvm) {
+			retc = VM_OVF;
+			goto EXIT_NOW;
+	}
+	ARRAY_SIZE(FREEvm) = c - FREEvm - FRAMEBYTES;
+	moveframe(FREEvm, o_1);
+	ARRAY_SIZE(o_1) = max;
+	FREEvm = c;
+	return OK;
+
+	EXIT_FILE:
+	close(fd[0]);
+	EXIT_PID:
+	kill(f, SIGKILL);
+	EXIT_NOW:
+	return retc;
 }
 
 /*---------------------------------------------------- readfile

@@ -697,6 +697,7 @@ L op_findfile(void);
 L op_readboxfile(void);
 L op_writeboxfile(void); 
 L op_tosystem(void);
+L op_fromsystem(void);
 L op_transcribe(void);
 
 /*-- more big operators.... */
