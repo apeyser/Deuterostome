@@ -21,10 +21,6 @@ static L int_regex_error(int e)
 				REGEX_ERR(ERANGE);
 				REGEX_ERR(ESPACE);
 				REGEX_ERR(BADRPT);
-				REGEX_ERR(EMPTY);
-				REGEX_ERR(ASSERT);
-				REGEX_ERR(INVARG);
-				REGEX_ERR(ILLSEQ);
 				default:
 						return REGEX_UNKNOWN;
 		};

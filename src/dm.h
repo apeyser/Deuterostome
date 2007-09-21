@@ -409,11 +409,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define REGEX_ERANGE   0x00000C0AL /* invalid character rangin in `[]' */
 #define REGEX_ESPACE   0x00000C0BL /* ran out of memory */
 #define REGEX_BADRPT   0x00000C0CL /* `?', `*', or `+' operand invalid */
-#define REGEX_EMPTY    0x00000C0DL /* empty (sub)expression */
-#define REGEX_ASSERT   0x00000C0EL /* can't happen - you found a bug */
-#define REGEX_INVARG   0x00000C0FL /* invalid argument, e.g. negative-length string */
-#define REGEX_ILLSEQ   0x00000C10L /* illegal byte sequence (bad multibyte character) */
-#define REGEX_UNKNOWN  0x00000C11L /* Unknown error */
+#define REGEX_UNKNOWN  0x00000C0DL /* Unknown error */
 #endif // DM_ENABLE_REGEX
 
 /* compare results */
