@@ -163,6 +163,9 @@ ENABLE_PROCESS_TRUE = @ENABLE_PROCESS_TRUE@
 ENABLE_PSTPDF = @ENABLE_PSTPDF@
 ENABLE_PSTPDF_FALSE = @ENABLE_PSTPDF_FALSE@
 ENABLE_PSTPDF_TRUE = @ENABLE_PSTPDF_TRUE@
+ENABLE_REGEX = @ENABLE_REGEX@
+ENABLE_REGEX_FALSE = @ENABLE_REGEX_FALSE@
+ENABLE_REGEX_TRUE = @ENABLE_REGEX_TRUE@
 ENABLE_SETUID_FALSE = @ENABLE_SETUID_FALSE@
 ENABLE_SETUID_TRUE = @ENABLE_SETUID_TRUE@
 ENABLE_TAIL = @ENABLE_TAIL@
@@ -538,7 +541,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/dcode $(distdir)/emacs $(distdir)/m4 $(distdir)/plugins $(distdir)/src $(distdir)/src/codegen $(distdir)/test
+	$(mkdir_p) $(distdir)/dcode $(distdir)/m4 $(distdir)/plugins $(distdir)/src $(distdir)/src/codegen $(distdir)/test
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

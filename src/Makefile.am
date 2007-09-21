@@ -28,6 +28,10 @@ if ENABLE_THREADS
   THREADSRC=threads.c
 endif ENABLE_THREADS
 
+if ENABLE_REGEX
+  REGEX_SRC=regex.c
+endif ENABLE_REGEX
+
 EXTRA_DIST = dnode-nice.c.in paths.h.in
 
 DISTCLEANFILES = dm-config.h
@@ -70,7 +74,7 @@ libdmglobals_la_LIBADD = $(PLUGIN_LD)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	dmnum.c dsp1.c dsp2.c error-local.h \
-	plugin.c pluginlib.h $(THREADSRC) 
+	plugin.c pluginlib.h $(THREADSRC) $(REGEX_SRC)
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)
 
@@ -94,7 +98,8 @@ nodist_pkgconfiglib_DATA = dm.pc
 dist_pkgdata_SCRIPTS = dgen-build
 
 dgen_SOURCES = dgen.c dgen_0.h dgen_1.h 
-dgen_CPPFLAGS = $(AM_CPPFLAGS) -DBOOTSTRAP_PLUGIN=1 @LIBDM_DLL_IMPORT@ 
+dgen_CPPFLAGS = $(AM_CPPFLAGS) -DBOOTSTRAP_PLUGIN=1 -DDM_DISABLE_REGEX=1 \
+	@LIBDM_DLL_IMPORT@ 
 dgen_LDADD = $(PLUGIN_LD) libdmbootstrap.la 
 
 libdmbootstrap_la_LIBADD = $(PLUGIN_LD)
@@ -102,5 +107,6 @@ libdmbootstrap_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c \
 	dmnum.c dsp1.c dsp2.c plugin.c  \
 	dmnuminc.h dsp1f.h  paths.h pluginlib.h
-libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) -DDM_DISABLE_THREADS=1
+libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) \
+	-DDM_DISABLE_THREADS=1 -DDM_DISABLE_REGEX=1
 libdmbootstrap_la_CFLAGS = $(AM_CFLAGS)

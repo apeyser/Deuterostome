@@ -85,8 +85,9 @@ libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
 libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am__libdmglobals_la_SOURCES_DIST = dmglobals.c dm1.c dm2.c dm3.c dm4.c \
 	dm5.c dm6.c dm7.c dm8.c dm9.c dmnum.c dsp1.c dsp2.c \
-	error-local.h plugin.c pluginlib.h threads.c
+	error-local.h plugin.c pluginlib.h threads.c regex.c
 @ENABLE_THREADS_TRUE@am__objects_1 = libdmglobals_la-threads.lo
+@ENABLE_REGEX_TRUE@am__objects_2 = libdmglobals_la-regex.lo
 am_libdmglobals_la_OBJECTS = libdmglobals_la-dmglobals.lo \
 	libdmglobals_la-dm1.lo libdmglobals_la-dm2.lo \
 	libdmglobals_la-dm3.lo libdmglobals_la-dm4.lo \
@@ -94,7 +95,7 @@ am_libdmglobals_la_OBJECTS = libdmglobals_la-dmglobals.lo \
 	libdmglobals_la-dm7.lo libdmglobals_la-dm8.lo \
 	libdmglobals_la-dm9.lo libdmglobals_la-dmnum.lo \
 	libdmglobals_la-dsp1.lo libdmglobals_la-dsp2.lo \
-	libdmglobals_la-plugin.lo $(am__objects_1)
+	libdmglobals_la-plugin.lo $(am__objects_1) $(am__objects_2)
 libdmglobals_la_OBJECTS = $(am_libdmglobals_la_OBJECTS)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 @ENABLE_SETUID_TRUE@am__EXEEXT_1 = dnode-nice$(EXEEXT)
@@ -238,6 +239,9 @@ ENABLE_PROCESS_TRUE = @ENABLE_PROCESS_TRUE@
 ENABLE_PSTPDF = @ENABLE_PSTPDF@
 ENABLE_PSTPDF_FALSE = @ENABLE_PSTPDF_FALSE@
 ENABLE_PSTPDF_TRUE = @ENABLE_PSTPDF_TRUE@
+ENABLE_REGEX = @ENABLE_REGEX@
+ENABLE_REGEX_FALSE = @ENABLE_REGEX_FALSE@
+ENABLE_REGEX_TRUE = @ENABLE_REGEX_TRUE@
 ENABLE_SETUID_FALSE = @ENABLE_SETUID_FALSE@
 ENABLE_SETUID_TRUE = @ENABLE_SETUID_TRUE@
 ENABLE_TAIL = @ENABLE_TAIL@
@@ -412,6 +416,7 @@ SUBDIRS = codegen
 
 @ENABLE_THREADS_TRUE@THREAD_HDR = threads.h
 @ENABLE_THREADS_TRUE@THREADSRC = threads.c
+@ENABLE_REGEX_TRUE@REGEX_SRC = regex.c
 EXTRA_DIST = dnode-nice.c.in paths.h.in
 DISTCLEANFILES = dm-config.h
 AM_CPPFLAGS = -DDM_HAVE_CONFIG_H
@@ -440,7 +445,7 @@ libdmglobals_la_LIBADD = $(PLUGIN_LD)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	dmnum.c dsp1.c dsp2.c error-local.h \
-	plugin.c pluginlib.h $(THREADSRC) 
+	plugin.c pluginlib.h $(THREADSRC) $(REGEX_SRC)
 
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)
@@ -453,7 +458,9 @@ editpaths = sed \
 nodist_pkgconfiglib_DATA = dm.pc
 dist_pkgdata_SCRIPTS = dgen-build
 dgen_SOURCES = dgen.c dgen_0.h dgen_1.h 
-dgen_CPPFLAGS = $(AM_CPPFLAGS) -DBOOTSTRAP_PLUGIN=1 @LIBDM_DLL_IMPORT@ 
+dgen_CPPFLAGS = $(AM_CPPFLAGS) -DBOOTSTRAP_PLUGIN=1 -DDM_DISABLE_REGEX=1 \
+	@LIBDM_DLL_IMPORT@ 
+
 dgen_LDADD = $(PLUGIN_LD) libdmbootstrap.la 
 libdmbootstrap_la_LIBADD = $(PLUGIN_LD)
 libdmbootstrap_la_SOURCES = dmglobals.c \
@@ -461,7 +468,9 @@ libdmbootstrap_la_SOURCES = dmglobals.c \
 	dmnum.c dsp1.c dsp2.c plugin.c  \
 	dmnuminc.h dsp1f.h  paths.h pluginlib.h
 
-libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) -DDM_DISABLE_THREADS=1
+libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) \
+	-DDM_DISABLE_THREADS=1 -DDM_DISABLE_REGEX=1
+
 libdmbootstrap_la_CFLAGS = $(AM_CFLAGS)
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -637,6 +646,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dsp1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dsp2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-plugin.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-regex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-threads.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-word-order.Po@am__quote@
 
@@ -856,6 +866,13 @@ libdmglobals_la-threads.lo: threads.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='threads.c' object='libdmglobals_la-threads.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -c -o libdmglobals_la-threads.lo `test -f 'threads.c' || echo '$(srcdir)/'`threads.c
+
+libdmglobals_la-regex.lo: regex.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -MT libdmglobals_la-regex.lo -MD -MP -MF "$(DEPDIR)/libdmglobals_la-regex.Tpo" -c -o libdmglobals_la-regex.lo `test -f 'regex.c' || echo '$(srcdir)/'`regex.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libdmglobals_la-regex.Tpo" "$(DEPDIR)/libdmglobals_la-regex.Plo"; else rm -f "$(DEPDIR)/libdmglobals_la-regex.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='regex.c' object='libdmglobals_la-regex.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -c -o libdmglobals_la-regex.lo `test -f 'regex.c' || echo '$(srcdir)/'`regex.c
 
 dgen-dgen.o: dgen.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dgen_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dgen-dgen.o -MD -MP -MF "$(DEPDIR)/dgen-dgen.Tpo" -c -o dgen-dgen.o `test -f 'dgen.c' || echo '$(srcdir)/'`dgen.c; \

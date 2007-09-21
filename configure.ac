@@ -17,6 +17,8 @@ CF_SUBST_DEFINE([NAMEBYTES],
 
 CF_AC_ENABLE([xps], [compile or install only new xps], [yes])
 
+CF_AC_ENABLE([regex], [include regex], [yes])
+
 CF_AC_ENABLE([plugins], [compile or install plugins], [yes])
 CF_IF_ENABLED([plugins], [
   CF_AM_ENABLE([process], [compile or install process plugin], [yes])
@@ -173,6 +175,7 @@ CF_IF_ENABLED([plugins], [CF_AC_CHECK_HEADER([stdarg.h])])
 AC_CHECK_HEADER([error.h], [
   AC_DEFINE([HAVE_ERROR_H], [1], [Define to 1 if you have <error.h>])
 ])
+CF_IF_ENABLED([regex], [CF_AC_CHECK_HEADER([regex.h])])
 
 AC_CHECK_FUNCS([setsid])
 AC_CHECK_FUNCS([srandomdev])
@@ -271,7 +274,7 @@ AC_CONFIG_FILES([
 		 plugins/Makefile plugins/dmflex.l
 		 ps/Makefile 
 		 sh/Makefile
-		 emacs/Makefile emacs/d-mode.el
+		 emacs/Makefile 
 		 dcode/Makefile dcode/startup_dnode.d 
 		 dcode/startup_dgen.d 
 		 src/codegen/startup_dgen.d:dcode/startup_dgen.d.in

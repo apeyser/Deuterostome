@@ -2,7 +2,8 @@ dist_noinst_DATA = dmnuminc.d dsp1f.d dsp2def.d
 dist_noinst_SCRIPTS = dgen-build
 
 AM_CFLAGS = $(GCC_CFLAGS)
-AM_CPPFLAGS = -DDM_DISABLE_THREADS=1 -DDM_HAVE_CONFIG_H \
+AM_CPPFLAGS = \
+	-DDM_DISABLE_THREADS=1 -DDM_HAVE_CONFIG_H -DDM_DISABLE_REGEX=1 \
 	-I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 AM_LDFLAGS = -no-undefined
 INCLUDE = @INCLTDL@

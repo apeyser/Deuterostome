@@ -184,7 +184,10 @@ B *sysop[] =
       "getstartupdir",  (B *)op_getstartupdir,
       "getconfdir",     (B *)op_getconfdir,
       "gethomedir",     (B *)op_gethomedir,
-
+#if DM_ENABLE_REGEX			
+			"regex",          (B *)op_regex,
+			"regexi",         (B *)op_regexi,
+#endif //DM_ENABLE_REGEX			
       "",               (B *)0L, 
  };
 
@@ -204,6 +207,16 @@ L syserrc[] =
      LIB_LOAD, LIB_EXPORT, LIB_LINK, LIB_ADD, LIB_LOADED, LIB_OVF,
      NO_XWINDOWS, X_ERR, X_BADFONT, X_BADHOST,
 		 MEM_OVF, BAD_ARR, SBOX_SET,
+		 REGEX_BADPAT, REGEX_ECOLLATE, REGEX_ECTYPE, REGEX_EESCAPE,
+		 REGEX_ESUBREG, REGEX_EBRACK, REGEX_EPAREN, REGEX_EBRACE, REGEX_BADBR,
+		 REGEX_ERANGE, REGEX_ESPACE, REGEX_BADRPT, REGEX_EMPTY, REGEX_ASSERT,
+		 REGEX_INVARG, REGEX_ILLSEQ, REGEX_UNKNOWN,
+#if DM_ENABLE_REGEX		
+		REGEX_BADPAT, REGEX_ECOLLATE, REGEX_ECTYPE, REGEX_EESCAPE,
+		REGEX_ESUBREG, REGEX_EBRACK, REGEX_EPAREN, REGEX_EBRACE, REGEX_BADBR,
+		REGEX_ERANGE, REGEX_ESPACE, REGEX_BADRPT, REGEX_EMPTY, REGEX_ASSERT,
+		REGEX_INVARG, REGEX_ILLSEQ, REGEX_UNKNOWN,
+#endif // DM_ENABLE_REGEX		
      0L,
      };
 
@@ -261,5 +274,24 @@ B *syserrm[] =
 	 "** Memory exhausted",
      "** dmnuminc debug error",
 		 "** Box already has a cleanup handler"
-     };
+ #if DM_ENABLE_REGEX
+    "Regex Error: Invalid regular expression",
+    "Regex Error: Invalid collating element",
+    "Regex Error: Invalid character class",
+    "Regex Error: `\' applied to unescapable character",
+    "Regex Error: invalid backreference number",
+		"Regex Error: brackets `[]' not balanced",
+    "Regex Error: paranthesis `()' not balanced",
+    "Regex Error: braces `{}' not balanced",
+    "Regex Error: invalid repetition count(s) in `{}'",
+    "Regex Error: invalid character rangin in `[]'",
+    "Regex Error: ran out of memory",
+    "Regex Error: `?', `*', or `+' operand invalid",
+    "Regex Error: empty (sub)expression",
+    "Regex Error: can't happen - you found a bug",
+    "Regex Error: invalid argument, e.g. negative-length string",
+    "Regex Error: illegal byte sequence (bad multibyte character)",
+    "Regex Error: Unknown error",
+#endif //DM_ENABLE_REGEX
+    };
 

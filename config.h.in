@@ -45,6 +45,9 @@
 /* Path to PSTPDF */
 #undef ENABLE_PSTPDF
 
+/* include regex */
+#undef ENABLE_REGEX
+
 /* Path to TAIL */
 #undef ENABLE_TAIL
 

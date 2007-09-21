@@ -36,7 +36,7 @@ host_triplet = @host@
 target_triplet = @target@
 subdir = emacs
 DIST_COMMON = $(dist_pkglisp_LISP) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/d-mode.el.in
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
@@ -48,7 +48,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = d-mode.el
+CONFIG_CLEAN_FILES =
 SOURCES =
 DIST_SOURCES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -154,6 +154,9 @@ ENABLE_PROCESS_TRUE = @ENABLE_PROCESS_TRUE@
 ENABLE_PSTPDF = @ENABLE_PSTPDF@
 ENABLE_PSTPDF_FALSE = @ENABLE_PSTPDF_FALSE@
 ENABLE_PSTPDF_TRUE = @ENABLE_PSTPDF_TRUE@
+ENABLE_REGEX = @ENABLE_REGEX@
+ENABLE_REGEX_FALSE = @ENABLE_REGEX_FALSE@
+ENABLE_REGEX_TRUE = @ENABLE_REGEX_TRUE@
 ENABLE_SETUID_FALSE = @ENABLE_SETUID_FALSE@
 ENABLE_SETUID_TRUE = @ENABLE_SETUID_TRUE@
 ENABLE_TAIL = @ENABLE_TAIL@
@@ -322,11 +325,20 @@ target_vendor = @target_vendor@
 tmp = @tmp@
 dist_pkglisp_LISP = dm-server.el
 nodist_pkglisp_LISP = d-comint-mode.el d-mode.el init.el
-EXTRA_DIST = d-comint-mode.el.in init.el.in
+EXTRA_DIST = d-comint-mode.el.in init.el.in d-mode.el.in
 CLEANFILES = $(nodist_pkglisp_LISP)
+REGEX_START = /^[[:space:]]*[@]ENABLE_REGEX_START[@][[:space:]]*$$/
+REGEX_END = /^[[:space:]]*[@]ENABLE_REGEX_END[@][[:space:]]*$$/
+@ENABLE_REGEX_FALSE@REGEX_EDIT = -e '$(REGEX_START),$(REGEX_END) d'
+@ENABLE_REGEX_TRUE@REGEX_EDIT = -e '$(REGEX_START) d' \
+@ENABLE_REGEX_TRUE@			 -e '$(REGEX_END) d' \
+@ENABLE_REGEX_TRUE@			 -e 's,[@]ENABLE_REGEX[@],$(ENABLE_REGEX),g'
+
 edit = sed \
 	-e 's,@bindir\@,$(bindir),g' \
-	-e 's,@pkglispdir\@,$(pkglispdir),g'
+	-e 's,@pkglispdir\@,$(pkglispdir),g' \
+	-e 's,@NAMEBYTES\@,@NAMEBYTES@,g' \
+	$(REGEX_EDIT)
 
 all: all-am
 
@@ -360,8 +372,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-d-mode.el: $(top_builddir)/config.status $(srcdir)/d-mode.el.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -577,6 +587,11 @@ uninstall-am: uninstall-dist_pkglispLISP uninstall-info-am \
 	uninstall-dist_pkglispLISP uninstall-info-am \
 	uninstall-nodist_pkglispLISP
 
+
+d-mode.el: Makefile $(srcdir)/d-mode.el.in
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/$@.in >$@.tmp
+	mv $@.tmp $@
 
 d-comint-mode.el: Makefile $(srcdir)/d-comint-mode.el.in
 	rm -f $@ $@.tmp

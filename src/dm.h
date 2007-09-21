@@ -39,6 +39,10 @@ extern "C" {
 #include "config.h"
 #endif
 
+#if DM_DISABLE_REGEX && DM_ENABLE_REGEX
+#undef DM_ENABLE_REGEX
+#endif
+
 #ifndef _dm_const
 #define _dm_const const
 #endif //_dm_const
@@ -392,6 +396,26 @@ NOTE: all objects that can populate the D machine's workspace must
 #define BAD_ARR     0x00000B00L /* dmnuminc debug error */
 #define SBOX_SET    0x00000B01L /* box already has a cleanup */		
 
+#if DM_ENABLE_REGEX		
+#define REGEX_BADPAT   0x00000C01L /* Invalid regular expression */
+#define REGEX_ECOLLATE 0x00000C02L /* Invalid collating element */
+#define REGEX_ECTYPE   0x00000C03L /* Invalid character class */
+#define REGEX_EESCAPE  0x00000C04L /* `\' applied to unescapable character */
+#define REGEX_ESUBREG  0x00000C05L /* invalid backreference number */
+#define REGEX_EBRACK   0x00000C06L /* brackets `[]' not balanced*/
+#define REGEX_EPAREN   0x00000C07L /* paranthesis `()' not balanced */
+#define REGEX_EBRACE   0x00000C08L /* braces `{}' not balanced */
+#define REGEX_BADBR    0x00000C09L /* invalid repetition count(s) in `{}' */
+#define REGEX_ERANGE   0x00000C0AL /* invalid character rangin in `[]' */
+#define REGEX_ESPACE   0x00000C0BL /* ran out of memory */
+#define REGEX_BADRPT   0x00000C0CL /* `?', `*', or `+' operand invalid */
+#define REGEX_EMPTY    0x00000C0DL /* empty (sub)expression */
+#define REGEX_ASSERT   0x00000C0EL /* can't happen - you found a bug */
+#define REGEX_INVARG   0x00000C0FL /* invalid argument, e.g. negative-length string */
+#define REGEX_ILLSEQ   0x00000C10L /* illegal byte sequence (bad multibyte character) */
+#define REGEX_UNKNOWN  0x00000C11L /* Unknown error */
+#endif // DM_ENABLE_REGEX
+
 /* compare results */
 
 #define LT                         (-1)
@@ -728,6 +752,11 @@ L op_matmul(void);
 L op_mattranspose(void);
 L op_dilute_add(void);
 L op_matvecmul(void);
+
+#if DM_ENABLE_REGEX
+L op_regex(void);
+L op_regexi(void);
+#endif //DM_ENABLE_REGEX		
 
 #define ERRLEN (1000)
 
