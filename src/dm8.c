@@ -20,8 +20,7 @@
 /*------------------------------------ used
   dict | int
 
-returns number of entries used in a dictionary. In case of an external
-dictionary, this requires access to the medium.
+returns number of entries used in a dictionary.
 */
 
 L op_used(void)
@@ -40,8 +39,7 @@ return(OK);
 /*------------------------------------ length
   dict/array/list/box | int
 
-returns (maximal) number of items in a composite object. If the object
-is an external dictionary, this requires access to the medium.
+returns (maximal) number of items in a composite object.
 */
 
 L op_length(void)
@@ -79,8 +77,6 @@ return(OK);
  - internal VM space is used as buffer of external/external faxes of
    arrays (a minimum of 20 kB is required and is used repeatedly to
    transfer the entire external fax regardless of its size)
- - external/external faxes of lists need to fit into the current VM 
-   freespace
 */
 
 L op_fax(void)
@@ -136,7 +132,6 @@ return(OK);
 
  - accepts any combination of internal/external dictionaries
  - acts like 'put' operator with all entries of the source
- - no internal associations are accepted into external destination
 */
 
 L op_merge(void)
@@ -192,6 +187,7 @@ if (CLASS(o_1) == NULLOBJ)
                    VALUEBYTES(TYPE(o_1))); break;
        case LIST: /* if ((ATTR(o_1) & PARENT) == 0) return(OPD_ATR); */
                   next = (B *)LIST_CEIL(o_1); break;
+			 case MATRIX: next = (B*) MATRIX_END(o_1); break;
        case DICT: next = (B *)VALUE_BASE(o_1) + DICT_NB(o_1); break;
        case BOX:  next = (B *)VALUE_BASE(o_1) + BOX_NB(o_1); break;
        default: return(OPD_CLA); 
