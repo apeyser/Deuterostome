@@ -160,6 +160,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define PROC                       ((UB) 0x70)
 #define DICT                       ((UB) 0x80)
 #define BOX                        ((UB) 0x90)
+#define MATRIX                     ((UB) 0xA0)      /* master matrix */		
 //#define HANDLE                     ((UB) 0xA0)
 	
 #define COMPOSITE(frame)           ((UB)(CLASS(frame)) > (UB)(MARK))
@@ -253,6 +254,9 @@ NOTE: all objects that can populate the D machine's workspace must
 #define LIST_CEIL_PTR(frame)       (*((B**)(((B*)(frame))+8)))
 /* #define HANDLE_ID(frame)           (*((L *)(((B*)(frame))+12))) */
 /* #define HANDLE_CEIL(frame)         (*((B**)(((B*)(frame))+8))) */
+#define MATRIX_LIST(frame)         (*((B**)(((B*)(frame))+12)))
+#define MATRIX_ARRAY(frame)        (VALUE_PTR(frame))
+#define MATRIX_END(frame)          (LIST_CEIL_PTR(frame))
 
 /* static void SET_HANDLE_ID(B* frame, B* string) { */
 /* 	HANDLE_ID(frame) = *(L*)(string); */

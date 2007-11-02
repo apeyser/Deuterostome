@@ -267,7 +267,107 @@ if (CLASS(o_1) != DICT) return(OPD_CLA);
 if (ATTR(o_1) & READONLY) return(OPD_ATR);
 cleardict((B *)VALUE_BASE(o_1));
 return(OK);
-} 
+}
+
+/*-----------------------------------  matrix
+ * rows columns | matrix
+ */
+L op_matrix(void)
+{
+		L m, n;
+		B* mframe;
+		B* arrayframe;
+		B* listframe;
+		B* list;
+		B* c;
+		
+		if (o_2 < FLOORopds) return OPDS_UNF;
+		if (CLASS(o_2) != NUM) return OPD_CLA;
+		if (CLASS(o_1) != NUM) return OPD_CLA;
+		if (! VALUE(o_2, &m)) return UNDF_VAL;
+		if (! VALUE(o_1, &n)) return UNDF_VAL;
+		
+		mframe = FREEvm;
+		TAG(mframe) = MATRIX; ATTR(mframe) = PARENT;
+		arrayframe = MATRIX_ARRAY(mframe) = mframe+FRAMEBYTES;
+		if (arrayframe >= CEILvm) return VM_OVF;
+		TAG(arrayframe) = ARRAY | DOUBLETYPE; ATTR(arrayframe) = 0;
+		VALUE_PTR(arrayframe) = arrayframe + FRAMEBYTES;
+		ARRAY_SIZE(arrayframe) = m*n;
+
+		if ((listframe = MATRIX_LIST(mframe)
+				 = (B*) DALIGN(arrayframe + m*n*sizeof(D)))
+				>= CEILvm) return VM_OVF;
+		if ((B*) (DALIGN(LIST_CEIL_PTR(listframe)
+								= listframe + FRAMEBYTES + m*FRAMEBYTES))
+				>= CEILvm) return VM_OVF;
+		
+		TAG(listframe) = LIST; ATTR(listframe) = READONLY;
+		VALUE_PTR(listframe) = listframe + FRAMEBYTES;
+		
+		for (list = VALUE_PTR(listframe), c = VALUE_PTR(arrayframe);
+				 list < LIST_CEIL_PTR(listframe);
+				 list += FRAMEBYTES, c += n*sizeof(D)) {
+				TAG(list) = ARRAY | DOUBLETYPE; ATTR(list) = 0;
+				VALUE_PTR(list) = c;
+				ARRAY_SIZE(list) = n;
+		}
+
+		FREEvm = MATRIX_END(mframe) = (B*) DALIGN(list);
+		
+		moveframe(mframe, o_2); 
+		FREEopds = o_1;
+		return OK;
+}
+
+/*---------------------------------------- matrix_dim
+ * matrix | m n
+ */
+L op_matrix_dim(void) 
+{
+		L m, n;
+		B* listframe;
+		if (o_1 < FLOORopds) return OPDS_UNF;
+		if (o2 > CEILopds) return OPDS_OVF;
+		if (CLASS(o_1) != MATRIX) return OPD_CLA;
+
+		listframe = MATRIX_LIST(o_1);
+		m = (LIST_CEIL(listframe) - VALUE_BASE(listframe))/FRAMEBYTES;
+		n = m ? ARRAY_SIZE(VALUE_PTR(listframe)) : 0;
+
+		TAG(o_1) = NUM | LONGTYPE; ATTR(o_1) = 0;
+		LONG_VAL(o_1) = m;
+		TAG(o1) = NUM | LONGTYPE; ATTR(o1) = 0;
+		LONG_VAL(o1) = n;
+
+		FREEopds = o2;
+		return OK;
+}
+
+/*---------------------------------------- matrix_list
+ * matrix | list-form
+ */
+L op_matrix_list(void) 
+{
+		if (o_1 < FLOORopds) return OPDS_UNF;
+		if (CLASS(o_1) != MATRIX) return OPD_CLA;
+
+		moveframe(MATRIX_LIST(o_1), o_1);
+		return OK;
+}
+
+/*---------------------------------------- matrix_array
+ * matrix | array-form
+ */
+L op_matrix_array(void) 
+{
+		if (o_1 < FLOORopds) return OPDS_UNF;
+		if (CLASS(o_1) != MATRIX) return OPD_CLA;
+
+		moveframe(MATRIX_ARRAY(o_1), o_1);
+		return OK;
+}
+
 
 /*------------------------------------ array
   n /type_name | array

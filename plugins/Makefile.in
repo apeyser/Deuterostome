@@ -40,7 +40,8 @@ DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/dmflex.l.in \
 	$(top_srcdir)/dcode/startup_dgen.d.in dmflex.c
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/acx_blas.m4 \
+	$(top_srcdir)/m4/acx_lapack.m4 $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
 	$(top_srcdir)/m4/configure.m4 \
@@ -134,6 +135,7 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BLAS_LIBS = @BLAS_LIBS@
 BYTECORRECT = @BYTECORRECT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -165,6 +167,8 @@ ENABLE_ATPS_TRUE = @ENABLE_ATPS_TRUE@
 ENABLE_BASH = @ENABLE_BASH@
 ENABLE_BASH_FALSE = @ENABLE_BASH_FALSE@
 ENABLE_BASH_TRUE = @ENABLE_BASH_TRUE@
+ENABLE_CLAPACK_FALSE = @ENABLE_CLAPACK_FALSE@
+ENABLE_CLAPACK_TRUE = @ENABLE_CLAPACK_TRUE@
 ENABLE_CPPPLUGIN_FALSE = @ENABLE_CPPPLUGIN_FALSE@
 ENABLE_CPPPLUGIN_TRUE = @ENABLE_CPPPLUGIN_TRUE@
 ENABLE_DEBUG_DMNUM = @ENABLE_DEBUG_DMNUM@
@@ -235,6 +239,7 @@ ENABLE_XTERM_TRUE = @ENABLE_XTERM_TRUE@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
+FLIBS = @FLIBS@
 GCC_CFLAGS = @GCC_CFLAGS@
 GCC_CXXFLAGS = @GCC_CXXFLAGS@
 GREP = @GREP@
@@ -244,6 +249,7 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LAPACK_LIBS = @LAPACK_LIBS@
 LDFLAGS = @LDFLAGS@
 LEX = @LEX@
 LEXLIB = @LEXLIB@

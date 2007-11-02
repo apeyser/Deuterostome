@@ -23,6 +23,11 @@ uninstall-local:
 
 endif ENABLE_SETUID
 
+if ENABLE_CLAPACK
+CLAPACK_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+CLAPACK_ACTIVATE = -DLAPACK_LIB
+endif ENABLE_CLAPACK
+
 if ENABLE_THREADS
   THREAD_HDR=threads.h
   THREADSRC=threads.c
@@ -59,11 +64,14 @@ nodist_pkginclude_HEADERS = dm-config.h  paths.h
 
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h
 dvt_LDADD = libdmglobals.la
+dvt_LDFLAGS = $(AM_LDFLAGS) $(CLAPACK_LIBS)
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 
 dnode_SOURCES = dnode.c dnode_0.h dnode_1.h dmx.h
-dnode_LDADD = libdmglobals.la
-dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
+dnode_LDADD = libdmglobals.la 
+dnode_LDFLAGS = $(AM_LDFLAGS) $(CLAPACK_LIBS)
+dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
+dnode_CPPFLAGS = $(AM_CPPFLAGS) $(CLAPACK_ACTIVATE)
 
 testwordorder_SOURCES = test-word-order.c
 
@@ -75,7 +83,7 @@ libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	dmnum.c dsp1.c dsp2.c error-local.h \
 	plugin.c pluginlib.h $(THREADSRC) $(REGEX_SRC)
-libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS)
+libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(CLAPACK_ACTIVATE)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)
 
 editpaths = sed \

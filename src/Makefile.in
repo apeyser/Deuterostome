@@ -50,7 +50,8 @@ DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(dist_pkgdata_SCRIPTS) \
 	$(srcdir)/dm8.c $(srcdir)/dmglobals.c $(srcdir)/dmnum.c \
 	$(srcdir)/dsp1.c $(srcdir)/paths.h.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/acx_blas.m4 \
+	$(top_srcdir)/m4/acx_lapack.m4 $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
 	$(top_srcdir)/m4/configure.m4 \
@@ -164,6 +165,7 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BLAS_LIBS = @BLAS_LIBS@
 BYTECORRECT = @BYTECORRECT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -195,6 +197,8 @@ ENABLE_ATPS_TRUE = @ENABLE_ATPS_TRUE@
 ENABLE_BASH = @ENABLE_BASH@
 ENABLE_BASH_FALSE = @ENABLE_BASH_FALSE@
 ENABLE_BASH_TRUE = @ENABLE_BASH_TRUE@
+ENABLE_CLAPACK_FALSE = @ENABLE_CLAPACK_FALSE@
+ENABLE_CLAPACK_TRUE = @ENABLE_CLAPACK_TRUE@
 ENABLE_CPPPLUGIN_FALSE = @ENABLE_CPPPLUGIN_FALSE@
 ENABLE_CPPPLUGIN_TRUE = @ENABLE_CPPPLUGIN_TRUE@
 ENABLE_DEBUG_DMNUM = @ENABLE_DEBUG_DMNUM@
@@ -265,6 +269,7 @@ ENABLE_XTERM_TRUE = @ENABLE_XTERM_TRUE@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
+FLIBS = @FLIBS@
 GCC_CFLAGS = @GCC_CFLAGS@
 GCC_CXXFLAGS = @GCC_CXXFLAGS@
 GREP = @GREP@
@@ -274,6 +279,7 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LAPACK_LIBS = @LAPACK_LIBS@
 LDFLAGS = @LDFLAGS@
 LEX = @LEX@
 LEXLIB = @LEXLIB@
@@ -414,6 +420,8 @@ SUBDIRS = codegen
 @ENABLE_SETUID_TRUE@edit = sed \
 @ENABLE_SETUID_TRUE@	-e 's,[@]bindir[@],$(bindir),g'
 
+@ENABLE_CLAPACK_TRUE@CLAPACK_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+@ENABLE_CLAPACK_TRUE@CLAPACK_ACTIVATE = -DLAPACK_LIB
 @ENABLE_THREADS_TRUE@THREAD_HDR = threads.h
 @ENABLE_THREADS_TRUE@THREADSRC = threads.c
 @ENABLE_REGEX_TRUE@REGEX_SRC = regex.c
@@ -433,10 +441,13 @@ pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
 nodist_pkginclude_HEADERS = dm-config.h  paths.h
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h
 dvt_LDADD = libdmglobals.la
+dvt_LDFLAGS = $(AM_LDFLAGS) $(CLAPACK_LIBS)
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dnode_SOURCES = dnode.c dnode_0.h dnode_1.h dmx.h
-dnode_LDADD = libdmglobals.la
-dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
+dnode_LDADD = libdmglobals.la 
+dnode_LDFLAGS = $(AM_LDFLAGS) $(CLAPACK_LIBS)
+dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
+dnode_CPPFLAGS = $(AM_CPPFLAGS) $(CLAPACK_ACTIVATE)
 testwordorder_SOURCES = test-word-order.c
 BUILT_SOURCES = paths.h dnode-nice.c
 CLEANFILES = paths.h dnode-nice.c
@@ -447,7 +458,7 @@ libdmglobals_la_SOURCES = dmglobals.c \
 	dmnum.c dsp1.c dsp2.c error-local.h \
 	plugin.c pluginlib.h $(THREADSRC) $(REGEX_SRC)
 
-libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS)
+libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(CLAPACK_ACTIVATE)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)
 editpaths = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
@@ -889,18 +900,18 @@ dgen-dgen.obj: dgen.c
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dgen_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgen-dgen.obj `if test -f 'dgen.c'; then $(CYGPATH_W) 'dgen.c'; else $(CYGPATH_W) '$(srcdir)/dgen.c'; fi`
 
 dnode-dnode.o: dnode.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dnode.o -MD -MP -MF "$(DEPDIR)/dnode-dnode.Tpo" -c -o dnode-dnode.o `test -f 'dnode.c' || echo '$(srcdir)/'`dnode.c; \
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dnode.o -MD -MP -MF "$(DEPDIR)/dnode-dnode.Tpo" -c -o dnode-dnode.o `test -f 'dnode.c' || echo '$(srcdir)/'`dnode.c; \
 @am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dnode-dnode.Tpo" "$(DEPDIR)/dnode-dnode.Po"; else rm -f "$(DEPDIR)/dnode-dnode.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dnode.c' object='dnode-dnode.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dnode.o `test -f 'dnode.c' || echo '$(srcdir)/'`dnode.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dnode.o `test -f 'dnode.c' || echo '$(srcdir)/'`dnode.c
 
 dnode-dnode.obj: dnode.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dnode.obj -MD -MP -MF "$(DEPDIR)/dnode-dnode.Tpo" -c -o dnode-dnode.obj `if test -f 'dnode.c'; then $(CYGPATH_W) 'dnode.c'; else $(CYGPATH_W) '$(srcdir)/dnode.c'; fi`; \
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dnode.obj -MD -MP -MF "$(DEPDIR)/dnode-dnode.Tpo" -c -o dnode-dnode.obj `if test -f 'dnode.c'; then $(CYGPATH_W) 'dnode.c'; else $(CYGPATH_W) '$(srcdir)/dnode.c'; fi`; \
 @am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dnode-dnode.Tpo" "$(DEPDIR)/dnode-dnode.Po"; else rm -f "$(DEPDIR)/dnode-dnode.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dnode.c' object='dnode-dnode.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dnode.obj `if test -f 'dnode.c'; then $(CYGPATH_W) 'dnode.c'; else $(CYGPATH_W) '$(srcdir)/dnode.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dnode.obj `if test -f 'dnode.c'; then $(CYGPATH_W) 'dnode.c'; else $(CYGPATH_W) '$(srcdir)/dnode.c'; fi`
 
 dvt-dvt.o: dvt.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -MT dvt-dvt.o -MD -MP -MF "$(DEPDIR)/dvt-dvt.Tpo" -c -o dvt-dvt.o `test -f 'dvt.c' || echo '$(srcdir)/'`dvt.c; \

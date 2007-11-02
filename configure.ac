@@ -93,6 +93,8 @@ AC_CHECK_PROG([guipdf], [xpdf], [xpdf])
 AC_CHECK_PROG([guipdf], [gv], [gv])
 AC_CHECK_PROG([guipdf], [gs], [gs])
 
+CF_CHECK_CLAPACK
+
 CF_AM_PROG([BASH], [bash])
 CF_AM_PROG([ENV], [env], [/usr/bin])
 CF_AM_PROG([PERL], [perl])
@@ -274,7 +276,7 @@ AC_CONFIG_FILES([
 		 plugins/Makefile plugins/dmflex.l
 		 ps/Makefile 
 		 sh/Makefile
-		 emacs/Makefile 
+		 emacs/Makefile emacs/d-mode.el
 		 dcode/Makefile dcode/startup_dnode.d 
 		 dcode/startup_dgen.d 
 		 src/codegen/startup_dgen.d:dcode/startup_dgen.d.in

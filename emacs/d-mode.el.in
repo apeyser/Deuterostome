@@ -554,10 +554,9 @@ and check/try to convert to unix line-ends."
     "vmresize"
     "transcribe"
     "matvecmul"
-@ENABLE_REGEX_START@
 	"regex"
 	"regexi"
-@ENABLE_REGEX_END@
+    "matmul_blas"    
     )
   "Operater names for d-mode.")
 

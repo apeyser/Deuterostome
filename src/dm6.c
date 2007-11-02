@@ -170,9 +170,11 @@ return(OK);
 
 copies n top elements of operand stack excluding n.
 
-  array1 array2 | subarray2
-    num1 array2 | array2
-    list1 list2 | sublist2
+  array1 array2   | subarray2
+    num1 array2   | array2
+  matrix1 matrix2 | matrix2  
+    num1 matrix2  | matrix2
+    list1 list2   | sublist2
 
 copies all elements of the first composite object into the second,
 starting at index zero of the destination (array or list), and returning
@@ -212,10 +214,20 @@ if (ATTR(o_1) & READONLY) return(OPD_ATR);
 
 switch(CLASS(o_2))
    {
-   case NUM: if (CLASS(o_1) != ARRAY) return(OPD_CLA);
+   case NUM:
+			 switch (CLASS(o_1)) {
+					 case ARRAY:
              MOVE(o_2,o_1);
              moveframes(o_1,o_2,1L);
              break;
+					 case MATRIX:
+						 MOVE(o_2, MATRIX_ARRAY(o_1));
+						 moveframe(o_1, o_2);
+						 break;
+					 default: return OPD_CLA;
+			 }
+			 break;
+			 
    case ARRAY: if (CLASS(o_1) != ARRAY) return(OPD_CLA);
                if (ARRAY_SIZE(o_1) < ARRAY_SIZE(o_2)) return(RNG_CHK);
                ARRAY_SIZE(o_1) = ARRAY_SIZE(o_2);
@@ -233,6 +245,17 @@ switch(CLASS(o_2))
               LIST_CEIL(o_2) = VALUE_BASE(o_2) + nb;
               ATTR(o_2) &= (~PARENT);
               break;
+	 case MATRIX:
+			 if (CLASS(o_1) != MATRIX) return OPD_CLA;
+			 if (ARRAY_SIZE(MATRIX_ARRAY(o_1)) != ARRAY_SIZE(MATRIX_ARRAY((o_2)))
+					 || (LIST_CEIL(MATRIX_LIST(o_2)) - VALUE_BASE(MATRIX_LIST(o_2))
+							 != LIST_CEIL(MATRIX_LIST(o_1)) - VALUE_BASE(MATRIX_LIST(o_1))))
+					 return RNG_CHK;
+			 MOVE(MATRIX_ARRAY(o_2), MATRIX_ARRAY(o_1));
+			 moveframe(o_1, o_2);
+			 ATTR(o_2) &= ~PARENT;
+			 break;									
+			 
    default: return(OPD_CLA);
    }
 FREEopds = o_1;
@@ -408,6 +431,18 @@ FREEopds = o_1;
 return(OK);
 }
 
+static void shift_subframe(B* frame, L offset) 
+{
+		VALUE_PTR(frame) -= offset;
+		switch (CLASS(frame)) {
+				case LIST: LIST_CEIL(frame) -= offset; break;
+				case MATRIX: MATRIX_LIST(frame) -= offset;
+						         MATRIX_END(frame) -= offset;
+										 break;
+		}
+}
+
+
 /*----------------------------------------------- restore
      VM_box | ---
 
@@ -515,6 +550,27 @@ L x_op_restore(void)
 					VALUE_BASE(cframe) -= offset;
 				cframe += nb + FRAMEBYTES; 
 				break;
+			case MATRIX:
+					if (VALUE_BASE(cframe) >= (L) caplevel) {
+							B* array;
+							B* list;
+							
+							array = MATRIX_ARRAY(cframe) -= offset;
+							list = MATRIX_LIST(cframe) -= offset;
+							MATRIX_END(cframe) -= offset;
+							VALUE_PTR(array) -= offset;
+							VALUE_PTR(list) -= offset;
+							LIST_CEIL_PTR(list) -= offset;
+							
+							for (frame = VALUE_PTR(list);
+									 frame < LIST_CEIL_PTR(list);
+									 frame += FRAMEBYTES)
+									VALUE_PTR(frame) -= offset;
+
+					}
+					cframe = MATRIX_END(cframe);
+					break;
+							
 			case LIST:  
 				if (VALUE_BASE(cframe) >= (L)caplevel) { 
 					VALUE_BASE(cframe) -= offset; LIST_CEIL(cframe) -= offset; 
@@ -525,9 +581,7 @@ L x_op_restore(void)
 					if (COMPOSITE(frame)) {  
 						if ((VALUE_BASE(frame) >= (L)caplevel) &&
 								(VALUE_BASE(frame) < (L) CEILvm)) { 
-							VALUE_BASE(frame) -= offset;
-							if (CLASS(frame) == LIST)
-								LIST_CEIL(frame) -= offset;
+							shift_subframe(frame, offset);
 						}
 						else if ((VALUE_BASE(frame) >= (L)savefloor) 
 										 && (VALUE_BASE(frame) < (L) caplevel)) { 
@@ -547,15 +601,14 @@ L x_op_restore(void)
 				if ((tdict = makedict((DICT_CEIL(dict) - DICT_ENTRIES(dict))
 															/ ENTRYBYTES)) == (B *)(-1L)) 
 					return(VM_OVF);
+				
 				for (entry = (B *)DICT_ENTRIES(dict);
 						 entry < (B *)DICT_FREE(dict); 
 						 entry += ENTRYBYTES) {
 					frame = ASSOC_FRAME(entry);
 					if (COMPOSITE(frame) && (VALUE_BASE(frame) < (L)CEILvm)) { 
 						if (VALUE_BASE(frame) >= (L)caplevel) { 
-							VALUE_BASE(frame) -= offset;
-							if (CLASS(frame) == LIST)
-								LIST_CEIL(frame) -= offset;
+							shift_subframe(frame, offset);
 						}
 						else
 							if (VALUE_BASE(frame) >= (L)savefloor) continue;
@@ -588,9 +641,7 @@ L x_op_restore(void)
 			if (COMPOSITE(cframe))
 				if ((VALUE_BASE(cframe) >= (L)caplevel) &&
 						(VALUE_BASE(cframe) < (L) CEILvm)) { 
-					VALUE_BASE(cframe) -= offset;
-					if (CLASS(cframe) == LIST) 
-						LIST_CEIL(cframe) -= offset;
+						shift_subframe(cframe, offset);
 				}
 			cframe -= FRAMEBYTES;
 		}
@@ -598,10 +649,8 @@ L x_op_restore(void)
 		while (cframe >= FLOORdicts)  { 
 			if (COMPOSITE(cframe))
 				if ((VALUE_BASE(cframe) >= (L)caplevel) 
-						&& (VALUE_BASE(cframe) < (L) CEILvm)) { 
-					VALUE_BASE(cframe) -= offset;
-					if (CLASS(cframe) == LIST) 
-						LIST_CEIL(cframe) -= offset;
+						&& (VALUE_BASE(cframe) < (L) CEILvm)) {
+						shift_subframe(cframe, offset);
 				}
 			cframe -= FRAMEBYTES;
 		}
@@ -609,10 +658,8 @@ L x_op_restore(void)
 		while (cframe >= FLOORopds) { 
 			if (COMPOSITE(cframe))
 				if ((VALUE_BASE(cframe) >= (L)caplevel) 
-						&& (VALUE_BASE(cframe) < (L) CEILvm)) { 
-					VALUE_BASE(cframe) -= offset;
-					if (CLASS(cframe) == LIST)
-						LIST_CEIL(cframe) -= offset;
+						&& (VALUE_BASE(cframe) < (L) CEILvm)) {
+						shift_subframe(cframe, offset);
 				}
 			cframe -= FRAMEBYTES;
 		} 
@@ -637,6 +684,9 @@ L x_op_restore_it(void)
 						case ARRAY:
 								nb = DALIGN(ARRAY_SIZE(next) * VALUEBYTES(TYPE(next)));
 								next += nb + FRAMEBYTES;
+								break;
+						case MATRIX:
+								next = MATRIX_END(next);
 								break;
 						case LIST:
 								next = LIST_CEIL_PTR(next);
@@ -823,6 +873,7 @@ switch(CLASS(o_1)) {
  case MARK:  s = "markclass"; break;
  case ARRAY: s = "arrayclass"; break;
  case LIST:  s = "listclass"; break;
+ case MATRIX: s = "matrixclass"; break;
  case DICT:  s = "dictclass"; break;
  case BOX:   s = "boxclass"; break;
  default: return(CORR_OBJ);

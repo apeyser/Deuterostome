@@ -573,7 +573,7 @@ D **p, **ap, **bp, **cp;
 #endif
 
 if (o_3 < FLOORopds) return(OPDS_UNF);
-if ( CLASS(o_3) != LIST) return(OPD_CLA);
+if (CLASS(o_3) != LIST) return(OPD_CLA);
 if (ATTR(o_3) & READONLY) return(OPD_ATR);
 Nrowc = (LIST_CEIL(o_3) - VALUE_BASE(o_3)) / FRAMEBYTES;
 if ( CLASS(o_2) != LIST) return(OPD_CLA);
@@ -614,7 +614,7 @@ for (k=0; k<Nrowb; k++)
   }  
   
  if ((Ncola != Nrowb) || (Nrowa != Nrowc) || (Ncolb != Ncolc)) return(RNG_CHK);
- 
+
 #if ENABLE_THREADS
  if (thread_num() > 1 && ! serialized && Nrowc > 1) {
    nways = Nrowc*Ncolc*Ncola/(THREADMUL << ROLLBITS)
@@ -646,7 +646,90 @@ for (k=0; k<Nrowb; k++)
  FREEopds = o_2;
  return(OK);
  }
- 
+
+#if HAVE_CLAPACK_H && CLAPACK_LIB
+#include <cblas.h>
+/*--------------------------------------------- matmul_blas
+ * C alpha beta A transA B transB | C
+ * alpha*A*B + beta*C -> C
+ */
+
+L op_matmul_blas(void)
+{
+		L Nrowa, Nrowb, Nrowc, Ncola , Ncolb, Ncolc, Nrowa_, Nrowb_, Ncola_, Ncolb_;
+		D *ap, *bp, *cp;
+		D alpha, beta;
+		B* mframe;
+		BOOLEAN transA, transB;
+
+		if (o_7 < FLOORopds) return(OPDS_UNF);
+		if (CLASS(o_1) != BOOL) return OPD_CLA;
+		if (CLASS(o_2) != MATRIX) return(OPD_CLA);
+		if (CLASS(o_3) != BOOL) return OPD_CLA;
+		if (CLASS(o_4) != MATRIX) return OPD_CLA;
+		if (CLASS(o_5) != NUM) return OPD_CLA;
+		if (CLASS(o_6) != NUM) return OPD_CLA;
+		if (CLASS(o_7) != MATRIX) return OPD_CLA;
+
+		if (ATTR(o_7) & READONLY) return(OPD_ATR);
+		Nrowc = (LIST_CEIL(MATRIX_LIST(o_7)) - VALUE_BASE(MATRIX_LIST(o_7)))
+				/ FRAMEBYTES;
+		Nrowa = (LIST_CEIL(MATRIX_LIST(o_4)) - VALUE_BASE(MATRIX_LIST(o_4)))
+				/ FRAMEBYTES;
+		Nrowb = (LIST_CEIL(MATRIX_LIST(o_2)) - VALUE_BASE(MATRIX_LIST(o_2)))
+				/ FRAMEBYTES;
+
+		cp = (D*) VALUE_PTR(MATRIX_ARRAY(o_7));
+		ap = (D*) VALUE_PTR(MATRIX_ARRAY(o_4));
+		bp = (D*) VALUE_PTR(MATRIX_ARRAY(o_2));
+
+		Ncolc = ARRAY_SIZE(MATRIX_ARRAY(o_7))/Nrowc;
+		Ncola = ARRAY_SIZE(MATRIX_ARRAY(o_4))/Nrowa;
+		Ncolb = ARRAY_SIZE(MATRIX_ARRAY(o_2))/Nrowb;
+  
+		TAG(mframe) = NUM | DOUBLETYPE;
+		MOVE(o_5, mframe);
+		beta = *(D*) NUM_VAL(mframe);
+		MOVE(o_6, mframe);
+		alpha = *(D*) NUM_VAL(mframe);
+
+		transA = BOOL_VAL(o_3);
+		transB = BOOL_VAL(o_1);
+		
+		if (transA) {
+				Nrowa_ = Ncola;
+				Ncola_ = Nrowa;
+		}
+		else {
+				Nrowa_ = Nrowa;
+				Ncola_ = Nocola;
+		}
+
+		if (transB) {
+				Nrowb_ = Ncolb;
+				Ncolb_ = Nrowb;
+		}
+		else {
+				Nrowb_ = Nrowb;
+				Ncolb_ = Ncolb;
+		}
+		
+		if ((Ncola_ != Nrowb_)
+				|| (Nrowa_ != Nrowc)
+				|| (Ncolb_ != Ncolc)) return RNG_CHK;
+		
+		cblas_dgemm(CblasRowMajor,
+								transA ? CblasTrans : CblasNoTrans,
+								transB ? CblasTrans : CblasNoTrans,
+								Nrowc, Ncolc, Ncola_,
+								alpha, ap, Nrowa, bp, Nrowb,
+								beta, cp, Nrowc);
+        
+		FREEopds = o_6;
+		return(OK);
+}
+#endif //HAVE_CLAPACK_H && CLAPACK_LIB
+
 /*----------------------------------------------- mattranspose
    b a | b           a* -> b
 

@@ -12,6 +12,13 @@ L op_getplugindir(void);
 L op_makethreads(void);
 L op_threads(void);
 
+/*--- blas */
+#if HAVE_CLAPACK_H && CLAPACK_LIB
+L op_matmul_blas(void);
+#endif
+
+
+
 B *sysop[] =
 {
       "lock",        (B*) op_lock,
@@ -224,6 +231,9 @@ B *sysop[] =
 			"regex",          (B *)op_regex,
 			"regexi",         (B *)op_regexi,
 #endif //DM_ENABLE_REGEX			
+#if HAVE_CLAPACK_H && CLAPACK_LIB
+			"matmul_blas",    (B *)op_matmul_blas,
+#endif //HAVE_CLAPACK_H && CLAPACK_LIB
       "",               (B *)0L, 
  };     
    

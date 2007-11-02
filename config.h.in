@@ -69,9 +69,25 @@
 /* Header for endianness */
 #undef ENDIAN_HDR
 
+/* Define to dummy `main' function (if any) required to link to the Fortran
+   libraries. */
+#undef F77_DUMMY_MAIN
+
+/* Define if F77 and FC dummy `main' functions are identical. */
+#undef FC_DUMMY_MAIN_EQ_F77
+
 /* name of program to display pdf's, eg gnome-open or launch -i
    com.apple.Preview */
 #undef GUIPDF
+
+/* Define if you have a BLAS library. */
+#undef HAVE_BLAS
+
+/* Define if you have cblas.h. */
+#undef HAVE_CBLAS_H
+
+/* Define if you have clapack.h */
+#undef HAVE_CLAPACK_H
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
@@ -81,6 +97,9 @@
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
+
+/* Define if you have LAPACK library. */
+#undef HAVE_LAPACK
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
