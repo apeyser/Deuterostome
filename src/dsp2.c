@@ -702,7 +702,7 @@ L op_matmul_blas(void)
 		}
 		else {
 				Nrowa_ = Nrowa;
-				Ncola_ = Nocola;
+				Ncola_ = Ncola;
 		}
 
 		if (transB) {

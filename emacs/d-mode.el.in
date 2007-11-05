@@ -557,6 +557,10 @@ and check/try to convert to unix line-ends."
 	"regex"
 	"regexi"
     "matmul_blas"    
+    "matrix"
+    "matrix_list"
+    "matrix_dim"
+    "matrix_array"
     )
   "Operater names for d-mode.")
 
