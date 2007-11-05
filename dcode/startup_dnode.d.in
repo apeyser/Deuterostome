@@ -85,6 +85,9 @@ getsocket setconsole
    /listclass  { * /object find active
                     { ({ .. } of ) } { ([ .. ] of ) } ifelse text
                  * /object find length * number } bind def
+   /matrixclass { * (matrix ) text
+                  * object matrix_dim pop * number * ( by ) text
+                  * object matrix_dim exch pop * number} bind def
    /dictclass  { * (dict of ) text
                  * object length * number * ( max and ) text
                  * object used * number * ( used) text } bind def
@@ -102,6 +105,7 @@ end mkread def
    /nameclass  /_ mkact def
    /arrayclass { intuples } def
    /listclass  { { _ pop } forall } bind def
+   /matrixclass {matrix_list listclass} def
    /dictclass  { { exch
                    line 0
                    -16 4 -1 roll text 
@@ -218,9 +222,18 @@ dup dup class /arrayclass eq exch type /B eq and
 | 
 | use:  textbuffer index object | textbuffer index
 
-/xtext  { xtext_dict begin /dprec 15 def /d_bnum totext end } bind def
-/xtexts { xtext_dict begin /dprec 15 def /d_blit totext end } bind def
-/pstext { xtext_dict begin /dprec 6 def /ps_blit totext end } bind def
+/xtext  { xtext_dict begin /dprec 15 def /d_matrix  /d_bnum  totext end } bind def
+/xtexts { xtext_dict begin /dprec 15 def /d_matrix  /d_blit  totext end } bind def
+/pstext { xtext_dict begin /dprec 6 def  /ps_matrix /ps_blit totext end } bind def
+
+| -- matrix_fromarray
+| unroll matrix from totext
+| save <d array> m n | matrix
+/matrix_fromarray {
+  3 index capsave
+  matrix exch 1 index matrix_array copy pop
+  exch restore
+} bind def
 
 /xtext_dict 40 dict dup begin
  
@@ -252,10 +265,14 @@ dup dup class /arrayclass eq exch type /B eq and
 
 | arrayclass is alternately associated with:
 
+/d_matrix { mkpass _matrixclass } bind def
+
 /d_bnum { mkpass _arrayclass } bind def
 
 /d_blit { mkpass dup
-          type mkact d_blit_dict begin exec end mkact exec } bind def
+          type mkact d_blit_dict begin exec end mkact exec
+} bind def
+
 /d_blit_dict 5 dict dup begin
    /B /_stringclass def
    /W /_arrayclass def
@@ -264,8 +281,12 @@ dup dup class /arrayclass eq exch type /B eq and
    /D /_arrayclass def
 end mkread def
 
+/ps_matrix {mkpass matrix_list listclass} bind def
+
 /ps_blit { mkpass dup 
-           type mkact ps_blit_dict begin exec end mkact exec } bind def
+           type mkact ps_blit_dict begin exec end mkact exec
+} bind def
+
 /ps_blit_dict 5 dict dup begin
    /B /_stringclass def
    /W /listclass def
@@ -312,6 +333,17 @@ end mkread def
                -3 indent (>) ftext
              } bind def
 
+/_matrixclass {/obj name newline
+  objstr 0 * (save <d) text 0 exch getinterval ftext 3 indent
+  obj {D} forall
+  -3 indent
+  objstr 0 * (> ) text
+           * obj matrix_dim pop * number * ( ) text
+           * obj matrix_dim exch pop * number
+           * ( matrix_fromarray )
+  0 exch getinterval ftext
+} bind def
+
 /B { objstr 0 4 4 -1 roll * number 0 exch getinterval ftext } bind def
 /W { objstr 0 6 4 -1 roll * number 0 exch getinterval ftext } bind def
 /L { objstr 0 11 4 -1 roll * number 0 exch getinterval ftext } bind def
@@ -319,7 +351,7 @@ end mkread def
 /D { objstr 0 dprec 8 add 4 -1 roll dprec number
      0 exch getinterval ftext } bind def
 
-/totext { find /arrayclass name /obj name
+/totext {find /arrayclass name find /matrixclass name /obj name
    /indents 0 def newline
    /obj find inword
    newline
