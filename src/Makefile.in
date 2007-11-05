@@ -421,6 +421,7 @@ SUBDIRS = codegen
 @ENABLE_SETUID_TRUE@	-e 's,[@]bindir[@],$(bindir),g'
 
 @ENABLE_CLAPACK_TRUE@CLAPACK_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+@ENABLE_CLAPACK_TRUE@CLAPACK_FLAGS = $(LAPACK_FLAGS) $(BLAS_FLAGS)
 @ENABLE_CLAPACK_TRUE@CLAPACK_ACTIVATE = -DLAPACK_LIB
 @ENABLE_THREADS_TRUE@THREAD_HDR = threads.h
 @ENABLE_THREADS_TRUE@THREADSRC = threads.c
@@ -442,12 +443,13 @@ nodist_pkginclude_HEADERS = dm-config.h  paths.h
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h
 dvt_LDADD = libdmglobals.la
 dvt_LDFLAGS = $(AM_LDFLAGS) $(CLAPACK_LIBS)
+dvt_CPPFLAGS = $(AM_CPPFLAGS) $(CLAPACK_FLAGS)
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dnode_SOURCES = dnode.c dnode_0.h dnode_1.h dmx.h
 dnode_LDADD = libdmglobals.la 
 dnode_LDFLAGS = $(AM_LDFLAGS) $(CLAPACK_LIBS)
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
-dnode_CPPFLAGS = $(AM_CPPFLAGS) $(CLAPACK_ACTIVATE)
+dnode_CPPFLAGS = $(AM_CPPFLAGS) $(CLAPACK_ACTIVATE) $(CLAPACK_FLAGS)
 testwordorder_SOURCES = test-word-order.c
 BUILT_SOURCES = paths.h dnode-nice.c
 CLEANFILES = paths.h dnode-nice.c
@@ -458,7 +460,7 @@ libdmglobals_la_SOURCES = dmglobals.c \
 	dmnum.c dsp1.c dsp2.c error-local.h \
 	plugin.c pluginlib.h $(THREADSRC) $(REGEX_SRC)
 
-libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(CLAPACK_ACTIVATE)
+libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(CLAPACK_ACTIVATE) $(CLAPACK_FLAGS)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)
 editpaths = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
@@ -914,18 +916,18 @@ dnode-dnode.obj: dnode.c
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dnode.obj `if test -f 'dnode.c'; then $(CYGPATH_W) 'dnode.c'; else $(CYGPATH_W) '$(srcdir)/dnode.c'; fi`
 
 dvt-dvt.o: dvt.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -MT dvt-dvt.o -MD -MP -MF "$(DEPDIR)/dvt-dvt.Tpo" -c -o dvt-dvt.o `test -f 'dvt.c' || echo '$(srcdir)/'`dvt.c; \
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dvt_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -MT dvt-dvt.o -MD -MP -MF "$(DEPDIR)/dvt-dvt.Tpo" -c -o dvt-dvt.o `test -f 'dvt.c' || echo '$(srcdir)/'`dvt.c; \
 @am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dvt-dvt.Tpo" "$(DEPDIR)/dvt-dvt.Po"; else rm -f "$(DEPDIR)/dvt-dvt.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dvt.c' object='dvt-dvt.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -c -o dvt-dvt.o `test -f 'dvt.c' || echo '$(srcdir)/'`dvt.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dvt_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -c -o dvt-dvt.o `test -f 'dvt.c' || echo '$(srcdir)/'`dvt.c
 
 dvt-dvt.obj: dvt.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -MT dvt-dvt.obj -MD -MP -MF "$(DEPDIR)/dvt-dvt.Tpo" -c -o dvt-dvt.obj `if test -f 'dvt.c'; then $(CYGPATH_W) 'dvt.c'; else $(CYGPATH_W) '$(srcdir)/dvt.c'; fi`; \
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dvt_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -MT dvt-dvt.obj -MD -MP -MF "$(DEPDIR)/dvt-dvt.Tpo" -c -o dvt-dvt.obj `if test -f 'dvt.c'; then $(CYGPATH_W) 'dvt.c'; else $(CYGPATH_W) '$(srcdir)/dvt.c'; fi`; \
 @am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dvt-dvt.Tpo" "$(DEPDIR)/dvt-dvt.Po"; else rm -f "$(DEPDIR)/dvt-dvt.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dvt.c' object='dvt-dvt.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -c -o dvt-dvt.obj `if test -f 'dvt.c'; then $(CYGPATH_W) 'dvt.c'; else $(CYGPATH_W) '$(srcdir)/dvt.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dvt_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -c -o dvt-dvt.obj `if test -f 'dvt.c'; then $(CYGPATH_W) 'dvt.c'; else $(CYGPATH_W) '$(srcdir)/dvt.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

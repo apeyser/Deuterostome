@@ -885,7 +885,6 @@ return(OK);
 /*------------------------------------------- type
    object | /type (upper-case, one-letter code)
    NULLOBJ | /T (socket) or /N (none)
-   BOX     | /M (mclib) or  /N (none)
    DICT    | /O (oplibtype) or /X (opaque) or /N (none)
 */
 
@@ -898,9 +897,6 @@ if (o_1 < FLOORopds) return(OPDS_UNF);
 switch (CLASS(o_1)) {
     case NULLOBJ:
 			*c = (TYPE(o_1) == SOCKETTYPE) ? 'T' : 'N';
-			break;
-    case BOX:
-			*c = 'N';
 			break;
     case DICT:
 	  switch (TYPE(o_1)) {
