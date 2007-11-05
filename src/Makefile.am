@@ -80,7 +80,7 @@ testwordorder_SOURCES = test-word-order.c
 BUILT_SOURCES = paths.h dnode-nice.c
 CLEANFILES = paths.h dnode-nice.c
 lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la
-libdmglobals_la_LIBADD = $(PLUGIN_LD)
+libdmglobals_la_LIBADD = $(PLUGIN_LD) $(CLAPACK_LIBS)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	dmnum.c dsp1.c dsp2.c error-local.h \

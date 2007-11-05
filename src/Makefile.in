@@ -83,7 +83,11 @@ am_libdmbootstrap_la_OBJECTS = libdmbootstrap_la-dmglobals.lo \
 	libdmbootstrap_la-dmnum.lo libdmbootstrap_la-dsp1.lo \
 	libdmbootstrap_la-dsp2.lo libdmbootstrap_la-plugin.lo
 libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
-libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
+@ENABLE_CLAPACK_TRUE@am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) \
+@ENABLE_CLAPACK_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_CLAPACK_TRUE@	$(am__DEPENDENCIES_1)
+libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_2)
 am__libdmglobals_la_SOURCES_DIST = dmglobals.c dm1.c dm2.c dm3.c dm4.c \
 	dm5.c dm6.c dm7.c dm8.c dm9.c dmnum.c dsp1.c dsp2.c \
 	error-local.h plugin.c pluginlib.h threads.c regex.c
@@ -454,7 +458,7 @@ testwordorder_SOURCES = test-word-order.c
 BUILT_SOURCES = paths.h dnode-nice.c
 CLEANFILES = paths.h dnode-nice.c
 lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la
-libdmglobals_la_LIBADD = $(PLUGIN_LD)
+libdmglobals_la_LIBADD = $(PLUGIN_LD) $(CLAPACK_LIBS)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	dmnum.c dsp1.c dsp2.c error-local.h \
