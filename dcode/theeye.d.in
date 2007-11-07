@@ -50,7 +50,6 @@
   /DIRCOLOR   <d 231 214 227 > 255 div mapcolor def
   /LISTCOLOR  <d 204 235 197 > 255 div mapcolor def
   /ARRAYCOLOR <d 204 235 197 > 255 div mapcolor def
-  /MATRIXCOLOR <d 204 235 197 > 255 div mapcolor def
   /DICTCOLOR  <d 166 219 160 > 255 div mapcolor def
   /BOXCOLOR   <d 166 219 160 > 255 div mapcolor def 
   
@@ -180,7 +179,6 @@
 |  [ /dictclass  dict name/index        ]
 |  [ /listclass  list name/index        ]
 |  [ /arrayclass array name/index       ]
-|  [ /matrixclass matrix name/index     ]
 |
 |---------------------------- some NOTABLES -------------------------------
 |
@@ -486,11 +484,6 @@ end
                  (\)) fax
                } if
              } def
-/matrixclass { * (matrix ) text
-               * /theobj find 1 get matrix_dim pop * number
-               * ( by ) text
-               * /theobj find 1 get matrix_dim exch pop * number
-             } def
 /listclass   { * theobj 1 get active { (proc) } { (list) } ifelse text
                * ( of ) text * theobj 1 get length * number
              } def
@@ -602,19 +595,6 @@ end mkread /infoclasses name
    showRpage
 } def
 
-|-------- opening matrix
-/open_matrix {
-  /ritepageT 0 def /ritepageU theobj 1 get matrix_dim pop def
-  newbuffers
-  theobj 1 get matrix_dim pop /b array /checkmarks name
-  0 checkmarks copy pop
-  theobj theopen copy pop
-  currentbuffers capsave
-  /showRpage /show_matrix find def
-  /fromRpage /from_matrix find def
-  showRpage
-} def
-
 |------------------------------ local error handling
 |
 | - error messages are intercepted and displayed on the info line
@@ -709,7 +689,6 @@ end mkread def
 /dictclass  { 1 get class /dictclass eq } bind def
 /listclass  { 1 get class /listclass eq } bind def
 /arrayclass { 1 get class /arrayclass eq } bind def
-/matrixclass { 1 get class /matrixclass eq } bind def
 /dirclass { pop true } def
 end /keeps name
 
@@ -764,9 +743,6 @@ end /keeps name
 /arrayclass  { array_icon  (< >) icon_text
                show_nameidx
              } bind def
-/matrixclass { matrix_icon (::) icon_text
-               show_nameidx
-             } bind def
 /listclass   { list_icon 
                theobj 1 get active { ({ }) } { ([ ]) } ifelse icon_text
                show_nameidx
@@ -781,7 +757,6 @@ end mkread /objpresenters name
 /dir_icon    { wid iconrects vidx get DIRCOLOR fillrectangle } bind def
 /list_icon   { wid iconrects vidx get LISTCOLOR fillrectangle } bind def
 /array_icon  { wid iconrects vidx get ARRAYCOLOR fillrectangle } bind def
-/matrix_icon { wid iconrects vidx get MATRIXCOLOR fillrectangle } bind def
 /dict_icon   { wid iconrects vidx get DICTCOLOR fillrectangle } bind def
 /box_icon    { wid iconrects vidx get BOXCOLOR fillrectangle } bind def
 
@@ -808,12 +783,11 @@ end mkread /objpresenters name
 
 |--------------- opening leftpage object (by control/click)
 
-6 dict dup begin
+7 dict dup begin
 /VMclass     { open_dict } def
 /FSclass     { open_fs } def
 /dirclass    { open_dir } bind def
 /arrayclass  { open_array } bind def
-/matrixclass { open_matrix } bind def
 /listclass   { open_list } bind def
 /dictclass   { open_dict } bind def
 end mkread /openLclasses name
@@ -911,7 +885,6 @@ end mkread /openLclasses name
 /dirclass    { open_dir } bind def
 /fileclass   { stop } def
 /arrayclass  { open_array } def
-/matrixclass { open_matrix } def
 /listclass   { open_list } def
 /dictclass   { open_dict } def
   
@@ -933,7 +906,6 @@ end mkread /openRclasses name
 /dirclass    { theitem 1 get theopen 1 get eqstr
                theitem 2 get theopen 2 get eqstr and } bind def
 /arrayclass  { theitem 1 get theopen 1 get eq } bind def
-/matrixclass { theitem 1 get theopen 1 get eq } bind def
 /listclass   { theitem 1 get theopen 1 get eq } bind def
 /dictclass   { theitem 1 get theopen 1 get eq } bind def
 end mkread /dupchecks name
@@ -972,12 +944,6 @@ end mkread /dupchecks name
                  * /theitem find length * number
                  /theitem find active {( active) fax} if }
                ARRAYCOLOR show_value
-             } bind def
-/matrixclass { { * (:: ) text
-                 * /theitem find matrix_dim pop * number
-                 * ( by ) text
-                 * /theitem find matrix_dim exch pop * number
-               } MATRIXCOLOR show_value
              } bind def
 /listclass   { { * /theitem find active { ({ }) } { ([ ]) } ifelse text
                  * ( of ) text * /theitem find length * number
@@ -1056,24 +1022,6 @@ end mkread /valuepresenters name
       } for
 } def
 
-|----- showing matrix value
-/show_matrix {
-  wid ritepagerect BG fillrectangle
-  theopen 0 get class /nullclass eq {stop} if
-  ritepageT nL add ritepageU gt {/ritepageT ritepageU nL sub def} if
-  ritepageT 0 lt {/ritepageT 0 def} if
-  0 1 nL 1 sub {
-    /vidx name
-    ritepageT vidx add dup ritepageU ge {pop exit} if /theidx name
-    theopen 1 get matrix_list theidx get /theitem name
-    wid reflocs vidx get exec
-    strbuf 0 * theidx * number 0 exch getinterval
-    checkmarks theidx get 0 ne {RITEHIGH} {VALUETEXT} ifelse
-    drawtext pop pop pop
-    valuepresenters /theitem find class get exec
-  } for
-} def
-
 |-------- show array value
 
 /show_array {
@@ -1139,14 +1087,6 @@ end mkread /valuepresenters name
    theopen 1 get theidx get dup
    class theobj 0 put theobj 1 put
    theidx theobj 2 put
-} bind def
-
-|-------- picking item from matrix
-/from_matrix {
-  theopen 1 get matrix_list theidx get
-  dup class theobj 0 put
-      theobj 1 put
-  theidx theobj 2 put
 } bind def
 
 |------- picking item from an array
@@ -1260,7 +1200,6 @@ end mkread /valuepresenters name
 /dictclass {} def
 /listclass {} def
 /arrayclass {} def
-/matrixclass {} def
 
 end def
 
@@ -1355,12 +1294,6 @@ end def
   0 1 checkmarks length 1 sub { /kR name
       checkmarks kR get 0 ne { theopen 1 get kR get } if 
     } for
-} bind def
-
-/matrixclass {
-  0 1 checkmarks length 1 sub { /kR name
-    checkmarks kR get 0 ne { theopen 1 get kR get } if
-  } for
 } bind def
 
 end def

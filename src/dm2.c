@@ -82,10 +82,6 @@ B* nextlib(B* frame)
             frame = (B*) LIST_CEIL(frame);
             goto ll_nextdict;
 
-				case MATRIX:
-						frame = MATRIX_END(frame);
-						goto ll_nextdict;
-
         default:
           return NULL;
     };
@@ -725,8 +721,6 @@ L deendian_frame(B *frame) {
       swap2bytes(frame+14);
       return OK;
 
-		case MATRIX:
-			swap4bytes((B*) MATRIX_LIST(frame));
 		case ARRAY: case LIST:
       swap4bytes((B*) &VALUE_BASE(frame));
       swap4bytes((B*) &ARRAY_SIZE(frame));
@@ -789,16 +783,6 @@ static L deendian_array(B* frame) {
     default:
       return OPD_TYP;
   }
-}
-
-static L deendian_matrix(B* frame) 
-{
-		int retc;
-		if (((retc = deendian_frame(MATRIX_ARRAY(frame))) != OK)
-				|| ((retc = deendian_frame(MATRIX_LIST(frame))) != OK))
-				return retc;
-
-		return OK;
 }
 
 static L deendian_list(B* frame) {
@@ -987,36 +971,6 @@ switch(CLASS(frame)) {
     moveframes(frame,tframe,1L); moveL((L *)value,(L *)tvalue,nb>>2);
     break;
 
-	case MATRIX:
-			tframe = *freemem;
-			tvalue = tframe + FRAMEBYTES;
-			value = MATRIX_ARRAY(frame);
-			value2 = MATRIX_LIST(frame);
-			
-			nb = (L) (DALIGN(ARRAY_SIZE(value)*sizeof(D)));
-			if ((tvalue2 = tvalue+FRAMEBYTES+nb) > *ceilmem) return VM_OVF;
-			*freemem = tvalue2;
-			
-			moveframe(value, tvalue);
-			moveD((D*) VALUE_PTR(value), (D*) tvalue+FRAMEBYTES, ARRAY_SIZE(value));
-			VALUE_PTR(tvalue) = tvalue + FRAMEBYTES - base;
-			
-			end2 = tvalue2 + FRAMEBYTES + (LIST_CEIL_PTR(value2) - VALUE_PTR(value2));
-
-			if ((*freemem = (B*) DALIGN(end2)) > *ceilmem)
-					return VM_OVF;
-			
-			moveframe(value2, tvalue2);
-			VALUE_PTR(tvalue2) = tvalue2 + FRAMEBYTES - base;
-			LIST_CEIL_PTR(tvalue2) = end2 - base;
-			
-			MATRIX_ARRAY(frame) = tvalue - base;
-			MATRIX_LIST(frame) = tvalue2 - base;
-			MATRIX_END(frame) = *freemem - base;
-
-			moveframe(frame, tframe);
-			break;
-
   case LIST:  tframe = *freemem; tvalue = tframe + FRAMEBYTES;
               nb = LIST_CEIL(frame) - VALUE_BASE(frame);
               if ((*freemem+nb+FRAMEBYTES) > *ceilmem) return(VM_OVF);
@@ -1092,32 +1046,6 @@ switch(CLASS(frame)) {
    if (! isnative && ((retc = deendian_array(frame)) != OK))
      return retc;
    break;
-
- case MATRIX:
-		 dframe = (MATRIX_ARRAY(frame) += base);
-		 lframe = (MATRIX_LIST(frame) += base);
-		 MATRIX_END(frame) += base;
-		 
-		 if (! isnative && ((retc = deendian_matrix(frame) != OK)))
-				 return retc;
-
-		 VALUE_PTR(dframe) += base;
-		 VALUE_PTR(lframe) += base;
-		 LIST_CEIL_PTR(lframe) += base;
-
-		 if (! isnative && (retc = deendian_array(dframe)) != OK)
-				 return retc;
-
-		 k = ARRAY_SIZE(dframe)
-				 /((LIST_CEIL_PTR(lframe)-VALUE_PTR(lframe))/FRAMEBYTES);
-		 for (xframe = VALUE_PTR(lframe), entry = VALUE_PTR(dframe);
-					xframe < LIST_CEIL_PTR(lframe);
-					xframe += FRAMEBYTES, entry += k*sizeof(D)) {
-				 TAG(xframe) = ARRAY | DOUBLETYPE; ATTR(xframe) = 0;
-				 VALUE_PTR(xframe) = entry;
-				 ARRAY_SIZE(xframe) = k;
-		 }
-		 break;
 
  case LIST: 
    VALUE_BASE(frame) += base; 

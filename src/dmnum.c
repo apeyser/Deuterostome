@@ -151,6 +151,18 @@ BOOLEAN VALUE(B *frame, L *val)
 return( (*val = (*(VALUElist[TYPE(frame)]))(NUM_VAL(frame))) != LINF);
 }
 
+/*-------------------------------------------- DVALUE
+  returns value of numerical frame as double in the destination
+  and a boolean 'true' if the value is not undefined
+
+  Note: uses a function list provided by DMNUMINC
+*/
+
+BOOLEAN DVALUE(B *frame, D *val) {
+  *val = (*(TESTlist[TYPE(frame)]))(NUM_VAL(frame));
+  return ! ISUNDEF(*val);
+}
+
 /*--------------------------------------------- TEST
   tests a numeral frame value for >0, < 0, ==0, and undefined;
   returns corresponding code word (1,-1,0 ,2)

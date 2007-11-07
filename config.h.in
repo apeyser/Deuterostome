@@ -24,6 +24,9 @@
 /* Path to GS */
 #undef ENABLE_GS
 
+/* compile and install lapack exts */
+#undef ENABLE_LAPACK
+
 /* Path to LATEX */
 #undef ENABLE_LATEX
 

@@ -12,16 +12,7 @@ L op_getplugindir(void);
 L op_makethreads(void);
 L op_threads(void);
 
-/*--- blas */
-L op_matrix(void);
-L op_matrix_list(void);
-L op_matrix_array(void);
-L op_matrix_dim(void);
-#if HAVE_CLAPACK_H && CLAPACK_LIB
-L op_matmul_blas(void);
-#endif
-
-
+#include "matrix.h"
 
 B *sysop[] =
 {
@@ -235,10 +226,6 @@ B *sysop[] =
 			"regex",          (B *)op_regex,
 			"regexi",         (B *)op_regexi,
 #endif //DM_ENABLE_REGEX			
-      "matrix",         (B *)op_matrix,
-      "matrix_dim",     (B *)op_matrix_dim,
-      "matrix_list",    (B *)op_matrix_list,
-      "matrix_array",   (B *)op_matrix_array,
 #if HAVE_CLAPACK_H && CLAPACK_LIB
 			"matmul_blas",    (B *)op_matmul_blas,
 #endif //HAVE_CLAPACK_H && CLAPACK_LIB

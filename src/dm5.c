@@ -452,7 +452,6 @@ if (CLASS(o_2) == CLASS(o_1)) {
       case ARRAY: 
       case LIST:
       case DICT:
-      case MATRIX:
       case BOX:  t = ((VALUE_BASE(o_2) == VALUE_BASE(o_1)) &&
                       (ARRAY_SIZE(o_2) == ARRAY_SIZE(o_1)));
                  break;

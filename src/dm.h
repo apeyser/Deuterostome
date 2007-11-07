@@ -160,8 +160,6 @@ NOTE: all objects that can populate the D machine's workspace must
 #define PROC                       ((UB) 0x70)
 #define DICT                       ((UB) 0x80)
 #define BOX                        ((UB) 0x90)
-#define MATRIX                     ((UB) 0xA0)      /* master matrix */		
-//#define HANDLE                     ((UB) 0xA0)
 	
 #define COMPOSITE(frame)           ((UB)(CLASS(frame)) > (UB)(MARK))
 
@@ -252,24 +250,6 @@ NOTE: all objects that can populate the D machine's workspace must
 #define BOX_NB(frame)              (*((L *)(((B*)(frame))+8)))
 #define VALUE_PTR(frame)           (*((B**)(((B*)(frame))+4)))
 #define LIST_CEIL_PTR(frame)       (*((B**)(((B*)(frame))+8)))
-/* #define HANDLE_ID(frame)           (*((L *)(((B*)(frame))+12))) */
-/* #define HANDLE_CEIL(frame)         (*((B**)(((B*)(frame))+8))) */
-#define MATRIX_LIST(frame)         (*((B**)(((B*)(frame))+12)))
-#define MATRIX_ARRAY(frame)        (VALUE_PTR(frame))
-#define MATRIX_END(frame)          (LIST_CEIL_PTR(frame))
-
-/* static void SET_HANDLE_ID(B* frame, B* string) { */
-/* 	HANDLE_ID(frame) = *(L*)(string); */
-/* } */
-/* static void GET_HANDLE_ID(B* frame, B* string) { */
-/* 	*(L*)(string) = HANDLE_ID(frame); */
-/* } */
-/* static BOOLEAN EQ_HANDLE_ID(B* frame1, B* frame2) { */
-/* 	return HANDLE_ID(frame1) == HANDLE_ID(frame2); */
-/* } */
-/* static BOOLEAN EQ_HANDLE_ID_STRING(B* frame, B string[5]) { */
-/* 	return HANDLE_ID(frame) == *(L*)string; */
-/* } */
 
 /* NB: Attention to moveframe & moveframes in dm2.c whenever
    framebytes is changed */
@@ -470,6 +450,10 @@ DLL_SCOPE UW ascii[];
 #define o_5                  (o_4-FRAMEBYTES)
 #define o_6                  (o_5-FRAMEBYTES)
 #define o_7                  (o_6-FRAMEBYTES)
+#define o_8                  (o_7-FRAMEBYTES)
+#define o_9                  (o_8-FRAMEBYTES)
+#define o_10                 (o_9-FRAMEBYTES)
+
 #define o1                   FREEopds
 #define o2                   (o1+FRAMEBYTES)
 #define o3                   (o2+FRAMEBYTES)
@@ -549,6 +533,7 @@ void DECODE(B *frame, BOOLEAN fauto, W prec, B *buf);
 B ENCODE(W type, B *string, B *dnum);
 W VALUEBYTES(B type);
 BOOLEAN VALUE(B *frame, L *val);
+BOOLEAN DVALUE(B *frame, D *val);
 W TEST(B *frame);
 W COMPARE(B *frame1, B *frame2);
 void THEARC(B *dframe, B *sframe);

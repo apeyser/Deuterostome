@@ -4,7 +4,9 @@ nodist_dmstart_DATA =  theeye.d startup_dnode.d \
 dist_dmconf_DATA = dvt.d
 nodist_dmconf_DATA = dnode.d
 
-EXTRA_DIST = theeye.d.in dnode.d.in dvt_macros.d.in startup_dvt.d.in
+nodist_pkglib_DATA = matrix.d
+
+EXTRA_DIST = theeye.d.in dnode.d.in dvt_macros.d.in startup_dvt.d.in matrix.d.in
 CLEANFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
 
 XPS_START = /^[[:space:]]*[@]ENABLE_XPS_START[@][[:space:]]*$$/
@@ -57,13 +59,24 @@ else !ENABLE_EMACS
 EMACSCLIENT_EDIT =  -e '$(EMACSCLIENT_START),$(EMACSCLIENT_END) d'
 endif !ENABLE_EMACS
 
+LAPACK_START = /^[[:space:]]*[@]ENABLE_LAPACK_START[@][[:space:]]*$$/
+LAPACK_END   = /^[[:space:]]*[@]ENABLE_LAPACK_END[@][[:space:]]*$$/
+
+if ENABLE_LAPACK
+LAPACK_EDIT = -e '$(LAPACK_START) d' \
+						  -e '$(LAPACK_END) d'
+else !ENABLE_LAPACK
+LAPACK_EDIT = -e '$(LAPACK_START),$(LAPACK_END) d'
+endif !ENABLE_LAPACK
+
 edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
 			$(PLUGIN_DELETE) \
 			$(THREADS_EDIT) \
 			$(XPS_DELETE) \
 			$(PERL_DELETE) \
-			$(EMACSCLIENT_EDIT)
+			$(EMACSCLIENT_EDIT) \
+			$(LAPACK_EDIT)
 
 theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in
 	rm -f $@ $@.tmp
@@ -83,4 +96,9 @@ dvt_macros.d: $(srcdir)/Makefile $(srcdir)/dvt_macros.d.in
 startup_dvt.d: $(srcdir)/Makefile $(srcdir)/startup_dvt.d.in 
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/startup_dvt.d.in >$@.tmp
+	mv $@.tmp $@
+
+matrix.d: $(srcdir)/Makefile $(srcdir)/matrix.d.in
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/matrix.d.in >$@.tmp
 	mv $@.tmp $@

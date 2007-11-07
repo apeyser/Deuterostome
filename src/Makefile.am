@@ -61,7 +61,7 @@ endif ENABLE_PLUGINS
 
 pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
 	error-local.h dm-snprintf.h srandomdev-local.h
-nodist_pkginclude_HEADERS = dm-config.h  paths.h
+nodist_pkginclude_HEADERS = dm-config.h paths.h
 
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h
 dvt_LDADD = libdmglobals.la
@@ -83,7 +83,7 @@ lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la
 libdmglobals_la_LIBADD = $(PLUGIN_LD) $(CLAPACK_LIBS)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
-	dmnum.c dsp1.c dsp2.c error-local.h \
+	dmnum.c dsp1.c dsp2.c error-local.h matrix.c matrix.h \
 	plugin.c pluginlib.h $(THREADSRC) $(REGEX_SRC)
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(CLAPACK_ACTIVATE) $(CLAPACK_FLAGS)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)

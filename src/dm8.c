@@ -187,7 +187,6 @@ if (CLASS(o_1) == NULLOBJ)
                    VALUEBYTES(TYPE(o_1))); break;
        case LIST: /* if ((ATTR(o_1) & PARENT) == 0) return(OPD_ATR); */
                   next = (B *)LIST_CEIL(o_1); break;
-			 case MATRIX: next = (B*) MATRIX_END(o_1); break;
        case DICT: next = (B *)VALUE_BASE(o_1) + DICT_NB(o_1); break;
        case BOX:  next = (B *)VALUE_BASE(o_1) + BOX_NB(o_1); break;
        default: return(OPD_CLA); 

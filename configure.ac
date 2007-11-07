@@ -93,7 +93,8 @@ AC_CHECK_PROG([guipdf], [xpdf], [xpdf])
 AC_CHECK_PROG([guipdf], [gv], [gv])
 AC_CHECK_PROG([guipdf], [gs], [gs])
 
-CF_CHECK_CLAPACK
+CF_AC_ENABLE([lapack], [compile and install lapack exts], [yes])
+CF_IF_ENABLED([lapack], [CF_CHECK_CLAPACK])
 
 CF_AM_PROG([BASH], [bash])
 CF_AM_PROG([ENV], [env], [/usr/bin])
