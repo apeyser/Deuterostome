@@ -66,8 +66,8 @@ L op_matmul_blas(void)
     ap = (D*) VALUE_PTR(o_7);
     bp = (D*) VALUE_PTR(o_4);
 
-    transA = BOOL_VAL(o_2);
-    transB = BOOL_VAL(o_4);
+    transA = BOOL_VAL(o_5);
+    transB = BOOL_VAL(o_2);
 		if (transA) {
 				Nrowa_ = Ncola;
 				Ncola_ = Nrowa;
