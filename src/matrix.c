@@ -50,7 +50,7 @@ L op_matmul_blas(void)
     Ncola = ((L*) VALUE_PTR(o_6))[1];
     Nrowa = ((L*) VALUE_PTR(o_6))[0]/Ncola;
     Ncolc = ((L*) VALUE_PTR(o_9))[1];
-    Nrowc = ((L*) VALUE_PTR(o_10))[0]/Ncolc;
+    Nrowc = ((L*) VALUE_PTR(o_9))[0]/Ncolc;
     if (Nrowa == LINF  || Nrowb == LINF || Nrowc == LINF 
         || Ncola == LINF || Ncolb == LINF || Ncolc == LINF)
       return MATRIX_UNDEF_CUT;
