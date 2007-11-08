@@ -42,32 +42,46 @@ AC_DEFUN([CF_ATLAS], [
 
   # BLAS in ATLAS library? (http://math-atlas.sourceforge.net/)
   if test $cf_atlas_ok = no; then
+     ATLAS_LIBS="-latlas"
      CPPFLAGS="$CPPFLAGS $ATLAS_FLAGS"
 	   AC_SEARCH_LIBS([cblas_sgemm], [ptcblas cblas],
-                    [if test "$ac_res" = "none required" ; then 
-                       ATLAS_LIBS="-latlas"
-                     else
-                       ATLAS_LIBS="$ac_res -latlas"
+                    [AC_MSG_CHECKING([for cblas_sgemm in $ac_res])
+                     if test -n "$ac_lib" ; then 
+                       ATLAS_LIBS="$ac_res $ATLAS_LIBS"
                      fi
-                     cf_atlas_ok=yes],
-                    [], [-latlas])
-     AC_MSG_CHECKING([for cblass_sgemm in ptcblas and cblas])
+                     AC_MSG_RESULT([yes])
+                     cf_atlas_ok=yes
+                     break
+                    ],
+                    [AC_MSG_CHECKING([for cblas_sgemm in $ac_res])
+                     AC_MSG_RESULT([no])
+                    ], 
+                    [$ATLAS_LIBS])
+     AC_MSG_CHECKING([for cblass_sgemm in ptcblas or cblas])
      if test $cf_atlas_ok = no ; then
         AC_MSG_ERROR([No atlas cblas found])
      else
         AC_MSG_RESULT([yes, in $ac_res])
-        AC_SEARCH_LIBS([clapack_dgesv], [lapack],
-                       [AC_MSG_CHECKING([for clapack_dgesv in lapack])
-                        if test "$ac_res" != "none required" ; then
-                         ATLAS_LIBS="-llapack $ATLAS_LIBS"
+        cf_atlas_ok=no
+        AC_SEARCH_LIBS([clapack_dgesv], [lapack clapack],
+                       [AC_MSG_CHECKING([for clapack_dgesv in $ac_res])
+                        if test -n "$ac_lib" ; then
+                         ATLAS_LIBS="$ac_res $ATLAS_LIBS"
                         fi
                         AC_MSG_RESULT([yes])
-                       ],
-                       [AC_MSG_CHECKING([for clapack_dgesv in lapack])
-                        cf_atlas_ok=no
-                        AC_MSG_ERROR([None found])
-                       ],
+                        cf_atlas_ok=yes
+                        break
+                       ], 
+                       [AC_MSG_CHECKING([for clapack_dgesv in $ac_res])
+                        AC_MSG_RESULT([no])
+                       ], 
                        [$ATLAS_LIBS])
+        AC_MSG_CHECKING([for clapack_dgesv in lapack or clapack])
+        if test $cf_atlas_ok = no ; then
+          AC_MSG_ERROR([No atlas clapack found])
+        else
+          AC_MSG_RESULT([yes, in $ac_res])
+        fi
      fi
      CPPFLAGS="$cf_atlas_save_CPPFLAGS"
   fi
