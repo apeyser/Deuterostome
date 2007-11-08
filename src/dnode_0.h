@@ -261,6 +261,11 @@ L syserrc[] =
 		REGEX_ESUBREG, REGEX_EBRACK, REGEX_EPAREN, REGEX_EBRACE, REGEX_BADBR,
 		REGEX_ERANGE, REGEX_ESPACE, REGEX_BADRPT, REGEX_UNKNOWN,
 #endif // DM_ENABLE_REGEX		
+    MATRIX_UNDEF_CUT,
+    MATRIX_ILLEGAL_CUT,
+    MATRIX_UNDER_CUT,
+    MATRIX_NONMATCH_CUT,
+    MATRIX_NONMATCH_SHAPE,
     0L,
 };
 
@@ -340,6 +345,11 @@ B* syserrm[] =
     "Regex Error: `?', `*', or `+' operand invalid",
     "Regex Error: Unknown error",
 #endif // DM_ENABLE_REGEX
+    "Matrix Error: undefined value in cut",
+    "Matrix Error: cut dimension less than 1",
+    "Matrix Error: number of cut dimensions too small",
+    "Matrix Error: array too small for cut",
+    "Matrix Error: matrix operand dimensions don't match",
 };
 
 // original directory for vmresize

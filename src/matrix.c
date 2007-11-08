@@ -41,7 +41,8 @@ L op_matmul_blas(void)
 
     if (ARRAY_SIZE(o_3) < 2 
         || ARRAY_SIZE(o_6) < 2
-        || ARRAY_SIZE(o_9) < 2) return RNG_CHK;
+        || ARRAY_SIZE(o_9) < 2) return MATRIX_UNDER_CUT;
+
     if (! DVALUE(o_1, &alpha) || ! DVALUE(o_8, &beta)) return UNDF_VAL;
 
     Ncolb = ((L*) VALUE_PTR(o_3))[1];
@@ -52,14 +53,14 @@ L op_matmul_blas(void)
     Nrowc = ((L*) VALUE_PTR(o_10))[0]/Ncolc;
     if (Nrowa == LINF  || Nrowb == LINF || Nrowc == LINF 
         || Ncola == LINF || Ncolb == LINF || Ncolc == LINF)
-      return UNDF_VAL;
+      return MATRIX_UNDEF_CUT;
     if (Nrowa < 1 || Nrowb < 1 || Nrowc < 1
         || Ncola < 1 || Ncolb < 1 || Ncolc < 1)
-      return RNG_CHK;
+      return MATRIX_ILLEGAL_CUT;
     if (Nrowb*Ncolb < ARRAY_SIZE(o_4)
         || Nrowa*Ncola < ARRAY_SIZE(o_7)
         || Nrowc*Ncolc <  ARRAY_SIZE(o_10))
-      return RNG_CHK;
+      return MATRIX_NONMATCH_CUT;
 
     cp = (D*) VALUE_PTR(o_10);
     ap = (D*) VALUE_PTR(o_7);
@@ -85,7 +86,7 @@ L op_matmul_blas(void)
 		}
 
     if (Ncola_ != Nrowb_ || Nrowc != Nrowa_ || Ncolc != Ncolb_) 
-      return RNG_CHK;
+      return MATRIX_NONMATCH_SHAPE;
 
 		cblas_dgemm(CblasRowMajor,
 								transA ? CblasTrans : CblasNoTrans,
