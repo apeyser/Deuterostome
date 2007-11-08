@@ -32,7 +32,7 @@
   exch | }                            | submatrix cuts_1n
 } bind userdef
 
-@ENABLE_LAPACK_START@
+@ENABLE_ATLAS_START@
 
 |========================== matmul_blas
 |
@@ -77,6 +77,6 @@
   false 4 1 roll false exch matmul_blas
 } bind userdef
 
-@ENABLE_LAPACK_END@
+@ENABLE_ATLAS_END@
 
 end _module

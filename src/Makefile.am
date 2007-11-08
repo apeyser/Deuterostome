@@ -23,11 +23,9 @@ uninstall-local:
 
 endif ENABLE_SETUID
 
-if ENABLE_CLAPACK
-CLAPACK_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
-CLAPACK_FLAGS= $(LAPACK_FLAGS) $(BLAS_FLAGS)
-CLAPACK_ACTIVATE = -DCLAPACK_LIB
-endif ENABLE_CLAPACK
+if ENABLE_ATLAS
+ATLAS_ACTIVATE = -DATLAS_LIB
+endif ENABLE_ATLAS
 
 if ENABLE_THREADS
   THREAD_HDR=threads.h
@@ -65,27 +63,27 @@ nodist_pkginclude_HEADERS = dm-config.h paths.h
 
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h
 dvt_LDADD = libdmglobals.la
-dvt_LDFLAGS = $(AM_LDFLAGS) $(CLAPACK_LIBS)
-dvt_CPPFLAGS = $(AM_CPPFLAGS) $(CLAPACK_FLAGS)
+dvt_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS)
+dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS)
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 
 dnode_SOURCES = dnode.c dnode_0.h dnode_1.h dmx.h
 dnode_LDADD = libdmglobals.la 
-dnode_LDFLAGS = $(AM_LDFLAGS) $(CLAPACK_LIBS)
+dnode_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS)
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
-dnode_CPPFLAGS = $(AM_CPPFLAGS) $(CLAPACK_ACTIVATE) $(CLAPACK_FLAGS)
+dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 
 testwordorder_SOURCES = test-word-order.c
 
 BUILT_SOURCES = paths.h dnode-nice.c
 CLEANFILES = paths.h dnode-nice.c
 lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la
-libdmglobals_la_LIBADD = $(PLUGIN_LD) $(CLAPACK_LIBS)
+libdmglobals_la_LIBADD = $(PLUGIN_LD) $(ATLAS_LIBS)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	dmnum.c dsp1.c dsp2.c error-local.h matrix.c matrix.h \
 	plugin.c pluginlib.h $(THREADSRC) $(REGEX_SRC)
-libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(CLAPACK_ACTIVATE) $(CLAPACK_FLAGS)
+libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)
 
 editpaths = sed \

@@ -647,6 +647,8 @@ Xwindows_ {
 (Startup: ) toconsole getstartupdir toconsole (\n) toconsole
 (Plugins: ) toconsole getplugindir toconsole (\n) toconsole
 
+getstartupdir (matrix.d) fromfiles
+
 (Trying ) toconsole getconfdir toconsole (dnode.d...\n) toconsole
 getconfdir (dnode.d) fromxfiles {
   (Read ) toconsole getconfdir toconsole (dnode.d\n) toconsole

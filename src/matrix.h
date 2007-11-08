@@ -9,10 +9,12 @@
 #define MATRIX_NONMATCH_CUT     0x00000D03L 
 #define MATRIX_NONMATCH_SHAPE   0x00000D04L
 
-#if HAVE_CLAPACK_H && CLAPACK_LIB
+#if HAVE_ATLAS && ATLAS_LIB
+
+#define BUILD_ATLAS 1
 
 L op_matmul_blas(void);
 
-#endif //HAVE_CLAPACK_H && CLAPACK_LIB
+#endif //BUILD_ATLAS
 
 #endif //MATRIX_H

@@ -1,7 +1,8 @@
 #include "matrix.h"
 
-#if HAVE_CLAPACK_H && CLAPACK_LIB
+#if BUILD_ATLAS
 #include <cblas.h>
+#include <clapack.h>
 /*--------------------------------------------- matmul_blas
  * C <cuts> beta A <cuts> transA B <cuts> transB alpha | C
  * alpha*A*B + beta*C -> C
@@ -99,4 +100,4 @@ L op_matmul_blas(void)
 		return(OK);
 }
 
-#endif //HAVE_CLAPACK_H && CLAPACK_LIB
+#endif //BUILD_ATLAS

@@ -39,11 +39,10 @@ DIST_COMMON = $(am__dist_m4data_DATA_DIST) \
 	$(am__dist_noinst_DATA_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/acx_blas.m4 \
-	$(top_srcdir)/m4/acx_lapack.m4 $(top_srcdir)/m4/acx_pthread.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
-	$(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/configure.m4 \
 	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -64,8 +63,8 @@ am__installdirs = "$(DESTDIR)$(m4datadir)"
 dist_m4dataDATA_INSTALL = $(INSTALL_DATA)
 am__dist_noinst_DATA_DIST = acx_pthread.m4 \
 	ax_cflags_strict_prototypes.m4 ax_prefix_config_h.m4 \
-	configure.m4 lf_x11.m4 acx_lapack.m4 acx_blas.m4 \
-	lib_socket_nsl.m4 plugin-config.m4
+	configure.m4 lf_x11.m4 cf_atlas.m4 lib_socket_nsl.m4 \
+	plugin-config.m4
 DATA = $(dist_m4data_DATA) $(dist_noinst_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 pkgdatadir = @pkgdatadir@
@@ -77,11 +76,12 @@ AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
 AR = @AR@
 AS = @AS@
+ATLAS_FLAGS = @ATLAS_FLAGS@
+ATLAS_LIBS = @ATLAS_LIBS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BLAS_LIBS = @BLAS_LIBS@
 BYTECORRECT = @BYTECORRECT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -107,14 +107,14 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EMACS = @EMACS@
 EMACSLOADPATH = @EMACSLOADPATH@
+ENABLE_ATLAS_FALSE = @ENABLE_ATLAS_FALSE@
+ENABLE_ATLAS_TRUE = @ENABLE_ATLAS_TRUE@
 ENABLE_ATPS = @ENABLE_ATPS@
 ENABLE_ATPS_FALSE = @ENABLE_ATPS_FALSE@
 ENABLE_ATPS_TRUE = @ENABLE_ATPS_TRUE@
 ENABLE_BASH = @ENABLE_BASH@
 ENABLE_BASH_FALSE = @ENABLE_BASH_FALSE@
 ENABLE_BASH_TRUE = @ENABLE_BASH_TRUE@
-ENABLE_CLAPACK_FALSE = @ENABLE_CLAPACK_FALSE@
-ENABLE_CLAPACK_TRUE = @ENABLE_CLAPACK_TRUE@
 ENABLE_CPPPLUGIN_FALSE = @ENABLE_CPPPLUGIN_FALSE@
 ENABLE_CPPPLUGIN_TRUE = @ENABLE_CPPPLUGIN_TRUE@
 ENABLE_DEBUG_DMNUM = @ENABLE_DEBUG_DMNUM@
@@ -136,9 +136,6 @@ ENABLE_ENV_TRUE = @ENABLE_ENV_TRUE@
 ENABLE_GS = @ENABLE_GS@
 ENABLE_GS_FALSE = @ENABLE_GS_FALSE@
 ENABLE_GS_TRUE = @ENABLE_GS_TRUE@
-ENABLE_LAPACK = @ENABLE_LAPACK@
-ENABLE_LAPACK_FALSE = @ENABLE_LAPACK_FALSE@
-ENABLE_LAPACK_TRUE = @ENABLE_LAPACK_TRUE@
 ENABLE_LATEX = @ENABLE_LATEX@
 ENABLE_LATEX_FALSE = @ENABLE_LATEX_FALSE@
 ENABLE_LATEX_TRUE = @ENABLE_LATEX_TRUE@
@@ -188,7 +185,6 @@ ENABLE_XTERM_TRUE = @ENABLE_XTERM_TRUE@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
-FLIBS = @FLIBS@
 GCC_CFLAGS = @GCC_CFLAGS@
 GCC_CXXFLAGS = @GCC_CXXFLAGS@
 GREP = @GREP@
@@ -198,7 +194,6 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
-LAPACK_LIBS = @LAPACK_LIBS@
 LDFLAGS = @LDFLAGS@
 LEX = @LEX@
 LEXLIB = @LEXLIB@
@@ -338,7 +333,7 @@ tmp = @tmp@
 dist_m4data_DATA = $(PLUGINDISTR)
 dist_noinst_DATA = acx_pthread.m4 ax_cflags_strict_prototypes.m4 \
 	ax_prefix_config_h.m4 configure.m4 lf_x11.m4 \
-	acx_lapack.m4 acx_blas.m4 \
+	cf_atlas.m4 \
 	lib_socket_nsl.m4 $(PLUGINNODISTR)
 
 all: all-am

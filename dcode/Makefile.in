@@ -39,11 +39,10 @@ DIST_COMMON = $(dist_dmconf_DATA) $(dist_dmstart_DATA) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in $(srcdir)/plugin.d \
 	$(srcdir)/startup_dgen.d.in $(srcdir)/startup_dnode.d.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/acx_blas.m4 \
-	$(top_srcdir)/m4/acx_lapack.m4 $(top_srcdir)/m4/acx_pthread.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
-	$(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/configure.m4 \
 	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -60,15 +59,13 @@ am__vpath_adj = case $$p in \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(dmconfdir)" "$(DESTDIR)$(dmstartdir)" \
-	"$(DESTDIR)$(dmconfdir)" "$(DESTDIR)$(dmstartdir)" \
-	"$(DESTDIR)$(pkglibdir)"
+	"$(DESTDIR)$(dmconfdir)" "$(DESTDIR)$(dmstartdir)"
 dist_dmconfDATA_INSTALL = $(INSTALL_DATA)
 dist_dmstartDATA_INSTALL = $(INSTALL_DATA)
 nodist_dmconfDATA_INSTALL = $(INSTALL_DATA)
 nodist_dmstartDATA_INSTALL = $(INSTALL_DATA)
-nodist_pkglibDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(dist_dmconf_DATA) $(dist_dmstart_DATA) $(nodist_dmconf_DATA) \
-	$(nodist_dmstart_DATA) $(nodist_pkglib_DATA)
+	$(nodist_dmstart_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 pkgdatadir = @pkgdatadir@
 pkglibdir = @pkglibdir@
@@ -79,11 +76,12 @@ AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
 AR = @AR@
 AS = @AS@
+ATLAS_FLAGS = @ATLAS_FLAGS@
+ATLAS_LIBS = @ATLAS_LIBS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BLAS_LIBS = @BLAS_LIBS@
 BYTECORRECT = @BYTECORRECT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -109,14 +107,14 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EMACS = @EMACS@
 EMACSLOADPATH = @EMACSLOADPATH@
+ENABLE_ATLAS_FALSE = @ENABLE_ATLAS_FALSE@
+ENABLE_ATLAS_TRUE = @ENABLE_ATLAS_TRUE@
 ENABLE_ATPS = @ENABLE_ATPS@
 ENABLE_ATPS_FALSE = @ENABLE_ATPS_FALSE@
 ENABLE_ATPS_TRUE = @ENABLE_ATPS_TRUE@
 ENABLE_BASH = @ENABLE_BASH@
 ENABLE_BASH_FALSE = @ENABLE_BASH_FALSE@
 ENABLE_BASH_TRUE = @ENABLE_BASH_TRUE@
-ENABLE_CLAPACK_FALSE = @ENABLE_CLAPACK_FALSE@
-ENABLE_CLAPACK_TRUE = @ENABLE_CLAPACK_TRUE@
 ENABLE_CPPPLUGIN_FALSE = @ENABLE_CPPPLUGIN_FALSE@
 ENABLE_CPPPLUGIN_TRUE = @ENABLE_CPPPLUGIN_TRUE@
 ENABLE_DEBUG_DMNUM = @ENABLE_DEBUG_DMNUM@
@@ -138,9 +136,6 @@ ENABLE_ENV_TRUE = @ENABLE_ENV_TRUE@
 ENABLE_GS = @ENABLE_GS@
 ENABLE_GS_FALSE = @ENABLE_GS_FALSE@
 ENABLE_GS_TRUE = @ENABLE_GS_TRUE@
-ENABLE_LAPACK = @ENABLE_LAPACK@
-ENABLE_LAPACK_FALSE = @ENABLE_LAPACK_FALSE@
-ENABLE_LAPACK_TRUE = @ENABLE_LAPACK_TRUE@
 ENABLE_LATEX = @ENABLE_LATEX@
 ENABLE_LATEX_FALSE = @ENABLE_LATEX_FALSE@
 ENABLE_LATEX_TRUE = @ENABLE_LATEX_TRUE@
@@ -190,7 +185,6 @@ ENABLE_XTERM_TRUE = @ENABLE_XTERM_TRUE@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
-FLIBS = @FLIBS@
 GCC_CFLAGS = @GCC_CFLAGS@
 GCC_CXXFLAGS = @GCC_CXXFLAGS@
 GREP = @GREP@
@@ -200,7 +194,6 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
-LAPACK_LIBS = @LAPACK_LIBS@
 LDFLAGS = @LDFLAGS@
 LEX = @LEX@
 LEXLIB = @LEXLIB@
@@ -337,11 +330,10 @@ target_vendor = @target_vendor@
 tmp = @tmp@
 dist_dmstart_DATA = color.d master.d sched.d plugin.d
 nodist_dmstart_DATA = theeye.d startup_dnode.d \
-	startup_dvt.d startup_dgen.d dvt_macros.d 
+	startup_dvt.d startup_dgen.d dvt_macros.d matrix.d
 
 dist_dmconf_DATA = dvt.d
 nodist_dmconf_DATA = dnode.d
-nodist_pkglib_DATA = matrix.d
 EXTRA_DIST = theeye.d.in dnode.d.in dvt_macros.d.in startup_dvt.d.in matrix.d.in
 CLEANFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
 XPS_START = /^[[:space:]]*[@]ENABLE_XPS_START[@][[:space:]]*$$/
@@ -371,11 +363,11 @@ EMACSCLIENT_END = /^[[:space:]]*[@]ENABLE_EMACSCLIENT_END[@][[:space:]]*$$/
 @ENABLE_EMACSCLIENT_TRUE@@ENABLE_EMACS_TRUE@					-e '$(EMACSCLIENT_END) d'
 
 @ENABLE_EMACS_FALSE@EMACSCLIENT_EDIT = -e '$(EMACSCLIENT_START),$(EMACSCLIENT_END) d'
-LAPACK_START = /^[[:space:]]*[@]ENABLE_LAPACK_START[@][[:space:]]*$$/
-LAPACK_END = /^[[:space:]]*[@]ENABLE_LAPACK_END[@][[:space:]]*$$/
-@ENABLE_LAPACK_FALSE@LAPACK_EDIT = -e '$(LAPACK_START),$(LAPACK_END) d'
-@ENABLE_LAPACK_TRUE@LAPACK_EDIT = -e '$(LAPACK_START) d' \
-@ENABLE_LAPACK_TRUE@						  -e '$(LAPACK_END) d'
+ATLAS_START = /^[[:space:]]*[@]ENABLE_ATLAS_START[@][[:space:]]*$$/
+ATLAS_END = /^[[:space:]]*[@]ENABLE_ATLAS_END[@][[:space:]]*$$/
+@ENABLE_ATLAS_FALSE@ATLAS_EDIT = -e '$(ATLAS_START),$(ATLAS_END) d'
+@ENABLE_ATLAS_TRUE@ATLAS_EDIT = -e '$(ATLAS_START) d' \
+@ENABLE_ATLAS_TRUE@						  -e '$(ATLAS_END) d'
 
 edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
@@ -384,7 +376,7 @@ edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			$(XPS_DELETE) \
 			$(PERL_DELETE) \
 			$(EMACSCLIENT_EDIT) \
-			$(LAPACK_EDIT)
+			$(ATLAS_EDIT)
 
 all: all-am
 
@@ -500,23 +492,6 @@ uninstall-nodist_dmstartDATA:
 	  echo " rm -f '$(DESTDIR)$(dmstartdir)/$$f'"; \
 	  rm -f "$(DESTDIR)$(dmstartdir)/$$f"; \
 	done
-install-nodist_pkglibDATA: $(nodist_pkglib_DATA)
-	@$(NORMAL_INSTALL)
-	test -z "$(pkglibdir)" || $(mkdir_p) "$(DESTDIR)$(pkglibdir)"
-	@list='$(nodist_pkglib_DATA)'; for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  f=$(am__strip_dir) \
-	  echo " $(nodist_pkglibDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(pkglibdir)/$$f'"; \
-	  $(nodist_pkglibDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(pkglibdir)/$$f"; \
-	done
-
-uninstall-nodist_pkglibDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(nodist_pkglib_DATA)'; for p in $$list; do \
-	  f=$(am__strip_dir) \
-	  echo " rm -f '$(DESTDIR)$(pkglibdir)/$$f'"; \
-	  rm -f "$(DESTDIR)$(pkglibdir)/$$f"; \
-	done
 tags: TAGS
 TAGS:
 
@@ -555,7 +530,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(dmconfdir)" "$(DESTDIR)$(dmstartdir)" "$(DESTDIR)$(dmconfdir)" "$(DESTDIR)$(dmstartdir)" "$(DESTDIR)$(pkglibdir)"; do \
+	for dir in "$(DESTDIR)$(dmconfdir)" "$(DESTDIR)$(dmstartdir)" "$(DESTDIR)$(dmconfdir)" "$(DESTDIR)$(dmstartdir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
 install: install-am
@@ -604,7 +579,7 @@ info-am:
 install-data-am: install-dist_dmconfDATA install-dist_dmstartDATA \
 	install-nodist_dmconfDATA install-nodist_dmstartDATA
 
-install-exec-am: install-nodist_pkglibDATA
+install-exec-am:
 
 install-info: install-info-am
 
@@ -630,7 +605,7 @@ ps-am:
 
 uninstall-am: uninstall-dist_dmconfDATA uninstall-dist_dmstartDATA \
 	uninstall-info-am uninstall-nodist_dmconfDATA \
-	uninstall-nodist_dmstartDATA uninstall-nodist_pkglibDATA
+	uninstall-nodist_dmstartDATA
 
 .PHONY: all all-am check check-am clean clean-generic clean-libtool \
 	distclean distclean-generic distclean-libtool distdir dvi \
@@ -639,13 +614,12 @@ uninstall-am: uninstall-dist_dmconfDATA uninstall-dist_dmstartDATA \
 	install-dist_dmstartDATA install-exec install-exec-am \
 	install-info install-info-am install-man \
 	install-nodist_dmconfDATA install-nodist_dmstartDATA \
-	install-nodist_pkglibDATA install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
-	uninstall-dist_dmconfDATA uninstall-dist_dmstartDATA \
-	uninstall-info-am uninstall-nodist_dmconfDATA \
-	uninstall-nodist_dmstartDATA uninstall-nodist_pkglibDATA
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	uninstall uninstall-am uninstall-dist_dmconfDATA \
+	uninstall-dist_dmstartDATA uninstall-info-am \
+	uninstall-nodist_dmconfDATA uninstall-nodist_dmstartDATA
 
 
 theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in

@@ -50,11 +50,10 @@ DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(dist_pkgdata_SCRIPTS) \
 	$(srcdir)/dm8.c $(srcdir)/dmglobals.c $(srcdir)/dmnum.c \
 	$(srcdir)/dsp1.c $(srcdir)/paths.h.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/acx_blas.m4 \
-	$(top_srcdir)/m4/acx_lapack.m4 $(top_srcdir)/m4/acx_pthread.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
-	$(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/configure.m4 \
 	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -83,11 +82,8 @@ am_libdmbootstrap_la_OBJECTS = libdmbootstrap_la-dmglobals.lo \
 	libdmbootstrap_la-dmnum.lo libdmbootstrap_la-dsp1.lo \
 	libdmbootstrap_la-dsp2.lo libdmbootstrap_la-plugin.lo
 libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
-@ENABLE_CLAPACK_TRUE@am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) \
-@ENABLE_CLAPACK_TRUE@	$(am__DEPENDENCIES_1) \
-@ENABLE_CLAPACK_TRUE@	$(am__DEPENDENCIES_1)
 libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_2)
+	$(am__DEPENDENCIES_1)
 am__libdmglobals_la_SOURCES_DIST = dmglobals.c dm1.c dm2.c dm3.c dm4.c \
 	dm5.c dm6.c dm7.c dm8.c dm9.c dmnum.c dsp1.c dsp2.c \
 	error-local.h matrix.c matrix.h plugin.c pluginlib.h threads.c \
@@ -167,11 +163,12 @@ AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
 AR = @AR@
 AS = @AS@
+ATLAS_FLAGS = @ATLAS_FLAGS@
+ATLAS_LIBS = @ATLAS_LIBS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BLAS_LIBS = @BLAS_LIBS@
 BYTECORRECT = @BYTECORRECT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -197,14 +194,14 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EMACS = @EMACS@
 EMACSLOADPATH = @EMACSLOADPATH@
+ENABLE_ATLAS_FALSE = @ENABLE_ATLAS_FALSE@
+ENABLE_ATLAS_TRUE = @ENABLE_ATLAS_TRUE@
 ENABLE_ATPS = @ENABLE_ATPS@
 ENABLE_ATPS_FALSE = @ENABLE_ATPS_FALSE@
 ENABLE_ATPS_TRUE = @ENABLE_ATPS_TRUE@
 ENABLE_BASH = @ENABLE_BASH@
 ENABLE_BASH_FALSE = @ENABLE_BASH_FALSE@
 ENABLE_BASH_TRUE = @ENABLE_BASH_TRUE@
-ENABLE_CLAPACK_FALSE = @ENABLE_CLAPACK_FALSE@
-ENABLE_CLAPACK_TRUE = @ENABLE_CLAPACK_TRUE@
 ENABLE_CPPPLUGIN_FALSE = @ENABLE_CPPPLUGIN_FALSE@
 ENABLE_CPPPLUGIN_TRUE = @ENABLE_CPPPLUGIN_TRUE@
 ENABLE_DEBUG_DMNUM = @ENABLE_DEBUG_DMNUM@
@@ -226,9 +223,6 @@ ENABLE_ENV_TRUE = @ENABLE_ENV_TRUE@
 ENABLE_GS = @ENABLE_GS@
 ENABLE_GS_FALSE = @ENABLE_GS_FALSE@
 ENABLE_GS_TRUE = @ENABLE_GS_TRUE@
-ENABLE_LAPACK = @ENABLE_LAPACK@
-ENABLE_LAPACK_FALSE = @ENABLE_LAPACK_FALSE@
-ENABLE_LAPACK_TRUE = @ENABLE_LAPACK_TRUE@
 ENABLE_LATEX = @ENABLE_LATEX@
 ENABLE_LATEX_FALSE = @ENABLE_LATEX_FALSE@
 ENABLE_LATEX_TRUE = @ENABLE_LATEX_TRUE@
@@ -278,7 +272,6 @@ ENABLE_XTERM_TRUE = @ENABLE_XTERM_TRUE@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
-FLIBS = @FLIBS@
 GCC_CFLAGS = @GCC_CFLAGS@
 GCC_CXXFLAGS = @GCC_CXXFLAGS@
 GREP = @GREP@
@@ -288,7 +281,6 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
-LAPACK_LIBS = @LAPACK_LIBS@
 LDFLAGS = @LDFLAGS@
 LEX = @LEX@
 LEXLIB = @LEXLIB@
@@ -429,9 +421,7 @@ SUBDIRS = codegen
 @ENABLE_SETUID_TRUE@edit = sed \
 @ENABLE_SETUID_TRUE@	-e 's,[@]bindir[@],$(bindir),g'
 
-@ENABLE_CLAPACK_TRUE@CLAPACK_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
-@ENABLE_CLAPACK_TRUE@CLAPACK_FLAGS = $(LAPACK_FLAGS) $(BLAS_FLAGS)
-@ENABLE_CLAPACK_TRUE@CLAPACK_ACTIVATE = -DCLAPACK_LIB
+@ENABLE_ATLAS_TRUE@ATLAS_ACTIVATE = -DATLAS_LIB
 @ENABLE_THREADS_TRUE@THREAD_HDR = threads.h
 @ENABLE_THREADS_TRUE@THREADSRC = threads.c
 @ENABLE_REGEX_TRUE@REGEX_SRC = regex.c
@@ -451,25 +441,25 @@ pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
 nodist_pkginclude_HEADERS = dm-config.h paths.h
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h
 dvt_LDADD = libdmglobals.la
-dvt_LDFLAGS = $(AM_LDFLAGS) $(CLAPACK_LIBS)
-dvt_CPPFLAGS = $(AM_CPPFLAGS) $(CLAPACK_FLAGS)
+dvt_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS)
+dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS)
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dnode_SOURCES = dnode.c dnode_0.h dnode_1.h dmx.h
 dnode_LDADD = libdmglobals.la 
-dnode_LDFLAGS = $(AM_LDFLAGS) $(CLAPACK_LIBS)
+dnode_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS)
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
-dnode_CPPFLAGS = $(AM_CPPFLAGS) $(CLAPACK_ACTIVATE) $(CLAPACK_FLAGS)
+dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 testwordorder_SOURCES = test-word-order.c
 BUILT_SOURCES = paths.h dnode-nice.c
 CLEANFILES = paths.h dnode-nice.c
 lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la
-libdmglobals_la_LIBADD = $(PLUGIN_LD) $(CLAPACK_LIBS)
+libdmglobals_la_LIBADD = $(PLUGIN_LD) $(ATLAS_LIBS)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	dmnum.c dsp1.c dsp2.c error-local.h matrix.c matrix.h \
 	plugin.c pluginlib.h $(THREADSRC) $(REGEX_SRC)
 
-libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(CLAPACK_ACTIVATE) $(CLAPACK_FLAGS)
+libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)
 editpaths = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \

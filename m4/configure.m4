@@ -410,16 +410,3 @@ AC_DEFUN([CF_AC_SUBST_EVAL], [dnl
   ifelse([$2], , [eval $1="${$1}"], [eval $1="$2"])
 ])
 
-AC_DEFUN([CF_CHECK_CLAPACK], [dnl
-  CF_AM_ENABLE([clapack], [compile with clapack features], [yes])
-  CF_IF_ENABLED([clapack], [
-    AC_REQUIRE([CF_CLAPACK])
-  
-    AC_MSG_CHECKING([for clapack requirement])
-	if test x"$cf_clapack_ok" = xyes ; then
-      AC_MSG_RESULT([yes, requirements fulfilled])
-	else
-	  AC_MSG_ERROR([no clapack properly installed])
-    fi
-  ])
-])

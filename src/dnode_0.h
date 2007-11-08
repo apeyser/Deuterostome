@@ -226,9 +226,9 @@ B *sysop[] =
 			"regex",          (B *)op_regex,
 			"regexi",         (B *)op_regexi,
 #endif //DM_ENABLE_REGEX			
-#if HAVE_CLAPACK_H && CLAPACK_LIB
+#if BUILD_ATLAS
 			"matmul_blas",    (B *)op_matmul_blas,
-#endif //HAVE_CLAPACK_H && CLAPACK_LIB
+#endif //BUILD_ATLAS
       "",               (B *)0L, 
  };     
    

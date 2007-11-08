@@ -1,10 +1,8 @@
 dist_dmstart_DATA = color.d master.d sched.d plugin.d
 nodist_dmstart_DATA =  theeye.d startup_dnode.d \
-	startup_dvt.d startup_dgen.d dvt_macros.d 
+	startup_dvt.d startup_dgen.d dvt_macros.d matrix.d
 dist_dmconf_DATA = dvt.d
 nodist_dmconf_DATA = dnode.d
-
-nodist_pkglib_DATA = matrix.d
 
 EXTRA_DIST = theeye.d.in dnode.d.in dvt_macros.d.in startup_dvt.d.in matrix.d.in
 CLEANFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
@@ -59,15 +57,15 @@ else !ENABLE_EMACS
 EMACSCLIENT_EDIT =  -e '$(EMACSCLIENT_START),$(EMACSCLIENT_END) d'
 endif !ENABLE_EMACS
 
-LAPACK_START = /^[[:space:]]*[@]ENABLE_LAPACK_START[@][[:space:]]*$$/
-LAPACK_END   = /^[[:space:]]*[@]ENABLE_LAPACK_END[@][[:space:]]*$$/
+ATLAS_START = /^[[:space:]]*[@]ENABLE_ATLAS_START[@][[:space:]]*$$/
+ATLAS_END   = /^[[:space:]]*[@]ENABLE_ATLAS_END[@][[:space:]]*$$/
 
-if ENABLE_LAPACK
-LAPACK_EDIT = -e '$(LAPACK_START) d' \
-						  -e '$(LAPACK_END) d'
-else !ENABLE_LAPACK
-LAPACK_EDIT = -e '$(LAPACK_START),$(LAPACK_END) d'
-endif !ENABLE_LAPACK
+if ENABLE_ATLAS
+ATLAS_EDIT = -e '$(ATLAS_START) d' \
+						  -e '$(ATLAS_END) d'
+else !ENABLE_ATLAS
+ATLAS_EDIT = -e '$(ATLAS_START),$(ATLAS_END) d'
+endif !ENABLE_ATLAS
 
 edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
@@ -76,7 +74,7 @@ edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			$(XPS_DELETE) \
 			$(PERL_DELETE) \
 			$(EMACSCLIENT_EDIT) \
-			$(LAPACK_EDIT)
+			$(ATLAS_EDIT)
 
 theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in
 	rm -f $@ $@.tmp
