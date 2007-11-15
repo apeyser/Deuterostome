@@ -228,6 +228,9 @@ B *sysop[] =
 #endif //DM_ENABLE_REGEX			
 #if BUILD_ATLAS
 			"matmul_blas",    (B *)op_matmul_blas,
+      "decompLU_lp",    (B *)op_decompLU_lp,
+      "backsubLU_lp",   (B *)op_backsubLU_lp,
+      "invertLU_lp",    (B *)op_invertLU_lp,
 #endif //BUILD_ATLAS
       "",               (B *)0L, 
  };     
@@ -266,6 +269,8 @@ L syserrc[] =
     MATRIX_UNDER_CUT,
     MATRIX_NONMATCH_CUT,
     MATRIX_NONMATCH_SHAPE,
+    MATRIX_PARAM_ERROR,
+    MATRIX_SINGULAR,
     0L,
 };
 
@@ -350,6 +355,8 @@ B* syserrm[] =
     "Matrix Error: number of cut dimensions too small",
     "Matrix Error: array too small for cut",
     "Matrix Error: matrix operand dimensions don't match",
+    "Matrix Error: parameters to clapack illegal",
+    "Matrix Error: lu matrix is singular",
 };
 
 // original directory for vmresize

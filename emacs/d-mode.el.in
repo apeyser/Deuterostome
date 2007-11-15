@@ -556,7 +556,10 @@ and check/try to convert to unix line-ends."
     "matvecmul"
 	"regex"
 	"regexi"
-    "matmul_blas"    
+    "matmul_blas"
+    "decompLU_lp"
+    "backsubLU_lp"
+    "invertLU_lp"
     )
   "Operater names for d-mode.")
 
