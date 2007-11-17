@@ -19,10 +19,20 @@
   pop
 } bind userdef
 
+| dim_s ... dim_f n | <l dim_f*..*dim_s .. dim_f>
+/cutsn {
+  dup /l array 1
+  3 -1 roll 1 sub -1 0 {/i name | s .. f   <l> mul  
+    3 -1 roll mul               | s .. f-1 <l> mul*f
+    dup 2 index i put           | s .. f-1 <l> mul*f
+  } for
+  pop
+} bind userdef
+
 |===================== cut
 |
 | Get a submatrix (row, plane...):
-| matrix cuts i | submatrix cuts
+| matrix cuts i | submatrix subcuts(cuts)
 
 /cut {
   /i name                             | matrix cuts_0n
@@ -30,6 +40,36 @@
   dup 0 get /sz name                  | matrix cuts_1n
   exch sz i mul sz getinterval        | cuts_1n submatrix
   exch | }                            | submatrix cuts_1n
+} bind userdef
+
+| matrix cuts i len | submatrix cuts
+/recut {
+  /len name /i name exch               | cuts matrix
+  1 index 1 get dup i mul exch len mul | cuts matrix start length
+  getinterval                          | cuts submatrix
+  exch dup 1 get len mul 1 index 0 put | submatrix subcuts
+} bind userdef
+
+| matrix cuts <d > column | <d > subcuts(cuts)
+/columnate {/col name
+  exch dup 1 get /sz name dup 2 get /csz name 3 1 roll | cuts matrix <d>
+  0 2 index length sz div 1 sub | cuts matrix <d> 0 rows-1
+  0 1 3 -1 roll {/i name        | cuts matrix <d> 0
+    2 index i sz mul col add get 1 index i put
+  } for
+  exch pop 0 i 1 add getinterval
+} bind userdef
+
+| matrix cuts row_s row_l col_s col_l | submatrix(matrix) subcuts(cuts)
+/compact {/col_l name /col_s name /row_l name /row_s name
+  dup 2 get /sz name
+  exch
+  0 row_s 1 row_l 1 sub {/row name
+    2 copy row cut pop col_s col_l sz mul getinterval fax
+  } for
+  0 exch getinterval exch
+  sz col_l mul 1 index 1 put
+  sz col_l mul row_l mul 1 index 0 put
 } bind userdef
 
 @ENABLE_ATLAS_START@
@@ -75,6 +115,11 @@
 
 /matmul_sum {
   false 4 1 roll false exch matmul_blas
+} bind userdef
+
+| y A A_cuts x | y=Ax
+/vecmatmul_simple {
+  0 4 -1 roll false exch 1 vecmatmul_blas
 } bind userdef
 
 @ENABLE_ATLAS_END@

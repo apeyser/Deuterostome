@@ -223,6 +223,75 @@ L op_invertLU_lp(void) {
   return OK;
 }
 
+// array | ||array||_2
+L op_norm2(void) {
+  D r;
+  if (FLOORopds > o_1) return OPDS_UNF;
+  r = cblas_dnrm2(ARRAY_SIZE(o_1), (D*) VALUE_PTR(o_1), 1);
+  TAG(o_1) = NUM | DOUBLETYPE; ATTR(o_1) = 0;
+  *(D*) NUM_VAL(o_1) = r;
+  return OK;
+}
+
+// y beta A <cuts> transpose x alpha | y=alpha*A*x+beta*y
+L op_vecmatmul_blas(void) {
+}
+
+// x A <cuts> transpose upper | x=A^(-1)x
+L op_triangular_solve(void) {
+}
+
+// <d h1 h2> | c s (h1=rot, h2=0)
+L op_givens_blas(void) {
+  D c, s;
+
+  if (FLOORopds > o_1) return OPDS_UNF;
+  if (CEILopds < o_2) return OPDS_OVF;
+
+  if (CLASS(o_1) != ARRAY) return OPD_CLA;
+  if (TYPE(o_1) != DOUBLETYPE) return OPD_TYP;
+  
+  cblas_drotg((D*) VALUE_PTR(o_1), ((D*) VALUE_PTR(o_1))+1, &c, &s);
+  ((D*) VALUE_PTR(o_1))[1] = 0;
+
+  TAG(o_1) = NUM | DOUBLETYPE; ATTR(o_1) = 0;
+  *((D*) NUM_VAL(o_1)) = c;
+  TAG(o1) = NUM | DOUBLETYPE; ATTR(o1) = 0;
+  *((D*) NUM_VAL(o1)) = s;
+  FREEopds = o2;
+  return OK;
+}
+
+// c s <d x...> <d y...> | <xr...> <yr...>
+L op_rotate_blas(void) {
+  D c, s;
+
+  if (FLOORopds > o_4) return OPDS_UNF;
+
+  if (CLASS(o_1) != ARRAY
+      || CLASS(o_2) != ARRAY
+      || CLASS(o_3) != NUM
+      || CLASS(o_4) != NUM) return OPD_CLA;
+
+  if (TYPE(o_1) != DOUBLETYPE
+      || TYPE(o_2) != DOUBLETYPE
+      || TYPE(o_3) != DOUBLETYPE
+      || TYPE(o_4) ! DOUBLETYPE) return OPD_TYP;
+
+  if (ARRAY_SIZE(o_1) != ARRAY_SIZE(o_2)) return RNG_CHK;
+  if (! DVALUE(o_3, &s) || ! DVALUE(o_4, &c)) return UNDF_VAL;
+
+  cblas_drot(ARRAY_SIZE(o_1), 
+             (D*) VALUE_PTR(o_2), 1, 
+             (D*) VALUE_PTR(o_1), 1,
+             c, s);
+
+  moveframes(o_2, o_4, 2);
+  FREEopds = o_2;
+  return OK;
+}
+
+
 
 
 #endif //BUILD_ATLAS
