@@ -16,7 +16,7 @@
     1 index i get mul                  | <l> mul*<l>_i
     dup 2 index i put                  | <l> mul*<l>_i
   } for
-  pop
+  pop dup dup length 1 sub get 1 ne {(Illegal cut\n) toconsole halt} if
 } bind userdef
 
 | dim_s ... dim_f n | <l dim_f*..*dim_s .. dim_f>
@@ -26,7 +26,7 @@
     3 -1 roll mul               | s .. f-1 <l> mul*f
     dup 2 index i put           | s .. f-1 <l> mul*f
   } for
-  pop
+  pop dup dup length 1 sub get 1 ne {(Illegal cut\n) toconsole halt} if
 } bind userdef
 
 |===================== cut

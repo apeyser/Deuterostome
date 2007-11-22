@@ -266,7 +266,7 @@ L op_norm2(void) {
 }
 
 // y beta A <cuts> transpose x alpha | y=alpha*A*x+beta*y
-L op_vecmatmul_blas(void) {
+L op_matvecmul_blas(void) {
   D alpha, beta;
   L Nrowa, Ncola, lda;
   enum CBLAS_TRANSPOSE trans;
