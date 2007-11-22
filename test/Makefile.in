@@ -314,7 +314,7 @@ target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
 tmp = @tmp@
-dist_noinst_DATA = benchmark.d arr.d.in
+dist_noinst_DATA = benchmark.d arr.d.in matrix-test.d
 noinst_DATA = arr.d
 all: all-am
 
