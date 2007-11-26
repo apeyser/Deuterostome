@@ -34,7 +34,9 @@ extern "C" {
 #define __attribute__(attr)
 #endif // ! defined __GNUC__ && ! defined __attribute__
 
+#if ! DM_NO_CONFIGS_AT_ALL
 #include "dm-config.h"
+#endif
 #ifdef DM_HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -80,10 +82,18 @@ extern "C" {
 
 typedef int8_t B;
 typedef int16_t W;
-typedef int32_t L;
+typedef int32_t M;
 typedef uint8_t UB;
 typedef uint16_t UW;
-typedef uint32_t UL;
+typedef uint32_t UM;
+
+#if DM_IS_32_BIT
+typedef UM UL;
+typedef M L;
+#else
+typedef uint64_t UL;
+typedef int64_t L;
+#endif // DM_IS_32_BIT
 
 typedef W BOOLEAN;
 typedef L INT;
@@ -102,11 +112,19 @@ typedef double D;
 
 #define BINF    ((B) 0x80)
 #define WINF    ((W) 0x8000)
-#define LINF    ((L) 0x80000000)
+#define MINF    ((M) 0x80000000)
 
-#define BMAX 0x7F
-#define WMAX 0x7FFF
-#define LMAX 0x7FFFFFFF
+#define BMAX (0x7F)
+#define WMAX (0x7FFF)
+#define MMAX (0x7FFFFFFF)
+
+#if DM_IS_32_BIT
+#define LMAX MMAX
+#define LINF MINF
+#else
+#define LMAX (0x7FFFFFFFFFFFFFFF)
+#define LINF ((L) 0x8000000000000000)
+#endif //DM_IS_32_BIT
 
 #define ISUNDEF(n) (isinf(n) || isnan(n))
 
@@ -167,7 +185,8 @@ NOTE: all objects that can populate the D machine's workspace must
 #define WORDTYPE                   ((UB) 0x01)
 #define LONGTYPE                   ((UB) 0x02)
 #define SINGLETYPE                 ((UB) 0x03)
-#define DOUBLETYPE                 ((UB) 0x04)      
+#define DOUBLETYPE                 ((UB) 0x04)
+#define DWORDTYPE                  ((UB) 0x05)      
 #define SOCKETTYPE                 ((UB) 0x01)      /* null types */
 #define SIMPLETYPE                 ((UB) 0x00)      /* handle types */
 #define COMPLEXTYPE                ((UB) 0x00)      
@@ -188,7 +207,14 @@ NOTE: all objects that can populate the D machine's workspace must
 #define ENDIANMASK                 ((UB) 0x01)
 /* Format specifier */
 #define FORMAT32                   ((UB) 0x10)
+#define FORMAT64                   ((UB) 0x20)
 #define FORMATMASK                 ((UB) 0xF0)
+
+#if DM_IS_32_BIT
+#define FORMAT_BITS_DEFAULT FORMAT32
+#else
+#define FORMAT_BITS_DEFAULT FORMAT64
+#endif //DM_IS_32_BIT 
 
 // make BSD and Linux look alike
 
@@ -217,8 +243,8 @@ NOTE: all objects that can populate the D machine's workspace must
 #endif //! NO_ENDIAN_HDR
 
 #define GETNATIVEFORMAT(frame) \
-  ((BOOLEAN) ((FORMAT(frame) & FORMATMASK) == FORMAT32))
-#define SETNATIVEFORMAT(frame) FORMAT(frame) |= FORMAT32
+  ((BOOLEAN) ((FORMAT(frame) & FORMATMASK) == FORMAT_BITS_DEFAULT))
+#define SETNATIVEFORMAT(frame) FORMAT(frame) |= FORMAT_BITS_DEFAULT
 
 #define GETNATIVE(frame) (GETNATIVEFORMAT(frame) && GETNATIVEENDIAN(frame))
 #define SETNATIVE(frame) \
@@ -235,72 +261,88 @@ NOTE: all objects that can populate the D machine's workspace must
 #define XMARK                      ((UB)0x70)
 #define BIND                       ((UB)0x80)   /* box op housekeeping */
 
-#define NUM_VAL(frame)             ( ((B *)(((B*)(frame))+4)))
-#define LONG_VAL(frame)            (*((L *)((frame)+4)))
-#define BOOL_VAL(frame)            (*((BOOLEAN *)((frame)+2)))
-#define NAME_KEY(frame)            (*((W *)((frame)+2)))
+#if DM_IS_32_BIT
+#define PACK_FRAME (4)
+#else
+#define PACK_FRAME (8)
+#endif //DM_IS_32_BIT
+#define PF_PTR(frame, offset) (((B*)(frame))+(offset)*PACK_FRAME)
 
-#define OP_CODE(frame)             (*((L *)(((B*)(frame))+4)))
-#define OP_NAME(frame)             (*((L *)(((B*)(frame))+8)))
-#define VALUE_BASE(frame)          (*((L *)(((B*)(frame))+4)))
-#define ARRAY_SIZE(frame)          (*((L *)(((B*)(frame))+8)))
-#define LIST_CEIL(frame)           (*((L *)(((B*)(frame))+8)))
-#define DICT_NB(frame)             (*((L *)(((B*)(frame))+8)))
-#define DICT_CURR(frame)           (*((L *)(((B*)(frame))+8)))
-#define BOX_NB(frame)              (*((L *)(((B*)(frame))+8)))
-#define VALUE_PTR(frame)           (*((B**)(((B*)(frame))+4)))
-#define LIST_CEIL_PTR(frame)       (*((B**)(((B*)(frame))+8)))
+#define BOOL_VAL(frame)      (*((BOOLEAN *)((frame)+2)))
+#define NAME_KEY(frame)      (*((W *)((frame)+2)))
+
+#define NUM_VAL(frame)       ( ((B *)PF_PTR(frame,1)))
+#define LONG_VAL(frame)      (*((L *)PF_PTR(frame,1)))
+
+#define VALUE_BASE(frame)    (*((L *)PF_PTR(frame,1)))
+#define VALUE_PTR(frame)     (*((B**)PF_PTR(frame,1)))
+
+#define OP_CODE(frame)       (*((L *)PF_PTR(frame,1)))
+#define OP_NAME(frame)       (*((L *)PF_PTR(frame,2)))
+#define LIST_CEIL(frame)     (*((L *)PF_PTR(frame,2)))
+#define ARRAY_SIZE(frame)    (*((L *)PF_PTR(frame,2)))
+#define DICT_NB(frame)       (*((L *)PF_PTR(frame,2)))
+#define DICT_CURR(frame)     (*((L *)PF_PTR(frame,2)))
+#define BOX_NB(frame)        (*((L *)PF_PTR(frame,2)))
+#define LIST_CEIL_PTR(frame) (*((B**)PF_PTR(frame,2)))
 
 /* NB: Attention to moveframe & moveframes in dm2.c whenever
    framebytes is changed */
-#define FRAMEBYTES                 16L
+#define FRAMEBYTES           DALIGN(3*PACK_FRAME)
 
 // NAMEBYTES is defined in ../config.h
 // To change, update ../configure.ac
 //#define NAMEBYTES                  18L //not including a terminating 0
+#define NAMEBYTES ((((FRAMEBYTES/sizeof(UW)-1)/3)*8)			\
+		   + (((FRAMEBYTES/sizeof(UW)-1)%3) ? 2 : 0)		\
+		   + (((FRAMEBYTES/sizeof(UW)-1)%3) == 2 ? 3 : 0))
 
 /*-------------------------------------------- dictionary */
  
-#define ASSOC_NAME(entry)          ( ((B *)(entry)))
-#define ASSOC_NEXT(entry)          (*((L *)(((B*)(entry))+FRAMEBYTES)))
-#define ASSOC_FRAME(entry)         (((B*)(entry))+ENTRYBYTES-FRAMEBYTES)
+#define ASSOC_NAME(entry)    ( ((B *)(entry)))
+#define ASSOC_NEXT(entry)    (*((L *)(((B*)(entry))+FRAMEBYTES)))
+#define ASSOC_FRAME(entry)   (((B*)(entry))+ENTRYBYTES-FRAMEBYTES)
 
 // keep frame on 64 bit boundaries, so that doubles will be so.
+#if DM_IS_32_BIT
 #define ENTRYBYTES  (8+2*FRAMEBYTES)
+#else
+#define ENTRYBYTES  DALIGN(FRAMEBYTES+PACK_FRAME+FRAMEBYTES)
+#endif
 
-#define DICT_ENTRIES(dict)         (*((L *)(dict)))
-#define DICT_FREE(dict)            (*((L *)(((B*)(dict))+4)))
-#define DICT_CEIL(dict)            (*((L *)(((B*)(dict))+8)))
-#define DICT_CONHASH(dict)         (*((W *)(((B*)(dict))+12)))
-#define DICT_TABHASH(dict)         (*((L *)(((B*)(dict))+8)))
+#define DICT_ENTRIES(dict)    (*((L *)(dict)))
+#define DICT_FREE(dict)       (*((L *)PF_PTR(dict,1)))
+#define DICT_CEIL(dict)       (*((L *)PF_PTR(dict,2)))
+#define DICT_CONHASH(dict)    (*((W *)PF_PTR(dict,3)))
+#define DICT_TABHASH(dict)    (*((L *)PF_PTR(dict,2)))
 
 
-#define DICTBYTES                  16L
+#define DICTBYTES             DALIGN(4*PACK_FRAME)
 
-#define LIB_DATA(frame)            ((B*)(VALUE_BASE(frame) + DICT_NB(frame)))
+#define LIB_DATA(frame)       ((B*)(VALUE_BASE(frame) + DICT_NB(frame)))
 
-#define LIB_TYPE(frame)            (*(L*) (LIB_DATA(frame)))
-#define LIB_HANDLE(frame)          (*(L*) (LIB_DATA(frame) + 4))
-#define LIB_ERRC(frame)            (*(L**)(LIB_DATA(frame) + 8))
-#define LIB_ERRM(frame)            (*(B***)(LIB_DATA(frame) + 12))
+#define LIB_TYPE(frame)       (*(L*) (LIB_DATA(frame)))
+#define LIB_HANDLE(frame)     (*(L*) (PF_PTR(LIB_DATA(frame),1)))
+#define LIB_ERRC(frame)       (*(L**)(PF_PTR(LIB_DATA(frame),2)))
+#define LIB_ERRM(frame)       (*(B***)(PF_PTR(LIB_DATA(frame),3)))
 
-#define LIBBYTES                   16L
+#define LIBBYTES              DALIGN(4*PACK_FRAME)
 
 /*---------------------------------- C Operator definition */
 
-#define OPDEF_NAME(operator)       (*((L *)(operator)))
-#define OPDEF_CODE(operator)       (*((L *)(((B*)operator)+4)))
+#define OPDEF_NAME(operator)  (*((L *)(operator)))
+#define OPDEF_CODE(operator)  (*((L *)PF_PTR(operator,1)))
 
-#define OPDEFBYTES                 8L
+#define OPDEFBYTES            DALIGN(2*PACK_FRAME)
 
 /*---------------------------------------- save box */
-#define SBOX_FLAGS(box)          (*(L *)(box))
-#define SBOX_DATA(box)           (*(B **)(((B*)(box))+4))
-#define SBOX_CAP(box)            (*(B **)(((B*)(box))+8))
+#define SBOX_FLAGS(box)       (*(L *)(box))
+#define SBOX_DATA(box)        (*(B **)PF_PTR(box,1))
+#define SBOX_CAP(box)         (*(B **)PF_PTR(box,2))
 
-#define SBOX_FLAGS_CLEANUP       ((UL) 0x01)
+#define SBOX_FLAGS_CLEANUP    ((UL) 0x01)
 
-#define SBOXBYTES                16
+#define SBOXBYTES             DALIGN(3*PACK_FRAME)
 
 /*--------------------------------------------- Internal message codes */
 

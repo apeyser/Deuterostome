@@ -316,13 +316,18 @@ AC_DEFUN([CF_IF_ENABLED_DO], [
       $3 
     fi
   ])dnl
+  ifelse([$4],[],,[dnl
+    if ! test x"${enable_$1-no}" == x"no" ; then
+      $4
+    fi
+  ])
 ])
 
 AC_DEFUN([CF_IF_ENABLED], [dnl
   changequote(<<, >>)dnl
   define(<<CF_IF_ENABLED_CVS>>, patsubst($1, <<->>, <<_>>))dnl
   changequote([, ])dnl
-  CF_IF_ENABLED_DO(CF_IF_ENABLED_CVS, [$2], [$3])
+  CF_IF_ENABLED_DO(CF_IF_ENABLED_CVS, [$2], [$3], [$4])
 ])
 
 AC_DEFUN([CF_AM_PROG], [dnl
@@ -410,3 +415,19 @@ AC_DEFUN([CF_AC_SUBST_EVAL], [dnl
   ifelse([$2], , [eval $1="${$1}"], [eval $1="$2"])
 ])
 
+AC_DEFUN([CF_NAMEBYTES], [
+  AC_MSG_CHECKING([for NAMEBYTES value])
+  AC_SUBST([NAMEBYTES])  
+  AC_LANG_PUSH([C])
+  AC_COMPUTE_INT([NAMEBYTES], [NAMEBYTES], [[
+    #define DM_IS_32_BIT IS_32_BIT
+    #define DM_NO_CONFIGS_AT_ALL 1
+    #define DM_NO_ENDIAN_HDR 1
+    #define DM_X_DISPLAY_MISSING 1
+    #include "src/dm.h"
+  ]], [
+    AC_MSG_ERROR([Unable to compute NAMEBYTES])
+  ])
+  AC_MSG_RESULT([NAMEBYTES = $NAMEBYTES])
+  AC_LANG_POP()
+])

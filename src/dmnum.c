@@ -26,8 +26,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-static W TYPEBYTES[] = { 1,2,4,4,8 };
-#define nTYPES  ((W)5)
+static W TYPEBYTES[] = { 1,2,PACK_FRAME,4,8,4 };
+
+#define nTYPES  ((W)6)
 
 /*----------------------- General remarks -------------------------------
 
@@ -70,6 +71,10 @@ switch(TYPE(frame))
                       else
                       sprintf(buf,"%d",*((W *)NUM_VAL(frame)));
                     return;
+     case DWORDTYPE: if(*((M *)NUM_VAL(frame)) == MINF) break;
+                      else
+                      sprintf(buf,"%d",*((M *)NUM_VAL(frame)));
+                    return;
      case LONGTYPE: if (*((L *)NUM_VAL(frame)) == LINF) break;
                       sprintf(buf,"%d",*((L *)NUM_VAL(frame)));
                     return;
@@ -99,7 +104,7 @@ sprintf(buf,"*");
 /*------------------------------------- ENCODE
  converts numeral from ASCII code in 'string' into binary form and
  places the binary value at 'dnum'. Encoding is directed by 'type' bits:
-     #0-3:  predefined type (B/W/L/S/D) if bit #6 is true
+     #0-3:  predefined type (B/W/L/M/S/D) if bit #6 is true
      #4:    to be undefined (U)
      #5:    string has float characteristic (F)
      #6:    type is predefined (T)

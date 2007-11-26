@@ -58,12 +58,15 @@
 
 /GETCV { dup pushA exch pushA pushA  GETCV_d exch get exec } def
 
-/GETCV_d 6 dict dup begin
+/GETCV_d 7 dict dup begin
 
 /B { NL (if \(\()__ popA __ ( = *\(\(B *\))__ popA exec (\)\) == BINF\) )__
         popA __ ( = HUGE_VAL;)__ 
    } def
 /W { NL (if \(\()__ popA __ ( = *\(\(W *\))__ popA exec (\)\) == WINF\) )__
+        popA __ ( = HUGE_VAL;)__  
+   } def
+/M { NL (if \(\()__ popA __ ( = *\(\(M *\))__ popA exec (\)\) == MINF\) )__
         popA __ ( = HUGE_VAL;)__  
    } def
 /L { NL (if \(\()__ popA __ ( = *\(\(L *\))__ popA exec (\)\) == LINF\) )__
@@ -83,7 +86,7 @@ end def
 
 /CVPUT { pushA pushA CVPUT_d exch get exec } def
 
-/CVPUT_d 6 dict dup begin
+/CVPUT_d 7 dict dup begin
 /B { NL (*\(\(B *\))__ popA exec (\) = \(\(\()__
         popA dup pushA __ (\) > BMAX\) || \(\()__
         popA dup pushA __ (\) < -BMAX\) || ISUNDEF\()__
@@ -93,6 +96,11 @@ end def
         popA dup pushA __ (\) > WMAX\) || \(\()__
         popA dup pushA __ (\) < -WMAX\) || ISUNDEF\()__
         popA dup pushA __ (\)\)? WINF : )__ popA __ (;)__
+   } def
+/M { NL (*\(\(M *\))__ popA exec (\) = \(\(\()__
+        popA dup pushA __ (\) > MMAX\) || \(\()__
+        popA dup pushA __ (\) < -MMAX\) || ISUNDEF\()__
+        popA dup pushA __ (\)\)? MINF : )__ popA __ (;)__
    } def
 /L { NL (*\(\(L *\))__ popA exec (\) = \(\(\()__
         popA dup pushA __ (\) > LMAX\) || \(\()__
@@ -747,6 +755,8 @@ NL (})__
 NL 
 } def
 
+/alltypes [/B /W /L /S /D /M] def
+
 |-------------------- construct DMNUMINC.C -----------------------------
 | (dirname) (filename) | --
 
@@ -776,53 +786,49 @@ void handleerr\(void\) {
 #define handleerr\(\)
 #endif
 )__
+
 |----- generate ENCODE function definitions
-[ /B /W /L  /S /D ] { /dt name DYencode } forall
+alltypes { /dt name DYencode } forall
 
 |----- generate definition of list of ENCODE functions
 
 NL (typedef void \(*ENCODEfct\)\(D,B*\);)__
 NL (static ENCODEfct ENCODElist[] = {)__
-[ /B /W /L  /S /D ]
-   {  /dt name 
+alltypes {  /dt name 
       NL (D)__ dt__ (encode, )__
    } forall
 NL(};)__
 NL
 
 |----- generate VALUE function definitions
-[ /B /W /L  /S /D ] { /st name XLvalue } forall
+alltypes { /st name XLvalue } forall
 
 |----- generate definition of list of VALUE functions
 
 NL (typedef L \(*VALUEfct\)\(B*\);)__
 NL (static VALUEfct VALUElist[] = {)__
-[ /B /W /L  /S /D ]
-   {  /st name 
+alltypes {  /st name 
       NL st__ (Lvalue, )__
    } forall
 NL(};)__
 NL
 
 |----- generate TEST function definitions
-[ /B /W /L  /S /D ] { /st name XDtest } forall
+alltypes { /st name XDtest } forall
 
 |----- generate definition of list of TEST functions
 
 NL (typedef D \(*TESTfct\)\(B*\);)__
 NL (static TESTfct TESTlist[] = {)__
-[ /B /W /L  /S /D ]
-   {  /st name 
+alltypes {  /st name 
       NL st__ (Dtest, )__
    } forall
 NL(};)__
 NL
 
 |----- generate MOVE function definitions
-[ /B /W /L  /S /D ]
-{  /st name 
-   [ /B /W /L  /S /D ]
-   {  /dt name 
+alltypes {  /st name 
+   alltypes {  /dt name 
       [ /XYmoveSS /XYmoveSA /XYmoveAS /XYmoveAA ] { mkact exec } forall
    } forall
 } forall
@@ -832,10 +838,8 @@ NL
 NL (typedef void \(*MOVEfct\)\(B*,B*\);)__
 NL (static MOVEfct MOVElist[] = {)__
 NL
-[ /B /W /L  /S /D ]
-{  /st name 
-   [ /B /W /L  /S /D ]
-   {  /dt name 
+alltypes {  /st name 
+   alltypes {  /dt name 
       [ /SS /SA /AS /AA ]
       { /cc name st__ dt__ (move)__ cc mkact __ (, )__ } forall
       NL
@@ -845,10 +849,8 @@ NL(};)__
 NL
 
 |----- generate dyadic operator function definitions
-[ /B /W /L  /S /D ]
-{  /dt name 
-   [ /B /W /L  /S /D ]
-   {  /st name
+alltypes {  /dt name 
+   alltypes {  /st name
       [ /ADD /SUB /MUL /DIV /PWR /MOD /THEARC ]
       { /op name 
         [ /XYdyOPSS /XYdyOPAS /XYdyOPSA /XYdyOPAA ] { mkact exec } forall
@@ -863,10 +865,8 @@ NL (typedef void \(*dyadic_fct\)\(B*,B*\);)__
 [ /ADD /SUB /MUL /DIV /PWR /MOD /THEARC ] { /op name
 NL (static dyadic_fct )__ op__ (list[] = {)__
 NL
-[ /B /W /L  /S /D ]
-{  /dt name 
-   [ /B /W /L  /S /D ]
-   { /st name 
+alltypes {  /dt name 
+   alltypes { /st name 
      [ /SS /AS /SA /AA ] 
      { /cc name
        dt__ st__ (dy)__ op mkact __ cc mkact __ mkact exec (, )__
@@ -879,8 +879,7 @@ NL(};)__
 NL
 
 |----- generate monadic operator function definitions
-[ /B /W /L  /S /D ]
-{  /dt name 
+alltypes {  /dt name 
   [ /NEG /ABS /SQRT /EXP /LN /LG /FLOOR /CEIL /SIN /COS /TAN
     /ASIN /ACOS /ATAN
   ]
@@ -898,8 +897,7 @@ NL (typedef void \(*monadic_fct\)\(B*\);)__
 { /op name
 NL (static monadic_fct )__ op__ (list[] = {)__
 NL
-[ /B /W /L  /S /D ]
-{ /dt name 
+alltypes { /dt name 
   [ /S /A ] 
   { /cc name
     dt__ (mo)__ op mkact __ cc mkact __ mkact exec (, )__
@@ -911,7 +909,7 @@ NL(};)__
 
 |----- generate DECREMENT function definitions
 
-[ /B /W /L  /S /D ] { /dt name Ydecr } forall
+alltypes { /dt name Ydecr } forall
 
 |----- generate definitions of DECREMENT function lists
 
@@ -919,8 +917,7 @@ NL (typedef void \(*DECR_fct\)\(B*\);)__
 
 NL (static DECR_fct DECRlist[] = {)__
 NL
-[ /B /W /L  /S /D ]
-{ /dt name dt__ (decr, )__ } forall
+alltypes { /dt name dt__ (decr, )__ } forall
 NL(};)__
 NL
     

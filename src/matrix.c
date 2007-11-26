@@ -72,7 +72,7 @@ static L matrix_dims_trans(B* cuts, B* array, L* m, L* n,
 
 static L pivot_dims(B* pivot, L rows) {
   if (CLASS(pivot) != ARRAY) return OPD_CLA;
-  if (TYPE(pivot) != LONGTYPE) return OPD_TYP;
+  if (TYPE(pivot) != DWORDTYPE) return OPD_TYP;
   if (rows != ARRAY_SIZE(pivot)) return MATRIX_NONMATCH_CUT;
 
   return OK;
@@ -201,7 +201,7 @@ L op_decompLU_lp(void) {
 
   if ((info = clapack_dgetrf(CblasRowMajor, N, N, 
                              (D*) VALUE_PTR(o_3), N,
-                             (L*) VALUE_PTR(o_1))) < 0)
+                             (M*) VALUE_PTR(o_1))) < 0)
     return MATRIX_PARAM_ERROR;
   else if (info > 0) nsing = FALSE;
 
@@ -226,7 +226,7 @@ L op_backsubLU_lp(void) {
   if (clapack_dgetrs(CblasRowMajor, CblasNoTrans,
                      N, 1, 
                      (D*) VALUE_PTR(o_3), N, 
-                     (L*) VALUE_PTR(o_1),
+                     (M*) VALUE_PTR(o_1),
                      (D*) VALUE_PTR(o_4), N))
     return MATRIX_PARAM_ERROR;
 
@@ -246,7 +246,7 @@ L op_invertLU_lp(void) {
 
   if (clapack_dgetri(CblasRowMajor, N, 
                      (D*) VALUE_PTR(o_3), N,
-                     (L*) VALUE_PTR(o_1)))
+                     (M*) VALUE_PTR(o_1)))
     return MATRIX_PARAM_ERROR;
 
   FREEopds = o_1;

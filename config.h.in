@@ -24,6 +24,9 @@
 /* Path to GS */
 #undef ENABLE_GS
 
+/* Build old style 32 bit frames */
+#undef ENABLE_IS_32_BIT
+
 /* Path to LATEX */
 #undef ENABLE_LATEX
 
@@ -124,6 +127,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Define to 1 if you are compile old 32 bit frames */
+#undef IS_32_BIT
+
 /* maximum vm allocation size in mb */
 #undef MAX_MEM_SIZE
 
@@ -139,11 +145,11 @@
 /* maximum user dict size */
 #undef MAX_USER_DICT_SIZE
 
-/* Number of bytes in a d name, without terminating '\0' */
-#undef NAMEBYTES
-
 /* "Header for endianness not found" */
 #undef NO_ENDIAN_HDR
+
+/* Define to 1 if your C compiler doesn't accept -c and -o together. */
+#undef NO_MINUS_C_MINUS_O
 
 /* Name of package */
 #undef PACKAGE
@@ -175,9 +181,6 @@
 
 /* The size of `pid_t', as computed by sizeof. */
 #undef SIZEOF_PID_T
-
-/* The size of `time_t', as computed by sizeof. */
-#undef SIZEOF_TIME_T
 
 /* The size of `void*', as computed by sizeof. */
 #undef SIZEOF_VOIDP

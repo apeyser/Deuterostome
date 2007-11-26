@@ -92,6 +92,7 @@ The lower nipple of a numeral type specifies one of:
      2 - long integer
      3 - single float
      4 - double float
+     5 - double word
 */
 
 #define RET_BAD_TOK do {                                                \

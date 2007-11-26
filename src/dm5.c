@@ -687,7 +687,7 @@ L n,c;
 
 if (o_2 < FLOORopds) return(OPDS_UNF);
 if ((CLASS(o_2) != NUM) || (CLASS(o_1) != NUM)) return(OPD_CLA);
-if (VALUEBYTES(TYPE(o_2)) > 4) return(OPD_ERR);
+if (VALUEBYTES(TYPE(o_2)) > sizeof(L)) return(OPD_ERR);
 if (!VALUE(o_1,&c)) return(UNDF_VAL);
 n = 0;
 moveB(NUM_VAL(o_2),(B *)&n,VALUEBYTES(TYPE(o_2)));

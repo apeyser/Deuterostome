@@ -46,7 +46,7 @@ L op_gettime(void)
 {
   if (o1 > CEILopds) return(OPDS_OVF);
   TAG(o1) = NUM | LONGTYPE; ATTR(o1) = 0;
-  if (time((time_t*) &LONG_VAL(o1)) == -1) LONG_VAL(o1) = 0;
+  if ((LONG_VAL(o1) = (L) time(NULL)) == -1) LONG_VAL(o1) = 0;
   FREEopds = o2;
   return(OK);
 }

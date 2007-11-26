@@ -1,4 +1,4 @@
-AC_INIT([D-Machine], [3.2], [Alexander Peyser <a.peyser@umiami.edu>], [dm])
+AC_INIT([D-Machine], [4.0], [Alexander Peyser <a.peyser@umiami.edu>], [dm])
 AC_CONFIG_MACRO_DIR(m4)
 AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE
@@ -10,30 +10,9 @@ AM_MAINTAINER_MODE
 
 CF_CLEAR_DEF([CFLAGS])
 
-CF_SUBST_DEFINE([NAMEBYTES], 
-				[18L], 
-				[Number of bytes in a d name, without terminating '\0'],
-				[18])
-
 CF_AC_ENABLE([xps], [compile or install only new xps], [yes])
 
 CF_AC_ENABLE([regex], [include regex], [yes])
-
-CF_AC_ENABLE([plugins], [compile or install plugins], [yes])
-CF_IF_ENABLED([plugins], [
-  CF_AM_ENABLE([process], [compile or install process plugin], [yes])
-  CF_AM_ENABLE([cppplugin], 
-               [compile or install cpp memory library for plugins], 
-  			   [yes])
-  CF_AM_ENABLE([dmflex], [compile or install dmflex plugin], [yes])
-  CF_IF_ENABLED([dmflex], [
-    AM_PROG_LEX
-    CF_AC_ARG_VAR_SUBST_EVAL([STRINGBUF], 
-      [Max buffer size for dmflex, must be at least $NAMEBYTES + 2], 
-      [8092])
-    CF_AC_SUBST_EVAL([NAMEBYTES_1], [`expr $NAMEBYTES - 1`])
-  ])
-])
 
 CF_AC_ARG_VAR([SYS_DICT_SIZE], [system dictionary size], [500])
 CF_AC_ARG_VAR([MAX_NUM_OPDS], [maximum operand stack size in frames], [100000])
@@ -84,6 +63,29 @@ CF_IF_ENABLED([unix-sockets], [
     [${tmp}/${PACKAGE}/sockets])
 ])
 
+CF_AC_ENABLE([is-32-bit], [Build old style 32 bit frames], [no], [yes])
+CF_IF_ENABLED([is-32-bit], [
+  AC_DEFINE([IS_32_BIT], [1], 
+            [Define to 1 if you are compile old 32 bit frames])
+])
+CF_NAMEBYTES()
+
+CF_AC_ENABLE([plugins], [compile or install plugins], [yes])
+CF_IF_ENABLED([plugins], [
+  CF_AM_ENABLE([process], [compile or install process plugin], [yes])
+  CF_AM_ENABLE([cppplugin], 
+               [compile or install cpp memory library for plugins], 
+  			   [yes])
+  CF_AM_ENABLE([dmflex], [compile or install dmflex plugin], [yes])
+  CF_IF_ENABLED([dmflex], [
+    AM_PROG_LEX
+    CF_AC_ARG_VAR_SUBST_EVAL([STRINGBUF], 
+      [Max buffer size for dmflex, must be at least $NAMEBYTES + 2], 
+      [8092])
+    CF_AC_SUBST_EVAL([NAMEBYTES_1], [`expr $NAMEBYTES - 1`])
+  ])
+])
+
 CF_ON_TARGET([*-*-darwin*], [
   AC_CHECK_PROG([guipdf], [launch], [launch -i com.apple.Preview])
 ])
@@ -118,7 +120,7 @@ CF_AC_ARG_VAR_QUOTE([guipdf],
 CF_EMACS_ENABLED
 
 AC_PROG_CC
-
+AM_PROG_CC_C_O
 AC_PROG_CC_STDC
 AC_C_CONST
 AC_C_RESTRICT
@@ -139,9 +141,10 @@ AC_CHECK_LIBM
 CF_AC_PATH_XTRA
 CF_PREPEND_VARS([LIBS], [XLIB LIBM])
 AC_C_BIGENDIAN
-CF_AC_CHECK_SIZEOF([time_t], [4])
-CF_AC_CHECK_SIZEOF([void*], [4])
-
+#CF_AC_CHECK_SIZEOF([time_t], [4])
+CF_IF_ENABLED([is-32-bit], [
+  CF_AC_CHECK_SIZEOF([void*], [4])
+])
 # check pid_t for plugins/process.c
 CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([pid_t], [4])])
 CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([int], [4])])
