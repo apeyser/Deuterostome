@@ -76,7 +76,7 @@ switch(TYPE(frame))
                       sprintf(buf,"%d",*((M *)NUM_VAL(frame)));
                     return;
      case LONGTYPE: if (*((L *)NUM_VAL(frame)) == LINF) break;
-                      sprintf(buf,"%d",*((L *)NUM_VAL(frame)));
+                      sprintf(buf,"%ld",*((L *)NUM_VAL(frame)));
                     return;
      case SINGLETYPE: if (ISUNDEF(*((S *)NUM_VAL(frame)))) break;
                        else if (fauto)

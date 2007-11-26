@@ -13,20 +13,17 @@
 
 static void srandomdev(void) 
 {
-		static int first_error_open = 1;
-		static int first_error_read = 1;
-		
-		int unsigned long seed;
-		int off = 0;
-		int r;
-		
-		int fd = open("/dev/random", O_RDONLY, 0);
-		if (fd == -1) {
-				srandom(time(NULL));
-				return;
-		}
+  int unsigned long seed;
+  int off = 0;
+  int r;
+  
+  int fd = open("/dev/random", O_RDONLY, 0);
+  if (fd == -1) {
+    srandom(time(NULL));
+    return;
+  }
 
-		while (off < sizeof(seed)) {
+  while (off < sizeof(seed)) {
       if ((r = read(fd, (char*) &seed + off, sizeof(seed))) == -1) {
         if (errno != EINTR) {
           seed = time(NULL);
@@ -37,8 +34,8 @@ static void srandomdev(void)
       off += r;
     }
 				
-		while (close(fd) && errno == EINTR);
-		srandom(seed);
+  while (close(fd) && errno == EINTR);
+  srandom(seed);
 }
 
 

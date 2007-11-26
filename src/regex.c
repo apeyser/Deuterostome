@@ -46,9 +46,9 @@ static L int_regex(BOOLEAN case_sensitive)
 		moveB(VALUE_PTR(o_1), FREEvm, ARRAY_SIZE(o_1));
 		FREEvm[ARRAY_SIZE(o_1)] = '\0';
 
-		if (r = regcomp(&preg, FREEvm,
-										REG_EXTENDED|(case_sensitive ? 0 : REG_ICASE)))
-				return int_regex_error(r);
+		if ((r = regcomp(&preg, FREEvm,
+				 REG_EXTENDED|(case_sensitive ? 0 : REG_ICASE))))
+		  return int_regex_error(r);
 
 		pmatch = (regmatch_t*) DALIGN(FREEvm+FRAMEBYTES*(preg.re_nsub+1));
 		string = ((char*) pmatch)+sizeof(regmatch_t)*(preg.re_nsub+1);

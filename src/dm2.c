@@ -999,7 +999,7 @@ void foldobj_free(void)
 
 static L foldobj_int(B *frame, L base, W *depth)
 {
-		B *tframe, *tvalue, *value, *lframe, *entry, *tvalue2, *value2, *end2;
+B *tframe, *tvalue, *value, *lframe, *entry;
 L k, retc, *link, nb, offset;
 
 if ((++(*depth)) > MAXDEPTH) return(RNG_CHK);

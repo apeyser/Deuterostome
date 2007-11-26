@@ -1,0 +1,12 @@
+Source: dm
+Section: unknown
+Priority: extra
+Maintainer: Alex Peyser <a.peyser@umiami.edu>
+Build-Depends: debhelper (>= 5), autotools-dev
+Standards-Version: 3.7.2
+
+Package: dm
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>

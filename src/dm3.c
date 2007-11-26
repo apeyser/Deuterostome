@@ -73,7 +73,7 @@ L init_unix_sockaddr(struct sockaddr_un *name, L port) {
     sock_path[strlen(sock_path)-1] = '\0';
 
   name->sun_family = AF_UNIX;
-  snprintf(name->sun_path, sizeof(name->sun_path)-1, "%s/dnode-%i",
+  snprintf(name->sun_path, sizeof(name->sun_path)-1, "%s/dnode-%li",
            sock_path, port - IPPORT_USERRESERVED);
 
   return OK;

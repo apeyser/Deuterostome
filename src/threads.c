@@ -229,7 +229,6 @@ L threads_destroy(L errno_) {
 
 
 L threads_init(L num) {
-  L i;
   if (num < 1 || num > THREADNUM) return RNG_CHK;
   if (num == 1) return OK;
 

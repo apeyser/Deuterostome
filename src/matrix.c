@@ -214,7 +214,6 @@ L op_decompLU_lp(void) {
 // rhs lumatrix <cut> <pivot> | solution(rhs)
 L op_backsubLU_lp(void) {
   L N;
-  enum CBLAS_TRANSPOSE trans;
 
   if (o_4 < FLOORopds) return OPDS_UNF;
   if (ATTR(o_4) & READONLY) return OPD_ATR;
@@ -340,16 +339,16 @@ L op_givens_blas(void) {
 // c s <d x...> <d y...> | <xr...> <yr...>
 L op_rotate_blas(void) {
   D c, s;
-  L r;
+  L rows;
 
   if (FLOORopds > o_4) return OPDS_UNF;
   if ((ATTR(o_1) & READONLY) || (ATTR(o_2) & READONLY)) return OPD_ATR;
-  VECTOR_GET_DIM(o_1, r);
-  VECTOR_DIM(o_2, r);
+  VECTOR_GET_DIM(o_1, rows);
+  VECTOR_DIM(o_2, rows);
   MULT(o_3, s);
   MULT(o_4, c);
 
-  cblas_drot(r, (D*) VALUE_PTR(o_2), 1, (D*) VALUE_PTR(o_1), 1,
+  cblas_drot(rows, (D*) VALUE_PTR(o_2), 1, (D*) VALUE_PTR(o_1), 1,
              c, s);
 
   moveframes(o_2, o_4, 2);

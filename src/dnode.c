@@ -224,7 +224,7 @@ If the mouse has more than one button (up to 5), these are reported
 
 */
 
-int main(L argc, char *argv[])
+int main(int argc, char *argv[])
 {
 B errorframe[FRAMEBYTES];
 L nb, retc;
@@ -402,7 +402,7 @@ if (moreX) {
           if ((Atom)event.xclient.data.l[0] 
               == XInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False)) {
 							wid = event.xclient.window;
-							snprintf(namestring, sizeof(namestring), "w%d", wid);
+							snprintf(namestring, sizeof(namestring), "w%ld", wid);
               makename(namestring, namef); ATTR(namef) = ACTIVE;
               userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
               if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
@@ -422,7 +422,7 @@ if (moreX) {
           else if ((Atom) event.xclient.data.l[0]
                    == XInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False)) {
               wid = event.xclient.window;
-              snprintf(namestring, sizeof(namestring), "w%d", wid);
+              snprintf(namestring, sizeof(namestring), "w%ld", wid);
               makename(namestring, namef); ATTR(namef) = ACTIVE;
               userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
               if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
@@ -441,7 +441,7 @@ if (moreX) {
           break;
 
     case ConfigureNotify: wid = event.xconfigure.window;
-      snprintf(namestring, sizeof(namestring), "w%d", wid);
+      snprintf(namestring, sizeof(namestring), "w%ld", wid);
       makename(namestring, namef); ATTR(namef) = ACTIVE;
       userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
       if ((dictf = lookup(namef, userdict)) == 0L) 
@@ -462,7 +462,7 @@ if (moreX) {
       running = TRUE; goto tuwat;
     case Expose: if (event.xexpose.count != 0) break;
       wid = event.xexpose.window;
-      snprintf(namestring, sizeof(namestring), "w%d", wid);
+      snprintf(namestring, sizeof(namestring), "w%ld", wid);
       makename(namestring, namef); ATTR(namef) = ACTIVE;
       userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
       if ((dictf = lookup(namef, userdict)) == 0L) 
@@ -482,7 +482,7 @@ if (moreX) {
       if (FREEdicts >= CEILdicts) { retc = DICTS_OVF; goto Xderror; }
       if (x1 >= CEILexecs) { retc = EXECS_OVF; goto Xderror; }
       if (o4 >= CEILopds) { retc = OPDS_OVF; goto Xderror; }
-      snprintf(namestring, sizeof(namestring), "w%d", wid);
+      snprintf(namestring, sizeof(namestring), "w%ld", wid);
       makename(namestring, namef); ATTR(namef) = ACTIVE;
       userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
       if ((dictf = lookup(namef, userdict)) == 0L) 

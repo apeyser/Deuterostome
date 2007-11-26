@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 static int dm_snprintf(char *str, size_t size, const char *format, ...) 
-  __attribute ((__format__ (__printf__, 3, 4)));
+  __attribute ((__unused__, __format__ (__printf__, 3, 4)));
 
 static int dm_snprintf(char *str, size_t size, const char *format, ...) {
   va_list ap;

@@ -6,7 +6,7 @@
 (
 static L max_n = 0;
 #define max_kn \(1000\)
-static D binom[max_kn+1][max_kn+1] = {1};
+static D binom[max_kn+1][max_kn+1] = {{1}};
 ) def
 
 
@@ -15,8 +15,7 @@ static D binom[max_kn+1][max_kn+1] = {1};
     [
       /combinations {(
   // n k | \(n/k\)
-  L n, k, num_min, denom_max, i, j, m;
-  D v; L* num;
+  L n, k, i, j;
 
   if \(o_2 < FLOORopds\) return OPDS_UNF;
   if \(CLASS\(o_1\) != NUM\) return OPD_CLA;

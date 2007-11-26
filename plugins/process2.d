@@ -29,9 +29,7 @@ def
     ssize_t ret;
     int errno_;
     size_t p;
-    B* procframe;
-    B initframe[FRAMEBYTES];
-    
+     
     if \(FREEvm + 2*FRAMEBYTES > CEILvm\) return VM_OVF;
     
     if \(o_1 < FLOORopds\) return OPDS_UNF;

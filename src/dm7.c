@@ -131,9 +131,9 @@ L op_setwdir(void)
 
 L op_tosystem(void)
 {
-  L nb, retc;
-	pid_t f, r;
-	int status;
+  L nb;
+  pid_t f, r;
+  int status;
 	
   if (o_1 < FLOORopds) return(OPDS_UNF);
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);

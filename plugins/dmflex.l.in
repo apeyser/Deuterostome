@@ -144,7 +144,7 @@ SPACE ([[:space:]])
 
 {PASS_NAME} {
   makename(yytext+1, frame);
-  if (yytext[0] = '~') ATTR(frame) = TILDE;
+  if (yytext[0] == '~') ATTR(frame) = TILDE;
   BEGIN(EATNAME);
 }
 
@@ -385,7 +385,6 @@ static L gettoken(void) {
   level = 0;
   oldfree = FREEopds;
   vm = oldvm = FREEvm;
-  char arrstate = 0;
   oldfree = FREEopds;
   vmfree = CEILvm - FREEvm;
   do {

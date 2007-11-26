@@ -27,7 +27,7 @@ L op_INIT_(void) {
 }
 
 L op_FINI_(void) {
-	fprintf(stderr, "Closing test2: retvalue=%i\n", retvalue);
+	fprintf(stderr, "Closing test2: retvalue=%li\n", retvalue);
 	return OK;
 }
 
