@@ -666,7 +666,7 @@ P op_execstream(void) {
 }
 
 #define CLEAR_HANDLE(frame) \
-  if (lasthandle = VALUE_PTR(frame)) lasthandle = NULL;
+  if ((lasthandle = VALUE_PTR(frame))) lasthandle = NULL;
 
 P x_op_execstream(void) {
   B* streamstate;
@@ -702,7 +702,7 @@ P x_op_execstream(void) {
     }
      
     FREEopds = o1;
-    DMFLEX_STATE(o1) == DMFLEX_ERR;
+    DMFLEX_STATE(o1) = DMFLEX_ERR;
     CLEAR_HANDLE(o1);
     KILL_OPAQUE(o1);
     return OK;
