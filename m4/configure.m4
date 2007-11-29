@@ -415,18 +415,37 @@ AC_DEFUN([CF_AC_SUBST_EVAL], [dnl
   ifelse([$2], , [eval $1="${$1}"], [eval $1="$2"])
 ])
 
-AC_DEFUN([CF_NAMEBYTES], [
+AC_DEFUN([CF_BASIC_DEFS], [
+  AC_CHECK_SIZEOF([void*])
+  AC_DEFINE_UNQUOTED([DM_SIZEOF_VOIDP_], 
+                     [$ac_cv_sizeof_voidp], 
+                     [sizeof(void*)])
+  AC_SUBST([CONFIG_STATUS_DEPENDENCIES], ['$(top_srcdir)/src/basic-defs.h'])
   AC_MSG_CHECKING([for NAMEBYTES value])
-  AC_SUBST([NAMEBYTES])  
-  AC_LANG_PUSH([C])
-  AC_COMPUTE_INT([NAMEBYTES], [NAMEBYTES], [[
-    #define DM_NO_CONFIGS_AT_ALL 1
-    #define DM_NO_ENDIAN_HDR 1
-    #define DM_X_DISPLAY_MISSING 1
-    #include "src/dm.h"
-  ]], [
-    AC_MSG_ERROR([Unable to compute NAMEBYTES])
-  ])
-  AC_MSG_RESULT([NAMEBYTES = $NAMEBYTES])
-  AC_LANG_POP()
+  m4_include([m4/basic-defs.m4])
+  if test $USE_MAINTAINER_MODE != yes; then
+    AC_MSG_RESULT([NAMEBYTES = $NAMEBYTES])
+  else
+    AC_LANG_PUSH([C])
+    AC_COMPUTE_INT([NAMEBYTES_NEW], [NAMEBYTES], [[
+      #include "src/basic-defs.h"
+    ]], [
+      AC_MSG_ERROR([Unable to compute NAMEBYTES])
+    ])
+    AC_LANG_POP()
+    if test $NAMEBYTES == $NAMEBYTES_NEW ; then
+      AC_MSG_RESULT([unchanged, NAMEBYTES = $NAMEBYTES])
+    else
+      AC_MSG_RESULT([changed, NAMEBYTES = $NAMEBYTES, NAMEBYTES_NEW = $NAMEBYTES_NEW])
+      [NAMEBYTES=$NAMEBYTES_NEW]
+      AC_MSG_CHECKING([Updating "$srcdir"/m4/basic-defs.m4])
+      if echo "[[NAMEBYTES=$NAMEBYTES_NEW]]" > "$srcdir"/m4/basic-defs.m4
+      then
+        AC_MSG_RESULT([successful])
+      else
+        AC_MSG_ERROR([failed])
+      fi
+    fi
+  fi
+  AC_SUBST([NAMEBYTES])
 ])

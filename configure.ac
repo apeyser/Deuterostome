@@ -68,7 +68,13 @@ CF_IF_ENABLED([is-32-bit], [
   AC_DEFINE([IS_32_BIT], [1], 
             [Define to 1 if you are compile old 32 bit frames])
 ])
-CF_NAMEBYTES()
+
+AC_PROG_CC
+AM_PROG_CC_C_O
+AC_PROG_CC_STDC
+AC_C_CONST
+AC_C_RESTRICT
+CF_BASIC_DEFS()
 
 CF_AC_ENABLE([plugins], [compile or install plugins], [yes])
 CF_IF_ENABLED([plugins], [
@@ -119,11 +125,6 @@ CF_AC_ARG_VAR_QUOTE([guipdf],
 
 CF_EMACS_ENABLED
 
-AC_PROG_CC
-AM_PROG_CC_C_O
-AC_PROG_CC_STDC
-AC_C_CONST
-AC_C_RESTRICT
 AC_CHECK_HEADERS([unistd.h])
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
@@ -141,12 +142,6 @@ AC_CHECK_LIBM
 CF_AC_PATH_XTRA
 CF_PREPEND_VARS([LIBS], [XLIB LIBM])
 AC_C_BIGENDIAN
-#CF_AC_CHECK_SIZEOF([time_t], [4])
-CF_IF_ENABLED([is-32-bit], [
-  CF_AC_CHECK_SIZEOF([void*], [4])
-], [
-  AC_CHECK_SIZEOF([void*])
-])
 # check pid_t for plugins/process.c
 CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([pid_t], [4])])
 CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([int], [4])])

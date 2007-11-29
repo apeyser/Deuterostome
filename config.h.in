@@ -3,6 +3,9 @@
 /* align to this many bytes */
 #undef BYTECORRECT
 
+/* sizeof(void*) */
+#undef DM_SIZEOF_VOIDP_
+
 /* Path to ATPS */
 #undef ENABLE_ATPS
 

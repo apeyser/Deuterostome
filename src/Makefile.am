@@ -58,7 +58,7 @@ PLUGIN_LD = @LIBLTDL@
 endif ENABLE_PLUGINS
 
 pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
-	error-local.h dm-snprintf.h srandomdev-local.h
+	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h basic-defs.h
 nodist_pkginclude_HEADERS = dm-config.h paths.h
 
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h

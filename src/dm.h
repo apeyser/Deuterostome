@@ -25,31 +25,20 @@
 #ifndef DM_H
 #define DM_H
 
-#if __cplusplus
-extern "C" {
-#endif
-		
-
-#if ! defined __GNUC__ && ! defined __attribute__
-#define __attribute__(attr)
-#endif // ! defined __GNUC__ && ! defined __attribute__
-
-#if ! DM_NO_CONFIGS_AT_ALL
 #include "dm-config.h"
-#endif
 #ifdef DM_HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#if ! DM_NO_CONFIGS_AT_ALL
-#if DM_SIZEOF_VOIDP == 4
-#define DM_HOST_IS_32_BIT 1
-#elif DM_SIZEOF_VOIDP == 8
-// DM_HOST_IS_32_BIT undefined
-#else
-#error "void* is not 32 or 64 bit: " DM_SIZEOF_VOIDP
-#endif //DM_SIZEOF_VOIDP
-#endif //DM_NO_CONFIGS_AT_ALL
+#include "basic-defs.h"
+
+#if __cplusplus
+extern "C" {
+#endif		
+
+#if ! defined __GNUC__ && ! defined __attribute__
+#define __attribute__(attr)
+#endif // ! defined __GNUC__ && ! defined __attribute__
 
 #if DM_DISABLE_REGEX && DM_ENABLE_REGEX
 #undef DM_ENABLE_REGEX
@@ -83,83 +72,14 @@ extern "C" {
 #define DLL_SCOPE extern
 #endif
 
-#include <inttypes.h>
 #include <sys/socket.h>
 #include <sys/select.h>
 #if ! DM_NO_ENDIAN_HDR
 #include DM_ENDIAN_HDR
 #endif //DM_NO_ENDIAN_HDR
 
-typedef int8_t B;
-typedef int16_t W;
-typedef int32_t L32;
-typedef int64_t L64;
-typedef uint8_t UB;
-typedef uint16_t UW;
-typedef uint32_t UL32;
-typedef uint64_t UL64;
-
-typedef L64 LBIG;
-typedef UL64 ULBIG;
-
-typedef L64 PBIG;
-typedef UL64 UPBIG;
-
-#if DM_HOST_IS_32_BIT
-typedef UL32 UP;
-typedef L32 P;
-#else
-typedef UL64 UP;
-typedef L64 P;
-#endif // DM_HOST_IS_32_BIT
-
-typedef W BOOLEAN;
-
-typedef  P  (*OPER)(void);
-
-#ifndef TRUE
-#define TRUE -1
-#endif
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-typedef float S;
-typedef double D;
-
-#define BINF    ((B) 0x80)
-#define WINF    ((W) 0x8000)
-#define L32INF  ((L32) 0x80000000)
-#define L64INF  ((L64) 0x8000000000000000)
-
-#define BMAX   (0x7F)
-#define WMAX   (0x7FFF)
-#define L32MAX (0x7FFFFFFF)
-#define L64MAX (0x7FFFFFFFFFFFFFFF)
-
-#if DM_HOST_IS_32_BIT
-#define PMAX L32MAX
-#define PINF L32INF
-#else
-#define PMAX L64MAX
-#define PINF L64INF
-#endif //DM_IS_32_BIT
-
-#define LBIGMAX L64MAX
-#define LBIGINF L64INF
-
-#define PBIGMAX L64MAX
-#define PBIGINF L64INF
-
 #define ISUNDEF(n) (isinf(n) || isnan(n))
 
-/*-------------------------- VM alignment ----------------------------
-
-NOTE: all objects that can populate the D machine's workspace must
-      be aligned using the macro defined here.
-*/
-
-#define DALIGN(bytes)         (((P)(bytes)+7) & ~((P) 7)) /* 8 bytes */
 /*-------------------------- network packet size ----------------------*/
 
 #define PACKET_SIZE 8192
@@ -321,7 +241,6 @@ NOTE: all objects that can populate the D machine's workspace must
 #define XMARK                      ((UB)0x70)
 #define BIND                       ((UB)0x80)   /* box op housekeeping */
 
-#define PACK_FRAME (sizeof(PBIG))
 #define PF_PTR(frame, offset) (((B*)(frame))+(offset)*PACK_FRAME)
 
 #define BOOL_VAL(frame)      (*((BOOLEAN *)((frame)+2)))
@@ -341,15 +260,6 @@ NOTE: all objects that can populate the D machine's workspace must
 #define DICT_CURR(frame)     (*((P *)PF_PTR(frame,2)))
 #define BOX_NB(frame)        (*((P *)PF_PTR(frame,2)))
 #define LIST_CEIL_PTR(frame) (*((B**)PF_PTR(frame,2)))
-
-/* NB: Attention to moveframe & moveframes in dm2.c whenever
-   framebytes is changed */
-#define FRAMEBYTES           DALIGN(3*PACK_FRAME)
-
-// This needs to be concrete without config.h included for configure
-#define NAMEBYTES ((((FRAMEBYTES/sizeof(UW)-1)/3)*8)			\
-		   + (((FRAMEBYTES/sizeof(UW)-1)%3) ? 2 : 0)		\
-		   + (((FRAMEBYTES/sizeof(UW)-1)%3) == 2 ? 3 : 0))
 
 /*-------------------------------------------- dictionary */
  
@@ -837,7 +747,6 @@ P op_regex(void);
 P op_regexi(void);
 #endif //DM_ENABLE_REGEX
 
-#if ! DM_NO_CONFIGS_AT_ALL
 static BOOLEAN PVALUE(B* frame, P* var) __attribute__ ((__unused__));
 static BOOLEAN PVALUE(B* frame, P* var) {
 #if DM_HOST_IS_32_BIT
@@ -850,7 +759,6 @@ static BOOLEAN PVALUE(B* frame, P* var) {
     return VALUE(frame, var);
 #endif // DM_HOST_IS_32_BIT
 }
-#endif // ! DM_NO_CONFIGS_AT_ALL
 
 #define ERRLEN (1000)
 
