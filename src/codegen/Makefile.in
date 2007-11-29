@@ -54,7 +54,7 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = dmnuminc.d dsp2def.d startup_dgen.d dmglobals.c \
 	dsp1.c dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dmnum.c \
-	paths.h.in dgen.c dgen_0.h dgen_1.h dgen-build
+	dsp2.c paths.h.in dgen.c dgen_0.h dgen_1.h dgen-build dmnum.h
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libdmbootstrap_la_LIBADD =
 am_libdmbootstrap_la_OBJECTS = dmglobals.lo dm1.lo dm2.lo dm3.lo \

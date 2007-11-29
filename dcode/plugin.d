@@ -173,11 +173,11 @@ end def
   bodyheaders fax (
 #include ") fax package_ fax (.h"
 
-UL ll_type = 0;
-L op_hi\(void\) {return wrap_hi\(") fax
+UP ll_type = 0;
+P op_hi\(void\) {return wrap_hi\(") fax
   package_ fax ( V) fax * version * number ("\);}
-L op_libnum\(void\) {return wrap_libnum\(ll_type\);}
-L ll_errc[] = {
+P op_libnum\(void\) {return wrap_libnum\(ll_type\);}
+P ll_errc[] = {
 ) fax
 
   errsdict null ne {
@@ -229,7 +229,7 @@ B opaquename[FRAMEBYTES];
   
   [bodycode] ~fax forall
 (
-  L op_INIT_\(void\) {
+P op_INIT_\(void\) {
 ) fax
 
   handledict null ne {
@@ -249,7 +249,7 @@ B opaquename[FRAMEBYTES];
   return OK;
 }
 
- L op_FINI_\(void\) {
+P op_FINI_\(void\) {
 ) fax
   finicode fax (
   return OK;
@@ -260,7 +260,7 @@ B opaquename[FRAMEBYTES];
   /handle ~body_handle def
   /nameit ~body_name def
   opslist {dup 0 get textit /op name 1 get /opb name
-(L op_) fax op fax (\(void\) {
+(P op_) fax op fax (\(void\) {
 ) fax
     [opb] {fax} forall (
 }
@@ -314,7 +314,7 @@ B opaquename[FRAMEBYTES];
 
   opslist {0 get textit /op name
     (\n#define op_) fax op fax ( EXPORTNAME\(op_) fax op fax (\)\n) fax
-    (L op_) fax op fax (\(void\);\n) fax
+    (P op_) fax op fax (\(void\);\n) fax
   } forall
 
 (

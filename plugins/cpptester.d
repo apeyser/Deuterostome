@@ -81,12 +81,12 @@ int randomtester\(int times, int inner, int max, Tester* t\) {
   return 0;
 }
 
-int bigtester\(L size, Tester* t\) {
+int bigtester\(P size, Tester* t\) {
   return big\(size, t\);
 }
 )} def
 
-/makehandles {[[/TESTER {(LONG_VAL\() handle (\))}]]} bind def
+/makehandles {[[/TESTER {(INNERP_VAL\() handle (\))}]]} bind def
 
 /makeops {
   [
@@ -97,8 +97,8 @@ int bigtester\(L size, Tester* t\) {
       if \(CEILopds < o2\) return OPDS_OVF;
 ) {(
       check_ret\(init\(&t\)\);
-      TAG) handle (= \(NUM | LONGTYPE\); ATTR) handle ( = 0;
-      LONG_VAL\() handle (\) = \(L\) t;
+      TAG) handle (= \(NUM | INNERPTYPE\); ATTR) handle ( = 0;
+      INNERP_VAL\() handle (\) = \(P\) t;
      ) /TESTER make_handle (;
 )} 0 /killtester (o1) build_handle (
       FREEopds = o2;
@@ -107,13 +107,13 @@ int bigtester\(L size, Tester* t\) {
     ][
       /runtester {(
       Tester* t;
-      L times, max;
+      P times, max;
       if \(o_3 < FLOORopds\) return OPDS_UNF;
       TEST_OPAQUE\(o_1\);
       if \(CLASS\(o_2\) != NUM\) return OPD_CLA;
-      if \(!VALUE\(o_2, &max\)\) return UNDF_VAL;
+      if \(!PVALUE\(o_2, &max\)\) return UNDF_VAL;
       if \(CLASS\(o_3\) != NUM\) return OPD_CLA;
-      if \(!VALUE\(o_3, &times\)\) return UNDF_VAL;
+      if \(!PVALUE\(o_3, &times\)\) return UNDF_VAL;
       
       t = \(Tester*\) ) /TESTER (o_1) handle (;
       check_ret\(runtester\(times, max, t\)\);
@@ -124,15 +124,15 @@ int bigtester\(L size, Tester* t\) {
     ][
       /randomtester {(
       Tester* t;
-      L times, inner, max;
+      P times, inner, max;
       if \(o_4 < FLOORopds\) return OPDS_UNF;
       TEST_OPAQUE\(o_1\);
       if \(CLASS\(o_2\) != NUM\) return OPD_CLA;
-      if \(!VALUE\(o_2, &max\)\) return UNDF_VAL;
+      if \(!PVALUE\(o_2, &max\)\) return UNDF_VAL;
       if \(CLASS\(o_3\) != NUM\) return OPD_CLA;
-      if \(!VALUE\(o_3, &inner\)\) return UNDF_VAL;
+      if \(!PVALUE\(o_3, &inner\)\) return UNDF_VAL;
       if \(CLASS\(o_4\) != NUM\) return OPD_CLA;
-      if \(!VALUE\(o_4, &times\)\) return UNDF_VAL;
+      if \(!PVALUE\(o_4, &times\)\) return UNDF_VAL;
 
       t = \(Tester*\) ) /TESTER (o_1) handle (;
       check_ret\(randomtester\(times, inner, max, t\)\);
@@ -143,11 +143,11 @@ int bigtester\(L size, Tester* t\) {
     ][
       /bigtester {(
       Tester* t;
-      L size;
+      P size;
       if \(o_2 < FLOORopds\) return OPDS_UNF;
       TEST_OPAQUE\(o_1\);
       if \(CLASS\(o_2\) != NUM\) return OPD_CLA;
-      if \(!VALUE\(o_2, &size\)\) return UNDF_VAL;
+      if \(!PVALUE\(o_2, &size\)\) return UNDF_VAL;
       t = \(Tester*\) ) /TESTER (o_1) handle (;
       check_ret\(bigtester\(size, t\)\);
 

@@ -40,7 +40,7 @@
 
 /GETCV { dup pushA exch pushA pushA  GETCV_d exch get exec } def
 
-/GETCV_d 6 dict dup begin
+/GETCV_d 7 dict dup begin
 
 /B { NL (if \(\()__ popA __ ( = *\(\(B *\))__ popA exec (\)\) == BINF\) )__
         popA __ ( = HUGE_VAL;)__  
@@ -48,7 +48,10 @@
 /W { NL (if \(\()__ popA __ ( = *\(\(W *\))__ popA exec (\)\) == WINF\) )__
         popA __ ( = HUGE_VAL;)__  
    } def
-/L { NL (if \(\()__ popA __ ( = *\(\(L *\))__ popA exec (\)\) == LINF\) )__
+/L32 { NL (if \(\()__ popA __ ( = *\(\(L32 *\))__ popA exec (\)\) == L32INF\) )__
+        popA __ ( = HUGE_VAL;)__  
+   } def
+/L64 { NL (if \(\()__ popA __ ( = *\(\(L64 *\))__ popA exec (\)\) == L64INF\) )__
         popA __ ( = HUGE_VAL;)__  
    } def
 /S { NL popA __ ( = *\(\(S *\))__ popA exec (\);)__ popA pop
@@ -65,7 +68,7 @@ end def
 
 /CVPUT { pushA pushA CVPUT_d exch get exec } def
 
-/CVPUT_d 6 dict dup begin
+/CVPUT_d 7 dict dup begin
 /B { NL (*\(\(B *\))__ popA exec (\) = \(\(abs\()__
         popA dup pushA __ (\) > BMAX\) || isinf\()__
         popA dup pushA __ (\)\)? BINF : )__ popA __ (;)__
@@ -74,9 +77,13 @@ end def
         popA dup pushA __ (\) > WMAX\) || isinf\()__
         popA dup pushA __ (\)\)? WINF : )__ popA __ (;)__
    } def
-/L { NL (*\(\(L *\))__ popA exec (\) = \(\(abs\()__
-        popA dup pushA __ (\) > LMAX\) || isinf\()__
-        popA dup pushA __ (\)\)? LINF : )__ popA __ (;)__
+/L32 { NL (*\(\(L32 *\))__ popA exec (\) = \(\(abs\()__
+        popA dup pushA __ (\) > L32MAX\) || isinf\()__
+        popA dup pushA __ (\)\)? L32INF : )__ popA __ (;)__
+   } def
+/L64 { NL (*\(\(L64 *\))__ popA exec (\) = \(\(abs\()__
+        popA dup pushA __ (\) > L64MAX\) || isinf\()__
+        popA dup pushA __ (\)\)? L64INF : )__ popA __ (;)__
    } def
 /S { NL (*\(\(S *\))__ popA exec (\) = )__ popA __ (;)__ 
    } def
@@ -128,7 +135,7 @@ NL (})__
 NL
 NL (static void )__ st__ dt__ (ip\(B *sf, B *df, W l2r\))__
 NL ({)__
-NL (D *c, *cl; W k; )__ st__ ( *s; )__ dt__ ( *d; L n,r;)__
+NL (D *c, *cl; W k; )__ st__ ( *s; )__ dt__ ( *d; P n,r;)__
 NL (s = \()__ st__ ( *\)VALUE_BASE\(sf\); d = \()__ 
    dt__ ( *\)VALUE_BASE\(df\);)__
 NL (n = ARRAY_SIZE\(sf\)-3; r = 1<<l2r;)__
@@ -183,7 +190,7 @@ NL
 /Xextr {
 NL (static void )__ st__ (extr\(B *sf, D *min, D *max\))__
 NL ({)__
-NL st__ ( *s; D t; L n;)__
+NL st__ ( *s; D t; P n;)__
 NL (s = \()__ st__ ( *\)VALUE_BASE\(sf\); n = ARRAY_SIZE\(sf\);)__
 NL (while \(n--\))__
 NL ( { t = *\(s++\);)__
@@ -206,7 +213,7 @@ NL
 /Xintegroh {
 NL (static void )__ st__ (integroh\(B *sf\))__
 NL ({)__
-NL st__ ( *s; D y, sum; L n;)__
+NL st__ ( *s; D y, sum; P n;)__
 NL (s = \()__ st__ ( *\)VALUE_BASE\(sf\); n = ARRAY_SIZE\(sf\);)__
 NL (y = *s; *\(s++\) = sum = 0.0;)__
 NL (while \(--n\) { sum += y + *s; y = *s; *\(s++\) = sum; })__
@@ -227,7 +234,7 @@ NL
 /Xintegrohv {
 NL (static void )__ st__ (integrohv\(B *sf, B *xf\))__
 NL ({)__
-NL st__ ( *s, *x; D y, sum; L n;)__
+NL st__ ( *s, *x; D y, sum; P n;)__
 NL (s = \()__ st__ ( *\)VALUE_BASE\(sf\); n = ARRAY_SIZE\(sf\);)__
    ( x = \()__ st__ ( *\)VALUE_BASE\(xf\) + 1;)__
 NL (y = *s; *\(s++\) = sum = 0.0;)__
@@ -235,6 +242,8 @@ NL (while \(--n\) { sum += \(y + *s\) * \(*\(x++\)\); y = *s; *\(s++\) = sum; })
 NL (})__
 NL
 } def
+
+/alltypes [/B /W /L32 /L64 /S /D] def
 
 |-------------------- construct DSP1F.C -----------------------------
 | (path/) (file) | --
@@ -247,9 +256,8 @@ NL
 5 SDipC
 
 |----- generate DSP1_IP function definitions
-[ /B /W /L  /S /D ]
-{  /st name 
-   [ /B /W /L  /S /D ] {  /dt name XYip } forall
+alltypes {  /st name 
+   alltypes {  /dt name XYip } forall
 } forall
 
 |----- generate definition of list of DSP1_IP functions
@@ -257,10 +265,8 @@ NL
 NL (typedef void \(*IPfct\)\(B *sf, B *df, W l2r\);)__
 NL (static IPfct IPlist[] = {)__
 NL
-[ /B /W /L  /S /D ]
-{  /st name 
-   [ /B /W /L  /S /D ]
-   {  /dt name 
+alltypes {  /st name 
+   alltypes {  /dt name 
       st__ dt__ (ip)__  (, )__
       NL
    } forall
@@ -269,15 +275,14 @@ NL(};)__
 NL
 
 |----- generate DSP1_EXTR function definitions
-[ /B /W /L /S /D ] {  /st name Xextr } forall
+alltypes {  /st name Xextr } forall
 
 |----- generate definition of list of DSP1_EXTR functions
 
 NL (typedef void \(*EXTRfct\)\(B *sf, D *min, D *max\);)__
 NL (static EXTRfct EXTRlist[] = {)__
 NL
-[ /B /W /L  /S /D ]
-   { /st name 
+alltypes { /st name 
       st__ (extr)__  (, )__
       NL
    } forall
@@ -286,15 +291,14 @@ NL
 
 |----- generate DSP1_INTEGRoh function definitions
 
-[ /B /W /L /S /D ] {  /st name Xintegroh } forall
+alltypes {  /st name Xintegroh } forall
 
 |----- generate definition of list of DSP1_INTEGRoh functions
 
 NL (typedef void \(*INTEGRohfct\)\(B *sf\);)__
 NL (static INTEGRohfct INTEGRohlist[] = {)__
 NL
-[ /B /W /L  /S /D ]
-   { /st name 
+alltypes { /st name 
       st__ (integroh)__  (, )__
       NL
    } forall
@@ -303,15 +307,14 @@ NL
 
 |----- generate DSP1_INTEGRoh function definitions
 
-[ /B /W /L /S /D ] {  /st name Xintegrohv } forall
+alltypes {  /st name Xintegrohv } forall
 
 |----- generate definition of list of DSP1_INTEGRohV functions
 
 NL (typedef void \(*INTEGRohVfct\)\(B *sf, B *xf\);)__
 NL (static INTEGRohVfct INTEGRohVlist[] = {)__
 NL
-[ /B /W /L  /S /D ]
-   { /st name 
+alltypes { /st name 
       st__ (integrohv)__  (, )__
       NL
    } forall

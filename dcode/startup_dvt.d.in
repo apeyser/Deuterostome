@@ -95,10 +95,11 @@ end mkread def
    * (\n) text 0 exch getinterval toconsole
 } bind def
 
-/tuples 5 dict dup begin
+/tuples 6 dict dup begin
    /B 10 def
    /W 10 def
    /L 5 def
+   /X 2 def
    /S 5 def
    /D 2 def
 end def
@@ -231,20 +232,22 @@ dup dup class /arrayclass eq exch type /B eq and
 
 /d_blit { mkpass dup
           type mkact d_blit_dict begin exec end mkact exec } bind def
-/d_blit_dict 5 dict dup begin
+/d_blit_dict 6 dict dup begin
    /B /_stringclass def
    /W /_arrayclass def
    /L /_arrayclass def
+   /X /_arrayclass def
    /S /_arrayclass def
    /D /_arrayclass def
 end mkread def
 
 /ps_blit { mkpass dup 
            type mkact ps_blit_dict begin exec end mkact exec } bind def
-/ps_blit_dict 5 dict dup begin
+/ps_blit_dict 6 dict dup begin
    /B /_stringclass def
    /W /listclass def
    /L /listclass def
+   /X /listclass def
    /S /listclass def
    /D /listclass def
 end mkread def
@@ -286,6 +289,7 @@ end mkread def
 /B { objstr 0 4 4 -1 roll * number 0 exch getinterval ftext } bind def
 /W { objstr 0 6 4 -1 roll * number 0 exch getinterval ftext } bind def
 /L { objstr 0 11 4 -1 roll * number 0 exch getinterval ftext } bind def
+/X { objstr 0 21 4 -1 roll * number 0 exch getinterval ftext } bind def
 /S { objstr 0 13 4 -1 roll 6 number 0 exch getinterval ftext } bind def
 /D { objstr 0 dprec 8 add 4 -1 roll dprec number
      0 exch getinterval ftext } bind def
@@ -1188,7 +1192,7 @@ Xwindows {
 |---------------------------------------------------- connection convenience
 |
 Xwindows {
-  /dnode_memory_ <l 0 0 0 0 0> def
+  /dnode_memory_ <x 0 0 0 0 0> def
 
   /dnode_setup 11 dict dup begin
     /display getmydisplay def
@@ -1673,7 +1677,7 @@ end userdict /dvt put
       myname myshortname makewindow /wid name pop
     /woutline [ 0 0 wW 1 sub 0 wW 1 sub wH 1 sub 0 wH 1 sub 0 0 ] def
     /wpane [ 1 1 wW 2 sub wH 2 sub ] def
-    /line 4 /l array def
+    /line 4 /x array def
     macros /windowsize get /windowsize name
     macros /drawwindow get /drawwindow name
     macros /mouseclick get /mouseclick name
@@ -1799,7 +1803,7 @@ Xwindows {
   /KEY { /s name
     /xl x def
     wid x y s TEXT drawtext pop xname pop
-    newmacros { /box 2 /l array def
+    newmacros { /box 2 /x array def
       xl box 0 put x box 1 put
       box
     } if

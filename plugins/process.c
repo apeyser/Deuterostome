@@ -18,10 +18,10 @@ extern char** environ;
 
 #include "process.h"
 
-UL ll_type = 0;
-L op_hi(void) {return wrap_hi("process V1");}
-L op_libnum(void) {return wrap_libnum(ll_type);}
-L ll_errc[] = {
+UP ll_type = 0;
+P op_hi(void) {return wrap_hi("process V1");}
+P op_libnum(void) {return wrap_libnum(ll_type);}
+P ll_errc[] = {
 	PROC_ARGS, PROC_WAIT, PROC_SIZE, PROC_SIG, PROC_EOF, PROC_DEAD, 0L
 };
 B* ll_errm[] = {
@@ -55,7 +55,7 @@ static B PROCESS_STDIN_N[FRAMEBYTES];
 static B PROCESS_STATE_N[FRAMEBYTES];
 static B PROCESS_BUFFC_N[FRAMEBYTES];
 
-L op_INIT_(void) {
+P op_INIT_(void) {
   makename(PROCESS_HANDLE, opaquename);
   makename("pid", PROCESS_PID_N);
   makename("stdout", PROCESS_STDOUT_N);
@@ -68,7 +68,7 @@ L op_INIT_(void) {
 
 #define DECLARE_ALARM \
   clock_t endclock = clock() + 180*CLOCKS_PER_SEC; \
-  L chunk_size
+  P chunk_size
 
 #define START_ALARM {timeout = FALSE;}
 
@@ -90,9 +90,9 @@ L op_INIT_(void) {
 		timeout = FALSE;														\
 	}
 
-L op_writeproc(void) {
-	int pipein;
-	L p, atmost, ret;
+P op_writeproc(void) {
+	P pipein;
+	P p, atmost, ret;
 	DECLARE_ALARM;
 
 	if (o_2 < FLOORopds) return OPDS_UNF;
@@ -103,7 +103,7 @@ L op_writeproc(void) {
 
 	if (PROCESS_STATE(o_1) == PROCESS_BUFFD) return OK;
 
-	pipein = PROCESS_STDIN(o_1);
+	pipein = (P)PROCESS_STDIN(o_1);
 	p = 0;
 	atmost = ARRAY_SIZE(o_2);
 	START_ALARM;
@@ -126,9 +126,9 @@ L op_writeproc(void) {
 	return OK;
 }
 
-L op_waitproc(void) {
-	L pipeout;
-	L ret;
+P op_waitproc(void) {
+	P pipeout;
+	P ret;
 	B nextchar;
 
 	if (o_1 < FLOORopds) return OPDS_UNF;
@@ -137,7 +137,7 @@ L op_waitproc(void) {
 	if (PROCESS_STATE(o_1) == PROCESS_DEAD) RETURN_ERROR(PROC_DEAD);
 	if (PROCESS_STATE(o_1) == PROCESS_BUFFD) return OK;
 
-	pipeout = PROCESS_STDOUT(o_1);
+	pipeout = (P)PROCESS_STDOUT(o_1);
 	while (1) {
 		alarm(10);
 		timeout = FALSE;
@@ -156,9 +156,9 @@ L op_waitproc(void) {
 	return OK;
 }
 
-L op_readproc(void) {
-	L pipeout;
-	L index, p, ret, atmost;
+P op_readproc(void) {
+	P pipeout;
+	P index, p, ret, atmost;
 	DECLARE_ALARM;
 	
 	if (o_4 < FLOORopds) return OPDS_UNF;
@@ -170,12 +170,12 @@ L op_readproc(void) {
 
 	if (PROCESS_STATE(o_1) == PROCESS_DEAD) RETURN_ERROR(PROC_DEAD);	
 
-	if (! VALUE(o_3, &index)) return UNDF_VAL;
+	if (! PVALUE(o_3, &index)) return UNDF_VAL;
 	if (ARRAY_SIZE(o_4)-index < 1) return RNG_CHK;
-	if (! VALUE(o_2, &atmost)) atmost = ARRAY_SIZE(o_4)-index;
+	if (! PVALUE(o_2, &atmost)) atmost = ARRAY_SIZE(o_4)-index;
 	if (ARRAY_SIZE(o_4)-index-atmost < 0) return RNG_CHK;
 
-	pipeout = PROCESS_STDOUT(o_1);
+	pipeout = (P)PROCESS_STDOUT(o_1);
 	p = index;
 	if (PROCESS_STATE(o_1) == PROCESS_BUFFD) {
 		VALUE_PTR(o_4)[p++] = PROCESS_BUFFC(o_1);
@@ -201,13 +201,13 @@ L op_readproc(void) {
 	};
  procread:
 	END_ALARM;
-	TAG(o_3) = NUM | LONGTYPE;
-	LONG_VAL(o_3) = index+p;
+	TAG(o_3) = NUM | LONGBIGTYPE;
+	LONGBIG_VAL(o_3) = index+p;
 	FREEopds = o_2;
 	return OK;
 }
 
-L op_unwaitproc(void) {
+P op_unwaitproc(void) {
 	if (o_1 < FLOORopds) return OPDS_UNF;
 	TEST_OPAQUE(o_1);
 
@@ -218,7 +218,7 @@ L op_unwaitproc(void) {
 	return OK;
 }
 
-L op_killproc(void) {
+P op_killproc(void) {
 	pid_t pid;
 	int errno_ = 0;
 
@@ -229,11 +229,11 @@ L op_killproc(void) {
 	if (PROCESS_STATE(o_1) == PROCESS_BUFFD) RETURN_ERROR(PROC_WAIT);
 
 	PROCESS_STATE(o_1) = PROCESS_DEAD;
-	pid = PROCESS_PID(o_1);
+	pid = (P)PROCESS_PID(o_1);
 	if (kill(pid, SIGTERM)) errno_ = errno;
 	if (waitpid(pid, 0, 0) == -1 && ! errno_) errno_ = errno;
-	if (close(PROCESS_STDIN(o_1)) && ! errno_) errno_ = errno;
-	if (close(PROCESS_STDOUT(o_1)) && ! errno_) errno_ = errno; 
+	if (close((P)PROCESS_STDIN(o_1)) && ! errno_) errno_ = errno;
+	if (close((P)PROCESS_STDOUT(o_1)) && ! errno_) errno_ = errno; 
 	if (errno_) return -errno_;
 
 	FREEopds = o_1;
@@ -241,13 +241,13 @@ L op_killproc(void) {
 	return OK;
 }
 
-L op_liveproc(void) {
+P op_liveproc(void) {
 	pid_t pid;
 	int status;
-	L ret;
+	P ret;
 	int errno_ = 0;
 	B nextchar;
-	L pipeout;
+	P pipeout;
 
 	if (o_1 < FLOORopds) return OPDS_UNF;
 	TEST_OPAQUE(o_1);
@@ -260,7 +260,7 @@ L op_liveproc(void) {
 		return OK;
 	}
 
-	pipeout = PROCESS_STDOUT(o_1);
+	pipeout = (P)PROCESS_STDOUT(o_1);
 	timeout = FALSE;
 	alarm(10);
 	ret = read(pipeout, &nextchar, 1);
@@ -276,11 +276,11 @@ L op_liveproc(void) {
 		return OK;
 	}
 
-	pid = PROCESS_PID(o_1);
+	pid = (P)PROCESS_PID(o_1);
 	if ((ret = waitpid(pid, &status, WNOHANG)) == -1) {
 		errno_ = errno;
-		close(PROCESS_STDIN(o_1));
-		close(PROCESS_STDOUT(o_1));
+		close((P)PROCESS_STDIN(o_1));
+		close((P)PROCESS_STDOUT(o_1));
 		PROCESS_STATE(o_1) = PROCESS_DEAD;
 		kill(pid, SIGKILL);
 		waitpid(pid, &status, 0);
@@ -291,17 +291,17 @@ L op_liveproc(void) {
 		BOOL_VAL(o_1) = TRUE;
 	} else {
 		PROCESS_STATE(o_1) = PROCESS_DEAD;
-		if (close(PROCESS_STDIN(o_1))) errno_ = errno;
-		if (close(PROCESS_STDOUT(o_1)) && ! errno_) errno_ = errno;
+		if (close((P)PROCESS_STDIN(o_1))) errno_ = errno;
+		if (close((P)PROCESS_STDOUT(o_1)) && ! errno_) errno_ = errno;
 		if (errno_) return -errno_;
 		
 		if (o2 > CEILopds) return OPDS_OVF;
 		ret = WIFEXITED(status) ?
-                    WEXITSTATUS(status) : (L) 0xFFFF0000L;
+                    WEXITSTATUS(status) : (P) 0xFFFF0000L;
 		TAG(o1) = BOOL; ATTR(o1) = 0;
 		BOOL_VAL(o1) = FALSE;
-		TAG(o_1) = NUM | LONGTYPE; ATTR(o_1) = 0;
-		LONG_VAL(o_1) = ret;
+		TAG(o_1) = NUM | LONGBIGTYPE; ATTR(o_1) = 0;
+		LONGBIG_VAL(o_1) = ret;
 		FREEopds = o2;
 	}
 
@@ -316,7 +316,7 @@ static void senderrno_(int line) {
 	exit(1); 
 }
 
-L op_makeproc(void) {
+P op_makeproc(void) {
     pid_t pid;
     B* param;
     int filedes_stdout[2];
@@ -459,7 +459,7 @@ L op_makeproc(void) {
         };
     };
     
-    if (! (procframe = MAKE_OPAQUE_DICT(0,
+    if (! (procframe = MAKE_OPAQUE_DICT(0, NULL,
                                         PROCESS_PID_N,
                                         PROCESS_STDOUT_N,
                                         PROCESS_STDIN_N,
@@ -467,12 +467,12 @@ L op_makeproc(void) {
                                         PROCESS_BUFFC_N))) 
         return VM_OVF;
     
-    TAG(initframe) = (NUM | LONGTYPE); ATTR(initframe) = 0;
-    LONG_VAL(initframe) = pid;
+    TAG(initframe) = (NUM | LONGBIGTYPE); ATTR(initframe) = 0;
+    LONGBIG_VAL(initframe) = pid;
     OPAQUE_MEM_SET(procframe, PROCESS_PID_N, initframe);
-    LONG_VAL(initframe) = filedes_stdin[1];
+    LONGBIG_VAL(initframe) = filedes_stdin[1];
     OPAQUE_MEM_SET(procframe, PROCESS_STDIN_N, initframe);
-    LONG_VAL(initframe) = filedes_stdout[0];
+    LONGBIG_VAL(initframe) = filedes_stdout[0];
     OPAQUE_MEM_SET(procframe, PROCESS_STDOUT_N, initframe);
     TAG(initframe) = (NUM | BYTETYPE);
     *(NUM_VAL(initframe)) = 0;

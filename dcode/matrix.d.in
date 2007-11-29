@@ -21,7 +21,7 @@
 
 | dim_s ... dim_f n | <l dim_f*..*dim_s .. dim_f>
 /cutsn {
-  dup /l array 1
+  dup /x array 1
   3 -1 roll 1 sub -1 0 {/i name | s .. f   <l> mul  
     3 -1 roll mul               | s .. f-1 <l> mul*f
     dup 2 index i put           | s .. f-1 <l> mul*f

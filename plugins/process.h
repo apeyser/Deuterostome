@@ -13,25 +13,25 @@
 #define op_unwaitproc EXPORTNAME(op_unwaitproc)
 
 // [(program) (argument)...] or (program) | handle
-L op_makeproc(void);
+P op_makeproc(void);
 
 // (string) handle | --
-L op_writeproc(void);
+P op_writeproc(void);
 
 // (buffer) index * or length handle | (buffer) index
-L op_readproc(void);
+P op_readproc(void);
 
 // handle | --
-L op_killproc(void);
+P op_killproc(void);
 
 // handle | true or return-code false
-L op_liveproc(void);
+P op_liveproc(void);
 
 // handle | --
-L op_waitproc(void);
+P op_waitproc(void);
 
 // handle | --
-L op_unwaitproc(void);
+P op_unwaitproc(void);
 
 #define PROCESS_HANDLE "PROCESS"
 #define PROC_ARGS 0x01L //argument types are not strings
@@ -41,9 +41,9 @@ L op_unwaitproc(void);
 #define PROC_EOF  0x05L //unexpected eof
 #define PROC_DEAD 0x06L //Process is dead
 
-#define PROCESS_PID(frame) (LONG_VAL(OPAQUE_MEM(frame, PROCESS_PID_N)))
-#define PROCESS_STDIN(frame) (LONG_VAL(OPAQUE_MEM(frame, PROCESS_STDIN_N)))
-#define PROCESS_STDOUT(frame) (LONG_VAL(OPAQUE_MEM(frame, PROCESS_STDOUT_N)))
+#define PROCESS_PID(frame) (LONGBIG_VAL(OPAQUE_MEM(frame, PROCESS_PID_N)))
+#define PROCESS_STDIN(frame) (LONGBIG_VAL(OPAQUE_MEM(frame, PROCESS_STDIN_N)))
+#define PROCESS_STDOUT(frame) (LONGBIG_VAL(OPAQUE_MEM(frame, PROCESS_STDOUT_N)))
 #define PROCESS_STATE(frame) (*(NUM_VAL(OPAQUE_MEM(frame, PROCESS_STATE_N))))
 #define PROCESS_BUFFC(frame) (*(NUM_VAL(OPAQUE_MEM(frame, PROCESS_BUFFC_N))))
 

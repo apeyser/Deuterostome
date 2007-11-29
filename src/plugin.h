@@ -36,7 +36,7 @@ char libPLUGIN_is_dll(void) {return 1;}
 extern "C" {
 #endif
 
-L wrap_readcode(const char* file);
+P wrap_readcode(const char* file);
 
 #define EXPORTNAME(name) PLUGIN_JOIN(PLUGIN_NAME, _LTX_##name)
 
@@ -46,8 +46,8 @@ L wrap_readcode(const char* file);
 #define PLUGIN_JOIN(name1,name2) PREPLUGIN_JOIN(name1,name2)
 #define PREPLUGIN_JOIN(name1,name2) name1##name2
 
-PLUGIN_SCOPE UL ll_type;
-PLUGIN_SCOPE L ll_errc[];
+PLUGIN_SCOPE UP ll_type;
+PLUGIN_SCOPE P ll_errc[];
 PLUGIN_SCOPE B* ll_errm[];
 PLUGIN_SCOPE B* ll_export[];
 
@@ -62,10 +62,10 @@ PLUGIN_SCOPE B* ll_export[];
 #define op_INIT_  EXPORTNAME(op_INIT_)
 #define op_FINI_  EXPORTNAME(op_FINI_)
 
-L op_hi(void);
-L op_libnum(void);
-L op_INIT_(void);
-L op_FINI_(void);
+P op_hi(void);
+P op_libnum(void);
+P op_INIT_(void);
+P op_FINI_(void);
 
 #define opaquename PRIVATENAME(opaquename)
 extern B opaquename[FRAMEBYTES];
@@ -93,7 +93,7 @@ extern B buffernameframe[FRAMEBYTES];
 
 // frame must be removed from the stack before call
 #define KILL_OPAQUE(frame) do {													\
-	L ret;																					      \
+	P ret;																					      \
 	if (o1 >= CEILopds) return OPDS_OVF;									\
 	moveframe(OPAQUE_MEM(frame, saveboxname), o1);				\
 	FREEopds = o2;																				\
@@ -102,9 +102,9 @@ extern B buffernameframe[FRAMEBYTES];
 
 #define PLUGIN_INTRO(version) PLUGIN_INTRO_(version, PLUGIN_NAME)
 #define PLUGIN_INTRO_(version, name)                 \
-  UL ll_type = 0; \
-  L op_hi(void) {return wrap_hi(#name " V" #version);} \
-  L op_libnum(void) {return wrap_libnum(ll_type);}
+  UP ll_type = 0; \
+  P op_hi(void) {return wrap_hi(#name " V" #version);} \
+  P op_libnum(void) {return wrap_libnum(ll_type);}
 
 #define PLUGIN_OP(name) #name, (B*) op_##name
 

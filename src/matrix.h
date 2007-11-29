@@ -15,10 +15,15 @@
 
 #define BUILD_ATLAS 1
 
-L op_matmul_blas(void);
-L op_decompLU_lp(void);
-L op_backsubLU_lp(void);
-L op_invertLU_lp(void);
+P op_matmul_blas(void);
+P op_decompLU_lp(void);
+P op_backsubLU_lp(void);
+P op_invertLU_lp(void);
+P op_norm2(void);
+P op_matvecmul_blas(void);
+P op_triangular_solve(void);
+P op_givens_blas(void);
+P op_rotate_blas(void);
 
 #endif //BUILD_ATLAS
 

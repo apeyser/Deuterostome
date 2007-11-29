@@ -9,9 +9,9 @@
 #define x_op_thrown PRIVATENAME(x_op_thrown)
 #define x_op_thrown_name PRIVATENAME(x_op_thrown_name)
 
-L op_throw(void);
-L op_thrown(void);
-L x_op_thrown(void);
+P op_throw(void);
+P op_thrown(void);
+P x_op_thrown(void);
 const char* x_op_uncaught_name;
 
 #define INV_THROW 0x01L //invalid throw

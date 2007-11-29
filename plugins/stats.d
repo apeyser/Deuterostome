@@ -4,7 +4,7 @@
 
 /bodycode
 (
-static L max_n = 0;
+static P max_n = 0;
 #define max_kn \(1000\)
 static D binom[max_kn+1][max_kn+1] = {{1}};
 ) def
@@ -15,13 +15,13 @@ static D binom[max_kn+1][max_kn+1] = {{1}};
     [
       /combinations {(
   // n k | \(n/k\)
-  L n, k, i, j;
+  P n, k, i, j;
 
   if \(o_2 < FLOORopds\) return OPDS_UNF;
   if \(CLASS\(o_1\) != NUM\) return OPD_CLA;
   if \(CLASS\(o_2\) != NUM\) return OPD_CLA;
-  if \(! VALUE\(o_2, &n\)\) return UNDF_VAL;
-  if \(! VALUE\(o_1, &k\)\) return UNDF_VAL;
+  if \(! PVALUE\(o_2, &n\)\) return UNDF_VAL;
+  if \(! PVALUE\(o_1, &k\)\) return UNDF_VAL;
   if \(n < 0 || k < 0 || n < k\) return RNG_CHK;
   if \(n > max_kn\) return RNG_CHK;
 
@@ -53,11 +53,11 @@ static D binom[max_kn+1][max_kn+1] = {{1}};
     [
       /legendre {(
   // x l | Pl\(x\)
-  L l, i;
+  P l, i;
   D x, Px, Px_1, Px_2;
   if \(o_2 < FLOORopds\) return OPDS_UNF;
   if \(CLASS\(o_1\) != NUM\) return OPD_CLA;
-  if \(! VALUE\(o_1, &l\)\) return UNDF_VAL;
+  if \(! PVALUE\(o_1, &l\)\) return UNDF_VAL;
   if \(l < 0\) return RNG_CHK;
   if \(TAG\(o_2\) != \(NUM | DOUBLETYPE\)\) return OPD_TYP;
 

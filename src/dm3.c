@@ -33,39 +33,40 @@ extern int h_errno;
 
 /*--------- makeDmemory */ 
  
-void makeDmemory(B *em, L specs[5])
+void makeDmemory(B *em, L64 specs[5])
 {
-FREEopds = FLOORopds = (B*)(((((size_t) em) >> 3) + 1) << 3);
-CEILopds = FLOORopds + specs[0] * FRAMEBYTES;
+  FREEopds = FLOORopds = (B*)(((((size_t) em) >> 3) + 1) << 3);
+  CEILopds = FLOORopds + specs[0] * FRAMEBYTES;
 
-FLOORexecs = FREEexecs = CEILopds;
-CEILexecs = FLOORexecs + specs[1] * FRAMEBYTES;
+  FLOORexecs = FREEexecs = CEILopds;
+  CEILexecs = FLOORexecs + specs[1] * FRAMEBYTES;
 
-FLOORdicts = FREEdicts = CEILexecs;
-CEILdicts = FLOORdicts + specs[2] * FRAMEBYTES;
+  FLOORdicts = FREEdicts = CEILexecs;
+  CEILdicts = FLOORdicts + specs[2] * FRAMEBYTES;
 
-FLOORvm = FREEvm = CEILdicts;
-TOPvm = CEILvm  = FLOORvm + specs[3] * 1000000;
+  FLOORvm = FREEvm = CEILdicts;
+  TOPvm = CEILvm  = FLOORvm + specs[3] * 1000000;
 }
-
 
 /*--------------------------- initialize a socket address */
 
-L init_sockaddr(struct sockaddr_in *name, const char *hostname,
-		L port)
+P init_sockaddr(struct sockaddr_in *name, 
+                const char *hostname,
+                UW port)
 {
   struct hostent *hostinfo;
   memset(name, 0, sizeof(struct sockaddr_in));
   name->sin_family = AF_INET;
-  name->sin_port = htons((UW)port);
+  name->sin_port = htons(port);
   hostinfo = gethostbyname(hostname);
   if (hostinfo == 0) return(-h_errno);
   name->sin_addr = *(struct in_addr *) hostinfo->h_addr;
-  return(OK);
+
+  return OK;
 }
 
 #if ENABLE_UNIX_SOCKETS
-L init_unix_sockaddr(struct sockaddr_un *name, L port) {
+P init_unix_sockaddr(struct sockaddr_un *name, UW port) {
   char* sock_path = getenv("DMSOCKDIR");
   memset(name, 0, sizeof(struct sockaddr_un));
   if (! sock_path || ! *sock_path) sock_path = DMSOCKDIR;
@@ -73,7 +74,7 @@ L init_unix_sockaddr(struct sockaddr_un *name, L port) {
     sock_path[strlen(sock_path)-1] = '\0';
 
   name->sun_family = AF_UNIX;
-  snprintf(name->sun_path, sizeof(name->sun_path)-1, "%s/dnode-%li",
+  snprintf(name->sun_path, sizeof(name->sun_path)-1, "%s/dnode-%i",
            sock_path, port - IPPORT_USERRESERVED);
 
   return OK;
@@ -82,9 +83,9 @@ L init_unix_sockaddr(struct sockaddr_un *name, L port) {
 
 /*--------------------------- make a server socket */
 
-L make_socket(L port)
+P make_socket(UW port)
 {
-  L sock;
+  P sock;
   struct sockaddr_in name;
   memset(&name, 0, sizeof(struct sockaddr_in));
 
@@ -100,7 +101,7 @@ L make_socket(L port)
 
 #if ENABLE_UNIX_SOCKETS
 typedef struct port_list {
-  L port;
+  UW port;
   struct port_list* next;
 } port_list;
 static port_list* ports_first = NULL;
@@ -114,7 +115,7 @@ static void unlink_socketfile(void) {
       unlink(name.sun_path);
 }
 
-void set_atexit_socks(L port) {
+void set_atexit_socks(P port) {
   if (! ports_first) {
     if (atexit(unlink_socketfile))
       error(EXIT_FAILURE, 0, "Can't set exit function");
@@ -129,9 +130,9 @@ void set_atexit_socks(L port) {
   ports_last->next = NULL;
 }
 
-L make_unix_socket(L port) {
+P make_unix_socket(UW port) {
   char* sock_dir; char* i;
-  L sock;
+  P sock;
   struct sockaddr_un name;
   struct stat buf;
   mode_t mask;
@@ -203,11 +204,11 @@ L make_unix_socket(L port) {
    
 */
 
-L fromsocket(L sock, B *bsf)
+P fromsocket(P sock, B *bsf)
 {
-  L nb, nsbuf, atmost, retc;
+  P nb, nsbuf, atmost, retc;
   B *p, sf[2*FRAMEBYTES], *bf, *sbuf, sbsf[FRAMEBYTES];
-  BOOLEAN isnative;
+  B isnonnative;
 
   moveframe(bsf,sbsf);
   nsbuf = ARRAY_SIZE(sbsf);
@@ -221,22 +222,21 @@ L fromsocket(L sock, B *bsf)
   /*----- get the string and box/null frames and evaluate */
   //rd0: 
   p = sf; atmost = 2*FRAMEBYTES;
-rd1:
+ rd1:
   if (timeout) return(BAD_MSG);
   nb = read(sock, p, atmost);
-  if (nb < 0)
-    { if((errno == EINTR) || (errno == EAGAIN)) goto rd1;
-      else return(-errno);
-    }
+  if (nb < 0) { 
+    if((errno == EINTR) || (errno == EAGAIN)) goto rd1;
+    else return(-errno);
+  }
   if (nb == 0) return(DONE);
   p += nb;
   if ((atmost -= nb) > 0) goto rd1;
   
   if (! GETNATIVEFORMAT(sf) || ! GETNATIVEUNDEF(sf)) return BAD_FMT;
-  if (! (isnative = GETNATIVEENDIAN(sf))) {
-    if ((retc = deendian_frame(sf)) != OK) return retc; 
-    if ((retc = deendian_frame(bf)) != OK) return retc;
-  };
+  isnonnative = GETNONNATIVE(sf);
+  if ((retc = deendian_frame(sf, isnonnative)) != OK) return retc; 
+  if ((retc = deendian_frame(bf, isnonnative)) != OK) return retc;
   FORMAT(sf) = 0;
 
   if (TAG(sf) != (ARRAY | BYTETYPE)) return(BAD_MSG);
@@ -246,14 +246,14 @@ rd1:
   if ((CLASS(bf) != NULLOBJ) && (CLASS(bf) != BOX)) return(BAD_MSG);
 
 /*----- get the string body */
-p = sbuf; atmost = (L)DALIGN(ARRAY_SIZE(sf));
-rd2:
+  p = sbuf; atmost = (P)DALIGN(ARRAY_SIZE(sf));
+ rd2:
   if (timeout) return(BAD_MSG);
   nb = read(sock, p, atmost);
-  if (nb < 0)
-    { if((errno == EINTR) || (errno == EAGAIN)) goto rd2;
-      else return(-errno);
-    }
+  if (nb < 0) { 
+    if((errno == EINTR) || (errno == EAGAIN)) goto rd2;
+    else return(-errno);
+  }
   if (nb == 0) { return(LOST_CONN); }               /* connection blew up */
   p += nb;
   if ((atmost -= nb) > 0) goto rd2;
@@ -262,13 +262,13 @@ rd2:
   if (CLASS(bf) == NULLOBJ) goto ev3;
   if ((FREEvm + DALIGN(BOX_NB(bf))) > CEILvm) return(VM_OVF);
   p = FREEvm; atmost = BOX_NB(bf);
-rd3:
+ rd3:
   if (timeout) return(BAD_MSG);
   nb = read(sock, p, atmost);
-  if (nb < 0)
-    { if((errno == EINTR) || (errno == EAGAIN)) goto rd3;
-      else return(-errno);
-    }
+  if (nb < 0) { 
+    if((errno == EINTR) || (errno == EAGAIN)) goto rd3;
+    else return(-errno);
+  }
   if (nb == 0) return(LOST_CONN);                 /* connection blew up */
   p += nb;
   if ((atmost -= nb) > 0) goto rd3;
@@ -276,16 +276,16 @@ rd3:
 /*----- relocate object tree of box and push root object on operand
         stack
 */
-  if (! isnative && ((retc = deendian_frame(FREEvm)) != OK)) return retc;
-  if ((retc = unfoldobj(FREEvm,(L)FREEvm, isnative)) != OK) return retc;
+  if ((retc = deendian_frame(FREEvm, isnonnative)) != OK) return retc;
+  if ((retc = unfoldobj(FREEvm,(P)FREEvm, isnonnative)) != OK) return retc;
   if (o2 >= CEILopds) return(OPDS_OVF);
   moveframe(FREEvm,o1);                    /* root obj of box -> opds */
   FREEvm += BOX_NB(bf); 
   FREEopds = o2;
-ev3:  /* push frame for substring in buffer on operand stack */
+ ev3:  /* push frame for substring in buffer on operand stack */
   moveframe(sbsf,o1); ARRAY_SIZE(o1) = ARRAY_SIZE(sf);
   FREEopds = o2;
-return(OK);
+  return(OK);
 }
 
 /*------------------------------- write a message to a socket
@@ -298,32 +298,38 @@ return(OK);
     LOST_CONN - the message could not be sent due to a broken connection
 */
 
-L tosocket(L sock, B *sf, B *cf)
+P tosocket(P sock, B *sf, B *cf)
 {
   static B frame[FRAMEBYTES];
-  L nb, atmost, retc; W d;
+  P nb, atmost, retc; 
+  W d;
   B *p, *oldFREEvm, *bf;
   
   p = oldFREEvm = FREEvm;
   if (p + FRAMEBYTES > CEILvm) return VM_OVF;
   nb = FRAMEBYTES + FRAMEBYTES + DALIGN(ARRAY_SIZE(sf));
   if (p + nb > CEILvm) return(VM_OVF);
-  moveframe(sf,p); VALUE_BASE(p) = 0; SETNATIVE(p);
+
+  moveframe(sf,p); 
+  VALUE_BASE(p) = 0; 
+  SETNATIVE(p);
   p += FRAMEBYTES; 
-  bf = p; moveframe(cf,bf);   p += FRAMEBYTES;
+  bf = p; 
+  moveframe(cf,bf);   
+  p += FRAMEBYTES;
   moveB((B *)VALUE_BASE(sf),p,ARRAY_SIZE(sf));
   p += DALIGN(ARRAY_SIZE(sf));
-  if (CLASS(cf) != NULLOBJ)
-    { 
-      FREEvm = p; d = 0;
-      moveframe(cf, frame);
-      retc = foldobj(frame,(L)p,&d);
-      TAG(bf) = BOX; ATTR(bf) = 0; 
-      VALUE_BASE(bf) = 0; BOX_NB(bf) = FREEvm - p;
-      nb += FREEvm - p;
-      FREEvm = oldFREEvm;
-      if (retc != OK) return(retc);
-    }
+
+  if (CLASS(cf) != NULLOBJ) { 
+    FREEvm = p; d = 0;
+    moveframe(cf, frame);
+    retc = foldobj(frame,(P)p,&d);
+    TAG(bf) = BOX; ATTR(bf) = 0; 
+    VALUE_BASE(bf) = 0; BOX_NB(bf) = FREEvm - p;
+    nb += FREEvm - p;
+    FREEvm = oldFREEvm;
+    if (retc != OK) return(retc);
+  }
   atmost = nb; p = FREEvm;
 
 /*----- we give ourselves 10 sec to get this out */
@@ -339,7 +345,7 @@ L tosocket(L sock, B *sf, B *cf)
   
   p += nb;
   if ((atmost -= nb) > 0) goto wr1;
-  return(OK);
+  return OK;
 }
 
 /*----------------------------------------------- connect
@@ -350,20 +356,25 @@ L tosocket(L sock, B *sf, B *cf)
     network operators.
 */
 
-L op_connect(void)
+P op_connect(void)
 {
-  L port, sock, retc, size = PACKET_SIZE;
+  UW port;
+  LBIG port_;
+  P sock, retc, size = PACKET_SIZE;
   struct sockaddr_in serveraddr;
 
   if (o_2 < FLOORopds) return(OPDS_UNF);
   if (TAG(o_2) != (ARRAY | BYTETYPE)) return(OPD_ERR);
   if (CLASS(o_1) != NUM) return(OPD_CLA);
-  if (!VALUE(o_1,&port)) return(UNDF_VAL);
-  port += IPPORT_USERRESERVED;
+  if (!VALUE(o_1,&port_)) return(UNDF_VAL);
+  port_ += IPPORT_USERRESERVED;
+  if (port_ >= WMAX) return RNG_CHK;
+  port = (UW) port_;
+  
   if ((FREEvm + ARRAY_SIZE(o_2) + 1) > CEILvm) return(VM_OVF);
   moveB((B *)VALUE_BASE(o_2),FREEvm,ARRAY_SIZE(o_2));
   FREEvm[ARRAY_SIZE(o_2)] = '\000';
-
+  
 #if ENABLE_UNIX_SOCKETS
   {
     struct sockaddr_un unixserveraddr;
@@ -381,8 +392,8 @@ L op_connect(void)
 
   if ((retc = init_sockaddr(&serveraddr, FREEvm, port)) != OK) return retc;
   if ((sock = socket(PF_INET, SOCK_STREAM, 0)) == -1) return -errno;
-  if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &size, sizeof(L)) == -1
-      || setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &size, sizeof(L)) == -1
+  if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &size, sizeof(P)) == -1
+      || setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &size, sizeof(P)) == -1
       || connect(sock, (struct sockaddr *)&serveraddr,
                  sizeof(serveraddr)) == -1) {
     int errno_ = errno;
@@ -390,12 +401,12 @@ L op_connect(void)
     return -errno_;
   };
   
-  goodsocket:
+ goodsocket:
   if (fcntl(sock, F_SETFL, O_NONBLOCK) == -1)   /* make non-blocking  */
     error(EXIT_FAILURE, errno, "fcntl");
   FD_SET(sock, &sock_fds);                      /* register the socket */
   TAG(o_2) = NULLOBJ | SOCKETTYPE; ATTR(o_2) = 0;
-  LONG_VAL(o_2) = sock;
+  LONGBIG_VAL(o_2) = sock;
   FREEopds = o_1;
   return OK;
 }
@@ -405,12 +416,12 @@ L op_connect(void)
     socket | --
 */
 
-L op_disconnect(void)
+P op_disconnect(void)
 {
   if (o_1 < FLOORopds) return(OPDS_UNF);
   if (TAG(o_1) != (NULLOBJ | SOCKETTYPE)) return(OPD_ERR);
-  FD_CLR(LONG_VAL(o_1), &sock_fds);
-  close(LONG_VAL(o_1));
+  FD_CLR((P) LONGBIG_VAL(o_1), &sock_fds);
+  close((P) LONGBIG_VAL(o_1));
   FREEopds = o_1;
   return(OK);
 }
@@ -420,44 +431,46 @@ L op_disconnect(void)
     socket [ rootobj (string) ] | --
 */
 
-L op_send(void)
+P op_send(void)
 {
-  L sock, retc; B * root, *string, nf[FRAMEBYTES];
+  P sock, retc; B * root, *string, nf[FRAMEBYTES];
 
   if (o_2 < FLOORopds) return(OPDS_UNF);
   if (TAG(o_2) != (NULLOBJ | SOCKETTYPE)) return(OPD_ERR);
-  sock = LONG_VAL(o_2);
-  if (TAG(o_1) == (ARRAY | BYTETYPE))
-    { if (FREEvm + FRAMEBYTES > CEILvm) return(VM_OVF);
-      TAG(nf) = NULLOBJ; ATTR(nf) = 0;
-      root = nf; string = o_1; 
-      goto send1;
-    }
-  else
-    if (CLASS(o_1) == LIST)
-      {
-	root = (B *)VALUE_BASE(o_1);
-	if ((CLASS(root) != LIST) && (CLASS(root) != DICT) &&
-	    (CLASS(root) != ARRAY)) return(INV_MSG);
-	string = root + FRAMEBYTES;
-	if (TAG(string) != (ARRAY | BYTETYPE)) return(INV_MSG);
-	if (string > (B *)LIST_CEIL(o_1)) return(INV_MSG);
-        goto send1;
-      }
-    else return(OPD_CLA);
+  sock = (P) LONGBIG_VAL(o_2);
+  if (TAG(o_1) == (ARRAY | BYTETYPE)) { 
+    if (FREEvm + FRAMEBYTES > CEILvm) return(VM_OVF);
+    TAG(nf) = NULLOBJ; 
+    ATTR(nf) = 0;
+    root = nf; 
+    string = o_1; 
+    goto send1;
+  }
+  else if (CLASS(o_1) == LIST) {
+    root = (B *)VALUE_BASE(o_1);
+    if ((CLASS(root) != LIST) 
+        && (CLASS(root) != DICT) 
+        && (CLASS(root) != ARRAY)) 
+      return(INV_MSG);
+
+    string = root + FRAMEBYTES;
+    if (TAG(string) != (ARRAY | BYTETYPE)) return(INV_MSG);
+    if (string > (B *)LIST_CEIL(o_1)) return(INV_MSG);
+    goto send1;
+  }
+  else return(OPD_CLA);
 
  send1:
- if ((retc = tosocket(sock,string,root)) != OK)
- {
-   if (retc == LOST_CONN)
-     { 
-       close(sock); FD_CLR(sock, &sock_fds);
-       return(retc);
-     }
-   else return(retc);
- }
+  if ((retc = tosocket(sock,string,root)) != OK) {
+    if (retc == LOST_CONN) { 
+      close(sock); 
+      FD_CLR(sock, &sock_fds);
+    }
+    return retc;
+  }
  
- FREEopds = o_2; return(OK);
+  FREEopds = o_2; 
+  return OK;
 }
 
 /*------------------------------------------- getsocket
@@ -466,11 +479,12 @@ L op_send(void)
 The socket is opaquely encoded in a null object of type socket.
 */
 
-L op_getsocket(void)
+P op_getsocket(void)
 {
   if (o1 >= CEILopds) return(OPDS_OVF);
-  TAG(o1) = NULLOBJ | SOCKETTYPE; ATTR(o1) = 0;
-  LONG_VAL(o1) = recsocket;
+  TAG(o1) = NULLOBJ | SOCKETTYPE; 
+  ATTR(o1) = 0;
+  LONGBIG_VAL(o1) = recsocket;
   FREEopds = o2;
   return(OK);
 }
@@ -481,14 +495,13 @@ L op_getsocket(void)
 returns the host's name
 */
 
-L op_getmyname(void)
+P op_getmyname(void)
 {
   if (o_1 < FLOORopds) return(OPDS_UNF);
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
   if (gethostname((B *)VALUE_BASE(o_1),ARRAY_SIZE(o_1)) == -1)
-      return(-errno);
-      ARRAY_SIZE(o_1) = strlen((B *)VALUE_BASE(o_1));
-      return(OK);
+    return(-errno);
+
+  ARRAY_SIZE(o_1) = strlen((B *)VALUE_BASE(o_1));
+  return OK;
 }
-
-

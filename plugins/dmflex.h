@@ -16,25 +16,25 @@
 
 // (dir) (file) flags | handle
 // where flags is one of /r /w /rw /rwtrunc  /a
-L op_makestream(void);
+P op_makestream(void);
 
 // handle position offset | handle
 // where position is /s --> beginning or /e --> end or /c --> current
-L op_seekstream(void);
+P op_seekstream(void);
 
 // handle (string) | handle
-L op_writestream(void);
+P op_writestream(void);
 
 // handle (string) offset bytes/* | handle (string) offset true/false
-L op_readstream(void);
+P op_readstream(void);
 
 // handle | --
-L op_closestream(void);
+P op_closestream(void);
 
 // handle | handle (something executed)
-L op_execstream(void);
+P op_execstream(void);
 
-L x_op_execstream(void);
+P x_op_execstream(void);
 const char* x_op_execstream_name;
 
 #define DMFLEX_STATE_ERR 0x01L //Illegal state for operation
@@ -45,14 +45,14 @@ const char* x_op_execstream_name;
 
 #define DMFLEX_HANDLE "DMFLEX"
 
-#define DMFLEX_FD(frame) (LONG_VAL(OPAQUE_MEM(frame, DMFLEX_FD_N)))
-#define DMFLEX_STATE(frame) (LONG_VAL(OPAQUE_MEM(frame, DMFLEX_STATE_N)))
+#define DMFLEX_FD(frame) (LONGBIG_VAL(OPAQUE_MEM(frame, DMFLEX_FD_N)))
+#define DMFLEX_STATE(frame) (LONGBIG_VAL(OPAQUE_MEM(frame, DMFLEX_STATE_N)))
 #define DMFLEX_CHBUF(frame) (VALUE_PTR(OPAQUE_MEM(frame, DMFLEX_CHBUF_N)))
 #define DMFLEX_BUFSIZE(frame) (ARRAY_SIZE(OPAQUE_MEM(frame, DMFLEX_CHBUF_N)))
 #define DMFLEX_BUFPOS(frame) (VALUE_PTR(OPAQUE_MEM(frame, DMFLEX_BUFPOS_N)))
 #define DMFLEX_NCHARS(frame) (ARRAY_SIZE(OPAQUE_MEM(frame, DMFLEX_BUFPOS_N)))
-#define DMFLEX_ATBOL(frame) (LONG_VAL(OPAQUE_MEM(frame, DMFLEX_ATBOL_N)))
-#define DMFLEX_BUFSTAT(frame) (LONG_VAL(OPAQUE_MEM(frame, DMFLEX_BUFSTAT_N)))
+#define DMFLEX_ATBOL(frame) (LONGBIG_VAL(OPAQUE_MEM(frame, DMFLEX_ATBOL_N)))
+#define DMFLEX_BUFSTAT(frame) (LONGBIG_VAL(OPAQUE_MEM(frame, DMFLEX_BUFSTAT_N)))
 #define DMFLEX_PARENT(frame) (VALUE_PTR(OPAQUE_MEM(frame, DMFLEX_PARENT_N)))
 
 #define DMFLEX_OPEN (1)

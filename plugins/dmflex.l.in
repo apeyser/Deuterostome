@@ -9,11 +9,11 @@
 #include <math.h>
 #include <ctype.h>
 
-  UL ll_type = 0;
-  L op_hi(void) {return wrap_hi("dmflex V1");}
-  L op_libnum(void) {return wrap_libnum(ll_type);}
+  UP ll_type = 0;
+  P op_hi(void) {return wrap_hi("dmflex V1");}
+  P op_libnum(void) {return wrap_libnum(ll_type);}
 
-  L ll_errc[] = {
+  P ll_errc[] = {
     DMFLEX_STATE_ERR, 
     DMFLEX_CLOSE_ERR, 
     DMFLEX_FLAGS, 
@@ -42,7 +42,7 @@
   B opaquename[FRAMEBYTES];
   const char* x_op_execstream_name = "x_op_execstream";
 
-  static L vmfree;
+  static P vmfree;
 
   static D toD(char* s) {return (*s == '*') ? HUGE_VAL : atof(s);}
   static S toS(char* s) {return (S) toD(s);}
@@ -56,7 +56,8 @@
   
   totype(B);
   totype(W);
-  totype(L);
+  totype(L32);
+  totype(L64);
   
 #define toframe(type, typename)                          \
   TAG(frame) = NUM | typename; ATTR(frame) = 0;          \
@@ -73,7 +74,7 @@
   static int fd;
 
 #define swallow()  vmfree = CEILvm - FREEvm;
-#define YY_DECL L yylex(void)
+#define YY_DECL P yylex(void)
 #define YY_INPUT(buf,result,max_size)  do {                       \
     if ((result = read(fd, buf, max_size)) == -1)  return -errno; \
   } while (0)
@@ -93,7 +94,8 @@ ACT_NAME  ({NAME})
 
 DIGIT  ([:digit:])
 S      ([+-]?)
-LONG   ({S}{DIGIT}+[l]?)
+LONG64   ({S}{DIGIT}+[x]?)
+LONG32   ({S}{DIGIT}+[l]?)
 SHORT  ({S}{DIGIT}+[w])
 BYTE   ({S}{DIGIT}+[b])
 MAN    ({S}{DIGIT}+(\.{DIGIT}+)?)
@@ -101,7 +103,7 @@ EXP    (e{MAN})
 FLOAT  ({MAN}{EXP}?s)
 DOUBLE ({MAN}{EXP}?d?)
 UNDEF  (\*)
-NUMBER ({LONG}|{SHORT}|{BYTE}|{FLOAT}|{DOUBLE}|UNDEF)
+NUMBER ({LONG64}|{LONG32}|{SHORT}|{BYTE}|{FLOAT}|{DOUBLE}|UNDEF)
 
 
 STRINGSTART     (\()
@@ -113,7 +115,7 @@ STRINGESCNL     (\\\n)
 STRINGESC       (\\.)
 STRINGESCSTRIP  (\\[()\\])
 
-ARRAYSTART  (\<[blwsf])
+ARRAYSTART  (\<[blxwsf])
 ARRAYEND    (\>)
 
 COMMENT (\|.*\n)
@@ -159,13 +161,18 @@ SPACE ([[:space:]])
  .       swallow(); BEGIN(INITIAL); yyless(0); return OK;
 }
 
-{LONG} {
-  toframe(L, LONGTYPE);
+{LONG64} {
+  toframe(L64, LONG64TYPE);
+  return OK;
+}
+
+{LONG32} {
+  toframe(L32, LONG32TYPE);
   return OK;
 }
 
 {SHORT} {
-  toframe(S, LONGTYPE);
+  toframe(W, WORDTYPE);
   return OK;
 }
 
@@ -272,7 +279,8 @@ SPACE ([[:space:]])
   switch (arrstate) {
     case 'B': toarray(B); break;
     case 'W': toarray(W); break;
-    case 'L': toarray(L); break;
+    case 'L': toarray(L32); break;
+    case 'X': toarray(L64); break;
     case 'S': toarray(S); break;
     case 'D': toarray(D); break;
   }
@@ -299,7 +307,7 @@ SPACE ([[:space:]])
 }
 
 {ENDPROC} {
-  L frames = 0, nb;
+  P frames = 0, nb;
   if (! level) return PRO_CLO;
   level--;
 
@@ -350,7 +358,7 @@ static B DMFLEX_PARENT_N[FRAMEBYTES];
   static B DMFLEX_CUR[FRAMEBYTES];
   static B DMFLEX_END[FRAMEBYTES];
 
-L op_INIT_(void) {
+P op_INIT_(void) {
   makename(DMFLEX_HANDLE, opaquename);
   makename("fd", DMFLEX_FD_N);
   makename("state", DMFLEX_STATE_N);
@@ -378,8 +386,8 @@ L op_INIT_(void) {
   return OK;
 }
 
-static L gettoken(void) {
-  L ret;
+static P gettoken(void) {
+  P ret;
   B *oldfree, *oldvm;
 
   level = 0;
@@ -407,9 +415,9 @@ static L gettoken(void) {
   return ret;
 }
 
-L op_makestream(void) {
+P op_makestream(void) {
   B *fullname, *next;
-  L fd, flags;
+  P fd, flags;
   B *streamframe;
   B initframe[FRAMEBYTES];
   
@@ -454,15 +462,15 @@ L op_makestream(void) {
   if ((fd = open(fullname, flags)) == -1)
     return -errno;
 
-  if (! (streamframe = MAKE_OPAQUE_DICT(0,
+  if (! (streamframe = MAKE_OPAQUE_DICT(0, NULL,
                                         DMFLEX_FD_N,
                                         DMFLEX_STATE_N)))
     return VM_OVF;
 
-  TAG(initframe) = (NUM | LONGTYPE); ATTR(initframe) = 0;
-  LONG_VAL(initframe) = fd;
+  TAG(initframe) = (NUM | LONGBIGTYPE); ATTR(initframe) = 0;
+  LONGBIG_VAL(initframe) = fd;
   OPAQUE_MEM_SET(streamframe, DMFLEX_FD_N, initframe);
-  LONG_VAL(initframe) = DMFLEX_OPEN;
+  LONGBIG_VAL(initframe) = DMFLEX_OPEN;
   OPAQUE_MEM_SET(streamframe, DMFLEX_STATE_N, initframe);
   
   moveframe(streamframe, o_3);
@@ -470,9 +478,9 @@ L op_makestream(void) {
   return OK;
 }
 
-L op_seekstream(void) {
-  L offset;
-  L whence;
+P op_seekstream(void) {
+  P offset;
+  P whence;
 
   if (FLOORopds > o_3) return OPDS_UNF;
   TEST_OPAQUE(o_3);
@@ -481,7 +489,7 @@ L op_seekstream(void) {
   
   if (TAG(o_2) != NAME) return OPD_CLA;
   if (CLASS(o_1) != NUM) return OPD_CLA;
-  if (! VALUE(o_1, &offset)) return UNDF_VAL;
+  if (! PVALUE(o_1, &offset)) return UNDF_VAL;
 
   if (matchname(o_2, DMFLEX_SET))
     whence = SEEK_SET;
@@ -503,7 +511,7 @@ L op_seekstream(void) {
   return OK;
 }
 
-L op_writestream(void) {
+P op_writestream(void) {
   if (o_2 < FLOORopds) return OPDS_UNF;
   TEST_OPAQUE(o_2);
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_TYP;
@@ -522,8 +530,8 @@ L op_writestream(void) {
   return OK;
 }
 
-L op_readstream(void) {
-  L offset, bytes;
+P op_readstream(void) {
+  P offset, bytes;
   if (o_4 <FLOORopds) return OPDS_UNF;
   TEST_OPAQUE(o_4);
 
@@ -534,8 +542,8 @@ L op_readstream(void) {
   if (DMFLEX_STATE(o_4) != DMFLEX_OPEN) 
     RETURN_ERROR(DMFLEX_STATE_ERR);
 
-  if (! VALUE(o_2, &offset)) return UNDF_VAL;
-  if (! VALUE(o_2, &bytes))
+  if (! PVALUE(o_2, &offset)) return UNDF_VAL;
+  if (! PVALUE(o_2, &bytes))
     bytes = ARRAY_SIZE(o_2) - offset;
   if (bytes <= 0) return RNG_CHK;
   if (ARRAY_SIZE(o_2) - offset - bytes <= 0) return RNG_CHK;
@@ -550,13 +558,13 @@ L op_readstream(void) {
 
   TAG(o_1) = BOOL;
   BOOL_VAL(o_1) = (bytes == 0) ? FALSE : TRUE;
-  TAG(o_2) = (NUM | LONGTYPE);
-  LONG_VAL(o_2) = offset + bytes;
+  TAG(o_2) = (NUM | LONGBIGTYPE);
+  LONGBIG_VAL(o_2) = offset + bytes;
 
   return OK;
 }
 
-L op_closestream(void) {
+P op_closestream(void) {
   if (FLOORopds > o_1) return OPDS_UNF;
   TEST_OPAQUE(o_1);
   
@@ -601,7 +609,7 @@ static void getbufstate(B* frame) {
   DMFLEX_BUFSTAT(frame) = state.yy_buffer_status;
 }
 
-L op_execstream(void) {
+P op_execstream(void) {
   B* streamstate;
   B initframe[FRAMEBYTES];
 
@@ -613,7 +621,7 @@ L op_execstream(void) {
     RETURN_ERROR(DMFLEX_STATE_ERR);
 
   
-  if (! (streamstate = MAKE_OPAQUE_DICT(@STRINGBUF@+8,
+  if (! (streamstate = MAKE_OPAQUE_DICT(@STRINGBUF@+8, NULL,
                                         DMFLEX_FD_N,
                                         DMFLEX_STATE_N,
                                         DMFLEX_CHBUF_N,
@@ -622,14 +630,14 @@ L op_execstream(void) {
                                         DMFLEX_PARENT_N)))
     return VM_OVF;
   
-  TAG(initframe) = (NUM | LONGTYPE); ATTR(initframe) = 0;
-  LONG_VAL(initframe) = DMFLEX_FD(o_1);
+  TAG(initframe) = (NUM | LONGBIGTYPE); ATTR(initframe) = 0;
+  LONGBIG_VAL(initframe) = DMFLEX_FD(o_1);
   OPAQUE_MEM_SET(streamstate, DMFLEX_FD_N, initframe);
-  LONG_VAL(initframe) = DMFLEX_EXEC;
+  LONGBIG_VAL(initframe) = DMFLEX_EXEC;
   OPAQUE_MEM_SET(streamstate, DMFLEX_STATE_N, initframe);
-  LONG_VAL(initframe) = YY_BUFFER_NEW;
+  LONGBIG_VAL(initframe) = YY_BUFFER_NEW;
   OPAQUE_MEM_SET(streamstate, DMFLEX_BUFSTAT_N, initframe);
-  LONG_VAL(initframe) = 1;
+  LONGBIG_VAL(initframe) = 1;
   OPAQUE_MEM_SET(streamstate, DMFLEX_ATBOL_N, initframe);
 
   moveframe(OPAQUE_MEM(streamstate, buffernameframe), initframe);
@@ -660,9 +668,9 @@ L op_execstream(void) {
 #define CLEAR_HANDLE(frame) \
   if (lasthandle = VALUE_PTR(frame)) lasthandle = NULL;
 
-L x_op_execstream(void) {
+P x_op_execstream(void) {
   B* streamstate;
-  L ret;
+  P ret;
   if (FLOORopds > o_2) return OPDS_UNF;
   TEST_OPAQUE(o_1);
   if (TAG(o_2) != BOOL) return OPD_CLA;
@@ -704,7 +712,7 @@ L x_op_execstream(void) {
   moveframe(o2, x2);
 
   TAG(x1) = OP; ATTR(x1) = ACTIVE;
-  OP_CODE(x1) = (L) x_op_execstream; OP_NAME(x1) = (L) x_op_execstream_name;
+  OP_CODE(x1) = (P) x_op_execstream; OP_NAME(x1) = (P) x_op_execstream_name;
   FREEexecs = x4;
 
   streamstate = x2;
@@ -722,11 +730,3 @@ L x_op_execstream(void) {
   getbufstate(streamstate);
   return OK;
 }
-  
-  
-  
-  
-  
-  
-  
-  

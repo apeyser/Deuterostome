@@ -11,14 +11,14 @@ void closealllibs(void);
 #include "dm.h"
 
 // for LL
-L op_getplugindir(void);
+P op_getplugindir(void);
 
 #if DM_ENABLE_PLUGINS
 
 BOOLEAN check_opaque_name(B* nameframe, B* dict);
 // ... = null terminated list of nameframes to insert
 // first set to be null objects -- you must initialize them OPAQUE_MEM_SET
-B* make_opaque_frame(L n, B* destroyer, B* pluginnameframe, ...);
+B* make_opaque_frame(P n, B* destroyer, B* pluginnameframe, ...);
 
 //globals -- used only in plugins and dnode_1.h
 extern B opaquename[FRAMEBYTES];
@@ -27,6 +27,13 @@ extern B fininame[FRAMEBYTES];
 extern B initname[FRAMEBYTES];
 // name frame for allocated buffer with opaque object
 extern B buffernameframe[FRAMEBYTES];
+
+#define INNERP_VAL(frame)  (*(P*)PF_PTR(frame,1))
+#if DM_HOST_IS_32_BIT
+#define INNERPTYPE LONG32TYPE
+#else
+#define INNERPTYPE LONG64TYPE
+#endif //DM_HOST_IS_32_BIT
 
 #endif //DM_ENABLE_PLUGINS
 

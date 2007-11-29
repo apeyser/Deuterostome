@@ -58,7 +58,7 @@
 
 /GETCV { dup pushA exch pushA pushA  GETCV_d exch get exec } def
 
-/GETCV_d 7 dict dup begin
+/GETCV_d 8 dict dup begin
 
 /B { NL (if \(\()__ popA __ ( = *\(\(B *\))__ popA exec (\)\) == BINF\) )__
         popA __ ( = HUGE_VAL;)__ 
@@ -66,10 +66,14 @@
 /W { NL (if \(\()__ popA __ ( = *\(\(W *\))__ popA exec (\)\) == WINF\) )__
         popA __ ( = HUGE_VAL;)__  
    } def
-/M { NL (if \(\()__ popA __ ( = *\(\(M *\))__ popA exec (\)\) == MINF\) )__
+/L64 { NL (if \(\()__ popA __ ( = *\(\(L64 *\))__ popA exec (\)\) == L64INF\) )__
         popA __ ( = HUGE_VAL;)__  
    } def
-/L { NL (if \(\()__ popA __ ( = *\(\(L *\))__ popA exec (\)\) == LINF\) )__
+/LBIG {
+    NL (if \(\()__ popA __ ( = *\(\(LBIG *\))__ popA exec (\)\) == LBIGINF\) )__
+        popA __ ( = HUGE_VAL;)__  
+   } def
+/L32 { NL (if \(\()__ popA __ ( = *\(\(L32 *\))__ popA exec (\)\) == L32INF\) )__
         popA __ ( = HUGE_VAL;)__  
    } def
 /S { NL popA __ ( = *\(\(S *\))__ popA exec (\);)__ popA pop
@@ -86,7 +90,7 @@ end def
 
 /CVPUT { pushA pushA CVPUT_d exch get exec } def
 
-/CVPUT_d 7 dict dup begin
+/CVPUT_d 8 dict dup begin
 /B { NL (*\(\(B *\))__ popA exec (\) = \(\(\()__
         popA dup pushA __ (\) > BMAX\) || \(\()__
         popA dup pushA __ (\) < -BMAX\) || ISUNDEF\()__
@@ -97,15 +101,21 @@ end def
         popA dup pushA __ (\) < -WMAX\) || ISUNDEF\()__
         popA dup pushA __ (\)\)? WINF : )__ popA __ (;)__
    } def
-/M { NL (*\(\(M *\))__ popA exec (\) = \(\(\()__
-        popA dup pushA __ (\) > MMAX\) || \(\()__
-        popA dup pushA __ (\) < -MMAX\) || ISUNDEF\()__
-        popA dup pushA __ (\)\)? MINF : )__ popA __ (;)__
+/L64 { NL (*\(\(L64 *\))__ popA exec (\) = \(\(\()__
+        popA dup pushA __ (\) > L64MAX\) || \(\()__
+        popA dup pushA __ (\) < -L64MAX\) || ISUNDEF\()__
+        popA dup pushA __ (\)\)? L64INF : )__ popA __ (;)__
    } def
-/L { NL (*\(\(L *\))__ popA exec (\) = \(\(\()__
-        popA dup pushA __ (\) > LMAX\) || \(\()__
-        popA dup pushA __ (\) < -LMAX\) || ISUNDEF\()__
-        popA dup pushA __ (\)\)? LINF : )__ popA __ (;)__
+/LBIG { NL (*\(\(LBIG *\))__ popA exec (\) = \(\(\()__
+        popA dup pushA __ (\) > LBIGMAX\) || \(\()__
+        popA dup pushA __ (\) < -LBIGMAX\) || ISUNDEF\()__
+        popA dup pushA __ (\)\)? LBIGINF : )__ popA __ (;)__
+   } def
+
+/L32 { NL (*\(\(L32 *\))__ popA exec (\) = \(\(\()__
+        popA dup pushA __ (\) > L32MAX\) || \(\()__
+        popA dup pushA __ (\) < -L32MAX\) || ISUNDEF\()__
+        popA dup pushA __ (\)\)? L32INF : )__ popA __ (;)__
    } def
 /S { NL (*\(\(S *\))__ popA exec (\) = )__ popA __ (;)__ 
    } def
@@ -127,7 +137,7 @@ NL (})__
 
 | arraytype (framename) returnsL/bool {body_construct} | --
 /FOR_modn {pushA exch pushA exch pushA pushA
-    NL ({ UL n__ = VALUE_BASE\()__ 2 indexA __ (\) % )__ BYTECORRECT n__ (;
+    NL ({ UP n__ = VALUE_BASE\()__ 2 indexA __ (\) % )__ BYTECORRECT n__ (;
         if \(n__\) {
           n__ = )__ BYTECORRECT n__ ( - n__;
           if \(DEBUG_DMNUM && \(n__ % sizeof\()__ 1 indexA __ (\)\)\) {
@@ -153,7 +163,7 @@ NL (})__
 
 | returnsL/bool {body_construct} | --
 /FOR_modnp {pushA pushA
-    NL ({ UL n__ = \(UL\))__ fixsource __ ( % )__ BYTECORRECT n__ (;
+    NL ({ UP n__ = \(UP\))__ fixsource __ ( % )__ BYTECORRECT n__ (;
       if \(n__\) {
       n__ = )__ BYTECORRECT n__ ( - n__;
       if \(DEBUG_DMNUM && \(n__ % sizeof\(*)__ fixsource __ (\)\)\) {
@@ -201,7 +211,7 @@ NL (})__
     )__ exchA popA exec (;
   else {
     thread_array_data data;
-    UL nways = ARRAY_SIZE\()__ peekA __ (\)/\(THREADMUL*)__ UNROLLS n__ (\)
+    UP nways = ARRAY_SIZE\()__ peekA __ (\)/\(THREADMUL*)__ UNROLLS n__ (\)
                + \(ARRAY_SIZE\()__ peekA __ (\)%\(THREADMUL*)__ UNROLLS n__ (\) ?
                1 : 0\);
     if \(nways > thread_num\(\)\) nways = thread_num\(\);
@@ -219,7 +229,7 @@ NL (})__
 /THREAD {pushA pushA pushA
 (
   const thread_array_data* data = \(const thread_array_data*\) indata;
-  UL n, n_ = data->perthread + \(thread_max\(\) == id ? data->leftover : 0\);)__
+  UP n, n_ = data->perthread + \(thread_max\(\) == id ? data->leftover : 0\);)__
   popA {(\n  )__ dt__ ( * d = \(\()__
     dt__ ( *\) data->df_start\)+data->perthread*id;)__
     /fixsource (d) def  
@@ -250,11 +260,11 @@ NL (})__
 
 /XLvalue {
 
-NL (static L )__ st__ (Lvalue\(B *sp\))__
+NL (static LBIG )__ st__ (Lvalue\(B *sp\))__
 NL ({)__
-NL (D t; L tc;)__
+NL (D t; LBIG tc;)__
 st { (sp)__ } (t) GETCV
-/L { (&tc)__ } (t) CVPUT
+/LBIG { (&tc)__ } (t) CVPUT
 NL (return\(tc\);)__
 NL (})__
 } def
@@ -296,14 +306,14 @@ NL
 (
   static void )__ st__ dt__ (moveSAs\(B *sf, B *df\)
   {
-    D t; L n; )__ dt__ ( * d;
+    D t; P n; )__ dt__ ( * d;
     d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
     st { (sf) SCALAR } (t) GETCV
     _dt (df) false { dt { (d++)__ } (t) CVPUT } FOR_modn (
   }
 
 #if ENABLE_THREADS
-  static L )__ st__ dt__ (moveSAt\(UL id, const void* indata,
+  static P )__ st__ dt__ (moveSAt\(UP id, const void* indata,
                                    void* ignore
                                    __attribute__ \(\(__unused__\)\)\)
   {)__
@@ -355,7 +365,7 @@ NL
 (
     static void )__ st__ dt__ (moveAAs\(B *sf, B *df\)
     {
-       D t; L n; )__ st__ ( * s; )__ dt__ ( * d;
+       D t; P n; )__ st__ ( * s; )__ dt__ ( * d;
        s = \()__ st__ ( *\))__ (sf) ARRAY (;
        d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
       _st (df) false { st { (s++)__ } (t) GETCV
@@ -365,7 +375,7 @@ NL
 
 
 #if ENABLE_THREADS
-    static L )__ st__ dt__ (moveAAt\(UL id, const void* indata,
+    static P )__ st__ dt__ (moveAAt\(UP id, const void* indata,
                                      void* ignore
                                      __attribute__ \(\(__unused__\)\)\)
     {)__
@@ -473,7 +483,7 @@ end def
 (
   static void )__ dt__ st__ (dy)__ op__ (ASs\(B *df, B *sf\)
   {
-    D t,tt; L n; )__ dt__ ( * d;
+    D t,tt; P n; )__ dt__ ( * d;
     d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
     st { (sf) SCALAR } (tt) GETCV
     _dt (df) false { dt { (d)__ } (t) GETCV
@@ -483,7 +493,7 @@ end def
   }
 
 #if ENABLE_THREADS
-  static L )__ dt__ st__ (dy)__ op__ (ASt\(UL id, const void* indata,
+  static P )__ dt__ st__ (dy)__ op__ (ASt\(UP id, const void* indata,
                                            void* ignore
                                            __attribute__ \(\(__unused__\)\)\)
   {)__
@@ -529,7 +539,7 @@ end def
 (
   static void )__ dt__ st__ (dy)__ op__ (SAs\(B *df, B *sf\)
   {
-    D t,tt; L n; )__ st__ ( * s;
+    D t,tt; P n; )__ st__ ( * s;
     s = \()__ st__ ( *\))__ (sf) ARRAY (;)__
     dt { (df) SCALAR } (t) GETCV
     _st (sf) false { st { (s++)__ } (tt) GETCV
@@ -540,7 +550,7 @@ end def
 )__
 dyadic_dp_seed op known {(
 #if ENABLE_THREADS
- static L )__ dt__ st__ (dy)__ op__ (SAt\(UL id, const void* indata,
+ static P )__ dt__ st__ (dy)__ op__ (SAt\(UP id, const void* indata,
                                           void* outdata\)
  {)__
    false true {(
@@ -557,7 +567,7 @@ dyadic_dp_seed op known {(
   static void )__ dt__ st__ (dy)__ op__ (SAc\(B* df, B* sf\)
   {)__
     {dt__ st__ (dy)__ op__ (SAs\(df, sf\))__} false true {(
-      UL n, n_ = nways;
+      UP n, n_ = nways;
       D t,tt, ret[THREADNUM];
       D* r = ret;
       threads_do_local\(nways, )__ dt__ st__ (dy)__ op__ (SAt, &data, ret\);
@@ -603,7 +613,7 @@ dyadic_dp_seed op known {(
 (
     static void )__ dt__ st__ (dy)__ op__ (AAs\(B * df, B * sf\)
     {
-       L n; )__  st__ ( * s; )__ dt__ ( * d;
+       P n; )__  st__ ( * s; )__ dt__ ( * d;
        D t, tt;
        s = \()__ st__ ( *\))__ (sf) ARRAY (;
        d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
@@ -618,7 +628,7 @@ dyadic_dp_seed op known {(
 
 
 #if ENABLE_THREADS
-    static L )__ dt__ st__ (dy)__ op__ (AAt\(UL id, const void* indata,
+    static P )__ dt__ st__ (dy)__ op__ (AAt\(UP id, const void* indata,
                                              void* ignore
                                              __attribute__ \(\(__unused__\)\)\)
     {)__
@@ -697,7 +707,7 @@ end def
 (
    static void )__ dt__ (mo)__ op__ (As\(B *df\)
    {
-     D t; )__ dt__ ( *d; L n;
+     D t; )__ dt__ ( *d; P n;
      d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
      _dt (df) false { dt { (d)__ } (t) GETCV
        monadic_d op get exec
@@ -706,7 +716,7 @@ end def
    }
 
 #if ENABLE_THREADS
-  static L )__ dt__ (mo)__ op__ (At\(UL id, const void* indata,
+  static P )__ dt__ (mo)__ op__ (At\(UP id, const void* indata,
                                      void* ignore
                                      __attribute__ \(\(__unused__\)\)\)
   {)__
@@ -755,7 +765,7 @@ NL (})__
 NL 
 } def
 
-/alltypes [/B /W /L /S /D /M] def
+/alltypes [/B /W /L32 /L64 /S /D] def
 
 |-------------------- construct DMNUMINC.C -----------------------------
 | (dirname) (filename) | --
@@ -768,8 +778,8 @@ NL
 typedef struct {
   B* df_start;
   B* sf_start;
-  UL perthread;
-  UL leftover;
+  UP perthread;
+  UP leftover;
   D in;
 } thread_array_data;
 #endif //ENABLE_THREADS
@@ -805,7 +815,7 @@ alltypes { /st name XLvalue } forall
 
 |----- generate definition of list of VALUE functions
 
-NL (typedef L \(*VALUEfct\)\(B*\);)__
+NL (typedef LBIG \(*VALUEfct\)\(B*\);)__
 NL (static VALUEfct VALUElist[] = {)__
 alltypes {  /st name 
       NL st__ (Lvalue, )__

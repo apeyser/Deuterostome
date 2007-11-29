@@ -261,7 +261,7 @@ userdict /dnode_setup known not {
 /theobj [ /nullclass null null ] def
 /thesubobj 5 list def
 /thesubitem 5 list def
-/fde <l 0 0 0 0 0 0 > def
+/fde <x 0 0 0 0 0 0 > def
 
 |-- file attribute templates
 
@@ -951,7 +951,7 @@ end mkread /dupchecks name
              } bind def
 /dictclass   { { * (~|~ of ) text * theitem length * number
                  theitem type dup /O eq {pop (:oplib) fax} {
-                     /X eq {(:opaque) fax} if
+                     /Q eq {(:opaque) fax} if
                  }ifelse
                } DICTCOLOR show_value
              } bind def

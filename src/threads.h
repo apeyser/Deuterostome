@@ -24,7 +24,7 @@
  * As long as global is read-only, no locking should be necessary
  *
  * */
-typedef L (*thread_func)(UL id, const void * global, void* local);
+typedef P (*thread_func)(UP id, const void * global, void* local);
 
 /************************************************** threads_do_int
  *
@@ -41,7 +41,7 @@ typedef L (*thread_func)(UL id, const void * global, void* local);
  *          thread to return error != OK.
  * 
  */
-L threads_do_int(UL nways, thread_func func, const void* global,
+P threads_do_int(UP nways, thread_func func, const void* global,
                  void* local, size_t size_per_local);
 
 /**************************************************** threads_do_pool_int
@@ -52,8 +52,8 @@ L threads_do_int(UL nways, thread_func func, const void* global,
  *   starting with the passed local.
  *
  */
-L threads_do_pool_int(UL nways, thread_func func, const void* global,
-					  void* local, size_t size_per_local);
+P threads_do_pool_int(UP nways, thread_func func, const void* global,
+                      void* local, size_t size_per_local);
 
 /**************************************************** threads_do_local
  * 
@@ -104,8 +104,8 @@ void thread_share_unlock_f(void);
  * 1 <= thread_num <= THREADMAX
  * 
  * */
-extern UL thread_num_;
-static UL thread_num(void) {return thread_num_;};
+extern UP thread_num_;
+static UP thread_num(void) {return thread_num_;};
 
 /*********************************************************** thread_max
  *
@@ -115,9 +115,9 @@ static UL thread_num(void) {return thread_num_;};
  * 0 <= thread_max < thread_num.
  * Equal to nways passed in threads_do_int
  */
-extern UL thread_max_;
+extern UP thread_max_;
 __attribute__ ((__unused__)) 
-  static UL thread_max(void)  {return thread_max_;};
+static UP thread_max(void)  {return thread_max_;};
 
 #else //!DM_ENABLE_THREADS
 

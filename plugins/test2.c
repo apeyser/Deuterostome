@@ -3,10 +3,10 @@
 
 #include "test2.h"
 
-UL ll_type = 0;
-L op_hi(void) {return wrap_hi("test2 V1");}
-L op_libnum(void) {return wrap_libnum(ll_type);}
-L ll_errc[] = {TEST2_ERROR, 0L};
+UP ll_type = 0;
+P op_hi(void) {return wrap_hi("test2 V1");}
+P op_libnum(void) {return wrap_libnum(ll_type);}
+P ll_errc[] = {TEST2_ERROR, 0L};
 B* ll_errm[] = {"**Test Error: test2"};
 B* ll_export[] = {
 	"hi", (B*) op_hi,
@@ -20,26 +20,26 @@ B* ll_export[] = {
 	"", NULL
 };
 
-static L retvalue = 6;
-L op_INIT_(void) {
+static P retvalue = 6;
+P op_INIT_(void) {
 	retvalue++;
 	return OK;
 }
 
-L op_FINI_(void) {
-	fprintf(stderr, "Closing test2: retvalue=%li\n", retvalue);
+P op_FINI_(void) {
+	fprintf(stderr, "Closing test2: retvalue=%i\n", retvalue);
 	return OK;
 }
 
-L op_say5(void) 
+P op_say5(void) 
 {
     if (CEILopds < o2) return OPDS_OVF;
-    TAG(o1) = NUM | LONGTYPE;
+    TAG(o1) = NUM | LONGBIGTYPE;
     ATTR(o1) = 0;
-    LONG_VAL(o1) = retvalue;
+    LONGBIG_VAL(o1) = retvalue;
     FREEopds = o2;
     return OK;
 }
 
-L op_sayerror(void) {RETURN_ERROR(TEST2_ERROR);}
+P op_sayerror(void) {RETURN_ERROR(TEST2_ERROR);}
 

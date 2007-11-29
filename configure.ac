@@ -144,6 +144,8 @@ AC_C_BIGENDIAN
 #CF_AC_CHECK_SIZEOF([time_t], [4])
 CF_IF_ENABLED([is-32-bit], [
   CF_AC_CHECK_SIZEOF([void*], [4])
+], [
+  AC_CHECK_SIZEOF([void*])
 ])
 # check pid_t for plugins/process.c
 CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([pid_t], [4])])
@@ -263,11 +265,13 @@ AC_CONFIG_LINKS([
 		src/codegen/dm7.c:src/dm7.c
 		src/codegen/dm8.c:src/dm8.c
 		src/codegen/dmnum.c:src/dmnum.c
+    src/codegen/dsp2.c:src/dsp2.c
 		src/codegen/paths.h.in:src/paths.h.in
 		src/codegen/dgen.c:src/dgen.c
 		src/codegen/dgen_0.h:src/dgen_0.h
 		src/codegen/dgen_1.h:src/dgen_1.h
 		src/codegen/dgen-build:src/dgen-build
+    src/codegen/dmnum.h:src/dmnum.h
 		plugins/plugin.d:dcode/plugin.d
 ])
 

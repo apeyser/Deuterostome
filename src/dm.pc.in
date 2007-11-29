@@ -14,8 +14,8 @@ conf_dir=@dmconfdir@
 pkgdata_dir=@pkgdatadir@
 m4data_dir=@m4datadir@
 plugindata_dir=@plugindatadir@
-ldflags=@PCLDFLAGS@ @X_LIBS@ @X_PRE_LIBS@ -lX11 @X_EXTRA_LIBS@
-cxxflags=@PCCXXFLAGS@
+ldflags=@PCLDFLAGS@ @X_LIBS@ @X_PRE_LIBS@ -lX11 @X_EXTRA_LIBS@ @ATLAS_LIBS@
+cxxflags=@PCCXXFLAGS@ @ATLAS_FLAGS@
 
 Name: @PACKAGE_NAME@
 Description: D-machine info for building plugins

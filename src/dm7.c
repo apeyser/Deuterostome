@@ -42,13 +42,19 @@
  - use 'localtime' to convert into date and time
 */
 
-L op_gettime(void)
+P op_gettime(void)
 {
-  if (o1 > CEILopds) return(OPDS_OVF);
-  TAG(o1) = NUM | LONGTYPE; ATTR(o1) = 0;
-  if ((LONG_VAL(o1) = (L) time(NULL)) == -1) LONG_VAL(o1) = 0;
+  time_t t;
+  if (o1 > CEILopds) return OPDS_OVF;
+  
+  if (((t = time(NULL)) == -1) && errno)
+    return CLOCK_ERR;
+
+  TAG(o1) = NUM | LONGBIGTYPE; 
+  ATTR(o1) = 0;
+  LONGBIG_VAL(o1) = (LBIG) t;
   FREEopds = o2;
-  return(OK);
+  return OK;
 }
 
 /*--------------------------------------------------- localtime
@@ -59,26 +65,33 @@ L op_gettime(void)
 NOTE: month[1...12], day[1...31], hour[0...23], min,sec[0...59]
 */
 
-L op_localtime(void)
+P op_localtime(void)
 {
-time_t dt; L dt_; struct tm *ldt;
-L *p;
+  time_t dt; 
+  P dt_; 
+  struct tm *ldt;
+  LBIG *p;
 
-if (o_2 < FLOORopds) return(OPDS_UNF);
-if (CLASS(o_2) != NUM) return(OPD_CLA);
-if (!VALUE(o_2, &dt_)) return(UNDF_VAL);
-if (TAG(o_1) != (ARRAY | LONGTYPE)) return(OPD_ERR);
-if (ATTR(o_1) & READONLY) return(OPD_ATR);
-if (ARRAY_SIZE(o_1) < 6) return(RNG_CHK);
-dt = (time_t) dt_;
-ldt = localtime(&dt);
-p = (L *)VALUE_BASE(o_1);
-p[0] = ldt->tm_year + 1900; p[1] = ldt->tm_mon + 1; p[2] = ldt->tm_mday;
-p[3] = ldt->tm_hour; p[4] = ldt->tm_min; p[5] = ldt->tm_sec;
-ARRAY_SIZE(o_1) = 6;
-moveframe(o_1,o_2);
-FREEopds = o_1;
-return(OK);
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_2) != NUM) return OPD_CLA;
+  if (! PVALUE(o_2, &dt_)) return UNDF_VAL;
+  if (TAG(o_1) != (ARRAY | LONGBIGTYPE)) return OPD_ERR;
+  if (ATTR(o_1) & READONLY) return OPD_ATR;
+  if (ARRAY_SIZE(o_1) < 6) return RNG_CHK;
+  dt = (time_t) dt_;
+  ldt = localtime(&dt);
+  p = (LBIG *)VALUE_BASE(o_1);
+  p[0] = ldt->tm_year + 1900; 
+  p[1] = ldt->tm_mon + 1; 
+  p[2] = ldt->tm_mday;
+  p[3] = ldt->tm_hour; 
+  p[4] = ldt->tm_min; 
+  p[5] = ldt->tm_sec;
+
+  ARRAY_SIZE(o_1) = 6;
+  moveframe(o_1,o_2);
+  FREEopds = o_1;
+  return OK;
 }
 
 /*---------------------------------------------------- gwdir
@@ -88,19 +101,22 @@ return(OK);
     the current working directory
 */
 
-L op_getwdir(void)
+P op_getwdir(void)
 {
-  B *p; L nb;
+  B *p; 
+  P nb;
+
   if (o_1 < FLOORopds) return (OPDS_UNF);
-  if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
-  if (ATTR(o_1) & READONLY) return(OPD_ATR);
-  if ((p = getcwd(0L,0L)) == 0L) return(-errno);
+  if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
+  if (ATTR(o_1) & READONLY) return OPD_ATR;
+  
+  if ((p = getcwd(0L,0L)) == 0L) return -errno;
   nb = strlen(p);
-  if (nb > ARRAY_SIZE(o_1)) return(RNG_CHK);
+  if (nb > ARRAY_SIZE(o_1)) return RNG_CHK;
   moveB(p, (B *)VALUE_BASE(o_1),nb);
   free(p);
   ARRAY_SIZE(o_1) = nb;
-  return(OK);
+  return OK;
 }
 
 /*---------------------------------------------------- setwdir
@@ -109,18 +125,20 @@ L op_getwdir(void)
   - sets the current working directory to 'string'
 */
 
-L op_setwdir(void)
+P op_setwdir(void)
 {
-  L nb;
-  if (o_1 < FLOORopds) return(OPDS_UNF);
-  if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
+  P nb;
+
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
   nb = ARRAY_SIZE(o_1) + 1;
-  if (nb > (CEILvm - FREEvm)) return(VM_OVF);
+  if (nb > (CEILvm - FREEvm)) return VM_OVF;
+
   moveB((B *)VALUE_BASE(o_1),FREEvm, nb-1);
   FREEvm[nb-1] = '\000';
-  if (chdir(FREEvm)) return(-errno);
+  if (chdir(FREEvm)) return -errno;
   FREEopds = o_1;
-  return(OK);
+  return OK;
 }
 
 /*---------------------------------------------------- tosystem
@@ -129,64 +147,64 @@ L op_setwdir(void)
   - executes 'string' as a bash shell command
 */
 
-L op_tosystem(void)
+P op_tosystem(void)
 {
-  L nb;
+  P nb;
   pid_t f, r;
   int status;
 	
-  if (o_1 < FLOORopds) return(OPDS_UNF);
-  if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
   nb = ARRAY_SIZE(o_1) + 1;
-  if (nb > (CEILvm - FREEvm)) return(VM_OVF);
+  if (nb > (CEILvm - FREEvm)) return VM_OVF;
   moveB((B *)VALUE_BASE(o_1),FREEvm, nb-1);
   FREEvm[nb-1] = '\000';
 
 	if ((f = fork()) == -1) return -errno;
 	if (! f) {
-			int retc2;
- 			while ((retc2 = open("/dev/null", O_RDWR, 0)) == -1 && errno == EINTR);
-			if (retc2 == -1) {
-					perror("Error opening /dev/null");
-					exit(-1);
-			}
+    int retc2;
+    while ((retc2 = open("/dev/null", O_RDWR, 0)) == -1 && errno == EINTR);
+    if (retc2 == -1) {
+      perror("Error opening /dev/null");
+      exit(-1);
+    }
 			
-			while ((status = dup2(retc2, STDIN_FILENO)) == -1 && errno == EINTR);
-			if (status == -1) {
-					perror("Error opening stdin into /dev/null");
-					exit(-1);
-			}
+    while ((status = dup2(retc2, STDIN_FILENO)) == -1 && errno == EINTR);
+    if (status == -1) {
+      perror("Error opening stdin into /dev/null");
+      exit(-1);
+    }
 			
- 			while ((status = dup2(retc2, STDOUT_FILENO)) == -1 && errno == EINTR);
-			if (status == -1) {
-					perror("Error opening stdout into /dev/null");
-					exit(-1);
-			}
+    while ((status = dup2(retc2, STDOUT_FILENO)) == -1 && errno == EINTR);
+    if (status == -1) {
+      perror("Error opening stdout into /dev/null");
+      exit(-1);
+    }
 
-			execl(ENABLE_BASH, ENABLE_BASH, "-c", FREEvm, (char*) NULL);
-			perror("Error exec'ing bash");
-			exit(-1);
+    execl(ENABLE_BASH, ENABLE_BASH, "-c", FREEvm, (char*) NULL);
+    perror("Error exec'ing bash");
+    exit(-1);
 	}
   
  wts:
   if (abortflag) {
-			alarm(0);
-			kill(f, SIGKILL);
-			return ABORT;
+    alarm(0);
+    kill(f, SIGKILL);
+    return ABORT;
 	};
   alarm(30);
   if ((r = waitpid(f, &status, 0)) == -1) {
-		int errno_;
+    int errno_;
     if (errno == EINTR) goto wts;
-		errno_ = errno;
-		kill(f, SIGKILL);
+    errno_ = errno;
+    kill(f, SIGKILL);
     return -errno_;
   }
 	else if (r != f) goto wts;
   if (status != 0) return NOSYSTEM;
 	
   FREEopds = o_1;
-  return(OK);
+  return OK;
 }
 
 /*---------------------------------------------------- fromsystem
@@ -197,83 +215,81 @@ L op_tosystem(void)
  * - box.
  */
 
-L op_fromsystem(void) 
+P op_fromsystem(void) 
 {
-	L max, retc;
+	P max, retc;
 	B* c;
 	pid_t f, r;
 	ssize_t rf;
 	int status;
 	int fd[2];
 	
-  if (o_1 < FLOORopds) return(OPDS_UNF);
-  if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
   max = ARRAY_SIZE(o_1) + 1;
-  if (max > (CEILvm - FREEvm)) return(VM_OVF);
+  if (max > (CEILvm - FREEvm)) return VM_OVF;
   moveB((B *)VALUE_BASE(o_1),FREEvm, max-1);
   FREEvm[max-1] = '\000';
 
 	if (pipe(fd)) return -errno;
 	
 	if ((f = fork()) == -1) {
-			retc = -errno;
-			close(fd[1]);
-			close(fd[0]);
-			return retc;
+    retc = -errno;
+    close(fd[1]);
+    close(fd[0]);
+    return retc;
 	}
 	
 	if (! f) {
-			int retc2;
- 			while ((retc2 = open("/dev/null", O_RDWR, 0)) == -1 && errno == EINTR);
-			if (retc2 == -1) {
-					perror("Error opening /dev/null");
-					exit(-1);
-			}
-			
-			while ((status = dup2(retc2, STDIN_FILENO)) == -1 && errno == EINTR);
-			if (status == -1) {
-					perror("Error opening stdin into /dev/null");
-					exit(-1);
-			}
-
-			while ((status = close(fd[0]))  && errno == EINTR);
-			if (status) {
-					perror("Error closing pipe in");
-					exit(-1);
-			}
-			
-			while ((status = dup2(fd[1], STDOUT_FILENO) == -1) && errno == EINTR);
-			if (status == -1) {
-					perror("Error duping pipe out to stdout");
-			}
-			
-			while ((status = close(fd[1])) && errno == EINTR);
-			if (status) {
-					perror("Error closing pipe out");
-					exit(-1);
-			}
-			
-			execl(ENABLE_BASH, ENABLE_BASH, "-c", FREEvm, (char*) NULL);
-			perror("Error exec'ing bash");
-			exit(-1);
+    int retc2;
+    while ((retc2 = open("/dev/null", O_RDWR, 0)) == -1 && errno == EINTR);
+    if (retc2 == -1) {
+      perror("Error opening /dev/null");
+      exit(-1);
+    }
+		
+    while ((status = dup2(retc2, STDIN_FILENO)) == -1 && errno == EINTR);
+    if (status == -1) {
+      perror("Error opening stdin into /dev/null");
+      exit(-1);
+    }
+    
+    while ((status = close(fd[0]))  && errno == EINTR);
+    if (status) {
+      perror("Error closing pipe in");
+      exit(-1);
+    }
+		
+    while ((status = dup2(fd[1], STDOUT_FILENO) == -1) && errno == EINTR);
+    if (status == -1) perror("Error duping pipe out to stdout");
+		
+    while ((status = close(fd[1])) && errno == EINTR);
+    if (status) {
+      perror("Error closing pipe out");
+      exit(-1);
+    }
+		
+    execl(ENABLE_BASH, ENABLE_BASH, "-c", FREEvm, (char*) NULL);
+    perror("Error exec'ing bash");
+    exit(-1);
 	}
 
 	alarm(30);
 	while ((status = close(fd[1])) == -1 && errno == EINTR) {
-			if (abortflag) {
-					retc = ABORT;
-					goto EXIT_FILE;
-			}
+    if (abortflag) {
+      retc = ABORT;
+      goto EXIT_FILE;
+    }
 	}
 	
 	if (status) {
-			retc = -errno;
-			goto EXIT_FILE;
+    retc = -errno;
+    goto EXIT_FILE;
 	}
 
 	if (FREEvm + FRAMEBYTES >= CEILvm) {
-			retc = VM_OVF;
-			goto EXIT_FILE;
+    retc = VM_OVF;
+    goto EXIT_FILE;
 	}
 	
 	max = CEILvm - FREEvm - FRAMEBYTES;
@@ -281,60 +297,60 @@ L op_fromsystem(void)
 	ATTR(FREEvm) = PARENT;
 	c = VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
 
-	READ:
+ READ:
 	alarm(30);
 	while ((rf = read(fd[0], c, max)) > 0) {
-			c += rf;
-			if ((max -= rf) == 0) {
-					char c_;
-					if ((rf = read(fd[0], &c_, 1)) != 0) {
-							retc = VM_OVF;
-							goto EXIT_FILE;
-					}
-					break;
-			}
+    c += rf;
+    if ((max -= rf) == 0) {
+      char c_;
+      if ((rf = read(fd[0], &c_, 1)) != 0) {
+        retc = VM_OVF;
+        goto EXIT_FILE;
+      }
+      break;
+    }
 	}
 	
 	if (rf == -1) {
-			if (abortflag) {
-					retc = ABORT;
-					goto EXIT_FILE;
-			}
+    if (abortflag) {
+      retc = ABORT;
+      goto EXIT_FILE;
+    }
 			
-			if (errno == EINTR) goto READ;
-			retc = -errno;
-			goto EXIT_FILE;
+    if (errno == EINTR) goto READ;
+    retc = -errno;
+    goto EXIT_FILE;
 	}
 	
 	if (close(fd[0])) {
-			retc = -errno;
-			goto EXIT_PID;
+    retc = -errno;
+    goto EXIT_PID;
 	}
-
-	WAIT_PID:
+  
+ WAIT_PID:
 	alarm(0);
   if (abortflag) {
-			retc = ABORT;
-			goto EXIT_PID;
+    retc = ABORT;
+    goto EXIT_PID;
 	};
 	
 	for (alarm(30); (r = waitpid(f, &status, 0)) != f; alarm(30)) {
-			if (r == -1) {
-					if (errno == EINTR) goto WAIT_PID;
-					retc = -errno;
-					goto EXIT_PID;
-			}
+    if (r == -1) {
+      if (errno == EINTR) goto WAIT_PID;
+      retc = -errno;
+      goto EXIT_PID;
+    }
 	}
 
 	if (status != 0) {
-			retc = NOSYSTEM;
-			goto EXIT_NOW;
+    retc = NOSYSTEM;
+    goto EXIT_NOW;
 	}
-
+  
 	max = c - FREEvm - FRAMEBYTES;
 	if ((c = (B*) DALIGN(FREEvm + FRAMEBYTES + max)) > CEILvm) {
-			retc = VM_OVF;
-			goto EXIT_NOW;
+    retc = VM_OVF;
+    goto EXIT_NOW;
 	}
 	ARRAY_SIZE(FREEvm) = c - FREEvm - FRAMEBYTES;
 	moveframe(FREEvm, o_1);
@@ -342,11 +358,11 @@ L op_fromsystem(void)
 	FREEvm = c;
 	return OK;
 
-	EXIT_FILE:
+ EXIT_FILE:
 	close(fd[0]);
-	EXIT_PID:
+ EXIT_PID:
 	kill(f, SIGKILL);
-	EXIT_NOW:
+ EXIT_NOW:
 	return retc;
 }
 
@@ -360,49 +376,59 @@ L op_fromsystem(void)
     a 'range check' error is reported
 */
 
-L op_readfile(void)
+P op_readfile(void)
 {
+  int fd;
+  P nb, atmost, npath;
+  B *p;
 
-int fd;
-L nb, atmost, npath;
-B *p;
+  if (o_3 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
+  if (ATTR(o_1) & READONLY) return OPD_ATR;
+  if (TAG(o_2) != (ARRAY | BYTETYPE)) return OPD_ERR;
+  if (TAG(o_3) != (ARRAY | BYTETYPE)) return OPD_ERR;
+  npath = ARRAY_SIZE(o_3) + ARRAY_SIZE(o_2) + 1;
+  if (FREEvm + npath > CEILvm) return(VM_OVF);
+  moveB((B *)VALUE_BASE(o_3), FREEvm, ARRAY_SIZE(o_3));
+  moveB((B *)VALUE_BASE(o_2), FREEvm + ARRAY_SIZE(o_3), ARRAY_SIZE(o_2));
+  FREEvm[npath-1] = '\000';
 
-if (o_3 < FLOORopds) return(OPDS_UNF);
-if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
-if (ATTR(o_1) & READONLY) return(OPD_ATR);
-if (TAG(o_2) != (ARRAY | BYTETYPE)) return(OPD_ERR);
-if (TAG(o_3) != (ARRAY | BYTETYPE)) return(OPD_ERR);
-npath = ARRAY_SIZE(o_3) + ARRAY_SIZE(o_2) + 1;
-if (FREEvm + npath > CEILvm) return(VM_OVF);
-moveB((B *)VALUE_BASE(o_3), FREEvm, ARRAY_SIZE(o_3));
-moveB((B *)VALUE_BASE(o_2), FREEvm + ARRAY_SIZE(o_3), ARRAY_SIZE(o_2));
-FREEvm[npath-1] = '\000';
-
-alarm(30);
-timeout = FALSE;
-rf1:
-if (timeout) return(TIMER); if (abortflag) return(ABORT);
+  alarm(30);
+  timeout = FALSE;
+ rf1:
+  if (timeout) return TIMER; 
+  if (abortflag) return ABORT;
   fd = open(FREEvm, O_RDONLY | O_NONBLOCK);
-  if (fd == -1) {if ((errno == EINTR) || (errno == EAGAIN))
-      goto rf1; else return(-errno);}
+  if (fd == -1) {
+    if ((errno == EINTR) || (errno == EAGAIN))
+      goto rf1; 
+    else return -errno;
+  }
   p = (B *)VALUE_BASE(o_1); atmost = ARRAY_SIZE(o_1);
-rf2:
- if (timeout) return(TIMER); if (abortflag) return(ABORT);
- nb = read(fd, p, atmost);
- if (nb == -1) {if ((errno == EAGAIN) || (errno == EINTR)) goto rf2;
-                else return(-errno);}
- if (nb == 0) goto rf3;
- p += nb; atmost -= nb;
- if (atmost == 0) return(RNG_CHK);
- goto rf2;
-rf3:
- if (timeout) return(TIMER); if (abortflag) return(ABORT);
- if (close(fd) == -1) {if (errno == EINTR) goto rf3; else return(-errno);}
+ rf2:
+  if (timeout) return TIMER; 
+  if (abortflag) return ABORT;
+  nb = read(fd, p, atmost);
+  if (nb == -1) {
+    if ((errno == EAGAIN) || (errno == EINTR)) goto rf2;
+    else return -errno;
+  }
+  if (nb == 0) goto rf3;
+  p += nb; atmost -= nb;
+  if (atmost == 0) return RNG_CHK;
+  goto rf2;
+ rf3:
+  if (timeout) return TIMER; 
+  if (abortflag) return ABORT;
+  if (close(fd) == -1) {
+    if (errno == EINTR) goto rf3; 
+    else return -errno;
+  }
  
-ARRAY_SIZE(o_1) = p - (B *)VALUE_BASE(o_1);
-moveframe(o_1, o_3);
-FREEopds = o_2;
-return(OK);
+  ARRAY_SIZE(o_1) = p - (B *)VALUE_BASE(o_1);
+  moveframe(o_1, o_3);
+  FREEopds = o_2;
+  return OK;
 }
 
 /*---------------------------------------------------- writefile
@@ -413,44 +439,53 @@ return(OK);
   - 'string' contains the byte array to be written
 */
 
-L op_writefile(void)
+P op_writefile(void)
 {
+  int fd;
+  P nb, atmost, npath;
+  B *p;
 
-int fd;
-L nb, atmost, npath;
-B *p;
-
-if (o_3 < FLOORopds) return(OPDS_UNF);
-if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
-if (TAG(o_2) != (ARRAY | BYTETYPE)) return(OPD_ERR);
-if (TAG(o_3) != (ARRAY | BYTETYPE)) return(OPD_ERR);
-npath = ARRAY_SIZE(o_2) + ARRAY_SIZE(o_1) + 1;
-if (FREEvm + npath > CEILvm) return(VM_OVF);
-moveB((B *)VALUE_BASE(o_2), FREEvm, ARRAY_SIZE(o_2));
-moveB((B *)VALUE_BASE(o_1), FREEvm + ARRAY_SIZE(o_2), ARRAY_SIZE(o_1));
-FREEvm[npath-1] = '\000';
-
-alarm(30);
-timeout = FALSE;
-wf1:
-if (timeout) return(TIMER); if (abortflag) return(ABORT);
+  if (o_3 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
+  if (TAG(o_2) != (ARRAY | BYTETYPE)) return OPD_ERR;
+  if (TAG(o_3) != (ARRAY | BYTETYPE)) return OPD_ERR;
+  npath = ARRAY_SIZE(o_2) + ARRAY_SIZE(o_1) + 1;
+  if (FREEvm + npath > CEILvm) return VM_OVF;
+  moveB((B *)VALUE_BASE(o_2), FREEvm, ARRAY_SIZE(o_2));
+  moveB((B *)VALUE_BASE(o_1), FREEvm + ARRAY_SIZE(o_2), ARRAY_SIZE(o_1));
+  FREEvm[npath-1] = '\000';
+  
+  alarm(30);
+  timeout = FALSE;
+ wf1:
+  if (timeout) return TIMER; 
+  if (abortflag) return ABORT;
   fd = open(FREEvm, O_CREAT | O_RDWR | O_TRUNC | O_NONBLOCK,
-	    S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
-  if (fd == -1) {if ((errno == EINTR) || (errno == EAGAIN))
-     goto wf1; else return(-errno);}
+            S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
+  if (fd == -1) {
+    if ((errno == EINTR) || (errno == EAGAIN)) goto wf1; 
+    else return -errno;
+  }
   p = (B *)VALUE_BASE(o_3); atmost = ARRAY_SIZE(o_3);
-wf2:
- if (timeout) return(TIMER); if (abortflag) return(ABORT);
- nb = write(fd, p, atmost);
- if (nb == -1) {if ((errno == EAGAIN) || (errno == EINTR)) goto wf2;
-   else return(-errno);}
+ wf2:
+  if (timeout) return TIMER; 
+  if (abortflag) return ABORT;
+  nb = write(fd, p, atmost);
+  if (nb == -1) {
+    if ((errno == EAGAIN) || (errno == EINTR)) goto wf2;
+    else return -errno;
+  }
   p += nb; atmost -= nb;
- if (atmost > 0) goto wf2;
-wf3:
- if (timeout) return(TIMER); if (abortflag) return(ABORT);
- if (close(fd) == -1) {if (errno == EINTR) goto wf3; else return(-errno);}
-FREEopds = o_3;
-return(OK);
+  if (atmost > 0) goto wf2;
+ wf3:
+  if (timeout) return TIMER; 
+  if (abortflag) return ABORT;
+  if (close(fd) == -1) {
+    if (errno == EINTR) goto wf3; 
+    else return -errno;
+  }
+  FREEopds = o_3;
+  return OK;
 }
 
 /******************************************* some funcs for read/writeboxfile
@@ -459,7 +494,7 @@ return(OK);
  */
 
 static clock_t endclock;
-static L chunk_size;
+static P chunk_size;
 
 static void START_ALARM(void) {
 		endclock = clock() + 180*CLOCKS_PER_SEC;
@@ -469,22 +504,22 @@ static void START_ALARM(void) {
 #define MAX_CHUNK (32000)
 //100mbit/s*1/8mbyte/mbit*1024byte/mbyte*5s*1/2minrate*/
 
-static L CHECK_ALARM(void) {
-		int timeout_;
-		alarm(0);
-
-		timeout_ = timeout;
-		timeout = FALSE;
-		if (clock() > endclock || timeout_) return TIMER;
-		if (abortflag) return ABORT;
-		
-		alarm(10);
-		return OK;
+static P CHECK_ALARM(void) {
+  int timeout_;
+  alarm(0);
+  
+  timeout_ = timeout;
+  timeout = FALSE;
+  if (clock() > endclock || timeout_) return TIMER;
+  if (abortflag) return ABORT;
+	
+  alarm(10);
+  return OK;
 }
 
 static void END_ALARM(void) {
-		alarm(0);
-		timeout = FALSE;
+  alarm(0);
+  timeout = FALSE;
 }
 
 /*---------------------------------------------------- readboxfile
@@ -496,24 +531,24 @@ static void END_ALARM(void) {
   - pushes root object of the tree on operand stack
 */
 
-L op_readboxfile(void)
+P op_readboxfile(void)
 {
+  int fd;
+  P nb, atmost, npath, retc;
+  B *p; B isnonnative;
 
-int fd;
-L nb, atmost, npath, retc;
-B *p;
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
+  if (TAG(o_2) != (ARRAY | BYTETYPE)) return OPD_ERR;
+  npath = ARRAY_SIZE(o_1) + ARRAY_SIZE(o_2) + 1;
+  if (FREEvm + npath > CEILvm) return VM_OVF;
 
-if (o_2 < FLOORopds) return(OPDS_UNF);
-if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
-if (TAG(o_2) != (ARRAY | BYTETYPE)) return(OPD_ERR);
-npath = ARRAY_SIZE(o_1) + ARRAY_SIZE(o_2) + 1;
-if (FREEvm + npath > CEILvm) return(VM_OVF);
-moveB((B *)VALUE_BASE(o_2), FREEvm, ARRAY_SIZE(o_2));
-moveB((B *)VALUE_BASE(o_1), FREEvm + ARRAY_SIZE(o_2), ARRAY_SIZE(o_1));
-FREEvm[npath-1] = '\000';
-atmost = CEILvm - FREEvm;   
-START_ALARM();
-rb1:
+  moveB((B *)VALUE_BASE(o_2), FREEvm, ARRAY_SIZE(o_2));
+  moveB((B *)VALUE_BASE(o_1), FREEvm + ARRAY_SIZE(o_2), ARRAY_SIZE(o_1));
+  FREEvm[npath-1] = '\000';
+  atmost = CEILvm - FREEvm;   
+  START_ALARM();
+ rb1:
   if ((retc = CHECK_ALARM()) != OK) return retc;
   fd = open(FREEvm, O_RDONLY | O_NONBLOCK);
   if (fd == -1) {
@@ -522,34 +557,37 @@ rb1:
   }
   p = FREEvm; 
 
-rb2:
- if ((retc = CHECK_ALARM()) != OK) return retc;
- chunk_size = MAX_CHUNK < atmost ? MAX_CHUNK : atmost;
- nb = read(fd, p, chunk_size);
- if (nb == -1) {if ((errno == EAGAIN) || (errno == EINTR)) goto rb2;
- else {retc = -errno; END_ALARM(); return retc;};}
- if (nb == 0) goto rb3;
- p += nb; atmost -= nb;
- if (atmost == 0) {END_ALARM(); return(VM_OVF);};
- goto rb2;
+ rb2:
+  if ((retc = CHECK_ALARM()) != OK) return retc;
+  chunk_size = MAX_CHUNK < atmost ? MAX_CHUNK : atmost;
+  nb = read(fd, p, chunk_size);
+  if (nb == -1) {
+    if ((errno == EAGAIN) || (errno == EINTR)) goto rb2;
+    else {retc = -errno; END_ALARM(); return retc;};
+  }
+  if (nb == 0) goto rb3;
+  p += nb; atmost -= nb;
+  if (atmost == 0) {END_ALARM(); return VM_OVF;};
+  goto rb2;
  
-rb3:
- if ((retc = CHECK_ALARM()) != OK) return retc;
- if (close(fd) == -1) {if ((errno == EINTR) || (errno == EAGAIN)) goto rb3;
-   else return(-errno);}
- END_ALARM();
+ rb3:
+  if ((retc = CHECK_ALARM()) != OK) return retc;
+  if (close(fd) == -1) {
+    if ((errno == EINTR) || (errno == EAGAIN)) goto rb3;
+    else return -errno;
+  }
+  END_ALARM();
  
- nb = DALIGN(p - FREEvm);
- if (! GETNATIVEFORMAT(FREEvm) || ! GETNATIVEUNDEF(FREEvm)) return BAD_FMT;
- if (! GETNATIVEENDIAN(FREEvm) && ((retc = deendian_frame(FREEvm)) != OK))
-     return retc;
- if ((retc = unfoldobj(FREEvm,(L)FREEvm, GETNATIVE(FREEvm))) != OK) 
-   return(retc);
- FORMAT(FREEvm) = 0;
- moveframe(FREEvm,o_2);
- FREEvm += nb;
- FREEopds = o_1;
- return(OK);
+  nb = DALIGN(p - FREEvm);
+  if (! GETNATIVEFORMAT(FREEvm) || ! GETNATIVEUNDEF(FREEvm)) return BAD_FMT;
+  isnonnative = GETNATIVEENDIAN(FREEvm);
+  if ((retc = deendian_frame(FREEvm, isnonnative)) != OK) return retc;
+  if ((retc = unfoldobj(FREEvm, (P)FREEvm, isnonnative)) != OK) return retc;
+  FORMAT(FREEvm) = 0;
+  moveframe(FREEvm,o_2);
+  FREEvm += nb;
+  FREEopds = o_1;
+  return OK;
 }
 
 /*---------------------------------------------------- writeboxfile
@@ -560,77 +598,78 @@ rb3:
     specified by the strings 'dir' and 'filename'
 */
 
-L op_writeboxfile(void) {
-		int fd;
-		L nb, atmost, retc, npath;
-		B *oldFREEvm, *base, *top, *freemem;
-		B frame[FRAMEBYTES];
+P op_writeboxfile(void) 
+{
+  int fd;
+  P nb, atmost, retc, npath;
+  B *oldFREEvm, *base, *top, *freemem;
+  B frame[FRAMEBYTES];
 
-		if (o_3 < FLOORopds) return(OPDS_UNF);
-		if (!((CLASS(o_3) == ARRAY)
-					|| (CLASS(o_3) == LIST)
-					|| (CLASS(o_3) == DICT)))
-				return(OPD_ERR);
-		if (TAG(o_2) != (ARRAY | BYTETYPE)) return(OPD_ERR);
-		if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
+  if (o_3 < FLOORopds) return OPDS_UNF;
+  if (!((CLASS(o_3) == ARRAY)
+        || (CLASS(o_3) == LIST)
+        || (CLASS(o_3) == DICT)))
+    return OPD_ERR;
+  if (TAG(o_2) != (ARRAY | BYTETYPE)) return OPD_ERR;
+  if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
 
-		oldFREEvm = FREEvm;
-		moveframe(o_3, frame);
+  oldFREEvm = FREEvm;
+  moveframe(o_3, frame);
 		
-		npath = ARRAY_SIZE(o_2) + ARRAY_SIZE(o_1) + 1;
-		if ((retc = foldobj_ext(frame, npath)) != OK) {
-				FREEvm = oldFREEvm;
-				return(retc);
-		}
+  npath = ARRAY_SIZE(o_2) + ARRAY_SIZE(o_1) + 1;
+  if ((retc = foldobj_ext(frame, npath)) != OK) {
+    FREEvm = oldFREEvm;
+    return retc;
+  }
 		
-		freemem = FREEvm;
-		if (! foldobj_mem(&base, &top)) {
-				base = oldFREEvm;
-				top = FREEvm;
-				FREEvm = oldFREEvm;
-		}
+  freemem = FREEvm;
+  if (! foldobj_mem(&base, &top)) {
+    base = oldFREEvm;
+    top = FREEvm;
+    FREEvm = oldFREEvm;
+  }
  
-		SETNATIVE(base);
-		atmost = top - base;
- 
-		if (freemem + npath > CEILvm) {foldobj_free(); return(VM_OVF);}
-		moveB((B *)VALUE_BASE(o_2), freemem, ARRAY_SIZE(o_2));
-		moveB((B *)VALUE_BASE(o_1), freemem + ARRAY_SIZE(o_2), ARRAY_SIZE(o_1));
-		freemem[npath-1] = '\000';
-
-		START_ALARM();
-	wb1:
-		if ((retc = CHECK_ALARM()) != OK) {foldobj_free(); return retc;};
-		fd = open(freemem, O_CREAT | O_NONBLOCK | O_RDWR | O_TRUNC,
-							S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
-		if (fd == -1) {
-				if ((errno == EINTR) || (errno == EAGAIN)) goto wb1;
-				else {retc = -errno; END_ALARM(); foldobj_free(); return retc;};
-		}
+  SETNATIVE(base);
+  atmost = top - base;
   
-	wb2:
-		if ((retc = CHECK_ALARM()) != OK) {foldobj_free(); return retc;};
-		chunk_size = MAX_CHUNK < atmost ? MAX_CHUNK : atmost;
-		nb = write(fd, base, chunk_size);
-		if (nb == -1) {
-				if ((errno == EAGAIN) || (errno == EINTR)) goto wb2;
-				else {retc = -errno; END_ALARM(); foldobj_free(); return retc;};
-		}
+  if (freemem + npath > CEILvm) {foldobj_free(); return VM_OVF;}
+  moveB((B *)VALUE_BASE(o_2), freemem, ARRAY_SIZE(o_2));
+  moveB((B *)VALUE_BASE(o_1), freemem + ARRAY_SIZE(o_2), ARRAY_SIZE(o_1));
+  freemem[npath-1] = '\000';
+
+  START_ALARM();
+ wb1:
+  if ((retc = CHECK_ALARM()) != OK) {foldobj_free(); return retc;};
+  fd = open(freemem, O_CREAT | O_NONBLOCK | O_RDWR | O_TRUNC,
+            S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
+  if (fd == -1) {
+    if ((errno == EINTR) || (errno == EAGAIN)) goto wb1;
+    else {retc = -errno; END_ALARM(); foldobj_free(); return retc;};
+  }
+  
+ wb2:
+  if ((retc = CHECK_ALARM()) != OK) {foldobj_free(); return retc;};
+  chunk_size = MAX_CHUNK < atmost ? MAX_CHUNK : atmost;
+  nb = write(fd, base, chunk_size);
+  if (nb == -1) {
+    if ((errno == EAGAIN) || (errno == EINTR)) goto wb2;
+    else {retc = -errno; END_ALARM(); foldobj_free(); return retc;};
+  }
  
-		base += nb; atmost -= nb;
-		if (atmost > 0) goto wb2;
+  base += nb; atmost -= nb;
+  if (atmost > 0) goto wb2;
 		
-		foldobj_free();
-	wb3:
-		if ((retc = CHECK_ALARM()) != OK) return retc;
-		if (close(fd) == -1) {
-				if (errno == EINTR) goto wb3;
-				else return(-errno);
-		}
-		END_ALARM();
+  foldobj_free();
+ wb3:
+  if ((retc = CHECK_ALARM()) != OK) return retc;
+  if (close(fd) == -1) {
+    if (errno == EINTR) goto wb3;
+    else return -errno;
+  }
+  END_ALARM();
  
-		FREEopds = o_3;
-		return(OK);
+  FREEopds = o_3;
+  return OK;
 }
 
 /*---------------------------------------------- findfiles
@@ -668,111 +707,121 @@ L op_writeboxfile(void) {
 
 static int compare(const void *a, const void *b)
 {
-  B *fpa, *fpb, *sa, *sb; L ta, tb, na, nb;
+  B *fpa, *fpb, *sa, *sb; 
+  LBIG ta, tb;
+  P na, nb;
 
   fpa = (B *)(VALUE_BASE(a) + 3 * FRAMEBYTES);
   fpb = (B *)(VALUE_BASE(b) + 3 * FRAMEBYTES);
-  VALUE(fpa,&ta); VALUE(fpb,&tb);
-  fpa = (B *)(VALUE_BASE(a)); fpb = (B *)(VALUE_BASE(b));
-  sa = (B *)(VALUE_BASE(fpa)); sb = (B *)(VALUE_BASE(fpb));
-  na = ARRAY_SIZE(fpa); nb = ARRAY_SIZE(fpb);
+  VALUE(fpa,&ta); 
+  VALUE(fpb,&tb);
+  fpa = (B *)(VALUE_BASE(a)); 
+  fpb = (B *)(VALUE_BASE(b));
+  sa = (B *)(VALUE_BASE(fpa)); 
+  sb = (B *)(VALUE_BASE(fpb));
+  na = ARRAY_SIZE(fpa); 
+  nb = ARRAY_SIZE(fpb);
 
-  if (S_ISDIR(ta)) 
-    {
-      if (S_ISDIR(tb))
-	  return(strncmp(sa,sb,(na <= nb)? na : nb));
-      else return(-1);
-    }
-  else
-    {
-      if (S_ISDIR(tb)) return(1);
-      else return(strncmp(sa,sb,(na <= nb)? na : nb));
-    }
+  if (S_ISDIR(ta)) {
+    if (S_ISDIR(tb))
+      return strncmp(sa,sb,(na <= nb? na : nb));
+    else return -1;
+  }
+  else {
+    if (S_ISDIR(tb)) return 1;
+    else return strncmp(sa,sb,(na <= nb)? na : nb);
+  }
 }
 
-L op_findfiles(void)
+P op_findfiles(void)
 {
-  L ndirn, nentries, k, nname; 
+  P ndirn, nentries, k, nname; 
   B *dirn, *vmp, *lp, *fnp, *fp;
   struct stat sb;
   struct dirent *ep;
   DIR *dp;
 
- if (o_1 < FLOORopds) return(OPDS_UNF);
- if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
- if ((dirn = malloc(1024)) == 0) return MEM_OVF;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
+  if ((dirn = malloc(1024)) == 0) return MEM_OVF;
 
- /*-- we need dirname as null-terminated string */
- ndirn = ARRAY_SIZE(o_1);
- if (ndirn > 1023) { free(dirn); return(RNG_CHK); }
- moveB((B *)VALUE_BASE(o_1),dirn,ndirn); dirn[ndirn] = '\000';
+  /*-- we need dirname as null-terminated string */
+  ndirn = ARRAY_SIZE(o_1);
+  if (ndirn > 1023) { free(dirn); return RNG_CHK; }
+  moveB((B *)VALUE_BASE(o_1),dirn,ndirn); dirn[ndirn] = '\000';
 
- /*-- open the directory */
- if ((dp = opendir(dirn)) == NULL) { free(dirn); return(-errno); }
- vmp = FREEvm;
+  /*-- open the directory */
+  if ((dp = opendir(dirn)) == NULL) { free(dirn); return -errno; }
+  vmp = FREEvm;
 
- /*-- scan file by file and save filenames and status info in VM
-      skipping files other than regular files or directories
- */
- nentries = 0;
- while ((ep = readdir(dp)))
-   {
-   nname = strlen(ep->d_name);
-   if ((ndirn + nname) > 1023) { closedir(dp); free(dirn); return(RNG_CHK); }
-   moveB(ep->d_name, dirn+ndirn, nname); dirn[ndirn + nname] = '\000'; 
-   if (stat(dirn, &sb) == 0)
-     {
-     if ((S_ISDIR(sb.st_mode) || (S_ISREG(sb.st_mode))))
-       {
-       if ((vmp + 6 * FRAMEBYTES + DALIGN(nname)) > CEILvm)
-	 { closedir(dp); free(dirn); return(VM_OVF); }
-       TAG(vmp) = LIST; ATTR(vmp) = 0;
-       lp = (B*)(VALUE_BASE(vmp) = (L)(vmp + FRAMEBYTES));
-       fnp = (B*)(LIST_CEIL(vmp) = (L)(lp + 4 * FRAMEBYTES));
-       TAG(lp) = (ARRAY | BYTETYPE); ATTR(lp) = 0;
-       VALUE_BASE(lp) = (L)(fnp + FRAMEBYTES);
-       ARRAY_SIZE(lp) = nname;
-       moveB(ep->d_name, (B *)VALUE_BASE(lp), ARRAY_SIZE(lp));
-       moveframe(lp,fnp);
-       lp += FRAMEBYTES;
-       TAG(lp) = (NUM | LONGTYPE); ATTR(lp) = 0;
-       LONG_VAL(lp) = sb.st_size;
-       lp += FRAMEBYTES;
-       TAG(lp) = (NUM | LONGTYPE); ATTR(lp) = 0;
-       LONG_VAL(lp) = sb.st_mtime;
-       lp += FRAMEBYTES;
-       TAG(lp) = (NUM | LONGTYPE); ATTR(lp) = 0;
-       LONG_VAL(lp) = sb.st_mode;
-       vmp = fnp + FRAMEBYTES + DALIGN(nname);
-       nentries++;
-       }
-     }
-   }
+  /*-- scan file by file and save filenames and status info in VM
+    skipping files other than regular files or directories
+  */
+  nentries = 0;
+  while ((ep = readdir(dp))) {
+    nname = strlen(ep->d_name);
+    if ((ndirn + nname) > 1023) {closedir(dp); free(dirn); return RNG_CHK;}
+    moveB(ep->d_name, dirn+ndirn, nname); dirn[ndirn + nname] = '\000'; 
+    
+    if (stat(dirn, &sb) == 0 
+        && ((S_ISDIR(sb.st_mode) || (S_ISREG(sb.st_mode))))) {
+      if ((vmp + 6 * FRAMEBYTES + DALIGN(nname)) > CEILvm) { 
+        closedir(dp); free(dirn); return VM_OVF; 
+      }
+      TAG(vmp) = LIST; 
+      ATTR(vmp) = 0;
+      lp = (B*)(VALUE_BASE(vmp) = (P)(vmp + FRAMEBYTES));
+      fnp = (B*)(LIST_CEIL(vmp) = (P)(lp + 4 * FRAMEBYTES));
 
- if (closedir(dp) != 0) return(-errno);
- /*-- build the 'filelist' master list */
- if ((vmp + (nentries + 1) * FRAMEBYTES) > CEILvm)
-   { free(dirn); return(VM_OVF); }
- TAG(vmp) = LIST; ATTR(vmp) = READONLY;
- VALUE_BASE(vmp) = (L)(vmp + FRAMEBYTES);
- LIST_CEIL(vmp) = (L)(vmp + (nentries + 1) * FRAMEBYTES);
- lp = vmp + FRAMEBYTES; fp = FREEvm;
- for (k=0; k<nentries; k++)
-   {
-     moveframe(fp,lp);
-     fp += 5 * FRAMEBYTES;
-     fp += FRAMEBYTES + DALIGN(ARRAY_SIZE(fp));
-     lp += FRAMEBYTES;
-   }
+      TAG(lp) = (ARRAY | BYTETYPE); 
+      ATTR(lp) = 0;
+      VALUE_BASE(lp) = (P)(fnp + FRAMEBYTES);
+      ARRAY_SIZE(lp) = nname;
+      moveB(ep->d_name, (B *)VALUE_BASE(lp), ARRAY_SIZE(lp));
+      moveframe(lp,fnp);
+      
+      lp += FRAMEBYTES;
+      TAG(lp) = (NUM | LONGBIGTYPE); 
+      ATTR(lp) = 0;
+      LONGBIG_VAL(lp) = sb.st_size;
+      lp += FRAMEBYTES;
+      TAG(lp) = (NUM | LONGBIGTYPE); 
+      ATTR(lp) = 0;
+      LONGBIG_VAL(lp) = sb.st_mtime;
+      lp += FRAMEBYTES;
+      TAG(lp) = (NUM | LONGBIGTYPE); 
+      ATTR(lp) = 0;
+      LONGBIG_VAL(lp) = sb.st_mode;
+      vmp = fnp + FRAMEBYTES + DALIGN(nname);
+      nentries++;
+    }
+  }
 
- /*-- sort into directories and regular files */
+  if (closedir(dp) != 0) return -errno;
+  /*-- build the 'filelist' master list */
+  if ((vmp + (nentries + 1) * FRAMEBYTES) > CEILvm) { 
+    free(dirn); return VM_OVF; 
+  }
+  TAG(vmp) = LIST; 
+  ATTR(vmp) = READONLY;
+  VALUE_BASE(vmp) = (P)(vmp + FRAMEBYTES);
+  LIST_CEIL(vmp) = (P)(vmp + (nentries + 1) * FRAMEBYTES);
+  lp = vmp + FRAMEBYTES; fp = FREEvm;
+  for (k=0; k<nentries; k++) {
+    moveframe(fp,lp);
+    fp += 5 * FRAMEBYTES;
+    fp += FRAMEBYTES + DALIGN(ARRAY_SIZE(fp));
+    lp += FRAMEBYTES;
+  }
 
- qsort((void *)VALUE_BASE(vmp), nentries, FRAMEBYTES, compare);
+  /*-- sort into directories and regular files */
+
+  qsort((void *)VALUE_BASE(vmp), nentries, FRAMEBYTES, compare);
  
- FREEvm = lp;    
- moveframe(vmp, o_1);
- free(dirn);
- return(OK);
+  FREEvm = lp;    
+  moveframe(vmp, o_1);
+  free(dirn);
+  return OK;
 }
 
 /**************************************************** findfile
@@ -784,22 +833,23 @@ L op_findfiles(void)
  **************************************************************
 */
 
-L op_findfile(void) {
+P op_findfile(void) 
+{
   struct stat buf;
 	BOOLEAN addslash;
-	L dirlen;
+	P dirlen;
 
   if (o_2 < FLOORopds) return OPDS_UNF;
   if ((TAG(o_1) != (ARRAY | BYTETYPE)) || (TAG(o_2) != (ARRAY | BYTETYPE)))
-			return OPD_ERR;
+    return OPD_ERR;
 	if (ARRAY_SIZE(o_1) == 0 || ARRAY_SIZE(o_2) == 0)
-			return RNG_CHK;
+    return RNG_CHK;
 
 	dirlen = ARRAY_SIZE(o_2);
 	addslash = (VALUE_PTR(o_2)[dirlen-1] != '/');
   // make null terminated file string
 	if (FREEvm+ARRAY_SIZE(o_1)+ARRAY_SIZE(o_2)+1+(addslash ? 1 : 0) >= CEILvm)
-			return VM_OVF;
+    return VM_OVF;
 
   moveB(VALUE_PTR(o_2), FREEvm, dirlen);
 	if (addslash) FREEvm[dirlen++] = '/';
@@ -807,31 +857,35 @@ L op_findfile(void) {
   FREEvm[dirlen+ARRAY_SIZE(o_1)] = '\0';
 
   if (stat(FREEvm, &buf)) {
-	if (errno == ENOENT) { // non-existent returns false
-	  TAG(o_2) = BOOL; ATTR(o_2) = 0;
-	  BOOL_VAL(o_2) = FALSE;
-	  FREEopds = o_1;
-	  return OK;
-	}
-	return -errno;
+    if (errno == ENOENT) { // non-existent returns false
+      TAG(o_2) = BOOL; ATTR(o_2) = 0;
+      BOOL_VAL(o_2) = FALSE;
+      FREEopds = o_1;
+      return OK;
+    }
+    return -errno;
   }
 
   // unhandled type return false
   if (! S_ISDIR(buf.st_mode) && ! S_ISREG(buf.st_mode)) {
-	TAG(o_2) = BOOL; ATTR(o_2) = 0;
-	BOOL_VAL(o_2) = FALSE;
-	FREEopds = o_1;
-	return OK;
+    TAG(o_2) = BOOL; ATTR(o_2) = 0;
+    BOOL_VAL(o_2) = FALSE;
+    FREEopds = o_1;
+    return OK;
   }
 
   if (o3 > CEILopds) return OPDS_OVF;
-  TAG(o_2) = (NUM | LONGTYPE); ATTR(o_2) = 0;
-  LONG_VAL(o_2) = buf.st_size;
-  TAG(o_1) = (NUM | LONGTYPE); ATTR(o_1) = 0;
-  LONG_VAL(o_1) = buf.st_mtime;
-  TAG(o1) = (NUM | LONGTYPE); ATTR(o1) = 0;
-  LONG_VAL(o1) = buf.st_mode;
-  TAG(o2) = BOOL; ATTR(o2) = 0;
+  TAG(o_2) = (NUM | LONGBIGTYPE); 
+  ATTR(o_2) = 0;
+  LONGBIG_VAL(o_2) = buf.st_size;
+  TAG(o_1) = (NUM | LONGBIGTYPE); 
+  ATTR(o_1) = 0;
+  LONGBIG_VAL(o_1) = buf.st_mtime;
+  TAG(o1) = (NUM | LONGBIGTYPE); 
+  ATTR(o1) = 0;
+  LONGBIG_VAL(o1) = buf.st_mode;
+  TAG(o2) = BOOL; 
+  ATTR(o2) = 0;
   BOOL_VAL(o2) = TRUE;
   FREEopds = o3;
 
@@ -847,18 +901,22 @@ L op_findfile(void) {
    as the replica
 */
 
-L op_transcribe(void)
+P op_transcribe(void)
 {
-L retc; W depth;
-B *p;
+  P retc; 
+  W depth;
+  B *p;
 
-if (o_1 < FLOORopds) return(OPDS_UNF);
-if (!((CLASS(o_1) == ARRAY) || (CLASS(o_1) == LIST) || (CLASS(o_1) == DICT)))
-   return(OPD_ERR);
-p = FREEvm; depth = 0;
-if ((retc = foldobj(o_1,0L ,&depth)) != OK)
-  { FREEvm = p; return(retc); }
-moveframe(p,o_1);
-return(OK);
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (!((CLASS(o_1) == ARRAY) 
+        || (CLASS(o_1) == LIST) 
+        || (CLASS(o_1) == DICT)))
+    return OPD_ERR;
+
+  p = FREEvm; depth = 0;
+  if ((retc = foldobj(o_1,0L ,&depth)) != OK) {FREEvm = p; return retc;}
+
+  moveframe(p,o_1);
+  return OK;
 }
 

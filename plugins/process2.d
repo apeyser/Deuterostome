@@ -163,12 +163,12 @@ def
     };
 
 ) {(
-  TAG) handle (= \(NUM | LONGTYPE \); ATTR) handle ( = 0;
-  LONG_VAL) handle (= pid;
+  TAG) handle (= \(NUM | LONGBIGTYPE \); ATTR) handle ( = 0;
+  LONGBIG_VAL) handle (= pid;
   ) /PID make_handle (;
-  LONG_VAL) handle (= filedes_stdin[1];
+  LONGBIG_VAL) handle (= filedes_stdin[1];
   ) /STDIN make_handle (;
-  LONG_VAL) handle (= filedes_stdout[1];
+  LONGBIG_VAL) handle (= filedes_stdout[1];
   ) /STDOUT make_handle (;
   TAG) handle ( = \(NUM | BYTETYPE \);
   *\(NUM_VAL) handle (\) = 0;
@@ -182,7 +182,7 @@ def
       /writeproc {
 (
 	int pipein;
-	L p, atmost, ret;
+	P p, atmost, ret;
 	DECLARE_ALARM;
 
 	if \(o_2 < FLOORopds\) return OPDS_UNF;
@@ -219,8 +219,8 @@ def
     ][
       /readproc {
 (
-	L pipeout;
-	L index, p, ret, atmost;
+	P pipeout;
+	P index, p, ret, atmost;
 	DECLARE_ALARM;
 	
 	if \(o_4 < FLOORopds\) return OPDS_UNF;
@@ -232,9 +232,9 @@ def
 
 	if \() /STATE (o_1) handle ( == PROCESS_STATE_DEAD\) ) /DEAD error_ (;
 
-	if \(! VALUE\(o_3, &index\)\) return UNDF_VAL;
+	if \(! PVALUE\(o_3, &index\)\) return UNDF_VAL;
 	if \(ARRAY_SIZE\(o_4\)-index < 1\) return RNG_CHK;
-	if \(! VALUE\(o_2, &atmost\)\) atmost = ARRAY_SIZE\(o_4\)-index;
+	if \(! PVALUE\(o_2, &atmost\)\) atmost = ARRAY_SIZE\(o_4\)-index;
 	if \(ARRAY_SIZE\(o_4\)-index-atmost < 0\) return RNG_CHK;
 
 	pipeout = ) /STDOUT (o_1) handle (;
@@ -263,8 +263,8 @@ def
 	};
  procread:
 	END_ALARM;
-	TAG\(o_3\) = NUM | LONGTYPE;
-	LONG_VAL\(o_3\) = index+p;
+	TAG\(o_3\) = NUM | LONGBIGTYPE;
+	LONGBIG_VAL\(o_3\) = index+p;
 	FREEopds = o_2;
 	return OK;
 )
@@ -299,10 +299,10 @@ def
 (
 	pid_t pid;
 	int status;
-	L ret;
+	P ret;
 	int errno_ = 0;
 	B nextchar;
-	L pipeout;
+	P pipeout;
 
 	if \(o_1 < FLOORopds\) return OPDS_UNF;
 	TEST_OPAQUE\(o_1\);
@@ -315,7 +315,7 @@ def
 		return OK;
 	}
 
-	pipeout = ) /STDOUT (o_1) handle (;
+	pipeout = \(P\)) /STDOUT (o_1) handle (;
 	timeout = FALSE;
 	alarm\(10\);
 	ret = read\(pipeout, &nextchar, 1\);
@@ -331,11 +331,11 @@ def
 		return OK;
 	}
 
-	pid = ) /PID (o_1) handle (;
+	pid = \(P\)) /PID (o_1) handle (;
 	if \(\(ret = waitpid\(pid, &status, WNOHANG\)\) == -1\) {
 		errno_ = errno;
-		close\() /STDIN (o_1) handle (\);
-		close\() /STDOUT (o_1) handle (\);
+		close\(\(P\)) /STDIN (o_1) handle (\);
+		close\(\(P\)) /STDOUT (o_1) handle (\);
 		) /STATE (o_1) handle ( = PROCESS_STATE_DEAD;
 		kill\(pid, SIGKILL\);
 		waitpid\(pid, &status, 0\);
@@ -346,17 +346,17 @@ def
 		BOOL_VAL\(o_1\) = TRUE;
 	} else {
 		) /STATE (o_1) handle ( = PROCESS_STATE_DEAD;
-		if \(close\() /STDIN (o_1) handle (\)\) errno_ = errno;
-		if \(close\() /STDOUT (o_1) handle (\) && ! errno_\) errno_ = errno;
+		if \(close\(\(P\)) /STDIN (o_1) handle (\)\) errno_ = errno;
+		if \(close\(\(P\)) /STDOUT (o_1) handle (\) && ! errno_\) errno_ = errno;
 		if \(errno_\) return -errno_;
 		
 		if \(o2 > CEILopds\) return OPDS_OVF;
 		ret = WIFEXITED\(status\) ?
-                    WEXITSTATUS\(status\) : \(L\) 0xFFFF0000L;
+                    WEXITSTATUS\(status\) : \(P\) 0xFFFF0000L;
 		TAG\(o1\) = BOOL; ATTR\(o1\) = 0;
 		BOOL_VAL\(o1\) = FALSE;
-		TAG\(o_1\) = NUM | LONGTYPE; ATTR\(o_1\) = 0;
-		LONG_VAL\(o_1\) = ret;
+		TAG\(o_1\) = NUM | LONGBIGTYPE; ATTR\(o_1\) = 0;
+		LONGBIG_VAL\(o_1\) = ret;
 		FREEopds = o2;
 	}
 
@@ -366,8 +366,8 @@ def
     ][
       /waitproc {
 (
-	L pipeout;
-	L ret;
+	P pipeout;
+	P ret;
 	B nextchar;
 
 	if \(o_1 < FLOORopds\) return OPDS_UNF;
@@ -376,7 +376,7 @@ def
 	if \() /STATE (o_1) handle ( == PROCESS_STATE_DEAD\) ) /DEAD error_ (;
 	if \() /STATE (o_1) handle ( == PROCESS_STATE_BUFFD\) return OK;
 
-	pipeout = ) /STDOUT (o_1) handle (;
+	pipeout = \(P\)) /STDOUT (o_1) handle (;
 	while \(1\) {
 		alarm\(10\);
 		timeout = FALSE;
@@ -415,9 +415,9 @@ def
 
 /makehandles {
   [
-    [/PID {(LONG_VAL\() handle (\))}]
-    [/STDIN {(LONG_VAL\() handle (\))}]
-    [/STDOUT {(LONG_VAL\() handle (\))}]
+    [/PID {(LONGBIG_VAL\() handle (\))}]
+    [/STDIN {(LONGBIG_VAL\() handle (\))}]
+    [/STDOUT {(LONGBIG_VAL\() handle (\))}]
     [/STATE {(*\(NUM_VAL\() handle (\)\))}]
     [/BUFFC {(*\(NUM_VAL\() handle (\)\))}]
   ]
@@ -447,7 +447,7 @@ extern char** environ;
 (
 #define DECLARE_ALARM \
   clock_t endclock = clock\(\) + 180*CLOCKS_PER_SEC; \
-  L chunk_size
+  P chunk_size
 
 #define START_ALARM {timeout = FALSE;}
 
