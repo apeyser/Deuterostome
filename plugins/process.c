@@ -19,33 +19,33 @@ extern char** environ;
 #include "process.h"
 
 UP ll_type = 0;
-P op_hi(void) {return wrap_hi("process V1");}
+P op_hi(void) {return wrap_hi((B*)"process V1");}
 P op_libnum(void) {return wrap_libnum(ll_type);}
 P ll_errc[] = {
 	PROC_ARGS, PROC_WAIT, PROC_SIZE, PROC_SIG, PROC_EOF, PROC_DEAD, 0L
 };
 B* ll_errm[] = {
-	"** process: argument list must be composed of strings",
-	"** process: waitproc call not immediately followed bre readproc",
-	"** process: argument string must not have a string length of 0",
-	"** process: error setting signal handler",
-	"** process: unexpected end of file",
-	"** process: process has been killed",
+	(B*)"** process: argument list must be composed of strings",
+	(B*)"** process: waitproc call not immediately followed bre readproc",
+	(B*)"** process: argument string must not have a string length of 0",
+	(B*)"** process: error setting signal handler",
+	(B*)"** process: unexpected end of file",
+	(B*)"** process: process has been killed",
 	NULL
 };
 
 B* ll_export[] = {
-	"hi", (B*) op_hi,
-	"libnum", (B*) op_libnum,
-	"makeproc", (B*) op_makeproc,
-	"writeproc", (B*) op_writeproc,
-	"readproc", (B*) op_readproc,
-	"killproc", (B*) op_killproc,
-	"waitproc", (B*) op_waitproc,
-	"unwaitproc", (B*) op_unwaitproc,
-	"liveproc", (B*) op_liveproc,
-	"INIT_", (B*) op_INIT_,
-	"", NULL
+	(B*)"hi", (B*) op_hi,
+	(B*)"libnum", (B*) op_libnum,
+	(B*)"makeproc", (B*) op_makeproc,
+	(B*)"writeproc", (B*) op_writeproc,
+	(B*)"readproc", (B*) op_readproc,
+	(B*)"killproc", (B*) op_killproc,
+	(B*)"waitproc", (B*) op_waitproc,
+	(B*)"unwaitproc", (B*) op_unwaitproc,
+	(B*)"liveproc", (B*) op_liveproc,
+	(B*)"INIT_", (B*) op_INIT_,
+	(B*)"", NULL
 };
 
 B opaquename[FRAMEBYTES];
@@ -56,12 +56,12 @@ static B PROCESS_STATE_N[FRAMEBYTES];
 static B PROCESS_BUFFC_N[FRAMEBYTES];
 
 P op_INIT_(void) {
-  makename(PROCESS_HANDLE, opaquename);
-  makename("pid", PROCESS_PID_N);
-  makename("stdout", PROCESS_STDOUT_N);
-  makename("stdin", PROCESS_STDIN_N);
-  makename("state", PROCESS_STATE_N);
-  makename("buffc", PROCESS_BUFFC_N);
+  makename((B*)PROCESS_HANDLE, opaquename);
+  makename((B*)"pid", PROCESS_PID_N);
+  makename((B*)"stdout", PROCESS_STDOUT_N);
+  makename((B*)"stdin", PROCESS_STDIN_N);
+  makename((B*)"state", PROCESS_STATE_N);
+  makename((B*)"buffc", PROCESS_BUFFC_N);
 
   return OK;
 }
@@ -394,7 +394,7 @@ P op_makeproc(void) {
 	
         if (TAG(o_1) == STRING) {
             if (! (prog = malloc(ARRAY_SIZE(o_1)+1))) senderrno();
-            strncpy(prog, VALUE_PTR(o_1), ARRAY_SIZE(o_1));
+            strncpy((char*)prog, (char*)VALUE_PTR(o_1), ARRAY_SIZE(o_1));
             prog[ARRAY_SIZE(o_1)] = '\0';
             args = NULL;
         } else {
@@ -404,7 +404,8 @@ P op_makeproc(void) {
                  param < (B*) LIST_CEIL(o_1);
                  (param += FRAMEBYTES), arg++) {
                 if (! (*arg = malloc(ARRAY_SIZE(param)+1))) senderrno();
-                strncpy(*arg, VALUE_PTR(param), ARRAY_SIZE(param));
+                strncpy((char*)*arg, (char*)VALUE_PTR(param), 
+			ARRAY_SIZE(param));
                 (*arg)[ARRAY_SIZE(param)] = '\0';
             }
             *arg = NULL;

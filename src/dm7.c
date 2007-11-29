@@ -110,8 +110,8 @@ P op_getwdir(void)
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
   if (ATTR(o_1) & READONLY) return OPD_ATR;
   
-  if ((p = getcwd(0L,0L)) == 0L) return -errno;
-  nb = strlen(p);
+  if ((p = (B*)getcwd(0L,0L)) == 0L) return -errno;
+  nb = strlen((char*)p);
   if (nb > ARRAY_SIZE(o_1)) return RNG_CHK;
   moveB(p, (B *)VALUE_BASE(o_1),nb);
   free(p);
@@ -136,7 +136,7 @@ P op_setwdir(void)
 
   moveB((B *)VALUE_BASE(o_1),FREEvm, nb-1);
   FREEvm[nb-1] = '\000';
-  if (chdir(FREEvm)) return -errno;
+  if (chdir((char*)FREEvm)) return -errno;
   FREEopds = o_1;
   return OK;
 }
@@ -398,7 +398,7 @@ P op_readfile(void)
  rf1:
   if (timeout) return TIMER; 
   if (abortflag) return ABORT;
-  fd = open(FREEvm, O_RDONLY | O_NONBLOCK);
+  fd = open((char*)FREEvm, O_RDONLY | O_NONBLOCK);
   if (fd == -1) {
     if ((errno == EINTR) || (errno == EAGAIN))
       goto rf1; 
@@ -460,7 +460,7 @@ P op_writefile(void)
  wf1:
   if (timeout) return TIMER; 
   if (abortflag) return ABORT;
-  fd = open(FREEvm, O_CREAT | O_RDWR | O_TRUNC | O_NONBLOCK,
+  fd = open((char*)FREEvm, O_CREAT | O_RDWR | O_TRUNC | O_NONBLOCK,
             S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
   if (fd == -1) {
     if ((errno == EINTR) || (errno == EAGAIN)) goto wf1; 
@@ -550,7 +550,7 @@ P op_readboxfile(void)
   START_ALARM();
  rb1:
   if ((retc = CHECK_ALARM()) != OK) return retc;
-  fd = open(FREEvm, O_RDONLY | O_NONBLOCK);
+  fd = open((char*)FREEvm, O_RDONLY | O_NONBLOCK);
   if (fd == -1) {
     if ((errno == EINTR) || (errno == EAGAIN)) goto rb1; 
     else {retc = -errno; END_ALARM(); return retc;};
@@ -640,7 +640,7 @@ P op_writeboxfile(void)
   START_ALARM();
  wb1:
   if ((retc = CHECK_ALARM()) != OK) {foldobj_free(); return retc;};
-  fd = open(freemem, O_CREAT | O_NONBLOCK | O_RDWR | O_TRUNC,
+  fd = open((char*)freemem, O_CREAT | O_NONBLOCK | O_RDWR | O_TRUNC,
             S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
   if (fd == -1) {
     if ((errno == EINTR) || (errno == EAGAIN)) goto wb1;
@@ -724,12 +724,12 @@ static int compare(const void *a, const void *b)
 
   if (S_ISDIR(ta)) {
     if (S_ISDIR(tb))
-      return strncmp(sa,sb,(na <= nb? na : nb));
+      return strncmp((char*)sa,(char*)sb,(na <= nb? na : nb));
     else return -1;
   }
   else {
     if (S_ISDIR(tb)) return 1;
-    else return strncmp(sa,sb,(na <= nb)? na : nb);
+    else return strncmp((char*)sa,(char*)sb,(na <= nb)? na : nb);
   }
 }
 
@@ -751,7 +751,7 @@ P op_findfiles(void)
   moveB((B *)VALUE_BASE(o_1),dirn,ndirn); dirn[ndirn] = '\000';
 
   /*-- open the directory */
-  if ((dp = opendir(dirn)) == NULL) { free(dirn); return -errno; }
+  if ((dp = opendir((char*)dirn)) == NULL) { free(dirn); return -errno; }
   vmp = FREEvm;
 
   /*-- scan file by file and save filenames and status info in VM
@@ -761,9 +761,9 @@ P op_findfiles(void)
   while ((ep = readdir(dp))) {
     nname = strlen(ep->d_name);
     if ((ndirn + nname) > 1023) {closedir(dp); free(dirn); return RNG_CHK;}
-    moveB(ep->d_name, dirn+ndirn, nname); dirn[ndirn + nname] = '\000'; 
+    moveB((B*)ep->d_name, dirn+ndirn, nname); dirn[ndirn + nname] = '\000'; 
     
-    if (stat(dirn, &sb) == 0 
+    if (stat((char*)dirn, &sb) == 0 
         && ((S_ISDIR(sb.st_mode) || (S_ISREG(sb.st_mode))))) {
       if ((vmp + 6 * FRAMEBYTES + DALIGN(nname)) > CEILvm) { 
         closedir(dp); free(dirn); return VM_OVF; 
@@ -777,7 +777,7 @@ P op_findfiles(void)
       ATTR(lp) = 0;
       VALUE_BASE(lp) = (P)(fnp + FRAMEBYTES);
       ARRAY_SIZE(lp) = nname;
-      moveB(ep->d_name, (B *)VALUE_BASE(lp), ARRAY_SIZE(lp));
+      moveB((B*)ep->d_name, (B *)VALUE_BASE(lp), ARRAY_SIZE(lp));
       moveframe(lp,fnp);
       
       lp += FRAMEBYTES;
@@ -856,7 +856,7 @@ P op_findfile(void)
   moveB(VALUE_PTR(o_1), FREEvm + dirlen, ARRAY_SIZE(o_1));
   FREEvm[dirlen+ARRAY_SIZE(o_1)] = '\0';
 
-  if (stat(FREEvm, &buf)) {
+  if (stat((char*)FREEvm, &buf)) {
     if (errno == ENOENT) { // non-existent returns false
       TAG(o_2) = BOOL; ATTR(o_2) = 0;
       BOOL_VAL(o_2) = FALSE;

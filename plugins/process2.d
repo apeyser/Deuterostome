@@ -97,7 +97,8 @@ def
 	
         if \(TAG\(o_1\) == STRING\) {
             if \(! \(prog = malloc\(ARRAY_SIZE\(o_1\)+1\)\)\) senderrno\(\);
-            strncpy\(prog, VALUE_PTR\(o_1\), ARRAY_SIZE\(o_1\)\);
+            strncpy\(\(char*\)prog, \(char*\)VALUE_PTR\(o_1\), 
+	             ARRAY_SIZE\(o_1\)\);
             prog[ARRAY_SIZE\(o_1\)] = '\\0';
             args = NULL;
         } else {
@@ -107,7 +108,8 @@ def
                  param < \(B*\) LIST_CEIL\(o_1\);
                  \(param += FRAMEBYTES\), arg++\) {
                 if \(! \(*arg = malloc\(ARRAY_SIZE\(param\)+1\)\)\) senderrno\(\);
-                strncpy\(*arg, VALUE_PTR\(param\), ARRAY_SIZE\(param\)\);
+                strncpy\(\(char*\)*arg, \(char*\)VALUE_PTR\(param\), 
+		         ARRAY_SIZE\(param\)\);
                 \(*arg\)[ARRAY_SIZE\(param\)] = '\\0';
             }
             *arg = NULL;

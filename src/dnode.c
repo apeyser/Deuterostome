@@ -255,8 +255,10 @@ int main(int argc, char *argv[])
 
 /*------------------------ get host name */
 
-  if (gethostname(hostname,255) == -1) error(EXIT_FAILURE,errno,"gethostname");
-  if (! (original_dir = getcwd(NULL, 0))) error(EXIT_FAILURE,errno,"getcwd");
+  if (gethostname((char*)hostname,255) == -1) 
+    error(EXIT_FAILURE,errno,"gethostname");
+  if (! (original_dir = getcwd(NULL, 0))) 
+    error(EXIT_FAILURE,errno,"getcwd");
 
 /*------------------------ parse arguments */
   errno = 0;
@@ -336,7 +338,7 @@ thus lead to termination of this process.
   maketinysetup();
 
 /*----------------- construct frames for use in execution of D code */
-  makename("error",errorframe); 
+  makename((B*)"error",errorframe); 
   ATTR(errorframe) = ACTIVE;
 
 /*-------------- you are entering the scheduler -------------------*/\
@@ -394,8 +396,10 @@ thus lead to termination of this process.
         if ((Atom)event.xclient.data.l[0] 
             == XInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False)) {
           wid = event.xclient.window;
-          snprintf(namestring, sizeof(namestring), "w%lld", (long long) wid);
-          makename(namestring, namef); ATTR(namef) = ACTIVE;
+          snprintf((char*)namestring, sizeof(namestring), 
+		   "w%lld", (long long) wid);
+          makename(namestring, namef); 
+	  ATTR(namef) = ACTIVE;
           userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
 
           if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
@@ -405,7 +409,7 @@ thus lead to termination of this process.
           moveframe(dictf, FREEdicts); FREEdicts += FRAMEBYTES;
           if (x2 > CEILexecs) {retc = EXECS_OVF; goto Xderror;}
 
-          makename("delete_window", o1); 
+          makename((B*)"delete_window", o1); 
           ATTR(o1) = ACTIVE;
           FREEopds = o2;
           TAG(x1) = OP; 
@@ -419,7 +423,8 @@ thus lead to termination of this process.
         else if ((Atom) event.xclient.data.l[0]
                  == XInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False)) {
           wid = event.xclient.window;
-          snprintf(namestring, sizeof(namestring), "w%lld", (long long) wid);
+          snprintf((char*)namestring, sizeof(namestring), 
+		   "w%lld", (long long) wid);
           makename(namestring, namef); ATTR(namef) = ACTIVE;
           userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
 
@@ -430,7 +435,7 @@ thus lead to termination of this process.
 
           moveframe(dictf, FREEdicts); 
           FREEdicts += FRAMEBYTES;
-          makename("take_input_focus", o1); 
+          makename((B*)"take_input_focus", o1); 
           ATTR(o1) = ACTIVE;
           FREEopds = o2;
           TAG(x1) = OP; 
@@ -445,7 +450,8 @@ thus lead to termination of this process.
 
       case ConfigureNotify: 
         wid = event.xconfigure.window;
-        snprintf(namestring, sizeof(namestring), "w%lld", (long long) wid);
+        snprintf((char*)namestring, sizeof(namestring), 
+		 "w%lld", (long long) wid);
         makename(namestring, namef); ATTR(namef) = ACTIVE;
         userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
         
@@ -465,7 +471,7 @@ thus lead to termination of this process.
         TAG(o2) = (NUM | LONGBIGTYPE); 
         ATTR(o2) = 0;
         LONGBIG_VAL(o2) = event.xconfigure.height;       
-        makename("windowsize",o3); 
+        makename((B*)"windowsize",o3); 
         ATTR(o3) = ACTIVE; 
         FREEopds = o4;
         TAG(x1) = OP; 
@@ -479,7 +485,8 @@ thus lead to termination of this process.
       case Expose: 
         if (event.xexpose.count != 0) break;
         wid = event.xexpose.window;
-        snprintf(namestring, sizeof(namestring), "w%lld", (long long) wid);
+        snprintf((char*)namestring, sizeof(namestring), 
+		 "w%lld", (long long) wid);
         makename(namestring, namef); ATTR(namef) = ACTIVE;
         userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
 
@@ -492,7 +499,7 @@ thus lead to termination of this process.
         if (x1 >= CEILexecs) {retc = EXECS_OVF; goto Xderror;}
         moveframe(dictf, FREEdicts); 
         FREEdicts += FRAMEBYTES;
-        makename("drawwindow",o1); 
+        makename((B*)"drawwindow",o1); 
         ATTR(o1) = ACTIVE; 
         FREEopds = o2;
         TAG(x1) = OP; 
@@ -510,7 +517,8 @@ thus lead to termination of this process.
         if (x1 >= CEILexecs) {retc = EXECS_OVF; goto Xderror;}
         if (o4 >= CEILopds) {retc = OPDS_OVF; goto Xderror;}
 
-        snprintf(namestring, sizeof(namestring), "w%lld", (long long) wid);
+        snprintf((char*)namestring, sizeof(namestring), 
+		 "w%lld", (long long) wid);
         makename(namestring, namef); 
         ATTR(namef) = ACTIVE;
         userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
@@ -529,7 +537,7 @@ thus lead to termination of this process.
         TAG(o3) = (NUM | LONGBIGTYPE); 
         ATTR(o3) = 0;
         LONGBIG_VAL(o3) = mod;
-        makename("mouseclick",o4); 
+        makename((B*)"mouseclick",o4); 
         ATTR(o4) = ACTIVE;
         FREEopds = o5;
         TAG(x1) = OP; 
@@ -589,7 +597,7 @@ thus lead to termination of this process.
         default:
           close(kr); 
           FD_CLR(kr, &sock_fds);
-          errsource = "socketservice"; 
+          errsource = (B*)"socketservice"; 
           goto derror;
       }
     }
@@ -643,11 +651,11 @@ thus lead to termination of this process.
 /*------------------------------------ report an error */
  execsovfl:
   retc = EXECS_OVF; 
-  errsource = "supervisor"; 
+  errsource = (B*)"supervisor"; 
   goto derror;
 
  Xderror:
-  errsource = "X service"; 
+  errsource = (B*)"X service"; 
   goto derror;
 
  derror:
@@ -663,14 +671,14 @@ thus lead to termination of this process.
   TAG(o1) = ARRAY | BYTETYPE; 
   ATTR(o1) = READONLY;
   VALUE_BASE(o1) = (P)hostname; 
-  ARRAY_SIZE(o1) = strlen(hostname);
+  ARRAY_SIZE(o1) = strlen((char*)hostname);
   TAG(o2) = NUM | LONGBIGTYPE; 
   ATTR(o2) = 0;
   LONGBIG_VAL(o2) = serverport - IPPORT_USERRESERVED;
   TAG(o3) = ARRAY | BYTETYPE; 
   ATTR(o3) = READONLY;
   VALUE_BASE(o3) = (P)errsource; 
-  ARRAY_SIZE(o3) = strlen(errsource);
+  ARRAY_SIZE(o3) = strlen((char*)errsource);
   TAG(o4) = NUM | LONGBIGTYPE; 
   ATTR(o4) = 0; 
   LONGBIG_VAL(o4) = retc;

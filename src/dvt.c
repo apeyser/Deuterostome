@@ -210,18 +210,19 @@ int main(void)
 
   setupdirs();
 /*----------------- construct frames for use in execution of D code */
-  makename("error",errorframe); 
+  makename((B*)"error",errorframe); 
   ATTR(errorframe) = ACTIVE;
-  makename("abort",abortframe); 
+  makename((B*)"abort",abortframe); 
   ATTR(abortframe) = ACTIVE;
 
 /*----------- read startup_dvt.d and push on execs ----------*/
   startup_dvt 
-    = strcat(strcpy(malloc(strlen(startup_dir) + strlen("/startup_dvt.d") + 1),
-                    startup_dir),
-             "/startup_dvt.d");
+    = (B*) strcat(strcpy(malloc(strlen((char*)startup_dir) 
+				+ strlen("/startup_dvt.d") + 1),
+			 startup_dir),
+		  "/startup_dvt.d");
  
-  if ((sufd = open(startup_dvt, O_RDONLY)) == -1)
+  if ((sufd = open((char*)startup_dvt, O_RDONLY)) == -1)
     error(EXIT_FAILURE,errno,"Opening startup_dvt.d");
   tnb = 0; 
   sf = FREEvm; 
@@ -266,7 +267,7 @@ int main(void)
 /*----------------------- error handler ---------------------------*/
  execsovfl:
   retc = EXECS_OVF; 
-  errsource = "supervisor"; 
+  errsource = (B*)"supervisor"; 
   goto derror;
 
  derror:
@@ -279,7 +280,7 @@ int main(void)
   if (x1 >= CEILexecs) FREEexecs = FLOORexecs;
   TAG(o1) = ARRAY | BYTETYPE; ATTR(o1) = READONLY;
   VALUE_BASE(o1) = (P)errsource; 
-  ARRAY_SIZE(o1) = strlen(errsource);
+  ARRAY_SIZE(o1) = strlen((char*)errsource);
   TAG(o2) = NUM | LONGBIGTYPE; 
   ATTR(o2) = 0;
   LONGBIG_VAL(o2) = retc;

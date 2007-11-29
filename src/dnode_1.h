@@ -217,11 +217,12 @@ P op_toconsole(void)
       B* max = FREEvm + 8192 - 20;
       if (max > CEILvm) max = CEILvm;
 
-      p = FREEvm; moveB("save (", p, 6); p += 6;    
+      p = FREEvm; 
+      moveB((B*)"save (", p, 6); p += 6;    
       for (; p_ <  max_ && p < max; p_++) {
         switch (*p_) {
           case ')': case '\\': 
-            p += dm_snprintf(p, max - p, "\\%c", (unsigned int) *p_);
+            p += dm_snprintf((char*)p, max - p, "\\%c", (unsigned int) *p_);
             break;
             
           case 0: case 1: case 2: case 3: case 4: case 5: 
@@ -230,7 +231,7 @@ P op_toconsole(void)
           case 18: case 19: case 20: case 21: case 22: case 23: 
           case 24: case 25: case 26: case 27: case 28: case 29: 
           case 30: case 31: case 127:
-            p += dm_snprintf(p, max - p, "\\%.3o", (unsigned int) *p_);
+            p += dm_snprintf((char*)p, max - p, "\\%.3o", (unsigned int) *p_);
             break;
 
           default:
@@ -240,7 +241,8 @@ P op_toconsole(void)
         if (p == CEILvm) return VM_OVF;
       }
       if (p + 19 > CEILvm) return VM_OVF;
-      moveB(") toconsole restore",p,19); p += 19;
+      moveB((B*)") toconsole restore",p,19); 
+      p += 19;
       TAG(sf) = ARRAY | BYTETYPE; ATTR(sf) = READONLY;
       VALUE_BASE(sf) = (P)FREEvm; ARRAY_SIZE(sf) = (P)(p - FREEvm);
       oldFREEvm = FREEvm; FREEvm = (B*)DALIGN(p);
@@ -296,19 +298,19 @@ P op_error(void)
   if (CLASS(o_1) != NUM) goto baderror;
   if (!VALUE(o_1,&e)) goto baderror;
 
-  nb = dm_snprintf(p,atmost,"\033[31mOn %*s port %lld: ",
-                   (int) ARRAY_SIZE(o_4), (B *)VALUE_BASE(o_4), 
+  nb = dm_snprintf((char*)p,atmost,"\033[31mOn %*s port %lld: ",
+                   (int) ARRAY_SIZE(o_4), (char*)VALUE_BASE(o_4), 
                    (long long) LONGBIG_VAL(o_3));
 
   p += nb; atmost -= nb;
   if ((P)e < 0) /*Clib error */
-    nb = dm_snprintf(p,atmost,(B *)strerror((P)-e));
+    nb = dm_snprintf((char*)p,atmost,(char*)strerror((P)-e));
   else { /* one of our error codes: decode */
     m = geterror((P)e);
-    nb = dm_snprintf(p,atmost,m);
+    nb = dm_snprintf((char*)p,atmost,(char*)m);
   }
   p += nb; atmost -= nb;
-  nb = dm_snprintf(p,atmost," in %s\033[0m\n", (B *)VALUE_BASE(o_2));
+  nb = dm_snprintf((char*)p,atmost," in %s\033[0m\n", (char*)VALUE_BASE(o_2));
   nb += (P)(p - strb);
   TAG(o_4) = ARRAY | BYTETYPE; 
   ATTR(o_4) = READONLY;
@@ -318,11 +320,11 @@ P op_error(void)
   op_toconsole();
   if ((ret = op_halt()) == DONE) return DONE;
 
-  nb = dm_snprintf(p, atmost, "** Error in internal halt!\n");
+  nb = dm_snprintf((char*)p, atmost, "** Error in internal halt!\n");
   goto baderror2;
 
  baderror: 
-  nb = dm_snprintf(p,atmost,
+  nb = dm_snprintf((char*)p,atmost,
                    "**Error with corrupted error info on operand stack!\n");
  baderror2:
   op_abort();
@@ -361,21 +363,22 @@ P op_errormessage(void)
 
   s = (B *)VALUE_BASE(o_1); 
   tnb = ARRAY_SIZE(o_1);
-  nb = dm_snprintf(s,tnb,"On %*s port %lld: ", (int) ARRAY_SIZE(o_5),
-                   (B *)VALUE_BASE(o_5), 
+  nb = dm_snprintf((char*)s,
+		   tnb,"On %*s port %lld: ", (int) ARRAY_SIZE(o_5),
+                   (char*)VALUE_BASE(o_5), 
                    (long long) LONGBIG_VAL(o_4));
   s += nb; tnb -= nb;
 
   if ((P)e < 0) /*Clib error */
-    nb = dm_snprintf(s,tnb,(B *)strerror(-e));
+    nb = dm_snprintf((char*)s,tnb,(char*)strerror(-e));
   else { /* one of our error codes: decode */
     m = geterror((P)e);
-    nb = strlen(m);
+    nb = strlen((char*)m);
     if (nb > tnb) nb = tnb;
     moveB(m,s,nb);
   }
   s += nb; tnb -= nb;
-  nb = dm_snprintf(s,tnb," in %s\n", (B *)VALUE_BASE(o_3));
+  nb = dm_snprintf((char*)s,tnb," in %s\n", (char*)VALUE_BASE(o_3));
   ARRAY_SIZE(o_1) = (P)(s + nb) - VALUE_BASE(o_1);
   moveframe(o_1,o_5);
   FREEopds = o_4;
@@ -529,14 +532,14 @@ P op_killsockets(void) {return KILL_SOCKS;}
 #if ! X_DISPLAY_MISSING
 //int xioerrorhandler(Display* display
 int xerrorhandler(Display* display, XErrorEvent* event) {
-	char msg[80];
-	XGetErrorText(display, event->error_code, msg, sizeof(msg));
-	fprintf(stderr, "Xerror: %s\n", msg);
-	if (x2 <= CEILexecs) {
-		makename("Xdisconnect", x1); ATTR(x1) = ACTIVE;
-		FREEexecs = x1;
-	}
-	return 0;
+  char msg[80];
+  XGetErrorText(display, event->error_code, msg, sizeof(msg));
+  fprintf(stderr, "Xerror: %s\n", msg);
+  if (x2 <= CEILexecs) {
+    makename((B*)"Xdisconnect", x1); ATTR(x1) = ACTIVE;
+    FREEexecs = x1;
+  }
+  return 0;
 }
 #endif
 	
@@ -552,10 +555,11 @@ P op_Xconnect(void)
   if (ARRAY_SIZE(o_1) > 0) {
     moveB((B *)VALUE_BASE(o_1), displayname, ARRAY_SIZE(o_1));
     displayname[ARRAY_SIZE(o_1)] = '\000';
-    dvtdisplay = XOpenDisplay(displayname);
+    dvtdisplay = XOpenDisplay((char*)displayname);
   }
   else if ((dvtdisplay = XOpenDisplay(NULL))) {
-    strncpy(displayname, DisplayString(dvtdisplay), sizeof(displayname)-1);
+    strncpy((char*)displayname, DisplayString(dvtdisplay), 
+	    sizeof(displayname)-1);
     displayname[sizeof(displayname)-1] = '\000';
   };
 
@@ -564,7 +568,7 @@ P op_Xconnect(void)
     return X_BADHOST;
   };
 
-  setenv("DISPLAY", displayname, 1);
+  setenv("DISPLAY", (char*)displayname, 1);
   dvtscreen = XDefaultScreenOfDisplay(dvtdisplay);
   dvtrootwindow = XDefaultRootWindow(dvtdisplay);
   if (XGetWindowAttributes(dvtdisplay,dvtrootwindow,&rootwindowattr) == 0)

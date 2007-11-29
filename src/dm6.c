@@ -842,7 +842,7 @@ P op_bind(void)
 
 P op_class(void)
 {
-  B *s;
+  char *s;
 
   if (o_1 < FLOORopds) return OPDS_UNF;
   switch(CLASS(o_1)) {
@@ -858,7 +858,7 @@ P op_class(void)
     case BOX:   s = "boxclass"; break;
     default: return CORR_OBJ;
   }
-  makename(s,o_1);
+  makename((B*)s,o_1);
   return OK;
 }
 
@@ -1082,12 +1082,12 @@ P op_text(void)
   if (ATTR(o_4) & READONLY) return OPD_ATR;
   if ((TAG(o_4) != (ARRAY | BYTETYPE)) || (CLASS(o_3) != NUM))
     return OPD_ERR;
-  if (!PVALUE(o_3,&index)) return UNDF_VAL;
+  if (!PVALUE(o_3,(P*)&index)) return UNDF_VAL;
   if (index < 0) return RNG_CHK;
 
   switch(CLASS(o_1)) {
     case NUM: 
-      if (!PVALUE(o_1,&val)) return UNDF_VAL;
+      if (!PVALUE(o_1,(P*)&val)) return UNDF_VAL;
       if ((val < 0) || (val > 255)) return UNDF_VAL;
       code = (B)val; 
       src = &code; 
@@ -1096,13 +1096,13 @@ P op_text(void)
 
     case OP: 
       src = (B *)OP_NAME(o_1); 
-      length = strlen(src); 
+      length = strlen((char*)src); 
       break;
 
     case NAME: 
       src = sbuf; 
       pullname(o_1,src);
-      length = strlen(src); 
+      length = strlen((char*)src); 
       break;
       
     case ARRAY: 
@@ -1116,7 +1116,7 @@ P op_text(void)
   }
 
   if (CLASS(o_2) != NUM) return OPD_CLA;
-  if (!PVALUE(o_2, &width)) {width = length; start = index;}
+  if (!PVALUE(o_2, (P*)&width)) {width = length; start = index;}
   else { 
     if (width < 0) { width = -width; start = index; }
     else { start = index + width - length;}
@@ -1163,7 +1163,7 @@ P op_number(void)
   TAG(o_2) = ARRAY | BYTETYPE; 
   ATTR(o_2) = READONLY;
   VALUE_BASE(o_2) = (P) buf; 
-  ARRAY_SIZE(o_2) = strlen(buf);
+  ARRAY_SIZE(o_2) = strlen((char*)buf);
   FREEopds = o_1;
   return op_text();
 }

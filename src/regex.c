@@ -46,7 +46,7 @@ static P int_regex(BOOLEAN case_sensitive)
   moveB(VALUE_PTR(o_1), FREEvm, ARRAY_SIZE(o_1));
   FREEvm[ARRAY_SIZE(o_1)] = '\0';
   
-  if ((r = regcomp(&preg, FREEvm,
+  if ((r = regcomp(&preg, (char*)FREEvm,
                    REG_EXTENDED|(case_sensitive ? 0 : REG_ICASE))))
     return int_regex_error(r);
 
@@ -57,7 +57,7 @@ static P int_regex(BOOLEAN case_sensitive)
     goto EXIT;
   }
 
-  moveB(VALUE_PTR(o_2), string, ARRAY_SIZE(o_2));
+  moveB(VALUE_PTR(o_2), (B*)string, ARRAY_SIZE(o_2));
   string[ARRAY_SIZE(o_2)] = '\0';
   switch (r = regexec(&preg, string, preg.re_nsub+1, pmatch, 0)) {
     case 0:

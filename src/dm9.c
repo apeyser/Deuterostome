@@ -965,7 +965,7 @@ P op_drawtext(void)
   fontspec[nname] = '\000';
   k = 0; fontcached = FALSE;
   for (k = 0; k < ncachedfonts; k++)
-    if (strcasecmp((cachedfonts[k]).fontname, fontspec) == 0) { 
+    if (strcasecmp((char*)cachedfonts[k].fontname, (char*)fontspec) == 0) { 
       fontcached = TRUE; 
       break; 
     }
@@ -980,7 +980,7 @@ P op_drawtext(void)
     }
     else k = ncachedfonts;
 
-    if ((font = XLoadQueryFont(dvtdisplay, fontspec)) == NULL)
+    if ((font = XLoadQueryFont(dvtdisplay, (char*)fontspec)) == NULL)
       return X_BADFONT;
 
     cachedfonts[k].fontstruct = font;
@@ -991,7 +991,7 @@ P op_drawtext(void)
   XSetFont(dvtdisplay,dvtgc,font->fid);
   XSetForeground(dvtdisplay,dvtgc,colidx);
 
-  dx = XTextWidth(font,(B *)VALUE_BASE(o1),ARRAY_SIZE(o1));
+  dx = XTextWidth(font, (char*)VALUE_BASE(o1),ARRAY_SIZE(o1));
   if (haln == 0) x -= dx / 2; 
   else if (haln > 0) x += dx;
   if (valn == 0) y += font->max_bounds.ascent / 2;
@@ -1002,7 +1002,7 @@ P op_drawtext(void)
   LONGBIG_VAL(o_2) = x + dx;
   
   XDrawString(dvtdisplay,wid, dvtgc, x,  y,
-              (B *)VALUE_BASE(o1), ARRAY_SIZE(o1));
+              (char*)VALUE_BASE(o1), ARRAY_SIZE(o1));
   return OK;
 #endif
 }
@@ -1028,7 +1028,7 @@ P op_Xdisplayname(void)
 #if ! X_DISPLAY_MISSING
 		}
 
-    len = strlen(displayname);
+    len = strlen((char*)displayname);
     if (ARRAY_SIZE(o_1) < len) return RNG_CHK;
     moveB(displayname, (B*) VALUE_BASE(o_1), len);
     ARRAY_SIZE(o_1) = len;

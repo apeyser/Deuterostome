@@ -28,12 +28,12 @@ void initialize_plugins(void) {
     error(EXIT_FAILURE, 0, "Can't dlinit");
   }
 
-  makename("OPAQUENAME", opaquename);
-  makename("SAVEBOX", saveboxname);
-  makename("BUFFER", buffernameframe);
-  makename("INIT_", initname);
-  makename("FINI_", fininame);
-  makename("BUFFER", buffernameframe);
+  makename((B*)"OPAQUENAME", opaquename);
+  makename((B*)"SAVEBOX", saveboxname);
+  makename((B*)"BUFFER", buffernameframe);
+  makename((B*)"INIT_", initname);
+  makename((B*)"FINI_", fininame);
+  makename((B*)"BUFFER", buffernameframe);
 }
 
 /*------------------------------------------------closealllibs
@@ -155,11 +155,12 @@ P op_loadlib(void)
   if (FREEvm + ARRAY_SIZE(o_1) + ARRAY_SIZE(o_2) + 1 > CEILvm)
     return VM_OVF;
   
-  strncpy(FREEvm, VALUE_PTR(o_2), ARRAY_SIZE(o_2));
-  strncpy(FREEvm + ARRAY_SIZE(o_2), VALUE_PTR(o_1), ARRAY_SIZE(o_1));
+  strncpy((char*)FREEvm, (char*)VALUE_PTR(o_2), ARRAY_SIZE(o_2));
+  strncpy((char*)FREEvm + ARRAY_SIZE(o_2), (char*)VALUE_PTR(o_1), 
+	  ARRAY_SIZE(o_1));
   FREEvm[ARRAY_SIZE(o_2) + ARRAY_SIZE(o_1)] = '\0';
   
-  if (! (handle = (void*) lt_dlopen(FREEvm))) {
+  if (! (handle = (void*) lt_dlopen((char*)FREEvm))) {
     const char* e;                         
     fprintf(stderr, "%s\n", (e = lt_dlerror()) ? e : "??");
     return LIB_LOAD;
@@ -300,11 +301,11 @@ P wrap_readcode(const char* file) {
   if (o2 > CEILopds) return OPDS_OVF;
   
   TAG(x1) = (ARRAY | BYTETYPE); ATTR(x1) = ACTIVE | READONLY;
-  ARRAY_SIZE(x1) =  strlen(VALUE_PTR(x1) = "fromfiles");
+  ARRAY_SIZE(x1) =  strlen((char*)(VALUE_PTR(x1) = (B*)"fromfiles"));
   FREEexecs = x2;
 
   TAG(o1) = (ARRAY | BYTETYPE); ATTR(o1) = READONLY;
-  ARRAY_SIZE(o1) = strlen(VALUE_PTR(o1) = (B*) file);
+  ARRAY_SIZE(o1) = strlen((char*)(VALUE_PTR(o1) = (B*) file));
   FREEexecs = o2;
   return OK;
 }

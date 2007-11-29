@@ -2,18 +2,18 @@
 #include "test.h"
 
 UP ll_type = 0;
-P op_hi(void) {return wrap_hi("test V1");}
+P op_hi(void) {return wrap_hi((B*)"test V1");}
 P op_libnum(void) {return wrap_libnum(ll_type);}
 P ll_errc[] = {TEST_ERROR, 0L};
-B* ll_errm[] = {"**Test Error: test"};
+B* ll_errm[] = {(B*)"**Test Error: test"};
 B* ll_export[] = {
-	"hi", (B*) op_hi,
-	"libnum", (B*) op_libnum,
-	"say5", (B*) op_say5,
-	"sayerror", (B*) op_sayerror,
-	"say5_1", (B*) op_say5,
-	"sayerror_1", (B*) op_sayerror,
-	"", NULL
+	(B*)"hi", (B*) op_hi,
+	(B*)"libnum", (B*) op_libnum,
+	(B*)"say5", (B*) op_say5,
+	(B*)"sayerror", (B*) op_sayerror,
+	(B*)"say5_1", (B*) op_say5,
+	(B*)"sayerror_1", (B*) op_sayerror,
+	(B*)"", NULL
 };
 
 P op_say5(void) 

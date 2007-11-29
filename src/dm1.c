@@ -350,7 +350,7 @@ goto next;
 
 /*------------------------------ endmark */
 endmark:
-makename("]",frame);
+makename((B*)"]",frame);
 ATTR(frame) = ACTIVE;
 FREEopds += FRAMEBYTES;
 goto next;

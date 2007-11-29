@@ -104,8 +104,8 @@ int main(void)
   makeDmemory(Dmemory,memsetup);
   
 /*----------------- construct frames for use in execution of D code */
-  makename("error",errorframe); ATTR(errorframe) = ACTIVE;
-  makename("fromconsole",fromconsoleframe); ATTR(fromconsoleframe) = ACTIVE;
+  makename((B*)"error",errorframe); ATTR(errorframe) = ACTIVE;
+  makename((B*)"fromconsole",fromconsoleframe); ATTR(fromconsoleframe) = ACTIVE;
   TAG(FREEvm) = STRING;
   ARRAY_SIZE(FREEvm) = 1024;
   VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
@@ -135,12 +135,12 @@ int main(void)
 
 /*----------- read startup_dvt.d and push on execs ----------*/
   startup_dvt 
-    = strcat(strcpy(malloc(strlen(startup_dir) 
-                           + strlen("/startup_dgen.d") + 1),
-                    startup_dir),
-             "/startup_dgen.d");
+    = (B*)strcat(strcpy(malloc(strlen((char*)startup_dir) 
+			       + strlen("/startup_dgen.d") + 1),
+			startup_dir),
+		 "/startup_dgen.d");
 
-  if ((sufd = open(startup_dvt, O_RDONLY)) == -1)
+  if ((sufd = open((char*)startup_dvt, O_RDONLY)) == -1)
     error(EXIT_FAILURE, errno,"Opening %s", startup_dvt);
   tnb = 0; sf = FREEvm; p = sf + FRAMEBYTES;
   TAG(sf) = ARRAY | BYTETYPE; ATTR(sf) = READONLY | ACTIVE | PARENT;
@@ -180,7 +180,7 @@ int main(void)
   TAG(o1) = ARRAY | BYTETYPE; 
   ATTR(o1) = READONLY;
   VALUE_BASE(o1) = (P)errsource; 
-  ARRAY_SIZE(o1) = strlen(errsource);
+  ARRAY_SIZE(o1) = strlen((char*)errsource);
   TAG(o2) = NUM | LONGBIGTYPE; ATTR(o2) = 0;
   LONGBIG_VAL(o2) = retc;
   moveframe(errorframe,x1);

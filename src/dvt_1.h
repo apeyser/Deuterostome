@@ -23,7 +23,7 @@
 P toconsole(B *p, P atmost)
 {
   P nb;
-  if (atmost == -1) atmost = strlen(p);
+  if (atmost == -1) atmost = strlen((char*)p);
   while (atmost > 0) {
   tc1:
     if (abortflag) {abortflag = FALSE; return ABORT;}
@@ -106,20 +106,20 @@ P op_error(void)
 
   p = strb; 
   atmost = 255;
-  nb = dm_snprintf(p,atmost,"\033[31m");
+  nb = dm_snprintf((char*)p,atmost,"\033[31m");
   p += nb; 
   atmost -= nb;
  
   if ((P)e < 0) /*Clib error */
-    nb = dm_snprintf(p,atmost,(B*)strerror(-e));
+    nb = dm_snprintf((char*)p,atmost,(char*)strerror(-e));
   else { /* one of our error codes: decode */
     m = geterror((P)e);
-    nb = dm_snprintf(p,atmost,m);
+    nb = dm_snprintf((char*)p,atmost,(char*)m);
   }
 
   p += nb; 
   atmost -= nb;
-  nb = dm_snprintf(p,atmost," in %s\033[0m\n", (B*)VALUE_BASE(o_2));
+  nb = dm_snprintf((char*)p,atmost," in %s\033[0m\n", (char*)VALUE_BASE(o_2));
   nb += (P) (p - strb);
   toconsole(strb, nb);
   FREEopds = o_2;
@@ -127,7 +127,7 @@ P op_error(void)
   return ABORT;
 
  baderror: 
-  toconsole("Error with corrupted error info on operand stack!\n", -1L);
+  toconsole((B*)"Error with corrupted error info on operand stack!\n", -1L);
   //return op_abort();
   return ABORT;
 }
@@ -151,16 +151,16 @@ P op_errormessage(void)
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
   s = (B *)VALUE_BASE(o_1); tnb = ARRAY_SIZE(o_1);
   if ((P)e < 0)/*Clib error */
-    nb = dm_snprintf(s,tnb,(B *)strerror(-e));
+    nb = dm_snprintf((char*)s,tnb,(char*)strerror(-e));
   else { /* one of our error codes: decode */
     m = geterror((P)e);
-    nb = strlen(m);
+    nb = strlen((char*)m);
     if (nb > tnb) nb = tnb;
     moveB(m,s,nb);
   }
   s += nb; 
   tnb -= nb;
-  nb = dm_snprintf(s,tnb," in %s\n", (B *)VALUE_BASE(o_3));
+  nb = dm_snprintf((char*)s,tnb," in %s\n", (char*)VALUE_BASE(o_3));
   ARRAY_SIZE(o_1) = (P)(s + nb) - VALUE_BASE(o_1);
   moveframe(o_1,o_3);
   FREEopds = o_2;
@@ -205,7 +205,7 @@ P op_abort(void)
       FREEexecs = frame + FRAMEBYTES; return OK;
     }
   }
-  toconsole("**Execution stack of dvt exhausted!\n", -1L);
+  toconsole((B*)"**Execution stack of dvt exhausted!\n", -1L);
   return QUIT;
 }
 
@@ -228,22 +228,22 @@ P op_toconsole(void)
  * pushes FALSE ABORTMARK on exec
  */
 static P makesocketdead(P ret, P socket) {
-	if (x3 > CEILexecs) return EXECS_OVF;
-	if (o2 > CEILopds) return OPDS_OVF;
+  if (x3 > CEILexecs) return EXECS_OVF;
+  if (o2 > CEILopds) return OPDS_OVF;
   
-	TAG(o1) = NULLOBJ | SOCKETTYPE; 
+  TAG(o1) = NULLOBJ | SOCKETTYPE; 
   ATTR(o1) = 0; 
   LONGBIG_VAL(o1) = socket;
-	FREEopds = o2;
+  FREEopds = o2;
 
-	makename("socketdead", x1); 
+  makename((B*)"socketdead", x1); 
   ATTR(x1) = ACTIVE; 
-	TAG(x2) = BOOL; 
+  TAG(x2) = BOOL; 
   ATTR(x2) = (ABORTMARK | ACTIVE); 
   BOOL_VAL(x2) = FALSE;
-	FREEexecs = x3;
+  FREEexecs = x3;
 
-	return ret;
+  return ret;
 }
 
 /*---------------------------------------------------- nextevent
@@ -346,7 +346,7 @@ P op_nextevent(void)
       if (recsocket == 0) { /* we have console input */
         if ((retc = fromconsole()) != OK) return retc;
         if (x1 >= CEILexecs) return EXECS_OVF;
-        makename("consoleline",x1); ATTR(x1) = ACTIVE;
+        makename((B*)"consoleline",x1); ATTR(x1) = ACTIVE;
         FREEexecs = x2;
         return OK;
       }
@@ -360,7 +360,7 @@ P op_nextevent(void)
 
           case OK: 
             if (x1 >= CEILexecs) return EXECS_OVF;
-            makename("nodemessage",x1); 
+            makename((B*)"nodemessage",x1); 
             ATTR(x1) = ACTIVE;
             FREEexecs = x2;
             return OK;
@@ -391,14 +391,15 @@ P op_nextevent(void)
           else if ((Atom) event.xclient.data.l[0]
                    == XInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False)) {
             wid = event.xclient.window;
-            snprintf(namestring, sizeof(namestring), "w%lld", (long long) wid);
+            snprintf((char*)namestring, sizeof(namestring), 
+		     "w%lld", (long long) wid);
             makename(namestring, namef); ATTR(namef) = ACTIVE;
             if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
             if (FREEdicts >= CEILdicts) return DICTS_OVF;
             moveframe(dictf, FREEdicts); 
             FREEdicts += FRAMEBYTES;
             if (x1 >= CEILexecs) return EXECS_OVF;
-            makename("take_input_focus", x1); 
+            makename((B*)"take_input_focus", x1); 
             ATTR(x1) = ACTIVE;
             FREEexecs = x2;
           }
@@ -408,7 +409,8 @@ P op_nextevent(void)
 
       case ConfigureNotify:
         wid = event.xconfigure.window;
-        snprintf(namestring, sizeof(namestring), "w%lld", (long long) wid);
+        snprintf((char*)namestring, sizeof(namestring), 
+		 "w%lld", (long long) wid);
         makename(namestring, namef); ATTR(namef) = ACTIVE;
         
         if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
@@ -418,7 +420,7 @@ P op_nextevent(void)
 
         moveframe(dictf, FREEdicts); 
         FREEdicts += FRAMEBYTES;
-        makename("windowsize",x1); 
+        makename((B*)"windowsize",x1); 
         ATTR(x1) = ACTIVE; 
         FREEexecs = x2;
         TAG(o_1) = (NUM | LONGBIGTYPE); 
@@ -433,7 +435,8 @@ P op_nextevent(void)
       case Expose:
         if (event.xexpose.count != 0) break;
         wid = event.xexpose.window;
-        snprintf(namestring, sizeof(namestring), "w%lld", (long long) wid);
+        snprintf((char*)namestring, sizeof(namestring), 
+		 "w%lld", (long long) wid);
         makename(namestring, namef); 
         ATTR(namef) = ACTIVE;
 
@@ -443,7 +446,7 @@ P op_nextevent(void)
         
         moveframe(dictf, FREEdicts); 
         FREEdicts += FRAMEBYTES;
-        makename("drawwindow",x1); 
+        makename((B*)"drawwindow",x1); 
         ATTR(x1) = ACTIVE; 
         FREEexecs = x2;
         FREEopds = o_1;
@@ -458,14 +461,15 @@ P op_nextevent(void)
         if (x1 >= CEILexecs) return EXECS_OVF;
         if (o2 >= CEILopds) return OPDS_OVF;
 
-        snprintf(namestring, sizeof(namestring), "w%lld", (long long) wid);
+        snprintf((char*)namestring, sizeof(namestring), 
+		 "w%lld", (long long) wid);
         makename(namestring, namef); 
         ATTR(namef) = ACTIVE;
         if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
 
         moveframe(dictf, FREEdicts); 
         FREEdicts += FRAMEBYTES;
-        makename("mouseclick",x1); 
+        makename((B*)"mouseclick",x1); 
         ATTR(x1) = ACTIVE; 
         FREEexecs = x2;
         TAG(o_1) = (NUM | LONGBIGTYPE); 

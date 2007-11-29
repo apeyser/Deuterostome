@@ -378,7 +378,7 @@ P op_connect(void)
 #if ENABLE_UNIX_SOCKETS
   {
     struct sockaddr_un unixserveraddr;
-    if (! strcmp("localhost", FREEvm)
+    if (! strcmp("localhost", (char*)FREEvm)
         && init_unix_sockaddr(&unixserveraddr, port) == OK
         && (sock = socket(PF_UNIX, SOCK_STREAM, 0)) != -1) {
       if (connect(sock, (struct sockaddr *) &unixserveraddr, 
@@ -390,7 +390,8 @@ P op_connect(void)
   };
 #endif //ENABLE_UNIX_SOCKETS
 
-  if ((retc = init_sockaddr(&serveraddr, FREEvm, port)) != OK) return retc;
+  if ((retc = init_sockaddr(&serveraddr, (char*)FREEvm, port)) != OK) 
+    return retc;
   if ((sock = socket(PF_INET, SOCK_STREAM, 0)) == -1) return -errno;
   if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &size, sizeof(P)) == -1
       || setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &size, sizeof(P)) == -1
@@ -499,9 +500,9 @@ P op_getmyname(void)
 {
   if (o_1 < FLOORopds) return(OPDS_UNF);
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
-  if (gethostname((B *)VALUE_BASE(o_1),ARRAY_SIZE(o_1)) == -1)
+  if (gethostname((char*)VALUE_BASE(o_1),ARRAY_SIZE(o_1)) == -1)
     return(-errno);
 
-  ARRAY_SIZE(o_1) = strlen((B *)VALUE_BASE(o_1));
+  ARRAY_SIZE(o_1) = strlen((char*)VALUE_BASE(o_1));
   return OK;
 }

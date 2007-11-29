@@ -61,46 +61,46 @@ void DECODE(B *frame, BOOLEAN fauto, W prec, B *buf)
   switch(TYPE(frame)) {
     case BYTETYPE: 
       if (*((B *)NUM_VAL(frame)) == BINF) break;
-      sprintf(buf,"%d",(W)(*((B *)NUM_VAL(frame))));
+      sprintf((char*)buf,"%d",(W)(*((B *)NUM_VAL(frame))));
       return;
 
     case WORDTYPE: 
       if(*((W *)NUM_VAL(frame)) == WINF) break;
-      sprintf(buf,"%d",*((W *)NUM_VAL(frame)));
+      sprintf((char*)buf,"%d",*((W *)NUM_VAL(frame)));
       return;
 
     case LONG32TYPE: 
       if(*((L32 *)NUM_VAL(frame)) == L32INF) break;
-      sprintf(buf,"%lld",(long long) *((L32 *)NUM_VAL(frame)));
+      sprintf((char*)buf,"%lld",(long long) *((L32 *)NUM_VAL(frame)));
       return;
 
     case LONG64TYPE: 
       if (*((L64 *)NUM_VAL(frame)) == L64INF) break;
-      sprintf(buf,"%lld",(long long) *((L64 *)NUM_VAL(frame)));
+      sprintf((char*)buf,"%lld",(long long) *((L64 *)NUM_VAL(frame)));
       return;
 
     case SINGLETYPE: 
       if (ISUNDEF(*((S *)NUM_VAL(frame)))) break;
       
-      if (fauto) sprintf(buf,"%.6e",*((S *)NUM_VAL(frame)));
+      if (fauto) sprintf((char*)buf,"%.6e",*((S *)NUM_VAL(frame)));
       else if (prec < 0) 
-        sprintf(buf,"%.*f",-prec, (D)(*((S *)NUM_VAL(frame))));
-      else sprintf(buf,"%.*e",prec, (D)(*((S *)NUM_VAL(frame))));
+        sprintf((char*)buf,"%.*f",-prec, (D)(*((S *)NUM_VAL(frame))));
+      else sprintf((char*)buf,"%.*e",prec, (D)(*((S *)NUM_VAL(frame))));
       return;
 
      case DOUBLETYPE: 
        if (ISUNDEF(*((D *)NUM_VAL(frame)))) break;
        
-       if (fauto) sprintf(buf,"%.15e",*((D *)NUM_VAL(frame)));
+       if (fauto) sprintf((char*)buf,"%.15e",*((D *)NUM_VAL(frame)));
        else if (prec < 0)
-         sprintf(buf,"%.*f",-prec,(*((D *)NUM_VAL(frame))));
-       else sprintf(buf,"%.*e",prec,(*((D *)NUM_VAL(frame))));
+         sprintf((char*)buf,"%.*f",-prec,(*((D *)NUM_VAL(frame))));
+       else sprintf((char*)buf,"%.*e",prec,(*((D *)NUM_VAL(frame))));
        return;
 
     default: 
       break;
   }
-  sprintf(buf,"*");
+  sprintf((char*)buf,"*");
 }
 
 /*------------------------------------- ENCODE
@@ -125,7 +125,7 @@ void DECODE(B *frame, BOOLEAN fauto, W prec, B *buf)
 B ENCODE(W type, B *string, B *dnum)
 {
   D num;
-  num = (type & Ubit)? HUGE_VAL : atof(string);
+  num = (type & Ubit)? HUGE_VAL : atof((char*)string);
   if (type & Tbit) { 
     (*(ENCODElist[type & 0xF]))(num,dnum); 
     return(type & 0xF); 

@@ -258,7 +258,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #endif // ! NO_ENDIAN_HDR && ! BYTE_ORDER
 
 #ifndef DM_WORDS_BIGENDIAN
-#define ENDIAN_DEFAULT LITTLENDIAN
+#define ENDIAN_DEFAULT LITTLEENDIAN
 #else
 #define ENDIAN_DEFAULT BIGENDIAN
 #endif //DM_WORDS_BIGENDIAN

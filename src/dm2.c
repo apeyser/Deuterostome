@@ -19,7 +19,7 @@
 #include <errno.h>
 
 static char sys_hi[] = "System Operators V" PACKAGE_VERSION;
-P op_syshi(void)   {return wrap_hi(sys_hi);}
+P op_syshi(void)   {return wrap_hi((B*)sys_hi);}
 P op_syslibnum(void) {return wrap_libnum(0);}
 
 P wrap_libnum(UP libnum)
@@ -40,10 +40,10 @@ P wrap_hi(B* hival)
 
     if (FLOORopds > o_2) return OPDS_UNF;
     if (! VALUE(o_1, &index)) return UNDF_VAL;
-    hilen = strlen(hival);
+    hilen = strlen((char*)hival);
     if (index + hilen > ARRAY_SIZE(o_2)) return RNG_CHK;
 
-    strncpy(VALUE_PTR(o_2) + index, hival, hilen);
+    strncpy((char*)VALUE_PTR(o_2) + index, (char*)hival, hilen);
     LONGBIG_VAL(o_1) = index + hilen;
     TAG(o_1) = (NUM | LONGBIGTYPE);
     ATTR(o_1) = 0;
@@ -99,7 +99,7 @@ B* geterror(P e)
 
     e &= 0x0000FFFFl;
     do {
-        if (! (frame = nextlib(frame))) return "Lib VM corrupted";
+      if (! (frame = nextlib(frame))) return (B*) "Lib VM corrupted";
     } while (LIB_TYPE(frame) != type);
 
     errc = LIB_ERRC(frame);
@@ -540,7 +540,9 @@ BOOLEAN mergedict(B *source, B* sink) {
   B *entry;
 	size_t i;
 	static B excludes_ = TRUE;
-	static B *_excludes[] = {"hi", "libnum", "INIT_", "FINI_"};
+	static B *_excludes[] = {
+	  (B*)"hi", (B*)"libnum", (B*)"INIT_", (B*)"FINI_"
+	};
 	static B excludes[sizeof(_excludes)/sizeof(_excludes[0])][FRAMEBYTES];
 
 	if (excludes_) {
@@ -1348,8 +1350,8 @@ static void setupdir(B** frame, const char* string) {
   ATTR(*frame) = READONLY;
   ARRAY_SIZE(*frame) = lenapp;
   VALUE_PTR(*frame) = *frame + FRAMEBYTES;
-  strncpy(*frame + FRAMEBYTES, string, len);
-	(*frame)[FRAMEBYTES+lenapp-1] = '/';
+  strncpy((char*) *frame + FRAMEBYTES, string, len);
+  (*frame)[FRAMEBYTES+lenapp-1] = '/';
 }
 
 #ifndef PLUGIN_DIR

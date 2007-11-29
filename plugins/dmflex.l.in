@@ -9,8 +9,10 @@
 #include <math.h>
 #include <ctype.h>
 
+  static void yyunput (int c,char *buf_ptr  ) __attribute__ ((unused)) ;
+
   UP ll_type = 0;
-  P op_hi(void) {return wrap_hi("dmflex V1");}
+  P op_hi(void) {return wrap_hi((B*)"dmflex V1");}
   P op_libnum(void) {return wrap_libnum(ll_type);}
 
   P ll_errc[] = {
@@ -20,23 +22,23 @@
     DMFLEX_SEEK,
     0L};
   B* ll_errm[] = {
-    "** dmflex: Illegal state of stream for operation",
-    "** dmflex: Illegal close on closed stream",
-    "** dmflex: Illegal flags",
-    "** dmflex: Illegal seek name",
+    (B*)"** dmflex: Illegal state of stream for operation",
+    (B*)"** dmflex: Illegal close on closed stream",
+    (B*)"** dmflex: Illegal flags",
+    (B*)"** dmflex: Illegal seek name",
     NULL};
 
   B* ll_export[] = {
-    "hi",          (B*) op_hi,
-    "libnum",      (B*) op_libnum,
-    "makestream",  (B*) op_makestream,
-    "seekstream",  (B*) op_seekstream,
-    "writestream", (B*) op_writestream,
-    "readstream",  (B*) op_readstream,
-    "closestream", (B*) op_closestream,
-    "execstream",  (B*) op_execstream,
-    "INIT_",       (B*) op_INIT_,
-    "", NULL
+    (B*)"hi",          (B*) op_hi,
+    (B*)"libnum",      (B*) op_libnum,
+    (B*)"makestream",  (B*) op_makestream,
+    (B*)"seekstream",  (B*) op_seekstream,
+    (B*)"writestream", (B*) op_writestream,
+    (B*)"readstream",  (B*) op_readstream,
+    (B*)"closestream", (B*) op_closestream,
+    (B*)"execstream",  (B*) op_execstream,
+    (B*)"INIT_",       (B*) op_INIT_,
+    (B*)"", NULL
   };
 
   B opaquename[FRAMEBYTES];
@@ -139,19 +141,19 @@ SPACE ([[:space:]])
 }
 
 {ENDMARK} {
-  makename("]", frame);
+  makename((B*)"]", frame);
   ATTR(frame) = ACTIVE;
   return OK;
 }
 
 {PASS_NAME} {
-  makename(yytext+1, frame);
+  makename((B*)yytext+1, frame);
   if (yytext[0] == '~') ATTR(frame) = TILDE;
   BEGIN(EATNAME);
 }
 
 {ACT_NAME} {
-  makename(yytext, frame);
+  makename((B*)yytext, frame);
   ATTR(frame) = ACTIVE;
   BEGIN(EATNAME);
 }
@@ -359,24 +361,24 @@ static B DMFLEX_PARENT_N[FRAMEBYTES];
   static B DMFLEX_END[FRAMEBYTES];
 
 P op_INIT_(void) {
-  makename(DMFLEX_HANDLE, opaquename);
-  makename("fd", DMFLEX_FD_N);
-  makename("state", DMFLEX_STATE_N);
-  makename("chbuf", DMFLEX_CHBUF_N);
-  makename("bufpos", DMFLEX_BUFPOS_N);
-  makename("atbol", DMFLEX_ATBOL_N);
-  makename("bufstat", DMFLEX_BUFSTAT_N);
-  makename("parent", DMFLEX_PARENT_N);
+  makename((B*)DMFLEX_HANDLE, opaquename);
+  makename((B*)"fd", DMFLEX_FD_N);
+  makename((B*)"state", DMFLEX_STATE_N);
+  makename((B*)"chbuf", DMFLEX_CHBUF_N);
+  makename((B*)"bufpos", DMFLEX_BUFPOS_N);
+  makename((B*)"atbol", DMFLEX_ATBOL_N);
+  makename((B*)"bufstat", DMFLEX_BUFSTAT_N);
+  makename((B*)"parent", DMFLEX_PARENT_N);
   
-  makename("r", DMFLEX_r);
-  makename("rw", DMFLEX_rw);
-  makename("w", DMFLEX_w);
-  makename("rwtrunc", DMFLEX_rwtrunc);
-  makename("a", DMFLEX_a);
+  makename((B*)"r", DMFLEX_r);
+  makename((B*)"rw", DMFLEX_rw);
+  makename((B*)"w", DMFLEX_w);
+  makename((B*)"rwtrunc", DMFLEX_rwtrunc);
+  makename((B*)"a", DMFLEX_a);
   
-  makename("s", DMFLEX_SET);
-  makename("c", DMFLEX_CUR);
-  makename("e", DMFLEX_END);
+  makename((B*)"s", DMFLEX_SET);
+  makename((B*)"c", DMFLEX_CUR);
+  makename((B*)"e", DMFLEX_END);
   
   state.yy_fill_buffer = 1;
   state.yy_input_file = NULL;
@@ -459,7 +461,7 @@ P op_makestream(void) {
   next += ARRAY_SIZE(o_2);
   *(next++) = '\0';
   
-  if ((fd = open(fullname, flags)) == -1)
+  if ((fd = open((char*)fullname, flags)) == -1)
     return -errno;
 
   if (! (streamframe = MAKE_OPAQUE_DICT(0, NULL,
@@ -591,9 +593,9 @@ static B* lasthandle = NULL;
 static void setbufstate(B* frame) {
   if (lasthandle != VALUE_PTR(frame)) {
     fd = DMFLEX_FD(frame);
-    state.yy_ch_buf = DMFLEX_CHBUF(frame);
+    state.yy_ch_buf = (char*)DMFLEX_CHBUF(frame);
     state.yy_buf_size = DMFLEX_BUFSIZE(frame);
-    state.yy_buf_pos = DMFLEX_BUFPOS(frame);
+    state.yy_buf_pos = (char*)DMFLEX_BUFPOS(frame);
     state.yy_n_chars = DMFLEX_NCHARS(frame);
     state.yy_at_bol = DMFLEX_ATBOL(frame);
     state.yy_buffer_status = DMFLEX_BUFSTAT(frame);
@@ -603,7 +605,7 @@ static void setbufstate(B* frame) {
 }
 
 static void getbufstate(B* frame) {
-  DMFLEX_BUFPOS(frame) = state.yy_buf_pos;
+  DMFLEX_BUFPOS(frame) = (B*)state.yy_buf_pos;
   DMFLEX_NCHARS(frame) = state.yy_n_chars;
   DMFLEX_ATBOL(frame) = state.yy_at_bol;
   DMFLEX_BUFSTAT(frame) = state.yy_buffer_status;
@@ -688,7 +690,7 @@ P x_op_execstream(void) {
     DMFLEX_STATE(o2) = DMFLEX_ERR;
     CLEAR_HANDLE(o2);
     KILL_OPAQUE(o2);
-    makename("stop", x1);
+    makename((B*)"stop", x1);
     FREEexecs = x2;
     return OK;
   }

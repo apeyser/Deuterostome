@@ -174,7 +174,7 @@ end def
 #include ") fax package_ fax (.h"
 
 UP ll_type = 0;
-P op_hi\(void\) {return wrap_hi\(") fax
+P op_hi\(void\) {return wrap_hi\(\(B*\)") fax
   package_ fax ( V) fax * version * number ("\);}
 P op_libnum\(void\) {return wrap_libnum\(ll_type\);}
 P ll_errc[] = {
@@ -192,7 +192,7 @@ B* ll_errm[] = {
 ) fax
   errsdict null ne {
     errsdict {exch pop /e name
-      ("** ) fax package_ fax (: ) fax e fax (",\n) fax
+      (\(B*\)"** ) fax package_ fax (: ) fax e fax (",\n) fax
     } forall
   } if
 
@@ -200,16 +200,16 @@ B* ll_errm[] = {
 };
 
 B* ll_export[] = {
-  "hi", \(B*\) op_hi,
-  "libnum", \(B*\) op_libnum,
-  "INIT_", \(B*\) op_INIT_,
-  "FINI_", \(B*\) op_FINI_,
+  \(B*\)"hi", \(B*\) op_hi,
+  \(B*\)"libnum", \(B*\) op_libnum,
+  \(B*\)"INIT_", \(B*\) op_INIT_,
+  \(B*\)"FINI_", \(B*\) op_FINI_,
 ) fax
 
   opslist {0 get textit /op name
-    (") fax op fax (", \(B*\) op_) fax op fax (,\n) fax
+    (\(B*\)") fax op fax (", \(B*\) op_) fax op fax (,\n) fax
   } forall
-(  "", NULL
+(  \(B*\)"", NULL
 };
 
 B opaquename[FRAMEBYTES];
@@ -233,15 +233,15 @@ P op_INIT_\(void\) {
 ) fax
 
   handledict null ne {
-    (makename\(") fax package fax (_HANDLE", opaquename\);\n) fax
+    (makename\(\(B*\)") fax package fax (_HANDLE", opaquename\);\n) fax
     handledict {pop textit /h name
-      (makename\(") fax h fax (", ) fax
+      (makename\(\(B*\)") fax h fax (", ) fax
       package fax (_) fax h fax (_N\);\n) fax
     } forall
   } if
   
   nameslist {textit /n name
-    (makename\(") fax n fax (", ) fax
+    (makename\(\(B*\)") fax n fax (", ) fax
     package fax (_) fax n fax (_N\);\n) fax
   } forall
 

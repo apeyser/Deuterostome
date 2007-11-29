@@ -23,7 +23,7 @@
 P toconsole(B *p, P atmost)
 {
   P nb;
-  if (atmost == -1) atmost = strlen(p);
+  if (atmost == -1) atmost = strlen((char*)p);
   while (atmost > 0) {
   tc1:
     if (abortflag) {abortflag = FALSE; return(ABORT);}
@@ -58,11 +58,11 @@ P op_fromconsole(void)
   sbuf = VALUE_PTR(inputframe);
 
 /* we read until we have a \n-terminated string */
-  if (!fgets(sbuf, nsbuf, stdin)) {
+  if (!fgets((char*)sbuf, nsbuf, stdin)) {
     if (ferror(stdin)) return -errno;
     eof = feof(stdin);
   }
-  nb = strlen(sbuf);
+  nb = strlen((char*)sbuf);
   /* we trim the buffer string object on the operand stack */
   ARRAY_SIZE(x1) = eof ? nb : nb - 1;
   FREEexecs = x2;
@@ -94,21 +94,21 @@ P op_error(void)
   
   p = strb; 
   atmost = 255;
-  nb = dm_snprintf(p,atmost,"\033[31m");
+  nb = dm_snprintf((char*)p,atmost,"\033[31m");
   p += nb; 
   atmost -= nb;
  
   if (e < 0) { /*Clib error */
-    nb = dm_snprintf(p,atmost,(B*)strerror(-e));
+    nb = dm_snprintf((char*)p,atmost,(char*)strerror(-e));
   }
   else { /* one of our error codes: decode */
     m = geterror(e);
-    nb = dm_snprintf(p,atmost,m);
+    nb = dm_snprintf((char*)p,atmost,(char*)m);
   }
 
   p += nb; 
   atmost -= nb;
-  nb = dm_snprintf(p,atmost," in %s\033[0m\n", (B*)VALUE_BASE(o_2));
+  nb = dm_snprintf((char*)p,atmost," in %s\033[0m\n", (B*)VALUE_BASE(o_2));
   nb += (P) (p - strb);
   toconsole(strb, nb);
   FREEopds = o_2;
@@ -116,7 +116,7 @@ P op_error(void)
   //return ABORT;
 
  baderror: 
-  toconsole("Error with corrupted error info on operand stack!\n", -1L);
+  toconsole((B*)"Error with corrupted error info on operand stack!\n", -1L);
   return op_abort();
   //return ABORT;
 }
@@ -138,16 +138,16 @@ P op_errormessage(void)
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
   s = (B *)VALUE_BASE(o_1); tnb = ARRAY_SIZE(o_1);
   if (e < 0) { /*Clib error */
-    nb = dm_snprintf(s,tnb,(B *)strerror(-e));
+    nb = dm_snprintf((char*)s,tnb,(char*)strerror(-e));
   } else { /* one of our error codes: decode */
     m = geterror(e);
-    nb = strlen(m);
+    nb = strlen((char*)m);
     if (nb > tnb) nb = tnb;
     moveB(m,s,nb);
   }
   s += nb; 
   tnb -= nb;
-  nb = snprintf(s,tnb," in %s\n", (B *)VALUE_BASE(o_3));
+  nb = snprintf((char*)s,tnb," in %s\n", (B *)VALUE_BASE(o_3));
   if (nb > tnb) nb = tnb;
   ARRAY_SIZE(o_1) = (P)(s + nb) - VALUE_BASE(o_1);
   moveframe(o_1,o_3);
@@ -186,7 +186,7 @@ P op_abort(void)
   TAG(x2) = ARRAY | BYTETYPE; 
   ATTR(x2) = ACTIVE;
   VALUE_PTR(x2) = FREEvm;
-  strncpy(FREEvm, "a__", 3);
+  strncpy((char*)FREEvm, "a__", 3);
   ARRAY_SIZE(x2) = 3;
   FREEvm += 3;
   

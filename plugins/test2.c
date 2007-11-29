@@ -4,20 +4,20 @@
 #include "test2.h"
 
 UP ll_type = 0;
-P op_hi(void) {return wrap_hi("test2 V1");}
+P op_hi(void) {return wrap_hi((B*)"test2 V1");}
 P op_libnum(void) {return wrap_libnum(ll_type);}
 P ll_errc[] = {TEST2_ERROR, 0L};
-B* ll_errm[] = {"**Test Error: test2"};
+B* ll_errm[] = {(B*)"**Test Error: test2"};
 B* ll_export[] = {
-	"hi", (B*) op_hi,
-	"libnum", (B*) op_libnum,
-	"say5", (B*) op_say5,
-	"sayerror", (B*) op_sayerror,
-	"say5_2", (B*) op_say5,
-	"sayerror_2", (B*) op_sayerror,
-	"INIT_", (B*) op_INIT_,
-	"FINI_", (B*) op_FINI_,
-	"", NULL
+	(B*)"hi", (B*) op_hi,
+	(B*)"libnum", (B*) op_libnum,
+	(B*)"say5", (B*) op_say5,
+	(B*)"sayerror", (B*) op_sayerror,
+	(B*)"say5_2", (B*) op_say5,
+	(B*)"sayerror_2", (B*) op_sayerror,
+	(B*)"INIT_", (B*) op_INIT_,
+	(B*)"FINI_", (B*) op_FINI_,
+	(B*)"", NULL
 };
 
 static P retvalue = 6;
@@ -27,8 +27,8 @@ P op_INIT_(void) {
 }
 
 P op_FINI_(void) {
-	fprintf(stderr, "Closing test2: retvalue=%i\n", retvalue);
-	return OK;
+  fprintf(stderr, "Closing test2: retvalue=%lli\n", (long long) retvalue);
+  return OK;
 }
 
 P op_say5(void) 

@@ -698,23 +698,18 @@ P op_lt(void)
 }
 
 static ULBIG getbitpattern(B* frame) {
-  ULBIG n;
   switch (TYPE(frame)) {
     case BYTETYPE: 
-      n = (ULBIG) *(UB*) NUM_VAL(frame); 
-      break;
+      return (ULBIG) *(UB*) NUM_VAL(frame); 
     case WORDTYPE: 
-      n = (ULBIG) *(UW*) NUM_VAL(frame); 
-      break;
+      return (ULBIG) *(UW*) NUM_VAL(frame); 
     case LONG32TYPE: case SINGLETYPE:
-      n = (ULBIG) *(UL32*) NUM_VAL(frame); 
-      break;
+      return (ULBIG) *(UL32*) NUM_VAL(frame); 
     case LONG64TYPE: case DOUBLETYPE:
-      n = (ULBIG) *(UL64*) NUM_VAL(frame);
-      break;
+      return (ULBIG) *(UL64*) NUM_VAL(frame);
   };
   
-  return n;
+  return 0; //should never happen
 }
 
 static void setbitpattern(B* frame, ULBIG n) {
