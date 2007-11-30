@@ -2034,23 +2034,26 @@ end def
 } bind def
 
 /fontdict1 1 dict mkfontdict def
+/fontdict4 1 dict dup begin 
+  /points (100) def
+end mkfontdict def
 /fontdict2 3 dict dup begin
   /family (helvetica) def
   /ITALICFONT 1 dict dup begin /slant (o) def end def
   /BOLDITALICFONT 1 dict dup begin /slant (o) def end def
 end mkfontdict def
-/fontdict fontdict1 def
+/fontdict3 4 dict dup begin
+  /family (helvetica) def
+  /points (100) def
+  /ITALICFONT 1 dict dup begin /slant (o) def end def
+  /BOLDITALICFONT 1 dict dup begin /slant (o) def end def
+end mkfontdict def
 
-| /fontdict1 4 dict dup begin
-|   /NORMALFONT 
-|      (-b&h-lucida-medium-r-normal-sans-0-0-75-75-p-0-iso8859-1) def
-|   /BOLDFONT 
-|      (-b&h-lucida-bold-r-normal-sans-0-0-75-75-p-0-iso8859-1) def
-|   /ITALICFONT 
-|     (-b&h-lucida-medium-i-normal-sans-0-0-75-75-p-0-iso8859-1) def
-|   /BOLDITALICFONT 
-|     (-b&h-lucida-bold-i-normal-sans-0-0-75-75-p-0-iso8859-1) def
-| end def
+/fontdict fontdict1 def
+/lucida_140_fontdict fontdict1 def
+/lucida_100_fontdict fontdict4 def
+/helvetica_140_fontdict fontdict2 def
+/helvetica_100_fontdict fontdict3 def
 
 |----------------------------- start the dvt ------------------------------
 | A 'save' representing a clean dvt is associated with the name cleanDVT in

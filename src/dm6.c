@@ -1075,7 +1075,7 @@ P op_parcel(void)
 P op_text(void)
 {
   B *src, *dest, code, sbuf[NAMEBYTES+1];
-  UP index, val, width;
+  P index, val, width;
   P length, start;
 
   if (o_4 < FLOORopds) return OPDS_UNF;
