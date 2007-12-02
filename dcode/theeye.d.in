@@ -268,51 +268,6 @@ userdict /dnode_setup known not {
 /TYPE 61440L def
 /DIRTYPE 16384L def
 
-|-- mouse key combos
-/shift1_plain3 {
-  mB 1 eq mM 1 eq and
-  mB 3 eq mM 0 eq and or
-} bind def
-
-/plain1 {
-  mB 1 eq mM 0 eq and
-} bind def
-
-|/shift1_plain4 {
-|  mB 1 eq mM 1 eq and
-|  mB 4 eq mM 0 eq and or
-|} bind def
-
-/shift1 {
-  mB 1 eq mM 1 eq and
-} bind def
-
-/opt1_plain2 {
-  mB 1 eq mM 8 eq and
-  mB 2 eq mM 0 eq and or
-} bind def
-
-/ctrl1_plain3 {
-  mB 1 eq mM 4 eq and
-  mB 3 eq mM 0 eq and or
-} bind def
-
-/scrollUp {
-  mB 4 eq mM 0 eq and
-} bind def
-
-/scrollDown {
-  mB 5 eq mM 0 eq and
-} bind def
-
-/pageUp {
-  mB 4 eq mM 4 eq and
-} bind def
-
-/pageDown {
-  mB 5 eq mM 4 eq and
-} bind def
-
 |============================== front end ================================
 
 |--------------------------------------------- resist resizing
@@ -367,45 +322,47 @@ end
 |     - command clicking checks one item in the left page or an unlimited
 |       number of items in the right page
 |     - shift clicking a left page item removes the item from the display
+
+/scroll_actions 6 dict dup begin | {
+  /scrollProp {|-- 'shift': proportional scrolling
+    mX wW 3 sub 2 div 2 add ge {
+      /ritepageT 2 ritepageU nL sub mul mX wW 3 sub 2 div sub mul
+      wW 3 sub div def showRpage
+    } {
+      scrolls mX 12 mul wW div get exec
+    } ifelse
+  } bind def
+        
+  /click { |-- plain click: do appropriate scroll step
+    scrolls mX 12 mul wW div get exec
+  } bind def
+
+  /scrollUp {
+    scrolls 2 mX wW 3 sub 2 div 1 add gt {6 add} if get exec
+  } bind def
+
+  /scrollDown {
+    scrolls 3 mX wW 3 sub 2 div 1 add gt {6 add} if get exec
+  } bind def
+
+  /pageUp {
+    scrolls 1 mX wW 3 sub 2 div 1 add gt {6 add} if get exec
+  } bind def
+
+  /pageDown {
+    scrolls 4 mX wW 3 sub 2 div 1 add gt {6 add} if get exec
+  } bind def | }
+end def
  
 /mouseclick {
    [ 4 1 roll { | stopped and reentry lock
-      dup -16 bitshift /mB name
-          15 and /mM name
-      /mY name /mX name 
-      mY 14 le { wid inforect BG fillrectangle stop } if
-      mY wH 15 sub ge {
-        shift1_plain3 {|-- 'shift': proportional scrolling
-          mX wW 3 sub 2 div 2 add ge {
-            /ritepageT 2 ritepageU nL sub mul mX wW 3 sub 2 div sub mul
-            wW 3 sub div def showRpage stop
-          } {
-            scrolls mX 12 mul wW div get exec stop
-          } ifelse
-        } if
-        
-        plain1 { |-- plain click: do appropriate scroll step
-          scrolls mX 12 mul wW div get exec stop
-        } if
-        scrollUp {
-          scrolls 2 mX wW 3 sub 2 div 1 add gt {6 add} if get exec stop
-        } if
-        scrollDown {
-          scrolls 3 mX wW 3 sub 2 div 1 add gt {6 add} if get exec stop
-        } if
-        pageUp {
-          scrolls 1 mX wW 3 sub 2 div 1 add gt {6 add} if get exec stop
-        } if
-        pageDown {
-          scrolls 4 mX wW 3 sub 2 div 1 add gt {6 add} if get exec stop
-        } if
-
-        stop
-      } if
-    /mL mY 15 sub 13 div def
-    mX wW 3 sub 2 div 1 add le { hitL } { hitR } ifelse
+     /mS name /mY name /mX name 
+     mY 14 le {wid inforect BG fillrectangle stop} if
+     mY wH 15 sub ge {mS /theeye scroll_actions mouseaction pop stop} if
+     /mL mY 15 sub 13 div def
+     mX wW 3 sub 2 div 1 add le {hitL} {hitR} ifelse
   } stopped cleartomark | ]
-    end 
+  end 
 } bind def
 
 |============================ shared machinery ===========================
@@ -631,39 +588,44 @@ end mkread def
 | path strings have been eliminated from the VM). If rebuilding eliminates
 | objects, the new left page is shown, but the click is otherwise ignored.
 
+/left_actions 8 dict dup begin | {
+  /remove { 
+    /leftchecked -1 def
+    mL leftpageMin ge {
+      leftpageT mL add 1 add 1 leftpageU 1 sub { /k name
+        leftpage k get leftpage k 1 sub get copy pop
+      } for
+      /leftpageU k def
+      leftpageU 2 eq {
+        /leftpagesb leftpageSB def /leftpagelb leftpageLB def
+      } if
+      showLpage
+    } if
+  } bind def
+
+  /check { 
+    leftchecked theidx eq { -1 } { theidx } ifelse /leftchecked name
+    showLpage
+  } bind def
+
+  /open { 
+    leftpage theidx get theobj copy pop
+    openLclasses theobj 0 get get mkact exec
+    rebuildLpage pop showLpage
+  } bind def
+
+  /click {leftpage theidx get theobj copy pop toinfo} bind def
+  /scrollUp {scrolls 2 get exec} bind def
+  /scrollDown {scrolls 3 get exec} bind def
+  /pageUp {scrolls 1 get exec} bind def
+  /pageDown {scrolls 4 get exec} bind def | }
+end def
+
 /hitL {
  { | stopped
-   leftpageT mL add dup leftpageU ge { pop stop } if /theidx name
-   rebuildLpage { showLpage stop } if
-   shift1 |-- 'shift': remove an object
-      { /leftchecked -1 def
-        mL leftpageMin ge {
-          leftpageT mL add 1 add 1 leftpageU 1 sub { /k name
-              leftpage k get leftpage k 1 sub get copy pop
-            } for
-          /leftpageU k def
-          leftpageU 2 eq {
-            /leftpagesb leftpageSB def /leftpagelb leftpageLB def
-          } if
-          showLpage stop 
-          } if
-      } if
-   opt1_plain2 |-- 'option': check/uncheck an object
-      { 
-        leftchecked theidx eq { -1 } { theidx } ifelse /leftchecked name
-        showLpage stop
-      } if
-   ctrl1_plain3 |-- 'control': open the object in the right page
-     { leftpage theidx get theobj copy pop
-       openLclasses theobj 0 get get mkact exec
-       rebuildLpage pop showLpage stop
-     } if
-   plain1 |-- plain click
-     { leftpage theidx get theobj copy pop toinfo } if
-   scrollUp {scrolls 2 get exec stop } if
-   scrollDown {scrolls 3 get exec stop} if
-   pageUp {scrolls 1 get exec stop} if
-   pageDown {scrolls 4 get exec stop} if
+   leftpageT mL add dup leftpageU ge {pop stop} if /theidx name
+   rebuildLpage {showLpage stop} if
+   mS /theeye left_actions mouseaction pop
  } stopped pop
 } def
 
@@ -805,65 +767,68 @@ end mkread /openLclasses name
 | page is shown, and the left page is rebuilt and shown; the click then
 | is ignored.
 
+/right_actions 7 dict dup begin | {
+  /click {fromRpage toinfo} bind def
+  /scrollUp {scrolls 8 get exec} bind def
+  /scrollDown {scrolls 9 get exec} bind def
+  /pageUp {scrolls 7 get exec stop} bind def
+  /pageDown {scrolls 10 get exec stop} bind def | }
+
+  /check { 
+    checkmarks theidx get 0 eq { -1 } { 0 } ifelse checkmarks theidx put
+    showRpage
+  } bind def
+
+  /open {|-- 'control': open object
+    fromRpage 
+    openRclasses theobj 0 get get exec {
+      leftpage 0 leftpageU getinterval {
+        /theitem name theitem 0 get theopen 0 get eq {
+          theopen 0 get dupchecks exch get exec {stop} if 
+        } if        
+      } forall
+    } stopped not {
+      rebuildLpage pop leftpageU leftpage length lt {
+        theopen 0 get /dirclass eq {
+          /theitem leftpage leftpageU get def
+          leftpagesb theopen 1 get length /b parcel
+          theopen 1 get exch copy theitem 1 put 
+          theopen 2 get length /b parcel
+          theopen 2 get exch copy theitem 2 put
+          /leftpagesb name
+          theopen 0 get theitem 0 put
+        } {
+          theopen 0 get /FSclass eq {
+            /theitem leftpage leftpageU get def
+            leftpagesb theopen 1 get length /b parcel
+            theopen 1 get exch copy theitem 1 put
+            leftpagelb 0 2 getinterval theitem 2 put
+            /leftpagelb leftpagelb 2 leftpagelb length 2 sub getinterval def
+            theopen 2 get 0 get length /b parcel
+            theopen 2 get 0 get exch copy theitem 2 get 0 put
+            theopen 2 get 1 get length /b parcel
+            theopen 2 get 1 get exch copy theitem 2 get 1 put
+            /leftpagesb name
+            theopen 0 get theitem 0 put
+          } {
+            theopen leftpage leftpageU get copy pop
+          } ifelse
+        } ifelse
+        /leftpageU leftpageU 1 add def
+        showLpage
+      } if
+    } if
+  } bind def | }
+end def
+
 /hitR { 
  { | stopped
-   ritepageT mL add dup ritepageU ge { pop stop } if /theidx name
-   theopen 0 get class /nullclass eq 
-      { wid ritepagerect BG fillrectangle
-        rebuildLpage pop showLpage
-      } if
-   opt1_plain2 |-- 'option': check/uncheck an object
-      { 
-        checkmarks theidx get 0 eq { -1 } { 0 } ifelse checkmarks theidx put
-        showRpage stop
-      } if
-   ctrl1_plain3 {|-- 'control': open object
-     fromRpage 
-     openRclasses theobj 0 get get exec {
-       leftpage 0 leftpageU getinterval {
-         /theitem name theitem 0 get theopen 0 get eq {
-           theopen 0 get dupchecks exch get exec { stop } if 
-         } if        
-       } forall
-     } stopped not {
-         rebuildLpage pop leftpageU leftpage length lt {
-           theopen 0 get /dirclass eq {
-             /theitem leftpage leftpageU get def
-             leftpagesb theopen 1 get length /b parcel
-             theopen 1 get exch copy theitem 1 put 
-             theopen 2 get length /b parcel
-             theopen 2 get exch copy theitem 2 put
-             /leftpagesb name
-             theopen 0 get theitem 0 put
-           } {
-             theopen 0 get /FSclass eq {
-               /theitem leftpage leftpageU get def
-               leftpagesb theopen 1 get length /b parcel
-               theopen 1 get exch copy theitem 1 put
-               leftpagelb 0 2 getinterval theitem 2 put
-               /leftpagelb leftpagelb 2 leftpagelb length 2 sub getinterval def
-               theopen 2 get 0 get length /b parcel
-               theopen 2 get 0 get exch copy theitem 2 get 0 put
-               theopen 2 get 1 get length /b parcel
-               theopen 2 get 1 get exch copy theitem 2 get 1 put
-               /leftpagesb name
-               theopen 0 get theitem 0 put
-             } {
-               theopen leftpage leftpageU get copy pop
-             } ifelse
-           } ifelse
-           /leftpageU leftpageU 1 add def
-           showLpage
-         } if
-     } if
-     stop
+   ritepageT mL add dup ritepageU ge {pop stop} if /theidx name
+   theopen 0 get class /nullclass eq { 
+     wid ritepagerect BG fillrectangle
+     rebuildLpage pop showLpage
    } if
-   plain1 |-- plain click: show object info
-     { fromRpage toinfo } if
-   scrollUp {scrolls 8 get exec stop} if
-   scrollDown {scrolls 9 get exec stop} if
-   pageUp {scrolls 7 get exec stop} if
-   pageDown {scrolls 10 get exec stop} if
+   mS /theeye right_actions mouseaction pop
  } stopped pop
 } def
 
