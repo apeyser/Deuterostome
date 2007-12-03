@@ -16,35 +16,36 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 static char sys_hi[] = "System Operators V" PACKAGE_VERSION;
-L op_syshi(void)   {return wrap_hi(sys_hi);}
-L op_syslibnum(void) {return wrap_libnum(0);}
+P op_syshi(void)   {return wrap_hi((B*)sys_hi);}
+P op_syslibnum(void) {return wrap_libnum(0);}
 
-L wrap_libnum(UL libnum)
+P wrap_libnum(UP libnum)
 {
     if (CEILopds < o2) return OPDS_OVF;
-    TAG(o1) = (NUM | LONGTYPE);
+    TAG(o1) = (NUM | LONGBIGTYPE);
     ATTR(o1) = 0;
-    LONG_VAL(o1) = libnum >> 16;
+    LONGBIG_VAL(o1) = libnum >> 16;
 
     FREEopds = o2;
     return OK;
 }
 
-L wrap_hi(B* hival)
+P wrap_hi(B* hival)
 {
-    L hilen;
-    L index;
+    P hilen;
+    LBIG index;
 
     if (FLOORopds > o_2) return OPDS_UNF;
     if (! VALUE(o_1, &index)) return UNDF_VAL;
-    hilen = strlen(hival);
+    hilen = strlen((char*)hival);
     if (index + hilen > ARRAY_SIZE(o_2)) return RNG_CHK;
 
-    strncpy(VALUE_PTR(o_2) + index, hival, hilen);
-    LONG_VAL(o_1) = index + hilen;
-    TAG(o_1) = (NUM | LONGTYPE);
+    strncpy((char*)VALUE_PTR(o_2) + index, (char*)hival, hilen);
+    LONGBIG_VAL(o_1) = index + hilen;
+    TAG(o_1) = (NUM | LONGBIGTYPE);
     ATTR(o_1) = 0;
     
     return OK;
@@ -87,18 +88,18 @@ B* nextlib(B* frame)
 }
 
 static B unknown[] = "** Unknown error";
-B* geterror(L e)
+B* geterror(P e)
 {
     B* frame = NULL;
-    L type = e >> 16;
-    UL i;
-    L* errc;
+    P type = e >> 16;
+    P i;
+    P* errc;
     B** errm;
     B* m = unknown;
 
     e &= 0x0000FFFFl;
     do {
-        if (! (frame = nextlib(frame))) return "Lib VM corrupted";
+      if (! (frame = nextlib(frame))) return (B*) "Lib VM corrupted";
     } while (LIB_TYPE(frame) != type);
 
     errc = LIB_ERRC(frame);
@@ -124,43 +125,45 @@ B* geterror(L e)
   below the dictionary value.
 */
 
-B *makedict(L n)
+B *makedict(L32 n)
 {
-static W lastprime = 9973;
-static W primes[] = 
+  static W lastprime = 9973;
+  static W primes[] = 
     { 7,13,17,19,23,31,41,53,61,79,
       101,127,157,199,251,317,397,503,631,797,
       997,1259,1579,2003,2503,3163,3989,4999,6311,7937,
       9973,
     };
-L k,nb,ne, *hashtable; W hcon; B *dict,*mframe;
+  P k,nb,ne; W hcon; B *dict,*mframe;
 
-k = 0;
-if ((n+n) >= lastprime) hcon = lastprime;
-   else while ((hcon = primes[k]) < (n+n)) k++;
-ne = n * ENTRYBYTES;
-nb = (L)(DALIGN(DICTBYTES + ne + (((L)hcon)<<2)));
-if ((FREEvm + nb + FRAMEBYTES) > CEILvm) return((B *)(-1L));
-dict = FREEvm + FRAMEBYTES;
-mframe = FREEvm;  FREEvm += nb + FRAMEBYTES;
+  k = 0;
+  if ((n+n) >= lastprime) hcon = lastprime;
+  else while ((hcon = primes[k]) < (n+n)) k++;
+  ne = n * ENTRYBYTES;
+  nb = (P)(DALIGN(DICTBYTES + ne + (((P)hcon)*sizeof(LBIG))));
+  if ((FREEvm + nb + FRAMEBYTES) > CEILvm) return((B *)(-1L));
+  dict = FREEvm + FRAMEBYTES;
+  mframe = FREEvm;  FREEvm += nb + FRAMEBYTES;
 
-DICT_ENTRIES(dict) = DICT_FREE(dict) = (L)dict + DICTBYTES;
-hashtable = (L *)(DICT_CEIL(dict) =  (L)(DICT_ENTRIES(dict) + ne));
-DICT_CONHASH(dict) = hcon;
-for (k=0; k<hcon; k++) hashtable[k] = -1L;
-TAG(mframe) = DICT; ATTR(mframe) = 0; 
-VALUE_BASE(mframe) = (L)dict; DICT_NB(mframe) = nb;
-return(dict);
+  DICT_ENTRIES(dict) = DICT_FREE(dict) = (P)dict + DICTBYTES;
+  DICT_TABHASH(dict) = DICT_ENTRIES(dict) + ne;
+  DICT_CONHASH(dict) = hcon;
+  for (k=0; k < hcon; k++) DICT_TABHASH_ARR(dict, k) = -1L;
+  TAG(mframe) = DICT; ATTR(mframe) = 0; 
+  VALUE_BASE(mframe) = (P)dict; 
+  DICT_NB(mframe) = nb;
+  return(dict);
 }
 
 /*----------------------------------- clear associations of dictionary */
 
 void cleardict(B *dict)
 {
-L k;
+  P k;
 
-DICT_FREE(dict) = DICT_ENTRIES(dict);
-for (k=0; k<DICT_CONHASH(dict); k++) ((L *)DICT_CEIL(dict))[k] = -1L;
+  DICT_FREE(dict) = DICT_ENTRIES(dict);
+  for (k=0; k< DICT_CONHASH(dict); k++)
+    DICT_TABHASH_ARR(dict, k) = -1L;
 }
 
 /*----------------------------------- make dictionary of operators 
@@ -185,44 +188,45 @@ for (k=0; k<DICT_CONHASH(dict); k++) ((L *)DICT_CEIL(dict))[k] = -1L;
   makeoptdict, with a dictionary length added (for sysdict).
 */
 
-B *makeopdict(B *opdefs, L *errc, B **errm) {
+B *makeopdict(B *opdefs, P *errc, B **errm) {
   return makeopdictbase(opdefs, errc, errm, 0);
 }
 
-B *makeopdictbase(B *opdefs, L *errc, B **errm, L n1)
+B *makeopdictbase(B *opdefs, P *errc, B **errm, L32 n1)
 {
-L n;
-B *opdef, *dict, *frame, framebuf[FRAMEBYTES], nameframe[FRAMEBYTES],
+  L32 n;
+  B *opdef;
+  B *dict, *frame, 
+    framebuf[FRAMEBYTES], nameframe[FRAMEBYTES],
     *oldFREEvm, *newdict;
 
- oldFREEvm = FREEvm;
- n = 0; opdef = opdefs;
- while ( OPDEF_CODE(opdef) != 0) { n++; opdef += OPDEFBYTES; };
- if (! n1) n1 = n;
+  oldFREEvm = FREEvm;
+  n = 0; opdef = opdefs;
+  while (OPDEF_CODE(opdef) != 0) { n++; opdef += OPDEFBYTES; };
+  if (! n1) n1 = n;
 
- if ((dict = makedict(n1))== (B *)(-1L)) return((B *)(-1L));
- if (FREEvm + LIBBYTES > CEILvm) return((B*) -1L);
- frame = framebuf;
- TAG(frame) = OP; ATTR(frame) = ACTIVE | READONLY;
- for (opdef = opdefs; n; opdef += OPDEFBYTES, n--)
- {
-   OP_NAME(frame) = OPDEF_NAME(opdef);
-   OP_CODE(frame) = OPDEF_CODE(opdef);
-   makename(((B *)OP_NAME(frame)),nameframe);
-   if (!insert(nameframe,dict,frame)) return((B *)(-1L));
- }
- FREEvm = oldFREEvm; 
- CEILvm -= FRAMEBYTES + LIBBYTES + DICT_NB(oldFREEvm);
- moveD((D*) oldFREEvm, (D*) CEILvm, (DICT_NB(oldFREEvm) + FRAMEBYTES)>>3);
- newdict = CEILvm + FRAMEBYTES;
- d_reloc(newdict, (L) dict, (L) newdict);
- VALUE_BASE(CEILvm) = (L) newdict;
- TAG(CEILvm) |= OPLIBTYPE; ATTR(CEILvm) |= READONLY;
- LIB_TYPE(CEILvm) = 0;
- LIB_HANDLE(CEILvm) = 0;
- LIB_ERRC(CEILvm) = errc;
- LIB_ERRM(CEILvm) = errm;
- return(newdict);
+  if ((dict = makedict(n1))== (B *)(-1L)) return((B *)(-1L));
+  if (FREEvm + LIBBYTES > CEILvm) return((B*) -1L);
+  frame = framebuf;
+  TAG(frame) = OP; ATTR(frame) = ACTIVE | READONLY;
+  for (opdef = opdefs; n; opdef += OPDEFBYTES, n--) {
+    OP_NAME(frame) = OPDEF_NAME(opdef);
+    OP_CODE(frame) = OPDEF_CODE(opdef);
+    makename(((B *)OP_NAME(frame)),nameframe);
+    if (!insert(nameframe,dict,frame)) return((B *)(-1L));
+  }
+  FREEvm = oldFREEvm; 
+  CEILvm -= FRAMEBYTES + LIBBYTES + DICT_NB(oldFREEvm);
+  moveD((D*) oldFREEvm, (D*) CEILvm, (DICT_NB(oldFREEvm) + FRAMEBYTES)>>3);
+  newdict = CEILvm + FRAMEBYTES;
+  d_reloc(newdict, (P) dict, (P) newdict);
+  VALUE_BASE(CEILvm) = (P) newdict;
+  TAG(CEILvm) |= OPLIBTYPE; ATTR(CEILvm) |= READONLY;
+  LIB_TYPE(CEILvm) = 0;
+  LIB_HANDLE(CEILvm) = 0;
+  LIB_ERRC(CEILvm) = errc;
+  LIB_ERRM(CEILvm) = errm;
+  return(newdict);
 }
 
 /*------------------------ dictionary relocators ----------------------*/
@@ -235,20 +239,23 @@ B *opdef, *dict, *frame, framebuf[FRAMEBYTES], nameframe[FRAMEBYTES],
 - sets up pointers into dict items before using them!
 */
 
-void d_reloc(B *dict, L oldl, L newl)
+void d_reloc(B *dict, P oldl, P newl)
 {
-L offs, *link, k; B *entry;
+  P offs, k; B *entry;
 
-offs = newl - oldl;
-DICT_ENTRIES(dict) += offs;
-DICT_FREE(dict) += offs;
-DICT_CEIL(dict) += offs;
- for (k = 0, link = (L *)DICT_TABHASH(dict);
-      k < DICT_CONHASH(dict); k++, link++)
-  if ( *link != (-1L)) *link += offs;
-for (entry = (B *)DICT_ENTRIES(dict); entry < (B *)DICT_FREE(dict);
-     entry += ENTRYBYTES)
-    if (ASSOC_NEXT(entry) != (-1L)) ASSOC_NEXT(entry) += offs;
+  offs = newl - oldl;
+  DICT_ENTRIES(dict) += offs;
+  DICT_FREE(dict) += offs;
+  DICT_TABHASH(dict) += offs;
+  for (k = 0; k < DICT_CONHASH(dict); k++)
+    if (DICT_TABHASH_ARR(dict, k) != (-1L))
+      DICT_TABHASH_ARR(dict, k) += offs;
+
+  for (entry = (B *)DICT_ENTRIES(dict); 
+       entry < (B *)DICT_FREE(dict);
+       entry += ENTRYBYTES)
+    if (ASSOC_NEXT(entry) != (-1L)) 
+      ASSOC_NEXT(entry) += offs;
 }
 
 /*-- relocate dictionary from actual to virtual addresses:
@@ -259,19 +266,24 @@ for (entry = (B *)DICT_ENTRIES(dict); entry < (B *)DICT_FREE(dict);
 - uses pointers into dict items before relocating them!
 */
 
-void d_rreloc(B *dict, L oldl, L newl)
+void d_rreloc(B *dict, P oldl, P newl)
 {
-L offs, *link, k; B *entry;
+  P offs, k; B *entry;
 
-offs = newl - oldl;
-for (k = 0, link = (L *)DICT_TABHASH(dict); k <  DICT_CONHASH(dict); k++, link++)
-  if ( *link != (-1L)) *link += offs;
-for (entry = (B *)DICT_ENTRIES(dict); entry < (B *)DICT_FREE(dict);
-     entry += ENTRYBYTES)
-    if (ASSOC_NEXT(entry) != (-1L)) ASSOC_NEXT(entry) += offs;
-DICT_ENTRIES(dict) += offs;
-DICT_FREE(dict) += offs;
-DICT_CEIL(dict) += offs;
+  offs = newl - oldl;
+  for (k = 0; k <  DICT_CONHASH(dict); k++)
+    if (DICT_TABHASH_ARR(dict, k) != -1L)
+      DICT_TABHASH_ARR(dict, k) += offs;
+
+  for (entry = (B *)DICT_ENTRIES(dict); 
+       entry < (B *)DICT_FREE(dict);
+       entry += ENTRYBYTES)
+    if (ASSOC_NEXT(entry) != (-1L)) 
+      ASSOC_NEXT(entry) += offs;
+
+  DICT_ENTRIES(dict) += offs;
+  DICT_FREE(dict) += offs;
+  DICT_TABHASH(dict) += offs;
 }
 
 /* ======================== name object functions =====================
@@ -299,6 +311,7 @@ DICT_CEIL(dict) += offs;
   makename(->namestring, ->nameframe) only first NAMEBYTES characters incl.
   pullname(->nameframe, ->namestring) namestring must be NAMEBYTES+1 long
   BOOLEAN matchname(->nameframe1, ->nameframe2)
+  L compname(->nameframe1, ->nameframe2) n1 < n2 : <0, n1 = n2 : 0, else >0
 
  Name strings need to be able to hold 15 bytes.
 */
@@ -322,163 +335,177 @@ static B sb[NAMEBYTES];
 void makename(B *namestring, B *nameframe)
 {
   W i; B c;
+  UW* n; B *j;
   /* clear string buffer, copy string converting it to six-bit code,
-     truncate after 18 bytes
+     truncate after NAMEBYTES bytes
   */
-   i = 0;
-   while ((c = namestring[i])) { 
-     sb[i] = tosix[c]; 
-     if (++i >= NAMEBYTES) break; 
-   }
-   for (; i<NAMEBYTES ; i++) sb[i] = 0;
+  for (i = 0; (i < NAMEBYTES) && (c = namestring[i]); ++i) 
+    sb[i] = tosix[c];
+  for (; i<NAMEBYTES ; i++) sb[i] = 0;
 
-   TAG(nameframe) = NAME;
-   ATTR(nameframe) = 0;
+  TAG(nameframe) = NAME;
+  ATTR(nameframe) = 0;
 
 /* tile nameframe longwords with 6-bit characters */
-   *(UW *) (nameframe+2) = (((sb[0] << 6) | sb[1]) << 4) | (sb[2] >> 2);
-   *(UW *) (nameframe+4) = (((((sb[2] << 6) | sb[3]) << 6) | sb[4]) << 2)
-     | (sb[5] >> 4);
-   *(UW *) (nameframe+6) = (((sb[5] << 6) | sb[6]) << 6) | sb[7];
-   *(UW *) (nameframe+8) = (((sb[8] << 6) | sb[9]) << 4) | (sb[10] >> 2);
-   *(UW *) (nameframe+10) = (((((sb[10] << 6) | sb[11]) << 6) | sb[12]) << 2)
-     | (sb[13] >> 4);
-   *(UW *) (nameframe+12) = (((sb[13] << 6) | sb[14]) << 6) | sb[15];
-   *(UW *) (nameframe+14) = (sb[16] << 6) | sb[17];
-			     
-   /* key = exclusive or of all nameframe words except CLASS/ATTR */
-   *(UW *)(nameframe+2) ^=  *(W *)(nameframe+4)
-     ^ *(UW *)(nameframe+6)
-     ^ *(UW *)(nameframe+8)
-     ^ *(UW *)(nameframe+10)
-     ^ *(UW *)(nameframe+12)
-     ^ *(UW *)(nameframe+14);
+  n = ((UW*)nameframe)+1;
+   for (i=0, j=sb; i < (FRAMEBYTES/sizeof(UW)-1)/3; ++i, j+=8) {
+     n[i*3] = (((j[0] << 6) | j[1]) << 4) | (j[2] >> 2);
+     n[i*3+1] = (((((j[2] << 6) | j[3]) << 6) | j[4]) << 2) | (j[5] >> 4);
+     n[i*3+2] = (((j[5] << 6) | j[6]) << 6) | j[7];
+   }
+   
+   switch ((FRAMEBYTES/sizeof(UW)-1)%3) {
+   case 0: break;
+   case 1:
+     n[3*i] = (j[0] << 6) | j[1];
+     break;
+   case 2:
+     n[3*i] = (((j[0] << 6) | j[1]) << 4) | (j[2] >> 2);
+     n[3*i+1] = ((((j[2] << 6) | j[3]) << 6) | j[4]) << 2;
+     break;
+   };
+
+   for (i=1; i<FRAMEBYTES/sizeof(UW)-1; ++i) n[0] ^= n[i];
 }
 
 // namestring must be NAMEBYTES+1 long
 void pullname(B *nameframe, B *namestring)
 {
   UW w0, w1;
-  
+  UW* n=((UW*)nameframe)+1;
+  B* j;
+  int i;
+
   /* recover string under checksum, merge into top longword */
-  w0 = *(UW *)(nameframe+2) 
-    ^ *(UW *)(nameframe+4)
-    ^ *(UW *)(nameframe+6) 
-    ^ *(UW *)(nameframe+8)
-    ^ *(UW *)(nameframe+10) 
-    ^ *(UW *)(nameframe+12)
-    ^ *(UW *)(nameframe+14);
-  w1 = *(UW *)(nameframe+4);
+  w0 = 0;
+  for (i=0; i < (FRAMEBYTES/sizeof(UW)-1); ++i) w0 ^= n[i];
+  for (i=0, j=namestring; i < (FRAMEBYTES/sizeof(UW)-1)/3; ++i, j+=8) {
+    if (i != 0) w0 = n[i*3];
+    
+    if (! (j[0] = fromsix[w0 >> 10])) {
+      if (i == 0) {
+	j[0] = ']';
+	j[1] = 0;
+      }
+      return;
+    }
 
-  if (! (namestring[0] = fromsix[(w0 >> 10)])) {
-    namestring[0] = ']'; 
-    namestring[1] = 0; 
-    return;
-  };
-  if (! (namestring[1] = fromsix[(w0 >> 4) & 0x3F])) return;
-  if (! (namestring[2] = fromsix[((w0 << 2) | (w1 >> 14)) & 0x3F])) return;
+    if (! (j[1] = fromsix[(w0 >> 4) & 0x3F])) return;
+    w1 = n[i*3+1];
+    if (! (j[2] = fromsix[((w0 << 2) | (w1 >> 14)) & 0x3F])) return;
+    if (! (j[3] = fromsix[(w1 >> 8) & 0x3F])) return;
+    if (! (j[4] = fromsix[(w1 >> 2) & 0x3F])) return;
+    w0 = n[i*3+2];
+    if (! (j[5] = fromsix[((w1 << 4) | (w0 >> 12)) & 0x3F])) return;
+    if (! (j[6] = fromsix[(w0 >> 6) & 0x3F])) return;
+    if (! (j[7] = fromsix[(w0 & 0x3F)])) return;
+  }
 
-  w0 = *(UW *)(nameframe+6);
-  if (! (namestring[3] = fromsix[(w1 >> 8) & 0x3F])) return;
-  if (! (namestring[4] = fromsix[(w1 >> 2) & 0x3F])) return;
-  if (! (namestring[5] = fromsix[((w1 << 4) | (w0 >> 12)) & 0x3F])) return;
-  
-  w1 = *(UW *)(nameframe+8);
-  if (! (namestring[6] = fromsix[(w0 >> 6) & 0x3F])) return;
-  if (! (namestring[7] = fromsix[w0 & 0x3F])) return;
-  
-  w0 = *(UW *)(nameframe+10);
-  if (! (namestring[8] = fromsix[(w1 >> 10)])) return;
-  if (! (namestring[9] = fromsix[(w1 >> 4) & 0x3F])) return;
-  if (! (namestring[10] = fromsix[((w1 << 2) | (w0 >> 14)) & 0x3F])) return;
-
-  w1 = *(UW *)(nameframe+12);
-  if (! (namestring[11] = fromsix[(w0 >> 8) & 0x3F])) return;
-  if (! (namestring[12] = fromsix[(w0 >> 2) & 0x3F])) return;
-  if (! (namestring[13] = fromsix[((w0 << 4) | (w1 >> 12)) & 0x3F])) return;
-  
-  w0 = *(UW *)(nameframe+14);
-  if (! (namestring[14] = fromsix[(w1 >> 6) & 0x3F])) return;
-  if (! (namestring[15] = fromsix[w1 & 0x3F])) return;
-  if (! (namestring[16] = fromsix[(w0 >> 6) & 0x3F])) return;
-  if (! (namestring[17] = fromsix[w0 & 0x3F])) return;
+  switch ((FRAMEBYTES/sizeof(UW)-1)%3) {
+  case 0: break;
+  case 1:
+    w0 = n[i*3];
+    if (! (j[0] = fromsix[(w0 >> 6) & 0x3F])) return;
+    if (! (j[1] = fromsix[w0 & 0x3F])) return;
+    break;
+  case 2:
+    w0 = n[i*3];
+    if (! (j[0] = fromsix[(w0 >> 10) & 0x3F])) return;
+    if (! (j[1] = fromsix[(w0 >> 4) & 0x3F])) return;
+    w1 = n[i*3+1];
+    if (! (j[2] = fromsix[((w0 << 2) | (w1 >> 14)) & 0x3F])) return;
+    if (! (j[3] = fromsix[(w1 >> 8) & 0x3F])) return;
+    if (! (j[4] = fromsix[(w1 >> 2) & 0x3F])) return;
+    break;
+  }
 
   namestring[NAMEBYTES] = 0;
 }
 
+P compname(B* nameframe1, B* nameframe2) 
+{
+  int i; W r; W* n1; W* n2;
+  n1 = ((W*) nameframe1)+1; n2 = ((W*) nameframe2)+1;
+  for (i = 0; i < (FRAMEBYTES/sizeof(UW)-1)/3; ++i) 
+    if ((r = n1[3*i] - n2[3*i])
+        || (r = n1[3*i+1] - n2[3*i+1])
+        || (r = n1[3*i+2] - n2[3*i+2])) 
+      return r;
+
+  switch ((FRAMEBYTES/sizeof(UW)-1)%3) {
+    case 1: return n1[3*i] - n2[3*i];
+    case 2: return (n1[3*i] - n2[3*i]) || (n1[3*i+1] - n2[3*i+1]);
+    default: return 0;
+  }
+}
+
 BOOLEAN matchname(B *nameframe1, B *nameframe2)
-{  
-  return (*(W *)(nameframe1+2) == *(W *)(nameframe2+2))
-    && (*(L *)(nameframe1+4) == *(L *)(nameframe2+4))
-    && (*(L *)(nameframe1+8) == *(L *)(nameframe2+8))
-    && (*(L *)(nameframe1+12) == *(L *)(nameframe2+12));
+{
+  return compname(nameframe1, nameframe2) == 0;
 }
 
 /* ======================== move frame(s) =============================
-  NOTA BENE: this implies FRAMEBYTES = 16 for sake of speed!
+  NOTA BENE: this implies FRAMEBYTES = n*8 for sake of speed!
 */
 
 void moveframe(B *source, B *dest)
 {
-#ifdef BITS_SIZE_64
-  uint64_t *s,*d;
-  s = (uint64_t *)source; d = (uint64_t *)dest;
-  *(d++) = *(s++); *(d++) = *(s++); *(d++) = *(s++);
-#else //!BIT_SIZE_64
-  uint32_t *s, *d;
-  s = (uint32_t *)source; d = (uint32_t *)dest;
-  *(d++) = *(s++); *(d++) = *(s++); *(d++) = *(s++);
-  *(d++) = *(s++); *(d++) = *(s++); *(d++) = *(s++);
-#endif //BITS_SIZE_64
+  int i;
+  int64_t *s,*d;
+
+  s = (int64_t *)source; d = (int64_t *)dest;
+  for (i=0;i<FRAMEBYTES/sizeof(int64_t);++i)
+    *(d++) = *(s++);
 }
 
-void moveframes(B *source, B *dest, L n)
+void moveframes(B *source, B *dest, P n)
 {
-#ifdef BITS_SIZE_64
-  uint64_t *s,*d;
-  s = (uint64_t *)source; d = (uint64_t *)dest;
-#else //!BIT_SIZE_64
-  uint32_t *s, *d;
-  s = (uint32_t *)source; d = (uint32_t *)dest;
-#endif //BITS_SIZE_64
+  int i;
+  int64_t *s,*d;
 
-  for (; n>0; n--) {
-#ifdef BITS_SIZE_64
-  *(d++) = *(s++); *(d++) = *(s++); *(d++) = *(s++);
-#else //!BIT_SIZE_64
-  *(d++) = *(s++); *(d++) = *(s++); *(d++) = *(s++);
-  *(d++) = *(s++); *(d++) = *(s++); *(d++) = *(s++);
-#endif //BITS_SIZE_64
-  }
+  s = (int64_t*)source; d = (int64_t*)dest;
+  for (; n>0; n--) 
+    for (i=0;i<FRAMEBYTES/sizeof(int64_t);++i) 
+      *(d++) = *(s++);
 }
 
 /* ========================== move block ==============================
 
 These move blocks of different data sizes among aligned locations     */
 
-void moveB(B *source, B *dest, L n)
+void moveB(B *source, B *dest, P n)
 { 
-for (; n>0; n--) *(dest++) = *(source++);
+  for (; n>0; n--) *(dest++) = *(source++);
 }
 
-void moveW(W *source, W *dest, L n)
+void moveW(W *source, W *dest, P n)
 { 
-for (; n>0; n--) *(dest++) = *(source++);
+  for (; n>0; n--) *(dest++) = *(source++);
 }
 
-void moveL(L *source, L *dest, L n)
+void moveL32(L32 *source, L32 *dest, P n)
 { 
-for (; n>0; n--) *(dest++) = *(source++);
+  for (; n>0; n--) *(dest++) = *(source++);
 }
 
-void moveS(S *source, S *dest, L n)
-{ 
-for (; n>0; n--) *(dest++) = *(source++);
+void moveL64(L64 *source, L64 *dest, P n)
+{
+  for (; n>0; n--) *(dest++) = *(source++);
 }
 
-void moveD(D *source, D *dest, L n)
+void moveLBIG(LBIG* source, LBIG* dest, P n)
+{
+  moveL64(source, dest, n);
+}
+
+void moveS(S *source, S *dest, P n)
 { 
-for (; n>0; n--) *(dest++) = *(source++);
+  for (; n>0; n--) *(dest++) = *(source++);
+}
+
+void moveD(D *source, D *dest, P n)
+{ 
+  for (; n>0; n--) *(dest++) = *(source++);
 }
 
 /* ===================== dictionary services ======================== */
@@ -490,18 +517,21 @@ not represented.
 
 B *lookup(B *nameframe, B *dict)
 {
+  B* link; W h, key;
 
-B  *link; W h, key; L *hashtable;
+  key = NAME_KEY(nameframe);
+  h = DICT_CONHASH(dict); 
+  h = (key & 0x7FFF) % h;
+  if ((link = (B*) DICT_TABHASH_ARR(dict, h)) == (B*) -1L)
+    return NULL;
 
-key = NAME_KEY(nameframe);
-h = DICT_CONHASH(dict); h = (key & 0x7FFF) % h;
-hashtable = (L *)(DICT_TABHASH(dict));
-if ( (link = (B *)(hashtable[h])) == (B *)(-1L)) return((B *)0L);
-do { if (key == NAME_KEY(ASSOC_NAME(link)))
-        if (matchname(nameframe,ASSOC_NAME(link))) 
-	  return(ASSOC_FRAME(link));
-   } while ( (link = (B *)(ASSOC_NEXT(link))) != (B *)(-1L));
-return(0L);
+  do { 
+    if (key == NAME_KEY(ASSOC_NAME(link)))
+      if (matchname(nameframe, ASSOC_NAME(link)))
+        return(ASSOC_FRAME(link));
+  } while ((link = (B*) ASSOC_NEXT(link)) != (B*) -1L);
+
+  return 0L;
 }
 
 /* merge entries in source into sink */
@@ -510,7 +540,9 @@ BOOLEAN mergedict(B *source, B* sink) {
   B *entry;
 	size_t i;
 	static B excludes_ = TRUE;
-	static B *_excludes[] = {"hi", "libnum", "INIT_", "FINI_"};
+	static B *_excludes[] = {
+	  (B*)"hi", (B*)"libnum", (B*)"INIT_", (B*)"FINI_"
+	};
 	static B excludes[sizeof(_excludes)/sizeof(_excludes[0])][FRAMEBYTES];
 
 	if (excludes_) {
@@ -541,34 +573,38 @@ returns TRUE if insertion was done, or FALSE on failure.
 
 BOOLEAN insert(B *nameframe, B *dict, B *framedef)
 {
-L *hashtable; W h, key; B *link, *newlink;
+  W h, key; B *link, *nextlink;
 
-key = NAME_KEY(nameframe);
-h = DICT_CONHASH(dict); h = (key & 0x7FFF) % h;
-hashtable = (L *)(DICT_TABHASH(dict));
+  key = NAME_KEY(nameframe);
+  h = DICT_CONHASH(dict); 
+  h = (key & 0x7FFF) % h;
 
-if ((newlink = (B *)(hashtable[h])) == (B *)(-1L))    /* prime a chain */
-   { if (DICT_FREE(dict) >= DICT_CEIL(dict)) return(FALSE);
-     link = (B *)( hashtable[h] = DICT_FREE(dict) );
-     goto ins_name;
-   }
-do { link = newlink;
-     if (key == NAME_KEY(ASSOC_NAME(link)))
-        if ( matchname(nameframe,ASSOC_NAME(link))) goto ins_fra;
-   } while ( (newlink = (B *)(ASSOC_NEXT(link))) != (B *)(-1L));
+  /* prime a chain */
+  if ((nextlink = (B*) DICT_TABHASH_ARR(dict, h)) == (B *)(-1L)) {
+    if (DICT_FREE(dict) >= DICT_TABHASH(dict)) return FALSE;
+    link = (B*) (DICT_TABHASH_ARR(dict, h) = DICT_FREE(dict));
+    goto ins_name;
+  }
 
-/* reserve entry for new name; link and fill it */
+  do {
+    link = nextlink;
+    if (key == NAME_KEY(ASSOC_NAME(link))
+        && (matchname(nameframe, ASSOC_NAME(link))))
+      goto ins_fra;
+  } while ((nextlink = (B *)(ASSOC_NEXT(link))) != (B *)(-1L));
 
-if (DICT_FREE(dict) >= DICT_CEIL(dict)) return(FALSE);
-link =  (B *)(ASSOC_NEXT(link) = DICT_FREE(dict)) ;
+  /* reserve entry for new name; link and fill it */
 
-ins_name:
-DICT_FREE(dict) += ENTRYBYTES;
-moveframe(nameframe, ASSOC_NAME(link)); ASSOC_NEXT(link) = -1L;
+  if (DICT_FREE(dict) >= DICT_TABHASH(dict)) return FALSE;
+  link =  (B *)(ASSOC_NEXT(link) = DICT_FREE(dict)) ;
 
-ins_fra:
- moveframe(framedef, ASSOC_FRAME(link));
-return(TRUE);
+ ins_name:
+  DICT_FREE(dict) += ENTRYBYTES;
+  moveframe(nameframe, ASSOC_NAME(link)); ASSOC_NEXT(link) = -1L;
+
+ ins_fra:
+  moveframe(framedef, ASSOC_FRAME(link));
+  return(TRUE);
 }
 
 /* ======================== executive ================================ 
@@ -586,13 +622,13 @@ return(TRUE);
  of an error, '_errsource' points to a string identifying the instance.
 */
 
-L exec(L turns)
+P exec(L32 turns)
 {
 static B fetch_err[] = "fetch phase\n";
 static B transl_err[] = "translation phase\n";
 static B exec_err[] = "execution phase\n";
 static B undfn_buf[NAMEBYTES+1];
- B *f, *af, *dict; L  retc; UB fclass;
+ B *f, *af, *dict; P  retc; UB fclass;
 OPER tmis;
 
 /* ------------------------------------------- test phase */
@@ -639,7 +675,12 @@ if (fclass > BOX) { retc = CORR_OBJ; goto e_er_1; }
 e_opd:                               /* push object on operand stack */
 if (FREEopds >= CEILopds) { retc = OPDS_OVF; goto e_er_1; }
 moveframe(f,o1);
- if ((CLASS(o1)== NAME) && ((ATTR(o1) & TILDE) != 0)) ATTR(o1) = ACTIVE;
+ATTR(o1) &= ~XMARK; // leave active alone -- might be procedure
+if ((CLASS(o1)== NAME) && ((ATTR(o1) & TILDE) != 0)) {
+		ATTR(o1) |= ACTIVE;
+		ATTR(o1) &= ~TILDE;
+}
+
 FREEopds = o2;
 goto x_t;
 
@@ -656,7 +697,7 @@ while ((dict -= FRAMEBYTES) >= FLOORdicts)
        { f = af;
          if (ATTR(af) & ACTIVE) 
           { if (FREEexecs >= CEILexecs) { retc = EXECS_OVF; goto e_er_1; }
-            moveframe(f,x1); FREEexecs = x2; goto x_t;
+							moveframe(f,x1); FREEexecs = x2; goto x_t;
           } else { goto e_opd; } 
         }
    }
@@ -673,87 +714,98 @@ static void swapbytes(B* arr, B n1, B n2) {
   arr[n1] = temp;
 }
 
-static void swap2bytes_(B* arr) {swapbytes(arr, 0, 1);}
+static void swap2bytes(B* arr) {swapbytes(arr, 0, 1);}
 
-static void swap4bytes_(B* arr) {
+static void swap4bytes(B* arr) {
   swapbytes(arr, 0, 3);
   swapbytes(arr, 1 ,2);
 }
 
-static void swap8bytes_(B* arr) {
+static void swap8bytes(B* arr) {
   swapbytes(arr, 0, 7);
   swapbytes(arr, 1, 6);
   swapbytes(arr, 2, 5);
   swapbytes(arr, 3, 4);
 }
 
-#define swapPbytes(ptr) do {                                            \
-    L retc;                                                             \
-    if (! isnative_bits                                                 \
-        && (retc = shiftPbytes(isnative_endian, ptr)) != OK)            \
-      return retc;                                                      \
-    swapPbytes_(ptr);                                                   \
+#define swaplongbytes(arr, isnonnative) do {      \
+    P r = swaplongbytes_int(arr, isnonnative);    \
+    if (r != OK) return r;                        \
   } while (0)
 
-#define swap2bytes(ptr) do { if (! isnative_endian) swap2bytes_(ptr); } while (0)
-#define swap4bytes(ptr) do { if (! isnative_endian) swap4bytes_(ptr); } while (0)
-#define swap8bytes(ptr) do { if (! isnative_endian) swap8bytes_(ptr); } while (0)
+#define checkovf(hi, lo) do {                   \
+    if (hi)                                     \
+      if ((hi) != -1 || (lo) >= 0)              \
+        return LONG_OVF;                        \
+  } while (0)
 
-#ifdef BITS_SIZE_32
+#define signextend(hi, lo) do {                 \
+    (hi) = (lo) < 0 ? -1 : 0;                   \
+  } while (0)
 
-#define swapPbytes_ swap4bytes
-
-#ifdef WORDS_BIGENDIAN
-static L shiftPbytes(BOOLEAN isnative_endian, B* arr) {
-  uint32_t* arr32 = (uint32_t*) arr;
-  if (isnative_endian) {
-    if (arr32[0]) return LONG_OVF;
-    arr32[0] = arr32[1];
+static P swaplongbytes_int(B* arr, B isnonnative) {
+  L32* warr = (L32*) arr;
+#if DM_WORDS_BIG_ENDIAN && DM_HOST_IS_32_BITS
+  if (HASNATIVEBITS(isnonnative)) {// && ! HASNATIVEENDIAN
+    swap4bytes(arr);
+  } 
+  else if (HASNATIVEENDIAN(isnonnative)) { // && ! HASNATIVEBITS
+    checkovf(warr[0], warr[1]);
+    warr[0] = warr[1];
   }
-  else if (arr32[1]) return LONG_OVF;
+  else { // !HASNATIVEBITS && !HASNATIVEENDIAN
+    swap4bytes(arr);
+    checkovf(warr[1], warr[0]);
+  }
+#elif ! DM_WORDS_BIG_ENDIAN && DM_HOST_IS_32_BITS
+  if (HASNATIVEBITS(isnonnative)) {// && ! HASNATIVEENDIAN
+    swap4bytes(arr);
+  }
+  else if (HASNATIVEENDIAN(isnonnative)) { // && ! HASNATIVEBITS
+    checkovf(warr[1], warr[0]);
+  } 
+  else { // !HASNATIVEBITS && !HASNATIVEENDIAN
+    swap4bytes(arr+4);
+    checkovf(warr[0], warr[1]);
+    warr[0] = warr[1];
+  }
+#elif DM_WORDS_BIG_ENDIAN // && ! DM_HOST_IS_32_BITS
+  if (HASNATIVEBITS(isnonnative)) {// && ! HASNATIVEENDIAN
+    swap8bytes(arr);
+  }
+  else { // ! HASNATIVEBITS
+    if (! HASNATIVEENDIAN(isnonnative)) // && ! HASNATIVEBITS
+      swap4bytes(arr);
+    warr[1] = warr[0];
+    signextend(warr[0], warr[1]);
+  }
+#else //!DM_WORDS_BIG_ENDIAN && ! DM_HOST_IS_32_BITS
+  if (HASNATIVEBITS(isnonnative)) {// && ! HASNATIVEENDIAN
+    swap8bytes(arr);
+  }
+  else { // ! HASNATIVEBITS
+    if (! HASNATIVEENDIAN(isnonnative)) // && ! HASNATIVEBITS
+      swap4bytes(arr);
+    signextend(warr[1], warr[0]);
+  }
+#endif //DM_WORDS_BIG_ENDIAN && DM_HOST_IS_32_BITS
   
   return OK;
 }
-#else //!WORDS_BIGENDIAN
-static L shiftPbytes(BOOLEAN isnative_endian, B* arr) {
-  uint_32t* arr32 = (uint_32t*) arr;
-  if (isnative_endian) {
-    if (arr32[1]) return LONG_OVF;
-  }
-  else {
-    if (arr32[0]) return LONG_OVF;
-    arr32[0] = arr32[1];
-  };
-  
-  return OK;
-} 
-#endif //!WORDS_BIGENDIAN
-
-#else //BITS_SIZE_64
-#define swapPbytes_ swap8bytes
-
-#ifdef WORDS_BIGENDIAN
-static L shiftPbytes(BOOLEAN isnative_endian, B* arr) {
-  uint_32t* arr32 = (uint_32t*) arr;
-  if (isnative_endian) arr32[1] = arr32[0];
-  return OK;
-}
-#else //!WORDS_BIGENDIAN
-static L shiftPbytes(BOOLEAN isnative_endian, B* arr) {
-  uint_32t* arr32 = (uint_32t*) arr;
-  if (! isnative_endian) arr32[1] = arr32[0];
-  return OK;
-}
-#endif //!WORDS_BIGENDIAN
-
-#endif //BITS_SIZE
 
 static void movehead(B* frame) {
   if (frame != VALUE_PTR(frame) - FRAMEBYTES)
     moveframe(frame, VALUE_PTR(frame) - FRAMEBYTES);
 }
 
-L deendian_frame(B *frame, BOOLEAN isnative_endian, BOOLEAN isnative_bits) {
+P deendian_frame(B *frame, B isnonnative) {
+  if (! isnonnative) return OK;
+
+  if (HASNATIVEENDIAN(isnonnative)) switch (CLASS(frame)) {
+    case NUM: return OK;
+    case NAME: return OK;
+  };
+
   switch (CLASS(frame)) {
     case NULLOBJ: case BOOL: case MARK:
       return OK;
@@ -765,12 +817,15 @@ L deendian_frame(B *frame, BOOLEAN isnative_endian, BOOLEAN isnative_bits) {
         case WORDTYPE:
           swap2bytes(NUM_VAL(frame));
           return OK;
+        case LONG32TYPE: 
+          swap4bytes(NUM_VAL(frame));
+        return OK;
+        case LONG64TYPE:
+          swap8bytes(NUM_VAL(frame));
+        return OK;
         case SINGLETYPE:
           swap4bytes(NUM_VAL(frame));
-          return OK;
-        case LONGTYPE:
-          swapPbytes(NUM_VAL(frame));
-          return OK;
+        return OK;
         case DOUBLETYPE:
           swap8bytes(NUM_VAL(frame));
           return OK;
@@ -780,34 +835,29 @@ L deendian_frame(B *frame, BOOLEAN isnative_endian, BOOLEAN isnative_bits) {
     case OP:
       return OPD_CLA;
 
-    case NAME:
-      swap2bytes(frame+2);
-      swap2bytes(frame+4);
-      swap2bytes(frame+6);
-      swap2bytes(frame+8);
-      swap2bytes(frame+10);
-      swap2bytes(frame+12);
-      swap2bytes(frame+14);
+    case NAME: {
+      int i;
+      for (i = 2; i < FRAMEBYTES; i+= 2)
+        swap2bytes(frame+i);
       return OK;
+    }
 
     case ARRAY: case LIST:
-      swapPbytes((B*) &VALUE_BASE(frame));
-      swapPbytes((B*) &ARRAY_SIZE(frame));
-      movehead(frame);
+      swaplongbytes((B*) &VALUE_BASE(frame), isnonnative);
+      swaplongbytes((B*) &ARRAY_SIZE(frame), isnonnative);
       movehead(frame);
       return OK;
 
     case DICT:
-      swapPbytes((B*) &VALUE_BASE(frame));
-      swapPbytes((B*) &DICT_NB(frame));
+      swaplongbytes((B*) &VALUE_BASE(frame), isnonnative);
+      swaplongbytes((B*) &DICT_NB(frame), isnonnative);
       //CURR=NB
       movehead(frame);
       return OK;
 
     case BOX:
-      swapPbytes((B*) &VALUE_BASE(frame));
-      swapPbytes((B*) &BOX_NB(frame));
-      movehead(frame);
+      swaplongbytes((B*) &VALUE_BASE(frame), isnonnative);
+      swaplongbytes((B*) &BOX_NB(frame), isnonnative);
       movehead(frame);
       return OK;
 
@@ -816,177 +866,111 @@ L deendian_frame(B *frame, BOOLEAN isnative_endian, BOOLEAN isnative_bits) {
   };
 }
 
-static L debit_longarray(B* frame, BOOLEAN isnative_endian) {
-  L retc;
-  B* nframe;
-  B* f; B* f_;
+static P deendian_array(B* frame, B isnonnative) {
+  if (! isnonnative) return OK;
+  if (HASNATIVEENDIAN(isnonnative)) return OK;
 
-#ifdef BITS_SIZE_64
-  int32_t* ls; int64_t* ld;
-  if (VALUE_PTR(frame) + DALIGN(sizeof(int32_t)*ARRAY_SIZE(frame)) < FREEvm) {
-    nframe = FREEvm;
-    FREEvm += DALIGN(FRAMEBYTES+sizeof(ld)*ARRAY_SIZE(frame));
-    f = VALUE_PTR(frame)-FRAMEBYTES;
-    f_ = VALUE_PTR(frame)+sizeof(ls)*ARRAY_SIZE(frame);
-  }
-  else {
-    nframe = VALUE_PTR(frame)-FRAMEBYTES;
-    f = NULL;
-  };
-
-  if (nframe + FRAMEBYTES + sizeof(L)*ARRAY_SIZE(frame) >= CEILvm)
-    return VM_OVF;
-
-  moveframe(frame, nframe);
-  VALUE_PTR(nframe) = nframe + FRAMEBYTES;
-  
-  for (ls = (int32_t*) VALUE_PTR(frame), ld = VALUE_PTR(nframe);
-       ls < ((int32_t*) VALUE_PTR(frame)) + ARRAY_SIZE(frame);
-       ++ls, ++ld) {
-    *(int32_t*) ld = *ls;
-    *(((int32_t*) ld)+1) = 0;
-    if ((retc = shiftPbytes(isnative_endian, (B*) ld)) != OK) return retc;
-  }
-
-#else // !BITS_SIZE_64
-  int32_t* ls_ = malloc(sizeof(int32_t)*2*ARRAY_SIZE(frame)); 
-  int32_t* ls;
-  int32_t* ld;
-  if (! ls_) return MEM_OVF;
-  nframe = VALUE_PTR(frame)-FRAMEBYTES;
-  f  = nframe+DALIGN(FRAMEBYTES+sizeof(ld)*ARRAY_SIZE(frame));
-  f_ = nframe+DALIGN(FRAMEBYTES+sizeof(ld)*2*ARRAY_SIZE(frame));
-
-  for (ls = (int32_t*) VALUE_PTR(frame), ld = ls_;
-       ls < ((int32_t*) VALUE_PTR(frame))+2*ARRAY_SIZE(frame);
-       ls += 2, ld += 2) {
-    ld[0] = ls[0];
-    ld[1] = ls[1];
-    if ((retc = shiftPbytes(isnative_endian, (B*) ld)) != OK) {
-      free(ls_);
-      return retc;
-    };
-  };
-
-  for (ls = ls_, ld = (int32_t*) VALUE_PTR(frame);
-       ld < ((int32_t*) VALUE_PTR(frame))+ARRAY_SIZE(frame);
-       ls += 2, ++ld)
-    *ld = *ls;
-
-  free(ls_);
-  
-#endif //BITS_SIZE_64
-
-  while (f < f_) {
-    TAG(f) = NULLOBJ; ATTR(f) = 0;
-    f += FRAMEBYTES;
-  }
-
-  moveframe(nframe, frame);
-  return OK;
-}
-
-static L deendian_array(B* frame, 
-                        BOOLEAN isnative_endian, 
-                        BOOLEAN isnative_bits) {
   switch (TYPE(frame)) {
     case BYTETYPE:
       return OK;
 
-    case WORDTYPE: 
-      if (! isnative_endian) {
-        W* w;
-        for (w = (W*)VALUE_BASE(frame); 
-             w < ((W*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
-             ++w)
-          swap2bytes((B*) w);
-      }
-      return OK;
-
-    case SINGLETYPE: 
-      if (! isnative_endian) {
-        L* l;
-        for (l = (L*)VALUE_BASE(frame); 
-             l < ((L*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
-             ++l)
-          swap4bytes((B*) l);
+    case WORDTYPE: {
+      W* w;
+      for (w = (W*)VALUE_BASE(frame); 
+           w < ((W*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
+           ++w) {
+        swap2bytes((B*) w);
       };
       return OK;
+    };
 
-    case LONGTYPE: 
-      if (! isnative_bits) {
-        L retc;
-        if ((retc = debit_longarray(frame, isnative_endian)) != OK) return retc;
-      };
-
-      if (! isnative_endian) {
-        L* l;
-        for (l = (L*)VALUE_BASE(frame); 
-             l < ((L*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
-             ++l)
-          swapPbytes((B*) l);
+    case LONG32TYPE: {
+      L32* w;
+      for (w = (L32*)VALUE_BASE(frame); 
+           w < ((L32*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
+           ++w) {
+        swap4bytes((B*) w);
       };
       return OK;
+    };
 
-    case DOUBLETYPE: 
-      if (! isnative_endian) {
-        D* d;
-        for (d = (D*)VALUE_BASE(frame); 
-             d < ((D*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
-             ++d)
-          swap8bytes((B*) d);
+    case LONG64TYPE: {
+      L64* l;
+      for (l = (L64*)VALUE_PTR(frame); 
+           l < ((L64*)VALUE_PTR(frame)) + ARRAY_SIZE(frame);
+           ++l) {
+        swap8bytes((B*)l);
       };
       return OK;
+    };
+    
+    case SINGLETYPE: {
+      S* l;
+      for (l = (S*)VALUE_BASE(frame); 
+           l < ((S*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
+           ++l) {
+        swap4bytes((B*) l);
+      };
+      return OK;
+    };
+
+    case DOUBLETYPE: {
+      D* d;
+      for (d = (D*)VALUE_BASE(frame); 
+           d < ((D*)VALUE_BASE(frame)) + ARRAY_SIZE(frame);
+           ++d) {
+        swap8bytes((B*) d);
+      };
+      return OK;
+    };
 
     default:
       return OPD_TYP;
   }
 }
 
-static L deendian_list(B* frame, BOOLEAN isnative_endian, BOOLEAN isnative_bits) {
+static P deendian_list(B* frame, B isnonnative) {
   B* lframe;
-  L retc;
+  P retc;
+
+  if (! isnonnative) return OK;
 
   for (lframe = (B*)VALUE_BASE(frame);
        lframe < (B*)LIST_CEIL(frame);
        lframe += FRAMEBYTES)
-    if ((retc = deendian_frame(lframe, isnative_endian, isnative_bits)) != OK)
+    if ((retc = deendian_frame(lframe, isnonnative)) != OK)
       return retc;
-
+  
   return OK;
 }
     
 
-static L deendian_dict(B* dict, BOOLEAN isnative_endian, BOOLEAN isnative_bits) {
-  swapPbytes((B*) &DICT_ENTRIES(dict));
-  swapPbytes((B*) &DICT_FREE(dict));
-  swapPbytes((B*) &DICT_CEIL(dict));
-  swap2bytes((B*) &DICT_CONHASH(dict));
-  //TABHASH==CEIL
+static P deendian_dict(B* dict, B isnonnative) {
+  if (! isnonnative) return OK;
+
+  swaplongbytes((B*) &DICT_ENTRIES(dict), isnonnative);
+  swaplongbytes((B*) &DICT_FREE(dict), isnonnative);
+  swaplongbytes((B*) &DICT_TABHASH(dict), isnonnative);
+  if (! HASNATIVEENDIAN(isnonnative)) {
+    swap2bytes((B*) &DICT_CONHASH(dict));
+  }
   return OK;
 }
 
-static L deendian_entries(B* dict, 
-                          BOOLEAN isnative_endian, BOOLEAN isnative_bits) {
-  L retc, i, *link;
+static P deendian_entries(B* dict, B isnonnative) {
+  P retc, i;
   B* entry;
 
-  for (i = 0, link = (L*)DICT_TABHASH(dict);
-       i < DICT_CONHASH(dict); 
-       i++, link++)
-    swapPbytes((B*) link);
+  for (i = 0; i < DICT_CONHASH(dict); i++)
+    swaplongbytes((B*) &DICT_TABHASH_ARR(dict, i), isnonnative);
 
   for (entry = (B*) DICT_ENTRIES(dict);
        entry < (B*) DICT_FREE(dict);
        entry += ENTRYBYTES) {
-    if ((retc 
-         = deendian_frame(ASSOC_NAME(entry), isnative_endian, isnative_bits))
-        != OK) 
+    if ((retc = deendian_frame(ASSOC_NAME(entry), isnonnative)) != OK) 
       return retc;
-    swapPbytes((B*) &ASSOC_NEXT(entry));
-    if ((retc 
-         = deendian_frame(ASSOC_FRAME(entry), isnative_endian, isnative_bits)) 
-        != OK)
+    swaplongbytes((B*) &ASSOC_NEXT(entry), isnonnative);
+    if ((retc = deendian_frame(ASSOC_FRAME(entry), isnonnative)) != OK)
       return retc;
   }
 
@@ -1033,74 +1017,170 @@ static BOOLEAN foldsubframe(B* lframe) {
 	}
 }
 
-L foldobj(B *frame, L base, W *depth)
+static B** freemem = NULL;
+static B** ceilmem = NULL;
+static B* vmalloc = NULL;
+static P foldobj_int(B *frame, P base, W *depth);
+
+P foldobj(B *frame, P base, W *depth) 
 {
-B *tframe, *tvalue, *value, *lframe, *entry;
-L k, retc, *link, nb, offset;
+		int retc;
+		
+		foldobj_free();
+		freemem = &FREEvm;
+		ceilmem = &CEILvm;
+		retc = foldobj_int(frame, base, depth);
+		foldobj_free();
 
-if ((++(*depth)) > MAXDEPTH) return(RNG_CHK);
+		return retc;
+}
 
-switch(CLASS(frame)) {
-  case ARRAY: 
-    tframe = FREEvm; 
-    tvalue = tframe + FRAMEBYTES;
-    nb = (L)(DALIGN(ARRAY_SIZE(frame) * VALUEBYTES(TYPE(frame))));
-    if ((FREEvm+nb+FRAMEBYTES) > CEILvm) return(VM_OVF);
-    FREEvm += nb + FRAMEBYTES;
-    value = (B*)VALUE_BASE(frame);
-    VALUE_BASE(frame) = (L)tvalue - base;
-    moveframes(frame,tframe,1L); moveL((L *)value,(L *)tvalue,nb>>2);
-    break;
+P foldobj_ext(B* frame, P extra) 
+{
+		static B* freemem_ = NULL;
+		static B* ceilmem_ = NULL;
+		W depth = 0;
+		int retc;
+		static B frame_[FRAMEBYTES];
 
-  case LIST:  tframe = FREEvm; tvalue = tframe + FRAMEBYTES;
-              nb = LIST_CEIL(frame) - VALUE_BASE(frame);
-              if ((FREEvm+nb+FRAMEBYTES) > CEILvm) return(VM_OVF);
-              FREEvm += nb + FRAMEBYTES;
-              value = (B *)VALUE_BASE(frame);
-              VALUE_BASE(frame) = (L)tvalue - base;
-              LIST_CEIL(frame) = VALUE_BASE(frame) + nb;
-              moveframes(frame,tframe,1L); moveL((L *)value,(L *)tvalue,nb>>2);
-              for (lframe = tvalue; lframe < (tvalue + nb); 
-                   lframe += FRAMEBYTES) { 
-								if (foldsubframe(lframe) 
-										&& (retc = foldobj(lframe,base,depth)) != OK)
-									return(retc);
-							}
-              break;
-  case DICT:  
-	          if (TYPE(frame) == OPAQUETYPE) return FOLD_OPAQUE;
-	          tframe = FREEvm; tvalue = tframe + FRAMEBYTES;
-              nb = DICT_NB(frame); 
-              if ((FREEvm+nb+FRAMEBYTES) > CEILvm) return(VM_OVF);
-              FREEvm += nb + FRAMEBYTES;
-              value = (B *)VALUE_BASE(frame);
-              VALUE_BASE(frame) = (L)tvalue - base;
-              moveframes(frame,tframe,1L); moveL((L *)value,(L *)tvalue,nb>>2);
-              offset = ((L)tvalue) - ((L)value);
-              DICT_ENTRIES(tvalue) += offset; DICT_FREE(tvalue) += offset;
-              DICT_CEIL(tvalue) += offset;
-              offset -= base;
-              for (k = 0, link = (L *)DICT_TABHASH(tvalue);
-                   k < DICT_CONHASH(tvalue); k++, link++) { 
-								if (*link != (-1L)) *link += offset; 
-							}
-              for (entry = (B *)DICT_ENTRIES(tvalue);
-                   entry < (B *)DICT_FREE(tvalue); 
-									 entry += ENTRYBYTES) { 
-								if (ASSOC_NEXT(entry) != (-1L))
-									ASSOC_NEXT(entry) += offset;
-								lframe = ASSOC_FRAME(entry);
-								if (foldsubframe(lframe) 
-										&& (retc = foldobj(lframe,base,depth)) != OK) 
-									return(retc);
-							}
-              DICT_ENTRIES(tvalue) -= base; DICT_FREE(tvalue) -= base;
-              DICT_CEIL(tvalue) -= base;
-              break;
-  default: return(CORR_OBJ);
+		freemem_ = FREEvm;
+		moveframe(frame, frame_);		
+		if ((retc = foldobj(frame, (P)FREEvm, &depth)) != VM_OVF)
+				return retc;
+
+		freemem = &freemem_;
+		ceilmem = &ceilmem_;
+		FREEvm = freemem_;
+
+		moveframe(frame_, frame);
+		depth = 0;
+		if (! (vmalloc = (B*) malloc((FREEvm - FLOORvm))))
+				return -errno;
+		
+		freemem_ = vmalloc;
+		ceilmem_ = freemem_ + (FREEvm - FLOORvm);
+		if ((retc = foldobj_int(frame, (P)freemem_, &depth)) == OK)
+				return OK;
+
+		foldobj_free();
+		if (retc != VM_OVF) return retc;
+
+		moveframe(frame_, frame);
+		depth = 0;
+		if (! (vmalloc = (B*) malloc((CEILvm - FLOORvm))))
+				return -errno;
+		
+		freemem_ = vmalloc;
+		ceilmem_ = freemem_ + (CEILvm - FLOORvm);
+		if ((retc = foldobj_int(frame, (P)freemem_, &depth)) == OK)
+				return OK;
+
+		foldobj_free();
+		return retc;
+}
+
+BOOLEAN foldobj_mem(B** base, B** top) 
+{
+		if (! vmalloc) return FALSE;
+
+		*base = vmalloc;
+		*top = *freemem;
+		return TRUE;
+}
+
+void foldobj_free(void) 
+{
+		if (vmalloc) {
+				free(vmalloc);
+				vmalloc = NULL;
+		}
+		
+		freemem = NULL;
+		ceilmem = NULL;
+}
+
+static P foldobj_int(B *frame, P base, W *depth)
+{
+  B *tframe, *tvalue, *value, *lframe, *entry;
+  P k, retc, nb, offset;
+
+  if ((++(*depth)) > MAXDEPTH) return(RNG_CHK);
+
+  switch(CLASS(frame)) {
+    case ARRAY: 
+      tframe = *freemem; 
+      tvalue = tframe + FRAMEBYTES;
+      nb = (P)(DALIGN(ARRAY_SIZE(frame) * VALUEBYTES(TYPE(frame))));
+      if ((*freemem+nb+FRAMEBYTES) > *ceilmem) return(VM_OVF);
+      *freemem += nb + FRAMEBYTES;
+      value = (B*)VALUE_BASE(frame);
+      VALUE_BASE(frame) = (P)tvalue - base;
+      moveframe(frame,tframe); 
+      moveLBIG((LBIG*)value,(LBIG*)tvalue, nb/sizeof(LBIG));
+      break;
+
+    case LIST:  
+      tframe = *freemem; 
+      tvalue = tframe + FRAMEBYTES;
+      nb = LIST_CEIL(frame) - VALUE_BASE(frame);
+      if ((*freemem+nb+FRAMEBYTES) > *ceilmem) return(VM_OVF);
+      *freemem += nb + FRAMEBYTES;
+      value = (B *)VALUE_BASE(frame);
+      VALUE_BASE(frame) = (P)tvalue - base;
+      LIST_CEIL(frame) = VALUE_BASE(frame) + nb;
+      moveframe(frame,tframe); 
+      moveLBIG((LBIG*) value,(LBIG*)tvalue, nb/sizeof(LBIG));
+      for (lframe = tvalue; 
+           lframe < (tvalue + nb); 
+           lframe += FRAMEBYTES) { 
+        if (foldsubframe(lframe) 
+            && (retc = foldobj_int(lframe,base,depth)) != OK)
+          return(retc);
+      }
+      break;
+
+    case DICT:  
+      if (TYPE(frame) == OPAQUETYPE) return FOLD_OPAQUE;
+
+      tframe = *freemem; 
+      tvalue = tframe + FRAMEBYTES;
+      value = (B *)VALUE_BASE(frame);
+      nb = DICT_NB(frame); 
+      if ((*freemem+nb+FRAMEBYTES) > *ceilmem) return(VM_OVF);
+
+      *freemem += nb + FRAMEBYTES;
+      VALUE_BASE(frame) = (P)tvalue - base;
+      moveframes(frame,tframe,1L); 
+      moveLBIG((LBIG*)value,(LBIG*)tvalue, nb/sizeof(LBIG));
+      offset = ((P)tvalue) - ((P)value);
+      DICT_ENTRIES(tvalue) += offset; 
+      DICT_FREE(tvalue) += offset;
+      DICT_TABHASH(tvalue) += offset;
+      offset -= base;
+      for (k = 0; k < DICT_CONHASH(tvalue); k++)
+        if (DICT_TABHASH_ARR(tvalue, k) != (-1L)) 
+          DICT_TABHASH_ARR(tvalue, k) += offset;
+      for (entry = (B *)DICT_ENTRIES(tvalue);
+           entry < (B *)DICT_FREE(tvalue);
+           entry += ENTRYBYTES) { 
+        if (ASSOC_NEXT(entry) != (-1L))
+          ASSOC_NEXT(entry) += offset;
+        lframe = ASSOC_FRAME(entry);
+        if (foldsubframe(lframe) 
+            && (retc = foldobj_int(lframe,base,depth)) != OK) 
+          return(retc);
+      }
+      DICT_ENTRIES(tvalue) -= base; 
+      DICT_FREE(tvalue) -= base;
+      DICT_TABHASH(tvalue) -= base;
+      break;
+
+    default: 
+      return(CORR_OBJ);
   }
-(*depth)--;
-return(OK);
+
+  (*depth)--;
+  return(OK);
 }
 
 /*----------------------------------- unfoldobj
@@ -1116,101 +1196,90 @@ return(OK);
 */
   
 
-L unfoldobj(B *frame, L base, 
-            BOOLEAN isnative_endian, BOOLEAN isnative_bits)
+P unfoldobj(B *frame, P base, B isnonnative)
 {
-B *lframe, *dict, *entry, *dframe, *xframe, *ldict;
-L retc, k, *link;
-BOOLEAN isnative = isnative_endian && isnative_bits;
+  B *lframe, *dict, *entry, *dframe, *xframe, *ldict;
+  P retc, k;
 
-switch(CLASS(frame)) {
- case ARRAY: 
-   VALUE_BASE(frame) += base; 
-   if (! isnative 
-       && ((retc = deendian_array(frame, isnative_endian, isnative_bits)) 
-           != OK))
-     return retc;
-   break;
+  switch(CLASS(frame)) {
+    case ARRAY: 
+      VALUE_BASE(frame) += base; 
+      if ((retc = deendian_array(frame, isnonnative)) != OK)
+        return retc;
+      break;
 
- case LIST: 
-   VALUE_BASE(frame) += base; 
-   LIST_CEIL(frame) += base;
-   if (! isnative 
-       && ((retc = deendian_list(frame, isnative_endian, isnative_bits)) != OK))
-     return retc;
+    case LIST: 
+      VALUE_BASE(frame) += base; 
+      LIST_CEIL(frame) += base;
+      if ((retc = deendian_list(frame, isnonnative)) != OK)
+        return retc;
 
-   for (lframe = (B *)VALUE_BASE(frame);
-				lframe < (B *)LIST_CEIL(frame); 
-				lframe += FRAMEBYTES) { 
-     if (ATTR(lframe) & BIND) { 
-       dframe = FREEdicts - FRAMEBYTES; xframe = 0L;
-       while ((dframe >= FLOORdicts) && (xframe == 0L)) { 
-				 ldict = (B *)VALUE_BASE(dframe);
-				 xframe = lookup(lframe,ldict);//lframe not frame
-				 dframe -= FRAMEBYTES;
-       }
-       if ((L)xframe > 0) { 
-				 moveframes(xframe,lframe,1L); 
-       } else { 
-				 ATTR(lframe) &= (~BIND); 
-       }
-       continue;
-     }   
-     if (!COMPOSITE(lframe)) continue;
-     if ((retc = unfoldobj(lframe, base, isnative_endian, isnative_bits)) != OK) 
-       return(retc);
-   }
-   break;
+      for (lframe = (B *)VALUE_BASE(frame);
+           lframe < (B *)LIST_CEIL(frame); 
+           lframe += FRAMEBYTES) { 
+        if (ATTR(lframe) & BIND) { 
+          dframe = FREEdicts - FRAMEBYTES; xframe = 0L;
+          while ((dframe >= FLOORdicts) && (xframe == 0L)) { 
+            ldict = (B *)VALUE_BASE(dframe);
+            xframe = lookup(lframe,ldict);//lframe not frame
+            dframe -= FRAMEBYTES;
+          }
+          if ((P)xframe > 0) moveframe(xframe,lframe); 
+          else ATTR(lframe) &= (~BIND); 
+          continue;
+        }   
+        if (!COMPOSITE(lframe)) continue;
+        if ((retc = unfoldobj(lframe, base, isnonnative)) != OK) return(retc);
+      }
+      break;
    
- case DICT: 
-   VALUE_BASE(frame) += base;
+    case DICT: 
+      VALUE_BASE(frame) += base;
    
-   dict = (B *)VALUE_BASE(frame);
-   if (! isnative 
-       && ((retc = deendian_dict(dict, isnative_endian, isnative_bits)) != OK)) 
-     return retc;
+      dict = (B *)VALUE_BASE(frame);
+      if ((retc = deendian_dict(dict, isnonnative)) != OK) 
+        return retc;
 
-   DICT_ENTRIES(dict) += base; DICT_FREE(dict) += base;
-   DICT_CEIL(dict) += base;
-   if (! isnative 
-       && ((retc = deendian_entries(dict, isnative_endian, isnative_bits)) != OK))
-     return retc;
+      DICT_ENTRIES(dict) += base; 
+      DICT_FREE(dict) += base;
+      DICT_TABHASH(dict) += base;
+      if ((retc = deendian_entries(dict, isnonnative)) != OK)
+        return retc;
 
-   for (k = 0, link = (L *)DICT_TABHASH(dict); 
-				k < DICT_CONHASH(dict); 
-				k++, link++)  { 
-     if (*link != (-1L)) *link += base; 
-   }
-   for (entry = (B *)DICT_ENTRIES(dict); 
-				entry < (B *)DICT_FREE(dict);
-				entry += ENTRYBYTES) {
-     if (ASSOC_NEXT(entry) != (-1L)) ASSOC_NEXT(entry) += base;
-     lframe = ASSOC_FRAME(entry);
-     if (ATTR(lframe) & BIND) { 
-       dframe = FREEdicts - FRAMEBYTES; xframe = 0L;
-       while ((dframe >= FLOORdicts) && (xframe == 0L)) { 
-				 ldict = (B *)VALUE_BASE(dframe);
-				 xframe = lookup(lframe,ldict);//lframe, not frame
-				 dframe -= FRAMEBYTES;
-       }
-       if ((L)xframe > 0) { 
-				 moveframes(xframe,lframe,1L); 
-       } else { 
-				 ATTR(lframe) &= (~BIND); 
-       }
-       continue;
-     }   
-     if (!COMPOSITE(lframe)) continue;
-     if ((retc = unfoldobj(lframe,base,isnative_endian,isnative_bits)) != OK)
-       return(retc);
-   }
-   break;
+      for (k = 0; k < DICT_CONHASH(dict); k++)
+        if (DICT_TABHASH_ARR(dict, k) != (-1L)) 
+          DICT_TABHASH_ARR(dict, k) += base; 
+
+      for (entry = (B *)DICT_ENTRIES(dict); 
+           entry < (B *)DICT_FREE(dict);
+           entry += ENTRYBYTES) {
+        if (ASSOC_NEXT(entry) != (-1L)) 
+          ASSOC_NEXT(entry) += base;
+
+        lframe = ASSOC_FRAME(entry);
+        if (ATTR(lframe) & BIND) { 
+          dframe = FREEdicts - FRAMEBYTES; xframe = 0L;
+          while ((dframe >= FLOORdicts) && (xframe == 0L)) { 
+            ldict = (B *)VALUE_BASE(dframe);
+            xframe = lookup(lframe,ldict);//lframe, not frame
+            dframe -= FRAMEBYTES;
+          }
+
+          if ((P)xframe > 0) moveframe(xframe,lframe); 
+          else ATTR(lframe) &= (~BIND); 
+          continue;
+        } 
+        if (!COMPOSITE(lframe)) continue;
+        if ((retc = unfoldobj(lframe,base,isnonnative)) != OK) return(retc);
+      }
+      break;
 	 
-	default: 
-		return(CORR_OBJ);
- }
- moveframes(frame,(B *)VALUE_BASE(frame)-FRAMEBYTES,1L);
- return(OK);
+    default: 
+      return(CORR_OBJ);
+  }
+
+  moveframe(frame,(B *)VALUE_BASE(frame)-FRAMEBYTES);
+  return(OK);
 }
 
 /*--------------------------------------------getstartupdir
@@ -1218,7 +1287,7 @@ switch(CLASS(frame)) {
  *  returns the hardcoded path (hidden at bottom of vm)
  *  to the startup directory for the node
  */
-L op_getstartupdir(void)
+P op_getstartupdir(void)
 {    
 	if (CEILopds < o2) return OPDS_OVF;
 	if (!startup_dir_frame) return CORR_OBJ;
@@ -1232,7 +1301,7 @@ L op_getstartupdir(void)
  *  returns the hardcoded path (hidden at bottom of vm)
  *  to the plugin directory for the node
  */
-L op_getplugindir(void)
+P op_getplugindir(void)
 {    
 	if (CEILopds < o2) return OPDS_OVF;
 	if (!plugin_dir_frame) return CORR_OBJ;
@@ -1245,7 +1314,7 @@ L op_getplugindir(void)
  * -- | string
  * returns the hardcoded path to the per-host configuration directory
  */
-L op_getconfdir(void) 
+P op_getconfdir(void) 
 {
     if (CEILopds < o2) return OPDS_OVF;
     if (! conf_dir_frame) return CORR_OBJ;
@@ -1259,7 +1328,7 @@ L op_getconfdir(void)
    - returns $HOME
 */
 
-L op_gethomedir(void) {
+P op_gethomedir(void) {
   if (CEILopds < o2) return OPDS_OVF;
   if (!home_dir_frame) return CORR_OBJ;
   moveframe(home_dir_frame, o1);
@@ -1268,8 +1337,8 @@ L op_gethomedir(void) {
 }
 
 static void setupdir(B** frame, const char* string) {
-  L len = strlen(string);
-  L lenapp = len;
+  P len = strlen(string);
+  P lenapp = len;
   if (len == 0 || string[len-1] != '/') lenapp++;
 
   if (FREEvm + FRAMEBYTES + DALIGN(len) > CEILvm)
@@ -1281,8 +1350,8 @@ static void setupdir(B** frame, const char* string) {
   ATTR(*frame) = READONLY;
   ARRAY_SIZE(*frame) = lenapp;
   VALUE_PTR(*frame) = *frame + FRAMEBYTES;
-  strncpy(*frame + FRAMEBYTES, string, len);
-	(*frame)[FRAMEBYTES+lenapp-1] = '/';
+  strncpy((char*) *frame + FRAMEBYTES, string, len);
+  (*frame)[FRAMEBYTES+lenapp-1] = '/';
 }
 
 #ifndef PLUGIN_DIR

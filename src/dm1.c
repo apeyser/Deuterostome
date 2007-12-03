@@ -13,8 +13,8 @@
  tokenizer; plus other shared variables  */
 
 static B *vm_token;   /* ->freespace                                 */
-static L vm_free;     /* # of free bytes available                   */
-static L vm_bytes;    /* length of returned token string including 0 */
+static P vm_free;     /* # of free bytes available                   */
+static P vm_bytes;    /* length of returned token string including 0 */
 static B *sframe;     /* ->source string frame                       */
 
 /*--------------- GETC, UNGETC for feeding string object to scanner */
@@ -92,6 +92,7 @@ The lower nipple of a numeral type specifies one of:
      2 - long integer
      3 - single float
      4 - double float
+     5 - double word
 */
 
 #define RET_BAD_TOK do {                                                \
@@ -308,10 +309,10 @@ to strings or arrays, which are assembled in VM.
         level 0: return, else re-iterate 
 */
 
-L tokenize(B *stringframe)
+P tokenize(B *stringframe)
 {
 
-L nframes, nb, arrnum;
+P nframes, nb, arrnum;
 W level, t;
 B *frame, *vm_stoken,  *oldfree;
 
@@ -349,7 +350,7 @@ goto next;
 
 /*------------------------------ endmark */
 endmark:
-makename("]",frame);
+makename((B*)"]",frame);
 ATTR(frame) = ACTIVE;
 FREEopds += FRAMEBYTES;
 goto next;
@@ -380,11 +381,11 @@ goto next;
 
 string:
 TAG(frame) = ARRAY | BYTETYPE; ATTR(frame) = PARENT;
-VALUE_BASE(frame) = (L)(vm_stoken + FRAMEBYTES);
+VALUE_BASE(frame) = (P)(vm_stoken + FRAMEBYTES);
 vm_bytes--;                              /* strip terminating null */
 ARRAY_SIZE(frame) = vm_bytes - FRAMEBYTES;
 moveframes(FREEopds,FREEvm,1L);      /* master frame */
-ARRAY_SIZE(FREEvm) = (vm_bytes = (L)(DALIGN(vm_bytes))) - FRAMEBYTES;
+ARRAY_SIZE(FREEvm) = (vm_bytes = (P)(DALIGN(vm_bytes))) - FRAMEBYTES;
 if ((FREEvm + vm_bytes) >= CEILvm) { FREEopds = oldfree; return(VM_OVF); }
 FREEvm += vm_bytes;
 FREEopds += FRAMEBYTES;
@@ -393,7 +394,7 @@ goto next;
 /*---------------------------- <> array */
 array:
 TAG(frame) = ARRAY | ((t>>8) & 0x0F); ATTR(frame) = PARENT;
-arrnum = VALUE_BASE(frame) = (L)(FREEvm + FRAMEBYTES); ARRAY_SIZE(frame) = 0;
+arrnum = VALUE_BASE(frame) = (P)(FREEvm + FRAMEBYTES); ARRAY_SIZE(frame) = 0;
 nb = VALUEBYTES(TYPE(frame));
 
 arrnext:
@@ -411,19 +412,19 @@ switch((t = scan()) & 0xFF)
 arrapp:
 t = 0x40 | TYPE(frame) | ((t>>8) & 0x30);
 ENCODE(t,vm_stoken,(B *)arrnum);
-if ((arrnum + nb) >= (L)CEILvm) { FREEopds = oldfree; return(VM_OVF); }
+if ((arrnum + nb) >= (P)CEILvm) { FREEopds = oldfree; return(VM_OVF); }
 
 ARRAY_SIZE(frame) += 1;
 arrnum += nb;
-vm_free = (L)CEILvm - arrnum;
+vm_free = (P)CEILvm - arrnum;
 vm_stoken = vm_token = (B *)arrnum;
 goto arrnext;
 
 arrend:
 moveframes(FREEopds,FREEvm,1L);              /* master frame */
-vm_bytes = (L)(DALIGN(nb * ARRAY_SIZE(FREEopds))) + FRAMEBYTES; 
+vm_bytes = (P)(DALIGN(nb * ARRAY_SIZE(FREEopds))) + FRAMEBYTES; 
 if ((FREEvm + vm_bytes) >= CEILvm) { FREEopds = oldfree; return(VM_OVF); }
-ARRAY_SIZE(FREEvm) = (vm_bytes - FRAMEBYTES) / nb;
+//ARRAY_SIZE(FREEvm) = (vm_bytes - FRAMEBYTES) / nb;
 FREEvm += vm_bytes;                          /* update VM */
 FREEopds += FRAMEBYTES;
 goto next;
@@ -447,8 +448,8 @@ nb = FREEopds - frame - FRAMEBYTES;
 if ((FREEvm + nb + FRAMEBYTES) >= CEILvm)
     { FREEopds = oldfree; return(VM_OVF); }
 moveframes(frame+FRAMEBYTES, FREEvm + FRAMEBYTES, nframes-1);
-VALUE_BASE(frame) = (L)(FREEvm + FRAMEBYTES);
-LIST_CEIL(frame) = (L)(VALUE_BASE(frame) + nb);
+VALUE_BASE(frame) = (P)(FREEvm + FRAMEBYTES);
+LIST_CEIL(frame) = (P)(VALUE_BASE(frame) + nb);
 moveframe(frame,FREEvm);         /* master frame */
 FREEvm += nb + FRAMEBYTES;
 FREEopds = frame + FRAMEBYTES;

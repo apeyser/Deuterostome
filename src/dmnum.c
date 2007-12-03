@@ -20,14 +20,12 @@
            LVALUE(B *frame, L *dest)
 */
 
-#include "dm.h"
+#include "dmnum.h"
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-static W TYPEBYTES[] = { 1,2,4,4,8 };
-#define nTYPES  ((W)5)
 
 /*----------------------- General remarks -------------------------------
 
@@ -60,46 +58,55 @@ static D thearc(D x, D y)
 
 void DECODE(B *frame, BOOLEAN fauto, W prec, B *buf)
 {
-switch(TYPE(frame))
-     {
-     case BYTETYPE: if (*((B *)NUM_VAL(frame)) == BINF) break;
-                      else
-                      sprintf(buf,"%d",(W)(*((B *)NUM_VAL(frame))));
-                    return;
-     case WORDTYPE: if(*((W *)NUM_VAL(frame)) == WINF) break;
-                      else
-                      sprintf(buf,"%d",*((W *)NUM_VAL(frame)));
-                    return;
-     case LONGTYPE: if (*((L *)NUM_VAL(frame)) == LINF) break;
-                      sprintf(buf,"%d",*((L *)NUM_VAL(frame)));
-                    return;
-     case SINGLETYPE: if (fabs(*((S *)NUM_VAL(frame))) == SINF) break;
-                       else if (fauto)
-                         sprintf(buf,"%.6e",*((S *)NUM_VAL(frame)));
-                         else if (prec < 0)
-                           sprintf(buf,"%.*f",-prec,
-                                   (D)(*((S *)NUM_VAL(frame))));
-                           else
-                           sprintf(buf,"%.*e",prec,
-                                   (D)(*((S *)NUM_VAL(frame))));
-                      return;
-     case DOUBLETYPE: if (fabs(*((D *)NUM_VAL(frame))) == DINF) break;
-                       else if (fauto)
-                         sprintf(buf,"%.15e",*((D *)NUM_VAL(frame)));
-                         else if (prec < 0)
-                           sprintf(buf,"%.*f",-prec,(*((D *)NUM_VAL(frame))));
-                           else
-                           sprintf(buf,"%.*e",prec,(*((D *)NUM_VAL(frame))));
-                      return;
-     default: break;
-     }
-sprintf(buf,"*");
+  switch(TYPE(frame)) {
+    case BYTETYPE: 
+      if (*((B *)NUM_VAL(frame)) == BINF) break;
+      sprintf((char*)buf,"%d",(W)(*((B *)NUM_VAL(frame))));
+      return;
+
+    case WORDTYPE: 
+      if(*((W *)NUM_VAL(frame)) == WINF) break;
+      sprintf((char*)buf,"%d",*((W *)NUM_VAL(frame)));
+      return;
+
+    case LONG32TYPE: 
+      if(*((L32 *)NUM_VAL(frame)) == L32INF) break;
+      sprintf((char*)buf,"%lld",(long long) *((L32 *)NUM_VAL(frame)));
+      return;
+
+    case LONG64TYPE: 
+      if (*((L64 *)NUM_VAL(frame)) == L64INF) break;
+      sprintf((char*)buf,"%lld",(long long) *((L64 *)NUM_VAL(frame)));
+      return;
+
+    case SINGLETYPE: 
+      if (ISUNDEF(*((S *)NUM_VAL(frame)))) break;
+      
+      if (fauto) sprintf((char*)buf,"%.6e",*((S *)NUM_VAL(frame)));
+      else if (prec < 0) 
+        sprintf((char*)buf,"%.*f",-prec, (D)(*((S *)NUM_VAL(frame))));
+      else sprintf((char*)buf,"%.*e",prec, (D)(*((S *)NUM_VAL(frame))));
+      return;
+
+     case DOUBLETYPE: 
+       if (ISUNDEF(*((D *)NUM_VAL(frame)))) break;
+       
+       if (fauto) sprintf((char*)buf,"%.15e",*((D *)NUM_VAL(frame)));
+       else if (prec < 0)
+         sprintf((char*)buf,"%.*f",-prec,(*((D *)NUM_VAL(frame))));
+       else sprintf((char*)buf,"%.*e",prec,(*((D *)NUM_VAL(frame))));
+       return;
+
+    default: 
+      break;
+  }
+  sprintf((char*)buf,"*");
 }
 
 /*------------------------------------- ENCODE
  converts numeral from ASCII code in 'string' into binary form and
  places the binary value at 'dnum'. Encoding is directed by 'type' bits:
-     #0-3:  predefined type (B/W/L/S/D) if bit #6 is true
+     #0-3:  predefined type (B/W/L/M/S/D) if bit #6 is true
      #4:    to be undefined (U)
      #5:    string has float characteristic (F)
      #6:    type is predefined (T)
@@ -117,16 +124,19 @@ sprintf(buf,"*");
 
 B ENCODE(W type, B *string, B *dnum)
 {
-D num;
-
-num = (type & Ubit)? DINF : atof(string);
-if (type & Tbit)
-  { (*(ENCODElist[type & 0xF]))(num,dnum); return(type & 0xF); }
-  else
-  { if (type & Fbit)
-      {  (*(ENCODElist[DOUBLETYPE]))(num,dnum); return(DOUBLETYPE); }
-      else
-      { (*(ENCODElist[LONGTYPE]))(num,dnum); return(LONGTYPE); }
+  D num;
+  num = (type & Ubit)? HUGE_VAL : atof((char*)string);
+  if (type & Tbit) { 
+    (*(ENCODElist[type & 0xF]))(num,dnum); 
+    return(type & 0xF); 
+  }
+  else if (type & Fbit) {  
+    (*(ENCODElist[DOUBLETYPE]))(num,dnum); 
+    return(DOUBLETYPE); 
+  }
+  else { 
+    (*(ENCODElist[LONGBIGTYPE]))(num,dnum); 
+    return(LONGBIGTYPE); 
   }
 }
 
@@ -136,19 +146,32 @@ if (type & Tbit)
 
 W VALUEBYTES(B type)
 {
-return(TYPEBYTES[type]);
+  return(TYPEBYTES[type]);
 }
 
 /*-------------------------------------------- VALUE
-  returns value of numerical frame as long integer in the destination
+  returns value of numerical frame as long big integer in the destination
   and a boolean 'true' if the value is not undefined
 
   Note: uses a function list provided by DMNUMINC
 */
 
-BOOLEAN VALUE(B *frame, L *val)
+BOOLEAN VALUE(B *frame, LBIG *val)
 {
-return( (*val = (*(VALUElist[TYPE(frame)]))(NUM_VAL(frame))) != LINF);
+  return( (*val = (*(VALUElist[TYPE(frame)]))(NUM_VAL(frame))) != LBIGINF);
+}
+
+/*-------------------------------------------- DVALUE
+  returns value of numerical frame as double in the destination
+  and a boolean 'true' if the value is not undefined
+
+  Note: uses a function list provided by DMNUMINC
+*/
+
+BOOLEAN DVALUE(B *frame, D *val) 
+{
+  *val = (*(TESTlist[TYPE(frame)]))(NUM_VAL(frame));
+  return ! ISUNDEF(*val);
 }
 
 /*--------------------------------------------- TEST
@@ -158,27 +181,14 @@ return( (*val = (*(VALUElist[TYPE(frame)]))(NUM_VAL(frame))) != LINF);
   Note: uses function list provided by DMNUMINC
 */
 
-/*--- isDINF 
-  returns 'true' if the argument is of value DINF 
-*/
-
-static BOOLEAN isDINF(D t)
-{
-L tt[2]; //D x;
-//x = t;
-//moveL((L *)(&x),tt,1);
-memcpy(tt, &t, sizeof(D));
-return((tt[0] & 0x7FF00000) == (0x7FF00000));
-}
-
 W TEST(B *frame)
 {
-D t; 
+  D t; 
 
-t = (*(TESTlist[TYPE(frame)]))(NUM_VAL(frame));
-if (isDINF(t)) return(UN);
-if (t) return( (t>0)? GT : LT );
-return(EQ);
+  t = (*(TESTlist[TYPE(frame)]))(NUM_VAL(frame));
+  if (ISUNDEF(t)) return(UN);
+  if (t) return( (t>0)? GT : LT );
+  return(EQ);
 }
 
 /*------------------------------------------------ COMPARE
@@ -188,13 +198,13 @@ return(EQ);
 
 W COMPARE(B *frame1, B *frame2)
 {
-D t;
-
-t = (*(TESTlist[TYPE(frame1)]))(NUM_VAL(frame1)) - 
+  D t;
+  
+  t = (*(TESTlist[TYPE(frame1)]))(NUM_VAL(frame1)) - 
     (*(TESTlist[TYPE(frame2)]))(NUM_VAL(frame2));
-if (isDINF(t)) return(UN);
-if (t) return( (t>0)? GT : LT );
-return(EQ);
+  if (ISUNDEF(t)) return(UN);
+  if (t) return( (t>0)? GT : LT );
+  return(EQ);
 }
 
 
@@ -215,13 +225,13 @@ return(EQ);
 
 void MOVE(B *sframe, B *dframe)
 {
-W idx;
-
-/* index (slow to fast): source type, dest type, class combination */ 
-idx = ( TYPE(sframe) * nTYPES + TYPE(dframe) ) * 4;
-idx += (CLASS(sframe) == ARRAY)? 2 : 0;
-idx += (CLASS(dframe) == ARRAY)? 1 : 0;
-(*(MOVElist[idx]))(sframe,dframe);
+  W idx;
+  
+  /* index (slow to fast): source type, dest type, class combination */ 
+  idx = ( TYPE(sframe) * nTYPES + TYPE(dframe) ) * 4;
+  idx += (CLASS(sframe) == ARRAY)? 2 : 0;
+  idx += (CLASS(dframe) == ARRAY)? 1 : 0;
+  (*(MOVElist[idx]))(sframe,dframe);
 } 
 
 /*----------------------------------------- dyadic math operators:
@@ -233,70 +243,70 @@ idx += (CLASS(dframe) == ARRAY)? 1 : 0;
 
 void THEARC(B *dframe, B* sframe)
 {
-    W idx;
-    idx = (TYPE(dframe) * nTYPES + TYPE(sframe))*4;
-    if (CLASS(dframe) == ARRAY) idx += 1;
-    if (CLASS(sframe) == ARRAY) idx += 2;
-    (*(THEARClist[idx]))(dframe,sframe);
+  W idx;
+  idx = (TYPE(dframe) * nTYPES + TYPE(sframe))*4;
+  if (CLASS(dframe) == ARRAY) idx += 1;
+  if (CLASS(sframe) == ARRAY) idx += 2;
+  (*(THEARClist[idx]))(dframe,sframe);
 }
 
 void MOD(B *dframe, B* sframe)
 {
-    W idx;
-    idx = (TYPE(dframe) * nTYPES + TYPE(sframe))*4;
-    if (CLASS(dframe) == ARRAY) idx += 1;
-    if (CLASS(sframe) == ARRAY) idx += 2;
-    (*(MODlist[idx]))(dframe,sframe);
+  W idx;
+  idx = (TYPE(dframe) * nTYPES + TYPE(sframe))*4;
+  if (CLASS(dframe) == ARRAY) idx += 1;
+  if (CLASS(sframe) == ARRAY) idx += 2;
+  (*(MODlist[idx]))(dframe,sframe);
 }
 
 void ADD(B *dframe, B *sframe)
 {
-W idx;
+  W idx;
 
-/* index (slow to fast): dest type, source type, class combination
-   (ss, as, sa, aa, in order dest, source)
-*/ 
-idx = ( TYPE(dframe) * nTYPES + TYPE(sframe) ) * 4;
-if (CLASS(dframe) == ARRAY) idx += 1;
-if (CLASS(sframe) == ARRAY) idx += 2;
-(*(ADDlist[idx]))(dframe,sframe);
+  /* index (slow to fast): dest type, source type, class combination
+     (ss, as, sa, aa, in order dest, source)
+  */ 
+  idx = ( TYPE(dframe) * nTYPES + TYPE(sframe) ) * 4;
+  if (CLASS(dframe) == ARRAY) idx += 1;
+  if (CLASS(sframe) == ARRAY) idx += 2;
+  (*(ADDlist[idx]))(dframe,sframe);
 } 
 
 void SUB(B *dframe, B *sframe)
 {
-W idx; 
-idx = ( TYPE(dframe) * nTYPES + TYPE(sframe) ) * 4;
-if (CLASS(dframe) == ARRAY) idx += 1;
-if (CLASS(sframe) == ARRAY) idx += 2;
-(*(SUBlist[idx]))(dframe,sframe);
+  W idx; 
+  idx = ( TYPE(dframe) * nTYPES + TYPE(sframe) ) * 4;
+  if (CLASS(dframe) == ARRAY) idx += 1;
+  if (CLASS(sframe) == ARRAY) idx += 2;
+  (*(SUBlist[idx]))(dframe,sframe);
 } 
 
 void MUL(B *dframe, B *sframe)
 {
-W idx; 
-idx = ( TYPE(dframe) * nTYPES + TYPE(sframe) ) * 4;
-if (CLASS(dframe) == ARRAY) idx += 1;
-if (CLASS(sframe) == ARRAY) idx += 2;
-(*(MULlist[idx]))(dframe,sframe);
+  W idx; 
+  idx = ( TYPE(dframe) * nTYPES + TYPE(sframe) ) * 4;
+  if (CLASS(dframe) == ARRAY) idx += 1;
+  if (CLASS(sframe) == ARRAY) idx += 2;
+  (*(MULlist[idx]))(dframe,sframe);
 } 
 
 void DIV(B *dframe, B *sframe)
 {
-W idx; 
-idx = ( TYPE(dframe) * nTYPES + TYPE(sframe) ) * 4;
-if (CLASS(dframe) == ARRAY) idx += 1;
-if (CLASS(sframe) == ARRAY) idx += 2;
-(*(DIVlist[idx]))(dframe,sframe);
+  W idx; 
+  idx = ( TYPE(dframe) * nTYPES + TYPE(sframe) ) * 4;
+  if (CLASS(dframe) == ARRAY) idx += 1;
+  if (CLASS(sframe) == ARRAY) idx += 2;
+  (*(DIVlist[idx]))(dframe,sframe);
 } 
 
 void PWR(B *dframe, B *sframe)
 {
-W idx; 
-idx = ( TYPE(dframe) * nTYPES + TYPE(sframe) ) * 4;
-if (CLASS(dframe) == ARRAY) idx += 1;
-if (CLASS(sframe) == ARRAY) idx += 2;
-(*(PWRlist[idx]))(dframe,sframe);
-} 
+  W idx; 
+  idx = ( TYPE(dframe) * nTYPES + TYPE(sframe) ) * 4;
+  if (CLASS(dframe) == ARRAY) idx += 1;
+  if (CLASS(sframe) == ARRAY) idx += 2;
+  (*(PWRlist[idx]))(dframe,sframe);
+}
 /*---------------------------------------  monadic math operators
    NEG, ABS, SQRT, EXP, LN, LG,FLOOR, CEIL, 
    SIN, COS, TAN, ASIN, ACOS, ATAN): ...(B *frame)
@@ -307,116 +317,116 @@ Note: use finction lists provided by DMNUMINC
 
 void NEG(B *frame)
 {
-W idx;
-
-/* index (slow to fast): type, class (s or a) */ 
-idx = TYPE(frame) << 1;
-if (CLASS(frame) == ARRAY) idx += 1;
-(*(NEGlist[idx]))(frame);
+  W idx;
+  
+  /* index (slow to fast): type, class (s or a) */ 
+  idx = TYPE(frame) << 1;
+  if (CLASS(frame) == ARRAY) idx += 1;
+  (*(NEGlist[idx]))(frame);
 } 
 
 void ABS(B *frame)
 {
-W idx;
-idx = TYPE(frame) << 1;
-if (CLASS(frame) == ARRAY) idx += 1;
-(*(ABSlist[idx]))(frame);
+  W idx;
+  idx = TYPE(frame) << 1;
+  if (CLASS(frame) == ARRAY) idx += 1;
+  (*(ABSlist[idx]))(frame);
 } 
  
 void SQRT(B *frame)
 {
-W idx;
-idx = TYPE(frame) << 1;
-if (CLASS(frame) == ARRAY) idx += 1;
-(*(SQRTlist[idx]))(frame);
+  W idx;
+  idx = TYPE(frame) << 1;
+  if (CLASS(frame) == ARRAY) idx += 1;
+  (*(SQRTlist[idx]))(frame);
 }          
 
 void EXP(B *frame)
 {
-W idx;
-idx = TYPE(frame) << 1;
-if (CLASS(frame) == ARRAY) idx += 1;
-(*(EXPlist[idx]))(frame);
+  W idx;
+  idx = TYPE(frame) << 1;
+  if (CLASS(frame) == ARRAY) idx += 1;
+  (*(EXPlist[idx]))(frame);
 } 
 
 void LN(B *frame)
 {
-W idx;
-idx = TYPE(frame) << 1;
-if (CLASS(frame) == ARRAY) idx += 1;
-(*(LNlist[idx]))(frame);
+  W idx;
+  idx = TYPE(frame) << 1;
+  if (CLASS(frame) == ARRAY) idx += 1;
+  (*(LNlist[idx]))(frame);
 } 
 
 void LG(B *frame)
 {
-W idx;
-idx = TYPE(frame) << 1;
-if (CLASS(frame) == ARRAY) idx += 1;
-(*(LGlist[idx]))(frame);
+  W idx;
+  idx = TYPE(frame) << 1;
+  if (CLASS(frame) == ARRAY) idx += 1;
+  (*(LGlist[idx]))(frame);
 } 
 
 void FLOOR(B *frame)
 {
-W idx;
-idx = TYPE(frame) << 1;
-if (CLASS(frame) == ARRAY) idx += 1;
-(*(FLOORlist[idx]))(frame);
+  W idx;
+  idx = TYPE(frame) << 1;
+  if (CLASS(frame) == ARRAY) idx += 1;
+  (*(FLOORlist[idx]))(frame);
 } 
 
 void CEIL(B *frame)
 {
-W idx;
-idx = TYPE(frame) << 1;
-if (CLASS(frame) == ARRAY) idx += 1;
-(*(CEILlist[idx]))(frame);
+  W idx;
+  idx = TYPE(frame) << 1;
+  if (CLASS(frame) == ARRAY) idx += 1;
+  (*(CEILlist[idx]))(frame);
 } 
 
 void SIN(B *frame)
 {
-W idx;
-idx = TYPE(frame) << 1;
-if (CLASS(frame) == ARRAY) idx += 1;
-(*(SINlist[idx]))(frame);
+  W idx;
+  idx = TYPE(frame) << 1;
+  if (CLASS(frame) == ARRAY) idx += 1;
+  (*(SINlist[idx]))(frame);
 } 
 
 void COS(B *frame)
 {
-W idx;
-idx = TYPE(frame) << 1;
-if (CLASS(frame) == ARRAY) idx += 1;
-(*(COSlist[idx]))(frame);
+  W idx;
+  idx = TYPE(frame) << 1;
+  if (CLASS(frame) == ARRAY) idx += 1;
+  (*(COSlist[idx]))(frame);
 } 
 
 void TAN(B *frame)
 {
-W idx;
-idx = TYPE(frame) << 1;
-if (CLASS(frame) == ARRAY) idx += 1;
-(*(TANlist[idx]))(frame);
+  W idx;
+  idx = TYPE(frame) << 1;
+  if (CLASS(frame) == ARRAY) idx += 1;
+  (*(TANlist[idx]))(frame);
 } 
 
 void ASIN(B *frame)
 {
-W idx;
-idx = TYPE(frame) << 1;
-if (CLASS(frame) == ARRAY) idx += 1;
-(*(ASINlist[idx]))(frame);
+  W idx;
+  idx = TYPE(frame) << 1;
+  if (CLASS(frame) == ARRAY) idx += 1;
+  (*(ASINlist[idx]))(frame);
 } 
 
 void ACOS(B *frame)
 {
-W idx;
-idx = TYPE(frame) << 1;
-if (CLASS(frame) == ARRAY) idx += 1;
-(*(ACOSlist[idx]))(frame);
+  W idx;
+  idx = TYPE(frame) << 1;
+  if (CLASS(frame) == ARRAY) idx += 1;
+  (*(ACOSlist[idx]))(frame);
 } 
 
 void ATAN(B *frame)
 {
-W idx;
-idx = TYPE(frame) << 1;
-if (CLASS(frame) == ARRAY) idx += 1;
-(*(ATANlist[idx]))(frame);
+  W idx;
+  idx = TYPE(frame) << 1;
+  if (CLASS(frame) == ARRAY) idx += 1;
+  (*(ATANlist[idx]))(frame);
 } 
 
 /*------------------------------------------ DECREMENT
@@ -425,7 +435,7 @@ if (CLASS(frame) == ARRAY) idx += 1;
 
 void DECREMENT(B *frame)
 {
-(*(DECRlist[TYPE(frame)]))((B *)frame);
+  (*(DECRlist[TYPE(frame)]))((B *)frame);
 }
 
 

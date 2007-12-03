@@ -19,9 +19,13 @@
 */
 #include "dm.h"
 #include "threads.h"
+#include "dmnum.h"
+
 #include <math.h>
-#define nTYPES  ((W)5)
+#include <inttypes.h>
 #include <stdio.h>
+
+#include "dsp2def.h"
 
 /*------------------------------ internal library ---------------------------*/
 
@@ -36,48 +40,51 @@
   NOTE: call with 'data' pointing one below the first element
 */
 
-#define SWAP(a,b) tempr = (a); (a) = (b); (b) = tempr
+#define SWAP(a,b) do {tempr = (a); (a) = (b); (b) = tempr;} while (0)
 #define TwoPi 6.28318530717959
 #define Pi 3.141592653589793
 
-static void four1( D *data, L nn, L dir)
+static void four1( D *data, P nn, P dir)
 {
-   L n, mmax, m, j, istep, i;
-   D wtemp, wr, wpr, wpi, wi, theta, tempr, tempi;
+  P n, mmax, m, j, istep, i;
+  D wtemp, wr, wpr, wpi, wi, theta, tempr, tempi;
    
-   n = nn << 1;
-   j = 1;
-   for (i=1; i<n; i+=2)
-     {  if (j>i) { SWAP(data[j],data[i]); SWAP(data[j+1],data[i+1]); }
-        m = n>>1;
-        while (m>=2 && j>m) { j -= m; m >>= 1; }
-        j += m;
-     }
+  n = nn << 1;
+  j = 1;
+  for (i=1; i<n; i+=2) {
+    if (j>i) SWAP(data[j],data[i]); SWAP(data[j+1],data[i+1]); 
+    m = n>>1;
+    while (m>=2 && j>m) { 
+      j -= m; 
+      m >>= 1; 
+    }
+    j += m;
+  }
   
-    mmax = 2;
-    while (n>mmax)
-      {  istep = mmax<<1;
-         theta = dir * (TwoPi/mmax);
-         wtemp = sin(0.5 * theta);
-         wpr = -2.0 * wtemp * wtemp;
-         wpi = sin(theta);
-         wr = 1.0;
-         wi = 0.0;
-         for (m=1; m<mmax; m+=2)
-           {  for (i=m; i<=n; i+=istep)
-                {  j = i + mmax;
-                   tempr = wr * data[j] - wi * data[j+1];
-                   tempi = wr * data[j+1] + wi * data[j];
-                   data[j] = data[i] - tempr;
-                   data[j+1] = data[i+1] - tempi;
-                   data[i] += tempr;
-                   data[i+1] += tempi;
-                }
-              wr = (wtemp=wr) * wpr - wi * wpi + wr;
-              wi = wi * wpr + wtemp * wpi + wi;
-           }
-         mmax = istep;
+  mmax = 2;
+  while (n>mmax) {
+    istep = mmax<<1;
+    theta = dir * (TwoPi/mmax);
+    wtemp = sin(0.5 * theta);
+    wpr = -2.0 * wtemp * wtemp;
+    wpi = sin(theta);
+    wr = 1.0;
+    wi = 0.0;
+    for (m=1; m<mmax; m+=2) { 
+      for (i=m; i<=n; i+=istep) { 
+        j = i + mmax;
+        tempr = wr * data[j] - wi * data[j+1];
+        tempi = wr * data[j+1] + wi * data[j];
+        data[j] = data[i] - tempr;
+        data[j+1] = data[i+1] - tempi;
+        data[i] += tempr;
+        data[i+1] += tempi;
       }
+      wr = (wtemp=wr) * wpr - wi * wpi + wr;
+      wi = wi * wpr + wtemp * wpi + wi;
+    }
+    mmax = istep;
+  }
 }
 
 /*------------------------------------ FFT: one real -> complex
@@ -92,48 +99,49 @@ static void four1( D *data, L nn, L dir)
   NOTE: call with 'data' pointing one below the first element
 */
 
-static void realft( D *data, L n, L dir)
+static void realft(D *data, P n, P dir)
 {
-   void four1( D *data, L nn, L dir);
-   L i, i1, i2, i3, i4, np3;
-   D c1, c2, h1r, h1i, h2r, h2i, wr, wi, wpr, wpi, wtemp, theta;
+  P i, i1, i2, i3, i4, np3;
+  D c1, c2, h1r, h1i, h2r, h2i, wr, wi, wpr, wpi, wtemp, theta;
    
-   c1 = 0.5;
-   theta = Pi / (D)(n>>1);
-   if (dir == 1)
-     { c2 = -0.5;
-       four1(data,n>>1,1);
-     } else
-     { c2 = 0.5;
-       theta = -theta;
-     }
-   wtemp = sin(0.5 * theta);
-   wpr = -2.0 * wtemp * wtemp;
-   wpi = sin(theta);
-   wr = 1.0 + wpr;
-   wi = wpi;
-   np3 = n + 3;
-   for (i=2; i<=(n>>2); i++)
-     { i4 = 1 + ( i3 = np3 - ( i2 = 1 + (i1 = i + i - 1)));
-       h1r = c1 * (data[i1] + data[i3]);
-       h1i = c1 * (data[i2] - data[i4]);
-       h2r = -c2 * (data[i2] + data[i4]);
-       h2i = c2 * (data[i1] - data[i3]);
-       data[i1] = h1r + wr * h2r - wi * h2i;
-       data[i2] = h1i + wr * h2i + wi * h2r;
-       data[i3] = h1r - wr * h2r + wi * h2i;
-       data[i4] = -h1i + wr * h2i + wi * h2r;
-       wr = (wtemp = wr) * wpr - wi * wpi + wr;
-       wi = wi * wpr + wtemp * wpi + wi;
-     }
-   if (dir == 1)
-     { data[1] = (h1r = data[1]) + data[2];
-       data[2] = h1r - data[2];
-     } else
-     { data[1] = c1 * ((h1r = data[1]) + data[2]);
-       data[2] = c1 * (h1r - data[2]);
-       four1(data, n>>1, -1);
-     }
+  c1 = 0.5;
+  theta = Pi / (D)(n>>1);
+  if (dir == 1) { 
+    c2 = -0.5;
+    four1(data,n>>1,1);
+  } 
+  else { 
+    c2 = 0.5;
+    theta = -theta;
+  }
+  wtemp = sin(0.5 * theta);
+  wpr = -2.0 * wtemp * wtemp;
+  wpi = sin(theta);
+  wr = 1.0 + wpr;
+  wi = wpi;
+  np3 = n + 3;
+  for (i=2; i<=(n>>2); i++) { 
+    i4 = 1 + ( i3 = np3 - ( i2 = 1 + (i1 = i + i - 1)));
+    h1r = c1 * (data[i1] + data[i3]);
+    h1i = c1 * (data[i2] - data[i4]);
+    h2r = -c2 * (data[i2] + data[i4]);
+    h2i = c2 * (data[i1] - data[i3]);
+    data[i1] = h1r + wr * h2r - wi * h2i;
+    data[i2] = h1i + wr * h2i + wi * h2r;
+    data[i3] = h1r - wr * h2r + wi * h2i;
+    data[i4] = -h1i + wr * h2i + wi * h2r;
+    wr = (wtemp = wr) * wpr - wi * wpi + wr;
+    wi = wi * wpr + wtemp * wpi + wi;
+  }
+  if (dir == 1) { 
+    data[1] = (h1r = data[1]) + data[2];
+    data[2] = h1r - data[2];
+  } 
+  else {
+    data[1] = c1 * ((h1r = data[1]) + data[2]);
+    data[2] = c1 * (h1r - data[2]);
+    four1(data, n>>1, -1);
+  }
 }
 
 /*---------------------------------------- FFT: sine
@@ -148,88 +156,90 @@ static void realft( D *data, L n, L dir)
 */  
 
 
-static void sinft( D *y, L n)
+static void sinft( D *y, P n)
 {
-   void realft( D *data, L n, L dir);
-   L j, n2;
-   D sum, y1, y2, theta, wi, wr, wpi, wpr, wtemp;
+  P j, n2;
+  D sum, y1, y2, theta, wi, wr, wpi, wpr, wtemp;
    
-   n2 = n + 2;
-   wi = 0.0;
-   wr = 1.0;
-   theta = Pi/ (D)n;
-   wtemp = sin(0.5 * theta);
-   wpr = -2.0 * wtemp * wtemp;
-   wpi = sin(theta);
-   y[1] = 0.0;
-   for (j=2; j<=(n>>1)+1; j++)
-     { wr = (wtemp = wr) * wpr - wi * wpi + wr;
-       wi = wi * wpr + wtemp * wpi + wi;
-       y1 = wi * (y[j] + y[n2-j]);
-       y2 = 0.5 * (y[j] - y[n2-j]);
-       y[j] = y1 + y2;
-       y[n2-j] = y1 - y2;
-     }
-   realft(y,n,1);
-   y[1] *= 0.5;
-   sum = y[2] = 0.0;
-   for (j=1; j<=n-1; j+=2)
-     { sum += y[j];
-       y[j] = y[j+1];
-       y[j+1] = sum;
-     }
+  n2 = n + 2;
+  wi = 0.0;
+  wr = 1.0;
+  theta = Pi/ (D)n;
+  wtemp = sin(0.5 * theta);
+  wpr = -2.0 * wtemp * wtemp;
+  wpi = sin(theta);
+  y[1] = 0.0;
+  for (j=2; j<=(n>>1)+1; j++) { 
+    wr = (wtemp = wr) * wpr - wi * wpi + wr;
+    wi = wi * wpr + wtemp * wpi + wi;
+    y1 = wi * (y[j] + y[n2-j]);
+    y2 = 0.5 * (y[j] - y[n2-j]);
+    y[j] = y1 + y2;
+    y[n2-j] = y1 - y2;
+  }
+  realft(y,n,1);
+  y[1] *= 0.5;
+  sum = y[2] = 0.0;
+  for (j=1; j<=n-1; j+=2) {
+    sum += y[j];
+    y[j] = y[j+1];
+    y[j+1] = sum;
+  }
 }
 
 /*------------------------------------------------------ LU decomposition
   (Press et al., page 46
 */
 
-static BOOLEAN ludcmp(D **a, L n, L *indx, D *d, D *vv)
+static BOOLEAN ludcmp(D **a, P n, LBIG *indx, D *d, D *vv)
 {
-   L i, imax = 0, j, k;
-   D big, dum, sum, temp, TINY;
-   TINY = 1e-20;
+  P i, imax = 0, j, k;
+  D big, dum, sum, temp, TINY;
+  TINY = 1e-20;
    
-   *d = 1.0;
-   for (i=1; i<=n; i++)
-     { big = 0.0;
-       for (j=1; j<=n; j++)  if ((temp = fabs(a[i][j])) > big) big = temp;
-       if (big == 0.0) return(FALSE);
-       vv[i] = 1.0 / big;
-     }
-   for (j=1; j<=n; j++)
-     { for (i=1; i<j; i++)
-         { sum = a[i][j];
-           for (k=1; k<i; k++) sum -= a[i][k] * a[k][j];
-           a[i][j] = sum;
-         }
-        big = 0.0;
-        for (i=j; i<=n; i++)
-          { sum = a[i][j];
-            for (k=1; k<j; k++) sum -= a[i][k] * a[k][j];
-            a[i][j] = sum;
-            if ((dum = vv[i] * fabs(sum)) >= big)
-              { big = dum;
-                imax = i;
-              }
-          }
-        if (j != imax)
-          { for (k=1; k<=n; k++)
-             { dum = a[imax][k];
-               a[imax][k] = a[j][k];
-               a[j][k] = dum;
-             }
-            *d = -(*d);
-            vv[imax] = vv[j];
-          }
-        indx[j] = imax;
-        if (a[j][j] == 0.0) a[j][j] = TINY;
-        if (j != n)
-          { dum = 1.0 / a[j][j];
-            for (i=j+1; i<=n; i++) a[i][j] *= dum;
-          }
-     }
-   return TRUE;
+  *d = 1.0;
+  for (i=1; i<=n; i++) { 
+    big = 0.0;
+    for (j=1; j<=n; j++)  if ((temp = fabs(a[i][j])) > big) big = temp;
+    if (big == 0.0) return FALSE;
+    vv[i] = 1.0 / big;
+  }
+
+  for (j=1; j<=n; j++) { 
+    for (i=1; i<j; i++) { 
+      sum = a[i][j];
+      for (k=1; k<i; k++) sum -= a[i][k] * a[k][j];
+      a[i][j] = sum;
+    }
+
+    big = 0.0;
+    for (i=j; i<=n; i++) { 
+      sum = a[i][j];
+      for (k=1; k<j; k++) sum -= a[i][k] * a[k][j];
+      a[i][j] = sum;
+      if ((dum = vv[i] * fabs(sum)) >= big) { 
+        big = dum;
+        imax = i;
+      }
+    }
+    if (j != imax) {
+      for (k=1; k<=n; k++) { 
+        dum = a[imax][k];
+        a[imax][k] = a[j][k];
+        a[j][k] = dum;
+      }
+      *d = -(*d);
+      vv[imax] = vv[j];
+    }
+    indx[j] = imax;
+    if (a[j][j] == 0.0) a[j][j] = TINY;
+    if (j != n) {
+      dum = 1.0 / a[j][j];
+      for (i=j+1; i<=n; i++) a[i][j] *= dum;
+    }
+  }
+
+  return TRUE;
 }
 
 
@@ -237,27 +247,27 @@ static BOOLEAN ludcmp(D **a, L n, L *indx, D *d, D *vv)
   (Press et al., page 47)
 */
 
-static void lubksb(D **a, L n, L *indx, D *b)
+static void lubksb(D **a, P n, LBIG *indx, D *b)
 {
-   L i, ii, ip, j;
+   P i, ii, ip, j;
    D sum;
 
    ii = 0;
-
-   for (i=1; i<=n; i++)
-     { ip = indx[i];
-       sum = b[ip];
-  	   b[ip] = b[i];
-       if (ii) for (j=ii; j<=i-1; j++) sum -= a[i][j] * b[j];
-       else if (sum) ii=i;
-       b[i] = sum;
-  }
+   
+   for (i=1; i<=n; i++) { 
+     ip = (P) indx[i];
+     sum = b[ip];
+     b[ip] = b[i];
+     if (ii) for (j=ii; j<=i-1; j++) sum -= a[i][j] * b[j];
+     else if (sum) ii=i;
+     b[i] = sum;
+   }
   
-   for (i=n; i>=1; i--)
-     { sum = b[i];
-       for (j=i+1; j<=n; j++) sum -= a[i][j] * b[j];
-       b[i] = sum / a[i][i];
-  }
+   for (i=n; i>=1; i--) {
+     sum = b[i];
+     for (j=i+1; j<=n; j++) sum -= a[i][j] * b[j];
+     b[i] = sum / a[i][i];
+   }
 }
                                                                                 
 /*---------------------------------------------------- complexFFT
@@ -273,27 +283,31 @@ static void lubksb(D **a, L n, L *indx, D *b)
 - two successive transforms give the original data
 */
 
-L op_complexFFT(void)
+P op_complexFFT(void)
 {
-L N2, logN2, dir, j;
-D f, *data;
+  P N2, logN2, j;
+  LBIG dir;
+  D f, *data;
 
-if (o_2 < FLOORopds) return(OPDS_UNF);
-if ( (TAG(o_2) != (ARRAY | DOUBLETYPE)) || (CLASS(o_1) != NUM))
-   return(OPD_CLA);
-N2 = ARRAY_SIZE(o_2);
-logN2 = 0; while ((N2 >>= 1) > 0) logN2 += 1;
-if ((N2 = ARRAY_SIZE(o_2)) != (1 << logN2)) return(RNG_CHK);
-if (!VALUE(o_1,&dir)) return(UNDF_VAL);
-if (fabs(dir) != 1) return(RNG_CHK);
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if ((TAG(o_2) != (ARRAY | DOUBLETYPE)) || (CLASS(o_1) != NUM))
+    return OPD_CLA;
+  N2 = ARRAY_SIZE(o_2);
+  logN2 = 0; 
+  while ((N2 >>= 1) > 0) logN2 += 1;
 
-four1((data = ((D *)VALUE_BASE(o_2)))-1,N2>>1,dir);
-if (dir == -1)
-   {  f = 2.0 / N2;
-      for (j=0; j<N2; j++) data[j] *= f;
-   }
-FREEopds = o_1;
-return(OK);
+  if ((N2 = ARRAY_SIZE(o_2)) != (1 << logN2)) return RNG_CHK;
+  if (!VALUE(o_1,&dir)) return UNDF_VAL;
+  if (imaxabs(dir) != 1) return RNG_CHK;
+
+  four1((data = ((D *)VALUE_BASE(o_2)))-1,N2>>1,dir);
+  if (dir == -1) {
+    f = 2.0 / N2;
+    for (j=0; j<N2; j++) data[j] *= f;
+  }
+
+  FREEopds = o_1;
+  return OK;
 }
 
 /*---------------------------------------------------- realFFT
@@ -311,27 +325,30 @@ return(OK);
 - successive forward and inverse transforms yield the original data
 */
 
-L op_realFFT(void)
+P op_realFFT(void)
 {
-L N, logN, dir, j;
-D f, *data;
+  P N, logN, j;
+  LBIG dir;
+  D f, *data;
 
-if (o_2 < FLOORopds) return(OPDS_UNF);
-if ( (TAG(o_2) != (ARRAY | DOUBLETYPE)) || (CLASS(o_1) != NUM))
-   return(OPD_CLA);
-N = ARRAY_SIZE(o_2);
-logN = 0; while ((N >>= 1) > 0) logN += 1;
-if ((N = ARRAY_SIZE(o_2)) != (1 << logN)) return(RNG_CHK);
-if (!VALUE(o_1,&dir)) return(UNDF_VAL);
-if (fabs(dir) != 1) return(RNG_CHK);
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if ((TAG(o_2) != (ARRAY | DOUBLETYPE)) || (CLASS(o_1) != NUM))
+    return OPD_CLA;
+  N = ARRAY_SIZE(o_2);
+  logN = 0; 
+  while ((N >>= 1) > 0) logN += 1;
+  if ((N = ARRAY_SIZE(o_2)) != (1 << logN)) return RNG_CHK;
+  if (!VALUE(o_1,&dir)) return UNDF_VAL;
+  if (imaxabs(dir) != 1) return RNG_CHK;
 
-realft((data = ((D *)VALUE_BASE(o_2)))-1,N,dir);
-if (dir == -1)
-   {  f = 2.0 / N;
-      for (j=0; j<N; j++) data[j] *= f;
-   }
-FREEopds = o_1;
-return(OK);
+  realft((data = ((D *)VALUE_BASE(o_2)))-1,N,dir);
+  if (dir == -1) {
+    f = 2.0 / N;
+    for (j=0; j<N; j++) data[j] *= f;
+  }
+
+  FREEopds = o_1;
+  return OK;
 }
 
 /*---------------------------------------------------- sineFFT
@@ -346,27 +363,30 @@ return(OK);
 - dir defines the transform: 1 - forward, -1 - inverse
 */
 
-L op_sineFFT(void)
+P op_sineFFT(void)
 {
-L N, logN, j, dir;
-D f, *data;
+  P N, logN, j;
+  LBIG dir;
+  D f, *data;
 
-if (o_2 < FLOORopds) return(OPDS_UNF);
-if ( (TAG(o_2) != (ARRAY | DOUBLETYPE)) || (CLASS(o_1) != NUM))
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if ((TAG(o_2) != (ARRAY | DOUBLETYPE)) || (CLASS(o_1) != NUM))
     return (OPD_CLA); 
-N = ARRAY_SIZE(o_2);
-logN = 0; while ((N >>= 1) > 0) logN += 1;
-if ((N = ARRAY_SIZE(o_2)) != (1 << logN)) return(RNG_CHK);
-if (!VALUE(o_1,&dir)) return(UNDF_VAL);
-if (fabs(dir) != 1) return(RNG_CHK);
+  N = ARRAY_SIZE(o_2);
+  logN = 0; 
+  while ((N >>= 1) > 0) logN += 1;
+  if ((N = ARRAY_SIZE(o_2)) != (1 << logN)) return RNG_CHK;
+  if (!VALUE(o_1,&dir)) return UNDF_VAL;
+  if (imaxabs(dir) != 1) return RNG_CHK;
 
-sinft((data = ((D *)VALUE_BASE(o_2)))-1,N);
-if (dir == -1)
-   {  f = 2.0 / N;
-      for (j=0; j<N; j++) data[j] *= f;
-   }
-FREEopds = o_1;
-return(OK);
+  sinft((data = ((D *)VALUE_BASE(o_2)))-1,N);
+  if (dir == -1) {
+    f = 2.0 / N;
+    for (j=0; j<N; j++) data[j] *= f;
+  }
+
+  FREEopds = o_1;
+  return OK;
 }
 
 /*-------------------------------------------------------- decompLU
@@ -382,41 +402,43 @@ return(OK);
 - returns false upon detecting singular matrix
 */
 
-L op_decompLU(void)
+P op_decompLU(void)
 {
+  P N, k;
+  LBIG *idxp;
+  B *fp;
+  D **ap, *vec, d;
 
-L N, k, *idxp;
-B *fp;
-D **ap, *vec, d;
-
-if (o_2 < FLOORopds) return(OPDS_UNF);
-if ( CLASS(o_2) != LIST) return(OPD_CLA);
-N = (LIST_CEIL(o_2) - VALUE_BASE(o_2)) / FRAMEBYTES;
-if (N<=0) return(RNG_CHK);
-if (FREEvm + DALIGN(N * sizeof(D *)) + N * sizeof(D) > CEILvm) return(VM_OVF);
-
-
-ap = (D **)FREEvm; fp = (B *)VALUE_BASE(o_2);
-for (k=0; k<N; k++)
-  { if (TAG(fp) != (ARRAY | DOUBLETYPE)) return(OPD_ERR);
-    if (ARRAY_SIZE(fp) != N) return(RNG_CHK);
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_2) != LIST) return OPD_CLA;
+  N = (LIST_CEIL(o_2) - VALUE_BASE(o_2)) / FRAMEBYTES;
+  if (N<=0) return RNG_CHK;
+  if (FREEvm + DALIGN(N * sizeof(D *)) + N * sizeof(D) > CEILvm) 
+    return VM_OVF;
+  
+  ap = (D **)FREEvm; 
+  fp = (B *)VALUE_BASE(o_2);
+  for (k=0; k<N; k++) { 
+    if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
+    if (ARRAY_SIZE(fp) != N) return RNG_CHK;
     *(ap++) = ((D *)VALUE_BASE(fp)) - 1;
     fp += FRAMEBYTES;
   }
-vec = (D *)DALIGN(ap);
-if (TAG(o_1) != (ARRAY | LONGTYPE)) return(OPD_ERR);
-if (ARRAY_SIZE(o_1) != N) return(RNG_CHK);
-idxp = (L *)VALUE_BASE(o_1);
+  vec = (D *)DALIGN(ap);
+  if (TAG(o_1) != (ARRAY | LONGBIGTYPE)) return OPD_ERR;
+  if (ARRAY_SIZE(o_1) != N) return RNG_CHK;
+  idxp = (LBIG *)VALUE_BASE(o_1);
 
-if (ludcmp(((D **)FREEvm)-1, N, idxp-1, &d, vec-1))
-   { TAG(o_2) = NUM | DOUBLETYPE;
-     *((D *)(NUM_VAL(o_2))) = d;
-     TAG(o_1) = BOOL; BOOL_VAL(o_1) = TRUE;
-   } else
-   { TAG(o_2) = BOOL; BOOL_VAL(o_2) = FALSE;
-     FREEopds = o_1;
-   }
-   return(OK);
+  if (ludcmp(((D **)FREEvm)-1, N, idxp-1, &d, vec-1)) { 
+    TAG(o_2) = NUM | DOUBLETYPE;
+    *((D *)(NUM_VAL(o_2))) = d;
+    TAG(o_1) = BOOL; BOOL_VAL(o_1) = TRUE;
+  } 
+  else {
+    TAG(o_2) = BOOL; BOOL_VAL(o_2) = FALSE;
+    FREEopds = o_1;
+  }
+  return OK;
 }
 
 /*-------------------------------------------------------- backsubLU
@@ -430,36 +452,37 @@ if (ludcmp(((D **)FREEvm)-1, N, idxp-1, &d, vec-1))
 
 */
 
-L op_backsubLU(void)
+P op_backsubLU(void)
 {
+  P N, k;
+  LBIG *idxp;
+  B *fp;
+  D **ap, *bp;
 
-L N, k, *idxp;
-B *fp;
-D **ap, *bp;
+  if (o_3 < FLOORopds) return OPDS_UNF;
+  if ( CLASS(o_3) != LIST) return OPD_CLA;
+  N = (LIST_CEIL(o_3) - VALUE_BASE(o_3)) / FRAMEBYTES;
+  if (N<=0) return RNG_CHK;
+  if (FREEvm + N * sizeof(D *) > CEILvm) return VM_OVF;
 
-if (o_3 < FLOORopds) return(OPDS_UNF);
-if ( CLASS(o_3) != LIST) return(OPD_CLA);
-N = (LIST_CEIL(o_3) - VALUE_BASE(o_3)) / FRAMEBYTES;
-if (N<=0) return(RNG_CHK);
-if (FREEvm + N * sizeof(D *) > CEILvm) return(VM_OVF);
-ap = (D **)FREEvm; fp = (B *)VALUE_BASE(o_3);
-for (k=0; k<N; k++)
-  { if (TAG(fp) != (ARRAY | DOUBLETYPE)) return(OPD_ERR);
-    if (ARRAY_SIZE(fp) != N) return(RNG_CHK);
+  ap = (D **)FREEvm; fp = (B *)VALUE_BASE(o_3);
+  for (k=0; k<N; k++) { 
+    if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
+    if (ARRAY_SIZE(fp) != N) return RNG_CHK;
     *(ap++) = ((D *)VALUE_BASE(fp)) - 1;
     fp += FRAMEBYTES;
   }
-if (TAG(o_2) != (ARRAY | LONGTYPE)) return(OPD_ERR);
-if (ARRAY_SIZE(o_2) != N) return(RNG_CHK);
-idxp = (L *)VALUE_BASE(o_2);
-if (TAG(o_1) != (ARRAY | DOUBLETYPE)) return(OPD_ERR);
-if (ARRAY_SIZE(o_1) != N) return(RNG_CHK);
-bp = (D *)VALUE_BASE(o_1);
+  if (TAG(o_2) != (ARRAY | LONGBIGTYPE)) return OPD_ERR;
+  if (ARRAY_SIZE(o_2) != N) return RNG_CHK;
+  idxp = (LBIG *)VALUE_BASE(o_2);
+  if (TAG(o_1) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
+  if (ARRAY_SIZE(o_1) != N) return RNG_CHK;
+  bp = (D *)VALUE_BASE(o_1);
 
-lubksb(((D **)FREEvm)-1, N, idxp-1, bp-1);
-moveframe(o_1,o_3);
-FREEopds = o_2;
-return(OK);
+  lubksb(((D **)FREEvm)-1, N, idxp-1, bp-1);
+  moveframe(o_1,o_3);
+  FREEopds = o_2;
+  return OK;
 }
 
 /*-------------------------------------------------------- invertLU
@@ -474,57 +497,61 @@ return(OK);
 - returns false upon detecting singular matrix
 */
 
-L op_invertLU(void)
+P op_invertLU(void)
 {
+  P N, k, i, j;
+  LBIG *idxp;
+  B *fp;
+  D **ap, **a1p, *vec, d;
 
-L N, k, *idxp, i, j;
-B *fp;
-D **ap, **a1p, *vec, d;
+  if (o_3 < FLOORopds) return OPDS_UNF;
+  if ( CLASS(o_3) != LIST) return OPD_CLA;
+  N = (LIST_CEIL(o_3) - VALUE_BASE(o_3)) / FRAMEBYTES;
+  if (N<=0) return RNG_CHK;
+  if ( CLASS(o_1) != LIST) return OPD_CLA;
+  if (N != (LIST_CEIL(o_1) - VALUE_BASE(o_1)) / FRAMEBYTES) return RNG_CHK;
+  if (FREEvm + DALIGN(N * (2 * sizeof(D *)) + N * sizeof(D)) > CEILvm)
+    return VM_OVF;
 
-if (o_3 < FLOORopds) return(OPDS_UNF);
-if ( CLASS(o_3) != LIST) return(OPD_CLA);
-N = (LIST_CEIL(o_3) - VALUE_BASE(o_3)) / FRAMEBYTES;
-if (N<=0) return(RNG_CHK);
-if ( CLASS(o_1) != LIST) return(OPD_CLA);
-if (N != (LIST_CEIL(o_1) - VALUE_BASE(o_1)) / FRAMEBYTES) return(RNG_CHK);
-
-if (FREEvm + DALIGN(N * (2 * sizeof(D *)) + N * sizeof(D)) > CEILvm)
-    return(VM_OVF);
-ap = (D **)FREEvm; fp = (B *)VALUE_BASE(o_3);
-for (k=0; k<N; k++)
-  { if (TAG(fp) != (ARRAY | DOUBLETYPE)) return(OPD_ERR);
-    if (ARRAY_SIZE(fp) != N) return(RNG_CHK);
+  ap = (D **)FREEvm; 
+  fp = (B *)VALUE_BASE(o_3);
+  for (k=0; k<N; k++) { if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
+    if (ARRAY_SIZE(fp) != N) return RNG_CHK;
     *(ap++) = ((D *)VALUE_BASE(fp)) - 1;
     fp += FRAMEBYTES;
   }
-a1p = ap; fp = (B *)VALUE_BASE(o_1);
-for (k=0; k<N; k++)
-  { if (TAG(fp) != (ARRAY | DOUBLETYPE)) return(OPD_ERR);
-    if (ARRAY_SIZE(fp) != N) return(RNG_CHK);
+
+  a1p = ap; 
+  fp = (B *)VALUE_BASE(o_1);
+  for (k=0; k<N; k++) {
+    if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
+    if (ARRAY_SIZE(fp) != N) return RNG_CHK;
     *(ap++) = ((D *)VALUE_BASE(fp)) - 1;
     fp += FRAMEBYTES;
   }
-vec = (D *)DALIGN(ap)-1;
-if (TAG(o_2) != (ARRAY | LONGTYPE)) return(OPD_ERR);
-if (ARRAY_SIZE(o_2) != N) return(RNG_CHK);
-idxp = (L *)VALUE_BASE(o_2)-1;
 
-if (ludcmp(((D **)FREEvm)-1, N, idxp, &d, vec))
-   { for (j=1; j<=N; j++)
-       { for (i=1; i<=N; i++) vec[i] = 0.0;
-         vec[j] = 1.0;
-         lubksb(((D **)FREEvm)-1, N, idxp, vec);
-         for (i=1; i<=N; i++)
-            (a1p-1)[i][j] = vec[i];
-       }
-     moveframe(o_1,o_3);
-     TAG(o_2) = BOOL; BOOL_VAL(o_2) = TRUE;
-     FREEopds = o_1;
-   } else
-   { TAG(o_3) = BOOL; BOOL_VAL(o_3) = FALSE;
-     FREEopds = o_2;
-   }
-   return(OK);
+  vec = (D *)DALIGN(ap)-1;
+  if (TAG(o_2) != (ARRAY | LONGBIGTYPE)) return OPD_ERR;
+  if (ARRAY_SIZE(o_2) != N) return RNG_CHK;
+  idxp = (LBIG *)VALUE_BASE(o_2)-1;
+  
+  if (ludcmp(((D **)FREEvm)-1, N, idxp, &d, vec)) {
+    for (j=1; j<=N; j++) {
+      for (i=1; i<=N; i++) vec[i] = 0.0;
+      vec[j] = 1.0;
+      lubksb(((D **)FREEvm)-1, N, idxp, vec);
+      for (i=1; i<=N; i++)
+        (a1p-1)[i][j] = vec[i];
+    }
+    moveframe(o_1,o_3);
+    TAG(o_2) = BOOL; BOOL_VAL(o_2) = TRUE;
+    FREEopds = o_1;
+  }
+  else {
+    TAG(o_3) = BOOL; BOOL_VAL(o_3) = FALSE;
+    FREEopds = o_2;
+  }
+  return OK;
 }
 
 /*----------------------------------------------- matmul
@@ -538,100 +565,116 @@ if (ludcmp(((D **)FREEvm)-1, N, idxp, &d, vec))
 
 #if ENABLE_THREADS
 typedef struct {
-  L Ncolc, Ncola;
+  P Ncolc, Ncola;
   D *restrict *restrict ap, 
 	*restrict *restrict bp, 
 	*restrict *restrict cp;
+  UP perthread;
+  UP leftover;
 } matmult;
 
-L thread_matmul(UL id __attribute__ ((__unused__)),
-                const void* global, void* local) {
-  L i = *(L*) local;
+P thread_matmul(UP id, const void* global, 
+                void* local __attribute__ ((__unused__))) {
   const matmult* restrict m = (const matmult*) global;
-  L j, k;
-  D sum;
-  for (j = 0; j < m->Ncolc; j++) {
-	sum = 0.0;
-	for (k = 0; k < m->Ncola; k++)
-	  sum += m->ap[i][k] * m->bp[k][j];
-	m->cp[i][j] = sum;
-  }
+  UP n = m->perthread + (thread_max() == id ? m->leftover : 0);
+  P i_ = m->perthread*id;
+  P i, j;
+
+  for (i = i_; i < i_ + n; i++)
+    for (j = 0; j < m->Ncolc; j++)
+      MATMUL_INNER(m->Ncola, m->ap, m->bp, m->cp);
+  
   return OK;
 }
 #endif
 
-L op_matmul(void)
+P op_matmul(void)
 {
+  P Nrowa, Nrowb, Nrowc, Ncola , Ncolb, Ncolc, i, j, k;
+  B *fp;
+  D **p, **ap, **bp, **cp;
+#if ENABLE_THREADS
+  UP nways;
+#endif
 
-L Nrowa, Nrowb, Nrowc, Ncola , Ncolb, Ncolc, i, j, k;
-B *fp;
-D **p, **ap, **bp, **cp, sum;
+  if (o_3 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_3) != LIST) return OPD_CLA;
+  if (ATTR(o_3) & READONLY) return OPD_ATR;
+  Nrowc = (LIST_CEIL(o_3) - VALUE_BASE(o_3)) / FRAMEBYTES;
+  if ( CLASS(o_2) != LIST) return OPD_CLA;
+  Nrowa = (LIST_CEIL(o_2) - VALUE_BASE(o_2)) / FRAMEBYTES;
+  if ( CLASS(o_1) != LIST) return OPD_CLA;
+  Nrowb = (LIST_CEIL(o_1) - VALUE_BASE(o_1)) / FRAMEBYTES;
 
-if (o_3 < FLOORopds) return(OPDS_UNF);
-if ( CLASS(o_3) != LIST) return(OPD_CLA);
-if (ATTR(o_3) & READONLY) return(OPD_ATR);
-Nrowc = (LIST_CEIL(o_3) - VALUE_BASE(o_3)) / FRAMEBYTES;
-if ( CLASS(o_2) != LIST) return(OPD_CLA);
-Nrowa = (LIST_CEIL(o_2) - VALUE_BASE(o_2)) / FRAMEBYTES;
-if ( CLASS(o_1) != LIST) return(OPD_CLA);
-Nrowb = (LIST_CEIL(o_1) - VALUE_BASE(o_1)) / FRAMEBYTES;
-
-if ((FREEvm + (Nrowc + Nrowa + Nrowb) *  sizeof(D *)) > CEILvm) return(VM_OVF);
-cp = p = (D **)FREEvm;  fp = (B *)VALUE_BASE(o_3); Ncolc = 0;
-for (k=0; k<Nrowc; k++)
-  { if (TAG(fp) != (ARRAY | DOUBLETYPE)) return(OPD_ERR);
-    if (Ncolc == 0)
-       { Ncolc = ARRAY_SIZE(fp); }
-       else
-       { if (ARRAY_SIZE(fp) != Ncolc) return(RNG_CHK); }
+  if ((FREEvm + (Nrowc + Nrowa + Nrowb) *  sizeof(D *)) > CEILvm) 
+    return VM_OVF;
+  cp = p = (D **)FREEvm;  
+  fp = (B *)VALUE_BASE(o_3); 
+  Ncolc = 0;
+  for (k=0; k<Nrowc; k++) {
+    if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
+    if (Ncolc == 0) Ncolc = ARRAY_SIZE(fp);
+    else if (ARRAY_SIZE(fp) != Ncolc) return RNG_CHK;
     *(p++) = ((D *)VALUE_BASE(fp));
     fp += FRAMEBYTES;
   }
-ap = p; fp = (B *)VALUE_BASE(o_2); Ncola = 0;
-for (k=0; k<Nrowa; k++)
-  { if (TAG(fp) != (ARRAY | DOUBLETYPE)) return(OPD_ERR);
-    if (Ncola == 0)
-       { Ncola = ARRAY_SIZE(fp); }
-       else
-       { if (ARRAY_SIZE(fp) != Ncola) return(RNG_CHK); }
+
+  ap = p; 
+  fp = (B *)VALUE_BASE(o_2); 
+  Ncola = 0;
+  for (k=0; k<Nrowa; k++) { 
+    if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
+    if (Ncola == 0) Ncola = ARRAY_SIZE(fp);
+    else if (ARRAY_SIZE(fp) != Ncola) return RNG_CHK;
     *(p++) = ((D *)VALUE_BASE(fp));
     fp += FRAMEBYTES;
-  }  
-bp = p; fp = (B *)VALUE_BASE(o_1); Ncolb = 0;
-for (k=0; k<Nrowb; k++)
-  { if (TAG(fp) != (ARRAY | DOUBLETYPE)) return(OPD_ERR);
-    if (Ncolb == 0)
-       { Ncolb = ARRAY_SIZE(fp); }
-       else
-       { if (ARRAY_SIZE(fp) != Ncolb) return(RNG_CHK); }
+  }
+
+  bp = p; 
+  fp = (B *)VALUE_BASE(o_1); 
+  Ncolb = 0;
+  for (k=0; k<Nrowb; k++) { 
+    if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
+    if (Ncolb == 0) Ncolb = ARRAY_SIZE(fp);
+    else if (ARRAY_SIZE(fp) != Ncolb) return RNG_CHK;
     *(p++) = ((D *)VALUE_BASE(fp));
     fp += FRAMEBYTES;
-  }  
+  }
   
- if ((Ncola != Nrowb) || (Nrowa != Nrowc) || (Ncolb != Ncolc)) return(RNG_CHK);
- 
- if (thread_num() == 1 || serialized) {
-   for (i=0; i<Nrowc; i++)
-	 for (j=0; j<Ncolc; j++) { 
-	   sum = 0.0;
-	   for (k=0; k<Ncola; k++) sum += ap[i][k] * bp[k][j];
-	   cp[i][j] = sum;
-	 }
- }
+  if ((Ncola != Nrowb) || (Nrowa != Nrowc) || (Ncolb != Ncolc)) return RNG_CHK;
+
 #if ENABLE_THREADS
- else {
-   matmult m;
-   m.Ncolc = Ncolc; m.Ncola = Ncola;
-   m.ap = ap; m.bp = bp; m.cp = cp;
-   threads_do_pool(Nrowc, thread_matmul, &m);
- }
+  if (thread_num() > 1 && ! serialized && Nrowc > 1) {
+    nways = Nrowc*Ncolc*Ncola/(THREADMUL << ROLLBITS)
+      + ((Nrowc*Ncolc*Ncola%(THREADMUL << ROLLBITS)) ? 1: 0);
+    if (nways > Nrowc) nways = Nrowc;
+  }
+  else nways = 1;
+  
+  if (nways == 1) {
+#endif
+    for (i=0; i<Nrowc; i++)
+      for (j=0; j<Ncolc; j++)
+        MATMUL_INNER(Ncola, ap, bp, cp);
+#if ENABLE_THREADS
+  }
+  else {
+    matmult m;
+    if (nways > thread_num()) nways = thread_num();
+    m.perthread = Nrowc / nways;
+    m.leftover = Nrowc % nways;
+    
+    m.Ncolc = Ncolc; m.Ncola = Ncola;
+    m.ap = ap; m.bp = bp; m.cp = cp;
+    threads_do(nways, thread_matmul, &m);
+  }
 #endif //ENABLE_THREADS
    
         
- FREEopds = o_2;
- return(OK);
- }
- 
+  FREEopds = o_2;
+  return OK;
+}
+
 /*----------------------------------------------- mattranspose
    b a | b           a* -> b
 
@@ -643,73 +686,85 @@ for (k=0; k<Nrowb; k++)
 
 #if ENABLE_THREADS
 typedef struct {
-    L Ncola;
-    UL perthread;
-    UL leftover;
-    D *restrict *restrict ap, *restrict *restrict bp;
+  P Ncola;
+  UP perthread;
+  UP leftover;
+  D *restrict *restrict ap, *restrict *restrict bp;
 } mattransposet;
 
-L thread_mattranspose(UL id,
+P thread_mattranspose(UP id,
                       const void* global,
                       void* local __attribute__ ((__unused__))) {
   const mattransposet* restrict m = (const mattransposet*) global;
-  UL n = m->perthread + (thread_max() == id ? m->leftover : 0);
-  const UL i_ = m->perthread*id;
-  UL i, j;
+  UP n = m->perthread + (thread_max() == id ? m->leftover : 0);
+  const UP i_ = m->perthread*id;
+  UP i;
   
-  for (i = i_; i < i_ + n; ++i) {
-      for (j = 0; j < m->Ncola; j++)
-          m->bp[j][i] = m->ap[i][j];
-  }
+  for (i = i_; i < i_ + n; ++i) 
+    MATTRANSPOSE_INNER(m->Ncola, m->ap, m->bp);
+  
   return OK;
 }
 #endif //ENABLE_THREADS
 
-L op_mattranspose(void)
+P op_mattranspose(void)
 {
+  P Nrowa, Nrowb, Ncola , Ncolb, i, k;
+  B *fp;
+  D **p, **ap, **bp;
+#if ENABLE_THREADS
+  UP nways;
+#endif //ENABLE_THREADS
 
-L Nrowa, Nrowb, Ncola , Ncolb, i, j, k;
-B *fp;
-D **p, **ap, **bp;
-
-if (o_2 < FLOORopds) return(OPDS_UNF);
-if ( CLASS(o_2) != LIST) return(OPD_CLA);
-if (ATTR(o_2) & READONLY) return(OPD_ATR);
-Nrowb = (LIST_CEIL(o_2) - VALUE_BASE(o_2)) / FRAMEBYTES;
-if ( CLASS(o_1) != LIST) return(OPD_CLA);
-Nrowa = (LIST_CEIL(o_1) - VALUE_BASE(o_1)) / FRAMEBYTES;
-
-if ((FREEvm + (Nrowa + Nrowb) *  sizeof(D *)) > CEILvm) return(VM_OVF);
-bp = p = (D **)FREEvm;  fp = (B *)VALUE_BASE(o_2); Ncolb = 0;
-for (k=0; k<Nrowb; k++)
-  { if (TAG(fp) != (ARRAY | DOUBLETYPE)) return(OPD_ERR);
-    if (Ncolb == 0)
-       { Ncolb = ARRAY_SIZE(fp); }
-       else
-       { if (ARRAY_SIZE(fp) != Ncolb) return(RNG_CHK); }
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_2) != LIST) return OPD_CLA;
+  if (ATTR(o_2) & READONLY) return OPD_ATR;
+  Nrowb = (LIST_CEIL(o_2) - VALUE_BASE(o_2)) / FRAMEBYTES;
+  if (CLASS(o_1) != LIST) return OPD_CLA;
+  Nrowa = (LIST_CEIL(o_1) - VALUE_BASE(o_1)) / FRAMEBYTES;
+  if ((FREEvm + (Nrowa + Nrowb) *  sizeof(D *)) > CEILvm) return VM_OVF;
+  
+  bp = p = (D **)FREEvm;  
+  fp = (B *)VALUE_BASE(o_2); 
+  Ncolb = 0;
+  for (k=0; k<Nrowb; k++) {
+    if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
+    if (Ncolb == 0) Ncolb = ARRAY_SIZE(fp);
+    else if (ARRAY_SIZE(fp) != Ncolb) return RNG_CHK;
     *(p++) = ((D *)VALUE_BASE(fp));
     fp += FRAMEBYTES;
   }
-ap = p; fp = (B *)VALUE_BASE(o_1); Ncola = 0;
-for (k=0; k<Nrowa; k++)
-  { if (TAG(fp) != (ARRAY | DOUBLETYPE)) return(OPD_ERR);
-    if (Ncola == 0)
-       { Ncola = ARRAY_SIZE(fp); }
-       else
-       { if (ARRAY_SIZE(fp) != Ncola) return(RNG_CHK); }
+
+  ap = p; 
+  fp = (B *)VALUE_BASE(o_1); 
+  Ncola = 0;
+  for (k=0; k<Nrowa; k++) { 
+    if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
+    if (Ncola == 0)  Ncola = ARRAY_SIZE(fp);
+    else if (ARRAY_SIZE(fp) != Ncola) return RNG_CHK;
     *(p++) = ((D *)VALUE_BASE(fp));
     fp += FRAMEBYTES;
-  }  
+  }
   
- if ((Ncola != Nrowb) || (Nrowa != Ncolb)) return(RNG_CHK);
+ if ((Ncola != Nrowb) || (Nrowa != Ncolb)) return RNG_CHK;
  
- if (thread_num() == 1 || serialized || Nrowa == 1 || Ncola < THREADMUL*8)
-   for (i=0; i<Nrowa; i++)
-	 for (j=0; j<Ncola; j++) bp[j][i] = ap[i][j];
 #if ENABLE_THREADS
+ if (thread_num() > 1 && ! serialized && Nrowa > 1) {
+   nways = Nrowa*Ncola/(THREADMUL << ROLLBITS)
+     + ((Nrowa*Ncola%(THREADMUL << ROLLBITS)) ? 1 : 0);
+   if (nways > Nrowa) nways = Nrowa;
+ }
+ else nways = 1;
+
+ if (nways == 1) {
+#endif //ENABLE_THREADS
+   for (i=0; i<Nrowa; i++)
+     MATTRANSPOSE_INNER(Ncola, ap, bp);
+#if ENABLE_THREADS
+ }
  else {
    mattransposet m;
-   UL nways = (Nrowa > thread_num()) ? thread_num() : Nrowa;
+   if (nways > thread_num()) nways = thread_num();
    m.perthread = Nrowa / nways;
    m.leftover = Nrowa % nways;
    m.Ncola = Ncola;
@@ -717,10 +772,10 @@ for (k=0; k<Nrowa; k++)
    threads_do(nways, thread_mattranspose, &m);
  }
 #endif //ENABLE_THREADS
-        
+ 
  FREEopds = o_1;
- return(OK);
- }
+ return OK;
+}
 
 /*----------------------------------------------- matvecmul
    c a b | c          a * b -> c
@@ -733,86 +788,90 @@ for (k=0; k<Nrowa; k++)
 
 #if ENABLE_THREADS
 typedef struct {
-    D *restrict *restrict ap,
-        *restrict bp,
-        *restrict cp;
-    UL perthread;
-    UL leftover;
-    L Ncola;
+  D *restrict *restrict ap,
+    *restrict bp,
+    *restrict cp;
+  UP perthread;
+  UP leftover;
+  P Ncola;
 } matvecmult;
 
-L thread_matvecmul(UL id,
+P thread_matvecmul(UP id,
                    const void* global,
                    void* local __attribute__ ((__unused__))) {
   const matvecmult *restrict m = (const matvecmult*) global;
-  const UL n = m->perthread + (thread_max() == id ? m->leftover : 0);
-  const UL i_ = m->perthread * id;
-  UL i;
-  UL k;
-  D sum;
+  const UP n = m->perthread + (thread_max() == id ? m->leftover : 0);
+  const UP i_ = m->perthread * id;
+  UP i;
   
-  for (i = i_;  i < i_ + n; ++i) {
-      sum = 0.0;
-      for (k = 0; k < m->Ncola; ++k)
-          sum += m->ap[i][k] * m->bp[k];
-      m->cp[i] = sum;
-  }
+  for (i = i_;  i < i_ + n; ++i)
+    MATVECMUL_INNER(m->Ncola, m->ap, m->bp, m->cp);
   
   return OK;
 }
 #endif //ENABLE_THREADS
 
-L op_matvecmul(void)
+P op_matvecmul(void)
 {
+  P Nrowa, Nrowb, Nrowc, Ncola, i, k;
+  B *fp;
+  D **p, **ap, *bp, *cp;
+#if ENABLE_THREADS
+  UP nways;
+#endif //ENABLE_THREADS
 
-L Nrowa, Nrowb, Nrowc, Ncola, i, k;
-B *fp;
-D **p, **ap, *bp, *cp, sum;
+  if (o_3 < FLOORopds) return OPDS_UNF;
+  if ( CLASS(o_3) != ARRAY) return OPD_CLA;
+  if (ATTR(o_3) & READONLY) return OPD_ATR;
+  Nrowc = ARRAY_SIZE(o_3);
+  if ( CLASS(o_2) != LIST) return OPD_CLA;
+  Nrowa = (LIST_CEIL(o_2) - VALUE_BASE(o_2)) / FRAMEBYTES;
+  if ( CLASS(o_1) != ARRAY) return OPD_CLA;
+  Nrowb = ARRAY_SIZE(o_1);
+  if ((FREEvm + Nrowa *  sizeof(D *)) > CEILvm) return VM_OVF;
+  p = (D **)FREEvm;
 
-if (o_3 < FLOORopds) return(OPDS_UNF);
-if ( CLASS(o_3) != ARRAY) return(OPD_CLA);
-if (ATTR(o_3) & READONLY) return(OPD_ATR);
-Nrowc = ARRAY_SIZE(o_3);
-if ( CLASS(o_2) != LIST) return(OPD_CLA);
-Nrowa = (LIST_CEIL(o_2) - VALUE_BASE(o_2)) / FRAMEBYTES;
-if ( CLASS(o_1) != ARRAY) return(OPD_CLA);
-Nrowb = ARRAY_SIZE(o_1);
-
-if ((FREEvm + Nrowa *  sizeof(D *)) > CEILvm) return(VM_OVF);
-p = (D **)FREEvm;
-ap = p; fp = (B *)VALUE_BASE(o_2); Ncola = 0;
-for (k=0; k<Nrowa; k++)
-  { if (TAG(fp) != (ARRAY | DOUBLETYPE)) return(OPD_ERR);
-    if (Ncola == 0)
-       { Ncola = ARRAY_SIZE(fp); }
-       else
-       { if (ARRAY_SIZE(fp) != Ncola) return(RNG_CHK); }
+  ap = p; 
+  fp = (B *)VALUE_BASE(o_2); 
+  Ncola = 0;
+  for (k=0; k<Nrowa; k++)  {
+    if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
+    if (Ncola == 0) Ncola = ARRAY_SIZE(fp);
+    else if (ARRAY_SIZE(fp) != Ncola) return RNG_CHK;
     *(p++) = ((D *)VALUE_BASE(fp));
     fp += FRAMEBYTES;
-  }  
+  }
   
- if ((Ncola != Nrowb) || (Nrowa != Nrowc)) return(RNG_CHK);
- 
- bp = (D*) VALUE_BASE(o_1); cp = (D*) VALUE_BASE(o_3);
- if (thread_num() == 1 || serialized || Nrowc == 1 || Ncola < THREADMUL*8)
-   for (i=0; i<Nrowc; i++) { 
-	 sum = 0.0;
-     for (k=0; k<Ncola; k++) sum += ap[i][k] * bp[k];
-     cp[i] = sum;
-   }
+  if ((Ncola != Nrowb) || (Nrowa != Nrowc)) return RNG_CHK;
+  bp = (D*) VALUE_BASE(o_1); cp = (D*) VALUE_BASE(o_3);
+
 #if ENABLE_THREADS
- else {
-   matvecmult m;
-   UL nways = (Nrowc > thread_num()) ? thread_num() : Ncola;
-   m.perthread = Nrowc / nways;
-   m.leftover = Nrowc % nways;
-   m.Ncola = Ncola;
-   m.ap = ap; m.bp = bp; m.cp = cp;
-   threads_do(nways, thread_matvecmul, &m);
- }
-#endif
-        
- FREEopds = o_2;
- return(OK);
- }
+  if (thread_num() > 1 && ! serialized && Nrowc > 1) {
+    nways = Nrowc*Ncola/(THREADMUL << ROLLBITS)
+      + ((Nrowc*Ncola % (THREADMUL << ROLLBITS)) ? 1 : 0);
+    if (nways > Nrowc) nways = Nrowc;
+  }
+  else nways = 1;
+
+  if (nways == 1) {
+#endif //ENABLE_THREADS
+    for (i=0; i<Nrowc; i++) 
+      MATVECMUL_INNER(Ncola, ap, bp, cp);
+#if ENABLE_THREADS
+  }
+  else {
+    matvecmult m;
+    if (nways > thread_num()) nways = thread_num();
+    m.perthread = Nrowc / nways;
+    m.leftover = Nrowc % nways;
+    
+    m.Ncola = Ncola;
+    m.ap = ap; m.bp = bp; m.cp = cp;
+    threads_do(nways, thread_matvecmul, &m);
+  }
+#endif //ENABLE_THREADS
+  
+  FREEopds = o_2;
+  return OK;
+}
  

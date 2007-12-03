@@ -5,10 +5,10 @@
 
 DLL_SCOPE int xsocket;
 
-#if ! X_DISPLAY_MISSING
+#if ! DM_X_DISPLAY_MISSING
 
-#define MAXDVTWINDOWS  ((L)20)
-#define MAXCACHEDFONTS ((L)10)
+#define MAXDVTWINDOWS  ((P)20)
+#define MAXCACHEDFONTS ((P)10)
 
 DLL_SCOPE Display *dvtdisplay;
 DLL_SCOPE B displayname[80];
@@ -16,9 +16,9 @@ DLL_SCOPE Screen *dvtscreen;
 DLL_SCOPE Window dvtrootwindow;
 DLL_SCOPE XWindowAttributes rootwindowattr;
 DLL_SCOPE GC dvtgc;
-DLL_SCOPE L ndvtwindows;
-DLL_SCOPE L dvtwindows[MAXDVTWINDOWS];
-DLL_SCOPE L ncachedfonts;
+DLL_SCOPE P ndvtwindows;
+DLL_SCOPE P dvtwindows[MAXDVTWINDOWS];
+DLL_SCOPE P ncachedfonts;
 
 typedef struct {
   XFontStruct *fontstruct;
@@ -29,24 +29,24 @@ DLL_SCOPE cachedfont cachedfonts[MAXCACHEDFONTS];
 #endif //! X_DISPLAY_MISSING
 
 /*----------------------- X windows operators */
-L op_Xwindows(void);
-L op_Xwindows_(void);
-L op_Xdisplayname(void);
-L op_Xconnect(void);
-L op_Xdisconnect(void);
-L op_screensize(void);
-L op_makewindow(void);
-L op_deletewindow(void);
-L op_mapwindow(void);
-L op_resizewindow(void);
-L op_Xsync(void);
-L op_mapcolor(void);
-L op_drawline(void);
-L op_drawsymbols(void);
-L op_fillrectangle(void);
-L op_drawtext(void);
-L op_makewindowtop(void);
-L op_setinputfocus(void);
+P op_Xwindows(void);
+P op_Xwindows_(void);
+P op_Xdisplayname(void);
+P op_Xconnect(void);
+P op_Xdisconnect(void);
+P op_screensize(void);
+P op_makewindow(void);
+P op_deletewindow(void);
+P op_mapwindow(void);
+P op_resizewindow(void);
+P op_Xsync(void);
+P op_mapcolor(void);
+P op_drawline(void);
+P op_drawsymbols(void);
+P op_fillrectangle(void);
+P op_drawtext(void);
+P op_makewindowtop(void);
+P op_setinputfocus(void);
 
 #endif
 

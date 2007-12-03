@@ -1,0 +1,24 @@
+# pkg-config file for dm
+
+prefix=@prefix@
+datarootdir=@datarootdir@
+exec_prefix=@exec_prefix@
+bindir=@bindir@
+includedir=@includedir@
+libdir=@libdir@
+pkgincludedir=@pkgincludedir@
+dmsockdir=@dmsockdir@
+startup_dir=@dmstartdir@
+plugin_dir=@pkglibdir@
+conf_dir=@dmconfdir@
+pkgdata_dir=@pkgdatadir@
+m4data_dir=@m4datadir@
+plugindata_dir=@plugindatadir@
+ldflags=@PCLDFLAGS@ @X_LIBS@ @X_PRE_LIBS@ -lX11 @X_EXTRA_LIBS@ @ATLAS_LIBS@
+cxxflags=@PCCXXFLAGS@ @ATLAS_FLAGS@
+
+Name: @PACKAGE_NAME@
+Description: D-machine info for building plugins
+Version: @PACKAGE_VERSION@
+Libs: @PCLIBS@
+Cflags: @PCCFLAGS@

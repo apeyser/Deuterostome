@@ -94,6 +94,50 @@
 (defvar d-mode-syntax-table nil
   "Syntax table used in d-mode.")
 
+(defcustom d-mode-use-timer t
+  "*Use timer hooks"
+  :type 'boolean
+  :group 'd-mode)
+
+(defcustom d-mode-timer-hooks '(d-mode-check-point)
+  "Hooks for timer"
+  :type 'hook
+  :group 'd-mode)
+
+(defvar d-mode-timer nil "Has the d-mode-timer been started?")
+
+(defvar d-mode-font-lock-keywords ()
+  "Font lock keyword sym.")
+
+(defcustom d-mode-hook nil
+  "Hooks for d-mode."
+  :type 'hook
+  :group 'd-mode)
+
+(defcustom d-mode-replace-cr-do t
+  "*If true, when opening a new file run `d-mode-replace-cr', 
+and check/try to convert to unix line-ends."
+  :type 'boolean
+  :group 'd-mode)
+
+(defun d-mode-setup-syntax-table ()
+  (setq d-mode-syntax-table 
+        (let ((table (make-syntax-table)))
+          (d-mode-add-parens d-mode-parens table)
+          (mapc (lambda (ss) (d-mode-add-simple ss table))
+                (list d-mode-spaces
+                      d-mode-prefixes
+                      d-mode-escape
+                      d-mode-symbols
+                      d-mode-array-start
+                      d-mode-array-end
+                      d-mode-comment-start
+                      d-mode-comment-end
+                      d-mode-string-start
+                      d-mode-string-end
+                      d-mode-punctuation))
+          table)))
+
 (defun d-mode-add-paren (pstart pend table)
   "Add PSTART and PEND as matching parens in TABLE."
   (modify-syntax-entry pstart (concat "(" (list pend)) table)
@@ -159,24 +203,6 @@
   '("." ?\" ?\' ?* ?\;)
   "List of punctuation for d-mode")
 
-(if (not d-mode-syntax-table)
-    (setq d-mode-syntax-table 
-	  (let ((table (make-syntax-table)))
-	    (d-mode-add-parens d-mode-parens table)
-	    (mapc (lambda (ss) (d-mode-add-simple ss table))
-		  (list d-mode-spaces
-				d-mode-prefixes
-				d-mode-escape
-				d-mode-symbols
-				d-mode-array-start
-				d-mode-array-end
-				d-mode-comment-start
-				d-mode-comment-end
-				d-mode-string-start
-				d-mode-string-end
-				d-mode-punctuation))
-	    table)))
-
 (defun d-mode-magic-parens-key (arg)
   (interactive "*p")
   (let ((indent (>= (current-indentation) (current-column))))
@@ -238,8 +264,8 @@
 					(and delete-selection-mode mark-active))
       (d-mode-backspace-function arg)
     (let* ((here (point))
-					 (leave-a-space (not (looking-at "[\]\} \t\n\r\f]")))
-					 (now (+ here (skip-chars-backward " \t\n\r\f")))
+					 (leave-a-space (not (looking-at "[\]\}[:space:]]")))
+					 (now (+ here (skip-syntax-backward "-")))
 					 (leave-a-space (and leave-a-space (/= now (1- here)) 
 															 (looking-back "[^\[\{/~]" (1- now)))))
 			(if (< now here)
@@ -273,11 +299,11 @@
 	    'd-mode-insert-tab)
 	  (define-key mode-map "\e\t"
 	    'd-mode-insert-tab)
+      (define-key mode-map [?~] 'd-mode-insert-squiggle)
+      (define-key mode-map [?/] 'd-mode-insert-squiggle)
 	  ;(define-key mode-map [(control tab)]
 	  ;  'indent-regions)
 	  mode-map)))
-
-(if (not d-mode-map) (d-mode-setup-map))
 
 (defcustom d-mode-magic-newline-on nil 
 	"*Start up d-editor in magic-newline minor mode"
@@ -300,57 +326,58 @@
 	:group 'd-mode)
 
 (defconst d-mode-variable-name-regexp
-  (format "\\([a-z_][a-z_0-9]\\{0,%d\\}\\)\\([a-z_0-9]*\\)" (- @NAMEBYTES@ 1))
+  (format "\\([[:alpha:]_][[:alnum:]_]\\{0,%d\\}\\)\\([[:alnum:]_]*\\)" (- @NAMEBYTES@ 1))
   "Regular expression for the simple name in d-mode.")
 
 (defconst d-mode-variables-regexp
-  (concat "\\s'?" d-mode-variable-name-regexp "\\>")
+  (concat "" d-mode-variable-name-regexp "\\>")
   "Regular expression for variables in d-mode.")
 
 (defconst d-mode-font-lock-keywords-1
- 	'(("<[bwsdl]\\|>" 0 'd-mode-array-face))
+ 	'(("<[bwsdlxBWSDLX]\\|>" 0 'd-mode-array-face))
   "Minimal set of font lock regexps for d-mode.")
 
 (defconst d-mode-constants-regexp
-  (concat "\\B\\*\\B\\|\\<\\(null\\|true\\|false"
-	  "\\|[-+]?[0-9]+\\("
-	  "\\(\\.[0-9]+\\)?\\(e[-+]?[0-9]+\\)?[sd]?\\|[sdbwl]?\\)\\)\\>")
+  (concat "\\*\\|\\<\\(null\\|true\\|false"
+	  "\\|[-+]?[[:digit:]]+\\("
+	  "\\(\\.[[:digit:]]+\\)?\\([eE][-+]?[[:digit:]]+\\)?[sdSD]?"
+      "\\|[bwlxBWLX]?\\)\\)\\>")
   "Regular expression for a constant in d-mode.")
 
 (defconst d-mode-marks-regexp
-  "~?\\[\\|\\]\\|{\\|}"
-  "Regular expression for paren markers.")
+  "~?\\[\\|[]{}]"
+   "Regular expression for paren markers.")
 
 (defconst d-mode-font-lock-keywords-2
   (append d-mode-font-lock-keywords-1
    (list
     (list d-mode-constants-regexp 0 'font-lock-builtin-face)
     (list d-mode-variables-regexp '(1 font-lock-type-face) 
-					'(2 d-mode-variable-xtra-face))
+		  '(2 d-mode-variable-xtra-face))
     (list d-mode-marks-regexp     0 'font-lock-type-face)))
   "Middle level font lock.")
 
 (defconst d-mode-hrefs-regexp
   (concat "\\(/\\)" d-mode-variable-name-regexp "\\>")
-  "Regular expression for local references in d-mode.")
+  "Regular expression for passive names in d-mode.")
 
 (defconst d-mode-orefs-regexp 
   (concat "\\(~\\)" d-mode-variable-name-regexp "\\>")
-  "Regular expression for foreign references in d-mode.")
+  "Regular expression for active names in d-mode.")
 
 (defconst d-mode-ops
   '("loadlib"
     "nextlib"
-	"lock"
-	"serialize"
-	"threads"
-	"makethreads"
+    "lock"
+    "serialize"
+    "threads"
+    "makethreads"
     "readboxfile"
     "writeboxfile"
     "getstartupdir"
     "gethomedir"
-	"getplugindir"
-	"getconfdir"
+    "getplugindir"
+    "getconfdir"
     "hi"
     "libnum"
     "def" 
@@ -405,6 +432,7 @@
     "copy"
     "fax"
     "tosystem"
+    "fromsystem"
     "forall"
     "parcel"
     "anchorsearch"
@@ -441,9 +469,9 @@
     "halt"
     "continue"
     "error"
-	"errormessage"
+    "errormessage"
     "abort"
-	"aborted"
+    "aborted"
     "countexecstack"
     "execstack"
     "quit"
@@ -465,14 +493,16 @@
     "save"
     "capsave"
     "restore"
+    "setcleanup"
     "nextobject"
     "update"
     "toconsole"
     "findfiles"
-	"findfile"
+    "findfile"
     "readfile"
     "writefile"
     "gettime"
+    "localtime"
     "send"
     "console"
     "getmyname"
@@ -517,21 +547,46 @@
     "drawsymbols"
     "fillrectangle"
     "drawtext"
-	"makewindowtop"
-	"setinputfocus"
+    "makewindowtop"
+    "setinputfocus"
     "getsocket"
     "vmresize"
     "transcribe"
     "matvecmul"
+    "regex"
+    "regexi"
+    "matmul_blas"
+    "decompLU_lp"
+    "backsubLU_lp"
+    "invertLU_lp"
+    "norm2"
+    "matvecmul_blas"
+    "triangular_solve"
+    "givens_blas"
+    "rotate_blas"
     )
   "Operater names for d-mode.")
 
 (defvar d-mode-font-lock-keywords-3 nil
   "Extreme set of font lock regexps for d-mode.")
 
+(defun d-mode-unfontified (limit)
+  (let (end (start (point)))
+	(block ret
+	  (while (setq start (text-property-any start limit 'face nil))
+		(setq end (next-single-property-change start 'face 
+											   (current-buffer) limit))
+		(goto-char start)
+		(skip-chars-forward "[:space:]" end)
+		(when (/= (setq start (point)) end)
+		  (re-search-forward "\\=[^[:space:]]+" end t)
+		  (return-from ret))))
+	start))
+
 (defun d-mode-font-lock-keywords-3 ()
   (setq d-mode-font-lock-keywords-3
-	(append d-mode-font-lock-keywords-1
+	(append
+        d-mode-font-lock-keywords-1
 		(list
 		 (list (concat "~" (regexp-opt d-mode-ops 'words)) 
 					 0 'd-mode-keyword-oref-face)
@@ -548,10 +603,70 @@
 					 '(2 d-mode-oref-face)
 					 '(3 d-mode-oref-xtra-face)))
 		d-mode-font-lock-keywords-2
-		'(("[^ \r\n\t]+" 0 'font-lock-warning-face)))))
+ 		'((d-mode-unfontified 0 'font-lock-warning-face)
+		  ("[~/]" 0 
+           (list 
+            'face
+             (let* ((start (match-beginning 0))
+                    (face (get-text-property start 'face)))
+               (if (and (eq face 'font-lock-warning-face)
+                        (get-text-property start 'd-mode-pointer-location))
+                   'bold face))
+            'point-entered 'd-mode-squiggly-enter
+            'point-left 'd-mode-squiggly-leave)
+           t)))))
 
-(if (not d-mode-font-lock-keywords-3)
-    (d-mode-font-lock-keywords-3))
+(defvar d-mode-point nil "Last known location of point in d-mode buffer")
+(make-variable-buffer-local 'd-mode-point)
+
+(defun d-mode-squiggly-enter (old new)
+  (setq d-mode-point new)
+  (when (and (> new (point-min))
+             (get-text-property (1- new) 'point-entered))
+    (let ((modp (buffer-modified-p))
+          (inhibit-read-only t)
+          (buffer-undo-list t)
+          deactivate-mark)
+      (put-text-property (1- new) new 'd-mode-pointer-location t)
+      (unless modp (restore-buffer-modified-p nil)))))
+
+(defun d-mode-squiggly-leave (old new)
+  (when (eq d-mode-point old) (setq d-mode-point nil))
+  (when (and (> old (point-min))
+             (get-text-property (1- old) 'point-left))
+    (let ((modp (buffer-modified-p))
+          (inhibit-read-only t)
+          (buffer-undo-list t)
+          deactivate-mark)
+      (put-text-property (1- old) old 'd-mode-pointer-location nil)
+      (unless modp (restore-buffer-modified-p nil)))))
+
+(defun d-mode-check-point ()
+  (when (and d-mode-point (not (eq d-mode-point (point))))
+    (d-mode-squiggly-leave d-mode-point (point))))
+
+(defun d-mode-insert-squiggle (n)
+    (interactive "p")
+    (self-insert-command n)
+    (put-text-property (1- (point)) (point) 'd-mode-pointer-location t))
+
+(defun d-mode-font-lock-unfontify-region (beg end)
+  (font-lock-default-unfontify-region beg end)
+  (let ((modp (buffer-modified-p))
+        (inhibit-read-only t)
+        (p (text-property-any beg end 'd-mode-pointer-location t)))
+    (when p (put-text-property p (1+ p) 'point-left 'd-mode-squiggly-leave))
+    (unless modp (restore-buffer-modified-p nil))))
+
+(defun d-mode-font-lock-unfontify-buffer ()
+  (font-lock-default-unfontify-buffer)
+  (let ((modp (buffer-modified-p))
+        (inhibit-read-only t))
+    (save-restriction
+      (widen)
+      (remove-list-of-text-properties 
+       (point-min) (point-max) '(point-left 'd-mode-pointer-location))
+      (unless modp (restore-buffer-modified-p nil)))))
 
 (defun d-mode-add-op (ops)
   (interactive "xList of keywords to add (\"x\" \"y\"):  ")
@@ -560,14 +675,6 @@
   (when font-lock-mode
     (font-lock-mode)
     (font-lock-mode)))
-
-(defvar d-mode-font-lock-keywords ()
-  "Font lock keyword sym.")
-(if (not d-mode-font-lock-keywords)
-    (setq d-mode-font-lock-keywords d-mode-font-lock-keywords-3))
-
-(defvar d-mode-hook nil
-  "Hooks for d-mode.")
 
 (defun d-mode-find-comment-column ()
   "Return the column of the last comment, not including the current one."
@@ -651,34 +758,76 @@
 	(save-buffer))))
 
 (defun d-mode-syntax-begin-function (&optional arg)
-	(or
-	 (re-search-backward "\\s(" nil t (or arg 1))
-	 (progn
-		 (while (and (re-search-backward "\\s|" nil 'move (or arg 1))
-								 (or
-									(\= (char-after) ?\()
-									(= (char-before) ?\\))))
-		 (= (char-after) ?\())))
+  (let ((p (point)))
+	(block ret
+	  (when (and (looking-at "[[:alnum:]_]")
+				 (looking-back "[[:alpha:]]"))
+		(re-search-backward "[^[:alnum:]_~/]")
+		(setq p (point)))
+	  (when (and (re-search-backward "\\s|" nil t)
+				 (= (char-after) ?\())
+		(let ((p2 (point)))
+		  (forward-char)
+		  (when (or (not (re-search-forward "\\s|" nil t))
+					(< p (point)))
+			(goto-char p2)
+			(return-from ret))))
+	  (goto-char p)
+	  (when (and (re-search-backward "\\s$" nil t)
+				 (= (char-after) ?\<))
+		(let ((p2 (point)))
+		  (forward-char)
+		  (when (or (not (re-search-forward "\\s$" nil t))
+					(< p (point)))
+			(goto-char p2)
+			(return-from ret p2))))
+	  (goto-char p)
+	  (when (re-search-backward "\\s<" (line-beginning-position) t)
+		(return-from ret))
+	  (goto-char p))))
 
-(defun d-mode-shared (&rest args)
+(if (not d-mode-syntax-table) (d-mode-setup-syntax-table))
+(if (not d-mode-map) (d-mode-setup-map))
+(if (not d-mode-font-lock-keywords-3) (d-mode-font-lock-keywords-3))
+(if (not d-mode-font-lock-keywords)
+    (setq d-mode-font-lock-keywords d-mode-font-lock-keywords-3))
+
+(defun d-mode-shared (&optional do-syntax-table &rest args)
   ""
   (interactive)
-  (set 
-	 (make-local-variable 'font-lock-defaults)
-	 '((d-mode-font-lock-keywords-1 
-			d-mode-font-lock-keywords-2
-			d-mode-font-lock-keywords-3)
-		 nil t nil nil
- 		 (font-lock-multiline . t)
- 		 (syntax-begin-function . d-mode-syntax-begin-function)
- 		 (comment-use-syntax . nil)
- 		 (comment-start . "|")
- 		 (comment-end . "")
-		 (d-mode-font-lock-past-paren . nil)))
+  (set (make-local-variable 'text-property-default-nonsticky)
+       (append text-property-default-nonsticky
+               '((d-mode-pointer-location . t)
+                 (point-entered . t)
+                 (point-left . t))))
 
-	(nconc font-lock-defaults args)
+  (setq font-lock-defaults
+        '((d-mode-font-lock-keywords-1 
+           d-mode-font-lock-keywords-2
+           d-mode-font-lock-keywords-3)
+          nil nil nil nil
+          (font-lock-multiline . t)
+          (syntax-begin-function . d-mode-syntax-begin-function)
+          (comment-use-syntax . nil)
+          (comment-start . "|")
+          (comment-end . "")
+          (d-mode-font-lock-past-paren . nil)
+          (font-lock-unfontify-region-function 
+           . d-mode-font-lock-unfontify-region)
+          (font-lock-unfontify-buffer-function
+           . d-mode-font-lock-unfontify-buffer)
+          (font-lock-extra-manage-props point-entered point-left)
+          ))
+  (nconc font-lock-defaults args)
 
-  (set-syntax-table d-mode-syntax-table))
+  (when do-syntax-table
+    (set-syntax-table d-mode-syntax-table))
+
+
+  (unless d-mode-timer
+    (setq d-mode-timer t)
+    (run-with-idle-timer 1 t (lambda () (run-hooks 'd-mode-timer-hooks))))
+)
 
 (defun d-mode-comment-region (beg end &optional arg)
   (interactive "*r\nP")
@@ -698,30 +847,30 @@
 
 (defun d-mode-font-lock-block-function ()
 	(let ((p (point)) (isset nil))
-		(when (re-search-backward "\\(?:^\\|[^\\\\]\\)\\\\\\{2\\}*\(" nil t)
-			(backward-char)
-			(push-mark nil t)
-			(if (not (and (re-search-forward
-										 "\\(?:^\\|\\=\\|[^\\\\]\\)\\\\\\{2\\}*\)" nil t)
-										(<= p (point))))
-					(pop-mark)
-				(setq isset t)
-				(exchange-point-and-mark)))
-		(when (not isset)
-			(goto-char p)
-			(end-of-line)
-			(push-mark nil t)
-			(beginning-of-line))))
-		
+      (when (re-search-backward "\\(?:^\\|[^\\\\]\\)\\\\\\{2\\}*\(" nil t)
+        (backward-char)
+        (push-mark nil t)
+        (if (not (and (re-search-forward
+                       "\\(?:^\\|\\=\\|[^\\\\]\\)\\\\\\{2\\}*\)" nil t)
+                      (<= p (point))))
+            (pop-mark)
+          (setq isset t)
+          (exchange-point-and-mark)))
+      (when (not isset)
+        (goto-char p)
+        (end-of-line)
+        (push-mark nil t)
+        (beginning-of-line))))
+
+;; shut up the compiler
 (defvar comment-region)
 (defvar uncomment-region)
 
-(defun d-mode ()
-  "Major mode for editing d code."
-  (interactive)
+(define-derived-mode d-mode nil "D Machine"
+  "Major mode for editing d code.
+\\{d-mode-map}"
+  :group 'd-mode
 
-  (kill-all-local-variables)
-  
   (set (make-local-variable 'parse-sexp-lookup-properties) t)
 
   (set (make-local-variable 'indent-line-function)
@@ -734,22 +883,15 @@
   (set (make-local-variable 'uncomment-region)
        'd-mode-uncomment-region)
 
-  (use-local-map d-mode-map)
-
-  (d-mode-shared 
+  (d-mode-shared nil
 	 '(font-lock-mark-block-function . d-mode-font-lock-mark-block-function))
 
-  (setq major-mode 'd-mode)
-  (setq mode-name "D Machine")
+  (when d-mode-replace-cr-do (d-mode-replace-cr))
 
-  (d-mode-replace-cr)
-
-	(if d-mode-magic-newline-on (d-mode-magic-newline))
-	(if d-mode-magic-parens-on (d-mode-magic-parens))
-	(if d-mode-magic-delete-on (d-mode-magic-delete))
-	(if d-mode-magic-comment-on (d-mode-magic-comment))
-
-  (run-hooks 'd-mode-hook)
+  (if d-mode-magic-newline-on (d-mode-magic-newline))
+  (if d-mode-magic-parens-on (d-mode-magic-parens))
+  (if d-mode-magic-delete-on (d-mode-magic-delete))
+  (if d-mode-magic-comment-on (d-mode-magic-comment))
 )
 
 

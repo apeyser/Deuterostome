@@ -1,5 +1,5 @@
 /* ltdl.c -- system independent dlopen wrapper
-   Copyright (C) 1998, 1999, 2000, 2004  Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2000, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
    Originally by Thomas Tanner <tanner@ffii.org>
    This file is part of GNU Libtool.
 
@@ -137,16 +137,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 
 /* --- WINDOWS SUPPORT --- */
 
-
-#ifdef DLL_EXPORT
-#  define LT_GLOBAL_DATA	__declspec(dllexport)
-#else
-#  define LT_GLOBAL_DATA
+/* DLL building support on win32 hosts;  mostly to workaround their
+   ridiculous implementation of data symbol exporting. */
+#ifndef LT_GLOBAL_DATA
+#  if defined(__WINDOWS__) || defined(__CYGWIN__)
+#    ifdef DLL_EXPORT           /* defined by libtool (if required) */
+#      define LT_GLOBAL_DATA __declspec(dllexport)
+#    endif
+#  endif
+#  ifndef LT_GLOBAL_DATA        /* static linking or !__WINDOWS__ */
+#    define LT_GLOBAL_DATA
+#  endif
 #endif
 
 /* fopen() mode flags for reading a text file */
 #undef	LT_READTEXT_MODE
-#ifdef __WINDOWS__
+#if defined(__WINDOWS__) || defined(__CYGWIN__)
 #  define LT_READTEXT_MODE "rt"
 #else
 #  define LT_READTEXT_MODE "r"
@@ -625,7 +631,7 @@ argz_create_sep (str, delim, pargz, pargz_len)
   assert (pargz);
   assert (pargz_len);
 
-  /* Make a copy of STR, but replacing each occurence of
+  /* Make a copy of STR, but replacing each occurrence of
      DELIM with '\0'.  */
   argz_len = 1+ LT_STRLEN (str);
   if (argz_len)
@@ -894,7 +900,7 @@ static	const char	sys_search_path[]	= LTDL_SYSSEARCHPATH;
 		(*lt_dlmutex_seterror_func) (errormsg);		\
 	else 	lt_dllast_error = (errormsg);	} LT_STMT_END
 #define LT_DLMUTEX_GETERROR(errormsg)		LT_STMT_START {	\
-	if (lt_dlmutex_seterror_func)				\
+	if (lt_dlmutex_geterror_func)				\
 		(errormsg) = (*lt_dlmutex_geterror_func) ();	\
 	else	(errormsg) = lt_dllast_error;	} LT_STMT_END
 
@@ -918,7 +924,7 @@ lt_dlmutex_register (lock, unlock, seterror, geterror)
      lt_dlmutex_seterror *seterror;
      lt_dlmutex_geterror *geterror;
 {
-  lt_dlmutex_unlock *old_unlock = unlock;
+  lt_dlmutex_unlock *old_unlock = lt_dlmutex_unlock_func;
   int		     errors	= 0;
 
   /* Lock using the old lock() callback, if any.  */
@@ -929,6 +935,7 @@ lt_dlmutex_register (lock, unlock, seterror, geterror)
     {
       lt_dlmutex_lock_func     = lock;
       lt_dlmutex_unlock_func   = unlock;
+      lt_dlmutex_seterror_func = seterror;
       lt_dlmutex_geterror_func = geterror;
     }
   else
@@ -1348,15 +1355,27 @@ sys_wll_open (loader_data, filename)
   if (!searchname)
     return 0;
 
-#if __CYGWIN__
   {
-    char wpath[MAX_PATH];
-    cygwin_conv_to_full_win32_path(searchname, wpath);
-    module = LoadLibrary(wpath);
-  }
+    /* Silence dialog from LoadLibrary on some failures.
+       No way to get the error mode, but to set it,
+       so set it twice to preserve any previous flags. */
+    UINT errormode = SetErrorMode(SEM_FAILCRITICALERRORS);
+    SetErrorMode(errormode | SEM_FAILCRITICALERRORS);
+
+#if defined(__CYGWIN__)
+    {
+      char wpath[MAX_PATH];
+      cygwin_conv_to_full_win32_path (searchname, wpath);
+      module = LoadLibrary (wpath);
+    }
 #else
-  module = LoadLibrary (searchname);
+    module = LoadLibrary (searchname);
 #endif
+
+    /* Restore the error mode. */
+    SetErrorMode(errormode);
+  }
+
   LT_DLFREE (searchname);
 
   /* libltdl expects this function to fail if it is unable
@@ -2329,6 +2348,18 @@ lt_dlexit ()
 		    {
 		      ++errors;
 		    }
+		  /* Make sure that the handle pointed to by 'cur' still exists.
+		     lt_dlclose recursively closes dependent libraries which removes
+		     them from the linked list.  One of these might be the one
+		     pointed to by 'cur'.  */
+		  if (cur)
+		    {
+		      for (tmp = handles; tmp; tmp = tmp->next)
+			if (tmp == cur)
+			  break;
+		      if (! tmp)
+			cur = handles;
+		    }
 		}
 	    }
 	  /* done if only resident modules are left */
@@ -2541,8 +2572,8 @@ find_module (handle, dir, libdir, dlname, old_name, installed)
 
       /* maybe it was moved to another directory */
       {
-	  if (tryall_dlopen_module (handle,
-				    (const char *) 0, dir, dlname) == 0)
+	  if (dir && (tryall_dlopen_module (handle,
+				    (const char *) 0, dir, dlname) == 0))
 	    return 0;
       }
     }
@@ -2869,12 +2900,6 @@ load_deplibs (handle, deplibs)
 	}
     }
 
-  /* restore the old search path */
-  LT_DLFREE (user_search_path);
-  user_search_path = save_search_path;
-
-  LT_DLMUTEX_UNLOCK ();
-
   if (!depcount)
     {
       errors = 0;
@@ -2938,7 +2963,7 @@ load_deplibs (handle, deplibs)
 
       handle->deplibs = (lt_dlhandle*) LT_EMALLOC (lt_dlhandle *, depcount);
       if (!handle->deplibs)
-	goto cleanup;
+	goto cleanup_names;
 
       for (i = 0; i < depcount; ++i)
 	{
@@ -2961,6 +2986,13 @@ load_deplibs (handle, deplibs)
 
  cleanup:
   LT_DLFREE (names);
+  /* restore the old search path */
+  if (user_search_path) {
+    LT_DLFREE (user_search_path);
+    user_search_path = save_search_path;
+  }
+  LT_DLMUTEX_UNLOCK ();
+
 #endif
 
   return errors;
@@ -2982,6 +3014,7 @@ unload_deplibs (handle)
 	      errors += lt_dlclose (handle->deplibs[i]);
 	    }
 	}
+      LT_DLFREE (handle->deplibs);
     }
 
   return errors;
@@ -3540,7 +3573,14 @@ lt_argz_insert (pargz, pargz_len, before, entry)
 {
   error_t error;
 
-  if ((error = argz_insert (pargz, pargz_len, before, entry)))
+  /* Prior to Sep 8, 2005, newlib had a bug where argz_insert(pargz,
+     pargz_len, NULL, entry) failed with EINVAL.  */
+  if (before)
+    error = argz_insert (pargz, pargz_len, before, entry);
+  else
+    error = argz_append (pargz, pargz_len, entry, 1 + LT_STRLEN (entry));
+
+  if (error)
     {
       switch (error)
 	{

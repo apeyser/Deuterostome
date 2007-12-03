@@ -7,6 +7,7 @@
 1000 dict dup begin
 
 /ROLLBITS @ROLLBITS@ def
+/BYTECORRECT @BYTECORRECT@ def
 /UNROLLS  2 ROLLBITS pwr def
 
 /__   { * exch text} def
@@ -15,7 +16,8 @@
 /n__  { * exch * number} def
 /op__ { op mkact __ } def
 /NL   { * (\n) text} def
-
+/_dt {dt mkact} def
+/_st {st mkact} def
 
 |----- macro argument stack routines
 
@@ -56,16 +58,23 @@
 
 /GETCV { dup pushA exch pushA pushA  GETCV_d exch get exec } def
 
-/GETCV_d 6 dict dup begin
+/GETCV_d 8 dict dup begin
 
 /B { NL (if \(\()__ popA __ ( = *\(\(B *\))__ popA exec (\)\) == BINF\) )__
-        popA __ ( = DINF;)__ 
+        popA __ ( = HUGE_VAL;)__ 
    } def
 /W { NL (if \(\()__ popA __ ( = *\(\(W *\))__ popA exec (\)\) == WINF\) )__
-        popA __ ( = DINF;)__  
+        popA __ ( = HUGE_VAL;)__  
    } def
-/L { NL (if \(\()__ popA __ ( = *\(\(L *\))__ popA exec (\)\) == LINF\) )__
-        popA __ ( = DINF;)__  
+/L64 { NL (if \(\()__ popA __ ( = *\(\(L64 *\))__ popA exec (\)\) == L64INF\) )__
+        popA __ ( = HUGE_VAL;)__  
+   } def
+/LBIG {
+    NL (if \(\()__ popA __ ( = *\(\(LBIG *\))__ popA exec (\)\) == LBIGINF\) )__
+        popA __ ( = HUGE_VAL;)__  
+   } def
+/L32 { NL (if \(\()__ popA __ ( = *\(\(L32 *\))__ popA exec (\)\) == L32INF\) )__
+        popA __ ( = HUGE_VAL;)__  
    } def
 /S { NL popA __ ( = *\(\(S *\))__ popA exec (\);)__ popA pop
    } def
@@ -81,21 +90,32 @@ end def
 
 /CVPUT { pushA pushA CVPUT_d exch get exec } def
 
-/CVPUT_d 6 dict dup begin
+/CVPUT_d 8 dict dup begin
 /B { NL (*\(\(B *\))__ popA exec (\) = \(\(\()__
         popA dup pushA __ (\) > BMAX\) || \(\()__
-        popA dup pushA __ (\) < -BMAX\) || \()__
-        popA dup pushA __ ( == DINF\)\)? BINF : )__ popA __ (;)__
+        popA dup pushA __ (\) < -BMAX\) || ISUNDEF\()__
+        popA dup pushA __ (\)\)? BINF : )__ popA __ (;)__
    } def
 /W { NL (*\(\(W *\))__ popA exec (\) = \(\(\()__
         popA dup pushA __ (\) > WMAX\) || \(\()__
-        popA dup pushA __ (\) < -WMAX\) || \()__
-        popA dup pushA __ ( == DINF\)\)? WINF : )__ popA __ (;)__
+        popA dup pushA __ (\) < -WMAX\) || ISUNDEF\()__
+        popA dup pushA __ (\)\)? WINF : )__ popA __ (;)__
    } def
-/L { NL (*\(\(L *\))__ popA exec (\) = \(\(\()__
-        popA dup pushA __ (\) > LMAX\) || \(\()__
-        popA dup pushA __ (\) < -LMAX\) || \()__
-        popA dup pushA __ ( == DINF\)\)? LINF : )__ popA __ (;)__
+/L64 { NL (*\(\(L64 *\))__ popA exec (\) = \(\(\()__
+        popA dup pushA __ (\) > L64MAX\) || \(\()__
+        popA dup pushA __ (\) < -L64MAX\) || ISUNDEF\()__
+        popA dup pushA __ (\)\)? L64INF : )__ popA __ (;)__
+   } def
+/LBIG { NL (*\(\(LBIG *\))__ popA exec (\) = \(\(\()__
+        popA dup pushA __ (\) > LBIGMAX\) || \(\()__
+        popA dup pushA __ (\) < -LBIGMAX\) || ISUNDEF\()__
+        popA dup pushA __ (\)\)? LBIGINF : )__ popA __ (;)__
+   } def
+
+/L32 { NL (*\(\(L32 *\))__ popA exec (\) = \(\(\()__
+        popA dup pushA __ (\) > L32MAX\) || \(\()__
+        popA dup pushA __ (\) < -L32MAX\) || ISUNDEF\()__
+        popA dup pushA __ (\)\)? L32INF : )__ popA __ (;)__
    } def
 /S { NL (*\(\(S *\))__ popA exec (\) = )__ popA __ (;)__ 
    } def
@@ -107,7 +127,7 @@ end def
 | statement, which executes body as many times as array frame has
 | elements (a long count variable, n, is assumed to exist);
 
-| (framename) { body_constructor } | --
+| (framename) { body_constructor }  | --
 
 /FOR { pushA pushA
 NL (for \(n = ARRAY_SIZE\()__ popA __ (\); n>0; n--\) {)__
@@ -115,25 +135,54 @@ popA exec
 NL (})__
 } def
 
-| (framename) {body_construct} log_2-iterations | --
-/FOR_modn {pushA pushA pushA
-    NL (for \(n = \(ARRAY_SIZE\()__ peekA __ (\)>>)__ 2 indexA n__  (\); n>0; n--\) {)__
-    exchA 2 2 indexA pwr {peekA exec} repeat exchA
+| arraytype (framename) returnsL/bool {body_construct} | --
+/FOR_modn {pushA exch pushA exch pushA pushA
+    NL ({ UP n__ = VALUE_BASE\()__ 2 indexA __ (\) % )__ BYTECORRECT n__ (;
+        if \(n__\) {
+          n__ = )__ BYTECORRECT n__ ( - n__;
+          if \(DEBUG_DMNUM && \(n__ % sizeof\()__ 1 indexA __ (\)\)\) {
+            handleerr\(\);
+            return)__ popA {( BAD_ARR)__} if (;
+          }
+          n__ /= sizeof\()__  popA __ (\);
+          if \(n__ > ARRAY_SIZE\()__ peekA __(\)\)
+            n__ = ARRAY_SIZE\()__ peekA __(\);
+          for \(n = n__; n > 0; n--\) {)__
+            1 indexA exec
+          NL (})__
     NL (})__
-    NL (for \(n = \(ARRAY_SIZE\()__ popA __(\)&)__ 2 exchA popA pwr 1 sub n__ (\); n>0; n--\) {)__
+    NL (for \(n = \(\(ARRAY_SIZE\()__ peekA __ (\)-n__\)>>)__
+      ROLLBITS n__  (\); n>0; n--\) {)__
+      exchA UNROLLS {peekA exec} repeat exchA
+    NL (})__
+    NL (for \(n = \(\(ARRAY_SIZE\()__ popA __(\)-n__\)&)__
+                UNROLLS 1 sub n__ (\); n>0; n--\) {)__
     popA exec
-    NL (})__
+    NL (}})__
 } def
 
-| {body_construct} log_2-iterations | --
+| returnsL/bool {body_construct} | --
 /FOR_modnp {pushA pushA
-    NL (for \(n = \(n_ >> )__ 1 indexA n__ (\); n>0; n--\) {)__
-    2 1 indexA pwr {peekA exec} repeat
+    NL ({ UP n__ = \(UP\))__ fixsource __ ( % )__ BYTECORRECT n__ (;
+      if \(n__\) {
+      n__ = )__ BYTECORRECT n__ ( - n__;
+      if \(DEBUG_DMNUM && \(n__ % sizeof\(*)__ fixsource __ (\)\)\) {
+        handleerr\(\);
+        return)__ popA {( BAD_ARR)__} if (;
+      }
+      n__ /= sizeof\(*)__ fixsource __ (\);
+      if \(n__ > n_\) n__ = n_;
+      for \(n = n__; n > 0; n--\) {)__
+        peekA exec
+      NL (})__
     NL (})__
-    exchA
-    NL (for \(n = \(n_ & )__ 2 popA pwr 1 sub n__ (\); n>0; n--\) {)__
+    NL (for \(n = \(\(n_-n__\) >> )__ ROLLBITS n__ (\); n>0; n--\) {)__
+    UNROLLS {peekA exec} repeat
+    NL (})__
+    NL (for \(n = \(\(n_-n__\) & )__ UNROLLS 1 sub n__
+         (\); n>0; n--\) {)__
     popA exec
-    NL (})__
+    NL (}})__ 
 } def
 
 
@@ -156,12 +205,13 @@ NL (})__
 | {parallel constructor} | --
 |
 /THREAD_SU {pushA pushA pushA pushA
+  /fixsource (r) def
   1 indexA {(df) pushA} {(sf) pushA} ifelse (
   if \(ARRAY_SIZE\()__ peekA __ (\) < THREADMUL*)__ UNROLLS n__ (\)
     )__ exchA popA exec (;
   else {
     thread_array_data data;
-    UL nways = ARRAY_SIZE\()__ peekA __ (\)/\(THREADMUL*)__ UNROLLS n__ (\)
+    UP nways = ARRAY_SIZE\()__ peekA __ (\)/\(THREADMUL*)__ UNROLLS n__ (\)
                + \(ARRAY_SIZE\()__ peekA __ (\)%\(THREADMUL*)__ UNROLLS n__ (\) ?
                1 : 0\);
     if \(nways > thread_num\(\)\) nways = thread_num\(\);
@@ -178,13 +228,15 @@ NL (})__
 | get-destination-array get-source-array {body-constructor} | --
 /THREAD {pushA pushA pushA
 (
-  const thread_array_data* restrict data = \(const thread_array_data*\) indata;
-  UL n, n_ = data->perthread + \(thread_max\(\) == id ? data->leftover : 0\);)__
-  popA {(\n  )__ dt__ ( * restrict d = \(\()__
+  const thread_array_data* data = \(const thread_array_data*\) indata;
+  UP n, n_ = data->perthread + \(thread_max\(\) == id ? data->leftover : 0\);)__
+  popA {(\n  )__ dt__ ( * d = \(\()__
     dt__ ( *\) data->df_start\)+data->perthread*id;)__
+    /fixsource (d) def  
   } if
-  popA {(\n  )__ st__ ( * restrict s = \(\()__
+  popA {(\n  )__ st__ ( * s = \(\()__
     st__ ( *\) data->sf_start\)+data->perthread*id;)__
+    /fixsource (s) def  
   } if
   popA exec (
   return OK;)__
@@ -208,11 +260,11 @@ NL (})__
 
 /XLvalue {
 
-NL (static L )__ st__ (Lvalue\(B *sp\))__
+NL (static LBIG )__ st__ (Lvalue\(B *sp\))__
 NL ({)__
-NL (D t; L tc;)__
+NL (D t; LBIG tc;)__
 st { (sp)__ } (t) GETCV
-/L { (&tc)__ } (t) CVPUT
+/LBIG { (&tc)__ } (t) CVPUT
 NL (return\(tc\);)__
 NL (})__
 } def
@@ -254,20 +306,20 @@ NL
 (
   static void )__ st__ dt__ (moveSAs\(B *sf, B *df\)
   {
-    D t; L n; )__ dt__ ( * restrict d;
+    D t; P n; )__ dt__ ( * d;
     d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
     st { (sf) SCALAR } (t) GETCV
-    (df) { dt { (d++)__ } (t) CVPUT } ROLLBITS FOR_modn (
+    _dt (df) false { dt { (d++)__ } (t) CVPUT } FOR_modn (
   }
 
 #if ENABLE_THREADS
-  static L )__ st__ dt__ (moveSAt\(UL id, const void* indata,
+  static P )__ st__ dt__ (moveSAt\(UP id, const void* indata,
                                    void* ignore
                                    __attribute__ \(\(__unused__\)\)\)
   {)__
     true false {(
       D t = data->in;)__ 
-      {dt {(d++)__} (t) CVPUT} ROLLBITS FOR_modnp
+      true {dt {(d++)__} (t) CVPUT} FOR_modnp
     } THREAD (
   }
 
@@ -311,44 +363,33 @@ NL
 
 /XYmoveAA {
 (
-    static void )__ st__ dt__ (moveAAp\(B *sf, B *df\)
-    {
-      D t; L n; )__ st__ ( * restrict s; )__ dt__ ( * restrict d;
-      s = \()__ st__ ( *\))__ (sf) ARRAY (;
-      d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
-      (df) { st { (s++)__ } (t) GETCV
-          dt { (d++)__ } (t) CVPUT
-      } ROLLBITS FOR_modn
-(
-    }
-
     static void )__ st__ dt__ (moveAAs\(B *sf, B *df\)
     {
-       D t; L n; )__ st__ ( * s; )__ dt__ ( * d;
+       D t; P n; )__ st__ ( * s; )__ dt__ ( * d;
        s = \()__ st__ ( *\))__ (sf) ARRAY (;
        d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
-      (df) { st { (s++)__ } (t) GETCV
+      _st (df) false { st { (s++)__ } (t) GETCV
           dt { (d++)__ } (t) CVPUT
-      } ROLLBITS FOR_modn (
+      } FOR_modn (
     }
 
 
 #if ENABLE_THREADS
-    static L )__ st__ dt__ (moveAAt\(UL id, const void* indata,
+    static P )__ st__ dt__ (moveAAt\(UP id, const void* indata,
                                      void* ignore
                                      __attribute__ \(\(__unused__\)\)\)
     {)__
       true true {(
-       D t;)__ { 
+       D t;)__ true { 
          st {(s++)__} (t) GETCV
          dt {(d++)__} (t) CVPUT
-       } ROLLBITS FOR_modnp
+       } FOR_modnp
       } THREAD (
     }
 
     static void )__ st__ dt__ (moveAAc\(B *sf, B *df\)
     {)__
-      {st__ dt__ (moveAAp\(sf, df\))__} true true {(
+      {st__ dt__ (moveAAs\(sf, df\))__} true true {(
         threads_do\(nways, )__ st__ dt__ (moveAAt, &data\);)__
       } THREAD_SU (
     }
@@ -356,8 +397,7 @@ NL
 
    static void )__ st__ dt__ (moveAA\(B *sf, B *df\)
    {
-    if \(serialized\) )__ st__ dt__ (moveAAs\(sf,df\);
-    else if \(thread_num\(\) == 1\) )__ st__ dt__ (moveAAp\(sf,df\);
+    if \(serialized || thread_num\(\) == 1\) )__ st__ dt__ (moveAAs\(sf,df\);
 #if ENABLE_THREADS
     else )__ st__ dt__ (moveAAc\(sf, df\);
 #endif //ENABLE_THREADS
@@ -443,27 +483,27 @@ end def
 (
   static void )__ dt__ st__ (dy)__ op__ (ASs\(B *df, B *sf\)
   {
-    D t,tt; L n; )__ dt__ ( * restrict d;
+    D t,tt; P n; )__ dt__ ( * d;
     d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
     st { (sf) SCALAR } (tt) GETCV
-    (df) { dt { (d)__ } (t) GETCV
+    _dt (df) false { dt { (d)__ } (t) GETCV
       dyadic_d op get exec
       dt { (d++)__ } (t) CVPUT
-    } ROLLBITS FOR_modn (
+    } FOR_modn (
   }
 
 #if ENABLE_THREADS
-  static L )__ dt__ st__ (dy)__ op__ (ASt\(UL id, const void* indata,
+  static P )__ dt__ st__ (dy)__ op__ (ASt\(UP id, const void* indata,
                                            void* ignore
                                            __attribute__ \(\(__unused__\)\)\)
   {)__
     true false {(
       D t, tt = data->in;
-      )__ {
+      )__ true {
         dt {(d)__} (t) GETCV
         dyadic_d op get exec
         dt {(d++)__} (t) CVPUT
-      } ROLLBITS FOR_modnp
+      } FOR_modnp
     } THREAD (
   }
 
@@ -499,27 +539,27 @@ end def
 (
   static void )__ dt__ st__ (dy)__ op__ (SAs\(B *df, B *sf\)
   {
-    D t,tt; L n; )__ st__ ( * restrict s;
+    D t,tt; P n; )__ st__ ( * s;
     s = \()__ st__ ( *\))__ (sf) ARRAY (;)__
     dt { (df) SCALAR } (t) GETCV
-    (sf) { st { (s++)__ } (tt) GETCV
+    _st (sf) false { st { (s++)__ } (tt) GETCV
       dyadic_d op get exec
-    } ROLLBITS FOR_modn
+    } FOR_modn
     dt { (df) SCALAR } (t) CVPUT (
    }
 )__
 dyadic_dp_seed op known {(
 #if ENABLE_THREADS
- static L )__ dt__ st__ (dy)__ op__ (SAt\(UL id, const void* indata,
+ static P )__ dt__ st__ (dy)__ op__ (SAt\(UP id, const void* indata,
                                           void* outdata\)
  {)__
    false true {(
-     D *restrict ret = \(D*\) outdata;
+     D * ret = \(D*\) outdata;
      D t = )__ dyadic_dp_seed op get exec (, tt;)__ 
-     { 
+     true { 
        st {(s++)__} (tt) GETCV
        dyadic_dp_op op get exec
-     } ROLLBITS FOR_modnp (
+     } FOR_modnp (
      *ret = t;)__
    } THREAD (
   }
@@ -527,15 +567,15 @@ dyadic_dp_seed op known {(
   static void )__ dt__ st__ (dy)__ op__ (SAc\(B* df, B* sf\)
   {)__
     {dt__ st__ (dy)__ op__ (SAs\(df, sf\))__} false true {(
-      UL n, n_ = nways;
+      UP n, n_ = nways;
       D t,tt, ret[THREADNUM];
       D* r = ret;
       threads_do_local\(nways, )__ dt__ st__ (dy)__ op__ (SAt, &data, ret\);
       )__  
-      dt {(df) SCALAR} (t) GETCV {(
+      dt {(df) SCALAR} (t) GETCV false {(
         tt = *\(r++\);)__
         dyadic_dp_unseed op get exec
-      } ROLLBITS FOR_modnp
+      } FOR_modnp
       dt {(df) SCALAR} (t) CVPUT
     } THREAD_SU (
   }
@@ -571,56 +611,41 @@ dyadic_dp_seed op known {(
 
 /XYdyOPAA {
 (
-    static void )__ dt__ st__ (dy)__ op__ (AAp\(B * df, B * sf\)
-    {
-      L n; )__  st__ ( * restrict s; )__ dt__ ( * restrict d;
-      D t, tt;
-      s = \()__ st__ ( *\))__ (sf) ARRAY (;
-      d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
-      (df) {
-          st {(s++)__} (tt) GETCV
-          dt {(d)__} (t) GETCV
-          () dyadic_d_x op get exec
-          dt {(d++)__} (t) CVPUT
-      } ROLLBITS FOR_modn
-(
-    }
-
     static void )__ dt__ st__ (dy)__ op__ (AAs\(B * df, B * sf\)
     {
-       L n; )__  st__ ( * s; )__ dt__ ( * d;
+       P n; )__  st__ ( * s; )__ dt__ ( * d;
        D t, tt;
        s = \()__ st__ ( *\))__ (sf) ARRAY (;
        d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
-       (df) {
+       _st (df) false {
            st {(s++)__} (tt) GETCV
            dt {(d)__} (t) GETCV
            () dyadic_d_x op get exec
            dt {(d++)__} (t) CVPUT
-       } ROLLBITS FOR_modn
+       } FOR_modn
 (
     }
 
 
 #if ENABLE_THREADS
-    static L )__ dt__ st__ (dy)__ op__ (AAt\(UL id, const void* indata,
+    static P )__ dt__ st__ (dy)__ op__ (AAt\(UP id, const void* indata,
                                              void* ignore
                                              __attribute__ \(\(__unused__\)\)\)
     {)__
       true true {(
         D t, tt;)__
-        {
+        true {
           st {(s++)__} (tt) GETCV
           dt {(d)__} (t) GETCV
           () dyadic_d_x op get exec
           dt {(d++)__} (t) CVPUT
-        } ROLLBITS FOR_modnp
+        } FOR_modnp
       } THREAD (
     }
 
     static void )__ dt__ st__ (dy)__ op__ (AAc\(B* df, B* sf\)
     {)__
-      {dt__ st__ (dy)__ op__ (AAp\(df, sf\))__} true true {(
+      {dt__ st__ (dy)__ op__ (AAs\(df, sf\))__} true true {(
          threads_do\(nways, )__ dt__ st__ (dy)__ op__ (AAt, &data\);)__
       } THREAD_SU (
     }
@@ -628,8 +653,7 @@ dyadic_dp_seed op known {(
 
     static void )__ dt__ st__ (dy)__ op__ (AA\(B * df, B * sf\)
     {
-      if \(serialized\) )__ dt__ st__ (dy)__ op__ (AAs\(df,sf\);
-      else if \(thread_num\(\) == 1\) )__ dt__ st__ (dy)__ op__ (AAp\(df,sf\);
+      if \(serialized || thread_num\(\) == 1\) )__ dt__ st__ (dy)__ op__ (AAs\(df,sf\);
 #if ENABLE_THREADS
       else )__ dt__ st__ (dy)__ op__ (AAc\(df,sf\);
 #endif //ENABLE_THREADS
@@ -683,26 +707,26 @@ end def
 (
    static void )__ dt__ (mo)__ op__ (As\(B *df\)
    {
-     D t; )__ dt__ ( *d; L n;
+     D t; )__ dt__ ( *d; P n;
      d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
-     (df) { dt { (d)__ } (t) GETCV
+     _dt (df) false { dt { (d)__ } (t) GETCV
        monadic_d op get exec
        dt { (d++)__ } (t) CVPUT
-     } ROLLBITS FOR_modn (
+     } FOR_modn (
    }
 
 #if ENABLE_THREADS
-  static L )__ dt__ (mo)__ op__ (At\(UL id, const void* indata,
+  static P )__ dt__ (mo)__ op__ (At\(UP id, const void* indata,
                                      void* ignore
                                      __attribute__ \(\(__unused__\)\)\)
   {)__
     true false {(
       D t;)__
-      {
+      true {
         dt {(d)__} (t) GETCV
         monadic_d op get exec
         dt {(d++)__} (t) CVPUT
-      } ROLLBITS FOR_modnp
+      } FOR_modnp
     } THREAD (
   }
     
@@ -741,6 +765,8 @@ NL (})__
 NL 
 } def
 
+/alltypes [/B /W /L32 /L64 /S /D] def
+
 |-------------------- construct DMNUMINC.C -----------------------------
 | (dirname) (filename) | --
 
@@ -752,59 +778,67 @@ NL
 typedef struct {
   B* df_start;
   B* sf_start;
-  UL perthread;
-  UL leftover;
+  UP perthread;
+  UP leftover;
   D in;
 } thread_array_data;
 #endif //ENABLE_THREADS
+
+#ifdef DEBUG_DMNUM
+#undef DEBUG_DMNUM
+#define DEBUG_DMNUM 1
+void handleerr\(void\) {
+  makename\("dmnumincerror", x1\); ATTR\(x1\) = ACTIVE;
+  FREEexecs = x2;
+}
+#else
+#define DEBUG_DMNUM 0
+#define handleerr\(\)
+#endif
 )__
+
 |----- generate ENCODE function definitions
-[ /B /W /L  /S /D ] { /dt name DYencode } forall
+alltypes { /dt name DYencode } forall
 
 |----- generate definition of list of ENCODE functions
 
 NL (typedef void \(*ENCODEfct\)\(D,B*\);)__
 NL (static ENCODEfct ENCODElist[] = {)__
-[ /B /W /L  /S /D ]
-   {  /dt name 
+alltypes {  /dt name 
       NL (D)__ dt__ (encode, )__
    } forall
 NL(};)__
 NL
 
 |----- generate VALUE function definitions
-[ /B /W /L  /S /D ] { /st name XLvalue } forall
+alltypes { /st name XLvalue } forall
 
 |----- generate definition of list of VALUE functions
 
-NL (typedef L \(*VALUEfct\)\(B*\);)__
+NL (typedef LBIG \(*VALUEfct\)\(B*\);)__
 NL (static VALUEfct VALUElist[] = {)__
-[ /B /W /L  /S /D ]
-   {  /st name 
+alltypes {  /st name 
       NL st__ (Lvalue, )__
    } forall
 NL(};)__
 NL
 
 |----- generate TEST function definitions
-[ /B /W /L  /S /D ] { /st name XDtest } forall
+alltypes { /st name XDtest } forall
 
 |----- generate definition of list of TEST functions
 
 NL (typedef D \(*TESTfct\)\(B*\);)__
 NL (static TESTfct TESTlist[] = {)__
-[ /B /W /L  /S /D ]
-   {  /st name 
+alltypes {  /st name 
       NL st__ (Dtest, )__
    } forall
 NL(};)__
 NL
 
 |----- generate MOVE function definitions
-[ /B /W /L  /S /D ]
-{  /st name 
-   [ /B /W /L  /S /D ]
-   {  /dt name 
+alltypes {  /st name 
+   alltypes {  /dt name 
       [ /XYmoveSS /XYmoveSA /XYmoveAS /XYmoveAA ] { mkact exec } forall
    } forall
 } forall
@@ -814,10 +848,8 @@ NL
 NL (typedef void \(*MOVEfct\)\(B*,B*\);)__
 NL (static MOVEfct MOVElist[] = {)__
 NL
-[ /B /W /L  /S /D ]
-{  /st name 
-   [ /B /W /L  /S /D ]
-   {  /dt name 
+alltypes {  /st name 
+   alltypes {  /dt name 
       [ /SS /SA /AS /AA ]
       { /cc name st__ dt__ (move)__ cc mkact __ (, )__ } forall
       NL
@@ -827,10 +859,8 @@ NL(};)__
 NL
 
 |----- generate dyadic operator function definitions
-[ /B /W /L  /S /D ]
-{  /dt name 
-   [ /B /W /L  /S /D ]
-   {  /st name
+alltypes {  /dt name 
+   alltypes {  /st name
       [ /ADD /SUB /MUL /DIV /PWR /MOD /THEARC ]
       { /op name 
         [ /XYdyOPSS /XYdyOPAS /XYdyOPSA /XYdyOPAA ] { mkact exec } forall
@@ -845,10 +875,8 @@ NL (typedef void \(*dyadic_fct\)\(B*,B*\);)__
 [ /ADD /SUB /MUL /DIV /PWR /MOD /THEARC ] { /op name
 NL (static dyadic_fct )__ op__ (list[] = {)__
 NL
-[ /B /W /L  /S /D ]
-{  /dt name 
-   [ /B /W /L  /S /D ]
-   { /st name 
+alltypes {  /dt name 
+   alltypes { /st name 
      [ /SS /AS /SA /AA ] 
      { /cc name
        dt__ st__ (dy)__ op mkact __ cc mkact __ mkact exec (, )__
@@ -861,8 +889,7 @@ NL(};)__
 NL
 
 |----- generate monadic operator function definitions
-[ /B /W /L  /S /D ]
-{  /dt name 
+alltypes {  /dt name 
   [ /NEG /ABS /SQRT /EXP /LN /LG /FLOOR /CEIL /SIN /COS /TAN
     /ASIN /ACOS /ATAN
   ]
@@ -880,8 +907,7 @@ NL (typedef void \(*monadic_fct\)\(B*\);)__
 { /op name
 NL (static monadic_fct )__ op__ (list[] = {)__
 NL
-[ /B /W /L  /S /D ]
-{ /dt name 
+alltypes { /dt name 
   [ /S /A ] 
   { /cc name
     dt__ (mo)__ op mkact __ cc mkact __ mkact exec (, )__
@@ -893,7 +919,7 @@ NL(};)__
 
 |----- generate DECREMENT function definitions
 
-[ /B /W /L  /S /D ] { /dt name Ydecr } forall
+alltypes { /dt name Ydecr } forall
 
 |----- generate definitions of DECREMENT function lists
 
@@ -901,14 +927,13 @@ NL (typedef void \(*DECR_fct\)\(B*\);)__
 
 NL (static DECR_fct DECRlist[] = {)__
 NL
-[ /B /W /L  /S /D ]
-{ /dt name dt__ (decr, )__ } forall
+alltypes { /dt name dt__ (decr, )__ } forall
 NL(};)__
 NL
     
 |------------ save the file
 }
-save /dmsave name /dmfile 2500000 /b array def dmsave capsave 
+save /dmsave name /dmfile 5000000 /b array def dmsave capsave 
 dmfile 0 3 -1 roll exec
 0 exch getinterval dirname filename writefile
 dmsave restore 

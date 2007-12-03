@@ -23,30 +23,12 @@ AC_DEFUN([CF_AC_CHECK_SIZEOF], [dnl
   changequote(<<, >>)dnl
   define(<<AC_CV_NAME>>, translit(ac_cv_sizeof_$1, [ *], [_p]))dnl
   changequote([, ])dnl
-  if test $AC_CV_NAME -eq 0 ; then
+  if test "$AC_CV_NAME" == "0" ; then
     AC_MSG_WARN([sizeof($1) is unknown, confirm that it is $2 on target])
-  elif test $AC_CV_NAME -ne $2 ; then
+  elif test "$AC_CV_NAME" != "$2" ; then
     AC_MSG_ERROR([sizeof($1) = $AC_CV_NAME, must be $2])
   fi
   undefine([AC_CV_NAME])dnl
-])
-
-AC_DEFUN([CF_AC_CHECK_SIZEOFS], [dnl
-  AC_CHECK_SIZEOF([$1], [0])dnl
-  changequote(<<, >>)dnl
-  define(<<AC_CV_NAME>>, translit(ac_cv_sizeof_$1, [ *], [_p]))dnl
-  changequote([, ])dnl   
-  if test $AC_CV_NAME -eq 0 ; then
-    AC_MSG_WARN([sizeof($1) is unknown, confirm that it is in ($2) on target])
-  else
-    cf_ac_check_sizeofs=false
-    for i in $2 ; do
-      if test $i -eq $AC_CV_NAME ; then cf_ac_check_sizeofs=: ; break; fi
-    done
-    if ! $cf_ac_check_sizeofs ; then
-       AC_MSG_ERROR([sizeof($1) == $AC_CV_NAME, not in ($2)])
-    fi
-  fi dnl
 ])
 
 dnl
@@ -72,28 +54,46 @@ AC_DEFUN([CF_ON_TARGET], [dnl
   esac dnl
 ])
 
+AC_DEFUN([CF_CLEAR_DEF], [dnl
+  if test "${$1-set}" == set ; then 
+     $1=""
+     cf_cleared_$1=:
+  else
+     cf_cleared_$1=false 
+  fi
+])
+
 AC_DEFUN([CF_IF_UNDEF], [dnl
   AC_MSG_CHECKING([if $1 is set])
-  if test "${$1-set}" == set ; then
+  if test "${$1-set}" == set \
+     || test "${$1}" == "" \
+     && test "$ac_cv_env_$1_set" == "" \
+     || test "${cf_cleared_$1-set}" == ":" ; then
     AC_MSG_RESULT([no])
     $2
   else
-    AC_MSG_RESULT([yes])
+    AC_MSG_RESULT([yes, `${$1}'])
   fi
 ])
 
 AC_DEFUN([CF_GCC_COMPILER_OPTION], [dnl
   AC_REQUIRE([AC_PROG_CC])dnl
   AC_REQUIRE([AC_PROG_LIBTOOL])dnl
-  CF_GCC_COMPILER_OPTION_INT([$1],ifelse([$2],[],[CFLAGS],[$2]))
+  CF_GCC_COMPILER_OPTION_INT([$1], [GCC], [C], ifelse([$2],[],[CFLAGS],[$2]))
+])
+
+AC_DEFUN([CF_GXX_COMPILER_OPTION], [dnl
+  AC_REQUIRE([AC_PROG_CXX])dnl
+  AC_REQUIRE([AC_PROG_LIBTOOL])dnl
+  CF_GCC_COMPILER_OPTION_INT([$1], [GXX], [C++], ifelse([$2],[],[CXXFLAGS],[$2]))
 ])
 
 AC_DEFUN([CF_GCC_COMPILER_OPTION_INT], [
-  AC_SUBST([$2])
-  if test "x$GCC" == "xyes" ; then
+  AC_SUBST([$4])
+  if test "x$$2" == "xyes" ; then
     AC_REQUIRE([LT_AC_PROG_SED])dnl
     AC_MSG_CHECKING([for compiler options $1])
-    AC_LANG_PUSH(C)
+    AC_LANG_PUSH($3)
     CF_GCO_S=
     lt_simple_compile_test_code="int some_variable = 0;\n"
     printf "$lt_simple_compile_test_code" > conftest.$ac_ext
@@ -120,11 +120,11 @@ AC_DEFUN([CF_GCC_COMPILER_OPTION_INT], [
  
     if test x"$CF_GCO_S" = xyes ; then
         AC_MSG_RESULT([Adding])
-        $2="$$2 $1"
+        $4="$$4 $1"
     else
         AC_MSG_RESULT([Failed, not adding])
     fi
-    AC_LANG_POP(C)
+    AC_LANG_POP($3)
   fi dnl
 ])
 
@@ -138,6 +138,30 @@ AC_DEFUN([CF_AC_ARG_VAR], [dnl
   if test "${CF_AC_CV_ARG-set}" == set ; then $1="$3"; fi
   AC_SUBST($1)
   AC_DEFINE_UNQUOTED(CF_AC_CV_ARG, [${$1}], [$2])
+  AC_MSG_RESULT([setting to ${$1}])dnl
+])
+
+AC_DEFUN([CF_AC_ARG_VAR_SUBST], [dnl
+  changequote(<<, >>)dnl
+  define(<<CF_AC_CV_ARG>>, translit($1, [a-z], [A-Z]))dnl
+  changequote([, ])
+  cf_ac_cv_arg_val="CF_AC_CV_ARG"
+  AC_MSG_CHECKING([if ${cf_ac_cv_arg_val} is set])
+  AC_ARG_VAR(CF_AC_CV_ARG, [$2, default=$3])
+  if test "${CF_AC_CV_ARG-set}" == set ; then $1="$3"; fi
+  CF_AC_SUBST([$1])
+  AC_MSG_RESULT([setting to ${$1}])dnl
+])
+
+AC_DEFUN([CF_AC_ARG_VAR_SUBST_EVAL], [dnl
+  changequote(<<, >>)dnl
+  define(<<CF_AC_CV_ARG>>, translit($1, [a-z], [A-Z]))dnl
+  changequote([, ])
+  cf_ac_cv_arg_val="CF_AC_CV_ARG"
+  AC_MSG_CHECKING([if ${cf_ac_cv_arg_val} is set])
+  AC_ARG_VAR(CF_AC_CV_ARG, [$2, default=$3])
+  if test "${CF_AC_CV_ARG-set}" == set ; then $1="$3"; fi
+  CF_AC_SUBST_EVAL([$1])
   AC_MSG_RESULT([setting to ${$1}])dnl
 ])
 
@@ -216,7 +240,7 @@ AC_DEFUN([CF_AM_CONDITIONAL], [dnl
 
 AC_DEFUN([CF_AM_ENABLE_DO], [dnl
   if test "${enable_$4-set}" == set ; then enable_$4='$3'; fi
-  if test x"${enable_$4}" == x"yes" ; then enable_$4='$3'; fi
+  if test x"${enable_$4}" == x"yes" ; then enable_$4='$6'; fi
   AC_ARG_ENABLE([$1], [AC_HELP_STRING([--enable-$1], [$2 ($3)])])
   CF_AM_CONDITIONAL($5, [test "${enable_$4-no}" != "no"])
   if test "${enable_$4-no}" == "no" ; then 
@@ -226,6 +250,10 @@ AC_DEFUN([CF_AM_ENABLE_DO], [dnl
   fi dnl
 ])
 
+dnl $1 = feauture
+dnl $2 = comment
+dnl $3 = default
+dnl $4 = value if value passed is yes (defaults to $3)
 AC_DEFUN([CF_AM_ENABLE], [dnl
   AC_MSG_CHECKING([if $1 is enabled])
   changequote(<<, >>)dnl
@@ -233,7 +261,8 @@ AC_DEFUN([CF_AM_ENABLE], [dnl
     patsubst(translit($1, [a-z], [A-Z]), <<->>, <<_>>))dnl
   define(<<CF_AM_CVS_ENABLE>>, patsubst($1, <<->>, <<_>>))dnl
   changequote([, ])dnl
-  CF_AM_ENABLE_DO([$1], [$2], [$3], CF_AM_CVS_ENABLE, CF_AM_CV_ENABLE, )dnl
+  CF_AM_ENABLE_DO([$1], [$2], [$3], CF_AM_CVS_ENABLE, CF_AM_CV_ENABLE, 
+    ifelse([$4], , [[$3]], [[$4]]))dnl
 ])
 
 AC_DEFUN([CF_AC_DEFINE_IF_ENABLED_DEFINE], [dnl
@@ -267,8 +296,12 @@ AC_DEFUN([CF_AC_DEFINE_IF_ENABLED], [dnl
     CF_AC_DEFINE_IF_ENABLED_CVS)
 ])
 
+dnl $1 = feauture
+dnl $2 = comment
+dnl $3 = default
+dnl $4 = value if value passed is yes (defaults to $3)
 AC_DEFUN([CF_AC_ENABLE], [dnl
-  CF_AM_ENABLE([$1], [$2], [$3])
+  CF_AM_ENABLE([$1], [$2], [$3], [$4])
   CF_AC_DEFINE_IF_ENABLED([$1], [$2])
 ])
 
@@ -283,18 +316,26 @@ AC_DEFUN([CF_IF_ENABLED_DO], [
       $3 
     fi
   ])dnl
+  ifelse([$4],[],,[dnl
+    if ! test x"${enable_$1-no}" == x"no" ; then
+      $4
+    fi
+  ])
 ])
 
 AC_DEFUN([CF_IF_ENABLED], [dnl
   changequote(<<, >>)dnl
   define(<<CF_IF_ENABLED_CVS>>, patsubst($1, <<->>, <<_>>))dnl
   changequote([, ])dnl
-  CF_IF_ENABLED_DO(CF_IF_ENABLED_CVS, [$2], [$3])
+  CF_IF_ENABLED_DO(CF_IF_ENABLED_CVS, [$2], [$3], [$4])
 ])
 
 AC_DEFUN([CF_AM_PROG], [dnl
-  AC_CHECK_PROG([$1], [$2], [$as_dir/$ac_word$ac_exec_ext], [], [$3])
-  AM_CONDITIONAL([$1], [test "${$1+set}" = set]) dnl
+  AC_CHECK_PROG([ENABLE_$1], [$2], [$as_dir/$ac_word$ac_exec_ext], [$4], [$3])
+  if test -n "$ENABLE_$1" ; then
+    AC_DEFINE_UNQUOTED([ENABLE_$1], ["${ENABLE_$1}"], [Path to $1])
+  fi
+  AM_CONDITIONAL([ENABLE_$1], [test "${ENABLE_$1+set}" = set]) dnl
 ])
 
 AC_DEFUN([CF_EMACS_ENABLED], [dnl
@@ -364,4 +405,47 @@ AC_DEFUN([CF_ACX_PTHREAD], [dnl
   ])
 ])
 
-    
+AC_DEFUN([CF_AC_SUBST], [dnl
+  AC_SUBST([$1])
+  ifelse([$2], , , [$1="$2"])
+])
+
+AC_DEFUN([CF_AC_SUBST_EVAL], [dnl
+  AC_SUBST([$1])
+  ifelse([$2], , [eval $1="${$1}"], [eval $1="$2"])
+])
+
+AC_DEFUN([CF_BASIC_DEFS], [
+  AC_CHECK_SIZEOF([void*])
+  AC_DEFINE_UNQUOTED([DM_SIZEOF_VOIDP_], 
+                     [$ac_cv_sizeof_voidp], 
+                     [sizeof(void*)])
+  AC_SUBST([CONFIG_STATUS_DEPENDENCIES], ['$(top_srcdir)/src/basic-defs.h'])
+  AC_MSG_CHECKING([for NAMEBYTES value])
+  m4_include([m4/basic-defs.m4])
+  if test $USE_MAINTAINER_MODE != yes; then
+    AC_MSG_RESULT([NAMEBYTES = $NAMEBYTES])
+  else
+    AC_LANG_PUSH([C])
+    AC_COMPUTE_INT([NAMEBYTES_NEW], [NAMEBYTES], [[
+      #include "src/basic-defs.h"
+    ]], [
+      AC_MSG_ERROR([Unable to compute NAMEBYTES])
+    ])
+    AC_LANG_POP()
+    if test $NAMEBYTES == $NAMEBYTES_NEW ; then
+      AC_MSG_RESULT([unchanged, NAMEBYTES = $NAMEBYTES])
+    else
+      AC_MSG_RESULT([changed, NAMEBYTES = $NAMEBYTES, NAMEBYTES_NEW = $NAMEBYTES_NEW])
+      [NAMEBYTES=$NAMEBYTES_NEW]
+      AC_MSG_CHECKING([Updating "$srcdir"/m4/basic-defs.m4])
+      if echo "[[NAMEBYTES=$NAMEBYTES_NEW]]" > "$srcdir"/m4/basic-defs.m4
+      then
+        AC_MSG_RESULT([successful])
+      else
+        AC_MSG_ERROR([failed])
+      fi
+    fi
+  fi
+  AC_SUBST([NAMEBYTES])
+])

@@ -19,9 +19,13 @@
 2 list dictstack dup 0 get /systemdict name   | name the roots
                      1 get /userdict name
 
-/setlock {pop} bind def  | null ops to parallel dnode
-/getlock {true} bind def |
-/lock {exec} bind def    | 
+/lock {exec} bind def    |
+/dmnumincerror {(dmnuminc) 2816 error} def
+
+/makefont {
+    ~[exch 3 -1 roll 1 ~index 0 ~put] bind
+} bind def
+
 
 |------------------------ low-level information -------------------------
 | For debugging and quick information about objects, stacks, and system
@@ -91,10 +95,11 @@ end mkread def
    * (\n) text 0 exch getinterval toconsole
 } bind def
 
-/tuples 5 dict dup begin
+/tuples 6 dict dup begin
    /B 10 def
    /W 10 def
    /L 5 def
+   /X 2 def
    /S 5 def
    /D 2 def
 end def
@@ -227,20 +232,22 @@ dup dup class /arrayclass eq exch type /B eq and
 
 /d_blit { mkpass dup
           type mkact d_blit_dict begin exec end mkact exec } bind def
-/d_blit_dict 5 dict dup begin
+/d_blit_dict 6 dict dup begin
    /B /_stringclass def
    /W /_arrayclass def
    /L /_arrayclass def
+   /X /_arrayclass def
    /S /_arrayclass def
    /D /_arrayclass def
 end mkread def
 
 /ps_blit { mkpass dup 
            type mkact ps_blit_dict begin exec end mkact exec } bind def
-/ps_blit_dict 5 dict dup begin
+/ps_blit_dict 6 dict dup begin
    /B /_stringclass def
    /W /listclass def
    /L /listclass def
+   /X /listclass def
    /S /listclass def
    /D /listclass def
 end mkread def
@@ -282,6 +289,7 @@ end mkread def
 /B { objstr 0 4 4 -1 roll * number 0 exch getinterval ftext } bind def
 /W { objstr 0 6 4 -1 roll * number 0 exch getinterval ftext } bind def
 /L { objstr 0 11 4 -1 roll * number 0 exch getinterval ftext } bind def
+/X { objstr 0 21 4 -1 roll * number 0 exch getinterval ftext } bind def
 /S { objstr 0 13 4 -1 roll 6 number 0 exch getinterval ftext } bind def
 /D { objstr 0 dprec 8 add 4 -1 roll dprec number
      0 exch getinterval ftext } bind def
@@ -517,11 +525,11 @@ end def  | of xtext_dict
 
 |--------------------------- Supervisor of the dvt ---------------------------
 
-100 dict dup begin
+/dvt 100 dict dup begin | {
 
-/linebuf 8192 /b array def
-/linebuf2 8192 /b array def
-/combuf 1024 /b array def
+  /linebuf 8192 /b array def
+  /linebuf2 8192 /b array def
+  /combuf 1024 /b array def
 
 |------------------------ supervisor  loop of the dvt ----------------------
 |
@@ -553,14 +561,16 @@ end def  | of xtext_dict
 | with dnodes and their use is the subject of a set of front-end procedures
 | and of an X window interface described subsequently.
 
-/supervisor
-{ {
-    { linebuf nextevent } aborted
-       { countdictstack 2 sub ~end repeat clear dvt begin
-         /kbdowner 0 def c_
-       } if
-  } loop
-} bind def
+  /supervisor
+  {
+    {
+      { linebuf nextevent } aborted { 
+        countdictstack 2 sub ~end repeat
+        clear dvt begin
+        /kbdowner 0 def c_
+      } if
+    } loop
+  } bind def
 
 |---------------------------------------------- consoleline
 |
@@ -610,152 +620,151 @@ end def  | of xtext_dict
 | You can reset a hung 'busy' status from the keyboard and by mouse action
 | on the 'nodes' window.
 
-/consoleline {
-  dup /line name length 0 gt {
+  /consoleline {
+    dup /line name length 0 gt {
       (%!$#@) line 0 1 getinterval search { 
         length 1 add /linetag name pop pop
         /line line 1 line length 1 sub getinterval def
       } { pop 0 /linetag name } ifelse
       tags linetag get exec
     } if 
-} bind def
+  } bind def
 
-/tags [
+  /tags [
 
   |-- no tag
   | dvt   - execute phrase
   | dnode - ready: encapsulate phrase and send it to dnode
   |         busy: discard phrase and print 'Wait!'
 
-  { 
-    kbdowner 0 eq {line end mkact exec dvt begin} { 
-      { 
-        node 3 get { 
-          (Wait!\n) toconsole
-        } { 
-          knode setbusy
-          node 2 get
-          linebuf2 0 ({ ) fax
-          line fax
-          ( } stopped pop console \(dvt begin ) fax
-          * knode * number ( setready end\) send) fax
-          0 exch getinterval send
-        } ifelse
-      } fornodes
-    } ifelse
-  } bind
+    { 
+      kbdowner 0 eq {line end mkact exec dvt begin} { 
+        { 
+          node 3 get { 
+            (Wait!\n) toconsole
+          } { 
+            knode setbusy
+            node 2 get
+            linebuf2 0 ({ ) fax
+            line fax
+            ( } stopped pop console \(dvt begin ) fax
+            * knode * number ( setready end\) send) fax
+            0 exch getinterval send
+          } ifelse
+        } fornodes
+      } ifelse
+    } bind
   
-  |-- *
-  | dvt - execute phrase
-  | dnode - execute phrase on dvt
-  {
-    line end mkact exec dvt begin
-  } bind
-
-  |-- !
-  | dvt   - ignore tag and execute rest of phrase
-  | dnode - send phrase regardless of dnode state
-
-  { 
-    kbdowner 0 eq { 
+    |-- *
+    | dvt - execute phrase
+    | dnode - execute phrase on dvt
+    {
       line end mkact exec dvt begin
-    } { 
-      { node 2 get line send } fornodes
-    } ifelse
-  } bind
+    } bind
+
+    |-- !
+    | dvt   - ignore tag and execute rest of phrase
+    | dnode - send phrase regardless of dnode state
+    
+    { 
+      kbdowner 0 eq { 
+        line end mkact exec dvt begin
+      } { 
+        { node 2 get line send } fornodes
+      } ifelse
+    } bind
+    
+    |-- $
+    | dvt   - submit line to linux of dvt
+    | dnode - ready: encapsulate and submit as linux command to dnode
+    |         busy: discard phrase and print 'Wait!'
   
-  |-- $
-  | dvt   - submit line to linux of dvt
-  | dnode - ready: encapsulate and submit as linux command to dnode
-  |         busy: discard phrase and print 'Wait!'
+    { 
+      kbdowner 0 eq { 
+        combuf 0 line fax ( &) fax 0 exch getinterval tosystem
+      } { 
+        { 
+          node 3 get  {(Wait!\n) toconsole}  { 
+            knode setbusy
+            node 2 get
+            combuf 0 (\() fax line fax
+            (\) tosystem console \(dvt begin ) fax
+            * knode * number ( setready end\) send) fax
+            0 exch getinterval send
+          } ifelse
+        } fornodes
+      } ifelse
+    } bind
   
-  { 
-    kbdowner 0 eq { 
-      combuf 0 line fax ( &) fax 0 exch getinterval tosystem
-    } { 
-      { 
-        node 3 get  {(Wait!\n) toconsole}  { 
-          knode setbusy
-          node 2 get
-          combuf 0 (\() fax line fax
-          (\) tosystem console \(dvt begin ) fax
-          * knode * number ( setready end\) send) fax
-          0 exch getinterval send
-        } ifelse
-      } fornodes
-    } ifelse
-  } bind
-  
-  |-- #
-  | dvt   - treat like '@'
-  | dnode - ready: evaluate, encapsulate, and submit as shell command to dnode
-  |       - busy: discard phrase and print 'Wait!'
-  
-  { 
-    kbdowner 0 eq { 
-      combuf 0 line mkact end exec dvt begin
-      ( &) fax 0 exch getinterval tosystem
-    } { 
-      { 
-        node 3 get {(Wait!\n) toconsole} { 
-          knode setbusy
-          node 2 get
-          combuf 0 (\() fax line mkact exec 
-          (\) tosystem console \(dvt begin ) fax
-          * knode * number ( setready end\) send) fax
-          0 exch getinterval send
-        } ifelse
-      } fornodes
-    } ifelse
-  } bind
+    |-- #
+    | dvt   - treat like '@'
+    | dnode - ready: evaluate, encapsulate, and submit as shell command to dnode
+    |       - busy: discard phrase and print 'Wait!'
+    
+    { 
+      kbdowner 0 eq { 
+        combuf 0 line mkact end exec dvt begin
+        ( &) fax 0 exch getinterval tosystem
+      } { 
+        { 
+          node 3 get {(Wait!\n) toconsole} { 
+            knode setbusy
+            node 2 get
+            combuf 0 (\() fax line mkact exec 
+            (\) tosystem console \(dvt begin ) fax
+            * knode * number ( setready end\) send) fax
+            0 exch getinterval send
+          } ifelse
+        } fornodes
+      } ifelse
+    } bind
   
 
-  |-- @
-  | dvt   - evaluate phrase and submit to shell
-  | dnode - ready: encapsulate, submit to dnode where the phrase is evaluated
-  |                and the result is submitted as shell command
-  |       - busy: discard phrase and print 'Wait!'
-  
-  { 
-    kbdowner 0 eq { 
-      combuf 0 line mkact end exec dvt begin
-      ( &) fax 0 exch getinterval tosystem
-    } { 
-      { 
-        node 3 get {(Wait!\n) toconsole}  { 
-          knode setbusy
-          node 2 get
-          combuf 0 (shellbuf 0 { ) fax line fax ( } exec 0 exch getinterval
-          tosystem console \(dvt begin ) fax
-          * knode * number ( setready end\) send) fax
-          0 exch getinterval send
-        }  ifelse
-      } fornodes
-    } ifelse
-  } bind
-  
-] def
+    |-- @
+    | dvt   - evaluate phrase and submit to shell
+    | dnode - ready: encapsulate, submit to dnode where the phrase is evaluated
+    |                and the result is submitted as shell command
+    |       - busy: discard phrase and print 'Wait!'
+    
+    { 
+      kbdowner 0 eq { 
+        combuf 0 line mkact end exec dvt begin
+        ( &) fax 0 exch getinterval tosystem
+      } { 
+        { 
+          node 3 get {(Wait!\n) toconsole}  { 
+            knode setbusy
+            node 2 get
+            combuf 0 (shellbuf 0 { ) fax line fax ( } exec 0 exch getinterval tosystem console \(dvt begin ) fax
+            * knode * number ( setready end\) send) fax
+            0 exch getinterval send
+          }  ifelse
+        } fornodes
+      } ifelse
+    } bind
+    
+  ] def
 
-|-- loop operator to invoke an individual dnode or group of dnodes
-
-/fornodes { /procfornodes name
-  kbdowner 0 gt 
-    { /knode kbdowner def /node nodelist knode get def
+  |-- loop operator to invoke an individual dnode or group of dnodes
+  
+  /fornodes { /procfornodes name
+    kbdowner 0 gt { 
+      /knode kbdowner def /node nodelist knode get def
       /procfornodes find exec
-    }
-    { 1 1 nodelist length 1 sub { /knode name
-          nodelist knode get /node name
-          node 4 get kbdowner eq { /procfornodes find exec } if
-        } for
+    } { 
+      1 1 nodelist length 1 sub { /knode name
+        nodelist knode get /node name
+        node 4 get kbdowner eq { /procfornodes find exec } if
+      } for
     } ifelse
-} bind def
+  } bind def
 
 |------------------------------------------------ nodemessage
 | execute the message string
 
-/nodemessage {
-  mkact exec
-} bind def
+  /nodemessage {
+    mkact exec
+  } bind def
 
 |-------------------- administration of the nodes -----------------------
 |
@@ -776,17 +785,17 @@ end def  | of xtext_dict
 | interface of node administration is defined first, followed by the
 | machinery of the nodes window.
 
-/nodelist [
-   [ (dvt) null null false 0 {} null ]
-   9 { [ null null null false 0 {} null] } repeat
-] def
+  /nodelist [
+    [ (dvt) null null false 0 {} null ]
+    9 { [ null null null false 0 {} null] } repeat
+  ] def
 
 |------------------------------- front-end ------------------------------
 | Note that thes procedures are defined in userdict!
 
 |---------------------------------------------------- print help message
 
-/h_ {
+  /h_ {
 (The dvt provides the following services:
 _          show top object of operand stack in brief form
 v_         show value of composite top object of operand stack
@@ -815,7 +824,7 @@ _cc        [/color..] hostname port# group | -- \(connect & color text\)
 _ccx       [/color..] hostname port# group | -- \(connect w/ eye & color text\)
 _csu       hostname port# group <l opds dicts execs vm/M userdict > | --
    \(connect to a dnode and set up new resources\)
-_ccsu      [/color..] hostname port# grop <l opds dicts execs vm/M userdict>
+_ccsu      [/color..] hostname port# group <l opds dicts execs vm/M userdict>
            | --
    \(connect, setup resource, and color text\)
 _dc        node# | --  \(disconnect from a dnode\)
@@ -824,9 +833,9 @@ _t         target | --  \(choose new owner\(s\) of the keyboard\)
 _r         node# | --  \(reset 'busy status of a node\)
 c_         list all connections
 ) toconsole 
-} bind userdict 3 -1 roll put
+  } bind userdict 3 -1 roll put
 
-/hk_ {
+  /hk_ {
 (
   Emacs dvt keys:
     f1: d-comint-mode-invert, execute the previous command line
@@ -848,18 +857,18 @@ c_         list all connections
     control-c control-n: d-comint-mode-narrow, narrow dvt buffer
     control-c control-w: d-comint-mode-widen, widen dvt buffer
 ) toconsole
-} bind userdict 3 -1 roll put
+  } bind userdict 3 -1 roll put
 
 |---------------------------------------------------- list active connections
 
-/c_ {
-  dvt begin
-  0 1 nodelist length 1 sub { /knode name
+  /c_ {
+    dvt begin
+    0 1 nodelist length 1 sub { /knode name
       nodelist knode get /node name
       printnode
     } for
-  end
-} bind userdict 3 -1 roll put
+    end
+  } bind userdict 3 -1 roll put
 
 |---------------------------------------------------- connect to node
 | hostname port# group# | -- 
@@ -867,19 +876,19 @@ c_         list all connections
 | connects to the node and makes itself the current dvt of the node;
 | the node is assigned a group number (enter as NEGATIVE integer)
 
-/_c {
-  dvt begin {
-    false 0 1 nodelist length 1 sub { /knode name
-      nodelist knode get /node name
-      node 0 get class /nullclass eq { pop true exit } if
-    } for not { (Too many nodes!\n) toconsole stop } if
-    node 4 put
-    2 copy connect node 2 put node 1 put node 0 put
-    false node 3 put
-    node 2 get (getsocket setconsole) send
-    printnode  
-  } stopped pop end
-} bind userdict 3 -1 roll put
+  /_c {
+    dvt begin {
+      false 0 1 nodelist length 1 sub { /knode name
+        nodelist knode get /node name
+        node 0 get class /nullclass eq { pop true exit } if
+      } for not { (Too many nodes!\n) toconsole stop } if
+      node 4 put
+      2 copy connect node 2 put node 1 put node 0 put
+      false node 3 put
+      node 2 get (getsocket setconsole) send
+      printnode  
+    } stopped pop end
+  } bind userdict 3 -1 roll put
 
 |---------------------------------------------------- connect to node
 | [/color...] hostname port# group# | -- 
@@ -887,27 +896,27 @@ c_         list all connections
 | connects to the node and makes itself the current dvt of the node;
 | the node is assigned a group number (enter as NEGATIVE integer)
 
-/_cc {
-  dvt begin {
-    false 0 1 nodelist length 1 sub { /knode name
-      nodelist knode get /node name
-      node 0 get class /nullclass eq { pop true exit } if
-    } for not { (Too many nodes!\n) toconsole stop } if
-    node 4 put
-    2 copy connect node 2 put node 1 put node 0 put
-    false node 3 put
-    node 6 put
+  /_cc {
+    dvt begin {
+      false 0 1 nodelist length 1 sub { /knode name
+        nodelist knode get /node name
+        node 0 get class /nullclass eq { pop true exit } if
+      } for not { (Too many nodes!\n) toconsole stop } if
+      node 4 put
+      2 copy connect node 2 put node 1 put node 0 put
+      false node 3 put
+      node 6 put
+      
+      node 2 get [[knode {
+        getsocket setconsole
+        console [[4 -1 roll] (0 get dvt begin _cc1)] send
+      }] ({} forall exec)] send
+    } stopped pop end
+  } bind userdict 3 -1 roll put
 
-    node 2 get [[knode {
-      getsocket setconsole
-      console [[4 -1 roll] (0 get dvt begin _cc1)] send
-    }] ({} forall exec)] send
-  } stopped pop end
-} bind userdict 3 -1 roll put
-
-/_cc1 {
-  {color_node_def} stopped pop end
-} bind userdict 3 -1 roll put
+  /_cc1 {
+    {color_node_def} stopped pop end
+  } bind userdict 3 -1 roll put
 
 |---------------------------------------------------- connect to node
 | hostname port# group# | -- 
@@ -916,36 +925,37 @@ c_         list all connections
 | the node is assigned a group number (enter as NEGATIVE integer)
 | Also connects the eye.
 
-Xwindows {
-  /_cx {
-    dvt begin {
-      false 0 1 nodelist length 1 sub { /knode name
-        nodelist knode get /node name
-        node 0 get class /nullclass eq { pop true exit } if
-      } for not { (Too many nodes!\n) toconsole stop } if
-      node 4 put
-      2 copy connect node 2 put node 1 put node 0 put
-      true node 3 put printnode
-
-      node 2 get [ [getmydisplay_ knode {/knode name
-        getsocket setconsole
-        Xwindows_ not {(No Xwindows on node!\n) toconsole stop} if
-        Xdisconnect
-        Xconnect
-        /filesave save def
-        /fbuf vmstatus sub 10 div /b array def
-        filesave capsave {
-          getstartupdir (/theeye.d) fbuf readfile mkact exec
-        } stopped pop filesave restore
-        console [[knode] (0 get dvt begin _cx1)] send
-      }] ( {} forall exec )] send
-    } stopped pop end
-  } bind userdict 3 -1 roll put
+  Xwindows {
+    /_cx {
+      dvt begin {
+        false 0 1 nodelist length 1 sub { /knode name
+          nodelist knode get /node name
+          node 0 get class /nullclass eq { pop true exit } if
+        } for not { (Too many nodes!\n) toconsole stop } if
+        node 4 put
+        2 copy connect node 2 put node 1 put node 0 put
+        true node 3 put printnode
+        
+        node 2 get [ [getmydisplay_ knode fontdict mousedict {
+          /mousedict name /fontdict name /knode name
+          getsocket setconsole
+          Xwindows_ not {(No Xwindows on node!\n) toconsole stop} if
+          Xdisconnect
+          Xconnect
+          /filesave save def
+          /fbuf vmstatus sub 10 div /b array def
+          filesave capsave {
+            getstartupdir (/theeye.d) fbuf readfile mkact exec
+          } stopped pop filesave restore
+          console [[knode] (0 get dvt begin _cx1)] send
+        }] ( {} forall exec )] send
+      } stopped pop end
+    } bind userdict 3 -1 roll put
   
-  /_cx1 {
-    {setready} stopped pop end
-  } bind userdict 3 -1 roll put
-} if
+    /_cx1 {
+      {setready} stopped pop end
+    } bind userdict 3 -1 roll put
+  } if
 
 |---------------------------------------------------- connect to node
 | [/color...] hostname port# group# | -- 
@@ -954,38 +964,39 @@ Xwindows {
 | the node is assigned a group number (enter as NEGATIVE integer)
 | this version also sets the eye on the current console
 
-Xwindows {
-  /_ccx {
-    dvt begin {
-      false 0 1 nodelist length 1 sub { /knode name
-        nodelist knode get /node name
-        node 0 get class /nullclass eq { pop true exit } if
-      } for not { (Too many nodes!\n) toconsole stop } if
-      node 4 put
-      2 copy connect node 2 put node 1 put node 0 put
-      node 6 put
-      true node 3 put printnode
+  Xwindows {
+    /_ccx {
+      dvt begin {
+        false 0 1 nodelist length 1 sub { /knode name
+          nodelist knode get /node name
+          node 0 get class /nullclass eq { pop true exit } if
+        } for not { (Too many nodes!\n) toconsole stop } if
+        node 4 put
+        2 copy connect node 2 put node 1 put node 0 put
+        node 6 put
+        true node 3 put printnode
       
-      node 2 get [ [getmydisplay_ knode {/knode name
-        getsocket setconsole
-        Xwindows_ not {(No Xwindows on node!\n) toconsole stop} if
-        Xdisconnect
-        Xconnect
-        /filesave save def
-        /fbuf vmstatus sub 10 div /b array def
-        filesave capsave {
-          getstartupdir (/theeye.d) fbuf readfile mkact exec
-        } stopped pop filesave restore
-        console [[knode] (0 get dvt begin _ccx1)] send
-      }] ( {} forall exec )] send
-    } stopped pop end
-  } bind userdict 3 -1 roll put
+        node 2 get [ [getmydisplay_ knode fontdict mousedict {
+          /mousedict name /fontdict name /knode name
+          getsocket setconsole
+          Xwindows_ not {(No Xwindows on node!\n) toconsole stop} if
+          Xdisconnect
+          Xconnect
+          /filesave save def
+          /fbuf vmstatus sub 10 div /b array def
+          filesave capsave {
+            getstartupdir (/theeye.d) fbuf readfile mkact exec
+          } stopped pop filesave restore
+          console [[knode] (0 get dvt begin _ccx1)] send
+        }] ( {} forall exec )] send
+      } stopped pop end
+    } bind userdict 3 -1 roll put
+    
+    /_ccx1 {
+      {dup color_node_def setready} stopped pop end
+    } bind userdict 3 -1 roll put
+  } if
   
-  /_ccx1 {
-    {dup color_node_def setready} stopped pop end
-  } bind userdict 3 -1 roll put
-} if
-
 |---------------------------------------------------- set up node
 | hostname port# group# <l opds dicts execs vm/M userdict > | -- 
 |
@@ -996,26 +1007,28 @@ Xwindows {
 | by default, dvtdisplay (in c)
 | but can be redefined in userdict
 
-/_csu {
-  dvt begin
-  { false 0 1 nodelist length 1 sub {/knode name
-      nodelist knode get /node name
-      node 0 get class /nullclass eq { pop true exit } if
-    } for not { (Too many nodes!\n) toconsole stop } if
-    4 1 roll node 4 put
-    2 copy connect node 2 put node 1 put node 0 put
-    true node 3 put printnode
-    node 2 get [ 3 -1 roll (getsocket setconsole vmresize ) ] send
-    null node 6 put
+  /_csu {
+    dvt begin
+    { 
+      false 0 1 nodelist length 1 sub {/knode name
+        nodelist knode get /node name
+        node 0 get class /nullclass eq { pop true exit } if
+      } for not { (Too many nodes!\n) toconsole stop } if
+      4 1 roll node 4 put
+      2 copy connect node 2 put node 1 put node 0 put
+      true node 3 put printnode
+      node 2 get [ 3 -1 roll (getsocket setconsole vmresize ) ] send
+      null node 6 put
 
-    node 2 get [
-      [Xwindows knode {
-          3 -1 roll not {killsockets abort} if
-          /knode name Xwindows_ and /otherXwindows name
+      node 2 get [
+        [getmydisplay_ Xwindows knode {
+          4 -1 roll not {killsockets abort} if
+          /knode name Xwindows_ and /otherXwindows name /getmydisplay name
           /filesave save def
           /fbuf vmstatus sub 10 div /b array def
           filesave capsave
-          { getstartupdir (/startup_dnode.d) fbuf readfile mkact exec
+          { 
+            getstartupdir (/startup_dnode.d) fbuf readfile mkact exec
           } stopped pop filesave restore
           console [
             [knode] otherXwindows {
@@ -1024,31 +1037,27 @@ Xwindows {
               (0 get dvt begin _csu1nox)
             } ifelse
           ] send
-      }] ( {} forall exec )
-    ] send
-  } stopped pop end
-} bind userdict 3 -1 roll put
+        }] ( {} forall exec )
+      ] send
+    } stopped pop end
+  } bind userdict 3 -1 roll put
 
-/getmydisplay 80 /b array Xdisplayname userdict 3 -1 roll put
-/getmydisplay_ ~getmydisplay def
+  /getmydisplay 80 /b array Xdisplayname userdict 3 -1 roll put
+  /getmydisplay_ ~getmydisplay def
 
-/_csu1x {/knode name
-  {
+  /_csu1x {/knode name {
     nodelist knode get /node name
     node 2 get [ [
       debug_dict /line1 get 0 node 0 get fax (:) fax * node 1 get * number
       0 exch getinterval 
-      getmydisplay_
       knode {/knode name
-        Xconnect
+        getmydisplay Xconnect
         userdict /myid put
         console [[knode] (0 get dvt begin _csu2x)] send
       }] ( {} forall exec )]  send
-  } stopped pop end
-} bind userdict 3 -1 roll put
+  } stopped pop end} bind userdict 3 -1 roll put
 
-/_csu1nox {/knode name
-  {
+  /_csu1nox {/knode name {
     nodelist knode get /node name
     node 2 get [ [
       debug_dict /line1 get 0 node 0 get fax (:) fax * node 1 get * number
@@ -1057,13 +1066,12 @@ Xwindows {
         userdict /myid put
         console [[knode] (0 get dvt begin _csu2nox)] send
       }] ( {} forall exec )]  send
-  } stopped pop end
-} bind userdict 3 -1 roll put
+  } stopped pop end} bind userdict 3 -1 roll put
 
-/_csu2x {/knode name
-  {
+  /_csu2x {/knode name {
     nodelist knode get /node name 
-    node 2 get [ [knode {/knode name
+    node 2 get [ [knode fontdict mousedict {
+      /mousedict name /fontdict name /knode name
       /filesave save def
       /fbuf vmstatus sub 10 div /b array def
       filesave capsave
@@ -1072,120 +1080,115 @@ Xwindows {
       1000 /b array userdict /shellbuf put
       console [[knode] (0 get dvt begin _csu3)] send
     } ] ( {} forall exec )] send
-  } stopped pop end
-} bind userdict 3 -1 roll put
+  } stopped pop end} bind userdict 3 -1 roll put
 
-/_csu2nox {/knode name
-  {
+  /_csu2nox {/knode name {
     nodelist knode get /node name 
     node 2 get [ [knode {/knode name
       1000 /b array userdict /shellbuf put
       console [[knode] (0 get dvt begin _csu3)] send
     } ] ( {} forall exec )] send
-  } stopped pop end
-} bind userdict 3 -1 roll put
+  } stopped pop end} bind userdict 3 -1 roll put
 
-/_csu3 {/knode name
-  {
+  /_csu3 {/knode name {
     knode setready
     knode color_node_def
-  } stopped pop end
-} bind userdict 3 -1 roll put
+  } stopped pop end} bind userdict 3 -1 roll put
 
 |---------------------------------------------------- set up node
 | [/color...] hostname port# group# <l opds dicts execs vm/M userdict > | -- 
 |
 | In addition to normal _csu behavior, colors the node on setup
 |
-/_ccsu {
-  _csu dvt begin {node 6 put} stopped pop end
-} bind userdict 3 -1 roll put
+  /_ccsu {
+    _csu dvt begin {node 6 put} stopped pop end
+  } bind userdict 3 -1 roll put
 
-/_ccsum {
-  _csum dvt begin {node 6 put} stopped pop end
-} bind userdict 3 -1 roll put
+  /_ccsum {
+    _csum dvt begin {node 6 put} stopped pop end
+  } bind userdict 3 -1 roll put
 |---------------------------------------------------- disconnect
 |  node# | --
 
-/_dc {
-  dvt begin /knode name
-  nodelist knode get /node name
-  node 0 get class /nullclass ne { 
-    node 2 get disconnect
-    nodeclear
-    check_kbdowner
-  } if
-  end
-} bind userdict 3 -1 roll put
+  /_dc {
+    dvt begin /knode name
+    nodelist knode get /node name
+    node 0 get class /nullclass ne { 
+      node 2 get disconnect
+      nodeclear
+      check_kbdowner
+    } if
+    end
+  } bind userdict 3 -1 roll put
 
 | nullsock true/false | --
-/socketmsg 1024 /b array def
-/socketdead {
-  exch dup null eq {pop} {
-    dvt begin
-    /deadsocket name
-    1 1 nodelist length 1 sub {/knode name
-      nodelist knode get /node name
-      node 2 get deadsocket eq {
-        loadcolor
-        socketmsg 0 [/red] {
-          (** [) fax * knode * number (] Dead connection on: ) fax
-          node 0 get fax (:) fax * node 1 get * number
-          (\n) fax
-        } color_text 0 exch getinterval toconsole
-        nodeclear
-      } if
-    } for
-    check_kbdowner
-    end
-  } ifelse
+  /socketmsg 1024 /b array def
+  /socketdead {
+    exch dup null eq {pop} {
+      dvt begin
+      /deadsocket name
+      1 1 nodelist length 1 sub {/knode name
+        nodelist knode get /node name
+        node 2 get deadsocket eq {
+          loadcolor
+          socketmsg 0 [/red] {
+            (** [) fax * knode * number (] Dead connection on: ) fax
+            node 0 get fax (:) fax * node 1 get * number
+            (\n) fax
+          } color_text 0 exch getinterval toconsole
+          nodeclear
+        } if
+      } for
+      check_kbdowner
+      end
+    } ifelse
   
-  {abort} if
-} bind def
+    {abort} if
+  } bind def
 
-/loadcolor {
-  userdict /color known not {getstartupdir (/color.d) fromfiles} if
-} bind def
+  /loadcolor {
+    userdict /color known not {getstartupdir (/color.d) fromfiles} if
+  } bind def
 
-Xwindows {
-  /_dx {
+  Xwindows {
+    /_dx {
+      dvt begin /knode name
+      nodelist knode get /node name
+      node 0 get class /nullclass ne {
+        node 2 get [
+          [ knode {/knode name
+            Xwindows {Xdisconnect} if
+            console [[knode] (0 get dvt begin _dx1)] send
+          }] ({} forall exec)] send
+      } if
+    } bind userdict 3 -1 roll put
+
+    /_dx1 {/knode name
+      nodelist knode get /node name
+      node 2 get disconnect
+      nodeclear
+      check_kbdowner
+      end | dvt dict
+    } bind def
+  } if
+
+  /_kill {
     dvt begin /knode name
     nodelist knode get /node name
     node 0 get class /nullclass ne {
-      node 2 get [
-        [ knode {/knode name
-          Xwindows {Xdisconnect} if
-          console [[knode] (0 get dvt begin _dx1)] send
-        }] ({} forall exec)] send
+      node 2 get dup (getsocket setconsole null vmresize) send disconnect
+      nodeclear
+      check_kbdowner
     } if
+    end    
   } bind userdict 3 -1 roll put
-
-  /_dx1 {/knode name
-    nodelist knode get /node name
-    node 2 get disconnect
-    nodeclear
-    check_kbdowner
-    end | dvt dict
-  } bind def
-} if
-
-/_kill {
-  dvt begin /knode name
-  nodelist knode get /node name
-  node 0 get class /nullclass ne {
-    node 2 get dup (getsocket setconsole null vmresize) send disconnect
-    nodeclear
-    check_kbdowner
-  } if
-  end    
-} bind userdict 3 -1 roll put
 
 |---------------------------------------------------- connection convenience
 |
-Xwindows {
-  /dnode_memory_ <l 0 0 0 0 0> def
-
-  /dnode_setup 11 dict dup begin
+  Xwindows {
+    /dnode_memory_ <x 0 0 0 0 0> def
+    
+    /dnode_setup 11 dict dup begin
     /display getmydisplay def
     /host (localhost) def
     /port 0 def
@@ -1197,13 +1200,13 @@ Xwindows {
     /execs 200    def
     /mb    500    def
     /user  200    def
-  end userdict 3 -1 roll put
+    end userdict 3 -1 roll put
 
-  /dnode_resize {
-    /getmydisplay_ dnode_setup /display get def
-    dnode_setup begin
+    /dnode_resize {
+      /getmydisplay_ dnode_setup /display get def
+      dnode_setup begin
       color dup null eq {pop ~_csu} {
-        dup class /lisclass ne {[exch]} if
+        dup class /listclass ne {[exch]} if
         ~_ccsu
       } ifelse
       host port group dnode_memory_
@@ -1212,36 +1215,36 @@ Xwindows {
       execs 1 index 2 put
       mb    1 index 3 put
       user  1 index 4 put
-    end 5 -1 roll exec
-    /getmydisplay_ ~getmydisplay def
-  } bind def
+      end 5 -1 roll exec
+      /getmydisplay_ ~getmydisplay def
+    } bind def
 
   | ~_c ~_cc | --
-  /dnode_up {
-    /getmydisplay_ dnode_setup /display get def
-    dnode_setup begin
+    /dnode_up {
+      /getmydisplay_ dnode_setup /display get def
+      dnode_setup begin
       color dup null eq {pop pop} {
         3 -1 roll pop
         dup class /listclass ne {[exch]} if
         exch
       } ifelse
       host port group
-    end
-    4 -1 roll exec
-    /getmydisplay_ ~getmydisplay def
-  } bind def
+      end
+      4 -1 roll exec
+      /getmydisplay_ ~getmydisplay def
+    } bind def
 
-  /dnode_display {dnode_setup /display put} bind userdict 3 -1 roll put
-  /dnode_host    {dnode_setup /host    put} bind userdict 3 -1 roll put
-  /dnode_port    {dnode_setup /port    put} bind userdict 3 -1 roll put
-  /dnode_group   {dnode_setup /group   put} bind userdict 3 -1 roll put
-  /dnode_color   {dnode_setup /color   put} bind userdict 3 -1 roll put
-  /dnode_opds    {dnode_setup /opds    put} bind userdict 3 -1 roll put
-  /dnode_dicts   {dnode_setup /dicts   put} bind userdict 3 -1 roll put
-  /dnode_execs   {dnode_setup /execs   put} bind userdict 3 -1 roll put
-  /dnode_mb      {dnode_setup /mb      put} bind userdict 3 -1 roll put
-  /dnode_user    {dnode_setup /user    put} bind userdict 3 -1 roll put
-} if
+    /dnode_display {dnode_setup /display put} bind userdict 3 -1 roll put
+    /dnode_host    {dnode_setup /host    put} bind userdict 3 -1 roll put
+    /dnode_port    {dnode_setup /port    put} bind userdict 3 -1 roll put
+    /dnode_group   {dnode_setup /group   put} bind userdict 3 -1 roll put
+    /dnode_color   {dnode_setup /color   put} bind userdict 3 -1 roll put
+    /dnode_opds    {dnode_setup /opds    put} bind userdict 3 -1 roll put
+    /dnode_dicts   {dnode_setup /dicts   put} bind userdict 3 -1 roll put
+    /dnode_execs   {dnode_setup /execs   put} bind userdict 3 -1 roll put
+    /dnode_mb      {dnode_setup /mb      put} bind userdict 3 -1 roll put
+    /dnode_user    {dnode_setup /user    put} bind userdict 3 -1 roll put
+  } if
 
 |---------------------------------------------------- talk to node
 |  target | --
@@ -1250,32 +1253,32 @@ Xwindows {
 | >0  - node#
 | <0  - group#
 
-/_t {
-  dvt begin {/target name
-    target 0 ge { 
-      target nodelist length gt ~stop if
-      nodelist target get /node name 
-      node 0 get class /nullclass ne { 
-        target /kbdowner name /knode target def
-      } ~stop ifelse
-    } { 
-      false 1 1 nodelist length 1 sub { /knode name
-        nodelist knode get /node name
+  /_t {
+    dvt begin {/target name
+      target 0 ge { 
+        target nodelist length gt ~stop if
+        nodelist target get /node name 
         node 0 get class /nullclass ne { 
-          node 4 get target eq { /kbdowner target def pop true } if
-        } if
+          target /kbdowner name /knode target def
+        } ~stop ifelse
+      } { 
+        false 1 1 nodelist length 1 sub { /knode name
+          nodelist knode get /node name
+          node 0 get class /nullclass ne { 
+            node 4 get target eq { /kbdowner target def pop true } if
+          } if
+        } for
+        not ~stop if
+      } ifelse
+
+      0 1 nodelist length 1 sub {/knode name
+        nodelist knode get /node name
+        printnode
       } for
-      not ~stop if
-    } ifelse
 
-    0 1 nodelist length 1 sub {/knode name
-      nodelist knode get /node name
-      printnode
-    } for
-
-  } stopped { (Think!\n) toconsole } if
-  end
-} bind userdict 3 -1 roll put
+    } stopped { (Think!\n) toconsole } if
+    end
+  } bind userdict 3 -1 roll put
 
 |------------------------ front end support ------------------------
 
@@ -1284,56 +1287,56 @@ Xwindows {
 | includes showing a blank field left by disconnected nodes);
 | otherwise the (existing) connection is printed (requires knode, node)
 
-/nodeclear {
-  knode setready
+  /nodeclear {
+    knode setready
+    
+    null  node 0 put
+    null  node 1 put
+    null  node 2 put
+    false node 3 put
+    0     node 4 put
+    {}    node 5 put
+    null  node 6 put
+  } bind def
+
+  /check_kbdowner {
+    true {node 0 get null eq and} fornodes {0 _t} {printnode} ifelse
+  } bind def
+
+  /pbuf 80 /b array def
   
-  null  node 0 put
-  null  node 1 put
-  null  node 2 put
-  false node 3 put
-  0     node 4 put
-  {}    node 5 put
-  null  node 6 put
-} bind def
-
-/check_kbdowner {
-  true {node 0 get null eq and} fornodes {0 _t} {printnode} ifelse
-} bind def
-
-/pbuf 80 /b array def
-
-/printnode {
-  Xwindows {drawnode} {
-    node 6 get null ne {loadcolor} if
-    node 0 get class /nullclass ne {
-      pbuf 0 {
-        -4 knode * number node 0 get fax
-        knode 0 ne {
-          (:) fax * node 1 get * number
-          node 3 get { ( - busy  ) } { ( - ready ) } ifelse fax
-          * node 4 get * number
-        } if
-        (\n) fax
-      } node 6 get dup null ne {exch color_text} {pop exec} ifelse
-      0 exch getinterval toconsole
-    } if
-  } ifelse
-} bind def
+  /printnode {
+    Xwindows {drawnode} {
+      node 6 get null ne {loadcolor} if
+      node 0 get class /nullclass ne {
+        pbuf 0 {
+          -4 knode * number node 0 get fax
+          knode 0 ne {
+            (:) fax * node 1 get * number
+            node 3 get { ( - busy  ) } { ( - ready ) } ifelse fax
+            * node 4 get * number
+          } if
+          (\n) fax
+        } node 6 get dup null ne {exch color_text} {pop exec} ifelse
+        0 exch getinterval toconsole
+      } if
+    } ifelse
+  } bind def
 
 |-------------------------------------- setready or setbusy
 | - usage: node# | --
 | - sets node ready or busy
 | - shows new node state in cluster window
 
-/setready { /knode name
-  nodelist knode get /node name false node 3 put
-  printnode
-} bind def
+  /setready { /knode name
+    nodelist knode get /node name false node 3 put
+    printnode
+  } bind def
 
-/setbusy { /knode name
-  nodelist knode get /node name true node 3 put
-  printnode
-} bind def
+  /setbusy { /knode name
+    nodelist knode get /node name true node 3 put
+    printnode
+  } bind def
 
 |---------------------------------------- setcolor
 | Used when color_node is called
@@ -1343,27 +1346,27 @@ Xwindows {
 |
 | [/color_name...] node# | -- <<nodelist->node#->5 is set>> 
 |
-/setcolor {
+  /setcolor {
     Xwindows {
-        dvt begin colorize begin {/knode name /colorlist name
-            /node nodelist knode get def
-            reset
-            colorlist {mkact exec} forall
-            ~[
-                (   ) BLACKTEXT ~drawtext
-                nodeforecolor
-                nodebackcolor
-                nodebold
-                nodeitalic
-                nodefaint
-                nodeul
-                nodeblink
-                nodeneg
-            ] node 5 put
-            drawnode
-        } stopped end end ~stop if
+      dvt begin colorize begin {/knode name /colorlist name
+        /node nodelist knode get def
+        reset
+        colorlist {mkact exec} forall
+        ~[
+          (   ) BLACKTEXT ~drawtext
+          nodeforecolor
+          nodebackcolor
+          nodebold
+          nodeitalic
+          nodefaint
+          nodeul
+          nodeblink
+          nodeneg
+        ] node 5 put
+        drawnode
+      } stopped end end ~stop if
     } {pop pop} ifelse
-} bind userdict 3 -1 roll put
+  } bind userdict 3 -1 roll put
 
 |---------------------------------------- color_node_def
 | Used when _csu2 is called
@@ -1372,88 +1375,91 @@ Xwindows {
 |
 | <<nodelist->node#->6 is set/null>> node# | --
 |
-/color_node_def {
-  dvt /nodelist get 1 index get 6 get
-  dup null eq {pop pop Xwindows {drawnode} if} {exch color_node} ifelse
-} bind userdict 3 -1 roll put
-
-Xwindows {
-/colorize 100 dict dup begin
-  /NORMALFONT 
-     (-b&h-lucida-medium-r-normal-sans-0-0-75-75-p-0-iso8859-1) def
-  /BOLDFONT 
-     (-b&h-lucida-bold-r-normal-sans-0-0-75-75-p-0-iso8859-1) def
-  /ITALICFONT 
-    (-b&h-lucida-medium-i-normal-sans-0-0-75-75-p-0-iso8859-1) def
-  /BOLDITALICFONT 
-    (-b&h-lucida-bold-i-normal-sans-0-0-75-75-p-0-iso8859-1) def
-
-  /BLACK   <d 0   0   0  > mapcolor def
-  /RED     <d 1   0   0  > mapcolor def
-  /GREEN   <d 0   1   0  > mapcolor def
-  /BLUE    <d 0   0   1  > mapcolor def
-  /WHITE   <d 1   1   1  > mapcolor def
-  /YELLOW  <d 1   1   0  > mapcolor def
-  /MAGENTA <d 1   0.5 0.5> mapcolor def
-  /CYAN    <d 0.5 0.5 1  > mapcolor def
-
-  /makecolortext {[NORMALFONT 3 -1 roll -1 0]} bind def
-  /BLACKTEXT   BLACK   makecolortext def
-  /REDTEXT     RED     makecolortext def
-  /GREENTEXT   GREEN   makecolortext def
-  /YELLOWTEXT  YELLOW  makecolortext def
-  /BLUETEXT    BLUE    makecolortext def
-  /MAGENTATEXT MAGENTA makecolortext def
-  /CYANTEXT    CYAN    makecolortext def
-  /WHITETEXT   WHITE   makecolortext def
-
-  /makefonttext {[exch BLACK -1 0]} bind def
-  /BOLDTEXT   BOLDFONT       makefonttext def
-  /ITALICTEXT ITALICFONT     makefonttext def
-  /FAINTTEXT  BLACKTEXT                   def
-  /UNDERTEXT  BLACKTEXT                   def
-  /SLOWTEXT   BOLDTEXT                    def
-  /RAPIDTEXT  BOLDITALICFONT makefonttext def
-  /NEGTEXT    WHITETEXT                   def 
-
-  /red     {/nodeforecolor {( Fr) REDTEXT     ~drawtext} bind def} bind def
-  /black   {/nodeforecolor {( Fb) BLACKTEXT   ~drawtext} bind def} bind def
-  /green   {/nodeforecolor {( Fg) GREENTEXT   ~drawtext} bind def} bind def
-  /yellow  {/nodeforecolor {( Fy) REDTEXT     ~drawtext} bind def} bind def
-  /blue    {/nodeforecolor {( Fl) BLUETEXT    ~drawtext} bind def} bind def
-  /magenta {/nodeforecolor {( Fm) MAGENTATEXT ~drawtext} bind def} bind def
-  /cyan    {/nodeforecolor {( Fc) CYANTEXT    ~drawtext} bind def} bind def
-  /white   {/nodeforecolor {( Fw) WHITETEXT   ~drawtext} bind def} bind def
-
-  /on_red     {/nodebackcolor {( Br) REDTEXT     ~drawtext} bind def} bind def
-  /on_black   {/nodebackcolor {( Bb) BLACKTEXT   ~drawtext} bind def} bind def
-  /on_green   {/nodebackcolor {( Bg) GREENTEXT   ~drawtext} bind def} bind def
-  /on_yellow  {/nodebackcolor {( By) REDTEXT     ~drawtext} bind def} bind def
-  /on_blue    {/nodebackcolor {( Bl) BLUETEXT    ~drawtext} bind def} bind def
-  /on_magenta {/nodebackcolor {( Bm) MAGENTATEXT ~drawtext} bind def} bind def
-  /on_cyan    {/nodebackcolor {( Bc) CYANTEXT    ~drawtext} bind def} bind def
-  /on_white   {/nodebackcolor {( Bw) WHITETEXT   ~drawtext} bind def} bind def
-
-  /bold        {/nodebold   {( Sb) BOLDTEXT   ~drawtext} bind def} bind def
-  /italic      {/nodeitalic {( Si) ITALICTEXT ~drawtext} bind def} bind def
-  /faint       {/nodefaint  {( Sf) FAINTTEXT  ~drawtext} bind def} bind def
-  /underlined  {/nodeul     {( S_) UNDERTEXT  ~drawtext} bind def} bind def
-  /slow_blink  {/nodeblink  {( Ss) SLOWTEXT   ~drawtext} bind def} bind def
-  /rapid_blink {/nodeblink  {( Sr) RAPIDTEXT  ~drawtext} bind def} bind def
-  /negative    {/nodeneg    {( Sn) NEGTEXT    ~drawtext} bind def} bind def
+  /color_node_def {
+    dvt /nodelist get 1 index get 6 get
+    dup null eq {pop pop Xwindows {drawnode} if} {exch color_node} ifelse
+  } bind userdict 3 -1 roll put
+  
+  Xwindows {
+    /colorize 100 dict dup begin | {
+      /NORMALFONT {fontdict /NORMALFONT get} bind def
+      /BOLDFONT {fontdict /BOLDFONT get} bind def
+      /ITALICFONT {fontdict /ITALICFONT get} bind def
+      /BOLDITALICFONT {fontdict /BOLDITALICFONT get} bind def
       
-  /reset {
-    /nodebold      {} def
-    /nodeitalic    {} def
-    /nodefaint     {} def
-    /nodeul        {} def
-    /nodeblink     {} def
-    /nodeneg       {} def
-    /nodeforecolor {} def
-    /nodebackcolor {} def
-  } def
-end def
-} if
+      /BLACK   <d 0   0   0  > mapcolor def
+      /RED     <d 1   0   0  > mapcolor def
+      /GREEN   <d 0   1   0  > mapcolor def
+      /BLUE    <d 0   0   1  > mapcolor def
+      /WHITE   <d 1   1   1  > mapcolor def
+      /YELLOW  <d 1   1   0  > mapcolor def
+      /MAGENTA <d 1   0.5 0.5> mapcolor def
+      /CYAN    <d 0.5 0.5 1  > mapcolor def
+      
+      /makecolortext {~NORMALFONT [null 4 -1 roll -1 0] makefont} bind def
+      |/makecolortext {[NORMALFONT 3 -1 roll -1 0]} bind def
+      /BLACKTEXT   BLACK   makecolortext def
+      /REDTEXT     RED     makecolortext def
+      /GREENTEXT   GREEN   makecolortext def
+      /YELLOWTEXT  YELLOW  makecolortext def
+      /BLUETEXT    BLUE    makecolortext def
+      /MAGENTATEXT MAGENTA makecolortext def
+      /CYANTEXT    CYAN    makecolortext def
+      /WHITETEXT   WHITE   makecolortext def
+
+      /makefonttext {[null BLACK -1 0] makefont} bind def
+      |/makefonttext {[exch BLACK -1 0]} bind def
+      /BOLDTEXT   ~BOLDFONT       makefonttext def
+      /ITALICTEXT ~ITALICFONT     makefonttext def
+      /FAINTTEXT  {BLACKTEXT}                  def
+      /UNDERTEXT  {BLACKTEXT}                  def
+      /SLOWTEXT   {BOLDTEXT}                   def
+      /RAPIDTEXT  ~BOLDITALICFONT makefonttext def
+      /NEGTEXT    {WHITETEXT}                  def 
+
+      /red     {/nodeforecolor {( Fr) REDTEXT     ~drawtext} bind def} bind def
+      /black   {/nodeforecolor {( Fb) BLACKTEXT   ~drawtext} bind def} bind def
+      /green   {/nodeforecolor {( Fg) GREENTEXT   ~drawtext} bind def} bind def
+      /yellow  {/nodeforecolor {( Fy) YELLOWTEXT  ~drawtext} bind def} bind def
+      /blue    {/nodeforecolor {( Fl) BLUETEXT    ~drawtext} bind def} bind def
+      /magenta {/nodeforecolor {( Fm) MAGENTATEXT ~drawtext} bind def} bind def
+      /cyan    {/nodeforecolor {( Fc) CYANTEXT    ~drawtext} bind def} bind def
+      /white   {/nodeforecolor {( Fw) WHITETEXT   ~drawtext} bind def} bind def
+      
+      /on_red  {/nodebackcolor {( Br) REDTEXT     ~drawtext} bind def} bind def
+      /on_black {/nodebackcolor {( Bb) BLACKTEXT   ~drawtext} bind def} bind def
+      /on_green {/nodebackcolor {( Bg) GREENTEXT   ~drawtext} bind def} bind def
+      /on_yellow 
+      {/nodebackcolor {( By) YELLOWTEXT  ~drawtext} bind def} bind def
+      /on_blue    
+      {/nodebackcolor {( Bl) BLUETEXT    ~drawtext} bind def} bind def
+      /on_magenta 
+      {/nodebackcolor {( Bm) MAGENTATEXT ~drawtext} bind def} bind def
+      /on_cyan    
+      {/nodebackcolor {( Bc) CYANTEXT    ~drawtext} bind def} bind def
+      /on_white   
+      {/nodebackcolor {( Bw) WHITETEXT   ~drawtext} bind def} bind def
+
+      /bold        {/nodebold   {( Sb) BOLDTEXT   ~drawtext} bind def} bind def
+      /italic      {/nodeitalic {( Si) ITALICTEXT ~drawtext} bind def} bind def
+      /faint       {/nodefaint  {( Sf) FAINTTEXT  ~drawtext} bind def} bind def
+      /underlined  {/nodeul     {( S-) UNDERTEXT  ~drawtext} bind def} bind def
+      /slow_blink  {/nodeblink  {( Ss) SLOWTEXT   ~drawtext} bind def} bind def
+      /rapid_blink {/nodeblink  {( Sr) RAPIDTEXT  ~drawtext} bind def} bind def
+      /negative    {/nodeneg    {( Sn) NEGTEXT    ~drawtext} bind def} bind def
+      
+      /reset {
+        /nodebold      {} def
+        /nodeitalic    {} def
+        /nodefaint     {} def
+        /nodeul        {} def
+        /nodeblink     {} def
+        /nodeneg       {} def
+        /nodeforecolor {} def
+        /nodebackcolor {} def
+      } def | }
+    end def
+  } if
 
 |------------------ machinery of 'nodes' window -----------------------
 |
@@ -1485,136 +1491,122 @@ end def
 | The services of the cluster window are duplicated through dvt procedures
 | that you can invoke from the keyboard (obviously this is your resort when
 | Xwindows is not available).
+  Xwindows {
+    /wW 200 2 add def
+    /wH nodelist length 13 mul 2 add def
+    /woutline [ 0 0 wW 1 sub 0 wW 1 sub wH 1 sub 0 wH 1 sub 0 0 ] def
+    /noderects [
+      /x 1 def
+      1 13 nodelist length 1 sub 13 mul 1 add { /y name
+        /r 4 /w array def
+        x r 0 put  y r 1 put wW 2 sub r 2 put 13 r 3 put
+        r
+      } for
+    ] def
+    /nodelocs [
+      /x 5 def
+      12 13 nodelist length 1 sub 13 mul 12 add { /y name
+        [ x y 6 sub ] mkact
+      } for
+    ] def
 
-Xwindows {
-/wW 200 2 add def
-/wH nodelist length 13 mul 2 add def
-/woutline [ 0 0 wW 1 sub 0 wW 1 sub wH 1 sub 0 wH 1 sub 0 0 ] def
-/noderects [
-    /x 1 def
-    1 13 nodelist length 1 sub 13 mul 1 add { /y name
-       /r 4 /w array def
-       x r 0 put  y r 1 put wW 2 sub r 2 put 13 r 3 put
-       r
-       } for
-  ] def
-/nodelocs [
-    /x 5 def
-    12 13 nodelist length 1 sub 13 mul 12 add { /y name
-       [ x y 6 sub ] mkact
-       } for
-  ] def
+    /NORMALFONT {fontdict /NORMALFONT get} def
+    /BOLDFONT {fontdict /BOLDFONT get} def
+    
+    /BLACK <d 0 0 0 >      mapcolor def
+    /GRAY  <d 0.2 0.2 0.2> mapcolor def
+    /BLUE  <d 0 0 1 >      mapcolor def
+    /RED   <d 1 0 0 >      mapcolor def
+    /LBLUE <d 0.1 0.1 0.9> mapcolor def
 
-/NORMALFONT 
-    (-b&h-lucida-medium-r-normal-sans-0-0-75-75-p-0-iso8859-1) def
-/BOLDFONT 
-    (-b&h-lucida-bold-r-normal-sans-0-0-75-75-p-0-iso8859-1) def
-
-/BLACK <d 0 0 0 >      mapcolor def
-/GRAY  <d 0.2 0.2 0.2> mapcolor def
-/BLUE  <d 0 0 1 >      mapcolor def
-/RED   <d 1 0 0 >      mapcolor def
-/LBLUE <d 0.1 0.1 0.9> mapcolor def
-
-/BG <d 235 243 248 >  255 div mapcolor def
-/HBG <d 166 219 160 > 255 div mapcolor def
-
-/NORMALTEXT   [NORMALFONT BLACK -1 0] def
-/HIGHTEXT     [BOLDFONT   BLUE  -1 0] def
+    /BG <d 235 243 248 >  255 div mapcolor def
+    /HBG <d 166 219 160 > 255 div mapcolor def
+    
+    /NORMALTEXT ~NORMALFONT [null BLACK -1 0] makefont def
+    |/NORMALTEXT   [NORMALFONT BLACK -1 0] bind def
+    /HIGHTEXT ~BOLDFONT [null BLUE -1 0] makefont def
+    |/HIGHTEXT     [BOLDFONT   BLUE  -1 0] bind def
 
 |--------------------------------------------- resist resizing
 
-/windowsize {
-  wH ne exch wW ne or {
-    { [
-      wid wW wH resizewindow
-    } stopped cleartomark
-  } if end
-} bind def
+    /windowsize {
+      wH ne exch wW ne or {
+        { [ | ]
+          wid wW wH resizewindow
+        } stopped cleartomark
+      } if end
+    } bind def
 
 |--------------------------------------------- draw cluster window
 
-/drawwindow {
-{ [ busy { stop } if     | stop capsule + reentry prevention
-  /busy true def
-  wid woutline BLACK drawline
-  0 1 nodelist length 1 sub { /knode name
-      nodelist knode get /node name
-      drawnode
-    } for
-} stopped cleartomark /busy false def
-end
-} bind def
+    /drawwindow {
+      { [ busy { stop } if     | stop capsule + reentry prevention ]
+        /busy true def
+        wid woutline BLACK drawline
+        0 1 nodelist length 1 sub { /knode name
+          nodelist knode get /node name
+          drawnode
+        } for
+      } stopped cleartomark /busy false def
+      end
+    } bind def
 
-/drawnode {
-   wid noderects knode get 
-     node 3 get { HBG } { BG } ifelse fillrectangle
-   node 0 get class /nullclass ne {
-     wid nodelocs knode get exec
-     pbuf 0 node 0 get fax
-     knode 0 ne {
-       (:) fax * node 1 get * number
-     } if 
-     0 exch getinterval
-     kbdowner 0 ge {knode} {node 4 get} ifelse
-     kbdowner eq {HIGHTEXT} {NORMALTEXT} ifelse
-     drawtext node 5 get exec pop pop pop
-   } if
-} bind def
+    /drawnode {
+      wid noderects knode get 
+      node 3 get { HBG } { BG } ifelse fillrectangle
+      node 0 get class /nullclass ne {
+        wid nodelocs knode get exec
+        pbuf 0 node 0 get fax
+        knode 0 ne {
+          (:) fax * node 1 get * number
+        } if 
+        0 exch getinterval
+        kbdowner 0 ge {knode} {node 4 get} ifelse
+        kbdowner eq {HIGHTEXT} {NORMALTEXT} ifelse
+        drawtext node 5 get exec pop pop pop
+      } if
+    } bind def
 
 |------------------------------------------------- mouseclick
 | - a simple mouse click selects a node
 
-|-- mouse key combos
-/plain1 {
-  mB 1 eq mM 0 eq and
-} bind def
+    /thehorses_actions 5 dict dup begin | {
+      /raise {raise_emacs} bind def
+      
+      /click {node 0 get class /nullclass ne {
+        /kbdowner knode def c_
+      } if} bind def
+      
+      /cancel {node 0 get class /nullclass ne {
+        false nodelist knode get 3 put c_
+      } if} bind def
+      
+      /group {node 0 get class /nullclass ne {
+        node 4 get _t
+      } if} bind def
 
-/shift1_plain2 {
-  mB 1 eq mM 1 eq and
-  mB 2 eq mM 0 eq and or
-} bind def
-
-/ctrl1_plain3 {
-  mB 1 eq mM 4 eq and
-  mB 3 eq mM 0 eq and or
-} bind def
-
-/meta1_plain4or5 {
-  mB 1 eq            mM 8 eq mM 10 eq or and
-  mB 4 eq mB 5 eq or mM 0 eq             and or
-} bind def
-
-/SM1_S4or5 {
-  mB 1 eq            mM 9 eq mM 11 eq or and
-  mB 5 eq mB 5 eq or mM 1 eq             and or
-} bind def
-
-/mouseclick { 
-    { [ 4 1 roll busy { stop } if  | stopped and reentry lock
-      /busy true def
-      dup -16 bitshift /mB name 255 and /mM name
-      /mY name /mX name 
-      SM1_S4or5 {raise_emacs stop} if
-      /knode mY 1 sub 13 div def
-      nodelist knode get /node name
-      node 0 get class /nullclass eq { stop } if
-      plain1 { /kbdowner knode def c_ stop } if
-      shift1_plain2 { false nodelist knode get 3 put c_ stop } if
-      ctrl1_plain3 { node 4 get _t stop } if
-      meta1_plain4or5 {
+      /map {node 0 get class /nullclass ne {
         knode 0 eq {null true mapwindow} {
           node 3 get not {
             node 2 get (Xwindows {null true mapwindow} if) send
           } if
         } ifelse
-      } if
-    } stopped cleartomark /busy false def
-  end 
-} bind def
-} if
+      } if} bind def | }
+    end def
 
-end userdict /dvt put
+    /mouseclick { 
+      { [ 4 1 roll busy {stop} if  | stopped and reentry lock | ]
+        /busy true def
+        /mS name /mY name /mX name
+        /knode mY 1 sub 13 div def
+        nodelist knode get /node name
+        mS /thehorses thehorses_actions mouseaction pop
+      } stopped cleartomark /busy false def
+      end 
+    } bind def
+  } if
+  | }
+end userdict 3 -1 roll put
 
 |--------------------------------- macros ------------------------------
 | 
@@ -1629,7 +1621,7 @@ end userdict /dvt put
 |               the phrase
 | control-F1  - copy the last line of output (the template) into the
 |               console input (so you can edit the phrase and then press
-|               'return' to execute the phrase
+|               'return' to execute the phrase)
 |
 | 'makemacros' (referenced in userdict) sets up a macro window:
 | use: macrodict | --
@@ -1657,20 +1649,21 @@ end userdict /dvt put
 |  - each 'command' string should be terminated by '\n'
 |
 
-{ begin
-  { Xwindows not ~stop if
+/makemacros {begin
+  { 
+    Xwindows not ~stop if
     screensize /scrH name /scrW name
     macros /rowH get /rowH name
     /nkeys 0 def /nrows 1 def
     [ [ macros /pass0 get begin keywords end ] ] /rowlist name
     commands length nkeys ne
       { (Macros: keys do not match commands!\n) toconsole stop } if
-    /wW scrW 3 div def /wH nrows rowH mul 6 add def
-    [ [ 2 scrH wH sub 2 sub wW wH ]
-      myname myshortname makewindow /wid name pop
+    /wW 1 def /wH nrows rowH mul 6 add def
+    [ [ 2 scrH wH sub 2 sub wW wH ] | ]
+    myname myshortname makewindow /wid name pop
     /woutline [ 0 0 wW 1 sub 0 wW 1 sub wH 1 sub 0 wH 1 sub 0 0 ] def
     /wpane [ 1 1 wW 2 sub wH 2 sub ] def
-    /line 4 /l array def
+    /line 4 /x array def
     macros /windowsize get /windowsize name
     macros /drawwindow get /drawwindow name
     macros /mouseclick get /mouseclick name
@@ -1685,126 +1678,139 @@ end userdict /dvt put
       0 exch getinterval mkact exec put
     wid true mapwindow
   } stopped pop end
-} userdict /makemacros put 
+} userdict 3 -1 roll put 
 
    
 |---------------------------- macros ----------------------------------
 
 Xwindows {
-100 dict dup begin
-
-/NORMALFONT 
-    (-b&h-lucida-medium-r-normal-sans-0-0-75-75-p-0-iso8859-1) def
-/BOLDFONT 
-    (-b&h-lucida-bold-r-normal-sans-0-0-75-75-p-0-iso8859-1) def
-/BLACK <d 0 0 0 > mapcolor def
-/GRAY  <d 0.5 0.5 0.5 > mapcolor def
-/BLUE  <d 0 0 1 > mapcolor def
-/RED   <d 1 0 0 > mapcolor def
-/BG <d 235 243 248 > 255 div mapcolor def
-/TEXT [ BOLDFONT BLACK -1 -1 ] def
-/rowH 20 def
-
-|------------------ resist resizing of a macro window
-
-/windowsize {
-  wH ne exch wW ne or {
-    { [
-      wid wW wH resizewindow
-    } stopped cleartomark
-  } if end
-} bind def
-
-|------------------ draw a macro window
-
-/drawwindow {
-  { [ 
-    wid woutline BLACK drawline
-    wid wpane BG fillrectangle
-    newmacros { [ [ } if
-    rowH 1 sub dup line 1 put line 3 put
-    /x 5 def /y rowH 2 sub def
-    macros /pass1 get begin keywords end
-    newmacros { ] ] /boxlist name } if
-    /newmacros false def
-  } stopped cleartomark
-  end
-} bind def
-
-|------------------ respond to a mouseclick into a macro window
-/outcolor [/blue /bold] def
+  /macros 100 dict dup begin | {
   
-/checkcolor {
-  userdict /color known {
-    /checkcolor {} def
-    0 1 rowlist length 1 sub {
-      dup rowlist exch get length 1 sub
-      0 1 3 -1 roll { | r# c#
-        outcolor rowlist 3 index get 2 index get color_string
-        rowlist 3 index get 3 -1 roll put
-      } for
-      pop
-    } for
-  } if
-} def
-  
-/mouseclick { 
-    { [ 4 1 roll
-      /mM name /mY name /mX name
-      /krow mY 1 sub rowH div def
-      /kbox 0 def
-      checkcolor
-      false boxlist krow get { /box name
-           mX box 0 get ge mX box 1 get le and
-             { pop true exit }
-             { /kbox kbox 1 add def }
-             ifelse
-         } forall
-      { rowlist krow get kbox get toconsole
+    /NORMALFONT {fontdict /NORMALFONT get} bind def
+    /BOLDFONT {fontdict /BOLDFONT get} bind def
+    /BLACK <d 0 0 0 > mapcolor def
+    /GRAY  <d 0.5 0.5 0.5 > mapcolor def
+    /BLUE  <d 0 0 1 > mapcolor def
+    /RED   <d 1 0 0 > mapcolor def
+    /BG <d 235 243 248 > 255 div mapcolor def
+    /TEXT ~BOLDFONT [null BLACK -1 -1] makefont def
+    |/TEXT [BOLDFONT BLACK -1 -1] bind def
+    /rowH 20 def
+
+  |------------------ resist resizing of a macro window
+
+    /windowsize {
+      wH ne exch wW ne or {
+        { [ | ]
+          wid wW wH resizewindow
+        } stopped cleartomark
       } if
-    } stopped cleartomark
-  end 
-} bind def
+      end
+    } bind def
 
-|------------------ pass0: count keywords, rows for window layout
+  |------------------ draw a macro window
 
-4 dict dup begin
-/NL  { ] [ /nrows nrows 1 add def } bind def
-/PRE { pop } bind def
-/KEY { pop commands nkeys get /nkeys nkeys 1 add def } bind def
-/GAP { pop } bind def
-end mkread /pass0 name
+    /drawwindow {
+      { [ | ]
+        wid woutline BLACK drawline
+        wid wpane BG fillrectangle
+        newmacros { [ [ } if | ] ]
+        rowH 1 sub dup line 1 put line 3 put
+        /x_ 0 def /x 5 def /y rowH 2 sub def
+        macros /pass1 get begin keywords end
+        /wW x_ 5 add def
+        wid wW wH resizewindow | [ [
+          newmacros { ] ] /boxlist name} if
+        /newmacros false def
+      } stopped cleartomark
+      end
+    } bind def
 
-|------------------ pass1: render (and measure) text and underlines;
-|                          a box gives the left and right x of the
-|                          keyword text
-4 dict dup begin
-/NL  { ul { /ul false def x line 2 put
-            wid line GRAY drawline
-          } if
-       line 1 get rowH add dup line 1 put line 3 put
-       /x 5 def /y y rowH add def
-       newmacros { ] [ } if
-     } bind def
-/PRE { /s name x line 0 put /ul true def
-       wid x y s TEXT drawtext pop /x name pop
-     } bind def
-/KEY { /s name
-       /xl x def
-       wid x y s TEXT drawtext pop /x name pop
-       newmacros { /box 2 /l array def
-                   xl box 0 put x box 1 put
-                   box
-                 } if
-     } bind def
-/GAP { ul { /ul false def x line 2 put
-            wid line GRAY drawline
-          } if
-       { wid x y ( ) TEXT drawtext pop /x name pop } repeat
-     } bind def
-end mkread /pass1 name
+  |------------------ respond to a mouseclick into a macro window
+    /outcolor [/blue /bold] def
+    
+    /checkcolor {
+      userdict /color known {
+        /checkcolor {} def
+        0 1 rowlist length 1 sub {
+          dup rowlist exch get length 1 sub
+          0 1 3 -1 roll { | r# c#
+            outcolor rowlist 3 index get 2 index get color_string
+            rowlist 3 index get 3 -1 roll put
+          } for
+          pop
+        } for
+      } if
+    } def
+  
+    /macros_actions 1 dict dup begin | {
+      /click {} bind def | }
+    end def
 
-end userdict /macros put
+    /mouseclick { 
+      { [ 4 1 roll | ]
+        /mS name /mY name /mX name
+        mS /macros macros /macros_actions get mouseaction not {stop} if
+        /krow mY 1 sub rowH div def
+        /kbox 0 def
+        checkcolor
+        false boxlist krow get { /box name
+          mX box 0 get ge mX box 1 get le and
+          { pop true exit } { /kbox kbox 1 add def } ifelse
+        } forall
+        { rowlist krow get kbox get toconsole } if
+      } stopped cleartomark
+      end 
+    } bind def
+
+  |------------------ pass0: count keywords, rows for window layout
+  
+    4 dict dup begin
+    /NL  { ] [ /nrows nrows 1 add def } bind def
+    /PRE { pop } bind def
+    /KEY { pop commands nkeys get /nkeys nkeys 1 add def } bind def
+    /GAP { pop } bind def
+    end mkread /pass0 name
+
+  |------------------ pass1: render (and measure) text and underlines;
+  |                          a box gives the left and right x of the
+  |                          keyword text
+    5 dict dup begin
+    /xname {dup /x name dup x_ le ~pop {/x_ name} ifelse} bind def
+    
+    /NL  {
+      ul { /ul false def x line 2 put
+        wid line GRAY drawline
+      } if
+      line 1 get rowH add dup line 1 put line 3 put
+      5 xname /y y rowH add def
+      newmacros { ] [ } if
+    } bind def
+    
+    /PRE { /s name x line 0 put /ul true def
+      wid x y s TEXT drawtext pop xname pop
+    } bind def
+    
+    /KEY { /s name
+      /xl x def
+      wid x y s TEXT drawtext pop xname pop
+      newmacros { /box 2 /x array def
+        xl box 0 put x box 1 put
+        box
+      } if
+    } bind def
+  
+    /GAP {
+      ul { /ul false def x line 2 put
+        wid line GRAY drawline
+      } if
+      { wid x y ( ) TEXT drawtext pop xname pop } repeat
+    } bind def
+  
+    end mkread /pass1 name
+
+    | }
+  end userdict 3 -1 roll put
 } if
 
 |================= debug abort ==================
@@ -1822,33 +1828,55 @@ end userdict /macros put
 
 /s_debug_abort {
   true userdict /debug_abort_c put
-  /debug_abort find userdict /abort put
-} def
+  debug_abort_su
+} bind def
 
 /e_debug_abort {
   false userdict /debug_abort_c put
-  /regular_abort find userdict /abort put
-} def
+  debug_abort_end
+} bind def
 
 |--------------------------------------------- dstate_
 | get current stacks state (see it in the eye)
+/reverse { | [ n1 .. nx ] | [ nx ... n1] 
+  [exch dup length 1 sub -1 0 { | \[ [] i
+    1 index exch get | \[ [] x
+    exch | \[ x []   
+  } for pop]
+} bind def
+  
 /dstate_ {
   countexecstack list execstack dup length 1 sub 0 exch getinterval
+    reverse
     userdict /d_execstack put
 
-  [count 1 ne {count 1 roll} if]
+  [count 1 ne {count 1 roll} if] dup
+    reverse
     userdict /d_opstack put
+    {} forall
     
   countdictstack list dictstack dup length 2 sub 2 exch getinterval
+    reverse
     userdict /d_dictstack put
 } bind def
+  
+/debug_abort_su {
+  /debug_abort find userdict /abort put
+} bind def
+
+/debug_abort_end {
+  debug_abort_c not {
+    /regular_abort find userdict /abort put
+  } if
+} bind def
+
 
 |-------------------- debug_abort
 | calls dstate_ to get debug info
 | fixes abort to normal
 | and continues aborting
 /debug_abort {
-  debug_abort_c not {/regular_abort find userdict /abort put} if
+  debug_abort_end
   dstate_
   abort
 } bind def
@@ -1858,11 +1886,7 @@ end userdict /macros put
 | and undoes it if no abort occurs
 | -- debug_abort undoes itself when called
 /debug_aborted { | {} --> ???
-  /debug_abort find userdict /abort put
-  
-  aborted {(abort\n) toconsole abort} {
-    debug_abort_c not {/regular_abort find userdict /abort put} if
-  } ifelse
+  debug_abort_su aborted debug_abort_end {(abort\n) toconsole abort} if
 } bind def
 
 |----------------------------------------- color_node
@@ -1893,17 +1917,21 @@ end userdict /macros put
 
 Xwindows {
   /take_input_focus {end} bind def
-  /pop_emacs {} def
-  
+  /raise_emacs {} def
+
+  /take_input_setup {pop pop} bind def
+@ENABLE_EMACSCLIENT_START@ 
   /take_input_setup {
     userdict begin
     /emacs_buffer_name name /emacs_server_name name
     
     /take_input_focus ~[
       1024 /b array 0 | {
-        (emacsclient -s ) fax
+        (exec ) fax
+        getstartupdir fax
+        (emacsclient-run.sh ) fax
         emacs_server_name fax
-        ( -n --eval "\(d-comint-mode-focus \") fax
+        ( "\(d-comint-mode-focus \") fax
         emacs_buffer_name fax
         (\"\)") fax
         0 exch getinterval | }
@@ -1913,9 +1941,11 @@ Xwindows {
 
     /raise_emacs ~[
       1024 /b array 0 | {
-        (emacsclient -s ) fax
+        (exec ) fax
+        getstartupdir fax
+        (emacsclient-run.sh ) fax
         emacs_server_name fax
-        ( -n --eval "\(d-comint-mode-focus-raise \") fax
+        ( "\(d-comint-mode-focus-raise \") fax
         emacs_buffer_name fax
         (\"\)") fax
         0 exch getinterval | }
@@ -1924,6 +1954,7 @@ Xwindows {
 
     end
   } bind def
+@ENABLE_EMACSCLIENT_END@  
 
   /raise_thehorses {TheHorsesWid true mapwindow end} bind def
   /raise_all {
@@ -1948,11 +1979,288 @@ Xwindows {
   } bind def
 } if
 
+/basefontdesc 8 dict dup begin
+  /family (lucida) def
+  /weight (medium) def
+  /slant (r) def
+  /points (140) def
+  /BOLDFONT 2 dict dup begin /weight (bold) def /slant (r) def end def
+  /ITALICFONT 1 dict dup begin /slant (i) def end def
+  /BOLDITALICFONT 2 dict dup begin /weight (bold) def /slant (i) def end def
+end def
+
+/mkfontdict {/fontdesc name
+  4 dict {
+    /NORMALFONT /BOLDFONT /ITALICFONT /BOLDITALICFONT
+  } {/fontname name
+    /fontlength 0 def [
+      {
+        /foundry /family /weight /slant /width /style /pixels /points
+        /resx /resy /space /avgwidth /registry /encoding
+      } {/fontvalue name
+        (-) (*) {
+          fontdesc fontname known {
+            fontdesc fontname get fontvalue known {
+              pop fontdesc fontname get fontvalue get
+              exit
+            } if
+          } if
+          
+          fontdesc fontvalue known {pop fontdesc fontvalue get exit} if
+          
+          basefontdesc fontname known {
+            basefontdesc fontname get fontvalue known {
+              pop basefontdesc fontname get fontvalue get exit} if
+          } if
+          
+          basefontdesc fontvalue known {pop basefontdesc fontvalue get} if
+          exit
+        } loop
+
+        dup length fontlength add 1 add /fontlength name
+      } forall
+    ] fontlength /b array 0 3 -1 roll {fax} forall pop
+    1 index fontname put
+  } forall
+  mkread
+} bind def
+
+/fontdict1 1 dict mkfontdict def
+/fontdict4 1 dict dup begin 
+  /points (100) def
+end mkfontdict def
+/fontdict2 3 dict dup begin
+  /family (helvetica) def
+  /ITALICFONT 1 dict dup begin /slant (o) def end def
+  /BOLDITALICFONT 1 dict dup begin /slant (o) def end def
+end mkfontdict def
+/fontdict3 4 dict dup begin
+  /family (helvetica) def
+  /points (100) def
+  /ITALICFONT 1 dict dup begin /slant (o) def end def
+  /BOLDITALICFONT 1 dict dup begin /slant (o) def end def
+end mkfontdict def
+
+/fontdict fontdict1 def
+/lucida_140_fontdict fontdict1 def
+/lucida_100_fontdict fontdict4 def
+/helvetica_140_fontdict fontdict2 def
+/helvetica_100_fontdict fontdict3 def
+
+|-- mouse key combos
+/mousebuttons 11 dict dup begin | {
+  /left        1  def
+  /middle      2  def
+  /right       3  def
+  /scrollUp    4  def
+  /scrollDown  5  def
+  /scrollLeft  6  def
+  /scrollRight 7  def 
+  /button8     8  def
+  /button9     9  def
+  /button10    10 def
+  /button11    11 def| }
+end mkread def
+
+/mousekeys 12 dict dup begin | {
+  /plain    0            def 
+  /shift    1 0 bitshift def
+  /capslock 1 1 bitshift def 
+  /ctrl     1 2 bitshift def
+  /mod1     1 3 bitshift def
+  /mod2     1 4 bitshift def
+  /mod3     1 5 bitshift def
+  /mod4     1 6 bitshift def
+  /mod5     1 7 bitshift def
+  | aliases
+  /alt     mod1 def
+  /numlock mod2 def
+  /super   mod4 def | }
+end mkread def
+
+| [/key1...] or /key, /button | {mB n1 eq mM n2 eq and}
+/mkmousepair {
+  ~[
+    exch mousebuttons 1 index known {mousebuttons exch get} {
+      (Warning unknown mouse button: ) toconsole _ pop -1
+    } ifelse
+    ~mB ~eq
+
+    0 6 -1 roll dup class /listclass ne {[exch]} if {
+      mousekeys 1 index known {mousekeys exch get or} {
+        (Warning unknown mouse key: ) toconsole _ pop
+      } ifelse
+    } forall
+    ~mM ~eq ~and
+  ] bind
+} bind def
+
+/basemousedesc 13 dict dup begin | {
+  /click      [/plain /left       mkmousepair] def | all 
+  /remove     [/shift /left       mkmousepair] def | theeye
+  /scrollUp   [/plain /scrollUp   mkmousepair] def | theeye
+  /scrollDown [/plain /scrollDown mkmousepair] def | theeye
+
+  /pageUp     [
+    /ctrl          /scrollUp   mkmousepair
+    /plain         /scrollLeft mkmousepair
+  ] def | theeye
+  /pageDown   [
+    /ctrl         /scrollDown  mkmousepair
+    /plain        /scrollRight mkmousepair
+  ] def | theeye
+
+  /scrollProp [ | theeye
+    /plain        /right  mkmousepair 
+    /shift        /left   mkmousepair
+  ] def
+  /open [       | theeye
+    /plain        /right  mkmousepair
+    /ctrl         /left   mkmousepair 
+  ] def
+  /check [      | theeye
+    /plain        /middle mkmousepair
+    /alt          /left   mkmousepair 
+  ] def
+
+  /map [        | thehorses
+    /alt          /left   mkmousepair
+    [/ctrl /alt]  /right  mkmousepair
+    [/shift /alt] /right  mkmousepair
+  ] def
+  /cancel [    | thehorses
+    /plain        /right  mkmousepair
+    /shift        /left   mkmousepair 
+  ] def
+  /group  [    | thehorses
+    /plain        /middle mkmousepair
+    /ctrl         /left   mkmousepair 
+    /shift        /right  mkmousepair
+  ] def
+  /raise  [    | thehorses
+    /ctrl         /right  mkmousepair 
+    [/shift /alt] /left   mkmousepair
+    [/ctrl  /alt] /left   mkmousepair
+  ] def
+end def
+    
+/mkmousedict {/mousedesc name
+  {/theeye /thehorses /macros /default} 
+  dup length dict exch 
+  {/mousepage name
+    {
+      /scrollProp /scrollUp /scrollDown /pageUp /pageDown 
+      /click /open /check /remove
+      /cancel /group /map /raise
+    } 
+    dup length dict 2 index mousepage put 
+    {/event name
+      null {
+        mousedesc mousepage known {
+          mousedesc mousepage get event known {
+            pop mousedesc mousepage get event get
+            exit
+          } if
+        } if
+          
+        mousedesc event known {pop mousedesc event get exit} if
+        
+        basemousedesc mousepage known {
+          basemousedesc mousepage get event known {
+            pop basemousedesc mousepage get event get exit
+          } if
+        } if
+        
+        basemousedesc event known {pop basemousedesc event get} if
+        exit
+      } loop
+      1 index mousepage get event put
+    } forall
+  } forall
+  
+  dup {/mousepage name pop
+    mousepage {
+      ~[
+        ~[
+          false 4 -1 roll {
+            dup active {
+              dup class /listclass eq {~exec} if
+            } {
+              (Warning illegal mouse command: ) toconsole _ pop
+            } ifelse
+            {pop true exit} ~if
+          } forall 
+          ~exit
+        ] ~loop
+      ] bind mousepage 3 -1 roll put
+    } forall
+  } forall
+  mkread
+} bind def
+
+/basemousedict 1 dict mkmousedict def
+/no_alt_mousedict 5 dict dup begin | {
+  /check [      | theeye
+    /super          /left   mkmousepair 
+    /plain         /middle  mkmousepair
+  ] def
+
+  /map        [ | thehorses
+    /super /left            mkmousepair
+    [/ctrl /super]  /right  mkmousepair
+    [/shift /super] /right  mkmousepair
+  ] def
+  /cancel [    | thehorses
+    /shift          /left   mkmousepair 
+    /plain          /right  mkmousepair
+  ] def
+  /group  [    | thehorses
+    /ctrl           /left   mkmousepair 
+    /plain          /middle mkmousepair
+    /shift          /right  mkmousepair
+  ] def
+  /raise  [    | thehorses
+    [/shift /super] /left   mkmousepair
+    [/ctrl  /super] /left   mkmousepair
+    /ctrl           /right  mkmousepair 
+  ] def
+end mkmousedict def
+
+/mousedict basemousedict def
+
+| mousestate /wintype actiondict | -- <<action exec'd>> 
+/mouseaction {/actiondict name
+  | bottom 8 bits are the modifier keys, bottom 8 of top 16 is mouse button
+  | Why? No clear reason.
+  exch dup -16 bitshift /mB name 255 and /mM name | /wintype
+  false mousedict 3 -1 roll get {                 | false /event {}
+    actiondict 2 index known not {pop pop} {
+      exec {exch pop true exit} {pop} ifelse
+    } ifelse
+  } forall
+  {actiondict exch get exec true} {false} ifelse
+} bind def
+
 |----------------------------- start the dvt ------------------------------
 | A 'save' representing a clean dvt is associated with the name cleanDVT in
 | userdict.
 
 (dvt) userdict /myid put
+
+(Starting...\n) toconsole
+(Home: ) toconsole gethomedir toconsole (\n) toconsole
+(Startup: ) toconsole getstartupdir toconsole (\n) toconsole
+
+| Read ~/.dvt, if it exists    
+{
+    (Trying ) toconsole getconfdir toconsole (dvt.d...\n) toconsole
+    getconfdir (dvt.d) fromxfiles {
+      (Read ) toconsole getconfdir toconsole (dvt.d\n) toconsole
+    } if
+    (Trying ~/.dvt ...\n) toconsole
+    gethomedir (.dvt) fromxfiles {(Read ~/.dvt\n) toconsole} if
+} aborted {countdictstack 2 sub ~end repeat clear} if
+
 dvt begin
 save /cleanDVT name
 /kbdowner 0 def
@@ -1970,21 +2278,4 @@ Xwindows {
   wid userdict /TheHorsesWid put
 } if  
 
-(Starting...\n) toconsole
-(Home: ) toconsole gethomedir toconsole (\n) toconsole
-(Startup: ) toconsole getstartupdir toconsole (\n) toconsole
-
-| Read ~/.dvt, if it exists    
-end {
-    (Trying ) toconsole getconfdir toconsole (dvt.d...\n) toconsole
-    getconfdir (dvt.d) fromxfiles {
-      (Read ) toconsole getconfdir toconsole (dvt.d\n) toconsole
-    } if
-    (Trying ~/.dvt ...\n) toconsole
-    gethomedir (.dvt) fromxfiles {(Read ~/.dvt\n) toconsole} if
-} aborted {
-    countdictstack 2 sub ~end repeat clear
-} if
-    
-dvt begin
 supervisor   | we never return

@@ -1,8 +1,8 @@
-#DIST_SUBDIRS = codegen
+SUBDIRS = codegen
 
 if ENABLE_SETUID
 
-dnode_nice_SOURCE = dnode-nice.c
+nodist_dnode_nice_SOURCES = dnode-nice.c
 DNODENICEBIN = dnode-nice
 
 edit = sed \
@@ -23,63 +23,68 @@ uninstall-local:
 
 endif ENABLE_SETUID
 
+if ENABLE_ATLAS
+ATLAS_ACTIVATE = -DATLAS_LIB
+endif ENABLE_ATLAS
+
 if ENABLE_THREADS
   THREAD_HDR=threads.h
   THREADSRC=threads.c
 endif ENABLE_THREADS
 
-EXTRA_DIST = codegen/buildh codegen/dgen_0.h codegen/dgen_1.h codegen/dgen.c \
-	codegen/dm1.c codegen/dm2.c codegen/dm3.c codegen/dm4.c codegen/dm5.c \
-	codegen/dm6.c codegen/dm7.c codegen/dm8.c codegen/dmglobals.c \
-	codegen/dm.h codegen/dmnum.c codegen/dsp1.c codegen/dsp2.c \
-	codegen/error-local.h \
-	codegen/dmnuminc.d.in codegen/dmnuminc.h codegen/dmnuminc.h.built \
-	codegen/dsp1f.d codegen/dsp1f.h codegen/dsp1f.h.built \
-	codegen/Makefile.am codegen/Makefile.in codegen/startup_dgen.d.in \
-	dnode-nice.c.in paths.h.in
+if ENABLE_REGEX
+  REGEX_SRC=regex.c
+endif ENABLE_REGEX
 
-distclean-local:
-	cd codegen && $(MAKE) $(AM_MAKEFLAGS) distclean
+EXTRA_DIST = dnode-nice.c.in paths.h.in
 
-clean-local:
-if ENABLE_SETUID
-	-rm -f dnode-nice.c
-endif ENABLE_SETUID
-	cd codegen && $(MAKE) $(AM_MAKEFLAGS) clean
+DISTCLEANFILES = dm-config.h
 
+AM_CPPFLAGS = -DDM_HAVE_CONFIG_H
 AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
+AM_CXXFLAGS = $(GCC_CXXFLAGS)
 AM_LDFLAGS = -no-undefined $(PTHREAD_LIBS) $(X_LDFLAGS)
 INCLUDE = @INCLTDL@
 
-bin_PROGRAMS = dvt dnode 
+bin_PROGRAMS = dvt dnode dgen
 noinst_PROGRAMS = testwordorder $(DNODENICEBIN)
 
 if ENABLE_PLUGINS
-PLUGIN_HDR = plugin.h
+if ENABLE_CPPPLUGIN
+CPPPLUGIN_HDR = cppplugin.h
+endif ENABLE_CPPPLUGIN
+PLUGIN_HDR = plugin.h pluginlib.h $(CPPPLUGIN_HDR)
 PLUGIN_LD = @LIBLTDL@
 endif ENABLE_PLUGINS
 
-pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) ../config.h
+pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
+	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h basic-defs.h
+nodist_pkginclude_HEADERS = dm-config.h paths.h
 
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h
 dvt_LDADD = libdmglobals.la
+dvt_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS)
+dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS)
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 
 dnode_SOURCES = dnode.c dnode_0.h dnode_1.h dmx.h
-dnode_LDADD = libdmglobals.la
-dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
+dnode_LDADD = libdmglobals.la 
+dnode_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS)
+dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
+dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 
 testwordorder_SOURCES = test-word-order.c
 
-BUILT_SOURCES = paths.h
-CLEANFILES = paths.h
-lib_LTLIBRARIES = libdmglobals.la
-libdmglobals_la_LIBADD = $(PLUGIN_LD)
+BUILT_SOURCES = paths.h dnode-nice.c
+CLEANFILES = paths.h dnode-nice.c
+lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la
+libdmglobals_la_LIBADD = $(PLUGIN_LD) $(ATLAS_LIBS)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
-	dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h error-local.h \
-	plugin.c pluginlib.h $(THREADSRC)
-nodist_libdmglobals_la_SOURCES = paths.h
+	dmnum.c dsp1.c dsp2.c error-local.h matrix.c matrix.h \
+	plugin.c pluginlib.h $(THREADSRC) $(REGEX_SRC)
+libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
+libdmglobals_la_CFLAGS = $(AM_CFLAGS)
 
 editpaths = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
@@ -92,8 +97,24 @@ paths.h: paths.h.in Makefile
 	$(editpaths) $(srcdir)/$@.in >$@.tmp
 	mv $@.tmp $@
 
-@SET_MAKE@
-
 gencode-all: gencode all
 gencode:
-	cd codegen && $(MAKE) $(AM_MAKEFLAGS) all
+	cd codegen && $(MAKE) $(AM_MAKEFLAGS) gencode
+
+nodist_pkgconfiglib_DATA = dm.pc
+
+dist_pkgdata_SCRIPTS = dgen-build
+
+dgen_SOURCES = dgen.c dgen_0.h dgen_1.h 
+dgen_CPPFLAGS = $(AM_CPPFLAGS) -DBOOTSTRAP_PLUGIN=1 -DDM_DISABLE_REGEX=1 \
+	@LIBDM_DLL_IMPORT@ 
+dgen_LDADD = $(PLUGIN_LD) libdmbootstrap.la 
+
+libdmbootstrap_la_LIBADD = $(PLUGIN_LD)
+libdmbootstrap_la_SOURCES = dmglobals.c \
+	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c \
+	dmnum.c dsp1.c dsp2.c plugin.c  \
+	dmnuminc.h dsp1f.h  paths.h pluginlib.h
+libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) \
+	-DDM_DISABLE_THREADS=1 -DDM_DISABLE_REGEX=1
+libdmbootstrap_la_CFLAGS = $(AM_CFLAGS)

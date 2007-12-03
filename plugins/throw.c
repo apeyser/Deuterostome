@@ -1,9 +1,9 @@
 #include "throw.h"
 
-UL ll_type = 0;
-L op_hi(void) {return wrap_hi("throw V1");}
-L op_libnum(void) {return wrap_libnum(ll_type);}
-L ll_errc[] = {INV_THROW, 0L};
+UP ll_type = 0;
+P op_hi(void) {return wrap_hi("throw V1");}
+P op_libnum(void) {return wrap_libnum(ll_type);}
+P ll_errc[] = {INV_THROW, 0L};
 B* ll_errm[] = {
 	"** throw: invalid throw, goes through abortmark or stopmark", 
 	NULL
@@ -21,13 +21,13 @@ const char* x_op_thrown_name = "x_op_thrown";
 /*------------------------------------------- thrown
  * any_active | <any true> , false
  */
-L op_thrown(void) {
+P op_thrown(void) {
 	if (o_1 < FLOORopds) return OPDS_UNF;
 	if (! (ATTR(o_1) & ACTIVE)) return OPD_ATR;
 
 	if (x3 > CEILexecs) return EXECS_OVF;
 	TAG(x1) = OP; ATTR(x1) = ACTIVE;
-	OP_CODE(x1) = (L) x_op_thrown; OP_NAME(x1) = (L) x_op_thrown_name;
+	OP_CODE(x1) = (P) x_op_thrown; OP_NAME(x1) = (P) x_op_thrown_name;
 	moveframe(o_1, x2); ATTR(x2) = 0;
 	FREEexecs = x3;
 	FREEopds = o_1;
@@ -37,7 +37,7 @@ L op_thrown(void) {
 /*------------------------------------------- throw
  * any | <any true <<go up stack to catch>>
  */
-L op_throw(void) {
+P op_throw(void) {
     if (o_1 < FLOORopds) return OPDS_UNF;
     if (o2 > CEILopds) return OPDS_OVF;
     
@@ -51,7 +51,7 @@ L op_throw(void) {
             RETURN_ERROR(INV_THROW);
         }
 
-        if ((TAG(x1) == OP) && (OP_NAME(x1) == (L) x_op_thrown_name)) {
+        if ((TAG(x1) == OP) && (OP_NAME(x1) == (P) x_op_thrown_name)) {
             TAG(o1) = BOOL; ATTR(o1) = 0;
             BOOL_VAL(o1) = TRUE;
             FREEopds = o2;
@@ -65,7 +65,7 @@ L op_throw(void) {
 /*-------------------------------------------- x_unthrown
  *  -- | false 
  */
-L x_op_thrown(void) {
+P x_op_thrown(void) {
 	if (o2 > CEILopds) return OPDS_OVF;
 
 	TAG(o1) = BOOL; ATTR(o1) = 0;

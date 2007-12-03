@@ -1,7 +1,61 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* align to this many bytes */
+#undef BYTECORRECT
+
+/* sizeof(void*) */
+#undef DM_SIZEOF_VOIDP_
+
+/* Path to ATPS */
+#undef ENABLE_ATPS
+
+/* Path to BASH */
+#undef ENABLE_BASH
+
+/* enable extra debug in dmnum */
+#undef ENABLE_DEBUG_DMNUM
+
+/* Path to DVIPDF */
+#undef ENABLE_DVIPDF
+
+/* Path to EMACSCLIENT */
+#undef ENABLE_EMACSCLIENT
+
+/* Path to ENV */
+#undef ENABLE_ENV
+
+/* Path to GS */
+#undef ENABLE_GS
+
+/* Build old style 32 bit frames */
+#undef ENABLE_IS_32_BIT
+
+/* Path to LATEX */
+#undef ENABLE_LATEX
+
+/* Path to LP */
+#undef ENABLE_LP
+
+/* Path to PDFLATEX */
+#undef ENABLE_PDFLATEX
+
+/* Path to PDFTPS */
+#undef ENABLE_PDFTPS
+
+/* Path to PERL */
+#undef ENABLE_PERL
+
 /* compile or install plugins */
 #undef ENABLE_PLUGINS
+
+/* Path to PSTPDF */
+#undef ENABLE_PSTPDF
+
+/* include regex */
+#undef ENABLE_REGEX
+
+/* Path to TAIL */
+#undef ENABLE_TAIL
 
 /* compile and install threads, value is default number */
 #undef ENABLE_THREADS
@@ -9,12 +63,30 @@
 /* compile and install unix domain sockets */
 #undef ENABLE_UNIX_SOCKETS
 
+/* Path to XDVI */
+#undef ENABLE_XDVI
+
+/* compile or install only new xps */
+#undef ENABLE_XPS
+
+/* Path to XTERM */
+#undef ENABLE_XTERM
+
 /* Header for endianness */
 #undef ENDIAN_HDR
 
 /* name of program to display pdf's, eg gnome-open or launch -i
    com.apple.Preview */
 #undef GUIPDF
+
+/* Define if you have ATLAS library. */
+#undef HAVE_ATLAS
+
+/* Define to 1 if you have the <cblas.h> header file. */
+#undef HAVE_CBLAS_H
+
+/* Define to 1 if you have the <clapack.h> header file. */
+#undef HAVE_CLAPACK_H
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
@@ -30,6 +102,12 @@
 
 /* Define if you have POSIX threads libraries and header files. */
 #undef HAVE_PTHREAD
+
+/* Define to 1 if you have the `setsid' function. */
+#undef HAVE_SETSID
+
+/* Define to 1 if you have the `srandomdev' function. */
+#undef HAVE_SRANDOMDEV
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -52,11 +130,29 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Number of bytes in a d name, without terminating '\0' */
-#undef NAMEBYTES
+/* Define to 1 if you are compile old 32 bit frames */
+#undef IS_32_BIT
+
+/* maximum vm allocation size in mb */
+#undef MAX_MEM_SIZE
+
+/* maximum dict stack size in frames */
+#undef MAX_NUM_DICTS
+
+/* maximum exec stack size in frame */
+#undef MAX_NUM_EXECS
+
+/* maximum operand stack size in frames */
+#undef MAX_NUM_OPDS
+
+/* maximum user dict size */
+#undef MAX_USER_DICT_SIZE
 
 /* "Header for endianness not found" */
 #undef NO_ENDIAN_HDR
+
+/* Define to 1 if your C compiler doesn't accept -c and -o together. */
+#undef NO_MINUS_C_MINUS_O
 
 /* Name of package */
 #undef PACKAGE
@@ -83,23 +179,20 @@
 /* unroll math loops to 2^rollbits */
 #undef ROLLBITS
 
-/* The size of a `int', as computed by sizeof. */
+/* The size of `int', as computed by sizeof. */
 #undef SIZEOF_INT
 
-/* The size of a `pid_t', as computed by sizeof. */
+/* The size of `pid_t', as computed by sizeof. */
 #undef SIZEOF_PID_T
 
-/* The size of a `time_t', as computed by sizeof. */
-#undef SIZEOF_TIME_T
-
-/* The size of a `void*', as computed by sizeof. */
+/* The size of `void*', as computed by sizeof. */
 #undef SIZEOF_VOIDP
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
 /* system dictionary size */
-#undef SYSDICTSIZE
+#undef SYS_DICT_SIZE
 
 /* min unrolls per thread */
 #undef THREADMUL
@@ -116,6 +209,10 @@
 
 /* Define to 1 if the X Window System is missing or not being used. */
 #undef X_DISPLAY_MISSING
+
+/* Define to 1 if `lex' declares `yytext' as a `char *' by default, not a
+   `char[]'. */
+#undef YYTEXT_POINTER
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const

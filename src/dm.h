@@ -25,16 +25,35 @@
 #ifndef DM_H
 #define DM_H
 
+#include "dm-config.h"
+#ifdef DM_HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "basic-defs.h"
+
+#if __cplusplus
+extern "C" {
+#endif		
+
 #if ! defined __GNUC__ && ! defined __attribute__
 #define __attribute__(attr)
 #endif // ! defined __GNUC__ && ! defined __attribute__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
+#if DM_DISABLE_REGEX && DM_ENABLE_REGEX
+#undef DM_ENABLE_REGEX
 #endif
 
+#ifndef _dm_const
+#define _dm_const const
+#endif //_dm_const
+
+#ifndef _dm_restrict
+#define _dm_restrict restrict
+#endif //_dm_restrict
+
 // Need to be here because we define things such as x1
-#if ! X_DISPLAY_MISSING
+#if ! DM_X_DISPLAY_MISSING
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #endif
@@ -53,65 +72,13 @@
 #define DLL_SCOPE extern
 #endif
 
-#include <inttypes.h>
 #include <sys/socket.h>
 #include <sys/select.h>
-#if ! NO_ENDIAN_HDR
-#include ENDIAN_HDR
-#endif //NO_ENDIAN_HDR
+#if ! DM_NO_ENDIAN_HDR
+#include DM_ENDIAN_HDR
+#endif //DM_NO_ENDIAN_HDR
 
-typedef int8_t B;
-typedef int16_t W;
-typedef uint8_t UB;
-typedef uint16_t UW;
-
-typedef int32_t M;
-typedef int32_t UM;
-
-#if SIZEOF_VOIDP == 4
-#define BITS_SIZE_32
-typedef int32_t L;
-typedef uint32_t UL;
-#elif SIZEOF_VOIDP == 8
-#define BITS_SIZE_64
-typedef int64_t L;
-typedef uint64_t UL;
-#else
-#error "SIZEOF_VOIDP is " #SIZEOF_VOIDP
-#endif //SIZEOF_VOIDP
-
-typedef W BOOLEAN;
-typedef L INT;
-
-typedef  L  (*OPER)(void);
-
-#ifndef TRUE
-#define TRUE -1
-#endif
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-typedef float S;
-typedef double D;
-
-#define BINF    ((B) 0x80)
-#define WINF    ((W) 0x8000)
-#define LINF    ((L) 0x80000000)
-static const S SINF __attribute__ ((unused)) = 1.0/0.0;  
-static const D DINF __attribute__ ((unused)) = 1.0/0.0;
-
-#define BMAX 0x7F
-#define WMAX 0x7FFF
-#define LMAX 0x7FFFFFFF
-
-/*-------------------------- VM alignment ----------------------------
-
-NOTE: all objects that can populate the D machine's workspace must
-      be aligned using the macro defined here.
-*/
-
-#define DALIGN(bytes)         ((((UL)(bytes)+7)>>3)<<3)  /* 8 bytes */
+#define ISUNDEF(n) (isinf(n) || isnan(n))
 
 /*-------------------------- network packet size ----------------------*/
 
@@ -155,15 +122,17 @@ NOTE: all objects that can populate the D machine's workspace must
 #define PROC                       ((UB) 0x70)
 #define DICT                       ((UB) 0x80)
 #define BOX                        ((UB) 0x90)
-//#define HANDLE                     ((UB) 0xA0)
 	
 #define COMPOSITE(frame)           ((UB)(CLASS(frame)) > (UB)(MARK))
 
 #define BYTETYPE                   ((UB) 0x00)       /* numeral types */
 #define WORDTYPE                   ((UB) 0x01)
-#define LONGTYPE                   ((UB) 0x02)
-#define SINGLETYPE                 ((UB) 0x03)
-#define DOUBLETYPE                 ((UB) 0x04)
+#define LONG32TYPE                 ((UB) 0x02)
+#define LONG64TYPE                 ((UB) 0x03)
+#define LONGBIGTYPE                LONG64TYPE
+#define SINGLETYPE                 ((UB) 0x04)
+#define DOUBLETYPE                 ((UB) 0x05)
+#define DWORDTYPE                  ((UB) 0x06)      
 #define SOCKETTYPE                 ((UB) 0x01)      /* null types */
 #define SIMPLETYPE                 ((UB) 0x00)      /* handle types */
 #define COMPLEXTYPE                ((UB) 0x00)      
@@ -182,13 +151,23 @@ NOTE: all objects that can populate the D machine's workspace must
 #define BIGENDIAN                  ((UB) 0x00)
 #define LITTLEENDIAN               ((UB) 0x01)
 #define ENDIANMASK                 ((UB) 0x01)
-#define BITS32                     ((UB) 0x00)
-#define BITS64                     ((UB) 0x02)
-#define BITSMASK                   ((UB) 0x02)
+
+/* Composite host bit format */
+#define HOSTBITS32                 ((UB) 0x00)
+#define HOSTBITS64                 ((UB) 0x02)
+#define HOSTBITSMASK               ((UB) 0x02)
+
 /* Format specifier */
 #define FORMAT32                   ((UB) 0x10)
 #define FORMAT64                   ((UB) 0x20)
 #define FORMATMASK                 ((UB) 0xF0)
+
+#define FORMAT_BITS_DEFAULT        FORMAT64
+#if DM_HOST_IS_32_BIT
+#define HOSTBITS_DEFAULT           HOSTBITS32
+#else
+#define HOSTBITS_DEFAULT           HOSTBITS64
+#endif //DM_HOST_IS_32_BIT
 
 // make BSD and Linux look alike
 
@@ -198,15 +177,29 @@ NOTE: all objects that can populate the D machine's workspace must
 #define BIG_ENDIAN __BIG_ENDIAN
 #endif // ! NO_ENDIAN_HDR && ! BYTE_ORDER
 
-#ifndef WORDS_BIGENDIAN
-#define GETNATIVEENDIAN(frame)  \
-  ((BOOLEAN) ((FORMAT(frame) & ENDIANMASK) == LITTLEENDIAN))
-#define SETNATIVEENDIAN(frame)  FORMAT(frame) |= LITTLEENDIAN
-#else //! WORDS_BIGENDIAN
-#define GETNATIVEENDIAN(frame)  \
-  ((BOOLEAN) ((FORMAT(frame) & ENDIANMASK) == BIGENDIAN))
-#define SETNATIVEENDIAN(frame)  FORMAT(frame) |= BIGENDIAN
-#endif //WORDS_BIGENDIAN
+#ifndef DM_WORDS_BIGENDIAN
+#define ENDIAN_DEFAULT LITTLEENDIAN
+#else
+#define ENDIAN_DEFAULT BIGENDIAN
+#endif //DM_WORDS_BIGENDIAN
+
+#define HOSTLAYOUTMASK            ((B) (HOSTBITSMASK | ENDIANMASK))
+#define HOSTLAYOUT_DEFAULT         ((B) (HOSTBITS_DEFAULT | ENDIAN_DEFAULT))
+
+#define GETNATIVE_FORMATSTATE(frame, mask, defaultbits) \
+  ((BOOLEAN) ((FORMAT(frame) & (mask)) == (defaultbits)))
+#define SETNATIVE_FORMATSTATE(frame, defaultbits) \
+  do {FORMAT(frame) |= (defaultbits);} while (0)
+
+#define GETNATIVEENDIAN(frame)                              \
+  GETNATIVE_FORMATSTATE(frame, ENDIANMASK, ENDIAN_DEFAULT)
+#define SETNATIVEENDIAN(frame)                  \
+  SETNATIVE_FORMATSTATE(frame, ENDIAN_DEFAULT)
+
+#define GETNATIVEHOSTBITS(frame)                                \
+  GETNATIVE_FORMATSTATE(frame, HOSTBITSMASK, HOSTBITS_DEFAULT)
+#define SETNATIVEHOSTBITS(frame) \
+  SETNATIVE_FORMATSTATE(frame, HOSTBITS_DEFAULT)
 
 #if ! NO_ENDIAN_HDR && __FLOAT_WORD_ORDER
 #if __FLOAT_WORD_ORDER != __BYTE_ORDER
@@ -217,27 +210,30 @@ NOTE: all objects that can populate the D machine's workspace must
 #endif //! NO_ENDIAN_HDR
 
 #define GETNATIVEFORMAT(frame) \
-  ((BOOLEAN) ((FORMAT(frame) & FORMATMASK) == FORMAT64))
-#define SETNATIVEFORMAT(frame) FORMAT(frame) |= FORMAT64
+  GETNATIVE_FORMATSTATE(frame, FORMATMASK, FORMAT_BITS_DEFAULT)
+#define SETNATIVEFORMAT(frame) \
+  SETNATIVE_FORMATSTATE(frame, FORMAT_BITS_DEFAULT)
 
-#ifdef BITS_SIZE_32
-#define GETNATIVEBITS(frame) \
-  ((BOOLEAN) ((FORMAT(frame) & BITSMASK) == BITS32))
-#define SETNATIVEBITS(frame) FORMAT(frame) |= BITS32
-#else //BITS_SIZE_64
-#define GETNATIVEBITES(frame) \
-  ((BOOLEAN) ((FORMAT(frame) & BITSMASK) == BITS64))
-#define SETNATIVEBITS(frame) FORMAT(frame) |= BITS64
-#endif //BITS_SIZE
+#define GETNATIVE(frame)                        \
+  (GETNATIVEFORMAT(frame)                       \
+   && GETNATIVEENDIAN(frame)                    \
+   && GETNATIVEHOSTBITS(frame))
 
-#define GETNATIVE(frame) \
-  (GETNATIVEFORMAT(frame) && GETNATIVEENDIAN(frame) && GETNATIVEBITS(frame))
-#define SETNATIVE(frame) do {                   \
+#define SETNATIVE(frame)do {                    \
     FORMAT(frame) = 0;                          \
     SETNATIVEFORMAT(frame);                     \
     SETNATIVEENDIAN(frame);                     \
-    SETNATIVEBITS(frame);                       \
-  } while(0)
+    SETNATIVEHOSTBITS(frame);                   \
+  } while (0)
+
+#define GETNATIVEUNDEF(frame) \
+  ((BOOLEAN) ! (FORMAT(frame) & ~(FORMATMASK | HOSTLAYOUTMASK)))
+
+#define GETNONNATIVE(frame) \
+  ((HOSTLAYOUTMASK & FORMAT(frame)) ^ HOSTLAYOUT_DEFAULT)
+#define HASNATIVEENDIAN(nomatchbits) (! ((nomatchbits) & ENDIANMASK))
+#define HASNATIVEBITS(nomatchbits) (! ((nomatchbits) & HOSTBITSMASK))
+  
 
 #define EXITMARK                   ((UB)0x10)   /* execstack marks */
 #define STOPMARK                   ((UB)0x20)
@@ -245,74 +241,66 @@ NOTE: all objects that can populate the D machine's workspace must
 #define XMARK                      ((UB)0x70)
 #define BIND                       ((UB)0x80)   /* box op housekeeping */
 
-#define FRAMEL1 (8)
-#define FRAMEL2 (16)
-#define FRAMEL3 (24)
+#define PF_PTR(frame, offset) (((B*)(frame))+(offset)*PACK_FRAME)
 
-#define NUM_VAL(frame)             ( ((B *)(((B*)(frame))+FRAMEL1)))
-#define LONG_VAL(frame)            (*((L *)((frame)+FRAMEL1)))
-#define BOOL_VAL(frame)            (*((BOOLEAN *)((frame)+2)))
-#define NAME_KEY(frame)            (*((W *)((frame)+2)))
+#define BOOL_VAL(frame)      (*((BOOLEAN *)((frame)+2)))
+#define NAME_KEY(frame)      (*((W *)((frame)+2)))
 
-#define OP_CODE(frame)             (*((L *)(((B*)(frame))+FRAMEL1)))
-#define OP_NAME(frame)             (*((L *)(((B*)(frame))+FRAMEL2)))
-#define VALUE_BASE(frame)          (*((L *)(((B*)(frame))+FRAMEL1)))
-#define ARRAY_SIZE(frame)          (*((L *)(((B*)(frame))+FRAMEL2)))
-#define LIST_CEIL(frame)           (*((L *)(((B*)(frame))+FRAMEL2)))
-#define DICT_NB(frame)             (*((L *)(((B*)(frame))+FRAMEL2)))
-#define DICT_CURR(frame)           (*((L *)(((B*)(frame))+FRAMEL2)))
-#define BOX_NB(frame)              (*((L *)(((B*)(frame))+FRAMEL2)))
-#define VALUE_PTR(frame)           (*((B**)(((B*)(frame))+FRAMEL1)))
-#define LIST_CEIL_PTR(frame)       (*((B**)(((B*)(frame))+FRAMEL2)))
+#define NUM_VAL(frame)       ( ((B *)PF_PTR(frame,1)))
+#define LONGBIG_VAL(frame)   (*((LBIG*)PF_PTR(frame,1)))
 
-/* NB: Attention to moveframe & moveframes in dm2.c whenever
-   framebytes is changed */
-#define FRAMEBYTES                 24L
+#define VALUE_BASE(frame)    (*((P *)PF_PTR(frame,1)))
+#define VALUE_PTR(frame)     (*((B**)PF_PTR(frame,1)))
 
-// NAMEBYTES is defined in ../config.h
-// To change, update ../configure.ac
-//#define NAMEBYTES                  18L //not including a terminating 0
+#define OP_CODE(frame)       (*((P *)PF_PTR(frame,1)))
+#define OP_NAME(frame)       (*((P *)PF_PTR(frame,2)))
+#define LIST_CEIL(frame)     (*((P *)PF_PTR(frame,2)))
+#define ARRAY_SIZE(frame)    (*((P *)PF_PTR(frame,2)))
+#define DICT_NB(frame)       (*((P *)PF_PTR(frame,2)))
+#define DICT_CURR(frame)     (*((P *)PF_PTR(frame,2)))
+#define BOX_NB(frame)        (*((P *)PF_PTR(frame,2)))
+#define LIST_CEIL_PTR(frame) (*((B**)PF_PTR(frame,2)))
 
 /*-------------------------------------------- dictionary */
  
-#define ASSOC_NAME(entry)          ( ((B *)(entry)))
-#define ASSOC_NEXT(entry)          (*((L *)(((B*)(entry))+FRAMEBYTES)))
-#define ASSOC_FRAME(entry)         (((B*)(entry))+ENTRYBYTES-FRAMEBYTES)
+#define ASSOC_NAME(entry)    ( ((B*)(entry)))
+#define ASSOC_NEXT(entry)    (*((P*)(((B*)(entry))+FRAMEBYTES)))
+#define ASSOC_FRAME(entry)   ( ((B*)(entry))+ENTRYBYTES-FRAMEBYTES)
 
 // keep frame on 64 bit boundaries, so that doubles will be so.
-#define ENTRYBYTES  (8+2*FRAMEBYTES)
+#define ENTRYBYTES  DALIGN(FRAMEBYTES+PACK_FRAME+FRAMEBYTES)
 
-#define DICT_ENTRIES(dict)         (*((L *)(dict)))
-#define DICT_FREE(dict)            (*((L *)(((B*)(dict))+FRAMEL1)))
-#define DICT_CEIL(dict)            (*((L *)(((B*)(dict))+FRAMEL2)))
-#define DICT_CONHASH(dict)         (*((W *)(((B*)(dict))+FRAMEL3)))
-#define DICT_TABHASH(dict)         (*((L *)(((B*)(dict))+FRAMEL2)))
+#define DICT_ENTRIES(dict)        (*((P *) (dict)))
+#define DICT_FREE(dict)           (*((P *) PF_PTR(dict,1)))
+#define DICT_CONHASH(dict)        (*((W *) PF_PTR(dict,3)))
+#define DICT_TABHASH(dict)        (*((P *) PF_PTR(dict,2)))
+#define DICT_TABHASH_ARR(dict, n) (*(P*) &(((LBIG*) DICT_TABHASH(dict))[n]))
 
+#define DICTBYTES             DALIGN(4*PACK_FRAME)
 
-#define DICTBYTES                  32L
+#define LIB_DATA(frame)       ((B*)(VALUE_BASE(frame) + DICT_NB(frame)))
 
-#define LIB_DATA(frame)            ((B*)(VALUE_BASE(frame) + DICT_NB(frame)))
+#define LIB_TYPE(frame)       (*(P*)   (LIB_DATA(frame)))
+#define LIB_HANDLE(frame)     (*(P*)   (PF_PTR(LIB_DATA(frame),1)))
+#define LIB_ERRC(frame)       (*(P**)  (PF_PTR(LIB_DATA(frame),2)))
+#define LIB_ERRM(frame)       (*(B***) (PF_PTR(LIB_DATA(frame),3)))
 
-#define LIB_TYPE(frame)            (*(L*) (LIB_DATA(frame)))
-#define LIB_HANDLE(frame)          (*(L*) (LIB_DATA(frame) + FRAMEL1))
-#define LIB_ERRC(frame)            (*(L**)(LIB_DATA(frame) + FRAMEL2))
-#define LIB_ERRM(frame)            (*(B***)(LIB_DATA(frame) + FRAMEL3))
-
-#define LIBBYTES                   32L
+#define LIBBYTES             DALIGN(4*PACK_FRAME)
 
 /*---------------------------------- C Operator definition */
 
-#define OPDEF_NAME(operator)       (*((L *)(operator)))
-#define OPDEF_CODE(operator)       (*((L *)(((B*)operator)+FRAMEL1)))
-
-#define OPDEFBYTES                 16L
+#define OPDEF_NAME(operator)  (((P*)(operator))[0])
+#define OPDEF_CODE(operator)  (((P*)(operator))[1])
+#define OPDEFBYTES            (2*sizeof(P))
 
 /*---------------------------------------- save box */
-#define SBOX_NOPDS(box)          (*(L *)(box))
-#define SBOX_NDICTS(box)         (*(L *)(((B*)(box))+FRAMEL1))
-#define SBOX_CAP(box)            (*(B **)(((B*)(box))+FRAMEL2))
+#define SBOX_FLAGS(box)       (*(P *)  (box))
+#define SBOX_DATA(box)        ( (P)    PF_PTR(box,1))
+#define SBOX_CAP(box)         (*(B **) PF_PTR(box,3))
 
-#define SBOXBYTES                24L
+#define SBOX_FLAGS_CLEANUP    ((UP) 0x01)
+#define SBOX_DATA_SIZE        (2*PACK_FRAME)
+#define SBOXBYTES             DALIGN(4*PACK_FRAME)
 
 /*--------------------------------------------- Internal message codes */
 
@@ -347,7 +335,7 @@ NOTE: all objects that can populate the D machine's workspace must
 #define VMR_STATE   0x00000211L /* vm already tiny                       */
 #define KILL_SOCKS  0x00000212L /* dvt must kill all non-server socks    */
 #define MEM_OVF     0x00000213L /* failed memory allocation              */
-#define LONG_OVF    0x00000214L /* attempt to read 64 bit long           */
+#define CLOCK_ERR   0x00000214L /* failed to get epoch                  */
 
 #define BAD_TOK     0x00000300L /* bad D token in source string          */
 #define BAD_ASC     0x00000301L /* bad ASCII character in source string  */
@@ -373,7 +361,8 @@ NOTE: all objects that can populate the D machine's workspace must
 #define NOSYSTEM    0x00000704L /* 'system' call failed                  */
 #define INV_MSG     0x00000705L /* operand constitutes invalid message   */
 #define NOT_HOST    0x00000706L /* hostname not in hosts file            */
-#define BAD_FMT     0x00000707L /* message not in native format */
+#define BAD_FMT     0x00000707L /* message not in native format          */
+#define LONG_OVF    0x00000708L /* 64 bit long doesn't fit in 32 bit long*/
 
 #define LIB_LOAD    0x00000807L /* unable to dlload                      */
 #define LIB_EXPORT  0x00000808L /* unable to find object in lib          */
@@ -389,6 +378,25 @@ NOTE: all objects that can populate the D machine's workspace must
 #define X_ERR       0x00000A02L /* X lib error                           */
 #define X_BADFONT   0x00000A03L /* X font does not exist                 */
 #define X_BADHOST   0x00000A04L /* X server cannot be connected          */
+
+#define BAD_ARR     0x00000B00L /* dmnuminc debug error */
+#define SBOX_SET    0x00000B01L /* box already has a cleanup */		
+
+#if DM_ENABLE_REGEX		
+#define REGEX_BADPAT   0x00000C01L /* Invalid regular expression */
+#define REGEX_ECOLLATE 0x00000C02L /* Invalid collating element */
+#define REGEX_ECTYPE   0x00000C03L /* Invalid character class */
+#define REGEX_EESCAPE  0x00000C04L /* `\' applied to unescapable character */
+#define REGEX_ESUBREG  0x00000C05L /* invalid backreference number */
+#define REGEX_EBRACK   0x00000C06L /* brackets `[]' not balanced*/
+#define REGEX_EPAREN   0x00000C07L /* paranthesis `()' not balanced */
+#define REGEX_EBRACE   0x00000C08L /* braces `{}' not balanced */
+#define REGEX_BADBR    0x00000C09L /* invalid repetition count(s) in `{}' */
+#define REGEX_ERANGE   0x00000C0AL /* invalid character rangin in `[]' */
+#define REGEX_ESPACE   0x00000C0BL /* ran out of memory */
+#define REGEX_BADRPT   0x00000C0CL /* `?', `*', or `+' operand invalid */
+#define REGEX_UNKNOWN  0x00000C0DL /* Unknown error */
+#endif // DM_ENABLE_REGEX
 
 /* compare results */
 
@@ -422,10 +430,10 @@ DLL_SCOPE BOOLEAN timeout;             /* for I/O operations          */
 DLL_SCOPE BOOLEAN abortflag;
 DLL_SCOPE BOOLEAN numovf;             /* FPU overflow status            */
 DLL_SCOPE BOOLEAN tinymemory;
-DLL_SCOPE L recsocket;
-DLL_SCOPE L consolesocket;
+DLL_SCOPE P recsocket;
+DLL_SCOPE P consolesocket;
 DLL_SCOPE fd_set sock_fds;            /* active sockets                 */
-DLL_SCOPE const char* startup_dir; // setup by makefile,
+DLL_SCOPE _dm_const char* startup_dir; // setup by makefile,
                                    // defines which directory
                                    // to use for the startup file
 DLL_SCOPE B* startup_dir_frame; // points the frame holding ^^^,
@@ -444,6 +452,10 @@ DLL_SCOPE UW ascii[];
 #define o_5                  (o_4-FRAMEBYTES)
 #define o_6                  (o_5-FRAMEBYTES)
 #define o_7                  (o_6-FRAMEBYTES)
+#define o_8                  (o_7-FRAMEBYTES)
+#define o_9                  (o_8-FRAMEBYTES)
+#define o_10                 (o_9-FRAMEBYTES)
+
 #define o1                   FREEopds
 #define o2                   (o1+FRAMEBYTES)
 #define o3                   (o2+FRAMEBYTES)
@@ -468,57 +480,64 @@ DLL_SCOPE UW ascii[];
 
 /*----------------------- function prototypes ------------------------*/
 
-void makeDmemory(B *mem, L specs[5]);
+void makeDmemory(B *mem, L64 specs[5]);
 
 /*--- DM1 */
-L tokenize(B *stringframe);
+P tokenize(B *stringframe);
 
 /*--- DM2 */
-L wrap_hi(B* hival);
-L wrap_libnum(UL libnum);
+P wrap_hi(B* hival);
+P wrap_libnum(UP libnum);
 B* nextlib(B* frame);
-B* geterror(L e);
-B *makedict(L n);
+B* geterror(P e);
+B *makedict(L32 n);
 void cleardict(B *dict);
-B *makeopdictbase(B *opdefs, L *errc, B **errm, L n1);
-B *makeopdict(B *opdefs, L *errc, B **errm);
-void d_reloc(B *dict, L oldd, L newd);
-void d_rreloc(B *dict, L oldd, L newd);
+B *makeopdictbase(B *opdefs, P *errc, B **errm, L32 n1);
+B *makeopdict(B *opdefs, P *errc, B **errm);
+void d_reloc(B *dict, P oldd, P newd);
+void d_rreloc(B *dict, P oldd, P newd);
 void makename(B *namestring, B *nameframe);
 void pullname(B *nameframe, B *namestring);
-BOOLEAN matchname(B *nameframe1, B *nameframe2);
+P compname(B *nameframe1, B *nameframe2);
+BOOLEAN matchname(B *nameframe1, B *nameframe2);		
 void moveframe(B *source, B *dest);
-void moveframes(B *source, B *dest, L n);
-void moveB(B *source, B *dest, L n);
-void moveW(W *source, W *dest, L n);
-void moveL(L *source, L *dest, L n);
-void moveS(S *source, S *dest, L n);
-void moveD(D *source, D *dest, L n);
+void moveframes(B *source, B *dest, P n);
+void moveB(B *source, B *dest, P n);
+void moveW(W *source, W *dest, P n);
+void moveL32(L32 *source, L32 *dest, P n);
+void moveL64(L64 *source, L64 *dest, P n);
+void moveLBIG(LBIG *source, LBIG *dest, P n);
+void moveS(S *source, S *dest, P n);
+void moveD(D *source, D *dest, P n);
 B *lookup(B *nameframe, B *dict);
 BOOLEAN insert(B *nameframe, B *dict, B *framedef);
 BOOLEAN mergedict(B *source, B *sink);
-L exec(L turns);
-L foldobj(B *frame, L base, W *depth);
-L unfoldobj(B *frame, L base, BOOLEAN isnative_endian, BOOLEAN isnative_bits);
-L deendian_frame(B *frame, BOOLEAN isnative_endian, BOOLEAN isnative_bits);
-//L deendian_array(B* frame);
-//L deendian_list(B* frame);
-//L deendian_dict(B* dict);
-//L deendian_entries(B* doct);
+P exec(L32 turns);
+P foldobj(B *frame, P base, W *depth);
+P unfoldobj(B *frame, P base, B isnonnative);
+P foldobj_ext(B* frame, P extra);
+BOOLEAN foldobj_mem(B** base, B** top);
+void foldobj_free(void);
+P deendian_frame(B *frame, B isnonnative);
+//L deendian_array(B* frame, B isnonnative);
+//L deendian_list(B* frame, B isnonnative);
+//L deendian_dict(B* dict, B isnonnative);
+//L deendian_entries(B* doct, B isnonnative);
 void setupdirs(void);
 
 /*--- DM3 */
-L make_socket(L port);
-L make_unix_socket(L port);
-L fromsocket(L socket, B *msf);
-L tosocket(L socket, B *sf, B *cf);
-L toconsole( B *string, L stringlength);
+P make_socket(UW port);
+P make_unix_socket(UW port);
+P fromsocket(P socket, B *msf);
+P tosocket(P socket, B *sf, B *cf);
+P toconsole(B *string, P stringlength);
 
 /*--- DMNUM */
 void DECODE(B *frame, BOOLEAN fauto, W prec, B *buf);
 B ENCODE(W type, B *string, B *dnum);
 W VALUEBYTES(B type);
-BOOLEAN VALUE(B *frame, L *val);
+BOOLEAN VALUE(B *frame, LBIG *val);
+BOOLEAN DVALUE(B *frame, D *val);
 W TEST(B *frame);
 W COMPARE(B *frame1, B *frame2);
 void THEARC(B *dframe, B *sframe);
@@ -546,183 +565,208 @@ void ATAN(B *frame);
 void DECREMENT(B *frame);
 
 /*----------------------- system operators */
-L op_serialize(void);
-L op_lock(void);
-L op_syshi(void);
-L op_syslibnum(void);
-L op_error(void);
-L op_errormessage(void);
-L op_aborted(void);
-L op_abort(void);
-L op_halt(void);
-L op_continue(void);
-L op_quit(void);
-L op_setconsole(void);
-L op_console(void);
-L op_toconsole(void);
-L op_tostderr(void);
-L op_connect(void);
-L op_disconnect(void);
-L op_send(void);
-L op_flush(void);
-L op_nextevent(void);
-L op_vmresize(void);
-L op_killsockets(void);
-L op_getstartupdir(void);
-L op_getconfdir(void);
-L op_gethomedir(void);
-L op_getsocket(void);
-L op_getmyname(void);
-L op_getmyport(void);
+P op_serialize(void);
+P op_lock(void);
+P op_syshi(void);
+P op_syslibnum(void);
+P op_error(void);
+P op_errormessage(void);
+P op_aborted(void);
+P op_abort(void);
+P op_halt(void);
+P op_continue(void);
+P op_quit(void);
+P op_setconsole(void);
+P op_console(void);
+P op_toconsole(void);
+P op_tostderr(void);
+P op_connect(void);
+P op_disconnect(void);
+P op_send(void);
+P op_flush(void);
+P op_nextevent(void);
+P op_vmresize(void);
+P op_killsockets(void);
+P op_getstartupdir(void);
+P op_getconfdir(void);
+P op_gethomedir(void);
+P op_getsocket(void);
+P op_getmyname(void);
+P op_getmyport(void);
 
-L op_pop(void);
-L op_exch(void);
-L op_dup(void);
-L op_copy(void);
-L op_index(void);
-L op_roll(void);
-L op_clear(void);
-L op_count(void);
-L op_cleartomark(void);
-L op_counttomark(void);
+P op_pop(void);
+P op_exch(void);
+P op_dup(void);
+P op_copy(void);
+P op_index(void);
+P op_roll(void);
+P op_clear(void);
+P op_count(void);
+P op_cleartomark(void);
+P op_counttomark(void);
 /*-- dictionary, array, list */
-L op_currentdict(void);
-L op_closelist(void); 
-L op_dict(void);
-L op_cleardict(void);
-L op_array(void);
-L op_list(void);
-L op_used(void);
-L op_length(void); 
-L op_begin(void);
-L op_end(void);
-L op_def(void);
-L op_name(void);
-L op_find(void);
-L op_get(void);
-L op_put(void);
-L op_known(void);
-L op_getinterval(void);
-L op_countdictstack(void);
-L op_dictstack(void);
+P op_currentdict(void);
+P op_closelist(void); 
+P op_dict(void);
+P op_cleardict(void);
+P op_array(void);
+P op_list(void);
+P op_used(void);
+P op_length(void); 
+P op_begin(void);
+P op_end(void);
+P op_def(void);
+P op_name(void);
+P op_find(void);
+P op_get(void);
+P op_put(void);
+P op_known(void);
+P op_getinterval(void);
+P op_countdictstack(void);
+P op_dictstack(void);
 /*-- VM and miscellaneous */
-L op_save(void);
-L op_capsave(void);
-L op_restore(void);
-L op_vmstatus(void);
-L op_bind(void);
-L op_null(void);
+P op_save(void);
+P op_capsave(void);
+P op_restore(void);
+P op_setcleanup(void);
+P op_vmstatus(void);
+P op_bind(void);
+P op_null(void);
 /*-- control */
-L op_start(void);
-L op_exec(void);
-L op_if(void);
-L op_ifelse(void);
-L op_for(void);
-L op_repeat(void);
-L op_loop(void);
-L op_forall(void);
-L op_exit(void);
-L op_stop(void);
-L op_stopped(void);
-L op_countexecstack(void);
-L op_execstack(void);
+P op_start(void);
+P op_exec(void);
+P op_if(void);
+P op_ifelse(void);
+P op_for(void);
+P op_repeat(void);
+P op_loop(void);
+P op_forall(void);
+P op_exit(void);
+P op_stop(void);
+P op_stopped(void);
+P op_countexecstack(void);
+P op_execstack(void);
 /*-- math */
-L op_checkFPU(void);
-L op_neg(void);
-L op_abs(void);
-L op_thearc(void);
-L op_add(void);
-L op_mod(void);
-L op_sub(void);
-L op_mul(void);
-L op_div(void);
-L op_sqrt(void);
-L op_exp(void);
-L op_ln(void);
-L op_lg(void);
-L op_pwr(void);
-L op_cos(void);
-L op_sin(void);
-L op_tan(void);
-L op_atan(void);
-L op_floor(void);
-L op_ceil(void);
-L op_asin(void);
-L op_acos(void);
+P op_checkFPU(void);
+P op_neg(void);
+P op_abs(void);
+P op_thearc(void);
+P op_add(void);
+P op_mod(void);
+P op_sub(void);
+P op_mul(void);
+P op_div(void);
+P op_sqrt(void);
+P op_exp(void);
+P op_ln(void);
+P op_lg(void);
+P op_pwr(void);
+P op_cos(void);
+P op_sin(void);
+P op_tan(void);
+P op_atan(void);
+P op_floor(void);
+P op_ceil(void);
+P op_asin(void);
+P op_acos(void);
 /*-- relational, boolean, bitwise */ 
-L op_eq(void);
-L op_ne(void);
-L op_ge(void);
-L op_gt(void);
-L op_le(void);
-L op_lt(void);
-L op_and(void);
-L op_not(void);
-L op_or(void);
-L op_xor(void);
-L op_bitshift(void);
+P op_eq(void);
+P op_ne(void);
+P op_ge(void);
+P op_gt(void);
+P op_le(void);
+P op_lt(void);
+P op_and(void);
+P op_not(void);
+P op_or(void);
+P op_xor(void);
+P op_bitshift(void);
 /*-- conversion, string, attribute, class ,type */
-L op_class(void);
-L op_type(void);
-L op_readonly(void);
-L op_active(void);
-L op_tilde(void);
-L op_mkread(void);
-L op_mkact(void);
-L op_mkpass(void);
-L op_ctype(void);
-L op_parcel(void);
-L op_text(void);
-L op_number(void);
-L op_token(void);
-L op_search(void);
-L op_anchorsearch(void);
+P op_class(void);
+P op_type(void);
+P op_readonly(void);
+P op_active(void);
+P op_tilde(void);
+P op_mkread(void);
+P op_mkact(void);
+P op_mkpass(void);
+P op_ctype(void);
+P op_parcel(void);
+P op_text(void);
+P op_number(void);
+P op_token(void);
+P op_search(void);
+P op_anchorsearch(void);
 
 /*-- time/date and file access  */
-L op_gettime(void);
-L op_localtime(void);
-L op_getwdir(void);
-L op_setwdir(void);
-L op_writefile(void);
-L op_readfile(void);
-L op_findfiles(void);
-L op_findfile(void);
-L op_readboxfile(void);
-L op_writeboxfile(void); 
-L op_tosystem(void);
-L op_transcribe(void);
+P op_gettime(void);
+P op_localtime(void);
+P op_getwdir(void);
+P op_setwdir(void);
+P op_writefile(void);
+P op_readfile(void);
+P op_findfiles(void);
+P op_findfile(void);
+P op_readboxfile(void);
+P op_writeboxfile(void); 
+P op_tosystem(void);
+P op_fromsystem(void);
+P op_transcribe(void);
 
 /*-- more big operators.... */
-L op_fax(void);
-L op_merge(void);
-L op_nextobject(void);
-L op_interpolate(void);
-L op_integrateOH(void);
-L op_extrema(void);
-L op_solvetridiag(void);
-L op_integrateOHv(void);
-L op_tile(void);
-L op_ramp(void);
-L op_extract(void);
-L op_dilute(void);
-L op_ran1(void);
-L op_solve_bandmat(void);
-L op_complexFFT(void);
-L op_realFFT(void);
-L op_sineFFT(void);
-L op_decompLU(void);
-L op_backsubLU(void);
-L op_integrateRS(void);
-L op_bandLU(void);
-L op_bandBS(void);
-L op_invertLU(void);
-L op_matmul(void);
-L op_mattranspose(void);
-L op_dilute_add(void);
-L op_matvecmul(void);
+P op_fax(void);
+P op_merge(void);
+P op_nextobject(void);
+P op_interpolate(void);
+P op_integrateOH(void);
+P op_extrema(void);
+P op_solvetridiag(void);
+P op_integrateOHv(void);
+P op_tile(void);
+P op_ramp(void);
+P op_extract(void);
+P op_dilute(void);
+P op_ran1(void);
+P op_solve_bandmat(void);
+P op_complexFFT(void);
+P op_realFFT(void);
+P op_sineFFT(void);
+P op_decompLU(void);
+P op_backsubLU(void);
+P op_integrateRS(void);
+P op_bandLU(void);
+P op_bandBS(void);
+P op_invertLU(void);
+P op_matmul(void);
+P op_mattranspose(void);
+P op_dilute_add(void);
+P op_matvecmul(void);
+
+#if DM_ENABLE_REGEX
+P op_regex(void);
+P op_regexi(void);
+#endif //DM_ENABLE_REGEX
+
+static BOOLEAN PVALUE(B* frame, P* var) __attribute__ ((__unused__));
+static BOOLEAN PVALUE(B* frame, P* var) {
+#if DM_HOST_IS_32_BIT
+    LBIG v;
+    if (!VALUE(frame, &v) || v > PMAX || v < -PMAX)
+      return FALSE;
+    *var = (P) v;
+    return TRUE;
+#else
+    return VALUE(frame, var);
+#endif // DM_HOST_IS_32_BIT
+}
 
 #define ERRLEN (1000)
 
 #include "error-local.h"
+#include "dm-snprintf.h"
+
+#if __cplusplus
+}
+#endif		
 
 #endif //DM_H

@@ -1,13 +1,16 @@
 #ifndef THREADS_H
 #define THREADS_H
 
-#ifdef ENABLE_THREADS //intentional ifdef for undef
-#if DISABLE_THREADS
+#ifdef DM_ENABLE_THREADS //intentional ifdef for undef
+#if DM_DISABLE_THREADS
+#undef DM_ENABLE_THREADS
+#ifdef DM_HAVE_CONFIG_H
 #undef ENABLE_THREADS
-#endif //DISABLE_THREADS
-#endif //ENABLE_THREADS
+#endif //DM_HAVE_CONFIG_H
+#endif //DM_DISABLE_THREADS
+#endif //DM_ENABLE_THREADS
 
-#if ENABLE_THREADS
+#if DM_ENABLE_THREADS
 
 /***************************************************** thread_func
  *
@@ -21,7 +24,7 @@
  * As long as global is read-only, no locking should be necessary
  *
  * */
-typedef L (*thread_func)(UL id, const void * global, void* local);
+typedef P (*thread_func)(UP id, const void * global, void* local);
 
 /************************************************** threads_do_int
  *
@@ -38,7 +41,7 @@ typedef L (*thread_func)(UL id, const void * global, void* local);
  *          thread to return error != OK.
  * 
  */
-L threads_do_int(UL nways, thread_func func, const void* global,
+P threads_do_int(UP nways, thread_func func, const void* global,
                  void* local, size_t size_per_local);
 
 /**************************************************** threads_do_pool_int
@@ -49,8 +52,8 @@ L threads_do_int(UL nways, thread_func func, const void* global,
  *   starting with the passed local.
  *
  */
-L threads_do_pool_int(UL nways, thread_func func, const void* global,
-					  void* local, size_t size_per_local);
+P threads_do_pool_int(UP nways, thread_func func, const void* global,
+                      void* local, size_t size_per_local);
 
 /**************************************************** threads_do_local
  * 
@@ -101,8 +104,8 @@ void thread_share_unlock_f(void);
  * 1 <= thread_num <= THREADMAX
  * 
  * */
-extern UL thread_num_;
-static UL thread_num(void) {return thread_num_;};
+extern UP thread_num_;
+static UP thread_num(void) {return thread_num_;};
 
 /*********************************************************** thread_max
  *
@@ -112,16 +115,16 @@ static UL thread_num(void) {return thread_num_;};
  * 0 <= thread_max < thread_num.
  * Equal to nways passed in threads_do_int
  */
-extern UL thread_max_;
+extern UP thread_max_;
 __attribute__ ((__unused__)) 
-  static UL thread_max(void)  {return thread_max_;};
+static UP thread_max(void)  {return thread_max_;};
 
-#else //!ENABLE_THREADS
+#else //!DM_ENABLE_THREADS
 
 //minimize the number of ifdefs by testing thread_num
 
 #define thread_num() (1)
 
-#endif //!ENABLE_THREADS
+#endif //!DM_ENABLE_THREADS
 
 #endif //THREADS_H

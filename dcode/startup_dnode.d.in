@@ -21,6 +21,15 @@
 getsocket setconsole
 /toconsole_ ~toconsole def
 
+/dmnumincerror {
+    (XXXXXXXXXXXXXXXXXXXXXXXXX) getmyname getmyport (dmnuminc) 2816 error
+} def
+
+
+/makefont {
+    ~[exch 3 -1 roll 1 ~index 0 ~put] bind
+} bind def
+
 | ///////// INTERNALIZED ////////////
 |-------------------------- lock -------------------
 |
@@ -110,10 +119,11 @@ end mkread def
    * (\n) text 0 exch getinterval toconsole_
 } bind def
 
-/tuples 5 dict dup begin
+/tuples 6 dict dup begin
    /B 10 def
    /W 10 def
    /L 5 def
+   /X 2 def
    /S 5 def
    /D 2 def
 end def
@@ -209,9 +219,9 @@ dup dup class /arrayclass eq exch type /B eq and
 | 
 | use:  textbuffer index object | textbuffer index
 
-/xtext  { xtext_dict begin /dprec 15 def /d_bnum totext end } bind def
-/xtexts { xtext_dict begin /dprec 15 def /d_blit totext end } bind def
-/pstext { xtext_dict begin /dprec 6 def /ps_blit totext end } bind def
+/xtext  { xtext_dict begin /dprec 15 def /d_bnum  totext end } bind def
+/xtexts { xtext_dict begin /dprec 15 def /d_blit  totext end } bind def
+/pstext { xtext_dict begin /dprec 6 def  /ps_blit totext end } bind def
 
 /xtext_dict 40 dict dup begin
  
@@ -246,21 +256,27 @@ dup dup class /arrayclass eq exch type /B eq and
 /d_bnum { mkpass _arrayclass } bind def
 
 /d_blit { mkpass dup
-          type mkact d_blit_dict begin exec end mkact exec } bind def
-/d_blit_dict 5 dict dup begin
+          type mkact d_blit_dict begin exec end mkact exec
+} bind def
+
+/d_blit_dict 6 dict dup begin
    /B /_stringclass def
    /W /_arrayclass def
    /L /_arrayclass def
+   /X /_arrayclass def
    /S /_arrayclass def
    /D /_arrayclass def
 end mkread def
 
 /ps_blit { mkpass dup 
-           type mkact ps_blit_dict begin exec end mkact exec } bind def
-/ps_blit_dict 5 dict dup begin
+           type mkact ps_blit_dict begin exec end mkact exec
+} bind def
+
+/ps_blit_dict 6 dict dup begin
    /B /_stringclass def
    /W /listclass def
    /L /listclass def
+   /X /listclass def
    /S /listclass def
    /D /listclass def
 end mkread def
@@ -277,7 +293,7 @@ end mkread def
               ifelse
             } bind def
 /dictclass  { mkpass /obj name
-              obj type /X ne {
+              obj type /Q ne {
                   newline
                   obj length 
                   objstr 0 * 4 -1 roll * number 0 exch getinterval
@@ -306,11 +322,12 @@ end mkread def
 /B { objstr 0 4 4 -1 roll * number 0 exch getinterval ftext } bind def
 /W { objstr 0 6 4 -1 roll * number 0 exch getinterval ftext } bind def
 /L { objstr 0 11 4 -1 roll * number 0 exch getinterval ftext } bind def
+/X { objstr 0 21 4 -1 roll * number 0 exch getinterval ftext } bind def
 /S { objstr 0 13 4 -1 roll 6 number 0 exch getinterval ftext } bind def
 /D { objstr 0 dprec 8 add 4 -1 roll dprec number
      0 exch getinterval ftext } bind def
 
-/totext { find /arrayclass name /obj name
+/totext {find /arrayclass name find /obj name
    /indents 0 def newline
    /obj find inword
    newline
@@ -545,27 +562,26 @@ end def  | of xtext_dict
 | opstack in userdict->[d_opstack]
 | dictstack in userdict->[d_dictstack]
 | execstack in userdict->[d_execstack]
+/reverse { | [ n1 .. nx ] | [ nx ... n1] 
+  [exch dup length 1 sub -1 0 { | \[ [] i
+    1 index exch get | \[ [] x
+    exch | \[ x []   
+  } for pop]
+} bind def
 
 /dstate_ {
   countexecstack list execstack dup length 1 sub 0 exch getinterval
+    reverse
     userdict /d_execstack put
 
-  [count 1 ne {count 1 roll} if]
+  [count 1 ne {count 1 roll} if] dup
+    reverse
     userdict /d_opstack put
+    {} forall
     
   countdictstack list dictstack dup length 2 sub 2 exch getinterval
+    reverse
     userdict /d_dictstack put
-} bind def
-
-|-------------------------------------- libdict
-| wrapper for loadlib
-| loads a shared library in dir/lib
-| and returns the associated dictionary
-| the library must not have been loaded
-| previously since the last vmresize
-/libdict { | (dir) (lib) --> << dict >>
-  loadlib
-  null nextlib pop
 } bind def
 
 |-------------------------------------------- libs_
@@ -602,6 +618,19 @@ end def  | of xtext_dict
   whoami
 } bind def
 
+| mousestate /wintype actiondict | -- <<action exec'd>> 
+/mouseaction {/actiondict name
+  | bottom 8 bits are the modifier keys, bottom 8 of top 16 is mouse button
+  | Why? No clear reason.
+  exch dup -16 bitshift /mB name 255 and /mM name | /wintype
+  false mousedict 3 -1 roll get {                 | false /event {}
+    actiondict 2 index known not {pop pop} {
+      exec {exch pop true exit} {pop} ifelse
+    } ifelse
+  } forall
+  {actiondict exch get exec true} {false} ifelse
+} bind def
+
 |------------------------------------------------ whoami
 | prints name and port
 | for use with make_toconsole to identify who looks like who
@@ -625,6 +654,8 @@ Xwindows_ {
     } stopped cleartomark
     end
   } bind def
+
+  /delete_window {end} bind def | default delete action is nothing.
 } if
 
 (Using startup_dnode.d $Id$ V@PACKAGE_VERSION@\n) toconsole
@@ -632,6 +663,8 @@ Xwindows_ {
 (Home:  ) toconsole gethomedir toconsole (\n) toconsole
 (Startup: ) toconsole getstartupdir toconsole (\n) toconsole
 (Plugins: ) toconsole getplugindir toconsole (\n) toconsole
+
+getstartupdir (matrix.d) fromfiles
 
 (Trying ) toconsole getconfdir toconsole (dnode.d...\n) toconsole
 getconfdir (dnode.d) fromxfiles {

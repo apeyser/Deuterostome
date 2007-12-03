@@ -1,9 +1,9 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-#ifdef HAVE_ERROR_H
+#ifdef DM_HAVE_ERROR_H
 #include <error.h>
-#else //HAVE_ERROR_H
+#else //DM_HAVE_ERROR_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,6 +19,6 @@ __attribute__ ((unused, format (printf, 3, 4)))
     if (__errnum) fprintf(stderr, ": %s\n", strerror(__errnum));
     if (__status) exit(__status);
 }
-#endif //HAVE_ERROR_H
+#endif //DM_HAVE_ERROR_H
 
 #endif //ERROR_H

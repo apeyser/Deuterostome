@@ -33,10 +33,8 @@
 
 |-- fonts
 
-  /NORMALFONT 
-    (-b&h-lucida-medium-r-normal-sans-0-0-75-75-p-0-iso8859-1) def
-  /BOLDFONT 
-    (-b&h-lucida-bold-r-normal-sans-0-0-75-75-p-0-iso8859-1) def
+  /NORMALFONT {fontdict /NORMALFONT get} bind def
+  /BOLDFONT {fontdict /BOLDFONT get} bind def
 
 |-- color templates
 
@@ -263,57 +261,12 @@ userdict /dnode_setup known not {
 /theobj [ /nullclass null null ] def
 /thesubobj 5 list def
 /thesubitem 5 list def
-/fde <l 0 0 0 0 0 0 > def
+/fde <x 0 0 0 0 0 0 > def
 
 |-- file attribute templates
 
 /TYPE 61440L def
 /DIRTYPE 16384L def
-
-|-- mouse key combos
-/shift1_plain3 {
-  mB 1 eq mM 1 eq and
-  mB 3 eq mM 0 eq and or
-} bind def
-
-/plain1 {
-  mB 1 eq mM 0 eq and
-} bind def
-
-|/shift1_plain4 {
-|  mB 1 eq mM 1 eq and
-|  mB 4 eq mM 0 eq and or
-|} bind def
-
-/shift1 {
-  mB 1 eq mM 1 eq and
-} bind def
-
-/opt1_plain2 {
-  mB 1 eq mM 8 eq and
-  mB 2 eq mM 0 eq and or
-} bind def
-
-/ctrl1_plain3 {
-  mB 1 eq mM 4 eq and
-  mB 3 eq mM 0 eq and or
-} bind def
-
-/scrollUp {
-  mB 4 eq mM 0 eq and
-} bind def
-
-/scrollDown {
-  mB 5 eq mM 0 eq and
-} bind def
-
-/pageUp {
-  mB 4 eq mM 4 eq and
-} bind def
-
-/pageDown {
-  mB 5 eq mM 4 eq and
-} bind def
 
 |============================== front end ================================
 
@@ -324,6 +277,8 @@ userdict /dnode_setup known not {
     [wid wW wH resizewindow | ]
   } stopped cleartomark} if end
 } bind def
+
+/delete_window {Xdisconnect end} bind def | if in dnode, disconnect
 
 |--------------------------------------------- draw the screen
 | - draws the screen layout
@@ -367,45 +322,47 @@ end
 |     - command clicking checks one item in the left page or an unlimited
 |       number of items in the right page
 |     - shift clicking a left page item removes the item from the display
+
+/scroll_actions 6 dict dup begin | {
+  /scrollProp {|-- 'shift': proportional scrolling
+    mX wW 3 sub 2 div 2 add ge {
+      /ritepageT 2 ritepageU nL sub mul mX wW 3 sub 2 div sub mul
+      wW 3 sub div def showRpage
+    } {
+      scrolls mX 12 mul wW div get exec
+    } ifelse
+  } bind def
+        
+  /click { |-- plain click: do appropriate scroll step
+    scrolls mX 12 mul wW div get exec
+  } bind def
+
+  /scrollUp {
+    scrolls 2 mX wW 3 sub 2 div 1 add gt {6 add} if get exec
+  } bind def
+
+  /scrollDown {
+    scrolls 3 mX wW 3 sub 2 div 1 add gt {6 add} if get exec
+  } bind def
+
+  /pageUp {
+    scrolls 1 mX wW 3 sub 2 div 1 add gt {6 add} if get exec
+  } bind def
+
+  /pageDown {
+    scrolls 4 mX wW 3 sub 2 div 1 add gt {6 add} if get exec
+  } bind def | }
+end def
  
 /mouseclick {
    [ 4 1 roll { | stopped and reentry lock
-      dup -16 bitshift /mB name
-          255 and      /mM name
-      /mY name /mX name 
-      mY 14 le { wid inforect BG fillrectangle stop } if
-      mY wH 15 sub ge {
-        shift1_plain3 {|-- 'shift': proportional scrolling
-          mX wW 3 sub 2 div 2 add ge {
-            /ritepageT 2 ritepageU nL sub mul mX wW 3 sub 2 div sub mul
-            wW 3 sub div def showRpage stop
-          } {
-            scrolls mX 12 mul wW div get exec stop
-          } ifelse
-        } if
-        
-        plain1 { |-- plain click: do appropriate scroll step
-          scrolls mX 12 mul wW div get exec stop
-        } if
-        scrollUp {
-          scrolls 2 mX wW 3 sub 2 div 1 add gt {6 add} if get exec stop
-        } if
-        scrollDown {
-          scrolls 3 mX wW 3 sub 2 div 1 add gt {6 add} if get exec stop
-        } if
-        pageUp {
-          scrolls 1 mX wW 3 sub 2 div 1 add gt {6 add} if get exec stop
-        } if
-        pageDown {
-          scrolls 4 mX wW 3 sub 2 div 1 add gt {6 add} if get exec stop
-        } if
-
-        stop
-      } if
-    /mL mY 15 sub 13 div def
-    mX wW 3 sub 2 div 1 add le { hitL } { hitR } ifelse
+     /mS name /mY name /mX name 
+     mY 14 le {wid inforect BG fillrectangle stop} if
+     mY wH 15 sub ge {mS /theeye scroll_actions mouseaction pop stop} if
+     /mL mY 15 sub 13 div def
+     mX wW 3 sub 2 div 1 add le {hitL} {hitR} ifelse
   } stopped cleartomark | ]
-    end 
+  end 
 } bind def
 
 |============================ shared machinery ===========================
@@ -430,7 +387,8 @@ end
 
 |------------------- presenting info on (simple-) clicked object
 
-/INFOTEXT [ NORMALFONT BLACK -1 -1 ] def
+/INFOTEXT ~NORMALFONT [null BLACK -1 -1] makefont def
+|/INFOTEXT [ NORMALFONT BLACK -1 -1 ] def
 
 /toinfo { 
   wid inforect BG fillrectangle
@@ -443,7 +401,7 @@ end
 
 /Kb { * exch 999 add 1000 div * number } def
 
-15 dict dup begin
+16 dict dup begin
 /VMclass     { * (VM: ) text vmstatus /bused name Kb
                * ( total Kb, ) text bused Kb * ( used) text
              } def
@@ -589,6 +547,7 @@ end mkread /infoclasses name
    theobj 1 get length /b array /checkmarks name
    0 checkmarks copy pop
    theobj theopen copy pop
+   | ??? currentbuffers capsave ???
    /showRpage /show_array find def /fromRpage /from_array find def
    showRpage
 } def
@@ -603,17 +562,17 @@ end mkread /infoclasses name
 end mkread def
 
 /error {
-  errordict begin {                                     | for both dvt and dnode:
-    dup 3 userdict /dvt known not {2 add} if 1 roll     | copy error #
-    wid inforect BG fillrectangle                       | under error stack
-    infoline errormessage dup length 1 sub 0 exch getinterval
-    wid 2 12 4 -1 roll INFOTEXT drawtext           | put err -newline in eye
-    208 ne {stop} {                                | avoid loop of illegal stops
-      (Illegal stop in the eye\n) toconsole
-      countdictstack 2 sub {end} repeat            | avoid redef of abort
-      abort                                        | drop all
+  errordict begin {
+    | avoid stop loop
+    dup 520 eq {error} {
+      dup 518 eq {error} {
+        wid inforect BG fillrectangle
+        infoline errormessage dup length 1 sub 0 exch getinterval
+        wid 2 12 4 -1 roll INFOTEXT drawtext   | put err -newline in eye
+        stop
+      } ifelse
     } ifelse
-  } stopped end ~stop if
+  } stopped end {stop} if
 } bind def
 
 |========================= left page machinery ============================
@@ -629,39 +588,44 @@ end mkread def
 | path strings have been eliminated from the VM). If rebuilding eliminates
 | objects, the new left page is shown, but the click is otherwise ignored.
 
+/left_actions 8 dict dup begin | {
+  /remove { 
+    /leftchecked -1 def
+    mL leftpageMin ge {
+      leftpageT mL add 1 add 1 leftpageU 1 sub { /k name
+        leftpage k get leftpage k 1 sub get copy pop
+      } for
+      /leftpageU k def
+      leftpageU 2 eq {
+        /leftpagesb leftpageSB def /leftpagelb leftpageLB def
+      } if
+      showLpage
+    } if
+  } bind def
+
+  /check { 
+    leftchecked theidx eq { -1 } { theidx } ifelse /leftchecked name
+    showLpage
+  } bind def
+
+  /open { 
+    leftpage theidx get theobj copy pop
+    openLclasses theobj 0 get get mkact exec
+    rebuildLpage pop showLpage
+  } bind def
+
+  /click {leftpage theidx get theobj copy pop toinfo} bind def
+  /scrollUp {scrolls 2 get exec} bind def
+  /scrollDown {scrolls 3 get exec} bind def
+  /pageUp {scrolls 1 get exec} bind def
+  /pageDown {scrolls 4 get exec} bind def | }
+end def
+
 /hitL {
  { | stopped
-   leftpageT mL add dup leftpageU ge { pop stop } if /theidx name
-   rebuildLpage { showLpage stop } if
-   shift1 |-- 'shift': remove an object
-      { /leftchecked -1 def
-        mL leftpageMin ge {
-          leftpageT mL add 1 add 1 leftpageU 1 sub { /k name
-              leftpage k get leftpage k 1 sub get copy pop
-            } for
-          /leftpageU k def
-          leftpageU 2 eq {
-            /leftpagesb leftpageSB def /leftpagelb leftpageLB def
-          } if
-          showLpage stop 
-          } if
-      } if
-   opt1_plain2 |-- 'option': check/uncheck an object
-      { 
-        leftchecked theidx eq { -1 } { theidx } ifelse /leftchecked name
-        showLpage stop
-      } if
-   ctrl1_plain3 |-- 'control': open the object in the right page
-     { leftpage theidx get theobj copy pop
-       openLclasses theobj 0 get get mkact exec
-       rebuildLpage pop showLpage stop
-     } if
-   plain1 |-- plain click
-     { leftpage theidx get theobj copy pop toinfo } if
-   scrollUp {scrolls 2 get exec stop } if
-   scrollDown {scrolls 3 get exec stop} if
-   pageUp {scrolls 1 get exec stop} if
-   pageDown {scrolls 4 get exec stop} if
+   leftpageT mL add dup leftpageU ge {pop stop} if /theidx name
+   rebuildLpage {showLpage stop} if
+   mS /theeye left_actions mouseaction pop
  } stopped pop
 } def
 
@@ -709,8 +673,10 @@ end /keeps name
   } loop
 } bind def
 
-/LEFTCHECKED [ BOLDFONT RED -1 0 ] def
-/LEFTNORMAL  [ NORMALFONT BLACK -1 0 ] def
+/LEFTCHECKED ~BOLDFONT [null RED -1 0] makefont def
+|/LEFTCHECKED [ BOLDFONT RED -1 0 ] def
+/LEFTNORMAL ~NORMALFONT [null BLACK -1 0] makefont def
+|/LEFTNORMAL  [ NORMALFONT BLACK -1 0 ] def
 
 
 |-------------- scrolling left page
@@ -726,7 +692,7 @@ end /keeps name
 |------------------- presenting a left-page object
 | expects 'vidx' = rowindex of selected object
  
-9 dict dup begin
+10 dict dup begin
 /VMclass     { dict_icon   (VM)  icon_text
                { * (userdict) text } show_id
              } bind def
@@ -757,7 +723,8 @@ end mkread /objpresenters name
 /box_icon    { wid iconrects vidx get BOXCOLOR fillrectangle } bind def
 
 
-/ICONTEXT [ NORMALFONT <d 0 0 0 > mapcolor 0 0 ] def
+/ICONTEXT ~NORMALFONT [ null <d 0 0 0> mapcolor 0 0] makefont def
+|/ICONTEXT [ NORMALFONT <d 0 0 0 > mapcolor 0 0 ] def
 
 /icon_text  { wid iconlocs vidx get exec 4 -1 roll 
               ICONTEXT drawtext pop pop pop
@@ -778,7 +745,7 @@ end mkread /objpresenters name
 
 |--------------- opening leftpage object (by control/click)
 
-6 dict dup begin
+7 dict dup begin
 /VMclass     { open_dict } def
 /FSclass     { open_fs } def
 /dirclass    { open_dir } bind def
@@ -800,65 +767,68 @@ end mkread /openLclasses name
 | page is shown, and the left page is rebuilt and shown; the click then
 | is ignored.
 
+/right_actions 7 dict dup begin | {
+  /click {fromRpage toinfo} bind def
+  /scrollUp {scrolls 8 get exec} bind def
+  /scrollDown {scrolls 9 get exec} bind def
+  /pageUp {scrolls 7 get exec stop} bind def
+  /pageDown {scrolls 10 get exec stop} bind def | }
+
+  /check { 
+    checkmarks theidx get 0 eq { -1 } { 0 } ifelse checkmarks theidx put
+    showRpage
+  } bind def
+
+  /open {|-- 'control': open object
+    fromRpage 
+    openRclasses theobj 0 get get exec {
+      leftpage 0 leftpageU getinterval {
+        /theitem name theitem 0 get theopen 0 get eq {
+          theopen 0 get dupchecks exch get exec {stop} if 
+        } if        
+      } forall
+    } stopped not {
+      rebuildLpage pop leftpageU leftpage length lt {
+        theopen 0 get /dirclass eq {
+          /theitem leftpage leftpageU get def
+          leftpagesb theopen 1 get length /b parcel
+          theopen 1 get exch copy theitem 1 put 
+          theopen 2 get length /b parcel
+          theopen 2 get exch copy theitem 2 put
+          /leftpagesb name
+          theopen 0 get theitem 0 put
+        } {
+          theopen 0 get /FSclass eq {
+            /theitem leftpage leftpageU get def
+            leftpagesb theopen 1 get length /b parcel
+            theopen 1 get exch copy theitem 1 put
+            leftpagelb 0 2 getinterval theitem 2 put
+            /leftpagelb leftpagelb 2 leftpagelb length 2 sub getinterval def
+            theopen 2 get 0 get length /b parcel
+            theopen 2 get 0 get exch copy theitem 2 get 0 put
+            theopen 2 get 1 get length /b parcel
+            theopen 2 get 1 get exch copy theitem 2 get 1 put
+            /leftpagesb name
+            theopen 0 get theitem 0 put
+          } {
+            theopen leftpage leftpageU get copy pop
+          } ifelse
+        } ifelse
+        /leftpageU leftpageU 1 add def
+        showLpage
+      } if
+    } if
+  } bind def | }
+end def
+
 /hitR { 
  { | stopped
-   ritepageT mL add dup ritepageU ge { pop stop } if /theidx name
-   theopen 0 get class /nullclass eq 
-      { wid ritepagerect BG fillrectangle
-        rebuildLpage pop showLpage
-      } if
-   opt1_plain2 |-- 'option': check/uncheck an object
-      { 
-        checkmarks theidx get 0 eq { -1 } { 0 } ifelse checkmarks theidx put
-        showRpage stop
-      } if
-   ctrl1_plain3 {|-- 'control': open object
-     fromRpage 
-     openRclasses theobj 0 get get exec {
-       leftpage 0 leftpageU getinterval {
-         /theitem name theitem 0 get theopen 0 get eq {
-           theopen 0 get dupchecks exch get exec { stop } if 
-         } if        
-       } forall
-     } stopped not {
-         rebuildLpage pop leftpageU leftpage length lt {
-           theopen 0 get /dirclass eq {
-             /theitem leftpage leftpageU get def
-             leftpagesb theopen 1 get length /b parcel
-             theopen 1 get exch copy theitem 1 put 
-             theopen 2 get length /b parcel
-             theopen 2 get exch copy theitem 2 put
-             /leftpagesb name
-             theopen 0 get theitem 0 put
-           } {
-             theopen 0 get /FSclass eq {
-               /theitem leftpage leftpageU get def
-               leftpagesb theopen 1 get length /b parcel
-               theopen 1 get exch copy theitem 1 put
-               leftpagelb 0 2 getinterval theitem 2 put
-               /leftpagelb leftpagelb 2 leftpagelb length 2 sub getinterval def
-               theopen 2 get 0 get length /b parcel
-               theopen 2 get 0 get exch copy theitem 2 get 0 put
-               theopen 2 get 1 get length /b parcel
-               theopen 2 get 1 get exch copy theitem 2 get 1 put
-               /leftpagesb name
-               theopen 0 get theitem 0 put
-             } {
-               theopen leftpage leftpageU get copy pop
-             } ifelse
-           } ifelse
-           /leftpageU leftpageU 1 add def
-           showLpage
-         } if
-     } if
-     stop
+   ritepageT mL add dup ritepageU ge {pop stop} if /theidx name
+   theopen 0 get class /nullclass eq { 
+     wid ritepagerect BG fillrectangle
+     rebuildLpage pop showLpage
    } if
-   plain1 |-- plain click: show object info
-     { fromRpage toinfo } if
-   scrollUp {scrolls 8 get exec stop} if
-   scrollDown {scrolls 9 get exec stop} if
-   pageUp {scrolls 7 get exec stop} if
-   pageDown {scrolls 10 get exec stop} if
+   mS /theeye right_actions mouseaction pop
  } stopped pop
 } def
 
@@ -875,7 +845,7 @@ end mkread /openLclasses name
 
 |--------------- opening rightpage object (by control/click)
 
-12 dict dup begin
+13 dict dup begin
   
 /dirclass    { open_dir } bind def
 /fileclass   { stop } def
@@ -897,7 +867,7 @@ end mkread /openRclasses name
 
 |-- duplication checks (for left page items)
 
-4 dict dup begin
+5 dict dup begin
 /dirclass    { theitem 1 get theopen 1 get eqstr
                theitem 2 get theopen 2 get eqstr and } bind def
 /arrayclass  { theitem 1 get theopen 1 get eq } bind def
@@ -910,7 +880,7 @@ end mkread /dupchecks name
 |------------- representing a right-page D object value
 | expects 'Rvaluerect' to be established for placing value
 
-11 dict dup begin
+12 dict dup begin
 /nullclass   {
   {(null) fax theitem type /T eq {(:socket) fax} if} BG show_value
 } bind def
@@ -946,7 +916,7 @@ end mkread /dupchecks name
              } bind def
 /dictclass   { { * (~|~ of ) text * theitem length * number
                  theitem type dup /O eq {pop (:oplib) fax} {
-                     /X eq {(:opaque) fax} if
+                     /Q eq {(:opaque) fax} if
                  }ifelse
                } DICTCOLOR show_value
              } bind def
@@ -959,8 +929,10 @@ end mkread /valuepresenters name
 |----------- showing a value field in the right page
 | text_generator fillpar | --
 
-/VALUETEXT [ NORMALFONT BLACK -1 0 ] def
-/RITEHIGH [ BOLDFONT BLUE -1 0 ] def
+/VALUETEXT ~NORMALFONT [null BLACK -1 0] makefont def
+|/VALUETEXT [ NORMALFONT BLACK -1 0 ] def
+/RITEHIGH ~BOLDFONT [null BLUE -1 0] makefont def
+|/RITEHIGH [ BOLDFONT BLUE -1 0 ] def
 
 /show_value { /fill name /textgen name
    wid valuerects vidx get fill fillrectangle
@@ -1014,7 +986,6 @@ end mkread /valuepresenters name
         valuepresenters /theitem find class get exec
       } for
 } def
-
 
 |-------- show array value
 
@@ -1137,7 +1108,7 @@ end mkread /valuepresenters name
          leftpage leftchecked get 2 get fax (/') fax 
        } {
          leftpage leftchecked get 0 get /FSclass eq {
-           (') fax leftpage leftcheck get 1 get fax (') fax
+           (') fax leftpage leftchecked get 1 get fax (') fax
          } if
        } ifelse
     } if
@@ -1150,7 +1121,7 @@ end mkread /valuepresenters name
   } stopped pop end
 } bind def 
 
-/faxRclasses 6 dict dup begin
+/faxRclasses 7 dict dup begin
 
 /VMclass { } def
 
@@ -1237,7 +1208,7 @@ end def
   ]
 } bind def 
  
-/getRclasses 6 dict dup begin
+/getRclasses 7 dict dup begin
 
 /VMclass {
   /kR 0 def

@@ -882,12 +882,14 @@ end def
 } bind def
 
 %---------- place label at X, Y
-% [ X Y label ] | --
+% [ X Y label ~coloring_setup] | --
+% coloring_setup is optional.
 
 /XYlabel { /thelabel exch def
   /lineabscissa thelabel 0 get X_to_x def
   /lineordinate thelabel 1 get Y_to_y def
   /theline thelabel 2 get def
+  thelabel length 3 gt {thelabel 3 get exec} if
   /style 0 def 1 LineAdjust ShowLine
 } bind def
  
@@ -900,7 +902,7 @@ end def
 % interprets the following entries in graph_dict:
 %
 %  title        - (..)
-%  wildlabel    - [[ X Y ( .. ) ..]
+%  wildlabel    - [[ X Y ( .. ) ~color_setup], color_setup is optional
 %  poreproper   - [ X_left X_right ]
 %  compression  - [ length X1 length X2 length ]
 %  forordinate  - [ scan min max type -0.075 unit ]

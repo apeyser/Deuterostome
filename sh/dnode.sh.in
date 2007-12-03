@@ -1,4 +1,4 @@
-#! /usr/bin/env bash 
+#! @ENABLE_BASH@ 
 
 if [[ -z "$DVTBINPATH" ]] ; then 
     PATH="@bindir@:$PATH"
