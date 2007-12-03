@@ -2048,12 +2048,18 @@ end mkfontdict def
 /helvetica_100_fontdict fontdict3 def
 
 |-- mouse key combos
-/mousebuttons 5 dict dup begin | {
-  /left       1 def
-  /middle     2 def
-  /right      3 def
-  /scrollUp   4 def
-  /scrollDown 5 def | }
+/mousebuttons 11 dict dup begin | {
+  /left        1  def
+  /middle      2  def
+  /right       3  def
+  /scrollUp    4  def
+  /scrollDown  5  def
+  /scrollLeft  6  def
+  /scrollRight 7  def 
+  /button8     8  def
+  /button9     9  def
+  /button10    10 def
+  /button11    11 def| }
 end mkread def
 
 /mousekeys 12 dict dup begin | {
@@ -2094,8 +2100,15 @@ end mkread def
   /remove     [/shift /left       mkmousepair] def | theeye
   /scrollUp   [/plain /scrollUp   mkmousepair] def | theeye
   /scrollDown [/plain /scrollDown mkmousepair] def | theeye
-  /pageUp     [/ctrl /scrollUp    mkmousepair] def | theeye
-  /pageDown   [/ctrl /scrollDown  mkmousepair] def | theeye
+
+  /pageUp     [
+    /ctrl          /scrollUp   mkmousepair
+    /plain         /scrollLeft mkmousepair
+  ] def | theeye
+  /pageDown   [
+    /ctrl         /scrollDown  mkmousepair
+    /plain        /scrollRight mkmousepair
+  ] def | theeye
 
   /scrollProp [ | theeye
     /plain        /right  mkmousepair 
