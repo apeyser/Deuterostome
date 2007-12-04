@@ -401,7 +401,7 @@ end def
 
 /Kb { * exch 999 add 1000 div * number } def
 
-16 dict dup begin
+15 dict dup begin
 /VMclass     { * (VM: ) text vmstatus /bused name Kb
                * ( total Kb, ) text bused Kb * ( used) text
              } def
@@ -444,7 +444,7 @@ end def
 /listclass   { * theobj 1 get active { (proc) } { (list) } ifelse text
                * ( of ) text * theobj 1 get length * number
              } def
-/dictclass   { * (dict) text               * ( of ) text * theobj 1 get length * number
+/dictclass   { * (dict) text * ( of ) text * theobj 1 get length * number
                * ( total, ) text * theobj 1 get used * number
                * ( used) text
              } def
@@ -453,7 +453,6 @@ end def
 /numclass    { * theobj 1 get * number * theobj 1 get type mkact text
              } def
 /nullclass   { } def
-/handleclass { } def  
 /opclass     { } def
 /nameclass   { } def
 /boolclass   { } def
@@ -845,7 +844,7 @@ end def
 
 |--------------- opening rightpage object (by control/click)
 
-13 dict dup begin
+12 dict dup begin
   
 /dirclass    { open_dir } bind def
 /fileclass   { stop } def
@@ -855,7 +854,6 @@ end def
   
 /boxclass    { stop } def 
 /nullclass   { stop } def
-/handleclass { stop } def
 /opclass     { stop } def
 /boolclass   { stop } def
   
@@ -880,15 +878,11 @@ end mkread /dupchecks name
 |------------- representing a right-page D object value
 | expects 'Rvaluerect' to be established for placing value
 
-12 dict dup begin
+11 dict dup begin
 /nullclass   {
   {(null) fax theitem type /T eq {(:socket) fax} if} BG show_value
 } bind def
 
-/handleclass {
-  {(handle:) fax * theitem handleid mkact text} BG show_value
-} bind def
-  
 /numclass    { { * theitem dup type /D eq { 7 } { * } ifelse number }
                BG show_value
              } bind def
@@ -921,7 +915,6 @@ end mkread /dupchecks name
                } DICTCOLOR show_value
              } bind def
 /boxclass    { { * (|_| of ) text * theitem length * number
-                 theitem type /M eq {(:mc) fax} if
                } BOXCOLOR show_value
              } bind def
 end mkread /valuepresenters name
