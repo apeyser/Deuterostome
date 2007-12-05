@@ -197,6 +197,7 @@
 ] def
 
 /run_tests {
+  (begin\n) toconsole a_
   base_tests {/itest name
     /test1 itest 0 get 0 get def
     /test2 itest 0 get 1 get def
@@ -218,6 +219,7 @@
     } forall
   } forall
   pop
+  (end\n) toconsole a_
 } bind def
 
 /base_setup {
