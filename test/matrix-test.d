@@ -22,9 +22,8 @@
 } bind def
 
 /matmulold_test {/beta name /alpha name settrans 
-  C2 beta mul
-  Cold_temp A2_old B2_old matmul alpha mul pop
-  C_temp add pop
+  Cold_temp A2_old B2_old matmul {alpha mul pop} forall
+  C2 beta mul C_temp add pop
 } bind def
 
 /matmul_cmp {
