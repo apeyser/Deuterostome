@@ -106,7 +106,7 @@
 } bind def
 
 /trisolve_test {false settrans
-  x1 y1 copy A1 A_cuts transA trigonal_u triangular_solve pop
+  x1 y1 copy A1 A_cuts transA triagonal_u triangular_solve pop
 } bind def
 
 /trisolveold_test {false settrans
@@ -126,7 +126,7 @@
 
 | [ [[test1 test2 comparator] [(name) params...]]... ]
 /base_tests [
-  [[~matmul_test ~matmulold_test ~matmul_cmp ~true] [
+  [[~matmul_test ~matmulold_test ~matmul_cmp ~do_full] [
     [(matmul01nn) false false 0 1]
     [(matmul10nn) false false 1 0]
     [(matmul02nn) false false 0 2]
@@ -148,10 +148,10 @@
     [(matmul11nt) true true 1 1]
     [(matmul12nt) true true 1 2]
   ]]
-  [[~luinv_test ~luinvold_test ~luinv_cmp ~symmetric] [
+  [[~luinv_test ~luinvold_test ~luinv_cmp {symmetric do_full and}] [
     [(luinv)]
   ]]
-  [[~matvecmul_test ~matvecmulold_test ~matvecmul_cmp ~true] [
+  [[~matvecmul_test ~matvecmulold_test ~matvecmul_cmp ~do_full] [
     [(matvecmul01n) false 0 1]
     [(matvecmul01t) true 0 1]
     [(matvecmul10n) false 1 0]
@@ -163,14 +163,14 @@
     [(matvecmul12n) false 1 2]
     [(matvecmul12t) true 1 2]
   ]]
-  [[~trisolve_test ~trisolveold_test ~trisolve_cmp ~triagonal][
+  [[~trisolve_test ~trisolveold_test ~trisolve_cmp {triagonal do_full and}][
     [(trisolven) false]
     [(trisolvet) true]
   ]]
   [[~lu_test ~luold_test ~gmres_cmp ~symmetric] [
     [(lu)]
   ]]
-  [[~gmres_test ~luold_test ~gmres_cmp {symmetric gmres_on and}] [
+  [[~gmres_test ~luold_test ~gmres_cmp {symmetric gmres_on and do_full and}] [
     [(gmres)]
   ]]
 ] def
@@ -272,6 +272,10 @@
 } bind def
 
 /full_model (s4split_shift_35_1) def
+
+/full_on false def
+
+/do_full {full_on full not or} def
 
 /full_tests {
   {
