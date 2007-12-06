@@ -172,7 +172,7 @@ P op_matmul_blas(void)
     MATRIX_DIMS_TRANS(o_6, o_7, Nrowa, Ncola, o_5, transA, lda);
     MATRIX_DIMS(o_9, o_10, Nrowc, Ncolc, ldc);
     MULT(o_1, alpha);
-    MULT(o_7, beta);
+    MULT(o_8, beta);
     
     cp = (D*) VALUE_PTR(o_10);
     ap = (D*) VALUE_PTR(o_7);
