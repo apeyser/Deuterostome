@@ -170,10 +170,12 @@
   [[~lu_test ~luold_test ~gmres_cmp ~symmetric] [
     [(lu)]
   ]]
-  [[~gmres_test ~luold_test ~gmres_cmp ~symmetric] [
+  [[~gmres_test ~luold_test ~gmres_cmp {symmetric gmres_on and}] [
     [(gmres)]
   ]]
 ] def
+
+/gmres_on false def
 
 /run_tests {
   base_tests {/itest name
