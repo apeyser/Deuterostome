@@ -184,9 +184,7 @@
     /testcmp itest 0 get 2 get def
     /conds itest 0 get 3 get def
     itest 1 get {/ktest name
-      (Herea\n) toconsole
       dup propagate
-      (Hereb\n) toconsole
       conds {
         (Starting: ) toconsole ktest 0 get toconsole (\n) toconsole
         {test1 test2} {/ctest name
@@ -254,6 +252,7 @@
 } bind def
 
 /triagonal {
+  (herea\n) toconsole
   /triagonal true def
 
   0 A1 copy pop
@@ -275,6 +274,7 @@
       } for
     } if
   }
+  (hereb\n) toconsole
 } bind def
 
 /full_model (s4split_shift_35_1) def
