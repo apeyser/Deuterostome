@@ -9,10 +9,10 @@
 
 /compare {/temp name /a name /b name
   0 a temp copy b sub dup mul add sqrt
-  0 b dup mul add sqrt div dup test_eps gt {
+  0 b dup mul add sqrt div dup test_eps lt {exch pop} {
     (Test error: ) toconsole exch toconsole _
     halt
-  } if
+  } ifelse
   pop
 } bind def
 
