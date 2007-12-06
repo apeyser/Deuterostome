@@ -120,13 +120,13 @@
 } bind def
 
 /trisolve_test {false settrans
-  full not symmetric and {
-    x1 y1 copy A1 A_cuts transA true triagonal_u pop
+  triagonal {
+    x1 y1 copy A1 A_cuts transA trigonal_u triangular_solve pop
   } if
 } bind def
 
 /trisolveold_test {false settrans
-  full not symmetric and {
+  triagonal {
     n 1 sub -1 0 {/i name
       x2 i get
       A2 A_cuts i cut pop x_temp copy
@@ -139,7 +139,7 @@
 } bind def
 
 /trisolve_cmp {
-  full not symmetric and not {pop} {
+  triagonal not {pop} {
     y1 y2 y_temp compare
   } ifelse
 } bind def
