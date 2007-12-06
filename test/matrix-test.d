@@ -183,18 +183,19 @@
     /conds itest 0 get 3 get def
     itest 1 get {/ktest name
       dup propagate
-      conds not {exit} if
-      
-      {test1 test2} {/ctest name
-        gettime
-        ktest 1 ktest length 1 sub getinterval {} forall ctest
-        gettime exch sub
-      } forall
-      exch
-      (Test1 time: ) toconsole _ pop
-      (Test2 time: ) toconsole _ pop
-      ktest 0 get testcmp
-      ktest 0 get done
+      conds {
+        (Starting: ) toconsole ktest 0 get toconsole (\n) toconsole
+        {test1 test2} {/ctest name
+          gettime
+          ktest 1 ktest length 1 sub getinterval {} forall ctest
+          gettime exch sub
+        } forall
+        exch
+        (Test1 time: ) toconsole _ pop
+        (Test2 time: ) toconsole _ pop
+        ktest 0 get testcmp
+        ktest 0 get done
+      } if
     } forall      
   } forall
   pop
@@ -352,8 +353,15 @@
 } bind def
 
 /test {
-  {lsymmetric lassymmetric  bsymmetric bassymmetric} {
+  {
+    {(little symm) lsymmetric}
+    {(little asymm) lassymmetric}
+    {(big symm) bsymmetric}
+    {(big asymm) bassymmetric}
+  } {
+    exch (Starting mode: ) toconsole toconsole (\n) toconsole
     exec
+    
     /matrix_test_ layer {
       /A1 m n mul /d array def
       /A_cuts m n 1 3 cutsn def
@@ -410,7 +418,10 @@
       /x2 n /d array def
       /y2 m /d array def
 
-      tests {dup 1 get exec 0 get done} forall
+      tests {
+        dup 0 get (Starting test type: ) toconsole toconsole (\n) toconsole
+        dup 1 get exec 0 get done
+      } forall
     } stopped /matrix_test_ _layer {stop} if
   } forall
 } bind def
