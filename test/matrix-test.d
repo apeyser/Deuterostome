@@ -184,8 +184,9 @@
     /testcmp itest 0 get 2 get def
     /conds itest 0 get 3 get def
     itest 1 get {/ktest name
+      (Herea\n) toconsole
       dup propagate
-      (Here\n) toconsole
+      (Hereb\n) toconsole
       conds {
         (Starting: ) toconsole ktest 0 get toconsole (\n) toconsole
         {test1 test2} {/ctest name
