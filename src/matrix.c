@@ -6,7 +6,7 @@
 
 static P matrix_dims(B* cuts, B* array, P* m, P* n, P* lda) 
 {
-  ULBIG t;
+  LBIG t;
 
   if (CLASS(cuts) != ARRAY 
       || CLASS(array) != ARRAY) return OPD_CLA;
