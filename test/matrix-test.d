@@ -359,8 +359,8 @@
     {(big symm) bsymmetric}
     {(big asymm) bassymmetric}
   } {
-    exec exch (Starting mode: ) toconsole toconsole (\n) toconsole
-    exec
+    (Starting mode: ) toconsole 
+    exec toconsole (\n) toconsole
     
     /matrix_test_ layer {
       /A1 m n mul /d array def
