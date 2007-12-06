@@ -184,8 +184,8 @@
     /testcmp itest 0 get 2 get def
     /conds itest 0 get 3 get def
     itest 1 get {/ktest name
-      (begin:\n) toconsole a_
       dup propagate
+      (Here\n) toconsole
       conds {
         (Starting: ) toconsole ktest 0 get toconsole (\n) toconsole
         {test1 test2} {/ctest name
@@ -199,7 +199,6 @@
         ktest 0 get testcmp
         ktest 0 get done
       } if
-      (end:\n) toconsole a_
     } forall
   } forall
   pop
