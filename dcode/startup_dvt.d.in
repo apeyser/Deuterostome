@@ -1571,7 +1571,7 @@ c_         list all connections
 | - a simple mouse click selects a node
 
     /thehorses_actions 5 dict dup begin | {
-      /raise {raise_emacs} bind def
+      /raise {userdict begin raise_emacs} bind def
       
       /click {node 0 get class /nullclass ne {
         /kbdowner knode def c_
@@ -1917,33 +1917,42 @@ Xwindows {
 
 Xwindows {
   /take_input_focus {end} bind def
-  /raise_emacs {} def
+  /raise_emacs {end} def
 
   /take_input_setup {pop pop} bind def
 @ENABLE_EMACSCLIENT_START@ 
   /take_input_setup {
     userdict begin
     /emacs_buffer_name name /emacs_server_name name
-    
-    /take_input_focus ~[
-      1024 /b array 0 | {
+
+    {
+      {/take_input_focus (focus)}
+      {/raise_emacs (focus-raise)}
+    } {
+      exec
+      ~[
+        1024 /b array 0
         (exec ) fax
         getstartupdir fax
-        (emacsclient-run.sh ) fax
+        (emacsclient-run.sh) fax
         emacs_server_name fax
-        ( "\(d-comint-mode-focus \") fax
+        ( "\(d-comint-mode-) fax
+        4 -1 roll fax
+        ( \") fax
         emacs_buffer_name fax
         (\"\)") fax
-        0 exch getinterval | }
-      {[exch tosystem} ~stopped ~cleartomark |]
-      ~end
-    ] bind def
-
+        0 exch getinterval
+        {[exch tosystem} ~stopped ~cleartomark | ]
+        ~end
+      ] bind def
+    } forall
+    
     {
       {/F1_KEY (invert)}
       {/F2_KEY (continue)}
       {/F3_KEY (stop)}
       {/F4_KEY (abort)}
+      {/CTRL_1_KEY (scream)}
     } {
       exec
       ~[1024 /b array 0
@@ -1960,19 +1969,6 @@ Xwindows {
       ] bind def
     } forall
     
-    /raise_emacs ~[
-      1024 /b array 0 | {
-        (exec ) fax
-        getstartupdir fax
-        (emacsclient-run.sh ) fax
-        emacs_server_name fax
-        ( "\(d-comint-mode-focus-raise \") fax
-        emacs_buffer_name fax
-        (\"\)") fax
-        0 exch getinterval | }
-      {[exch tosystem} ~stopped ~cleartomark |]
-    ] bind def
-
     end
   } bind def
 @ENABLE_EMACSCLIENT_END@  

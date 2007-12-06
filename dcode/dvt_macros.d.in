@@ -21,7 +21,9 @@
       (PrintTo:) PRE (  gs) KEY (  paper) KEY (  pdf) KEY (  dvi) KEY NL
 @ENABLE_PERL_END@    
       (Selection:) PRE (  show) KEY NL
-      (Action:) PRE (  send) KEY (  cont) KEY (  stop) KEY (  abort) KEY
+      (Action:) PRE (  f1-send) KEY (  f2-cont) KEY
+                    (  f3-stop) KEY (  f4-abort) KEY
+                    (  ctrl-!-scream) KEY
       10 GAP
     } def
 
@@ -67,5 +69,6 @@
      {userdict begin F2_KEY}
      {userdict begin F3_KEY}
      {userdict begin F4_KEY}
+     {userdict begin CTRL_1_KEY}
     ] def
 end makemacros
