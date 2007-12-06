@@ -266,6 +266,8 @@
     } if
     triagonal_u {1} {i} ifelse exch i put
     triagonal_u {1} {i} ifelse y1 i get add y1 i put
+    (For: ) toconsole i _ pop
+    A1 A_cuts i cut pop v_ pop
   } for
     
   {}
