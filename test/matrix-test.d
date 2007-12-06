@@ -261,11 +261,11 @@
   m 1 sub -1 0 {/i name
     A1 A_cuts i cut pop 0 exch copy
     i m 1 sub eq not {
-      A1 A_cuts i 1 add cut pop exch copy i mul
-      y1 i 1 add get i mul y1 i put
+      A1 A_cuts i 1 add cut pop exch copy i 1 add mul
+      y1 i 1 add get i 1 add mul y1 i put
     } if
-    triagonal_u {1} {i} ifelse exch i put
-    triagonal_u {1} {i} ifelse y1 i get add y1 i put
+    triagonal_u {1} {i 1 add} ifelse exch i put
+    triagonal_u {1} {i 1 add} ifelse y1 i get add y1 i put
     (For: ) toconsole i _ pop
     A1 A_cuts i cut pop v_ pop
   } for
