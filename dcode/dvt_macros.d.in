@@ -20,7 +20,9 @@
          ( pdf) KEY ( dvi) KEY ( tex) KEY NL      
       (PrintTo:) PRE (  gs) KEY (  paper) KEY (  pdf) KEY (  dvi) KEY NL
 @ENABLE_PERL_END@    
-      (Selection:) PRE (  show) KEY 10 GAP
+      (Selection:) PRE (  show) KEY NL
+      (Action:) PRE (  send) KEY (  cont) KEY (  stop) KEY (  abort) KEY
+      10 GAP
     } def
 
    /commands [
@@ -61,5 +63,9 @@
      (\(xdvi \) fax faxRpage\n)
 @ENABLE_PERL_END@
      (save 1024 /b array 0 faxLpage \(:\) fax faxRpage \(\\n\) fax 0 exch getinterval toconsole restore\n)
+     {userdict begin F1_KEY}
+     {userdict begin F2_KEY}
+     {userdict begin F3_KEY}
+     {userdict begin F4_KEY}
     ] def
 end makemacros

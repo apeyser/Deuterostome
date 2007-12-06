@@ -1758,7 +1758,7 @@ Xwindows {
           mX box 0 get ge mX box 1 get le and
           { pop true exit } { /kbox kbox 1 add def } ifelse
         } forall
-        { rowlist krow get kbox get toconsole } if
+        { rowlist krow get kbox get dup active {exec} {toconsole} ifelse} if
       } stopped cleartomark
       end 
     } bind def
@@ -1939,6 +1939,27 @@ Xwindows {
       ~end
     ] bind def
 
+    {
+      {/F1_KEY (invert)}
+      {/F2_KEY (continue)}
+      {/F3_KEY (stop)}
+      {/F4_KEY (abort)}
+    } {
+      exec
+      ~[1024 /b array 0
+        (exec ) fax
+        getstartupdir fax
+        (emacsclient-run.sh ) fax
+        emacs_server_name fax
+        ( "\(d-comint-mode-) fax
+        4 -1 roll fax
+        (\)") fax
+        0 exch getinterval
+        {[exch tosystem} ~stopped ~cleartomark |]
+        ~end
+      ] bind def
+    } forall
+    
     /raise_emacs ~[
       1024 /b array 0 | {
         (exec ) fax
