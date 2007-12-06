@@ -187,9 +187,12 @@
       dup propagate
       conds {
         (Starting: ) toconsole ktest 0 get toconsole (\n) toconsole
-        {test1 test2} {/ctest name
+        {{(1) test1} {(2) test2}} {/ctest name
           gettime
-          ktest 1 ktest length 1 sub getinterval {} forall ctest
+          (Starting test#) toconsole /ctest find 0 get toconsole
+          (\n) toconsole
+          ktest 1 ktest length 1 sub getinterval {} forall
+          /ctest find 1 get exec
           gettime exch sub
         } forall
         exch
@@ -203,7 +206,7 @@
   pop
 } bind def
 
-/base_setup {
+/base_setup{
   /triagonal false def
   /triagonal_u false def
   /full false def
@@ -255,24 +258,17 @@
   /triagonal true def
 
   0 A1 copy pop
-  0 1 m 1 sub {/i name
-    A1 A_cuts i cut pop
-    0 1 n 1 sub {/j name
-      j i ge {
-        triagonal_u j 1 eq and {1} {j i n mul add} ifelse
-        1 index j put
-      } if
-    } for
-    pop
-  } for
-
-  {
-    triagonal_u {
-      0 1 m 1 sub {/i name
-        0 A1 A_cuts i cut pop i n mod put
-      } for
+  m 1 sub -1 0 {/i name
+    A1 A_cuts i cut pop 0 exch copy
+    i m 1 sub eq not {
+      A1 A_cuts i 1 add cut pop exch copy i mul
+      y1 i 1 add get i mul y1 i put
     } if
-  }
+    triagonal_u {1} {i} ifelse exch i put
+    triagonal_u {1} {i} ifelse y1 i get add y1 i put
+  } for
+    
+  {}
 } bind def
 
 /full_model (s4split_shift_35_1) def
