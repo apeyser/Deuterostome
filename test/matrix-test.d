@@ -31,56 +31,42 @@
 } bind def
 
 /gmres_test {
-  symmetric {
-    y1 A1 A_cuts x1 m GMRES begin gmres end pop
-  } if
+  y1 A1 A_cuts x1 m GMRES begin gmres end pop
 } bind def
 
 /gmres_cmp {
-  symmetric not {pop} {
-    x1 x2 x_temp compare
-  } ifelse
+  x1 x2 x_temp compare
 } bind def
 
 /lu_test {
-  symmetric not {pop} {
-    A1 A_cuts piv1 decompLU_lp {3 {pop} repeat} {
-      (Singular!\n) toconsole halt
-    } ifelse
-    y1 x1 copy A1 A_cuts piv1 backsubLU_lp pop
+  A1 A_cuts piv1 decompLU_lp {3 {pop} repeat} {
+    (Singular!\n) toconsole halt
   } ifelse
+  y1 x1 copy A1 A_cuts piv1 backsubLU_lp pop
 } bind def
 
 /luold_test {
-  symmetric {
-    A2_old piv2 decompLU {pop} {
-      (Singular!\n) toconsole halt
-    } ifelse
-    A2_old piv2 y2 x2 copy backsubLU pop
-  } if
+  A2_old piv2 decompLU {pop} {
+    (Singular!\n) toconsole halt
+  } ifelse
+  A2_old piv2 y2 x2 copy backsubLU pop
 } bind def
 
 /luinv_test {
-  symmetric {
-    A1 A_cuts piv1 decompLU_lp {3 {pop} repeat} {
-      (Singular!\n) toconsole halt
-    } ifelse
-    A1 A_cuts piv1 invertLU_lp pop pop
-  } if
+  A1 A_cuts piv1 decompLU_lp {3 {pop} repeat} {
+    (Singular!\n) toconsole halt
+  } ifelse
+  A1 A_cuts piv1 invertLU_lp pop pop
 } bind def
 
 /luinvold_test {
-  symmetric {
-    A2_old piv2 B2_old invertLU {pop} {
-      (Singular!\n) toconsole halt
-    } ifelse
-  } if
+  A2_old piv2 B2_old invertLU {pop} {
+    (Singular!\n) toconsole halt
+  } ifelse
 } bind def
 
 /luinv_cmp {
-  symmetric not {pop} {
-    A1 B2 C_temp compare
-  } ifelse
+  A1 B2 C_temp compare
 } bind def
 
 /settrans {/transB name /transA name
@@ -120,33 +106,27 @@
 } bind def
 
 /trisolve_test {false settrans
-  triagonal {
-    x1 y1 copy A1 A_cuts transA trigonal_u triangular_solve pop
-  } if
+  x1 y1 copy A1 A_cuts transA trigonal_u triangular_solve pop
 } bind def
 
 /trisolveold_test {false settrans
-  triagonal {
-    n 1 sub -1 0 {/i name
-      x2 i get
-      A2 A_cuts i cut pop x_temp copy
-      i 1 add 1 index length 1 index sub getinterval
-      sub
-      A2 A_cuts i cut pop i get
-      div y2 i put
-    } for
-  } if
+  n 1 sub -1 0 {/i name
+    x2 i get
+    A2 A_cuts i cut pop x_temp copy
+    i 1 add 1 index length 1 index sub getinterval
+    sub
+    A2 A_cuts i cut pop i get
+    div y2 i put
+  } for
 } bind def
 
 /trisolve_cmp {
-  triagonal not {pop} {
-    y1 y2 y_temp compare
-  } ifelse
+  y1 y2 y_temp compare
 } bind def
 
 | [ [[test1 test2 comparator] [(name) params...]]... ]
 /base_tests [
-  [[~matmul_test ~matmulold_test ~matmul_cmp] [
+  [[~matmul_test ~matmulold_test ~matmul_cmp ~true] [
     [(matmul01nn) false false 0 1]
     [(matmul10nn) false false 1 0]
     [(matmul02nn) false false 0 2]
@@ -168,10 +148,10 @@
     [(matmul11nt) true true 1 1]
     [(matmul12nt) true true 1 2]
   ]]
-  [[~luinv_test ~luinvold_test ~luinv_cmp] [
+  [[~luinv_test ~luinvold_test ~luinv_cmp ~symmetric] [
     [(luinv)]
   ]]
-  [[~matvecmul_test ~matvecmulold_test ~matvecmul_cmp] [
+  [[~matvecmul_test ~matvecmulold_test ~matvecmul_cmp ~true] [
     [(matvecmul01n) false 0 1]
     [(matvecmul01t) true 0 1]
     [(matvecmul10n) false 1 0]
@@ -183,42 +163,46 @@
     [(matvecmul12n) false 1 2]
     [(matvecmul12t) true 1 2]
   ]]
-  [[~trisolve_test ~trisolveold_test ~trisolve_cmp][
+  [[~trisolve_test ~trisolveold_test ~trisolve_cmp ~triagonal][
     [(trisolven) false]
     [(trisolvet) true]
   ]]
-  [[~lu_test ~luold_test ~gmres_cmp] [
+  [[~lu_test ~luold_test ~gmres_cmp ~symmetric] [
     [(lu)]
   ]]
-  [[~gmres_test ~luold_test ~gmres_cmp] [
+  [[~gmres_test ~luold_test ~gmres_cmp ~symmetric] [
     [(gmres)]
   ]]
 ] def
 
 /run_tests {
-  (begin\n) toconsole a_
   base_tests {/itest name
     /test1 itest 0 get 0 get def
     /test2 itest 0 get 1 get def
     /testcmp itest 0 get 2 get def
+    /conds itest 0 get 3 get def
+    conds not {
+      {exit} if
 
-    itest 1 get {/ktest name
-      dup propagate
-
-      {test1 test2} {/ctest name
-        gettime
-        ktest 1 ktest length 1 sub getinterval {} forall ctest
-        gettime exch sub
+      itest 1 get {/ktest name
+        dup propagate
+        
+        {test1 test2} {/ctest name
+          gettime
+          ktest 1 ktest length 1 sub getinterval {} forall ctest
+          gettime exch sub
+        } forall
+        exch
+        (Test1 time: ) toconsole _ pop
+        (Test2 time: ) toconsole _ pop
+        ktest 0 get testcmp
+        ktest 0 get done
       } forall
-      exch
-      (Test1 time: ) toconsole _ pop
-      (Test2 time: ) toconsole _ pop
-      ktest 0 get testcmp
-      ktest 0 get done
-    } forall
+      
+      exit
+    } loop
   } forall
   pop
-  (end\n) toconsole a_
 } bind def
 
 /base_setup {
