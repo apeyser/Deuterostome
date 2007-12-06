@@ -121,7 +121,7 @@
 
 /trisolve_test {false settrans
   full not symmetric {
-    x1 y1 copy A_ A_cuts transA true triagonal_u pop
+    x1 y1 copy A1 A_cuts transA true triagonal_u pop
   } if
 } bind def
 
