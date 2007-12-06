@@ -403,7 +403,7 @@
       /Ct_cuts k m 1 3 cutsn def
       /C1t_old [C1t k {m /d parcel exch} repeat pop] def
 
-      /piv1 n /l array def
+      /piv1 n /x array def
       /x_temp n /d array def
       /x1 n /d array def
       /y_temp m /d array def
@@ -427,7 +427,7 @@
       /C2t k m mul /d array def
       /C2t_old [C2t k {m /d parcel exch} repeat pop] def
 
-      /piv2 n /l array def
+      /piv2 n /x array def
       /x2 n /d array def
       /y2 m /d array def
 

@@ -508,7 +508,7 @@ P op_invertLU(void)
   if ( CLASS(o_3) != LIST) return OPD_CLA;
   N = (LIST_CEIL(o_3) - VALUE_BASE(o_3)) / FRAMEBYTES;
   if (N<=0) return RNG_CHK;
-  if ( CLASS(o_1) != LIST) return OPD_CLA;
+  if (CLASS(o_1) != LIST) return OPD_CLA;
   if (N != (LIST_CEIL(o_1) - VALUE_BASE(o_1)) / FRAMEBYTES) return RNG_CHK;
   if (FREEvm + DALIGN(N * (2 * sizeof(D *)) + N * sizeof(D)) > CEILvm)
     return VM_OVF;
