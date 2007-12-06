@@ -359,7 +359,7 @@
     {(big symm) bsymmetric}
     {(big asymm) bassymmetric}
   } {
-    exch (Starting mode: ) toconsole toconsole (\n) toconsole
+    exec exch (Starting mode: ) toconsole toconsole (\n) toconsole
     exec
     
     /matrix_test_ layer {
