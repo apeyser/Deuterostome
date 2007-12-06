@@ -181,26 +181,21 @@
     /test2 itest 0 get 1 get def
     /testcmp itest 0 get 2 get def
     /conds itest 0 get 3 get def
-    conds not {
-      {exit} if
-
-      itest 1 get {/ktest name
-        dup propagate
-        
-        {test1 test2} {/ctest name
-          gettime
-          ktest 1 ktest length 1 sub getinterval {} forall ctest
-          gettime exch sub
-        } forall
-        exch
-        (Test1 time: ) toconsole _ pop
-        (Test2 time: ) toconsole _ pop
-        ktest 0 get testcmp
-        ktest 0 get done
-      } forall
+    itest 1 get {/ktest name
+      dup propagate
+      conds not {exit} if
       
-      exit
-    } loop
+      {test1 test2} {/ctest name
+        gettime
+        ktest 1 ktest length 1 sub getinterval {} forall ctest
+        gettime exch sub
+      } forall
+      exch
+      (Test1 time: ) toconsole _ pop
+      (Test2 time: ) toconsole _ pop
+      ktest 0 get testcmp
+      ktest 0 get done
+    } forall      
   } forall
   pop
 } bind def
