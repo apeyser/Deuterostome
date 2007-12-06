@@ -200,7 +200,7 @@
   base_tests {/itest name
     /test1 itest 0 get 0 get def
     /test2 itest 0 get 1 get def
-    /testcomp itest 0 get 2 get def
+    /testcmp itest 0 get 2 get def
 
     itest 1 get {/ktest name
       dup propagate
