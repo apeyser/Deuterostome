@@ -303,9 +303,9 @@
 } bind def
 
 /propagate {
-  (Hered\n) toconsole
+  (Hered) toconsole a_
   exec
-  (Heree\n) toconsole
+  (Heree) toconsole a_
   A1t_old A1_old mattranspose pop
   A1 A2 copy pop
   A1t A2t copy pop
