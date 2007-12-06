@@ -183,7 +183,7 @@
     [(matvecmul12n) false 1 2]
     [(matvecmul12t) true 1 2]
   ]]
-  [[~trisolve ~trisolveold_test ~trisolve_cmp][
+  [[~trisolve_test ~trisolveold_test ~trisolve_cmp][
     [(trisolven) false]
     [(trisolvet) true]
   ]]
