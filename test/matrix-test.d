@@ -184,6 +184,7 @@
     /testcmp itest 0 get 2 get def
     /conds itest 0 get 3 get def
     itest 1 get {/ktest name
+      (Herec\n) toconsole
       dup propagate
       conds {
         (Starting: ) toconsole ktest 0 get toconsole (\n) toconsole
@@ -301,7 +302,10 @@
   } run_tests
 } bind def
 
-/propagate {exec
+/propagate {
+  (Hered\n) toconsole
+  exec
+  (Heree\n) toconsole
   A1t_old A1_old mattranspose pop
   A1 A2 copy pop
   A1t A2t copy pop
@@ -316,8 +320,10 @@
   
   x1 x2 copy pop
   y1 y2 copy pop
-  
+
+  (Heref\n) toconsole
   exec
+  (Hereg\n) toconsole
 } bind def
 
 /tests [
