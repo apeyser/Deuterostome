@@ -42,7 +42,7 @@
   } ifelse
 } bind def
 
-/lu_cmp {
+/lu_test {
   symmetric not {pop} {
     A1 A_cuts piv1 decompLU_lp {3 {pop} repeat} {
       (Singular!\n) toconsole halt
