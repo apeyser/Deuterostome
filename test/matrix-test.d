@@ -184,7 +184,6 @@
     /testcmp itest 0 get 2 get def
     /conds itest 0 get 3 get def
     itest 1 get {/ktest name
-      (Herec\n) toconsole
       dup propagate
       conds {
         (Starting: ) toconsole ktest 0 get toconsole (\n) toconsole
@@ -240,7 +239,7 @@
 /triagonal_nu_tests {
   {
     base_setup
-    triagonal
+    triagonal_setup
   } run_tests
 } bind def
 
@@ -248,12 +247,11 @@
   {
     base_setup
     /triagonal_u true def
-    triagonal
+    triagonal_setup
   } run_tests
 } bind def
 
-/triagonal {
-  (herea\n) toconsole
+/triagonal_setup {
   /triagonal true def
 
   0 A1 copy pop
@@ -275,7 +273,6 @@
       } for
     } if
   }
-  (hereb\n) toconsole
 } bind def
 
 /full_model (s4split_shift_35_1) def
@@ -302,10 +299,7 @@
   } run_tests
 } bind def
 
-/propagate {
-  (Hered) toconsole a_
-  exec
-  (Heree) toconsole a_
+/propagate {exec
   A1t_old A1_old mattranspose pop
   A1 A2 copy pop
   A1t A2t copy pop
@@ -321,9 +315,7 @@
   x1 x2 copy pop
   y1 y2 copy pop
 
-  (Heref\n) toconsole
   exec
-  (Hereg\n) toconsole
 } bind def
 
 /tests [
