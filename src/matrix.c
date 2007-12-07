@@ -38,7 +38,7 @@ static P matrix_square(B* cuts, B* array, P* n) {
   return OK;
 }
 
-static P get_trans(B* t, BOOLEAN* trans, enum CBLAS_TRANSPOSE* trans_) {
+static P get_trans(B* t, enum CBLAS_TRANSPOSE* trans_, BOOLEAN* trans) {
   if (CLASS(t) != BOOL) return OPD_CLA;
   *trans = BOOL_VAL(t);
   *trans_ = *trans ? CblasTrans : CblasNoTrans;
@@ -46,32 +46,31 @@ static P get_trans(B* t, BOOLEAN* trans, enum CBLAS_TRANSPOSE* trans_) {
 }
 
 static P matrix_square_trans(B* cuts, B* array, P* n, 
-                             B* t, enum CBLAS_TRANSPOSE* trans_) {
-  BOOLEAN trans;
+                             B* t, enum CBLAS_TRANSPOSE* trans_,
+                             BOOLEAN* trans) {
   P m, lda;
   P r = matrix_dims(cuts, array, &m, n, &lda);
   if (r != OK) return r;
   if (m != *n) return MATRIX_NONMATCH_SHAPE;
-  return get_trans(t, &trans, trans_);
+  return get_trans(t, trans_, trans);
 }
 
 static P matrix_dims_trans(B* cuts, B* array, P* m, P* n, 
                            B* t, enum CBLAS_TRANSPOSE* trans_, 
-                           P* lda) {
-  BOOLEAN trans;
+                           BOOLEAN* trans, P* lda) {
   P m_, n_;
   P r = matrix_dims(cuts, array, &m_, &n_, lda);
   if (r != OK) return r;
-  if ((r = get_trans(t, &trans, trans_)) != OK) return r;
+  if ((r = get_trans(t, trans_, trans)) != OK) return r;
   
-  if (trans) {
-    *m = n_;
-    *n = m_;
-  }
-  else {
-    *m = m_;
-    *n = n_;
-  }
+  //  if (*trans) {
+  //  *m = n_;
+  //  *n = m_;
+  //}
+  //else {
+  //  *m = m_;
+  //  *n = n_;
+  //}
 
   return OK;
 }
@@ -106,9 +105,8 @@ static P vector_get_dim(B* vec, P* rows) {
     if (r != OK) return r;                      \
   } while (0)
 
-#define GET_TRANS(t, trans) do {                 \
-    BOOLEAN trans_;                              \
-    P r = get_trans((t), &(trans_), &(trans));   \
+#define GET_TRANS(t, trans, trans_) do {                \
+     P r = get_trans((t), &(trans), &(trans_));   \
     if (r != OK) return r;                       \
   } while (0)
 
@@ -122,13 +120,15 @@ static P vector_get_dim(B* vec, P* rows) {
     if (r != OK) return r;           \
   } while (0)
 
-#define MATRIX_DIMS_TRANS(cuts, a, m, n, t, trans, lda) do {    \
-    P r = matrix_dims_trans((cuts), (a), &(m), &(n), (t), &(trans), &(lda)); \
+#define MATRIX_DIMS_TRANS(cuts, a, m, n, t, trans, transb, lda) do {     \
+        P r = matrix_dims_trans((cuts), (a), &(m), &(n),                \
+                                (t), &(trans), &(transb), &(lda));      \
     if (r != OK) return r;                                     \
   } while (0)
 
-#define MATRIX_SQUARE_TRANS(cuts, a, n, t, trans) do { \
-    P r = matrix_square_trans((cuts), (a), &(n), (t), &(trans));  \
+#define MATRIX_SQUARE_TRANS(cuts, a, n, t, trans, transb) do { \
+        P r = matrix_square_trans((cuts), (a), &(n),           \
+                                  (t), &(trans), &(transb));   \
     if (r != OK) return r;                             \
   } while (0)
 
@@ -164,12 +164,13 @@ P op_matmul_blas(void)
 		D *ap, *bp, *cp;
 		D alpha, beta;
 		enum CBLAS_TRANSPOSE transA, transB;
+                BOOLEAN transA_, transB_;
 
 		if (o_10 < FLOORopds) return OPDS_UNF;
 		if (ATTR(o_10) & READONLY) return OPD_ATR;
-    
-    MATRIX_DIMS_TRANS(o_3, o_4, Nrowb, Ncolb, o_2, transB, ldb);
-    MATRIX_DIMS_TRANS(o_6, o_7, Nrowa, Ncola, o_5, transA, lda);
+
+    MATRIX_DIMS_TRANS(o_3, o_4, Nrowb, Ncolb, o_2, transB, transB_,ldb);
+    MATRIX_DIMS_TRANS(o_6, o_7, Nrowa, Ncola, o_5, transA, transA_, lda);
     MATRIX_DIMS(o_9, o_10, Nrowc, Ncolc, ldc);
     MULT(o_1, alpha);
     MULT(o_8, beta);
@@ -278,11 +279,12 @@ P op_matvecmul_blas(void) {
   D alpha, beta;
   P Nrowa, Ncola, lda;
   enum CBLAS_TRANSPOSE trans;
+  BOOLEAN trans_;
 
   if (o_7 < FLOORopds) return OPDS_UNF;
   if (ATTR(o_7) & READONLY) return OPD_ATR;
 
-  MATRIX_DIMS_TRANS(o_4, o_5, Nrowa, Ncola, o_3, trans, lda);
+  MATRIX_DIMS_TRANS(o_4, o_5, Nrowa, Ncola, o_3, trans, trans_, lda);
   VECTOR_DIM(o_2, Ncola);
   VECTOR_DIM(o_7, Nrowa);
   MULT(o_1, alpha);
@@ -302,16 +304,16 @@ P op_matvecmul_blas(void) {
 // x A <cuts> trans upper unit | x=A^(-1)x
 P op_triangular_solve(void) {
   enum CBLAS_TRANSPOSE trans;
-  BOOLEAN uplo, unit;
+  BOOLEAN uplo, unit, trans_;
   P N;
   
   if (FLOORopds > o_6) return OPDS_UNF;
   if (CLASS(o_1) != BOOL || CLASS(o_2) != BOOL)
     return OPD_CLA;
 
-  MATRIX_SQUARE_TRANS(o_4, o_5, N, o_3, trans);
+  MATRIX_SQUARE_TRANS(o_4, o_5, N, o_3, trans, trans_);
   VECTOR_DIM(o_6, N);
-  uplo = BOOL_VAL(o_2);
+  uplo = trans_ ? ! BOOL_VAL(o_2) : BOOL_VAL(o_2);
   unit = BOOL_VAL(o_1);
   
   cblas_dtrsv(CblasRowMajor, 
