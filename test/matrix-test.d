@@ -106,8 +106,7 @@
 } bind def
 
 /trisolve_test {false settrans
-  (Here: ) toconsole transA _ pop
-  x1 y1 copy A1_ A_cuts_ transA true triagonal_u triangular_solve pop
+  x1 x_temp copy A1_ A_cuts_ transA true triagonal_u triangular_solve pop
 } bind def
 
 /trisolveold_test {false settrans
