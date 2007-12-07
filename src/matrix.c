@@ -37,8 +37,8 @@ void cblas_xerbla(int p, char *rout, char *form, ...)
   len = vsnprintf(buf, nlen, form, argptr);
   if (len < 0 || len > nlen) goto xerbla_err;
         
-  ARRAY_SIZE(f) = len;
-  FREEvm = (B*) DALIGN(VALUE_PTR(f) + len);
+  ARRAY_SIZE(f) = len + len_;
+  FREEvm = (B*) DALIGN(VALUE_PTR(f) + len + len_);
   moveframe(f, o1);
   FREEopds = o2;
   if (! xerbla_background) goto xerbla_end;
