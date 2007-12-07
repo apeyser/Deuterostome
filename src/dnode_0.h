@@ -235,6 +235,7 @@ B *sysop[] = {
   (B*)"triangular_solve",(B *)op_triangular_solve,
   (B*)"givens_blas",    (B *)op_givens_blas,
   (B*)"rotate_blas",    (B *)op_rotate_blas,
+  (B*)"xerbla_test",    (B *)op_xerbla_test,
 #endif //BUILD_ATLAS
   (B*)"",               (B *)0L, 
 };     
@@ -275,6 +276,7 @@ P syserrc[] = {
   MATRIX_PARAM_ERROR,
   MATRIX_SINGULAR,
   CLOCK_ERR, LONG_OVF,
+  MATRIX_INT_ERR,
   0L
 };
 
@@ -361,7 +363,8 @@ B* syserrm[] = {
   (B*)"Matrix Error: parameters to clapack illegal",
   (B*)"Matrix Error: lu matrix is singular",
   (B*)"** Error accessing clock",
-  (B*)"** Error loading 64 bit integer into 32 bit machine"  
+  (B*)"** Error loading 64 bit integer into 32 bit machine",
+  (B*)"Matrix Error: Internal Error - message on stack",
 };
 
 // original directory for vmresize

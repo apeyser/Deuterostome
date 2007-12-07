@@ -3,13 +3,14 @@
 
 #include "dm.h" 
 
-#define MATRIX_UNDEF_CUT        0x00000D00L
-#define MATRIX_ILLEGAL_CUT      0x00000D01L
-#define MATRIX_UNDER_CUT        0x00000D02L
-#define MATRIX_NONMATCH_CUT     0x00000D03L 
-#define MATRIX_NONMATCH_SHAPE   0x00000D04L
-#define MATRIX_PARAM_ERROR      0x00000D05L
-#define MATRIX_SINGULAR         0x00000D06L
+#define MATRIX_UNDEF_CUT        (MATRIX_ERRS+0)
+#define MATRIX_ILLEGAL_CUT      (MATRIX_ERRS+1)
+#define MATRIX_UNDER_CUT        (MATRIX_ERRS+2)
+#define MATRIX_NONMATCH_CUT     (MATRIX_ERRS+3)
+#define MATRIX_NONMATCH_SHAPE   (MATRIX_ERRS+4)
+#define MATRIX_PARAM_ERROR      (MATRIX_ERRS+5)
+#define MATRIX_SINGULAR         (MATRIX_ERRS+6)
+#define MATRIX_INT_ERR          (MATRIX_ERRS+7)
 
 #if HAVE_ATLAS && ATLAS_LIB
 
@@ -24,6 +25,7 @@ P op_matvecmul_blas(void);
 P op_triangular_solve(void);
 P op_givens_blas(void);
 P op_rotate_blas(void);
+P op_xerbla_test(void);
 
 #endif //BUILD_ATLAS
 

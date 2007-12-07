@@ -3,6 +3,101 @@
 #if BUILD_ATLAS
 #include <cblas.h>
 #include <clapack.h>
+#include <stdarg.h>
+
+static BOOLEAN xerbla_err = FALSE;
+void cblas_xerbla(int p, char *rout, char *form, ...) 
+{
+  B* f;
+  char* buf;
+  size_t len, nlen, len_;
+  va_list argptr;
+  va_start(argptr, form);
+  xerbla_err = TRUE;
+
+  if (CEILvm - FREEvm <= FRAMEBYTES || o1 >= CEILopds) goto xerbla_err;
+
+  f = FREEvm;
+  TAG(f) = ARRAY | BYTETYPE;
+  ATTR(f) = PARENT;
+  VALUE_PTR(f) = f+FRAMEBYTES;
+  nlen = ARRAY_SIZE(f) = FREEvm - CEILvm - FRAMEBYTES;
+  buf = (char*) VALUE_PTR(f);
+
+  if (! p) len = 0;
+  else len = snprintf(buf, nlen,
+                      "Parameter %d to routine %s was inccorect\n", 
+                      p, rout);
+  if (len < 0 || len > nlen) goto xerbla_err;
+
+  buf += len;
+  nlen -= len;
+  len_ = len;
+  len = vsnprintf(buf, nlen, form, argptr);
+  if (len < 0 || len > nlen) goto xerbla_err;
+        
+  ARRAY_SIZE(f) = len;
+  FREEvm = (B*) DALIGN(VALUE_PTR(f) + len);
+  moveframe(f, o1);
+  FREEopds = o2;
+  goto xerbla_end;
+
+ xerbla_err:
+  va_end(argptr);
+  va_start(argptr, form);
+  if (p) fprintf(stderr, "Parameter %d to routine %s was incorrect\n", 
+                 p, rout);
+  vfprintf(stderr, form, argptr);
+
+ xerbla_end:
+  va_end(argptr);
+  return;
+}
+
+static BOOLEAN errprn_err = FALSE;
+int cblas_errprn(int ierr, int info, char *form, ...) 
+{
+  B* f;
+  char* buf;
+  size_t len;
+  va_list argptr;
+  va_start(argptr, form);
+  errprn_err = TRUE;
+
+  if (CEILvm - FREEvm <= FRAMEBYTES || o1 >= CEILopds) goto errnprn_err;
+
+  f = FREEvm;
+  TAG(f) = ARRAY | BYTETYPE;
+  ATTR(f) = PARENT;
+  VALUE_PTR(f) = f+FRAMEBYTES;
+  ARRAY_SIZE(f) =  FREEvm - CEILvm - FRAMEBYTES;
+  buf = (char*) VALUE_PTR(f);
+
+  len = vsnprintf(buf, ARRAY_SIZE(f), form, argptr);
+  if (len < 0 || len > ARRAY_SIZE(f)) goto errnprn_err;
+
+  ARRAY_SIZE(f) = len;
+  FREEvm = (B*) DALIGN(VALUE_PTR(f) + len);
+  moveframe(f, o1);
+  FREEopds = o2; 
+  goto errnprn_end;
+
+ errnprn_err:
+  va_end(argptr);
+  va_start(argptr, form);
+  vfprintf(stderr, form, argptr);
+
+ errnprn_end:
+  va_end(argptr);
+  return (ierr < info) ? ierr : info;
+}
+
+#define CHECK_ERR do {                  \
+    if (xerbla_err || errprn_err) {    \
+      xerbla_err = errprn_err = FALSE; \
+      return MATRIX_INT_ERR;               \
+    }                                   \
+  } while (0)
 
 static P matrix_dims(B* cuts, B* array, P* m, P* n, P* lda) 
 {
@@ -100,6 +195,22 @@ static P vector_get_dim(B* vec, P* rows) {
   return OK;
 }
 
+static void matrix_trans(P rows, P cols, BOOLEAN istrans, P* rowst, P* colst)
+{
+  if (istrans) {
+    *rowst = cols;
+    *colst = rows;
+  } 
+  else {
+    *rowst = rows;
+    *colst = cols;
+  }
+}
+
+#define MATRIX_TRANS(rows, cols, istrans, rowst, colst) do {    \
+    matrix_trans((rows), (cols), (istrans), &(rowst), &(colst)); \
+  } while (0)
+
 #define VECTOR_GET_DIM(vec, rows) do {          \
     P r = vector_get_dim(vec, &rows);           \
     if (r != OK) return r;                      \
@@ -161,10 +272,11 @@ static P mult(B* num, D* val) {
 P op_matmul_blas(void)
 {
     P Nrowa,  Nrowb,  Ncola,  Ncolb, Ncolc, Nrowc, lda, ldb, ldc;
+    P Ncola_, Nrowa_, Ncolb_, Nrowb_;
 		D *ap, *bp, *cp;
 		D alpha, beta;
 		enum CBLAS_TRANSPOSE transA, transB;
-                BOOLEAN transA_, transB_;
+    BOOLEAN transA_, transB_;
 
 		if (o_10 < FLOORopds) return OPDS_UNF;
 		if (ATTR(o_10) & READONLY) return OPD_ATR;
@@ -174,21 +286,24 @@ P op_matmul_blas(void)
     MATRIX_DIMS(o_9, o_10, Nrowc, Ncolc, ldc);
     MULT(o_1, alpha);
     MULT(o_8, beta);
+    MATRIX_TRANS(Nrowb, Ncolb, transB_, Nrowb_, Ncolb_);
+    MATRIX_TRANS(Nrowa, Ncola, transA_, Nrowa_, Ncola_);
     
     cp = (D*) VALUE_PTR(o_10);
     ap = (D*) VALUE_PTR(o_7);
     bp = (D*) VALUE_PTR(o_4);
 
-    if (Ncola != Nrowb || Nrowc != Nrowa || Ncolc != Ncolb) 
+    if (Ncola_ != Nrowb_ || Nrowc != Nrowa_ || Ncolc != Ncolb_) 
       return MATRIX_NONMATCH_SHAPE;
 
 		cblas_dgemm(CblasRowMajor,
 								transA,
 								transB,
-								 Nrowc,  Ncolc,  Ncola,
+                Nrowc,  Ncolc,  Ncola_,
 								alpha, ap, lda, 
                 bp,  ldb,
 								beta, cp,  ldc);
+    CHECK_ERR;
         
 		FREEopds = o_8;
 		return(OK);
@@ -213,6 +328,7 @@ P op_decompLU_lp(void) {
                              (L32*) VALUE_PTR(o_1))) < 0)
     return MATRIX_PARAM_ERROR;
   else if (info > 0) nsing = FALSE;
+  CHECK_ERR;
   
   FREEopds = nsing ? o2 : o_2;    
   TAG(o_1) = BOOL; 
@@ -238,6 +354,7 @@ P op_backsubLU_lp(void) {
                      (L32*) VALUE_PTR(o_1),
                      (D*) VALUE_PTR(o_4), N))
     return MATRIX_PARAM_ERROR;
+  CHECK_ERR;
   
   FREEopds = o_3;
   return OK;
@@ -269,6 +386,7 @@ P op_norm2(void) {
   if (CLASS(o_1) != ARRAY) return OPD_CLA;
   if (TYPE(o_1) != DOUBLETYPE) return OPD_TYP;
   r = cblas_dnrm2(ARRAY_SIZE(o_1), (D*) VALUE_PTR(o_1), 1);
+  CHECK_ERR;
   TAG(o_1) = NUM | DOUBLETYPE; ATTR(o_1) = 0;
   *(D*) NUM_VAL(o_1) = r;
   return OK;
@@ -277,7 +395,7 @@ P op_norm2(void) {
 // y beta A <cuts> transpose x alpha | y=alpha*A*x+beta*y
 P op_matvecmul_blas(void) {
   D alpha, beta;
-  P Nrowa, Ncola, lda;
+  P Nrowa, Ncola, Nrowa_, Ncola_, lda;
   enum CBLAS_TRANSPOSE trans;
   BOOLEAN trans_;
 
@@ -285,17 +403,19 @@ P op_matvecmul_blas(void) {
   if (ATTR(o_7) & READONLY) return OPD_ATR;
 
   MATRIX_DIMS_TRANS(o_4, o_5, Nrowa, Ncola, o_3, trans, trans_, lda);
-  VECTOR_DIM(o_2, Ncola);
-  VECTOR_DIM(o_7, Nrowa);
+  MATRIX_TRANS(Nrowa, Ncola, trans_, Nrowa_, Ncola_);
+  VECTOR_DIM(o_2, Ncola_);
+  VECTOR_DIM(o_7, Nrowa_);
   MULT(o_1, alpha);
   MULT(o_6, beta);
 
   cblas_dgemv(CblasRowMajor,
               trans,
-              Nrowa, Ncola, alpha,
+              Nrowa_, Ncola_, alpha,
               (D*) VALUE_PTR(o_5), lda,
               (D*) VALUE_PTR(o_2), 1, beta,
               (D*) VALUE_PTR(o_7), 1);
+  CHECK_ERR;
   
   FREEopds = o_6;
   return OK;
@@ -322,6 +442,7 @@ P op_triangular_solve(void) {
               unit ? CblasUnit : CblasNonUnit,
               N, (D*) VALUE_PTR(o_5), N, 
               (D*) VALUE_PTR(o_6), 1);
+  CHECK_ERR;
 
   FREEopds = o_5;
   return OK;
@@ -337,6 +458,7 @@ P op_givens_blas(void) {
   VECTOR_DIM(o_1, 2);
   
   cblas_drotg((D*) VALUE_PTR(o_1), ((D*) VALUE_PTR(o_1))+1, &c, &s);
+  CHECK_ERR;
   ((D*) VALUE_PTR(o_1))[1] = 0;
 
   TAG(o_1) = NUM | DOUBLETYPE; 
@@ -363,10 +485,34 @@ P op_rotate_blas(void) {
 
   cblas_drot(rows, (D*) VALUE_PTR(o_2), 1, (D*) VALUE_PTR(o_1), 1,
              c, s);
+  CHECK_ERR;
 
   moveframes(o_2, o_4, 2);
   FREEopds = o_2;
   return OK;
+}
+
+P op_xerbla_test(void) {
+  BOOLEAN test;
+
+  if (FLOORopds > o_1) return OPDS_UNF;
+  if (CLASS(o_1) != BOOL) return OPD_CLA;
+  test = BOOL_VAL(o_1);
+
+  if (test) {
+    cblas_dgemv(CblasRowMajor, CblasTrans, 
+                0, 0, 0, NULL, 0, NULL, 0, 0, NULL, 0);
+  } 
+  else {
+    D A[1] = {0};
+    D B[1] = {0};
+    D C[1] = {0};
+    cblas_dgemv(CblasRowMajor, CblasTrans,
+                1, 1, 1, A, 1, B, 1, 1, C, 1);
+  }
+  CHECK_ERR;
+
+  return OK;  
 }
 
 #endif //BUILD_ATLAS

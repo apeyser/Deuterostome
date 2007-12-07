@@ -398,6 +398,8 @@ extern "C" {
 #define REGEX_UNKNOWN  0x00000C0DL /* Unknown error */
 #endif // DM_ENABLE_REGEX
 
+#define MATRIX_ERRS    0x00000D00L /* 0D00:0E00-1 for errors in matrix.h */
+
 /* compare results */
 
 #define LT                         (-1)
