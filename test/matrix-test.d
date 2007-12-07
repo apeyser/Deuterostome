@@ -8,8 +8,8 @@
 /test_eps 1e-12 def
 
 /compare {/temp name /a name /b name
-  0 a temp copy b sub dup mul add sqrt
-  0 b dup mul add sqrt div dup test_eps lt {exch pop} {
+  0d a temp copy b sub dup mul add sqrt
+  0d b dup mul add sqrt div dup test_eps lt {exch pop} {
     (Test error: ) toconsole exch toconsole _
     halt
   } ifelse
@@ -106,6 +106,7 @@
 } bind def
 
 /trisolve_test {false settrans
+  (Here: ) toconsole transA _ pop
   x1 y1 copy A1_ A_cuts_ transA true triagonal_u triangular_solve pop
 } bind def
 
