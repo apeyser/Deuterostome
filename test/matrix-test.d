@@ -92,7 +92,7 @@
 } bind def
 
 /matvecmul_test {/beta name /alpha name false settrans 
-  y1 beta A1_ A_cuts transA x1 alpha matvecmul_blas pop
+  y1 beta A1_ A_cuts_ transA x1 alpha matvecmul_blas pop
 } bind def
 
 /matvecmulold_test {/beta name /alpha name false settrans 
@@ -106,7 +106,7 @@
 } bind def
 
 /trisolve_test {false settrans
-  x1 y1 copy A1 A_cuts transA true triagonal_u triangular_solve pop
+  x1 y1 copy A1_ A_cuts_ transA true triagonal_u triangular_solve pop
 } bind def
 
 /trisolveold_test {false settrans
