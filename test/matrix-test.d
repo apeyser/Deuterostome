@@ -281,22 +281,23 @@
 
 /full_tests {
   {
-    base_setup
-    /full true def
-    
-    DEP begin
-    full_model read
-    end
-    
-    MODEL /Matrix get
-    0 1 m 1 sub {/i name
-      dup i get 0 n getinterval
-      A1 A_cuts i cut pop copy pop
-    } for
-    pop
-
-    MODEL /myName get forgetmodule
-    
+    full_on {
+      base_setup
+      /full true def
+      
+      DEP begin
+      full_model read
+      end
+      
+      MODEL /Matrix get
+      0 1 m 1 sub {/i name
+        dup i get 0 n getinterval
+        A1 A_cuts i cut pop copy pop
+      } for
+      pop
+      
+      MODEL /myName get forgetmodule
+    } if
     {}
   } run_tests
 } bind def
