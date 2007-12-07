@@ -5,6 +5,7 @@
 #include <clapack.h>
 #include <stdarg.h>
 
+static BOOLEAN xerbla_background = FALSE;
 static BOOLEAN xerbla_err = FALSE;
 void cblas_xerbla(int p, char *rout, char *form, ...) 
 {
@@ -26,7 +27,7 @@ void cblas_xerbla(int p, char *rout, char *form, ...)
 
   if (! p) len = 0;
   else len = snprintf(buf, nlen,
-                      "Parameter %d to routine %s was inccorect\n", 
+                      "Parameter %d to routine %s was incorrect\n", 
                       p, rout);
   if (len < 0 || len > nlen) goto xerbla_err;
 
@@ -40,7 +41,7 @@ void cblas_xerbla(int p, char *rout, char *form, ...)
   FREEvm = (B*) DALIGN(VALUE_PTR(f) + len);
   moveframe(f, o1);
   FREEopds = o2;
-  goto xerbla_end;
+  if (! xerbla_background) goto xerbla_end;
 
  xerbla_err:
   va_end(argptr);
@@ -80,7 +81,7 @@ int cblas_errprn(int ierr, int info, char *form, ...)
   FREEvm = (B*) DALIGN(VALUE_PTR(f) + len);
   moveframe(f, o1);
   FREEopds = o2; 
-  goto errnprn_end;
+  if (! xerbla_background) goto errnprn_end;
 
  errnprn_err:
   va_end(argptr);
@@ -92,11 +93,12 @@ int cblas_errprn(int ierr, int info, char *form, ...)
   return (ierr < info) ? ierr : info;
 }
 
-#define CHECK_ERR do {                  \
-    if (xerbla_err || errprn_err) {    \
-      xerbla_err = errprn_err = FALSE; \
+#define CHECK_ERR do {                     \
+    xerbla_background = FALSE;             \
+    if (xerbla_err || errprn_err) {        \
+      xerbla_err = errprn_err = FALSE;     \
       return MATRIX_INT_ERR;               \
-    }                                   \
+    }                                      \
   } while (0)
 
 static P matrix_dims(B* cuts, B* array, P* m, P* n, P* lda) 
@@ -498,7 +500,7 @@ P op_xerbla_test(void) {
   if (FLOORopds > o_1) return OPDS_UNF;
   if (CLASS(o_1) != BOOL) return OPD_CLA;
   test = BOOL_VAL(o_1);
-
+  
   if (test) {
     cblas_dgemv(CblasRowMajor, CblasTrans, 
                 0, 0, 0, NULL, 0, NULL, 0, 0, NULL, 0);
@@ -510,8 +512,10 @@ P op_xerbla_test(void) {
     cblas_dgemv(CblasRowMajor, CblasTrans,
                 1, 1, 1, A, 1, B, 1, 1, C, 1);
   }
+  xerbla_background = TRUE;
   CHECK_ERR;
 
+  FREEopds = o_1;
   return OK;  
 }
 
