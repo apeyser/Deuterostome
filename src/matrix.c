@@ -501,6 +501,7 @@ P op_xerbla_test(void) {
   if (CLASS(o_1) != BOOL) return OPD_CLA;
   test = BOOL_VAL(o_1);
   
+  xerbla_background = TRUE;
   if (test) {
     cblas_dgemv(CblasRowMajor, CblasTrans, 
                 0, 0, 0, NULL, 0, NULL, 0, 0, NULL, 0);
@@ -512,7 +513,6 @@ P op_xerbla_test(void) {
     cblas_dgemv(CblasRowMajor, CblasTrans,
                 1, 1, 1, A, 1, B, 1, 1, C, 1);
   }
-  xerbla_background = TRUE;
   CHECK_ERR;
 
   FREEopds = o_1;
