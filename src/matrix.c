@@ -155,20 +155,9 @@ static P matrix_square_trans(B* cuts, B* array, P* n,
 static P matrix_dims_trans(B* cuts, B* array, P* m, P* n, 
                            B* t, enum CBLAS_TRANSPOSE* trans_, 
                            BOOLEAN* trans, P* lda) {
-  P m_, n_;
-  P r = matrix_dims(cuts, array, &m_, &n_, lda);
+  P r = matrix_dims(cuts, array, m, n, lda);
   if (r != OK) return r;
   if ((r = get_trans(t, trans_, trans)) != OK) return r;
-  
-  //  if (*trans) {
-  //  *m = n_;
-  //  *n = m_;
-  //}
-  //else {
-  //  *m = m_;
-  //  *n = n_;
-  //}
-
   return OK;
 }
 
