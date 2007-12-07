@@ -402,7 +402,7 @@ P op_matvecmul_blas(void) {
 
   cblas_dgemv(CblasRowMajor,
               trans,
-              Nrowa_, Ncola_, alpha,
+              Nrowa, Ncola, alpha,
               (D*) VALUE_PTR(o_5), lda,
               (D*) VALUE_PTR(o_2), 1, beta,
               (D*) VALUE_PTR(o_7), 1);
