@@ -114,6 +114,7 @@
     x2 i get
     A2 A_cuts i cut pop x_temp copy
     i 1 add 1 index length 1 index sub getinterval
+    y2 i 1 add 1 index length 1 index sub getinterval mul
     sub
     A2 A_cuts i cut pop i get
     div y2 i put
