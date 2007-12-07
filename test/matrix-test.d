@@ -336,7 +336,7 @@
   /k ~m def
 } bind def
 
-/lassymetric {
+/lassymmetric {
   /symmetric false def
   /m 5 def
   /n 7 def
@@ -350,7 +350,7 @@
   /k ~m def
 } bind def
 
-/bassymetric {
+/bassymmetric {
   /symmetric false def
   /m 1000 def
   /n 1007 def
