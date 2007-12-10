@@ -745,7 +745,7 @@ static void swap8bytes(B* arr) {
 
 static P swaplongbytes_int(B* arr, B isnonnative) {
   L32* warr = (L32*) arr;
-#if DM_WORDS_BIG_ENDIAN && DM_HOST_IS_32_BITS
+#if DM_WORDS_BIGENDIAN && DM_HOST_IS_32_BIT
   if (HASNATIVEBITS(isnonnative)) {// && ! HASNATIVEENDIAN
     swap4bytes(arr);
   } 
@@ -757,7 +757,7 @@ static P swaplongbytes_int(B* arr, B isnonnative) {
     swap4bytes(arr);
     checkovf(warr[1], warr[0]);
   }
-#elif ! DM_WORDS_BIG_ENDIAN && DM_HOST_IS_32_BITS
+#elif ! DM_WORDS_BIGENDIAN && DM_HOST_IS_32_BIT
   if (HASNATIVEBITS(isnonnative)) {// && ! HASNATIVEENDIAN
     swap4bytes(arr);
   }
@@ -769,7 +769,7 @@ static P swaplongbytes_int(B* arr, B isnonnative) {
     checkovf(warr[0], warr[1]);
     warr[0] = warr[1];
   }
-#elif DM_WORDS_BIG_ENDIAN // && ! DM_HOST_IS_32_BITS
+#elif DM_WORDS_BIGENDIAN // && ! DM_HOST_IS_32_BIT
   if (HASNATIVEBITS(isnonnative)) {// && ! HASNATIVEENDIAN
     swap8bytes(arr);
   }
@@ -779,7 +779,7 @@ static P swaplongbytes_int(B* arr, B isnonnative) {
     warr[1] = warr[0];
     signextend(warr[0], warr[1]);
   }
-#else //!DM_WORDS_BIG_ENDIAN && ! DM_HOST_IS_32_BITS
+#else //!DM_WORDS_BIGENDIAN && ! DM_HOST_IS_32_BIT
   if (HASNATIVEBITS(isnonnative)) {// && ! HASNATIVEENDIAN
     swap8bytes(arr);
   }
@@ -788,7 +788,7 @@ static P swaplongbytes_int(B* arr, B isnonnative) {
       swap4bytes(arr);
     signextend(warr[1], warr[0]);
   }
-#endif //DM_WORDS_BIG_ENDIAN && DM_HOST_IS_32_BITS
+#endif //DM_WORDS_BIGENDIAN && DM_HOST_IS_32_BIT
   
   return OK;
 }
@@ -845,20 +845,17 @@ P deendian_frame(B *frame, B isnonnative) {
     case ARRAY: case LIST:
       swaplongbytes((B*) &VALUE_BASE(frame), isnonnative);
       swaplongbytes((B*) &ARRAY_SIZE(frame), isnonnative);
-      movehead(frame);
       return OK;
 
     case DICT:
       swaplongbytes((B*) &VALUE_BASE(frame), isnonnative);
       swaplongbytes((B*) &DICT_NB(frame), isnonnative);
       //CURR=NB
-      movehead(frame);
       return OK;
 
     case BOX:
       swaplongbytes((B*) &VALUE_BASE(frame), isnonnative);
       swaplongbytes((B*) &BOX_NB(frame), isnonnative);
-      movehead(frame);
       return OK;
 
     default:
@@ -1278,7 +1275,7 @@ P unfoldobj(B *frame, P base, B isnonnative)
       return(CORR_OBJ);
   }
 
-  moveframe(frame,(B *)VALUE_BASE(frame)-FRAMEBYTES);
+  movehead(frame);
   return(OK);
 }
 
