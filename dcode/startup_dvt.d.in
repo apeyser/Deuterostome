@@ -1934,7 +1934,7 @@ Xwindows {
         1024 /b array 0
         (exec ) fax
         getstartupdir fax
-        (emacsclient-run.sh) fax
+        (emacsclient-run.sh ) fax
         emacs_server_name fax
         ( "\(d-comint-mode-) fax
         4 -1 roll fax
