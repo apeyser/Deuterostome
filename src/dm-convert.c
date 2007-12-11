@@ -1,4 +1,8 @@
 #include "dm.h"
+#include <unistd.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <errno.h>
 
 #if DM_HOST_IS_32_BIT
 typedef int32_t L;
@@ -483,11 +487,11 @@ static P Z32_convert(B* s, B* f) {
 
       df = FREEvm;
       VALUE_PTR(f) = FREEvm + FRAMEBYTES;
-      ARRAY_SIZE(f) = Z_ARRAY_SIZE(s);
+      ARRAY_SIZE(f) = Z32_ARRAY_SIZE(s);
       FREEvm += DALIGN(FRAMEBYTES+ARRAY_SIZE(FREEvm));
       if (FREEvm >= CEILvm) return VM_OVF;
       moveframe(f, df);
-      moveB(Z_VALUE_PTR(s), VALUE_PTR(f), ARRAY_SIZE(f));
+      moveB(Z32_VALUE_PTR(s), VALUE_PTR(f), ARRAY_SIZE(f));
       break;
 
     case LIST:
@@ -502,7 +506,7 @@ static P Z32_convert(B* s, B* f) {
       for (df = VALUE_PTR(f), sf = VALUE_PTR(s); 
 	   df < LIST_CEIL_PTR(f); 
 	   df += FRAMEBYTES, sf += Z32_FRAMEBYTES)
-	if ((retc Z32_convert(sf, df)) != OK) return retc;
+	if ((retc = Z32_convert(sf, df)) != OK) return retc;
       break;
 
     case DICT:
