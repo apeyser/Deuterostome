@@ -424,7 +424,7 @@ P op_triangular_solve(void) {
 
   MATRIX_SQUARE_TRANS(o_4, o_5, N, o_3, trans, trans_);
   VECTOR_DIM(o_6, N);
-  uplo = trans_ ? ! BOOL_VAL(o_2) : BOOL_VAL(o_2);
+  uplo = trans_ ? !BOOL_VAL(o_2) : BOOL_VAL(o_2);
   unit = BOOL_VAL(o_1);
   
   cblas_dtrsv(CblasRowMajor, 

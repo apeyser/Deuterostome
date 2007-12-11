@@ -13,6 +13,7 @@ P op_makethreads(void);
 P op_threads(void);
 
 #include "matrix.h"
+#include "dm-convert.h"
 
 B *sysop[] = {
   (B*)"lock",        (B*) op_lock,

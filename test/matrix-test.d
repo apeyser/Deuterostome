@@ -106,7 +106,8 @@
 } bind def
 
 /trisolve_test {false settrans
-  x1 x_temp copy A1_ A_cuts_ transA true triagonal_u triangular_solve pop
+  x1 x_temp copy A1_ A_cuts_ transA true triagonal_u triangular_solve
+  y1 copy pop
 } bind def
 
 /trisolveold_test {false settrans
@@ -164,7 +165,8 @@
     [(matvecmul12n) false 1 2]
     [(matvecmul12t) true 1 2]
   ]]
-  [[~trisolve_test ~trisolveold_test ~trisolve_cmp {triagonal do_full and}][
+  [[~trisolve_test ~trisolveold_test ~trisolve_cmp
+    {triagonal do_full and symmetric and}][
     [(trisolven) false]
     [(trisolvet) true]
   ]]
@@ -188,17 +190,14 @@
       dup propagate
       conds {
         (Starting: ) toconsole ktest 0 get toconsole (\n) toconsole
-        {{(1) test1} {(2) test2}} {/ctest name
+        {{1 test1} {2 test2}} {/ctest name
           gettime
-          (Starting test#) toconsole /ctest find 0 get toconsole
-          (\n) toconsole
+          (Starting test#) toconsole /ctest find 0 get _ pop
           ktest 1 ktest length 1 sub getinterval {} forall
           /ctest find 1 get exec
           gettime exch sub
+          (Time: ) toconsole _ pop
         } forall
-        exch
-        (Test1 time: ) toconsole _ pop
-        (Test2 time: ) toconsole _ pop
         ktest 0 get testcmp
         ktest 0 get done
       } if
@@ -262,8 +261,9 @@
   m 1 sub -1 0 {/i name
     A1 A_cuts i cut pop 0 exch copy
     i m 1 sub eq not {
-      A1 A_cuts i 1 add cut pop exch copy i 1 add mul
-      y1 i 1 add get i 1 add mul y1 i put
+      A1 A_cuts i 1 add cut pop exch copy 0.5 mul |i 1 add mul
+      y1 i 1 add get 0.5 mul |i 1 add mul
+      y1 i put
     } if
     triagonal_u {1} {i 1 add} ifelse exch i put
     triagonal_u {1} {i 1 add} ifelse y1 i get add y1 i put
@@ -284,7 +284,7 @@
       base_setup
       /full true def
       
-      DEP begin
+      GAT begin
       full_model read
       end
       

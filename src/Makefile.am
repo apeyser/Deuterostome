@@ -82,7 +82,7 @@ libdmglobals_la_LIBADD = $(PLUGIN_LD) $(ATLAS_LIBS)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	dmnum.c dsp1.c dsp2.c error-local.h matrix.c matrix.h \
-	plugin.c pluginlib.h $(THREADSRC) $(REGEX_SRC)
+	plugin.c pluginlib.h $(THREADSRC) $(REGEX_SRC) dm-convert.c
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)
 

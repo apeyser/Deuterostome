@@ -4,10 +4,7 @@
 typedef int32_t L;
 typedef uint32_t UL;
 
-#define LINF    ((L) 0x80000000)
-#define LMAX 0x7FFFFFFF
-
-#define LONGTYPE                   ((UB) 0x02)
+#define LONGTYPE                       ((UB) 0x02)
 #define Z32_SINGLETYPE                 ((UB) 0x03)
 #define Z32_DOUBLETYPE                 ((UB) 0x04)      
 
@@ -21,25 +18,17 @@ typedef uint32_t UL;
 #define Z32_SETNATIVEENDIAN(frame)  FORMAT(frame) |= BIGENDIAN
 #endif //DM_WORDS_BIGENDIAN
 
-#if ! NO_ENDIAN_HDR && __FLOAT_WORD_ORDER
-#if __FLOAT_WORD_ORDER != __BYTE_ORDER
-#error "Can't handle float word order __FLOAT_WORD_ORDER"
-#endif //__FLOAT_WORD_ORDER
-//#else //! NO_ENDIAN_HDR
-//#warning "Confirm that float word order = word order"
-#endif //! NO_ENDIAN_HDR
-
 #define Z32_GETNATIVEFORMAT(frame) \
   ((BOOLEAN) ((FORMAT(frame) & FORMATMASK) == FORMAT32))
 #define Z32_SETNATIVEFORMAT(frame) FORMAT(frame) |= FORMAT32
 
-#define Z32_GETNATIVE(frame) (GETNATIVEFORMAT(frame) && GETNATIVEENDIAN(frame))
+#define Z32_GETNATIVE(frame) (Z32_GETNATIVEFORMAT(frame) && Z32_GETNATIVEENDIAN(frame))
 #define Z32_SETNATIVE(frame) \
   FORMAT(frame) = 0; \
   Z32_SETNATIVEFORMAT(frame); \
   Z32_SETNATIVEENDIAN(frame)
 
-#define GETNATIVEUNDEF(frame) \
+#define Z32_GETNATIVEUNDEF(frame) \
   ((BOOLEAN) ! (FORMAT(frame) & ~(FORMATMASK | ENDIANMASK)))
 
 #define Z32_NUM_VAL(frame)             ( ((B *)(((B*)(frame))+4)))
@@ -73,7 +62,7 @@ typedef uint32_t UL;
 #define Z32_ASSOC_FRAME(entry)         (((B*)(entry))+Z32_ENTRYBYTES-Z32_FRAMEBYTES)
 
 // keep frame on 64 bit boundaries, so that doubles will be so.
-#define Z32_ENTRYBYTES  (8+2*FRAMEBYTES)
+#define Z32_ENTRYBYTES  (8+2*Z32_FRAMEBYTES)
 
 #define Z32_DICT_ENTRIES(dict)         (*((L *)(dict)))
 #define Z32_DICT_FREE(dict)            (*((L *)(((B*)(dict))+4)))
@@ -81,38 +70,10 @@ typedef uint32_t UL;
 #define Z32_DICT_CONHASH(dict)         (*((W *)(((B*)(dict))+12)))
 #define Z32_DICT_TABHASH(dict)         (*((L *)(((B*)(dict))+8)))
 
-
 #define Z32_DICTBYTES                  16L
-
-#define Z32_LIB_DATA(frame)            ((B*)(Z32_VALUE_BASE(frame) + Z32_DICT_NB(frame)))
-
-#define Z32_LIB_TYPE(frame)            (*(L*) (Z32_LIB_DATA(frame)))
-#define Z32_LIB_HANDLE(frame)          (*(L*) (Z32_LIB_DATA(frame) + 4))
-#define Z32_LIB_ERRC(frame)            (*(L**)(Z32_LIB_DATA(frame) + 8))
-#define Z32_LIB_ERRM(frame)            (*(B***)(Z32_LIB_DATA(frame) + 12))
-
-#define Z32_LIBBYTES                   16L
-
-/*---------------------------------- C Operator definition */
-
-#define Z32_OPDEF_NAME(operator)       (*((L *)(operator)))
-#define Z32_OPDEF_CODE(operator)       (*((L *)(((B*)operator)+4)))
-
-#define Z32_OPDEFBYTES                 8L
-
-/*---------------------------------------- save box */
-#define Z32_SBOX_FLAGS(box)          (*(L *)(box))
-#define Z32_SBOX_DATA(box)           (*(B **)(((B*)(box))+4))
-#define Z32_SBOX_CAP(box)            (*(B **)(((B*)(box))+8))
-
-#define Z32_SBOX_FLAGS_CLEANUP       ((UL) 0x01)
-
-#define Z32_SBOXBYTES                16
 
 static void Z32_pullname(B *nameframe, B *namestring);
 static void Z32_moveframe(B *source, B *dest);
-static void Z32_moveframes(B *source, B *dest, L n);
-static void moveL(L *source, L *dest, L n);
 static L Z32_unfoldobj(B *frame, L base, BOOLEAN isnative);
 static L Z32_deendian_frame(B *frame);
 
@@ -152,7 +113,7 @@ static UB fromsix[] =
 static B sb[Z32_NAMEBYTES];
 
 // namestring must be Z32_NAMEBYTES+1 long
-void Z32_pullname(B *nameframe, B *namestring)
+static void Z32_pullname(B *nameframe, B *namestring)
 {
   UW w0, w1;
   
@@ -206,30 +167,13 @@ void Z32_pullname(B *nameframe, B *namestring)
   NOTA BENE: this implies FRAMEBYTES = 16 for sake of speed!
 */
 
-void Z32_moveframe(B *source, B *dest)
+static void Z32_moveframe(B *source, B *dest)
 {
 D *s,*d;
 
 s = (D *)source; d = (D *)dest;
 *(d++) = *(s++); *(d++) = *(s++);
 
-}
-
-void Z32_moveframes(B *source, B *dest, L n)
-{
-D *s,*d;
-
-s = (D *)source; d = (D *)dest;
-for (; n>0; n--) { *(d++) = *(s++); *(d++) = *(s++); }
-}
-
-/* ========================== move block ==============================
-
-These move blocks of different data sizes among aligned locations     */
-
-void moveL(L *source, L *dest, L n)
-{ 
-for (; n>0; n--) *(dest++) = *(source++);
 }
 
 /* ===================== dictionary services ======================== */
@@ -257,16 +201,11 @@ static void swap8bytes(B* arr) {
 }
 
 static void movehead(B* frame) {
-  if (frame != VALUE_PTR(frame) - FRAMEBYTES)
-    moveframe(frame, VALUE_PTR(frame) - FRAMEBYTES);
-}
-
-static void Z32_movehead(B* frame) {
   if (frame != Z32_VALUE_PTR(frame) - Z32_FRAMEBYTES)
     Z32_moveframe(frame, Z32_VALUE_PTR(frame) - Z32_FRAMEBYTES);
 }
 
-L Z32_deendian_frame(B *frame) {
+static L Z32_deendian_frame(B *frame) {
   switch (CLASS(frame)) {
     case NULLOBJ: case BOOL: case MARK:
       return OK;
@@ -479,7 +418,7 @@ switch(CLASS(frame)) {
 	default: 
 		return(CORR_OBJ);
  }
- Z32_movehead(frame);
+ movehead(frame);
  return(OK);
 }
 
