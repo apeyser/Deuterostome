@@ -89,7 +89,7 @@ libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 am__libdmglobals_la_SOURCES_DIST = dmglobals.c dm1.c dm2.c dm3.c dm4.c \
 	dm5.c dm6.c dm7.c dm8.c dm9.c dmnum.c dsp1.c dsp2.c \
 	error-local.h matrix.c matrix.h plugin.c pluginlib.h threads.c \
-	regex.c dm-convert.c
+	regex.c dm-convert.c dm-convert.h
 @ENABLE_THREADS_TRUE@am__objects_1 = libdmglobals_la-threads.lo
 @ENABLE_REGEX_TRUE@am__objects_2 = libdmglobals_la-regex.lo
 am_libdmglobals_la_OBJECTS = libdmglobals_la-dmglobals.lo \
@@ -422,7 +422,7 @@ libdmglobals_la_LIBADD = $(PLUGIN_LD) $(ATLAS_LIBS)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	dmnum.c dsp1.c dsp2.c error-local.h matrix.c matrix.h \
-	plugin.c pluginlib.h $(THREADSRC) $(REGEX_SRC) dm-convert.c
+	plugin.c pluginlib.h $(THREADSRC) $(REGEX_SRC) dm-convert.c dm-convert.h
 
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)
