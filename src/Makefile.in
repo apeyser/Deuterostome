@@ -1280,6 +1280,7 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_pkgdataSCRIPTS \
 @ENABLE_SETUID_TRUE@	mv $@.tmp $@
 
 @ENABLE_SETUID_TRUE@install-exec-local:
+@ENABLE_SETUID_TRUE@	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
 @ENABLE_SETUID_TRUE@	$(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install \
 @ENABLE_SETUID_TRUE@		$(INSTALL) -m 4755 "dnode-nice$(EXEEXT)" \
 @ENABLE_SETUID_TRUE@			"$(DESTDIR)$(bindir)/dnode-nice$(EXEEXT)" 

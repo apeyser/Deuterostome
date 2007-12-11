@@ -14,6 +14,7 @@ dnode-nice.c: Makefile $(srcdir)/dnode-nice.c.in
 	mv $@.tmp $@
 
 install-exec-local:
+	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
 	$(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install \
 		$(INSTALL) -m 4755 "dnode-nice$(EXEEXT)" \
 			"$(DESTDIR)$(bindir)/dnode-nice$(EXEEXT)" 
