@@ -89,7 +89,7 @@ libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 am__libdmglobals_la_SOURCES_DIST = dmglobals.c dm1.c dm2.c dm3.c dm4.c \
 	dm5.c dm6.c dm7.c dm8.c dm9.c dmnum.c dsp1.c dsp2.c \
 	error-local.h matrix.c matrix.h plugin.c pluginlib.h threads.c \
-	regex.c
+	regex.c dm-convert.c
 @ENABLE_THREADS_TRUE@am__objects_1 = libdmglobals_la-threads.lo
 @ENABLE_REGEX_TRUE@am__objects_2 = libdmglobals_la-regex.lo
 am_libdmglobals_la_OBJECTS = libdmglobals_la-dmglobals.lo \
@@ -100,7 +100,8 @@ am_libdmglobals_la_OBJECTS = libdmglobals_la-dmglobals.lo \
 	libdmglobals_la-dm9.lo libdmglobals_la-dmnum.lo \
 	libdmglobals_la-dsp1.lo libdmglobals_la-dsp2.lo \
 	libdmglobals_la-matrix.lo libdmglobals_la-plugin.lo \
-	$(am__objects_1) $(am__objects_2)
+	$(am__objects_1) $(am__objects_2) \
+	libdmglobals_la-dm-convert.lo
 libdmglobals_la_OBJECTS = $(am_libdmglobals_la_OBJECTS)
 libdmglobals_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libdmglobals_la_CFLAGS) \
@@ -421,7 +422,7 @@ libdmglobals_la_LIBADD = $(PLUGIN_LD) $(ATLAS_LIBS)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	dmnum.c dsp1.c dsp2.c error-local.h matrix.c matrix.h \
-	plugin.c pluginlib.h $(THREADSRC) $(REGEX_SRC)
+	plugin.c pluginlib.h $(THREADSRC) $(REGEX_SRC) dm-convert.c
 
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)
@@ -608,6 +609,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dsp1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dsp2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-plugin.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm-convert.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm3.Plo@am__quote@
@@ -857,6 +859,13 @@ libdmglobals_la-regex.lo: regex.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='regex.c' object='libdmglobals_la-regex.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -c -o libdmglobals_la-regex.lo `test -f 'regex.c' || echo '$(srcdir)/'`regex.c
+
+libdmglobals_la-dm-convert.lo: dm-convert.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -MT libdmglobals_la-dm-convert.lo -MD -MP -MF $(DEPDIR)/libdmglobals_la-dm-convert.Tpo -c -o libdmglobals_la-dm-convert.lo `test -f 'dm-convert.c' || echo '$(srcdir)/'`dm-convert.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmglobals_la-dm-convert.Tpo $(DEPDIR)/libdmglobals_la-dm-convert.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-convert.c' object='libdmglobals_la-dm-convert.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -c -o libdmglobals_la-dm-convert.lo `test -f 'dm-convert.c' || echo '$(srcdir)/'`dm-convert.c
 
 dgen-dgen.o: dgen.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dgen_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dgen-dgen.o -MD -MP -MF $(DEPDIR)/dgen-dgen.Tpo -c -o dgen-dgen.o `test -f 'dgen.c' || echo '$(srcdir)/'`dgen.c
