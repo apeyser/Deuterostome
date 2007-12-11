@@ -237,6 +237,9 @@ B *sysop[] = {
   (B*)"rotate_blas",    (B *)op_rotate_blas,
   (B*)"xerbla_test",    (B *)op_xerbla_test,
 #endif //BUILD_ATLAS
+#if DM_HOST_IS_32_BIT
+  (B*)"readf32",        (B *)op_readf32,
+#endif //DM_HOST_IS_32_BIT
   (B*)"",               (B *)0L, 
 };     
    

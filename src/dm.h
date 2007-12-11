@@ -132,13 +132,10 @@ extern "C" {
 #define LONGBIGTYPE                LONG64TYPE
 #define SINGLETYPE                 ((UB) 0x04)
 #define DOUBLETYPE                 ((UB) 0x05)
-#define DWORDTYPE                  ((UB) 0x06)      
+
 #define SOCKETTYPE                 ((UB) 0x01)      /* null types */
-#define SIMPLETYPE                 ((UB) 0x00)      /* handle types */
-#define COMPLEXTYPE                ((UB) 0x00)      
-#define CMACHINE                   ((UB) 0x00)      /* operator types */
-#define OPLIBTYPE                  ((UB) 0x01)      /* operator lib type */
-#define OPAQUETYPE                 ((UB) 0x02)      /* opaque dictionary */
+#define OPLIBTYPE                  ((UB) 0x02)      /* operator lib type */
+#define OPAQUETYPE                 ((UB) 0x03)      /* opaque dictionary */
 
 /* attributes qualify a frame, not an object value: */
 
