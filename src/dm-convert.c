@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <time.h>
 
 #if DM_HOST_IS_32_BIT
 typedef int32_t L;
@@ -368,7 +369,7 @@ static L deendian_entries(B* dict) {
 
 static L Z32_unfoldobj(B *frame, L base, BOOLEAN isnative)
 {
-B *lframe, *dict, *entry, *dframe, *xframe, *ldict;
+B *lframe, *dict, *entry;
 L retc, k, *link;
 
 switch(CLASS(frame)) {
