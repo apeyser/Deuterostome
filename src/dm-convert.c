@@ -512,10 +512,11 @@ static P Z32_convert(B* s, B* f) {
 
     case DICT:
       sf = Z32_VALUE_PTR(s);
-      VALUE_PTR(f) 
-	= makedict((Z32_DICT_TABHASH(sf) - Z32_DICT_ENTRIES(sf))
-		   /Z32_ENTRYBYTES);
-      if (VALUE_BASE(f) == -1) return VM_OVF;
+      if ((VALUE_PTR(f) 
+           = makedict((Z32_DICT_TABHASH(sf) - Z32_DICT_ENTRIES(sf))
+                      /Z32_ENTRYBYTES)) == -1)
+          return VM_OVF;
+      moveframe(VALUE_PTR(f)-FRAMEBYTES, f);
 
       for (ldict = (B*)Z32_DICT_ENTRIES(sf);
 	   ldict < (B*)Z32_DICT_FREE(sf);
