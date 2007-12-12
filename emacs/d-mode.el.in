@@ -564,6 +564,7 @@ and check/try to convert to unix line-ends."
     "triangular_solve"
     "givens_blas"
     "rotate_blas"
+    "readf32"
     )
   "Operater names for d-mode.")
 

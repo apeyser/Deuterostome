@@ -578,7 +578,6 @@ B *p;
 B f[FRAMEBYTES];
 
 if (o_2 < FLOORopds) return(OPDS_UNF);
-if (o2 > CEILopds) return OPDS_OVF;
 if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
 if (TAG(o_2) != (ARRAY | BYTETYPE)) return(OPD_ERR);
 npath = ARRAY_SIZE(o_1) + ARRAY_SIZE(o_2) + 1;
@@ -624,11 +623,7 @@ rb3:
 
  FORMAT(FREEvm) = 0;
  p = FREEvm;
- nb = DALIGN(nb);
  if (nb < FRAMEBYTES) nb = FRAMEBYTES;
- if (p + FRAMEBYTES >= CEILvm) return VM_OVF;
-
- atmost = nb;
  FREEvm += nb;
 
  if ((retc = Z32_convert(p, f)) != OK) {
@@ -638,7 +633,7 @@ rb3:
  TAG(p) = ARRAY | BYTETYPE;
  ATTR(p) = 0;
  VALUE_PTR(p) = p + FRAMEBYTES;
- ARRAY_SIZE(p) = atmost - FRAMEBYTES;
+ ARRAY_SIZE(p) = nb - FRAMEBYTES;
 
  moveframe(f, o_2);
  FREEopds = o_1;
