@@ -631,6 +631,27 @@ end def  | of xtext_dict
   {actiondict exch get exec true} {false} ifelse
 } bind def
 
+| (base-dir) (file) | --
+/convert_from_32 {
+  save /cstate name
+  /basefilename name
+  /dirname name
+  
+  /boxfile
+    basefilename length 4 add /b array 0 basefilename fax (.box) fax pop
+  def
+  /olddirname
+    dirname length 5 add /b array 0 dirname fax (/old/) fax pop
+  def
+  /newdirname
+    dirname length 1 add /b array 0 dirname fax (/) fax pop
+  def
+
+  olddirname boxfile readf32 newdirname boxfile writeboxfile
+
+  cstate restore
+} bind def
+
 |------------------------------------------------ whoami
 | prints name and port
 | for use with make_toconsole to identify who looks like who
