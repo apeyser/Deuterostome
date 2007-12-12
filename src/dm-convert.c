@@ -113,7 +113,7 @@ static L Z32_deendian_frame(B *frame);
 */
 
 static UB fromsix[] =
-   "\0000123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ32_abcdefghijklmnopqrstuvwxyz";
+   "\0000123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
 
 static B sb[Z32_NAMEBYTES];
 
@@ -428,7 +428,7 @@ switch(CLASS(frame)) {
 }
 
 static P Z32_convert(B* s, B* f) {
-  B* df; B* sf; B* ldict;
+  B* df; B* sf; B* ldict; 
   B namestring[Z32_NAMEBYTES+1];
   B xf[FRAMEBYTES], xf2[FRAMEBYTES];
   P retc;
@@ -489,10 +489,10 @@ static P Z32_convert(B* s, B* f) {
       df = FREEvm;
       VALUE_PTR(f) = FREEvm + FRAMEBYTES;
       ARRAY_SIZE(f) = Z32_ARRAY_SIZE(s);
-      FREEvm += DALIGN(FRAMEBYTES+ARRAY_SIZE(FREEvm));
+      FREEvm += DALIGN(FRAMEBYTES+ARRAY_SIZE(f)*VALUEBYTES(TYPE(f)));
       if (FREEvm >= CEILvm) return VM_OVF;
       moveframe(f, df);
-      moveB(Z32_VALUE_PTR(s), VALUE_PTR(f), ARRAY_SIZE(f));
+      moveB(Z32_VALUE_PTR(s), VALUE_PTR(f), ARRAY_SIZE(f)*VALUEBYTES(TYPE(f)));
       break;
 
     case LIST:
@@ -504,10 +504,10 @@ static P Z32_convert(B* s, B* f) {
       if (FREEvm >= CEILvm) return VM_OVF;
 
       moveframe(f, df);
-      for (df = VALUE_PTR(f), sf = VALUE_PTR(s); 
+      for (df = VALUE_PTR(f), sf = Z32_VALUE_PTR(s); 
 	   df < LIST_CEIL_PTR(f); 
 	   df += FRAMEBYTES, sf += Z32_FRAMEBYTES)
-	if ((retc = Z32_convert(sf, df)) != OK) return retc;
+          if ((retc = Z32_convert(sf, df)) != OK) return retc;
       break;
 
     case DICT:
@@ -527,8 +527,10 @@ static P Z32_convert(B* s, B* f) {
 	if (! insert(xf, VALUE_PTR(f), xf2)) return DICT_OVF;
       }
       break;
+      
+      default:
+          return CORR_OBJ;
   }
-
   return OK;
 }
 

@@ -474,7 +474,7 @@ void moveframes(B *source, B *dest, P n)
 These move blocks of different data sizes among aligned locations     */
 
 void moveB(B *source, B *dest, P n)
-{ 
+{
   for (; n>0; n--) *(dest++) = *(source++);
 }
 
