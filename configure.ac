@@ -63,12 +63,6 @@ CF_IF_ENABLED([unix-sockets], [
     [${tmp}/${PACKAGE}/sockets])
 ])
 
-CF_AC_ENABLE([is-32-bit], [Build old style 32 bit frames], [no], [yes])
-CF_IF_ENABLED([is-32-bit], [
-  AC_DEFINE([IS_32_BIT], [1], 
-            [Define to 1 if you are compile old 32 bit frames])
-])
-
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_CC_STDC

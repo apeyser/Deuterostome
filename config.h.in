@@ -27,9 +27,6 @@
 /* Path to GS */
 #undef ENABLE_GS
 
-/* Build old style 32 bit frames */
-#undef ENABLE_IS_32_BIT
-
 /* Path to LATEX */
 #undef ENABLE_LATEX
 
@@ -129,9 +126,6 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
-
-/* Define to 1 if you are compile old 32 bit frames */
-#undef IS_32_BIT
 
 /* maximum vm allocation size in mb */
 #undef MAX_MEM_SIZE
