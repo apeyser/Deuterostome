@@ -115,8 +115,6 @@ static L Z32_deendian_frame(B *frame);
 static UB fromsix[] =
    "\0000123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
 
-static B sb[Z32_NAMEBYTES];
-
 // namestring must be Z32_NAMEBYTES+1 long
 static void Z32_pullname(B *nameframe, B *namestring)
 {
@@ -505,27 +503,27 @@ static P Z32_convert(B* s, B* f) {
 
       moveframe(f, df);
       for (df = VALUE_PTR(f), sf = Z32_VALUE_PTR(s); 
-	   df < LIST_CEIL_PTR(f); 
-	   df += FRAMEBYTES, sf += Z32_FRAMEBYTES)
-          if ((retc = Z32_convert(sf, df)) != OK) return retc;
+           df < LIST_CEIL_PTR(f); 
+           df += FRAMEBYTES, sf += Z32_FRAMEBYTES)
+        if ((retc = Z32_convert(sf, df)) != OK) return retc;
       break;
 
     case DICT:
       sf = Z32_VALUE_PTR(s);
       if ((VALUE_PTR(f) 
            = makedict((Z32_DICT_TABHASH(sf) - Z32_DICT_ENTRIES(sf))
-                      /Z32_ENTRYBYTES)) == -1)
+                      /Z32_ENTRYBYTES)) == (B*)-1)
           return VM_OVF;
       moveframe(VALUE_PTR(f)-FRAMEBYTES, f);
 
       for (ldict = (B*)Z32_DICT_ENTRIES(sf);
-	   ldict < (B*)Z32_DICT_FREE(sf);
-	   ldict += Z32_ENTRYBYTES) {
-	Z32_pullname(Z32_ASSOC_NAME(ldict), namestring);
-	makename(namestring, xf);
-	if ((retc = Z32_convert(Z32_ASSOC_FRAME(ldict), xf2)) != OK)
-	  return retc;
-	if (! insert(xf, VALUE_PTR(f), xf2)) return DICT_OVF;
+           ldict < (B*)Z32_DICT_FREE(sf);
+           ldict += Z32_ENTRYBYTES) {
+        Z32_pullname(Z32_ASSOC_NAME(ldict), namestring);
+        makename(namestring, xf);
+        if ((retc = Z32_convert(Z32_ASSOC_FRAME(ldict), xf2)) != OK)
+          return retc;
+        if (! insert(xf, VALUE_PTR(f), xf2)) return DICT_OVF;
       }
       break;
       
