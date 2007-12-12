@@ -633,23 +633,37 @@ end def  | of xtext_dict
 
 | (base-dir) (file) | --
 /convert_from_32 {
-  save /cstate name
-  /basefilename name
-  /dirname name
-  
-  /boxfile
-    basefilename length 4 add /b array 0 basefilename fax (.box) fax pop
-  def
-  /olddirname
-    dirname length 5 add /b array 0 dirname fax (/old/) fax pop
-  def
-  /newdirname
-    dirname length 1 add /b array 0 dirname fax (/) fax pop
-  def
+  save /cstate name {
+    /filename name
+    /dirname name
+    
+    /boxfile
+      filename length 4 add /b array 0 filename fax (.box) fax pop
+    def
+    /olddirname
+      dirname length 5 add /b array 0 dirname fax (/old/) fax pop
+    def
+    /newdirname
+      dirname length 1 add /b array 0 dirname fax (/) fax pop
+    def
 
-  olddirname boxfile readf32 newdirname boxfile writeboxfile
+    olddirname boxfile readf32 newdirname boxfile writeboxfile
+  } stopped cstate restore {stop} if
+} bind def
 
-  cstate restore
+| (base-dir) | --
+/convertdir_from_32 {
+  save /cdstate name {
+    dup length 1 add /b array 0 3 -1 roll fax (/) fax pop /basedirname name
+    basedirname length 4 add /b array 0 basedirname fax (old/) fax pop
+    /oldbasedirname name
+    
+    oldbasedirname findfiles {
+      0 get (.box$) regex not {pop} {pop /basefilename name pop pop
+        basedirname basefilename convert_from_32
+      } ifelse
+    } forall
+  } stopped cdstate restore {stop} if
 } bind def
 
 |------------------------------------------------ whoami
