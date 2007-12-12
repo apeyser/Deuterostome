@@ -660,7 +660,10 @@ end def  | of xtext_dict
     
     oldbasedirname findfiles {
       0 get (.box$) regex not {pop} {pop /basefilename name pop pop
+        (Converting: ) basedirename toconsole basefilename toconsole
+        (\n) toconsole
         basedirname basefilename convert_from_32
+        (Done\n) toconsole
       } ifelse
     } forall
   } stopped cdstate restore {stop} if
