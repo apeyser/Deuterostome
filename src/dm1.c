@@ -19,14 +19,14 @@ static B *sframe;     /* ->source string frame                       */
 
 /*--------------- GETC, UNGETC for feeding string object to scanner */
 
-static B GETC(void)
+DM_INLINE_STATIC B GETC(void)
 {
 if (ARRAY_SIZE(sframe) <= 0L) return(0);
 ARRAY_SIZE(sframe)--; 
 return((*(B *)((VALUE_BASE(sframe))++)) & 0x7F);
 }
 
-static void UNGETC(void)
+DM_INLINE_STATIC void UNGETC(void)
 {
 ARRAY_SIZE(sframe)++; VALUE_BASE(sframe)--;
 }
@@ -101,7 +101,7 @@ The lower nipple of a numeral type specifies one of:
         return 3;                                                       \
     } while (0)
 
-static W scan(void)
+DM_INLINE_STATIC W scan(void)
 {
 W kk,type,num;  UW k;
 B c;

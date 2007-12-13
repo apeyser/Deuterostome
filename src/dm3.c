@@ -107,7 +107,7 @@ typedef struct port_list {
 static port_list* ports_first = NULL;
 static port_list* ports_last = NULL;
 
-static void unlink_socketfile(void) {
+DM_INLINE_STATIC void unlink_socketfile(void) {
   struct sockaddr_un name;
   port_list* i;
   for (i = ports_first; i; i = i->next)

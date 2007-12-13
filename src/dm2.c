@@ -708,20 +708,20 @@ e_er_1:   errsource = exec_err; return(retc);
 
 /*-------------------- tree handling support --------------------------*/
 
-static void swapbytes(B* arr, B n1, B n2) {
+DM_INLINE_STATIC void swapbytes(B* arr, B n1, B n2) {
   B temp = arr[n2];
   arr[n2] = arr[n1];
   arr[n1] = temp;
 }
 
-static void swap2bytes(B* arr) {swapbytes(arr, 0, 1);}
+DM_INLINE_STATIC void swap2bytes(B* arr) {swapbytes(arr, 0, 1);}
 
-static void swap4bytes(B* arr) {
+DM_INLINE_STATIC void swap4bytes(B* arr) {
   swapbytes(arr, 0, 3);
   swapbytes(arr, 1 ,2);
 }
 
-static void swap8bytes(B* arr) {
+DM_INLINE_STATIC void swap8bytes(B* arr) {
   swapbytes(arr, 0, 7);
   swapbytes(arr, 1, 6);
   swapbytes(arr, 2, 5);
@@ -743,7 +743,7 @@ static void swap8bytes(B* arr) {
     (hi) = (lo) < 0 ? -1 : 0;                   \
   } while (0)
 
-static P swaplongbytes_int(B* arr, B isnonnative) {
+DM_INLINE_STATIC P swaplongbytes_int(B* arr, B isnonnative) {
   L32* warr = (L32*) arr;
 #if DM_WORDS_BIGENDIAN && DM_HOST_IS_32_BIT
   if (HASNATIVEBITS(isnonnative)) {// && ! HASNATIVEENDIAN
@@ -793,7 +793,7 @@ static P swaplongbytes_int(B* arr, B isnonnative) {
   return OK;
 }
 
-static void movehead(B* frame) {
+DM_INLINE_STATIC void movehead(B* frame) {
   if (frame != VALUE_PTR(frame) - FRAMEBYTES)
     moveframe(frame, VALUE_PTR(frame) - FRAMEBYTES);
 }
@@ -863,7 +863,7 @@ P deendian_frame(B *frame, B isnonnative) {
   };
 }
 
-static P deendian_array(B* frame, B isnonnative) {
+DM_INLINE_STATIC P deendian_array(B* frame, B isnonnative) {
   if (! isnonnative) return OK;
   if (HASNATIVEENDIAN(isnonnative)) return OK;
 
@@ -926,7 +926,7 @@ static P deendian_array(B* frame, B isnonnative) {
   }
 }
 
-static P deendian_list(B* frame, B isnonnative) {
+DM_INLINE_STATIC P deendian_list(B* frame, B isnonnative) {
   B* lframe;
   P retc;
 
@@ -942,7 +942,7 @@ static P deendian_list(B* frame, B isnonnative) {
 }
     
 
-static P deendian_dict(B* dict, B isnonnative) {
+DM_INLINE_STATIC P deendian_dict(B* dict, B isnonnative) {
   if (! isnonnative) return OK;
 
   swaplongbytes((B*) &DICT_ENTRIES(dict), isnonnative);
@@ -954,7 +954,7 @@ static P deendian_dict(B* dict, B isnonnative) {
   return OK;
 }
 
-static P deendian_entries(B* dict, B isnonnative) {
+DM_INLINE_STATIC P deendian_entries(B* dict, B isnonnative) {
   P retc, i;
   B* entry;
 
@@ -994,7 +994,7 @@ NB: a dict is relocated in 2 steps: 1 - to the new physical mem loc
 */
 #define MAXDEPTH 50  /* counts depth of object nesting (<= 20) */
 
-static BOOLEAN foldsubframe(B* lframe) {
+DM_INLINE_STATIC BOOLEAN foldsubframe(B* lframe) {
 	switch (CLASS(lframe)) {
 		case OP:
 			makename((B *)OP_NAME(lframe),lframe);
@@ -1017,7 +1017,7 @@ static BOOLEAN foldsubframe(B* lframe) {
 static B** freemem = NULL;
 static B** ceilmem = NULL;
 static B* vmalloc = NULL;
-static P foldobj_int(B *frame, P base, W *depth);
+DM_INLINE_STATIC P foldobj_int(B *frame, P base, W *depth);
 
 P foldobj(B *frame, P base, W *depth) 
 {
@@ -1096,7 +1096,7 @@ void foldobj_free(void)
 		ceilmem = NULL;
 }
 
-static P foldobj_int(B *frame, P base, W *depth)
+DM_INLINE_STATIC P foldobj_int(B *frame, P base, W *depth)
 {
   B *tframe, *tvalue, *value, *lframe, *entry;
   P k, retc, nb, offset;
@@ -1333,7 +1333,7 @@ P op_gethomedir(void) {
   return OK;
 }
 
-static void setupdir(B** frame, const char* string) {
+DM_INLINE_STATIC void setupdir(B** frame, const char* string) {
   P len = strlen(string);
   P lenapp = len;
   if (len == 0 || string[len-1] != '/') lenapp++;

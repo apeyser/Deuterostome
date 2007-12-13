@@ -44,7 +44,7 @@ P toconsole(B *p, P atmost)
     returns can occur.
  */
 
-static P fromconsole(void)
+DM_INLINE_STATIC P fromconsole(void)
 {
   P nb, nsbuf, atmost;
   B *p, *sbuf;
@@ -227,7 +227,7 @@ P op_toconsole(void)
  * pushes "socketdead" on exec
  * pushes FALSE ABORTMARK on exec
  */
-static P makesocketdead(P ret, P socket) {
+DM_INLINE_STATIC P makesocketdead(P ret, P socket) {
   if (x3 > CEILexecs) return EXECS_OVF;
   if (o2 > CEILopds) return OPDS_OVF;
   

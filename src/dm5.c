@@ -697,7 +697,7 @@ P op_lt(void)
   return OK;
 }
 
-static ULBIG getbitpattern(B* frame) {
+DM_INLINE_STATIC ULBIG getbitpattern(B* frame) {
   switch (TYPE(frame)) {
     case BYTETYPE: 
       return (ULBIG) *(UB*) NUM_VAL(frame); 
@@ -712,7 +712,7 @@ static ULBIG getbitpattern(B* frame) {
   return 0; //should never happen
 }
 
-static void setbitpattern(B* frame, ULBIG n) {
+DM_INLINE_STATIC void setbitpattern(B* frame, ULBIG n) {
   switch (TYPE(frame)) {
     case BYTETYPE:
       *(UB*) NUM_VAL(frame) = (UB) n;

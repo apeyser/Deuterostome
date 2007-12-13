@@ -496,7 +496,7 @@ P op_writefile(void)
 static clock_t endclock;
 static P chunk_size;
 
-static void START_ALARM(void) {
+DM_INLINE_STATIC void START_ALARM(void) {
 		endclock = clock() + 180*CLOCKS_PER_SEC;
 		timeout = FALSE;
 }
@@ -504,7 +504,7 @@ static void START_ALARM(void) {
 #define MAX_CHUNK (32000)
 //100mbit/s*1/8mbyte/mbit*1024byte/mbyte*5s*1/2minrate*/
 
-static P CHECK_ALARM(void) {
+DM_INLINE_STATIC P CHECK_ALARM(void) {
   int timeout_;
   alarm(0);
   
@@ -517,7 +517,7 @@ static P CHECK_ALARM(void) {
   return OK;
 }
 
-static void END_ALARM(void) {
+DM_INLINE_STATIC void END_ALARM(void) {
   alarm(0);
   timeout = FALSE;
 }
@@ -705,7 +705,7 @@ P op_writeboxfile(void)
     name
 */
 
-static int compare(const void *a, const void *b)
+DM_INLINE_STATIC int compare(const void *a, const void *b)
 {
   B *fpa, *fpb, *sa, *sb; 
   LBIG ta, tb;

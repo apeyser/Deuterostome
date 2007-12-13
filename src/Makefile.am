@@ -59,7 +59,8 @@ PLUGIN_LD = @LIBLTDL@
 endif ENABLE_PLUGINS
 
 pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
-	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h basic-defs.h
+	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h \
+	basic-defs.h dm-types.h
 nodist_pkginclude_HEADERS = dm-config.h paths.h
 
 dvt_SOURCES = dvt.c dvt_0.h dvt_1.h
@@ -83,7 +84,8 @@ libdmglobals_la_LIBADD = $(PLUGIN_LD) $(ATLAS_LIBS)
 libdmglobals_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	dmnum.c dsp1.c dsp2.c error-local.h matrix.c matrix.h \
-	plugin.c pluginlib.h $(THREADSRC) $(REGEX_SRC) dm-convert.c dm-convert.h
+	plugin.c pluginlib.h $(THREADSRC) $(REGEX_SRC) \
+	dm-convert.c dm-convert.h dm-types.c
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)
 
@@ -115,7 +117,8 @@ libdmbootstrap_la_LIBADD = $(PLUGIN_LD)
 libdmbootstrap_la_SOURCES = dmglobals.c \
 	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c \
 	dmnum.c dsp1.c dsp2.c plugin.c  \
-	dmnuminc.h dsp1f.h  paths.h pluginlib.h
+	dmnuminc.h dsp1f.h  paths.h pluginlib.h \
+	dm-types.c
 libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_THREADS=1 -DDM_DISABLE_REGEX=1
 libdmbootstrap_la_CFLAGS = $(AM_CFLAGS)

@@ -44,7 +44,7 @@
 #define TwoPi 6.28318530717959
 #define Pi 3.141592653589793
 
-static void four1( D *data, P nn, P dir)
+DM_INLINE_STATIC void four1( D *data, P nn, P dir)
 {
   P n, mmax, m, j, istep, i;
   D wtemp, wr, wpr, wpi, wi, theta, tempr, tempi;
@@ -99,7 +99,7 @@ static void four1( D *data, P nn, P dir)
   NOTE: call with 'data' pointing one below the first element
 */
 
-static void realft(D *data, P n, P dir)
+DM_INLINE_STATIC void realft(D *data, P n, P dir)
 {
   P i, i1, i2, i3, i4, np3;
   D c1, c2, h1r, h1i, h2r, h2i, wr, wi, wpr, wpi, wtemp, theta;
@@ -156,7 +156,7 @@ static void realft(D *data, P n, P dir)
 */  
 
 
-static void sinft( D *y, P n)
+DM_INLINE_STATIC void sinft( D *y, P n)
 {
   P j, n2;
   D sum, y1, y2, theta, wi, wr, wpi, wpr, wtemp;
@@ -191,7 +191,7 @@ static void sinft( D *y, P n)
   (Press et al., page 46
 */
 
-static BOOLEAN ludcmp(D **a, P n, LBIG *indx, D *d, D *vv)
+DM_INLINE_STATIC BOOLEAN ludcmp(D **a, P n, LBIG *indx, D *d, D *vv)
 {
   P i, imax = 0, j, k;
   D big, dum, sum, temp, TINY;
@@ -247,7 +247,7 @@ static BOOLEAN ludcmp(D **a, P n, LBIG *indx, D *d, D *vv)
   (Press et al., page 47)
 */
 
-static void lubksb(D **a, P n, LBIG *indx, D *b)
+DM_INLINE_STATIC void lubksb(D **a, P n, LBIG *indx, D *b)
 {
    P i, ii, ip, j;
    D sum;

@@ -21,7 +21,8 @@ EXTRA_DIST = dmnuminc.h.built dsp1f.h.built dmnuminc.d.in paths.h.in \
 gencode: all dmnuminc.h.built dsp1f.h.built dsp2def.h.built
 
 libdmbootstrap_la_SOURCES = dmglobals.c dm1.c dm2.c dm3.c dm4.c dm5.c \
-	dm6.c dm7.c dm8.c dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h
+	dm6.c dm7.c dm8.c dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h \
+	dm-types.c
 
 dgen_SOURCES = dgen.c dgen_0.h dgen_1.h
 dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@

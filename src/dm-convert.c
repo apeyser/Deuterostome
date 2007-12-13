@@ -5,6 +5,8 @@
 #include <errno.h>
 #include <time.h>
 
+#include "dm-types.h"
+
 #if DM_HOST_IS_32_BIT
 typedef int32_t L;
 typedef uint32_t UL;
@@ -77,11 +79,6 @@ typedef uint32_t UL;
 
 #define Z32_DICTBYTES                  16L
 
-static void Z32_pullname(B *nameframe, B *namestring);
-static void Z32_moveframe(B *source, B *dest);
-static L Z32_unfoldobj(B *frame, L base, BOOLEAN isnative);
-static L Z32_deendian_frame(B *frame);
-
 /* ======================== name object functions =====================
 
  The internal makeup of the name object is hidden inside functions
@@ -116,7 +113,7 @@ static UB fromsix[] =
    "\0000123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
 
 // namestring must be Z32_NAMEBYTES+1 long
-static void Z32_pullname(B *nameframe, B *namestring)
+DM_INLINE_STATIC void Z32_pullname(B *nameframe, B *namestring)
 {
   UW w0, w1;
   
@@ -170,7 +167,7 @@ static void Z32_pullname(B *nameframe, B *namestring)
   NOTA BENE: this implies FRAMEBYTES = 16 for sake of speed!
 */
 
-static void Z32_moveframe(B *source, B *dest)
+DM_INLINE_STATIC void Z32_moveframe(B *source, B *dest)
 {
 D *s,*d;
 
@@ -183,32 +180,32 @@ s = (D *)source; d = (D *)dest;
 
 /*-------------------- tree handling support --------------------------*/
 
-static void swapbytes(B* arr, B n1, B n2) {
+DM_INLINE_STATIC void swapbytes(B* arr, B n1, B n2) {
   B temp = arr[n2];
   arr[n2] = arr[n1];
   arr[n1] = temp;
 }
 
-static void swap2bytes(B* arr) {swapbytes(arr, 0, 1);}
+DM_INLINE_STATIC void swap2bytes(B* arr) {swapbytes(arr, 0, 1);}
 
-static void swap4bytes(B* arr) {
+DM_INLINE_STATIC void swap4bytes(B* arr) {
   swapbytes(arr, 0, 3);
   swapbytes(arr, 1 ,2);
 }
 
-static void swap8bytes(B* arr) {
+DM_INLINE_STATIC void swap8bytes(B* arr) {
   swapbytes(arr, 0, 7);
   swapbytes(arr, 1, 6);
   swapbytes(arr, 2, 5);
   swapbytes(arr, 3, 4);
 }
 
-static void movehead(B* frame) {
+DM_INLINE_STATIC void movehead(B* frame) {
   if (frame != Z32_VALUE_PTR(frame) - Z32_FRAMEBYTES)
     Z32_moveframe(frame, Z32_VALUE_PTR(frame) - Z32_FRAMEBYTES);
 }
 
-static L Z32_deendian_frame(B *frame) {
+DM_INLINE_STATIC L Z32_deendian_frame(B *frame) {
   switch (CLASS(frame)) {
     case NULLOBJ: case BOOL: case MARK:
       return OK;
@@ -266,7 +263,7 @@ static L Z32_deendian_frame(B *frame) {
   };
 }
 
-static L deendian_array(B* frame) {
+DM_INLINE_STATIC L deendian_array(B* frame) {
   switch (TYPE(frame)) {
     case BYTETYPE:
       return OK;
@@ -306,7 +303,7 @@ static L deendian_array(B* frame) {
   }
 }
 
-static L deendian_list(B* frame) {
+DM_INLINE_STATIC L deendian_list(B* frame) {
   B* lframe;
   L retc;
 
@@ -320,7 +317,7 @@ static L deendian_list(B* frame) {
 }
     
 
-static L deendian_dict(B* dict) {
+DM_INLINE_STATIC L deendian_dict(B* dict) {
   swap4bytes((B*) &Z32_DICT_ENTRIES(dict));
   swap4bytes((B*) &Z32_DICT_FREE(dict));
   swap4bytes((B*) &Z32_DICT_CEIL(dict));
@@ -329,7 +326,7 @@ static L deendian_dict(B* dict) {
   return OK;
 }
 
-static L deendian_entries(B* dict) {
+DM_INLINE_STATIC L deendian_entries(B* dict) {
   L retc, i, *link;
   B* entry;
 
@@ -365,7 +362,7 @@ static L deendian_entries(B* dict) {
 */
   
 
-static L Z32_unfoldobj(B *frame, L base, BOOLEAN isnative)
+DM_INLINE_STATIC L Z32_unfoldobj(B *frame, L base, BOOLEAN isnative)
 {
 B *lframe, *dict, *entry;
 L retc, k, *link;
@@ -425,7 +422,7 @@ switch(CLASS(frame)) {
  return(OK);
 }
 
-static P Z32_convert(B* s, B* f) {
+DM_INLINE_STATIC P Z32_convert(B* s, B* f) {
   B* df; B* sf; B* ldict; 
   B namestring[Z32_NAMEBYTES+1];
   B xf[FRAMEBYTES], xf2[FRAMEBYTES];
@@ -536,7 +533,7 @@ static P Z32_convert(B* s, B* f) {
 static clock_t endclock;
 static L chunk_size;
 
-static void START_ALARM(void) {
+DM_INLINE_STATIC void START_ALARM(void) {
 		endclock = clock() + 180*CLOCKS_PER_SEC;
 		timeout = FALSE;
 }
@@ -544,7 +541,7 @@ static void START_ALARM(void) {
 #define MAX_CHUNK (32000)
 //100mbit/s*1/8mbyte/mbit*1024byte/mbyte*5s*1/2minrate*/
 
-static L CHECK_ALARM(void) {
+DM_INLINE_STATIC L CHECK_ALARM(void) {
 		int timeout_;
 		alarm(0);
 
@@ -557,7 +554,7 @@ static L CHECK_ALARM(void) {
 		return OK;
 }
 
-static void END_ALARM(void) {
+DM_INLINE_STATIC void END_ALARM(void) {
 		alarm(0);
 		timeout = FALSE;
 }

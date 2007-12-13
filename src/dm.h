@@ -52,6 +52,16 @@ extern "C" {
 #define _dm_restrict restrict
 #endif //_dm_restrict
 
+#ifndef _dm_inline
+#define _dm_inline inline
+#endif //_dm_inline
+
+#ifdef __GNUC__
+#define DM_GNUC_VERSION (__GNUC__ * 10000 \
+                         + __GNUC_MINOR__ * 100 \
+                         + __GNUC_PATCHLEVEL__)
+#endif
+
 // Need to be here because we define things such as x1
 #if ! DM_X_DISPLAY_MISSING
 #include <X11/Xlib.h>
@@ -746,23 +756,12 @@ P op_regex(void);
 P op_regexi(void);
 #endif //DM_ENABLE_REGEX
 
-static BOOLEAN PVALUE(B* frame, P* var) __attribute__ ((__unused__));
-static BOOLEAN PVALUE(B* frame, P* var) {
-#if DM_HOST_IS_32_BIT
-    LBIG v;
-    if (!VALUE(frame, &v) || v > PMAX || v < -PMAX)
-      return FALSE;
-    *var = (P) v;
-    return TRUE;
-#else
-    return VALUE(frame, var);
-#endif // DM_HOST_IS_32_BIT
-}
-
 #define ERRLEN (1000)
 
 #include "error-local.h"
 #include "dm-snprintf.h"
+
+#include "dm-types.h"
 
 #if __cplusplus
 }

@@ -55,11 +55,13 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = dmnuminc.d dsp2def.d startup_dgen.d dmglobals.c \
 	dsp1.c dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dmnum.c \
-	dsp2.c paths.h.in dgen.c dgen_0.h dgen_1.h dgen-build dmnum.h
+	dsp2.c dm-types.h dm-types.c paths.h.in dgen.c dgen_0.h \
+	dgen_1.h dgen-build dmnum.h
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libdmbootstrap_la_LIBADD =
 am_libdmbootstrap_la_OBJECTS = dmglobals.lo dm1.lo dm2.lo dm3.lo \
-	dm4.lo dm5.lo dm6.lo dm7.lo dm8.lo dmnum.lo dsp1.lo dsp2.lo
+	dm4.lo dm5.lo dm6.lo dm7.lo dm8.lo dmnum.lo dsp1.lo dsp2.lo \
+	dm-types.lo
 libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
 am_dgen_OBJECTS = dgen-dgen.$(OBJEXT)
@@ -313,7 +315,8 @@ EXTRA_DIST = dmnuminc.h.built dsp1f.h.built dmnuminc.d.in paths.h.in \
 	dsp2def.h.built dsp2def.d.in
 
 libdmbootstrap_la_SOURCES = dmglobals.c dm1.c dm2.c dm3.c dm4.c dm5.c \
-	dm6.c dm7.c dm8.c dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h
+	dm6.c dm7.c dm8.c dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h \
+	dm-types.c
 
 dgen_SOURCES = dgen.c dgen_0.h dgen_1.h
 dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
@@ -393,6 +396,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dgen.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm-types.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm3.Plo@am__quote@

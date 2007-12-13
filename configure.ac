@@ -68,6 +68,7 @@ AM_PROG_CC_C_O
 AC_PROG_CC_STDC
 AC_C_CONST
 AC_C_RESTRICT
+CF_C_INLINE
 CF_BASIC_DEFS()
 
 CF_AC_ENABLE([plugins], [compile or install plugins], [yes])
@@ -256,6 +257,8 @@ AC_CONFIG_LINKS([
 		src/codegen/dm8.c:src/dm8.c
 		src/codegen/dmnum.c:src/dmnum.c
     src/codegen/dsp2.c:src/dsp2.c
+    src/codegen/dm-types.h:src/dm-types.h
+    src/codegen/dm-types.c:src/dm-types.c
 		src/codegen/paths.h.in:src/paths.h.in
 		src/codegen/dgen.c:src/dgen.c
 		src/codegen/dgen_0.h:src/dgen_0.h
@@ -268,7 +271,9 @@ AC_CONFIG_LINKS([
 AC_CONFIG_FILES([
 		 Makefile 
 		 src/Makefile 
-		 src/codegen/Makefile src/codegen/dmnuminc.d src/codegen/dsp2def.d
+		 src/codegen/Makefile 
+     src/codegen/dmnuminc.d 
+     src/codegen/dsp2def.d
  		 src/dm.pc
 		 plugins/Makefile plugins/dmflex.l
 		 ps/Makefile 

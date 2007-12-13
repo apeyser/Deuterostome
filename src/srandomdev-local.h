@@ -11,7 +11,7 @@
 #include <time.h>
 #include <fcntl.h>
 
-static void srandomdev(void) 
+DM_INLINE_STATIC void srandomdev(void) 
 {
   int unsigned long seed;
   int off = 0;

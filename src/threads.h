@@ -105,7 +105,7 @@ void thread_share_unlock_f(void);
  * 
  * */
 extern UP thread_num_;
-static UP thread_num(void) {return thread_num_;};
+DM_INLINE_STATIC UP thread_num(void) {return thread_num_;};
 
 /*********************************************************** thread_max
  *
@@ -117,7 +117,7 @@ static UP thread_num(void) {return thread_num_;};
  */
 extern UP thread_max_;
 __attribute__ ((__unused__)) 
-static UP thread_max(void)  {return thread_max_;};
+DM_INLINE_STATIC UP thread_max(void)  {return thread_max_;};
 
 #else //!DM_ENABLE_THREADS
 

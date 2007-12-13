@@ -76,6 +76,9 @@
    com.apple.Preview */
 #undef GUIPDF
 
+/* Define to 1 if compiler has inline */
+#undef HAS_INLINE
+
 /* Define if you have ATLAS library. */
 #undef HAVE_ATLAS
 
@@ -210,6 +213,12 @@
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
+
+/* Define to `__inline__' or `__inline' if that's what the C compiler
+   calls it, or to nothing if 'inline' is not supported under any name.  */
+#ifndef __cplusplus
+#undef inline
+#endif
 
 /* Define to equivalent of C99 restrict keyword, or to nothing if this is not
    supported. Do not define if restrict is supported directly. */

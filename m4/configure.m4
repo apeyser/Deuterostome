@@ -449,3 +449,12 @@ AC_DEFUN([CF_BASIC_DEFS], [
   fi
   AC_SUBST([NAMEBYTES])
 ])
+
+AC_DEFUN([CF_C_INLINE], [dnl
+  AC_C_INLINE
+  if test $ac_cv_c_inline = "no" ; then
+    AC_DEFINE([inline], [static])
+  else
+    AC_DEFINE([HAS_INLINE], [1], [Define to 1 if compiler has inline])
+  fi dnl
+])

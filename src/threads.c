@@ -138,7 +138,7 @@ P threads_do_int(UP nways, thread_func func,
   return OK;
 }
 
-static P threads_do_pool_int_(UP nways, thread_func func, 
+DM_INLINE_STATIC P threads_do_pool_int_(UP nways, thread_func func, 
                               const void* global, 
                               void* local, size_t s) {
   P i; P r;

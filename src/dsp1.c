@@ -188,7 +188,7 @@ P op_integrateOHv(void)
    - bool indicates whether system was solvable
 */
 
-static BOOLEAN solvetridiagS(B *f)
+DM_INLINE_STATIC BOOLEAN solvetridiagS(B *f)
 {
   S *a, *b, *c, *r, *u, bet, *gam; 
   P n, j;
@@ -213,7 +213,7 @@ static BOOLEAN solvetridiagS(B *f)
   return TRUE;
 }
 
-static BOOLEAN solvetridiagD(B *f)
+DM_INLINE_STATIC BOOLEAN solvetridiagD(B *f)
 {
   D *a, *b, *c, *r, *u, bet, *gam; 
   P n, j;

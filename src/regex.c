@@ -6,7 +6,7 @@
 
 #define REGEX_ERR(err) case REG_##err: return REGEX_##err
 
-static P int_regex_error(int e) 
+DM_INLINE_STATIC P int_regex_error(int e) 
 {
   switch (e) {
     REGEX_ERR(BADPAT);
@@ -26,7 +26,7 @@ static P int_regex_error(int e)
   };
 }
 
-static P int_regex(BOOLEAN case_sensitive) 
+DM_INLINE_STATIC P int_regex(BOOLEAN case_sensitive) 
 {
   char* string;
   regex_t preg;

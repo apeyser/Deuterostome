@@ -432,7 +432,7 @@ P op_capsave(void)
   return OK;
 }
 
-static void shift_subframe(B* frame, P offset) 
+DM_INLINE_STATIC void shift_subframe(B* frame, P offset) 
 {
 		VALUE_PTR(frame) -= offset;
 		switch (CLASS(frame)) {
@@ -797,7 +797,7 @@ P op_vmstatus(void)
 */
 
 // name bind conflicts with socket bind function, changed to dmbind
-static P dmbind(B *pframe)
+DM_INLINE_STATIC P dmbind(B *pframe)
 {
   P retc; 
   B *frame, *xframe, *dframe, *dict;
