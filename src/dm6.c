@@ -1147,7 +1147,7 @@ P op_text(void)
 P op_number(void)
 {
   static B buf[30];
-  P prec; 
+  P prec = 0; 
   BOOLEAN fauto;
 
   if (o_2 < FLOORopds) return OPDS_UNF;
