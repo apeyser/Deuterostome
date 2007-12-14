@@ -929,7 +929,6 @@ DM_INLINE_STATIC P deendian_array(B* frame, B isnonnative) {
 DM_INLINE_STATIC P deendian_list(B* frame, B isnonnative) {
   B* lframe;
   P retc;
-
   if (! isnonnative) return OK;
 
   for (lframe = (B*)VALUE_BASE(frame);
@@ -957,7 +956,8 @@ DM_INLINE_STATIC P deendian_dict(B* dict, B isnonnative) {
 DM_INLINE_STATIC P deendian_entries(B* dict, B isnonnative) {
   P retc, i;
   B* entry;
-
+  if (! isnonnative) return OK;
+  
   for (i = 0; i < DICT_CONHASH(dict); i++)
     swaplongbytes((B*) &DICT_TABHASH_ARR(dict, i), isnonnative);
 
