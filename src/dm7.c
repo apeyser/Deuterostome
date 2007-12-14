@@ -580,7 +580,7 @@ P op_readboxfile(void)
  
   nb = DALIGN(p - FREEvm);
   if (! GETNATIVEFORMAT(FREEvm) || ! GETNATIVEUNDEF(FREEvm)) return BAD_FMT;
-  isnonnative = GETNATIVEENDIAN(FREEvm);
+  isnonnative = GETNONNATIVE(FREEvm);
   if ((retc = deendian_frame(FREEvm, isnonnative)) != OK) return retc;
   if ((retc = unfoldobj(FREEvm, (P)FREEvm, isnonnative)) != OK) return retc;
   FORMAT(FREEvm) = 0;

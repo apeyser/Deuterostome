@@ -430,7 +430,6 @@ DM_INLINE_STATIC P Z32_convert(B* s, B* f) {
 
   TAG(f) = TAG(s);
   ATTR(f) = ATTR(s);
-  if (COMPOSITE(f)) ATTR(f) |= PARENT;
 
   switch (CLASS(s)) {
     case NULLOBJ:

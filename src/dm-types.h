@@ -47,7 +47,7 @@ struct Tag {
 };
 
 DM_INLINE enum Classes getclass(struct Tag t) {
-  return (enum Classes) (t.t >> 4);
+    return (enum Classes) (((UB) t.t) >> 4);
 }
 
 DM_INLINE enum Types gettype(struct Tag t) {
@@ -84,11 +84,11 @@ DM_INLINE enum F_ENDIAN getendian(struct Format f) {
 }
 
 DM_INLINE enum F_HOSTBITS gethostbits(struct Format f) {
-  return (enum F_HOSTBITS) ((f.f & 0x02) >> 1);
+    return (enum F_HOSTBITS) ((((UB) f.f) & 0x02) >> 1);
 }
 
 DM_INLINE enum F_FORMAT getformat(struct Format f) {
-  return (enum F_FORMAT) (f.f >> 4);
+    return (enum F_FORMAT) (((UB)f.f) >> 4);
 }
 
 DM_INLINE void setformat(struct Format* f, enum F_FORMAT format, 
@@ -125,15 +125,15 @@ DM_INLINE enum A_ACTIVE getactive(struct Attr a) {
 }
 
 DM_INLINE enum A_READONLY getreadonly(struct Attr a) {
-  return (enum A_READONLY) ((a.a & 0x02) >> 1);
+    return (enum A_READONLY) ((((UB) a.a) & 0x02) >> 1);
 }
 
 DM_INLINE enum A_PARENT getparent(struct Attr a) {
-  return (enum A_PARENT) ((a.a & 0x04) >> 2);
+    return (enum A_PARENT) ((((UB) a.a) & 0x04) >> 2);
 }
 
 DM_INLINE enum A_TILDE gettilde(struct Attr a) {
-  return (enum A_TILDE) ((a.a & 0x08) >> 3);
+    return (enum A_TILDE) ((((UB) a.a) & 0x08) >> 3);
 }
 
 DM_INLINE void setattr(struct Attr* a, enum A_TILDE t,
@@ -468,6 +468,8 @@ struct Frame {
     struct BoxFrame box;
   };
 };
+
+__attribute__ ((__unused__)) static struct Frame visFrame;
 
 struct Entry {
   struct NameFrame name;

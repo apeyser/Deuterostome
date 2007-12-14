@@ -1147,7 +1147,7 @@ DM_INLINE_STATIC P foldobj_int(B *frame, P base, W *depth)
 
       *freemem += nb + FRAMEBYTES;
       VALUE_BASE(frame) = (P)tvalue - base;
-      moveframes(frame,tframe,1L); 
+      moveframe(frame,tframe); 
       moveLBIG((LBIG*)value,(LBIG*)tvalue, nb/sizeof(LBIG));
       offset = ((P)tvalue) - ((P)value);
       DICT_ENTRIES(tvalue) += offset; 
@@ -1157,6 +1157,7 @@ DM_INLINE_STATIC P foldobj_int(B *frame, P base, W *depth)
       for (k = 0; k < DICT_CONHASH(tvalue); k++)
         if (DICT_TABHASH_ARR(tvalue, k) != (-1L)) 
           DICT_TABHASH_ARR(tvalue, k) += offset;
+      
       for (entry = (B *)DICT_ENTRIES(tvalue);
            entry < (B *)DICT_FREE(tvalue);
            entry += ENTRYBYTES) { 
