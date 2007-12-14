@@ -1,0 +1,21 @@
+Package: dm
+Version: 4.0
+Revision: 1
+
+Type: nosource
+
+PatchScript: svn co svn://klutz0.nonnerlab/svn/dm-4.0/trunk dm-4.0
+
+SetCFLAGS: -g -O2 -mpowerpc64 -mcpu=G5
+ConfigureParams: MAX_MEM_SIZE=3000
+
+CompileScript: cd dm-4.0 && ./configure %c && make -j3
+
+InstallScript: <<
+  cd dm-4.0 && make install DESTDIR=%d
+  cd dm-4.0 && install -m 755 -d %i/etc/emacs/site-start.d
+  cd dm-4.0 && install -m 644 fink/%n.el %i/etc/emacs/site-start.d/50%n.el
+<<
+
+ConfFiles: %p/etc/dm/dnode.d %p/etc/dm/dvt.d
+
