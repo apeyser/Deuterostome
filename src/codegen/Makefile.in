@@ -59,8 +59,8 @@ CONFIG_CLEAN_FILES = dmnuminc.d dsp2def.d startup_dgen.d dmglobals.c \
 	dgen_1.h dgen-build dmnum.h
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libdmbootstrap_la_LIBADD =
-am_libdmbootstrap_la_OBJECTS = dmglobals.lo dm1.lo dm2.lo dm3.lo \
-	dm4.lo dm5.lo dm6.lo dm7.lo dm8.lo dmnum.lo dsp1.lo dsp2.lo \
+am_libdmbootstrap_la_OBJECTS = dmnum.lo dsp1.lo dsp2.lo dmglobals.lo \
+	dm1.lo dm2.lo dm3.lo dm4.lo dm5.lo dm6.lo dm7.lo dm8.lo \
 	dm-types.lo
 libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
@@ -314,8 +314,9 @@ noinst_LTLIBRARIES = libdmbootstrap.la
 EXTRA_DIST = dmnuminc.h.built dsp1f.h.built dmnuminc.d.in paths.h.in \
 	dsp2def.h.built dsp2def.d.in
 
-libdmbootstrap_la_SOURCES = dmglobals.c dm1.c dm2.c dm3.c dm4.c dm5.c \
-	dm6.c dm7.c dm8.c dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h \
+libdmbootstrap_la_SOURCES = dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h \
+	dmglobals.c dm1.c dm2.c dm3.c dm4.c dm5.c \
+	dm6.c dm7.c dm8.c \
 	dm-types.c
 
 dgen_SOURCES = dgen.c dgen_0.h dgen_1.h
