@@ -77,15 +77,19 @@ dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 
 testwordorder_SOURCES = test-word-order.c
 
+globsrcs = dmglobals.c \
+	dmnuminc.h dmnum.c dsp1f.h dsp1.c dsp2.c \
+	paths.h dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
+	pluginlib.h plugin.c \
+	dm-types.c
+
 BUILT_SOURCES = paths.h dnode-nice.c
 CLEANFILES = paths.h dnode-nice.c
 lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la
 libdmglobals_la_LIBADD = $(PLUGIN_LD) $(ATLAS_LIBS)
-libdmglobals_la_SOURCES = dmglobals.c \
-	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
-	dmnum.c dsp1.c dsp2.c error-local.h matrix.c matrix.h \
-	plugin.c pluginlib.h $(THREADSRC) $(REGEX_SRC) \
-	dm-convert.c dm-convert.h dm-types.c
+libdmglobals_la_SOURCES = $(globsrcs) \
+	error-local.h matrix.c matrix.h \
+	$(THREADSRC) $(REGEX_SRC) dm-convert.h dm-convert.c
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)
 
@@ -114,11 +118,7 @@ dgen_CPPFLAGS = $(AM_CPPFLAGS) -DBOOTSTRAP_PLUGIN=1 -DDM_DISABLE_REGEX=1 \
 dgen_LDADD = $(PLUGIN_LD) libdmbootstrap.la 
 
 libdmbootstrap_la_LIBADD = $(PLUGIN_LD)
-libdmbootstrap_la_SOURCES = dmglobals.c \
-	dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c \
-	dmnum.c dsp1.c dsp2.c plugin.c  \
-	dmnuminc.h dsp1f.h  paths.h pluginlib.h \
-	dm-types.c
+libdmbootstrap_la_SOURCES = $(globsrcs) 
 libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_THREADS=1 -DDM_DISABLE_REGEX=1
 libdmbootstrap_la_CFLAGS = $(AM_CFLAGS)
