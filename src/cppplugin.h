@@ -48,7 +48,7 @@ namespace Plugins
 		{
 				NameFrame(const bftype f): Frame(f) {};
 				string str(void) const {
-						B s[DM_NAMEBYTES+1];
+						B s[NAMEBYTES+1];
 						pullname((B*) bframe, s);
 						return string((char*) s);
 				};

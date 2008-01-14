@@ -1,6 +1,10 @@
 #ifndef DM_TYPES_H
 #define DM_TYPES_H
 
+#if __cplusplus
+extern "C" {
+#endif
+
 #ifdef __GNUC_GNU_INLINE__
 #  ifndef DM_INLINE
 #    define DM_INLINE \
@@ -27,6 +31,11 @@
 #else
 #  define DM_INLINE static
 #  define DM_INLINE_STATIC static
+#endif
+
+#if __cplusplus
+namespace Debug {
+  using namespace std;
 #endif
 
 enum Classes {
@@ -480,6 +489,10 @@ struct Entry {
   struct Frame frame;
 };
 
+#if __cplusplus
+}
+#endif
+
 DM_INLINE BOOLEAN PVALUE(B* frame, P* var) {
 #if DM_HOST_IS_32_BIT
     LBIG v;
@@ -492,5 +505,8 @@ DM_INLINE BOOLEAN PVALUE(B* frame, P* var) {
 #endif // DM_HOST_IS_32_BIT
 }
 
+#if __cplusplus
+}
+#endif
 
 #endif //DM_TYPES_H
