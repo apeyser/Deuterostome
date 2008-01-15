@@ -469,7 +469,7 @@ struct Frame {
     struct NullFrame null;
     struct NumFrame num;
     struct OpFrame op;
-    struct BoolFrame bool;
+    struct BoolFrame boolf;
     struct MarkFrame mark;
     struct ArrFrame array;
     struct ListFrame list;
