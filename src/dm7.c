@@ -181,6 +181,7 @@ P op_tosystem(void)
       exit(-1);
     }
 
+    fprintf(stderr, "tosystem: '%s' '%s' '%s'\n", ENABLE_BASH, "-c", FREEvm);
     execl(ENABLE_BASH, ENABLE_BASH, "-c", FREEvm, (char*) NULL);
     perror("Error exec'ing bash");
     exit(-1);
@@ -188,11 +189,9 @@ P op_tosystem(void)
   
  wts:
   if (abortflag) {
-    alarm(0);
     kill(f, SIGKILL);
     return ABORT;
 	};
-  alarm(30);
   if ((r = waitpid(f, &status, 0)) == -1) {
     int errno_;
     if (errno == EINTR) goto wts;
@@ -274,7 +273,6 @@ P op_fromsystem(void)
     exit(-1);
 	}
 
-	alarm(30);
 	while ((status = close(fd[1])) == -1 && errno == EINTR) {
     if (abortflag) {
       retc = ABORT;
@@ -298,12 +296,21 @@ P op_fromsystem(void)
 	c = VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
 
  READ:
-	alarm(30);
 	while ((rf = read(fd[0], c, max)) > 0) {
     c += rf;
     if ((max -= rf) == 0) {
       char c_;
-      if ((rf = read(fd[0], &c_, 1)) != 0) {
+      while ((rf = read(fd[0], &c_, 1)) == -1 && errno == EINTR) {
+        if (abortflag) {
+          retc = ABORT;
+          goto EXIT_FILE;
+        }
+      }
+      if (rf == -1) {
+        retc = -errno;
+        goto EXIT_FILE;
+      } 
+      if (rf > 0) {
         retc = VM_OVF;
         goto EXIT_FILE;
       }
@@ -328,15 +335,20 @@ P op_fromsystem(void)
 	}
   
  WAIT_PID:
-	alarm(0);
   if (abortflag) {
     retc = ABORT;
     goto EXIT_PID;
 	};
 	
-	for (alarm(30); (r = waitpid(f, &status, 0)) != f; alarm(30)) {
+	while ((r = waitpid(f, &status, 0)) != f) {
     if (r == -1) {
-      if (errno == EINTR) goto WAIT_PID;
+      if (errno == EINTR) {
+        if (abortflag) {
+          retc = ABORT;
+          goto EXIT_PID;
+        }
+        goto WAIT_PID;
+      }
       retc = -errno;
       goto EXIT_PID;
     }
@@ -493,11 +505,13 @@ P op_writefile(void)
  *                    and 3 minutes for the full thing.
  */
 
+#define TIMEOUT_SECS (3*60)
+
 static clock_t endclock;
 static P chunk_size;
 
 DM_INLINE_STATIC void START_ALARM(void) {
-		endclock = clock() + 180*CLOCKS_PER_SEC;
+		endclock = clock() + TIMEOUT_SECS*CLOCKS_PER_SEC;
 		timeout = FALSE;
 }
 
