@@ -181,7 +181,7 @@ P op_tosystem(void)
       exit(-1);
     }
 
-    fprintf(stderr, "tosystem: '%s' '%s' '%s'\n", ENABLE_BASH, "-c", FREEvm);
+    //fprintf(stderr, "tosystem: '%s' '%s' '%s'\n", ENABLE_BASH, "-c", FREEvm);
     execl(ENABLE_BASH, ENABLE_BASH, "-c", FREEvm, (char*) NULL);
     perror("Error exec'ing bash");
     exit(-1);
