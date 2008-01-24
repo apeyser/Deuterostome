@@ -6,10 +6,16 @@ Type: nosource
 
 PatchScript: svn co svn://klutz0.nonnerlab/svn/dm-4.0/trunk dm-4.0
 
-SetCFLAGS: -g -O2 -mpowerpc64 -mcpu=G5
 ConfigureParams: MAX_MEM_SIZE=3000
 
-CompileScript: cd dm-4.0 && ./configure %c && make -j3
+CompileScript: <<
+  CFLAGS="-g -O2" ; \
+  case `machine` in \
+  	   ppc970) CFLAGS="$CFLAGS -mpowerpc64 -mcpu=G5" ;; \
+	   ppc7450) CFLAGS="$CFLAGS -mcpu=7450" ; confflag="--without-atlas" ;; \
+  esac && \
+  cd dm-4.0 && ./configure %c CFLAGS="$CFLAGS" $confflag && make -j3
+<<
 
 InstallScript: <<
   cd dm-4.0 && make install DESTDIR=%d
