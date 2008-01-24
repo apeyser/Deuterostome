@@ -16,7 +16,7 @@ extern "C" {
 #  endif  
 #elif defined(DM_GNUC_VERSION) && DM_GNUC_VERSION < 40103
 #  ifndef DM_INLINE
-#    define INLINE extern inline
+#    define DM_INLINE extern inline
 #  endif
 #  ifndef DM_INLINE_STATIC 
 #    define DM_INLINE_STATIC static inline
