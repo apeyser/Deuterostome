@@ -50,13 +50,13 @@ INCLUDE = @INCLTDL@
 bin_PROGRAMS = dvt dnode dgen
 noinst_PROGRAMS = testwordorder $(DNODENICEBIN)
 
-if ENABLE_PLUGINS
+if ENABLE_PLUGINS_SUPPORT
 if ENABLE_CPPPLUGIN
 CPPPLUGIN_HDR = cppplugin.h
 endif ENABLE_CPPPLUGIN
 PLUGIN_HDR = plugin.h pluginlib.h $(CPPPLUGIN_HDR)
 PLUGIN_LD = @LIBLTDL@
-endif ENABLE_PLUGINS
+endif ENABLE_PLUGINS_SUPPORT
 
 pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
 	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h \

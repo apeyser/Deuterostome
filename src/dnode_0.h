@@ -14,6 +14,7 @@ P op_threads(void);
 
 #include "matrix.h"
 #include "dm-convert.h"
+#include "pluginlib.h"
 
 B *sysop[] = {
   (B*)"lock",        (B*) op_lock,
@@ -281,6 +282,7 @@ P syserrc[] = {
   MATRIX_SINGULAR,
   CLOCK_ERR, LONG_OVF,
   MATRIX_INT_ERR,
+  NO_PLUGINS,
   0L
 };
 
@@ -369,6 +371,7 @@ B* syserrm[] = {
   (B*)"** Error accessing clock",
   (B*)"** Error loading 64 bit integer into 32 bit machine",
   (B*)"Matrix Error: Internal Error - message on stack",
+  (B*)"Plugin Error: Compiled without plugin support",
 };
 
 // original directory for vmresize

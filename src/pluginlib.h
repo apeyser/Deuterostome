@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#define NO_PLUGINS PLUGIN_ERRS
+
 void initialize_plugins(void);
 void closealllibs(void);
 
@@ -13,7 +15,7 @@ void closealllibs(void);
 // for LL
 P op_getplugindir(void);
 
-#if DM_ENABLE_PLUGINS
+#if DM_ENABLE_PLUGINS_SUPPORT
 
 BOOLEAN check_opaque_name(B* nameframe, B* dict);
 // ... = null terminated list of nameframes to insert
@@ -35,7 +37,7 @@ extern B buffernameframe[FRAMEBYTES];
 #define INNERPTYPE LONG64TYPE
 #endif //DM_HOST_IS_32_BIT
 
-#endif //DM_ENABLE_PLUGINS
+#endif //DM_ENABLE_PLUGINS_SUPPORT
 
 #if __cplusplus
 }

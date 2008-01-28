@@ -407,6 +407,8 @@ extern "C" {
 
 #define MATRIX_ERRS    0x00000D00L /* 0D00:0E00-1 for errors in matrix.h */
 
+#define PLUGIN_ERRS    0x00000E00L /* 0E00L:0F00-1 for errors in plugin.h */
+
 /* compare results */
 
 #define LT                         (-1)

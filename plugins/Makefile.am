@@ -57,8 +57,12 @@ endif ENABLE_DMFLEX
 BUILT_SOURCES += dmflex.c
 dmflex_la_SOURCES = dmflex.l dmflex.h
 
-pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB) \
+if ENABLE_PLUGINS
+PLUGINS = test.la test2.la $(PROCESS_LIB) throw.la \
+	$(DMFLEX_LIB) \
 	stats.la $(CPPPLUGIN_LIB)
+endif ENABLE_PLUGINS
+pkglib_LTLIBRARIES = $(PLUGINS)
 
 test_la_SOURCES = test.c test.h
 test2_la_SOURCES = test2.c test2.h

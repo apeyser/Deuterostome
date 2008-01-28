@@ -71,13 +71,19 @@ AC_C_RESTRICT
 CF_C_INLINE
 CF_BASIC_DEFS()
 
-CF_AC_ENABLE([plugins], [compile or install plugins], [yes])
+CF_AC_ENABLE([plugins-support], [compile or install plugin support], [yes])
+CF_AM_ENABLE([plugins], [compile or install plugins], [no])
+CF_AM_ENABLE([process], 
+             [compile or install process plugin], 
+             [yes])
+CF_AM_ENABLE([cppplugin], 
+             [compile or install cpp memory library for plugins], 
+  			     [yes])
+CF_AM_ENABLE([dmflex], 
+             [compile or install dmflex plugin], 
+             [yes])
+
 CF_IF_ENABLED([plugins], [
-  CF_AM_ENABLE([process], [compile or install process plugin], [yes])
-  CF_AM_ENABLE([cppplugin], 
-               [compile or install cpp memory library for plugins], 
-  			   [yes])
-  CF_AM_ENABLE([dmflex], [compile or install dmflex plugin], [yes])
   CF_IF_ENABLED([dmflex], [
     AM_PROG_LEX
     CF_AC_ARG_VAR_SUBST_EVAL([STRINGBUF], 

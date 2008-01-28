@@ -60,31 +60,40 @@ LTLIBRARIES = $(pkglib_LTLIBRARIES)
 cpptester_la_LIBADD =
 am_cpptester_la_OBJECTS = cpptester.lo cpptestercode.lo
 cpptester_la_OBJECTS = $(am_cpptester_la_OBJECTS)
-@ENABLE_CPPPLUGIN_TRUE@am_cpptester_la_rpath = -rpath $(pkglibdir)
+@ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_TRUE@am_cpptester_la_rpath =  \
+@ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_TRUE@	-rpath \
+@ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
 dmflex_la_LIBADD =
 am_dmflex_la_OBJECTS = dmflex.lo
 dmflex_la_OBJECTS = $(am_dmflex_la_OBJECTS)
-@ENABLE_DMFLEX_TRUE@am_dmflex_la_rpath = -rpath $(pkglibdir)
+@ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_TRUE@am_dmflex_la_rpath = -rpath \
+@ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
 process_la_LIBADD =
 am_process_la_OBJECTS = process.lo
 process_la_OBJECTS = $(am_process_la_OBJECTS)
-@ENABLE_PROCESS_TRUE@am_process_la_rpath = -rpath $(pkglibdir)
+@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@am_process_la_rpath =  \
+@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@	-rpath $(pkglibdir)
 process2_la_LIBADD =
 am_process2_la_OBJECTS = process2.lo
 process2_la_OBJECTS = $(am_process2_la_OBJECTS)
-@ENABLE_PROCESS_TRUE@am_process2_la_rpath = -rpath $(pkglibdir)
+@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@am_process2_la_rpath =  \
+@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@	-rpath $(pkglibdir)
 stats_la_LIBADD =
 am_stats_la_OBJECTS = stats.lo
 stats_la_OBJECTS = $(am_stats_la_OBJECTS)
+@ENABLE_PLUGINS_TRUE@am_stats_la_rpath = -rpath $(pkglibdir)
 test_la_LIBADD =
 am_test_la_OBJECTS = test.lo
 test_la_OBJECTS = $(am_test_la_OBJECTS)
+@ENABLE_PLUGINS_TRUE@am_test_la_rpath = -rpath $(pkglibdir)
 test2_la_LIBADD =
 am_test2_la_OBJECTS = test2.lo
 test2_la_OBJECTS = $(am_test2_la_OBJECTS)
+@ENABLE_PLUGINS_TRUE@am_test2_la_rpath = -rpath $(pkglibdir)
 throw_la_LIBADD =
 am_throw_la_OBJECTS = throw.lo
 throw_la_OBJECTS = $(am_throw_la_OBJECTS)
+@ENABLE_PLUGINS_TRUE@am_throw_la_rpath = -rpath $(pkglibdir)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -174,7 +183,7 @@ ENABLE_LP = @ENABLE_LP@
 ENABLE_PDFLATEX = @ENABLE_PDFLATEX@
 ENABLE_PDFTPS = @ENABLE_PDFTPS@
 ENABLE_PERL = @ENABLE_PERL@
-ENABLE_PLUGINS = @ENABLE_PLUGINS@
+ENABLE_PLUGINS_SUPPORT = @ENABLE_PLUGINS_SUPPORT@
 ENABLE_PSTPDF = @ENABLE_PSTPDF@
 ENABLE_REGEX = @ENABLE_REGEX@
 ENABLE_TAIL = @ENABLE_TAIL@
@@ -347,9 +356,11 @@ cpptester_la_SOURCES = cpptester.c cpptester.h \
 
 @ENABLE_DMFLEX_TRUE@DMFLEX_LIB = dmflex.la
 dmflex_la_SOURCES = dmflex.l dmflex.h
-pkglib_LTLIBRARIES = test.la test2.la $(PROCESS_LIB) throw.la $(DMFLEX_LIB) \
-	stats.la $(CPPPLUGIN_LIB)
+@ENABLE_PLUGINS_TRUE@PLUGINS = test.la test2.la $(PROCESS_LIB) throw.la \
+@ENABLE_PLUGINS_TRUE@	$(DMFLEX_LIB) \
+@ENABLE_PLUGINS_TRUE@	stats.la $(CPPPLUGIN_LIB)
 
+pkglib_LTLIBRARIES = $(PLUGINS)
 test_la_SOURCES = test.c test.h
 test2_la_SOURCES = test2.c test2.h
 throw_la_SOURCES = throw.c throw.h
@@ -428,13 +439,13 @@ process.la: $(process_la_OBJECTS) $(process_la_DEPENDENCIES)
 process2.la: $(process2_la_OBJECTS) $(process2_la_DEPENDENCIES) 
 	$(LINK) $(am_process2_la_rpath) $(process2_la_OBJECTS) $(process2_la_LIBADD) $(LIBS)
 stats.la: $(stats_la_OBJECTS) $(stats_la_DEPENDENCIES) 
-	$(LINK) -rpath $(pkglibdir) $(stats_la_OBJECTS) $(stats_la_LIBADD) $(LIBS)
+	$(LINK) $(am_stats_la_rpath) $(stats_la_OBJECTS) $(stats_la_LIBADD) $(LIBS)
 test.la: $(test_la_OBJECTS) $(test_la_DEPENDENCIES) 
-	$(LINK) -rpath $(pkglibdir) $(test_la_OBJECTS) $(test_la_LIBADD) $(LIBS)
+	$(LINK) $(am_test_la_rpath) $(test_la_OBJECTS) $(test_la_LIBADD) $(LIBS)
 test2.la: $(test2_la_OBJECTS) $(test2_la_DEPENDENCIES) 
-	$(LINK) -rpath $(pkglibdir) $(test2_la_OBJECTS) $(test2_la_LIBADD) $(LIBS)
+	$(LINK) $(am_test2_la_rpath) $(test2_la_OBJECTS) $(test2_la_LIBADD) $(LIBS)
 throw.la: $(throw_la_OBJECTS) $(throw_la_DEPENDENCIES) 
-	$(LINK) -rpath $(pkglibdir) $(throw_la_OBJECTS) $(throw_la_LIBADD) $(LIBS)
+	$(LINK) $(am_throw_la_rpath) $(throw_la_OBJECTS) $(throw_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

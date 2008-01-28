@@ -2,14 +2,14 @@
 #include <string.h>
 #include "pluginlib.h"
 
-#if ! ENABLE_PLUGINS
+#if ! ENABLE_PLUGINS_SUPPORT
 
 P op_nextlib(void) {return NO_PLUGINS;}
 P op_loadlib(void) {return NO_PLUGINS;}
 void closealllibs(void) {}
 void initialize_plugins(void) {}
 
-#else //ENABLE_PLUGINS
+#else //ENABLE_PLUGINS_SUPPORT
 
 #include <ltdl.h>
 #include <stdio.h>
@@ -310,4 +310,4 @@ P wrap_readcode(const char* file) {
   return OK;
 }
 
-#endif //ENABLE_PLUGINS
+#endif //ENABLE_PLUGINS_SUPPORT

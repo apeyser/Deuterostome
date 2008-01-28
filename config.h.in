@@ -42,8 +42,8 @@
 /* Path to PERL */
 #undef ENABLE_PERL
 
-/* compile or install plugins */
-#undef ENABLE_PLUGINS
+/* compile or install plugin support */
+#undef ENABLE_PLUGINS_SUPPORT
 
 /* Path to PSTPDF */
 #undef ENABLE_PSTPDF
