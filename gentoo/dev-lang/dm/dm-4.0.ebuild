@@ -110,7 +110,6 @@ src_compile() {
 	# The quickest (and preferred) way of running configure is:
 	econf --with-atlas="`pkg-config --libs-only-L cblas`" \
 		  --with-atlas-flags="-I`pkg-config --variable=includedir cblas`/atlas" \
-		  --disable-plugins \
 		|| die "econf failed"
 	#
 	# You could use something similar to the following lines to

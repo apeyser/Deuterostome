@@ -1,4 +1,4 @@
-DEBIAN_FILES = \
+EBIAN_FILES = \
 	debian/changelog debian/docs debian/menu.ex \
 	debian/compat debian/emacsen-install.ex debian/postinst.ex \
 	debian/control debian/emacsen-remove.ex debian/postrm.ex \
@@ -20,17 +20,14 @@ if ENABLE_EMACS
 EMACS_DIR=emacs
 endif ENABLE_EMACS
 
-if ENABLE_PLUGINS
-PLUGINS_DIR=plugins
-endif ENABLE_PLUGINS
-
 if ENABLE_BASH
 if ENABLE_ENV
 BASH_DIR=sh
 endif ENABLE_ENV
 endif ENABLE_BASH
 
-SUBDIRS = libltdl src $(PLUGINS_DIR) $(BASH_DIR) ps $(EMACS_DIR) dcode test \
+SUBDIRS = libltdl src plugins $(BASH_DIR) ps \
+	$(EMACS_DIR) dcode test \
 	m4
 ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS = 
