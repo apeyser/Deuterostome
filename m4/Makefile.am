@@ -1,8 +1,8 @@
-if ENABLE_PLUGINS
+if ENABLE_PLUGINS_SUPPORT
 PLUGINDISTR = plugin-config.m4
-else !ENABLE_PLUGINS
+else !ENABLE_PLUGINS_SUPPORT
 PLUGINNODISTR = plugin-config.m4
-endif !ENABLE_PLUGINS
+endif !ENABLE_PLUGINS_SUPPORT
 
 dist_m4data_DATA = $(PLUGINDISTR)
 dist_noinst_DATA = acx_pthread.m4 ax_cflags_strict_prototypes.m4 \

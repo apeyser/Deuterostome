@@ -272,8 +272,8 @@ target_vendor = @target_vendor@
 tmp = @tmp@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-@ENABLE_PLUGINS_TRUE@PLUGINDISTR = plugin-config.m4
-@ENABLE_PLUGINS_FALSE@PLUGINNODISTR = plugin-config.m4
+@ENABLE_PLUGINS_SUPPORT_TRUE@PLUGINDISTR = plugin-config.m4
+@ENABLE_PLUGINS_SUPPORT_FALSE@PLUGINNODISTR = plugin-config.m4
 dist_m4data_DATA = $(PLUGINDISTR)
 dist_noinst_DATA = acx_pthread.m4 ax_cflags_strict_prototypes.m4 \
 	ax_prefix_config_h.m4 configure.m4 lf_x11.m4 \
