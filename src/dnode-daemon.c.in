@@ -352,7 +352,6 @@ void daemonize(const char* pidfilename) {
 
   startlog();
   if (daemon(0, 0)) errorxy("Unable to daemonize");
-  if (setpgrp()) errorxy("Unable to setpgrp");
   if (! (pidfile = fopen(pidfilename, "w")))
     errorxy("Unable to open %s", pidfilename);
   if (fprintf(pidfile, "%i\n", getpid()) < 0)
