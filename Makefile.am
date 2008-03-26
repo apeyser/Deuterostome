@@ -36,8 +36,8 @@ ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS = --enable-plugins --enable-daemon
 #--disable-process
 
-.PHONY: gentoo
-gentoo:
+.PHONY: gentoo-setup
+gentoo-setup:
 	find $(srcdir)/gentoo -name "*~" -print0 | xargs -r0 rm
 	( \
 		cd $(srcdir)/gentoo ; \
@@ -48,14 +48,13 @@ gentoo:
 
 DISTPKG = dm-4.0.tar.gz 
 .PHONY: rsync
-rsync:
-	$(MAKE) $(AM_MAKEFLAGS) distcheck
+rsync: dist
 	rsync $(DISTPKG) root@deli1:/usr/local/portage/distfiles/
 	! test -e /usr/portage/distfiles/$(DISTPKG) \
 		|| sudo rm /usr/portage/distfiles/$(DISTPKG)
 
 .PHONY: ebuild
-ebuild: rsync gentoo
+ebuild: rsync gentoo-setup
 	svn ci -m ''
 
 gencode-all: gencode all

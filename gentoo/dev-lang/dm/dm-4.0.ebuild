@@ -31,7 +31,7 @@ IUSE="daemon emacs atlas setuid threads formats xclient X"
 
 # A space delimited list of portage features to restrict. man 5 ebuild
 # for details.  Usually not needed.
-RESTRICT="strip mirror primaryuri"
+RESTRICT="strip fetch"
 
 DEPEND="
 emacs? (virtual/emacs)
@@ -53,6 +53,12 @@ RDEPEND="${DEPEND}"
 #     einfo "Unpacking ${P}.tar.gz"
 #     tar xzf ${DISTDIR}/${P}.tar.gz -C ${WORKDIR}
 # }
+
+pkg_nofetch() {
+    [ -z "${SRC_URI}" ] && return
+    einfo "Fetching ${SRC_URI}"
+    rsync -a ${SRC_URI} ${DISTDIR}
+}
 
 add_myconf() {
     myconf=("${myconf[@]}" "$@")
@@ -117,11 +123,16 @@ src_install() {
 	if use daemon ; then
 	    newinitd "${FILESDIR}"/dnoded.rc6 dnoded
 	    newinitd "${FILESDIR}"/dnoded.conf dnoded
-	    enewgroup node
-	    enewuser node -1 -1 /home/node node -g node
 	    fowners node:node /usr/bin/dnode-daemon
 	    fperms ug+s /usr/bin/dnode-daemon
 	fi
+}
+
+pkg_setup() {
+    if use daemon ; then
+	enewgroup node
+	enewuser node -1 -1 /home/node node -g node
+    fi
 }
 
 pkg_postinst() {
