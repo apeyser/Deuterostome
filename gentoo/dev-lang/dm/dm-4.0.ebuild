@@ -116,7 +116,7 @@ src_install() {
 	elisp-site-file-install "${FILESDIR}/${SITEFILE}" || die
 	if use daemon ; then
 	    newinitd "${FILESDIR}"/dnoded.rc6 dnoded
-	    newinitd "${FILESDIR}"/dnoded.conf dnoded
+	    newconfd "${FILESDIR}"/dnoded.conf dnoded
 	    fowners node:node /usr/bin/dnode-daemon
 	    fperms ug+s /usr/bin/dnode-daemon
 	fi
