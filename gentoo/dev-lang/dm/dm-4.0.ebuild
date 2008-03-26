@@ -14,7 +14,8 @@ HOMEPAGE="http://foo.bar.com/"
 
 # Point to any required sources; these will be automatically downloaded by
 # Portage.
-SRC_URI="rsync://deli1/gentoo-local/distfiles/${P}.tar.gz"
+SRC_URI=""
+RSRC_URI="rsync://deli1/gentoo-local/distfiles/${P}.tar.gz"
 #ESVN_REPO_URI="svn://klutz0.nonnerlab/svn/dm-4.0/trunk"
 
 # License of the package.  This must match the name of file(s) in
@@ -47,8 +48,8 @@ sys-libs/glibc
 RDEPEND="${DEPEND}"
 
 src_unpack() {
-    einfo "Fetching ${SRC_URI}"
-    rsync -a ${SRC_URI} ${DISTDIR}
+    einfo "Fetching ${RSRC_URI}"
+    rsync -a ${RSRC_URI} ${DISTDIR}
     einfo "Unpacking ${P}.tar.gz"
     tar xzf ${DISTDIR}/${P}.tar.gz -C ${WORKDIR}
 }
