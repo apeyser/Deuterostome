@@ -9,7 +9,7 @@ depend() {
 
 start() {
     ebegin "Starting ${SVCNAME}"
-    einfo "For ports ${DNODE_PORTS[@]}"
+    einfo "For ports ${DNODED_PORTS[@]}"
     start-stop-daemon -S \
 	-x /usr/bin/dnode-daemon \
 	-- $DNODED_NICE /var/run/dnode-$i.pid ${DNODED_PORTS[@]}
