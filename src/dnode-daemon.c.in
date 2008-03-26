@@ -153,6 +153,8 @@ char daemonized = 0 ;
 void startlog(void) {
   daemonized = 1;
   openlog("dnode-daemon", LOG_DAEMON, LOG_CONS);
+  if (close(0) || close(1) || close(2)) errorxy("Unable to close std streams");
+  if (setsid()) warnxy("Unable to setsid");
 }
 
 void errorx(char doerrno, int warn, const char* format, ...) {
@@ -237,11 +239,9 @@ void body(fd_set* read_) {
       sleep(CHILD_TIME);
       while ((pidr = waitpid(pid, &status, WNOHANG)) != pid) {
 	if (pidr == -1) {
-	  switch (errno) {
-	    case EINTR: case ECHILD: break;
-	    default:
-	      nodes->node[i].pid = 0;
-	      errorxy("Unable to wait");
+	  if (errno != EINTR) {
+	    nodes->node[i].pid = 0;
+	    errorxy("Unable to wait");
 	  }
 	  break;
 	}
@@ -255,11 +255,9 @@ void body(fd_set* read_) {
 
 	while (pidr != pid)
 	  if ((pidr = waitpid(pid, &status, 0)) == -1) {
-	    switch (errno) {
-	      case EINTR: case ECHILD: break;
-	      default:
-		nodes->node[i].pid = 0;
-		errorxy("Unable to wait again for %i", nodes->node[i].port);
+	    if (errno != EINTR) {
+	      nodes->node[i].pid = 0;
+	      errorxy("Unable to wait again for %i", nodes->node[i].port);
 	    }
 	    break;
 	  }
@@ -272,10 +270,10 @@ void body(fd_set* read_) {
 	      errorxn("Child %i exited due to signal %i", pid, WTERMSIG(status));
 	  }
 	}
-	lognode(&nodes->node[i]);
 	errorxy("Trying again for port %i", nodes->node[i].port);
 	killing = 0;
 	nodes->node[i].pid = 0;
+	lognode(&nodes->node[i]);
 	goto FORK;
       }
 
@@ -329,10 +327,6 @@ void mainloop(void) {
   int active = 0;
   FD_ZERO(&read);
 
-  sethandler(sigint, SIGINT, 0);
-  sethandler(sigterm, SIGTERM, 0);
-  sethandler(sigterm, SIGQUIT, 0);
-  
   do {
     body(&read);
     read_ = read;
@@ -377,15 +371,41 @@ const char* args(const int argc, const char* argv[]) {
 
 void daemonize(const char* pidfilename) {
   FILE* pidfile;
+  pid_t pid, pidr;
+  int status;
 
+  sethandler(sigint, SIGINT, 0);
+  sethandler(sigterm, SIGTERM, 0);
+  sethandler(sigterm, SIGQUIT, 0);
+  
+  if ((pid = fork())) {
+    if (pid == -1) errorxy("Unable to fork");
+
+    if (! (pidfile = fopen(pidfilename, "w"))) {
+      kill(pid, SIGTERM);
+      errorxy("Unable to open %s", pidfilename);
+    }
+    if (fprintf(pidfile, "%i\n", pid) < 0) {
+      kill(pid, SIGTERM);
+      errorxy("Unable to write to %s", pidfilename);
+    }
+    if (fclose(pidfile)) {
+      kill(pid, SIGTERM);
+      errorxy("Unable to close %s", pidfilename);
+    }
+
+    if (kill(pid, SIGINT)) errorxy("Unable to signal %i", pid);
+    while ((pidr = waitpid(pid, NULL, 0)) != pid && ! int_)
+      if (pidr == -1 && errno != EINTR) errorxy("Unable to wait for daemon");
+      
+    exit(pidr ? 1 : 0);
+  }
+  
   startlog();
-  if (daemon(0, 0)) errorxy("Unable to daemonize");
-  if (! (pidfile = fopen(pidfilename, "w")))
-    errorxy("Unable to open %s", pidfilename);
-  if (fprintf(pidfile, "%i\n", getpid()) < 0)
-    errorxy("Unable to write to %s", pidfilename);
-  if (fclose(pidfile))
-    errorxy("Unable to close %s", pidfilename);
+  pause();
+  if (term_) exit(0);
+  if (int_) int_ = 0;
+  if (kill(getppid(), SIGINT)) errorxy("Unable to signal parent");
 }
 
 void setuids(void) {

@@ -2,6 +2,7 @@
 
 [[ ${#DNODED_PORTS[@]} == 0 ]] && DNODED_PORTS=(0)
 DNODED_NICE=${DNODED_NICE:-0}
+DNODED_PID=${DNODED_PID:-/var/run/dnoded.pid}
 
 depend() {
     after net xdm
@@ -13,7 +14,7 @@ start() {
     start-stop-daemon -S \
 	-p /var/run/dnoded.pid \
 	-x /usr/bin/dnode-daemon \
-	-- $DNODED_NICE /var/run/dnode.pid ${DNODED_PORTS[@]}
+	-- $DNODED_NICE /var/run/dnoded.pid ${DNODED_PORTS[@]}
     eend $?
 }
 

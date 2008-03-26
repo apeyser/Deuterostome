@@ -246,11 +246,13 @@ int main(int argc, char *argv[])
 
 #if HAVE_SETSID
   // separate from current session - don't die if term closed.
+  fprintf(stderr, "Number of args: %i\n", argc);
   if (argc < 3) setsid(); 
   else if (argc == 3) {
     char* endptr;
     long ss = strtol(argv[2], &endptr, 10);
     if (! argv[2] || *endptr) goto argerr;
+    fprintf(stderr, "Setsid: %s: %i\n", argv[2], ss);
     if (ss) setsid();
   }
 #endif
