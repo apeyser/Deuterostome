@@ -37,7 +37,7 @@ DISTCHECK_CONFIGURE_FLAGS = --enable-plugins --enable-daemon
 #--disable-process
 
 .PHONY: gentoo-setup
-gentoo-setup:
+gentoo-setup: rsync
 	find $(srcdir)/gentoo -name "*~" -print0 | xargs -r0 rm
 	( \
 		cd $(srcdir)/gentoo ; \
@@ -54,7 +54,7 @@ rsync: dist
 		|| sudo rm /usr/portage/distfiles/$(DISTPKG)
 
 .PHONY: ebuild
-ebuild: rsync gentoo-setup
+ebuild: rsync
 	svn ci -m ''
 
 gencode-all: gencode all
