@@ -12,7 +12,7 @@ start() {
     einfo "For ports ${DNODE_PORTS[@]}"
     start-stop-daemon -S \
 	-x /usr/bin/dnode-daemon \
-	-- $DNODED_NICE /var/run/dnode-$i.pid ${DNODE_PORTS[@]}
+	-- $DNODED_NICE /var/run/dnode-$i.pid ${DNODED_PORTS[@]}
     eend $?
 }
 
