@@ -49,7 +49,7 @@ if ENABLE_REGEX
   REGEX_SRC=regex.c
 endif ENABLE_REGEX
 
-EXTRA_DIST = dnode-nice.c.in paths.h.in
+EXTRA_DIST = dnode-nice.c.in dnode-daemon.c.in paths.h.in
 
 DISTCLEANFILES = dm-config.h
 
@@ -95,8 +95,8 @@ globsrcs = dmglobals.c \
 	pluginlib.h plugin.c \
 	dm-types.c
 
-BUILT_SOURCES = paths.h dnode-nice.c
-CLEANFILES = paths.h dnode-nice.c
+BUILT_SOURCES = paths.h dnode-nice.c dnode-daemon.c
+CLEANFILES = paths.h dnode-nice.c dnode-daemon.c
 lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la
 libdmglobals_la_LIBADD = $(PLUGIN_LD) $(ATLAS_LIBS)
 libdmglobals_la_SOURCES = $(globsrcs) \

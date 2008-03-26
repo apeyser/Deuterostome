@@ -33,7 +33,7 @@ SUBDIRS = libltdl src plugins $(BASH_DIR) ps \
 	$(EMACS_DIR) dcode test \
 	m4
 ACLOCAL_AMFLAGS = -I m4
-DISTCHECK_CONFIGURE_FLAGS = --enable-plugins
+DISTCHECK_CONFIGURE_FLAGS = --enable-plugins --enable-daemon
 #--disable-process
 
 .PHONY: gentoo
@@ -42,9 +42,19 @@ gentoo:
 	( \
 		cd $(srcdir)/gentoo ; \
 		for i in dev-lang/dm/*.ebuild; do \
-			ebuild $$i digest || exit 1; \
+			ebuild --force $$i digest || exit 1; \
 		done \
 	)
+
+DISTPKG = dm-4.0.tar.gz 
+.PHONY: rsync
+	$(MAKE) $(AM_MAKEFLAGS) distcheck
+	rsync $(DISTPKG) root@deli1:/usr/local/portage/distfiles/
+	@sudo rm /usr/portage/distfiles/$(DISTPKG)
+
+.PHONY: ebuild
+ebuild: rsync gentoo
+	svn ci -m ''
 
 gencode-all: gencode all
 .PHONY: gencode
