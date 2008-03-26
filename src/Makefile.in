@@ -1314,11 +1314,6 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_pkgdataSCRIPTS \
 	uninstall-nodist_pkgincludeHEADERS uninstall-pkgincludeHEADERS
 
 
-@ENABLE_SETUID_TRUE@dnode-nice.c: Makefile $(srcdir)/dnode-nice.c.in
-@ENABLE_SETUID_TRUE@	rm -f $@ $@.tmp
-@ENABLE_SETUID_TRUE@	$(edit) "$(srcdir)/dnode-nice.c.in" > $@.tmp
-@ENABLE_SETUID_TRUE@	mv $@.tmp $@
-
 @ENABLE_SETUID_TRUE@install-exec-local:
 @ENABLE_SETUID_TRUE@	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
 @ENABLE_SETUID_TRUE@	$(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install \
@@ -1328,10 +1323,15 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_pkgdataSCRIPTS \
 @ENABLE_SETUID_TRUE@uninstall-local:
 @ENABLE_SETUID_TRUE@	-rm -f "$(DESTDIR)$(bindir)/dnode-nice$(EXEEXT)"
 
-@ENABLE_DAEMON_TRUE@dnode-daemon.c: Makefile $(srcdir)/dnode-daemon.c.in
-@ENABLE_DAEMON_TRUE@	rm -f $@ $@.tmp
-@ENABLE_DAEMON_TRUE@	$(edit) "$(srcdir)/dnode-daemon.c.in" > $@.tmp
-@ENABLE_DAEMON_TRUE@	mv $@.tmp $@
+dnode-nice.c: Makefile $(srcdir)/dnode-nice.c.in
+	rm -f $@ $@.tmp
+	$(edit) "$(srcdir)/dnode-nice.c.in" > $@.tmp
+	mv $@.tmp $@
+
+dnode-daemon.c: Makefile $(srcdir)/dnode-daemon.c.in
+	rm -f $@ $@.tmp
+	$(edit) "$(srcdir)/dnode-daemon.c.in" > $@.tmp
+	mv $@.tmp $@
 
 paths.h: paths.h.in Makefile
 	-rm -f $@ $@.tmp

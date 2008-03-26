@@ -7,11 +7,6 @@ if ENABLE_SETUID
 nodist_dnode_nice_SOURCES = dnode-nice.c
 DNODENICEBIN = dnode-nice
 
-dnode-nice.c: Makefile $(srcdir)/dnode-nice.c.in
-	rm -f $@ $@.tmp
-	$(edit) "$(srcdir)/dnode-nice.c.in" > $@.tmp
-	mv $@.tmp $@
-
 install-exec-local:
 	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
 	$(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install \
@@ -23,17 +18,23 @@ uninstall-local:
 
 endif ENABLE_SETUID
 
+dnode-nice.c: Makefile $(srcdir)/dnode-nice.c.in
+	rm -f $@ $@.tmp
+	$(edit) "$(srcdir)/dnode-nice.c.in" > $@.tmp
+	mv $@.tmp $@
+
 if ENABLE_DAEMON
 
 nodist_dnode_daemon_SOURCES = dnode-daemon.c
 DNODEDAEMONBIN = dnode-daemon
+
+endif ENABLE_DAEMON
 
 dnode-daemon.c: Makefile $(srcdir)/dnode-daemon.c.in
 	rm -f $@ $@.tmp
 	$(edit) "$(srcdir)/dnode-daemon.c.in" > $@.tmp
 	mv $@.tmp $@
 
-endif ENABLE_DAEMON
 
 
 if ENABLE_ATLAS

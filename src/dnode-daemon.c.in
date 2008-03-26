@@ -195,7 +195,14 @@ void body(fd_set* read_) {
   int pipefd[2];
 
   while ((pid = waitpid(-1, &status, WNOHANG))) {
-    if (pid < 0) errorxy("Error calling waitpid");
+    if (pid < 0) {
+      select (errno) {
+	case ECHILD: goto ENDWAIT;
+	case EINTR: return;
+	default:
+	  errorxy("Error calling waitpid");
+      }
+    }
 
     for (i = 0; i < nodes->n; ++i) 
       if (pid == nodes->node[i].pid) {
@@ -216,6 +223,7 @@ void body(fd_set* read_) {
       }
   }
 
+  ENDWAIT:
   for (i=0; i<nodes->n; i++) {
     if (nodes->node[i].pid) continue;
     
