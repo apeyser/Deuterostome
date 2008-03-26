@@ -769,7 +769,8 @@ gentoo:
 rsync:
 	$(MAKE) $(AM_MAKEFLAGS) distcheck
 	rsync $(DISTPKG) root@deli1:/usr/local/portage/distfiles/
-	@sudo rm /usr/portage/distfiles/$(DISTPKG)
+	! test -e /usr/portage/distfiles/$(DISTPKG) \
+		|| sudo rm /usr/portage/distfiles/$(DISTPKG)
 
 .PHONY: ebuild
 ebuild: rsync gentoo
