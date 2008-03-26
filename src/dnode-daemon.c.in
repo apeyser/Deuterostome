@@ -141,14 +141,6 @@ void killall(void) {
   sethandler(sigint, SIGINT, 0);
 }
 
-void sigparent(char redir) {
-  if (kill(getppid(), SIGINT) == -1) {
-    if (redir) perror("Unable to signal parent");
-    else syslog(LOG_ERR, "Unable to signal parent");
-  }
-  exit(1);
-}
-
 char daemonized = 0 ;
 void startlog(void) {
   daemonized = 1;
@@ -184,140 +176,104 @@ void errorx(char doerrno, int warn, const char* format, ...) {
   }
 }
 
+void cleanupdead(fd_set* read) {
+  pid_t pid;
+  int i, status;
+
+  while ((pid = waitpid(-1, &status, WNOHANG)) > 0);
+  if (! pid) return;
+  if (pid < 0) switch (errno) {
+    case ECHILD: case EINTR: return;
+    default:errorxy("Error calling waitpid");
+  }
+
+  for (i = 0; i < nodes->n; ++i)
+    if (pid == nodes->node[i].pid) {
+      if (! WIFEXITED(status)) {
+	killing = 1;
+	errorxn("Child %i exited with status %i", pid, WEXITSTATUS(status));
+	if (WIFSIGNALED(status))
+	  errorxn("Child %i exited due to signal %i", pid, WTERMSIG(status));
+	killing = 0;
+      }
+      if (nodes->node[i].fd != -1) {
+	lognode(&nodes->node[i]);
+	if (close(nodes->node[i].fd))
+	  warnxn("Unable to close read end of pipe for child %i", pid);
+	FD_CLR(nodes->node[i].fd, read);
+      }
+
+      nodes->node[i].fd = -1;
+      nodes->node[i].pid = 0;
+    }
+}
+
 uid_t uid;
 uid_t euid;
 gid_t gid;
 gid_t egid;
 
-void body(fd_set* read_) {
-  pid_t pid, pidr;
-  fd_set read = *read_;
-  int status;
+void child (int pipefd[2], int port) {
+  char buffer[1024];
+  if (close(pipefd[0])) {
+    syslog(LOG_ERR, "Unable to close read end of pipe: %m");
+    exit(1);
+  }
+  if (dup2(pipefd[1], 1) < 0 || dup2(pipefd[1], 2) < 0) {
+    syslog(LOG_ERR, "Unable to dup stdout and stderr to pid: %m");
+    exit(1);
+  }
+  if (pipefd[1] != 1 && pipefd[1] != 2 && close(pipefd[1])) {
+    fprintf(stderr, "Unable to close write end of pipe after dup\n");
+    exit(1);
+  }
+
+  errno = 0;
+  if (euid != 0)
+    fprintf(stderr, "Not running as root - not trying to renice\n");
+  else if (nice(renice) == -1 && errno) perror("Unable to renice");
+
+  if (gid == egid)
+    fprintf(stderr, "Not running setgid, not dropping privileges\n");
+  else if (setegid(egid) || setgid(egid)) {
+    perror("Unable to drop privileges");
+    exit(1);
+  }
+
+  if (uid == euid)
+    fprintf(stderr, "Not running setuid, not dropping privileges\n");
+  else if (seteuid(euid) || setuid(euid)) {
+    perror("Unable to drop privileges");
+    exit(1);
+  }
+      
+  sprintf(buffer, "%i", port);
+  fprintf(stderr, "stderr - Starting: `%s' `%s' `%s'\n", 
+	  "@bindir@/dnode", buffer, "0");
+  syslog(LOG_WARNING, "syslog - Starting: `%s' `%s' `%s'\n", 
+	 "@bindir@/dnode", buffer, "0");
+
+  execl("@bindir@/dnode", "@bindir@/dnode", buffer, "0", NULL);
+  perror("Unable to run `/usr/local/bin/dnode'");
+  exit(1);
+}
+
+void body(fd_set* read) {
   int i;
   int pipefd[2];
 
-  while ((pid = waitpid(-1, &status, WNOHANG))) {
-    if (pid < 0) {
-      switch (errno) {
-	case ECHILD: goto ENDWAIT;
-	case EINTR: return;
-	default:
-	  errorxy("Error calling waitpid");
-      }
-    }
-
-    for (i = 0; i < nodes->n; ++i) 
-      if (pid == nodes->node[i].pid) {
-	lognode(&nodes->node[i]);
-	if (! WIFEXITED(status)) {
-	  killing = 1;
-	  errorxn("Child %i exited with status %i", pid, WEXITSTATUS(status));
-	  if (WIFSIGNALED(status))
-	    errorxn("Child %i exited due to signal %i", pid, WTERMSIG(status));
-	  killing = 0;
-	}
-	if (close(nodes->node[i].fd))
-	  warnxn("Unable to close child %i pipe", pid);
-	
-	FD_CLR(nodes->node[i].fd, &read);
-	nodes->node[i].fd = -1;
-	nodes->node[i].pid = 0;
-      }
-  }
-
-  ENDWAIT:
   for (i=0; i<nodes->n; i++) {
     if (nodes->node[i].pid) continue;
     
     if (pipe(pipefd)) errorxy("Error creating pipe");
-    nodes->node[i].fd = pipefd[0];
 
-  FORK:
-    if ((nodes->node[i].pid = fork()) == -1) errorxy("Unable to fork");
-
-    if ((pid = nodes->node[i].pid)) {
-      sleep(CHILD_TIME);
-      while ((pidr = waitpid(pid, &status, WNOHANG)) != pid) {
-	if (pidr == -1) {
-	  if (errno != EINTR) {
-	    nodes->node[i].pid = 0;
-	    errorxy("Unable to wait");
-	  }
-	  break;
-	}
-	if (int_) break;
-      }
-
-      if (int_) {
-	killing = 1;
-	errorxn("Dnode setup failure for port %i", nodes->node[i].port);
-	killing = 0;
-
-	while (pidr != pid)
-	  if ((pidr = waitpid(pid, &status, 0)) == -1) {
-	    if (errno != EINTR) {
-	      nodes->node[i].pid = 0;
-	      errorxy("Unable to wait again for %i", nodes->node[i].port);
-	    }
-	    break;
-	  }
-
-	killing = 1;
-	if (pidr != -1) {
-	  if (! WIFEXITED(status)) {
-	    errorxn("Child %i exited with status %i", pid, WEXITSTATUS(status));
-	    if (WIFSIGNALED(status))
-	      errorxn("Child %i exited due to signal %i", pid, WTERMSIG(status));
-	  }
-	}
-	errorxy("Trying again for port %i", nodes->node[i].port);
-	killing = 0;
-	nodes->node[i].pid = 0;
-	lognode(&nodes->node[i]);
-	goto FORK;
-      }
-
-      if (close(pipefd[1])) errorxy("Unable to close read end of pipe");
-    }
-    else {
-      char buffer[1024];
-      if (close(pipefd[0])) {
-	syslog(LOG_ERR, "Unable to close write end of pipe: %m");
-	sigparent(0);
-      }
-      if (dup2(pipefd[1], 1) < 0 || dup2(pipefd[1], 2) < 0) {
-	syslog(LOG_ERR, "Unable to dup stdout and stderr to pid: %m");
-	sigparent(0);
-      }
-      if (pipefd[1] != 1 && pipefd[1] != 2 && close(pipefd[1])) {
-	fprintf(stderr, "Unable to close pipe after dup\n");
-	sigparent(1);
-      }
-	
-      errno = 0;
-      if (euid != 0)
-	fprintf(stderr, "Not running as root - not trying to renice\n");
-      else if (nice(renice) == -1 && errno) perror("Unable to renice");
-
-      if (gid == egid)
-	fprintf(stderr, "Not running setgid, not dropping privileges\n");
-      else if (setegid(egid) || setgid(egid)) {
-	perror("Unable to drop privileges");
-	sigparent(1);
-      }
-
-      if (uid == euid)
-	fprintf(stderr, "Not running setuid, not dropping privileges\n");
-      else if (seteuid(euid) || setuid(euid)) {
-	perror("Unable to drop privileges");
-	sigparent(1);
-      }
-      
-      sprintf(buffer, "%i", nodes->node[i].port);
-      execl("@bindir@/dnode", "@bindir@/dnode", buffer, "0", NULL);
-
-      perror("Unable to run `/usr/local/bin/dnode'");
-      sigparent(1);
+    switch ((nodes->node[i].pid = fork())) {
+      case -1: errorxy("Unable to fork");
+      case 0: child(pipefd, nodes->node[i].port);
+      default:
+	nodes->node[i].fd = pipefd[0];
+	if (close(pipefd[1]))
+	  errorxy("Unable to close write end of pipe in parent");
     }
   }
 }
@@ -328,10 +284,11 @@ void mainloop(void) {
   FD_ZERO(&read);
 
   do {
+    cleanupdead(&read);
     body(&read);
     read_ = read;
     if ((active = select(nodes->n, &read_, NULL, NULL, NULL)) < 0)
-      errorxy("Select error");
+      if (errno != EINTR) errorxy("Select error");
     lognodes(active, &read_);
   } while (! term_ && ! int_);
 
