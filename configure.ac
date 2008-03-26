@@ -25,6 +25,7 @@ CF_AC_ARG_VAR([ROLLBITS], [unroll math loops to 2^rollbits], [3])
 CF_AC_ARG_VAR([BYTECORRECT], [align to this many bytes], [8])
 CF_AC_ENABLE([debug-dmnum], [enable extra debug in dmnum], [no], [yes])
 
+CF_AM_ENABLE([daemon], [compile and install daemonizer], [no], [yes])
 CF_AM_ENABLE([setuid], [compile or install setuid wrapper], [yes])
 CF_AC_ENABLE([threads], 
              [compile and install threads, value is default number], 
@@ -72,7 +73,7 @@ CF_C_INLINE
 CF_BASIC_DEFS()
 
 CF_AC_ENABLE([plugins-support], [compile or install plugin support], [yes])
-CF_AM_ENABLE([plugins], [compile or install plugins], [no])
+CF_AM_ENABLE([plugins], [compile or install plugins], [no], [yes])
 CF_AM_ENABLE([process], 
              [compile or install process plugin], 
              [yes])
@@ -83,13 +84,14 @@ CF_AM_ENABLE([dmflex],
              [compile or install dmflex plugin], 
              [yes])
 
+CF_AC_ARG_VAR_SUBST_EVAL([STRINGBUF], 
+      [Max buffer size for dmflex, must be at least $NAMEBYTES + 2], 
+      [8092])
+CF_AC_SUBST_EVAL([NAMEBYTES_1], [`expr $NAMEBYTES - 1`])
+
 CF_IF_ENABLED([plugins], [
   CF_IF_ENABLED([dmflex], [
     AM_PROG_LEX
-    CF_AC_ARG_VAR_SUBST_EVAL([STRINGBUF], 
-      [Max buffer size for dmflex, must be at least $NAMEBYTES + 2], 
-      [8092])
-    CF_AC_SUBST_EVAL([NAMEBYTES_1], [`expr $NAMEBYTES - 1`])
   ])
 ])
 

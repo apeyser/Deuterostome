@@ -34,8 +34,9 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-bin_PROGRAMS = dvt$(EXEEXT) dnode$(EXEEXT) dgen$(EXEEXT)
-noinst_PROGRAMS = testwordorder$(EXEEXT) $(am__EXEEXT_1)
+bin_PROGRAMS = dvt$(EXEEXT) dnode$(EXEEXT) dgen$(EXEEXT) \
+	$(am__EXEEXT_1)
+noinst_PROGRAMS = testwordorder$(EXEEXT) $(am__EXEEXT_2)
 subdir = src
 DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(dist_pkgdata_SCRIPTS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
@@ -110,8 +111,9 @@ libdmglobals_la_OBJECTS = $(am_libdmglobals_la_OBJECTS)
 libdmglobals_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libdmglobals_la_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+@ENABLE_DAEMON_TRUE@am__EXEEXT_1 = dnode-daemon$(EXEEXT)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-@ENABLE_SETUID_TRUE@am__EXEEXT_1 = dnode-nice$(EXEEXT)
+@ENABLE_SETUID_TRUE@am__EXEEXT_2 = dnode-nice$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_dgen_OBJECTS = dgen-dgen.$(OBJEXT)
 dgen_OBJECTS = $(am_dgen_OBJECTS)
@@ -122,6 +124,10 @@ dnode_DEPENDENCIES = libdmglobals.la
 dnode_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(dnode_CFLAGS) $(CFLAGS) $(dnode_LDFLAGS) \
 	$(LDFLAGS) -o $@
+@ENABLE_DAEMON_TRUE@nodist_dnode_daemon_OBJECTS =  \
+@ENABLE_DAEMON_TRUE@	dnode-daemon.$(OBJEXT)
+dnode_daemon_OBJECTS = $(nodist_dnode_daemon_OBJECTS)
+dnode_daemon_LDADD = $(LDADD)
 @ENABLE_SETUID_TRUE@nodist_dnode_nice_OBJECTS = dnode-nice.$(OBJEXT)
 dnode_nice_OBJECTS = $(nodist_dnode_nice_OBJECTS)
 dnode_nice_LDADD = $(LDADD)
@@ -149,7 +155,8 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libdmbootstrap_la_SOURCES) $(libdmglobals_la_SOURCES) \
-	$(dgen_SOURCES) $(dnode_SOURCES) $(nodist_dnode_nice_SOURCES) \
+	$(dgen_SOURCES) $(dnode_SOURCES) \
+	$(nodist_dnode_daemon_SOURCES) $(nodist_dnode_nice_SOURCES) \
 	$(dvt_SOURCES) $(testwordorder_SOURCES)
 DIST_SOURCES = $(libdmbootstrap_la_SOURCES) \
 	$(am__libdmglobals_la_SOURCES_DIST) $(dgen_SOURCES) \
@@ -384,11 +391,11 @@ tmp = @tmp@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = codegen
+edit = sed -e 's,[@]bindir[@],$(bindir),g' -e 's,[@]srcdir[@],$(srcdir),g'
 @ENABLE_SETUID_TRUE@nodist_dnode_nice_SOURCES = dnode-nice.c
 @ENABLE_SETUID_TRUE@DNODENICEBIN = dnode-nice
-@ENABLE_SETUID_TRUE@edit = sed \
-@ENABLE_SETUID_TRUE@	-e 's,[@]bindir[@],$(bindir),g'
-
+@ENABLE_DAEMON_TRUE@nodist_dnode_daemon_SOURCES = dnode-daemon.c
+@ENABLE_DAEMON_TRUE@DNODEDAEMONBIN = dnode-daemon
 @ENABLE_ATLAS_TRUE@ATLAS_ACTIVATE = -DATLAS_LIB
 @ENABLE_THREADS_TRUE@THREAD_HDR = threads.h
 @ENABLE_THREADS_TRUE@THREADSRC = threads.c
@@ -562,6 +569,9 @@ dgen$(EXEEXT): $(dgen_OBJECTS) $(dgen_DEPENDENCIES)
 dnode$(EXEEXT): $(dnode_OBJECTS) $(dnode_DEPENDENCIES) 
 	@rm -f dnode$(EXEEXT)
 	$(dnode_LINK) $(dnode_OBJECTS) $(dnode_LDADD) $(LIBS)
+dnode-daemon$(EXEEXT): $(dnode_daemon_OBJECTS) $(dnode_daemon_DEPENDENCIES) 
+	@rm -f dnode-daemon$(EXEEXT)
+	$(LINK) $(dnode_daemon_OBJECTS) $(dnode_daemon_LDADD) $(LIBS)
 dnode-nice$(EXEEXT): $(dnode_nice_OBJECTS) $(dnode_nice_DEPENDENCIES) 
 	@rm -f dnode-nice$(EXEEXT)
 	$(LINK) $(dnode_nice_OBJECTS) $(dnode_nice_LDADD) $(LIBS)
@@ -598,6 +608,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dgen.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-daemon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dnode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-nice.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvt-dvt.Po@am__quote@
@@ -1317,11 +1328,17 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_pkgdataSCRIPTS \
 @ENABLE_SETUID_TRUE@uninstall-local:
 @ENABLE_SETUID_TRUE@	-rm -f "$(DESTDIR)$(bindir)/dnode-nice$(EXEEXT)"
 
+@ENABLE_DAEMON_TRUE@dnode-daemon.c: Makefile $(srcdir)/dnode-daemon.c.in
+@ENABLE_DAEMON_TRUE@	rm -f $@ $@.tmp
+@ENABLE_DAEMON_TRUE@	$(edit) "$(srcdir)/dnode-daemon.c.in" > $@.tmp
+@ENABLE_DAEMON_TRUE@	mv $@.tmp $@
+
 paths.h: paths.h.in Makefile
 	-rm -f $@ $@.tmp
 	$(editpaths) $(srcdir)/$@.in >$@.tmp
 	mv $@.tmp $@
 
+.PHONY: gencode-all gencode
 gencode-all: gencode all
 gencode:
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS) gencode

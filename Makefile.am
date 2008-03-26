@@ -1,4 +1,4 @@
-EBIAN_FILES = \
+DEBIAN_FILES = \
 	debian/changelog debian/docs debian/menu.ex \
 	debian/compat debian/emacsen-install.ex debian/postinst.ex \
 	debian/control debian/emacsen-remove.ex debian/postrm.ex \
@@ -12,7 +12,10 @@ GENTOO_FILES = \
 	gentoo/dev-lang/dm/dm-4.0.ebuild \
 	gentoo/dev-lang/dm/Manifest \
 	gentoo/dev-lang/dm/files/50dm-gentoo.el \
-	gentoo/dev-lang/dm/files/digest-dm-4.0
+	gentoo/dev-lang/dm/files/digest-dm-4.0 \
+	gentoo/dev-lang/dm/files/dnoded.conf \
+	gentoo/dev-lang/dm/files/dnoded.rc6
+
 
 EXTRA_DIST = bootstrap autom4te.cfg $(DEBIAN_FILES) $(GENTOO_FILES)
 
@@ -30,11 +33,21 @@ SUBDIRS = libltdl src plugins $(BASH_DIR) ps \
 	$(EMACS_DIR) dcode test \
 	m4
 ACLOCAL_AMFLAGS = -I m4
-DISTCHECK_CONFIGURE_FLAGS = 
+DISTCHECK_CONFIGURE_FLAGS = --enable-plugins
 #--disable-process
 
+.PHONY: gentoo
+gentoo:
+	find $(srcdir)/gentoo -name "*~" -print0 | xargs -r0 rm
+	( \
+		cd $(srcdir)/gentoo ; \
+		for i in dev-lang/dm/*.ebuild; do \
+			ebuild $$i digest || exit 1; \
+		done \
+	)
 
 gencode-all: gencode all
+.PHONY: gencode
 gencode: 
 	cd libltdl && $(MAKE) $(AM_MAKEFLAGS) all
 	cd src && $(MAKE) $(AM_MAKEFLAGS) gencode

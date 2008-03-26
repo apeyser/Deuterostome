@@ -1,0 +1,28 @@
+#!/sbin/runscript
+
+[[ ${#DNODED_PORTS[@]} == 0 ]] && DNODED_PORTS=(0)
+DNODED_NICE=${DNODED_NICE:-0}
+
+depend() {
+    after net xdm
+}
+
+start() {
+    ebegin "Starting ${SVCNAME}"
+    for i in ${DNODED_PORTS[@]} ; do
+	einfo "For port: $i"
+	start-stop-daemon -S \
+	    -x /usr/bin/dnode-daemon \
+	    -- $i $DNODED_NICE /var/run/dnode-$i.pid
+    done
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping ${SVCNAME}"
+    for i in ${DNODED_PORTS[@]} ; do
+	einfo "For port: $i"
+	start-stop-daemon -K -p /var/run/dnoded-$i.pid
+    done
+    eend $?
+}

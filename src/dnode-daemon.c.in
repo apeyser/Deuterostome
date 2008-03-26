@@ -1,0 +1,389 @@
+#line 2 "@srcdir@/dnode-daemon.c.in"
+
+#include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <syslog.h>
+#include <sys/select.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdarg.h>
+#include <string.h>
+
+struct node {
+  pid_t pid;
+  int port;
+  int fd;
+};
+
+struct nodes {
+  int n;
+  struct node node[0];
+} *nodes = NULL;
+
+#define QUIT_TIME 20
+#define WAIT_TIME 20
+#define CHILD_TIME 10
+
+long renice;
+
+#define errorxn(...) errorx(0, 0, __VA_ARGS__)
+#define errorxy(...) errorx(1, 0, __VA_ARGS__)
+#define warnxn(...)  errorx(0, 1, __VA_ARGS__)
+#define warnxy(...)  errorx(1, 1, __VA_ARGS__)
+void errorx(char doerrno, int warn, const char* format, ...);
+
+char int_ = 0;
+void sigint(int sig __attribute__((__unused__))) {int_ = 1;}
+char term_ = 0;
+void sigterm(int sig __attribute__((__unused__))) {term_ = 1;}
+char alarm_ = 0;
+void sigalarm(int sig __attribute__((__unused__))) {alarm_ = 1;}
+
+void sethandler(void (*handler)(int), int sig, int flag) {
+  struct sigaction sa;
+  sigset_t mask;
+  sigfillset(&mask);
+
+  sa.sa_handler = handler;
+  sa.sa_flags = flag;
+  sa.sa_mask = mask;
+  if (sigaction(sig, &sa, NULL) == -1)
+    errorxy("Unable to setup signal handler for sig: %i", sig);
+}
+
+void lognode(struct node* node) {
+  char buffer[1024];
+  ssize_t s;
+  while ((s = read(node->fd, buffer, sizeof(buffer)-1) > 0)) {
+    buffer[s] = '\0';
+    warnxn("Message from %i: %s", node->pid, buffer);
+  }
+  if (s < 0) {
+    if (errno == EINTR) return;
+    errorxy("Error reading from child %i", node->pid);
+  }
+}
+
+void lognodes(int active, fd_set* read) {
+  int i = 0;
+  for (; active && i < nodes->n; ++i, --active) {
+    if (nodes->node[i].fd != -1 && FD_ISSET(nodes->node[i].fd, read)) {
+      lognode(&nodes->node[i]);
+      break;
+    }
+  }
+}
+
+char killing = 0;
+void killall(void) {
+  int status;
+  pid_t pid;
+  int i;
+  int n;
+  
+  if (! nodes) return;
+
+  killing = 1;
+  alarm_ = 0;
+  sethandler(SIG_IGN, SIGINT, 0);
+  sethandler(sigalarm, SIGALRM, SA_RESETHAND);
+  alarm(QUIT_TIME);
+
+  if (kill(0, SIGINT)) {
+    errorxy("Error calling kill SIGINT on children");
+    exit(1);
+  }
+  
+  n = nodes->n;
+  while (n && ! alarm_) {
+    if ((pid = wait(&status)) < 0) {
+      errorxy("Error waiting for children");
+      exit(1);
+    }
+
+    for (i = 0; i < nodes->n; ++i) 
+      if (nodes->node[i].pid == pid) {
+	--n;
+	nodes->node[i].pid = 0;
+	if (! WIFEXITED(status)) {
+	  errorxn("Child %i exited with status %i", pid, WEXITSTATUS(status));
+	  if (WIFSIGNALED(status))
+	    errorxn("Child %i exited due to signal %i", pid, WTERMSIG(status));
+	}
+	break;
+      }
+  }
+
+  sethandler(SIG_IGN, SIGALRM, 0);
+  sethandler(SIG_IGN, SIGCHLD, SA_NOCLDWAIT);
+
+  for (i = 0; i < nodes->n; ++i)
+    if (nodes->node[i].fd != -1) {
+      lognode(&nodes->node[i]);
+      if (close(nodes->node[i].fd))
+	warnxn("Unable to close child %i pipe", nodes->node[i].pid);
+    }
+
+  if (n) {
+    for (i = 0; i < nodes->n; ++i) {
+      if (! nodes->node[i].pid) continue;
+      if (kill(nodes->node[i].pid, SIGKILL))
+	warnxy("Unable to send SIGKILL to child %i", nodes->node[i].pid);
+    }
+  }
+  killing = 0;
+  sethandler(sigint, SIGINT, 0);
+}
+
+void sigparent(char redir) {
+  if (kill(getppid(), SIGINT) == -1) {
+    if (redir) perror("Unable to signal parent");
+    else syslog(LOG_ERR, "Unable to signal parent");
+  }
+  exit(1);
+}
+
+char daemonized = 0 ;
+void startlog(void) {
+  daemonized = 1;
+  openlog("dnode-daemon", LOG_DAEMON, LOG_CONS);
+}
+
+void errorx(char doerrno, int warn, const char* format, ...) {
+  char buffer[1024];
+  va_list ap;
+  va_start(ap, format);
+  vsnprintf(buffer, sizeof(buffer), format, ap);
+  va_end(ap);
+  buffer[sizeof(buffer)-1] = '\0';
+
+  if (daemonized) {
+    int pri = warn ? LOG_WARNING : LOG_ERR;
+    if (doerrno) syslog(pri, "%s: %m", buffer);
+    else syslog(pri, "%s", buffer);
+  }
+  else {
+    char* pri = warn ? "Warning" : "Error";
+    if (doerrno) fprintf(stderr, "%s - %s: %s", pri, buffer, strerror(errno));
+    else fprintf(stderr, "%s - %s", pri, buffer);
+  }
+
+  if (! warn) {
+    if (! killing) {
+      killall();
+      exit(1);
+    }
+  }
+}
+
+uid_t uid;
+uid_t euid;
+gid_t gid;
+gid_t egid;
+
+void body(fd_set* read_) {
+  pid_t pid, pidr;
+  fd_set read = *read_;
+  int status;
+  int i;
+  int pipefd[2];
+
+  while ((pid = waitpid(-1, &status, WNOHANG))) {
+    if (pid < 0) errorxy("Error calling waitpid");
+
+    for (i = 0; i < nodes->n; ++i) 
+      if (pid == nodes->node[i].pid) {
+	lognode(&nodes->node[i]);
+	if (! WIFEXITED(status)) {
+	  killing = 1;
+	  errorxn("Child %i exited with status %i", pid, WEXITSTATUS(status));
+	  if (WIFSIGNALED(status))
+	    errorxn("Child %i exited due to signal %i", pid, WTERMSIG(status));
+	  killing = 0;
+	}
+	if (close(nodes->node[i].fd))
+	  warnxn("Unable to close child %i pipe", pid);
+	
+	FD_CLR(nodes->node[i].fd, &read);
+	nodes->node[i].fd = -1;
+	nodes->node[i].pid = 0;
+      }
+  }
+
+  for (i=0; i<nodes->n; i++) {
+    if (nodes->node[i].pid) continue;
+    
+    if (pipe(pipefd)) errorxy("Error creating pipe");
+    nodes->node[i].fd = pipefd[0];
+
+  FORK:
+    if ((nodes->node[i].pid = fork()) == -1) errorxy("Unable to fork");
+
+    if ((nodes->node[i].pid = pid)) {
+      sleep(CHILD_TIME);
+      while ((pidr = waitpid(nodes->node[i].pid, &status, WNOHANG)) != pid
+	     && pidr && ! int_);
+      if (pidr == -1 && ! int_) errorxy("Unable to wait");
+
+      if (int_) {
+	killing = 1;
+	errorxn("Dnode setup failure for port %i", nodes->node[i].port);
+	killing = 0;
+
+	while (pidr != pid)
+	  if ((pidr = waitpid(pid, &status, 0)) == -1)
+	    errorxy("Unable to wait again for %i", nodes->node[i].port);
+
+	killing = 1;
+	if (! WIFEXITED(status)) {
+	  errorxn("Child %i exited with status %i", pid, WEXITSTATUS(status));
+	  if (WIFSIGNALED(status))
+	    errorxn("Child %i exited due to signal %i", pid, WTERMSIG(status));
+	}
+	errorxy("Trying again for port %i", nodes->node[i].port);
+	killing = 0;
+	goto FORK;
+      }
+
+      if (close(pipefd[1])) errorxy("Unable to close read end of pipe");
+    }
+    else {
+      char buffer[1024];
+      if (close(pipefd[0])) {
+	syslog(LOG_ERR, "Unable to close write end of pipe: %m");
+	sigparent(0);
+      }
+      if (dup2(pipefd[1], 1) < 0 || dup2(pipefd[1], 2) < 0) {
+	syslog(LOG_ERR, "Unable to dup stdout and stderr to pid: %m");
+	sigparent(0);
+      }
+      if (pipefd[1] != 1 && pipefd[1] != 2 && close(pipefd[1])) {
+	fprintf(stderr, "Unable to close pipe after dup");
+	sigparent(1);
+      }
+	
+      errno = 0;
+      if (euid != 0)
+	fprintf(stderr, "Not running as root - not trying to renice");
+      else if (nice(renice) == -1 && errno) perror("Unable to renice");
+
+      if (gid == egid)
+	fprintf(stderr, "Not running setgid, not dropping privileges\n");
+      else if (setegid(egid) || setgid(egid)) {
+	perror("Unable to drop privileges");
+	sigparent(1);
+      }
+
+      if (uid == euid)
+	fprintf(stderr, "Not running setuid, not dropping privileges\n");
+      else if (seteuid(euid) || setuid(euid)) {
+	perror("Unable to drop privileges");
+	sigparent(1);
+      }
+      
+      sprintf(buffer, "%i", nodes->node[i].port);
+      execl("@bindir@/dnode", "@bindir@/dnode", buffer, "0", NULL);
+
+      perror("Unable to run `/usr/local/bin/dnode'");
+      sigparent(1);
+    }
+  }
+}
+
+void mainloop(void) {
+  fd_set read, read_;
+  int active = 0;
+  FD_ZERO(&read);
+
+  sethandler(sigint, SIGINT, 0);
+  sethandler(sigterm, SIGTERM, 0);
+  sethandler(sigterm, SIGQUIT, 0);
+  
+  do {
+    body(&read);
+    read_ = read;
+    if ((active = select(nodes->n, &read_, NULL, NULL, NULL)) < 0)
+      errorxy("Select error");
+    lognodes(active, &read_);
+  } while (! term_ && ! int_);
+
+  killall();
+}
+
+const char* args(const int argc, const char* argv[]) {
+  const char** argvi = argv;
+  char* endptr;
+  int nnodes, i;
+  const char* pidfilename;
+
+  if (argc < 4)
+    errorxn("Arguments: renice-number pid-file port... - Params: %d", 
+	    argc-1);
+  
+  renice = strtol(*++argvi, &endptr, 0);
+  if (! **argvi || *endptr)
+    errorxn("Renice argument must be an integer: `%s'", argvi);
+
+  pidfilename = *++argvi;
+
+  nnodes = argc-3;
+  nodes = (struct nodes*) malloc(sizeof(struct nodes)
+				  +sizeof(struct node)*nnodes);
+  nodes->n = nnodes;
+  for (i=0; i<nnodes; i++) {
+    nodes->node[i].port = strtol(*++argvi, &endptr, 0);
+    if (! **argvi || *endptr)
+      errorxn("Port argument must be an integer: `%s'", *argvi);
+    nodes->node[i].pid = 0;
+    nodes->node[i].fd = -1;
+  }
+
+  return pidfilename;
+}
+
+void daemonize(const char* pidfilename) {
+  FILE* pidfile;
+
+  startlog();
+  if (daemon(0, 0)) errorxy("Unable to daemonize");
+  if (setpgrp()) errorxy("Unable to setpgrp");
+  if (! (pidfile = fopen(pidfilename, "w")))
+    errorxy("Unable to open %s", pidfilename);
+  if (fprintf(pidfile, "%i", getpid()) < 0)
+    errorxy("Unable to write to %s", pidfilename);
+  if (fclose(pidfile))
+    errorxy("Unable to close %s", pidfilename);
+}
+
+void setuids(void) {
+  uid = getuid();
+  euid = geteuid();
+  gid = getgid();
+  egid = getegid();
+
+  if (uid == euid)
+    warnxn("Not running setuid, uid = %i", uid);
+  else if (seteuid(uid))
+    errorxy("Not able to switch euid from %i to %i", euid, uid);
+
+  if (gid == egid)
+    warnxn("Not running setgid, gid = %i", gid);
+  else if (setegid(gid))
+    errorxy("Not able to switch egid from %i to %i", egid, gid);
+}    
+
+int main(const int argc, const char* argv[]) {
+  const char* pidfilename = args(argc, argv);
+  setuids();
+  daemonize(pidfilename);
+  mainloop();
+  
+  return 0;
+}
+  

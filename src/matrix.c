@@ -7,7 +7,7 @@
 
 static BOOLEAN xerbla_background = FALSE;
 static BOOLEAN xerbla_err = FALSE;
-void cblas_xerbla(int p, char *rout, char *form, ...) 
+void cblas_xerbla(int p, const char *rout, const char *form, ...) 
 {
   B* f;
   char* buf;

@@ -245,7 +245,14 @@ int main(int argc, char *argv[])
   B namef[FRAMEBYTES], *dictf, namestring[20];
 
 #if HAVE_SETSID
-  setsid(); // separate from current session - don't die if term closed.
+  // separate from current session - don't die if term closed.
+  if (argc < 3) setsid(); 
+  else if (argc == 3) {
+    char* endptr;
+    long ss = strtol(argv[2], &endptr, 10);
+    if (! argv[2] || *endptr) goto argerr;
+    if (ss) setsid();
+  }
 #endif
 
 #if ! X_DISPLAY_MISSING
@@ -269,7 +276,7 @@ int main(int argc, char *argv[])
   goto wearegood;
   
  argerr:
-  error(EXIT_FAILURE,errno,"usage is: dnode portnumber [&]\n");
+  error(EXIT_FAILURE,errno,"usage is: dnode portnumber [setsid=0/1]\n");
 
  wearegood:
 /*----------------- SIGNALS that we wish to handle */

@@ -1,12 +1,11 @@
 SUBDIRS = codegen
 
+edit = sed -e 's,[@]bindir[@],$(bindir),g' -e 's,[@]srcdir[@],$(srcdir),g'
+
 if ENABLE_SETUID
 
 nodist_dnode_nice_SOURCES = dnode-nice.c
 DNODENICEBIN = dnode-nice
-
-edit = sed \
-	-e 's,[@]bindir[@],$(bindir),g'
 
 dnode-nice.c: Makefile $(srcdir)/dnode-nice.c.in
 	rm -f $@ $@.tmp
@@ -23,6 +22,19 @@ uninstall-local:
 	-rm -f "$(DESTDIR)$(bindir)/dnode-nice$(EXEEXT)"
 
 endif ENABLE_SETUID
+
+if ENABLE_DAEMON
+
+nodist_dnode_daemon_SOURCES = dnode-daemon.c
+DNODEDAEMONBIN = dnode-daemon
+
+dnode-daemon.c: Makefile $(srcdir)/dnode-daemon.c.in
+	rm -f $@ $@.tmp
+	$(edit) "$(srcdir)/dnode-daemon.c.in" > $@.tmp
+	mv $@.tmp $@
+
+endif ENABLE_DAEMON
+
 
 if ENABLE_ATLAS
 ATLAS_ACTIVATE = -DATLAS_LIB
@@ -47,7 +59,7 @@ AM_CXXFLAGS = $(GCC_CXXFLAGS)
 AM_LDFLAGS = -no-undefined $(PTHREAD_LIBS) $(X_LDFLAGS)
 INCLUDE = @INCLTDL@
 
-bin_PROGRAMS = dvt dnode dgen
+bin_PROGRAMS = dvt dnode dgen $(DNODEDAEMONBIN)
 noinst_PROGRAMS = testwordorder $(DNODENICEBIN)
 
 if ENABLE_PLUGINS_SUPPORT
@@ -104,6 +116,7 @@ paths.h: paths.h.in Makefile
 	$(editpaths) $(srcdir)/$@.in >$@.tmp
 	mv $@.tmp $@
 
+.PHONY: gencode-all gencode
 gencode-all: gencode all
 gencode:
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS) gencode
