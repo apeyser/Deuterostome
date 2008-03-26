@@ -196,7 +196,7 @@ void body(fd_set* read_) {
 
   while ((pid = waitpid(-1, &status, WNOHANG))) {
     if (pid < 0) {
-      select (errno) {
+      switch (errno) {
 	case ECHILD: goto ENDWAIT;
 	case EINTR: return;
 	default:
