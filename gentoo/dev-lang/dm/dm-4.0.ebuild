@@ -92,6 +92,7 @@ src_compile() {
 	add_with x '' xclient X
 	add_myconf $(use_with emacs) $(use_enable setuid threads daemon)
 	
+	echo flags: "${myconf[@]}"
 	econf  "${myconf[@]}" || die "econf failed"
 	emake || die "emake failed"
 }
