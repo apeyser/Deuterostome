@@ -48,6 +48,7 @@ gentoo:
 
 DISTPKG = dm-4.0.tar.gz 
 .PHONY: rsync
+rsync:
 	$(MAKE) $(AM_MAKEFLAGS) distcheck
 	rsync $(DISTPKG) root@deli1:/usr/local/portage/distfiles/
 	@sudo rm /usr/portage/distfiles/$(DISTPKG)
