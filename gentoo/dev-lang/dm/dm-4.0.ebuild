@@ -4,7 +4,7 @@
 
 #EAPI="prefix"
 
-inherit eutils subversion elisp-common
+inherit eutils elisp-common
 
 # Short one-line description of this package.
 DESCRIPTION="The World Famous D-Machine"
@@ -46,9 +46,12 @@ sys-libs/glibc
 
 RDEPEND="${DEPEND}"
 
-#src_unpack() {
-#	subversion_src_unpack
-#}
+src_unpack() {
+    einfo "Fetching ${SRC_URI}"
+    rsync -a ${SRC_URI} ${DISTDIR}
+    einfo "Unpacking ${P}.tar.gz"
+    tar xzf ${DISTDIR}/${P}.tar.gz -C ${WORKDIR}
+}
 
 add_myconf() {
     myconf=("$myconf[@]" "$@")
