@@ -11,13 +11,15 @@ start() {
     ebegin "Starting ${SVCNAME}"
     einfo "For ports ${DNODED_PORTS[@]}"
     start-stop-daemon -S \
+	-p /var/run/dnoded.pid \
 	-x /usr/bin/dnode-daemon \
-	-- $DNODED_NICE /var/run/dnode-$i.pid ${DNODED_PORTS[@]}
+	-- $DNODED_NICE /var/run/dnode.pid ${DNODED_PORTS[@]}
     eend $?
 }
 
 stop() {
     ebegin "Stopping ${SVCNAME}"
-    start-stop-daemon -K -p /var/run/dnoded-$i.pid
+    start-stop-daemon -K \
+	-p /var/run/dnoded.pid
     eend $?
 }
