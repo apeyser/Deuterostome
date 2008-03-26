@@ -85,11 +85,13 @@ add_with() {
 
 src_compile() {
         local myconf
+	set -x
 	add_with atlas "`pkg-config --libs-only-L cblas`" atlas
 	add_with atlas-flags \
 	    "-I`pkg-config --variable=includedir cblas`/atlas" \
 	    atlas
 	add_with x '' xclient X
+	set +x
 	add_myconf $(use_with emacs) $(use_enable setuid threads daemon)
 	
 	econf  "${myconf[@]}" || die "econf failed"
