@@ -72,10 +72,10 @@ void lognode(struct node* node) {
 
 void lognodes(int active, fd_set* read) {
   int i = 0;
-  for (; active && i < nodes->n; ++i, --active) {
+  for (; active && i < nodes->n; ++i) {
     if (nodes->node[i].fd != -1 && FD_ISSET(nodes->node[i].fd, read)) {
       lognode(&nodes->node[i]);
-      break;
+      --active;
     }
   }
 }
@@ -146,7 +146,7 @@ void startlog(void) {
   daemonized = 1;
   openlog("dnode-daemon", LOG_DAEMON, LOG_CONS);
   if (close(0) || close(1) || close(2)) errorxy("Unable to close std streams");
-  if (setsid()) warnxy("Unable to setsid");
+  if (getpgrp() != getpid() && setsid() == -1) errorxy("Unable to setsid");
 }
 
 void errorx(char doerrno, int warn, const char* format, ...) {
@@ -271,7 +271,7 @@ void body(fd_set* read) {
       case -1: errorxy("Unable to fork");
       case 0: child(pipefd, nodes->node[i].port);
       default:
-	nodes->node[i].fd = pipefd[0];
+	FD_SET(nodes->node[i].fd = pipefd[0], read);
 	if (close(pipefd[1]))
 	  errorxy("Unable to close write end of pipe in parent");
     }
