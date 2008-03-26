@@ -233,11 +233,20 @@ void body(fd_set* read_) {
   FORK:
     if ((nodes->node[i].pid = fork()) == -1) errorxy("Unable to fork");
 
-    if ((nodes->node[i].pid = pid)) {
+    if ((pid = nodes->node[i].pid)) {
       sleep(CHILD_TIME);
-      while ((pidr = waitpid(nodes->node[i].pid, &status, WNOHANG)) != pid
-	     && pidr && ! int_);
-      if (pidr == -1 && ! int_) errorxy("Unable to wait");
+      while ((pidr = waitpid(pid, &status, WNOHANG)) != pid) {
+	if (pidr == -1) {
+	  switch (errno) {
+	    case EINTR: case ECHILD: break;
+	    default:
+	      nodes->node[i].pid = 0;
+	      errorxy("Unable to wait");
+	  }
+	  break;
+	}
+	if (int_) break;
+      }
 
       if (int_) {
 	killing = 1;
@@ -245,17 +254,28 @@ void body(fd_set* read_) {
 	killing = 0;
 
 	while (pidr != pid)
-	  if ((pidr = waitpid(pid, &status, 0)) == -1)
-	    errorxy("Unable to wait again for %i", nodes->node[i].port);
+	  if ((pidr = waitpid(pid, &status, 0)) == -1) {
+	    switch (errno) {
+	      case EINTR: case ECHILD: break;
+	      default:
+		nodes->node[i].pid = 0;
+		errorxy("Unable to wait again for %i", nodes->node[i].port);
+	    }
+	    break;
+	  }
 
 	killing = 1;
-	if (! WIFEXITED(status)) {
-	  errorxn("Child %i exited with status %i", pid, WEXITSTATUS(status));
-	  if (WIFSIGNALED(status))
-	    errorxn("Child %i exited due to signal %i", pid, WTERMSIG(status));
+	if (pidr != -1) {
+	  if (! WIFEXITED(status)) {
+	    errorxn("Child %i exited with status %i", pid, WEXITSTATUS(status));
+	    if (WIFSIGNALED(status))
+	      errorxn("Child %i exited due to signal %i", pid, WTERMSIG(status));
+	  }
 	}
+	lognode(&nodes->node[i]);
 	errorxy("Trying again for port %i", nodes->node[i].port);
 	killing = 0;
+	nodes->node[i].pid = 0;
 	goto FORK;
       }
 
