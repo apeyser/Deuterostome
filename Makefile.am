@@ -54,7 +54,7 @@ rsync: dist
 		|| sudo rm /usr/portage/distfiles/$(DISTPKG)
 
 .PHONY: ebuild
-ebuild: rsync
+ebuild: gentoo-setup
 	svn ci -m ''
 
 gencode-all: gencode all
