@@ -6,6 +6,8 @@
 #include "dm.h"
 #include "threads.h"
 
+#if DM_ENABLE_THREADS
+
 P op_makethreads(void);
 P op_threads(void);
 
@@ -292,3 +294,5 @@ P op_makethreads(void) {
     FREEopds = o_1;
   return ret;
 }
+
+#endif
