@@ -170,8 +170,8 @@ void errorx(char doerrno, int warn, const char* format, ...) {
   }
   else {
     char* pri = warn ? "Warning" : "Error";
-    if (doerrno) fprintf(stderr, "%s - %s: %s", pri, buffer, strerror(errno));
-    else fprintf(stderr, "%s - %s", pri, buffer);
+    if (doerrno) fprintf(stderr, "%s - %s: %s\n", pri, buffer, strerror(errno));
+    else fprintf(stderr, "%s - %s\n", pri, buffer);
   }
 
   if (! warn) {
@@ -264,13 +264,13 @@ void body(fd_set* read_) {
 	sigparent(0);
       }
       if (pipefd[1] != 1 && pipefd[1] != 2 && close(pipefd[1])) {
-	fprintf(stderr, "Unable to close pipe after dup");
+	fprintf(stderr, "Unable to close pipe after dup\n");
 	sigparent(1);
       }
 	
       errno = 0;
       if (euid != 0)
-	fprintf(stderr, "Not running as root - not trying to renice");
+	fprintf(stderr, "Not running as root - not trying to renice\n");
       else if (nice(renice) == -1 && errno) perror("Unable to renice");
 
       if (gid == egid)
@@ -355,7 +355,7 @@ void daemonize(const char* pidfilename) {
   if (setpgrp()) errorxy("Unable to setpgrp");
   if (! (pidfile = fopen(pidfilename, "w")))
     errorxy("Unable to open %s", pidfilename);
-  if (fprintf(pidfile, "%i", getpid()) < 0)
+  if (fprintf(pidfile, "%i\n", getpid()) < 0)
     errorxy("Unable to write to %s", pidfilename);
   if (fclose(pidfile))
     errorxy("Unable to close %s", pidfilename);
