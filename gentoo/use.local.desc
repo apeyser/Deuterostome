@@ -3,4 +3,4 @@ dev-lang/dm:daemon - enable dnode daemon
 dev-lang/dm:formats - enable formats like ps2pdf
 dev-lang/dm:setuid - enable setuid re-nice
 dev-lang/dm:xclient - enable minimal Xorg interface
-dev-lang/dm:xserver - enable maximal Xorg interface
+dev-lang/dm:X - enable maximal Xorg interface

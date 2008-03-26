@@ -27,7 +27,7 @@ SLOT="0"
 
 KEYWORDS="~x86 ~amd64 ~ppc"
 
-IUSE="daemon emacs atlas setuid threads formats xclient xserver"
+IUSE="daemon emacs atlas setuid threads formats xclient X"
 
 # A space delimited list of portage features to restrict. man 5 ebuild
 # for details.  Usually not needed.
@@ -37,11 +37,11 @@ DEPEND="
 emacs? (virtual/emacs)
 formats? (app-text/a2ps)
 formats? (virtual/ghostscript)
-xserver? (app-text/xdvik)
-xserver? (x11-terms/xterm)
+X? (app-text/xdvik)
+X? (x11-terms/xterm)
+X? (x11-base/xorg-server)
 atlas? (sci-libs/blas-atlas)
 xclient? (x11-libs/libX11)
-xserver? (x11-base/xorg-server)
 sys-libs/glibc
 "
 
@@ -89,7 +89,7 @@ src_compile() {
 	add_with atlas-flags \
 	    "-I`pkg-config --variable=includedir cblas`/atlas" \
 	    atlas
-	add_with x '' xclient xserver xterm
+	add_with x '' xclient X
 	add_myconf $(use_with emacs) $(use_enable setuid threads daemon)
 	
 	econf  "${myconf[@]}" || die "econf failed"
