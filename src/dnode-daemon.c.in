@@ -59,15 +59,19 @@ void sethandler(void (*handler)(int), int sig, int flag) {
 
 void lognode(struct node* node) {
   static char buffer[1024];
-  ssize_t s;
-  while ((s = read(node->fd, buffer, 1023) > 0)) {
+  ssize_t s, s_;
+  do {
+    s = 0;
+    while ((s_ = read(node->fd, buffer + s, 1023 - s)) > 0) s += s_;
+
+    if (s_ < 0) {
+      if (errno == EINTR) return;
+      errorxy("Error reading from child %i", node->pid);
+    }
+
     buffer[s] = '\0';
     warnxn("Message from %i: %s", node->pid, buffer);
-  }
-  if (s < 0) {
-    if (errno == EINTR) return;
-    errorxy("Error reading from child %i", node->pid);
-  }
+  } while (s == 1023);
 }
 
 void lognodes(int active, fd_set* read) {
