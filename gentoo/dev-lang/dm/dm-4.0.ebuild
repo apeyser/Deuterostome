@@ -106,6 +106,8 @@ src_compile() {
 	    $(use_enable setuid) \
 	    $(use_enable threads) \
 	    $(use_enable daemon)
+
+	add_myconf REAL_TMP=/tmp
 	
 	econf  "${myconf[@]}" || die "econf failed"
 	emake || die "emake failed"
