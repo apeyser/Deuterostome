@@ -252,7 +252,7 @@ void child(int pipefd[2], int port) {
   }
 
   errno = 0;
-  if (euid != 0)
+  if (uid != 0)
     fprintf(stderr, "Not running as root - not trying to renice\n");
   else if (nice(renice) == -1 && errno) perror("Unable to renice");
 
@@ -403,7 +403,7 @@ void setuids(void) {
     warnxn("Not running setgid, gid = %i", gid);
   else if (setegid(gid))
     errorxy("Not able to switch egid from %i to %i", egid, gid);
-}    
+}
 
 int main(const int argc, const char* argv[]) {
   const char* pidfilename = args(argc, argv);
