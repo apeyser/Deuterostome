@@ -62,7 +62,9 @@ void lognode(struct node* node) {
   ssize_t s, s_;
   do {
     s = 0;
+    syslog(LOG_WARNING, "Reading from pid %i", node->pid);
     while ((s_ = read(node->fd, buffer + s, 1023 - s)) > 0) s += s_;
+    syslog(LOG_WARNING, "Read %i chars", s);
 
     if (s_ < 0) {
       if (errno == EINTR) return;
@@ -264,8 +266,6 @@ void child(int pipefd[2], int port) {
   sprintf(buffer, "%i", port);
   fprintf(stderr, "stderr - Starting: `%s' `%s' `%s'\n", 
 	  "@bindir@/dnode", buffer, "0");
-  syslog(LOG_WARNING, "syslog - Starting: `%s' `%s' `%s'", 
-	 "@bindir@/dnode", buffer, "0");
 
   execl("@bindir@/dnode", "@bindir@/dnode", buffer, "0", NULL);
   perror("Unable to run `/usr/local/bin/dnode'");
