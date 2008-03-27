@@ -58,7 +58,7 @@ void sethandler(void (*handler)(int), int sig, int flag) {
 }
 
 void lognode(struct node* node) {
-  char buffer[1024];
+  static char buffer[1024];
   ssize_t s;
   while ((s = read(node->fd, buffer, sizeof(buffer)-1) > 0)) {
     buffer[s] = '\0';
@@ -155,7 +155,7 @@ void startlog(void) {
 }
 
 void errorx(char doerrno, int warn, const char* format, ...) {
-  char buffer[1024];
+  static char buffer[1024];
   va_list ap;
   va_start(ap, format);
   vsnprintf(buffer, sizeof(buffer), format, ap);
@@ -219,7 +219,7 @@ gid_t gid;
 gid_t egid;
 
 void child(int pipefd[2], int port) {
-  char buffer[1024];
+  static char buffer[1024];
   if (close(pipefd[0])) {
     syslog(LOG_ERR, "Unable to close read end of pipe: %m");
     exit(1);
@@ -260,7 +260,7 @@ void child(int pipefd[2], int port) {
   sprintf(buffer, "%i", port);
   fprintf(stderr, "stderr - Starting: `%s' `%s' `%s'\n", 
 	  "@bindir@/dnode", buffer, "0");
-  syslog(LOG_WARNING, "syslog - Starting: `%s' `%s' `%s'\n", 
+  syslog(LOG_WARNING, "syslog - Starting: `%s' `%s' `%s'", 
 	 "@bindir@/dnode", buffer, "0");
 
   execl("@bindir@/dnode", "@bindir@/dnode", buffer, "0", NULL);
@@ -365,7 +365,7 @@ void daemonize(const char* pidfilename) {
     while ((pidr = waitpid(pid, NULL, 0)) != pid && ! int_)
       if (pidr == -1 && errno != EINTR) errorxy("Unable to wait for daemon");
       
-    exit(pidr ? 1 : 0);
+    exit(int_ ? 0 : 1);
   }
   
   startlog();
