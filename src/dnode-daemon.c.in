@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <stdarg.h>
 #include <string.h>
+#include <fcntl.h>
 
 struct node {
   pid_t pid;
@@ -67,8 +68,14 @@ void lognode(struct node* node) {
     syslog(LOG_WARNING, "Read %i chars", s);
 
     if (s_ < 0) {
-      if (errno == EINTR) return;
-      errorxy("Error reading from child %i", node->pid);
+      switch (errno) {
+	case EINTR: case EAGAIN:
+	  buffer[s] = '\0';
+	  warnxn("Message from %s: %s", node->pid, buffer);
+	  return;
+	default:
+	  errorxy("Error reading from child %i", node->pid);
+      }
     }
 
     buffer[s] = '\0';
@@ -288,6 +295,8 @@ void body(fd_set* read) {
 	FD_SET(nodes->node[i].fd = pipefd[0], read);
 	if (close(pipefd[1]))
 	  errorxy("Unable to close write end of pipe in parent");
+	if (fcntl(pipefd[0], F_SETFL, O_NONBLOCK) == -1)
+	  errorxy("Unable to set read end of pipe nonblocking");
     }
   }
 }
