@@ -63,9 +63,7 @@ void lognode(struct node* node) {
   ssize_t s, s_;
   do {
     s = 0;
-    syslog(LOG_WARNING, "Reading from pid %i", node->pid);
     while ((s_ = read(node->fd, buffer + s, 1023 - s)) > 0) s += s_;
-    syslog(LOG_WARNING, "Read %i chars", s);
 
     if (s_ < 0) {
       switch (errno) {

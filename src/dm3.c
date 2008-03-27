@@ -147,6 +147,7 @@ P make_unix_socket(UW port) {
     if (stat(sock_dir, &buf)) {
       if ((errno != ENOTDIR && errno != ENOENT)
           || mkdir(sock_dir, ~(mode_t) 0)) {
+	fprintf(stderr, "Unable to mkdir: %s\n", sock_dir);
         free(sock_dir);
         umask(mask);
         return -1;
@@ -163,6 +164,7 @@ P make_unix_socket(UW port) {
   free(sock_dir);
 
   if (! stat(name.sun_path, &buf) && unlink(name.sun_path)) {
+      fprintf(stderr, "Unable to unlink: %s\n", name.sun_path);
       umask(mask);
       return -1;
   }
@@ -170,6 +172,7 @@ P make_unix_socket(UW port) {
   if (bind(sock, (struct sockaddr *) &name, 
            sizeof(name.sun_family)+strlen(name.sun_path)+1)
       < 0) {
+      fprintf(stderr, "Unable to bind: %s\n", name.sun_path);
       umask(mask);
       return -1;
   }
