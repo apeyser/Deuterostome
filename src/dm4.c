@@ -281,7 +281,7 @@ P op_cleardict(void)
   n /type_name | array
 
 makes an array to hold an array of n numerals of specifed type (one
-of b, w, l, s, d, x, p); returns new internal object.
+of b, w, l=32bit, x=64bit, s, d); returns new internal object.
 */
 
 P op_array(void)

@@ -50,7 +50,8 @@ White space         80    00 no attention
 Numeral             40    00 no attention (digit or sign)
                           10 float characteristic (. or e/E)
                           20 'undefined' specifier (*)
-                          3x type specifier (x=0-5 for b/w/l/s/d/m)
+                          3x type specifier (x=0-5 for b/w/l=32/x=64/s/d)
+			     x is the offset into TYPEBYTES in dmnum.h
                           40 octal digit
 Slash               10    00 /
                           01 \
