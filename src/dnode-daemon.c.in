@@ -83,7 +83,7 @@ static void lognode(struct node* node) {
     t.tv_sec = READ_TIME;
     t.tv_usec = 0;
     while ((sel = select(1, &readf, NULL, NULL, &t)) > 0) {
-      if ((s_ = read(node->fd, buffer + s, sizeof(buffer-1) - s)) < 0) 
+      if ((s_ = read(node->fd, buffer + s, sizeof(buffer) - 1 - s)) < 0) 
 	break;
       warnxn("Just read: %i", s_);
       s += s_;
@@ -121,7 +121,7 @@ static void lognode(struct node* node) {
 	warnxn("Cont message from %i: %s", node->oldpid, last);
       warnxn("End message from %i: %s", node->oldpid, last);
     }
-  } while (s == sizeof(buffer)-1);
+  } while (s == sizeof(buffer) - 1);
 }
 
 static void lognodes(int active, fd_set* read) {
