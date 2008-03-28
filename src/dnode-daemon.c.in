@@ -329,14 +329,18 @@ static void dnode(int reader, int writer, struct node* node) {
 typedef void (*sibfunc)(int reader, int writer, struct node* node);
 
 static pid_t forksib(const char* pname, sibfunc sibf, 
-		     int reader, int writer, struct node* node) {
+		     int reader, int writer, 
+		     struct node* node, int* pid) {
   pid_t sib;
   switch ((sib = fork())) {
     case -1: fataly("Daemon unable to fork");
     case 0: 
       dokillall = 0; 
+      *pid = getpid();
       SETPROCESSNAME(pname);
       sibf(reader, writer, node);
+    default:
+      *pid = pid;
   }
   return sib;
 }
@@ -349,10 +353,10 @@ static void createlive(void) {
     if (nodes->node[i].pid || nodes->node[i].io) continue;
     
     if (pipe(pipefd)) fataly("Dameon unable to create pipe");
-    nodes->node[i].io = forksib("dnode-io", io, pipefd[0], pipefd[1], 
-				&nodes->node[i]);
-    nodes->node[i].pid = forksib("dnode-init", dnode, pipefd[0], pipefd[1],
-				 &nodes->node[i]);
+    forksib("dnode-init", dnode, pipefd[0], pipefd[1],
+	    &nodes->node[i], &nodes->node[i].pid);
+    forksib("dnode-io", io, pipefd[0], pipefd[1], 
+	    &nodes->node[i], &nodes->node[i].io);
     if (close(pipefd[0])) fataly("Daemon unable to close reader in daemon");
     if (close(pipefd[1])) fataly("Daemon unable to close writer in daemon");
   }
