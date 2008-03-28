@@ -72,8 +72,7 @@ static void lognode(struct node* node) {
   ssize_t s, s_;
   char* next;
   char* last;
-  static struct timeval t_ = {READ_TIME, 0};
-  struct timeval t = t_;
+  struct timeval t;
   fd_set readf;
   FD_ZERO(&readf);
 
@@ -81,11 +80,16 @@ static void lognode(struct node* node) {
     int sel;
     s = 0;
     FD_SET(node->fd, &readf);
+    t.tv_sec = READ;
+    t.tv_usec = 0;
     while ((sel = select(1, &readf, NULL, NULL, &t)) > 0) {
       if ((s_ = read(node->fd, buffer + s, sizeof(buffer-1) - s)) <= 0) break;
       s += s_;
       t = t_;
     }
+    warnxn("Characters read=%i,sel=%i,sec=%i,s_=%i", 
+	   s, sel, t.tv_sec, s_);
+
     if (sel < 0) {
       if (errno == EINTR) s_ = -1;
       else
@@ -104,7 +108,6 @@ static void lognode(struct node* node) {
       }
     }
 
-    warnxn("Characters read: %i", s);
     buffer[s] = '\0';
     last = buffer;
     if (! (next = splitstring(&last))) {
