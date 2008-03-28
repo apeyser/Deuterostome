@@ -27,7 +27,7 @@ SLOT="0"
 
 KEYWORDS="~x86 ~amd64 ~ppc"
 
-IUSE="daemon emacs atlas setuid threads formats xclient X"
+IUSE="daemon emacs atlas setuid threads formats xclient X memory"
 
 # A space delimited list of portage features to restrict. man 5 ebuild
 # for details.  Usually not needed.
@@ -105,10 +105,21 @@ src_compile() {
 	add_myconf \
 	    $(use_with emacs) \
 	    $(use_enable setuid) \
-	    $(use_enable threads) \
 	    $(use_enable daemon)
 
 	add_myconf REAL_TMP=/tmp
+
+	if use threads; then
+	    local threads=$(grep -E -e '^processor[[:space:]]+:' /proc/cpuinfo | wc -l)
+	    add_myconf --enable-threads=${threads}
+	else
+	    add_myconf --disable-threads
+	fi
+
+	if use memory; then
+	    local memory=$(grep -E -e '^MemTotal:' /proc/meminfo | sed -re 's/.*:[[:space:]]*//g' -e 's/[^0-9]*$//g')
+	    add_myconf MAX_MEM_SIZE=$((memory/1024))
+	fi
 	
 	econf  "${myconf[@]}" || die "econf failed"
 	emake || die "emake failed"

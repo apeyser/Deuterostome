@@ -4,3 +4,5 @@ dev-lang/dm:formats - enable formats like ps2pdf
 dev-lang/dm:setuid - enable setuid re-nice
 dev-lang/dm:xclient - enable minimal Xorg interface
 dev-lang/dm:X - enable maximal Xorg interface
+dev-lang/dm:memory - set max memory for vm to approx. build-time physical memory
+
