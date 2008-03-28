@@ -20,9 +20,8 @@
 
 struct node {
   pid_t pid;
-  pid_t oldpid;
+  pid_t io;
   int port;
-  int fd;
 };
 
 struct nodes {
@@ -31,15 +30,17 @@ struct nodes {
 } *nodes = NULL;
 
 #define QUIT_TIME 20
-#define READ_TIME 2
+#define DAEMON_TIME 10
 
 static long renice;
 
-#define errorxn(...) errorx(0, 0, __VA_ARGS__)
-#define errorxy(...) errorx(1, 0, __VA_ARGS__)
-#define warnxn(...)  errorx(0, 1, __VA_ARGS__)
-#define warnxy(...)  errorx(1, 1, __VA_ARGS__)
-static void errorx(char doerrno, int warn, const char* format, ...);
+#define fataln(...)  errorx(0, 0, 1, __VA_ARGS__)
+#define fataly(...)  errorx(1, 0, 1, __VA_ARGS__)
+#define errorxn(...) errorx(0, 0, 0, __VA_ARGS__)
+#define errorxy(...) errorx(1, 0, 0, __VA_ARGS__)
+#define warnxn(...)  errorx(0, 1, 0, __VA_ARGS__)
+#define warnxy(...)  errorx(1, 1, 0, __VA_ARGS__)
+static void errorx(char doerrno, char warn, char die, const char* format, ...);
 
 static char int_ = 0;
 void sigint(int sig __attribute__((__unused__))) {int_ = 1;}
@@ -57,7 +58,7 @@ static void sethandler(void (*handler)(int), int sig, int flag) {
   sa.sa_flags = flag;
   sa.sa_mask = mask;
   if (sigaction(sig, &sa, NULL) == -1)
-    errorxy("Unable to setup signal handler for sig: %i", sig);
+    fataly("Unable to setup signal handler for sig: %i", sig);
 }
 
 static char* splitstring(char** string) {
@@ -74,142 +75,94 @@ static char* splitstring(char** string) {
   return *next ? next : NULL;
 }
 
-static void lognode(struct node* node) {
-  static char buffer[1024];
-  ssize_t s, s_;
-  char* next;
-  char* last;
-  struct timeval t;
-  fd_set readf;
-  FD_ZERO(&readf);
-
-  if (node->fd == -1) return;
-
-  do {
-    int sel;
-    s = 0;
-    FD_SET(node->fd, &readf);
-    t.tv_sec = READ_TIME;
-    t.tv_usec = 0;
-    while ((sel = select(1, &readf, NULL, NULL, &t)) > 0) {
-      if ((s_ = read(node->fd, buffer + s, sizeof(buffer) - 1 - s)) <= 0) 
-	break;
-      warnxn("Just read: %i", s_);
-      s += s_;
-    }
-    if (sel && ! s) {
-      if (close(node->fd))
-	warnxy("Pipe dead for child %i, fd %i", node->oldpid, node->fd);
-      node->fd = -1;
-      return;
-    }
-    warnxn("Characters read=%i,sel=%i,sec=%i,s_=%i", 
-	   s, sel, t.tv_sec, s_);
-
-    if (sel < 0) {
-      if (errno == EINTR) s_ = -1;
-      else
-	errorxy("Unable to select on child %i, fd %i", node->oldpid, node->fd);
-    }
-
-    if (! s) continue;
-    else if (s_ < 0) {
-      switch (errno) {
-	case EINTR: case EAGAIN:
-	  buffer[s] = '\0';
-	  warnxn("Intr Message from %i: %s", node->oldpid, buffer);
-	  return;
-	default:
-	  errorxy("Error reading from child %i", node->oldpid);
-      }
-    }
-
-    buffer[s] = '\0';
-    last = buffer;
-    if (! (next = splitstring(&last))) {
-      if (*last) warnxn("Message from %i: %s", node->oldpid, last);
-      else continue;
-    }
-    else {
-      warnxn("Begin message from %i: %s", node->oldpid, last);
-      for (last = next; (next = splitstring(&last)); last = next)
-	warnxn("Cont message from %i: %s", node->oldpid, last);
-      warnxn("End message from %i: %s", node->oldpid, last);
-    }
-  } while (s == sizeof(buffer) - 1);
+static void handlestatus(const char* type, int status, pid_t pid) {
+  if (WIFEXITED(status))
+    warnxn("Child %s %i exited normally", type, pid);
+  else {
+    errorxn("Child %s %i exited with status %i", 
+	    type, pid, WEXITSTATUS(status));
+    if (WIFSIGNALED(status))
+      errorxn("Child %s %i exited due to signal %i", 
+	      type, pid, WTERMSIG(status));
+  }
 }
 
-static void lognodes(int active, fd_set* read) {
-  int i = 0;
-  for (; active && i < nodes->n; ++i) {
-    if (nodes->node[i].fd != -1 && FD_ISSET(nodes->node[i].fd, read)) {
-      lognode(&nodes->node[i]);
-      --active;
+static void killnode(struct node* node) {
+  if (! node->pid) return;
+  
+  if (! kill(node->pid, SIGINT)) {
+    if (errno != ESRCH) fataly("Unable to send SIGINT to %i", node->pid);
+    else node->pid = 0;
+  }
+}
+
+static void waitdead(void) {
+  pid_t pid;
+  int i;
+  int status;
+
+  if ((pid = wait(&status)) < 0) {
+    if (errno == EINTR) return;
+    fataly("Daemon unable to wait");
+  }
+
+  for (i = 0; i < nodes->n; i++) {
+    if (nodes->node[i].pid == pid) {
+      nodes->node[i].pid = 0;
+      handlestatus("dnode", status, pid);
+      return;
+    }
+
+    if (nodes->node[i].io == pid) {
+      nodes->node[i].io = 0;
+      handlestatus("io", status, pid);
+      killnode(&nodes->node[i]);
+      return;
     }
   }
 }
 
 static char killing = 0;
 static void killall(void) {
-  int status;
-  pid_t pid;
   int i;
-  int n;
-  
   if (! nodes) return;
 
   killing = 1;
-  alarm_ = 0;
   sethandler(SIG_IGN, SIGINT, 0);
+  sethandler(SIG_IGN, SIGQUIT, 0);
+  sethandler(SIG_IGN, SIGTERM, 0);
+
+  for (int i = 0; i < nodes->n; i++) killnode(&nodes->node[i]);
+
+  alarm_ = 0;
   sethandler(sigalarm, SIGALRM, SA_RESETHAND);
   alarm(QUIT_TIME);
 
-  if (kill(0, SIGINT)) {
-    errorxy("Error calling kill SIGINT on children");
-    exit(1);
-  }
-  
-  n = nodes->n;
-  while (n && ! alarm_) {
-    if ((pid = wait(&status)) < 0) {
-      errorxy("Error waiting for children");
-      exit(1);
-    }
-
-    for (i = 0; i < nodes->n; ++i) 
-      if (nodes->node[i].pid == pid || nodes->node[i].oldpid == pid) {
-	--n;
-	nodes->node[i].pid = 0;
-	if (! WIFEXITED(status)) {
-	  errorxn("Child %i exited with status %i", pid, WEXITSTATUS(status));
-	  if (WIFSIGNALED(status))
-	    errorxn("Child %i exited due to signal %i", pid, WTERMSIG(status));
-	}
-	break;
-      }
-  }
-
+  do {
+    waitdead();
+    for (i = 0; 
+	 i < nodes->n && (nodes->node[i].pid || nodes->node[i].io); 
+	 i++);
+  } while (i < nodes->n && ! alarm);
   sethandler(SIG_IGN, SIGALRM, 0);
+  alarm(0);
   sethandler(SIG_IGN, SIGCHLD, SA_NOCLDWAIT);
 
-  for (i = 0; i < nodes->n; ++i)
-    if (nodes->node[i].fd != -1) {
-      lognode(&nodes->node[i]);
-      if (close(nodes->node[i].fd))
-	warnxn("Unable to close child %i pipe", nodes->node[i].oldpid);
-      nodes->node[i].fd = -1;
-    }
-
-  if (n) {
-    for (i = 0; i < nodes->n; ++i) {
-      if (! nodes->node[i].pid) continue;
-      if (kill(nodes->node[i].pid, SIGKILL))
-	warnxy("Unable to send SIGKILL to child %i", nodes->node[i].pid);
-      nodes->node[i].pid = 0;
-    }
+  if (i < nodes->n) {
+    for (i = 0; i < nodes->n; i++)
+      if (nodes->node[i].pid 
+	  && kill(nodes->node[i].pid, SIGKILL)
+	  && errno != ESRCH) 
+	errorxy("Unable to send SIGKILL to child %i", nodes->node[i].pid);
+    for (i = 0; i < nodes->n; i++)
+      if (nodes->node[i].io 
+	  && kill(nodes->node[i].io, SIGKILL)
+	  && errno != ESRCH) 
+	errorxy("Unable to send SIGKILL to child %i", nodes->node[i].pid);
+    exit(1);
   }
-  killing = 0;
-  sethandler(sigint, SIGINT, 0);
+
+  exit(0);
 }
 
 static char daemonized = 0 ;
@@ -219,79 +172,86 @@ static void startlog(void) {
   if (close(STDIN_FILENO) 
       || close(STDOUT_FILENO) 
       || close(STDERR_FILENO))
-    errorxy("Unable to close std streams");
+    fataly("Unable to close std streams");
 
   if (getpgrp() != getpid() && setsid() == -1) 
-    errorxy("Unable to setsid");
+    fataly("Unable to setsid");
 }
 
-static void errorx(char doerrno, int warn, const char* format, ...) {
+static char dokillall = 1;
+static void errorx(char doerrno, char warn, char die, const char* format, ...) {
   int s;
   static char buffer[2048];
+  char* type = warn ? "Warning" : "Error";
   va_list ap;
   va_start(ap, format);
   s = vsnprintf(buffer, sizeof(buffer), format, ap);
   va_end(ap);
   if (s < 0) {
     syslog(LOG_ERR, "Unable to init errorx buffer");
-    if (!killing) exit(1);
+    if (!killing && die) exit(1);
   }
   if (s >= sizeof(buffer)) {
     errorxn("errorx buffer overflow");
-    if (!killing) exit(1);
+    if (!killing && die) exit(1);
   }
 
   if (daemonized) {
     int pri = warn ? LOG_WARNING : LOG_ERR;
-    if (doerrno) syslog(pri, "%s: %m", buffer);
-    else syslog(pri, "%s", buffer);
+    if (doerrno) syslog(pri, "%s - %s: %m", type, buffer);
+    else syslog(pri, "%s - %s", type, buffer);
   }
   else {
-    char* pri = warn ? "Warning" : "Error";
     if (doerrno) {
-      if (fprintf(stderr, "%s - %s: %s\n", pri, buffer, strerror(errno)) < 0) {
+      if (fprintf(stderr, "%s - %s: %s\n", type, buffer, strerror(errno)) < 0) {
 	perror("Unable to fprintf errorx");
-	if (! killing) exit(1);
+	if (! killing && die) exit(1);
       }
-    } else if (fprintf(stderr, "%s - %s\n", pri, buffer) < 0) {
+    } else if (fprintf(stderr, "%s - %s\n", type, buffer) < 0) {
       perror("Unable to fprintf errorx");
-      if (! killing) exit(1);
+      if (! killing && die) exit(1);
     }
   }
 
-  if (! warn && ! killing) {
-    killall();
+  if (! killing && die) {
+    if (dokillall) killall();
     exit(1);
   }
 }
 
-static void cleanupdead(void) {
-  pid_t pid;
-  int i, status;
+static void io(int reader, int writer, struct node* node) {
+  static char buffer[1024];
+  ssize_t s;
+  char* next;
+  char* last;
 
-  while ((pid = waitpid(-1, &status, WNOHANG)) > 0);
-  if (! pid) return;
-  if (pid < 0) switch (errno) {
-    case ECHILD: case EINTR: return;
-    default:errorxy("Error calling waitpid");
-  }
+  if (close(writer))
+    fataly("io %i unable to close writer %i for child %i", 
+	     node->io, writer, node->pid);
 
-  for (i = 0; i < nodes->n; ++i)
-    if (pid == nodes->node[i].pid || pid == nodes->node[i].oldpid) {
-      if (! WIFEXITED(status)) {
-	killing = 1;
-	errorxn("Child %i exited with status %i", pid, WEXITSTATUS(status));
-	if (WIFSIGNALED(status))
-	  errorxn("Child %i exited due to signal %i", pid, WTERMSIG(status));
-	killing = 0;
-      }
-
-      lognode(&nodes->node[i]);
-      if (nodes->node[i].fd != -1 && close(nodes->node[i].fd))
-	warnxn("Unable to close read end of pipe for child %i", pid);
-      nodes->node[i].fd = -1;
-      nodes->node[i].pid = 0;
+  while ((s = read(reader, buffer, sizeof(buffer) - 1)) > 0) {
+    buffer[s] = '\0';
+    last = buffer;
+    if (! (next = splitstring(&last))) {
+      if (*last) warnxn("Message from %i: %s", node->pid, last);
     }
+    else {
+      warnxn("Begin message from %i: %s", node->pid, last);
+      for (last = next; (next = splitstring(&last)); last = next)
+	warnxn("Cont message from %i: %s", node->pid, last);
+      warnxn("End message from %i: %s", node->pid, last);
+    }
+  };
+
+  if (s < 0 && ! term_)
+    fataly("io %i reading error for child %i, fd %i", 
+	     node->io, node->pid, reader);
+
+  if (close(reader))
+    fataly("io %i pipe dead for child %i, fd %i", 
+	   node->io, node->pid, reader);
+  
+  exit(0);
 }
 
 static uid_t uid;
@@ -299,111 +259,85 @@ static uid_t euid;
 static gid_t gid;
 static gid_t egid;
 
-static void child(int pipefd[2], int port) {
+static void dnode(int reader, int writer, struct node* node) {
   static char buffer[1024];
   int s;
 
-  if (close(pipefd[0])) {
-    syslog(LOG_ERR, "Unable to close read end of pipe: %m");
-    exit(1);
-  }
-  if (dup2(pipefd[1], STDOUT_FILENO) < 0 
-      || dup2(pipefd[1], STDERR_FILENO) < 0) {
-    syslog(LOG_ERR, "Unable to dup stdout and stderr to pid: %m");
-    exit(1);
-  }
+  if (close(reader))
+    fataly("Child %i unable to close read end of pipe %i: %m",
+	     node->pid, reader);
+  if (dup2(writer, STDOUT_FILENO) < 0 || dup2(writer, STDERR_FILENO) < 0)
+    fataly("Child %i unable to dup from %i to stdout and stderr to: %m",
+	     node->pid, writer);
   
-  
-  if (pipefd[1] != STDOUT_FILENO 
-      && pipefd[1] != STDERR_FILENO
-      && close(pipefd[1])) {
-    fprintf(stderr, "Unable to close write end of pipe after dup\n");
-    exit(1);
-  }
+  daemonized = 0;
+  if (writer != STDOUT_FILENO 
+      && writer != STDERR_FILENO
+      && close(writer))
+    fataly("Child %i unable to close write end of pipe %i after dup",
+	     node->pid, writer);
 
   errno = 0;
-  if (uid != 0)
-    fprintf(stderr, "Not running as root - not trying to renice\n");
-  else if (nice(renice) == -1 && errno) perror("Unable to renice");
+  if (uid != 0) 
+    warnxn("Child %i not running as root - not trying to renice", node->pid);
+  else if (nice(renice) == -1 && errno) 
+    warnxy("Child %i unable to renice", node->pid);
 
   if (gid == egid)
-    fprintf(stderr, "Not running setgid, not dropping privileges\n");
-  else if (setegid(egid) || setgid(egid)) {
-    perror("Unable to drop privileges");
-    exit(1);
-  }
+    warnxn("Child %i not running setgid, not dropping privileges", node->pid);
+  else if (setegid(egid) || setgid(egid))
+    fataly("Child %i unable to drop privileges", node->pid);
 
   if (uid == euid)
-    fprintf(stderr, "Not running setuid, not dropping privileges\n");
-  else if (seteuid(euid) || setuid(euid)) {
-    perror("Unable to drop privileges");
-    exit(1);
-  }
+    warnxn("Child %i not running setuid, not dropping privileges", node->pid);
+  else if (seteuid(euid) || setuid(euid))
+    fataly("Child %i unable to drop privileges", node->pid);
       
-  if ((s = snprintf(buffer, sizeof(buffer), "%i", port)) < 1) {
-    perror("Unable to sprintf buffer");
-    exit(1);
-  }
-  if (s >= sizeof(buffer)) {
-    fprintf(stderr, "Holy shit - port doesn't fit in %i characters\n", s);
-    exit(1);
-  }
-  
-  fprintf(stderr, "Starting: `%s' `%s' `%s'\n", 
-	  "@bindir@/dnode", buffer, "0");
+  if ((s = snprintf(buffer, sizeof(buffer), "%i", node->port)) < 1)
+    fataly("Child %i unable to sprintf buffer");
+  if (s >= sizeof(buffer))
+    fataln("Child %i holy shit - port doesn't fit in %i characters", 
+	     node->pid, s);
+  warnxn("Starting `%s' `%s' `%s'", 
+	 "@bindir@/dnode", buffer, "0");
 
   execl("@bindir@/dnode", "@bindir@/dnode", buffer, "0", NULL);
-  perror("Unable to run `/usr/local/bin/dnode'");
-  exit(1);
+  fataly("Child %i unable to run `@bindir@/dnode'", node->pid);
 }
 
-static void body(void) {
+typedef void (*sibfunc)(int reader, int writer, struct node* node);
+
+static pid_t forksib(sibfunc sibf, int reader, int writer, struct node* node) {
+  pid_t sib;
+  switch ((sib = fork())) {
+    case -1: fataly("Daemon unable to fork");
+    case 0: dokillall = 0; sibf(reader, writer, node);
+  }
+  return sib;
+}
+
+static void createlive(void) {
   int i;
   int pipefd[2];
 
   for (i=0; i<nodes->n; i++) {
-    if (nodes->node[i].pid) continue;
+    if (nodes->node[i].pid || nodes->node[i].io) continue;
     
-    if (pipe(pipefd)) errorxy("Error creating pipe");
-
-    switch ((nodes->node[i].oldpid = nodes->node[i].pid = fork())) {
-      case -1: errorxy("Unable to fork");
-      case 0: child(pipefd, nodes->node[i].port);
-      default:
-	if (close(pipefd[1]))
-	  errorxy("Unable to close write end of pipe in parent");
-	nodes->node[i].fd = pipefd[0];
-	//if (fcntl(pipefd[0], F_SETFL, O_NONBLOCK) == -1)
-	//  errorxy("Unable to set read end of pipe nonblocking");
-    }
-  }
-}
-
-static void pickuplive(fd_set* read, int* active) {
-  int i;
-  *active = 0;
-  FD_ZERO(read);
-  for (i = 0; i < nodes->n; ++i) {
-    if (nodes->node[i].fd != -1) {
-      ++*active;
-      FD_SET(nodes->node[i].fd, read);
-    }
+    if (pipe(pipefd)) fataly("Dameon unable to create pipe");
+    nodes->node[i].io = forksib(io, pipefd[0], pipefd[1], 
+				&nodes->node[i]);
+    nodes->node[i].pid = forksib(dnode, pipefd[0], pipefd[1],
+				 &nodes->node[i]);
+    if (close(pipefd[0])) fataly("Daemon unable to close reader in daemon");
+    if (close(pipefd[1])) fataly("Daemon unable to close writer in daemon");
   }
 }
 
 static void mainloop(void) {
-  fd_set read;
-  int active = 0;
-  FD_ZERO(&read);
-
   do {
-    cleanupdead();
-    body(); 
-    pickuplive(&read, &active);
-    if ((active = select(active, &read, NULL, NULL, NULL)) < 0)
-      if (errno != EINTR) errorxy("Select error");
-    lognodes(active, &read);
-  } while (! term_ && ! int_);
+    createlive(); 
+    waitdead();
+  } while (! term_);
 
   killall();
 }
@@ -415,12 +349,12 @@ const char* args(const int argc, const char* argv[]) {
   const char* pidfilename;
 
   if (argc < 4)
-    errorxn("Arguments: renice-number pid-file port... - Params: %d", 
-	    argc-1);
+    fataln("Arguments: renice-number pid-file port... - Params: %d", 
+	     argc-1);
   
   renice = strtol(*++argvi, &endptr, 0);
   if (! **argvi || *endptr)
-    errorxn("Renice argument must be an integer: `%s'", argvi);
+    fataln("Renice argument must be an integer: `%s'", argvi);
 
   pidfilename = *++argvi;
 
@@ -431,52 +365,94 @@ const char* args(const int argc, const char* argv[]) {
   for (i=0; i<nnodes; i++) {
     nodes->node[i].port = strtol(*++argvi, &endptr, 0);
     if (! **argvi || *endptr)
-      errorxn("Port argument must be an integer: `%s'", *argvi);
+      fataln("Port argument must be an integer: `%s'", *argvi);
     nodes->node[i].pid = 0;
-    nodes->node[i].oldpid = 0;
-    nodes->node[i].fd = -1;
+    nodes->node[i].io = 0;
   }
 
   return pidfilename;
+}
+
+static void killdaemon(pid_t pid, sigset_t* oldset, const char* format, ...) {
+  int s;
+  static char buffer[1024];
+  va_list ap;
+
+  sethandler(SIG_IGN, SIGCHLD, SA_NOCLDWAIT);
+  if (sigprocmask(SIG_SETMASK, oldset, NULL))
+    errorxy("Master unable to revert sigprocmask");
+  if (kill(pid, SIGTERM) && errno != ESRCH)
+    errorxy("Master unable to send SIGTERM to daemon");
+
+  sleep(DAEMON_TIME);
+  kill(pid, SIGKILL);
+
+  va_start(ap, format);
+  s = vsnprintf(buffer, sizeof(buffer), format, ap);
+  va_end(ap);
+  if (s < 0) fataly("Master unable to format error");
+  if (s >= sizeof(buffer)) fataln("Master had buffer overflow");
+
+  fataly(buffer);
 }
 
 static void daemonize(const char* pidfilename) {
   FILE* pidfile;
   pid_t pid, pidr;
   int status;
+  sigset_t set, oldset;
+
+  if (sigemptyset(&set) 
+      || sigaddset(&set, SIGINT) 
+      || sigaddset(&set, SIGTERM)
+      || sigaddset(&set, SIGQUIT))
+    fataly("Master unable to set mask to SIGQUIT|SIGTERM|SIGINT");
 
   sethandler(sigint, SIGINT, 0);
   sethandler(sigterm, SIGTERM, 0);
   sethandler(sigterm, SIGQUIT, 0);
+
+  if (sigprocmask(SIG_BLOCK, &set, &oldset))
+    fataly("Master unable to set sigprocmask");
   
   if ((pid = fork())) {
-    if (pid == -1) errorxy("Unable to fork");
+    if (pid == -1) fataly("Master unable to fork");
 
-    if (! (pidfile = fopen(pidfilename, "w"))) {
-      kill(pid, SIGTERM);
-      errorxy("Unable to open %s", pidfilename);
-    }
-    if (fprintf(pidfile, "%i\n", pid) < 0) {
-      kill(pid, SIGTERM);
-      errorxy("Unable to write to %s", pidfilename);
-    }
-    if (fclose(pidfile)) {
-      kill(pid, SIGTERM);
-      errorxy("Unable to close %s", pidfilename);
-    }
+    if (errno != EINTR) 
+      killdaemon(pid, &oldset, "Master unable to sigsuspend");
+    if (term_) killdaemon(pid, &oldset, "Master received terminate");
 
-    if (kill(pid, SIGINT)) errorxy("Unable to signal %i", pid);
-    while ((pidr = waitpid(pid, NULL, 0)) != pid && ! int_)
-      if (pidr == -1 && errno != EINTR) errorxy("Unable to wait for daemon");
+    if (! (pidfile = fopen(pidfilename, "w")))
+      killdaemon(pid, &oldset, "Master unable to open %s", pidfilename);
+
+    if (fprintf(pidfile, "%i\n", pid) < 0)
+      killdaemon(pid, &oldset, "Master unable to write to %s", pidfilename);
+
+    if (fclose(pidfile))
+      killdaemon(pid, &oldset, "Master unable to close %s", pidfilename);
+
+    sigsuspend(&oldset);
+    if (errno != EINTR) 
+      killdaemon(pid, &oldset, "Master unable to sigsuspend");
+    if (! int_) 
+      killdaemon(pid, &oldset, "Master did not receive SIGINT");
       
-    exit(int_ ? 0 : 1);
+    if (kill(pid, SIGINT)) 
+      killdaemon(pid, &oldset, "Master unable to signal %i", pid);
+      
+    exit(0);
   }
   
   startlog();
-  pause();
+  if (kill(getppid(), SIGINT)) fataly("Daemon unable to signal master");
+  sigsuspend(&oldset);
+  if (errno != EINTR) fataly("Daemon unable to sigsuspend");
+  sethandler(sigterm, SIGINT, 0);
   if (term_) exit(0);
-  if (int_) int_ = 0;
-  if (kill(getppid(), SIGINT)) errorxy("Unable to signal parent");
+  if (! int_) fataln("Daemon did not receive SIGINT");
+
+  if (sigprocmask(SIG_SETMASK, &oldset, NULL))
+    fataly("Daemon unable to revert sigprocmask");  
 }
 
 static void setuids(void) {
@@ -488,12 +464,12 @@ static void setuids(void) {
   if (uid == euid)
     warnxn("Not running setuid, uid = %i", uid);
   else if (seteuid(uid))
-    errorxy("Not able to switch euid from %i to %i", euid, uid);
+    fataly("Not able to switch euid from %i to %i", euid, uid);
 
   if (gid == egid)
     warnxn("Not running setgid, gid = %i", gid);
   else if (setegid(gid))
-    errorxy("Not able to switch egid from %i to %i", egid, gid);
+    fataly("Not able to switch egid from %i to %i", egid, gid);
 }
 
 int main(const int argc, const char* argv[]) {
