@@ -83,7 +83,7 @@ static void lognode(struct node* node) {
     t.tv_sec = READ_TIME;
     t.tv_usec = 0;
     while ((sel = select(1, &readf, NULL, NULL, &t)) > 0) {
-      if ((s_ = read(node->fd, buffer + s, sizeof(buffer-1) - s)) <= 0) break;
+      if ((s_ = read(node->fd, buffer + s, sizeof(buffer-1) - s)) < 0) break;
       s += s_;
     }
     warnxn("Characters read=%i,sel=%i,sec=%i,s_=%i", 
