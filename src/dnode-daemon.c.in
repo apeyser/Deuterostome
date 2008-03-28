@@ -76,6 +76,8 @@ static void lognode(struct node* node) {
   fd_set readf;
   FD_ZERO(&readf);
 
+  if (node->fd == -1) return;
+
   do {
     int sel;
     s = 0;
@@ -87,6 +89,12 @@ static void lognode(struct node* node) {
 	break;
       warnxn("Just read: %i", s_);
       s += s_;
+    }
+    if (sel && ! s) {
+      if (close(node->fd))
+	warnxy("Pipe dead for child %i, fd %i", node->oldpid, node->fd);
+      node->fd = -1;
+      return;
     }
     warnxn("Characters read=%i,sel=%i,sec=%i,s_=%i", 
 	   s, sel, t.tv_sec, s_);
@@ -250,7 +258,7 @@ static void errorx(char doerrno, int warn, const char* format, ...) {
   }
 }
 
-static void cleanupdead(fd_set* read) {
+static void cleanupdead(void) {
   pid_t pid;
   int i, status;
 
@@ -270,13 +278,10 @@ static void cleanupdead(fd_set* read) {
 	  errorxn("Child %i exited due to signal %i", pid, WTERMSIG(status));
 	killing = 0;
       }
-      if (nodes->node[i].fd != -1) {
-	lognode(&nodes->node[i]);
-	if (close(nodes->node[i].fd))
-	  warnxn("Unable to close read end of pipe for child %i", pid);
-	FD_CLR(nodes->node[i].fd, read);
-      }
 
+      lognode(&nodes->node[i]);
+      if (nodes->node[i].fd != -1 && close(nodes->node[i].fd))
+	warnxn("Unable to close read end of pipe for child %i", pid);
       nodes->node[i].fd = -1;
       nodes->node[i].pid = 0;
     }
@@ -345,7 +350,7 @@ static void child(int pipefd[2], int port) {
   exit(1);
 }
 
-static void body(fd_set* read) {
+static void body(void) {
   int i;
   int pipefd[2];
 
@@ -358,7 +363,6 @@ static void body(fd_set* read) {
       case -1: errorxy("Unable to fork");
       case 0: child(pipefd, nodes->node[i].port);
       default:
-	FD_SET(nodes->node[i].fd = pipefd[0], read);
 	if (close(pipefd[1]))
 	  errorxy("Unable to close write end of pipe in parent");
 	//if (fcntl(pipefd[0], F_SETFL, O_NONBLOCK) == -1)
@@ -367,18 +371,30 @@ static void body(fd_set* read) {
   }
 }
 
+static void pickuplive(fd_set* read, int* active) {
+  int i;
+  *active = 0;
+  FD_ZERO(read);
+  for (i = 0; i < nodes->n; ++i) {
+    if (nodes->node[i].fd != -1) {
+      ++*active;
+      FD_SET(nodes->node[i].fd, read);
+    }
+  }
+}
+
 static void mainloop(void) {
-  fd_set read, read_;
+  fd_set read;
   int active = 0;
   FD_ZERO(&read);
 
   do {
-    cleanupdead(&read);
-    body(&read);
-    read_ = read;
-    if ((active = select(nodes->n, &read_, NULL, NULL, NULL)) < 0)
+    cleanupdead();
+    body(); 
+    pickuplive(&read, &active);
+    if ((active = select(active, &read, NULL, NULL, NULL)) < 0)
       if (errno != EINTR) errorxy("Select error");
-    lognodes(active, &read_);
+    lognodes(active, &read);
   } while (! term_ && ! int_);
 
   killall();
