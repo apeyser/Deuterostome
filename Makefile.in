@@ -771,13 +771,15 @@ gentoo-setup: rsync
 	)
 .PHONY: rsync
 rsync: dist
-	rsync $(DISTPKG) root@deli1:/usr/local/portage/distfiles/
-	! test -e /usr/portage/distfiles/$(DISTPKG) \
-		|| sudo rm /usr/portage/distfiles/$(DISTPKG)
+	scp $(DISTPKG) root@deli1:/usr/local/portage/distfiles/
+	source /etc/make.conf \
+	&& if test -z "$$DISTDIR" ; then DISTDIR=/usr/portage/distfiles; fi \
+	&& sudo cp -a $(DISTPKG) $${DISTDIR}
 
 .PHONY: ebuild
 ebuild: gentoo-setup
 	svn ci -m ''
+	sudo layman -s gentoo-local
 
 gencode-all: gencode all
 .PHONY: gencode

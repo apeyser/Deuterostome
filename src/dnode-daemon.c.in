@@ -422,10 +422,6 @@ static void daemonize(const char* pidfilename) {
     if (pid == -1) fataly("Master unable to fork");
     sethandler(SIG_IGN, SIGCHLD, SA_NOCLDWAIT);
 
-    if (errno != EINTR) 
-      killdaemon(pid, &oldset, "Master unable to sigsuspend");
-    if (term_) killdaemon(pid, &oldset, "Master received terminate");
-
     if (! (pidfile = fopen(pidfilename, "w")))
       killdaemon(pid, &oldset, "Master unable to open %s", pidfilename);
 
@@ -437,7 +433,8 @@ static void daemonize(const char* pidfilename) {
 
     sigsuspend(&oldset);
     if (errno != EINTR) 
-      killdaemon(pid, &oldset, "Master unable to sigsuspend: %i", errno);
+      killdaemon(pid, &oldset, "Master unable to sigsuspend");
+    if (term_) killdaemon(pid, &oldset, "Master received terminate");
     if (! int_) 
       killdaemon(pid, &oldset, "Master did not receive SIGINT");
       
