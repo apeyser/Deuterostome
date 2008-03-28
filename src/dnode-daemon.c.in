@@ -104,13 +104,23 @@ static void handlestatus(const char* type, int status, pid_t pid) {
   }
 }
 
-static void killnode(struct node* node) {
-  if (! node->pid) return;
-  
-  if (! kill(node->pid, SIGINT)) {
-    if (errno != ESRCH) fataly("Unable to send SIGINT to %i", node->pid);
-    else node->pid = 0;
+static void killnode(pid_t* pid, int sig) {
+  sigset_t new, old;
+  char p;
+  if (! *pid) return;
+  if (sigfillset(&new)) fataly("Daemon unable to set mask to *");
+  if ((p = sigprocmask(SIG_BLOCK, &new, &old))) 
+    errorxy("Daemon unable to set sigprocmask");
+ START:
+  if (! kill(*pid, sig)) {
+    if (errno != ESRCH) {
+      if (!p) sigprocmask(SIG_SETMASK, &old, NULL);
+      fataly("Unable to send SIGINT to %i", *pid);
+    }
+    *pid = 0;
   }
+  if (! p && sigprocmask(SIG_SETMASK, &old, NULL))
+    errorxy("Daemon unable to unset sigprocmask");
 }
 
 static void waitdead(void) {
@@ -133,7 +143,7 @@ static void waitdead(void) {
     if (nodes->node[i].io == pid) {
       nodes->node[i].io = 0;
       handlestatus("io", status, pid);
-      killnode(&nodes->node[i]);
+      killnode(&nodes->node[i].pid, SIGINT);
       return;
     }
   }
@@ -149,7 +159,7 @@ static void killall(void) {
   sethandler(SIG_IGN, SIGQUIT, 0);
   sethandler(SIG_IGN, SIGTERM, 0);
 
-  for (int i = 0; i < nodes->n; i++) killnode(&nodes->node[i]);
+  for (int i = 0; i < nodes->n; i++) killnode(&nodes->node[i].pid, SIGINT);
 
   alarm_ = 0;
   sethandler(sigalarm, SIGALRM, SA_RESETHAND);
@@ -157,7 +167,7 @@ static void killall(void) {
 
  START:
   for (i = 0; 
-       i < nodes->n && (nodes->node[i].pid || nodes->node[i].io); 
+       i < nodes->n && (nodes->node[i].pid || nodes->node[i].io);
        i++);
   if (i < nodes->n && ! alarm) {
     waitdead();
@@ -170,15 +180,9 @@ static void killall(void) {
 
   if (i < nodes->n) {
     for (i = 0; i < nodes->n; i++)
-      if (nodes->node[i].pid 
-	  && kill(nodes->node[i].pid, SIGKILL)
-	  && errno != ESRCH) 
-	errorxy("Unable to send SIGKILL to child %i", nodes->node[i].pid);
+      if (nodes->node[i].pid) killnode(&nodes->node[i].pid, SIGKILL);
     for (i = 0; i < nodes->n; i++)
-      if (nodes->node[i].io 
-	  && kill(nodes->node[i].io, SIGKILL)
-	  && errno != ESRCH) 
-	errorxy("Unable to send SIGKILL to child %i", nodes->node[i].pid);
+      if (nodes->node[i].io) killnode(&nodes->node[i].io, SIGKILL);
     exit(1);
   }
 
