@@ -97,13 +97,14 @@ static void lognode(struct node* node) {
       switch (errno) {
 	case EINTR: case EAGAIN:
 	  buffer[s] = '\0';
-	  warnxn("Message from %i: %s", node->oldpid, buffer);
+	  warnxn("Intr Message from %i: %s", node->oldpid, buffer);
 	  return;
 	default:
 	  errorxy("Error reading from child %i", node->oldpid);
       }
     }
 
+    warnxn("Characters read: %i", s);
     buffer[s] = '\0';
     last = buffer;
     if (! (next = splitstring(&last))) {
