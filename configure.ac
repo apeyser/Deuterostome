@@ -190,6 +190,10 @@ AC_CHECK_HEADER([error.h], [
   AC_DEFINE([HAVE_ERROR_H], [1], [Define to 1 if you have <error.h>])
 ])
 CF_IF_ENABLED([regex], [CF_AC_CHECK_HEADER([regex.h])])
+CF_IF_ENABLED([daemon], [
+  AC_CHECK_HEADERS([sys/prctl.h])
+  AC_CHECK_FUNCS([prctl])
+])
 
 AC_CHECK_FUNCS([setsid])
 AC_CHECK_FUNCS([srandomdev])

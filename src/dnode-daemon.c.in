@@ -42,6 +42,21 @@ static long renice;
 #define warnxy(...)  errorx(1, 1, 0, __VA_ARGS__)
 static void errorx(char doerrno, char warn, char die, const char* format, ...);
 
+#if HAVE_SYS_PRCTL_H && HAVE_PRCTL
+#include <sys/prctl.h>
+#ifdef PR_SET_NAME
+static void setprocessname(const char* name) {
+  if (prctl(PR_SET_NAME, name))
+    warnxy("Unable to set process name to %s", name);
+}
+#define SETPROCESSNAME(name) setprocessname(name)
+#endif // PR_SET_NAME
+#endif // HAVE_PRCTL && HAVE_SYS_PRCTL_H
+
+#ifndef SETPROCESSNAME
+#define SETPROCESSNAME(name)
+#endif
+
 static char int_ = 0;
 void sigint(int sig __attribute__((__unused__))) {int_ = 1;}
 static char term_ = 0;
@@ -311,11 +326,15 @@ static void dnode(int reader, int writer, struct node* node) {
 
 typedef void (*sibfunc)(int reader, int writer, struct node* node);
 
-static pid_t forksib(sibfunc sibf, int reader, int writer, struct node* node) {
+static pid_t forksib(const char* pname, sibfunc sibf, 
+		     int reader, int writer, struct node* node) {
   pid_t sib;
   switch ((sib = fork())) {
     case -1: fataly("Daemon unable to fork");
-    case 0: dokillall = 0; sibf(reader, writer, node);
+    case 0: 
+      dokillall = 0; 
+      SETPROCESSNAME(pname);
+      sibf(reader, writer, node);
   }
   return sib;
 }
@@ -328,9 +347,9 @@ static void createlive(void) {
     if (nodes->node[i].pid || nodes->node[i].io) continue;
     
     if (pipe(pipefd)) fataly("Dameon unable to create pipe");
-    nodes->node[i].io = forksib(io, pipefd[0], pipefd[1], 
+    nodes->node[i].io = forksib("dnode-io", io, pipefd[0], pipefd[1], 
 				&nodes->node[i]);
-    nodes->node[i].pid = forksib(dnode, pipefd[0], pipefd[1],
+    nodes->node[i].pid = forksib("dnode-init", dnode, pipefd[0], pipefd[1],
 				 &nodes->node[i]);
     if (close(pipefd[0])) fataly("Daemon unable to close reader in daemon");
     if (close(pipefd[1])) fataly("Daemon unable to close writer in daemon");
