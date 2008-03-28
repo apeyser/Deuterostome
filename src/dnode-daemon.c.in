@@ -16,6 +16,8 @@
 #include <string.h>
 #include <fcntl.h>
 
+#include "config.h"
+
 //#define SIGINT SIGHUP
 
 struct node {
@@ -45,9 +47,7 @@ static void errorx(char doerrno, char warn, char die, const char* format, ...);
 #if HAVE_SYS_PRCTL_H && HAVE_PRCTL
 #include <sys/prctl.h>
 #ifdef PR_SET_NAME
-#warn Here!
 static void setprocessname(const char* name) {
-  warnxy("Switching name to %s", name);
   if (prctl(PR_SET_NAME, name))
     warnxy("Unable to set process name to %s", name);
 }
