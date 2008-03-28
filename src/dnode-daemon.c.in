@@ -317,7 +317,7 @@ static void child(int pipefd[2], int port) {
     exit(1);
   }
   
-  fprintf(stderr, "stderr - Starting: `%s' `%s' `%s'\n", 
+  fprintf(stderr, "Starting: `%s' `%s' `%s'\n", 
 	  "@bindir@/dnode", buffer, "0");
 
   execl("@bindir@/dnode", "@bindir@/dnode", buffer, "0", NULL);

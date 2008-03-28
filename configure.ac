@@ -21,6 +21,13 @@ CF_AC_ARG_VAR([MAX_NUM_EXECS], [maximum exec stack size in frame], [5000])
 CF_AC_ARG_VAR([MAX_MEM_SIZE], [maximum vm allocation size in mb], [1000])
 CF_AC_ARG_VAR([MAX_USER_DICT_SIZE], [maximum user dict size], [5000])
 
+CF_AC_ARG_VAR([DM_IPPORT_USERRESERVED],
+              [Symbol or integer value to use for default port base], 
+	      [IPPORT_USERRESERVED])
+CF_AC_ARG_VAR([DM_IPPORT_USERRESERVED_STANDARD],
+	      [Fail if DM_IPPORT_USERRESERVED_SET != DM_IPPORT_USERRESERVED],
+	      [5000])
+
 CF_AC_ARG_VAR([ROLLBITS], [unroll math loops to 2^rollbits], [3])
 CF_AC_ARG_VAR([BYTECORRECT], [align to this many bytes], [8])
 CF_AC_ENABLE([debug-dmnum], [enable extra debug in dmnum], [no], [yes])

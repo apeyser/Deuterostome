@@ -273,7 +273,11 @@ int main(int argc, char *argv[])
   
   if (argc < 2) goto argerr;
   serverport = strtol(argv[1],0,0); if (errno) goto argerr;
-  serverport += IPPORT_USERRESERVED;
+  if (DM_IPPORT_USERRESERVED != DM_IPPORT_USERRESERVED_STANDARD)
+    fprintf(stderr, 
+	    "Unusual value for IPPORT_USERRESERVED: %i instead of %i\n",
+	    DM_IPPORT_USERRESERVED, DM_IPPORT_USERRESERVED_STANDARD);
+  serverport += DM_IPPORT_USERRESERVED;
   goto wearegood;
   
  argerr:
@@ -682,7 +686,7 @@ thus lead to termination of this process.
   ARRAY_SIZE(o1) = strlen((char*)hostname);
   TAG(o2) = NUM | LONGBIGTYPE; 
   ATTR(o2) = 0;
-  LONGBIG_VAL(o2) = serverport - IPPORT_USERRESERVED;
+  LONGBIG_VAL(o2) = serverport - DM_IPPORT_USERRESERVED;
   TAG(o3) = ARRAY | BYTETYPE; 
   ATTR(o3) = READONLY;
   VALUE_BASE(o3) = (P)errsource; 

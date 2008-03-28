@@ -640,7 +640,7 @@ P op_getmyport(void)
   if (CEILopds < o2) return OPDS_OVF;
   TAG(o1) = (NUM | LONGBIGTYPE);
   ATTR(o1) = 0;
-  LONGBIG_VAL(o1) = serverport - IPPORT_USERRESERVED;
+  LONGBIG_VAL(o1) = serverport - DM_IPPORT_USERRESERVED;
   FREEopds = o2;
 
   return OK;

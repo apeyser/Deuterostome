@@ -3,6 +3,12 @@
 /* align to this many bytes */
 #undef BYTECORRECT
 
+/* Symbol or integer value to use for default port base */
+#undef DM_IPPORT_USERRESERVED
+
+/* Fail if DM_IPPORT_USERRESERVED_SET != DM_IPPORT_USERRESERVED */
+#undef DM_IPPORT_USERRESERVED_STANDARD
+
 /* sizeof(void*) */
 #undef DM_SIZEOF_VOIDP_
 
