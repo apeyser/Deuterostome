@@ -328,21 +328,17 @@ static void dnode(int reader, int writer, struct node* node) {
 
 typedef void (*sibfunc)(int reader, int writer, struct node* node);
 
-static pid_t forksib(const char* pname, sibfunc sibf, 
-		     int reader, int writer, 
-		     struct node* node, int* pid) {
-  pid_t sib;
-  switch ((sib = fork())) {
+static void forksib(const char* pname, sibfunc sibf, 
+		    int reader, int writer, 
+		    struct node* node, pid_t* pid) {
+  switch ((*pid = fork())) {
     case -1: fataly("Daemon unable to fork");
     case 0: 
       dokillall = 0; 
       *pid = getpid();
       SETPROCESSNAME(pname);
       sibf(reader, writer, node);
-    default:
-      *pid = pid;
   }
-  return sib;
 }
 
 static void createlive(void) {
