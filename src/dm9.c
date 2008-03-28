@@ -34,6 +34,7 @@
 
 #include "dm.h"
 #include "dmx.h"
+#include "xhack.h"
 
 int xsocket = -1;
 
@@ -232,7 +233,7 @@ P coloropd(void)
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != NUM) return OPD_CLA;
   if (!PVALUE(o_1,&colidx)) return UNDF_VAL;
-  XSetForeground(dvtdisplay,dvtgc,colidx);
+  HXSetForeground(dvtdisplay,dvtgc,colidx);
   FREEopds = o_1;
   return OK;
 #endif
@@ -251,7 +252,7 @@ P op_Xwindows(void)
   if (o1 >= CEILopds) return OPDS_OVF;
   TAG(o1) = BOOL; ATTR(o1) = 0;
 #if X_DISPLAY_MISSING
-	BOOL_VAL(o1) = FALSE;
+  BOOL_VAL(o1) = FALSE;
 #else
   BOOL_VAL(o1) = (dvtdisplay != NULL);
 #endif
@@ -331,18 +332,17 @@ P op_makewindow(void)
   if (ARRAY_SIZE(xyf) != 4) return RNG_CHK;
   if (ndvtwindows >= MAXDVTWINDOWS) return RNG_CHK;
 
-  wid = XCreateWindow(dvtdisplay, dvtrootwindow, pxy[0], pxy[1],
+  wid = HXCreateWindow(dvtdisplay, dvtrootwindow, pxy[0], pxy[1],
                       pxy[2], pxy[3], 0, CopyFromParent,
                       InputOutput, CopyFromParent,
                       CWEventMask, &attr);
-  //XSetTransientForHint(dvtdisplay, wid, dvtrootwindow);
-  XSetWMName(dvtdisplay,wid,&wname);
-  XSetWMIconName(dvtdisplay,wid,&icname);
-  XSetClassHint(dvtdisplay, wid,&classhint);
-	atom[0] = XInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False);
-	atom[1] = XInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False);
-	XSetWMProtocols(dvtdisplay, wid, atom, 2);
-	XSetWMHints(dvtdisplay, wid, &xwmhints);
+  HXSetWMName(dvtdisplay,wid,&wname);
+  HXSetWMIconName(dvtdisplay,wid,&icname);
+  HXSetClassHint(dvtdisplay, wid,&classhint);
+  atom[0] = HXInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False);
+  atom[1] = HXInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False);
+  HXSetWMProtocols(dvtdisplay, wid, atom, 2);
+  HXSetWMHints(dvtdisplay, wid, &xwmhints);
   dvtwindows[ndvtwindows++] = wid;
 
   TAG(o1) = NUM | LONGBIGTYPE; 
@@ -380,17 +380,17 @@ P op_makewindowtop(void)
 	event.xclient.display = dvtdisplay;
 	event.xclient.window = wid;
 	event.xclient.message_type 
-		= XInternAtom(dvtdisplay, "_NET_WM_STATE", False);
+		= HXInternAtom(dvtdisplay, "_NET_WM_STATE", False);
 	event.xclient.format = 32;
 	event.xclient.data.l[0] = (BOOL_VAL(o2) ? 1 : 0);
 	event.xclient.data.l[1] 
-		= XInternAtom(dvtdisplay, "_NET_WM_STATE_ABOVE", False);
+		= HXInternAtom(dvtdisplay, "_NET_WM_STATE_ABOVE", False);
 	event.xclient.data.l[2] = 0;
 	event.xclient.data.l[3] = 2;
 	event.xclient.data.l[4] = 0;
-	XSendEvent(dvtdisplay, XRootWindowOfScreen(dvtscreen),
-						 False, (SubstructureNotifyMask|SubstructureRedirectMask),
-						 &event);
+	HXSendEvent(dvtdisplay, XRootWindowOfScreen(dvtscreen),
+		    False, (SubstructureNotifyMask|SubstructureRedirectMask),
+		    &event);
 	return OK;
 #endif
 }
@@ -420,7 +420,7 @@ P op_deletewindow(void)
             }
   --ndvtwindows;
   for ( ; k<ndvtwindows; k++) dvtwindows[k] = dvtwindows[k+1];
-  XDestroyWindow(dvtdisplay,wid);
+  HXDestroyWindow(dvtdisplay,wid);
   FREEopds = o_1;
   return OK;
 #endif
@@ -438,21 +438,21 @@ P op_deletewindow(void)
 #if ! X_DISPLAY_MISSING
 void mapraisewindow(P win) {
 	XEvent event;
-	XMapRaised(dvtdisplay, win);
+	HXMapRaised(dvtdisplay, win);
 	event.xclient.type = ClientMessage;
 	event.xclient.display = dvtdisplay;
 	event.xclient.window = win;
 	event.xclient.message_type 
-		= XInternAtom(dvtdisplay, "_NET_ACTIVE_WINDOW", False);
+	  = HXInternAtom(dvtdisplay, "_NET_ACTIVE_WINDOW", False);
 	event.xclient.format = 32;
 	event.xclient.data.l[0] = 2;
 	event.xclient.data.l[1] = time(NULL);
 	event.xclient.data.l[2] = 0;
 	event.xclient.data.l[3] = 0;
 	event.xclient.data.l[4] = 0;
-	XSendEvent(dvtdisplay, XRootWindowOfScreen(dvtscreen), 
-						 False, (SubstructureNotifyMask|SubstructureRedirectMask), 
-						 &event);
+	HXSendEvent(dvtdisplay, XRootWindowOfScreen(dvtscreen), 
+		    False, (SubstructureNotifyMask|SubstructureRedirectMask), 
+		    &event);
 }
 #endif //! X_DISPLAY_MISSING
 
@@ -470,7 +470,7 @@ P op_mapwindow(void)
 		case NULLOBJ:
 			for (k = 0; k < ndvtwindows; k++)
 				if (BOOL_VAL(o_1)) mapraisewindow(dvtwindows[k]);
-				else XUnmapWindow(dvtdisplay, dvtwindows[k]);
+				else HXUnmapWindow(dvtdisplay, dvtwindows[k]);
 			break;
 
 		case NUM:
@@ -479,7 +479,7 @@ P op_mapwindow(void)
 			if (k == ndvtwindows) break;
 
 			if (BOOL_VAL(o_1)) mapraisewindow(wid);
-			else XUnmapWindow(dvtdisplay,wid);
+			else HXUnmapWindow(dvtdisplay,wid);
 			break;
 
 		default:
@@ -516,7 +516,7 @@ P op_resizewindow(void)
     if (dvtwindows[k] == wid) break;
   if (k >= ndvtwindows) {FREEopds = o_3; return OK;}
 
-  XResizeWindow(dvtdisplay,wid, width, height);
+  HXResizeWindow(dvtdisplay,wid, width, height);
   FREEopds = o_3;
   return OK;
 #endif
@@ -534,7 +534,7 @@ P op_Xsync(void)
 	return NO_XWINDOWS;
 #else
   if (dvtdisplay == NULL) return NO_XWINDOWS;
-  XFlush(dvtdisplay);
+  HXFlush(dvtdisplay);
   return OK;
 #endif
 }
@@ -570,9 +570,9 @@ P op_mapcolor(void)
   color.red = val[0] * 65535.0;
   color.green = val[1] * 65535.0;
   color.blue = val[2] * 65535.0;
-  if ((k = XAllocColor(dvtdisplay,
-                       XDefaultColormapOfScreen(dvtscreen),
-                       &color)) 
+  if ((k = HXAllocColor(dvtdisplay,
+			XDefaultColormapOfScreen(dvtscreen),
+			&color)) 
       == 0)
     return RNG_CHK;
 
@@ -615,7 +615,7 @@ P op_fillrectangle(void)
     if (dvtwindows[k] == wid) break;
   if (k >= ndvtwindows) return OK;
 
-  XFillRectangles(dvtdisplay,wid,dvtgc,(XRectangle *)VALUE_BASE(xyf),1);
+  HXFillRectangles(dvtdisplay,wid,dvtgc,(XRectangle *)VALUE_BASE(xyf),1);
   return OK;
 #endif
 }
@@ -652,7 +652,7 @@ P op_drawline(void)
     if (dvtwindows[k] == wid) break;
   if (k >= ndvtwindows) return OK;
 
-  XDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)VALUE_BASE(xyf),
+  HXDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)VALUE_BASE(xyf),
              ARRAY_SIZE(xyf)>>1, CoordModeOrigin);
   return OK;
 #endif
@@ -694,7 +694,7 @@ P op_drawline(void)
 #if ! X_DISPLAY_MISSING
 static void DOTsymbol(void)
 {
-  XDrawPoint(dvtdisplay,wid,dvtgc,x,y);
+  HXDrawPoint(dvtdisplay,wid,dvtgc,x,y);
 }
 
 static void DIAMONDsymbol(void)
@@ -705,59 +705,59 @@ static void DIAMONDsymbol(void)
             x+d, y,
             x,   y+d,
             x-d, y };
- XDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,5,CoordModeOrigin);   
+  HXDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,5,CoordModeOrigin);   
 }
 
 static void fSQUAREsymbol(void)
 {
   W d = s>>1;
-  XFillRectangle(dvtdisplay,wid,dvtgc,(x-d),(y-d),(UP)s,(UP)(s));
+  HXFillRectangle(dvtdisplay,wid,dvtgc,(x-d),(y-d),(UP)s,(UP)(s));
 }
 
 static void sSQUAREsymbol(void)
 {
   W d = s>>1;
-  XDrawRectangle(dvtdisplay,wid,dvtgc,(x-d),(y-d),(UP)s,(UP)(s));
+  HXDrawRectangle(dvtdisplay,wid,dvtgc,(x-d),(y-d),(UP)s,(UP)(s));
 }
 
 static void hsSQUAREsymbol(void)
 {
   W d = s>>1;
-  XDrawRectangle(dvtdisplay,wid,dvtgc,(x-d),(y-d),(UP)s,(UP)(s));
-  XDrawLine(dvtdisplay,wid,dvtgc,(x-d),y,(x+d),y);
+  HXDrawRectangle(dvtdisplay,wid,dvtgc,(x-d),(y-d),(UP)s,(UP)(s));
+  HXDrawLine(dvtdisplay,wid,dvtgc,(x-d),y,(x+d),y);
 }
 
 static void PLUSsymbol(void)
 {
   W d = s>>1;
   W p[] = { x-d, y, x+d, y, x, y-d, x, y+d };
-  XDrawSegments(dvtdisplay,wid,dvtgc,(XSegment *)p,2);
+  HXDrawSegments(dvtdisplay,wid,dvtgc,(XSegment *)p,2);
 }
 
 static void Xsymbol(void)
 {
   W d = s>>1;
   W p[] = { x-d, y-d, x+d, y+d, x-d, y+d, x+d, y-d };
-  XDrawSegments(dvtdisplay,wid,dvtgc,(XSegment *)p,2);
+  HXDrawSegments(dvtdisplay,wid,dvtgc,(XSegment *)p,2);
 }
 
 static void fCIRCLEsymbol(void)
 {
   W d = s>>1;
-  XFillArc(dvtdisplay,wid,dvtgc,(x-d),(y-d),(UP)s,(UP)s,0L,360L<<6);
+  HXFillArc(dvtdisplay,wid,dvtgc,(x-d),(y-d),(UP)s,(UP)s,0L,360L<<6);
 }
 
 static void sCIRCLEsymbol(void)
 {
   W d = s>>1;
-  XDrawArc(dvtdisplay,wid,dvtgc,(x-d),(y-d),(UP)s,(UP)s,0L,360L<<6);
+  HXDrawArc(dvtdisplay,wid,dvtgc,(x-d),(y-d),(UP)s,(UP)s,0L,360L<<6);
 }
 
 static void hsCIRCLEsymbol(void)
 {
   W d = s>>1;
-  XDrawArc(dvtdisplay,wid,dvtgc,(x-d),(y-d),(UP)s,(UP)s,0L,360L<<6);
-  XDrawLine(dvtdisplay,wid,dvtgc,(x-d),y,(x+d),y);
+  HXDrawArc(dvtdisplay,wid,dvtgc,(x-d),(y-d),(UP)s,(UP)s,0L,360L<<6);
+  HXDrawLine(dvtdisplay,wid,dvtgc,(x-d),y,(x+d),y);
 }
 
 static void ASTERsymbol(void)
@@ -772,7 +772,7 @@ static void usTRIsymbol(void)
             x,   y-d,
             x+d, y+d,
             x-d, y+d };
- XDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,4,CoordModeOrigin);
+  HXDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,4,CoordModeOrigin);
 }
 
 static void dsTRIsymbol(void)
@@ -782,7 +782,7 @@ static void dsTRIsymbol(void)
             x+d, y-d,
             x,   y+d,
             x-d, y-d };
- XDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,4,CoordModeOrigin);
+  HXDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,4,CoordModeOrigin);
 }
 
 static void rsTRIsymbol(void)
@@ -792,7 +792,7 @@ static void rsTRIsymbol(void)
             x+d, y,
             x-d, y+d,
             x-d, y-d };
- XDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,4,CoordModeOrigin);
+  HXDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,4,CoordModeOrigin);
 }
 
 static void lsTRIsymbol(void)
@@ -802,39 +802,39 @@ static void lsTRIsymbol(void)
             x+d, y-d,
             x+d, y+d,
             x-d, y };
- XDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,4,CoordModeOrigin);
+  HXDrawLines(dvtdisplay,wid,dvtgc,(XPoint *)p,4,CoordModeOrigin);
 }
 
 static void vcBARsymbol(void)
 {
   W d = s>>1;
-  XDrawLine(dvtdisplay,wid,dvtgc,x,(y-d),x,(y+d));
+  HXDrawLine(dvtdisplay,wid,dvtgc,x,(y-d),x,(y+d));
 }
 
 static void vdBARsymbol(void)
 {
-  XDrawLine(dvtdisplay,wid,dvtgc,x,y,x,(y+s));
+  HXDrawLine(dvtdisplay,wid,dvtgc,x,y,x,(y+s));
 }
 
 static void vuBARsymbol(void)
 {
-  XDrawLine(dvtdisplay,wid,dvtgc,x,y,x,(y-s));
+  HXDrawLine(dvtdisplay,wid,dvtgc,x,y,x,(y-s));
 }
 
 static void hcBARsymbol(void)
 {
   W d = s>>1;
-  XDrawLine(dvtdisplay,wid,dvtgc,(x-d),y,x+d,y);
+  HXDrawLine(dvtdisplay,wid,dvtgc,(x-d),y,x+d,y);
 }
 
 static void hlBARsymbol(void)
 {
-  XDrawLine(dvtdisplay,wid,dvtgc,x,y,(x+s),y);
+  HXDrawLine(dvtdisplay,wid,dvtgc,x,y,(x+s),y);
 }
 
 static void hrBARsymbol(void)
 {
-  XDrawLine(dvtdisplay,wid,dvtgc,x,y,(x-s),y);
+  HXDrawLine(dvtdisplay,wid,dvtgc,x,y,(x-s),y);
 }
 
 typedef void (*SYMBfunction)(void);
@@ -906,7 +906,7 @@ P op_setinputfocus(void) {
 	if (CLASS(o_1) != NUM) return OPD_CLA;
 	if (! PVALUE(o_1, &wid)) return UNDF_VAL;
 	
-	XSetInputFocus(dvtdisplay, wid, RevertToParent, CurrentTime);
+	HXSetInputFocus(dvtdisplay, wid, RevertToParent, CurrentTime);
 	return OK;
 #endif
 }
@@ -972,7 +972,7 @@ P op_drawtext(void)
 
   if (!fontcached) { 
     if ((ncachedfonts + 1) > MAXCACHEDFONTS) {
-      XFreeFont(dvtdisplay,(cachedfonts[0]).fontstruct);
+      HXFreeFont(dvtdisplay,(cachedfonts[0]).fontstruct);
       for (k=1; k<ncachedfonts; k++)
         cachedfonts[k-1] = cachedfonts[k];
       k = MAXCACHEDFONTS - 1; 
@@ -980,7 +980,7 @@ P op_drawtext(void)
     }
     else k = ncachedfonts;
 
-    if ((font = XLoadQueryFont(dvtdisplay, (char*)fontspec)) == NULL)
+    if ((font = HXLoadQueryFont(dvtdisplay, (char*)fontspec)) == NULL)
       return X_BADFONT;
 
     cachedfonts[k].fontstruct = font;
@@ -988,8 +988,8 @@ P op_drawtext(void)
     ncachedfonts++;
   }
   font = cachedfonts[k].fontstruct;
-  XSetFont(dvtdisplay,dvtgc,font->fid);
-  XSetForeground(dvtdisplay,dvtgc,colidx);
+  HXSetFont(dvtdisplay,dvtgc,font->fid);
+  HXSetForeground(dvtdisplay,dvtgc,colidx);
 
   dx = XTextWidth(font, (char*)VALUE_BASE(o1),ARRAY_SIZE(o1));
   if (haln == 0) x -= dx / 2; 
@@ -1001,8 +1001,8 @@ P op_drawtext(void)
   ATTR(o_2) = 0;
   LONGBIG_VAL(o_2) = x + dx;
   
-  XDrawString(dvtdisplay,wid, dvtgc, x,  y,
-              (char*)VALUE_BASE(o1), ARRAY_SIZE(o1));
+  HXDrawString(dvtdisplay,wid, dvtgc, x,  y,
+	       (char*)VALUE_BASE(o1), ARRAY_SIZE(o1));
   return OK;
 #endif
 }

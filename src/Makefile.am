@@ -94,7 +94,7 @@ globsrcs = dmglobals.c \
 	dmnuminc.h dmnum.c dsp1f.h dsp1.c dsp2.c \
 	paths.h dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	pluginlib.h plugin.c \
-	dm-types.c
+	dm-types.c xhack.h
 
 BUILT_SOURCES = paths.h dnode-nice.c dnode-daemon.c
 CLEANFILES = paths.h dnode-nice.c dnode-daemon.c

@@ -92,8 +92,8 @@ libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 am__libdmglobals_la_SOURCES_DIST = dmglobals.c dmnuminc.h dmnum.c \
 	dsp1f.h dsp1.c dsp2.c paths.h dm1.c dm2.c dm3.c dm4.c dm5.c \
 	dm6.c dm7.c dm8.c dm9.c pluginlib.h plugin.c dm-types.c \
-	error-local.h matrix.c matrix.h threads.c regex.c dm-convert.h \
-	dm-convert.c
+	xhack.h error-local.h matrix.c matrix.h threads.c regex.c \
+	dm-convert.h dm-convert.c
 am__objects_2 = libdmglobals_la-dmglobals.lo libdmglobals_la-dmnum.lo \
 	libdmglobals_la-dsp1.lo libdmglobals_la-dsp2.lo \
 	libdmglobals_la-dm1.lo libdmglobals_la-dm2.lo \
@@ -432,7 +432,7 @@ globsrcs = dmglobals.c \
 	dmnuminc.h dmnum.c dsp1f.h dsp1.c dsp2.c \
 	paths.h dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	pluginlib.h plugin.c \
-	dm-types.c
+	dm-types.c xhack.h
 
 BUILT_SOURCES = paths.h dnode-nice.c dnode-daemon.c
 CLEANFILES = paths.h dnode-nice.c dnode-daemon.c

@@ -105,3 +105,8 @@ UW ascii[128] = {
 #if defined _WIN32 && defined DLL_EXPORT
 char libDM_is_dll(void) {return 1;}
 #endif
+
+#if ! DM_X_DISPLAY_MISSING
+#include "xhack.h"
+jmp_buf xhack_buf;
+#endif

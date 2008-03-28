@@ -18,6 +18,7 @@
 #include <string.h>
 #include "dm.h"
 #include "dmx.h"
+#include "xhack.h"
 
 P init_sockaddr(struct sockaddr_in *name, const char *hostname, P port);
 
@@ -163,13 +164,13 @@ int main(void)
 #if ! X_DISPLAY_MISSING
   dvtdisplay = XOpenDisplay(NULL);  /* use the DISPLAY environment */
   if (dvtdisplay && DisplayString(dvtdisplay)) {
-    dvtscreen = XDefaultScreenOfDisplay(dvtdisplay);
-    dvtrootwindow = XDefaultRootWindow(dvtdisplay);
-    if (XGetWindowAttributes(dvtdisplay,dvtrootwindow,&rootwindowattr) == 0)
+    dvtscreen = HXDefaultScreenOfDisplay(dvtdisplay);
+    dvtrootwindow = HXDefaultRootWindow(dvtdisplay);
+    if (HXGetWindowAttributes(dvtdisplay,dvtrootwindow,&rootwindowattr) == 0)
       error(EXIT_FAILURE,0,"Xwindows: no root window attributes");
     ndvtwindows = 0; 
     ncachedfonts = 0;
-    dvtgc = XCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
+    dvtgc = HXCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
     xsocket = ConnectionNumber(dvtdisplay);
     FD_SET(xsocket, &sock_fds);
   } 
@@ -250,7 +251,7 @@ int main(void)
 
     case QUIT:     
 #if ! X_DISPLAY_MISSING
-      if (dvtdisplay) XCloseDisplay(dvtdisplay);
+      if (dvtdisplay) HXCloseDisplay(dvtdisplay);
       *displayname = '\0';
 #endif
       exit(EXIT_SUCCESS);

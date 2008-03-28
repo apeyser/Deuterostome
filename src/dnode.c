@@ -16,6 +16,7 @@
 #include <signal.h>
 #include "dm.h"
 #include "dmx.h"
+#include "xhack.h"
 
 /*----------------- DM global variables -----------------------------*/
 
@@ -74,7 +75,7 @@ static void quithandler(int sig) {
   fprintf(stderr, "Exiting dnode on signal: %i\n", sig);
 #if ! X_DISPLAY_MISSING
   if (dvtdisplay != NULL)
-    {XCloseDisplay(dvtdisplay); displayname[0] = '\0';}
+    {HXCloseDisplay(dvtdisplay); displayname[0] = '\0';}
 #endif
     
   for (i = 0; i < FD_SETSIZE; i++)
@@ -369,8 +370,8 @@ thus lead to termination of this process.
   read_fds = sock_fds;
 #if ! X_DISPLAY_MISSING
   if (dvtdisplay != NULL && ! moreX) {
-    XFlush(dvtdisplay);
-    moreX = QLength(dvtdisplay);
+    HXFlush(dvtdisplay);
+    moreX = HQLength(dvtdisplay);
 }
 #endif 
   if (moreX || running) {zerosec_ = zerosec; iv = &zerosec_;}
@@ -393,15 +394,15 @@ thus lead to termination of this process.
  
 #if ! X_DISPLAY_MISSING
   if (moreX) {
-    XNextEvent(dvtdisplay, &event);
-    moreX = QLength(dvtdisplay) ? TRUE : FALSE;
+    HXNextEvent(dvtdisplay, &event);
+    moreX = HQLength(dvtdisplay) ? TRUE : FALSE;
     switch(event.type) {
       case ClientMessage:
         if (event.xclient.message_type 
-            != XInternAtom(dvtdisplay, "WM_PROTOCOLS", False))
+            != HXInternAtom(dvtdisplay, "WM_PROTOCOLS", False))
           break;
         if ((Atom)event.xclient.data.l[0] 
-            == XInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False)) {
+            == HXInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False)) {
           wid = event.xclient.window;
           snprintf((char*)namestring, sizeof(namestring), 
 		   "w%lld", (long long) wid);
@@ -428,7 +429,7 @@ thus lead to termination of this process.
           goto tuwat;
         }
         else if ((Atom) event.xclient.data.l[0]
-                 == XInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False)) {
+                 == HXInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False)) {
           wid = event.xclient.window;
           snprintf((char*)namestring, sizeof(namestring), 
 		   "w%lld", (long long) wid);

@@ -314,8 +314,8 @@ P op_nextevent(void)
   read_fds = sock_fds;
 #if ! X_DISPLAY_MISSING
   if (dvtdisplay != NULL && ! moreX) {
-    XFlush(dvtdisplay);
-    moreX = QLength(dvtdisplay);
+    HXFlush(dvtdisplay);
+    moreX = HQLength(dvtdisplay);
   }
 #endif
  
@@ -379,17 +379,17 @@ P op_nextevent(void)
  nextXwindows:
   if (moreX) {
     userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
-    XNextEvent(dvtdisplay, &event);
+    HXNextEvent(dvtdisplay, &event);
     moreX = QLength(dvtdisplay);
     switch(event.type) {
       case ClientMessage:
         if ((Atom) event.xclient.message_type 
-            == XInternAtom(dvtdisplay, "WM_PROTOCOLS", False)) {
+            == HXInternAtom(dvtdisplay, "WM_PROTOCOLS", False)) {
           if ((Atom) event.xclient.data.l[0] 
-              == XInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False))
-            XBell(dvtdisplay, 0);
+              == HXInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False))
+            HXBell(dvtdisplay, 0);
           else if ((Atom) event.xclient.data.l[0]
-                   == XInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False)) {
+                   == HXInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False)) {
             wid = event.xclient.window;
             snprintf((char*)namestring, sizeof(namestring), 
 		     "w%lld", (long long) wid);

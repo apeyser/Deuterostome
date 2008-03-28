@@ -529,11 +529,43 @@ P op_killsockets(void) {return KILL_SOCKS;}
     the specified host (hostname is the plain host name)
 */
 
+P int_Xdisconnect(BOOLEAN nocheck) {
+#if X_DISPLAY_MISSING
+  return NO_XWINDOWS;
+#else
+  if (nocheck || dvtdisplay)  {
+    if (dvtdisplay) HXCloseDisplay(dvtdisplay);
+    FD_CLR(xsocket, &sock_fds);
+    xsocket = -1;
+    if (defaultdisplay) setenv("DISPLAY", defaultdisplay, 1);
+    else unsetenv("DISPLAY");
+    dvtdisplay = NULL;
+  }
+  *displayname = '\0';
+  moreX = FALSE;
+  return OK;
+#endif
+}
+
+
 #if ! X_DISPLAY_MISSING
-//int xioerrorhandler(Display* display
+int xioerrorhandler(Display* display) {
+  char msg[80];
+  HXGetErrorDatabaseText(display, "dnode", 
+			 "XRequest", "Connection Dead", msg, sizeof(msg));
+  fprintf(stderr, "Fatal Xerror: %s\n", msg);
+  HXGetErrorDatabaseText(display, "dnode", 
+			 "XlibMessage", "Connection Dead", msg, sizeof(msg));
+  fprintf(stderr, "Internal Xerror: %s\n", msg);
+
+  dvtdisplay = NULL;
+  int_Xdisconnect(TRUE);
+  longjmp(xhack_buf, 1);
+}
+
 int xerrorhandler(Display* display, XErrorEvent* event) {
   char msg[80];
-  XGetErrorText(display, event->error_code, msg, sizeof(msg));
+  HXGetErrorText(display, event->error_code, msg, sizeof(msg));
   fprintf(stderr, "Xerror: %s\n", msg);
   if (x2 <= CEILexecs) {
     makename((B*)"Xdisconnect", x1); ATTR(x1) = ACTIVE;
@@ -569,18 +601,18 @@ P op_Xconnect(void)
   };
 
   setenv("DISPLAY", (char*)displayname, 1);
-  dvtscreen = XDefaultScreenOfDisplay(dvtdisplay);
-  dvtrootwindow = XDefaultRootWindow(dvtdisplay);
-  if (XGetWindowAttributes(dvtdisplay,dvtrootwindow,&rootwindowattr) == 0)
+  dvtscreen = HXDefaultScreenOfDisplay(dvtdisplay);
+  dvtrootwindow = HXDefaultRootWindow(dvtdisplay);
+  if (HXGetWindowAttributes(dvtdisplay,dvtrootwindow,&rootwindowattr) == 0)
     error(EXIT_FAILURE,0,"Xwindows: no root window attributes");
   ndvtwindows = 0; 
   ncachedfonts = 0;
-  dvtgc = XCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
+  dvtgc = HXCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
   xsocket = ConnectionNumber(dvtdisplay);
   FD_SET(xsocket, &sock_fds);
   FREEopds = o_1; 
   XSetErrorHandler(xerrorhandler);
-  //XSetIOErrorHandler(xerrorhandler);
+  XSetIOErrorHandler(xioerrorhandler);
   return OK;
 #endif
 }
@@ -594,21 +626,7 @@ P op_Xconnect(void)
 
 P op_Xdisconnect(void)
 {
-#if X_DISPLAY_MISSING
-	return NO_XWINDOWS;
-#else
-  if (dvtdisplay != NULL)  {
-    XCloseDisplay(dvtdisplay);
-    FD_CLR(xsocket, &sock_fds);
-    xsocket = -1;
-    if (defaultdisplay) setenv("DISPLAY", defaultdisplay, 1);
-    else unsetenv("DISPLAY");
-    dvtdisplay = NULL;
-  }
-  *displayname = '\0';
-	moreX = FALSE;
-  return OK;
-#endif
+  return int_Xdisconnect(FALSE);
 }
 
 /*------------------------------------------- getmyport

@@ -37,6 +37,7 @@ DEPEND="
 emacs? (virtual/emacs)
 formats? (app-text/a2ps)
 formats? (virtual/ghostscript)
+formats? (dev-lang/perl)
 X? (app-text/xdvik)
 X? (x11-terms/xterm)
 X? (x11-base/xorg-server)
@@ -127,7 +128,7 @@ src_install() {
 pkg_setup() {
     if use daemon ; then
 	enewgroup node
-	enewuser node -1 -1 /home/node node -g node
+	enewuser node -1 -1 -1 node -g node
     fi
 }
 
