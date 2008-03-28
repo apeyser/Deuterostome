@@ -168,9 +168,11 @@ static void killall(void) {
   exit(0);
 }
 
+static char dokillall = 0;
 static char daemonized = 0 ;
 static void startlog(void) {
   daemonized = 1;
+  dokillall = 1;
   openlog("dnode-daemon", LOG_DAEMON, LOG_CONS);
   if (close(STDIN_FILENO) 
       || close(STDOUT_FILENO) 
@@ -181,7 +183,6 @@ static void startlog(void) {
     fataly("Unable to setsid");
 }
 
-static char dokillall = 1;
 static void errorx(char doerrno, char warn, char die, const char* format, ...) {
   int s;
   static char buffer[2048];
@@ -455,7 +456,7 @@ static void daemonize(const char* pidfilename) {
   if (! int_) fataln("Daemon did not receive SIGINT");
 
   if (sigprocmask(SIG_SETMASK, &oldset, NULL))
-    fataly("Daemon unable to revert sigprocmask");  
+    fataly("Daemon unable to revert sigprocmask");
 }
 
 static void setuids(void) {
