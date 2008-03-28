@@ -138,12 +138,15 @@ static void killall(void) {
   sethandler(sigalarm, SIGALRM, SA_RESETHAND);
   alarm(QUIT_TIME);
 
-  do {
+ START:
+  for (i = 0; 
+       i < nodes->n && (nodes->node[i].pid || nodes->node[i].io); 
+       i++);
+  if (i < nodes->n && ! alarm) {
     waitdead();
-    for (i = 0; 
-	 i < nodes->n && (nodes->node[i].pid || nodes->node[i].io); 
-	 i++);
-  } while (i < nodes->n && ! alarm);
+    goto START;
+  }
+
   sethandler(SIG_IGN, SIGALRM, 0);
   alarm(0);
   sethandler(SIG_IGN, SIGCHLD, SA_NOCLDWAIT);
@@ -378,7 +381,6 @@ static void killdaemon(pid_t pid, sigset_t* oldset, const char* format, ...) {
   static char buffer[1024];
   va_list ap;
 
-  sethandler(SIG_IGN, SIGCHLD, SA_NOCLDWAIT);
   if (sigprocmask(SIG_SETMASK, oldset, NULL))
     errorxy("Master unable to revert sigprocmask");
   if (kill(pid, SIGTERM) && errno != ESRCH)
@@ -417,6 +419,7 @@ static void daemonize(const char* pidfilename) {
   
   if ((pid = fork())) {
     if (pid == -1) fataly("Master unable to fork");
+    sethandler(SIG_IGN, SIGCHLD, SA_NOCLDWAIT);
 
     if (errno != EINTR) 
       killdaemon(pid, &oldset, "Master unable to sigsuspend");
@@ -433,7 +436,7 @@ static void daemonize(const char* pidfilename) {
 
     sigsuspend(&oldset);
     if (errno != EINTR) 
-      killdaemon(pid, &oldset, "Master unable to sigsuspend");
+      killdaemon(pid, &oldset, "Master unable to sigsuspend: %i", errno);
     if (! int_) 
       killdaemon(pid, &oldset, "Master did not receive SIGINT");
       
