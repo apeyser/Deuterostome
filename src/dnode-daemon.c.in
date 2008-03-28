@@ -177,6 +177,7 @@ static void killall(void) {
       lognode(&nodes->node[i]);
       if (close(nodes->node[i].fd))
 	warnxn("Unable to close child %i pipe", nodes->node[i].oldpid);
+      nodes->node[i].fd = -1;
     }
 
   if (n) {
@@ -184,6 +185,7 @@ static void killall(void) {
       if (! nodes->node[i].pid) continue;
       if (kill(nodes->node[i].pid, SIGKILL))
 	warnxy("Unable to send SIGKILL to child %i", nodes->node[i].pid);
+      nodes->node[i].pid = 0;
     }
   }
   killing = 0;
