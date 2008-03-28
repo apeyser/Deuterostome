@@ -16,6 +16,8 @@
 #include <string.h>
 #include <fcntl.h>
 
+//#define SIGINT SIGHUP
+
 struct node {
   pid_t pid;
   pid_t oldpid;
@@ -60,11 +62,16 @@ static void sethandler(void (*handler)(int), int sig, int flag) {
 
 static char* splitstring(char** string) {
   char* next = *string;
-  while (next = strchr(next, '\n')) {
-    *(next++) = '\0';
-    if (! **string) *string = next;
-  };
-  return next && *next ? next : NULL;
+
+  if (! *next) return NULL;
+  while (*next ==  '\n') next++;
+  if (**string == '\n') *string = next;
+
+  while (*next && *next != '\n') next++;
+  if (*next) *(next++) = '\0';
+
+  while (*next && *next == '\n') next++;
+  return *next ? next : NULL;
 }
 
 static void lognode(struct node* node) {
@@ -365,6 +372,7 @@ static void body(void) {
       default:
 	if (close(pipefd[1]))
 	  errorxy("Unable to close write end of pipe in parent");
+	nodes->node[i].fd = pipefd[0];
 	//if (fcntl(pipefd[0], F_SETFL, O_NONBLOCK) == -1)
 	//  errorxy("Unable to set read end of pipe nonblocking");
     }
