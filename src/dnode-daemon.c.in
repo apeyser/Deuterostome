@@ -29,8 +29,7 @@ struct nodes {
 } *nodes = NULL;
 
 #define QUIT_TIME 20
-#define WAIT_TIME 20
-#define CHILD_TIME 10
+#define READ_TIME 2
 
 static long renice;
 
@@ -73,11 +72,25 @@ static void lognode(struct node* node) {
   ssize_t s, s_;
   char* next;
   char* last;
+  static struct timeval t_ = {READ_TIME, 0};
+  struct timeval t = t_;
+  fd_set readf;
+  FD_ZERO(&readf);
 
   do {
+    int sel;
     s = 0;
-    while ((s_ = read(node->fd, buffer + s, sizeof(buffer-1) - s)) > 0) 
+    FD_SET(node->fd, &readf);
+    while ((sel = select(1, &read, NULL, NULL, &t)) > 0) {
+      if ((s_ = read(node->fd, buffer + s, sizeof(buffer-1) - s)) <= 0) break;
       s += s_;
+      t = t_;
+    }
+    if (sel < 0) {
+      if (errno == EINTR) s_ = -1;
+      else
+	errorxy("Unable to select on child %i, fd %i", node->oldpid, node->fd);
+    }
 
     if (! s) continue;
     else if (s_ < 0) {
@@ -341,8 +354,8 @@ static void body(fd_set* read) {
 	FD_SET(nodes->node[i].fd = pipefd[0], read);
 	if (close(pipefd[1]))
 	  errorxy("Unable to close write end of pipe in parent");
-	if (fcntl(pipefd[0], F_SETFL, O_NONBLOCK) == -1)
-	  errorxy("Unable to set read end of pipe nonblocking");
+	//if (fcntl(pipefd[0], F_SETFL, O_NONBLOCK) == -1)
+	//  errorxy("Unable to set read end of pipe nonblocking");
     }
   }
 }
