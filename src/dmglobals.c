@@ -110,4 +110,5 @@ char libDM_is_dll(void) {return 1;}
 #if ! DM_X_DISPLAY_MISSING
 #include "xhack.h"
 jmp_buf xhack_buf;
+char xhack_jmpd = 0;
 #endif

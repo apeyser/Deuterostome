@@ -9,45 +9,70 @@
 #include <setjmp.h>
 
 extern jmp_buf xhack_buf;
+extern char xhack_jmpd;
 
 #define H(...) __VA_ARGS__
 
-#define xhackr(name, type, err, paramslist, params)		\
-  DM_INLINE_STATIC type H##name(Display* d, paramslist) {	\
-    if (! d) return (err);					\
-    if (setjmp(xhack_buf)) return (err);			\
-    return name(d, params);					\
+static int xhack_setjmp_(void) {
+  int r;
+  xhack_jmpd = 1;
+  r = setjmp(xhack_buf);
+  if (r) xhack_jmpd = 0;
+  return r;
+}
+
+static void xhack_longjmp(void) {
+  if (xhack_jmpd) longjmp(xhack_buf, 1);
+}
+
+#define xhackr_setjmp(type, err, func)	do {			\
+    type xhackr_r;							\
+    if (xhack_setjmp_()) return (err);				\
+    xhackr_r = func;							\
+    xhack_jmpd = 0;						\
+    return xhackr_r;\
+  } while (0)
+
+#define xhack_setjmp(func) do {			\
+    if (xhack_setjmp_()) return;		\
+    func;					\
+    xhack_jmpd = 0;				\
+  } while (0)
+
+#define xhackr(name, type, err, paramslist, params)			\
+  DM_INLINE_STATIC type H##name(Display* xhackr_d, paramslist) {	\
+    if (! xhackr_d) return (err);					\
+    xhackr_setjmp(type, (err), name(xhackr_d, params));			\
   }
 
 #define xhack(name, paramslist, params)			\
   xhackr(name, int, 0, H(paramslist), H(params))
 
 #define xhack0(name)				\
-  DM_INLINE_STATIC int H##name(Display* d) {	\
-    if (! d) return 0;				\
-    if (setjmp(xhack_buf)) return 0;		\
-    return name(d);				\
+  DM_INLINE_STATIC int H##name(Display* xhackr_d) {	\
+    if (! xhackr_d) return 0;				\
+    xhackr_setjmp(int, 0, name(xhackr_d));			\
   }
 
-#define xhack0r(name, type, err)		\
-  DM_INLINE_STATIC type H##name(Display* d) {	\
-    if (! d) return (err);			\
-    if (setjmp(xhack_buf)) return (err);	\
-    return name(d);				\
+#define xhack0r(name, type, err)			\
+  DM_INLINE_STATIC type H##name(Display* xhackr_d) {	\
+    if (! xhackr_d) return (err);			\
+    xhackr_setjmp(type, (err), name(xhackr_d));		\
   }
 
-#define xhackv(name, paramslist, params)			\
-  DM_INLINE_STATIC void H##name(Display* d, paramslist) {	\
-    if (! d) return;						\
-    if (setjmp(xhack_buf)) return;				\
-    name(d, params);						\
-  }
+#define xhackv(name, paramslist, params)				\
+  DM_INLINE_STATIC void H##name(Display* xhackr_d, paramslist) {	\
+    if (! xhackr_d) return;						\
+    xhack_setjmp(name(xhackr_d, params));				\
+ }
 
 #define xhacks(name, paramslist, params)	\
   xhackr(name, Status, 0, H(paramslist), H(params))
 
 #define xhackd(name, paramlist, params)		\
-  xhack(name, H(Drawable dr, GC g, paramlist), H(dr, g, params))
+  xhack(name, \
+	H(Drawable xhackr_dr, GC xhackr_g, paramlist),	\
+	H(xhackr_dr, xhackr_g, params))
 
 xhack0(XCloseDisplay);
 xhack0(XFlush);

@@ -18,6 +18,10 @@
 
 #include "config.h"
 
+#if ! defined __GNUC__ && ! defined __attribute__
+#define __attribute__(attr)
+#endif // ! defined __GNUC__ && ! defined __attribute__
+
 //#define SIGINT SIGHUP
 
 struct node {
@@ -42,7 +46,8 @@ static long renice;
 #define errorxy(...) errorx(1, 0, 0, __VA_ARGS__)
 #define warnxn(...)  errorx(0, 1, 0, __VA_ARGS__)
 #define warnxy(...)  errorx(1, 1, 0, __VA_ARGS__)
-static void errorx(char doerrno, char warn, char die, const char* format, ...);
+static void errorx(char doerrno, char warn, char die, const char* format, ...)
+  __attribute__ ((format (printf, 4, 5)));
 
 #if HAVE_SYS_PRCTL_H && HAVE_PRCTL
 #include <sys/prctl.h>
@@ -391,6 +396,9 @@ const char* args(const int argc, const char* argv[]) {
 
   return pidfilename;
 }
+
+static void killdaemon(pid_t pid, sigset_t* oldset, const char* format, ...) 
+  __attribute__ ((format (printf, 3, 4)));
 
 static void killdaemon(pid_t pid, sigset_t* oldset, const char* format, ...) {
   int s;
