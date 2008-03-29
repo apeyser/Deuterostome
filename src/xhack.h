@@ -13,12 +13,18 @@ extern char xhack_jmpd;
 
 #define H(...) __VA_ARGS__
 
-static int xhack_setjmp_(void) {
+#define XHACK_DEBUG 1
+
+static int xhack_setjmp_(const char* mode) {
   int r;
   xhack_jmpd = 1;
-  r = setjmp(xhack_buf);
-  if (r) xhack_jmpd = 0;
-  return r;
+  if (XHACK_DEBUG) fprintf(stderr, "Entering xhack mode for %s", mode);
+  if ((r = setjmp(xhack_buf))) {
+    xhack_jmpd = 0;
+    if (XHACK_DEBUG) fprintf(stderr, "Exiting xhack mode for %s", mode);
+    return 1;
+  }
+  return 0;
 }
 
 static void xhack_longjmp(void) {
@@ -26,45 +32,47 @@ static void xhack_longjmp(void) {
   else fprintf(stderr, "Not in xhack mode\n");
 }
 
-#define xhackr_setjmp(type, err, func)	do {			\
+#define xhackr_setjmp(type, err, name, params)	do {			\
     type xhackr_r;							\
-    if (xhack_setjmp_()) return (err);				\
-    xhackr_r = func;							\
-    xhack_jmpd = 0;						\
+    if (xhack_setjmp_(#name)) return (err);				\
+    xhackr_r = name(params);						\
+    xhack_jmpd = 0;							\
+    if (XHACK_DEBUG)							\
+      fprintf(stderr, "Exiting xhack mode for %s", #name);		\
     return xhackr_r;\
   } while (0)
 
-#define xhack_setjmp(func) do {			\
-    if (xhack_setjmp_()) return;		\
-    func;					\
+#define xhack_setjmp(name, params) do {		\
+    if (xhack_setjmp_(#name)) return;		\
+    name(params);				\
     xhack_jmpd = 0;				\
   } while (0)
 
 #define xhackr(name, type, err, paramslist, params)			\
   DM_INLINE_STATIC type H##name(Display* xhackr_d, paramslist) {	\
     if (! xhackr_d) return (err);					\
-    xhackr_setjmp(type, (err), name(xhackr_d, params));			\
+    xhackr_setjmp(type, (err), name, H(xhackr_d, params));		\
   }
 
 #define xhack(name, paramslist, params)			\
   xhackr(name, int, 0, H(paramslist), H(params))
 
-#define xhack0(name)				\
+#define xhack0(name)					\
   DM_INLINE_STATIC int H##name(Display* xhackr_d) {	\
     if (! xhackr_d) return 0;				\
-    xhackr_setjmp(int, 0, name(xhackr_d));			\
+    xhackr_setjmp(int, 0, name, H(xhackr_d));		\
   }
 
 #define xhack0r(name, type, err)			\
   DM_INLINE_STATIC type H##name(Display* xhackr_d) {	\
     if (! xhackr_d) return (err);			\
-    xhackr_setjmp(type, (err), name(xhackr_d));		\
+    xhackr_setjmp(type, (err), name, H(xhackr_d));	\
   }
 
 #define xhackv(name, paramslist, params)				\
   DM_INLINE_STATIC void H##name(Display* xhackr_d, paramslist) {	\
     if (! xhackr_d) return;						\
-    xhack_setjmp(name(xhackr_d, params));				\
+    xhack_setjmp(name, H(xhackr_d, params));				\
  }
 
 #define xhacks(name, paramslist, params)	\
