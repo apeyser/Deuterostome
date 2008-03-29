@@ -23,6 +23,7 @@ static int xhack_setjmp_(void) {
 
 static void xhack_longjmp(void) {
   if (xhack_jmpd) longjmp(xhack_buf, 1);
+  else fprintf(stderr, "Not in xhack mode\n");
 }
 
 #define xhackr_setjmp(type, err, func)	do {			\
