@@ -314,7 +314,6 @@ SUBDIRS = libltdl src plugins $(BASH_DIR) ps \
 
 ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS = --enable-plugins --enable-daemon
-DISTPKG = dm-4.0.tar.gz 
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -769,12 +768,15 @@ gentoo-setup: rsync
 			ebuild --force $$i digest || exit 1; \
 		done \
 	)
+
 .PHONY: rsync
 rsync: dist
-	scp $(DISTPKG) root@deli1:/usr/local/portage/distfiles/
+	scp $(DIST_ARCHIVES) root@deli1:/usr/local/portage/distfiles/
 	source /etc/make.conf \
 	&& if test -z "$$DISTDIR" ; then DISTDIR=/usr/portage/distfiles; fi \
-	&& sudo rsync -a rsync://deli1/gentoo-local/distfiles/$(DISTPKG) $${DISTDIR}
+	&& sudo rsync -a \
+		rsync://deli1/gentoo-local/distfiles/$(DIST_ARCHIVES) \
+		$${DISTDIR}
 
 .PHONY: ebuild
 ebuild: gentoo-setup

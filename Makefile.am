@@ -46,13 +46,14 @@ gentoo-setup: rsync
 		done \
 	)
 
-DISTPKG = dm-4.0.tar.gz 
 .PHONY: rsync
 rsync: dist
-	scp $(DISTPKG) root@deli1:/usr/local/portage/distfiles/
+	scp $(DIST_ARCHIVES) root@deli1:/usr/local/portage/distfiles/
 	source /etc/make.conf \
 	&& if test -z "$$DISTDIR" ; then DISTDIR=/usr/portage/distfiles; fi \
-	&& sudo rsync -a rsync://deli1/gentoo-local/distfiles/$(DISTPKG) $${DISTDIR}
+	&& sudo rsync -a \
+		rsync://deli1/gentoo-local/distfiles/$(DIST_ARCHIVES) \
+		$${DISTDIR}
 
 .PHONY: ebuild
 ebuild: gentoo-setup
