@@ -52,7 +52,7 @@ rsync: dist
 	scp $(DISTPKG) root@deli1:/usr/local/portage/distfiles/
 	source /etc/make.conf \
 	&& if test -z "$$DISTDIR" ; then DISTDIR=/usr/portage/distfiles; fi \
-	&& sudo cp -a $(DISTPKG) $${DISTDIR}
+	&& sudo rsync -a rsync://deli1/gentoo-local/distfiles/$(DISTPKG) $${DISTDIR}
 
 .PHONY: ebuild
 ebuild: gentoo-setup
