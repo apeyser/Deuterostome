@@ -105,27 +105,12 @@ static void handlestatus(const char* type, int status, pid_t pid) {
 }
 
 static void killnode(pid_t* pid, int sig) {
-  sigset_t new, old;
-  char p;
-  int iters = 2;
   if (! *pid) return;
-  if (sigfillset(&new)) fataly("Daemon unable to set mask to *");
-  if ((p = sigprocmask(SIG_BLOCK, &new, &old))) 
-    errorxy("Daemon unable to set sigprocmask");
- START:
-  if (! kill(*pid, sig)) {
-    switch (errno) {
-      case ESRCH: *pid = 0; break;
-      case EINTR: 
-	if (iters--) goto START;
-	fataly("Unable to get through a kill %i to %i", sig, *pid);
-      default:
-	if (!p) sigprocmask(SIG_SETMASK, &old, NULL);
-	fataly("Unable to kill %i to %i", sig, *pid);
-    }
+
+  if (kill(*pid, sig)) {
+    if (errno == ESRCH) *pid = 0;
+    else fataly("Daemon unable to kill %i to %i", sig, *pid);
   }
-  if (! p && sigprocmask(SIG_SETMASK, &old, NULL))
-    errorxy("Daemon unable to unset sigprocmask");
 }
 
 static void waitdead(void) {
