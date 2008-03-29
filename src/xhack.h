@@ -13,15 +13,19 @@ extern char xhack_jmpd;
 
 #define H(...) __VA_ARGS__
 
-#define XHACK_DEBUG 1
+#define XHACK_DEBUG 0
+#if XHACK_DEBUG
+#warning "XHACK_DEBUG on"
+#endif //XHACK_DEBUG
 
 static int xhack_setjmp_(const char* mode) {
   int r;
+  if (xhack_jmpd) return 0;
   xhack_jmpd = 1;
-  if (XHACK_DEBUG) fprintf(stderr, "Entering xhack mode for %s", mode);
+  if (XHACK_DEBUG) fprintf(stderr, "Entering xhack mode for %s\n", mode);
   if ((r = setjmp(xhack_buf))) {
     xhack_jmpd = 0;
-    if (XHACK_DEBUG) fprintf(stderr, "Exiting xhack mode for %s", mode);
+    if (XHACK_DEBUG) fprintf(stderr, "Exiting xhack mode for %s\n", mode);
     return 1;
   }
   return 0;
@@ -29,23 +33,25 @@ static int xhack_setjmp_(const char* mode) {
 
 static void xhack_longjmp(void) {
   if (xhack_jmpd) longjmp(xhack_buf, 1);
-  else fprintf(stderr, "Not in xhack mode\n");
+  else if (XHACK_DEBUG) fprintf(stderr, "Not in xhack mode\n");
 }
 
 #define xhackr_setjmp(type, err, name, params)	do {			\
     type xhackr_r;							\
+    int xhack_jmpds = xhack_jmpd;					\
     if (xhack_setjmp_(#name)) return (err);				\
     xhackr_r = name(params);						\
-    xhack_jmpd = 0;							\
+    xhack_jmpd = xhack_jmpds;						\
     if (XHACK_DEBUG)							\
-      fprintf(stderr, "Exiting xhack mode for %s", #name);		\
+      fprintf(stderr, "Exiting xhack mode for %s\n", #name);		\
     return xhackr_r;\
   } while (0)
 
 #define xhack_setjmp(name, params) do {		\
+    int xhack_jmpds = xhack_jmpd;		\
     if (xhack_setjmp_(#name)) return;		\
     name(params);				\
-    xhack_jmpd = 0;				\
+    xhack_jmpd = xhack_jmpds;			\
   } while (0)
 
 #define xhackr(name, type, err, paramslist, params)			\
