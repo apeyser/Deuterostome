@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <string.h>
 #include "paths.h"
+#include "dm3.h"
 
 #ifndef h_errno
 extern int h_errno;
@@ -508,9 +509,33 @@ P op_getmyname(void)
 {
   if (o_1 < FLOORopds) return(OPDS_UNF);
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
-  if (gethostname((char*)VALUE_BASE(o_1),ARRAY_SIZE(o_1)) == -1)
-    return(-errno);
+  if (gethostname((char*)VALUE_PTR(o_1), ARRAY_SIZE(o_1)) == -1)
+    return -errno;
 
   ARRAY_SIZE(o_1) = strlen((char*)VALUE_BASE(o_1));
+  return OK;
+}
+
+/*------------------------------------------- getmyfqdn
+    stringbuf | substring
+
+returns the host's name
+*/
+
+P op_getmyfqdn(void)
+{
+  size_t len;
+  struct hostent* h;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
+  if (gethostname((char*)VALUE_PTR(o_1), ARRAY_SIZE(o_1)-1) == -1)
+    return -errno;
+
+  VALUE_PTR(o_1)[ARRAY_SIZE(o_1)-1] = '\0';
+  if (! (h = gethostbyname((char*) VALUE_PTR(o_1)))) return -h_errno;
+  if ((len = strlen(h->h_name)) > ARRAY_SIZE(o_1)) return RNG_CHK;
+  moveB((B*) h->h_name, VALUE_PTR(o_1), len);
+  ARRAY_SIZE(o_1) = len;
+
   return OK;
 }

@@ -469,3 +469,21 @@ AC_DEFUN([CF_AC_CHECK_HEADER_WITH], [dnl
   AC_CHECK_HEADER([$1], [$3], [$4])
   ac_includes_default="${ac_includes_default}"
 ])
+
+AC_DEFUN([CF_AC_CHECK_XSEC], [dnl
+  cf_check_sec=false
+  CF_AC_CHECK_HEADER_WITH([X11/extensions/security.h], 
+    [X11/Xlib.h X11/Xutil.h], [
+    AC_DEFINE([HAVE_X11_EXTENSIONS_SECURITY_H], 
+              [1], 
+	      [Define to 1 if you have <X11/extensions/security.h])
+    cf_check_sec=:
+  ])
+  if $cf_check_sec ; then
+    AC_CHECK_LIB([Xext], [XSecurityGenerateAuthorization], [
+      X_LDFLAGS="$X_LDFLAGS -lXext"
+    ], [
+      AC_MSG_ERROR([Checking for Xext library for XSecurity... not found])
+    ])
+  fi
+])

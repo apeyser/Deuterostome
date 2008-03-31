@@ -18,6 +18,7 @@ B *sysop[] = {
   (B*)"send",           (B *)op_send,
   (B*)"getsocket",      (B *)op_getsocket,
   (B*)"getmyname",      (B *)op_getmyname,
+  (B*)"getmyfqdn",      (B *)op_getmyfqdn,
 /*-- X windows */
   (B*)"Xwindows",       (B *)op_Xwindows,
   (B*)"Xdisplayname",   (B *)op_Xdisplayname,
@@ -37,6 +38,7 @@ B *sysop[] = {
   (B*)"xauthrev",       (B *)op_xauthrev,
   (B*)"xauthset",       (B *)op_xauthset,
   (B*)"xauthgen",       (B *)op_xauthgen,
+  (B*)"xauth",          (B *)op_xauth,
 /*-- operand stack */
   (B*)"pop",            (B *)op_pop,
   (B*)"exch",           (B *)op_exch,

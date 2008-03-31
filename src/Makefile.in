@@ -92,8 +92,8 @@ libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 am__libdmglobals_la_SOURCES_DIST = dmglobals.c dmnuminc.h dmnum.c \
 	dsp1f.h dsp1.c dsp2.c paths.h dm1.c dm2.c dm3.c dm4.c dm5.c \
 	dm6.c dm7.c dm8.c dm9.c pluginlib.h plugin.c dm-types.c \
-	xhack.h error-local.h matrix.c matrix.h threads.c regex.c \
-	dm-convert.h dm-convert.c
+	xhack.h error-local.h matrix.c matrix.h threads.c dregex.c \
+	dregex.h dm-convert.h dm-convert.c
 am__objects_2 = libdmglobals_la-dmglobals.lo libdmglobals_la-dmnum.lo \
 	libdmglobals_la-dsp1.lo libdmglobals_la-dsp2.lo \
 	libdmglobals_la-dm1.lo libdmglobals_la-dm2.lo \
@@ -103,7 +103,7 @@ am__objects_2 = libdmglobals_la-dmglobals.lo libdmglobals_la-dmnum.lo \
 	libdmglobals_la-dm9.lo libdmglobals_la-plugin.lo \
 	libdmglobals_la-dm-types.lo
 @ENABLE_THREADS_TRUE@am__objects_3 = libdmglobals_la-threads.lo
-@ENABLE_REGEX_TRUE@am__objects_4 = libdmglobals_la-regex.lo
+@ENABLE_REGEX_TRUE@am__objects_4 = libdmglobals_la-dregex.lo
 am_libdmglobals_la_OBJECTS = $(am__objects_2) \
 	libdmglobals_la-matrix.lo $(am__objects_3) $(am__objects_4) \
 	libdmglobals_la-dm-convert.lo
@@ -171,9 +171,9 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 nodist_pkgconfiglibDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(nodist_pkgconfiglib_DATA)
 nodist_pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
-am__pkginclude_HEADERS_DIST = dm.h plugin.h pluginlib.h cppplugin.h \
-	dmx.h threads.h error-local.h dm-snprintf.h srandomdev-local.h \
-	dmnum.h basic-defs.h dm-types.h
+am__pkginclude_HEADERS_DIST = dm.h dm3.h plugin.h pluginlib.h \
+	cppplugin.h dmx.h threads.h error-local.h dm-snprintf.h \
+	srandomdev-local.h dmnum.h basic-defs.h dm-types.h
 pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(nodist_pkginclude_HEADERS) $(pkginclude_HEADERS)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
@@ -403,7 +403,7 @@ edit = sed -e 's,[@]bindir[@],$(bindir),g' -e 's,[@]srcdir[@],$(srcdir),g'
 @ENABLE_ATLAS_TRUE@ATLAS_ACTIVATE = -DATLAS_LIB
 @ENABLE_THREADS_TRUE@THREAD_HDR = threads.h
 @ENABLE_THREADS_TRUE@THREADSRC = threads.c
-@ENABLE_REGEX_TRUE@REGEX_SRC = regex.c
+@ENABLE_REGEX_TRUE@REGEX_SRC = dregex.c dregex.h
 EXTRA_DIST = dnode-nice.c.in dnode-daemon.c.in paths.h.in
 DISTCLEANFILES = dm-config.h
 AM_CPPFLAGS = -DDM_HAVE_CONFIG_H
@@ -414,7 +414,7 @@ INCLUDE = @INCLTDL@
 @ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@CPPPLUGIN_HDR = cppplugin.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_HDR = plugin.h pluginlib.h $(CPPPLUGIN_HDR)
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_LD = @LIBLTDL@
-pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
+pkginclude_HEADERS = dm.h dm3.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
 	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h \
 	basic-defs.h dm-types.h
 
@@ -644,11 +644,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm9.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dmglobals.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dmnum.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dregex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dsp1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dsp2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-matrix.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-plugin.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-regex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-threads.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-word-order.Po@am__quote@
 
@@ -897,12 +897,12 @@ libdmglobals_la-threads.lo: threads.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -c -o libdmglobals_la-threads.lo `test -f 'threads.c' || echo '$(srcdir)/'`threads.c
 
-libdmglobals_la-regex.lo: regex.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -MT libdmglobals_la-regex.lo -MD -MP -MF $(DEPDIR)/libdmglobals_la-regex.Tpo -c -o libdmglobals_la-regex.lo `test -f 'regex.c' || echo '$(srcdir)/'`regex.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmglobals_la-regex.Tpo $(DEPDIR)/libdmglobals_la-regex.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='regex.c' object='libdmglobals_la-regex.lo' libtool=yes @AMDEPBACKSLASH@
+libdmglobals_la-dregex.lo: dregex.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -MT libdmglobals_la-dregex.lo -MD -MP -MF $(DEPDIR)/libdmglobals_la-dregex.Tpo -c -o libdmglobals_la-dregex.lo `test -f 'dregex.c' || echo '$(srcdir)/'`dregex.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmglobals_la-dregex.Tpo $(DEPDIR)/libdmglobals_la-dregex.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dregex.c' object='libdmglobals_la-dregex.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -c -o libdmglobals_la-regex.lo `test -f 'regex.c' || echo '$(srcdir)/'`regex.c
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -c -o libdmglobals_la-dregex.lo `test -f 'dregex.c' || echo '$(srcdir)/'`dregex.c
 
 libdmglobals_la-dm-convert.lo: dm-convert.c
 @am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -MT libdmglobals_la-dm-convert.lo -MD -MP -MF $(DEPDIR)/libdmglobals_la-dm-convert.Tpo -c -o libdmglobals_la-dm-convert.lo `test -f 'dm-convert.c' || echo '$(srcdir)/'`dm-convert.c

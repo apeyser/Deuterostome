@@ -486,8 +486,6 @@ DLL_SCOPE UW ascii[];
 
 /*----------------------- function prototypes ------------------------*/
 
-void makeDmemory(B *mem, L64 specs[5]);
-
 /*--- DM1 */
 P tokenize(B *stringframe);
 
@@ -530,13 +528,6 @@ P deendian_frame(B *frame, B isnonnative);
 //L deendian_dict(B* dict, B isnonnative);
 //L deendian_entries(B* doct, B isnonnative);
 void setupdirs(void);
-
-/*--- DM3 */
-P make_socket(UW port);
-P make_unix_socket(UW port);
-P fromsocket(P socket, B *msf);
-P tosocket(P socket, B *sf, B *cf);
-P toconsole(B *string, P stringlength);
 
 /*--- DMNUM */
 void DECODE(B *frame, BOOLEAN fauto, W prec, B *buf);
@@ -586,9 +577,6 @@ P op_setconsole(void);
 P op_console(void);
 P op_toconsole(void);
 P op_tostderr(void);
-P op_connect(void);
-P op_disconnect(void);
-P op_send(void);
 P op_flush(void);
 P op_nextevent(void);
 P op_vmresize(void);
@@ -596,8 +584,6 @@ P op_killsockets(void);
 P op_getstartupdir(void);
 P op_getconfdir(void);
 P op_gethomedir(void);
-P op_getsocket(void);
-P op_getmyname(void);
 P op_getmyport(void);
 
 P op_pop(void);
@@ -747,11 +733,6 @@ P op_matmul(void);
 P op_mattranspose(void);
 P op_dilute_add(void);
 P op_matvecmul(void);
-
-#if DM_ENABLE_REGEX
-P op_regex(void);
-P op_regexi(void);
-#endif //DM_ENABLE_REGEX
 
 #define ERRLEN (1000)
 

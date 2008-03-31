@@ -24,6 +24,14 @@ else !ENABLE_PERL
 PERL_DELETE = -e '$(PERL_START),$(PERL_END) d'
 endif !ENABLE_PERL
 
+REGEX_START = /^[[:space:]]*[@]ENABLE_REGEX_START[@][[:space:]]*$$/
+REGEX_END = /^[[:space:]]*[@]ENABLE_REGEX_END[@][[:space:]]*$$/
+if ENABLE_REGEX
+REGEX_DELETE = -e '$(REGEX_START) d' -e '$(REGEX_END) d'
+else !ENABLE_REGEX
+REGEX_DELETE = -e '$(REGEX_START),$(REGEX_END) d'
+endif !ENABLE_REGEX
+
 PLUGIN_START = /^[[:space:]]*[@]ENABLE_PLUGINS_START[@][[:space:]]*$$/
 PLUGIN_END = /^[[:space:]]*[@]ENABLE_PLUGINS_END[@][[:space:]]*$$/
 if ENABLE_PLUGINS
@@ -74,7 +82,8 @@ edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			$(XPS_DELETE) \
 			$(PERL_DELETE) \
 			$(EMACSCLIENT_EDIT) \
-			$(ATLAS_EDIT)
+			$(ATLAS_EDIT) \
+			$(REGEX_EDIT)
 
 theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in
 	rm -f $@ $@.tmp

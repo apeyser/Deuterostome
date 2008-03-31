@@ -60,6 +60,7 @@ P op_setinputfocus(void);
 P op_xauthrev(void);
 P op_xauthset(void);
 P op_xauthgen(void);
+P op_xauth(void);
 
 #endif
 

@@ -19,6 +19,8 @@
 #include "dm.h"
 #include "dmx.h"
 #include "xhack.h"
+#include "dm3.h"
+#include "dregex.h"
 
 P init_sockaddr(struct sockaddr_in *name, const char *hostname, P port);
 

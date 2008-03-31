@@ -1021,12 +1021,12 @@ P op_Xdisplayname(void)
     if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
 
 #if ! X_DISPLAY_MISSING
-		if (dvtdisplay == NULL) {
+    if (dvtdisplay == NULL) {
 #endif
-			ARRAY_SIZE(o_1) = 0;
-			return OK;
+      ARRAY_SIZE(o_1) = 0;
+      return OK;
 #if ! X_DISPLAY_MISSING
-		}
+    }
 
     len = strlen((char*)displayname);
     if (ARRAY_SIZE(o_1) < len) return RNG_CHK;
@@ -1199,3 +1199,24 @@ P op_xauthgen(void)
 #endif
 }
   
+/*----------------------------------------------- xauth
+
+   -- | bool
+
+  - reports whether xauth is available (if not, xauth operators
+    will return the error X_SEC_LIB)
+*/
+
+P op_xauth(void)
+{
+  if (o1 >= CEILopds) return OPDS_OVF;
+  TAG(o1) = BOOL; ATTR(o1) = 0;
+#if X_DISPLAY_MISSING || ! HAVE_X11_EXTENSIONS_SECURITY_H
+  BOOL_VAL(o1) = FALSE;
+#else
+  BOOL_VAL(o1) = (dvtdisplay != NULL);
+#endif
+  FREEopds = o2;
+  return OK;
+}
+
