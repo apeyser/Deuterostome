@@ -49,11 +49,6 @@ sys-libs/glibc
 
 RDEPEND="${DEPEND}"
 
-#src_nofetch() {
-#    einfo "Please fetch ${SRC_URI}:"
-#    ewarn "rsync -a ${SRC_URI} ${DISTDIR}"
-#}
-
 add_myconf() {
     myconf=("${myconf[@]}" "$@")
 }
