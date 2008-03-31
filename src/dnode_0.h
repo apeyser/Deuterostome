@@ -72,6 +72,9 @@ B *sysop[] = {
   (B*)"drawtext",       (B *)op_drawtext,
   (B*)"makewindowtop",  (B *)op_makewindowtop,
   (B*)"setinputfocus",  (B *)op_setinputfocus,
+  (B*)"xauthrev",       (B *)op_xauthrev,
+  (B*)"xauthset",       (B *)op_xauthset,
+  (B*)"xauthgen",       (B *)op_xauthgen,
 
 /*-- operand stack */
   (B*)"pop",            (B *)op_pop,
@@ -283,6 +286,7 @@ P syserrc[] = {
   CLOCK_ERR, LONG_OVF,
   MATRIX_INT_ERR,
   NO_PLUGINS,
+  X_SEC_MISS, X_SEC_GEN, X_SEC_REV, X_SEC_LIB,
   0L
 };
 
@@ -372,6 +376,10 @@ B* syserrm[] = {
   (B*)"** Error loading 64 bit integer into 32 bit machine",
   (B*)"Matrix Error: Internal Error - message on stack",
   (B*)"Plugin Error: Compiled without plugin support",
+  (B*)"** X Security Extension missing",
+  (B*)"** X Security Extension unable to generate",
+  (B*)"** X Security Extension unable to revoke",
+  (B*)"** X Security Extension library missing",
 };
 
 // original directory for vmresize

@@ -561,6 +561,7 @@ int xioerrorhandler(Display* display) {
   dvtdisplay = NULL;
   int_Xdisconnect(TRUE);
   xhack_longjmp();
+  return 0;
 }
 
 int xerrorhandler(Display* display, XErrorEvent* event) {

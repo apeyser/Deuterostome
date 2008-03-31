@@ -381,11 +381,6 @@ extern "C" {
 #define LIB_INIT    0x0000090EL /* __init failed for lib */
 #define NOPLUGINS   0x0000090FL /* compiled without plugins */
 
-#define NO_XWINDOWS 0x00000A01L /* X windows unavailable                 */
-#define X_ERR       0x00000A02L /* X lib error                           */
-#define X_BADFONT   0x00000A03L /* X font does not exist                 */
-#define X_BADHOST   0x00000A04L /* X server cannot be connected          */
-
 #define BAD_ARR     0x00000B00L /* dmnuminc debug error */
 #define SBOX_SET    0x00000B01L /* box already has a cleanup */		
 

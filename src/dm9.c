@@ -1036,3 +1036,166 @@ P op_Xdisplayname(void)
     return OK;
 #endif
 }
+
+//------------------------------------------------- xauthrev
+// id | --
+
+P op_xauthrev(void) 
+{
+#if X_DISPLAY_MISSING
+  return NO_XWINDOWS;
+#elif ! HAVE_X11_EXTENSIONS_SECURITY_H
+  return X_SEC_LIB;
+#else
+  XSecurityAuthorization id;
+  LBIG id_;
+
+  if (! dvtdisplay) return NO_XWINDOWS;
+
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != NUM) return OPD_CLA;
+  if (! VALUE(o_1, &id_)) return UNDF_VAL;
+  id = (XSecurityAuthorization) id_;
+
+  if (! HXSecurityRevokeAuthorization(dvtdisplay, id))
+    return X_SEC_REV;
+
+  FREEopds = o_1;
+  return OK;
+#endif
+}
+
+//------------------------------------------------ xauthset
+// (name) <b data> | --
+//
+
+P op_xauthset(void) {
+#if X_DISPLAY_MISSING
+  return NO_XWINDOWS;
+#else
+  char* name = NULL;
+  unsigned short name_len;
+  char* data = NULL;
+  unsigned short data_len;
+  P ret = OK;
+
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != (ARRAY | BYTETYPE) 
+      || TAG(o_2) != (ARRAY | BYTETYPE)) return OPD_ERR;
+
+  if (ARRAY_SIZE(o_1) > (8*sizeof(short)-1)) return RNG_CHK;
+  if (ARRAY_SIZE(o_2) > (8*sizeof(short)-1)) return RNG_CHK;
+  name_len = (unsigned short) ARRAY_SIZE(o_2);
+  data_len = (unsigned short) ARRAY_SIZE(o_1);
+
+  if (! (name = (char*) malloc(name_len+1))
+      || ! (data = (char*) malloc(data_len+1))) {
+    ret = MEM_OVF;
+    goto RET;
+  }
+
+  moveB(VALUE_PTR(o_2), name, name_len);
+  name[name_len] = '\0';
+  moveB(VALUE_PTR(o_1), data, data_len);
+  data[data_len] = '\0';
+
+  XSetAuthorization(name, name_len, data, data_len);
+  FREEopds = o_2;
+  
+ RET:
+  if (name) free(name);
+  if (data) free(data);
+  return ret;
+#endif
+}
+
+//------------------------------------------------ xauthgen
+// (name) <b data> bool-trusted int-timeout 
+//            | (new-name) <b new-data> id/x 
+//
+
+P op_xauthgen(void) 
+{
+#if X_DISPLAY_MISSING
+  return NO_XWINDOWS;
+#elif ! HAVE_X11_EXTENSIONS_SECURITY_H
+  return X_SEC_LIB;
+#else
+  P timeout;
+  BOOLEAN trusted;
+  Xauth* authin = NULL;
+  Xauth* authout = NULL;
+  XSecurityAuthorizationAttributes attr;
+  XSecurityAuthorization id;
+  char* data; unsigned short data_len;
+  char* name; unsigned short name_len;
+  int maj_ver, min_ver;
+  unsigned long eventmask;
+  P ret = OK;
+  B* oldfreevm = FREEvm;
+  B* dataf;
+
+  if (! dvtdisplay) return NO_XWINDOWS;
+
+  if (o_4 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != NUM) return OPD_CLA;
+  if (! PVALUE(o_1, &timeout)) return UNDF_VAL;
+  if (TAG(o_3) != BOOL) return OPD_ERR;
+  trusted = BOOL_VAL(o_3);
+  if (TAG(o_3) != (ARRAY | BYTETYPE)) return OPD_ERR;
+  data = (char*) VALUE_PTR(o_3);
+  if (ARRAY_SIZE(o_3) > (1 << (8*sizeof(short)-1))) return RNG_CHK;
+  data_len = ARRAY_SIZE(o_3);
+  if (TAG(o_4) != (ARRAY | BYTETYPE)) return OPD_ERR;
+  name = (char*) VALUE_PTR(o_4);
+  if (ARRAY_SIZE(o_4) > (1 << (8*sizeof(short)-1))) return RNG_CHK;
+  name_len = ARRAY_SIZE(o_4);
+
+  if (! HXSecurityQueryExtension(dvtdisplay, &maj_ver, &min_ver))
+    return X_SEC_MISS;
+
+  if (! (authin = XSecurityAllocXauth()))
+    return MEM_OVF;
+  
+  authin->name = name;
+  authin->name_length = name_len;
+  authin->data = data;
+  authin->data_length = data_len;
+
+  attr.trust_level = trusted 
+    ? XSecurityClientTrusted : XSecurityClientUntrusted;
+  attr.timeout = timeout;
+  eventmask = XSecurityTrustLevel|(timeout>0 ? XSecurityTimeout : 0);
+  
+  if (! (authout = HXSecurityGenerateAuthorization(dvtdisplay, authin,
+						   eventmask, &attr, &id))) {
+    ret = X_SEC_GEN;
+    goto RET;
+  }
+
+  if (CEILvm <= FREEvm + FRAMEBYTES + DALIGN(authout->data_length)) {
+    ret = VM_OVF;
+    goto RET;
+  }
+  
+  dataf = FREEvm;
+  TAG(dataf) = (ARRAY | BYTETYPE);
+  VALUE_PTR(dataf) = dataf + FRAMEBYTES;
+  ARRAY_SIZE(dataf) = authout->data_length;
+  moveB(authout->data, VALUE_PTR(dataf), authout->data_length);
+  FREEvm += FRAMEBYTES + DALIGN(authout->data_length);
+  oldfreevm = FREEvm;
+
+  TAG(o_2) = (NUM | LONGBIGTYPE);
+  LONGBIG_VAL(o_2) = id;
+  moveframe(dataf, o_3);
+  FREEopds = o_1;
+
+ RET:
+  if (authin) XSecurityFreeXauth(authin);
+  if (authout) XSecurityFreeXauth(authout);
+  FREEvm = oldfreevm;
+  return ret;
+#endif
+}
+  

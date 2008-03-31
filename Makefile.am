@@ -57,7 +57,7 @@ rsync: dist
 
 .PHONY: ebuild
 ebuild: gentoo-setup
-	svn ci -m ''
+	svn ci -m '' gentoo
 	sudo layman -s gentoo-local
 
 gencode-all: gencode all

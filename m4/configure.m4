@@ -369,15 +369,15 @@ AC_DEFUN([CF_SUBST_DEFINE_UNQUOTED], [dnl
 
 AC_DEFUN([CF_AC_PATH_XTRA], [dnl
   AC_REQUIRE([AC_PATH_XTRA])
-	if test x"$no_x" == xyes ; then
-	  AM_CONDITIONAL([X_DISPLAY_MISSING], [:])
-		X_LDFLAGS=''
+  if test x"$no_x" == xyes ; then
+    AM_CONDITIONAL([X_DISPLAY_MISSING], [:])
+    X_LDFLAGS=''
   else
     AM_CONDITIONAL([X_DISPLAY_MISSING], [false])
-		X_LDFLAGS='$(X_LIBS) $(X_PRE_LIBS) -lX11 $(X_EXTRA_LIBS)'
+    X_LDFLAGS='$(X_LIBS) $(X_PRE_LIBS) -lX11 $(X_EXTRA_LIBS)'
   fi
   AC_SUBST(X_DISPLAY_MISSING) 
-	AC_SUBST(X_LDFLAGS) dnl
+  AC_SUBST(X_LDFLAGS) dnl
 ])
     
 AC_DEFUN([CF_ACX_PTHREAD], [dnl
@@ -457,4 +457,15 @@ AC_DEFUN([CF_C_INLINE], [dnl
   else
     AC_DEFINE([HAS_INLINE], [1], [Define to 1 if compiler has inline])
   fi dnl
+])
+
+AC_DEFUN([CF_AC_CHECK_HEADER_WITH], [dnl
+  cf_ac_includes_default="${ac_includes_default}"
+  for i in $2 ; do
+      ac_includes_default="
+#include <$i>
+"
+  done
+  AC_CHECK_HEADER([$1], [$3], [$4])
+  ac_includes_default="${ac_includes_default}"
 ])
