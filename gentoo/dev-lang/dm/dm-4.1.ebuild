@@ -31,7 +31,7 @@ IUSE="daemon emacs atlas setuid threads formats xclient X memory xauth"
 
 # A space delimited list of portage features to restrict. man 5 ebuild
 # for details.  Usually not needed.
-RESTRICT="strip fetch"
+RESTRICT="strip mirror primaryuri"
 
 DEPEND="
 emacs? (virtual/emacs)
@@ -43,16 +43,16 @@ X? (x11-terms/xterm)
 X? (x11-base/xorg-server)
 atlas? (sci-libs/blas-atlas)
 xclient? (x11-libs/libX11)
-xauth ? (x11-libs/libXext)
+xauth? (x11-libs/libXext)
 sys-libs/glibc
 "
 
 RDEPEND="${DEPEND}"
 
-src_nofetch() {
-    einfo "Please fetch ${SRC_URI}:"
-    ewarn "rsync -a ${SRC_URI} ${DISTDIR}"
-}
+#src_nofetch() {
+#    einfo "Please fetch ${SRC_URI}:"
+#    ewarn "rsync -a ${SRC_URI} ${DISTDIR}"
+#}
 
 add_myconf() {
     myconf=("${myconf[@]}" "$@")
