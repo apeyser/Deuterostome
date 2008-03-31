@@ -27,7 +27,7 @@ SLOT="0"
 
 KEYWORDS="~x86 ~amd64 ~ppc"
 
-IUSE="daemon emacs atlas setuid threads formats xclient X memory"
+IUSE="daemon emacs atlas setuid threads formats xclient X memory xauth"
 
 # A space delimited list of portage features to restrict. man 5 ebuild
 # for details.  Usually not needed.
@@ -43,6 +43,7 @@ X? (x11-terms/xterm)
 X? (x11-base/xorg-server)
 atlas? (sci-libs/blas-atlas)
 xclient? (x11-libs/libX11)
+xauth ? (x11-libs/libXext)
 sys-libs/glibc
 "
 
