@@ -17,6 +17,8 @@
 #include "dm.h"
 #include "dmx.h"
 #include "xhack.h"
+#include "dm3.h"
+#include "dregex.h"
 
 /*----------------- DM global variables -----------------------------*/
 

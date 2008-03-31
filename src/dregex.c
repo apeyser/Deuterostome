@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "dm.h"
+#include "dregex.h"
 
 #define REGEX_ERR(err) case REG_##err: return REGEX_##err
 

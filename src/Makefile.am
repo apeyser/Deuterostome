@@ -47,7 +47,7 @@ if ENABLE_THREADS
 endif ENABLE_THREADS
 
 if ENABLE_REGEX
-  REGEX_SRC=regex.c
+  REGEX_SRC=dregex.c dregex.h
 endif ENABLE_REGEX
 
 EXTRA_DIST = dnode-nice.c.in dnode-daemon.c.in paths.h.in
@@ -71,7 +71,7 @@ PLUGIN_HDR = plugin.h pluginlib.h $(CPPPLUGIN_HDR)
 PLUGIN_LD = @LIBLTDL@
 endif ENABLE_PLUGINS_SUPPORT
 
-pkginclude_HEADERS = dm.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
+pkginclude_HEADERS = dm.h dm3.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
 	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h \
 	basic-defs.h dm-types.h
 nodist_pkginclude_HEADERS = dm-config.h paths.h

@@ -6,6 +6,10 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+#if HAVE_X11_EXTENSIONS_SECURITY_H
+#include <X11/extensions/security.h>
+#endif //HAVE_X11_EXTENSIONS_SECURITY_H
+
 #include <setjmp.h>
 
 extern jmp_buf xhack_buf;
@@ -18,7 +22,9 @@ extern char xhack_jmpd;
 #warning "XHACK_DEBUG on"
 #endif //XHACK_DEBUG
 
-static int xhack_setjmp_(const char* mode) {
+#define XHACK_UNUSED(proto) proto __attribute__ ((__unused__)); proto
+
+XHACK_UNUSED(static int xhack_setjmp_(const char* mode)) {
   int r;
   if (xhack_jmpd) return 0;
   xhack_jmpd = 1;
@@ -31,7 +37,7 @@ static int xhack_setjmp_(const char* mode) {
   return 0;
 }
 
-static void xhack_longjmp(void) {
+XHACK_UNUSED(static void xhack_longjmp(void)) {
   if (xhack_jmpd) longjmp(xhack_buf, 1);
   else if (XHACK_DEBUG) fprintf(stderr, "Not in xhack mode\n");
 }
@@ -55,7 +61,7 @@ static void xhack_longjmp(void) {
   } while (0)
 
 #define xhackr(name, type, err, paramslist, params)			\
-  DM_INLINE_STATIC type H##name(Display* xhackr_d, paramslist) {	\
+  XHACK_UNUSED(DM_INLINE_STATIC type H##name(Display* xhackr_d, paramslist)) { \
     if (! xhackr_d) return (err);					\
     xhackr_setjmp(type, (err), name, H(xhackr_d, params));		\
   }
@@ -70,13 +76,13 @@ static void xhack_longjmp(void) {
   }
 
 #define xhack0r(name, type, err)			\
-  DM_INLINE_STATIC type H##name(Display* xhackr_d) {	\
+  XHACK_UNUSED(DM_INLINE_STATIC type H##name(Display* xhackr_d)) {	\
     if (! xhackr_d) return (err);			\
     xhackr_setjmp(type, (err), name, H(xhackr_d));	\
   }
 
 #define xhackv(name, paramslist, params)				\
-  DM_INLINE_STATIC void H##name(Display* xhackr_d, paramslist) {	\
+  XHACK_UNUSED(DM_INLINE_STATIC void H##name(Display* xhackr_d, paramslist)) { \
     if (! xhackr_d) return;						\
     xhack_setjmp(name, H(xhackr_d, params));				\
  }
@@ -152,6 +158,15 @@ xhack0r(XDefaultScreenOfDisplay, Screen*, NULL);
 xhack0r(XDefaultRootWindow, Window, 0);
 xhacks(XGetWindowAttributes, H(Window w, XWindowAttributes* a), H(w, a));
 
+#if HAVE_X11_EXTENSIONS_SECURITY_H
+xhacks(XSecurityQueryExtension, H(int* m1, int* m2), H(m1, m2));
+xhackr(XSecurityGenerateAuthorization, Xauth*, NULL,
+       H(Xauth* ai, unsigned long m, XSecurityAuthorizationAttributes* a,
+	 XSecurityAuthorization* id),
+       H(ai, m, a, id));
+xhacks(XSecurityRevokeAuthorization, H(XSecurityAuthorization i), H(i));
+#endif //HAVE_X11_EXTENSIONS_SECURITY_H
+
 #undef xhackd
 #undef xhacks
 #undef xhackv
@@ -159,8 +174,9 @@ xhacks(XGetWindowAttributes, H(Window w, XWindowAttributes* a), H(w, a));
 #undef xhack0
 #undef xhack
 #undef xhackr
+#undef XHACK_UNUSED
 
-#undef h
+#undef H
 
 #endif // ! DM_X_DISPLAY_MISSING
 #endif // XHACK_H

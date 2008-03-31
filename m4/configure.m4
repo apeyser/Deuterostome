@@ -369,15 +369,15 @@ AC_DEFUN([CF_SUBST_DEFINE_UNQUOTED], [dnl
 
 AC_DEFUN([CF_AC_PATH_XTRA], [dnl
   AC_REQUIRE([AC_PATH_XTRA])
-	if test x"$no_x" == xyes ; then
-	  AM_CONDITIONAL([X_DISPLAY_MISSING], [:])
-		X_LDFLAGS=''
+  if test x"$no_x" == xyes ; then
+    AM_CONDITIONAL([X_DISPLAY_MISSING], [:])
+    X_LDFLAGS=''
   else
     AM_CONDITIONAL([X_DISPLAY_MISSING], [false])
-		X_LDFLAGS='$(X_LIBS) $(X_PRE_LIBS) -lX11 $(X_EXTRA_LIBS)'
+    X_LDFLAGS='$(X_LIBS) $(X_PRE_LIBS) -lX11 $(X_EXTRA_LIBS)'
   fi
   AC_SUBST(X_DISPLAY_MISSING) 
-	AC_SUBST(X_LDFLAGS) dnl
+  AC_SUBST(X_LDFLAGS) dnl
 ])
     
 AC_DEFUN([CF_ACX_PTHREAD], [dnl
@@ -457,4 +457,33 @@ AC_DEFUN([CF_C_INLINE], [dnl
   else
     AC_DEFINE([HAS_INLINE], [1], [Define to 1 if compiler has inline])
   fi dnl
+])
+
+AC_DEFUN([CF_AC_CHECK_HEADER_WITH], [dnl
+  cf_ac_includes_default="${ac_includes_default}"
+  for i in $2 ; do
+      ac_includes_default="
+#include <$i>
+"
+  done
+  AC_CHECK_HEADER([$1], [$3], [$4])
+  ac_includes_default="${ac_includes_default}"
+])
+
+AC_DEFUN([CF_AC_CHECK_XSEC], [dnl
+  cf_check_sec=false
+  CF_AC_CHECK_HEADER_WITH([X11/extensions/security.h], 
+    [X11/Xlib.h X11/Xutil.h], [
+    AC_DEFINE([HAVE_X11_EXTENSIONS_SECURITY_H], 
+              [1], 
+	      [Define to 1 if you have <X11/extensions/security.h])
+    cf_check_sec=:
+  ])
+  if $cf_check_sec ; then
+    AC_CHECK_LIB([Xext], [XSecurityGenerateAuthorization], [
+      X_LDFLAGS="$X_LDFLAGS -lXext"
+    ], [
+      AC_MSG_ERROR([Checking for Xext library for XSecurity... not found])
+    ])
+  fi
 ])

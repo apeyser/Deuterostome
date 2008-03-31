@@ -926,6 +926,13 @@ c_         list all connections
 | Also connects the eye.
 
   Xwindows {
+    /getdnodedisplay {
+      ~[
+        getdvtdisplay_ 
+        xauthcreate xauthget /xauthput find ~exec
+      ]
+    } bind def
+
     /_cx {
       dvt begin {
         false 0 1 nodelist length 1 sub { /knode name
@@ -936,12 +943,12 @@ c_         list all connections
         2 copy connect node 2 put node 1 put node 0 put
         true node 3 put printnode
         
-        node 2 get [ [getmydisplay_ knode fontdict mousedict {
+        node 2 get [ [getdnodedisplay knode fontdict mousedict {
           /mousedict name /fontdict name /knode name
           getsocket setconsole
           Xwindows_ not {(No Xwindows on node!\n) toconsole stop} if
           Xdisconnect
-          Xconnect
+          exec Xconnect
           /filesave save def
           /fbuf vmstatus sub 10 div /b array def
           filesave capsave {
@@ -976,12 +983,12 @@ c_         list all connections
         node 6 put
         true node 3 put printnode
       
-        node 2 get [ [getmydisplay_ knode fontdict mousedict {
+        node 2 get [ [getdnodedisplay knode fontdict mousedict {
           /mousedict name /fontdict name /knode name
           getsocket setconsole
           Xwindows_ not {(No Xwindows on node!\n) toconsole stop} if
           Xdisconnect
-          Xconnect
+          exec Xconnect
           /filesave save def
           /fbuf vmstatus sub 10 div /b array def
           filesave capsave {
@@ -1003,7 +1010,7 @@ c_         list all connections
 | connects to the node like '-c', primes its memory setup, reads
 | startup_dnode.d, and makes itself the dvt of the node;
 |
-| uses getmydisplay as the Xserver for the dnode
+| uses getdvtdisplay as the Xserver for the dnode
 | by default, dvtdisplay (in c)
 | but can be redefined in userdict
 
@@ -1021,9 +1028,9 @@ c_         list all connections
       null node 6 put
 
       node 2 get [
-        [getmydisplay_ Xwindows knode {
+        [getdnodedisplay Xwindows knode {
           4 -1 roll not {killsockets abort} if
-          /knode name Xwindows_ and /otherXwindows name /getmydisplay name
+          /knode name Xwindows_ and /otherXwindows name /getdnodedisplay name
           /filesave save def
           /fbuf vmstatus sub 10 div /b array def
           filesave capsave
@@ -1042,8 +1049,21 @@ c_         list all connections
     } stopped pop end
   } bind userdict 3 -1 roll put
 
-  /getmydisplay 80 /b array Xdisplayname userdict 3 -1 roll put
-  /getmydisplay_ ~getmydisplay def
+  /getdvtdisplay | {
+    80 /b array dup Xdisplayname | () (hostname:n.n)
+@ENABLE_REGEX_START@
+    save exch | () save (hostname:n.n)
+    dup (^\(localhost\)?\(:\\d+\(\\d+\)\)$) regex {
+      dup length 1 sub get
+      4 1 roll 3 ~pop repeat | () save (localhost:0.0) (:0.0)
+      4 -1 roll 0 80 /b array getmyfqdn fax
+      3 -1 roll fax          | save (localhost:0.0) (x.y:0.0) len
+      0 exch getinterval     | save (localhost:0.0) (x.y:0.0)
+      3 -1 roll exch         | (localhost:0.0) save (x.y:0.0)
+    } if exch restore | }    | () (hostname:n.n)
+@ENABLE_REGEX_END@  
+  exch pop userdict 3 -1 roll put
+  /getdvtdisplay_ ~getdvtdisplay def
 
   /_csu1x {/knode name {
     nodelist knode get /node name
@@ -1051,7 +1071,7 @@ c_         list all connections
       debug_dict /line1 get 0 node 0 get fax (:) fax * node 1 get * number
       0 exch getinterval 
       knode {/knode name
-        getmydisplay Xconnect
+        getdnodedisplay Xconnect
         userdict /myid put
         console [[knode] (0 get dvt begin _csu2x)] send
       }] ( {} forall exec )]  send
@@ -1189,7 +1209,7 @@ c_         list all connections
     /dnode_memory_ <x 0 0 0 0 0> def
     
     /dnode_setup 11 dict dup begin
-    /display getmydisplay def
+    /display getdvtdisplay def
     /host (localhost) def
     /port 0 def
     /group -1 def
@@ -1203,7 +1223,7 @@ c_         list all connections
     end userdict 3 -1 roll put
 
     /dnode_resize {
-      /getmydisplay_ dnode_setup /display get def
+      /getdvtdisplay_ dnode_setup /display get def
       dnode_setup begin
       color dup null eq {pop ~_csu} {
         dup class /listclass ne {[exch]} if
@@ -1216,12 +1236,12 @@ c_         list all connections
       mb    1 index 3 put
       user  1 index 4 put
       end 5 -1 roll exec
-      /getmydisplay_ ~getmydisplay def
+      /getdvtdisplay_ ~getdvtdisplay def
     } bind def
 
   | ~_c ~_cc | --
     /dnode_up {
-      /getmydisplay_ dnode_setup /display get def
+      /getdvtdisplay_ dnode_setup /display get def
       dnode_setup begin
       color dup null eq {pop pop} {
         3 -1 roll pop
@@ -1231,7 +1251,7 @@ c_         list all connections
       host port group
       end
       4 -1 roll exec
-      /getmydisplay_ ~getmydisplay def
+      /getdvtdisplay_ ~getdvtdisplay def
     } bind def
 
     /dnode_display {dnode_setup /display put} bind userdict 3 -1 roll put
@@ -2258,6 +2278,47 @@ end mkmousedict def
   {actiondict exch get exec true} {false} ifelse
 } bind def
 
+
+| set up xauth data for dnodes
+xauth {
+  | (name) <b indata>/{} bool-trusted int-timeout | xauthdict
+  /xauthmake {
+    7 dict dup begin
+       /timeout name
+       /trusted name
+       /datain  name
+       /sec_name name
+    end 
+  } bind def
+
+  /xauthcreate {
+    xauthdict /xsave known {xauthdict /xsave get restore} if
+    save xauthdict /xsave put
+    xauthdict dup /sec_name get
+    exch      dup /datain   get
+    exch      dup /trusted  get
+    exch          /timeout  get xauthgen
+    xauthdict exch 1 index /id      put
+              exch 1 index /dataout put
+              exch pop
+              /xsave get capsave
+  } bind def
+
+  /xauthget {
+    xauthdict dup  /sec_name get
+              exch /dataout  get
+  } bind def
+
+  /xauthput {xauthset} bind def
+          
+  /xauthdict_def (MIT-MAGIC-COOKIE-1) () true 60 xauthmake def
+  /xauthdict xauthdict_def def
+} {
+  /xauthcreate {} def
+  /xauthget {} def
+  /xauthput {} def
+} if
+        
 |----------------------------- start the dvt ------------------------------
 | A 'save' representing a clean dvt is associated with the name cleanDVT in
 | userdict.

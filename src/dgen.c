@@ -20,6 +20,7 @@
 #include <string.h>
 #include "dm.h"
 #include "dmx.h"
+#include "dm3.h"
 
 /*---------- include modules of dgen --------------*/
 

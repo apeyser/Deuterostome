@@ -62,7 +62,11 @@ typedef double D;
 #define BMAX   (0x7F)
 #define WMAX   (0x7FFF)
 #define L32MAX (0x7FFFFFFF)
-#define L64MAX (0x7FFFFFFFFFFFFFFF)
+// 64 bit is different - it has a max size of 53 bits to fit in
+// a double for operations; on the other hand, the extra bits
+// are available, so L64MAX doesn't need to reserve any bits for
+// infinity.
+#define L64MAX (0x20000000000000)
 
 #if DM_HOST_IS_32_BIT
 #define PMAX L32MAX

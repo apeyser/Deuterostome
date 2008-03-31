@@ -1,4 +1,4 @@
-AC_INIT([D-Machine], [4.0], [Alexander Peyser <a.peyser@umiami.edu>], [dm])
+AC_INIT([D-Machine], [4.1], [Alexander Peyser <a.peyser@umiami.edu>], [dm])
 AC_CONFIG_MACRO_DIR(m4)
 AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE
@@ -182,6 +182,7 @@ CF_AC_CHECK_HEADER([time.h])
 CF_AC_CHECK_HEADER([sys/time.h])
 AC_CHECK_HEADER([X11/Xlib.h])
 AC_CHECK_HEADER([X11/Xutil.h])
+CF_AC_CHECK_XSEC()
 CF_AC_CHECK_HEADER([strings.h])
 CF_AC_CHECK_HEADER([inttypes.h])
 CF_AC_CHECK_HEADER([sys/wait.h])

@@ -561,6 +561,7 @@ int xioerrorhandler(Display* display) {
   dvtdisplay = NULL;
   int_Xdisconnect(TRUE);
   xhack_longjmp();
+  return 0;
 }
 
 int xerrorhandler(Display* display, XErrorEvent* event) {
@@ -579,7 +580,7 @@ int xerrorhandler(Display* display, XErrorEvent* event) {
 P op_Xconnect(void)
 {
 #if X_DISPLAY_MISSING
-	return NO_XWINDOWS;
+  return NO_XWINDOWS;
 #else
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;

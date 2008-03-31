@@ -18,6 +18,7 @@ B *sysop[] = {
   (B*)"send",           (B *)op_send,
   (B*)"getsocket",      (B *)op_getsocket,
   (B*)"getmyname",      (B *)op_getmyname,
+  (B*)"getmyfqdn",      (B *)op_getmyfqdn,
 /*-- X windows */
   (B*)"Xwindows",       (B *)op_Xwindows,
   (B*)"Xdisplayname",   (B *)op_Xdisplayname,
@@ -34,6 +35,10 @@ B *sysop[] = {
   (B*)"drawtext",       (B *)op_drawtext,
   (B*)"makewindowtop",  (B *)op_makewindowtop,
   (B*)"setinputfocus",  (B *)op_setinputfocus,
+  (B*)"xauthrev",       (B *)op_xauthrev,
+  (B*)"xauthset",       (B *)op_xauthset,
+  (B*)"xauthgen",       (B *)op_xauthgen,
+  (B*)"xauth",          (B *)op_xauth,
 /*-- operand stack */
   (B*)"pop",            (B *)op_pop,
   (B*)"exch",           (B *)op_exch,
@@ -211,6 +216,7 @@ P syserrc[] = {
   REGEX_ERANGE, REGEX_ESPACE, REGEX_BADRPT, REGEX_UNKNOWN,
 #endif // DM_ENABLE_REGEX
   CLOCK_ERR, LONG_OVF,
+  X_SEC_MISS, X_SEC_GEN, X_SEC_REV, X_SEC_LIB,
   0L
 };
 
@@ -283,5 +289,9 @@ B *syserrm[] = {
   (B*)"Regex Error: Unknown error",
 #endif //DM_ENABLE_REGEX
   (B*)"** Error accessing clock",
-  (B*)"** Error loading 64 bit integer into 32 bit machine"
+  (B*)"** Error loading 64 bit integer into 32 bit machine",
+  (B*)"** X Security Extension missing on server",
+  (B*)"** X Security Extension unable to generate",
+  (B*)"** X Security Extension unable to revoke",
+  (B*)"** X Security Extension client library missing",
 };

@@ -5,6 +5,15 @@
 
 DLL_SCOPE int xsocket;
 
+#define NO_XWINDOWS 0x00000A01L /* X windows unavailable                 */
+#define X_ERR       0x00000A02L /* X lib error                           */
+#define X_BADFONT   0x00000A03L /* X font does not exist                 */
+#define X_BADHOST   0x00000A04L /* X server cannot be connected          */
+#define X_SEC_MISS  0x00000A05L /* X security extension missing          */
+#define X_SEC_GEN   0x00000A06L /* X generate failure                    */
+#define X_SEC_REV   0x00000A07L /* X revoke failure                      */
+#define X_SEC_LIB   0x00000A08L /* X security lib missing                */
+
 #if ! DM_X_DISPLAY_MISSING
 
 #define MAXDVTWINDOWS  ((P)20)
@@ -47,6 +56,11 @@ P op_fillrectangle(void);
 P op_drawtext(void);
 P op_makewindowtop(void);
 P op_setinputfocus(void);
+
+P op_xauthrev(void);
+P op_xauthset(void);
+P op_xauthgen(void);
+P op_xauth(void);
 
 #endif
 
