@@ -1050,19 +1050,24 @@ c_         list all connections
   } bind userdict 3 -1 roll put
 
   /getdvtdisplay | {
-    80 /b array dup Xdisplayname | () (hostname:n.n)
+    80 /b array 
+    dup Xdisplayname           | /b-80 (hostname:n.n)
 @ENABLE_REGEX_START@
-    save exch | () save (hostname:n.n)
-    dup (^\(localhost\)?\(:\\d+\(\\d+\)\)$) regex {
-      dup length 1 sub get
-      4 1 roll 3 ~pop repeat | () save (localhost:0.0) (:0.0)
-      4 -1 roll 0 80 /b array getmyfqdn fax
-      3 -1 roll fax          | save (localhost:0.0) (x.y:0.0) len
-      0 exch getinterval     | save (localhost:0.0) (x.y:0.0)
-      3 -1 roll exch         | (localhost:0.0) save (x.y:0.0)
-    } if exch restore | }    | () (hostname:n.n)
+    save exch                  | /b-80 save (hostname:n.n)
+    (^\(localhost\)?\(:[0-9]+\(\\.[0-9]+\)?\)$) regex { 
+                               | /b-80 save () (localhost:0.0) () [(:0.0)]
+      1 get                    | /b-80 save () (localhost:0.0) () (:0.0)
+      4 1 roll 3 ~pop repeat   | /b-80 save (:0.0)
+      dup length /b array copy | /b-80 save (:0.0)
+      3 -1 roll 0              | save (:0.0) /b-80 0
+      80 /b array getmyfqdn fax| save (:0.0) /b-80 n
+      3 -1 roll fax            | save /b-80 n
+      0 exch getinterval       | save /b-80
+      null 3 1 roll            | null save /b-80
+    } if exch restore          | /b-80|null (hostname:n.n)|/b-80
 @ENABLE_REGEX_END@  
-  exch pop userdict 3 -1 roll put
+    exch pop | }
+  userdict 3 -1 roll put
   /getdvtdisplay_ ~getdvtdisplay def
 
   /_csu1x {/knode name {
@@ -2284,10 +2289,10 @@ xauth {
   | (name) <b indata>/{} bool-trusted int-timeout | xauthdict
   /xauthmake {
     7 dict dup begin
-       /timeout name
-       /trusted name
-       /datain  name
-       /sec_name name
+       exch /timeout name
+       exch /trusted name
+       exch /datain  name
+       exch /sec_name name
     end 
   } bind def
 
@@ -2317,7 +2322,7 @@ xauth {
   /xauthcreate {} def
   /xauthget {} def
   /xauthput {} def
-} if
+} ifelse
         
 |----------------------------- start the dvt ------------------------------
 | A 'save' representing a clean dvt is associated with the name cleanDVT in

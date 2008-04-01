@@ -584,7 +584,7 @@ P op_Xconnect(void)
 #else
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
-  if (ARRAY_SIZE(o_1) > 79) return RNG_CHK;
+  if (ARRAY_SIZE(o_1) > sizeof(displayname)-1) return RNG_CHK;
   if (ARRAY_SIZE(o_1) > 0) {
     moveB((B *)VALUE_BASE(o_1), displayname, ARRAY_SIZE(o_1));
     displayname[ARRAY_SIZE(o_1)] = '\000';

@@ -66,7 +66,7 @@ typedef double D;
 // a double for operations; on the other hand, the extra bits
 // are available, so L64MAX doesn't need to reserve any bits for
 // infinity.
-#define L64MAX (0x20000000000000)
+#define L64MAX (0x1FFFFFFFFFFFFF)
 
 #if DM_HOST_IS_32_BIT
 #define PMAX L32MAX

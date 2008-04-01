@@ -329,7 +329,7 @@ edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			$(PERL_DELETE) \
 			$(EMACSCLIENT_EDIT) \
 			$(ATLAS_EDIT) \
-			$(REGEX_EDIT)
+			$(REGEX_DELETE)
 
 all: all-am
 

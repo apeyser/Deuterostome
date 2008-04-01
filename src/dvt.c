@@ -165,7 +165,9 @@ int main(void)
  /*-------------- fire up Xwindows (if there is) -----------------------*/
 #if ! X_DISPLAY_MISSING
   dvtdisplay = XOpenDisplay(NULL);  /* use the DISPLAY environment */
-  if (dvtdisplay && DisplayString(dvtdisplay)) {
+  if (dvtdisplay && HDisplayString(dvtdisplay)) {
+    strncpy(displayname, HDisplayString(dvtdisplay), sizeof(displayname)-1);
+    displayname[sizeof(displayname)-1];
     dvtscreen = HXDefaultScreenOfDisplay(dvtdisplay);
     dvtrootwindow = HXDefaultRootWindow(dvtdisplay);
     if (HXGetWindowAttributes(dvtdisplay,dvtrootwindow,&rootwindowattr) == 0)
@@ -178,7 +180,7 @@ int main(void)
   } 
   else {
     dvtdisplay = NULL;
-    *displayname = 0;
+    *displayname = '\0';
   }
 #endif
  

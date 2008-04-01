@@ -83,7 +83,7 @@ edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			$(PERL_DELETE) \
 			$(EMACSCLIENT_EDIT) \
 			$(ATLAS_EDIT) \
-			$(REGEX_EDIT)
+			$(REGEX_DELETE)
 
 theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in
 	rm -f $@ $@.tmp

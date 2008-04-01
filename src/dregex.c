@@ -51,7 +51,7 @@ DM_INLINE_STATIC P int_regex(BOOLEAN case_sensitive)
                    REG_EXTENDED|(case_sensitive ? 0 : REG_ICASE))))
     return int_regex_error(r);
 
-  pmatch = (regmatch_t*) DALIGN(FREEvm+FRAMEBYTES*(preg.re_nsub+1));
+  pmatch = (regmatch_t*) (FREEvm+FRAMEBYTES*(preg.re_nsub+1));
   string = ((char*) pmatch)+sizeof(regmatch_t)*(preg.re_nsub+1);
   if ((B*) string + ARRAY_SIZE(o_2)+2 > CEILvm) {
     retc = VM_OVF;
@@ -83,7 +83,7 @@ DM_INLINE_STATIC P int_regex(BOOLEAN case_sensitive)
       
       TAG(o3) = BOOL;
       ATTR(o3) = 0;
-      BOOL_VAL(o_3) = TRUE;
+      BOOL_VAL(o3) = TRUE;
       
       moveframe(FREEvm, o2);
       ATTR(o2) = 0;

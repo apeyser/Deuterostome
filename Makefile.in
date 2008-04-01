@@ -774,9 +774,9 @@ rsync: dist
 	scp $(DIST_ARCHIVES) root@deli1:/usr/local/portage/distfiles/
 	source /etc/make.conf \
 	&& if test -z "$$DISTDIR" ; then DISTDIR=/usr/portage/distfiles; fi \
-	&& sudo rsync -a \
-		rsync://deli1/gentoo-local/distfiles/$(DIST_ARCHIVES) \
-		$${DISTDIR}
+	&& if test -e $$DISTDIR/$(DIST_ARCHIVES); then \
+		sudo rm $$DISTDIR/$(DIST_ARCHIVES); \
+	fi
 
 .PHONY: ebuild
 ebuild: gentoo-setup

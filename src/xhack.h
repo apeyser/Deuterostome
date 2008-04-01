@@ -158,6 +158,8 @@ xhack0r(XDefaultScreenOfDisplay, Screen*, NULL);
 xhack0r(XDefaultRootWindow, Window, 0);
 xhacks(XGetWindowAttributes, H(Window w, XWindowAttributes* a), H(w, a));
 
+xhack0r(DisplayString, char*, NULL);
+
 #if HAVE_X11_EXTENSIONS_SECURITY_H
 xhacks(XSecurityQueryExtension, H(int* m1, int* m2), H(m1, m2));
 xhackr(XSecurityGenerateAuthorization, Xauth*, NULL,

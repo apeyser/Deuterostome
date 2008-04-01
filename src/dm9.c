@@ -1021,7 +1021,7 @@ P op_Xdisplayname(void)
     if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
 
 #if ! X_DISPLAY_MISSING
-    if (dvtdisplay == NULL) {
+    if (! dvtdisplay) {
 #endif
       ARRAY_SIZE(o_1) = 0;
       return OK;
@@ -1140,8 +1140,8 @@ P op_xauthgen(void)
   if (o_4 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != NUM) return OPD_CLA;
   if (! PVALUE(o_1, &timeout)) return UNDF_VAL;
-  if (TAG(o_3) != BOOL) return OPD_ERR;
-  trusted = BOOL_VAL(o_3);
+  if (TAG(o_2) != BOOL) return OPD_ERR;
+  trusted = BOOL_VAL(o_2);
   if (TAG(o_3) != (ARRAY | BYTETYPE)) return OPD_ERR;
   data = (char*) VALUE_PTR(o_3);
   if (ARRAY_SIZE(o_3) > (1 << (8*sizeof(short)-1))) return RNG_CHK;
