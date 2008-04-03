@@ -125,15 +125,15 @@ src_install() {
 	if use daemon ; then
 	    newinitd "${FILESDIR}"/dnoded.rc6 dnoded
 	    newconfd "${FILESDIR}"/dnoded.conf dnoded
-	    fowners node:node /usr/bin/dnode-daemon
+	    fowners dnode:dnode /usr/bin/dnode-daemon
 	    fperms ug+s /usr/bin/dnode-daemon
 	fi
 }
 
 pkg_setup() {
     if use daemon ; then
-	enewgroup node
-	enewuser node -1 -1 -1 node -g node
+	enewgroup dnode
+	enewuser node -1 -1 -1 dnode dnode
     fi
 }
 
