@@ -133,7 +133,7 @@ src_install() {
 pkg_setup() {
     if use daemon ; then
 	enewgroup dnode
-	enewuser node -1 -1 -1 dnode dnode
+	enewuser dnode -1 -1 -1 dnode
     fi
 }
 
