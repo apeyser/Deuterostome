@@ -310,6 +310,10 @@ static void dnode(int reader, int writer, struct node* node) {
 
   if (uid == euid)
     warnxn("Child %i not running setuid, not dropping privileges", node->pid);
+  else if (uid == 0) {
+    if (setuid(euid))
+      fataly("Child %i unable to drop privileges", node->pid);
+  }
   else if (seteuid(euid) || setuid(euid))
     fataly("Child %i unable to drop privileges", node->pid);
       

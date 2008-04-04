@@ -39,6 +39,7 @@
 int xsocket = -1;
 
 #if ! X_DISPLAY_MISSING
+#include <X11/Xatom.h>
 Display *dvtdisplay;
 B displayname[80] = "";
 Screen *dvtscreen;
@@ -301,6 +302,8 @@ P op_makewindow(void)
   static XClassHint classhint = {"d_machine", "d_machine"};
   static XWMHints xwmhints = {InputHint, False};
   static Atom atom[2];
+  static Atom opaque;
+  static L32 opaqueval = ~(L32) 0;
   P retc; 
   W *pxy;
   B *xyf, *freevm, nstr[31], icstr[13],
@@ -336,13 +339,17 @@ P op_makewindow(void)
                       pxy[2], pxy[3], 0, CopyFromParent,
                       InputOutput, CopyFromParent,
                       CWEventMask, &attr);
-  HXSetWMName(dvtdisplay,wid,&wname);
-  HXSetWMIconName(dvtdisplay,wid,&icname);
-  HXSetClassHint(dvtdisplay, wid,&classhint);
+
+  HXSetWMProperties(dvtdisplay, wid, 
+		    &wname, &icname, 
+		    NULL, 0, 
+		    NULL, &xwmhints, &classhint);
   atom[0] = HXInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False);
   atom[1] = HXInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False);
   HXSetWMProtocols(dvtdisplay, wid, atom, 2);
-  HXSetWMHints(dvtdisplay, wid, &xwmhints);
+  opaque = HXInternAtom(dvtdisplay, "_KDE_WM_WINDOW_OPACITY", False);
+  HXChangeProperty(dvtdisplay, wid, opaque, XA_CARDINAL, 32,
+		   PropModeReplace, (unsigned char*) &opaqueval, 1);
   dvtwindows[ndvtwindows++] = wid;
 
   TAG(o1) = NUM | LONGBIGTYPE; 
@@ -1008,30 +1015,39 @@ P op_drawtext(void)
 }
 
 //----------------------------------------------- Xdisplayname
-// bytearray | bytearray
-// stuffs the current displayname in the bytearray, and shrinks
-//   the array as necessary
-// returns a RNG_CHK if the bytearray isn't large enough,
-// and a 0 length string if no dvt display
+// -- | bytearray
+// allocates a a string and stuffs dvt display name in it
+// returns 0 length string if no dvt display
 
 P op_Xdisplayname(void)
 {
     P len;
-    if (o_1 < FLOORopds) return OPDS_UNF;
-    if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
-
+    B* oldfreevm = FREEvm;
+    if (o1 >= CEILopds) return OPDS_OVF;
+    if ((FREEvm += FRAMEBYTES) >= CEILvm) {
+      FREEvm = oldfreevm;
+      return VM_OVF;
+    }
+    TAG(oldfreevm) = ARRAY | BYTETYPE;
+    VALUE_PTR(oldfreevm) = FREEvm;
+    
 #if ! X_DISPLAY_MISSING
     if (! dvtdisplay) {
 #endif
-      ARRAY_SIZE(o_1) = 0;
+      ARRAY_SIZE(oldfreevm) = 0;
       return OK;
 #if ! X_DISPLAY_MISSING
     }
 
     len = strlen((char*)displayname);
-    if (ARRAY_SIZE(o_1) < len) return RNG_CHK;
-    moveB(displayname, (B*) VALUE_BASE(o_1), len);
-    ARRAY_SIZE(o_1) = len;
+    if ((FREEvm += DALIGN(len)) >= CEILvm) {
+      FREEvm = oldfreevm;
+      return VM_OVF;
+    }
+    ARRAY_SIZE(oldfreevm) = len;
+    moveB((B*) displayname, VALUE_PTR(oldfreevm), len);
+    moveframe(oldfreevm, o1);
+    FREEopds = o2;
 
     return OK;
 #endif
@@ -1083,8 +1099,8 @@ P op_xauthset(void) {
   if (TAG(o_1) != (ARRAY | BYTETYPE) 
       || TAG(o_2) != (ARRAY | BYTETYPE)) return OPD_ERR;
 
-  if (ARRAY_SIZE(o_1) > (8*sizeof(short)-1)) return RNG_CHK;
-  if (ARRAY_SIZE(o_2) > (8*sizeof(short)-1)) return RNG_CHK;
+  if (ARRAY_SIZE(o_1) > (1 << (8*sizeof(short)-1))) return RNG_CHK;
+  if (ARRAY_SIZE(o_2) > (1 << (8*sizeof(short)-1))) return RNG_CHK;
   name_len = (unsigned short) ARRAY_SIZE(o_2);
   data_len = (unsigned short) ARRAY_SIZE(o_1);
 
@@ -1214,7 +1230,7 @@ P op_xauth(void)
 #if X_DISPLAY_MISSING || ! HAVE_X11_EXTENSIONS_SECURITY_H
   BOOL_VAL(o1) = FALSE;
 #else
-  BOOL_VAL(o1) = (dvtdisplay != NULL);
+  BOOL_VAL(o1) = TRUE;
 #endif
   FREEopds = o2;
   return OK;

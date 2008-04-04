@@ -21,11 +21,6 @@
 getsocket setconsole
 /toconsole_ ~toconsole def
 
-/dmnumincerror {
-    (XXXXXXXXXXXXXXXXXXXXXXXXX) getmyname getmyport (dmnuminc) 2816 error
-} def
-
-
 /makefont {
     ~[exch 3 -1 roll 1 ~index 0 ~put] bind
 } bind def
@@ -374,6 +369,9 @@ end def  | of xtext_dict
 /DIRTYPE 16384L def
 /FUSERREAD 256 def
 
+| dirname filename | 
+|   if file exists: objects.. true
+|   else:           false
 /fromxfiles {
     2 copy findfile not {pop pop false} {
         3 1 roll pop pop

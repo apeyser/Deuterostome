@@ -31311,7 +31311,7 @@ fi
 
 
 
-      if test x"${enable_plugins-no}" != x"no" ; then
+      if test x"${enable_plugins_support-no}" != x"no" ; then
        if test "${ac_cv_header_stdarg_h+set}" = set; then
   { echo "$as_me:$LINENO: checking for stdarg.h" >&5
 echo $ECHO_N "checking for stdarg.h... $ECHO_C" >&6; }

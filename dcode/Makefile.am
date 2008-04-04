@@ -32,13 +32,22 @@ else !ENABLE_REGEX
 REGEX_DELETE = -e '$(REGEX_START),$(REGEX_END) d'
 endif !ENABLE_REGEX
 
-PLUGIN_START = /^[[:space:]]*[@]ENABLE_PLUGINS_START[@][[:space:]]*$$/
-PLUGIN_END = /^[[:space:]]*[@]ENABLE_PLUGINS_END[@][[:space:]]*$$/
+PLUGINS_START = /^[[:space:]]*[@]ENABLE_PLUGINS_START[@][[:space:]]*$$/
+PLUGINS_END = /^[[:space:]]*[@]ENABLE_PLUGINS_END[@][[:space:]]*$$/
 if ENABLE_PLUGINS
-PLUGIN_DELETE = -e '$(PLUGIN_START) d' -e '$(PLUGIN_END) d'
+PLUGINS_DELETE = -e '$(PLUGINS_START) d' -e '$(PLUGINS_END) d'
 else !ENABLE_PLUGINS
-PLUGIN_DELETE = -e '$(PLUGIN_START),$(PLUGIN_END) d'
+PLUGINS_DELETE = -e '$(PLUGINS_START),$(PLUGINS_END) d'
 endif !ENABLE_PLUGINS
+
+PLUGINS_SUPPORT_START = /^[[:space:]]*[@]ENABLE_PLUGINS_SUPPORT_START[@][[:space:]]*$$/
+PLUGINS_SUPPORT_END = /^[[:space:]]*[@]ENABLE_PLUGINS_SUPPORT_END[@][[:space:]]*$$/
+if ENABLE_PLUGINS_SUPPORT
+PLUGINS_SUPPORT_DELETE = -e '$(PLUGINS_SUPPORT_START) d' -e '$(PLUGINS_SUPPORT_END) d'
+else !ENABLE_PLUGINS_SUPPORT
+PLUGINS_SUPPORT_DELETE = -e '$(PLUGINS_SUPPORT_START),$(PLUGINS_SUPPORT_END) d'
+endif !ENABLE_PLUGINS_SUPPORT
+
 
 THREADS_START = /^[[:space:]]*[@]ENABLE_THREADS_START[@][[:space:]]*$$/
 THREADS_END   = /^[[:space:]]*[@]ENABLE_THREADS_END[@][[:space:]]*$$/
@@ -77,7 +86,8 @@ endif !ENABLE_ATLAS
 
 edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
-			$(PLUGIN_DELETE) \
+			$(PLUGINS_DELETE) \
+			$(PLUGINS_SUPPORT_DELETE) \
 			$(THREADS_EDIT) \
 			$(XPS_DELETE) \
 			$(PERL_DELETE) \

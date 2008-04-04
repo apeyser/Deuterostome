@@ -159,6 +159,13 @@ xhack0r(XDefaultRootWindow, Window, 0);
 xhacks(XGetWindowAttributes, H(Window w, XWindowAttributes* a), H(w, a));
 
 xhack0r(DisplayString, char*, NULL);
+xhackv(XSetWMProperties, 
+       H(Window w, XTextProperty* wn, XTextProperty* in, char** ac, int av,
+	 XSizeHints* nh, XWMHints* wh, XClassHint* ch),
+       H(w, wn, in, ac, av, nh, wh, ch));
+xhack(XChangeProperty,
+      H(Window w, Atom p, Atom t, int f, int m, unsigned char* d, int n),
+      H(w, p, t, f, m, d, n));
 
 #if HAVE_X11_EXTENSIONS_SECURITY_H
 xhacks(XSecurityQueryExtension, H(int* m1, int* m2), H(m1, m2));

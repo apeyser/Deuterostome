@@ -84,10 +84,10 @@ CF_AC_ENABLE([plugins-support], [compile or install plugin support], [yes])
 CF_AM_ENABLE([plugins], [compile or install plugins], [no], [yes])
 CF_AM_ENABLE([process], 
              [compile or install process plugin], 
-             [yes])
+	     [yes])
 CF_AM_ENABLE([cppplugin], 
              [compile or install cpp memory library for plugins], 
-  			     [yes])
+	     [yes])
 CF_AM_ENABLE([dmflex], 
              [compile or install dmflex plugin], 
              [yes])
@@ -186,7 +186,7 @@ CF_AC_CHECK_XSEC()
 CF_AC_CHECK_HEADER([strings.h])
 CF_AC_CHECK_HEADER([inttypes.h])
 CF_AC_CHECK_HEADER([sys/wait.h])
-CF_IF_ENABLED([plugins], [CF_AC_CHECK_HEADER([stdarg.h])])
+CF_IF_ENABLED([plugins-support], [CF_AC_CHECK_HEADER([stdarg.h])])
 AC_CHECK_HEADER([error.h], [
   AC_DEFINE([HAVE_ERROR_H], [1], [Define to 1 if you have <error.h>])
 ])

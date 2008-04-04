@@ -500,42 +500,85 @@ P op_getsocket(void)
 }
 
 /*------------------------------------------- getmyname
-    stringbuf | substring
+  -- | string
 
-returns the host's name
+  allocates && returns the host's name
 */
 
 P op_getmyname(void)
 {
-  if (o_1 < FLOORopds) return(OPDS_UNF);
-  if (TAG(o_1) != (ARRAY | BYTETYPE)) return(OPD_ERR);
-  if (gethostname((char*)VALUE_PTR(o_1), ARRAY_SIZE(o_1)) == -1)
-    return -errno;
+  B* oldfreevm = FREEvm;
+  P len;
 
-  ARRAY_SIZE(o_1) = strlen((char*)VALUE_BASE(o_1));
+  if (o1 >= CEILopds) return OPDS_OVF;
+  if ((FREEvm += FRAMEBYTES) >= CEILvm) {
+    FREEvm = oldfreevm;
+    return VM_OVF;
+  }
+  TAG(oldfreevm) = ARRAY | BYTETYPE;
+  VALUE_PTR(oldfreevm) = FREEvm;
+
+  if (gethostname((char*) FREEvm, CEILvm - FREEvm - 1) == -1) {
+    FREEvm = oldfreevm;
+    return -errno;
+  }
+
+  CEILvm[-1] = '\0';
+  len = strlen(FREEvm);
+  if ((FREEvm += DALIGN(len)) >= CEILvm) {
+    FREEvm = oldfreevm;
+    return VM_OVF;
+  }
+  ARRAY_SIZE(oldfreevm) = len;
+  moveframe(oldfreevm, o1);
+  FREEopds = o2;
   return OK;
 }
 
 /*------------------------------------------- getmyfqdn
-    stringbuf | substring
+    -- | string
 
-returns the host's name
+    allocates && returns the host's name
 */
 
 P op_getmyfqdn(void)
 {
-  size_t len;
+  B* oldfreevm = FREEvm;
+  P len;
   struct hostent* h;
-  if (o_1 < FLOORopds) return OPDS_UNF;
-  if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
-  if (gethostname((char*)VALUE_PTR(o_1), ARRAY_SIZE(o_1)-1) == -1)
+  if (o1 >= CEILopds) return OPDS_OVF;
+  if ((FREEvm += FRAMEBYTES) >= CEILvm) {
+    FREEvm = oldfreevm;
+    return VM_OVF;
+  }
+  TAG(oldfreevm) = ARRAY | BYTETYPE;
+  VALUE_PTR(oldfreevm) = FREEvm;
+
+  if (gethostname((char*) FREEvm, CEILvm - FREEvm - 1) == -1) {
+    FREEvm = oldfreevm;
     return -errno;
+  }
+  
+  CEILvm[-1] = '\0';
+  if (strlen(FREEvm) == CEILvm - FREEvm) {
+    FREEvm = oldfreevm;
+    return VM_OVF;
+  }
 
-  VALUE_PTR(o_1)[ARRAY_SIZE(o_1)-1] = '\0';
-  if (! (h = gethostbyname((char*) VALUE_PTR(o_1)))) return -h_errno;
-  if ((len = strlen(h->h_name)) > ARRAY_SIZE(o_1)) return RNG_CHK;
-  moveB((B*) h->h_name, VALUE_PTR(o_1), len);
-  ARRAY_SIZE(o_1) = len;
+  if (! (h = gethostbyname((char*) FREEvm))) {
+    FREEvm = oldfreevm;
+    return -h_errno;
+  }
 
+  len = strlen(h->h_name);
+  if ((FREEvm += DALIGN(len)) >= CEILvm) {
+    FREEvm = oldfreevm;
+    return VM_OVF;
+  }
+
+  moveB((B*) h->h_name, VALUE_PTR(oldfreevm), len);
+  ARRAY_SIZE(oldfreevm) = len;
+  moveframe(oldfreevm, o1);
+  FREEopds = o2;
   return OK;
 }

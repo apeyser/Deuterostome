@@ -31,9 +31,15 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-@ENABLE_PLUGINS_TRUE@am__append_1 = process2.c process2.h stats.c \
-@ENABLE_PLUGINS_TRUE@	stats.h cpptester.c cpptester.h dmflex.c
-@ENABLE_PLUGINS_FALSE@am__append_2 = .plugins
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am__append_1 =  \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	process2.c \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	process2.h \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	stats.c \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	stats.h \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptester.c \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptester.h \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	dmflex.c
+@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@am__append_2 = .plugins
 subdir = plugins
 DIST_COMMON = $(am__dist_noinst_DATA_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/dmflex.l.in \
@@ -63,50 +69,64 @@ LTLIBRARIES = $(pkglib_LTLIBRARIES)
 cpptester_la_LIBADD =
 am__cpptester_la_SOURCES_DIST = cpptester.c cpptester.h \
 	cpptestercode.cpp cpptestercode.h
-@ENABLE_PLUGINS_TRUE@am_cpptester_la_OBJECTS = cpptester.lo \
-@ENABLE_PLUGINS_TRUE@	cpptestercode.lo
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_cpptester_la_OBJECTS = cpptester.lo \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptestercode.lo
 cpptester_la_OBJECTS = $(am_cpptester_la_OBJECTS)
-@ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_TRUE@am_cpptester_la_rpath =  \
-@ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_TRUE@	-rpath \
-@ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
+@ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_cpptester_la_rpath = -rpath \
+@ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
 dmflex_la_LIBADD =
 am__dmflex_la_SOURCES_DIST = dmflex.l dmflex.h
-@ENABLE_PLUGINS_TRUE@am_dmflex_la_OBJECTS = dmflex.lo
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_dmflex_la_OBJECTS =  \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	dmflex.lo
 dmflex_la_OBJECTS = $(am_dmflex_la_OBJECTS)
-@ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_TRUE@am_dmflex_la_rpath = -rpath \
-@ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
+@ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_dmflex_la_rpath = -rpath \
+@ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
 process_la_LIBADD =
 am__process_la_SOURCES_DIST = process.c process.h
-@ENABLE_PLUGINS_TRUE@am_process_la_OBJECTS = process.lo
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_process_la_OBJECTS =  \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	process.lo
 process_la_OBJECTS = $(am_process_la_OBJECTS)
-@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@am_process_la_rpath =  \
-@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@	-rpath $(pkglibdir)
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@am_process_la_rpath = -rpath \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@	$(pkglibdir)
 process2_la_LIBADD =
 am__process2_la_SOURCES_DIST = process2.c process2.h
-@ENABLE_PLUGINS_TRUE@am_process2_la_OBJECTS = process2.lo
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_process2_la_OBJECTS =  \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	process2.lo
 process2_la_OBJECTS = $(am_process2_la_OBJECTS)
-@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@am_process2_la_rpath =  \
-@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@	-rpath $(pkglibdir)
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@am_process2_la_rpath = -rpath \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@	$(pkglibdir)
 stats_la_LIBADD =
 am__stats_la_SOURCES_DIST = stats.h stats.c
-@ENABLE_PLUGINS_TRUE@am_stats_la_OBJECTS = stats.lo
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_stats_la_OBJECTS =  \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	stats.lo
 stats_la_OBJECTS = $(am_stats_la_OBJECTS)
-@ENABLE_PLUGINS_TRUE@am_stats_la_rpath = -rpath $(pkglibdir)
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_stats_la_rpath =  \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	-rpath \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
 test_la_LIBADD =
 am__test_la_SOURCES_DIST = test.c test.h
-@ENABLE_PLUGINS_TRUE@am_test_la_OBJECTS = test.lo
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_test_la_OBJECTS =  \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	test.lo
 test_la_OBJECTS = $(am_test_la_OBJECTS)
-@ENABLE_PLUGINS_TRUE@am_test_la_rpath = -rpath $(pkglibdir)
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_test_la_rpath =  \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	-rpath \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
 test2_la_LIBADD =
 am__test2_la_SOURCES_DIST = test2.c test2.h
-@ENABLE_PLUGINS_TRUE@am_test2_la_OBJECTS = test2.lo
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_test2_la_OBJECTS =  \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	test2.lo
 test2_la_OBJECTS = $(am_test2_la_OBJECTS)
-@ENABLE_PLUGINS_TRUE@am_test2_la_rpath = -rpath $(pkglibdir)
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_test2_la_rpath =  \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	-rpath \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
 throw_la_LIBADD =
 am__throw_la_SOURCES_DIST = throw.c throw.h
-@ENABLE_PLUGINS_TRUE@am_throw_la_OBJECTS = throw.lo
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_throw_la_OBJECTS =  \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	throw.lo
 throw_la_OBJECTS = $(am_throw_la_OBJECTS)
-@ENABLE_PLUGINS_TRUE@am_throw_la_rpath = -rpath $(pkglibdir)
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_throw_la_rpath =  \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	-rpath \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -364,28 +384,31 @@ AM_CFLAGS = $(GCC_CFLAGS) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
 AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 BUILT_SOURCES = $(am__append_1) $(am__append_2)
-@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@PROCESS_LIB = process.la process2.la
-@ENABLE_PLUGINS_TRUE@process_la_SOURCES = process.c process.h
-@ENABLE_PLUGINS_TRUE@process2_la_SOURCES = process2.c process2.h
-@ENABLE_PLUGINS_TRUE@dist_noinst_DATA = process2.d stats.d cpptester.d
-@ENABLE_PLUGINS_TRUE@stats_la_SOURCES = stats.h stats.c
-@ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_TRUE@CPPPLUGIN_LIB = cpptester.la
-@ENABLE_PLUGINS_TRUE@cpptester_la_SOURCES = cpptester.c cpptester.h \
-@ENABLE_PLUGINS_TRUE@	cpptestercode.cpp cpptestercode.h
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@PROCESS_LIB = process.la process2.la
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process_la_SOURCES = process.c process.h
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process2_la_SOURCES = process2.c process2.h
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dist_noinst_DATA =  \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	process2.d \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	stats.d \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptester.d
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@stats_la_SOURCES = stats.h stats.c
+@ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@CPPPLUGIN_LIB = cpptester.la
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@cpptester_la_SOURCES = cpptester.c cpptester.h \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptestercode.cpp cpptestercode.h
 
-@ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_TRUE@DMFLEX_LIB = dmflex.la
-@ENABLE_PLUGINS_TRUE@dmflex_la_SOURCES = dmflex.l dmflex.h
-@ENABLE_PLUGINS_TRUE@PLUGINS = test.la test2.la $(PROCESS_LIB) throw.la \
-@ENABLE_PLUGINS_TRUE@	$(DMFLEX_LIB) \
-@ENABLE_PLUGINS_TRUE@	stats.la $(CPPPLUGIN_LIB)
+@ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@DMFLEX_LIB = dmflex.la
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dmflex_la_SOURCES = dmflex.l dmflex.h
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@PLUGINS = test.la test2.la $(PROCESS_LIB) throw.la \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(DMFLEX_LIB) \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	stats.la $(CPPPLUGIN_LIB)
 
-@ENABLE_PLUGINS_FALSE@PLACEHOLDER = .plugins
-@ENABLE_PLUGINS_TRUE@test_la_SOURCES = test.c test.h
-@ENABLE_PLUGINS_TRUE@test2_la_SOURCES = test2.c test2.h
-@ENABLE_PLUGINS_TRUE@throw_la_SOURCES = throw.c throw.h
-pkglib_LTLIBRARIES = $(PLUGINS)
-pkglib_DATA = $(PLACEHOLDER)
-CLEANFILES = $(BUILT_SOURCES)
+@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@PLACEHOLDER = .plugins
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@test_la_SOURCES = test.c test.h
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@test2_la_SOURCES = test2.c test2.h
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@throw_la_SOURCES = throw.c throw.h
+@ENABLE_PLUGINS_SUPPORT_TRUE@pkglib_LTLIBRARIES = $(PLUGINS)
+@ENABLE_PLUGINS_SUPPORT_TRUE@pkglib_DATA = $(PLACEHOLDER)
+@ENABLE_PLUGINS_SUPPORT_TRUE@CLEANFILES = $(BUILT_SOURCES)
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -739,32 +762,32 @@ uninstall-am: uninstall-pkglibDATA uninstall-pkglibLTLIBRARIES
 	uninstall-pkglibDATA uninstall-pkglibLTLIBRARIES
 
 
-@ENABLE_PLUGINS_TRUE@process2.c: process2.d plugin.d
-@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
-@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "process2.d" "$@" true true
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process2.c: process2.d plugin.d
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "process2.d" "$@" true true
 
-@ENABLE_PLUGINS_TRUE@process2.h: process2.d plugin.d
-@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
-@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "process2.d" "$@" false true
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process2.h: process2.d plugin.d
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "process2.d" "$@" false true
 
-@ENABLE_PLUGINS_TRUE@stats.c: stats.d plugin.d
-@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
-@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "stats.d" "$@" true true
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@stats.c: stats.d plugin.d
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "stats.d" "$@" true true
 
-@ENABLE_PLUGINS_TRUE@stats.h: stats.d plugin.d
-@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
-@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "stats.d" "$@" false true
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@stats.h: stats.d plugin.d
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "stats.d" "$@" false true
 
-@ENABLE_PLUGINS_TRUE@cpptester.c: cpptester.d plugin.d
-@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
-@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "cpptester.d" "$@" true true
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@cpptester.c: cpptester.d plugin.d
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "cpptester.d" "$@" true true
 
-@ENABLE_PLUGINS_TRUE@cpptester.h: cpptester.d plugin.d
-@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
-@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "cpptester.d" "$@" false true
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@cpptester.h: cpptester.d plugin.d
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "cpptester.d" "$@" false true
 
-@ENABLE_PLUGINS_FALSE@.plugins:
-@ENABLE_PLUGINS_FALSE@	touch "$@"
+@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@.plugins:
+@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@	touch "$@"
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

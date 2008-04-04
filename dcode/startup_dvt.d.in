@@ -20,7 +20,6 @@
                      1 get /userdict name
 
 /lock {exec} bind def    |
-/dmnumincerror {(dmnuminc) 2816 error} def
 
 /makefont {
     ~[exch 3 -1 roll 1 ~index 0 ~put] bind
@@ -341,6 +340,9 @@ end def  | of xtext_dict
 /DIRTYPE 16384L def
 /FUSERREAD 256 def
 
+| dirname filename | 
+|   if file exists: objects.. true
+|   else:           false
 /fromxfiles {
     2 copy findfile not {pop pop false} {
         3 1 roll pop pop
@@ -567,7 +569,8 @@ end def  | of xtext_dict
       { linebuf nextevent } aborted { 
         countdictstack 2 sub ~end repeat
         clear dvt begin
-        /kbdowner 0 def c_
+        /kbdowner 0 def 
+        {c_} aborted {(!! c_ error\n)} if
       } if
     } loop
   } bind def
@@ -925,14 +928,16 @@ c_         list all connections
 | the node is assigned a group number (enter as NEGATIVE integer)
 | Also connects the eye.
 
-  Xwindows {
+  Xwindows not {null} {  
     /getdnodedisplay {
       ~[
         getdvtdisplay_ 
-        xauthcreate xauthget /xauthput find ~exec
+        xauthget /xauthput find ~exec
       ]
     } bind def
+  } ifelse
 
+  Xwindows {
     /_cx {
       dvt begin {
         false 0 1 nodelist length 1 sub { /knode name
@@ -1049,26 +1054,30 @@ c_         list all connections
     } stopped pop end
   } bind userdict 3 -1 roll put
 
-  /getdvtdisplay | {
-    80 /b array 
-    dup Xdisplayname           | /b-80 (hostname:n.n)
-@ENABLE_REGEX_START@
-    save exch                  | /b-80 save (hostname:n.n)
-    (^\(localhost\)?\(:[0-9]+\(\\.[0-9]+\)?\)$) regex { 
-                               | /b-80 save () (localhost:0.0) () [(:0.0)]
-      1 get                    | /b-80 save () (localhost:0.0) () (:0.0)
-      4 1 roll 3 ~pop repeat   | /b-80 save (:0.0)
-      dup length /b array copy | /b-80 save (:0.0)
-      3 -1 roll 0              | save (:0.0) /b-80 0
-      80 /b array getmyfqdn fax| save (:0.0) /b-80 n
-      3 -1 roll fax            | save /b-80 n
-      0 exch getinterval       | save /b-80
-      null 3 1 roll            | null save /b-80
-    } if exch restore          | /b-80|null (hostname:n.n)|/b-80
-@ENABLE_REGEX_END@  
-    exch pop | }
-  userdict 3 -1 roll put
-  /getdvtdisplay_ ~getdvtdisplay def
+  Xwindows {
+    save
+    Xdisplayname {
+      (localhost:) anchorsearch not {
+        (:) anchorsearch not {dup exit} if
+      } if pop
+      dup length 1 add /b array 0 (:) fax 3 -1 roll fax pop
+      getmyfqdn dup length 2 index length add /b array 0
+      3 -1 roll fax 2 index fax pop
+      exit
+    } loop 
+    2 index capsave
+    dup length /b array copy userdict /getforeigndisplay put
+    dup length /b array copy userdict /getlocaldisplay put
+    restore
+
+    /getdvtdisplay {
+      node 0 get (localhost) anchorsearch not {pop getforeigndisplay} {
+        pop length 0 eq ~getlocaldisplay ~getforeigndisplay ifelse
+      } ifelse
+    } bind def
+
+    /getdvtdisplay_ ~getdvtdisplay def
+  } if
 
   /_csu1x {/knode name {
     nodelist knode get /node name
@@ -1214,7 +1223,7 @@ c_         list all connections
     /dnode_memory_ <x 0 0 0 0 0> def
     
     /dnode_setup 11 dict dup begin
-    /display getdvtdisplay def
+    /display ~getdvtdisplay def
     /host (localhost) def
     /port 0 def
     /group -1 def
@@ -1686,8 +1695,15 @@ end userdict 3 -1 roll put
     /wW 1 def /wH nrows rowH mul 6 add def
     [ [ 2 scrH wH sub 2 sub wW wH ] | ]
     myname myshortname makewindow /wid name pop
-    /woutline [ 0 0 wW 1 sub 0 wW 1 sub wH 1 sub 0 wH 1 sub 0 0 ] def
-    /wpane [ 1 1 wW 2 sub wH 2 sub ] def
+    /woutline ~[[0 0 wW 1 sub 0 wW 1 sub wH 1 sub 0 wH 1 sub 0 0] {
+      wW 1 sub 1 index 2 put
+      wW 1 sub 1 index 4 put
+      } ~exec] bind def
+    |/woutline [ 0 0 wW 1 sub 0 wW 1 sub wH 1 sub 0 wH 1 sub 0 0 ] def
+    /wpane ~[[ 1 1 wW 2 sub wH 2 sub ] {
+      wW 2 sub 1 index 2 put
+      } ~exec] bind def
+    |/wpane [ 1 1 wW 2 sub wH 2 sub ] def
     /line 4 /x array def
     macros /windowsize get /windowsize name
     macros /drawwindow get /drawwindow name
@@ -2284,45 +2300,80 @@ end mkmousedict def
 } bind def
 
 
-| set up xauth data for dnodes
-xauth {
-  | (name) <b indata>/{} bool-trusted int-timeout | xauthdict
-  /xauthmake {
-    7 dict dup begin
-       exch /timeout name
-       exch /trusted name
-       exch /datain  name
-       exch /sec_name name
-    end 
-  } bind def
+| ========================================= set up xauth data for dnodes
+| xauthmake - set up a dictionary of xauth data:
+|  /timeout - timeout for generated data
+|  /trusted - true if the connection will be trusted
+|  /datain  - data for creating cookie
+|  /sec_name - protocol string (such as MIT-MAGIC-COOKIE-1)
+|  /lasttime - time that data was generated (-1 if none generated yet)
+| xauthcreate - generate dataout and id
+|  /dataout - xauth certificate generated
+|  /id - id for certificate (used to revoke, numeral)
+|  /lasttime - set to current time
+| xauthget - if certificate has timed, generate one; 
+|            return protocol name and dataout
+| xauthput - if xauth available, call xauthset with (protocol) <b dataout>
+| 
+| If no xauth, xauthget and xauthput are defined to empty,
+|  the rest are undefined.
+|
+Xwindows {
+  xauth not {/xauthget {} def /xauthput {} def} {
+    | (name) <b indata>/{} bool-trusted int-timeout | xauthdict
+    /xauthmake {
+      8 dict dup begin
+        exch /timeout name
+        exch /trusted name
+        exch /datain  name
+        exch /sec_name name
+        -1 /lasttime name
+      end 
+    } bind def
 
-  /xauthcreate {
-    xauthdict /xsave known {xauthdict /xsave get restore} if
-    save xauthdict /xsave put
-    xauthdict dup /sec_name get
-    exch      dup /datain   get
-    exch      dup /trusted  get
-    exch          /timeout  get xauthgen
-    xauthdict exch 1 index /id      put
-              exch 1 index /dataout put
-              exch pop
-              /xsave get capsave
-  } bind def
+    | -- xauthdict <<xauthmake called, /xauthdict set>> 
+    |    | -- <<dataout,id,timeout set>>
+    /xauthcreate {
+      dup              /xsave    known {dup /xsave get restore} if
+      save 1 index     /xsave    put
+      dup gettime exch /lasttime put
 
-  /xauthget {
-    xauthdict dup  /sec_name get
-              exch /dataout  get
-  } bind def
+      dup              /sec_name get exch
+      dup              /datain   get exch
+      dup              /trusted  get exch
+      dup              /timeout  get exch
+      5 1 roll xauthgen
 
-  /xauthput {xauthset} bind def
+      4 -1 roll 
+      exch 1 index /id      put
+      exch 1 index /dataout put
+      exch pop     /xsave get capsave
+    } bind def
+
+    | -- <<xauthmake called, /xauthdict save>> | (protocol) <b dataout>
+    /xauthget {
+      xauthdict dup /lasttime get -1 eq {dup xauthcreate} {
+        dup /timeout get dup 0 eq {pop} {
+          1 index /lasttime get gettime exch sub lt {dup xauthcreate} if
+        } ifelse
+      } ifelse
+
+      dup  /sec_name get
+      exch /dataout  get
+    } bind def
+
+    | (protocol) <b dataout> | -- <<xauth certificate set for Xconnect>>
+    /xauthput {
+      xauth {xauthset} {
+        pop pop (!!! xauth extension missing !!!\n) toconsole
+      } ifelse
+    } bind def
           
-  /xauthdict_def (MIT-MAGIC-COOKIE-1) () true 60 xauthmake def
-  /xauthdict xauthdict_def def
-} {
-  /xauthcreate {} def
-  /xauthget {} def
-  /xauthput {} def
-} ifelse
+    | default is MIT-MAGIC-COOKIE trusted for 60 seconds
+    /xauthdict_def (MIT-MAGIC-COOKIE-1) () true 60 xauthmake def
+    /xauthdict xauthdict_def def
+  } ifelse
+} if
         
 |----------------------------- start the dvt ------------------------------
 | A 'save' representing a clean dvt is associated with the name cleanDVT in

@@ -229,11 +229,11 @@ gethomedir length 0 ne {
   [/FSclass gethomedir [gethomedir (home)]] leftpageadd | home dir
 } if
 
-@ENABLE_PLUGINS_START@
+@ENABLE_PLUGINS_SUPPORT_START@
 userdict /dnode_setup known not {
   [ /FSclass getplugindir [getplugindir (plugins)]] leftpageadd   | plugins
 } if
-@ENABLE_PLUGINS_END@
+@ENABLE_PLUGINS_SUPPORT_END@
 
 |/leftpageU 2 def               | current used length of object list
 /leftpageT 0 def               | index of top displayed object

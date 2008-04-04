@@ -4,7 +4,10 @@ AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 LIBS += $(LTLIBOBJS) $(top_builddir)/src/libdmglobals.la
 BUILT_SOURCES =
 
+if ENABLE_PLUGINS_SUPPORT
+
 if ENABLE_PLUGINS
+
 if ENABLE_PROCESS
 PROCESS_LIB=process.la process2.la
 endif ENABLE_PROCESS
@@ -86,3 +89,4 @@ pkglib_DATA = $(PLACEHOLDER)
 
 CLEANFILES = $(BUILT_SOURCES)
 
+endif ENABLE_PLUGINS_SUPPORT
