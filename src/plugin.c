@@ -228,7 +228,7 @@ BOOLEAN check_opaque_name(B* nameframe, B* dict) {
   return matchname(frame, nameframe);
 }
 
-B* make_opaque_frame(P n, B* destroyer, B* pluginnameframe, ...) {
+B* make_opaque_frame(P n, B* pluginnameframe, ...) {
   int len = 0;
   B* nameframe;
   va_list nameframes;
@@ -244,12 +244,6 @@ B* make_opaque_frame(P n, B* destroyer, B* pluginnameframe, ...) {
   va_end(nameframes);
   
   if (op_save() != OK) return NULL;
-	if (destroyer) {
-    B* box = VALUE_PTR(o_1);
-    OPDEF_NAME(SBOX_DATA(box)) = OPDEF_NAME(destroyer);
-    OPDEF_CODE(SBOX_DATA(box)) = OPDEF_CODE(destroyer);
-    SBOX_FLAGS(box) |= SBOX_FLAGS_CLEANUP;
-	}
 
   if ((dict = makedict(len + 2 + (n ? 1 : 0))) == (B*) -1L) {
     FREEvm = oldFREEvm;

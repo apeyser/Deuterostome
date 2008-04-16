@@ -493,18 +493,6 @@ struct Entry {
 }
 #endif
 
-DM_INLINE BOOLEAN PVALUE(B* frame, P* var) {
-#if DM_HOST_IS_32_BIT
-    LBIG v;
-    if (!VALUE(frame, &v) || v > PMAX || v < -PMAX)
-      return FALSE;
-    *var = (P) v;
-    return TRUE;
-#else
-    return VALUE(frame, var);
-#endif // DM_HOST_IS_32_BIT
-}
-
 #if __cplusplus
 }
 #endif

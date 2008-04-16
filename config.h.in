@@ -106,6 +106,12 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
+/* Define if you have MPI library. */
+#undef HAVE_MPI
+
+/* Define to 1 if you have the <mpi.h> header file. */
+#undef HAVE_MPI_H
+
 /* Define to 1 if you have the `prctl' function. */
 #undef HAVE_PRCTL
 
@@ -225,6 +231,12 @@
 /* Define to 1 if `lex' declares `yytext' as a `char *' by default, not a
    `char[]'. */
 #undef YYTEXT_POINTER
+
+/* Define to 200112L - we are POSIXY */
+#undef _POSIX_C_SOURCE
+
+/* Define to >500 - we are POSIXY */
+#undef _XOPEN_SOURCE
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const

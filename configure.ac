@@ -1,4 +1,4 @@
-AC_INIT([D-Machine], [4.1], [Alexander Peyser <a.peyser@umiami.edu>], [dm])
+AC_INIT([D-Machine], [4.2.0], [Alexander Peyser <a.peyser@umiami.edu>], [dm])
 AC_CONFIG_MACRO_DIR(m4)
 AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE
@@ -8,10 +8,11 @@ AX_PREFIX_CONFIG_H([src/codegen/dm-config.h])
 AM_PATH_LISPDIR
 AM_MAINTAINER_MODE
 
+AX_SET_VERSION_INFO
+
 CF_CLEAR_DEF([CFLAGS])
 
 CF_AC_ENABLE([xps], [compile or install only new xps], [yes])
-
 CF_AC_ENABLE([regex], [include regex], [yes])
 
 CF_AC_ARG_VAR([SYS_DICT_SIZE], [system dictionary size], [500])
@@ -45,6 +46,8 @@ CF_IF_ENABLED([threads], [
     CF_AC_ARG_VAR([THREADMUL], [min unrolls per thread], [56])
   ])
 ])
+
+CF_AM_ENABLE([rthreads], [Activate mpi & petsc], [yes])
 
 CF_AC_ARG_DIR([dmbindir], [location for dm binary], [${bindir}/${PACKAGE}])
 CF_AC_ARG_DIR([pkgdatadir], [location for data files], 
@@ -81,16 +84,16 @@ CF_C_INLINE
 CF_BASIC_DEFS()
 
 CF_AC_ENABLE([plugins-support], [compile or install plugin support], [yes])
-CF_AM_ENABLE([plugins], [compile or install plugins], [no], [yes])
+CF_AM_ENABLE([plugins], [compile or install plugins], [yes])
 CF_AM_ENABLE([process], 
              [compile or install process plugin], 
-	     [yes])
+	     [no], [yes])
 CF_AM_ENABLE([cppplugin], 
              [compile or install cpp memory library for plugins], 
-	     [yes])
+	     [no], [yes])
 CF_AM_ENABLE([dmflex], 
              [compile or install dmflex plugin], 
-             [yes])
+             [no], [yes])
 
 CF_AC_ARG_VAR_SUBST_EVAL([STRINGBUF], 
       [Max buffer size for dmflex, must be at least $NAMEBYTES + 2], 
@@ -114,6 +117,8 @@ AC_CHECK_PROG([guipdf], [gv], [gv])
 AC_CHECK_PROG([guipdf], [gs], [gs])
 
 CF_ATLAS()
+CF_MPI()
+#CF_PETSC()
 
 CF_AM_PROG([BASH], [bash])
 CF_AM_PROG([ENV], [env], [/usr/bin])
@@ -143,7 +148,13 @@ AC_PROG_MAKE_SET
 AC_PROG_LN_S
 
 CF_SET_TOP_DIR
-CF_ACX_PTHREAD([threads])
+
+CF_IF_ENABLED([threads], [CF_ACX_PTHREAD_REQUIRE([no, please disable threads])])
+CF_IF_ENABLED([rthreads], [
+  CF_ACX_PTHREAD_REQUIRE([no, pleas disable rthreads])
+  
+])
+
 AC_LIBTOOL_WIN32_DLL
 AC_LIBTOOL_DLOPEN
 AC_LIBLTDL_CONVENIENCE
@@ -157,6 +168,10 @@ AC_C_BIGENDIAN
 # check pid_t for plugins/process.c
 CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([pid_t], [4])])
 CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([int], [4])])
+
+AC_DEFINE([_POSIX_C_SOURCE], [200112L], [Define to 200112L - we are POSIXY])
+AC_DEFINE([_XOPEN_SOURCE], [(_XOPEN_SOURCE < 500 ? 500 : _XOPEN_SOURCE)], 
+  [Define to >500 - we are POSIXY])
 
 CF_AC_CHECK_HEADERS([endian.h machine/endian.h], [ENDIAN_HDR], 
   [Header for endianness], [NO_ENDIAN_HDR])
@@ -263,50 +278,58 @@ CF_IF_ENABLED([cppplugin], [
 ])
 
 AC_CONFIG_LINKS([
-		src/dsp1f.h:src/codegen/dsp1f.h.built
-		src/dmnuminc.h:src/codegen/dmnuminc.h.built
-		src/dsp2def.h:src/codegen/dsp2def.h.built
-		src/codegen/dmglobals.c:src/dmglobals.c
-		src/codegen/dsp1.c:src/dsp1.c
-		src/codegen/dm1.c:src/dm1.c
-		src/codegen/dm2.c:src/dm2.c
-		src/codegen/dm3.c:src/dm3.c
-		src/codegen/dm4.c:src/dm4.c
-		src/codegen/dm5.c:src/dm5.c
-		src/codegen/dm6.c:src/dm6.c
-		src/codegen/dm7.c:src/dm7.c
-		src/codegen/dm8.c:src/dm8.c
-		src/codegen/dmnum.c:src/dmnum.c
-    src/codegen/dsp2.c:src/dsp2.c
-    src/codegen/dm-types.h:src/dm-types.h
-    src/codegen/dm-types.c:src/dm-types.c
-		src/codegen/paths.h.in:src/paths.h.in
-		src/codegen/dgen.c:src/dgen.c
-		src/codegen/dgen_0.h:src/dgen_0.h
-		src/codegen/dgen_1.h:src/dgen_1.h
-		src/codegen/dgen-build:src/dgen-build
-    src/codegen/dmnum.h:src/dmnum.h
-		plugins/plugin.d:dcode/plugin.d
+  src/dsp1f.h:src/codegen/dsp1f.h.built
+  src/dmnuminc.h:src/codegen/dmnuminc.h.built
+  src/dsp2def.h:src/codegen/dsp2def.h.built
+  src/dgen_0.h:src/codegen/dgen_0.h.built
+  src/dnode_0.h:src/codegen/dnode_0.h.built
+  src/dpawn_0.h:src/codegen/dpawn_0.h.built
+  src/dvt_0.h:src/codegen/dvt_0.h.built
+  src/codegen/dmglobals.c:src/dmglobals.c
+  src/codegen/dsp1.c:src/dsp1.c
+  src/codegen/dm1.c:src/dm1.c
+  src/codegen/dm2.c:src/dm2.c
+  src/codegen/dm-swapbytes.h:src/dm-swapbytes.h
+  src/codegen/dm-conv.c:src/dm-conv.c
+  src/codegen/dm3.c:src/dm3.c
+  src/codegen/dm4.c:src/dm4.c
+  src/codegen/dm5.c:src/dm5.c
+  src/codegen/dm6.c:src/dm6.c
+  src/codegen/dm7.c:src/dm7.c
+  src/codegen/dm8.c:src/dm8.c
+  src/codegen/dmnum.c:src/dmnum.c
+  src/codegen/dsp2.c:src/dsp2.c
+  src/codegen/dm-types.h:src/dm-types.h
+  src/codegen/dm-types.c:src/dm-types.c
+  src/codegen/paths.h.in:src/paths.h.in
+  src/codegen/dgen.c:src/dgen.c
+  src/codegen/dgen_1.h:src/dgen_1.h
+  src/codegen/dgen-build:src/dgen-build
+  src/codegen/dmnum.h:src/dmnum.h
+  src/codegen/dm-nextevent.c:src/dm-nextevent.c
+  src/codegen/dm-nextevent.h:src/dm-nextevent.h
+  plugins/plugin.d:dcode/plugin.d
+  plugins/new-plugin.d:dcode/new-plugin.d
 ])
 
 AC_CONFIG_FILES([
-		 Makefile 
-		 src/Makefile 
-		 src/codegen/Makefile 
-     src/codegen/dmnuminc.d 
-     src/codegen/dsp2def.d
- 		 src/dm.pc
-		 plugins/Makefile plugins/dmflex.l
-		 ps/Makefile 
-		 sh/Makefile
-		 emacs/Makefile emacs/d-mode.el
-		 dcode/Makefile dcode/startup_dnode.d 
-		 dcode/startup_dgen.d 
-		 src/codegen/startup_dgen.d:dcode/startup_dgen.d.in
-		 plugins/startup_dgen.d:dcode/startup_dgen.d.in
-		 test/Makefile
-		 m4/Makefile
-		 test/arr.d
+  Makefile 
+  src/Makefile 
+  src/codegen/Makefile 
+  src/codegen/dmnuminc.d 
+  src/codegen/dsp2def.d
+  src/dm.pc
+  plugins/Makefile plugins/dmflex.l
+  ps/Makefile 
+  sh/Makefile
+  emacs/Makefile emacs/d-mode.el
+  dcode/Makefile dcode/startup_dnode.d 
+  dcode/startup_dgen.d 
+  src/codegen/startup_dgen.d:dcode/startup_dgen.d.in
+  plugins/startup_dgen.d:dcode/startup_dgen.d.in
+  test/Makefile
+  m4/Makefile
+  test/arr.d
 ])
 
 AC_OUTPUT

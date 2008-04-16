@@ -20,7 +20,7 @@ P op_getplugindir(void);
 BOOLEAN check_opaque_name(B* nameframe, B* dict);
 // ... = null terminated list of nameframes to insert
 // first set to be null objects -- you must initialize them OPAQUE_MEM_SET
-B* make_opaque_frame(P n, B* destroyer, B* pluginnameframe, ...);
+B* make_opaque_frame(P n, B* pluginnameframe, ...);
 
 //globals -- used only in plugins and dnode_1.h
 extern B opaquename[FRAMEBYTES];

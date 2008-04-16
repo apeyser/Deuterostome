@@ -19,7 +19,7 @@
 2 list dictstack dup 0 get /systemdict name   | name the roots
                      1 get /userdict name
 
-/lock {exec} bind def    |
+/lock {exec} bind def    | just to make dnodes & dvts symmetric
 
 /makefont {
     ~[exch 3 -1 roll 1 ~index 0 ~put] bind
@@ -566,7 +566,7 @@ end def  | of xtext_dict
   /supervisor
   {
     {
-      { linebuf nextevent } aborted { 
+      {linebuf nextevent} aborted { 
         countdictstack 2 sub ~end repeat
         clear dvt begin
         /kbdowner 0 def 
@@ -641,21 +641,14 @@ end def  | of xtext_dict
   |         busy: discard phrase and print 'Wait!'
 
     { 
-      kbdowner 0 eq {line end mkact exec dvt begin} { 
-        { 
-          node 3 get { 
-            (Wait!\n) toconsole
-          } { 
-            knode setbusy
-            node 2 get
-            linebuf2 0 ({ ) fax
-            line fax
-            ( } stopped pop console \(dvt begin ) fax
-            * knode * number ( setready end\) send) fax
-            0 exch getinterval send
-          } ifelse
-        } fornodes
-      } ifelse
+      kbdowner 0 eq {line end mkact exec dvt begin} { { 
+        node 3 get {(Wait!\n) toconsole} { 
+          knode setbusy 
+          save
+          node 2 get ~[line knode ~dvtreceive] send
+          restore
+        } ifelse
+      } fornodes} ifelse
     } bind
   
     |-- *
@@ -689,11 +682,9 @@ end def  | of xtext_dict
         { 
           node 3 get  {(Wait!\n) toconsole}  { 
             knode setbusy
-            node 2 get
-            combuf 0 (\() fax line fax
-            (\) tosystem console \(dvt begin ) fax
-            * knode * number ( setready end\) send) fax
-            0 exch getinterval send
+            save
+            node 2 get ~[line knode ~dvtsystem] send
+            restore
           } ifelse
         } fornodes
       } ifelse
@@ -712,11 +703,9 @@ end def  | of xtext_dict
         { 
           node 3 get {(Wait!\n) toconsole} { 
             knode setbusy
-            node 2 get
-            combuf 0 (\() fax line mkact exec 
-            (\) tosystem console \(dvt begin ) fax
-            * knode * number ( setready end\) send) fax
-            0 exch getinterval send
+            save
+            node 2 get ~[line mkact exec knode ~dvtsystem] send
+            restore
           } ifelse
         } fornodes
       } ifelse
@@ -737,10 +726,9 @@ end def  | of xtext_dict
         { 
           node 3 get {(Wait!\n) toconsole}  { 
             knode setbusy
-            node 2 get
-            combuf 0 (shellbuf 0 { ) fax line fax ( } exec 0 exch getinterval tosystem console \(dvt begin ) fax
-            * knode * number ( setready end\) send) fax
-            0 exch getinterval send
+            save 
+            node 2 get ~[line knode ~dvtexecsystem] send
+            restore
           }  ifelse
         } fornodes
       } ifelse
@@ -910,15 +898,17 @@ c_         list all connections
       false node 3 put
       node 6 put
       
-      node 2 get [[knode {
+      save
+      node 2 get ~[knode {
         getsocket setconsole
-        console [[4 -1 roll] (0 get dvt begin _cc1)] send
-      }] ({} forall exec)] send
+        console ~[3 -1 roll ~dvt ~begin ~_cc1] send
+      } ~exec ~restore] send
+      restore
     } stopped pop end
   } bind userdict 3 -1 roll put
 
   /_cc1 {
-    {color_node_def} stopped pop end
+    exch restore {color_node_def} stopped pop end
   } bind userdict 3 -1 roll put
 
 |---------------------------------------------------- connect to node
@@ -932,7 +922,7 @@ c_         list all connections
     /getdnodedisplay {
       ~[
         getdvtdisplay_ 
-        xauthget /xauthput find ~exec
+        Xauthget /Xauthput find ~exec
       ]
     } bind def
   } ifelse
@@ -948,24 +938,30 @@ c_         list all connections
         2 copy connect node 2 put node 1 put node 0 put
         true node 3 put printnode
         
-        node 2 get [ [getdnodedisplay knode fontdict mousedict {
-          /mousedict name /fontdict name /knode name
+        save
+        node 2 get ~[getdnodedisplay knode fontdict mousedict {
           getsocket setconsole
+          /mousedict name /fontdict name /knode name /getdnodedisplay name
+          capsave
+          
           Xwindows_ not {(No Xwindows on node!\n) toconsole stop} if
           Xdisconnect
-          exec Xconnect
+          getdnodedisplay Xconnect
+
           /filesave save def
           /fbuf vmstatus sub 10 div /b array def
           filesave capsave {
             getstartupdir (/theeye.d) fbuf readfile mkact exec
           } stopped pop filesave restore
-          console [[knode] (0 get dvt begin _cx1)] send
-        }] ( {} forall exec )] send
+          
+          console ~[knode ~dvt ~begin ~_cx1] send
+        } ~exec] send
+        restore
       } stopped pop end
     } bind userdict 3 -1 roll put
   
     /_cx1 {
-      {setready} stopped pop end
+      {setready} stopped pop end restore
     } bind userdict 3 -1 roll put
   } if
 
@@ -987,25 +983,31 @@ c_         list all connections
         2 copy connect node 2 put node 1 put node 0 put
         node 6 put
         true node 3 put printnode
-      
-        node 2 get [ [getdnodedisplay knode fontdict mousedict {
-          /mousedict name /fontdict name /knode name
+   
+        save
+        node 2 get [getdnodedisplay knode fontdict mousedict {
           getsocket setconsole
+          /mousedict name /fontdict name /knode name /getdnodedisplay name
+          capsave
+
           Xwindows_ not {(No Xwindows on node!\n) toconsole stop} if
           Xdisconnect
-          exec Xconnect
+          getdnodedisplay Xconnect
+
           /filesave save def
           /fbuf vmstatus sub 10 div /b array def
           filesave capsave {
             getstartupdir (/theeye.d) fbuf readfile mkact exec
           } stopped pop filesave restore
-          console [[knode] (0 get dvt begin _ccx1)] send
-        }] ( {} forall exec )] send
+
+          console ~[knode ~dvt ~begin ~_ccx1] send
+        } ~exec]  send
+        restore
       } stopped pop end
     } bind userdict 3 -1 roll put
     
     /_ccx1 {
-      {dup color_node_def setready} stopped pop end
+      exch restore {dup color_node_def setready} stopped pop end
     } bind userdict 3 -1 roll put
   } if
   
@@ -1029,33 +1031,35 @@ c_         list all connections
       4 1 roll node 4 put
       2 copy connect node 2 put node 1 put node 0 put
       true node 3 put printnode
-      node 2 get [ 3 -1 roll (getsocket setconsole vmresize ) ] send
+      save
+      node 2 get ~[4 -1 roll ~exch ~pop ~getsocket ~setconsole ~vmresize] send
+      restore
       null node 6 put
 
-      node 2 get [
-        [getdnodedisplay Xwindows knode {
-          4 -1 roll not {killsockets abort} if
-          /knode name Xwindows_ and /otherXwindows name /getdnodedisplay name
-          /filesave save def
-          /fbuf vmstatus sub 10 div /b array def
-          filesave capsave
-          { 
-            getstartupdir (/startup_dnode.d) fbuf readfile mkact exec
-          } stopped pop filesave restore
-          console [
-            [knode] otherXwindows {
-              (0 get dvt begin _csu1x)
-            } {
-              (0 get dvt begin _csu1nox)
-            } ifelse
-          ] send
-        }] ( {} forall exec )
-      ] send
+      save
+      node 2 get ~[getdnodedisplay Xwindows knode {
+        getsocket setconsole
+        5 -1 roll not {killsockets abort} if | bool from vmresize
+        /knode name 
+        Xwindows_ and /otherXwindows name 
+        /getdnodedisplay name
+        capsave
+
+        /filesave save def
+        /fbuf vmstatus sub 10 div /b array def
+        filesave capsave { 
+          getstartupdir (/startup_dnode.d) fbuf readfile mkact exec
+        } stopped pop filesave restore
+
+        console ~[knode 
+          otherXwindows {~dvt ~begin ~_csu1x} {~dvt ~begin ~csu1nox} ifelse
+        ] send
+      } ~exec] send
+      restore
     } stopped pop end
   } bind userdict 3 -1 roll put
 
   Xwindows {
-    save
     Xdisplayname {
       (localhost:) anchorsearch not {
         (:) anchorsearch not {dup exit} if
@@ -1065,10 +1069,8 @@ c_         list all connections
       3 -1 roll fax 2 index fax pop
       exit
     } loop 
-    2 index capsave
-    dup length /b array copy userdict /getforeigndisplay put
-    dup length /b array copy userdict /getlocaldisplay put
-    restore
+    userdict /getforeigndisplay put
+    userdict /getlocaldisplay put
 
     /getdvtdisplay {
       node 0 get (localhost) anchorsearch not {pop getforeigndisplay} {
@@ -1079,55 +1081,75 @@ c_         list all connections
     /getdvtdisplay_ ~getdvtdisplay def
   } if
 
-  /_csu1x {/knode name {
-    nodelist knode get /node name
-    node 2 get [ [
-      debug_dict /line1 get 0 node 0 get fax (:) fax * node 1 get * number
-      0 exch getinterval 
-      knode {/knode name
-        getdnodedisplay Xconnect
-        userdict /myid put
-        console [[knode] (0 get dvt begin _csu2x)] send
-      }] ( {} forall exec )]  send
-  } stopped pop end} bind userdict 3 -1 roll put
+  /_csu1x {
+    /knode name {
+      nodelist knode get /node name
+      node 2 get [
+        debug_dict /line1 get 0 node 0 get fax (:) fax * node 1 get * number
+        0 exch getinterval 
+        knode {/knode name
+          1 index capsave
+          getdnodedisplay Xconnect
+          dup length /b array copy userdict /myid put
+          save console ~[knode ~dvt ~begin ~_csu2x] send restore
+        } ~exec ~restore
+      ] send
+      restore
+    } stopped pop end
+  } bind userdict 3 -1 roll put
 
-  /_csu1nox {/knode name {
-    nodelist knode get /node name
-    node 2 get [ [
-      debug_dict /line1 get 0 node 0 get fax (:) fax * node 1 get * number
-      0 exch getinterval 
-      knode {/knode name
-        userdict /myid put
-        console [[knode] (0 get dvt begin _csu2nox)] send
-      }] ( {} forall exec )]  send
-  } stopped pop end} bind userdict 3 -1 roll put
+  /_csu1nox {
+    /knode name {
+      nodelist knode get /node name
+      node 2 get ~[
+        debug_dict /line1 get 0 node 0 get fax (:) fax * node 1 get * number
+        0 exch getinterval 
+        knode {/knode name
+          1 index capsave
+          dup length /b array copy userdict /myid put
+          save console ~[knode ~dvt ~begin ~_csu2nox] send restore
+        } ~exec ~restore
+      ]  send
+      restore
+    } stopped pop end
+  } bind userdict 3 -1 roll put
 
-  /_csu2x {/knode name {
-    nodelist knode get /node name 
-    node 2 get [ [knode fontdict mousedict {
-      /mousedict name /fontdict name /knode name
-      /filesave save def
-      /fbuf vmstatus sub 10 div /b array def
-      filesave capsave
-      { getstartupdir (/theeye.d) fbuf readfile mkact exec
-      } stopped pop filesave restore
-      1000 /b array userdict /shellbuf put
-      console [[knode] (0 get dvt begin _csu3)] send
-    } ] ( {} forall exec )] send
-  } stopped pop end} bind userdict 3 -1 roll put
+  /_csu2x {
+    /knode name {
+      nodelist knode get /node name
+      node 2 get ~[knode fontdict mousedict {
+        /mousedict name /fontdict name /knode name capsave
 
-  /_csu2nox {/knode name {
-    nodelist knode get /node name 
-    node 2 get [ [knode {/knode name
-      1000 /b array userdict /shellbuf put
-      console [[knode] (0 get dvt begin _csu3)] send
-    } ] ( {} forall exec )] send
-  } stopped pop end} bind userdict 3 -1 roll put
+        /filesave save def
+        /fbuf vmstatus sub 10 div /b array def
+        filesave capsave { 
+          getstartupdir (/theeye.d) fbuf readfile mkact exec
+        } stopped pop filesave restore
 
-  /_csu3 {/knode name {
-    knode setready
-    knode color_node_def
-  } stopped pop end} bind userdict 3 -1 roll put
+        save console ~[knode ~dvt ~begin ~_csu3] send restore
+      } ~exec] send
+      restore
+    } stopped pop end
+  } bind userdict 3 -1 roll put
+
+  /_csu2nox {
+    /knode name {
+      nodelist knode get /node name 
+      node 2 get [
+        knode {/knode name
+          console [knode ~dvt ~begin ~_csu3] send
+        } ~exec ~restore
+      ] send
+      restore
+    } stopped pop end
+  } bind userdict 3 -1 roll put
+
+  /_csu3 {
+    exch restore {
+      dup setready
+      color_node_def
+    } stopped pop end
+  } bind userdict 3 -1 roll put
 
 |---------------------------------------------------- set up node
 | [/color...] hostname port# group# <l opds dicts execs vm/M userdict > | -- 
@@ -1189,15 +1211,18 @@ c_         list all connections
       dvt begin /knode name
       nodelist knode get /node name
       node 0 get class /nullclass ne {
-        node 2 get [
-          [ knode {/knode name
+        save
+        node 2 get ~[
+          knode {/knode name
             Xwindows {Xdisconnect} if
-            console [[knode] (0 get dvt begin _dx1)] send
-          }] ({} forall exec)] send
+            console ~[knode ~dvt ~begin ~_dx1] send
+          } ~exec ~restore
+        ] send
+        restore
       } if
     } bind userdict 3 -1 roll put
 
-    /_dx1 {/knode name
+    /_dx1 {/knode name restore
       nodelist knode get /node name
       node 2 get disconnect
       nodeclear
@@ -1370,6 +1395,10 @@ c_         list all connections
   /setbusy { /knode name
     nodelist knode get /node name true node 3 put
     printnode
+  } bind def
+
+  /setready_dnode {
+    setready end restore
   } bind def
 
 |---------------------------------------- setcolor
@@ -1622,7 +1651,7 @@ c_         list all connections
       /map {node 0 get class /nullclass ne {
         knode 0 eq {null true mapwindow} {
           node 3 get not {
-            node 2 get (Xwindows {null true mapwindow} if) send
+            node 2 get {Xwindows {null true mapwindow} if restore} send
           } if
         } ifelse
       } if} bind def | }
@@ -1935,7 +1964,10 @@ Xwindows {
 |
 | [/color_name...] node# | --- <<changed text color>>
 |
-/color_send [ null (make_toconsole) ] def
+/color_send {
+  {null 1 index capsave transcribe make_toconsole restore}
+} def
+
 /color_node {
   2 copy setcolor
   exch color_send 0 put
@@ -2019,7 +2051,7 @@ Xwindows {
     dvt /nodelist get 1 1 index length 1 sub getinterval {
       dup 0 get null eq {pop} {
         dup 3 get {pop} {
-          2 get [{null true mapwindow} (lock)] send
+          2 get {{null true mapwindow} lock restore} send
         } ifelse
       } ifelse
     } forall
@@ -2029,7 +2061,7 @@ Xwindows {
     dvt /nodelist get 1 1 index length 1 sub getinterval {
       dup 0 get null eq {pop} {
         dup 3 get {pop} {
-          2 get [{null false mapwindow} (lock)] send
+          2 get {{null false mapwindow} lock restore} send
         } ifelse
       } ifelse
     } forall
@@ -2300,30 +2332,28 @@ end mkmousedict def
 } bind def
 
 
-| ========================================= set up xauth data for dnodes
-| xauthmake - set up a dictionary of xauth data:
-|  /timeout - timeout for generated data
+| ========================================= set up Xauth data for dnodes
+| Xauthmake - set up a dictionary of Xauth data:
 |  /trusted - true if the connection will be trusted
 |  /datain  - data for creating cookie
 |  /sec_name - protocol string (such as MIT-MAGIC-COOKIE-1)
 |  /lasttime - time that data was generated (-1 if none generated yet)
-| xauthcreate - generate dataout and id
-|  /dataout - xauth certificate generated
+| Xauthcreate - generate dataout and id
+|  /dataout - Xauth certificate generated
 |  /id - id for certificate (used to revoke, numeral)
 |  /lasttime - set to current time
-| xauthget - if certificate has timed, generate one; 
+| Xauthget - if certificate has timed, generate one; 
 |            return protocol name and dataout
-| xauthput - if xauth available, call xauthset with (protocol) <b dataout>
+| Xauthput - if Xauth available, call Xauthset with (protocol) <b dataout>
 | 
-| If no xauth, xauthget and xauthput are defined to empty,
+| If no Xauth, Xauthget and Xauthput are defined to empty,
 |  the rest are undefined.
 |
 Xwindows {
-  xauth not {/xauthget {} def /xauthput {} def} {
-    | (name) <b indata>/{} bool-trusted int-timeout | xauthdict
-    /xauthmake {
-      8 dict dup begin
-        exch /timeout name
+  Xauth not {/Xauthget {} def /Xauthput {} def} {
+    | (name) <b indata>/{} bool-trusted | xauthdict
+    /Xauthmake {
+      7 dict dup begin
         exch /trusted name
         exch /datain  name
         exch /sec_name name
@@ -2331,9 +2361,9 @@ Xwindows {
       end 
     } bind def
 
-    | -- xauthdict <<xauthmake called, /xauthdict set>> 
-    |    | -- <<dataout,id,timeout set>>
-    /xauthcreate {
+    | -- xauthdict <<Xauthmake called, /xauthdict set>> 
+    |    | -- <<dataout,id>>
+    /Xauthcreate {
       dup              /xsave    known {dup /xsave get restore} if
       save 1 index     /xsave    put
       dup gettime exch /lasttime put
@@ -2341,8 +2371,7 @@ Xwindows {
       dup              /sec_name get exch
       dup              /datain   get exch
       dup              /trusted  get exch
-      dup              /timeout  get exch
-      5 1 roll xauthgen
+      5 1 roll Xauthgen
 
       4 -1 roll 
       exch 1 index /id      put
@@ -2350,27 +2379,25 @@ Xwindows {
       exch pop     /xsave get capsave
     } bind def
 
-    | -- <<xauthmake called, /xauthdict save>> | (protocol) <b dataout>
-    /xauthget {
-      xauthdict dup /lasttime get -1 eq {dup xauthcreate} {
-        dup /timeout get dup 0 eq {pop} {
-          1 index /lasttime get gettime exch sub lt {dup xauthcreate} if
-        } ifelse
+    | -- <<Xauthmake called, /xauthdict save>> | (protocol) <b dataout>
+    /Xauthget {
+      xauthdict dup /lasttime get dup -1 eq {pop dup Xauthcreate} {
+        gettime exch sub 30 gt {dup Xauthcreate} if
       } ifelse
 
       dup  /sec_name get
       exch /dataout  get
     } bind def
 
-    | (protocol) <b dataout> | -- <<xauth certificate set for Xconnect>>
-    /xauthput {
-      xauth {xauthset} {
-        pop pop (!!! xauth extension missing !!!\n) toconsole
+    | (protocol) <b dataout> | -- <<Xauth certificate set for Xconnect>>
+    /Xauthput {
+      Xauth {Xauthset} {
+        pop pop (!!! Xauth extension missing !!!\n) toconsole
       } ifelse
     } bind def
           
     | default is MIT-MAGIC-COOKIE trusted for 60 seconds
-    /xauthdict_def (MIT-MAGIC-COOKIE-1) () true 60 xauthmake def
+    /xauthdict_def (MIT-MAGIC-COOKIE-1) () true Xauthmake def
     /xauthdict xauthdict_def def
   } ifelse
 } if

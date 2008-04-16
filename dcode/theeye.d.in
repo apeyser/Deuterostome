@@ -567,6 +567,7 @@ end mkread def
       dup 518 eq {error} {
         wid inforect BG fillrectangle
         infoline errormessage dup length 1 sub 0 exch getinterval
+        dup toconsole (\n) toconsole
         wid 2 12 4 -1 roll INFOTEXT drawtext   | put err -newline in eye
         stop
       } ifelse

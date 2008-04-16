@@ -10,6 +10,19 @@
 
 */
 
+/* #ifdef _XOPEN_SOURCE */
+/* #if _XOPEN_SOURCE < 500 */
+/* #undef _XOPEN_SOURCE */
+/* #endif */
+/* #ifndef _XOPEN_SOURCE */
+/* #define _XOPEN_SOURCE 500 */
+/* #endif */
+
+#include "dm.h"
+#include "paths.h"
+#include "dm3.h"
+#include "dm-nextevent.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -20,15 +33,14 @@
 #include <errno.h>
 #include <netdb.h>
 #include <fcntl.h>
-#include "dm.h"
 #include <unistd.h>
 #include <string.h>
-#include "paths.h"
-#include "dm3.h"
 
 #ifndef h_errno
 extern int h_errno;
 #endif
+
+#define SOCK_TIMEOUT (60)
 
 /*---------------------------- support -------------------------------------*/
 
@@ -47,6 +59,113 @@ void makeDmemory(B *em, L64 specs[5])
 
   FLOORvm = FREEvm = CEILdicts;
   TOPvm = CEILvm  = FLOORvm + specs[3] * 1000000;
+}
+
+//-------------------------------- set close-on-exec value for sockets
+
+P closeonexec(P socket) {
+  int oldflags = fcntl(socket, F_GETFD, 0);
+  if (oldflags < 0) return -errno;
+  if (fcntl(socket, F_SETFD, oldflags | FD_CLOEXEC) < 0) return -errno;
+
+  return OK;
+}
+
+P nocloseonexec(P socket) {
+  int oldflags = fcntl(socket, F_GETFD, 0);
+  if (oldflags < 0) return -errno;
+  if (fcntl(socket, F_SETFD, oldflags & ~FD_CLOEXEC) < 0) return -errno;
+
+  return OK;
+}
+
+// -------- delsocket ---------------------------
+// After a socket has been closed, call delsocket to cleanup maxsocket
+// and recsocket, and clear flag from sock_fds
+void delsocket(P socketfd) {
+  FD_CLR(socketfd, &sock_fds);
+  if (socketfd == maxsocket-1) {
+    P i, j = -1;
+    for (i = 0; i < socketfd; i++)
+      if (FD_ISSET(i, &sock_fds)) j = i;
+    maxsocket = j+1;
+  }
+
+  if (recsocket >= maxsocket) recsocket = maxsocket-1;
+}
+
+
+
+// -------- addsocket -----------------------------
+// After opening a socket, call addsocket to increase maxsocket,
+// care for recsocket, and add socket to sock_fds.
+void addsocket(P socketfd) {
+  FD_SET(socketfd, &sock_fds);
+  if (socketfd >= maxsocket) maxsocket = socketfd+1;
+  if (recsocket < 0) recsocket = socketfd;
+}
+
+//------------------- read/write a block from a file descriptor
+// assumes that fd is blocking
+// returns within secs seconds
+// uses SIGALRM internally
+
+// broken into readfd, writefd, and skipreadframefd:
+//   readfd -> read from fd n bytes into where
+//   writefd -> write to fd n bytes from where
+// The under score versions are for use in this modules,
+//   the non under score version are externally linkable.
+
+DM_INLINE_STATIC P readfd_(P fd, B* where, P n, P secs) {
+  P r, off = 0;
+
+  alarm(secs);
+  timeout = 0;
+  do {
+    if (timeout) return TIMER;
+    switch ((r = read(fd, where+off, n))) {
+      case 0: 
+	if (n) return LOST_CONN;
+	break;
+
+      case -1:
+	if (errno == EINTR) continue;
+	return -errno;
+
+      default:
+	n -= r;
+	off += r;
+    }
+  } while (n > 0);
+
+  return OK;
+}
+
+P readfd(P fd, B* where, P n, P secs) {
+  return readfd_(fd, where, n, secs);
+}
+
+DM_INLINE_STATIC P writefd_(P fd, B* where, P n, P secs) {
+  ssize_t r, off = 0;
+  alarm(secs);
+  timeout = 0;
+  do {
+    if (timeout) return TIMER;
+    if ((r = write(fd, where+off, n)) < 0) switch (errno) {
+      case EINTR: continue;
+      case EPIPE: return LOST_CONN;
+      default: return -errno;
+    }
+
+    n -= r;
+    off += r;
+  } while (n > 0);
+
+  return OK;
+}
+
+P writefd(P fd, B* where, P n, P secs) {
+  return writefd(fd, where, n, secs);
 }
 
 /*--------------------------- initialize a socket address */
@@ -208,148 +327,153 @@ P make_unix_socket(UW port) {
    
 */
 
-P fromsocket(P sock, B *bsf)
+P fromsocket(P socket, B *bufferf)
 {
-  P nb, nsbuf, atmost, retc;
-  B *p, sf[2*FRAMEBYTES], *bf, *sbuf, sbsf[FRAMEBYTES];
   B isnonnative;
+  P retc;
+  static B xboxf[FRAMEBYTES*2];
+  static B* const xrootf = xboxf+FRAMEBYTES;
+  B* oldfreevm = FREEvm;
 
-  moveframe(bsf,sbsf);
-  nsbuf = ARRAY_SIZE(sbsf);
-  sbuf = (B *)VALUE_BASE(sbsf);
-  bf = sf + FRAMEBYTES;
+  /*----- get the root frame and evaluate */
+  /*----- we give ourselves SOCK_TIMEOUT secs */
+  if ((retc = readfd_(socket, xboxf, sizeof(xboxf), SOCK_TIMEOUT)))
+    return retc;
   
-  /*----- we give ourselves 10 sec */
-  alarm(10);
-  timeout = FALSE;
+  if (! GETNATIVEFORMAT(xboxf) || ! GETNATIVEUNDEF(xboxf))
+    return BAD_FMT;
 
-  /*----- get the string and box/null frames and evaluate */
-  //rd0: 
-  p = sf; atmost = 2*FRAMEBYTES;
- rd1:
-  if (timeout) return(BAD_MSG);
-  nb = read(sock, p, atmost);
-  if (nb < 0) { 
-    if((errno == EINTR) || (errno == EAGAIN)) goto rd1;
-    else return(-errno);
-  }
-  if (nb == 0) return(DONE);
-  p += nb;
-  if ((atmost -= nb) > 0) goto rd1;
-  
-  if (! GETNATIVEFORMAT(sf) || ! GETNATIVEUNDEF(sf)) return BAD_FMT;
-  isnonnative = GETNONNATIVE(sf);
-  if ((retc = deendian_frame(sf, isnonnative)) != OK) return retc; 
-  if ((retc = deendian_frame(bf, isnonnative)) != OK) return retc;
-  FORMAT(sf) = 0;
+  isnonnative = GETNONNATIVE(xboxf);
+  if ((retc = deendian_frame(xboxf, isnonnative)) != OK) return retc;
+  if ((retc = deendian_frame(xrootf, isnonnative)) != OK) return retc;
 
-  if (TAG(sf) != (ARRAY | BYTETYPE)) return(BAD_MSG);
-  if (VALUE_BASE(sf) != 0 ) return(BAD_MSG);
-  if (ARRAY_SIZE(sf) <= 0) return(BAD_MSG);
-  if (ARRAY_SIZE(sf) > nsbuf) return(RNG_CHK);
-  if ((CLASS(bf) != NULLOBJ) && (CLASS(bf) != BOX)) return(BAD_MSG);
+  switch (CLASS(xrootf)) {
+    case ARRAY:
+      if (TYPE(xrootf) == BYTETYPE) {
+	if (VALUE_BASE(xrootf) != 0) return BAD_MSG;
+	if (ARRAY_SIZE(xrootf) <= 0) return BAD_MSG;
+	if (ARRAY_SIZE(xrootf) > ARRAY_SIZE(bufferf)) return RNG_CHK;
 
-/*----- get the string body */
-  p = sbuf; atmost = (P)DALIGN(ARRAY_SIZE(sf));
- rd2:
-  if (timeout) return(BAD_MSG);
-  nb = read(sock, p, atmost);
-  if (nb < 0) { 
-    if((errno == EINTR) || (errno == EAGAIN)) goto rd2;
-    else return(-errno);
-  }
-  if (nb == 0) { return(LOST_CONN); }               /* connection blew up */
-  p += nb;
-  if ((atmost -= nb) > 0) goto rd2;
+	// reserve this space in the passed in buffer object
+	VALUE_PTR(xrootf) = VALUE_PTR(bufferf);
+	VALUE_PTR(bufferf) += ARRAY_SIZE(xrootf);
+	ARRAY_SIZE(bufferf) -= ARRAY_SIZE(xrootf);
+	
+	if ((retc = readfd_(socket, VALUE_PTR(xrootf), 
+			    ARRAY_SIZE(xrootf), SOCK_TIMEOUT)))
+	  return retc;
 
-/*----- read the body of a received box */
-  if (CLASS(bf) == NULLOBJ) goto ev3;
-  if ((FREEvm + DALIGN(BOX_NB(bf))) > CEILvm) return(VM_OVF);
-  p = FREEvm; atmost = BOX_NB(bf);
- rd3:
-  if (timeout) return(BAD_MSG);
-  nb = read(sock, p, atmost);
-  if (nb < 0) { 
-    if((errno == EINTR) || (errno == EAGAIN)) goto rd3;
-    else return(-errno);
-  }
-  if (nb == 0) return(LOST_CONN);                 /* connection blew up */
-  p += nb;
-  if ((atmost -= nb) > 0) goto rd3;
+	if (o1 >= CEILopds) return OPDS_OVF;
+	moveframe(xrootf, o1);
+	FREEopds = o2;
+	return OK;
+      };
+      // else fall through
+    case LIST: case DICT: {
+      B* irootf;
+      B* iboxf;
+      if (FREEvm + FRAMEBYTES + SBOXBYTES + BOX_NB(xboxf) >= CEILvm)
+	return VM_OVF;
+
+      iboxf = FREEvm;
+      TAG(iboxf) = BOX;
+      ATTR(iboxf) = PARENT;
+      VALUE_PTR(iboxf) = FREEvm + FRAMEBYTES;
+      BOX_NB(iboxf) = SBOXBYTES;
+      FREEvm += FRAMEBYTES;
+      SBOX_CAP(FREEvm) = NULL;
+      FREEvm += SBOXBYTES;
+      
+      irootf = FREEvm;
+      moveframe(xrootf, irootf);
+      ATTR(irootf) = PARENT;
+      FREEvm += FRAMEBYTES;
+
+
+      if ((retc = readfd_(socket, FREEvm, BOX_NB(xboxf)-FRAMEBYTES, 
+			  SOCK_TIMEOUT))) {
+	FREEvm = oldfreevm;
+	return retc;
+      }
+      FREEvm += BOX_NB(xboxf)-FRAMEBYTES;
+
+      if (o2 >= CEILopds) {
+	FREEvm = oldfreevm;
+	return OPDS_OVF;
+      }
  
-/*----- relocate object tree of box and push root object on operand
-        stack
-*/
-  if ((retc = deendian_frame(FREEvm, isnonnative)) != OK) return retc;
-  if ((retc = unfoldobj(FREEvm,(P)FREEvm, isnonnative)) != OK) return retc;
-  if (o2 >= CEILopds) return(OPDS_OVF);
-  moveframe(FREEvm,o1);                    /* root obj of box -> opds */
-  FREEvm += BOX_NB(bf); 
-  FREEopds = o2;
- ev3:  /* push frame for substring in buffer on operand stack */
-  moveframe(sbsf,o1); ARRAY_SIZE(o1) = ARRAY_SIZE(sf);
-  FREEopds = o2;
-  return(OK);
+/*----- relocate root object*/
+      if ((retc = unfoldobj(irootf, (P) irootf, isnonnative))) {
+	FREEvm = oldfreevm;
+	return retc;
+      }
+
+      moveframe(iboxf, o1);
+      moveframe(irootf, o2);
+      FREEopds = o3;
+      return OK;
+    };
+      
+    default: 
+      return BAD_MSG;
+  };
 }
 
 /*------------------------------- write a message to a socket
-   receives a string frame and either a nullframe or a composite-object
-   frame; assembles a message in free VM (see 'fromsocket' above). Sends
-   the message to the socket and returns after the complete message has
+   receives a string frame or a composite frame;
+   assembles a message in free VM (see 'fromsocket' above). 
+   Sends the message to the socket and returns after the complete message has
    been sent. Besides error conditions, return codes are:
 
     OK        - the message has been sent
     LOST_CONN - the message could not be sent due to a broken connection
+
+    The parameters should not be pointers into the operand stack,
+    but safely stored away (i.e., side effects on rootf frame should
+    be discarded).
 */
 
-P tosocket(P sock, B *sf, B *cf)
+P tosocket(P socket, B* rootf)
 {
-  static B frame[FRAMEBYTES];
-  P nb, atmost, retc; 
-  W d;
-  B *p, *oldFREEvm, *bf;
-  
-  p = oldFREEvm = FREEvm;
-  if (p + FRAMEBYTES > CEILvm) return VM_OVF;
-  nb = FRAMEBYTES + FRAMEBYTES + DALIGN(ARRAY_SIZE(sf));
-  if (p + nb > CEILvm) return(VM_OVF);
+  P retc = OK;
+  P nb;
+  B* oldFREEvm = FREEvm;
 
-  moveframe(sf,p); 
-  VALUE_BASE(p) = 0; 
-  SETNATIVE(p);
-  p += FRAMEBYTES; 
-  bf = p; 
-  moveframe(cf,bf);   
-  p += FRAMEBYTES;
-  moveB((B *)VALUE_BASE(sf),p,ARRAY_SIZE(sf));
-  p += DALIGN(ARRAY_SIZE(sf));
+  if (FREEvm + FRAMEBYTES >= CEILvm) return VM_OVF;
+  TAG(FREEvm) = BOX;
+  VALUE_PTR(FREEvm) = 0;
+  FREEvm += FRAMEBYTES;
 
-  if (CLASS(cf) != NULLOBJ) { 
-    FREEvm = p; d = 0;
-    moveframe(cf, frame);
-    retc = foldobj(frame,(P)p,&d);
-    TAG(bf) = BOX; ATTR(bf) = 0; 
-    VALUE_BASE(bf) = 0; BOX_NB(bf) = FREEvm - p;
-    nb += FREEvm - p;
-    FREEvm = oldFREEvm;
-    if (retc != OK) return(retc);
-  }
-  atmost = nb; p = FREEvm;
+  switch (CLASS(rootf)) {
+    case ARRAY:
+      if (TYPE(rootf) == BYTETYPE) {
+	if (FREEvm + FRAMEBYTES + ARRAY_SIZE(rootf) >= CEILvm)
+	  return VM_OVF;
+      
+	moveframe(rootf, FREEvm);
+	moveB(VALUE_PTR(rootf), FREEvm+FRAMEBYTES, ARRAY_SIZE(rootf));
+	VALUE_PTR(FREEvm) = NULL;
+	FREEvm += FRAMEBYTES + ARRAY_SIZE(rootf);
+	break;
+      };
+      // otherwise fall throught
 
-/*----- we give ourselves 10 sec to get this out */
-  alarm(10);
-  timeout = FALSE;
- wr1:
-  if (timeout) return(TIMER);
-  nb = write(sock, p, atmost);
-  if (nb < 0) {
-      if((errno == EAGAIN) || (errno == EINTR)) goto wr1;
-      else if (errno == EPIPE) return(LOST_CONN); else return(-errno);
-  }
-  
-  p += nb;
-  if ((atmost -= nb) > 0) goto wr1;
-  return OK;
+    case LIST: case DICT: {
+      W d = 0;
+      retc = foldobj(rootf, (P) FREEvm, &d);
+    };
+    break;
+
+    default:
+      return BAD_FMT;
+  };
+
+/*----- we give ourselves SOCK_TIMEOUT secs to get this out */
+  nb = FREEvm - oldFREEvm;
+  FREEvm = oldFREEvm;
+  BOX_NB(FREEvm) = nb-FRAMEBYTES;
+  SETNATIVE(FREEvm);
+  return retc ? retc : writefd_(socket, FREEvm, nb, SOCK_TIMEOUT);
 }
 
 /*----------------------------------------------- connect
@@ -410,11 +534,15 @@ P op_connect(void)
     close(sock);
     return -errno_;
   };
+  if ((retc = closeonexec(sock))) {
+    close(sock);
+    return retc;
+  }
   
  goodsocket:
-  if (fcntl(sock, F_SETFL, O_NONBLOCK) == -1)   /* make non-blocking  */
-    error(EXIT_FAILURE, errno, "fcntl");
-  FD_SET(sock, &sock_fds);                      /* register the socket */
+  //  if (fcntl(sock, F_SETFL, O_NONBLOCK) == -1)   /* make non-blocking  */
+  //  error(EXIT_FAILURE, errno, "fcntl");
+  addsocket(sock);
   TAG(o_2) = NULLOBJ | SOCKETTYPE; ATTR(o_2) = 0;
   LONGBIG_VAL(o_2) = sock;
   FREEopds = o_1;
@@ -430,54 +558,40 @@ P op_disconnect(void)
 {
   if (o_1 < FLOORopds) return(OPDS_UNF);
   if (TAG(o_1) != (NULLOBJ | SOCKETTYPE)) return(OPD_ERR);
-  FD_CLR((P) LONGBIG_VAL(o_1), &sock_fds);
   close((P) LONGBIG_VAL(o_1));
+  delsocket((P) LONGBIG_VAL(o_1));
   FREEopds = o_1;
   return(OK);
 }
 
 /*----------------------------------------------- send
     socket (string) | --
-    socket [ rootobj (string) ] | --
+    socket [ num/\* bool? rootobj (string) ] | --
+
+    op_send defined in dm-nextevent.c
+    since op_send must handle calling makesocketdead.
+    In case of error, returns the active fd as *socketfd.
 */
 
-P op_send(void)
+P int_send(P* socketfd)
 {
-  P sock, retc; B * root, *string, nf[FRAMEBYTES];
+  P retc; 
+  static B rootf[FRAMEBYTES];
 
   if (o_2 < FLOORopds) return(OPDS_UNF);
   if (TAG(o_2) != (NULLOBJ | SOCKETTYPE)) return(OPD_ERR);
-  sock = (P) LONGBIG_VAL(o_2);
-  if (TAG(o_1) == (ARRAY | BYTETYPE)) { 
-    if (FREEvm + FRAMEBYTES > CEILvm) return(VM_OVF);
-    TAG(nf) = NULLOBJ; 
-    ATTR(nf) = 0;
-    root = nf; 
-    string = o_1; 
-    goto send1;
-  }
-  else if (CLASS(o_1) == LIST) {
-    root = (B *)VALUE_BASE(o_1);
-    if ((CLASS(root) != LIST) 
-        && (CLASS(root) != DICT) 
-        && (CLASS(root) != ARRAY)) 
-      return(INV_MSG);
+  *socketfd = (P) LONGBIG_VAL(o_2);
 
-    string = root + FRAMEBYTES;
-    if (TAG(string) != (ARRAY | BYTETYPE)) return(INV_MSG);
-    if (string > (B *)LIST_CEIL(o_1)) return(INV_MSG);
-    goto send1;
-  }
-  else return(OPD_CLA);
+  switch (TAG(o_1)) {
+    case ARRAY: case DICT: case LIST:
+      moveframe(o_1, rootf);
+      break;
 
- send1:
-  if ((retc = tosocket(sock,string,root)) != OK) {
-    if (retc == LOST_CONN) { 
-      close(sock); 
-      FD_CLR(sock, &sock_fds);
-    }
-    return retc;
+    default:
+      return OPD_CLA;
   }
+	  
+  if ((retc = tosocket(*socketfd, rootf))) return retc;
  
   FREEopds = o_2; 
   return OK;
@@ -502,35 +616,14 @@ P op_getsocket(void)
 /*------------------------------------------- getmyname
   -- | string
 
-  allocates && returns the host's name
+  returns the host's name
 */
 
 P op_getmyname(void)
 {
-  B* oldfreevm = FREEvm;
-  P len;
-
   if (o1 >= CEILopds) return OPDS_OVF;
-  if ((FREEvm += FRAMEBYTES) >= CEILvm) {
-    FREEvm = oldfreevm;
-    return VM_OVF;
-  }
-  TAG(oldfreevm) = ARRAY | BYTETYPE;
-  VALUE_PTR(oldfreevm) = FREEvm;
-
-  if (gethostname((char*) FREEvm, CEILvm - FREEvm - 1) == -1) {
-    FREEvm = oldfreevm;
-    return -errno;
-  }
-
-  CEILvm[-1] = '\0';
-  len = strlen(FREEvm);
-  if ((FREEvm += DALIGN(len)) >= CEILvm) {
-    FREEvm = oldfreevm;
-    return VM_OVF;
-  }
-  ARRAY_SIZE(oldfreevm) = len;
-  moveframe(oldfreevm, o1);
+  if (! myname_frame) return CORR_OBJ;
+  moveframe(myname_frame, o1);
   FREEopds = o2;
   return OK;
 }
@@ -538,47 +631,14 @@ P op_getmyname(void)
 /*------------------------------------------- getmyfqdn
     -- | string
 
-    allocates && returns the host's name
+    returns the host's name
 */
 
 P op_getmyfqdn(void)
 {
-  B* oldfreevm = FREEvm;
-  P len;
-  struct hostent* h;
   if (o1 >= CEILopds) return OPDS_OVF;
-  if ((FREEvm += FRAMEBYTES) >= CEILvm) {
-    FREEvm = oldfreevm;
-    return VM_OVF;
-  }
-  TAG(oldfreevm) = ARRAY | BYTETYPE;
-  VALUE_PTR(oldfreevm) = FREEvm;
-
-  if (gethostname((char*) FREEvm, CEILvm - FREEvm - 1) == -1) {
-    FREEvm = oldfreevm;
-    return -errno;
-  }
-  
-  CEILvm[-1] = '\0';
-  if (strlen(FREEvm) == CEILvm - FREEvm) {
-    FREEvm = oldfreevm;
-    return VM_OVF;
-  }
-
-  if (! (h = gethostbyname((char*) FREEvm))) {
-    FREEvm = oldfreevm;
-    return -h_errno;
-  }
-
-  len = strlen(h->h_name);
-  if ((FREEvm += DALIGN(len)) >= CEILvm) {
-    FREEvm = oldfreevm;
-    return VM_OVF;
-  }
-
-  moveB((B*) h->h_name, VALUE_PTR(oldfreevm), len);
-  ARRAY_SIZE(oldfreevm) = len;
-  moveframe(oldfreevm, o1);
+  if (! myfqdn_frame) return CORR_OBJ;
+  moveframe(myfqdn_frame, o1);
   FREEopds = o2;
   return OK;
 }

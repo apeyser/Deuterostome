@@ -38,6 +38,8 @@ target_triplet = @target@
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	stats.h \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptester.c \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptester.h \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	dm-rthreads-main.h \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	dm-rthreads-header.h \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	dmflex.c
 @ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@am__append_2 = .plugins
 subdir = plugins
@@ -48,7 +50,9 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
-	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/ax_set_version_info.m4 \
+	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/cf_mpi.m4 \
+	$(top_srcdir)/m4/configure.m4 \
 	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/acinclude.m4 $(top_srcdir)/m4/basic-defs.m4 \
 	$(top_srcdir)/configure.ac
@@ -56,7 +60,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = dmflex.l startup_dgen.d plugin.d
+CONFIG_CLEAN_FILES = dmflex.l startup_dgen.d plugin.d new-plugin.d
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -66,7 +70,7 @@ am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(pkglibdir)"
 pkglibLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(pkglib_LTLIBRARIES)
-cpptester_la_LIBADD =
+cpptester_la_DEPENDENCIES =
 am__cpptester_la_SOURCES_DIST = cpptester.c cpptester.h \
 	cpptestercode.cpp cpptestercode.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_cpptester_la_OBJECTS = cpptester.lo \
@@ -74,14 +78,14 @@ am__cpptester_la_SOURCES_DIST = cpptester.c cpptester.h \
 cpptester_la_OBJECTS = $(am_cpptester_la_OBJECTS)
 @ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_cpptester_la_rpath = -rpath \
 @ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
-dmflex_la_LIBADD =
+dmflex_la_DEPENDENCIES =
 am__dmflex_la_SOURCES_DIST = dmflex.l dmflex.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_dmflex_la_OBJECTS =  \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	dmflex.lo
 dmflex_la_OBJECTS = $(am_dmflex_la_OBJECTS)
 @ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_dmflex_la_rpath = -rpath \
 @ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
-process_la_LIBADD =
+process_la_DEPENDENCIES =
 am__process_la_SOURCES_DIST = process.c process.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_process_la_OBJECTS =  \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	process.lo
@@ -95,7 +99,14 @@ am__process2_la_SOURCES_DIST = process2.c process2.h
 process2_la_OBJECTS = $(am_process2_la_OBJECTS)
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@am_process2_la_rpath = -rpath \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@	$(pkglibdir)
-stats_la_LIBADD =
+rthreads_la_DEPENDENCIES =
+am__rthreads_la_SOURCES_DIST = dm-rthreads-main.h dm-rthreads-header.h \
+	rthreads.h
+am_rthreads_la_OBJECTS =
+rthreads_la_OBJECTS = $(am_rthreads_la_OBJECTS)
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_RTHREADS_TRUE@am_rthreads_la_rpath = -rpath \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_RTHREADS_TRUE@	$(pkglibdir)
+stats_la_DEPENDENCIES =
 am__stats_la_SOURCES_DIST = stats.h stats.c
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_stats_la_OBJECTS =  \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	stats.lo
@@ -103,7 +114,7 @@ stats_la_OBJECTS = $(am_stats_la_OBJECTS)
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_stats_la_rpath =  \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	-rpath \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
-test_la_LIBADD =
+test_la_DEPENDENCIES =
 am__test_la_SOURCES_DIST = test.c test.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_test_la_OBJECTS =  \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	test.lo
@@ -111,7 +122,7 @@ test_la_OBJECTS = $(am_test_la_OBJECTS)
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_test_la_rpath =  \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	-rpath \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
-test2_la_LIBADD =
+test2_la_DEPENDENCIES =
 am__test2_la_SOURCES_DIST = test2.c test2.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_test2_la_OBJECTS =  \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	test2.lo
@@ -119,7 +130,7 @@ test2_la_OBJECTS = $(am_test2_la_OBJECTS)
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_test2_la_rpath =  \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	-rpath \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
-throw_la_LIBADD =
+throw_la_DEPENDENCIES =
 am__throw_la_SOURCES_DIST = throw.c throw.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_throw_la_OBJECTS =  \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	throw.lo
@@ -155,14 +166,15 @@ LTLEXCOMPILE = $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 YLWRAP = $(top_srcdir)/ylwrap
 SOURCES = $(cpptester_la_SOURCES) $(dmflex_la_SOURCES) \
 	$(process_la_SOURCES) $(process2_la_SOURCES) \
-	$(stats_la_SOURCES) $(test_la_SOURCES) $(test2_la_SOURCES) \
-	$(throw_la_SOURCES)
+	$(rthreads_la_SOURCES) $(stats_la_SOURCES) $(test_la_SOURCES) \
+	$(test2_la_SOURCES) $(throw_la_SOURCES)
 DIST_SOURCES = $(am__cpptester_la_SOURCES_DIST) \
 	$(am__dmflex_la_SOURCES_DIST) $(am__process_la_SOURCES_DIST) \
-	$(am__process2_la_SOURCES_DIST) $(am__stats_la_SOURCES_DIST) \
+	$(am__process2_la_SOURCES_DIST) \
+	$(am__rthreads_la_SOURCES_DIST) $(am__stats_la_SOURCES_DIST) \
 	$(am__test_la_SOURCES_DIST) $(am__test2_la_SOURCES_DIST) \
 	$(am__throw_la_SOURCES_DIST)
-am__dist_noinst_DATA_DIST = process2.d stats.d cpptester.d
+am__dist_noinst_DATA_DIST = process2.d stats.d cpptester.d rthreads.d
 pkglibDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(dist_noinst_DATA) $(pkglib_DATA)
 ETAGS = etags
@@ -265,6 +277,8 @@ MAX_NUM_EXECS = @MAX_NUM_EXECS@
 MAX_NUM_OPDS = @MAX_NUM_OPDS@
 MAX_USER_DICT_SIZE = @MAX_USER_DICT_SIZE@
 MKDIR_P = @MKDIR_P@
+MPI_FLAGS = @MPI_FLAGS@
+MPI_LIBS = @MPI_LIBS@
 NAMEBYTES = @NAMEBYTES@
 NAMEBYTES_1 = @NAMEBYTES_1@
 NO_PTHREAD_CC = @NO_PTHREAD_CC@
@@ -293,6 +307,7 @@ PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
 PTHREAD_LIBS = @PTHREAD_LIBS@
 RANLIB = @RANLIB@
 REAL_TMP = @REAL_TMP@
+RELEASE_INFO = @RELEASE_INFO@
 ROLLBITS = @ROLLBITS@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
@@ -303,6 +318,7 @@ THREADMUL = @THREADMUL@
 THREADNUM = @THREADNUM@
 TMP = @TMP@
 VERSION = @VERSION@
+VERSION_INFO = @VERSION_INFO@
 XMKMF = @XMKMF@
 X_CFLAGS = @X_CFLAGS@
 X_DISPLAY_MISSING = @X_DISPLAY_MISSING@
@@ -386,26 +402,37 @@ AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 BUILT_SOURCES = $(am__append_1) $(am__append_2)
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@PROCESS_LIB = process.la process2.la
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process_la_SOURCES = process.c process.h
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process2_la_SOURCES = process2.c process2.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dist_noinst_DATA =  \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	process2.d \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	stats.d \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptester.d
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptester.d \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	rthreads.d
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@stats_la_SOURCES = stats.h stats.c
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@stats_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
 @ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@CPPPLUGIN_LIB = cpptester.la
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@cpptester_la_SOURCES = cpptester.c cpptester.h \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptestercode.cpp cpptestercode.h
 
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@cpptester_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_RTHREADS_TRUE@RTHREADS_LIB = rthreads.la
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@rthreads_la_SOURCES = dm-rthreads-main.h dm-rthreads-header.h rthreads.h rthreads.h
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@rthreads_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
 @ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@DMFLEX_LIB = dmflex.la
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dmflex_la_SOURCES = dmflex.l dmflex.h
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dmflex_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@PLUGINS = test.la test2.la $(PROCESS_LIB) throw.la \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(DMFLEX_LIB) \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(DMFLEX_LIB) $(RTHREADS_LIB) \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	stats.la $(CPPPLUGIN_LIB)
 
 @ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@PLACEHOLDER = .plugins
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@test_la_SOURCES = test.c test.h
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@test_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@test2_la_SOURCES = test2.c test2.h
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@test2_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@throw_la_SOURCES = throw.c throw.h
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@throw_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
 @ENABLE_PLUGINS_SUPPORT_TRUE@pkglib_LTLIBRARIES = $(PLUGINS)
 @ENABLE_PLUGINS_SUPPORT_TRUE@pkglib_DATA = $(PLACEHOLDER)
 @ENABLE_PLUGINS_SUPPORT_TRUE@CLEANFILES = $(BUILT_SOURCES)
@@ -482,6 +509,8 @@ process.la: $(process_la_OBJECTS) $(process_la_DEPENDENCIES)
 	$(LINK) $(am_process_la_rpath) $(process_la_OBJECTS) $(process_la_LIBADD) $(LIBS)
 process2.la: $(process2_la_OBJECTS) $(process2_la_DEPENDENCIES) 
 	$(LINK) $(am_process2_la_rpath) $(process2_la_OBJECTS) $(process2_la_LIBADD) $(LIBS)
+rthreads.la: $(rthreads_la_OBJECTS) $(rthreads_la_DEPENDENCIES) 
+	$(LINK) $(am_rthreads_la_rpath) $(rthreads_la_OBJECTS) $(rthreads_la_LIBADD) $(LIBS)
 stats.la: $(stats_la_OBJECTS) $(stats_la_DEPENDENCIES) 
 	$(LINK) $(am_stats_la_rpath) $(stats_la_OBJECTS) $(stats_la_LIBADD) $(LIBS)
 test.la: $(test_la_OBJECTS) $(test_la_DEPENDENCIES) 
@@ -785,6 +814,14 @@ uninstall-am: uninstall-pkglibDATA uninstall-pkglibLTLIBRARIES
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@cpptester.h: cpptester.d plugin.d
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "cpptester.d" "$@" false true
+
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dm-rthreads-main.h: new-plugin.d rthreads.d
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "rthreads.d" "$@" true true
+
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dm-rthreads-header.h: new-plugin.d rthreads.d
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "rthreads.d" "$@" false true
 
 @ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@.plugins:
 @ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@	touch "$@"

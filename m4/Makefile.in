@@ -38,7 +38,9 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
-	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/ax_set_version_info.m4 \
+	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/cf_mpi.m4 \
+	$(top_srcdir)/m4/configure.m4 \
 	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/acinclude.m4 $(top_srcdir)/m4/basic-defs.m4 \
 	$(top_srcdir)/configure.ac
@@ -61,7 +63,8 @@ dist_m4dataDATA_INSTALL = $(INSTALL_DATA)
 am__dist_noinst_DATA_DIST = acx_pthread.m4 \
 	ax_cflags_strict_prototypes.m4 ax_prefix_config_h.m4 \
 	configure.m4 lf_x11.m4 cf_atlas.m4 lib_socket_nsl.m4 \
-	plugin-config.m4 basic-defs.m4
+	plugin-config.m4 basic-defs.m4 cf_petsc.m4 cf_mpi.m4 \
+	ax_set_version_info.m4
 DATA = $(dist_m4data_DATA) $(dist_noinst_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 pkgdatadir = @pkgdatadir@
@@ -161,6 +164,8 @@ MAX_NUM_EXECS = @MAX_NUM_EXECS@
 MAX_NUM_OPDS = @MAX_NUM_OPDS@
 MAX_USER_DICT_SIZE = @MAX_USER_DICT_SIZE@
 MKDIR_P = @MKDIR_P@
+MPI_FLAGS = @MPI_FLAGS@
+MPI_LIBS = @MPI_LIBS@
 NAMEBYTES = @NAMEBYTES@
 NAMEBYTES_1 = @NAMEBYTES_1@
 NO_PTHREAD_CC = @NO_PTHREAD_CC@
@@ -189,6 +194,7 @@ PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
 PTHREAD_LIBS = @PTHREAD_LIBS@
 RANLIB = @RANLIB@
 REAL_TMP = @REAL_TMP@
+RELEASE_INFO = @RELEASE_INFO@
 ROLLBITS = @ROLLBITS@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
@@ -199,6 +205,7 @@ THREADMUL = @THREADMUL@
 THREADNUM = @THREADNUM@
 TMP = @TMP@
 VERSION = @VERSION@
+VERSION_INFO = @VERSION_INFO@
 XMKMF = @XMKMF@
 X_CFLAGS = @X_CFLAGS@
 X_DISPLAY_MISSING = @X_DISPLAY_MISSING@
@@ -283,7 +290,10 @@ dist_noinst_DATA = acx_pthread.m4 ax_cflags_strict_prototypes.m4 \
 	ax_prefix_config_h.m4 configure.m4 lf_x11.m4 \
 	cf_atlas.m4 \
 	lib_socket_nsl.m4 $(PLUGINNODISTR) \
-	basic-defs.m4
+	basic-defs.m4 \
+	cf_petsc.m4 \
+	cf_mpi.m4 \
+	ax_set_version_info.m4
 
 all: all-am
 

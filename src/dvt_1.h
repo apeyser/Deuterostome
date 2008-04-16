@@ -222,30 +222,6 @@ P op_toconsole(void)
   return toconsole((B *)VALUE_BASE(o1), ARRAY_SIZE(o1));
 }
 
-/*------------------------------------------------ makesocketdead
- * | socketobj
- * pushes "socketdead" on exec
- * pushes FALSE ABORTMARK on exec
- */
-DM_INLINE_STATIC P makesocketdead(P ret, P socket) {
-  if (x3 > CEILexecs) return EXECS_OVF;
-  if (o2 > CEILopds) return OPDS_OVF;
-  
-  TAG(o1) = NULLOBJ | SOCKETTYPE; 
-  ATTR(o1) = 0; 
-  LONGBIG_VAL(o1) = socket;
-  FREEopds = o2;
-
-  makename((B*)"socketdead", x1); 
-  ATTR(x1) = ACTIVE; 
-  TAG(x2) = BOOL; 
-  ATTR(x2) = (ABORTMARK | ACTIVE); 
-  BOOL_VAL(x2) = FALSE;
-  FREEexecs = x3;
-
-  return ret;
-}
-
 /*---------------------------------------------------- nextevent
     string_obj | eventarguments...
 
@@ -292,200 +268,130 @@ DM_INLINE_STATIC P makesocketdead(P ret, P socket) {
        modifier values of 0,1,2,4, or 8.
 */
 
+static BOOLEAN ispending;
+
 P op_nextevent(void)
 {
-  P nround, nact, i, retc, mod, wid;
-  B namef[FRAMEBYTES], *dictf, *userdict, namestring[20];
-  fd_set read_fds;
-#if ! X_DISPLAY_MISSING
-  XEvent event;
-#endif
-
+  B bufferf[FRAMEBYTES];
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
   if (ARRAY_SIZE(o_1) < 8192) return RNG_CHK;
-  nround = 0;
+  
+  moveframe(o_1, bufferf);
+  FREEopds = o_1;
 
- nextloop: 
-/* we use zero timeout for the first 10 scans; thereafter we use
-   0.2 sec timeout
+  ispending = FALSE;
+  return nextevent(bufferf);
+}
+
+BOOLEAN pending(void) {return ispending;}
+
+P clientinput(void) {
+  if (x1 >= CEILexecs) return EXECS_OVF;
+
+  makename((B*)"nodemessage", x1);
+  ATTR(x1) = ACTIVE;
+  FREEexecs = x2;
+  ispending = TRUE;
+  return OK;
+}
+
+
+BOOLEAN consoleinput(P* retc, B* bufferf) {
+  if (recsocket != 0) return FALSE;
+  if (o2 > CEILopds) {
+    *retc = OPDS_OVF;
+    return TRUE;
+  }
+
+  moveframe(bufferf, o1);
+  FREEopds = o2;
+
+  if ((*retc = fromconsole()) != OK) return TRUE;
+  if (x1 >= CEILexecs) {
+    *retc = EXECS_OVF;
+    return TRUE;
+  }
+
+  makename((B*)"consoleline",x1); 
+  ATTR(x1) = ACTIVE;
+  FREEexecs = x2;
+  ispending = TRUE;
+  return TRUE;
+}
+
+BOOLEAN serverinput(P* retc __attribute__ ((__unused__)), 
+		    fd_set* read_fds __attribute__ ((__unused__)) ) {
+  return FALSE;
+}
+
+#if ! X_DISPLAY_MISSING
+P wm_delete_window(XEvent* event __attribute__ ((__unused__)), 
+		   B* userdict __attribute__ ((__unused__)) ) {
+  HXBell(dvtdisplay, 0); 
+  return OK;
+}
+
+DM_INLINE_STATIC P wrap_stop(P retc) {
+  if (retc) return retc;
+
+  if (o2 > CEILopds) return OPDS_OVF;
+  if (x_1 < FLOORexecs) return EXECS_UNF;
+  if (x2 > CEILexecs) return EXECS_OVF;
+
+  moveframe(x_1, o1);
+  TAG(x_1) = OP;
+  ATTR(x_1) = ACTIVE;
+  OP_NAME(x_1) = (P) "pop";
+  OP_CODE(x_1) = (P) op_pop;
+
+  TAG(x1) = OP;
+  ATTR(x1) = ACTIVE;
+  OP_NAME(x1) = (P) "stopped";
+  OP_CODE(x1) = (P) op_stopped;
+
+  FREEopds = o2;
+  FREEexecs = x2;
+
+  ispending = TRUE;
+  return OK;
+}
+
+
+P wm_take_focus(XEvent* event, B* userdict) {
+  return wrap_stop(wm_take_focus_(event, userdict));
+}
+
+P wm_configure_notify(XEvent* event, B* userdict) {
+  return wrap_stop(wm_configure_notify_(event, userdict));
+}
+
+P wm_expose(XEvent* event, B* userdict) {
+  return wrap_stop(wm_expose_(event, userdict));
+}
+
+P wm_button_press(XEvent* event, B* userdict) {
+  return wrap_stop(wm_button_press_(event, userdict));
+}
+
+#endif //! X_DISPLAY_MISSING
+
+/* we push the errsource string followed by the error code on
+   the operand stack, and 'error' on the execution stack 
 */
-  if (abortflag) return ABORT;
-  read_fds = sock_fds;
-#if ! X_DISPLAY_MISSING
-  if (dvtdisplay != NULL && ! moreX) {
-    HXFlush(dvtdisplay);
-    moreX = HQLength(dvtdisplay);
-  }
-#endif
- 
-  nact = select(FD_SETSIZE, &read_fds, NULL, NULL,
-                moreX ? &zerosec : NULL);
 
-  if (nact < 0) {
-    if (errno == EINTR) goto nextloop;
-    else error(EXIT_FAILURE, errno, "select");
-  }
-
-#if ! X_DISPLAY_MISSING
-  if (dvtdisplay != NULL && FD_ISSET(xsocket, &read_fds)) {
-    moreX = TRUE;
-    FD_CLR(xsocket, &read_fds);
-    nact--;
-  }
-  if (nact == 0) goto nextXwindows;
-#endif
- 
-
-/* starting from the first socket after the last serviced socket, we
-   find the next active socket and service it */
-
-  for (i=0; i < FD_SETSIZE; i++) {
-    recsocket++; if (recsocket >= FD_SETSIZE) recsocket = 0;
-    if (FD_ISSET(recsocket, &read_fds)) {
-      if (recsocket == 0) { /* we have console input */
-        if ((retc = fromconsole()) != OK) return retc;
-        if (x1 >= CEILexecs) return EXECS_OVF;
-        makename((B*)"consoleline",x1); ATTR(x1) = ACTIVE;
-        FREEexecs = x2;
-        return OK;
-      }
-      else { /* we have node input */
-        FREEopds = o_1;
-        switch(retc = fromsocket(recsocket, o1)) {
-          case DONE: 
-            close(recsocket); 
-            FD_CLR(recsocket, &sock_fds);
-            return makesocketdead(OK, recsocket);
-
-          case OK: 
-            if (x1 >= CEILexecs) return EXECS_OVF;
-            makename((B*)"nodemessage",x1); 
-            ATTR(x1) = ACTIVE;
-            FREEexecs = x2;
-            return OK;
-
-          default:   
-            close(recsocket); 
-            FD_CLR(recsocket, &sock_fds);
-            return makesocketdead(retc, recsocket);
-        }
-      }
-    }
-  }
-  goto nextloop;
-
-#if ! X_DISPLAY_MISSING
- nextXwindows:
-  if (moreX) {
-    userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
-    HXNextEvent(dvtdisplay, &event);
-    moreX = QLength(dvtdisplay);
-    switch(event.type) {
-      case ClientMessage:
-        if ((Atom) event.xclient.message_type 
-            == HXInternAtom(dvtdisplay, "WM_PROTOCOLS", False)) {
-          if ((Atom) event.xclient.data.l[0] 
-              == HXInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False))
-            HXBell(dvtdisplay, 0);
-          else if ((Atom) event.xclient.data.l[0]
-                   == HXInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False)) {
-            wid = event.xclient.window;
-            snprintf((char*)namestring, sizeof(namestring), 
-		     "w%lld", (long long) wid);
-            makename(namestring, namef); ATTR(namef) = ACTIVE;
-            if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
-            if (FREEdicts >= CEILdicts) return DICTS_OVF;
-            moveframe(dictf, FREEdicts); 
-            FREEdicts += FRAMEBYTES;
-            if (x1 >= CEILexecs) return EXECS_OVF;
-            makename((B*)"take_input_focus", x1); 
-            ATTR(x1) = ACTIVE;
-            FREEexecs = x2;
-          }
-        }
-        FREEopds = o_1;
-        return OK;
-
-      case ConfigureNotify:
-        wid = event.xconfigure.window;
-        snprintf((char*)namestring, sizeof(namestring), 
-		 "w%lld", (long long) wid);
-        makename(namestring, namef); ATTR(namef) = ACTIVE;
-        
-        if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
-        if (FREEdicts >= CEILdicts) return DICTS_OVF;
-        if (x1 >= CEILexecs) return EXECS_OVF;
-        if (o1 >= CEILopds) return OPDS_OVF;
-
-        moveframe(dictf, FREEdicts); 
-        FREEdicts += FRAMEBYTES;
-        makename((B*)"windowsize",x1); 
-        ATTR(x1) = ACTIVE; 
-        FREEexecs = x2;
-        TAG(o_1) = (NUM | LONGBIGTYPE); 
-        ATTR(o_1) = 0;
-        LONGBIG_VAL(o_1) = event.xconfigure.width;
-        TAG(o1) = (NUM | LONGBIGTYPE); 
-        ATTR(o1) = 0;
-        LONGBIG_VAL(o1) = event.xconfigure.height;
-        FREEopds = o2;
-        return OK;
-
-      case Expose:
-        if (event.xexpose.count != 0) break;
-        wid = event.xexpose.window;
-        snprintf((char*)namestring, sizeof(namestring), 
-		 "w%lld", (long long) wid);
-        makename(namestring, namef); 
-        ATTR(namef) = ACTIVE;
-
-        if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
-        if (FREEdicts >= CEILdicts) return DICTS_OVF;
-        if (x1 >= CEILexecs) return EXECS_OVF;
-        
-        moveframe(dictf, FREEdicts); 
-        FREEdicts += FRAMEBYTES;
-        makename((B*)"drawwindow",x1); 
-        ATTR(x1) = ACTIVE; 
-        FREEexecs = x2;
-        FREEopds = o_1;
-        return OK;
-
-      case ButtonPress:
-        wid = event.xbutton.window;
-        mod = (event.xbutton.state & 0xFF)
-          | (event.xbutton.button << 16);
-
-        if (FREEdicts >= CEILdicts) return DICTS_OVF;
-        if (x1 >= CEILexecs) return EXECS_OVF;
-        if (o2 >= CEILopds) return OPDS_OVF;
-
-        snprintf((char*)namestring, sizeof(namestring), 
-		 "w%lld", (long long) wid);
-        makename(namestring, namef); 
-        ATTR(namef) = ACTIVE;
-        if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
-
-        moveframe(dictf, FREEdicts); 
-        FREEdicts += FRAMEBYTES;
-        makename((B*)"mouseclick",x1); 
-        ATTR(x1) = ACTIVE; 
-        FREEexecs = x2;
-        TAG(o_1) = (NUM | LONGBIGTYPE); 
-        ATTR(o_1) = 0;
-        LONGBIG_VAL(o_1) = event.xbutton.x;
-        TAG(o1) = (NUM | LONGBIGTYPE);
-        ATTR(o1) = 0;
-        LONGBIG_VAL(o1) = event.xbutton.y;
-        TAG(o2) = (NUM | LONGBIGTYPE); 
-        ATTR(o2) = 0;
-        LONGBIG_VAL(o2) = mod;
-        FREEopds = o3;
-        return OK;
-    }
-  }
-
-  goto nextloop;
-#endif
+void makeerror(P retc, B* error_source) {
+  if (retc == OPDS_OVF) FREEopds = FLOORopds;
+  if (retc == EXECS_OVF) FREEexecs = FLOORexecs;
+  if (o2 >= CEILopds) FREEopds = FLOORopds;
+  if (x1 >= CEILexecs) FREEexecs = FLOORexecs;
+  TAG(o1) = ARRAY | BYTETYPE; ATTR(o1) = READONLY;
+  VALUE_BASE(o1) = (P)error_source; 
+  ARRAY_SIZE(o1) = strlen((char*)error_source);
+  TAG(o2) = NUM | LONGBIGTYPE; 
+  ATTR(o2) = 0;
+  LONGBIG_VAL(o2) = retc;
+  moveframe(errorframe,x1);
+  FREEopds = o3; 
+  FREEexecs = x2;
 }

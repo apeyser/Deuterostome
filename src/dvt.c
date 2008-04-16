@@ -16,21 +16,17 @@
 #include <netdb.h>
 #include <signal.h>
 #include <string.h>
+
 #include "dm.h"
 #include "dmx.h"
 #include "xhack.h"
 #include "dm3.h"
 #include "dregex.h"
+#include "dm-nextevent.h"
 
 P init_sockaddr(struct sockaddr_in *name, const char *hostname, P port);
 
 /*----------------- DM global variables -----------------------------*/
-
-/*-- the X corner */
-#if X_DISPLAY_MISSING
-const
-#endif
-BOOLEAN moreX = FALSE;
 
 /*----------------------- for the dvt module ------------------------*/
 
@@ -118,7 +114,7 @@ int main(void)
 {
   B* startup_dvt;
     
-  B errorframe[FRAMEBYTES], abortframe[FRAMEBYTES], *sf;
+  B abortframe[FRAMEBYTES], *sf;
   P nb, retc,tnb;
   B *sysdict, *userdict, *Dmemory, *p;
   int sufd;
@@ -159,15 +155,14 @@ int main(void)
   FD_ZERO(&sock_fds);
 
  /*----------------- include stdin into socket table */ 
-  FD_SET(0, &sock_fds);                 /* we monitor console input */
-  recsocket = 0;
+  addsocket(0);                 /* we monitor console input */
 
  /*-------------- fire up Xwindows (if there is) -----------------------*/
 #if ! X_DISPLAY_MISSING
   dvtdisplay = XOpenDisplay(NULL);  /* use the DISPLAY environment */
   if (dvtdisplay && HDisplayString(dvtdisplay)) {
     strncpy(displayname, HDisplayString(dvtdisplay), sizeof(displayname)-1);
-    displayname[sizeof(displayname)-1];
+    displayname[sizeof(displayname)-1] = '\0';
     dvtscreen = HXDefaultScreenOfDisplay(dvtdisplay);
     dvtrootwindow = HXDefaultRootWindow(dvtdisplay);
     if (HXGetWindowAttributes(dvtdisplay,dvtrootwindow,&rootwindowattr) == 0)
@@ -176,8 +171,8 @@ int main(void)
     ncachedfonts = 0;
     dvtgc = HXCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
     xsocket = ConnectionNumber(dvtdisplay);
-    FD_SET(xsocket, &sock_fds);
-  } 
+    addsocket(xsocket);
+  }
   else {
     dvtdisplay = NULL;
     *displayname = '\0';
@@ -248,50 +243,33 @@ int main(void)
   FREEexecs = x2;
   
  /*-------------------------- run the D mill --------------------- */
- more:
-  switch(retc = exec(1000)) {
-    case MORE:     goto more;
-    case DONE:     goto more;
+  while (1) {
+    switch(retc = exec(1000)) {
+      case MORE: case DONE: continue;
 
-    case QUIT:     
+      case QUIT:     
 #if ! X_DISPLAY_MISSING
-      if (dvtdisplay) HXCloseDisplay(dvtdisplay);
-      *displayname = '\0';
+	if (dvtdisplay) HXCloseDisplay(dvtdisplay);
+	*displayname = '\0';
 #endif
-      exit(EXIT_SUCCESS);
+	exit(EXIT_SUCCESS);
 
-    case ABORT:    
-      if (x1 >= CEILexecs) goto execsovfl;
-      moveframe(abortframe,x1); 
-      FREEexecs = x2; 
-      goto more;
+      case ABORT:    
+	if (x1 < CEILexecs) {
+	  moveframe(abortframe,x1); 
+	  FREEexecs = x2; 
+	  continue;
+	};
 
-    default:       goto derror;
-  }
+	retc = EXECS_OVF; 
+	errsource = (B*)"supervisor"; 
+	break;
+
+      default: break;
+    }
 
 /*----------------------- error handler ---------------------------*/
- execsovfl:
-  retc = EXECS_OVF; 
-  errsource = (B*)"supervisor"; 
-  goto derror;
-
- derror:
-/* we push the errsource string followed by the error code on
-   the operand stack, and 'error' on the execution stack 
-*/
-  if (retc == OPDS_OVF) FREEopds = FLOORopds;
-  if (retc == EXECS_OVF) FREEexecs = FLOORexecs;
-  if (o2 >= CEILopds) FREEopds = FLOORopds;
-  if (x1 >= CEILexecs) FREEexecs = FLOORexecs;
-  TAG(o1) = ARRAY | BYTETYPE; ATTR(o1) = READONLY;
-  VALUE_BASE(o1) = (P)errsource; 
-  ARRAY_SIZE(o1) = strlen((char*)errsource);
-  TAG(o2) = NUM | LONGBIGTYPE; 
-  ATTR(o2) = 0;
-  LONGBIG_VAL(o2) = retc;
-  moveframe(errorframe,x1);
-  FREEopds = o3; 
-  FREEexecs = x2;
-  goto more;
+    makeerror(retc, errsource);
+  }
 } /* of main */
 

@@ -8,86 +8,90 @@
 
 #include "pluginlib.h"
 
-BOOLEAN moreX = FALSE;
-
 /*-------------------------- Dnode operators -------------------------*/
 
 P x_op_lock(void) {
-	if (o_1 < FLOORopds) return OPDS_UNF;
-	if (x_1 < FLOORexecs) return EXECS_UNF;
-	if (TAG(o_1) != BOOL) return OPD_CLA;
-	if (TAG(x_1) != BOOL) return EXECS_COR;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (x_1 < FLOORexecs) return EXECS_UNF;
+  if (TAG(o_1) != BOOL) return OPD_CLA;
+  if (TAG(x_1) != BOOL) return EXECS_COR;
 	
-	locked = BOOL_VAL(x_1);
-	if (! BOOL_VAL(o_1)) FREEexecs = x_1;
-	else {
-		TAG(x_1) = OP; ATTR(x_1) = ACTIVE;
-		OP_NAME(x_1) = (P) "stop"; OP_CODE(x_1) = (P) op_stop;
-	}
-	FREEopds = o_1;
-	return OK;
+  locked = BOOL_VAL(x_1);
+  if (! BOOL_VAL(o_1)) FREEexecs = x_1;
+  else {
+    TAG(x_1) = OP;
+    ATTR(x_1) = ACTIVE;
+    OP_NAME(x_1) = (P) "stop"; 
+    OP_CODE(x_1) = (P) op_stop;
+  }
+  FREEopds = o_1;
+  return OK;
 }
 
 /* ~active | -- */
 P op_lock(void) {
-	if (o_1 < FLOORopds) return OPDS_UNF;
-	if (CEILexecs < x5) return EXECS_OVF;
-	if (! (ATTR(o_1) & ACTIVE)) return OPD_ATR;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (CEILexecs < x5) return EXECS_OVF;
+  if (! (ATTR(o_1) & ACTIVE)) return OPD_ATR;
 
-	TAG(x1) = BOOL; ATTR(x1) = 0;
-	BOOL_VAL(x1) = locked;
+  TAG(x1) = BOOL; 
+  ATTR(x1) = 0;
+  BOOL_VAL(x1) = locked;
 
-	TAG(x2) = OP; ATTR(x2) = ACTIVE;
-	OP_NAME(x2) = (P) "x_lock"; OP_CODE(x2) = (P) x_op_lock;
+  TAG(x2) = OP; 
+  ATTR(x2) = ACTIVE;
+  OP_NAME(x2) = (P) "x_lock"; 
+  OP_CODE(x2) = (P) x_op_lock;
 
-	TAG(x3) = BOOL; ATTR(x3) = (STOPMARK | ACTIVE);
-	BOOL_VAL(x3) = FALSE;
+  TAG(x3) = BOOL; 
+  ATTR(x3) = (STOPMARK | ACTIVE);
+  BOOL_VAL(x3) = FALSE;
 
-	moveframe(o_1, x4);
-	FREEexecs = x5;
-	FREEopds = o_1;
-	locked = TRUE;
+  moveframe(o_1, x4);
+  FREEexecs = x5;
+  FREEopds = o_1;
+  locked = TRUE;
 
-	return OK;
+  return OK;
 }
 
 P x_op_serialize(void) {
-	if (o_1 < FLOORopds) return OPDS_UNF;
-	if (x_1 < FLOORexecs) return EXECS_UNF;
-	if (TAG(o_1) != BOOL) return OPD_CLA;
-	if (TAG(x_1) != BOOL) return EXECS_COR;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (x_1 < FLOORexecs) return EXECS_UNF;
+  if (TAG(o_1) != BOOL) return OPD_CLA;
+  if (TAG(x_1) != BOOL) return EXECS_COR;
 	
-	serialized = BOOL_VAL(x_1);
-	if (! BOOL_VAL(o_1)) FREEexecs = x_1;
-	else {
-		TAG(x_1) = OP; ATTR(x_1) = ACTIVE;
-		OP_NAME(x_1) = (P) "stop"; OP_CODE(x_1) = (P) op_stop;
-	}
-	FREEopds = o_1;
-	return OK;
+  serialized = BOOL_VAL(x_1);
+  if (! BOOL_VAL(o_1)) FREEexecs = x_1;
+  else {
+    TAG(x_1) = OP; ATTR(x_1) = ACTIVE;
+    OP_NAME(x_1) = (P) "stop"; OP_CODE(x_1) = (P) op_stop;
+  }
+  FREEopds = o_1;
+  return OK;
 }
 
 /* ~active | -- */
 P op_serialize(void) {
-	if (o_1 < FLOORopds) return OPDS_UNF;
-	if (CEILexecs < x5) return EXECS_OVF;
-	if (! (ATTR(o_1) & ACTIVE)) return OPD_ATR;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (CEILexecs < x5) return EXECS_OVF;
+  if (! (ATTR(o_1) & ACTIVE)) return OPD_ATR;
 
-	TAG(x1) = BOOL; ATTR(x1) = 0;
-	BOOL_VAL(x1) = serialized;
+  TAG(x1) = BOOL; ATTR(x1) = 0;
+  BOOL_VAL(x1) = serialized;
 
-	TAG(x2) = OP; ATTR(x2) = ACTIVE;
-	OP_NAME(x2) = (P) "x_serialize"; OP_CODE(x2) = (P) x_op_serialize;
+  TAG(x2) = OP; ATTR(x2) = ACTIVE;
+  OP_NAME(x2) = (P) "x_serialize"; OP_CODE(x2) = (P) x_op_serialize;
 
-	TAG(x3) = BOOL; ATTR(x3) = (STOPMARK | ACTIVE);
-	BOOL_VAL(x3) = FALSE;
+  TAG(x3) = BOOL; ATTR(x3) = (STOPMARK | ACTIVE);
+  BOOL_VAL(x3) = FALSE;
 
-	moveframe(o_1, x4);
-	FREEexecs = x5;
-	FREEopds = o_1;
-	serialized = TRUE;
+  moveframe(o_1, x4);
+  FREEexecs = x5;
+  FREEopds = o_1;
+  serialized = TRUE;
 
-	return OK;
+  return OK;
 }
 
 /*------------------------------------- 'halt' 
@@ -96,37 +100,81 @@ P op_serialize(void) {
    - 'x_halt' blocks execution of frames below it on the execution stack
      by pushing itself back on the stack until 'continue' is executed
    - frames pushed above 'x_halt' are executed normally
+   - below x_halt is x_halt_stop, which intercepts stops (if necessary),
+     resets locked and halt_flag values under the halt, and starts the
+     stop again (if necessary).
 */
 
 static P x_op_halt(void)
 {
-	if (x_1 < FLOORexecs) return EXECS_UNF;
-	if (TAG(x_1) != BOOL) return EXECS_COR;
-  if (halt_flag) { FREEexecs = x2; return DONE; }
-	locked = BOOL_VAL(x_1);
-	FREEexecs = x_1;
-	return OK;
+  if (halt_flag) {
+    FREEexecs = x2;
+    return DONE; 
+  }
+  return OK;
+}
+
+static P x_op_halt_stop(void) {
+  if (x_2 < FLOORexecs) return EXECS_UNF;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != BOOL) return OPD_CLA;
+  if (TAG(x_1) != BOOL || TAG(x_2) != BOOL)
+    return EXECS_COR;
+
+  halt_flag = BOOL_VAL(x_1);
+  locked = BOOL_VAL(x_2);
+  if (! BOOL_VAL(o_1)) FREEexecs = x_2;
+  else {
+    TAG(x_2) = OP;
+    ATTR(x_2) = ACTIVE;
+    OP_NAME(x_2) = (P) "stop";
+    OP_CODE(x_2) = (P) op_stop;
+    FREEexecs = x_1;
+  }
+  FREEopds = o_1;
+  return OK;
 }
 
 P op_halt(void)
 {
-	if (x2 >= CEILexecs) return EXECS_OVF;
+  if (x5 >= CEILexecs) return EXECS_OVF;
+  
+  TAG(x1) = BOOL; 
+  ATTR(x1) = 0;
+  BOOL_VAL(x1) = locked;
 
-	TAG(x1) = BOOL; ATTR(x1) = 0;
-	BOOL_VAL(x1) = locked;
-	TAG(x2) = OP; ATTR(x2) = ACTIVE;
-	OP_NAME(x2) = (P)"x_halt"; 
-  OP_CODE(x2) = (P)x_op_halt;
-	FREEexecs = x3;
-	halt_flag = TRUE;
-	return DONE;
+  TAG(x2) = BOOL;
+  ATTR(x2) = 0;
+  BOOL_VAL(x2) = halt_flag;
+
+  TAG(x3) = OP;
+  ATTR(x3) = ACTIVE;
+  OP_NAME(x3) = (P) "x_halt_stop";
+  OP_CODE(x3) = (P) x_op_halt_stop;
+
+  TAG(x4) = BOOL;
+  ATTR(x4) = (STOPMARK|ACTIVE);
+  BOOL_VAL(x4) = FALSE;
+
+  TAG(x5) = OP;
+  ATTR(x5) = ACTIVE;
+  OP_NAME(x5) = (P) "x_halt";
+  OP_CODE(x5) = (P) x_op_halt;
+
+
+  FREEexecs = x6;
+  halt_flag = TRUE;
+  return DONE;
 }
 
 /*------------------------------------- 'continue'
    - enables removal of x_halt from the execution stack
 */
 
-P op_continue(void) { halt_flag = FALSE; return OK; }
+P op_continue(void) { 
+  halt_flag = FALSE; 
+  return OK; 
+}
 
 /*------------------------------------- 'setconsole'
    consolesocket | -
@@ -202,15 +250,16 @@ P op_tostderr(void)
 
 P op_toconsole(void)
 {
-  B *p, nf[FRAMEBYTES], sf[FRAMEBYTES], *oldFREEvm;
-  P nb, atmost, retc;
+  static B stringf[FRAMEBYTES];
+  B *p; 
   B *p_;
+  B *oldFREEvm;
+  P nb, atmost, retc;
 
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
   if (consolesocket != PINF) { 
     B* max_ = VALUE_PTR(o_1) + ARRAY_SIZE(o_1);
-    TAG(nf) = NULLOBJ;
     if ((FREEvm + ARRAY_SIZE(o_1) + 25) > CEILvm) return VM_OVF;
     p_ = VALUE_PTR(o_1);
     do {
@@ -243,13 +292,15 @@ P op_toconsole(void)
       if (p + 19 > CEILvm) return VM_OVF;
       moveB((B*)") toconsole restore",p,19); 
       p += 19;
-      TAG(sf) = ARRAY | BYTETYPE; ATTR(sf) = READONLY;
-      VALUE_BASE(sf) = (P)FREEvm; ARRAY_SIZE(sf) = (P)(p - FREEvm);
-      oldFREEvm = FREEvm; FREEvm = (B*)DALIGN(p);
-      if ((retc = tosocket(consolesocket,sf,nf)) != OK) {
-        consolesocket = PINF;
+      TAG(stringf) = ARRAY | BYTETYPE; 
+      ATTR(stringf) = 0;
+      VALUE_PTR(stringf) = FREEvm; 
+      ARRAY_SIZE(stringf) = p - FREEvm;
+      oldFREEvm = FREEvm; 
+      FREEvm = (B*)DALIGN(p);
+      if ((retc = tosocket(consolesocket, stringf))) {
         FREEvm = oldFREEvm;
-        return retc;
+        return makesocketdead(retc, consolesocket, "toconsole");
       }
       FREEvm = oldFREEvm;
     } while (p_ < max_);
@@ -258,12 +309,10 @@ P op_toconsole(void)
     p = (B *)VALUE_BASE(o_1); 
     atmost = ARRAY_SIZE(o_1);
     while (atmost > 0) { 
-    tc1:
-      if ((nb = write(2, p, atmost)) < 0) { 
-        if ((errno == EINTR) || (errno == EAGAIN)) goto tc1;
-        else return op_abort();  /* we drop dead */
-      }
-      atmost -= nb; p += nb;
+      while ((nb = write(STDERR_FILENO, p, atmost)) < 0)
+        if (errno != EINTR) return op_abort();
+      atmost -= nb;
+      p += nb;
     }
   }
   FREEopds = o_1;
@@ -447,11 +496,11 @@ static void maketinysetup(void)
 */
 
 static P VMRESIZE_ERR(P err, BOOLEAN bool) {
-	TAG(o1) = BOOL; 
+  TAG(o1) = BOOL; 
   ATTR(o1) = 0; 
   BOOL_VAL(o1) = bool;
-	FREEopds = o2;
-	return err;
+  FREEopds = o2;
+  return err;
 }
 
 P op_vmresize(void)
@@ -468,9 +517,10 @@ P op_vmresize(void)
     maketinysetup();
     free(Dmemory);
     Dmemory = NULL;
-	} else { 
-		if (TAG(o1) != (ARRAY | LONGBIGTYPE)) return VMRESIZE_ERR(OPD_ERR, FALSE);
-		if (ARRAY_SIZE(o1) < 5) return VMRESIZE_ERR(RNG_CHK, FALSE);
+  } 
+  else { 
+    if (TAG(o1) != (ARRAY | LONGBIGTYPE)) return VMRESIZE_ERR(OPD_ERR, FALSE);
+    if (ARRAY_SIZE(o1) < 5) return VMRESIZE_ERR(RNG_CHK, FALSE);
     moveLBIG((LBIG *)VALUE_BASE(o1), setup, 5);
     if ((setup[0] < 1000) || (setup[1] < 100)
         || (setup[2] < 50) || (setup[3] < 1)
@@ -502,7 +552,7 @@ P op_vmresize(void)
     moveframe(userdict-FRAMEBYTES,FREEdicts);
     FREEdicts += FRAMEBYTES;
     
-	  initialize_plugins();
+    initialize_plugins();
     setupdirs();
   }
 
@@ -535,14 +585,14 @@ P int_Xdisconnect(BOOLEAN nocheck) {
 #else
   if (nocheck || dvtdisplay)  {
     if (dvtdisplay) HXCloseDisplay(dvtdisplay);
-    FD_CLR(xsocket, &sock_fds);
+    delsocket(xsocket);
     xsocket = -1;
     if (defaultdisplay) setenv("DISPLAY", defaultdisplay, 1);
     else unsetenv("DISPLAY");
     dvtdisplay = NULL;
   }
   *displayname = '\0';
-  moreX = FALSE;
+  noMoreX();
   return OK;
 #endif
 }
@@ -584,7 +634,7 @@ P op_Xconnect(void)
 #else
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
-  if (ARRAY_SIZE(o_1) > sizeof(displayname)-1) return RNG_CHK;
+  if (ARRAY_SIZE(o_1) > (P) sizeof(displayname)-1) return RNG_CHK;
   if (ARRAY_SIZE(o_1) > 0) {
     moveB((B *)VALUE_BASE(o_1), displayname, ARRAY_SIZE(o_1));
     displayname[ARRAY_SIZE(o_1)] = '\000';
@@ -610,7 +660,7 @@ P op_Xconnect(void)
   ncachedfonts = 0;
   dvtgc = HXCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
   xsocket = ConnectionNumber(dvtdisplay);
-  FD_SET(xsocket, &sock_fds);
+  addsocket(xsocket);
   FREEopds = o_1; 
   XSetErrorHandler(xerrorhandler);
   XSetIOErrorHandler(xioerrorhandler);
@@ -669,3 +719,212 @@ P op_Xwindows_()
   FREEopds = o2;
   return OK;
 }
+
+BOOLEAN pending(void) {
+  if (halt_flag) {
+    if (x_1 >= FLOORexecs 
+	&& TAG(x_1) == OP 
+	&& OP_CODE(x_1) == (P) x_op_halt)
+      return FALSE;
+  }
+
+  return (FREEexecs != FLOORexecs);
+}
+
+P clientinput(void) {
+  if (x1 >= CEILexecs) return EXECS_OVF;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+
+  moveframe(o_1, x1);
+  FREEopds = o_1;
+  ATTR(x1) = ACTIVE;
+  FREEexecs = x2;
+  
+  return OK;
+}
+
+BOOLEAN consoleinput(P* retc __attribute__ ((__unused__)), 
+		     B* bufferf __attribute__ ((__unused__)) ) {
+  return FALSE;
+}
+
+#if ENABLE_UNIX_SOCKETS
+static P unixserversocket;
+#endif
+static P serversocket;
+
+DM_INLINE_STATIC P handleserverinput(int ssocket, fd_set* read_fds) {
+  struct sockaddr clientname;
+  socklen_t size = sizeof(clientname);
+  P newfd; 
+  P psize = PACKET_SIZE;
+  P retc;
+
+  FD_CLR(ssocket, read_fds);  /* to prevent double service */
+
+  if ((newfd = accept(ssocket, &clientname, &size)) == -1)
+    goto ERR;
+  if (setsockopt(newfd, SOL_SOCKET, SO_SNDBUF, (B *)&psize, sizeof(P)) == -1) 
+    goto ERR;
+  if (setsockopt(newfd, SOL_SOCKET, SO_RCVBUF, (B *)&psize, sizeof(P)) == -1)
+    goto ERR;
+  if ((retc = closeonexec(ssocket)))
+    goto ERR;
+
+  addsocket(newfd);
+  return OK;
+
+  ERR: {
+    P e = errno;
+    close(ssocket);
+    delsocket(ssocket);
+    if (newfd != -1) close(newfd);
+    return -e;
+  }
+}
+
+BOOLEAN serverinput(P* retc, fd_set* read_fds) {
+#if ENABLE_UNIX_SOCKETS
+  if (unixserversocket != -1 && FD_ISSET(unixserversocket, read_fds)) {
+    *retc = handleserverinput(unixserversocket, read_fds);
+    return TRUE;
+  }
+#endif //ENABLE_UNIX_SOCKETS
+
+  if (FD_ISSET(serversocket, read_fds)) {
+    *retc = handleserverinput(serversocket, read_fds);
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+#if ! X_DISPLAY_MISSING
+DM_INLINE_STATIC P wrap_lock(P retc) {
+  if (retc) return retc;
+
+  if (o2 >= CEILopds) return OPDS_OVF;
+  if (x_1 < FLOORexecs) return EXECS_UNF;
+
+  moveframe(x_1, o1);
+
+  TAG(o2) = OP;
+  ATTR(o2) = ACTIVE;
+  OP_NAME(o2) = (P) "stopped";
+  OP_CODE(o2) = (P) op_stopped;
+  
+  TAG(x_1) = OP;
+  ATTR(x_1) = ACTIVE;
+  OP_NAME(x_1) = (P) "lock";
+  OP_CODE(x_1) = (P) op_lock;
+
+  FREEopds = o3;
+  return OK;
+}
+
+DM_INLINE_STATIC P wm_delete_window_(XEvent* event, B* userdict) {
+  P wid = event->xclient.window;
+  static B namestring[NAMEBYTES];
+  static B namef[FRAMEBYTES];
+  B* dictf;
+
+  snprintf((char*)namestring, sizeof(namestring), 
+	   "w%lld", (long long) wid);
+  makename(namestring, namef); 
+  ATTR(namef) = ACTIVE;
+  
+  if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
+  if (x1 >= CEILexecs) return EXECS_OVF;
+  if (FREEdicts >= CEILdicts) return DICTS_OVF;
+  moveframe(dictf, FREEdicts); FREEdicts += FRAMEBYTES;
+  
+  makename((B*)"delete_window", x1); 
+  ATTR(x1) = ACTIVE;
+  FREEexecs = x2;
+
+  return OK;
+}
+
+P wm_delete_window(XEvent* event, B* userdict) {
+  return wrap_lock(wm_delete_window_(event, userdict));
+}
+
+
+P wm_take_focus(XEvent* event, B* userdict) {
+  return wrap_lock(wm_take_focus_(event, userdict));
+}
+
+P wm_configure_notify(XEvent* event, B* userdict) {
+  return wrap_lock(wm_configure_notify_(event, userdict));
+}
+
+P wm_expose(XEvent* event, B* userdict) {
+  return wrap_lock(wm_expose_(event, userdict));
+}
+
+P wm_button_press(XEvent* event, B* userdict) {
+  return wrap_lock(wm_button_press_(event, userdict));
+}
+#endif //X_DISPLAY_MISSING
+
+DM_INLINE_STATIC P killsockets(void) {
+  int i;
+  op_Xdisconnect();
+
+  for (i = 0; i < FD_SETSIZE; ++i)
+    if (FD_ISSET(i, &sock_fds) 
+#if ENABLE_UNIX_SOCKETS
+	&& (i != unixserversocket)
+#endif //ENABLE_UNIX_SOCKETS
+	&& (i != serversocket)) {
+      close(i);
+      delsocket(i);
+    }
+
+  if (x1 >= CEILexecs)
+    return EXECS_OVF; 
+
+  TAG(x1) = OP; 
+  ATTR(x1) = ACTIVE;
+  OP_NAME(x1) = (P) "abort"; 
+  OP_CODE(x1) = (P) op_abort;
+  FREEexecs = x2;
+  
+  return OK;
+}
+
+DM_INLINE_STATIC void usage_error(int errno_) __attribute__ ((__noreturn__));
+DM_INLINE_STATIC void usage_error(int errno_) {
+  error(EXIT_FAILURE, errno_, "usage is: dnode portnumber [setsid=0/1]");
+  exit(1);
+}
+
+    /* push on operand stack:
+       error code    (top)
+       errsource string
+       port#
+       hostname string
+       and push active name 'error' on execution stack
+    */
+void makeerror(P retc, B* error_source) {   
+  if (o4 >= CEILopds) FREEopds = FLOORopds;
+  if (x1 >= CEILexecs) FREEexecs = FLOORexecs;
+  TAG(o1) = ARRAY | BYTETYPE; 
+  ATTR(o1) = READONLY;
+  VALUE_BASE(o1) = (P)hostname; 
+  ARRAY_SIZE(o1) = strlen((char*)hostname);
+  TAG(o2) = NUM | LONGBIGTYPE; 
+  ATTR(o2) = 0;
+  LONGBIG_VAL(o2) = serverport - DM_IPPORT_USERRESERVED;
+  TAG(o3) = ARRAY | BYTETYPE; 
+  ATTR(o3) = READONLY;
+  VALUE_BASE(o3) = (P)error_source; 
+  ARRAY_SIZE(o3) = strlen((char*)error_source);
+  TAG(o4) = NUM | LONGBIGTYPE; 
+  ATTR(o4) = 0; 
+  LONGBIG_VAL(o4) = retc;
+  moveframe(errorframe,x1);
+  FREEopds = o5; 
+  FREEexecs = x2;
+}
+

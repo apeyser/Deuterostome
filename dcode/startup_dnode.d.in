@@ -381,6 +381,42 @@ end def  | of xtext_dict
     } ifelse
 } bind def
 
+|----------------- myname
+| -- | (hostname)
+| just allocate it on startup
+/myname getmyname def
+
+|---------------- socketdead
+| socket | --
+| default handler just throws away the socket and signals an error
+
+/socketdead {
+  pop myname getmyport (socketdead) 533 error
+} bind def
+
+/linebuf2 8192 /b array def
+
+/dvtreceive_base {
+  userdict /knode put
+  dup capsave userdict /dvtsave put
+  stopped pop
+  userdict /dvtsave get restore
+
+  save console ~[userdict /knode get ~dvt ~begin ~setready_dnode] send restore
+} bind def
+
+/dvtreceive {
+  exch mkact 3 1 roll dvtreceive_base
+} bind def
+
+/dvtsystem {
+  ~tosystem 4 -1 roll 3 -1 roll dvtreceive_base
+} bind def
+
+/dvtexecsystem {
+  {linebuf2 0 3 -1 roll mkact exec 0 exch getinterval tosystem}
+  4 -1 roll 3 -1 roll dvtreceive_base
+} bind def
 
 |====================== Support for toolboxes and projects =====================
 |
@@ -672,20 +708,22 @@ end def  | of xtext_dict
 | for use with make_toconsole to identify who looks like who
 | -- | -- <<printout>>
 |
-/whoami {
-  (xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)
-  dup getmyname length
-  (:) fax
-  * getmyport * number
-  (\n) fax
-  0 exch getinterval toconsole_
-} bind def
+/whoami ~[
+  1024 /b array {
+    0 
+    myname fax
+    (:) fax
+    * getmyport * number
+    (\n) fax
+    0 exch getinterval toconsole_
+  } ~exec
+] bind def
 
 Xwindows_ {
   /take_input_focus {
     {[
       console dup null eq {pop} {
-        (Xwindows {userdict begin take_input_focus} if) send
+        {Xwindows {userdict begin take_input_focus} if restore} send
       } ifelse |]
     } stopped cleartomark
     end
@@ -708,4 +746,3 @@ getconfdir (dnode.d) fromxfiles {
 } if
 (Trying ~/.dnode ...\n) toconsole
 gethomedir (.dnode) fromxfiles {(Read ~/.dnode\n) toconsole_} if
-  

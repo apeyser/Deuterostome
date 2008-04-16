@@ -399,18 +399,20 @@ P op_acos(void)
 
 P op_save(void)
 {
-  B *bf, *bv;
-
   if (o1 >= CEILopds) return OPDS_OVF;
   if ((FREEvm + FRAMEBYTES + SBOXBYTES) > CEILvm) return VM_OVF;
-  bf = FREEvm; bv = bf + FRAMEBYTES;
-  SBOX_FLAGS(bv) = 0; 
-  memset((B*) SBOX_DATA(bv), 0, SBOX_DATA_SIZE);
-  SBOX_CAP(bv) = (B *)0;
-  TAG(bf) = BOX; ATTR(bf) = PARENT;
-  VALUE_BASE(bf) = (P)bv; BOX_NB(bf) = SBOXBYTES;
-  FREEvm = bv + SBOXBYTES;
-  moveframe(bf,o1); FREEopds = o2;
+
+  TAG(FREEvm) = BOX;
+  ATTR(FREEvm) = PARENT;
+  BOX_NB(FREEvm) = SBOXBYTES;
+  VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
+  moveframe(FREEvm, o1);
+  FREEopds = o2;
+  FREEvm += FRAMEBYTES;
+
+  SBOX_CAP(FREEvm) = NULL;
+  FREEvm += SBOXBYTES;
+
   return OK;
 }
 
@@ -424,20 +426,21 @@ P op_save(void)
 
 P op_capsave(void)
 {
-  B *box;
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != BOX) return OPD_CLA;
-  box = (B *)VALUE_BASE(o_1); SBOX_CAP(box) = FREEvm;
+
+  SBOX_CAP(VALUE_PTR(o_1)) = FREEvm;
   FREEopds = o_1;
+
   return OK;
 }
 
 DM_INLINE_STATIC void shift_subframe(B* frame, P offset) 
 {
-		VALUE_PTR(frame) -= offset;
-		switch (CLASS(frame)) {
-				case LIST: LIST_CEIL(frame) -= offset; break;
-		}
+  VALUE_PTR(frame) -= offset;
+  switch (CLASS(frame)) {
+  case LIST: LIST_CEIL(frame) -= offset; break;
+  }
 }
 
 
@@ -463,312 +466,182 @@ DM_INLINE_STATIC void shift_subframe(B* frame, P offset)
     exempted from address modifications made to shifted objects
   - NOTE: we no longer support restoration of operand and dictionary
     stacks from uncapped 'save' objects
-  - Added cleanup handlers. If the SBOX_FLAGS has SBOX_CLEANUP set,
-    SBOX_DATA points to an OPNAME and OPCODE pair. These are used to
-    construct an OP called with the first object in the box as operand.
-    This is done instead of the restore - the op should finish be calling
-    restore again (that time, a normal restore will be done).
-    All boxes are walked through prior to actually doing a restore, to find
-    save boxes inside that have SBOX_FLAGS_CLEANUP set (which is of course
-    checked recursively).
  */
-P x_op_restore(void) 
+P op_restore(void) 
 {
-	B *cframe, *frame, *dict, *tdict, *entry, *box, *savebox,
-		*caplevel, *savefloor, *topframe;
-	P nb, offset;
-	BOOLEAN capped;
+  B *cframe, *frame, *dict, *tdict, *entry, *box, *savebox,
+    *caplevel, *savefloor, *topframe;
+  P nb, offset;
+  BOOLEAN capped;
 
-	if (o_1 < FLOORopds) return OPDS_UNF;
-	if (CLASS(o_1) != BOX) return OPD_CLA;
-	savebox = (B *)VALUE_BASE(o_1);
-	savefloor = (B *)VALUE_BASE(o_1) - FRAMEBYTES;
-	if ((caplevel = SBOX_CAP(savebox)) == (B *)0) { 
-		capped = FALSE; caplevel = FREEvm; 
-	}
-	else capped = TRUE;
-	offset = caplevel - savefloor;
-	FREEopds = o_1;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != BOX) return OPD_CLA;
+  savebox = VALUE_PTR(o_1);
+  savefloor = VALUE_PTR(o_1) - FRAMEBYTES;
+  if ((caplevel = SBOX_CAP(savebox))) capped = TRUE;
+  else {
+    capped = FALSE; 
+    caplevel = FREEvm; 
+  }
+  offset = caplevel - savefloor;
+  FREEopds = o_1;
 
-	topframe = cframe = FREEexecs - FRAMEBYTES;
-	while (cframe >= FLOORexecs) {
+  topframe = cframe = FREEexecs - FRAMEBYTES;
+  while (cframe >= FLOORexecs) {
     if (COMPOSITE(cframe)
-				&& (VALUE_BASE(cframe) >= (P)savefloor)
-				&& (VALUE_BASE(cframe) < (P)caplevel)) {
-			if (capped) return INV_REST;
-			moveframes(cframe + FRAMEBYTES,
-								 cframe,
-								 (topframe - cframe)/FRAMEBYTES);
-			topframe -= FRAMEBYTES;
-			FREEexecs -= FRAMEBYTES;
+	&& (VALUE_BASE(cframe) >= (P)savefloor)
+	&& (VALUE_BASE(cframe) < (P)caplevel)) {
+      if (capped) return INV_REST;
+      moveframes(cframe + FRAMEBYTES,
+		 cframe,
+		 (topframe - cframe)/FRAMEBYTES);
+      topframe -= FRAMEBYTES;
+      FREEexecs -= FRAMEBYTES;
     }
     cframe -= FRAMEBYTES;
-	}
+  }
  
-	topframe = cframe = FREEdicts - FRAMEBYTES;
-	while (cframe >= FLOORdicts) {
+  topframe = cframe = FREEdicts - FRAMEBYTES;
+  while (cframe >= FLOORdicts) {
     if (COMPOSITE(cframe)
-				&& (VALUE_BASE(cframe) >= (P)savefloor)
-				&& (VALUE_BASE(cframe) < (P)caplevel)) {
-			if (capped) return INV_REST;
-			moveframes(cframe + FRAMEBYTES,
-								 cframe,
-								 (topframe - cframe)/FRAMEBYTES);
-			topframe -= FRAMEBYTES;
-			FREEdicts -= FRAMEBYTES;
+	&& (VALUE_BASE(cframe) >= (P)savefloor)
+	&& (VALUE_BASE(cframe) < (P)caplevel)) {
+      if (capped) return INV_REST;
+      moveframes(cframe + FRAMEBYTES,
+		 cframe,
+		 (topframe - cframe)/FRAMEBYTES);
+      topframe -= FRAMEBYTES;
+      FREEdicts -= FRAMEBYTES;
     }
     cframe -= FRAMEBYTES;
-	}
+  }
  
-	topframe = cframe = FREEopds - FRAMEBYTES;
-	while (cframe >= FLOORopds) {
+  topframe = cframe = FREEopds - FRAMEBYTES;
+  while (cframe >= FLOORopds) {
     if (COMPOSITE(cframe)
-				&& (VALUE_BASE(cframe) >= (P)savefloor)
-				&& (VALUE_BASE(cframe) < (P)caplevel)) {
-			if (capped) return INV_REST;
-			moveframes(cframe + FRAMEBYTES,
-								 cframe,
-								 (topframe - cframe)/FRAMEBYTES);
-			topframe -= FRAMEBYTES;
-			FREEopds -= FRAMEBYTES;
+	&& (VALUE_BASE(cframe) >= (P)savefloor)
+	&& (VALUE_BASE(cframe) < (P)caplevel)) {
+      if (capped) return INV_REST;
+      moveframes(cframe + FRAMEBYTES,
+		 cframe,
+		 (topframe - cframe)/FRAMEBYTES);
+      topframe -= FRAMEBYTES;
+      FREEopds -= FRAMEBYTES;
     }
     cframe -= FRAMEBYTES;
-	}
+  }
  
-	if (capped)
-		moveLBIG((LBIG*)caplevel, (LBIG*)savefloor, 
+  if (capped)
+    moveLBIG((LBIG*)caplevel, (LBIG*)savefloor, 
              (FREEvm - caplevel)/sizeof(LBIG));
 
-	FREEvm -= offset;
-	cframe = FLOORvm;
-	while (cframe < FREEvm) {
-		switch(CLASS(cframe)) {
-			case ARRAY: 
-				nb = DALIGN(ARRAY_SIZE(cframe) * VALUEBYTES(TYPE(cframe)));
-				if (VALUE_BASE(cframe) >= (P)caplevel)
-					VALUE_BASE(cframe) -= offset;
-				cframe += nb + FRAMEBYTES; 
-				break;
+  FREEvm -= offset;
+  cframe = FLOORvm;
+  while (cframe < FREEvm) {
+    switch(CLASS(cframe)) {
+    case ARRAY: 
+      nb = DALIGN(ARRAY_SIZE(cframe) * VALUEBYTES(TYPE(cframe)));
+      if (VALUE_BASE(cframe) >= (P)caplevel)
+	VALUE_BASE(cframe) -= offset;
+      cframe += nb + FRAMEBYTES; 
+      break;
 							
-			case LIST:  
-				if (VALUE_BASE(cframe) >= (P)caplevel) { 
-					VALUE_BASE(cframe) -= offset; LIST_CEIL(cframe) -= offset; 
-				}
-				for (frame = (B *)VALUE_BASE(cframe);
-						 frame < (B *)LIST_CEIL(cframe); 
-						 frame += FRAMEBYTES) {
-					if (COMPOSITE(frame)) {  
-						if ((VALUE_BASE(frame) >= (P)caplevel) &&
-								(VALUE_BASE(frame) < (P) CEILvm)) { 
-							shift_subframe(frame, offset);
-						}
-						else if ((VALUE_BASE(frame) >= (P)savefloor) 
-										 && (VALUE_BASE(frame) < (P) caplevel)) { 
-							TAG(frame) = NULLOBJ; ATTR(frame) = 0; 
-						}
-					}
-				}
-				cframe = (B *)LIST_CEIL(cframe); 
-				break;
-			case DICT:  
-				if (VALUE_BASE(cframe) >= (P)caplevel) { 
-					VALUE_BASE(cframe) -= offset;
-					d_reloc((B *)VALUE_BASE(cframe),VALUE_BASE(cframe)+offset,
-									VALUE_BASE(cframe));
-				}
-				dict = (B *)VALUE_BASE(cframe);
-				if ((tdict = makedict((DICT_TABHASH(dict) - DICT_ENTRIES(dict))
-															/ ENTRYBYTES)) == (B *)(-1L)) 
-					return VM_OVF;
+    case LIST:  
+      if (VALUE_BASE(cframe) >= (P)caplevel) { 
+	VALUE_BASE(cframe) -= offset; LIST_CEIL(cframe) -= offset; 
+      }
+      for (frame = (B *)VALUE_BASE(cframe);
+	   frame < (B *)LIST_CEIL(cframe); 
+	   frame += FRAMEBYTES) {
+	if (COMPOSITE(frame)) {  
+	  if ((VALUE_BASE(frame) >= (P)caplevel) &&
+	      (VALUE_BASE(frame) < (P) CEILvm)) { 
+	    shift_subframe(frame, offset);
+	  }
+	  else if ((VALUE_BASE(frame) >= (P)savefloor) 
+		   && (VALUE_BASE(frame) < (P) caplevel)) { 
+	    TAG(frame) = NULLOBJ; ATTR(frame) = 0; 
+	  }
+	}
+      }
+      cframe = (B *)LIST_CEIL(cframe); 
+      break;
+    case DICT:  
+      if (VALUE_BASE(cframe) >= (P)caplevel) { 
+	VALUE_BASE(cframe) -= offset;
+	d_reloc((B *)VALUE_BASE(cframe),VALUE_BASE(cframe)+offset,
+		VALUE_BASE(cframe));
+      }
+      dict = (B *)VALUE_BASE(cframe);
+      if ((tdict = makedict((DICT_TABHASH(dict) - DICT_ENTRIES(dict))
+			    / ENTRYBYTES)) == (B *)(-1L)) 
+	return VM_OVF;
 				
-				for (entry = (B *)DICT_ENTRIES(dict);
-						 entry < (B *)DICT_FREE(dict); 
-						 entry += ENTRYBYTES) {
-					frame = ASSOC_FRAME(entry);
-					if (COMPOSITE(frame) && (VALUE_BASE(frame) < (P)CEILvm)) { 
-						if (VALUE_BASE(frame) >= (P)caplevel) { 
-							shift_subframe(frame, offset);
-						}
-						else
-							if (VALUE_BASE(frame) >= (P)savefloor) continue;
-					}
-					insert(ASSOC_NAME(entry),tdict,frame);
-				} 
-				d_rreloc(tdict,(P)tdict,(P)dict);
-				moveD((D *)tdict, (D *)dict, DICT_NB(cframe)/sizeof(D));
-				FREEvm = tdict - FRAMEBYTES;
-				cframe += DICT_NB(cframe) + FRAMEBYTES; 
-				break;
-			case BOX:  
-				if (VALUE_BASE(cframe) >= (P)caplevel)
-					VALUE_BASE(cframe) -= offset;
-				box = (B *)VALUE_BASE(cframe);
-				if (SBOX_CAP(box)) { 
-					if (SBOX_CAP(box) >= caplevel) SBOX_CAP(box) -= offset;
-					else if (SBOX_CAP(box) > savefloor)
-						SBOX_CAP(box) = savefloor;
-				}
-				cframe += BOX_NB(cframe) + FRAMEBYTES; 
-				break;
-			default:   return CORR_OBJ;
-		}
+      for (entry = (B *)DICT_ENTRIES(dict);
+	   entry < (B *)DICT_FREE(dict); 
+	   entry += ENTRYBYTES) {
+	frame = ASSOC_FRAME(entry);
+	if (COMPOSITE(frame) && (VALUE_BASE(frame) < (P)CEILvm)) { 
+	  if (VALUE_BASE(frame) >= (P)caplevel) { 
+	    shift_subframe(frame, offset);
+	  }
+	  else
+	    if (VALUE_BASE(frame) >= (P)savefloor) continue;
 	}
+	insert(ASSOC_NAME(entry),tdict,frame);
+      } 
+      d_rreloc(tdict,(P)tdict,(P)dict);
+      moveD((D *)tdict, (D *)dict, DICT_NB(cframe)/sizeof(D));
+      FREEvm = tdict - FRAMEBYTES;
+      cframe += DICT_NB(cframe) + FRAMEBYTES; 
+      break;
+    case BOX:  
+      if (VALUE_BASE(cframe) >= (P)caplevel)
+	VALUE_BASE(cframe) -= offset;
+      box = VALUE_PTR(cframe);
+      if (SBOX_CAP(box)) { 
+	if (SBOX_CAP(box) >= caplevel) SBOX_CAP(box) -= offset;
+	else if (SBOX_CAP(box) > savefloor)
+	  SBOX_CAP(box) = savefloor;
+      }
+      cframe += BOX_NB(cframe) + FRAMEBYTES; 
+      break;
+    default:   
+      return CORR_OBJ;
+    }
+  }
 
-	if (capped) { 
-		cframe = FREEexecs - FRAMEBYTES;
-		while (cframe >= FLOORexecs) { 
-			if (COMPOSITE(cframe))
-				if ((VALUE_BASE(cframe) >= (P)caplevel) &&
-						(VALUE_BASE(cframe) < (P) CEILvm)) { 
-						shift_subframe(cframe, offset);
-				}
-			cframe -= FRAMEBYTES;
-		}
-		cframe = FREEdicts - FRAMEBYTES;
-		while (cframe >= FLOORdicts)  { 
-			if (COMPOSITE(cframe))
-				if ((VALUE_BASE(cframe) >= (P)caplevel) 
-						&& (VALUE_BASE(cframe) < (P) CEILvm)) {
-						shift_subframe(cframe, offset);
-				}
-			cframe -= FRAMEBYTES;
-		}
-		cframe = FREEopds - FRAMEBYTES;
-		while (cframe >= FLOORopds) { 
-			if (COMPOSITE(cframe))
-				if ((VALUE_BASE(cframe) >= (P)caplevel) 
-						&& (VALUE_BASE(cframe) < (P) CEILvm)) {
-						shift_subframe(cframe, offset);
-				}
-			cframe -= FRAMEBYTES;
-		} 
+  if (capped) { 
+    cframe = FREEexecs - FRAMEBYTES;
+    while (cframe >= FLOORexecs) { 
+      if (COMPOSITE(cframe))
+	if ((VALUE_BASE(cframe) >= (P)caplevel) &&
+	    (VALUE_BASE(cframe) < (P) CEILvm)) { 
+	  shift_subframe(cframe, offset);
 	}
+      cframe -= FRAMEBYTES;
+    }
+    cframe = FREEdicts - FRAMEBYTES;
+    while (cframe >= FLOORdicts)  { 
+      if (COMPOSITE(cframe))
+	if ((VALUE_BASE(cframe) >= (P)caplevel) 
+	    && (VALUE_BASE(cframe) < (P) CEILvm)) {
+	  shift_subframe(cframe, offset);
+	}
+      cframe -= FRAMEBYTES;
+    }
+    cframe = FREEopds - FRAMEBYTES;
+    while (cframe >= FLOORopds) { 
+      if (COMPOSITE(cframe))
+	if ((VALUE_BASE(cframe) >= (P)caplevel) 
+	    && (VALUE_BASE(cframe) < (P) CEILvm)) {
+	  shift_subframe(cframe, offset);
+	}
+      cframe -= FRAMEBYTES;
+    } 
+  }
 
-	return OK;
-}
-
-P x_op_restore_it(void) 
-{
-		B *next, *top, *box;
-		P nb;
-		
-		if (FLOORexecs > x_2) return EXECS_UNF;
-		if (TAG(x_1) != (ARRAY | BYTETYPE)) return EXECS_COR;
-		if (TAG(x_2) != (ARRAY | BYTETYPE)) return EXECS_COR;
-		FREEexecs = x2;
-
-		next = VALUE_PTR(x_3) + FRAMEBYTES;
-		top = VALUE_PTR(x_2);
-		while (next < top) {
-				switch (CLASS(next)) {
-						case ARRAY:
-								nb = DALIGN(ARRAY_SIZE(next) * VALUEBYTES(TYPE(next)));
-								next += nb + FRAMEBYTES;
-								break;
-						case LIST:
-								next = LIST_CEIL_PTR(next);
-								break;
-						case DICT:
-								next += DICT_NB(next) + FRAMEBYTES;
-								break;
-						case BOX:
-								box = VALUE_PTR(next);
-								if (SBOX_FLAGS(box) & SBOX_FLAGS_CLEANUP) {
-										if (CEILexecs < x2) return EXECS_OVF;
-										if (CEILopds < o2) return OPDS_OVF;
-										VALUE_PTR(x_3) = next - FRAMEBYTES;
-										
-										moveframe(next, o1);
-										FREEopds = o2;
-										
-										TAG(x1) = OP;
-										ATTR(x1) = ACTIVE;
-										OP_NAME(x1) = (P) "op_restore";
-										OP_CODE(x1) = (P) op_restore;
-										FREEexecs = x2;
-										
-										return OK;
-								}
-								next += BOX_NB(next) + FRAMEBYTES;
-								break;
-						default:
-								return CORR_OBJ;
-				};
-		};
-		
-		OP_NAME(x_1) = (P) "x_op_restore";
-		OP_CODE(x_1) = (P) x_op_restore;
-		moveframe(x_1, x_3);
-		FREEexecs = x_2;
-		
-		return OK;
-}
-
-
-P op_restore(void)
-{
-		B *savebox, *caplevel;
-		if (o_1 < FLOORopds) return OPDS_UNF;
-		if (CLASS(o_1) != BOX) return OPD_CLA;
-		savebox = VALUE_PTR(o_1);
-		if (SBOX_FLAGS(savebox) & SBOX_FLAGS_CLEANUP) {
-				if (CEILexecs < x2) return EXECS_OVF;
-				SBOX_FLAGS(savebox) &= ~SBOX_FLAGS_CLEANUP;
-				TAG(x1) = OP;
-				ATTR(x1) = ACTIVE;
-				OP_NAME(x1) = OPDEF_NAME(SBOX_DATA(savebox));
-				OP_CODE(x1) = OPDEF_CODE(SBOX_DATA(savebox));
-				FREEexecs = x2;
-				moveframe(VALUE_PTR(o_1) + BOX_NB(o_1), o_1);
-				return OK;
-		}
-		
-		if (CEILexecs < x4) return EXECS_OVF;
-		TAG(x1) = ARRAY | BYTETYPE;
-		ATTR(x1) = 0;
-		ARRAY_SIZE(x1) = 0;
-		VALUE_PTR(x1) = VALUE_PTR(o_1) + SBOXBYTES - FRAMEBYTES;
-		TAG(x2) = ARRAY | BYTETYPE;
-		ATTR(x2) = 0;
-		ARRAY_SIZE(x2) = 0;
-		if ((caplevel = SBOX_CAP(savebox))) VALUE_PTR(x2) = caplevel;
-		else VALUE_PTR(x2) = FREEvm;
-		
-		TAG(x3) = OP;
-		ATTR(x3) = ACTIVE;
-		OP_NAME(x3) = (P) "x_op_restore_it";
-		OP_CODE(x3) = (P) x_op_restore_it;
-		FREEexecs = x4;
-		return OK;
-}
-
-//------------------- setcleanup ------------
-//
-// /name^op savebox | --
-// sets the savebox cleanup op to op, or the op
-//   pointed to by /name
-//
-P op_setcleanup(void) 
-{
-		B* box;
-		if (o_2 < FLOORopds) return OPDS_UNF;
-		if (CLASS(o_1) != BOX) return OPD_CLA;
-		box = VALUE_PTR(o_1);
-		if (SBOX_FLAGS(box) & SBOX_FLAGS_CLEANUP) return SBOX_SET;
-		FREEopds = o_1;
-		
-		if (CLASS(o_1) == NAME) {
-				int ret = op_find();
-				if (ret != OK) return ret;
-		}
-		if (CLASS(o_1) != OP) return OPD_CLA;
-
-		SBOX_FLAGS(box) |= SBOX_FLAGS_CLEANUP;
-		OPDEF_NAME(SBOX_DATA(box)) = OP_NAME(o_1);
-		OPDEF_CODE(SBOX_DATA(box)) = OP_CODE(o_1);
-
-		FREEopds = o_1;
-		return OK;
+  return OK;
 }
 
 /*----------------------------------------------- vmstatus

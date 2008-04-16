@@ -33,7 +33,7 @@ DM_INLINE_STATIC P int_regex(BOOLEAN case_sensitive)
   regex_t preg;
   regmatch_t* pmatch;
   int r;
-  int i;
+  unsigned int i;
   B* lframe;
   P retc = OK;
 	

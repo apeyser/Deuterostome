@@ -20,6 +20,8 @@
 
 #define _GNU_SOURCE
 
+#include "dm.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -33,7 +35,6 @@
 #include <math.h>
 #include <sys/wait.h>
 #include <signal.h>
-#include "dm.h"
 
 /*--------------------------------------------------- gettime
    -- | time
@@ -230,16 +231,16 @@ P op_fromsystem(void)
   moveB((B *)VALUE_BASE(o_1),FREEvm, max-1);
   FREEvm[max-1] = '\000';
 
-	if (pipe(fd)) return -errno;
-	
-	if ((f = fork()) == -1) {
+  if (pipe(fd)) return -errno;
+  
+  if ((f = fork()) == -1) {
     retc = -errno;
     close(fd[1]);
     close(fd[0]);
     return retc;
-	}
+  }
 	
-	if (! f) {
+  if (! f) {
     int retc2;
     while ((retc2 = open("/dev/null", O_RDWR, 0)) == -1 && errno == EINTR);
     if (retc2 == -1) {
@@ -271,32 +272,32 @@ P op_fromsystem(void)
     execl(ENABLE_BASH, ENABLE_BASH, "-c", FREEvm, (char*) NULL);
     perror("Error exec'ing bash");
     exit(-1);
-	}
+  }
 
-	while ((status = close(fd[1])) == -1 && errno == EINTR) {
+  while ((status = close(fd[1])) == -1 && errno == EINTR) {
     if (abortflag) {
       retc = ABORT;
       goto EXIT_FILE;
     }
-	}
+  }
 	
-	if (status) {
+  if (status) {
     retc = -errno;
     goto EXIT_FILE;
-	}
+  }
 
-	if (FREEvm + FRAMEBYTES >= CEILvm) {
+  if (FREEvm + FRAMEBYTES >= CEILvm) {
     retc = VM_OVF;
     goto EXIT_FILE;
-	}
+  }
 	
-	max = CEILvm - FREEvm - FRAMEBYTES;
-	TAG(FREEvm) = ARRAY | BYTETYPE;
-	ATTR(FREEvm) = PARENT;
-	c = VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
+  max = CEILvm - FREEvm - FRAMEBYTES;
+  TAG(FREEvm) = ARRAY | BYTETYPE;
+  ATTR(FREEvm) = PARENT;
+  c = VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
 
  READ:
-	while ((rf = read(fd[0], c, max)) > 0) {
+  while ((rf = read(fd[0], c, max)) > 0) {
     c += rf;
     if ((max -= rf) == 0) {
       char c_;
@@ -316,9 +317,9 @@ P op_fromsystem(void)
       }
       break;
     }
-	}
+  }
 	
-	if (rf == -1) {
+  if (rf == -1) {
     if (abortflag) {
       retc = ABORT;
       goto EXIT_FILE;
@@ -327,20 +328,20 @@ P op_fromsystem(void)
     if (errno == EINTR) goto READ;
     retc = -errno;
     goto EXIT_FILE;
-	}
+  }
 	
-	if (close(fd[0])) {
+  if (close(fd[0])) {
     retc = -errno;
     goto EXIT_PID;
-	}
+  }
   
  WAIT_PID:
   if (abortflag) {
     retc = ABORT;
     goto EXIT_PID;
-	};
+  };
 	
-	while ((r = waitpid(f, &status, 0)) != f) {
+  while ((r = waitpid(f, &status, 0)) != f) {
     if (r == -1) {
       if (errno == EINTR) {
         if (abortflag) {
@@ -352,23 +353,23 @@ P op_fromsystem(void)
       retc = -errno;
       goto EXIT_PID;
     }
-	}
+  }
 
-	if (status != 0) {
+  if (status != 0) {
     retc = NOSYSTEM;
     goto EXIT_NOW;
-	}
+  }
   
-	max = c - FREEvm - FRAMEBYTES;
-	if ((c = (B*) DALIGN(FREEvm + FRAMEBYTES + max)) > CEILvm) {
+  max = c - FREEvm - FRAMEBYTES;
+  if ((c = (B*) DALIGN(FREEvm + FRAMEBYTES + max)) > CEILvm) {
     retc = VM_OVF;
     goto EXIT_NOW;
-	}
-	ARRAY_SIZE(FREEvm) = c - FREEvm - FRAMEBYTES;
-	moveframe(FREEvm, o_1);
-	ARRAY_SIZE(o_1) = max;
-	FREEvm = c;
-	return OK;
+  }
+  ARRAY_SIZE(FREEvm) = c - FREEvm - FRAMEBYTES;
+  moveframe(FREEvm, o_1);
+  ARRAY_SIZE(o_1) = max;
+  FREEvm = c;
+  return OK;
 
  EXIT_FILE:
 	close(fd[0]);
@@ -631,7 +632,7 @@ P op_writeboxfile(void)
   moveframe(o_3, frame);
 		
   npath = ARRAY_SIZE(o_2) + ARRAY_SIZE(o_1) + 1;
-  if ((retc = foldobj_ext(frame, npath)) != OK) {
+  if ((retc = foldobj_ext(frame)) != OK) {
     FREEvm = oldFREEvm;
     return retc;
   }

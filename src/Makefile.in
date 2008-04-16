@@ -35,23 +35,27 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 bin_PROGRAMS = dvt$(EXEEXT) dnode$(EXEEXT) dgen$(EXEEXT) \
-	$(am__EXEEXT_1)
-noinst_PROGRAMS = testwordorder$(EXEEXT) $(am__EXEEXT_2)
+	$(am__EXEEXT_1) $(am__EXEEXT_2)
+noinst_PROGRAMS = testwordorder$(EXEEXT) $(am__EXEEXT_3)
 subdir = src
 DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(dist_pkgdata_SCRIPTS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/dgen-build $(srcdir)/dgen.c $(srcdir)/dgen_0.h \
-	$(srcdir)/dgen_1.h $(srcdir)/dm-types.c $(srcdir)/dm-types.h \
-	$(srcdir)/dm.pc.in $(srcdir)/dm1.c $(srcdir)/dm2.c \
-	$(srcdir)/dm3.c $(srcdir)/dm4.c $(srcdir)/dm5.c \
-	$(srcdir)/dm6.c $(srcdir)/dm7.c $(srcdir)/dm8.c \
-	$(srcdir)/dmglobals.c $(srcdir)/dmnum.c $(srcdir)/dmnum.h \
-	$(srcdir)/dsp1.c $(srcdir)/dsp2.c $(srcdir)/paths.h.in
+	$(srcdir)/dgen-build $(srcdir)/dgen.c $(srcdir)/dgen_1.h \
+	$(srcdir)/dm-conv.c $(srcdir)/dm-nextevent.c \
+	$(srcdir)/dm-nextevent.h $(srcdir)/dm-swapbytes.h \
+	$(srcdir)/dm-types.c $(srcdir)/dm-types.h $(srcdir)/dm.pc.in \
+	$(srcdir)/dm1.c $(srcdir)/dm2.c $(srcdir)/dm3.c \
+	$(srcdir)/dm4.c $(srcdir)/dm5.c $(srcdir)/dm6.c \
+	$(srcdir)/dm7.c $(srcdir)/dm8.c $(srcdir)/dmglobals.c \
+	$(srcdir)/dmnum.c $(srcdir)/dmnum.h $(srcdir)/dsp1.c \
+	$(srcdir)/dsp2.c $(srcdir)/paths.h.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
-	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/ax_set_version_info.m4 \
+	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/cf_mpi.m4 \
+	$(top_srcdir)/m4/configure.m4 \
 	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/acinclude.m4 $(top_srcdir)/m4/basic-defs.m4 \
 	$(top_srcdir)/configure.ac
@@ -59,7 +63,8 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = dm.pc dsp1f.h dmnuminc.h dsp2def.h
+CONFIG_CLEAN_FILES = dm.pc dsp1f.h dmnuminc.h dsp2def.h dgen_0.h \
+	dnode_0.h dpawn_0.h dvt_0.h
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -76,32 +81,33 @@ libdmbootstrap_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am__objects_1 = libdmbootstrap_la-dmglobals.lo \
 	libdmbootstrap_la-dmnum.lo libdmbootstrap_la-dsp1.lo \
 	libdmbootstrap_la-dsp2.lo libdmbootstrap_la-dm1.lo \
-	libdmbootstrap_la-dm2.lo libdmbootstrap_la-dm3.lo \
-	libdmbootstrap_la-dm4.lo libdmbootstrap_la-dm5.lo \
-	libdmbootstrap_la-dm6.lo libdmbootstrap_la-dm7.lo \
-	libdmbootstrap_la-dm8.lo libdmbootstrap_la-dm9.lo \
-	libdmbootstrap_la-plugin.lo libdmbootstrap_la-dm-types.lo
+	libdmbootstrap_la-dm2.lo libdmbootstrap_la-dm-conv.lo \
+	libdmbootstrap_la-dm3.lo libdmbootstrap_la-dm4.lo \
+	libdmbootstrap_la-dm5.lo libdmbootstrap_la-dm6.lo \
+	libdmbootstrap_la-dm7.lo libdmbootstrap_la-dm8.lo \
+	libdmbootstrap_la-dm9.lo libdmbootstrap_la-plugin.lo \
+	libdmbootstrap_la-dm-types.lo
 am_libdmbootstrap_la_OBJECTS = $(am__objects_1)
 libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
 libdmbootstrap_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(libdmbootstrap_la_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
-	-o $@
+	$(libdmbootstrap_la_CFLAGS) $(CFLAGS) \
+	$(libdmbootstrap_la_LDFLAGS) $(LDFLAGS) -o $@
 libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
 am__libdmglobals_la_SOURCES_DIST = dmglobals.c dmnuminc.h dmnum.c \
-	dsp1f.h dsp1.c dsp2.c paths.h dm1.c dm2.c dm3.c dm4.c dm5.c \
-	dm6.c dm7.c dm8.c dm9.c pluginlib.h plugin.c dm-types.c \
-	xhack.h error-local.h matrix.c matrix.h threads.c dregex.c \
-	dregex.h dm-convert.h dm-convert.c
+	dsp1f.h dsp1.c dsp2.c paths.h dm1.c dm2.c dm-conv.c \
+	dm-swapbytes.h dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
+	pluginlib.h plugin.c dm-types.c xhack.h matrix.c matrix.h \
+	threads.c dregex.c dregex.h dm-convert.h dm-convert.c
 am__objects_2 = libdmglobals_la-dmglobals.lo libdmglobals_la-dmnum.lo \
 	libdmglobals_la-dsp1.lo libdmglobals_la-dsp2.lo \
 	libdmglobals_la-dm1.lo libdmglobals_la-dm2.lo \
-	libdmglobals_la-dm3.lo libdmglobals_la-dm4.lo \
-	libdmglobals_la-dm5.lo libdmglobals_la-dm6.lo \
-	libdmglobals_la-dm7.lo libdmglobals_la-dm8.lo \
-	libdmglobals_la-dm9.lo libdmglobals_la-plugin.lo \
-	libdmglobals_la-dm-types.lo
+	libdmglobals_la-dm-conv.lo libdmglobals_la-dm3.lo \
+	libdmglobals_la-dm4.lo libdmglobals_la-dm5.lo \
+	libdmglobals_la-dm6.lo libdmglobals_la-dm7.lo \
+	libdmglobals_la-dm8.lo libdmglobals_la-dm9.lo \
+	libdmglobals_la-plugin.lo libdmglobals_la-dm-types.lo
 @ENABLE_THREADS_TRUE@am__objects_3 = libdmglobals_la-threads.lo
 @ENABLE_REGEX_TRUE@am__objects_4 = libdmglobals_la-dregex.lo
 am_libdmglobals_la_OBJECTS = $(am__objects_2) \
@@ -112,13 +118,18 @@ libdmglobals_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libdmglobals_la_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 @ENABLE_DAEMON_TRUE@am__EXEEXT_1 = dnode-daemon$(EXEEXT)
+@ENABLE_MPI_TRUE@am__EXEEXT_2 = drook$(EXEEXT)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-@ENABLE_SETUID_TRUE@am__EXEEXT_2 = dnode-nice$(EXEEXT)
+@ENABLE_SETUID_TRUE@am__EXEEXT_3 = dnode-nice$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
-am_dgen_OBJECTS = dgen-dgen.$(OBJEXT)
+am_dgen_OBJECTS = dgen-dgen.$(OBJEXT) dgen-dm-nextevent.$(OBJEXT)
 dgen_OBJECTS = $(am_dgen_OBJECTS)
 dgen_DEPENDENCIES = $(am__DEPENDENCIES_1) libdmbootstrap.la
-am_dnode_OBJECTS = dnode-dnode.$(OBJEXT)
+am__dnode_SOURCES_DIST = dnode.c dnode_0.h dnode_1.h dmx.h \
+	dm-nextevent.c dm-nextevent.h dqueen.c
+@ENABLE_MPI_TRUE@am__objects_5 = dnode-dqueen.$(OBJEXT)
+am_dnode_OBJECTS = dnode-dnode.$(OBJEXT) dnode-dm-nextevent.$(OBJEXT) \
+	$(am__objects_5)
 dnode_OBJECTS = $(am_dnode_OBJECTS)
 dnode_DEPENDENCIES = libdmglobals.la
 dnode_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -131,7 +142,13 @@ dnode_daemon_LDADD = $(LDADD)
 @ENABLE_SETUID_TRUE@nodist_dnode_nice_OBJECTS = dnode-nice.$(OBJEXT)
 dnode_nice_OBJECTS = $(nodist_dnode_nice_OBJECTS)
 dnode_nice_LDADD = $(LDADD)
-am_dvt_OBJECTS = dvt-dvt.$(OBJEXT)
+am_drook_OBJECTS = drook-drook.$(OBJEXT)
+drook_OBJECTS = $(am_drook_OBJECTS)
+drook_DEPENDENCIES = libdmbootstrap.la
+drook_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(drook_LDFLAGS) \
+	$(LDFLAGS) -o $@
+am_dvt_OBJECTS = dvt-dvt.$(OBJEXT) dvt-dm-nextevent.$(OBJEXT)
 dvt_OBJECTS = $(am_dvt_OBJECTS)
 dvt_DEPENDENCIES = libdmglobals.la
 dvt_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -157,10 +174,11 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 SOURCES = $(libdmbootstrap_la_SOURCES) $(libdmglobals_la_SOURCES) \
 	$(dgen_SOURCES) $(dnode_SOURCES) \
 	$(nodist_dnode_daemon_SOURCES) $(nodist_dnode_nice_SOURCES) \
-	$(dvt_SOURCES) $(testwordorder_SOURCES)
+	$(drook_SOURCES) $(dvt_SOURCES) $(testwordorder_SOURCES)
 DIST_SOURCES = $(libdmbootstrap_la_SOURCES) \
 	$(am__libdmglobals_la_SOURCES_DIST) $(dgen_SOURCES) \
-	$(dnode_SOURCES) $(dvt_SOURCES) $(testwordorder_SOURCES)
+	$(am__dnode_SOURCES_DIST) $(drook_SOURCES) $(dvt_SOURCES) \
+	$(testwordorder_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -173,7 +191,8 @@ DATA = $(nodist_pkgconfiglib_DATA)
 nodist_pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 am__pkginclude_HEADERS_DIST = dm.h dm3.h plugin.h pluginlib.h \
 	cppplugin.h dmx.h threads.h error-local.h dm-snprintf.h \
-	srandomdev-local.h dmnum.h basic-defs.h dm-types.h
+	srandomdev-local.h dmnum.h basic-defs.h dm-types.h \
+	dm-nextevent.h
 pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(nodist_pkginclude_HEADERS) $(pkginclude_HEADERS)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
@@ -279,6 +298,8 @@ MAX_NUM_EXECS = @MAX_NUM_EXECS@
 MAX_NUM_OPDS = @MAX_NUM_OPDS@
 MAX_USER_DICT_SIZE = @MAX_USER_DICT_SIZE@
 MKDIR_P = @MKDIR_P@
+MPI_FLAGS = @MPI_FLAGS@
+MPI_LIBS = @MPI_LIBS@
 NAMEBYTES = @NAMEBYTES@
 NAMEBYTES_1 = @NAMEBYTES_1@
 NO_PTHREAD_CC = @NO_PTHREAD_CC@
@@ -307,6 +328,7 @@ PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
 PTHREAD_LIBS = @PTHREAD_LIBS@
 RANLIB = @RANLIB@
 REAL_TMP = @REAL_TMP@
+RELEASE_INFO = @RELEASE_INFO@
 ROLLBITS = @ROLLBITS@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
@@ -317,6 +339,7 @@ THREADMUL = @THREADMUL@
 THREADNUM = @THREADNUM@
 TMP = @TMP@
 VERSION = @VERSION@
+VERSION_INFO = @VERSION_INFO@
 XMKMF = @XMKMF@
 X_CFLAGS = @X_CFLAGS@
 X_DISPLAY_MISSING = @X_DISPLAY_MISSING@
@@ -395,7 +418,14 @@ tmp = @tmp@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = codegen
-edit = sed -e 's,[@]bindir[@],$(bindir),g' -e 's,[@]srcdir[@],$(srcdir),g'
+dpawn = $(bindir)/dpawn
+drook = $(bindir)/drook
+edit = sed \
+	-e 's,[@]bindir[@],$(bindir),g' \
+	-e 's,[@]srcdir[@],$(srcdir),g' \
+	-e 's,[@]dpawn[@],$(dpawn),g' \
+	-e 's,[@]drook[@],$(drook),g'
+
 @ENABLE_SETUID_TRUE@nodist_dnode_nice_SOURCES = dnode-nice.c
 @ENABLE_SETUID_TRUE@DNODENICEBIN = dnode-nice
 @ENABLE_DAEMON_TRUE@nodist_dnode_daemon_SOURCES = dnode-daemon.c
@@ -404,27 +434,33 @@ edit = sed -e 's,[@]bindir[@],$(bindir),g' -e 's,[@]srcdir[@],$(srcdir),g'
 @ENABLE_THREADS_TRUE@THREAD_HDR = threads.h
 @ENABLE_THREADS_TRUE@THREADSRC = threads.c
 @ENABLE_REGEX_TRUE@REGEX_SRC = dregex.c dregex.h
-EXTRA_DIST = dnode-nice.c.in dnode-daemon.c.in paths.h.in
+@ENABLE_MPI_TRUE@MPI_PROGS = drook
+@ENABLE_MPI_TRUE@DNODE_MPI_SRCS = dqueen.c
+EXTRA_DIST = dnode-nice.c.in dnode-daemon.c.in paths.h.in drook.c.in dqueen.c.in
+BUILT_SOURCES = dnode-nice.c    dnode-daemon.c    paths.h    drook.c    dqueen.c
+CLEANFILES = $(BUILT_SOURCES)
 DISTCLEANFILES = dm-config.h
 AM_CPPFLAGS = -DDM_HAVE_CONFIG_H
 AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
 AM_CXXFLAGS = $(GCC_CXXFLAGS)
-AM_LDFLAGS = -no-undefined $(PTHREAD_LIBS) $(X_LDFLAGS)
+AM_LDFLAGS = $(PTHREAD_LIBS) $(X_LDFLAGS) -no-undefined 
 INCLUDE = @INCLTDL@
 @ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@CPPPLUGIN_HDR = cppplugin.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_HDR = plugin.h pluginlib.h $(CPPPLUGIN_HDR)
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_LD = @LIBLTDL@
 pkginclude_HEADERS = dm.h dm3.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
 	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h \
-	basic-defs.h dm-types.h
+	basic-defs.h dm-types.h dm-nextevent.h
 
 nodist_pkginclude_HEADERS = dm-config.h paths.h
-dvt_SOURCES = dvt.c dvt_0.h dvt_1.h
+dvt_SOURCES = dvt.c dvt_0.h dvt_1.h dm-nextevent.c dm-nextevent.h
 dvt_LDADD = libdmglobals.la
 dvt_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS)
 dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS)
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
-dnode_SOURCES = dnode.c dnode_0.h dnode_1.h dmx.h
+dnode_SOURCES = dnode.c dnode_0.h dnode_1.h dmx.h \
+	dm-nextevent.c dm-nextevent.h $(DNODE_MPI_SRCS)
+
 dnode_LDADD = libdmglobals.la 
 dnode_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS)
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
@@ -432,16 +468,15 @@ dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 testwordorder_SOURCES = test-word-order.c
 globsrcs = dmglobals.c \
 	dmnuminc.h dmnum.c dsp1f.h dsp1.c dsp2.c \
-	paths.h dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
+	paths.h dm1.c dm2.c dm-conv.c dm-swapbytes.h\
+	dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	pluginlib.h plugin.c \
 	dm-types.c xhack.h
 
-BUILT_SOURCES = paths.h dnode-nice.c dnode-daemon.c
-CLEANFILES = paths.h dnode-nice.c dnode-daemon.c
 lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la
-libdmglobals_la_LIBADD = $(PLUGIN_LD) $(ATLAS_LIBS)
+libdmglobals_la_LIBADD = $(PLUGIN_LD) $(ATLAS_LIBS) @VERSION_INFO@ @RELEASE_INFO@
 libdmglobals_la_SOURCES = $(globsrcs) \
-	error-local.h matrix.c matrix.h \
+	matrix.c matrix.h \
 	$(THREADSRC) $(REGEX_SRC) dm-convert.h dm-convert.c
 
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
@@ -454,17 +489,29 @@ editpaths = sed \
 
 nodist_pkgconfiglib_DATA = dm.pc
 dist_pkgdata_SCRIPTS = dgen-build
-dgen_SOURCES = dgen.c dgen_0.h dgen_1.h 
-dgen_CPPFLAGS = $(AM_CPPFLAGS) -DBOOTSTRAP_PLUGIN=1 -DDM_DISABLE_REGEX=1 \
+dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h
+dgen_CPPFLAGS = $(AM_CPPFLAGS) \
+	-DBOOTSTRAP_PLUGIN=1 -DDM_DISABLE_REGEX=1 \
+	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 \
 	@LIBDM_DLL_IMPORT@ 
 
 dgen_LDADD = $(PLUGIN_LD) libdmbootstrap.la 
-libdmbootstrap_la_LIBADD = $(PLUGIN_LD)
+drook_SOURCES = drook.c
+drook_CPPFLAGS = $(AM_CPPFLAGS) \
+	-DDM_DISABLE_REGEX=1 -DDM_DISABLE_XDISPLAY \
+	$(MPI_FLAGS) \
+	@LIBDM_DLL_IMPORT@ 
+
+drook_LDFLAGS = $(AM_LDFLAGS) $(MPI_LIBS)
+drook_LDADD = libdmbootstrap.la
+libdmbootstrap_la_LIBADD = $(PLUGIN_LD) @VERSION_INFO@ @RELEASE_INFO@
 libdmbootstrap_la_SOURCES = $(globsrcs) 
 libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) \
-	-DDM_DISABLE_THREADS=1 -DDM_DISABLE_REGEX=1
+	-DDM_DISABLE_THREADS=1 -DDM_DISABLE_REGEX=1 \
+	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1
 
 libdmbootstrap_la_CFLAGS = $(AM_CFLAGS)
+libdmbootstrap_la_LDFLAGS = $(AM_LDFLAGS)
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -579,6 +626,9 @@ dnode-daemon$(EXEEXT): $(dnode_daemon_OBJECTS) $(dnode_daemon_DEPENDENCIES)
 dnode-nice$(EXEEXT): $(dnode_nice_OBJECTS) $(dnode_nice_DEPENDENCIES) 
 	@rm -f dnode-nice$(EXEEXT)
 	$(LINK) $(dnode_nice_OBJECTS) $(dnode_nice_LDADD) $(LIBS)
+drook$(EXEEXT): $(drook_OBJECTS) $(drook_DEPENDENCIES) 
+	@rm -f drook$(EXEEXT)
+	$(drook_LINK) $(drook_OBJECTS) $(drook_LDADD) $(LIBS)
 dvt$(EXEEXT): $(dvt_OBJECTS) $(dvt_DEPENDENCIES) 
 	@rm -f dvt$(EXEEXT)
 	$(dvt_LINK) $(dvt_OBJECTS) $(dvt_LDADD) $(LIBS)
@@ -612,10 +662,16 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dgen.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dm-nextevent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-daemon.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dm-nextevent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dnode.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dqueen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-nice.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drook-drook.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvt-dm-nextevent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvt-dvt.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm-conv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm-types.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm2.Plo@am__quote@
@@ -631,6 +687,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dsp1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dsp2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-plugin.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm-conv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm-convert.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm-types.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm1.Plo@am__quote@
@@ -714,6 +771,13 @@ libdmbootstrap_la-dm2.lo: dm2.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm2.c' object='libdmbootstrap_la-dm2.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(libdmbootstrap_la_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dm2.lo `test -f 'dm2.c' || echo '$(srcdir)/'`dm2.c
+
+libdmbootstrap_la-dm-conv.lo: dm-conv.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(libdmbootstrap_la_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dm-conv.lo -MD -MP -MF $(DEPDIR)/libdmbootstrap_la-dm-conv.Tpo -c -o libdmbootstrap_la-dm-conv.lo `test -f 'dm-conv.c' || echo '$(srcdir)/'`dm-conv.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmbootstrap_la-dm-conv.Tpo $(DEPDIR)/libdmbootstrap_la-dm-conv.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-conv.c' object='libdmbootstrap_la-dm-conv.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(libdmbootstrap_la_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dm-conv.lo `test -f 'dm-conv.c' || echo '$(srcdir)/'`dm-conv.c
 
 libdmbootstrap_la-dm3.lo: dm3.c
 @am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(libdmbootstrap_la_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dm3.lo -MD -MP -MF $(DEPDIR)/libdmbootstrap_la-dm3.Tpo -c -o libdmbootstrap_la-dm3.lo `test -f 'dm3.c' || echo '$(srcdir)/'`dm3.c
@@ -820,6 +884,13 @@ libdmglobals_la-dm2.lo: dm2.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -c -o libdmglobals_la-dm2.lo `test -f 'dm2.c' || echo '$(srcdir)/'`dm2.c
 
+libdmglobals_la-dm-conv.lo: dm-conv.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -MT libdmglobals_la-dm-conv.lo -MD -MP -MF $(DEPDIR)/libdmglobals_la-dm-conv.Tpo -c -o libdmglobals_la-dm-conv.lo `test -f 'dm-conv.c' || echo '$(srcdir)/'`dm-conv.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmglobals_la-dm-conv.Tpo $(DEPDIR)/libdmglobals_la-dm-conv.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-conv.c' object='libdmglobals_la-dm-conv.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -c -o libdmglobals_la-dm-conv.lo `test -f 'dm-conv.c' || echo '$(srcdir)/'`dm-conv.c
+
 libdmglobals_la-dm3.lo: dm3.c
 @am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -MT libdmglobals_la-dm3.lo -MD -MP -MF $(DEPDIR)/libdmglobals_la-dm3.Tpo -c -o libdmglobals_la-dm3.lo `test -f 'dm3.c' || echo '$(srcdir)/'`dm3.c
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmglobals_la-dm3.Tpo $(DEPDIR)/libdmglobals_la-dm3.Plo
@@ -925,6 +996,20 @@ dgen-dgen.obj: dgen.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dgen_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgen-dgen.obj `if test -f 'dgen.c'; then $(CYGPATH_W) 'dgen.c'; else $(CYGPATH_W) '$(srcdir)/dgen.c'; fi`
 
+dgen-dm-nextevent.o: dm-nextevent.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dgen_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dgen-dm-nextevent.o -MD -MP -MF $(DEPDIR)/dgen-dm-nextevent.Tpo -c -o dgen-dm-nextevent.o `test -f 'dm-nextevent.c' || echo '$(srcdir)/'`dm-nextevent.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dgen-dm-nextevent.Tpo $(DEPDIR)/dgen-dm-nextevent.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-nextevent.c' object='dgen-dm-nextevent.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dgen_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgen-dm-nextevent.o `test -f 'dm-nextevent.c' || echo '$(srcdir)/'`dm-nextevent.c
+
+dgen-dm-nextevent.obj: dm-nextevent.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dgen_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dgen-dm-nextevent.obj -MD -MP -MF $(DEPDIR)/dgen-dm-nextevent.Tpo -c -o dgen-dm-nextevent.obj `if test -f 'dm-nextevent.c'; then $(CYGPATH_W) 'dm-nextevent.c'; else $(CYGPATH_W) '$(srcdir)/dm-nextevent.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dgen-dm-nextevent.Tpo $(DEPDIR)/dgen-dm-nextevent.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-nextevent.c' object='dgen-dm-nextevent.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dgen_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgen-dm-nextevent.obj `if test -f 'dm-nextevent.c'; then $(CYGPATH_W) 'dm-nextevent.c'; else $(CYGPATH_W) '$(srcdir)/dm-nextevent.c'; fi`
+
 dnode-dnode.o: dnode.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dnode.o -MD -MP -MF $(DEPDIR)/dnode-dnode.Tpo -c -o dnode-dnode.o `test -f 'dnode.c' || echo '$(srcdir)/'`dnode.c
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dnode-dnode.Tpo $(DEPDIR)/dnode-dnode.Po
@@ -939,6 +1024,48 @@ dnode-dnode.obj: dnode.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dnode.obj `if test -f 'dnode.c'; then $(CYGPATH_W) 'dnode.c'; else $(CYGPATH_W) '$(srcdir)/dnode.c'; fi`
 
+dnode-dm-nextevent.o: dm-nextevent.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dm-nextevent.o -MD -MP -MF $(DEPDIR)/dnode-dm-nextevent.Tpo -c -o dnode-dm-nextevent.o `test -f 'dm-nextevent.c' || echo '$(srcdir)/'`dm-nextevent.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dnode-dm-nextevent.Tpo $(DEPDIR)/dnode-dm-nextevent.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-nextevent.c' object='dnode-dm-nextevent.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dm-nextevent.o `test -f 'dm-nextevent.c' || echo '$(srcdir)/'`dm-nextevent.c
+
+dnode-dm-nextevent.obj: dm-nextevent.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dm-nextevent.obj -MD -MP -MF $(DEPDIR)/dnode-dm-nextevent.Tpo -c -o dnode-dm-nextevent.obj `if test -f 'dm-nextevent.c'; then $(CYGPATH_W) 'dm-nextevent.c'; else $(CYGPATH_W) '$(srcdir)/dm-nextevent.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dnode-dm-nextevent.Tpo $(DEPDIR)/dnode-dm-nextevent.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-nextevent.c' object='dnode-dm-nextevent.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dm-nextevent.obj `if test -f 'dm-nextevent.c'; then $(CYGPATH_W) 'dm-nextevent.c'; else $(CYGPATH_W) '$(srcdir)/dm-nextevent.c'; fi`
+
+dnode-dqueen.o: dqueen.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dqueen.o -MD -MP -MF $(DEPDIR)/dnode-dqueen.Tpo -c -o dnode-dqueen.o `test -f 'dqueen.c' || echo '$(srcdir)/'`dqueen.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dnode-dqueen.Tpo $(DEPDIR)/dnode-dqueen.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dqueen.c' object='dnode-dqueen.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dqueen.o `test -f 'dqueen.c' || echo '$(srcdir)/'`dqueen.c
+
+dnode-dqueen.obj: dqueen.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dqueen.obj -MD -MP -MF $(DEPDIR)/dnode-dqueen.Tpo -c -o dnode-dqueen.obj `if test -f 'dqueen.c'; then $(CYGPATH_W) 'dqueen.c'; else $(CYGPATH_W) '$(srcdir)/dqueen.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dnode-dqueen.Tpo $(DEPDIR)/dnode-dqueen.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dqueen.c' object='dnode-dqueen.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dqueen.obj `if test -f 'dqueen.c'; then $(CYGPATH_W) 'dqueen.c'; else $(CYGPATH_W) '$(srcdir)/dqueen.c'; fi`
+
+drook-drook.o: drook.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(drook_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT drook-drook.o -MD -MP -MF $(DEPDIR)/drook-drook.Tpo -c -o drook-drook.o `test -f 'drook.c' || echo '$(srcdir)/'`drook.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/drook-drook.Tpo $(DEPDIR)/drook-drook.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='drook.c' object='drook-drook.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(drook_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o drook-drook.o `test -f 'drook.c' || echo '$(srcdir)/'`drook.c
+
+drook-drook.obj: drook.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(drook_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT drook-drook.obj -MD -MP -MF $(DEPDIR)/drook-drook.Tpo -c -o drook-drook.obj `if test -f 'drook.c'; then $(CYGPATH_W) 'drook.c'; else $(CYGPATH_W) '$(srcdir)/drook.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/drook-drook.Tpo $(DEPDIR)/drook-drook.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='drook.c' object='drook-drook.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(drook_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o drook-drook.obj `if test -f 'drook.c'; then $(CYGPATH_W) 'drook.c'; else $(CYGPATH_W) '$(srcdir)/drook.c'; fi`
+
 dvt-dvt.o: dvt.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dvt_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -MT dvt-dvt.o -MD -MP -MF $(DEPDIR)/dvt-dvt.Tpo -c -o dvt-dvt.o `test -f 'dvt.c' || echo '$(srcdir)/'`dvt.c
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dvt-dvt.Tpo $(DEPDIR)/dvt-dvt.Po
@@ -952,6 +1079,20 @@ dvt-dvt.obj: dvt.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dvt.c' object='dvt-dvt.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dvt_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -c -o dvt-dvt.obj `if test -f 'dvt.c'; then $(CYGPATH_W) 'dvt.c'; else $(CYGPATH_W) '$(srcdir)/dvt.c'; fi`
+
+dvt-dm-nextevent.o: dm-nextevent.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dvt_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -MT dvt-dm-nextevent.o -MD -MP -MF $(DEPDIR)/dvt-dm-nextevent.Tpo -c -o dvt-dm-nextevent.o `test -f 'dm-nextevent.c' || echo '$(srcdir)/'`dm-nextevent.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dvt-dm-nextevent.Tpo $(DEPDIR)/dvt-dm-nextevent.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-nextevent.c' object='dvt-dm-nextevent.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dvt_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -c -o dvt-dm-nextevent.o `test -f 'dm-nextevent.c' || echo '$(srcdir)/'`dm-nextevent.c
+
+dvt-dm-nextevent.obj: dm-nextevent.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dvt_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -MT dvt-dm-nextevent.obj -MD -MP -MF $(DEPDIR)/dvt-dm-nextevent.Tpo -c -o dvt-dm-nextevent.obj `if test -f 'dm-nextevent.c'; then $(CYGPATH_W) 'dm-nextevent.c'; else $(CYGPATH_W) '$(srcdir)/dm-nextevent.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dvt-dm-nextevent.Tpo $(DEPDIR)/dvt-dm-nextevent.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-nextevent.c' object='dvt-dm-nextevent.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dvt_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -c -o dvt-dm-nextevent.obj `if test -f 'dm-nextevent.c'; then $(CYGPATH_W) 'dm-nextevent.c'; else $(CYGPATH_W) '$(srcdir)/dm-nextevent.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -1328,8 +1469,18 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_pkgdataSCRIPTS \
 @ENABLE_SETUID_TRUE@	-rm -f "$(DESTDIR)$(bindir)/dnode-nice$(EXEEXT)"
 
 dnode-nice.c: Makefile $(srcdir)/dnode-nice.c.in
-	rm -f $@ $@.tmp
+	-rm -f $@ $@.tmp
 	$(edit) "$(srcdir)/dnode-nice.c.in" > $@.tmp
+	mv $@.tmp $@
+
+dqueen.c: Makefile $(srcdir)/dqueen.c.in
+	-rm -f $@ $@.tmp
+	$(edit) "$(srcdir)/dqueen.c.in" >$@.tmp
+	mv $@.tmp $@
+
+drook.c: Makefile $(srcdir)/drook.c.in
+	-rm -f $@ $@.tmp
+	$(edit) "$(srcdir)/drook.c.in" >$@.tmp
 	mv $@.tmp $@
 
 dnode-daemon.c: Makefile $(srcdir)/dnode-daemon.c.in
@@ -1339,7 +1490,7 @@ dnode-daemon.c: Makefile $(srcdir)/dnode-daemon.c.in
 
 paths.h: paths.h.in Makefile
 	-rm -f $@ $@.tmp
-	$(editpaths) $(srcdir)/$@.in >$@.tmp
+	$(editpaths) "$(srcdir)/$@.in" >$@.tmp
 	mv $@.tmp $@
 
 .PHONY: gencode-all gencode

@@ -11,7 +11,7 @@ static int dm_snprintf(char *str, size_t size, const char *format, ...) {
   va_list ap;
   int nb;
   va_start(ap, format);
-  if ((nb = vsnprintf(str, size, format, ap)) > size) nb = size;
+  if ((nb = vsnprintf(str, size, format, ap)) > (int) size) nb = size;
   va_end(ap);
   return nb;
 }

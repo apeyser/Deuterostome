@@ -50,6 +50,8 @@ P ndvtwindows;
 P dvtwindows[MAXDVTWINDOWS];
 P ncachedfonts;
 cachedfont cachedfonts[MAXCACHEDFONTS];
+jmp_buf xhack_buf;
+char xhack_jmpd = 0;
 #endif
 
 /*----------------- some details on operands ----------------------------
@@ -65,9 +67,11 @@ cachedfont cachedfonts[MAXCACHEDFONTS];
    [ x ... ] [ y ... ]
 */
 
+#if ! X_DISPLAY_MISSING
 static P wid;
 static P colidx;
 static P x,y,s;
+#endif
 
 /*-------------------------- support routines -------------------------------*/
 
@@ -159,6 +163,7 @@ static P merge(B *xf, B *yf, B **xyf, B **freevm)
   - new arrays are stored in temporary VM space
 */
 
+static P xy(B **xyf, B **freevm) __attribute__ ((__unused__));
 static P xy(B **xyf, B **freevm)
 {
   P retc; 
@@ -900,24 +905,6 @@ P op_drawsymbols(void)
 #endif
 }
 
-/*--------------------------------------- setinputfocus
- * window# | --
- * window# gets keyboard focus
- */
-P op_setinputfocus(void) {
-#if X_DISPLAY_MISSING
-	return NO_XWINDOWS;
-#else
-	if (dvtdisplay == NULL) return NO_XWINDOWS;
-	if (o_1 < FLOORopds) return OPDS_UNF;
-	if (CLASS(o_1) != NUM) return OPD_CLA;
-	if (! PVALUE(o_1, &wid)) return UNDF_VAL;
-	
-	HXSetInputFocus(dvtdisplay, wid, RevertToParent, CurrentTime);
-	return OK;
-#endif
-}
-
 /*-------------------------------------- drawtext
    window# x y (text) [ (font_spec) col_idx h_align v_align ] | window# x y 
 
@@ -1016,47 +1003,40 @@ P op_drawtext(void)
 
 //----------------------------------------------- Xdisplayname
 // -- | bytearray
-// allocates a a string and stuffs dvt display name in it
+// return display name of current X connection
 // returns 0 length string if no dvt display
 
 P op_Xdisplayname(void)
 {
+#if ! X_DISPLAY_MISSING
     P len;
-    B* oldfreevm = FREEvm;
+#endif
     if (o1 >= CEILopds) return OPDS_OVF;
-    if ((FREEvm += FRAMEBYTES) >= CEILvm) {
-      FREEvm = oldfreevm;
-      return VM_OVF;
-    }
-    TAG(oldfreevm) = ARRAY | BYTETYPE;
-    VALUE_PTR(oldfreevm) = FREEvm;
+
+    moveframe(myxname_frame, o1);
     
 #if ! X_DISPLAY_MISSING
     if (! dvtdisplay) {
 #endif
-      ARRAY_SIZE(oldfreevm) = 0;
+      ARRAY_SIZE(o1) = 0;
       return OK;
 #if ! X_DISPLAY_MISSING
     }
 
-    len = strlen((char*)displayname);
-    if ((FREEvm += DALIGN(len)) >= CEILvm) {
-      FREEvm = oldfreevm;
-      return VM_OVF;
-    }
-    ARRAY_SIZE(oldfreevm) = len;
-    moveB((B*) displayname, VALUE_PTR(oldfreevm), len);
-    moveframe(oldfreevm, o1);
+    if ((len = strlen((char*)displayname)) > ARRAY_SIZE(myxname_frame)) 
+      return RNG_CHK;
+    ARRAY_SIZE(o1) = len;
+    moveB((B*) displayname, VALUE_PTR(myxname_frame), len);
     FREEopds = o2;
 
     return OK;
 #endif
 }
 
-//------------------------------------------------- xauthrev
+//------------------------------------------------- Xauthrev
 // id | --
 
-P op_xauthrev(void) 
+P op_Xauthrev(void) 
 {
 #if X_DISPLAY_MISSING
   return NO_XWINDOWS;
@@ -1081,11 +1061,11 @@ P op_xauthrev(void)
 #endif
 }
 
-//------------------------------------------------ xauthset
+//------------------------------------------------ Xauthset
 // (name) <b data> | --
 //
 
-P op_xauthset(void) {
+P op_Xauthset(void) {
 #if X_DISPLAY_MISSING
   return NO_XWINDOWS;
 #else
@@ -1125,19 +1105,17 @@ P op_xauthset(void) {
 #endif
 }
 
-//------------------------------------------------ xauthgen
-// (name) <b data> bool-trusted int-timeout 
-//            | (new-name) <b new-data> id/x 
+//------------------------------------------------ Xauthgen
+// (name) <b data> bool-trusted | (new-name) <b new-data> id/x 
 //
 
-P op_xauthgen(void) 
+P op_Xauthgen(void) 
 {
 #if X_DISPLAY_MISSING
   return NO_XWINDOWS;
 #elif ! HAVE_X11_EXTENSIONS_SECURITY_H
   return X_SEC_LIB;
 #else
-  P timeout;
   BOOLEAN trusted;
   Xauth* authin = NULL;
   Xauth* authout = NULL;
@@ -1153,19 +1131,17 @@ P op_xauthgen(void)
 
   if (! dvtdisplay) return NO_XWINDOWS;
 
-  if (o_4 < FLOORopds) return OPDS_UNF;
-  if (CLASS(o_1) != NUM) return OPD_CLA;
-  if (! PVALUE(o_1, &timeout)) return UNDF_VAL;
-  if (TAG(o_2) != BOOL) return OPD_ERR;
-  trusted = BOOL_VAL(o_2);
+  if (o_3 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != BOOL) return OPD_ERR;
+  trusted = BOOL_VAL(o_1);
+  if (TAG(o_2) != (ARRAY | BYTETYPE)) return OPD_ERR;
+  data = (char*) VALUE_PTR(o_2);
+  if (ARRAY_SIZE(o_2) > (1 << (8*sizeof(short)-1))) return RNG_CHK;
+  data_len = ARRAY_SIZE(o_2);
   if (TAG(o_3) != (ARRAY | BYTETYPE)) return OPD_ERR;
-  data = (char*) VALUE_PTR(o_3);
+  name = (char*) VALUE_PTR(o_3);
   if (ARRAY_SIZE(o_3) > (1 << (8*sizeof(short)-1))) return RNG_CHK;
-  data_len = ARRAY_SIZE(o_3);
-  if (TAG(o_4) != (ARRAY | BYTETYPE)) return OPD_ERR;
-  name = (char*) VALUE_PTR(o_4);
-  if (ARRAY_SIZE(o_4) > (1 << (8*sizeof(short)-1))) return RNG_CHK;
-  name_len = ARRAY_SIZE(o_4);
+  name_len = ARRAY_SIZE(o_3);
 
   if (! HXSecurityQueryExtension(dvtdisplay, &maj_ver, &min_ver))
     return X_SEC_MISS;
@@ -1180,8 +1156,7 @@ P op_xauthgen(void)
 
   attr.trust_level = trusted 
     ? XSecurityClientTrusted : XSecurityClientUntrusted;
-  attr.timeout = timeout;
-  eventmask = XSecurityTrustLevel|(timeout>0 ? XSecurityTimeout : 0);
+  eventmask = XSecurityTrustLevel;
   
   if (! (authout = HXSecurityGenerateAuthorization(dvtdisplay, authin,
 						   eventmask, &attr, &id))) {
@@ -1202,10 +1177,9 @@ P op_xauthgen(void)
   FREEvm += FRAMEBYTES + DALIGN(authout->data_length);
   oldfreevm = FREEvm;
 
-  TAG(o_2) = (NUM | LONGBIGTYPE);
-  LONGBIG_VAL(o_2) = id;
-  moveframe(dataf, o_3);
-  FREEopds = o_1;
+  TAG(o_1) = (NUM | LONGBIGTYPE);
+  LONGBIG_VAL(o_1) = id;
+  moveframe(dataf, o_2);
 
  RET:
   if (authin) XSecurityFreeXauth(authin);
@@ -1215,15 +1189,15 @@ P op_xauthgen(void)
 #endif
 }
   
-/*----------------------------------------------- xauth
+/*----------------------------------------------- Xauth
 
    -- | bool
 
-  - reports whether xauth is available (if not, xauth operators
+  - reports whether Xauth is available (if not, Xauth operators
     will return the error X_SEC_LIB)
 */
 
-P op_xauth(void)
+P op_Xauth(void)
 {
   if (o1 >= CEILopds) return OPDS_OVF;
   TAG(o1) = BOOL; ATTR(o1) = 0;

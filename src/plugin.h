@@ -46,11 +46,6 @@ P wrap_readcode(const char* file);
 #define PLUGIN_JOIN(name1,name2) PREPLUGIN_JOIN(name1,name2)
 #define PREPLUGIN_JOIN(name1,name2) name1##name2
 
-PLUGIN_SCOPE UP ll_type;
-PLUGIN_SCOPE P ll_errc[];
-PLUGIN_SCOPE B* ll_errm[];
-PLUGIN_SCOPE B* ll_export[];
-
 #define RETURN_ERROR(err) return (ll_type | (err))
 
 #define ll_type   EXPORTNAME(ll_type)
@@ -61,6 +56,11 @@ PLUGIN_SCOPE B* ll_export[];
 #define op_libnum EXPORTNAME(op_libnum)
 #define op_INIT_  EXPORTNAME(op_INIT_)
 #define op_FINI_  EXPORTNAME(op_FINI_)
+
+PLUGIN_SCOPE UP ll_type;
+PLUGIN_SCOPE P ll_errc[];
+PLUGIN_SCOPE B* ll_errm[];
+PLUGIN_SCOPE B* ll_export[];
 
 P op_hi(void);
 P op_libnum(void);
@@ -83,22 +83,25 @@ extern B buffernameframe[FRAMEBYTES];
     moveframe(newframe, OPAQUE_MEM(frame, nameframe));	\
   } while (0)
 
+#define OPAQUE_BUFFER_GET(frame) OPAQUE_MEM(frame, buffernameframe)
+
+
 #define OPAQUE_MEM_SET_NR(frame, nameframe, newframe) do {	\
     ATTR(newframe) &= ~READONLY;                            \
     moveframe(newframe, OPAQUE_MEM(frame, nameframe));      \
   } while (0)
   
-#define MAKE_OPAQUE_DICT(n, d, ...)											\
-	(make_opaque_frame(n, d, opaquename, __VA_ARGS__, NULL))
+#define MAKE_OPAQUE_DICT(n, ...)					\
+  (make_opaque_frame(n, opaquename, __VA_ARGS__, NULL))
 
 // frame must be removed from the stack before call
-#define KILL_OPAQUE(frame) do {													\
-	P ret;																					      \
-	if (o1 >= CEILopds) return OPDS_OVF;									\
-	moveframe(OPAQUE_MEM(frame, saveboxname), o1);				\
-	FREEopds = o2;																				\
-	if ((ret = op_restore()) != OK) return ret;						\
-} while (0)
+#define KILL_OPAQUE(frame) do {						\
+    P ret;								\
+    if (o1 >= CEILopds) return OPDS_OVF;				\
+    moveframe(OPAQUE_MEM(frame, saveboxname), o1);			\
+    FREEopds = o2;							\
+    if ((ret = op_restore()) != OK) return ret;				\
+  } while (0)
 
 #define PLUGIN_INTRO(version) PLUGIN_INTRO_(version, PLUGIN_NAME)
 #define PLUGIN_INTRO_(version, name)                 \
@@ -106,7 +109,7 @@ extern B buffernameframe[FRAMEBYTES];
   P op_hi(void) {return wrap_hi(#name " V" #version);} \
   P op_libnum(void) {return wrap_libnum(ll_type);}
 
-#define PLUGIN_OP(name) #name, (B*) op_##name
+#define PLUGIN_OP(name) (B*) #name, (B*) op_##name
 
 #define PLUGIN_OPS PLUGIN_OP(hi), PLUGIN_OP(libnum)
 

@@ -577,11 +577,11 @@ P thread_matmul(UP id, const void* global,
                 void* local __attribute__ ((__unused__))) {
   const matmult* restrict m = (const matmult*) global;
   UP n = m->perthread + (thread_max() == id ? m->leftover : 0);
-  P i_ = m->perthread*id;
-  P i, j;
+  UP i_ = m->perthread*id;
+  UP i, j;
 
   for (i = i_; i < i_ + n; i++)
-    for (j = 0; j < m->Ncolc; j++)
+    for (j = 0; j < (UP)m->Ncolc; j++)
       MATMUL_INNER(m->Ncola, m->ap, m->bp, m->cp);
   
   return OK;
@@ -590,7 +590,7 @@ P thread_matmul(UP id, const void* global,
 
 P op_matmul(void)
 {
-  P Nrowa, Nrowb, Nrowc, Ncola , Ncolb, Ncolc, i, j, k;
+  UP Nrowa, Nrowb, Nrowc, Ncola , Ncolb, Ncolc, i, j, k;
   B *fp;
   D **p, **ap, **bp, **cp;
 #if ENABLE_THREADS
@@ -614,7 +614,7 @@ P op_matmul(void)
   for (k=0; k<Nrowc; k++) {
     if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
     if (Ncolc == 0) Ncolc = ARRAY_SIZE(fp);
-    else if (ARRAY_SIZE(fp) != Ncolc) return RNG_CHK;
+    else if ((UP)ARRAY_SIZE(fp) != Ncolc) return RNG_CHK;
     *(p++) = ((D *)VALUE_BASE(fp));
     fp += FRAMEBYTES;
   }
@@ -625,7 +625,7 @@ P op_matmul(void)
   for (k=0; k<Nrowa; k++) { 
     if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
     if (Ncola == 0) Ncola = ARRAY_SIZE(fp);
-    else if (ARRAY_SIZE(fp) != Ncola) return RNG_CHK;
+    else if ((UP)ARRAY_SIZE(fp) != Ncola) return RNG_CHK;
     *(p++) = ((D *)VALUE_BASE(fp));
     fp += FRAMEBYTES;
   }
@@ -636,7 +636,7 @@ P op_matmul(void)
   for (k=0; k<Nrowb; k++) { 
     if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
     if (Ncolb == 0) Ncolb = ARRAY_SIZE(fp);
-    else if (ARRAY_SIZE(fp) != Ncolb) return RNG_CHK;
+    else if ((UP)ARRAY_SIZE(fp) != Ncolb) return RNG_CHK;
     *(p++) = ((D *)VALUE_BASE(fp));
     fp += FRAMEBYTES;
   }
@@ -709,7 +709,7 @@ P thread_mattranspose(UP id,
 
 P op_mattranspose(void)
 {
-  P Nrowa, Nrowb, Ncola , Ncolb, i, k;
+  UP Nrowa, Nrowb, Ncola , Ncolb, i, k;
   B *fp;
   D **p, **ap, **bp;
 #if ENABLE_THREADS
@@ -730,7 +730,7 @@ P op_mattranspose(void)
   for (k=0; k<Nrowb; k++) {
     if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
     if (Ncolb == 0) Ncolb = ARRAY_SIZE(fp);
-    else if (ARRAY_SIZE(fp) != Ncolb) return RNG_CHK;
+    else if ((UP)ARRAY_SIZE(fp) != Ncolb) return RNG_CHK;
     *(p++) = ((D *)VALUE_BASE(fp));
     fp += FRAMEBYTES;
   }
@@ -741,7 +741,7 @@ P op_mattranspose(void)
   for (k=0; k<Nrowa; k++) { 
     if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
     if (Ncola == 0)  Ncola = ARRAY_SIZE(fp);
-    else if (ARRAY_SIZE(fp) != Ncola) return RNG_CHK;
+    else if ((UP)ARRAY_SIZE(fp) != Ncola) return RNG_CHK;
     *(p++) = ((D *)VALUE_BASE(fp));
     fp += FRAMEBYTES;
   }
@@ -813,7 +813,7 @@ P thread_matvecmul(UP id,
 
 P op_matvecmul(void)
 {
-  P Nrowa, Nrowb, Nrowc, Ncola, i, k;
+  UP Nrowa, Nrowb, Nrowc, Ncola, i, k;
   B *fp;
   D **p, **ap, *bp, *cp;
 #if ENABLE_THREADS
@@ -837,7 +837,7 @@ P op_matvecmul(void)
   for (k=0; k<Nrowa; k++)  {
     if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
     if (Ncola == 0) Ncola = ARRAY_SIZE(fp);
-    else if (ARRAY_SIZE(fp) != Ncola) return RNG_CHK;
+    else if ((UP)ARRAY_SIZE(fp) != Ncola) return RNG_CHK;
     *(p++) = ((D *)VALUE_BASE(fp));
     fp += FRAMEBYTES;
   }

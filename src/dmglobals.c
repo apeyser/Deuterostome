@@ -14,6 +14,7 @@ B* FREEvm;
 B* CEILvm;
 B* TOPvm;
 B* errsource;
+B errorframe[FRAMEBYTES];
 
 B locked = FALSE;
 B serialized = FALSE;
@@ -23,8 +24,9 @@ BOOLEAN timeout;             /* for I/O operations          */
 BOOLEAN abortflag;
 BOOLEAN numovf;             /* FPU overflow status            */
 BOOLEAN tinymemory;
-P recsocket;
-P consolesocket;
+P recsocket = -1;
+P maxsocket = 0;            // maxsocket = max(socketfd)+1
+P consolesocket = PINF;
 fd_set sock_fds;            /* active sockets                 */
 
 const char* startup_dir; // setup by makefile in main
@@ -35,7 +37,9 @@ B* startup_dir_frame; // points the frame holding ^^^, at the bottom of the vm
 B* home_dir_frame; //points to the frame holding $HOME
 B* plugin_dir_frame; //points to the frame holding the plugindir
 B* conf_dir_frame; //points to the frame holding confdir
-
+B* myname_frame; //points to the frame holding my hostname
+B* myfqdn_frame; //points to the frame holding my fully qualified domain name
+B* myxname_frame; //points to the frame buffering the DISPLAY name
 
 /*---------------------------- ASCII character classification table
 
@@ -105,10 +109,4 @@ UW ascii[128] = {
 
 #if defined _WIN32 && defined DLL_EXPORT
 char libDM_is_dll(void) {return 1;}
-#endif
-
-#if ! DM_X_DISPLAY_MISSING
-#include "xhack.h"
-jmp_buf xhack_buf;
-char xhack_jmpd = 0;
 #endif

@@ -256,7 +256,7 @@ P op_dict(void)
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != NUM) return OPD_CLA;
   if (!VALUE(o_1,&n)) return UNDF_VAL;
-  if (n <= 0 || n >= L32MAX) return RNG_CHK;
+  if (n < 0 || n >= L32MAX) return RNG_CHK;
   if ((dict = makedict((L32) n)) == (B *)(-1L)) return VM_OVF;
   moveframe(dict - FRAMEBYTES,o_1);
   return OK;

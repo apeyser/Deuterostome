@@ -66,8 +66,11 @@ P op_length(void)
       n = (DICT_TABHASH(dict) - DICT_ENTRIES(dict))/ENTRYBYTES; 
       break;
     
-    case BOX: 
-      n = BOX_NB(o_1); 
+    case BOX:
+      if (SBOX_CAP(VALUE_PTR(o_1)))
+	n = SBOX_CAP(VALUE_PTR(o_1))-VALUE_PTR(o_1);
+      else
+	n = FREEvm - VALUE_PTR(o_1);
       break;
 
     default: 
@@ -153,7 +156,7 @@ P op_fax(void)
 /*--------------------------------------------- merge
     dest_dict src_dict | dest_dict
 
- - accepts any combination of internal/external dictionaries
+ - accepts any combination of dictionaries
  - acts like 'put' operator with all entries of the source
 */
 

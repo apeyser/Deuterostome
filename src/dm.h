@@ -30,6 +30,8 @@
 #include "config.h"
 #endif
 
+#include <features.h>
+
 #include "basic-defs.h"
 
 #if __cplusplus
@@ -61,6 +63,21 @@ extern "C" {
                          + __GNUC_MINOR__ * 100 \
                          + __GNUC_PATCHLEVEL__)
 #endif
+
+#if DM_DISABLE_XDISPLAY
+
+#ifdef DM_X_DISPLAY_MISSING
+#undef DM_X_DISPLAY_MISSING
+#endif //def DM_X_DISPLAY_MISSING
+
+#ifdef X_DISPLAY_MISSING
+#undef X_DISPLAY_MISSING
+#endif //def X_DISPLAY_MISSING
+
+#define DM_X_DISPLAY_MISSING 1
+#define X_DISPLAY_MISSING 1
+
+#endif //DM_DISABLE_XDISPLAY
 
 // Need to be here because we define things such as x1
 #if ! DM_X_DISPLAY_MISSING
@@ -301,108 +318,98 @@ extern "C" {
 #define OPDEFBYTES            (2*sizeof(P))
 
 /*---------------------------------------- save box */
-#define SBOX_FLAGS(box)       (*(P *)  (box))
-#define SBOX_DATA(box)        ( (P)    PF_PTR(box,1))
-#define SBOX_CAP(box)         (*(B **) PF_PTR(box,3))
-
-#define SBOX_FLAGS_CLEANUP    ((UP) 0x01)
-#define SBOX_DATA_SIZE        (2*PACK_FRAME)
-#define SBOXBYTES             DALIGN(4*PACK_FRAME)
+#define SBOXBYTES             DALIGN(1*PACK_FRAME)
+#define SBOX_CAP(box)         (*(B **) PF_PTR(box,0))
 
 /*--------------------------------------------- Internal message codes */
 
-#define OK          0x00000000L /* o.k.                                  */
-#define DONE        0x00000001L /* you got it                            */
-#define TIMER       0x00000002L /*                                       */
-#define WAIT        0x00000003L /*                                       */
-#define MORE        0x00000004L /*                                       */
-#define ABORT       0x00000005L /* ABORT signal sent from console        */
-#define QUIT        0x00000006L /*                                       */
+#define OK          (P)0x00000000L /* o.k.                                  */
+#define DONE        (P)0x00000001L /* you got it                            */
+#define TIMER       (P)0x00000002L /*                                       */
+#define WAIT        (P)0x00000003L /*                                       */
+#define MORE        (P)0x00000004L /*                                       */
+#define ABORT       (P)0x00000005L /* ABORT signal sent from console        */
+#define QUIT        (P)0x00000006L /*                                       */
 
-#define CORR_OBJ    0x00000101L /* corrupted object                      */
-#define LOST_CONN   0x00000102L /* network connection lost               */
+#define CORR_OBJ    (P)0x00000101L /* corrupted object                      */
+#define LOST_CONN   (P)0x00000102L /* network connection lost               */
 
-#define VM_OVF      0x00000200L /* VM overflow                           */
-#define OPDS_OVF    0x00000201L /* operand stack overflow                */
-#define EXECS_OVF   0x00000202L /* execution stack overflow              */
-#define DICTS_OVF   0x00000203L /* dictionary stack overflow             */
-#define OPDS_UNF    0x00000204L /* operand stack underflow               */
-#define DICTS_UNF   0x00000205L /* dictionary stack underflow            */
-#define EXECS_UNF   0x00000206L /* execution stack underflow             */
-#define INV_EXT     0x00000207L /* invalid exit                          */
-#define INV_STOP    0x00000208L /* invalid stop                          */
-#define EXECS_COR   0x00000209L /* execution stack corrupted             */
-#define SAVE_OVF    0x0000020AL /* save stack overflow                   */
-#define INV_REST    0x0000020BL /* invalid restore                       */
-#define SAVE_UNF    0x0000020DL /* save stack underflow                  */
-#define ILL_OPAQUE  0x0000020EL /* Opaque dict type mismatch             */
-#define FOLD_OPAQUE 0x0000020FL /* Illegal attempt to box opaque object  */
+#define VM_OVF      (P)0x00000200L /* VM overflow                           */
+#define OPDS_OVF    (P)0x00000201L /* operand stack overflow                */
+#define EXECS_OVF   (P)0x00000202L /* execution stack overflow              */
+#define DICTS_OVF   (P)0x00000203L /* dictionary stack overflow             */
+#define OPDS_UNF    (P)0x00000204L /* operand stack underflow               */
+#define DICTS_UNF   (P)0x00000205L /* dictionary stack underflow            */
+#define EXECS_UNF   (P)0x00000206L /* execution stack underflow             */
+#define INV_EXT     (P)0x00000207L /* invalid exit                          */
+#define INV_STOP    (P)0x00000208L /* invalid stop                          */
+#define EXECS_COR   (P)0x00000209L /* execution stack corrupted             */
+#define INV_REST    (P)0x0000020BL /* invalid restore                       */
+#define ILL_OPAQUE  (P)0x0000020EL /* Opaque dict type mismatch             */
+#define FOLD_OPAQUE (P)0x0000020FL /* Illegal attempt to box opaque object  */
 
-#define VMR_ERR     0x00000210L /* couldn't allocate memory              */
-#define VMR_STATE   0x00000211L /* vm already tiny                       */
-#define KILL_SOCKS  0x00000212L /* dvt must kill all non-server socks    */
-#define MEM_OVF     0x00000213L /* failed memory allocation              */
-#define CLOCK_ERR   0x00000214L /* failed to get epoch                  */
+#define VMR_ERR     (P)0x00000210L /* couldn't allocate memory              */
+#define VMR_STATE   (P)0x00000211L /* vm already tiny                       */
+#define KILL_SOCKS  (P)0x00000212L /* dvt must kill all non-server socks    */
+#define MEM_OVF     (P)0x00000213L /* failed memory allocation              */
+#define CLOCK_ERR   (P)0x00000214L /* failed to get epoch                   */
+#define DEAD_SOCK   (P)0x00000215L /* socket died - no special handler      */
 
-#define BAD_TOK     0x00000300L /* bad D token in source string          */
-#define BAD_ASC     0x00000301L /* bad ASCII character in source string  */
-#define ARR_CLO     0x00000302L /* unmatched array closure               */
-#define CLA_ARR     0x00000303L /* illegal class in array                */
-#define PRO_CLO     0x00000304L /* unmatched procedure closure           */
+#define BAD_TOK     (P)0x00000300L /* bad D token in source string          */
+#define BAD_ASC     (P)0x00000301L /* bad ASCII character in source string  */
+#define ARR_CLO     (P)0x00000302L /* unmatched array closure               */
+#define CLA_ARR     (P)0x00000303L /* illegal class in array                */
+#define PRO_CLO     (P)0x00000304L /* unmatched procedure closure           */
 
-#define OPD_TYP     0x00000400L /* illegal operand type                  */
-#define OPD_CLA     0x00000401L /* illegal operand class                 */
-#define RNG_CHK     0x00000402L /* range check error                     */
-#define OPD_ATR     0x00000403L /* illegal operand attribute             */
-#define UNDF        0x00000404L /* undefined name                        */
-#define OPD_ERR     0x00000405L /* wrong operand class or type           */
-#define DICT_ATR    0x00000406L /* write attempt in read-only dictionary */
-#define DICT_OVF    0x00000407L /* dictionary overflow                   */
-#define DICT_USED   0x00000408L /* copying into used dictionary          */
-#define UNDF_VAL    0x00000409L /* using undefined number (NAN)          */
-#define DIR_NOSUCH  0x00000501L /* no such directory/volume              */
+#define OPD_TYP     (P)0x00000400L /* illegal operand type                  */
+#define OPD_CLA     (P)0x00000401L /* illegal operand class                 */
+#define RNG_CHK     (P)0x00000402L /* range check error                     */
+#define OPD_ATR     (P)0x00000403L /* illegal operand attribute             */
+#define UNDF        (P)0x00000404L /* undefined name                        */
+#define OPD_ERR     (P)0x00000405L /* wrong operand class or type           */
+#define DICT_ATR    (P)0x00000406L /* write attempt in read-only dictionary */
+#define DICT_OVF    (P)0x00000407L /* dictionary overflow                   */
+#define DICT_USED   (P)0x00000408L /* copying into used dictionary          */
+#define UNDF_VAL    (P)0x00000409L /* using undefined number (NAN)          */
+#define DIR_NOSUCH  (P)0x00000501L /* no such directory/volume              */
 
-#define CORR_OP     0x00000700L /* OP: operator array is corrupted       */
-#define BADBOX      0x00000701L /* file does not hold a box              */
-#define BAD_MSG     0x00000703L /* bad message received via network      */
-#define NOSYSTEM    0x00000704L /* 'system' call failed                  */
-#define INV_MSG     0x00000705L /* operand constitutes invalid message   */
-#define NOT_HOST    0x00000706L /* hostname not in hosts file            */
-#define BAD_FMT     0x00000707L /* message not in native format          */
-#define LONG_OVF    0x00000708L /* 64 bit long doesn't fit in 32 bit long*/
+#define BADBOX      (P)0x00000701L /* file does not hold a box              */
+#define BAD_MSG     (P)0x00000703L /* bad message received via network      */
+#define NOSYSTEM    (P)0x00000704L /* 'system' call failed                  */
+#define INV_MSG     (P)0x00000705L /* operand constitutes invalid message   */
+#define BAD_FMT     (P)0x00000707L /* message not in native format          */
+#define LONG_OVF    (P)0x00000708L /* 64 bit long doesn't fit in 32 bit long*/
 
-#define LIB_LOAD    0x00000807L /* unable to dlload                      */
-#define LIB_EXPORT  0x00000808L /* unable to find object in lib          */
-#define LIB_LINK    0x00000809L /* lib has not been loaded               */
-#define LIB_ADD     0x0000090AL /* unable to add op to lib dict          */
-#define LIB_LOADED  0x0000090BL /* lib already loaded                    */
-#define LIB_OVF     0x0000090CL /* malloc in lib overflowed              */
-#define LIB_MERGE   0x0000090DL /* out of space in sysdict for merge     */
-#define LIB_INIT    0x0000090EL /* __init failed for lib */
-#define NOPLUGINS   0x0000090FL /* compiled without plugins */
+#define LIB_LOAD    (P)0x00000807L /* unable to dlload                      */
+#define LIB_EXPORT  (P)0x00000808L /* unable to find object in lib          */
+#define LIB_LINK    (P)0x00000809L /* lib has not been loaded               */
+#define LIB_ADD     (P)0x0000090AL /* unable to add op to lib dict          */
+#define LIB_LOADED  (P)0x0000090BL /* lib already loaded                    */
+#define LIB_OVF     (P)0x0000090CL /* malloc in lib overflowed              */
+#define LIB_MERGE   (P)0x0000090DL /* out of space in sysdict for merge     */
+#define LIB_INIT    (P)0x0000090EL /* __init failed for lib */
 
-#define BAD_ARR     0x00000B00L /* dmnuminc debug error */
-#define SBOX_SET    0x00000B01L /* box already has a cleanup */		
+#define BAD_ARR     (P)0x00000B00L /* dmnuminc debug error */
 
 #if DM_ENABLE_REGEX		
-#define REGEX_BADPAT   0x00000C01L /* Invalid regular expression */
-#define REGEX_ECOLLATE 0x00000C02L /* Invalid collating element */
-#define REGEX_ECTYPE   0x00000C03L /* Invalid character class */
-#define REGEX_EESCAPE  0x00000C04L /* `\' applied to unescapable character */
-#define REGEX_ESUBREG  0x00000C05L /* invalid backreference number */
-#define REGEX_EBRACK   0x00000C06L /* brackets `[]' not balanced*/
-#define REGEX_EPAREN   0x00000C07L /* paranthesis `()' not balanced */
-#define REGEX_EBRACE   0x00000C08L /* braces `{}' not balanced */
-#define REGEX_BADBR    0x00000C09L /* invalid repetition count(s) in `{}' */
-#define REGEX_ERANGE   0x00000C0AL /* invalid character rangin in `[]' */
-#define REGEX_ESPACE   0x00000C0BL /* ran out of memory */
-#define REGEX_BADRPT   0x00000C0CL /* `?', `*', or `+' operand invalid */
-#define REGEX_UNKNOWN  0x00000C0DL /* Unknown error */
+#define REGEX_BADPAT   (P)0x00000C01L /* Invalid regular expression */
+#define REGEX_ECOLLATE (P)0x00000C02L /* Invalid collating element */
+#define REGEX_ECTYPE   (P)0x00000C03L /* Invalid character class */
+#define REGEX_EESCAPE  (P)0x00000C04L /* `\' applied to unescapable character */
+#define REGEX_ESUBREG  (P)0x00000C05L /* invalid backreference number */
+#define REGEX_EBRACK   (P)0x00000C06L /* brackets `[]' not balanced*/
+#define REGEX_EPAREN   (P)0x00000C07L /* paranthesis `()' not balanced */
+#define REGEX_EBRACE   (P)0x00000C08L /* braces `{}' not balanced */
+#define REGEX_BADBR    (P)0x00000C09L /* invalid repetition count(s) in `{}' */
+#define REGEX_ERANGE   (P)0x00000C0AL /* invalid character rangin in `[]' */
+#define REGEX_ESPACE   (P)0x00000C0BL /* ran out of memory */
+#define REGEX_BADRPT   (P)0x00000C0CL /* `?', `*', or `+' operand invalid */
+#define REGEX_UNKNOWN  (P)0x00000C0DL /* Unknown error */
 #endif // DM_ENABLE_REGEX
 
-#define MATRIX_ERRS    0x00000D00L /* 0D00:0E00-1 for errors in matrix.h */
+#define MATRIX_ERRS    (P)0x00000D00L /* 0D00:0E00-1 for errors in matrix.h */
 
-#define PLUGIN_ERRS    0x00000E00L /* 0E00L:0F00-1 for errors in plugin.h */
+#define PLUGIN_ERRS    (P)0x00000E00L /* 0E00L:0F00-1 for errors in plugin.h */
 
 /* compare results */
 
@@ -427,6 +434,7 @@ DLL_SCOPE B* CEILvm;
 DLL_SCOPE B* TOPvm;
 
 DLL_SCOPE B* errsource;
+DLL_SCOPE B errorframe[FRAMEBYTES];
 
 DLL_SCOPE B locked;
 DLL_SCOPE B serialized;
@@ -437,6 +445,7 @@ DLL_SCOPE BOOLEAN abortflag;
 DLL_SCOPE BOOLEAN numovf;             /* FPU overflow status            */
 DLL_SCOPE BOOLEAN tinymemory;
 DLL_SCOPE P recsocket;
+DLL_SCOPE P maxsocket;
 DLL_SCOPE P consolesocket;
 DLL_SCOPE fd_set sock_fds;            /* active sockets                 */
 DLL_SCOPE _dm_const char* startup_dir; // setup by makefile,
@@ -447,6 +456,10 @@ DLL_SCOPE B* startup_dir_frame; // points the frame holding ^^^,
 DLL_SCOPE B* home_dir_frame; //points to the frame holding $HOME
 DLL_SCOPE B* plugin_dir_frame; //points to the frame holding plugindir
 DLL_SCOPE B* conf_dir_frame; //points to frame holding confdir
+DLL_SCOPE B* myname_frame;  //points to frame holding my hostname
+DLL_SCOPE B* myfqdn_frame; // point to frame holding my fully qualified domain name
+DLL_SCOPE B* myxname_frame; //points to the frame buffering the DISPLAY name
+
 DLL_SCOPE UW ascii[];
 
 /*----------------------- operator hands ------------------------------*/
@@ -487,252 +500,253 @@ DLL_SCOPE UW ascii[];
 /*----------------------- function prototypes ------------------------*/
 
 /*--- DM1 */
-P tokenize(B *stringframe);
+DLL_SCOPE P tokenize(B *stringframe);
+
+/*-- dm-conv.c */
+DLL_SCOPE void moveframe(B *source, B *dest);
+DLL_SCOPE void moveframes(B *source, B *dest, P n);
+DLL_SCOPE void moveB(B *source, B *dest, P n);
+DLL_SCOPE void moveW(W *source, W *dest, P n);
+DLL_SCOPE void moveL32(L32 *source, L32 *dest, P n);
+DLL_SCOPE void moveL64(L64 *source, L64 *dest, P n);
+DLL_SCOPE void moveLBIG(LBIG *source, LBIG *dest, P n);
+DLL_SCOPE void moveS(S *source, S *dest, P n);
+DLL_SCOPE void moveD(D *source, D *dest, P n);
 
 /*--- DM2 */
-P wrap_hi(B* hival);
-P wrap_libnum(UP libnum);
-B* nextlib(B* frame);
-B* geterror(P e);
-B *makedict(L32 n);
-void cleardict(B *dict);
-B *makeopdictbase(B *opdefs, P *errc, B **errm, L32 n1);
-B *makeopdict(B *opdefs, P *errc, B **errm);
-void d_reloc(B *dict, P oldd, P newd);
-void d_rreloc(B *dict, P oldd, P newd);
-void makename(B *namestring, B *nameframe);
-void pullname(B *nameframe, B *namestring);
-P compname(B *nameframe1, B *nameframe2);
-BOOLEAN matchname(B *nameframe1, B *nameframe2);		
-void moveframe(B *source, B *dest);
-void moveframes(B *source, B *dest, P n);
-void moveB(B *source, B *dest, P n);
-void moveW(W *source, W *dest, P n);
-void moveL32(L32 *source, L32 *dest, P n);
-void moveL64(L64 *source, L64 *dest, P n);
-void moveLBIG(LBIG *source, LBIG *dest, P n);
-void moveS(S *source, S *dest, P n);
-void moveD(D *source, D *dest, P n);
-B *lookup(B *nameframe, B *dict);
-BOOLEAN insert(B *nameframe, B *dict, B *framedef);
-BOOLEAN mergedict(B *source, B *sink);
-P exec(L32 turns);
-P foldobj(B *frame, P base, W *depth);
-P unfoldobj(B *frame, P base, B isnonnative);
-P foldobj_ext(B* frame, P extra);
-BOOLEAN foldobj_mem(B** base, B** top);
-void foldobj_free(void);
-P deendian_frame(B *frame, B isnonnative);
+DLL_SCOPE P wrap_hi(B* hival);
+DLL_SCOPE P wrap_libnum(UP libnum);
+DLL_SCOPE B* nextlib(B* frame);
+DLL_SCOPE B* geterror(P e);
+DLL_SCOPE B *makedict(L32 n);
+DLL_SCOPE void cleardict(B *dict);
+DLL_SCOPE B *makeopdictbase(B *opdefs, P *errc, B **errm, L32 n1);
+DLL_SCOPE B *makeopdict(B *opdefs, P *errc, B **errm);
+DLL_SCOPE void d_reloc(B *dict, P oldd, P newd);
+DLL_SCOPE void d_rreloc(B *dict, P oldd, P newd);
+DLL_SCOPE void makename(B *namestring, B *nameframe);
+DLL_SCOPE void pullname(B *nameframe, B *namestring);
+DLL_SCOPE P compname(B *nameframe1, B *nameframe2);
+DLL_SCOPE BOOLEAN matchname(B *nameframe1, B *nameframe2);		
+DLL_SCOPE B *lookup(B *nameframe, B *dict);
+DLL_SCOPE BOOLEAN insert(B *nameframe, B *dict, B *framedef);
+DLL_SCOPE BOOLEAN mergedict(B *source, B *sink);
+DLL_SCOPE P exec(L32 turns);
+DLL_SCOPE P foldobj(B *frame, P base, W *depth);
+DLL_SCOPE P unfoldobj(B *frame, P base, B isnonnative);
+DLL_SCOPE P foldobj_ext(B* frame);
+DLL_SCOPE BOOLEAN foldobj_mem(B** base, B** top);
+DLL_SCOPE void foldobj_free(void);
+DLL_SCOPE P deendian_frame(B *frame, B isnonnative);
 //L deendian_array(B* frame, B isnonnative);
 //L deendian_list(B* frame, B isnonnative);
 //L deendian_dict(B* dict, B isnonnative);
 //L deendian_entries(B* doct, B isnonnative);
-void setupdirs(void);
+DLL_SCOPE void setupdirs(void);
 
 /*--- DMNUM */
-void DECODE(B *frame, BOOLEAN fauto, W prec, B *buf);
-B ENCODE(W type, B *string, B *dnum);
-W VALUEBYTES(B type);
-BOOLEAN VALUE(B *frame, LBIG *val);
-BOOLEAN DVALUE(B *frame, D *val);
-W TEST(B *frame);
-W COMPARE(B *frame1, B *frame2);
-void THEARC(B *dframe, B *sframe);
-void MOD(B *dframe, B *sframe);
-void MOVE(B *sframe, B *dframe);
-void ADD(B *dframe, B *sframe);
-void SUB(B *dframe, B *sframe);
-void MUL(B *dframe, B *sframe);
-void DIV(B *dframe, B *sframe);
-void PWR(B *dframe, B *sframe);
-void NEG(B *frame);
-void ABS(B *frame);
-void SQRT(B *frame);
-void EXP(B *frame);
-void LN(B *frame);
-void LG(B *frame);
-void FLOOR(B *frame);
-void CEIL(B *frame);
-void SIN(B *frame);
-void COS(B *frame);
-void TAN(B *frame);
-void ASIN(B *frame);
-void ACOS(B *frame);
-void ATAN(B *frame);
-void DECREMENT(B *frame);
+DLL_SCOPE void DECODE(B *frame, BOOLEAN fauto, W prec, B *buf);
+DLL_SCOPE B ENCODE(W type, B *string, B *dnum);
+DLL_SCOPE W VALUEBYTES(B type);
+DLL_SCOPE BOOLEAN VALUE(B *frame, LBIG *val);
+DLL_SCOPE BOOLEAN DVALUE(B *frame, D *val);
+DLL_SCOPE W TEST(B *frame);
+DLL_SCOPE W COMPARE(B *frame1, B *frame2);
+DLL_SCOPE void THEARC(B *dframe, B *sframe);
+DLL_SCOPE void MOD(B *dframe, B *sframe);
+DLL_SCOPE void MOVE(B *sframe, B *dframe);
+DLL_SCOPE void ADD(B *dframe, B *sframe);
+DLL_SCOPE void SUB(B *dframe, B *sframe);
+DLL_SCOPE void MUL(B *dframe, B *sframe);
+DLL_SCOPE void DIV(B *dframe, B *sframe);
+DLL_SCOPE void PWR(B *dframe, B *sframe);
+DLL_SCOPE void NEG(B *frame);
+DLL_SCOPE void ABS(B *frame);
+DLL_SCOPE void SQRT(B *frame);
+DLL_SCOPE void EXP(B *frame);
+DLL_SCOPE void LN(B *frame);
+DLL_SCOPE void LG(B *frame);
+DLL_SCOPE void FLOOR(B *frame);
+DLL_SCOPE void CEIL(B *frame);
+DLL_SCOPE void SIN(B *frame);
+DLL_SCOPE void COS(B *frame);
+DLL_SCOPE void TAN(B *frame);
+DLL_SCOPE void ASIN(B *frame);
+DLL_SCOPE void ACOS(B *frame);
+DLL_SCOPE void ATAN(B *frame);
+DLL_SCOPE void DECREMENT(B *frame);
 
 /*----------------------- system operators */
-P op_serialize(void);
-P op_lock(void);
-P op_syshi(void);
-P op_syslibnum(void);
-P op_error(void);
-P op_errormessage(void);
-P op_aborted(void);
-P op_abort(void);
-P op_halt(void);
-P op_continue(void);
-P op_quit(void);
-P op_setconsole(void);
-P op_console(void);
-P op_toconsole(void);
-P op_tostderr(void);
-P op_flush(void);
-P op_nextevent(void);
-P op_vmresize(void);
-P op_killsockets(void);
-P op_getstartupdir(void);
-P op_getconfdir(void);
-P op_gethomedir(void);
-P op_getmyport(void);
+DLL_SCOPE P op_serialize(void);
+DLL_SCOPE P op_lock(void);
+DLL_SCOPE P op_syshi(void);
+DLL_SCOPE P op_syslibnum(void);
+DLL_SCOPE P op_error(void);
+DLL_SCOPE P op_errormessage(void);
+DLL_SCOPE P op_aborted(void);
+DLL_SCOPE P op_abort(void);
+DLL_SCOPE P op_halt(void);
+DLL_SCOPE P op_continue(void);
+DLL_SCOPE P op_quit(void);
+DLL_SCOPE P op_setconsole(void);
+DLL_SCOPE P op_console(void);
+DLL_SCOPE P op_toconsole(void);
+DLL_SCOPE P op_tostderr(void);
+DLL_SCOPE P op_flush(void);
+DLL_SCOPE P op_nextevent(void);
+DLL_SCOPE P op_vmresize(void);
+DLL_SCOPE P op_killsockets(void);
+DLL_SCOPE P op_getstartupdir(void);
+DLL_SCOPE P op_getconfdir(void);
+DLL_SCOPE P op_gethomedir(void);
+DLL_SCOPE P op_getmyport(void);
 
-P op_pop(void);
-P op_exch(void);
-P op_dup(void);
-P op_copy(void);
-P op_index(void);
-P op_roll(void);
-P op_clear(void);
-P op_count(void);
-P op_cleartomark(void);
-P op_counttomark(void);
+DLL_SCOPE P op_pop(void);
+DLL_SCOPE P op_exch(void);
+DLL_SCOPE P op_dup(void);
+DLL_SCOPE P op_copy(void);
+DLL_SCOPE P op_index(void);
+DLL_SCOPE P op_roll(void);
+DLL_SCOPE P op_clear(void);
+DLL_SCOPE P op_count(void);
+DLL_SCOPE P op_cleartomark(void);
+DLL_SCOPE P op_counttomark(void);
 /*-- dictionary, array, list */
-P op_currentdict(void);
-P op_closelist(void); 
-P op_dict(void);
-P op_cleardict(void);
-P op_array(void);
-P op_list(void);
-P op_used(void);
-P op_length(void); 
-P op_begin(void);
-P op_end(void);
-P op_def(void);
-P op_name(void);
-P op_find(void);
-P op_get(void);
-P op_put(void);
-P op_known(void);
-P op_getinterval(void);
-P op_countdictstack(void);
-P op_dictstack(void);
+DLL_SCOPE P op_currentdict(void);
+DLL_SCOPE P op_closelist(void); 
+DLL_SCOPE P op_dict(void);
+DLL_SCOPE P op_cleardict(void);
+DLL_SCOPE P op_array(void);
+DLL_SCOPE P op_list(void);
+DLL_SCOPE P op_used(void);
+DLL_SCOPE P op_length(void); 
+DLL_SCOPE P op_begin(void);
+DLL_SCOPE P op_end(void);
+DLL_SCOPE P op_def(void);
+DLL_SCOPE P op_name(void);
+DLL_SCOPE P op_find(void);
+DLL_SCOPE P op_get(void);
+DLL_SCOPE P op_put(void);
+DLL_SCOPE P op_known(void);
+DLL_SCOPE P op_getinterval(void);
+DLL_SCOPE P op_countdictstack(void);
+DLL_SCOPE P op_dictstack(void);
 /*-- VM and miscellaneous */
-P op_save(void);
-P op_capsave(void);
-P op_restore(void);
-P op_setcleanup(void);
-P op_vmstatus(void);
-P op_bind(void);
-P op_null(void);
+DLL_SCOPE P op_save(void);
+DLL_SCOPE P op_capsave(void);
+DLL_SCOPE P op_restore(void);
+DLL_SCOPE P op_vmstatus(void);
+DLL_SCOPE P op_bind(void);
+DLL_SCOPE P op_null(void);
 /*-- control */
-P op_start(void);
-P op_exec(void);
-P op_if(void);
-P op_ifelse(void);
-P op_for(void);
-P op_repeat(void);
-P op_loop(void);
-P op_forall(void);
-P op_exit(void);
-P op_stop(void);
-P op_stopped(void);
-P op_countexecstack(void);
-P op_execstack(void);
+DLL_SCOPE P op_start(void);
+DLL_SCOPE P op_exec(void);
+DLL_SCOPE P op_if(void);
+DLL_SCOPE P op_ifelse(void);
+DLL_SCOPE P op_for(void);
+DLL_SCOPE P op_repeat(void);
+DLL_SCOPE P op_loop(void);
+DLL_SCOPE P op_forall(void);
+DLL_SCOPE P op_exit(void);
+DLL_SCOPE P op_stop(void);
+DLL_SCOPE P op_stopped(void);
+DLL_SCOPE P op_countexecstack(void);
+DLL_SCOPE P op_execstack(void);
 /*-- math */
-P op_checkFPU(void);
-P op_neg(void);
-P op_abs(void);
-P op_thearc(void);
-P op_add(void);
-P op_mod(void);
-P op_sub(void);
-P op_mul(void);
-P op_div(void);
-P op_sqrt(void);
-P op_exp(void);
-P op_ln(void);
-P op_lg(void);
-P op_pwr(void);
-P op_cos(void);
-P op_sin(void);
-P op_tan(void);
-P op_atan(void);
-P op_floor(void);
-P op_ceil(void);
-P op_asin(void);
-P op_acos(void);
+DLL_SCOPE P op_checkFPU(void);
+DLL_SCOPE P op_neg(void);
+DLL_SCOPE P op_abs(void);
+DLL_SCOPE P op_thearc(void);
+DLL_SCOPE P op_add(void);
+DLL_SCOPE P op_mod(void);
+DLL_SCOPE P op_sub(void);
+DLL_SCOPE P op_mul(void);
+DLL_SCOPE P op_div(void);
+DLL_SCOPE P op_sqrt(void);
+DLL_SCOPE P op_exp(void);
+DLL_SCOPE P op_ln(void);
+DLL_SCOPE P op_lg(void);
+DLL_SCOPE P op_pwr(void);
+DLL_SCOPE P op_cos(void);
+DLL_SCOPE P op_sin(void);
+DLL_SCOPE P op_tan(void);
+DLL_SCOPE P op_atan(void);
+DLL_SCOPE P op_floor(void);
+DLL_SCOPE P op_ceil(void);
+DLL_SCOPE P op_asin(void);
+DLL_SCOPE P op_acos(void);
 /*-- relational, boolean, bitwise */ 
-P op_eq(void);
-P op_ne(void);
-P op_ge(void);
-P op_gt(void);
-P op_le(void);
-P op_lt(void);
-P op_and(void);
-P op_not(void);
-P op_or(void);
-P op_xor(void);
-P op_bitshift(void);
+DLL_SCOPE P op_eq(void);
+DLL_SCOPE P op_ne(void);
+DLL_SCOPE P op_ge(void);
+DLL_SCOPE P op_gt(void);
+DLL_SCOPE P op_le(void);
+DLL_SCOPE P op_lt(void);
+DLL_SCOPE P op_and(void);
+DLL_SCOPE P op_not(void);
+DLL_SCOPE P op_or(void);
+DLL_SCOPE P op_xor(void);
+DLL_SCOPE P op_bitshift(void);
 /*-- conversion, string, attribute, class ,type */
-P op_class(void);
-P op_type(void);
-P op_readonly(void);
-P op_active(void);
-P op_tilde(void);
-P op_mkread(void);
-P op_mkact(void);
-P op_mkpass(void);
-P op_ctype(void);
-P op_parcel(void);
-P op_text(void);
-P op_number(void);
-P op_token(void);
-P op_search(void);
-P op_anchorsearch(void);
+DLL_SCOPE P op_class(void);
+DLL_SCOPE P op_type(void);
+DLL_SCOPE P op_readonly(void);
+DLL_SCOPE P op_active(void);
+DLL_SCOPE P op_tilde(void);
+DLL_SCOPE P op_mkread(void);
+DLL_SCOPE P op_mkact(void);
+DLL_SCOPE P op_mkpass(void);
+DLL_SCOPE P op_ctype(void);
+DLL_SCOPE P op_parcel(void);
+DLL_SCOPE P op_text(void);
+DLL_SCOPE P op_number(void);
+DLL_SCOPE P op_token(void);
+DLL_SCOPE P op_search(void);
+DLL_SCOPE P op_anchorsearch(void);
 
 /*-- time/date and file access  */
-P op_gettime(void);
-P op_localtime(void);
-P op_getwdir(void);
-P op_setwdir(void);
-P op_writefile(void);
-P op_readfile(void);
-P op_findfiles(void);
-P op_findfile(void);
-P op_readboxfile(void);
-P op_writeboxfile(void); 
-P op_tosystem(void);
-P op_fromsystem(void);
-P op_transcribe(void);
+DLL_SCOPE P op_gettime(void);
+DLL_SCOPE P op_localtime(void);
+DLL_SCOPE P op_getwdir(void);
+DLL_SCOPE P op_setwdir(void);
+DLL_SCOPE P op_writefile(void);
+DLL_SCOPE P op_readfile(void);
+DLL_SCOPE P op_findfiles(void);
+DLL_SCOPE P op_findfile(void);
+DLL_SCOPE P op_readboxfile(void);
+DLL_SCOPE P op_writeboxfile(void); 
+DLL_SCOPE P op_tosystem(void);
+DLL_SCOPE P op_fromsystem(void);
+DLL_SCOPE P op_transcribe(void);
 
 /*-- more big operators.... */
-P op_fax(void);
-P op_merge(void);
-P op_nextobject(void);
-P op_interpolate(void);
-P op_integrateOH(void);
-P op_extrema(void);
-P op_solvetridiag(void);
-P op_integrateOHv(void);
-P op_tile(void);
-P op_ramp(void);
-P op_extract(void);
-P op_dilute(void);
-P op_ran1(void);
-P op_solve_bandmat(void);
-P op_complexFFT(void);
-P op_realFFT(void);
-P op_sineFFT(void);
-P op_decompLU(void);
-P op_backsubLU(void);
-P op_integrateRS(void);
-P op_bandLU(void);
-P op_bandBS(void);
-P op_invertLU(void);
-P op_matmul(void);
-P op_mattranspose(void);
-P op_dilute_add(void);
-P op_matvecmul(void);
+DLL_SCOPE P op_fax(void);
+DLL_SCOPE P op_merge(void);
+DLL_SCOPE P op_nextobject(void);
+DLL_SCOPE P op_interpolate(void);
+DLL_SCOPE P op_integrateOH(void);
+DLL_SCOPE P op_extrema(void);
+DLL_SCOPE P op_solvetridiag(void);
+DLL_SCOPE P op_integrateOHv(void);
+DLL_SCOPE P op_tile(void);
+DLL_SCOPE P op_ramp(void);
+DLL_SCOPE P op_extract(void);
+DLL_SCOPE P op_dilute(void);
+DLL_SCOPE P op_ran1(void);
+DLL_SCOPE P op_solve_bandmat(void);
+DLL_SCOPE P op_complexFFT(void);
+DLL_SCOPE P op_realFFT(void);
+DLL_SCOPE P op_sineFFT(void);
+DLL_SCOPE P op_decompLU(void);
+DLL_SCOPE P op_backsubLU(void);
+DLL_SCOPE P op_integrateRS(void);
+DLL_SCOPE P op_bandLU(void);
+DLL_SCOPE P op_bandBS(void);
+DLL_SCOPE P op_invertLU(void);
+DLL_SCOPE P op_matmul(void);
+DLL_SCOPE P op_mattranspose(void);
+DLL_SCOPE P op_dilute_add(void);
+DLL_SCOPE P op_matvecmul(void);
 
 #define ERRLEN (1000)
 
@@ -740,6 +754,17 @@ P op_matvecmul(void);
 #include "dm-snprintf.h"
 
 #include "dm-types.h"
+DM_INLINE_STATIC BOOLEAN PVALUE(B* frame, P* var) {
+#if DM_HOST_IS_32_BIT
+  LBIG v;
+  if (!VALUE(frame, &v) || v > PMAX || v < -PMAX)
+    return FALSE;
+  *var = (P) v;
+  return TRUE;
+#else
+  return VALUE(frame, var);
+#endif // DM_HOST_IS_32_BIT
+}
 
 #if __cplusplus
 }

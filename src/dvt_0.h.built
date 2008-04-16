@@ -1,54 +1,17 @@
-/*=================== D machine Rev3.0: dnode_0.c =====================
+/*=================== D machine Rev3.0: dvt_0.c =====================
 
-  Include module for dnode.c: operator and error lists of dnode.
+  Include module for dvt.c: operator and error lists of the dvt.
 */
 
-/*--- LL */
-P op_loadlib(void);
-P op_nextlib(void);
-P op_getplugindir(void);
-
-/*--- threads */
-P op_makethreads(void);
-P op_threads(void);
-
-/*--- X op */
-P op_Xconnect(void);
-
-#include "matrix.h"
-#include "dm-convert.h"
-#include "pluginlib.h"
-
 B *sysop[] = {
-  (B*)"lock",        (B*) op_lock,
-  (B*)"serialize",   (B*) op_serialize,
-#if ENABLE_THREADS
-  (B*)"threads",     (B*) op_threads,
-  (B*)"makethreads", (B*) op_makethreads,
-#endif //ENABLE_THREADS
-
-/*-- hi */
-  (B*)"hi",            (B*) op_syshi,
-  (B*)"libnum",        (B*) op_syslibnum,
-  
-/*-- load library */
-  (B*)"loadlib",       (B*) op_loadlib,
-  (B*)"nextlib",       (B*) op_nextlib,
-      
-/*-- dnode specific */
-  (B*)"toconsole",      (B *)op_toconsole,
-  (B*)"tostderr",       (B *)op_tostderr,
-  (B*)"setconsole",     (B *)op_setconsole,
-  (B*)"console",        (B *)op_console,
+/*-- dvt specific */
   (B*)"error",          (B *)op_error,
   (B*)"errormessage",   (B *)op_errormessage,
+  (B*)"aborted",        (B *)op_aborted,
   (B*)"abort",          (B *)op_abort,
-  (B*)"halt",           (B *)op_halt,
-  (B*)"continue",       (B *)op_continue,
-  (B*)"vmresize",       (B *)op_vmresize,
-  (B*)"killsockets",    (B *)op_killsockets,
-  (B*)"getmyport",      (B *)op_getmyport,
-  
+  (B*)"quit",           (B *)op_quit,
+  (B*)"toconsole",      (B *)op_toconsole,
+  (B*)"nextevent",      (B *)op_nextevent,
 /*-- network */
   (B*)"connect",        (B *)op_connect,
   (B*)"disconnect",     (B *)op_disconnect,
@@ -56,13 +19,9 @@ B *sysop[] = {
   (B*)"getsocket",      (B *)op_getsocket,
   (B*)"getmyname",      (B *)op_getmyname,
   (B*)"getmyfqdn",      (B *)op_getmyfqdn,
-  
 /*-- X windows */
   (B*)"Xwindows",       (B *)op_Xwindows,
-  (B*)"Xwindows_",      (B *)op_Xwindows_,
-  (B*)"Xconnect",       (B *)op_Xconnect,
   (B*)"Xdisplayname",   (B *)op_Xdisplayname,
-  (B*)"Xdisconnect",    (B *)op_Xdisconnect,
   (B*)"screensize",     (B *)op_screensize,
   (B*)"makewindow",     (B *)op_makewindow,
   (B*)"deletewindow",   (B *)op_deletewindow,
@@ -75,12 +34,10 @@ B *sysop[] = {
   (B*)"fillrectangle",  (B *)op_fillrectangle,
   (B*)"drawtext",       (B *)op_drawtext,
   (B*)"makewindowtop",  (B *)op_makewindowtop,
-  (B*)"setinputfocus",  (B *)op_setinputfocus,
-  (B*)"xauthrev",       (B *)op_xauthrev,
-  (B*)"xauthset",       (B *)op_xauthset,
-  (B*)"xauthgen",       (B *)op_xauthgen,
-  (B*)"xauth",          (B *)op_xauth,
-
+  (B*)"Xauthrev",       (B *)op_Xauthrev,
+  (B*)"Xauthset",       (B *)op_Xauthset,
+  (B*)"Xauthgen",       (B *)op_Xauthgen,
+  (B*)"Xauth",          (B *)op_Xauth,
 /*-- operand stack */
   (B*)"pop",            (B *)op_pop,
   (B*)"exch",           (B *)op_exch,
@@ -116,7 +73,6 @@ B *sysop[] = {
   (B*)"save",           (B *)op_save,
   (B*)"capsave",        (B *)op_capsave,
   (B*)"restore",        (B *)op_restore,
-  (B*)"setcleanup",     (B *)op_setcleanup,
   (B*)"vmstatus",       (B *)op_vmstatus,
   (B*)"bind",           (B *)op_bind,
   (B*)"null",           (B *)op_null,
@@ -230,76 +186,44 @@ B *sysop[] = {
   (B*)"getstartupdir",  (B *)op_getstartupdir,
   (B*)"getconfdir",     (B *)op_getconfdir,
   (B*)"gethomedir",     (B *)op_gethomedir,
-  (B*)"getplugindir",   (B *)op_getplugindir,
 #if DM_ENABLE_REGEX			
   (B*)"regex",          (B *)op_regex,
   (B*)"regexi",         (B *)op_regexi,
 #endif //DM_ENABLE_REGEX			
-#if BUILD_ATLAS
-  (B*)"matmul_blas",    (B *)op_matmul_blas,
-  (B*)"decompLU_lp",    (B *)op_decompLU_lp,
-  (B*)"backsubLU_lp",   (B *)op_backsubLU_lp,
-  (B*)"invertLU_lp",    (B *)op_invertLU_lp,
-  (B*)"norm2",          (B *)op_norm2,
-  (B*)"matvecmul_blas", (B *)op_matvecmul_blas,
-  (B*)"triangular_solve",(B *)op_triangular_solve,
-  (B*)"givens_blas",    (B *)op_givens_blas,
-  (B*)"rotate_blas",    (B *)op_rotate_blas,
-  (B*)"xerbla_test",    (B *)op_xerbla_test,
-#endif //BUILD_ATLAS
-#if DM_HOST_IS_32_BIT
-  (B*)"readf32",        (B *)op_readf32,
-#endif //DM_HOST_IS_32_BIT
   (B*)"",               (B *)0L, 
-};     
-   
-   
-/*========================== Error Table =================================
+};
 
-This has been expanded in order to accommodate external operator errors.
-'errm' and 'errc' now are arrays of pointers rather than arrays of messages
-or codes. Each pointer denotes an array of messages or codes; the first
-pointer belongs to the basic dnode operator set.
-*/
+/*========================== Error Table =================================*/
+
 
 P syserrc[] = {
-  TIMER,CORR_OBJ,VM_OVF, LOST_CONN,
-  OPDS_OVF, EXECS_OVF, DICTS_OVF, SAVE_OVF,
+  TIMER,CORR_OBJ,LOST_CONN,
+  VM_OVF, OPDS_OVF, EXECS_OVF, DICTS_OVF, SAVE_OVF,
   OPDS_UNF, EXECS_UNF, DICTS_UNF, SAVE_UNF,
   INV_EXT, INV_STOP, EXECS_COR, INV_REST, 
   BAD_TOK, BAD_ASC, ARR_CLO, CLA_ARR, PRO_CLO,
   OPD_CLA, OPD_TYP, OPD_ERR, RNG_CHK, OPD_ATR, UNDF, DICT_ATR,
   DICT_OVF, DICT_USED, UNDF_VAL, DIR_NOSUCH,
   CORR_OP, BADBOX, BAD_MSG, NOSYSTEM, INV_MSG, NOT_HOST, BAD_FMT,
-  LIB_LOAD, LIB_EXPORT, LIB_LINK, LIB_ADD, LIB_LOADED, LIB_OVF, LIB_MERGE,
-  LIB_INIT,
+  LIB_LOAD, LIB_EXPORT, LIB_LINK, LIB_ADD, LIB_LOADED, LIB_OVF,
   NO_XWINDOWS, X_ERR, X_BADFONT, X_BADHOST,
-	VMR_ERR, VMR_STATE, ILL_OPAQUE, FOLD_OPAQUE, NOPLUGINS,
   MEM_OVF, BAD_ARR, SBOX_SET,
 #if DM_ENABLE_REGEX		
   REGEX_BADPAT, REGEX_ECOLLATE, REGEX_ECTYPE, REGEX_EESCAPE,
   REGEX_ESUBREG, REGEX_EBRACK, REGEX_EPAREN, REGEX_EBRACE, REGEX_BADBR,
   REGEX_ERANGE, REGEX_ESPACE, REGEX_BADRPT, REGEX_UNKNOWN,
-#endif // DM_ENABLE_REGEX		
-  MATRIX_UNDEF_CUT,
-  MATRIX_ILLEGAL_CUT,
-  MATRIX_UNDER_CUT,
-  MATRIX_NONMATCH_CUT,
-  MATRIX_NONMATCH_SHAPE,
-  MATRIX_PARAM_ERROR,
-  MATRIX_SINGULAR,
+#endif // DM_ENABLE_REGEX
   CLOCK_ERR, LONG_OVF,
-  MATRIX_INT_ERR,
-  NO_PLUGINS,
   X_SEC_MISS, X_SEC_GEN, X_SEC_REV, X_SEC_LIB,
+  DEAD_SOCK,
   0L
 };
 
-B* syserrm[] = {
+B *syserrm[] = {
   (B*)"** Timeout",
   (B*)"** Corrupted object",
-  (B*)"** VM overflow",
   (B*)"** Lost connection",
+  (B*)"** VM overflow",
   (B*)"** Operand stack overflow",
   (B*)"** Execution stack overflow",
   (B*)"** Dictionary stack overflow",
@@ -333,26 +257,19 @@ B* syserrm[] = {
   (B*)"** Bad message received on network",
   (B*)"** 'System' call to Linux failed",
   (B*)"** Invalid message format",
-  (B*)"** Hostname not in 'hosts' file",
+  (B*)"** Not in host file",
   (B*)"** Box not in native format",
-  (B*)"** Unable to load dynamically linked shared library",
-  (B*)"** Unable to find object in shared library",
+  (B*)"** Unable to load operator library",
+  (B*)"** Cannot find operator in library",
   (B*)"** Library has not been loaded",
-  (B*)"** Unable to add operation to library dictionary",
-  (B*)"** Library already loaded",
-  (B*)"** Overflow in malloc while loading library",
-  (B*)"** Unable to merge library into sysdict",
-  (B*)"** Unable to initialize loaded library",
+  (B*)"** Cannot add operator to library dictionary",
+  (B*)"** Library exists already",
+  (B*)"** Insufficient memory for library",
   (B*)"** X windows unavailable",
   (B*)"** Error in X windows",
   (B*)"** Bad X windows font",
   (B*)"** Cannot connect to X server",
-	(B*)"** Cannot allocate D memory",
-	(B*)"** Memory already minimized",
-	(B*)"** Opaque dict type mismatch",
-	(B*)"** Illegal attempt to fold opaque object",
-	(B*)"** Compiled without plugin support",
-	(B*)"** Memory exhausted",
+  (B*)"** Memory exhausted",
   (B*)"** dmnuminc debug error",
   (B*)"** Box already has a cleanup handler",
 #if DM_ENABLE_REGEX
@@ -369,25 +286,12 @@ B* syserrm[] = {
   (B*)"Regex Error: ran out of memory",
   (B*)"Regex Error: `?', `*', or `+' operand invalid",
   (B*)"Regex Error: Unknown error",
-#endif // DM_ENABLE_REGEX
-  (B*)"Matrix Error: undefined value in cut",
-  (B*)"Matrix Error: cut dimension less than 1",
-  (B*)"Matrix Error: number of cut dimensions too small",
-  (B*)"Matrix Error: array too small for cut",
-  (B*)"Matrix Error: matrix operand dimensions don't match",
-  (B*)"Matrix Error: parameters to clapack illegal",
-  (B*)"Matrix Error: lu matrix is singular",
+#endif //DM_ENABLE_REGEX
   (B*)"** Error accessing clock",
   (B*)"** Error loading 64 bit integer into 32 bit machine",
-  (B*)"Matrix Error: Internal Error - message on stack",
-  (B*)"Plugin Error: Compiled without plugin support",
-  (B*)"** X Security Extension missing",
+  (B*)"** X Security Extension missing on server",
   (B*)"** X Security Extension unable to generate",
   (B*)"** X Security Extension unable to revoke",
-  (B*)"** X Security Extension library missing",
+  (B*)"** X Security Extension client library missing",
+  (B*)"** Dead socket connection",
 };
-
-// original directory for vmresize
-char* original_dir;
-P serverport;
-B hostname[256];

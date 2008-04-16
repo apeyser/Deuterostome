@@ -55,12 +55,11 @@ P op_drawsymbols(void);
 P op_fillrectangle(void);
 P op_drawtext(void);
 P op_makewindowtop(void);
-P op_setinputfocus(void);
 
-P op_xauthrev(void);
-P op_xauthset(void);
-P op_xauthgen(void);
-P op_xauth(void);
+P op_Xauthrev(void);
+P op_Xauthset(void);
+P op_Xauthgen(void);
+P op_Xauth(void);
 
 #endif
 

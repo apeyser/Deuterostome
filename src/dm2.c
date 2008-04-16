@@ -12,11 +12,15 @@
 
 #include "dm.h"
 #include "paths.h"
+#include "dm-swapbytes.h"
+
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
+#include <netdb.h>
 
 static char sys_hi[] = "System Operators V" PACKAGE_VERSION;
 P op_syshi(void)   {return wrap_hi((B*)sys_hi);}
@@ -108,8 +112,7 @@ B* geterror(P e)
         if (e == errc[i]) {m = errm[i]; break;}
 
     return m;
-}    
-
+}
 
 /*----------------------------------- make empty dictionary 
 
@@ -334,7 +337,7 @@ static B sb[NAMEBYTES];
 
 void makename(B *namestring, B *nameframe)
 {
-  W i; B c;
+  UW i; B c;
   UW* n; B *j;
   /* clear string buffer, copy string converting it to six-bit code,
      truncate after NAMEBYTES bytes
@@ -374,7 +377,7 @@ void pullname(B *nameframe, B *namestring)
   UW w0, w1;
   UW* n=((UW*)nameframe)+1;
   B* j;
-  int i;
+  UW i;
 
   /* recover string under checksum, merge into top longword */
   w0 = 0;
@@ -424,7 +427,7 @@ void pullname(B *nameframe, B *namestring)
 
 P compname(B* nameframe1, B* nameframe2) 
 {
-  int i; W r; W* n1; W* n2;
+  UW i; W r; W* n1; W* n2;
   n1 = ((W*) nameframe1)+1; n2 = ((W*) nameframe2)+1;
   for (i = 0; i < (FRAMEBYTES/sizeof(UW)-1)/3; ++i) 
     if ((r = n1[3*i] - n2[3*i])
@@ -442,70 +445,6 @@ P compname(B* nameframe1, B* nameframe2)
 BOOLEAN matchname(B *nameframe1, B *nameframe2)
 {
   return compname(nameframe1, nameframe2) == 0;
-}
-
-/* ======================== move frame(s) =============================
-  NOTA BENE: this implies FRAMEBYTES = n*8 for sake of speed!
-*/
-
-void moveframe(B *source, B *dest)
-{
-  int i;
-  int64_t *s,*d;
-
-  s = (int64_t *)source; d = (int64_t *)dest;
-  for (i=0;i<FRAMEBYTES/sizeof(int64_t);++i)
-    *(d++) = *(s++);
-}
-
-void moveframes(B *source, B *dest, P n)
-{
-  int i;
-  int64_t *s,*d;
-
-  s = (int64_t*)source; d = (int64_t*)dest;
-  for (; n>0; n--) 
-    for (i=0;i<FRAMEBYTES/sizeof(int64_t);++i) 
-      *(d++) = *(s++);
-}
-
-/* ========================== move block ==============================
-
-These move blocks of different data sizes among aligned locations     */
-
-void moveB(B *source, B *dest, P n)
-{
-  for (; n>0; n--) *(dest++) = *(source++);
-}
-
-void moveW(W *source, W *dest, P n)
-{ 
-  for (; n>0; n--) *(dest++) = *(source++);
-}
-
-void moveL32(L32 *source, L32 *dest, P n)
-{ 
-  for (; n>0; n--) *(dest++) = *(source++);
-}
-
-void moveL64(L64 *source, L64 *dest, P n)
-{
-  for (; n>0; n--) *(dest++) = *(source++);
-}
-
-void moveLBIG(LBIG* source, LBIG* dest, P n)
-{
-  moveL64(source, dest, n);
-}
-
-void moveS(S *source, S *dest, P n)
-{ 
-  for (; n>0; n--) *(dest++) = *(source++);
-}
-
-void moveD(D *source, D *dest, P n)
-{ 
-  for (; n>0; n--) *(dest++) = *(source++);
 }
 
 /* ===================== dictionary services ======================== */
@@ -708,160 +647,11 @@ e_er_1:   errsource = exec_err; return(retc);
 
 /*-------------------- tree handling support --------------------------*/
 
-DM_INLINE_STATIC void swapbytes(B* arr, B n1, B n2) {
-  B temp = arr[n2];
-  arr[n2] = arr[n1];
-  arr[n1] = temp;
-}
-
-DM_INLINE_STATIC void swap2bytes(B* arr) {swapbytes(arr, 0, 1);}
-
-DM_INLINE_STATIC void swap4bytes(B* arr) {
-  swapbytes(arr, 0, 3);
-  swapbytes(arr, 1 ,2);
-}
-
-DM_INLINE_STATIC void swap8bytes(B* arr) {
-  swapbytes(arr, 0, 7);
-  swapbytes(arr, 1, 6);
-  swapbytes(arr, 2, 5);
-  swapbytes(arr, 3, 4);
-}
-
-#define swaplongbytes(arr, isnonnative) do {      \
-    P r = swaplongbytes_int(arr, isnonnative);    \
-    if (r != OK) return r;                        \
-  } while (0)
-
-#define checkovf(hi, lo) do {                   \
-    if (hi)                                     \
-      if ((hi) != -1 || (lo) >= 0)              \
-        return LONG_OVF;                        \
-  } while (0)
-
-#define signextend(hi, lo) do {                 \
-    (hi) = (lo) < 0 ? -1 : 0;                   \
-  } while (0)
-
-DM_INLINE_STATIC P swaplongbytes_int(B* arr, B isnonnative) {
-  L32* warr = (L32*) arr;
-#if DM_WORDS_BIGENDIAN && DM_HOST_IS_32_BIT
-  if (HASNATIVEBITS(isnonnative)) {// && ! HASNATIVEENDIAN
-    swap4bytes(arr);
-  } 
-  else if (HASNATIVEENDIAN(isnonnative)) { // && ! HASNATIVEBITS
-    checkovf(warr[0], warr[1]);
-    warr[0] = warr[1];
-  }
-  else { // !HASNATIVEBITS && !HASNATIVEENDIAN
-    swap4bytes(arr);
-    checkovf(warr[1], warr[0]);
-  }
-#elif ! DM_WORDS_BIGENDIAN && DM_HOST_IS_32_BIT
-  if (HASNATIVEBITS(isnonnative)) {// && ! HASNATIVEENDIAN
-    swap4bytes(arr);
-  }
-  else if (HASNATIVEENDIAN(isnonnative)) { // && ! HASNATIVEBITS
-    checkovf(warr[1], warr[0]);
-  } 
-  else { // !HASNATIVEBITS && !HASNATIVEENDIAN
-    swap4bytes(arr+4);
-    checkovf(warr[0], warr[1]);
-    warr[0] = warr[1];
-  }
-#elif DM_WORDS_BIGENDIAN // && ! DM_HOST_IS_32_BIT
-  if (HASNATIVEBITS(isnonnative)) {// && ! HASNATIVEENDIAN
-    swap8bytes(arr);
-  }
-  else { // ! HASNATIVEBITS
-    if (! HASNATIVEENDIAN(isnonnative)) // && ! HASNATIVEBITS
-      swap4bytes(arr);
-    warr[1] = warr[0];
-    signextend(warr[0], warr[1]);
-  }
-#else //!DM_WORDS_BIGENDIAN && ! DM_HOST_IS_32_BIT
-  if (HASNATIVEBITS(isnonnative)) {// && ! HASNATIVEENDIAN
-    swap8bytes(arr);
-  }
-  else { // ! HASNATIVEBITS
-    if (! HASNATIVEENDIAN(isnonnative)) // && ! HASNATIVEBITS
-      swap4bytes(arr);
-    signextend(warr[1], warr[0]);
-  }
-#endif //DM_WORDS_BIGENDIAN && DM_HOST_IS_32_BIT
-  
-  return OK;
-}
-
 DM_INLINE_STATIC void movehead(B* frame) {
   if (frame != VALUE_PTR(frame) - FRAMEBYTES)
     moveframe(frame, VALUE_PTR(frame) - FRAMEBYTES);
 }
 
-P deendian_frame(B *frame, B isnonnative) {
-  if (! isnonnative) return OK;
-
-  if (HASNATIVEENDIAN(isnonnative)) switch (CLASS(frame)) {
-    case NUM: return OK;
-    case NAME: return OK;
-  };
-
-  switch (CLASS(frame)) {
-    case NULLOBJ: case BOOL: case MARK:
-      return OK;
-
-    case NUM:
-      switch (TYPE(frame)) {
-        case BYTETYPE:
-          return OK;
-        case WORDTYPE:
-          swap2bytes(NUM_VAL(frame));
-          return OK;
-        case LONG32TYPE: 
-          swap4bytes(NUM_VAL(frame));
-        return OK;
-        case LONG64TYPE:
-          swap8bytes(NUM_VAL(frame));
-        return OK;
-        case SINGLETYPE:
-          swap4bytes(NUM_VAL(frame));
-        return OK;
-        case DOUBLETYPE:
-          swap8bytes(NUM_VAL(frame));
-          return OK;
-      };
-      return OPD_TYP;
-
-    case OP:
-      return OPD_CLA;
-
-    case NAME: {
-      int i;
-      for (i = 2; i < FRAMEBYTES; i+= 2)
-        swap2bytes(frame+i);
-      return OK;
-    }
-
-    case ARRAY: case LIST:
-      swaplongbytes((B*) &VALUE_BASE(frame), isnonnative);
-      swaplongbytes((B*) &ARRAY_SIZE(frame), isnonnative);
-      return OK;
-
-    case DICT:
-      swaplongbytes((B*) &VALUE_BASE(frame), isnonnative);
-      swaplongbytes((B*) &DICT_NB(frame), isnonnative);
-      //CURR=NB
-      return OK;
-
-    case BOX:
-      swaplongbytes((B*) &VALUE_BASE(frame), isnonnative);
-      swaplongbytes((B*) &BOX_NB(frame), isnonnative);
-      return OK;
-
-    default:
-      return OPD_CLA;
-  };
-}
 
 DM_INLINE_STATIC P deendian_array(B* frame, B isnonnative) {
   if (! isnonnative) return OK;
@@ -944,9 +734,9 @@ DM_INLINE_STATIC P deendian_list(B* frame, B isnonnative) {
 DM_INLINE_STATIC P deendian_dict(B* dict, B isnonnative) {
   if (! isnonnative) return OK;
 
-  swaplongbytes((B*) &DICT_ENTRIES(dict), isnonnative);
-  swaplongbytes((B*) &DICT_FREE(dict), isnonnative);
-  swaplongbytes((B*) &DICT_TABHASH(dict), isnonnative);
+  swaplongbytes(&DICT_ENTRIES(dict), isnonnative);
+  swaplongbytes(&DICT_FREE(dict), isnonnative);
+  swaplongbytes(&DICT_TABHASH(dict), isnonnative);
   if (! HASNATIVEENDIAN(isnonnative)) {
     swap2bytes((B*) &DICT_CONHASH(dict));
   }
@@ -959,14 +749,14 @@ DM_INLINE_STATIC P deendian_entries(B* dict, B isnonnative) {
   if (! isnonnative) return OK;
   
   for (i = 0; i < DICT_CONHASH(dict); i++)
-    swaplongbytes((B*) &DICT_TABHASH_ARR(dict, i), isnonnative);
+    swaplongbytes(&DICT_TABHASH_ARR(dict, i), isnonnative);
 
   for (entry = (B*) DICT_ENTRIES(dict);
        entry < (B*) DICT_FREE(dict);
        entry += ENTRYBYTES) {
     if ((retc = deendian_frame(ASSOC_NAME(entry), isnonnative)) != OK) 
       return retc;
-    swaplongbytes((B*) &ASSOC_NEXT(entry), isnonnative);
+    swaplongbytes(&ASSOC_NEXT(entry), isnonnative);
     if ((retc = deendian_frame(ASSOC_FRAME(entry), isnonnative)) != OK)
       return retc;
   }
@@ -1032,7 +822,7 @@ P foldobj(B *frame, P base, W *depth)
 		return retc;
 }
 
-P foldobj_ext(B* frame, P extra) 
+P foldobj_ext(B* frame) 
 {
 		static B* freemem_ = NULL;
 		static B* ceilmem_ = NULL;
@@ -1122,11 +912,11 @@ DM_INLINE_STATIC P foldobj_int(B *frame, P base, W *depth)
       nb = LIST_CEIL(frame) - VALUE_BASE(frame);
       if ((*freemem+nb+FRAMEBYTES) > *ceilmem) return(VM_OVF);
       *freemem += nb + FRAMEBYTES;
-      value = (B *)VALUE_BASE(frame);
-      VALUE_BASE(frame) = (P)tvalue - base;
+      value = VALUE_PTR(frame);
+      VALUE_PTR(frame) = tvalue - base;
       LIST_CEIL(frame) = VALUE_BASE(frame) + nb;
       moveframe(frame,tframe); 
-      moveLBIG((LBIG*) value,(LBIG*)tvalue, nb/sizeof(LBIG));
+      moveframes(value, tvalue, nb/FRAMEBYTES);
       for (lframe = tvalue; 
            lframe < (tvalue + nb); 
            lframe += FRAMEBYTES) { 
@@ -1141,7 +931,7 @@ DM_INLINE_STATIC P foldobj_int(B *frame, P base, W *depth)
 
       tframe = *freemem; 
       tvalue = tframe + FRAMEBYTES;
-      value = (B *)VALUE_BASE(frame);
+      value = VALUE_PTR(frame);
       nb = DICT_NB(frame); 
       if ((*freemem+nb+FRAMEBYTES) > *ceilmem) return(VM_OVF);
 
@@ -1334,10 +1124,10 @@ P op_gethomedir(void) {
   return OK;
 }
 
-DM_INLINE_STATIC void setupdir(B** frame, const char* string) {
+DM_INLINE_STATIC void setupname(B** frame, const char* string, BOOLEAN app) {
   P len = strlen(string);
   P lenapp = len;
-  if (len == 0 || string[len-1] != '/') lenapp++;
+  if (app && (len == 0 || string[len-1] != '/')) lenapp++;
 
   if (FREEvm + FRAMEBYTES + DALIGN(len) > CEILvm)
     error(EXIT_FAILURE,0,"VM overflow");
@@ -1349,7 +1139,7 @@ DM_INLINE_STATIC void setupdir(B** frame, const char* string) {
   ARRAY_SIZE(*frame) = lenapp;
   VALUE_PTR(*frame) = *frame + FRAMEBYTES;
   strncpy((char*) *frame + FRAMEBYTES, string, len);
-  (*frame)[FRAMEBYTES+lenapp-1] = '/';
+  if (app) (*frame)[FRAMEBYTES+lenapp-1] = '/';
 }
 
 #ifndef PLUGIN_DIR
@@ -1368,6 +1158,9 @@ void setupdirs(void) {
   const char* startup_env = getenv("DVTSCRIPTPATH");
   const char* conf_dir = CONF_DIR;
   const char* conf_env = getenv("DMCONFDIR");
+  char  myname[1024];
+  char  myxname[1024];
+  struct hostent* h;
 
   if (home_env && *home_env) home_dir = home_env;
   if (plugin_env && *plugin_env) plugin_dir = plugin_env;
@@ -1375,8 +1168,19 @@ void setupdirs(void) {
   else startup_dir = STARTUP_DIR;
   if (conf_env && *conf_env) conf_dir = conf_env;
 
-  setupdir(&home_dir_frame, home_dir);
-  setupdir(&startup_dir_frame, startup_dir);
-  setupdir(&plugin_dir_frame, plugin_dir);
-  setupdir(&conf_dir_frame, conf_dir);
+  if (gethostname(myname, sizeof(myname)))
+    error(1, errno, "gethostname failure");
+
+  if (! (h = gethostbyname(myname)))
+    error(1, h_errno, "gethostbyname failure");
+  
+  memset(myxname, '*', sizeof(myxname)-1);
+
+  setupname(&home_dir_frame, home_dir, TRUE);
+  setupname(&startup_dir_frame, startup_dir, TRUE);
+  setupname(&plugin_dir_frame, plugin_dir, TRUE);
+  setupname(&conf_dir_frame, conf_dir, TRUE);
+  setupname(&myname_frame, myname, FALSE);
+  setupname(&myfqdn_frame, h->h_name, FALSE);
+  setupname(&myxname_frame, myxname, FALSE);
 }

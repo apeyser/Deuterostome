@@ -1,0 +1,433 @@
+#line 2 "@srcdir@/drook.c.in"
+
+/* #ifdef _XOPEN_SOURCE */
+/* #if _XOPEN_SOURCE < 500 */
+/* #undef _XOPEN_SOURCE */
+/* #endif */
+/* #ifndef _XOPEN_SOURCE */
+/* #define _XOPEN_SOURCE 500 */
+/* #endif */
+
+#include "dm.h"
+#include "error-local.h"
+
+#include <stdio.h>
+#include <mpi.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <errno.h>
+
+UL32 nodes;
+P socketfd;
+MPI_Comm sendcomm;
+MPI_Comm recvcomm;
+P socketfd;
+
+static int quit = 0;
+static const int sigs[] = {SIGTERM, SIGPIPE};
+
+DM_INLINE_STATIC void checkflags(void) {
+  if (quit) exit(1);
+}
+
+static void handler(int sig __attribute__ ((__unused__)) ) {
+  quit = 1;
+}
+
+DM_INLINE_STATIC void sethandlers(void) {
+  struct sigaction action;
+  unsigned int i;
+
+  action.sa_flags = 0;
+  sigemptyset(&action.sa_mask);
+  action.sa_handler = handler;
+
+  for (i = 0; i < sizeof(sigs); i++)
+    if (sigaction(sigs[i], &action, NULL))
+      error(1, errno, "Unable to set signal handlers (%i)", sigs[i]);
+}
+
+
+DM_INLINE_STATIC void usage_error(const char* name) __attribute__ ((__noreturn__));
+void usage_error(const char* name) {
+  error(1, 0, 
+	"Usage: %s\n"
+	"Unix socket is available on fd 3\n"
+	"Number of jobs is 32 bit number available on socket", name);
+  exit(1);
+}
+
+DM_INLINE_STATIC void read_socket_int(void* where, size_t n) {
+  ssize_t r, off = 0;
+  do {
+    switch ((r = read(socketfd, where+off, n))) {
+      case 0: 
+	error(1, 0, "EOF from dnode");
+
+      case -1:
+	if (errno == EINTR) {
+	  checkflags();
+	  continue;
+	}
+	error(1, errno, "Error in socket read");
+
+      default:
+	n -= r;
+	off += r;
+    }
+  } while (n > 0);
+}
+
+DM_INLINE_STATIC void write_socket_int(const void* where, size_t n) {
+  ssize_t r, off = 0;
+  do {
+    if ((r = write(socketfd, where+off, n)) < 0) {
+      if (errno == EINTR) {
+	checkflags();
+	continue;
+      }
+      error(1, errno, "Error in socket write");
+    }
+
+    n -= r;
+    off += r;
+  } while (n > 0);
+}
+
+DM_INLINE_STATIC void usage(int argc, char* argv[]) {
+  if (argc != 1) usage_error(argv[0]);
+ 
+  read_socket_int(&nodes, sizeof(nodes));
+  socketfd = 3;
+}
+
+DM_INLINE_STATIC void initmpi(void) {
+  int argc = 0;
+  char* argv[] = {NULL};
+  int threadtype;
+
+  MPI_Init_thread(&argc, (char***)&argv, MPI_THREAD_MULTIPLE, &threadtype);
+  if (threadtype < MPI_THREAD_MULTIPLE)
+    error(1, 0, "MPI_Init_thread: Requested %i, received %i\n", 
+	  MPI_THREAD_MULTIPLE, threadtype);
+}
+
+DM_INLINE_STATIC void mpiabort(void) __attribute__ ((__noreturn__));
+DM_INLINE_STATIC void mpiabort(void) {
+  close(socketfd);
+  MPI_Abort(sendcomm, 1);
+  exit(1);
+}
+
+DM_INLINE_STATIC void spawn(void) {
+  int* errors;
+  char* argv[] = {NULL};
+  unsigned int i, any = 0;
+
+  errors = (int*) malloc(sizeof(int)*nodes);
+  MPI_Comm_spawn("@dpawn@", argv, nodes, MPI_INFO_NULL, 
+		 0, MPI_COMM_WORLD, &sendcomm, errors);
+  atexit(mpiabort);
+  for (i = 0; i < nodes; i++) {
+    if (errors[i]) {
+      int len;
+      static char string[MPI_MAX_ERROR_STRING];
+      any = 1;
+      MPI_Error_string(errors[i], string, &len);
+      error(0, 0, "For node %i, error %i, %s", i, errors[i], string);
+    }
+  }
+  if (any) exit(1);
+
+  free(errors);
+}
+
+DM_INLINE_STATIC void writesocketerror(char* type, char* info) {
+  static B errormsg[] = "rthread_";
+  static B frames[FRAMEBYTES*2+sizeof(errormsg)+1024];
+  static B *const stringf = frames;
+  static B *const nullf = frames+FRAMEBYTES;
+  static B *const string = frames+2*FRAMEBYTES;
+
+  int n = snprintf(string, sizeof(errormsg)+1024, "(%s) %s%s", info, errormsg, type);
+  if (n < 0) error(1, errno, "Unable to snprintf error message");
+  if ((unsigned) n >= sizeof(errormsg)+1024) 
+    error(1, 0, "snprintf overflow: %i", n);
+  
+  TAG(stringf) = (ARRAY|BYTETYPE);
+  ATTR(stringf) = 0;
+  ARRAY_SIZE(stringf) = n;
+  VALUE_PTR(stringf) = 0;
+
+  TAG(nullf) = NULLOBJ;
+  ATTR(nullf) = 0;
+  VALUE_PTR(nullf) = 0;
+
+  write_socket_int(frames, FRAMEBYTES*2+n);
+}
+
+static B* from_dnode_data = NULL;
+static P from_dnode_data_n = 0;
+
+DM_INLINE_STATIC void dumpsocket(P n) {
+  while (n) {
+    static B throwaway[1024*10];
+    P n_ = sizeof(throwaway) < (UP)n ? sizeof(throwaway) : (UP)n;
+    read_socket_int(throwaway, n_);
+    n -= n_;
+  }
+}
+
+DM_INLINE_STATIC BOOLEAN readbody(void) {
+  B* data_ = (B*) realloc(from_dnode_data, from_dnode_data_n);
+  if (! data_) {
+    dumpsocket(from_dnode_data_n - FRAMEBYTES*2);
+    return FALSE;
+  }
+  
+  from_dnode_data = data_;
+  read_socket_int(from_dnode_data + FRAMEBYTES*2,
+		  from_dnode_data_n - FRAMEBYTES*2);
+
+  return TRUE;
+}
+
+#define readsocketerr(doex, string) do {				\
+    writesocketerror("readsocket", "Bad " string " from dnode");	\
+    error((doex) ? 1 : 0, 0, "Bad " string " from dnode");		\
+    target = -1;							\
+    goto RET;								\
+  } while (0)
+
+DM_INLINE_STATIC P readsocket(void) {
+  P target = PINF;
+
+  from_dnode_data_n = 2*FRAMEBYTES;
+  if (! (from_dnode_data = (B*) malloc(from_dnode_data_n)))
+    readsocketerr(TRUE, "allocation of base frames");
+  read_socket_int(from_dnode_data, from_dnode_data_n);
+
+  if (! GETNATIVEFORMAT(from_dnode_data)
+      || ! GETNATIVEUNDEF(from_dnode_data))
+    readsocketerr(TRUE, "msg");
+  if (GETNONNATIVE(from_dnode_data)) 
+    readsocketerr(TRUE, "nativity");
+
+  from_dnode_data_n += BOX_NB(from_dnode_data)-FRAMEBYTES;
+  if (! readbody()) readsocketerr(FALSE, "message body");
+
+  if (CLASS(from_dnode_data+FRAMEBYTES) != LIST) target = PINF;
+  else if (CLASS(from_dnode_data + 2*FRAMEBYTES) != NUM) 
+    readsocketerr(FALSE, "targeting info");
+  else if (PVALUE(from_dnode_data + 2*FRAMEBYTES, &target)
+	   && (target < 0 || target >= nodes)) {
+    target = -1;
+    readsocketerr(FALSE, "illegal target");
+  }
+  
+ RET:
+  if (target == -1 && from_dnode_data) {
+    free(from_dnode_data);
+    from_dnode_data = NULL;
+  }
+  return target;
+}
+
+DM_INLINE_STATIC void writempi(P to) {
+  P min = (to == PINF) ? 0 : to;
+  P max = (to == PINF) ? nodes : (to+1);
+  int i;
+  if (to == -1) return;
+
+  for (i = min; i < max; i++)
+    MPI_Send(from_dnode_data, from_dnode_data_n, 
+	     MPI_UNSIGNED_CHAR, i, 1, sendcomm);
+    
+  free(from_dnode_data);
+  from_dnode_data = NULL;
+}
+
+void mpihandler(MPI_Comm* comm, int* err, ...) {
+  static char string[MPI_MAX_ERROR_STRING];
+  int len;
+  int eq = 0;
+  static int inhandler = MPI_IDENT;
+
+  if (inhandler) return;
+  inhandler = 1;
+
+  if (MPI_Error_string(*err, string, &len))
+    error(0, 0, "Unable to produce error string (%i)", *err);
+  else if (MPI_Comm_compare(*comm, sendcomm, &eq))
+    error(0, 0, "MPI Error: %s", string);
+  else
+    error(0, 0, "Error %s mpi: %s", 
+	  (eq == MPI_IDENT) ? "sending to" : "receiving from",
+	  string);
+  checkflags();
+
+  switch (*err) {
+    case MPI_ERR_TRUNCATE:
+    case MPI_ERR_NO_MEM:
+      break;
+
+    default:
+      mpiabort();
+  };
+
+  inhandler = 0;
+}
+
+// never returns
+DM_INLINE_STATIC void* from_dnode(void* arg __attribute__ ((__unused__))) {
+  MPI_Errhandler mpierr;
+  UL32 ok;
+
+  MPI_Comm_create_errhandler(mpihandler, &mpierr);
+  MPI_Comm_set_errhandler(sendcomm, mpierr);
+  write_socket_int(&ok, sizeof(ok));
+
+  while (1) {
+    checkflags();
+    writempi(readsocket());
+  }
+
+  return NULL;
+}
+
+
+DM_INLINE_STATIC BOOLEAN read_mpi_int(B* where, size_t n, int source) {
+  return (BOOLEAN) MPI_Recv(where, n, MPI_UNSIGNED_CHAR,
+			    source, 1, recvcomm, MPI_STATUS_IGNORE);
+}
+
+DM_INLINE_STATIC BOOLEAN probe_mpi_int(P* count, P* src) {
+  MPI_Status status;
+  int count_;
+  if (MPI_Probe(MPI_ANY_SOURCE, 1, recvcomm, &status))
+    return FALSE;
+
+  if (MPI_Get_count(&status, MPI_UNSIGNED_CHAR, &count_))
+    return FALSE;
+
+  *count = count_;
+  *src = status.MPI_SOURCE;
+  return TRUE;
+}
+
+DM_INLINE_STATIC void dumpmpi(P source) {
+  int r = MPI_Recv(NULL, 0, MPI_UNSIGNED_CHAR, 
+		   source, 1, recvcomm, MPI_STATUS_IGNORE);
+  switch (r) {
+    case MPI_SUCCESS: case MPI_ERR_TRUNCATE: return;
+  };
+
+  writesocketerror("readmpi", "Unable to dump message from mpi");
+  error(1, 0, "Unable to dump message from mpi");
+}
+
+static B* from_mpi_data = NULL;
+static P from_mpi_data_n = 0;
+
+#define readmpierr(doex, string) do {				\
+    writesocketerror("readmpi", "Bad " string " from mpi");	\
+    error((doex) ? 1 : 0, 0, "Bad " string " from mpi");		\
+    ret = FALSE;						\
+    goto RET;							\
+  } while (0)
+
+DM_INLINE_STATIC BOOLEAN readmpi(void) {
+  BOOLEAN ret = TRUE;
+  P source;
+
+  if (probe_mpi_int(&from_mpi_data_n, &source)) 
+    readmpierr(TRUE, "probing frames");
+
+  if (! (from_mpi_data = (B*) malloc(from_mpi_data_n))) {
+    readmpierr(FALSE, "total size");
+    dumpmpi(source);
+  }
+
+  if (read_mpi_int(from_mpi_data, from_mpi_data_n, source)) {
+    readmpierr(FALSE, "receiving frames");
+    dumpmpi(source);
+  }
+
+ RET:
+  if (! ret && from_mpi_data) {
+    free(from_mpi_data);
+    from_mpi_data = NULL;
+  }
+
+  return ret;
+}
+
+DM_INLINE_STATIC void writesocket(BOOLEAN good) {
+  if (! good) return;
+
+  write_socket_int(from_mpi_data, from_mpi_data_n);
+  free(from_mpi_data);
+  from_mpi_data = NULL;
+}
+
+//never returns
+DM_INLINE_STATIC void* from_mpi(void* arg __attribute__ ((__unused__))) {
+  MPI_Errhandler mpierr;
+  MPI_Comm_dup(sendcomm, &recvcomm);
+  MPI_Comm_create_errhandler(mpihandler, &mpierr);
+  MPI_Comm_set_errhandler(recvcomm, mpierr);
+
+  while (1) {
+    checkflags();
+    writesocket(readmpi());
+  }
+
+  return NULL;
+}
+
+DM_INLINE_STATIC void makethread(char* name, void* (*func)(void*)) {
+  pthread_t thread;
+  if (pthread_create(&thread, NULL, func, NULL))
+    error(1, errno, "Unable to create %s thread", name);
+}
+
+DM_INLINE_STATIC void mainthread(sigset_t* set) __attribute__ ((__noreturn__));
+void mainthread(sigset_t* set) {
+  int sig;
+
+  while (! sigwait(set, &sig)) {
+    handler(sig);
+    checkflags();
+  }
+  error(1, errno, "Sigwait failure");
+  exit(1);
+}
+
+DM_INLINE_STATIC void blocksigs(sigset_t* set) {
+  unsigned int i;
+
+  if (sigemptyset(set)) error(1, errno, "Unable to empty sigset");
+  for (i = 0; i < sizeof(sigs); i++) 
+    if (sigaddset(set, sigs[i]))
+      error(1, errno, "Unable to sigaddset (%i)", sigs[i]);
+
+  if (sigprocmask(SIG_BLOCK, set, NULL)) 
+    error(1, errno, "Unable to block sigs");
+}
+
+int main(int argc, char* argv[]) {
+  sigset_t set;
+
+  sethandlers();
+
+  usage(argc, argv);
+  initmpi();
+  spawn();
+  
+  blocksigs(&set);
+  makethread("mpi receive", from_mpi);
+  makethread("dnode receive", from_dnode);
+  mainthread(&set);
+}

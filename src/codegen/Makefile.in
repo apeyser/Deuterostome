@@ -37,15 +37,18 @@ noinst_PROGRAMS = dgen$(EXEEXT)
 subdir = src/codegen
 DIST_COMMON = $(dist_noinst_DATA) $(dist_noinst_SCRIPTS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/dmnuminc.d.in $(srcdir)/dmnuminc.h.built \
-	$(srcdir)/dsp1f.h.built $(srcdir)/dsp2def.d.in \
-	$(srcdir)/dsp2def.h.built \
-	$(top_srcdir)/dcode/startup_dgen.d.in
+	$(srcdir)/dgen_0.h.built $(srcdir)/dmnuminc.d.in \
+	$(srcdir)/dmnuminc.h.built $(srcdir)/dnode_0.h.built \
+	$(srcdir)/dpawn_0.h.built $(srcdir)/dsp1f.h.built \
+	$(srcdir)/dsp2def.d.in $(srcdir)/dsp2def.h.built \
+	$(srcdir)/dvt_0.h.built $(top_srcdir)/dcode/startup_dgen.d.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
-	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/ax_set_version_info.m4 \
+	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/cf_mpi.m4 \
+	$(top_srcdir)/m4/configure.m4 \
 	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/acinclude.m4 $(top_srcdir)/m4/basic-defs.m4 \
 	$(top_srcdir)/configure.ac
@@ -54,17 +57,18 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = dmnuminc.d dsp2def.d startup_dgen.d dmglobals.c \
-	dsp1.c dm1.c dm2.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dmnum.c \
-	dsp2.c dm-types.h dm-types.c paths.h.in dgen.c dgen_0.h \
-	dgen_1.h dgen-build dmnum.h
+	dsp1.c dm1.c dm2.c dm-swapbytes.h dm-conv.c dm3.c dm4.c dm5.c \
+	dm6.c dm7.c dm8.c dmnum.c dsp2.c dm-types.h dm-types.c \
+	paths.h.in dgen.c dgen_1.h dgen-build dmnum.h dm-nextevent.c \
+	dm-nextevent.h
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libdmbootstrap_la_LIBADD =
 am_libdmbootstrap_la_OBJECTS = dmnum.lo dsp1.lo dsp2.lo dmglobals.lo \
-	dm1.lo dm2.lo dm3.lo dm4.lo dm5.lo dm6.lo dm7.lo dm8.lo \
-	dm-types.lo
+	dm1.lo dm2.lo dm-conv.lo dm3.lo dm4.lo dm5.lo dm6.lo dm7.lo \
+	dm8.lo dm-types.lo
 libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
-am_dgen_OBJECTS = dgen-dgen.$(OBJEXT)
+am_dgen_OBJECTS = dgen-dgen.$(OBJEXT) dgen-dm-nextevent.$(OBJEXT)
 dgen_OBJECTS = $(am_dgen_OBJECTS)
 dgen_DEPENDENCIES = libdmbootstrap.la
 dgen_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -186,6 +190,8 @@ MAX_NUM_EXECS = @MAX_NUM_EXECS@
 MAX_NUM_OPDS = @MAX_NUM_OPDS@
 MAX_USER_DICT_SIZE = @MAX_USER_DICT_SIZE@
 MKDIR_P = @MKDIR_P@
+MPI_FLAGS = @MPI_FLAGS@
+MPI_LIBS = @MPI_LIBS@
 NAMEBYTES = @NAMEBYTES@
 NAMEBYTES_1 = @NAMEBYTES_1@
 NO_PTHREAD_CC = @NO_PTHREAD_CC@
@@ -214,6 +220,7 @@ PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
 PTHREAD_LIBS = @PTHREAD_LIBS@
 RANLIB = @RANLIB@
 REAL_TMP = @REAL_TMP@
+RELEASE_INFO = @RELEASE_INFO@
 ROLLBITS = @ROLLBITS@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
@@ -224,6 +231,7 @@ THREADMUL = @THREADMUL@
 THREADNUM = @THREADNUM@
 TMP = @TMP@
 VERSION = @VERSION@
+VERSION_INFO = @VERSION_INFO@
 XMKMF = @XMKMF@
 X_CFLAGS = @X_CFLAGS@
 X_DISPLAY_MISSING = @X_DISPLAY_MISSING@
@@ -306,6 +314,7 @@ dist_noinst_SCRIPTS = dgen-build
 AM_CFLAGS = $(GCC_CFLAGS)
 AM_CPPFLAGS = \
 	-DDM_DISABLE_THREADS=1 -DDM_HAVE_CONFIG_H -DDM_DISABLE_REGEX=1 \
+	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 \
 	-I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 
 AM_LDFLAGS = -no-undefined
@@ -315,15 +324,15 @@ BUILT_SOURCES = paths.h
 CLEANFILES = $(BUILT_SOURCES)
 DISTCLEANFILES = dm-config.h
 noinst_LTLIBRARIES = libdmbootstrap.la
-EXTRA_DIST = dmnuminc.h.built dsp1f.h.built dmnuminc.d.in paths.h.in \
-	dsp2def.h.built dsp2def.d.in
+PRODSRCS = dmnuminc.h.built dsp1f.h.built dsp2def.h.built \
+	dgen_0.h.built dnode_0.h.built dvt_0.h.built dpawn_0.h.built
 
+EXTRA_DIST = dmnuminc.d.in paths.h.in dsp2def.d.in
 libdmbootstrap_la_SOURCES = dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h \
-	dmglobals.c dm1.c dm2.c dm3.c dm4.c dm5.c \
-	dm6.c dm7.c dm8.c \
-	dm-types.c
+	dmglobals.c dm1.c dm2.c dm-conv.c dm-swapbytes.h \
+	dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm-types.c
 
-dgen_SOURCES = dgen.c dgen_0.h dgen_1.h
+dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h
 dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dgen_LDADD = libdmbootstrap.la
 edit = sed \
@@ -401,6 +410,8 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dgen.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dm-nextevent.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm-conv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm-types.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm2.Plo@am__quote@
@@ -449,6 +460,20 @@ dgen-dgen.obj: dgen.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dgen.c' object='dgen-dgen.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dgen.obj `if test -f 'dgen.c'; then $(CYGPATH_W) 'dgen.c'; else $(CYGPATH_W) '$(srcdir)/dgen.c'; fi`
+
+dgen-dm-nextevent.o: dm-nextevent.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -MT dgen-dm-nextevent.o -MD -MP -MF $(DEPDIR)/dgen-dm-nextevent.Tpo -c -o dgen-dm-nextevent.o `test -f 'dm-nextevent.c' || echo '$(srcdir)/'`dm-nextevent.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dgen-dm-nextevent.Tpo $(DEPDIR)/dgen-dm-nextevent.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-nextevent.c' object='dgen-dm-nextevent.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dm-nextevent.o `test -f 'dm-nextevent.c' || echo '$(srcdir)/'`dm-nextevent.c
+
+dgen-dm-nextevent.obj: dm-nextevent.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -MT dgen-dm-nextevent.obj -MD -MP -MF $(DEPDIR)/dgen-dm-nextevent.Tpo -c -o dgen-dm-nextevent.obj `if test -f 'dm-nextevent.c'; then $(CYGPATH_W) 'dm-nextevent.c'; else $(CYGPATH_W) '$(srcdir)/dm-nextevent.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dgen-dm-nextevent.Tpo $(DEPDIR)/dgen-dm-nextevent.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-nextevent.c' object='dgen-dm-nextevent.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dm-nextevent.obj `if test -f 'dm-nextevent.c'; then $(CYGPATH_W) 'dm-nextevent.c'; else $(CYGPATH_W) '$(srcdir)/dm-nextevent.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -640,7 +665,7 @@ uninstall-am:
 	tags uninstall uninstall-am
 
 
-gencode: all dmnuminc.h.built dsp1f.h.built dsp2def.h.built
+gencode: all $(PRODSRCS)
 
 dsp2def.h.built: dsp2def.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
@@ -667,6 +692,38 @@ paths.h: paths.h.in Makefile
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/paths.h.in >$@.tmp
 	mv $@.tmp $@
+
+dgen_0.h.built: ops.d dgen dgen-build
+	"$(srcdir)/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
+		"$@" "/dgen"
+	(cd "$(srcdir)/.." ; \
+	rm dgen_0.h ; \
+	$(LN_S) codegen/dgen_0.h.built dgen_0.h)
+
+dvt_0.h.built: ops.d dgen dgen-build
+	"$(srcdir)/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
+		"$@" "/dvt"
+	(cd "$(srcdir)/.." ; \
+	rm dvt_0.h ; \
+	$(LN_S) codegen/dvt_0.h.built dvt_0.h)
+
+dnode_0.h.built: ops.d dgen dgen-build
+	"$(srcdir)/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
+		"$@" "/dnode"
+	(cd "$(srcdir)/.." ; \
+	rm dnode_0.h ; \
+	$(LN_S) codegen/dnode_0.h.built dnode_0.h)
+
+dpawn_0.h.built: ops.d dgen dgen-build
+	"$(srcdir)/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
+		"$@" "/dpawn"
+	(cd "$(srcdir)/.." ; \
+	rm dpawn_0.h ; \
+	$(LN_S) codegen/dpawn_0.h.built dpawn_0.h)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

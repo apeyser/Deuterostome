@@ -143,7 +143,7 @@ P threads_do_int(UP nways, thread_func func,
 DM_INLINE_STATIC P threads_do_pool_int_(UP nways, thread_func func, 
                               const void* global, 
                               void* local, size_t s) {
-  P i; P r;
+  UP i; P r;
   if ((P) nways < 0) return RNG_CHK;
     
   for (i = (P) nways; i > 0; i -= thread_num()) {
@@ -240,7 +240,7 @@ P threads_init(P num) {
   THREADS_INIT_TEST(main_wait, pthread_cond_init, NULL);
 
   MAINERR(pthread_mutex_lock, &main_lock);
-  for (; thread_num_ < num; thread_num_++)
+  for (; thread_num_ < (UP)num; thread_num_++)
     THREADS_INIT(pthread_create,
                  threads + thread_num_,
                  NULL, //&attr,

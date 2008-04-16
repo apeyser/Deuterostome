@@ -143,7 +143,6 @@ xhackd(XFillArc,
        H(int x, int y, int w, int h, int a1, int a2), H(x, y, w, h, a1, a2));
 xhackd(XDrawArc, 
        H(int x, int y, int w, int h, int a1, int a2), H(x, y, w, h, a1, a2));
-xhack(XSetInputFocus, H(Window f, int r, Time t), H(f, r, t));
 xhack(XFreeFont, H(XFontStruct* f), H(f));
 xhackr(XLoadQueryFont, XFontStruct*, NULL, H(char* n), H(n));
 xhack(XSetFont, H(GC g, Font f), H(g, f));

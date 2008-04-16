@@ -64,7 +64,7 @@ int main(void)
 {
   LBIG memsetup[5] = { 1000, 100, 20, 10, 200 };
   B* startup_dvt;    
-  B errorframe[FRAMEBYTES], fromconsoleframe[FRAMEBYTES], *sf;
+  B fromconsoleframe[FRAMEBYTES], *sf;
   P nb, retc,tnb;
   B *sysdict, *userdict, *Dmemory, *p;
   int sufd;
@@ -159,33 +159,25 @@ int main(void)
   FREEexecs = x2;
   
   /*-------------------------- run the D mill --------------------- */
- more:
-  switch(retc = exec(1000)) {
-    case MORE:     goto more;
-    case DONE:     moveframe(fromconsoleframe,x1); FREEexecs=x2; goto more;
-    case QUIT:     printf("Success..\n"); exit(EXIT_SUCCESS);
-    case ABORT:    printf("Failure...\n"); exit(EXIT_FAILURE);
-    default:       goto derror;
- }
+  while (1) {
+    switch(retc = exec(1000)) {
+      case MORE: continue;
+      case DONE:     
+	moveframe(fromconsoleframe, x1); 
+	FREEexecs=x2; 
+	continue;
+      case QUIT: 
+	printf("Success..\n"); 
+	exit(EXIT_SUCCESS);
+      case ABORT:    
+	printf("Failure...\n"); 
+	exit(EXIT_FAILURE);
+      default: break;
+    }
 
 /*----------------------- error handler ---------------------------*/
 
- derror:
-/* we push the errsource string followed by the error code on
-   the operand stack, and 'error' on the execution stack 
-*/
-  if (retc == OPDS_OVF) FREEopds = FLOORopds;
-  if (retc == EXECS_OVF) FREEexecs = FLOORexecs;
-  if (o2 >= CEILopds) FREEopds = FLOORopds;
-  if (x1 >= CEILexecs) FREEexecs = FLOORexecs;
-  TAG(o1) = ARRAY | BYTETYPE; 
-  ATTR(o1) = READONLY;
-  VALUE_BASE(o1) = (P)errsource; 
-  ARRAY_SIZE(o1) = strlen((char*)errsource);
-  TAG(o2) = NUM | LONGBIGTYPE; ATTR(o2) = 0;
-  LONGBIG_VAL(o2) = retc;
-  moveframe(errorframe,x1);
-  FREEopds = o3; FREEexecs = x2;
-  goto more; 
+    makeerror(retc, errsource);
+  };
 } /* of main */
 

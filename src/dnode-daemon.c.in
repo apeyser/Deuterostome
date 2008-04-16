@@ -72,13 +72,12 @@ static char alarm_ = 0;
 void sigalarm(int sig __attribute__((__unused__))) {alarm_ = 1;}
 
 static void sethandler(void (*handler)(int), int sig, int flag) {
-  struct sigaction sa;
+  struct sigaction sa = {};
   sigset_t mask;
   sigfillset(&mask);
 
   sa.sa_handler = handler;
   sa.sa_flags = flag;
-  sa.sa_mask = mask;
   if (sigaction(sig, &sa, NULL) == -1)
     fataly("Unable to setup signal handler for sig: %i", sig);
 }
@@ -164,7 +163,7 @@ static void killall(void) {
   for (i = 0; 
        i < nodes->n && (nodes->node[i].pid || nodes->node[i].io);
        i++);
-  if (i < nodes->n && ! alarm) {
+  if (i < nodes->n && ! alarm_) {
     waitdead();
     goto START;
   }
@@ -211,7 +210,7 @@ static void errorx(char doerrno, char warn, char die, const char* format, ...) {
     syslog(LOG_ERR, "Unable to init errorx buffer");
     if (!killing && die) exit(1);
   }
-  if (s >= sizeof(buffer)) {
+  if ((unsigned) s >= sizeof(buffer)) {
     errorxn("errorx buffer overflow");
     if (!killing && die) exit(1);
   }
@@ -318,8 +317,8 @@ static void dnode(int reader, int writer, struct node* node) {
     fataly("Child %i unable to drop privileges", node->pid);
       
   if ((s = snprintf(buffer, sizeof(buffer), "%i", node->port)) < 1)
-    fataly("Child %i unable to sprintf buffer");
-  if (s >= sizeof(buffer))
+    fataly("Child %i unable to sprintf buffer", node->pid);
+  if ((unsigned) s >= sizeof(buffer))
     fataln("Child %i holy shit - port doesn't fit in %i characters", 
 	     node->pid, s);
   warnxn("Starting `%s' `%s' `%s'", 
@@ -382,7 +381,7 @@ const char* args(const int argc, const char* argv[]) {
   
   renice = strtol(*++argvi, &endptr, 0);
   if (! **argvi || *endptr)
-    fataln("Renice argument must be an integer: `%s'", argvi);
+    fataln("Renice argument must be an integer: `%s'", *argvi);
 
   pidfilename = *++argvi;
 
@@ -421,15 +420,14 @@ static void killdaemon(pid_t pid, sigset_t* oldset, const char* format, ...) {
   s = vsnprintf(buffer, sizeof(buffer), format, ap);
   va_end(ap);
   if (s < 0) fataly("Master unable to format error");
-  if (s >= sizeof(buffer)) fataln("Master had buffer overflow");
+  if ((unsigned) s >= sizeof(buffer)) fataln("Master had buffer overflow");
 
   fataly(buffer);
 }
 
 static void daemonize(const char* pidfilename) {
   FILE* pidfile;
-  pid_t pid, pidr;
-  int status;
+  pid_t pid;
   sigset_t set, oldset;
 
   if (sigemptyset(&set) 

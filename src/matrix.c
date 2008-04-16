@@ -11,7 +11,7 @@ void cblas_xerbla(int p, const char *rout, const char *form, ...)
 {
   B* f;
   char* buf;
-  size_t len, nlen, len_;
+  int len, nlen, len_;
   va_list argptr;
   va_start(argptr, form);
   xerbla_err = TRUE;
@@ -60,7 +60,7 @@ int cblas_errprn(int ierr, int info, char *form, ...)
 {
   B* f;
   char* buf;
-  size_t len;
+  int len;
   va_list argptr;
   va_start(argptr, form);
   errprn_err = TRUE;

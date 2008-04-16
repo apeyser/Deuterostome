@@ -17,6 +17,7 @@ __attribute__ ((unused, format (printf, 3, 4)))
     va_start(ap, __format);
     vfprintf(stderr, __format, ap);
     if (__errnum) fprintf(stderr, ": %s\n", strerror(__errnum));
+    else fprintf(stderr, "\n");
     if (__status) exit(__status);
 }
 #endif //DM_HAVE_ERROR_H
