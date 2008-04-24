@@ -10,7 +10,7 @@ P op_nextlib(void);
 #endif
 
 
-B *sysop[] =
+B *_sysop[] =
    {
 /*-- dvt specific */
       (B*)"error",          (B *)op_error,
@@ -176,7 +176,7 @@ B *sysop[] =
 /*========================== Error Table =================================*/
 
 
-P syserrc[] = {
+P _syserrc[] = {
   TIMER,CORR_OBJ,LOST_CONN,
   VM_OVF, OPDS_OVF, EXECS_OVF, DICTS_OVF, 
   OPDS_UNF, EXECS_UNF, DICTS_UNF, 
@@ -193,7 +193,7 @@ P syserrc[] = {
   0L,
 };
 
-B *syserrm[] = {
+B *_syserrm[] = {
   (B*)"** Timeout",
   (B*)"** Corrupted object",
   (B*)"** Lost connection",

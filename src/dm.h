@@ -350,13 +350,13 @@ extern "C" {
 
 #define VMR_ERR     (P)0x00000210L /* couldn't allocate memory              */
 #define VMR_STATE   (P)0x00000211L /* vm already tiny                       */
-#define KILL_SOCKS  (P)0x00000212L /* dvt must kill all non-server socks    */
+#define KILL_SOCKETS (P)0x00000212L /* dvt must kill all non-server socks    */
 #define MEM_OVF     (P)0x00000213L /* failed memory allocation              */
 #define CLOCK_ERR   (P)0x00000214L /* failed to get epoch                   */
-#define DEAD_SOCK   (P)0x00000215L /* socket died - no special handler      */
+#define DEAD_SOCKET (P)0x00000215L /* socket died - no special handler      */
 
-#define BAD_TOK     (P)0x00000300L /* bad D token in source string          */
-#define BAD_ASC     (P)0x00000301L /* bad ASCII character in source string  */
+#define BAD_TOK     (P)0x00000300L /* bad D token in socket string          */
+#define BAD_ASC     (P)0x00000301L /* bad ASCII character in socket string  */
 #define ARR_CLO     (P)0x00000302L /* unmatched array closure               */
 #define CLA_ARR     (P)0x00000303L /* illegal class in array                */
 #define PRO_CLO     (P)0x00000304L /* unmatched procedure closure           */
@@ -435,10 +435,14 @@ DLL_SCOPE B* TOPvm;
 
 DLL_SCOPE B* errsource;
 DLL_SCOPE B errorframe[FRAMEBYTES];
+DLL_SCOPE B** syserrm;
+DLL_SCOPE P* syserrc;
+DLL_SCOPE B** sysop;
 
 DLL_SCOPE B locked;
 DLL_SCOPE B serialized;
 
+DLL_SCOPE BOOLEAN halt_flag;          /* execution block due to 'halt'     */
 DLL_SCOPE fd_set sock_fds;
 DLL_SCOPE BOOLEAN timeout;             /* for I/O operations          */
 DLL_SCOPE BOOLEAN abortflag;
@@ -503,46 +507,15 @@ DLL_SCOPE UW ascii[];
 DLL_SCOPE P tokenize(B *stringframe);
 
 /*-- dm-conv.c */
-DLL_SCOPE void moveframe(B *source, B *dest);
-DLL_SCOPE void moveframes(B *source, B *dest, P n);
-DLL_SCOPE void moveB(B *source, B *dest, P n);
-DLL_SCOPE void moveW(W *source, W *dest, P n);
-DLL_SCOPE void moveL32(L32 *source, L32 *dest, P n);
-DLL_SCOPE void moveL64(L64 *source, L64 *dest, P n);
-DLL_SCOPE void moveLBIG(LBIG *source, LBIG *dest, P n);
-DLL_SCOPE void moveS(S *source, S *dest, P n);
-DLL_SCOPE void moveD(D *source, D *dest, P n);
-
-/*--- DM2 */
-DLL_SCOPE P wrap_hi(B* hival);
-DLL_SCOPE P wrap_libnum(UP libnum);
-DLL_SCOPE B* nextlib(B* frame);
-DLL_SCOPE B* geterror(P e);
-DLL_SCOPE B *makedict(L32 n);
-DLL_SCOPE void cleardict(B *dict);
-DLL_SCOPE B *makeopdictbase(B *opdefs, P *errc, B **errm, L32 n1);
-DLL_SCOPE B *makeopdict(B *opdefs, P *errc, B **errm);
-DLL_SCOPE void d_reloc(B *dict, P oldd, P newd);
-DLL_SCOPE void d_rreloc(B *dict, P oldd, P newd);
-DLL_SCOPE void makename(B *namestring, B *nameframe);
-DLL_SCOPE void pullname(B *nameframe, B *namestring);
-DLL_SCOPE P compname(B *nameframe1, B *nameframe2);
-DLL_SCOPE BOOLEAN matchname(B *nameframe1, B *nameframe2);		
-DLL_SCOPE B *lookup(B *nameframe, B *dict);
-DLL_SCOPE BOOLEAN insert(B *nameframe, B *dict, B *framedef);
-DLL_SCOPE BOOLEAN mergedict(B *source, B *sink);
-DLL_SCOPE P exec(L32 turns);
-DLL_SCOPE P foldobj(B *frame, P base, W *depth);
-DLL_SCOPE P unfoldobj(B *frame, P base, B isnonnative);
-DLL_SCOPE P foldobj_ext(B* frame);
-DLL_SCOPE BOOLEAN foldobj_mem(B** base, B** top);
-DLL_SCOPE void foldobj_free(void);
-DLL_SCOPE P deendian_frame(B *frame, B isnonnative);
-//L deendian_array(B* frame, B isnonnative);
-//L deendian_list(B* frame, B isnonnative);
-//L deendian_dict(B* dict, B isnonnative);
-//L deendian_entries(B* doct, B isnonnative);
-DLL_SCOPE void setupdirs(void);
+DLL_SCOPE void moveframe(B *socket, B *dest);
+DLL_SCOPE void moveframes(B *socket, B *dest, P n);
+DLL_SCOPE void moveB(B *socket, B *dest, P n);
+DLL_SCOPE void moveW(W *socket, W *dest, P n);
+DLL_SCOPE void moveL32(L32 *socket, L32 *dest, P n);
+DLL_SCOPE void moveL64(L64 *socket, L64 *dest, P n);
+DLL_SCOPE void moveLBIG(LBIG *socket, LBIG *dest, P n);
+DLL_SCOPE void moveS(S *socket, S *dest, P n);
+DLL_SCOPE void moveD(D *socket, D *dest, P n);
 
 /*--- DMNUM */
 DLL_SCOPE void DECODE(B *frame, BOOLEAN fauto, W prec, B *buf);
@@ -594,7 +567,6 @@ DLL_SCOPE P op_toconsole(void);
 DLL_SCOPE P op_tostderr(void);
 DLL_SCOPE P op_flush(void);
 DLL_SCOPE P op_nextevent(void);
-DLL_SCOPE P op_vmresize(void);
 DLL_SCOPE P op_killsockets(void);
 DLL_SCOPE P op_getstartupdir(void);
 DLL_SCOPE P op_getconfdir(void);

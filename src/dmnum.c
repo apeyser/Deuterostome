@@ -216,7 +216,7 @@ W COMPARE(B *frame1, B *frame2)
 
   Undefined values are copied in proper translation; conversion
   results exceeding the destination numerical range become undefined.
-  Can be used for conversion in place if source type VALUEBYTES >=
+  Can be used for conversion in place if socket type VALUEBYTES >=
   destination type VALUEBYTES.
 
   Note: uses function list provided by DMNUMINC
@@ -227,7 +227,7 @@ void MOVE(B *sframe, B *dframe)
 {
   W idx;
   
-  /* index (slow to fast): source type, dest type, class combination */ 
+  /* index (slow to fast): socket type, dest type, class combination */ 
   idx = ( TYPE(sframe) * nTYPES + TYPE(dframe) ) * 4;
   idx += (CLASS(sframe) == ARRAY)? 2 : 0;
   idx += (CLASS(dframe) == ARRAY)? 1 : 0;
@@ -263,8 +263,8 @@ void ADD(B *dframe, B *sframe)
 {
   W idx;
 
-  /* index (slow to fast): dest type, source type, class combination
-     (ss, as, sa, aa, in order dest, source)
+  /* index (slow to fast): dest type, socket type, class combination
+     (ss, as, sa, aa, in order dest, socket)
   */ 
   idx = ( TYPE(dframe) * nTYPES + TYPE(sframe) ) * 4;
   if (CLASS(dframe) == ARRAY) idx += 1;

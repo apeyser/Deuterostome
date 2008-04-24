@@ -27,8 +27,10 @@
           - bitshift
 */
 
-#include "dm.h"
 #include <stdio.h>
+
+#include "dm.h"
+#include "dm2.h"
 
 /*----------------------------------------------- start
    any_active | --

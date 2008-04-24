@@ -15,8 +15,6 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <signal.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
 #include <string.h>
 #include "dm.h"
 #include "dmx.h"
@@ -31,10 +29,6 @@ P op_fromconsole(void);
 #include "dgen_1.h"
 
 /*----------------- DM global variables -----------------------------*/
-
-extern B *sysop[];
-extern P errc[];
-extern B *errm[];
 
 /*--------- signal handler: SIGFPE */
 
@@ -68,6 +62,10 @@ int main(void)
   P nb, retc,tnb;
   B *sysdict, *userdict, *Dmemory, *p;
   int sufd;
+
+  sysop = _sysop;
+  syserrc = _syserrc;
+  syserrm = _syserrm;
 
   serialized = TRUE; // no serialize operator
 

@@ -76,7 +76,7 @@ static P x,y,s;
 /*-------------------------- support routines -------------------------------*/
 
 /*------ copy_array
-  - copies a source array of any type into temporary long array
+  - copies a socket array of any type into temporary long array
 */
 
 static P copy_array(B *sf, B **df, B **freevm)
@@ -97,7 +97,7 @@ static P copy_array(B *sf, B **df, B **freevm)
 }
 
 /*------ copy_list
-  - copies a source list of numerals into temporary long array
+  - copies a socket list of numerals into temporary long array
 */
 
 static P copy_list(B *sf, B **df, B **freevm)
@@ -158,7 +158,7 @@ static P merge(B *xf, B *yf, B **xyf, B **freevm)
 }
 
 /*------ xy
-  - copies the source array(s) while converting into long type
+  - copies the socket array(s) while converting into long type
   - merges separate x,y arrays into one
   - new arrays are stored in temporary VM space
 */

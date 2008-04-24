@@ -8,9 +8,6 @@
 
 #if DM_ENABLE_THREADS
 
-P op_makethreads(void);
-P op_threads(void);
-
 // thread[0] is the main thread in all arrays
 // Therefore, elements 0 is empty.
 pthread_t threads[THREADNUM] = {};

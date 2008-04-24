@@ -28,6 +28,7 @@ P recsocket = -1;
 P maxsocket = 0;            // maxsocket = max(socketfd)+1
 P consolesocket = PINF;
 fd_set sock_fds;            /* active sockets                 */
+BOOLEAN halt_flag;          /* execution block due to 'halt'     */
 
 const char* startup_dir; // setup by makefile in main
                          // defines which directory to use for
@@ -40,6 +41,10 @@ B* conf_dir_frame; //points to the frame holding confdir
 B* myname_frame; //points to the frame holding my hostname
 B* myfqdn_frame; //points to the frame holding my fully qualified domain name
 B* myxname_frame; //points to the frame buffering the DISPLAY name
+
+B** syserrm;
+P* syserrc;
+B** sysop;
 
 /*---------------------------- ASCII character classification table
 

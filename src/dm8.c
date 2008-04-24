@@ -14,8 +14,10 @@
 ========================================================================*/
 
 /*------------------------------ externals -----------------------------*/
-#include "dm.h"
 #include <math.h>
+
+#include "dm.h"
+#include "dm2.h"
 
 /*------------------------------------ used
   dict | int
@@ -91,10 +93,10 @@ P op_length(void)
  - faxes value of internal/external composite object into
    internal/external composite object (any combination)
  - array types match
- - in the case of byte arrays: dest and source starting addresses have
-   to be even; also, in case of odd source length, one dest byte
+ - in the case of byte arrays: dest and socket starting addresses have
+   to be even; also, in case of odd socket length, one dest byte
    following the range mofified by 'fax' becomes undefined
- - the destination accommodates the entire source
+ - the destination accommodates the entire socket
  - the list/subarray and updated index are returned
  - no internal objects are contained in the list faxed to an external list
  - internal VM space is used as buffer of external/external faxes of
@@ -157,7 +159,7 @@ P op_fax(void)
     dest_dict src_dict | dest_dict
 
  - accepts any combination of dictionaries
- - acts like 'put' operator with all entries of the source
+ - acts like 'put' operator with all entries of the socket
 */
 
 P op_merge(void)

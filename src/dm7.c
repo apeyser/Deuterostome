@@ -18,9 +18,7 @@
           - transcribe
 */
 
-#define _GNU_SOURCE
-
-#include "dm.h"
+//#define _GNU_SOURCE
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -35,6 +33,9 @@
 #include <math.h>
 #include <sys/wait.h>
 #include <signal.h>
+
+#include "dm.h"
+#include "dm2.h"
 
 /*--------------------------------------------------- gettime
    -- | time

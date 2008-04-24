@@ -5,22 +5,22 @@
   NOTA BENE: this implies FRAMEBYTES = n*8 for sake of speed!
 */
 
-void moveframe(B *source, B *dest)
+void moveframe(B *socket, B *dest)
 {
   unsigned int i;
   int64_t *s,*d;
 
-  s = (int64_t *)source; d = (int64_t *)dest;
+  s = (int64_t *)socket; d = (int64_t *)dest;
   for (i=0;i<FRAMEBYTES/sizeof(int64_t);++i)
     *(d++) = *(s++);
 }
 
-void moveframes(B *source, B *dest, P n)
+void moveframes(B *socket, B *dest, P n)
 {
   unsigned int i;
   int64_t *s,*d;
 
-  s = (int64_t*)source; d = (int64_t*)dest;
+  s = (int64_t*)socket; d = (int64_t*)dest;
   for (; n>0; n--) 
     for (i=0;i<FRAMEBYTES/sizeof(int64_t);++i) 
       *(d++) = *(s++);
@@ -30,39 +30,39 @@ void moveframes(B *source, B *dest, P n)
 
 These move blocks of different data sizes among aligned locations     */
 
-void moveB(B *source, B *dest, P n)
+void moveB(B *socket, B *dest, P n)
 {
-  for (; n>0; n--) *(dest++) = *(source++);
+  for (; n>0; n--) *(dest++) = *(socket++);
 }
 
-void moveW(W *source, W *dest, P n)
+void moveW(W *socket, W *dest, P n)
 { 
-  for (; n>0; n--) *(dest++) = *(source++);
+  for (; n>0; n--) *(dest++) = *(socket++);
 }
 
-void moveL32(L32 *source, L32 *dest, P n)
+void moveL32(L32 *socket, L32 *dest, P n)
 { 
-  for (; n>0; n--) *(dest++) = *(source++);
+  for (; n>0; n--) *(dest++) = *(socket++);
 }
 
-void moveL64(L64 *source, L64 *dest, P n)
+void moveL64(L64 *socket, L64 *dest, P n)
 {
-  for (; n>0; n--) *(dest++) = *(source++);
+  for (; n>0; n--) *(dest++) = *(socket++);
 }
 
-void moveLBIG(LBIG* source, LBIG* dest, P n)
+void moveLBIG(LBIG* socket, LBIG* dest, P n)
 {
-  moveL64(source, dest, n);
+  moveL64(socket, dest, n);
 }
 
-void moveS(S *source, S *dest, P n)
+void moveS(S *socket, S *dest, P n)
 { 
-  for (; n>0; n--) *(dest++) = *(source++);
+  for (; n>0; n--) *(dest++) = *(socket++);
 }
 
-void moveD(D *source, D *dest, P n)
+void moveD(D *socket, D *dest, P n)
 { 
-  for (; n>0; n--) *(dest++) = *(source++);
+  for (; n>0; n--) *(dest++) = *(socket++);
 }
 
 P deendian_frame(B *frame, B isnonnative) {

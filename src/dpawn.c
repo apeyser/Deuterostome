@@ -5,23 +5,17 @@
 */
 
 #include <unistd.h>
-#include <netdb.h>
-#include <stdlib.h>
+#include <time.h>
+#include <stdio.h>
 #include <errno.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <mpi.h>
 
 #include "dm.h"
-#include "dmx.h"
-#include "dm-dnode.h"
+#include "dm-nextevent.h"
+#include "dm-mpi.h"
 #include "dm-vm.h"
-#include "error-local.h"
-
-#include "dregex.h"
-#include "threads.h"
-#include "matrix.h"
-#include "dm-convert.h"
-#include "pluginlib.h"
-#include "dm3.h"
-#include "dnode_0.h"
 
 /*----------------- DM global variables -----------------------------*/
 
@@ -29,22 +23,21 @@
 /*-------------------------- DM globals --------------------------------*/
 
 
-
-/*------------------------- for this module --------------------------*/
-
 /*------------------------- include modules of dnode -------------------*/
 
-/*----------------------- supervisor tools -------------------------*/
+#include "pluginlib.h"
+#include "matrix.h"
+#include "dm-convert.h"
+#include "pluginlib.h"
+#include "threads.h"
+#include "dm-dpawn.h"
+#include "dregex.h"
 
-DM_INLINE_STATIC void usage_error(int errno_) __attribute__ ((__noreturn__));
-DM_INLINE_STATIC void usage_error(int errno_) {
-  error(EXIT_FAILURE, errno_, "usage is: dnode portnumber [setsid=0/1]");
-  exit(1);
-}
+#include "dpawn_0.h"
 
 /*------------------------------ main ----------------------------------
 
-- usage: dnode portnumber
+- usage: dpawn
 
 'dnode' runs as a TCP demon that serves port 'portnumber' until
 it is killed. 'portnumber' is an offset into the range of port numbers
@@ -124,91 +117,11 @@ execution can be interrupted by a subsequent message. If a message takes less
 than the 100 cycles to execute, the remainder of the 100 cycles goes to a
 previous message whose execution has been interrupted.
 
-While an X server is connected to the dnode, the idle dnode will not doze
-indefinitely. Instead it will check for X events every 0.2 sec for up to
-1 min, and then increase the scan interval to 1 sec. Socket messages from
-dnodes or a dvt are detected without delay.
-
-Three types of X server messages are propagated to the D level by pushing
-one of the following active names on the execution stack:
-
-       windowsize   - the window dimensions have been changed
-       drawwindow   - an X window needs to be (re)drawn
-       mouseclick   - a mouseclick into an X window has occurred
-
-Furthermore, a dictionary associated with the window's name is pushed on the
-dictionary stack; this dictionary must be defined in userdict and associated
-there with a name that is concatenated from "w" followed by digits that
-specify the window#. Other parameters needed to respond to the event are
-placed on the operand stack; these are event-specific:
-
-       | string                     (consoleline)
-       | string                     (nodemessage)
-       | rootobj string             (nodemessage)
-       | width height               (windowsize)
-       | --                         (drawwindow)
-       | x y modifier               (mouseclick) 
-
-Mouse clicks are interpreted in conjunction with modifier keys that are
-simultaneously held down on the keyboard; the modifier is reported as
-binary pattern (starting with the LSB: shift, capslock, modifier1,..,
-modifier5, where the modifier keys depend on the specific keyboard).
-If the mouse has more than one button (up to 5), these are reported
-(from left to right) by modifier values of 0,1,2,4, or 8.
-
 */
 
-int main(int argc, char *argv[])
+int main(int argc __attribute__ ((__unused__)), 
+	 char *argv[] __attribute__((__unused__)) )
 {
-  char* endptr;
-
-  sysop = _sysop;
-  syserrm = _syserrm;
-  syserrc = _syserrc;
-
-#if HAVE_SETSID
-  // separate from current session - don't die if term closed.
-  if (argc < 3) setsid(); 
-  else if (argc == 3) {
-    char* endptr;
-    long ss = strtol(argv[2], &endptr, 10);
-    if (! argv[2] || *endptr) usage_error(0);
-    if (ss) setsid();
-  }
-#endif
-
-/*------------------------ get host name */
-
-  if (gethostname((char*)hostname,255) == -1) 
-    error(EXIT_FAILURE,errno,"gethostname");
-
-/*------------------------ parse arguments */
-  if (argc < 2) usage_error(0);
-  switch (serverport = strtol(argv[1], &endptr, 0)) {
-    case LONG_MAX: case LONG_MIN: 
-      if (errno) usage_error(errno);
-  }
-  if (! *(argv[1]) || *endptr) usage_error(errno);
-
-  if (DM_IPPORT_USERRESERVED != DM_IPPORT_USERRESERVED_STANDARD)
-    fprintf(stderr, 
-	    "Unusual value for IPPORT_USERRESERVED: %i instead of %i\n",
-	    DM_IPPORT_USERRESERVED, DM_IPPORT_USERRESERVED_STANDARD);
-  serverport += DM_IPPORT_USERRESERVED;
-
-/*-------------------- prime the socket table -----------------------
-  We use a fd_set bit array to keep track of active sockets. Hence,
-  the number of active sockets is limited to the FD_SET_SIZE of
-  the host system. 
-*/
-  FD_ZERO(&sock_fds);
-
-/*------------- make server socket and listen on it -----------------
-
-Note: all communication errors that can only be due to faulty code
-(rather than an external condition) are reported through 'error' and
-thus lead to termination of this process.
-*/
-
-  run_dnode_mill();
+  initmpi();
+  run_dpawn_mill();
 }

@@ -167,11 +167,11 @@ DM_INLINE_STATIC void Z32_pullname(B *nameframe, B *namestring)
   NOTA BENE: this implies FRAMEBYTES = 16 for sake of speed!
 */
 
-DM_INLINE_STATIC void Z32_moveframe(B *source, B *dest)
+DM_INLINE_STATIC void Z32_moveframe(B *socket, B *dest)
 {
 D *s,*d;
 
-s = (D *)source; d = (D *)dest;
+s = (D *)socket; d = (D *)dest;
 *(d++) = *(s++); *(d++) = *(s++);
 
 }

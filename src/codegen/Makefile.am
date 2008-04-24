@@ -25,9 +25,9 @@ gencode: all $(PRODSRCS)
 
 libdmbootstrap_la_SOURCES = dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h \
 	dmglobals.c dm1.c dm2.c dm-conv.c dm-swapbytes.h \
-	dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm-types.c
+	dm4.c dm5.c dm6.c dm7.c dm8.c dm-types.c 
 
-dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h
+dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h dm3.c
 dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dgen_LDADD = libdmbootstrap.la
 

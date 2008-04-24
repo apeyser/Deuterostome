@@ -57,18 +57,19 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = dmnuminc.d dsp2def.d startup_dgen.d dmglobals.c \
-	dsp1.c dm1.c dm2.c dm-swapbytes.h dm-conv.c dm3.c dm4.c dm5.c \
-	dm6.c dm7.c dm8.c dmnum.c dsp2.c dm-types.h dm-types.c \
+	dsp1.c dm1.c dm2.c dm2.h dm-swapbytes.h dm-conv.c dm3.c dm4.c \
+	dm5.c dm6.c dm7.c dm8.c dmnum.c dsp2.c dm-types.h dm-types.c \
 	paths.h.in dgen.c dgen_1.h dgen-build dmnum.h dm-nextevent.c \
 	dm-nextevent.h
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libdmbootstrap_la_LIBADD =
 am_libdmbootstrap_la_OBJECTS = dmnum.lo dsp1.lo dsp2.lo dmglobals.lo \
-	dm1.lo dm2.lo dm-conv.lo dm3.lo dm4.lo dm5.lo dm6.lo dm7.lo \
-	dm8.lo dm-types.lo
+	dm1.lo dm2.lo dm-conv.lo dm4.lo dm5.lo dm6.lo dm7.lo dm8.lo \
+	dm-types.lo
 libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
-am_dgen_OBJECTS = dgen-dgen.$(OBJEXT) dgen-dm-nextevent.$(OBJEXT)
+am_dgen_OBJECTS = dgen-dgen.$(OBJEXT) dgen-dm-nextevent.$(OBJEXT) \
+	dgen-dm3.$(OBJEXT)
 dgen_OBJECTS = $(am_dgen_OBJECTS)
 dgen_DEPENDENCIES = libdmbootstrap.la
 dgen_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -330,9 +331,9 @@ PRODSRCS = dmnuminc.h.built dsp1f.h.built dsp2def.h.built \
 EXTRA_DIST = dmnuminc.d.in paths.h.in dsp2def.d.in
 libdmbootstrap_la_SOURCES = dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h \
 	dmglobals.c dm1.c dm2.c dm-conv.c dm-swapbytes.h \
-	dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm-types.c
+	dm4.c dm5.c dm6.c dm7.c dm8.c dm-types.c 
 
-dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h
+dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h dm3.c
 dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dgen_LDADD = libdmbootstrap.la
 edit = sed \
@@ -411,11 +412,11 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dgen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dm-nextevent.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dm3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm-conv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm-types.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm2.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm3.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm4.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm5.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm6.Plo@am__quote@
@@ -474,6 +475,20 @@ dgen-dm-nextevent.obj: dm-nextevent.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-nextevent.c' object='dgen-dm-nextevent.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dm-nextevent.obj `if test -f 'dm-nextevent.c'; then $(CYGPATH_W) 'dm-nextevent.c'; else $(CYGPATH_W) '$(srcdir)/dm-nextevent.c'; fi`
+
+dgen-dm3.o: dm3.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -MT dgen-dm3.o -MD -MP -MF $(DEPDIR)/dgen-dm3.Tpo -c -o dgen-dm3.o `test -f 'dm3.c' || echo '$(srcdir)/'`dm3.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dgen-dm3.Tpo $(DEPDIR)/dgen-dm3.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm3.c' object='dgen-dm3.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dm3.o `test -f 'dm3.c' || echo '$(srcdir)/'`dm3.c
+
+dgen-dm3.obj: dm3.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -MT dgen-dm3.obj -MD -MP -MF $(DEPDIR)/dgen-dm3.Tpo -c -o dgen-dm3.obj `if test -f 'dm3.c'; then $(CYGPATH_W) 'dm3.c'; else $(CYGPATH_W) '$(srcdir)/dm3.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dgen-dm3.Tpo $(DEPDIR)/dgen-dm3.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm3.c' object='dgen-dm3.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dm3.obj `if test -f 'dm3.c'; then $(CYGPATH_W) 'dm3.c'; else $(CYGPATH_W) '$(srcdir)/dm3.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

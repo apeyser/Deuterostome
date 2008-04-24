@@ -289,6 +289,7 @@ AC_CONFIG_LINKS([
   src/codegen/dsp1.c:src/dsp1.c
   src/codegen/dm1.c:src/dm1.c
   src/codegen/dm2.c:src/dm2.c
+  src/codegen/dm2.h:src/dm2.h
   src/codegen/dm-swapbytes.h:src/dm-swapbytes.h
   src/codegen/dm-conv.c:src/dm-conv.c
   src/codegen/dm3.c:src/dm3.c

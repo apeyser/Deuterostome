@@ -44,11 +44,11 @@ DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(dist_pkgdata_SCRIPTS) \
 	$(srcdir)/dm-conv.c $(srcdir)/dm-nextevent.c \
 	$(srcdir)/dm-nextevent.h $(srcdir)/dm-swapbytes.h \
 	$(srcdir)/dm-types.c $(srcdir)/dm-types.h $(srcdir)/dm.pc.in \
-	$(srcdir)/dm1.c $(srcdir)/dm2.c $(srcdir)/dm3.c \
-	$(srcdir)/dm4.c $(srcdir)/dm5.c $(srcdir)/dm6.c \
-	$(srcdir)/dm7.c $(srcdir)/dm8.c $(srcdir)/dmglobals.c \
-	$(srcdir)/dmnum.c $(srcdir)/dmnum.h $(srcdir)/dsp1.c \
-	$(srcdir)/dsp2.c $(srcdir)/paths.h.in
+	$(srcdir)/dm1.c $(srcdir)/dm2.c $(srcdir)/dm2.h \
+	$(srcdir)/dm3.c $(srcdir)/dm4.c $(srcdir)/dm5.c \
+	$(srcdir)/dm6.c $(srcdir)/dm7.c $(srcdir)/dm8.c \
+	$(srcdir)/dmglobals.c $(srcdir)/dmnum.c $(srcdir)/dmnum.h \
+	$(srcdir)/dsp1.c $(srcdir)/dsp2.c $(srcdir)/paths.h.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
@@ -82,11 +82,11 @@ am__objects_1 = libdmbootstrap_la-dmglobals.lo \
 	libdmbootstrap_la-dmnum.lo libdmbootstrap_la-dsp1.lo \
 	libdmbootstrap_la-dsp2.lo libdmbootstrap_la-dm1.lo \
 	libdmbootstrap_la-dm2.lo libdmbootstrap_la-dm-conv.lo \
-	libdmbootstrap_la-dm3.lo libdmbootstrap_la-dm4.lo \
-	libdmbootstrap_la-dm5.lo libdmbootstrap_la-dm6.lo \
-	libdmbootstrap_la-dm7.lo libdmbootstrap_la-dm8.lo \
-	libdmbootstrap_la-dm9.lo libdmbootstrap_la-plugin.lo \
-	libdmbootstrap_la-dm-types.lo
+	libdmbootstrap_la-dm4.lo libdmbootstrap_la-dm5.lo \
+	libdmbootstrap_la-dm6.lo libdmbootstrap_la-dm7.lo \
+	libdmbootstrap_la-dm8.lo libdmbootstrap_la-dm9.lo \
+	libdmbootstrap_la-plugin.lo libdmbootstrap_la-dm-types.lo \
+	libdmbootstrap_la-dm-vm.lo
 am_libdmbootstrap_la_OBJECTS = $(am__objects_1)
 libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
 libdmbootstrap_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
@@ -96,18 +96,18 @@ libdmbootstrap_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
 am__libdmglobals_la_SOURCES_DIST = dmglobals.c dmnuminc.h dmnum.c \
-	dsp1f.h dsp1.c dsp2.c paths.h dm1.c dm2.c dm-conv.c \
-	dm-swapbytes.h dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
-	pluginlib.h plugin.c dm-types.c xhack.h matrix.c matrix.h \
+	dsp1f.h dsp1.c dsp2.c paths.h dm1.c dm2.c dm2.h dm-conv.c \
+	dm-swapbytes.h dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c pluginlib.h \
+	plugin.c dm-types.c xhack.h dm-vm.h dm-vm.c matrix.c matrix.h \
 	threads.c dregex.c dregex.h dm-convert.h dm-convert.c
 am__objects_2 = libdmglobals_la-dmglobals.lo libdmglobals_la-dmnum.lo \
 	libdmglobals_la-dsp1.lo libdmglobals_la-dsp2.lo \
 	libdmglobals_la-dm1.lo libdmglobals_la-dm2.lo \
-	libdmglobals_la-dm-conv.lo libdmglobals_la-dm3.lo \
-	libdmglobals_la-dm4.lo libdmglobals_la-dm5.lo \
-	libdmglobals_la-dm6.lo libdmglobals_la-dm7.lo \
-	libdmglobals_la-dm8.lo libdmglobals_la-dm9.lo \
-	libdmglobals_la-plugin.lo libdmglobals_la-dm-types.lo
+	libdmglobals_la-dm-conv.lo libdmglobals_la-dm4.lo \
+	libdmglobals_la-dm5.lo libdmglobals_la-dm6.lo \
+	libdmglobals_la-dm7.lo libdmglobals_la-dm8.lo \
+	libdmglobals_la-dm9.lo libdmglobals_la-plugin.lo \
+	libdmglobals_la-dm-types.lo libdmglobals_la-dm-vm.lo
 @ENABLE_THREADS_TRUE@am__objects_3 = libdmglobals_la-threads.lo
 @ENABLE_REGEX_TRUE@am__objects_4 = libdmglobals_la-dregex.lo
 am_libdmglobals_la_OBJECTS = $(am__objects_2) \
@@ -118,18 +118,16 @@ libdmglobals_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libdmglobals_la_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 @ENABLE_DAEMON_TRUE@am__EXEEXT_1 = dnode-daemon$(EXEEXT)
-@ENABLE_MPI_TRUE@am__EXEEXT_2 = drook$(EXEEXT)
+@ENABLE_MPI_TRUE@am__EXEEXT_2 = drook$(EXEEXT) dpawn$(EXEEXT)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 @ENABLE_SETUID_TRUE@am__EXEEXT_3 = dnode-nice$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
-am_dgen_OBJECTS = dgen-dgen.$(OBJEXT) dgen-dm-nextevent.$(OBJEXT)
+am_dgen_OBJECTS = dgen-dgen.$(OBJEXT) dgen-dm-nextevent.$(OBJEXT) \
+	dgen-dm3.$(OBJEXT)
 dgen_OBJECTS = $(am_dgen_OBJECTS)
 dgen_DEPENDENCIES = $(am__DEPENDENCIES_1) libdmbootstrap.la
-am__dnode_SOURCES_DIST = dnode.c dnode_0.h dnode_1.h dmx.h \
-	dm-nextevent.c dm-nextevent.h dqueen.c
-@ENABLE_MPI_TRUE@am__objects_5 = dnode-dqueen.$(OBJEXT)
 am_dnode_OBJECTS = dnode-dnode.$(OBJEXT) dnode-dm-nextevent.$(OBJEXT) \
-	$(am__objects_5)
+	dnode-dm3.$(OBJEXT) dnode-dm-dnode.$(OBJEXT)
 dnode_OBJECTS = $(am_dnode_OBJECTS)
 dnode_DEPENDENCIES = libdmglobals.la
 dnode_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -142,13 +140,21 @@ dnode_daemon_LDADD = $(LDADD)
 @ENABLE_SETUID_TRUE@nodist_dnode_nice_OBJECTS = dnode-nice.$(OBJEXT)
 dnode_nice_OBJECTS = $(nodist_dnode_nice_OBJECTS)
 dnode_nice_LDADD = $(LDADD)
+am_dpawn_OBJECTS = dpawn-dpawn.$(OBJEXT) dpawn-dm-dpawn.$(OBJEXT) \
+	dpawn-dm-mpi.$(OBJEXT)
+dpawn_OBJECTS = $(am_dpawn_OBJECTS)
+dpawn_DEPENDENCIES = libdmglobals.la
+dpawn_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(dpawn_CFLAGS) $(CFLAGS) $(dpawn_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am_drook_OBJECTS = drook-drook.$(OBJEXT)
 drook_OBJECTS = $(am_drook_OBJECTS)
 drook_DEPENDENCIES = libdmbootstrap.la
 drook_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(drook_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am_dvt_OBJECTS = dvt-dvt.$(OBJEXT) dvt-dm-nextevent.$(OBJEXT)
+am_dvt_OBJECTS = dvt-dvt.$(OBJEXT) dvt-dm-nextevent.$(OBJEXT) \
+	dvt-dm3.$(OBJEXT) dvt-dm-dvt.$(OBJEXT)
 dvt_OBJECTS = $(am_dvt_OBJECTS)
 dvt_DEPENDENCIES = libdmglobals.la
 dvt_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -174,11 +180,12 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 SOURCES = $(libdmbootstrap_la_SOURCES) $(libdmglobals_la_SOURCES) \
 	$(dgen_SOURCES) $(dnode_SOURCES) \
 	$(nodist_dnode_daemon_SOURCES) $(nodist_dnode_nice_SOURCES) \
-	$(drook_SOURCES) $(dvt_SOURCES) $(testwordorder_SOURCES)
+	$(dpawn_SOURCES) $(drook_SOURCES) $(dvt_SOURCES) \
+	$(testwordorder_SOURCES)
 DIST_SOURCES = $(libdmbootstrap_la_SOURCES) \
 	$(am__libdmglobals_la_SOURCES_DIST) $(dgen_SOURCES) \
-	$(am__dnode_SOURCES_DIST) $(drook_SOURCES) $(dvt_SOURCES) \
-	$(testwordorder_SOURCES)
+	$(dnode_SOURCES) $(dpawn_SOURCES) $(drook_SOURCES) \
+	$(dvt_SOURCES) $(testwordorder_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -434,10 +441,14 @@ edit = sed \
 @ENABLE_THREADS_TRUE@THREAD_HDR = threads.h
 @ENABLE_THREADS_TRUE@THREADSRC = threads.c
 @ENABLE_REGEX_TRUE@REGEX_SRC = dregex.c dregex.h
-@ENABLE_MPI_TRUE@MPI_PROGS = drook
+@ENABLE_MPI_TRUE@MPI_PROGS = drook dpawn
 @ENABLE_MPI_TRUE@DNODE_MPI_SRCS = dqueen.c
-EXTRA_DIST = dnode-nice.c.in dnode-daemon.c.in paths.h.in drook.c.in dqueen.c.in
-BUILT_SOURCES = dnode-nice.c    dnode-daemon.c    paths.h    drook.c    dqueen.c
+EXTRA_DIST = dnode-nice.c.in dnode-daemon.c.in paths.h.in \
+	drook.c.in dqueen.c.in 
+
+BUILT_SOURCES = dnode-nice.c    dnode-daemon.c    paths.h    \
+	drook.c    dqueen.c
+
 CLEANFILES = $(BUILT_SOURCES)
 DISTCLEANFILES = dm-config.h
 AM_CPPFLAGS = -DDM_HAVE_CONFIG_H
@@ -453,25 +464,34 @@ pkginclude_HEADERS = dm.h dm3.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
 	basic-defs.h dm-types.h dm-nextevent.h
 
 nodist_pkginclude_HEADERS = dm-config.h paths.h
-dvt_SOURCES = dvt.c dvt_0.h dvt_1.h dm-nextevent.c dm-nextevent.h
+dvt_SOURCES = dvt.c dvt_0.h dm-nextevent.c dm-nextevent.h dm3.c \
+	dm-dvt.h dm-dvt.c
+
 dvt_LDADD = libdmglobals.la
 dvt_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS)
 dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS)
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
-dnode_SOURCES = dnode.c dnode_0.h dnode_1.h dmx.h \
-	dm-nextevent.c dm-nextevent.h $(DNODE_MPI_SRCS)
+dnode_SOURCES = dnode.c dnode_0.h dmx.h \
+	dm-nextevent.c dm-nextevent.h \
+	dm3.c dm-dnode.h dm-dnode.c
 
 dnode_LDADD = libdmglobals.la 
-dnode_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS)
+dnode_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS) $(MPI_LIBS)
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
-dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
+dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS) $(MPI_FLAGS)
+dpawn_SOURCES = dpawn.c dpawn_0.h dm-dpawn.h dm-dpawn.c dm-mpi.h dm-mpi.c
+dpawn_LDADD = libdmglobals.la
+dpawn_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS) $(MPI_LIBS)
+dpawn_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
+dpawn_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS) $(MPI_FLAGS)
 testwordorder_SOURCES = test-word-order.c
 globsrcs = dmglobals.c \
 	dmnuminc.h dmnum.c dsp1f.h dsp1.c dsp2.c \
-	paths.h dm1.c dm2.c dm-conv.c dm-swapbytes.h\
-	dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
+	paths.h dm1.c dm2.c dm2.h dm-conv.c dm-swapbytes.h\
+	dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	pluginlib.h plugin.c \
-	dm-types.c xhack.h
+	dm-types.c xhack.h \
+	dm-vm.h dm-vm.c
 
 lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la
 libdmglobals_la_LIBADD = $(PLUGIN_LD) $(ATLAS_LIBS) @VERSION_INFO@ @RELEASE_INFO@
@@ -489,7 +509,7 @@ editpaths = sed \
 
 nodist_pkgconfiglib_DATA = dm.pc
 dist_pkgdata_SCRIPTS = dgen-build
-dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h
+dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h dm3.c
 dgen_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DBOOTSTRAP_PLUGIN=1 -DDM_DISABLE_REGEX=1 \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 \
@@ -626,6 +646,9 @@ dnode-daemon$(EXEEXT): $(dnode_daemon_OBJECTS) $(dnode_daemon_DEPENDENCIES)
 dnode-nice$(EXEEXT): $(dnode_nice_OBJECTS) $(dnode_nice_DEPENDENCIES) 
 	@rm -f dnode-nice$(EXEEXT)
 	$(LINK) $(dnode_nice_OBJECTS) $(dnode_nice_LDADD) $(LIBS)
+dpawn$(EXEEXT): $(dpawn_OBJECTS) $(dpawn_DEPENDENCIES) 
+	@rm -f dpawn$(EXEEXT)
+	$(dpawn_LINK) $(dpawn_OBJECTS) $(dpawn_LDADD) $(LIBS)
 drook$(EXEEXT): $(drook_OBJECTS) $(drook_DEPENDENCIES) 
 	@rm -f drook$(EXEEXT)
 	$(drook_LINK) $(drook_OBJECTS) $(drook_LDADD) $(LIBS)
@@ -663,19 +686,26 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dgen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dm-nextevent.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dm3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-daemon.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dm-dnode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dm-nextevent.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dm3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dnode.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dqueen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-nice.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpawn-dm-dpawn.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpawn-dm-mpi.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpawn-dpawn.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drook-drook.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvt-dm-dvt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvt-dm-nextevent.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvt-dm3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvt-dvt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm-conv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm-types.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm-vm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm2.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm3.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm4.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm5.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm6.Plo@am__quote@
@@ -690,9 +720,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm-conv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm-convert.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm-types.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm-vm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm2.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm3.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm4.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm5.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm6.Plo@am__quote@
@@ -779,13 +809,6 @@ libdmbootstrap_la-dm-conv.lo: dm-conv.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(libdmbootstrap_la_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dm-conv.lo `test -f 'dm-conv.c' || echo '$(srcdir)/'`dm-conv.c
 
-libdmbootstrap_la-dm3.lo: dm3.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(libdmbootstrap_la_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dm3.lo -MD -MP -MF $(DEPDIR)/libdmbootstrap_la-dm3.Tpo -c -o libdmbootstrap_la-dm3.lo `test -f 'dm3.c' || echo '$(srcdir)/'`dm3.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmbootstrap_la-dm3.Tpo $(DEPDIR)/libdmbootstrap_la-dm3.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm3.c' object='libdmbootstrap_la-dm3.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(libdmbootstrap_la_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dm3.lo `test -f 'dm3.c' || echo '$(srcdir)/'`dm3.c
-
 libdmbootstrap_la-dm4.lo: dm4.c
 @am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(libdmbootstrap_la_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dm4.lo -MD -MP -MF $(DEPDIR)/libdmbootstrap_la-dm4.Tpo -c -o libdmbootstrap_la-dm4.lo `test -f 'dm4.c' || echo '$(srcdir)/'`dm4.c
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmbootstrap_la-dm4.Tpo $(DEPDIR)/libdmbootstrap_la-dm4.Plo
@@ -842,6 +865,13 @@ libdmbootstrap_la-dm-types.lo: dm-types.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(libdmbootstrap_la_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dm-types.lo `test -f 'dm-types.c' || echo '$(srcdir)/'`dm-types.c
 
+libdmbootstrap_la-dm-vm.lo: dm-vm.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(libdmbootstrap_la_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dm-vm.lo -MD -MP -MF $(DEPDIR)/libdmbootstrap_la-dm-vm.Tpo -c -o libdmbootstrap_la-dm-vm.lo `test -f 'dm-vm.c' || echo '$(srcdir)/'`dm-vm.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmbootstrap_la-dm-vm.Tpo $(DEPDIR)/libdmbootstrap_la-dm-vm.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-vm.c' object='libdmbootstrap_la-dm-vm.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(libdmbootstrap_la_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dm-vm.lo `test -f 'dm-vm.c' || echo '$(srcdir)/'`dm-vm.c
+
 libdmglobals_la-dmglobals.lo: dmglobals.c
 @am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -MT libdmglobals_la-dmglobals.lo -MD -MP -MF $(DEPDIR)/libdmglobals_la-dmglobals.Tpo -c -o libdmglobals_la-dmglobals.lo `test -f 'dmglobals.c' || echo '$(srcdir)/'`dmglobals.c
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmglobals_la-dmglobals.Tpo $(DEPDIR)/libdmglobals_la-dmglobals.Plo
@@ -890,13 +920,6 @@ libdmglobals_la-dm-conv.lo: dm-conv.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-conv.c' object='libdmglobals_la-dm-conv.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -c -o libdmglobals_la-dm-conv.lo `test -f 'dm-conv.c' || echo '$(srcdir)/'`dm-conv.c
-
-libdmglobals_la-dm3.lo: dm3.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -MT libdmglobals_la-dm3.lo -MD -MP -MF $(DEPDIR)/libdmglobals_la-dm3.Tpo -c -o libdmglobals_la-dm3.lo `test -f 'dm3.c' || echo '$(srcdir)/'`dm3.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmglobals_la-dm3.Tpo $(DEPDIR)/libdmglobals_la-dm3.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm3.c' object='libdmglobals_la-dm3.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -c -o libdmglobals_la-dm3.lo `test -f 'dm3.c' || echo '$(srcdir)/'`dm3.c
 
 libdmglobals_la-dm4.lo: dm4.c
 @am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -MT libdmglobals_la-dm4.lo -MD -MP -MF $(DEPDIR)/libdmglobals_la-dm4.Tpo -c -o libdmglobals_la-dm4.lo `test -f 'dm4.c' || echo '$(srcdir)/'`dm4.c
@@ -954,6 +977,13 @@ libdmglobals_la-dm-types.lo: dm-types.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -c -o libdmglobals_la-dm-types.lo `test -f 'dm-types.c' || echo '$(srcdir)/'`dm-types.c
 
+libdmglobals_la-dm-vm.lo: dm-vm.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -MT libdmglobals_la-dm-vm.lo -MD -MP -MF $(DEPDIR)/libdmglobals_la-dm-vm.Tpo -c -o libdmglobals_la-dm-vm.lo `test -f 'dm-vm.c' || echo '$(srcdir)/'`dm-vm.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmglobals_la-dm-vm.Tpo $(DEPDIR)/libdmglobals_la-dm-vm.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-vm.c' object='libdmglobals_la-dm-vm.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -c -o libdmglobals_la-dm-vm.lo `test -f 'dm-vm.c' || echo '$(srcdir)/'`dm-vm.c
+
 libdmglobals_la-matrix.lo: matrix.c
 @am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -MT libdmglobals_la-matrix.lo -MD -MP -MF $(DEPDIR)/libdmglobals_la-matrix.Tpo -c -o libdmglobals_la-matrix.lo `test -f 'matrix.c' || echo '$(srcdir)/'`matrix.c
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmglobals_la-matrix.Tpo $(DEPDIR)/libdmglobals_la-matrix.Plo
@@ -1010,6 +1040,20 @@ dgen-dm-nextevent.obj: dm-nextevent.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dgen_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgen-dm-nextevent.obj `if test -f 'dm-nextevent.c'; then $(CYGPATH_W) 'dm-nextevent.c'; else $(CYGPATH_W) '$(srcdir)/dm-nextevent.c'; fi`
 
+dgen-dm3.o: dm3.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dgen_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dgen-dm3.o -MD -MP -MF $(DEPDIR)/dgen-dm3.Tpo -c -o dgen-dm3.o `test -f 'dm3.c' || echo '$(srcdir)/'`dm3.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dgen-dm3.Tpo $(DEPDIR)/dgen-dm3.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm3.c' object='dgen-dm3.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dgen_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgen-dm3.o `test -f 'dm3.c' || echo '$(srcdir)/'`dm3.c
+
+dgen-dm3.obj: dm3.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dgen_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dgen-dm3.obj -MD -MP -MF $(DEPDIR)/dgen-dm3.Tpo -c -o dgen-dm3.obj `if test -f 'dm3.c'; then $(CYGPATH_W) 'dm3.c'; else $(CYGPATH_W) '$(srcdir)/dm3.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dgen-dm3.Tpo $(DEPDIR)/dgen-dm3.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm3.c' object='dgen-dm3.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dgen_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgen-dm3.obj `if test -f 'dm3.c'; then $(CYGPATH_W) 'dm3.c'; else $(CYGPATH_W) '$(srcdir)/dm3.c'; fi`
+
 dnode-dnode.o: dnode.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dnode.o -MD -MP -MF $(DEPDIR)/dnode-dnode.Tpo -c -o dnode-dnode.o `test -f 'dnode.c' || echo '$(srcdir)/'`dnode.c
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dnode-dnode.Tpo $(DEPDIR)/dnode-dnode.Po
@@ -1038,19 +1082,75 @@ dnode-dm-nextevent.obj: dm-nextevent.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dm-nextevent.obj `if test -f 'dm-nextevent.c'; then $(CYGPATH_W) 'dm-nextevent.c'; else $(CYGPATH_W) '$(srcdir)/dm-nextevent.c'; fi`
 
-dnode-dqueen.o: dqueen.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dqueen.o -MD -MP -MF $(DEPDIR)/dnode-dqueen.Tpo -c -o dnode-dqueen.o `test -f 'dqueen.c' || echo '$(srcdir)/'`dqueen.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dnode-dqueen.Tpo $(DEPDIR)/dnode-dqueen.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dqueen.c' object='dnode-dqueen.o' libtool=no @AMDEPBACKSLASH@
+dnode-dm3.o: dm3.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dm3.o -MD -MP -MF $(DEPDIR)/dnode-dm3.Tpo -c -o dnode-dm3.o `test -f 'dm3.c' || echo '$(srcdir)/'`dm3.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dnode-dm3.Tpo $(DEPDIR)/dnode-dm3.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm3.c' object='dnode-dm3.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dqueen.o `test -f 'dqueen.c' || echo '$(srcdir)/'`dqueen.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dm3.o `test -f 'dm3.c' || echo '$(srcdir)/'`dm3.c
 
-dnode-dqueen.obj: dqueen.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dqueen.obj -MD -MP -MF $(DEPDIR)/dnode-dqueen.Tpo -c -o dnode-dqueen.obj `if test -f 'dqueen.c'; then $(CYGPATH_W) 'dqueen.c'; else $(CYGPATH_W) '$(srcdir)/dqueen.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dnode-dqueen.Tpo $(DEPDIR)/dnode-dqueen.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dqueen.c' object='dnode-dqueen.obj' libtool=no @AMDEPBACKSLASH@
+dnode-dm3.obj: dm3.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dm3.obj -MD -MP -MF $(DEPDIR)/dnode-dm3.Tpo -c -o dnode-dm3.obj `if test -f 'dm3.c'; then $(CYGPATH_W) 'dm3.c'; else $(CYGPATH_W) '$(srcdir)/dm3.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dnode-dm3.Tpo $(DEPDIR)/dnode-dm3.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm3.c' object='dnode-dm3.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dqueen.obj `if test -f 'dqueen.c'; then $(CYGPATH_W) 'dqueen.c'; else $(CYGPATH_W) '$(srcdir)/dqueen.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dm3.obj `if test -f 'dm3.c'; then $(CYGPATH_W) 'dm3.c'; else $(CYGPATH_W) '$(srcdir)/dm3.c'; fi`
+
+dnode-dm-dnode.o: dm-dnode.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dm-dnode.o -MD -MP -MF $(DEPDIR)/dnode-dm-dnode.Tpo -c -o dnode-dm-dnode.o `test -f 'dm-dnode.c' || echo '$(srcdir)/'`dm-dnode.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dnode-dm-dnode.Tpo $(DEPDIR)/dnode-dm-dnode.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-dnode.c' object='dnode-dm-dnode.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dm-dnode.o `test -f 'dm-dnode.c' || echo '$(srcdir)/'`dm-dnode.c
+
+dnode-dm-dnode.obj: dm-dnode.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dm-dnode.obj -MD -MP -MF $(DEPDIR)/dnode-dm-dnode.Tpo -c -o dnode-dm-dnode.obj `if test -f 'dm-dnode.c'; then $(CYGPATH_W) 'dm-dnode.c'; else $(CYGPATH_W) '$(srcdir)/dm-dnode.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dnode-dm-dnode.Tpo $(DEPDIR)/dnode-dm-dnode.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-dnode.c' object='dnode-dm-dnode.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dm-dnode.obj `if test -f 'dm-dnode.c'; then $(CYGPATH_W) 'dm-dnode.c'; else $(CYGPATH_W) '$(srcdir)/dm-dnode.c'; fi`
+
+dpawn-dpawn.o: dpawn.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dpawn_CPPFLAGS) $(CPPFLAGS) $(dpawn_CFLAGS) $(CFLAGS) -MT dpawn-dpawn.o -MD -MP -MF $(DEPDIR)/dpawn-dpawn.Tpo -c -o dpawn-dpawn.o `test -f 'dpawn.c' || echo '$(srcdir)/'`dpawn.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dpawn-dpawn.Tpo $(DEPDIR)/dpawn-dpawn.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dpawn.c' object='dpawn-dpawn.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dpawn_CPPFLAGS) $(CPPFLAGS) $(dpawn_CFLAGS) $(CFLAGS) -c -o dpawn-dpawn.o `test -f 'dpawn.c' || echo '$(srcdir)/'`dpawn.c
+
+dpawn-dpawn.obj: dpawn.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dpawn_CPPFLAGS) $(CPPFLAGS) $(dpawn_CFLAGS) $(CFLAGS) -MT dpawn-dpawn.obj -MD -MP -MF $(DEPDIR)/dpawn-dpawn.Tpo -c -o dpawn-dpawn.obj `if test -f 'dpawn.c'; then $(CYGPATH_W) 'dpawn.c'; else $(CYGPATH_W) '$(srcdir)/dpawn.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dpawn-dpawn.Tpo $(DEPDIR)/dpawn-dpawn.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dpawn.c' object='dpawn-dpawn.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dpawn_CPPFLAGS) $(CPPFLAGS) $(dpawn_CFLAGS) $(CFLAGS) -c -o dpawn-dpawn.obj `if test -f 'dpawn.c'; then $(CYGPATH_W) 'dpawn.c'; else $(CYGPATH_W) '$(srcdir)/dpawn.c'; fi`
+
+dpawn-dm-dpawn.o: dm-dpawn.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dpawn_CPPFLAGS) $(CPPFLAGS) $(dpawn_CFLAGS) $(CFLAGS) -MT dpawn-dm-dpawn.o -MD -MP -MF $(DEPDIR)/dpawn-dm-dpawn.Tpo -c -o dpawn-dm-dpawn.o `test -f 'dm-dpawn.c' || echo '$(srcdir)/'`dm-dpawn.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dpawn-dm-dpawn.Tpo $(DEPDIR)/dpawn-dm-dpawn.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-dpawn.c' object='dpawn-dm-dpawn.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dpawn_CPPFLAGS) $(CPPFLAGS) $(dpawn_CFLAGS) $(CFLAGS) -c -o dpawn-dm-dpawn.o `test -f 'dm-dpawn.c' || echo '$(srcdir)/'`dm-dpawn.c
+
+dpawn-dm-dpawn.obj: dm-dpawn.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dpawn_CPPFLAGS) $(CPPFLAGS) $(dpawn_CFLAGS) $(CFLAGS) -MT dpawn-dm-dpawn.obj -MD -MP -MF $(DEPDIR)/dpawn-dm-dpawn.Tpo -c -o dpawn-dm-dpawn.obj `if test -f 'dm-dpawn.c'; then $(CYGPATH_W) 'dm-dpawn.c'; else $(CYGPATH_W) '$(srcdir)/dm-dpawn.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dpawn-dm-dpawn.Tpo $(DEPDIR)/dpawn-dm-dpawn.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-dpawn.c' object='dpawn-dm-dpawn.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dpawn_CPPFLAGS) $(CPPFLAGS) $(dpawn_CFLAGS) $(CFLAGS) -c -o dpawn-dm-dpawn.obj `if test -f 'dm-dpawn.c'; then $(CYGPATH_W) 'dm-dpawn.c'; else $(CYGPATH_W) '$(srcdir)/dm-dpawn.c'; fi`
+
+dpawn-dm-mpi.o: dm-mpi.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dpawn_CPPFLAGS) $(CPPFLAGS) $(dpawn_CFLAGS) $(CFLAGS) -MT dpawn-dm-mpi.o -MD -MP -MF $(DEPDIR)/dpawn-dm-mpi.Tpo -c -o dpawn-dm-mpi.o `test -f 'dm-mpi.c' || echo '$(srcdir)/'`dm-mpi.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dpawn-dm-mpi.Tpo $(DEPDIR)/dpawn-dm-mpi.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-mpi.c' object='dpawn-dm-mpi.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dpawn_CPPFLAGS) $(CPPFLAGS) $(dpawn_CFLAGS) $(CFLAGS) -c -o dpawn-dm-mpi.o `test -f 'dm-mpi.c' || echo '$(srcdir)/'`dm-mpi.c
+
+dpawn-dm-mpi.obj: dm-mpi.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dpawn_CPPFLAGS) $(CPPFLAGS) $(dpawn_CFLAGS) $(CFLAGS) -MT dpawn-dm-mpi.obj -MD -MP -MF $(DEPDIR)/dpawn-dm-mpi.Tpo -c -o dpawn-dm-mpi.obj `if test -f 'dm-mpi.c'; then $(CYGPATH_W) 'dm-mpi.c'; else $(CYGPATH_W) '$(srcdir)/dm-mpi.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dpawn-dm-mpi.Tpo $(DEPDIR)/dpawn-dm-mpi.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-mpi.c' object='dpawn-dm-mpi.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dpawn_CPPFLAGS) $(CPPFLAGS) $(dpawn_CFLAGS) $(CFLAGS) -c -o dpawn-dm-mpi.obj `if test -f 'dm-mpi.c'; then $(CYGPATH_W) 'dm-mpi.c'; else $(CYGPATH_W) '$(srcdir)/dm-mpi.c'; fi`
 
 drook-drook.o: drook.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(drook_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT drook-drook.o -MD -MP -MF $(DEPDIR)/drook-drook.Tpo -c -o drook-drook.o `test -f 'drook.c' || echo '$(srcdir)/'`drook.c
@@ -1093,6 +1193,34 @@ dvt-dm-nextevent.obj: dm-nextevent.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-nextevent.c' object='dvt-dm-nextevent.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dvt_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -c -o dvt-dm-nextevent.obj `if test -f 'dm-nextevent.c'; then $(CYGPATH_W) 'dm-nextevent.c'; else $(CYGPATH_W) '$(srcdir)/dm-nextevent.c'; fi`
+
+dvt-dm3.o: dm3.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dvt_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -MT dvt-dm3.o -MD -MP -MF $(DEPDIR)/dvt-dm3.Tpo -c -o dvt-dm3.o `test -f 'dm3.c' || echo '$(srcdir)/'`dm3.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dvt-dm3.Tpo $(DEPDIR)/dvt-dm3.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm3.c' object='dvt-dm3.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dvt_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -c -o dvt-dm3.o `test -f 'dm3.c' || echo '$(srcdir)/'`dm3.c
+
+dvt-dm3.obj: dm3.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dvt_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -MT dvt-dm3.obj -MD -MP -MF $(DEPDIR)/dvt-dm3.Tpo -c -o dvt-dm3.obj `if test -f 'dm3.c'; then $(CYGPATH_W) 'dm3.c'; else $(CYGPATH_W) '$(srcdir)/dm3.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dvt-dm3.Tpo $(DEPDIR)/dvt-dm3.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm3.c' object='dvt-dm3.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dvt_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -c -o dvt-dm3.obj `if test -f 'dm3.c'; then $(CYGPATH_W) 'dm3.c'; else $(CYGPATH_W) '$(srcdir)/dm3.c'; fi`
+
+dvt-dm-dvt.o: dm-dvt.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dvt_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -MT dvt-dm-dvt.o -MD -MP -MF $(DEPDIR)/dvt-dm-dvt.Tpo -c -o dvt-dm-dvt.o `test -f 'dm-dvt.c' || echo '$(srcdir)/'`dm-dvt.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dvt-dm-dvt.Tpo $(DEPDIR)/dvt-dm-dvt.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-dvt.c' object='dvt-dm-dvt.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dvt_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -c -o dvt-dm-dvt.o `test -f 'dm-dvt.c' || echo '$(srcdir)/'`dm-dvt.c
+
+dvt-dm-dvt.obj: dm-dvt.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dvt_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -MT dvt-dm-dvt.obj -MD -MP -MF $(DEPDIR)/dvt-dm-dvt.Tpo -c -o dvt-dm-dvt.obj `if test -f 'dm-dvt.c'; then $(CYGPATH_W) 'dm-dvt.c'; else $(CYGPATH_W) '$(srcdir)/dm-dvt.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dvt-dm-dvt.Tpo $(DEPDIR)/dvt-dm-dvt.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-dvt.c' object='dvt-dm-dvt.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dvt_CPPFLAGS) $(CPPFLAGS) $(dvt_CFLAGS) $(CFLAGS) -c -o dvt-dm-dvt.obj `if test -f 'dm-dvt.c'; then $(CYGPATH_W) 'dm-dvt.c'; else $(CYGPATH_W) '$(srcdir)/dm-dvt.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

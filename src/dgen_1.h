@@ -20,6 +20,8 @@
 
 #include <string.h>
 
+#include "dm2.h"
+
 P toconsole(B *p, P atmost)
 {
   P nb;

@@ -53,10 +53,12 @@
 
 */
 
-#include "dm.h"
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+
+#include "dm.h"
+#include "dm2.h"
 
 /*---------------------------------------------------- checkFPU
      -- | bool

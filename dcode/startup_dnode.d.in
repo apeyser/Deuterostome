@@ -386,7 +386,7 @@ end def  | of xtext_dict
 | just allocate it on startup
 /myname getmyname def
 
-|---------------- socketdead
+|---------------- sourcedead
 | socket | --
 | default handler just throws away the socket and signals an error
 

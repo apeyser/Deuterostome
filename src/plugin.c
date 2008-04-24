@@ -1,6 +1,8 @@
 #include <stdarg.h>
 #include <string.h>
+
 #include "pluginlib.h"
+#include "dm2.h"
 
 #if ! ENABLE_PLUGINS_SUPPORT
 

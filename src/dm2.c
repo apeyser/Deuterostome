@@ -9,11 +9,6 @@
      -  getstartupdir
 
 */
-
-#include "dm.h"
-#include "paths.h"
-#include "dm-swapbytes.h"
-
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -21,6 +16,12 @@
 #include <errno.h>
 #include <unistd.h>
 #include <netdb.h>
+
+
+#include "dm.h"
+#include "paths.h"
+#include "dm-swapbytes.h"
+#include "dm2.h"
 
 static char sys_hi[] = "System Operators V" PACKAGE_VERSION;
 P op_syshi(void)   {return wrap_hi((B*)sys_hi);}
@@ -473,9 +474,9 @@ B *lookup(B *nameframe, B *dict)
   return 0L;
 }
 
-/* merge entries in source into sink */
+/* merge entries in socket into sink */
 /* return false if not enough space in sink */
-BOOLEAN mergedict(B *source, B* sink) {
+BOOLEAN mergedict(B *socket, B* sink) {
   B *entry;
 	size_t i;
 	static B excludes_ = TRUE;
@@ -491,8 +492,8 @@ BOOLEAN mergedict(B *source, B* sink) {
 		excludes_ = FALSE;
 	}
 
-  for (entry = (B*) DICT_ENTRIES(source);
-       entry < (B*) DICT_FREE(source);
+  for (entry = (B*) DICT_ENTRIES(socket);
+       entry < (B*) DICT_FREE(socket);
        entry += ENTRYBYTES) {
 		for (i = 0; i < sizeof(_excludes)/sizeof(_excludes[0]); i++) {
 			if (matchname(ASSOC_NAME(entry), excludes[i]))
@@ -1183,4 +1184,192 @@ void setupdirs(void) {
   setupname(&myname_frame, myname, FALSE);
   setupname(&myfqdn_frame, h->h_name, FALSE);
   setupname(&myxname_frame, myxname, FALSE);
+}
+
+void makeDmemory(B *em, LBIG specs[5])
+{
+  FREEopds = FLOORopds = (B*)(((((size_t) em) >> 3) + 1) << 3);
+  CEILopds = FLOORopds + specs[0] * FRAMEBYTES;
+
+  FLOORexecs = FREEexecs = CEILopds;
+  CEILexecs = FLOORexecs + specs[1] * FRAMEBYTES;
+
+  FLOORdicts = FREEdicts = CEILexecs;
+  CEILdicts = FLOORdicts + specs[2] * FRAMEBYTES;
+
+  FLOORvm = FREEvm = CEILdicts;
+  TOPvm = CEILvm  = FLOORvm + specs[3] * 1000000;
+}
+
+P tosource(B* rootf, BOOLEAN mksave, SourceFunc w1, SourceFunc w2) {
+  P retc = OK;
+  P nb;
+  B* oldFREEvm = FREEvm;
+
+  if (FREEvm + FRAMEBYTES >= CEILvm) return VM_OVF;
+  TAG(FREEvm) = BOX;
+  ATTR(FREEvm) = 0;
+  VALUE_PTR(FREEvm) = 0;
+  FREEvm += FRAMEBYTES;
+
+  switch (CLASS(rootf)) {
+    case ARRAY:
+      if (mksave && TYPE(rootf) == BYTETYPE) {
+	if (FREEvm + FRAMEBYTES + ARRAY_SIZE(rootf) >= CEILvm)
+	  return VM_OVF;
+      
+	moveframe(rootf, FREEvm);
+	moveB(VALUE_PTR(rootf), FREEvm+FRAMEBYTES, ARRAY_SIZE(rootf));
+	VALUE_PTR(FREEvm) = NULL;
+	FREEvm += FRAMEBYTES + ARRAY_SIZE(rootf);
+	break;
+      };
+      // otherwise fall throught
+
+    case LIST: case DICT: {
+      W d = 0;
+      retc = foldobj(rootf, (P) FREEvm, &d);
+    };
+    break;
+
+    case OP:
+      makename((B*) OP_NAME(rootf), rootf);
+      ATTR(rootf) |= (BIND|ACTIVE);
+      //intentional fall through
+    case NULLOBJ: case NUM: case BOOL: case MARK: case NAME:
+      moveframe(rootf, FREEvm);
+      FREEvm += FRAMEBYTES;
+      break;
+
+    default:
+      return BAD_FMT;
+  };
+
+/*----- we give ourselves SOCK_TIMEOUT secs to get this out */
+  nb = FREEvm - oldFREEvm;
+  FREEvm = oldFREEvm;
+  BOX_NB(FREEvm) = nb-FRAMEBYTES;
+  SETNATIVE(FREEvm);
+  
+  if (retc) return retc;
+  if ((retc = w1(FREEvm, FRAMEBYTES)) 
+      || (retc = w2(FREEvm + FRAMEBYTES, nb - FRAMEBYTES)))
+    return retc;
+
+  return OK;
+}
+
+P fromsource(B* bufferf, SourceFunc r1, SourceFunc r2) {
+  B isnonnative;
+  P retc;
+  static B xboxf[FRAMEBYTES*2];
+  static B* const xrootf = xboxf+FRAMEBYTES;
+  B* irootf;
+  B* oldfreevm = FREEvm;
+
+  /*----- get the root frame and evaluate */
+  /*----- we give ourselves SOCK_TIMEOUT secs */
+  if ((retc = r1(xboxf, FRAMEBYTES))) return retc;
+
+  if (! GETNATIVEFORMAT(xboxf) || ! GETNATIVEUNDEF(xboxf))
+    return BAD_FMT;
+
+  isnonnative = GETNONNATIVE(xboxf);
+  if ((retc = deendian_frame(xboxf, isnonnative)) != OK) return retc;
+  if ((retc = deendian_frame(xrootf, isnonnative)) != OK) return retc;
+
+  switch (CLASS(xrootf)) {
+    case ARRAY:
+      if (bufferf && TYPE(xrootf) == BYTETYPE) {
+	if (VALUE_BASE(xrootf) != 0) return BAD_MSG;
+	if (ARRAY_SIZE(xrootf) <= 0) return BAD_MSG;
+	if (ARRAY_SIZE(xrootf) > ARRAY_SIZE(bufferf)) return RNG_CHK;
+
+	// reserve this space in the passed in buffer object
+	VALUE_PTR(xrootf) = VALUE_PTR(bufferf);
+	VALUE_PTR(bufferf) += ARRAY_SIZE(xrootf);
+	ARRAY_SIZE(bufferf) -= ARRAY_SIZE(xrootf);
+
+	if ((retc = r2(VALUE_PTR(xrootf), ARRAY_SIZE(xrootf))))
+	  return retc;
+
+	irootf = xrootf;
+	break;
+      };
+      // else fall through
+    case LIST: case DICT: {
+      B* irootf;
+      B* iboxf;
+      
+      if (bufferf) {
+	if (FREEvm + FRAMEBYTES + SBOXBYTES + BOX_NB(xboxf) >= CEILvm)
+	  return VM_OVF;
+
+	iboxf = FREEvm;
+	TAG(iboxf) = BOX;
+	ATTR(iboxf) = PARENT;
+	VALUE_PTR(iboxf) = FREEvm + FRAMEBYTES;
+	BOX_NB(iboxf) = SBOXBYTES;
+	FREEvm += FRAMEBYTES;
+	SBOX_CAP(FREEvm) = NULL;
+	FREEvm += SBOXBYTES;
+      }
+      
+      irootf = FREEvm;
+      moveframe(xrootf, irootf);
+      ATTR(irootf) = PARENT;
+      FREEvm += FRAMEBYTES;
+
+      if ((retc = r2(FREEvm, BOX_NB(xboxf)-FRAMEBYTES))) {
+	FREEvm = oldfreevm;
+	return retc;
+      }
+      FREEvm += BOX_NB(xboxf)-FRAMEBYTES;
+
+      if ((bufferf && o2 >= CEILopds) || o1 >= CEILopds) {
+	FREEvm = oldfreevm;
+	return OPDS_OVF;
+      }
+ 
+/*----- relocate root object*/
+      if ((retc = unfoldobj(irootf, (P) irootf, isnonnative))) {
+	FREEvm = oldfreevm;
+	return retc;
+      }
+
+      if (bufferf) {
+	moveframe(iboxf, o1);
+	FREEopds = o2;
+      }
+
+      break;
+    };
+
+    case NAME:
+      if ((ATTR(xrootf) & (BIND|ACTIVE)) == (BIND|ACTIVE)) {
+	B* dframe;
+	B* xframe = NULL;
+	for (dframe = FREEdicts - FRAMEBYTES; 
+	     dframe >= FLOORdicts; 
+	     dframe -= FRAMEBYTES) {
+	  if ((xframe = lookup(xrootf, VALUE_PTR(dframe)))) break;
+	}
+	if (! xframe) ATTR(xrootf) &= ~BIND;
+	else moveframe(xframe, xrootf);
+      }
+      // intentional fall through
+    case NULLOBJ: case NUM: case BOOL: case MARK:
+      irootf = xrootf;
+      break;
+
+      
+    default: 
+      return BAD_MSG;
+  };
+
+
+  if (o1 >= CEILopds) return OPDS_OVF;
+  moveframe(irootf, o1);
+  FREEopds = o2;
+  return OK;
 }

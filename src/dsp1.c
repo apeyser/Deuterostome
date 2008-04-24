@@ -34,9 +34,9 @@
 - dest_array length should be by the expansion factor larger than
   src_array length (exactly: (src_length - 3) * xf + 1); the returned
   subarray has been adjusted to this length;
-- the first and last source samples are used in the interpolation, but
+- the first and last socket samples are used in the interpolation, but
   are not transferred into the expanded result; the first destination sample
-  is identical to the second source sample, and subsequent destination
+  is identical to the second socket sample, and subsequent destination
   samples are equally spaced at the reduced sampling interval
 */
 

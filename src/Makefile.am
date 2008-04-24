@@ -69,12 +69,14 @@ if ENABLE_REGEX
 endif ENABLE_REGEX
 
 if ENABLE_MPI
-MPI_PROGS = drook
+MPI_PROGS = drook dpawn
 DNODE_MPI_SRCS = dqueen.c
 endif ENABLE_MPI
 
-EXTRA_DIST =    dnode-nice.c.in dnode-daemon.c.in paths.h.in drook.c.in dqueen.c.in
-BUILT_SOURCES = dnode-nice.c    dnode-daemon.c    paths.h    drook.c    dqueen.c
+EXTRA_DIST =    dnode-nice.c.in dnode-daemon.c.in paths.h.in \
+	drook.c.in dqueen.c.in 
+BUILT_SOURCES = dnode-nice.c    dnode-daemon.c    paths.h    \
+	drook.c    dqueen.c
 CLEANFILES = $(BUILT_SOURCES)
 
 DISTCLEANFILES = dm-config.h
@@ -101,29 +103,37 @@ pkginclude_HEADERS = dm.h dm3.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
 	basic-defs.h dm-types.h dm-nextevent.h
 nodist_pkginclude_HEADERS = dm-config.h paths.h
 
-dvt_SOURCES = dvt.c dvt_0.h dvt_1.h dm-nextevent.c dm-nextevent.h
+dvt_SOURCES = dvt.c dvt_0.h dm-nextevent.c dm-nextevent.h dm3.c \
+	dm-dvt.h dm-dvt.c
 dvt_LDADD = libdmglobals.la
 dvt_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS)
 dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS)
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 
-dnode_SOURCES = dnode.c dnode_0.h dnode_1.h dmx.h \
-	dm-nextevent.c dm-nextevent.h $(DNODE_MPI_SRCS)
+dnode_SOURCES = dnode.c dnode_0.h dmx.h \
+	dm-nextevent.c dm-nextevent.h \
+	dm3.c dm-dnode.h dm-dnode.c
 
 dnode_LDADD = libdmglobals.la 
-dnode_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS)
+dnode_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS) $(MPI_LIBS)
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
-dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
+dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS) $(MPI_FLAGS)
+
+dpawn_SOURCES = dpawn.c dpawn_0.h dm-dpawn.h dm-dpawn.c dm-mpi.h dm-mpi.c
+dpawn_LDADD = libdmglobals.la
+dpawn_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS) $(MPI_LIBS)
+dpawn_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
+dpawn_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS) $(MPI_FLAGS)
 
 testwordorder_SOURCES = test-word-order.c
 
 globsrcs = dmglobals.c \
 	dmnuminc.h dmnum.c dsp1f.h dsp1.c dsp2.c \
-	paths.h dm1.c dm2.c dm-conv.c dm-swapbytes.h\
-	dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
+	paths.h dm1.c dm2.c dm2.h dm-conv.c dm-swapbytes.h\
+	dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
 	pluginlib.h plugin.c \
-	dm-types.c xhack.h
-
+	dm-types.c xhack.h \
+	dm-vm.h dm-vm.c
 
 lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la
 libdmglobals_la_LIBADD = $(PLUGIN_LD) $(ATLAS_LIBS) @VERSION_INFO@ @RELEASE_INFO@
@@ -154,7 +164,7 @@ nodist_pkgconfiglib_DATA = dm.pc
 
 dist_pkgdata_SCRIPTS = dgen-build
 
-dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h
+dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h dm3.c
 dgen_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DBOOTSTRAP_PLUGIN=1 -DDM_DISABLE_REGEX=1 \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 \

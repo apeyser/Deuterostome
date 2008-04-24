@@ -3,9 +3,11 @@
 
 */
 
-#include "dm.h"
 #include <math.h>
 #include <stdio.h>
+
+#include "dm.h"
+#include "dm2.h"
 
 /* NOTE: the '~' enjoys some fortuitous encoding */
 
@@ -15,7 +17,7 @@
 static B *vm_token;   /* ->freespace                                 */
 static P vm_free;     /* # of free bytes available                   */
 static P vm_bytes;    /* length of returned token string including 0 */
-static B *sframe;     /* ->source string frame                       */
+static B *sframe;     /* ->socket string frame                       */
 
 /*--------------- GETC, UNGETC for feeding string object to scanner */
 
@@ -33,7 +35,7 @@ ARRAY_SIZE(sframe)++; VALUE_BASE(sframe)--;
 
 /*----------------------------- scanner ---------------------------------
 
-searches the source string for the next token. Returns a classification
+searches the socket string for the next token. Returns a classification
 code and places a null-terminated string representing the body of the
 token into VM temporary space: 
 
@@ -250,7 +252,7 @@ else RET_BAD_TOK;                               /* garbage            */
 
      L tokenize(string_frame)
 
-Receives a string frame representing the source. The source string length
+Receives a string frame representing the socket. The socket string length
 is defined by a terminating zero byte or the size of the string object.
 Source characters are stripped to 7 bits before use.
 

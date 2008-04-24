@@ -10,19 +10,6 @@
 
 */
 
-/* #ifdef _XOPEN_SOURCE */
-/* #if _XOPEN_SOURCE < 500 */
-/* #undef _XOPEN_SOURCE */
-/* #endif */
-/* #ifndef _XOPEN_SOURCE */
-/* #define _XOPEN_SOURCE 500 */
-/* #endif */
-
-#include "dm.h"
-#include "paths.h"
-#include "dm3.h"
-#include "dm-nextevent.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -40,25 +27,39 @@
 extern int h_errno;
 #endif
 
+#include "dm3.h"
+#include "paths.h"
+#include "dm-nextevent.h"
+#include "dm2.h"
+
 #define SOCK_TIMEOUT (60)
 
 /*---------------------------- support -------------------------------------*/
 
-/*--------- makeDmemory */ 
- 
-void makeDmemory(B *em, L64 specs[5])
-{
-  FREEopds = FLOORopds = (B*)(((((size_t) em) >> 3) + 1) << 3);
-  CEILopds = FLOORopds + specs[0] * FRAMEBYTES;
 
-  FLOORexecs = FREEexecs = CEILopds;
-  CEILexecs = FLOORexecs + specs[1] * FRAMEBYTES;
+// -------- delsocket ---------------------------
+// After a socket has been closed, call delsocket to cleanup maxsocket
+// and recsocket, and clear flag from sock_fds
+void delsocket(P socketfd) {
+  FD_CLR(socketfd, &sock_fds);
+  if (socketfd == maxsocket-1) {
+    P i, j = -1;
+    for (i = 0; i < socketfd; i++)
+      if (FD_ISSET(i, &sock_fds)) j = i;
+    maxsocket = j+1;
+  }
 
-  FLOORdicts = FREEdicts = CEILexecs;
-  CEILdicts = FLOORdicts + specs[2] * FRAMEBYTES;
+  if (recsocket >= maxsocket) recsocket = maxsocket-1;
+  close(socketfd);
+}
 
-  FLOORvm = FREEvm = CEILdicts;
-  TOPvm = CEILvm  = FLOORvm + specs[3] * 1000000;
+// -------- addsocket -----------------------------
+// After opening a socket, call addsocket to increase maxsocket,
+// care for recsocket, and add socket to sock_fds.
+void addsocket(P socketfd) {
+  FD_SET(socketfd, &sock_fds);
+  if (socketfd >= maxsocket) maxsocket = socketfd+1;
+  if (recsocket < 0) recsocket = socketfd;
 }
 
 //-------------------------------- set close-on-exec value for sockets
@@ -79,30 +80,240 @@ P nocloseonexec(P socket) {
   return OK;
 }
 
-// -------- delsocket ---------------------------
-// After a socket has been closed, call delsocket to cleanup maxsocket
-// and recsocket, and clear flag from sock_fds
-void delsocket(P socketfd) {
-  FD_CLR(socketfd, &sock_fds);
-  if (socketfd == maxsocket-1) {
-    P i, j = -1;
-    for (i = 0; i < socketfd; i++)
-      if (FD_ISSET(i, &sock_fds)) j = i;
-    maxsocket = j+1;
-  }
+#if X_DISPLAY_MISSING
+#define moreX (0)
+#else
+#include "dmx.h"
+#include "xhack.h"
 
-  if (recsocket >= maxsocket) recsocket = maxsocket-1;
+// moreX is true iff there are X events pending, but dequeued from
+// the xsocket
+BOOLEAN moreX = FALSE;
+
+// ---------- nextXevent ---------------------------
+// Call when there is an X event pending, either on 
+// the xsocket or in the pending queue.
+// Gets one X event from the queue, updates moreX
+// and then, if it is a recognized X event, it calls
+// the associated handler (from dnode or dvt).
+// the base for the handlers are defined below (name handler_)
+DM_INLINE_STATIC P nextXevent(void) {
+  XEvent event;
+  B* userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
+
+  HXNextEvent(dvtdisplay, &event);
+  moreX = HQLength(dvtdisplay) ? TRUE : FALSE;
+
+  switch(event.type) {
+    case ClientMessage:
+      if ((Atom) event.xclient.message_type 
+	  != HXInternAtom(dvtdisplay, "WM_PROTOCOLS", False))
+	return OK;
+
+      if ((Atom) event.xclient.data.l[0] 
+	  == HXInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False))
+	return wm_delete_window(&event, userdict); 
+
+      if ((Atom) event.xclient.data.l[0]
+	  == HXInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False))
+	return wm_take_focus(&event, userdict);
+
+      return OK;
+
+    case ConfigureNotify:
+      return wm_configure_notify(&event, userdict);
+
+    case Expose:
+      if (event.xexpose.count != 0) return OK;
+      return wm_expose(&event, userdict);
+
+    case ButtonPress:
+      return wm_button_press(&event, userdict);
+
+    default:
+      return OK;
+  }
 }
 
+// ---------- wm_take_focus_ ---------------------
+// for a focus XEvent, pushes take_input_focus on exec stack
+// and pushes the windows dictionary on the dict stack
+P wm_take_focus_(XEvent* event, B* userdict) {
+  static B namestring[NAMEBYTES];
+  static B namef[FRAMEBYTES];
+  P wid = event->xclient.window;
+  B* dictf;
 
+  snprintf((char*)namestring, sizeof(namestring),
+	   "w%lld", (long long) wid);
+  makename(namestring, namef); ATTR(namef) = ACTIVE;
+  if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
+  if (FREEdicts >= CEILdicts) return DICTS_OVF;
+  moveframe(dictf, FREEdicts); 
+  FREEdicts += FRAMEBYTES;
+  if (x1 >= CEILexecs) return EXECS_OVF;
+  makename((B*)"take_input_focus", x1); 
+  ATTR(x1) = ACTIVE;
+  FREEexecs = x2;
 
-// -------- addsocket -----------------------------
-// After opening a socket, call addsocket to increase maxsocket,
-// care for recsocket, and add socket to sock_fds.
-void addsocket(P socketfd) {
-  FD_SET(socketfd, &sock_fds);
-  if (socketfd >= maxsocket) maxsocket = socketfd+1;
-  if (recsocket < 0) recsocket = socketfd;
+  return OK;
+}
+
+// ---------- wm_configure_notify_ ---------------------
+// for a configure XEvent, pushes windowsize on exec stack
+// and pushes the windows dictionary on the dict stack
+// and pushes width, height on op stack
+P wm_configure_notify_(XEvent* event, B* userdict) {
+  B namestring[NAMEBYTES];
+  B namef[FRAMEBYTES];
+  P wid = event->xconfigure.window;
+  B* dictf;
+
+  snprintf((char*)namestring, sizeof(namestring), 
+	   "w%lld", (long long) wid);
+  makename(namestring, namef); 
+  ATTR(namef) = ACTIVE;
+        
+  if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
+  if (FREEdicts >= CEILdicts) return DICTS_OVF;
+  if (x1 >= CEILexecs) return EXECS_OVF;
+  if (o2 >= CEILopds) return OPDS_OVF;
+
+  moveframe(dictf, FREEdicts); 
+  FREEdicts += FRAMEBYTES;
+
+  makename((B*)"windowsize",x1); 
+  ATTR(x1) = ACTIVE; 
+  FREEexecs = x2;
+
+  TAG(o1) = (NUM | LONGBIGTYPE); 
+  ATTR(o1) = 0;
+  LONGBIG_VAL(o1) = event->xconfigure.width;
+
+  TAG(o2) = (NUM | LONGBIGTYPE); 
+  ATTR(o2) = 0;
+  LONGBIG_VAL(o2) = event->xconfigure.height;
+  FREEopds = o3;
+
+  return OK;
+}
+
+// ---------- wm_expose_ ---------------------
+// for an expose XEvent, pushes drawwindow on exec stack
+// and pushes the windows dictionary on the dict stack
+P wm_expose_(XEvent* event, B* userdict) {
+  static B namestring[NAMEBYTES];
+  static B namef[FRAMEBYTES];
+  B* dictf;
+  P wid = event->xexpose.window;
+
+  snprintf((char*)namestring, sizeof(namestring), 
+	   "w%lld", (long long) wid);
+  makename(namestring, namef); 
+  ATTR(namef) = ACTIVE;
+
+  if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
+  if (FREEdicts >= CEILdicts) return DICTS_OVF;
+  if (x1 >= CEILexecs) return EXECS_OVF;
+        
+  moveframe(dictf, FREEdicts); 
+  FREEdicts += FRAMEBYTES;
+
+  makename((B*)"drawwindow",x1); 
+  ATTR(x1) = ACTIVE; 
+  FREEexecs = x2;
+
+  return OK;
+}
+
+// ---------- wm_take_focus_ ---------------------
+// for a mouse button press XEvent, pushes mouseclick on exec stack
+// and pushes the windows dictionary on the dict stack
+// and x-position, y-position, mod-mask on the operand stack.
+// mod-mask is the X bit mask of buttons pushed (1-12?)
+P wm_button_press_(XEvent* event, B* userdict) {
+  static B namestring[NAMEBYTES];
+  static B namef[FRAMEBYTES];
+  B* dictf;
+  P wid = event->xbutton.window;
+  P mod = (event->xbutton.state & 0xFF)
+    | (event->xbutton.button << 16);
+
+  if (FREEdicts >= CEILdicts) return DICTS_OVF;
+  if (x1 >= CEILexecs) return EXECS_OVF;
+  if (o3 >= CEILopds) return OPDS_OVF;
+
+  snprintf((char*)namestring, sizeof(namestring), 
+	   "w%lld", (long long) wid);
+  makename(namestring, namef); 
+  ATTR(namef) = ACTIVE;
+  if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
+  moveframe(dictf, FREEdicts); 
+  FREEdicts += FRAMEBYTES;
+
+  makename((B*)"mouseclick",x1); 
+  ATTR(x1) = ACTIVE; 
+  FREEexecs = x2;
+
+  TAG(o1) = (NUM | LONGBIGTYPE); 
+  ATTR(o1) = 0;
+  LONGBIG_VAL(o1) = event->xbutton.x;
+
+  TAG(o2) = (NUM | LONGBIGTYPE);
+  ATTR(o2) = 0;
+  LONGBIG_VAL(o2) = event->xbutton.y;
+
+  TAG(o3) = (NUM | LONGBIGTYPE); 
+  ATTR(o3) = 0;
+  LONGBIG_VAL(o3) = mod;
+  FREEopds = o4;
+
+  return OK;
+}
+#endif //! X_DISPLAY_MISSING
+
+P waitsocket(BOOLEAN ispending, fd_set* out_fds) {
+  static const struct timeval zerosec_ = {0, 0};
+  static struct timeval zerosec;
+  fd_set read_fds, err_fds;
+  P ret;
+  P i;
+
+  if (! maxsocket) return 0;
+
+#if ! X_DISPLAY_MISSING
+    if (dvtdisplay != NULL && ! moreX) {
+      HXFlush(dvtdisplay);
+      moreX = HQLength(dvtdisplay);
+    }
+#endif
+
+  zerosec = zerosec_;
+  read_fds = sock_fds;
+  err_fds = sock_fds;
+  
+  if ((ret = select(maxsocket, &read_fds, NULL, &err_fds, 
+		    ispending || moreX ? &zerosec : NULL)) == -1)
+    return ret;
+
+  *out_fds = read_fds;
+  for (i = 0; i < maxsocket; ++i)
+    if (FD_ISSET(i, &err_fds)) FD_SET(i, out_fds);
+
+#if ! X_DISPLAY_MISSING
+    if (dvtdisplay != NULL && FD_ISSET(xsocket, &read_fds)) {
+      moreX = TRUE;
+      FD_CLR(xsocket, &read_fds);
+      ret--;
+    }
+
+    if (! ret) {
+      if (moreX && (ret = nextXevent())) errsource = "X service";
+      return 0;
+    }
+#endif
+
+  return ret;
 }
 
 //------------------- read/write a block from a file descriptor
@@ -326,97 +537,15 @@ P make_unix_socket(UW port) {
   LOST_CONN - lost connection while receiving message
    
 */
-
-P fromsocket(P socket, B *bufferf)
-{
-  B isnonnative;
-  P retc;
-  static B xboxf[FRAMEBYTES*2];
-  static B* const xrootf = xboxf+FRAMEBYTES;
-  B* oldfreevm = FREEvm;
-
-  /*----- get the root frame and evaluate */
-  /*----- we give ourselves SOCK_TIMEOUT secs */
-  if ((retc = readfd_(socket, xboxf, sizeof(xboxf), SOCK_TIMEOUT)))
-    return retc;
-  
-  if (! GETNATIVEFORMAT(xboxf) || ! GETNATIVEUNDEF(xboxf))
-    return BAD_FMT;
-
-  isnonnative = GETNONNATIVE(xboxf);
-  if ((retc = deendian_frame(xboxf, isnonnative)) != OK) return retc;
-  if ((retc = deendian_frame(xrootf, isnonnative)) != OK) return retc;
-
-  switch (CLASS(xrootf)) {
-    case ARRAY:
-      if (TYPE(xrootf) == BYTETYPE) {
-	if (VALUE_BASE(xrootf) != 0) return BAD_MSG;
-	if (ARRAY_SIZE(xrootf) <= 0) return BAD_MSG;
-	if (ARRAY_SIZE(xrootf) > ARRAY_SIZE(bufferf)) return RNG_CHK;
-
-	// reserve this space in the passed in buffer object
-	VALUE_PTR(xrootf) = VALUE_PTR(bufferf);
-	VALUE_PTR(bufferf) += ARRAY_SIZE(xrootf);
-	ARRAY_SIZE(bufferf) -= ARRAY_SIZE(xrootf);
-	
-	if ((retc = readfd_(socket, VALUE_PTR(xrootf), 
-			    ARRAY_SIZE(xrootf), SOCK_TIMEOUT)))
-	  return retc;
-
-	if (o1 >= CEILopds) return OPDS_OVF;
-	moveframe(xrootf, o1);
-	FREEopds = o2;
-	return OK;
-      };
-      // else fall through
-    case LIST: case DICT: {
-      B* irootf;
-      B* iboxf;
-      if (FREEvm + FRAMEBYTES + SBOXBYTES + BOX_NB(xboxf) >= CEILvm)
-	return VM_OVF;
-
-      iboxf = FREEvm;
-      TAG(iboxf) = BOX;
-      ATTR(iboxf) = PARENT;
-      VALUE_PTR(iboxf) = FREEvm + FRAMEBYTES;
-      BOX_NB(iboxf) = SBOXBYTES;
-      FREEvm += FRAMEBYTES;
-      SBOX_CAP(FREEvm) = NULL;
-      FREEvm += SBOXBYTES;
-      
-      irootf = FREEvm;
-      moveframe(xrootf, irootf);
-      ATTR(irootf) = PARENT;
-      FREEvm += FRAMEBYTES;
+static P socket_int;
+static P wrap_readfd(B* buffer, P size) {
+  return readfd_(socket_int, buffer, size, SOCK_TIMEOUT);
+}
 
 
-      if ((retc = readfd_(socket, FREEvm, BOX_NB(xboxf)-FRAMEBYTES, 
-			  SOCK_TIMEOUT))) {
-	FREEvm = oldfreevm;
-	return retc;
-      }
-      FREEvm += BOX_NB(xboxf)-FRAMEBYTES;
-
-      if (o2 >= CEILopds) {
-	FREEvm = oldfreevm;
-	return OPDS_OVF;
-      }
- 
-/*----- relocate root object*/
-      if ((retc = unfoldobj(irootf, (P) irootf, isnonnative))) {
-	FREEvm = oldfreevm;
-	return retc;
-      }
-
-      moveframe(iboxf, o1);
-      moveframe(irootf, o2);
-      FREEopds = o3;
-      return OK;
-    };
-      
-    default: 
-      return BAD_MSG;
-  };
+P fromsocket(P socket, B *bufferf) {
+  socket_int = socket;
+  return fromsource(bufferf, wrap_readfd, wrap_readfd);
 }
 
 /*------------------------------- write a message to a socket
@@ -433,47 +562,13 @@ P fromsocket(P socket, B *bufferf)
     be discarded).
 */
 
-P tosocket(P socket, B* rootf)
-{
-  P retc = OK;
-  P nb;
-  B* oldFREEvm = FREEvm;
+static P wrap_writefd(B* buffer, P size) {
+  return writefd_(socket_int, buffer, size, SOCK_TIMEOUT);
+}
 
-  if (FREEvm + FRAMEBYTES >= CEILvm) return VM_OVF;
-  TAG(FREEvm) = BOX;
-  VALUE_PTR(FREEvm) = 0;
-  FREEvm += FRAMEBYTES;
-
-  switch (CLASS(rootf)) {
-    case ARRAY:
-      if (TYPE(rootf) == BYTETYPE) {
-	if (FREEvm + FRAMEBYTES + ARRAY_SIZE(rootf) >= CEILvm)
-	  return VM_OVF;
-      
-	moveframe(rootf, FREEvm);
-	moveB(VALUE_PTR(rootf), FREEvm+FRAMEBYTES, ARRAY_SIZE(rootf));
-	VALUE_PTR(FREEvm) = NULL;
-	FREEvm += FRAMEBYTES + ARRAY_SIZE(rootf);
-	break;
-      };
-      // otherwise fall throught
-
-    case LIST: case DICT: {
-      W d = 0;
-      retc = foldobj(rootf, (P) FREEvm, &d);
-    };
-    break;
-
-    default:
-      return BAD_FMT;
-  };
-
-/*----- we give ourselves SOCK_TIMEOUT secs to get this out */
-  nb = FREEvm - oldFREEvm;
-  FREEvm = oldFREEvm;
-  BOX_NB(FREEvm) = nb-FRAMEBYTES;
-  SETNATIVE(FREEvm);
-  return retc ? retc : writefd_(socket, FREEvm, nb, SOCK_TIMEOUT);
+P tosocket(P socket, B* rootf) {
+  socket_int = socket;
+  return tosource(rootf, TRUE, wrap_writefd, wrap_writefd);
 }
 
 /*----------------------------------------------- connect
@@ -558,7 +653,6 @@ P op_disconnect(void)
 {
   if (o_1 < FLOORopds) return(OPDS_UNF);
   if (TAG(o_1) != (NULLOBJ | SOCKETTYPE)) return(OPD_ERR);
-  close((P) LONGBIG_VAL(o_1));
   delsocket((P) LONGBIG_VAL(o_1));
   FREEopds = o_1;
   return(OK);
@@ -573,14 +667,15 @@ P op_disconnect(void)
     In case of error, returns the active fd as *socketfd.
 */
 
-P int_send(P* socketfd)
+P op_send(void)
 {
   P retc; 
   static B rootf[FRAMEBYTES];
+  P socketfd;
 
   if (o_2 < FLOORopds) return(OPDS_UNF);
   if (TAG(o_2) != (NULLOBJ | SOCKETTYPE)) return(OPD_ERR);
-  *socketfd = (P) LONGBIG_VAL(o_2);
+  socketfd = (P) LONGBIG_VAL(o_2);
 
   switch (TAG(o_1)) {
     case ARRAY: case DICT: case LIST:
@@ -591,7 +686,8 @@ P int_send(P* socketfd)
       return OPD_CLA;
   }
 	  
-  if ((retc = tosocket(*socketfd, rootf))) return retc;
+  if ((retc = tosocket(socketfd, rootf)))
+    return makesocketdead(retc, socketfd, "send");
  
   FREEopds = o_2; 
   return OK;
