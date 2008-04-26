@@ -15,11 +15,9 @@
 //     pushes an error info on the opstack, and error on the exec stack
 // and then, in all cases:
 //     pushes the socket on the opstack, and ~socketdead on the exec stack
-P makesocketdead(P retc, P socketfd, B* error_socket) {
+P makesocketdead(P retc, P socketfd, B* error_source) {
   if (socketfd == consolesocket) consolesocket = PINF;
-  if (retc != LOST_CONN && retc >= 0) return retc;
-
-  if (retc && retc != LOST_CONN) makeerror(retc, error_socket);
+  if (retc && retc != LOST_CONN) makeerror(retc, error_source);
 
   delsocket(socketfd);
 
@@ -50,6 +48,7 @@ P makesocketdead(P retc, P socketfd, B* error_socket) {
 // in a circular fashion.
 DM_INLINE_STATIC BOOLEAN nextsocket(fd_set* read_fds) {
   P i;
+  if (! maxsocket) return FALSE;
 
   for (i=0; i < maxsocket; i++) { /* we go up to a full period, round robin */
     if (++recsocket >= maxsocket) recsocket = 0;
@@ -102,7 +101,8 @@ P nextevent(B* buffer) {
 
     if (nextsocket(&read_fds)) {
       if (masterinput(&retc, buffer)) {
-	retc = makesocketdead(retc, recsocket, "Master service");
+	if (retc)
+	  retc = makesocketdead(retc, recsocket, "Master service");
 	continue;
       }
     

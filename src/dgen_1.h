@@ -214,7 +214,7 @@ P op_toconsole(void)
    the operand stack, and 'error' on the execution stack 
 */
 
-void makeerror(int retc, B* error_source) {
+void makeerror(P retc, B* error_source) {
   if (retc == OPDS_OVF) FREEopds = FLOORopds;
   if (retc == EXECS_OVF) FREEexecs = FLOORexecs;
   if (o2 >= CEILopds) FREEopds = FLOORopds;

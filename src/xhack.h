@@ -24,18 +24,22 @@ extern char xhack_jmpd;
 
 #define XHACK_UNUSED(proto) proto __attribute__ ((__unused__)); proto
 
-XHACK_UNUSED(static int xhack_setjmp_(const char* mode)) {
-  int r;
-  if (xhack_jmpd) return 0;
-  xhack_jmpd = 1;
-  if (XHACK_DEBUG) fprintf(stderr, "Entering xhack mode for %s\n", mode);
-  if ((r = setjmp(xhack_buf))) {
-    xhack_jmpd = 0;
-    if (XHACK_DEBUG) fprintf(stderr, "Exiting xhack mode for %s\n", mode);
-    return 1;
-  }
-  return 0;
-}
+#define xhack_setjmp_(name, ret, exe) do {				\
+    int xhack_jmpds = xhack_jmpd;					\
+    if (! xhack_jmpd) {							\
+      xhack_jmpd = 1;							\
+      if (XHACK_DEBUG)							\
+	fprintf(stderr, "Entering xhack mode for %s\n", #name);		\
+      if (setjmp(xhack_buf)) {						\
+	xhack_jmpd = 0;							\
+	if (XHACK_DEBUG)						\
+	  fprintf(stderr, "Exiting xhack mode for %s\n", #name);	\
+	ret;								\
+      }									\
+    }									\
+    exe;								\
+    xhack_jmpd = xhack_jmpds;						\
+  } while (0)
 
 XHACK_UNUSED(static void xhack_longjmp(void)) {
   if (xhack_jmpd) longjmp(xhack_buf, 1);
@@ -44,20 +48,14 @@ XHACK_UNUSED(static void xhack_longjmp(void)) {
 
 #define xhackr_setjmp(type, err, name, params)	do {			\
     type xhackr_r;							\
-    int xhack_jmpds = xhack_jmpd;					\
-    if (xhack_setjmp_(#name)) return (err);				\
-    xhackr_r = name(params);						\
-    xhack_jmpd = xhack_jmpds;						\
+    xhack_setjmp_(name, return (err), xhackr_r = name(params));	\
     if (XHACK_DEBUG)							\
       fprintf(stderr, "Exiting xhack mode for %s\n", #name);		\
     return xhackr_r;\
   } while (0)
 
 #define xhack_setjmp(name, params) do {		\
-    int xhack_jmpds = xhack_jmpd;		\
-    if (xhack_setjmp_(#name)) return;		\
-    name(params);				\
-    xhack_jmpd = xhack_jmpds;			\
+    xhack_setjmp_(name, return, name(params));	\
   } while (0)
 
 #define xhackr(name, type, err, paramslist, params)			\
@@ -88,7 +86,7 @@ XHACK_UNUSED(static void xhack_longjmp(void)) {
  }
 
 #define xhacks(name, paramslist, params)	\
-  xhackr(name, Status, 0, H(paramslist), H(params))
+  xhackr(name, Status, 0, H(paramslist), H(params))\
 
 #define xhackd(name, paramlist, params)		\
   xhack(name, \

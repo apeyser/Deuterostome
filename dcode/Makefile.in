@@ -33,8 +33,7 @@ target_triplet = @target@
 subdir = dcode
 DIST_COMMON = $(dist_dmconf_DATA) $(dist_dmstart_DATA) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/new-plugin.d $(srcdir)/plugin.d \
-	$(srcdir)/startup_dgen.d.in $(srcdir)/startup_dnode.d.in
+	$(srcdir)/new-plugin.d $(srcdir)/plugin.d
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
@@ -49,7 +48,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = startup_dnode.d startup_dgen.d
+CONFIG_CLEAN_FILES =
 SOURCES =
 DIST_SOURCES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -284,12 +283,15 @@ tmp = @tmp@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 dist_dmstart_DATA = color.d master.d sched.d plugin.d
-nodist_dmstart_DATA = theeye.d startup_dnode.d \
+nodist_dmstart_DATA = theeye.d startup_dnode.d startup_dpawn.d \
 	startup_dvt.d startup_dgen.d dvt_macros.d matrix.d
 
 dist_dmconf_DATA = dvt.d
 nodist_dmconf_DATA = dnode.d
-EXTRA_DIST = theeye.d.in dnode.d.in dvt_macros.d.in startup_dvt.d.in matrix.d.in
+EXTRA_DIST = theeye.d.in dnode.d.in dvt_macros.d.in \
+	startup_dvt.d.in startup_dnode.d.in startup_dpawn.d.in \
+	matrix.d.in
+
 CLEANFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
 XPS_START = /^[[:space:]]*[@]ENABLE_XPS_START[@][[:space:]]*$$/
 XPS_ELSE = /^[[:space:]]*[@]ENABLE_XPS_ELSE[@][[:space:]]*$$/
@@ -375,10 +377,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-startup_dnode.d: $(top_builddir)/config.status $(srcdir)/startup_dnode.d.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-startup_dgen.d: $(top_builddir)/config.status $(srcdir)/startup_dgen.d.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -611,6 +609,21 @@ dvt_macros.d: $(srcdir)/Makefile $(srcdir)/dvt_macros.d.in
 startup_dvt.d: $(srcdir)/Makefile $(srcdir)/startup_dvt.d.in 
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/startup_dvt.d.in >$@.tmp
+	mv $@.tmp $@
+
+startup_dnode.d: $(srcdir)/Makefile $(srcdir)/startup_dnode.d.in 
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/startup_dnode.d.in >$@.tmp
+	mv $@.tmp $@
+
+startup_dpawn.d: $(srcdir)/Makefile $(srcdir)/startup_dpawn.d.in 
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/startup_dpawn.d.in >$@.tmp
+	mv $@.tmp $@
+
+startup_dgen.d: $(srcdir)/Makefile $(srcdir)/startup_dgen.d.in 
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/startup_dgen.d.in >$@.tmp
 	mv $@.tmp $@
 
 matrix.d: $(srcdir)/Makefile $(srcdir)/matrix.d.in

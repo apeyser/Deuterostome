@@ -27,16 +27,45 @@ static P wrap_mpisend_2(B* buffer, P size) {
   return mpisend(comm, 2, rank, buffer, size);
 }
 
+static P handle_error(P retc) {
+  static B buf[FRAMEBYTES+1024];
+  if (o4 >= CEILopds) goto baderr;
+
+  TAG(o1) = (NUM|LONGBIGTYPE);
+  ATTR(o1) = 0;
+  LONGBIG_VAL(o1) = getworldrank();
+  TAG(o2) = (ARRAY|BYTETYPE);
+  ATTR(o2) = 0;
+  VALUE_PTR(o2) = (B*) "mpi error";
+  ARRAY_SIZE(o2) = strlen((char*) VALUE_PTR(o2));
+  TAG(o3) = (NUM|LONGBIGTYPE);
+  ATTR(o3) = 0;
+  LONGBIG_VAL(o3) = retc;
+  TAG(buf) = (ARRAY|BYTETYPE);
+  ATTR(buf) = 0;
+  VALUE_PTR(buf) = buf+FRAMEBYTES;
+  ARRAY_SIZE(buf) = sizeof(buf)-FRAMEBYTES;
+  moveframe(buf, o4);
+  FREEopds = o4;
+  if (op_errormessage()) goto baderr;  
+  error(1, 0, "%.*s", (int) ARRAY_SIZE(o_1), VALUE_PTR(o_1));
+  
+ baderr:
+  error(1, 0, "Unable to compose error for %lli\n", (long long) retc);
+  return retc;
+}
+    
+
 static P frommpi(B* bufferf, MPI_Comm parent, P src) {
   rank = src;
   comm = parent;
-  return fromsource(bufferf, wrap_mpirecv_1, wrap_mpirecv_2);
+  return handle_error(fromsource(bufferf, wrap_mpirecv_1, wrap_mpirecv_2));
 }
 
 static P tompi(B* rootf, MPI_Comm parent, BOOLEAN mksave, P dest) {
   rank = dest;
   comm = parent;
-  return tosource(rootf, mksave, wrap_mpisend_1, wrap_mpisend_2);
+  return handle_error(tosource(rootf, mksave, wrap_mpisend_1, wrap_mpisend_2));
 }
 
 static P wrap_mpibroadcast_1(B* buffer, P size) {

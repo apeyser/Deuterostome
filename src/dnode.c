@@ -21,6 +21,7 @@
 #include "dm-convert.h"
 #include "pluginlib.h"
 #include "dm3.h"
+#include "dqueen.h"
 #include "dnode_0.h"
 
 /*----------------- DM global variables -----------------------------*/

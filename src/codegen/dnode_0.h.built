@@ -41,6 +41,7 @@ B* _sysop[] =
   (B*) "vmstatus", (B*) op_vmstatus,
   (B*) "bind", (B*) op_bind,
   (B*) "null", (B*) op_null,
+  (B*) "not", (B*) op_not,
   (B*) "start", (B*) op_start,
   (B*) "exec", (B*) op_exec,
   (B*) "if", (B*) op_if,
@@ -140,6 +141,7 @@ B* _sysop[] =
   (B*) "matvecmul", (B*) op_matvecmul,
   (B*) "getstartupdir", (B*) op_getstartupdir,
   (B*) "gethomedir", (B*) op_gethomedir,
+  (B*) "getconfdir", (B*) op_getconfdir,
   (B*) "connect", (B*) op_connect,
   (B*) "disconnect", (B*) op_disconnect,
   (B*) "send", (B*) op_send,
@@ -178,6 +180,7 @@ B* _sysop[] =
   (B*) "mapcolor", (B*) op_mapcolor,
   (B*) "drawline", (B*) op_drawline,
   (B*) "drawsymbols", (B*) op_drawsymbols,
+  (B*) "fillrectangle", (B*) op_fillrectangle,
   (B*) "drawtext", (B*) op_drawtext,
   (B*) "makewindowtop", (B*) op_makewindowtop,
   (B*) "Xauth", (B*) op_Xauth,
@@ -191,6 +194,12 @@ B* _sysop[] =
   (B*) "setconsole", (B*) op_setconsole,
   (B*) "console", (B*) op_console,
   (B*) "killsockets", (B*) op_killsockets,
+  (B*) "socketdead", (B*) op_socketdead,
+#ifdef DM_ENABLE_MPI
+  (B*) "rthreads", (B*) op_rthreads,
+  (B*) "checkrthreads", (B*) op_checkrthreads,
+  (B*) "makerthreads", (B*) op_makerthreads,
+#endif //DM_ENABLE_MPI
 #ifdef DM_HOST_IS_32_BIT
   (B*) "readf32", (B*) op_readf32,
 #endif //DM_HOST_IS_32_BIT
@@ -274,6 +283,9 @@ P _syserrc[] = {
   X_SEC_GEN,
   X_SEC_REV,
   X_SEC_LIB,
+  DEAD_SOCKET,
+#ifdef DM_ENABLE_MPI
+#endif //DM_ENABLE_MPI
 #ifdef DM_HOST_IS_32_BIT
 #endif //DM_HOST_IS_32_BIT
 #ifdef DM_ENABLE_REGEX
@@ -364,6 +376,9 @@ B* _syserrm[] = {
   (B*) "** X Security Extension unable to generate",
   (B*) "** X Security Extension unable to revoke",
   (B*) "** X Security library missing",
+  (B*) "** Dead socket",
+#ifdef DM_ENABLE_MPI
+#endif //DM_ENABLE_MPI
 #ifdef DM_HOST_IS_32_BIT
 #endif //DM_HOST_IS_32_BIT
 #ifdef DM_ENABLE_REGEX

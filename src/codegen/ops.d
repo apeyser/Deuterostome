@@ -95,7 +95,7 @@
       /find /get /put /known
       /getinterval /countdictstack /dictstack
       /save /capsave /restore /vmstatus
-      /bind /null
+      /bind /null /not
       /start /exec
       /if /ifelse /for /repeat /loop /forall /exit
       /stop /stopped
@@ -119,7 +119,7 @@
       /decompLU /backsubLU /integrateRS /bandLU
       /bandBS /invertLU /matmul /mattranspose
       /dilute_add /matvecmul
-      /getstartupdir /gethomedir
+      /getstartupdir /gethomedir /getconfdir
     ] def
     /errors 100 dict dup begin |[
       /TIMER (** Timeout) def
@@ -195,7 +195,7 @@ end def
   /all 2 dict dup begin |[
     /commands [
       /connect /disconnect /send /getsocket
-      /getmyname /getmyfqdn 
+      /getmyname /getmyfqdn
     ] def
     /error 2 dict dup begin |[
       /DEAD_SOCKET (Dead source connection) def
@@ -211,7 +211,7 @@ end def
       /screensize /makewindow
       /deletewindow /mapwindow /resizewindow
       /Xsync /mapcolor /drawline
-      /drawsymbols /drawtext
+      /drawsymbols /fillrectangle /drawtext
       /makewindowtop 
       /Xauth /Xauthrev /Xauthgen /Xauthset
     ] def
@@ -285,9 +285,15 @@ end def
   end def |]
 end def
 
-/master 2 dict dup begin |[
-  /all 1 dict dup begin |[
-    /commands [/getmyport /setconsole /console /killsockets] def |]
+/master 3 dict dup begin |[
+  /all 2 dict dup begin |[
+    /commands [/getmyport /setconsole /console /killsockets /socketdead] def 
+    /errors 1 dict dup begin |[
+      /DEAD_SOCKET (** Dead socket) def |]
+    end def |]
+  end def
+  /DM_ENABLE_MPI 1 dict dup begin  |[
+    /commands [/rthreads /checkrthreads /makerthreads] def |]
   end def
   /DM_HOST_IS_32_BIT 1 dict dup begin |[
     /commands [/readf32] def |]
@@ -311,16 +317,16 @@ end def end def
   ] def |]
 end def end def
 
-/dgen 1 dict dup begin /all 1 dict dup begin |[
+/dgen 1 dict dup begin |[
   /parents [/common /quitable] def |]
-end def end def
+end def
 
 /dvt 1 dict dup begin |[
-  /parents [/common /net /x /terminal /quitable] def
+  /parents [/common /net /x /terminal /quitable] def |]
 end def
 
 /dnode 1 dict dup begin |[
-  /parents [/common /net /node /x /xnode /master /regex /plugins] def
+  /parents [/common /net /node /x /xnode /master /regex /plugins] def |]
 end def
 
 /dpawn 1 dict dup begin |[

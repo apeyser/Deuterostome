@@ -37,7 +37,15 @@ DLL_SCOPE P deendian_frame(B *frame, B isnonnative);
 //L deendian_list(B* frame, B isnonnative);
 //L deendian_dict(B* dict, B isnonnative);
 //L deendian_entries(B* doct, B isnonnative);
+
 DLL_SCOPE void setupdirs(void);
+DLL_SCOPE P op_getstartupdir(void);
+DLL_SCOPE P op_getconfdir(void);
+DLL_SCOPE P op_gethomedir(void);
+DLL_SCOPE P op_getmyport(void);
+
+DLL_SCOPE P op_syshi(void);
+DLL_SCOPE P op_syslibnum(void);
 
 
 #endif //DM_2_H

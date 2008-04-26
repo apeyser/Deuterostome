@@ -126,8 +126,11 @@ am_dgen_OBJECTS = dgen-dgen.$(OBJEXT) dgen-dm-nextevent.$(OBJEXT) \
 	dgen-dm3.$(OBJEXT)
 dgen_OBJECTS = $(am_dgen_OBJECTS)
 dgen_DEPENDENCIES = $(am__DEPENDENCIES_1) libdmbootstrap.la
+am__dnode_SOURCES_DIST = dnode.c dnode_0.h dmx.h dm-nextevent.c \
+	dm-nextevent.h dm3.c dm-dnode.h dm-dnode.c dqueen.c dqueen.h
+@ENABLE_MPI_TRUE@am__objects_5 = dnode-dqueen.$(OBJEXT)
 am_dnode_OBJECTS = dnode-dnode.$(OBJEXT) dnode-dm-nextevent.$(OBJEXT) \
-	dnode-dm3.$(OBJEXT) dnode-dm-dnode.$(OBJEXT)
+	dnode-dm3.$(OBJEXT) dnode-dm-dnode.$(OBJEXT) $(am__objects_5)
 dnode_OBJECTS = $(am_dnode_OBJECTS)
 dnode_DEPENDENCIES = libdmglobals.la
 dnode_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -184,7 +187,7 @@ SOURCES = $(libdmbootstrap_la_SOURCES) $(libdmglobals_la_SOURCES) \
 	$(testwordorder_SOURCES)
 DIST_SOURCES = $(libdmbootstrap_la_SOURCES) \
 	$(am__libdmglobals_la_SOURCES_DIST) $(dgen_SOURCES) \
-	$(dnode_SOURCES) $(dpawn_SOURCES) $(drook_SOURCES) \
+	$(am__dnode_SOURCES_DIST) $(dpawn_SOURCES) $(drook_SOURCES) \
 	$(dvt_SOURCES) $(testwordorder_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
@@ -442,7 +445,7 @@ edit = sed \
 @ENABLE_THREADS_TRUE@THREADSRC = threads.c
 @ENABLE_REGEX_TRUE@REGEX_SRC = dregex.c dregex.h
 @ENABLE_MPI_TRUE@MPI_PROGS = drook dpawn
-@ENABLE_MPI_TRUE@DNODE_MPI_SRCS = dqueen.c
+@ENABLE_MPI_TRUE@DNODE_MPI_SRCS = dqueen.c dqueen.h
 EXTRA_DIST = dnode-nice.c.in dnode-daemon.c.in paths.h.in \
 	drook.c.in dqueen.c.in 
 
@@ -473,7 +476,8 @@ dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS)
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dnode_SOURCES = dnode.c dnode_0.h dmx.h \
 	dm-nextevent.c dm-nextevent.h \
-	dm3.c dm-dnode.h dm-dnode.c
+	dm3.c dm-dnode.h dm-dnode.c \
+	$(DNODE_MPI_SRCS)
 
 dnode_LDADD = libdmglobals.la 
 dnode_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS) $(MPI_LIBS)
@@ -692,6 +696,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dm-nextevent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dm3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dnode.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dqueen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-nice.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpawn-dm-dpawn.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpawn-dm-mpi.Po@am__quote@
@@ -1109,6 +1114,20 @@ dnode-dm-dnode.obj: dm-dnode.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-dnode.c' object='dnode-dm-dnode.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dm-dnode.obj `if test -f 'dm-dnode.c'; then $(CYGPATH_W) 'dm-dnode.c'; else $(CYGPATH_W) '$(srcdir)/dm-dnode.c'; fi`
+
+dnode-dqueen.o: dqueen.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dqueen.o -MD -MP -MF $(DEPDIR)/dnode-dqueen.Tpo -c -o dnode-dqueen.o `test -f 'dqueen.c' || echo '$(srcdir)/'`dqueen.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dnode-dqueen.Tpo $(DEPDIR)/dnode-dqueen.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dqueen.c' object='dnode-dqueen.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dqueen.o `test -f 'dqueen.c' || echo '$(srcdir)/'`dqueen.c
+
+dnode-dqueen.obj: dqueen.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dqueen.obj -MD -MP -MF $(DEPDIR)/dnode-dqueen.Tpo -c -o dnode-dqueen.obj `if test -f 'dqueen.c'; then $(CYGPATH_W) 'dqueen.c'; else $(CYGPATH_W) '$(srcdir)/dqueen.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dnode-dqueen.Tpo $(DEPDIR)/dnode-dqueen.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dqueen.c' object='dnode-dqueen.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dqueen.obj `if test -f 'dqueen.c'; then $(CYGPATH_W) 'dqueen.c'; else $(CYGPATH_W) '$(srcdir)/dqueen.c'; fi`
 
 dpawn-dpawn.o: dpawn.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dpawn_CPPFLAGS) $(CPPFLAGS) $(dpawn_CFLAGS) $(CFLAGS) -MT dpawn-dpawn.o -MD -MP -MF $(DEPDIR)/dpawn-dpawn.Tpo -c -o dpawn-dpawn.o `test -f 'dpawn.c' || echo '$(srcdir)/'`dpawn.c

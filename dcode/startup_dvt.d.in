@@ -938,9 +938,10 @@ c_         list all connections
         2 copy connect node 2 put node 1 put node 0 put
         true node 3 put printnode
         
+        getdnodedisplay | needs to be outside of save box
         save
-        node 2 get ~[getdnodedisplay knode fontdict mousedict {
-          getsocket setconsole
+        node 2 get ~[4 -1 roll knode fontdict mousedict {
+          getsocket setconsole 
           /mousedict name /fontdict name /knode name /getdnodedisplay name
           capsave
           
@@ -984,8 +985,9 @@ c_         list all connections
         node 6 put
         true node 3 put printnode
    
+        getdnodedisplay 
         save
-        node 2 get [getdnodedisplay knode fontdict mousedict {
+        node 2 get [4 -1 roll knode fontdict mousedict {
           getsocket setconsole
           /mousedict name /fontdict name /knode name /getdnodedisplay name
           capsave
@@ -1036,8 +1038,9 @@ c_         list all connections
       restore
       null node 6 put
 
+      getdnodedisplay
       save
-      node 2 get ~[getdnodedisplay Xwindows knode {
+      node 2 get ~[4 -1 roll Xwindows knode {
         getsocket setconsole
         5 -1 roll not {killsockets abort} if | bool from vmresize
         /knode name 

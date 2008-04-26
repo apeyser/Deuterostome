@@ -70,7 +70,7 @@ endif ENABLE_REGEX
 
 if ENABLE_MPI
 MPI_PROGS = drook dpawn
-DNODE_MPI_SRCS = dqueen.c
+DNODE_MPI_SRCS = dqueen.c dqueen.h
 endif ENABLE_MPI
 
 EXTRA_DIST =    dnode-nice.c.in dnode-daemon.c.in paths.h.in \
@@ -112,7 +112,8 @@ dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 
 dnode_SOURCES = dnode.c dnode_0.h dmx.h \
 	dm-nextevent.c dm-nextevent.h \
-	dm3.c dm-dnode.h dm-dnode.c
+	dm3.c dm-dnode.h dm-dnode.c \
+	$(DNODE_MPI_SRCS)
 
 dnode_LDADD = libdmglobals.la 
 dnode_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS) $(MPI_LIBS)

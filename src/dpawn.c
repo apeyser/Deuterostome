@@ -60,7 +60,7 @@ The typical first connection request made to a dnode comes from a dvt. The
 dvt will initiate two actions: (1) using the 'vmresize' operator of the dnode,
 the memory resockets of the dnode's D machine will be set to sizes as 
 needed for the job at hand. (2) startup code will be either transmitted or
-read from the file system. In particular, the file 'startup_dnode.d' will be
+read from the file system. In particular, the file 'startup_dpawn.d' will be
 included, which provides, among many other things, procedures that emulate
 virtual terminal operators in the dnode, including a procedure 'error' that
 monitors errors arising in the dnode on the console screen of the dvt.

@@ -550,29 +550,6 @@ DLL_SCOPE void ATAN(B *frame);
 DLL_SCOPE void DECREMENT(B *frame);
 
 /*----------------------- system operators */
-DLL_SCOPE P op_serialize(void);
-DLL_SCOPE P op_lock(void);
-DLL_SCOPE P op_syshi(void);
-DLL_SCOPE P op_syslibnum(void);
-DLL_SCOPE P op_error(void);
-DLL_SCOPE P op_errormessage(void);
-DLL_SCOPE P op_aborted(void);
-DLL_SCOPE P op_abort(void);
-DLL_SCOPE P op_halt(void);
-DLL_SCOPE P op_continue(void);
-DLL_SCOPE P op_quit(void);
-DLL_SCOPE P op_setconsole(void);
-DLL_SCOPE P op_console(void);
-DLL_SCOPE P op_toconsole(void);
-DLL_SCOPE P op_tostderr(void);
-DLL_SCOPE P op_flush(void);
-DLL_SCOPE P op_nextevent(void);
-DLL_SCOPE P op_killsockets(void);
-DLL_SCOPE P op_getstartupdir(void);
-DLL_SCOPE P op_getconfdir(void);
-DLL_SCOPE P op_gethomedir(void);
-DLL_SCOPE P op_getmyport(void);
-
 DLL_SCOPE P op_pop(void);
 DLL_SCOPE P op_exch(void);
 DLL_SCOPE P op_dup(void);

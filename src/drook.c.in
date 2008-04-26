@@ -96,18 +96,9 @@ static void mpihandler(MPI_Comm* comm __attribute__ ((__unused__)),
   inhandler = TRUE;
 
   if (MPI_Error_string(*err, string, &len))
-    error(0, 0, "Unable to produce error string (%i)", *err);
+    error(1, 0, "Unable to produce error string (%i)", *err);
   else
-    error(0, 0, "Error mpi: %s", string);
-
-  switch (*err) {
-    case MPI_ERR_TRUNCATE:
-    case MPI_ERR_NO_MEM:
-      break;
-
-    default:
-      exit(1);
-  };
+    error(1, 0, "Error mpi: %s", string);
 
   inhandler = FALSE;
 }
@@ -154,7 +145,7 @@ DM_INLINE_STATIC void writesocketerror(char* type, char* info) {
     error(1, 0, "snprintf overflow: %i", n);
 
   TAG(boxf) = BOX;
-  BOX_NB(boxf) = FRAMEBYTES+n;
+  BOX_NB(boxf) = n;
   SETNATIVE(boxf);
   
   TAG(stringf) = (ARRAY|BYTETYPE);
@@ -168,67 +159,43 @@ DM_INLINE_STATIC void writesocketerror(char* type, char* info) {
 static B* from_dnode_data = NULL;
 static P from_dnode_data_n = 0;
 
-DM_INLINE_STATIC void dumpsocket(P n) {
-  while (n) {
-    static B throwaway[1024*10];
-    P n_ = sizeof(throwaway) < (UP)n ? sizeof(throwaway) : (UP)n;
-    read_socket_int(throwaway, n_);
-    n -= n_;
-  }
-}
-
-DM_INLINE_STATIC BOOLEAN readbody(void) {
+DM_INLINE_STATIC void readbody(void) {
   B* data_ = (B*) realloc(from_dnode_data, from_dnode_data_n);
-  if (! data_) {
-    dumpsocket(from_dnode_data_n - FRAMEBYTES);
-    return FALSE;
-  }
+  if (! data_) 
+    error(1, errno, "Unable to alloc %i", (int) from_dnode_data_n);
   
   from_dnode_data = data_;
-  read_socket_int(from_dnode_data + FRAMEBYTES, 
-		  from_dnode_data_n - FRAMEBYTES);
-
-  return TRUE;
+  read_socket_int(from_dnode_data + FRAMEBYTES*2, 
+		  from_dnode_data_n - FRAMEBYTES*2);
 }
 
-#define readsocketerr(doex, string) do {				\
+#define readsocketerr(string) do {					\
     writesocketerror("readsocket", "Bad " string " from dnode");	\
-    error((doex) ? 1 : 0, 0, "Bad " string " from dnode");		\
-    retc = FALSE;							\
-    goto RET;								\
+    error(1, 0, "Bad " string " from dnode");				\
   } while (0)
 
-DM_INLINE_STATIC BOOLEAN readsocket(void) {
-  BOOLEAN retc = TRUE;
-
-  from_dnode_data_n = FRAMEBYTES;
+DM_INLINE_STATIC void readsocket(void) {
+  from_dnode_data_n = FRAMEBYTES*2;
   if (! (from_dnode_data = (B*) malloc(from_dnode_data_n)))
-    readsocketerr(TRUE, "allocation of base frames");
+    readsocketerr("allocation of base frames");
   read_socket_int(from_dnode_data, from_dnode_data_n);
 
   if (! GETNATIVEFORMAT(from_dnode_data)
       || ! GETNATIVEUNDEF(from_dnode_data))
-    readsocketerr(TRUE, "msg");
+    readsocketerr("msg");
   if (GETNONNATIVE(from_dnode_data)) 
-    readsocketerr(TRUE, "nativity");
+    readsocketerr("nativity");
 
   from_dnode_data_n += BOX_NB(from_dnode_data);
-  if (! readbody()) readsocketerr(FALSE, "message body");
-
- RET:
-  if (!retc && from_dnode_data) {
-    free(from_dnode_data);
-    from_dnode_data = NULL;
-  }
-  return retc;
+  readbody();
 }
 
 DM_INLINE_STATIC void writempi(void) {
   P i;
   for (i = 0; i < nodes; i++) {
-    MPI_Isend(from_dnode_data, FRAMEBYTES, MPI_UNSIGNED_CHAR,
+    MPI_Isend(from_dnode_data, FRAMEBYTES*2, MPI_UNSIGNED_CHAR,
 	      i, 1, children, &requests[i]);
-    MPI_Isend(from_dnode_data+FRAMEBYTES, from_dnode_data_n-FRAMEBYTES, 
+    MPI_Isend(from_dnode_data+FRAMEBYTES*2, from_dnode_data_n-FRAMEBYTES*2, 
 	      MPI_UNSIGNED_CHAR,
 	      i, 2, children, &requests[i*2]);
   }
@@ -246,103 +213,47 @@ DM_INLINE_STATIC void* from_dnode(void* arg __attribute__ ((__unused__))) {
     error(1, errno, "Unable to malloc requests");
   write_socket_int(&ok, sizeof(ok));
 
-  while (1) if (readsocket()) writempi();
+  while (1) {readsocket(); writempi();};
   exit(1);
 }
 
 
-DM_INLINE_STATIC BOOLEAN read_mpi_int(B* where, size_t n, int source, int tag) 
+DM_INLINE_STATIC void read_mpi_int(B* where, size_t n, int source, int tag) 
 {
-  return (BOOLEAN) MPI_Recv(where, n, MPI_UNSIGNED_CHAR,
-			    source, tag, children, MPI_STATUS_IGNORE);
+  MPI_Recv(where, n, MPI_UNSIGNED_CHAR,
+	   source, tag, children, MPI_STATUS_IGNORE);
 }
 
-DM_INLINE_STATIC BOOLEAN probe_mpi_int(P* count, P* src, P tag) {
+DM_INLINE_STATIC void probe_mpi_int(P* count, P* src, P tag) {
   MPI_Status status;
-  if (MPI_Probe(*src, tag, children, &status))
-    return FALSE;
-
+  MPI_Probe(*src, tag, children, &status);
   *count = status.count;
   *src = status.MPI_SOURCE;
-  return TRUE;
-}
-
-DM_INLINE_STATIC void dumpmpi2(P source) {
-  int r = MPI_Recv(NULL, 0, MPI_UNSIGNED_CHAR, 
-		   source, 2, children, MPI_STATUS_IGNORE);
-  switch (r) {
-    case MPI_SUCCESS: case MPI_ERR_TRUNCATE: return;
-  };
-
-  writesocketerror("readmpi", "Unable to dump message from mpi");
-  error(1, 0, "Unable to dump message from mpi");
-}
-
-DM_INLINE_STATIC void dumpmpi1(P source) {
-  int r = MPI_Recv(NULL, 0, MPI_UNSIGNED_CHAR, 
-		   source, 1, children, MPI_STATUS_IGNORE);
-  switch (r) {
-    case MPI_SUCCESS: case MPI_ERR_TRUNCATE: dumpmpi2(source); return;
-  };
-
-  writesocketerror("readmpi", "Unable to dump message from mpi");
-  error(1, 0, "Unable to dump message from mpi");
 }
 
 static B* from_mpi_data = NULL;
 static P from_mpi_data_n = 0;
 
-#define readmpierr(doex, string) do {				\
+#define readmpierr(string) do {					\
     writesocketerror("readmpi", "Bad " string " from mpi");	\
-    error((doex) ? 1 : 0, 0, "Bad " string " from mpi");	\
-    ret = FALSE;						\
-    goto RET;							\
+    error(1, 0, "Bad " string " from mpi");	\
   } while (0)
 
-DM_INLINE_STATIC BOOLEAN readmpi(void) {
-  BOOLEAN ret = TRUE;
+DM_INLINE_STATIC void readmpi(void) {
   P source= MPI_ANY_SOURCE;
   P more_data_n;
-  B* more_data;
 
-  if (probe_mpi_int(&from_mpi_data_n, &source, 1)) 
-    readmpierr(TRUE, "probing frames");
+  probe_mpi_int(&from_mpi_data_n, &source, 1);
+  if (! (from_mpi_data = (B*) malloc(from_mpi_data_n)))
+    readmpierr("total size");
+  read_mpi_int(from_mpi_data, from_mpi_data_n, source, 1);
 
-  if (! (from_mpi_data = (B*) malloc(from_mpi_data_n))) {
-    dumpmpi1(source);
-    readmpierr(FALSE, "total size");
-  }
-
-  if (read_mpi_int(from_mpi_data, from_mpi_data_n, source, 1)) {
-    dumpmpi1(source);
-    readmpierr(FALSE, "receiving frames");
-  }
-
-  if (probe_mpi_int(&more_data_n, &source, 2)) {
-    dumpmpi2(source);
-    readmpierr(FALSE, "probing latter frames");
-  }
-  
-  if (! (more_data = (B*) realloc(from_mpi_data, 
-				  from_mpi_data_n + more_data_n))) {
-    dumpmpi2(source);
-    readmpierr(FALSE, "total size - latter frames");
-  }
-
-  from_mpi_data = more_data;
-  if (read_mpi_int(from_mpi_data + from_mpi_data_n, more_data_n, source, 2)) {
-    dumpmpi2(source);
-    readmpierr(FALSE, "receiving latter frames");
-  }
+  probe_mpi_int(&more_data_n, &source, 2);
+  if (! (from_mpi_data = (B*) realloc(from_mpi_data, 
+				      from_mpi_data_n + more_data_n)))
+    readmpierr("total size - latter frames");
+  read_mpi_int(from_mpi_data + from_mpi_data_n, more_data_n, source, 2);
   from_mpi_data_n += more_data_n;
-
- RET:
-  if (! ret && from_mpi_data) {
-    free(from_mpi_data);
-    from_mpi_data = NULL;
-  }
-
-  return ret;
 }
 
 DM_INLINE_STATIC void writesocket(void) {
@@ -353,7 +264,7 @@ DM_INLINE_STATIC void writesocket(void) {
 
 DM_INLINE_STATIC void* from_mpi(void* arg) __attribute__ ((__noreturn__));
 DM_INLINE_STATIC void* from_mpi(void* arg __attribute__ ((__unused__))) {
-  while (1) if (readmpi()) writesocket();
+  while (1) {readmpi(); writesocket();};
   exit(1);
 }
 

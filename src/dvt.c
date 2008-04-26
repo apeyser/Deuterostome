@@ -25,6 +25,7 @@
 #include "dm-nextevent.h"
 #include "dm-vm.h"
 #include "dm-dvt.h"
+#include "dm2.h"
 
 /*----------------- DM global variables -----------------------------*/
 

@@ -1106,7 +1106,7 @@ P op_Xauthset(void) {
 }
 
 //------------------------------------------------ Xauthgen
-// (name) <b data> bool-trusted | (new-name) <b new-data> id/x 
+// (name) <b data> bool-trusted | (name) <b new-data> id/x 
 //
 
 P op_Xauthgen(void) 
@@ -1126,7 +1126,6 @@ P op_Xauthgen(void)
   int maj_ver, min_ver;
   unsigned long eventmask;
   P ret = OK;
-  B* oldfreevm = FREEvm;
   B* dataf;
 
   if (! dvtdisplay) return NO_XWINDOWS;
@@ -1171,11 +1170,11 @@ P op_Xauthgen(void)
   
   dataf = FREEvm;
   TAG(dataf) = (ARRAY | BYTETYPE);
+  ATTR(dataf) = PARENT;
   VALUE_PTR(dataf) = dataf + FRAMEBYTES;
   ARRAY_SIZE(dataf) = authout->data_length;
   moveB(authout->data, VALUE_PTR(dataf), authout->data_length);
   FREEvm += FRAMEBYTES + DALIGN(authout->data_length);
-  oldfreevm = FREEvm;
 
   TAG(o_1) = (NUM | LONGBIGTYPE);
   LONGBIG_VAL(o_1) = id;
@@ -1184,7 +1183,6 @@ P op_Xauthgen(void)
  RET:
   if (authin) XSecurityFreeXauth(authin);
   if (authout) XSecurityFreeXauth(authout);
-  FREEvm = oldfreevm;
   return ret;
 #endif
 }

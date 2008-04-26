@@ -18,32 +18,6 @@
 2 list dictstack dup 0 get /systemdict name   | name the roots
                      1 get /userdict name
 
-getsocket setconsole
-/toconsole_ ~toconsole def
-
-/makefont {
-    ~[exch 3 -1 roll 1 ~index 0 ~put] bind
-} bind def
-
-| ///////// INTERNALIZED ////////////
-|-------------------------- lock -------------------
-|
-| This requires the convention that no one set a lock
-| and then drop out (say by a stop or end of procedure)
-| before clearing the lock, which will be the case
-| if this function is used to handle the lock.
-|
-| ~active | -- <<active executed>>
-|
-| /lock {
-|   getlock {exec} {
-|     true setlock
-|     stopped
-|     false setlock
-|     {stop} if
-|   } ifelse
-| } bind def
-
 |------------------------ low-level information -------------------------
 | For debugging and quick information about objects, stacks, and system
 | resources use:
@@ -381,41 +355,29 @@ end def  | of xtext_dict
     } ifelse
 } bind def
 
-|----------------- myname
-| -- | (hostname)
-| just allocate it on startup
-/myname getmyname def
-
-|---------------- sourcedead
-| socket | --
-| default handler just throws away the socket and signals an error
-
-/socketdead {
-  pop myname getmyport (/socketdead) 533 error
-} bind def
-
 /linebuf2 8192 /b array def
 
-/dvtreceive_base {
-  userdict /knode put
-  dup capsave userdict /dvtsave put
-  stopped pop
-  userdict /dvtsave get restore
+/dnodereceive_base {
+  dup mpirank eq exch * eq or not {restore} {
+    dup capsave userdict /dnodesave put
+    stopped pop
+    userdict /dnodesave get restore
 
-  save console ~[userdict /knode get ~dvt ~begin ~setready_dnode] send restore
+    save ~[mpirank ~dnode ~begin ~setready_dpawn] send restore
+  } ifelse
 } bind def
 
-/dvtreceive {
-  exch mkact 3 1 roll dvtreceive_base
+/dnodereceive {
+  exch mkact 3 1 roll dnodereceive_base
 } bind def
 
-/dvtsystem {
-  ~tosystem 4 -1 roll 3 -1 roll dvtreceive_base
+/dnodesystem {
+  ~tosystem 4 -1 roll 3 -1 roll dnodereceive_base
 } bind def
 
-/dvtexecsystem {
+/dnodeexecsystem {
   {linebuf2 0 3 -1 roll mkact exec 0 exch getinterval tosystem}
-  4 -1 roll 3 -1 roll dvtreceive_base
+  4 -1 roll 3 -1 roll dnodereceive_base
 } bind def
 
 |====================== Support for toolboxes and projects =====================
@@ -642,66 +604,6 @@ end def  | of xtext_dict
   end                                     | pop debug_dict
 } def
 
-|----------------------- color loader and setup
-| [/color_name ...] | -- <<redefines toconsole>>
-/make_toconsole {
-  userdict /color known not {
-    getstartupdir (/color.d) fromfiles
-  } if
-  color /make_toconsole get exec
-  whoami
-} bind def
-
-| mousestate /wintype actiondict | -- <<action exec'd>> 
-/mouseaction {/actiondict name
-  | bottom 8 bits are the modifier keys, bottom 8 of top 16 is mouse button
-  | Why? No clear reason.
-  exch dup -16 bitshift /mB name 255 and /mM name | /wintype
-  false mousedict 3 -1 roll get {                 | false /event {}
-    actiondict 2 index known not {pop pop} {
-      exec {exch pop true exit} {pop} ifelse
-    } ifelse
-  } forall
-  {actiondict exch get exec true} {false} ifelse
-} bind def
-
-| (base-dir) (file) | --
-/convert_from_32 {
-  save /cstate name {
-    /filename name
-    /dirname name
-    
-    /boxfile
-      filename length 4 add /b array 0 filename fax (.box) fax pop
-    def
-    /olddirname
-      dirname length 5 add /b array 0 dirname fax (/old/) fax pop
-    def
-    /newdirname
-      dirname length 1 add /b array 0 dirname fax (/) fax pop
-    def
-
-    olddirname boxfile readf32 newdirname boxfile writeboxfile
-  } stopped cstate restore {stop} if
-} bind def
-
-| (base-dir) | --
-/convertdir_from_32 {
-  save /cdstate name {
-    dup length 1 add /b array 0 3 -1 roll fax (/) fax pop /basedirname name
-    basedirname length 4 add /b array 0 basedirname fax (old/) fax pop
-    /oldbasedirname name
-    
-    oldbasedirname findfiles {
-      0 get (.box$) regex not {pop} {pop /basefilename name pop pop
-        (Converting: ) toconsole
-        basedirname toconsole basefilename toconsole (\n) toconsole
-        basedirname basefilename convert_from_32
-        (Done\n) toconsole
-      } ifelse
-    } forall
-  } stopped cdstate restore {stop} if
-} bind def
 
 |------------------------------------------------ whoami
 | prints name and port
@@ -710,39 +612,12 @@ end def  | of xtext_dict
 |
 /whoami ~[
   1024 /b array {
-    0 
-    myname fax
-    (:) fax
-    * getmyport * number
+    * mpirank * number 
     (\n) fax
     0 exch getinterval toconsole_
   } ~exec
 ] bind def
 
-Xwindows_ {
-  /take_input_focus {
-    {[
-      console dup null eq {pop} {
-        {Xwindows {userdict begin take_input_focus} if restore} send
-      } ifelse |]
-    } stopped cleartomark
-    end
-  } bind def
-
-  /delete_window {end} bind def | default delete action is nothing.
-} if
-
-(Using startup_dnode.d $Id$ V@PACKAGE_VERSION@\n) toconsole
-  
-(Home:  ) toconsole gethomedir toconsole (\n) toconsole
-(Startup: ) toconsole getstartupdir toconsole (\n) toconsole
-(Plugins: ) toconsole getplugindir toconsole (\n) toconsole
+(Using startup_dpawn.d $Id: startup_dnode.d.in 1367 2008-04-24 01:36:55Z ap $ V@PACKAGE_VERSION@\n) toconsole
 
 getstartupdir (matrix.d) fromfiles
-
-(Trying ) toconsole getconfdir toconsole (dnode.d...\n) toconsole
-getconfdir (dnode.d) fromxfiles {
-  (Read ) toconsole getconfdir toconsole (dnode.d\n) toconsole
-} if
-(Trying ~/.dnode ...\n) toconsole
-gethomedir (.dnode) fromxfiles {(Read ~/.dnode\n) toconsole_} if

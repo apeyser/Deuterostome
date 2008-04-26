@@ -11,6 +11,7 @@
 #include "error-local.h"
 #include "dm3.h"
 #include "dm-nextevent.h"
+#include "dqueen.h"
 
 #define SOCKET_TIMEOUT (60)
 

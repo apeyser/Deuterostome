@@ -1248,12 +1248,12 @@ P tosource(B* rootf, BOOLEAN mksave, SourceFunc w1, SourceFunc w2) {
 /*----- we give ourselves SOCK_TIMEOUT secs to get this out */
   nb = FREEvm - oldFREEvm;
   FREEvm = oldFREEvm;
-  BOX_NB(FREEvm) = nb-FRAMEBYTES;
+  BOX_NB(FREEvm) = nb-FRAMEBYTES*2;
   SETNATIVE(FREEvm);
   
   if (retc) return retc;
-  if ((retc = w1(FREEvm, FRAMEBYTES)) 
-      || (retc = w2(FREEvm + FRAMEBYTES, nb - FRAMEBYTES)))
+  if ((retc = w1(FREEvm, FRAMEBYTES*2)) 
+      || (retc = w2(FREEvm + FRAMEBYTES*2, nb - FRAMEBYTES*2)))
     return retc;
 
   return OK;
@@ -1269,7 +1269,7 @@ P fromsource(B* bufferf, SourceFunc r1, SourceFunc r2) {
 
   /*----- get the root frame and evaluate */
   /*----- we give ourselves SOCK_TIMEOUT secs */
-  if ((retc = r1(xboxf, FRAMEBYTES))) return retc;
+  if ((retc = r1(xboxf, FRAMEBYTES*2))) return retc;
 
   if (! GETNATIVEFORMAT(xboxf) || ! GETNATIVEUNDEF(xboxf))
     return BAD_FMT;
@@ -1298,7 +1298,6 @@ P fromsource(B* bufferf, SourceFunc r1, SourceFunc r2) {
       };
       // else fall through
     case LIST: case DICT: {
-      B* irootf;
       B* iboxf;
       
       if (bufferf) {
@@ -1320,11 +1319,11 @@ P fromsource(B* bufferf, SourceFunc r1, SourceFunc r2) {
       ATTR(irootf) = PARENT;
       FREEvm += FRAMEBYTES;
 
-      if ((retc = r2(FREEvm, BOX_NB(xboxf)-FRAMEBYTES))) {
+      if ((retc = r2(FREEvm, BOX_NB(xboxf)))) {
 	FREEvm = oldfreevm;
 	return retc;
       }
-      FREEvm += BOX_NB(xboxf)-FRAMEBYTES;
+      FREEvm += BOX_NB(xboxf);
 
       if ((bufferf && o2 >= CEILopds) || o1 >= CEILopds) {
 	FREEvm = oldfreevm;

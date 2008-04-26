@@ -375,14 +375,14 @@ P wm_button_press(XEvent* event, B* userdict) {
    the operand stack, and 'error' on the execution stack 
 */
 
-void makeerror(P retc, B* error_socket) {
+void makeerror(P retc, B* error_source) {
   if (retc == OPDS_OVF) FREEopds = FLOORopds;
   if (retc == EXECS_OVF) FREEexecs = FLOORexecs;
   if (o2 >= CEILopds) FREEopds = FLOORopds;
   if (x1 >= CEILexecs) FREEexecs = FLOORexecs;
   TAG(o1) = ARRAY | BYTETYPE; ATTR(o1) = READONLY;
-  VALUE_BASE(o1) = (P)error_socket; 
-  ARRAY_SIZE(o1) = strlen((char*)error_socket);
+  VALUE_BASE(o1) = (P)error_source; 
+  ARRAY_SIZE(o1) = strlen((char*)error_source);
   TAG(o2) = NUM | LONGBIGTYPE; 
   ATTR(o2) = 0;
   LONGBIG_VAL(o2) = retc;

@@ -324,8 +324,7 @@ AC_CONFIG_FILES([
   ps/Makefile 
   sh/Makefile
   emacs/Makefile emacs/d-mode.el
-  dcode/Makefile dcode/startup_dnode.d 
-  dcode/startup_dgen.d 
+  dcode/Makefile
   src/codegen/startup_dgen.d:dcode/startup_dgen.d.in
   plugins/startup_dgen.d:dcode/startup_dgen.d.in
   test/Makefile

@@ -24,6 +24,8 @@
 
 B inputframe[FRAMEBYTES];
 P op_fromconsole(void);
+#include "dm-dvt.h"
+#include "dm2.h"
 
 #include "dgen_0.h"
 #include "dgen_1.h"

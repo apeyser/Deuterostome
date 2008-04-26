@@ -1,10 +1,13 @@
 dist_dmstart_DATA = color.d master.d sched.d plugin.d
-nodist_dmstart_DATA =  theeye.d startup_dnode.d \
+nodist_dmstart_DATA =  theeye.d startup_dnode.d startup_dpawn.d \
 	startup_dvt.d startup_dgen.d dvt_macros.d matrix.d
 dist_dmconf_DATA = dvt.d
 nodist_dmconf_DATA = dnode.d
 
-EXTRA_DIST = theeye.d.in dnode.d.in dvt_macros.d.in startup_dvt.d.in matrix.d.in
+EXTRA_DIST = theeye.d.in dnode.d.in dvt_macros.d.in \
+	startup_dvt.d.in startup_dnode.d.in startup_dpawn.d.in \
+	matrix.d.in
+
 CLEANFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
 
 XPS_START = /^[[:space:]]*[@]ENABLE_XPS_START[@][[:space:]]*$$/
@@ -113,6 +116,21 @@ dvt_macros.d: $(srcdir)/Makefile $(srcdir)/dvt_macros.d.in
 startup_dvt.d: $(srcdir)/Makefile $(srcdir)/startup_dvt.d.in 
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/startup_dvt.d.in >$@.tmp
+	mv $@.tmp $@
+
+startup_dnode.d: $(srcdir)/Makefile $(srcdir)/startup_dnode.d.in 
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/startup_dnode.d.in >$@.tmp
+	mv $@.tmp $@
+
+startup_dpawn.d: $(srcdir)/Makefile $(srcdir)/startup_dpawn.d.in 
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/startup_dpawn.d.in >$@.tmp
+	mv $@.tmp $@
+
+startup_dgen.d: $(srcdir)/Makefile $(srcdir)/startup_dgen.d.in 
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/startup_dgen.d.in >$@.tmp
 	mv $@.tmp $@
 
 matrix.d: $(srcdir)/Makefile $(srcdir)/matrix.d.in
