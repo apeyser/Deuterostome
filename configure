@@ -7796,7 +7796,7 @@ return clapack_dgesv ();
   return 0;
 }
 _ACEOF
-for ac_lib in '' lapack clapack; do
+for ac_lib in '' lapack clapack lapack_atlas; do
   if test -z "$ac_lib"; then
     ac_res="none required"
   else
