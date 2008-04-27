@@ -8096,8 +8096,8 @@ fi
     if test "x$MPI_LIBS" != x; then
       LIBS="$MPI_LIBS $LIBS"
       CPPFLAGS="$CPPFLAGS $MPI_FLAGS"
-      { echo "$as_me:$LINENO: checking for VecCreate in $MPI_LIBS" >&5
-echo $ECHO_N "checking for VecCreate in $MPI_LIBS... $ECHO_C" >&6; }
+      { echo "$as_me:$LINENO: checking for MPI_Bcast in $MPI_LIBS" >&5
+echo $ECHO_N "checking for MPI_Bcast in $MPI_LIBS... $ECHO_C" >&6; }
 	cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -8111,11 +8111,11 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef __cplusplus
 extern "C"
 #endif
-char VecCreate ();
+char MPI_Bcast ();
 int
 main ()
 {
-return VecCreate ();
+return MPI_Bcast ();
   ;
   return 0;
 }

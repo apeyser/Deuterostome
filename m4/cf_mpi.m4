@@ -27,8 +27,8 @@ AC_DEFUN([CF_MPI], [
     if test "x$MPI_LIBS" != x; then
       LIBS="$MPI_LIBS $LIBS"
       CPPFLAGS="$CPPFLAGS $MPI_FLAGS"
-      AC_MSG_CHECKING([for VecCreate in $MPI_LIBS])
-	AC_TRY_LINK_FUNC([VecCreate], [cf_mpi_ok=yes], [MPI_LIBS=""])
+      AC_MSG_CHECKING([for MPI_Bcast in $MPI_LIBS])
+	AC_TRY_LINK_FUNC([MPI_Bcast], [cf_mpi_ok=yes], [MPI_LIBS=""])
 	AC_MSG_RESULT([$cf_mpi_ok])
       LIBS="$cf_mpi_save_LIBS"
       CPPFLAGS="$cf_mpi_save_CPPFLAGS"
