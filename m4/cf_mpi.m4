@@ -54,7 +54,7 @@ AC_DEFUN([CF_MPI], [
         [$MPI_LIBS])
      AC_MSG_CHECKING([for MPI_Bcast in mpich])
      if test $cf_mpi_ok = no ; then
-        AC_MSG_ERROR([No mpich MPI_Bcast found])
+        AC_MSG_RESULT([No mpich MPI_Bcast found])
      else
         AC_MSG_RESULT([yes, in $ac_res])
      fi
