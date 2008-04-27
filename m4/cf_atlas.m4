@@ -63,7 +63,7 @@ AC_DEFUN([CF_ATLAS], [
      else
         AC_MSG_RESULT([yes, in $ac_res])
         cf_atlas_ok=no
-        AC_SEARCH_LIBS([clapack_dgesv], [lapack clapack lapack_atlas lapack-3],
+        AC_SEARCH_LIBS([clapack_dgesv], [lapack clapack lapack_atlas],
                        [AC_MSG_CHECKING([for clapack_dgesv in $ac_res])
                         if test -n "$ac_lib" ; then
                          ATLAS_LIBS="$ac_res $ATLAS_LIBS"
