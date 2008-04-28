@@ -272,48 +272,64 @@ P wm_button_press_(XEvent* event, B* userdict) {
 }
 #endif //! X_DISPLAY_MISSING
 
-P waitsocket(BOOLEAN ispending, fd_set* out_fds) {
+P waitsocket(BOOLEAN ispending, fd_set* out_fds, BOOLEAN* active) {
   static const struct timeval zerosec_ = {0, 0};
   static struct timeval zerosec;
   fd_set read_fds, err_fds;
-  P ret;
+  P nact;
   P i;
 
-  if (! maxsocket) return 0;
+  if (! maxsocket) {
+    *active = FALSE;
+    return OK;
+  }
 
 #if ! X_DISPLAY_MISSING
-    if (dvtdisplay != NULL && ! moreX) {
-      HXFlush(dvtdisplay);
-      moreX = HQLength(dvtdisplay);
-    }
+  if (dvtdisplay != NULL && ! moreX) {
+    HXFlush(dvtdisplay);
+    moreX = HQLength(dvtdisplay);
+  }
 #endif
 
   zerosec = zerosec_;
   read_fds = sock_fds;
   err_fds = sock_fds;
   
-  if ((ret = select(maxsocket, &read_fds, NULL, &err_fds, 
-		    ispending || moreX ? &zerosec : NULL)) == -1)
-    return ret;
+  if ((nact = select(maxsocket, &read_fds, NULL, &err_fds, 
+		     ispending || moreX ? &zerosec : NULL)) == -1) {
+    if (errno == EINTR) {
+      *active = FALSE;
+      return OK;
+    }
+    error(EXIT_FAILURE, -errno, "select");
+  }
+
+#if ! X_DISPLAY_MISSING
+  if (dvtdisplay != NULL && FD_ISSET(xsocket, &read_fds)) {
+    moreX = TRUE;
+    FD_CLR(xsocket, &read_fds);
+    nact--;
+  }
+#endif //! X_DISPLAY_MISSING
+
+  if (! nact) {
+#if ! X_DISPLAY_MISSING
+    P ret;
+    if (moreX && (ret = nextXevent())) {
+      errsource = "X service";
+      return ret;
+    }
+#endif
+    *active = FALSE;
+    return OK;
+  }
 
   *out_fds = read_fds;
   for (i = 0; i < maxsocket; ++i)
     if (FD_ISSET(i, &err_fds)) FD_SET(i, out_fds);
 
-#if ! X_DISPLAY_MISSING
-    if (dvtdisplay != NULL && FD_ISSET(xsocket, &read_fds)) {
-      moreX = TRUE;
-      FD_CLR(xsocket, &read_fds);
-      ret--;
-    }
-
-    if (! ret) {
-      if (moreX && (ret = nextXevent())) errsource = "X service";
-      return 0;
-    }
-#endif
-
-  return ret;
+  *active = TRUE;
+  return OK;
 }
 
 //------------------- read/write a block from a file descriptor

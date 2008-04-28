@@ -15,7 +15,7 @@ DLL_SCOPE P clientinput(void);
 DLL_SCOPE BOOLEAN pending(void);
 DLL_SCOPE void makeerror(P retc, B* error_source);
 
-DLL_SCOPE P waitsocket(BOOLEAN ispending, fd_set* out_fds);
+DLL_SCOPE P waitsocket(BOOLEAN ispending, fd_set* out_fds, BOOLEAN* active);
 DLL_SCOPE P fromsocket(P socket, B* buffer);
 
 #endif //DM_NEXTEVENT_H

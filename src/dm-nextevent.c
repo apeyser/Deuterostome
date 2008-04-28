@@ -85,16 +85,15 @@ DM_INLINE_STATIC BOOLEAN nextsocket(fd_set* read_fds) {
 //        bail out.
 
 P nextevent(B* buffer) {
-  P nact, retc = OK;
+  P retc = OK;
   fd_set read_fds;
+  BOOLEAN active;
 
   do {
     if (abortflag) return ABORT;
-    if ((nact = waitsocket(pending(), &read_fds)) < 0) {
-      if (errno == EINTR) continue;
-      else error(EXIT_FAILURE, errno, "select");
-    }
-    if (! nact) continue;
+    if ((retc = waitsocket(pending(), &read_fds, &active)))
+      return retc;
+    if (! active) continue;
  
   /* starting from the first socket after the last serviced socket, we
      find the next active socket and service it */
