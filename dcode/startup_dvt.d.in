@@ -645,7 +645,7 @@ end def  | of xtext_dict
         node 3 get {(Wait!\n) toconsole} { 
           knode setbusy 
           save
-          node 2 get ~[line knode ~dvtreceive] send
+          node 2 get ~[~[line knode ~dvtreceive] ~lock] send
           restore
         } ifelse
       } fornodes} ifelse
@@ -683,7 +683,7 @@ end def  | of xtext_dict
           node 3 get  {(Wait!\n) toconsole}  { 
             knode setbusy
             save
-            node 2 get ~[line knode ~dvtsystem] send
+            node 2 get ~[~[line knode ~dvtsystem] ~lock] send
             restore
           } ifelse
         } fornodes
@@ -704,7 +704,7 @@ end def  | of xtext_dict
           node 3 get {(Wait!\n) toconsole} { 
             knode setbusy
             save
-            node 2 get ~[line mkact exec knode ~dvtsystem] send
+            node 2 get ~[~[line mkact exec knode ~dvtsystem] ~lock] send
             restore
           } ifelse
         } fornodes
@@ -727,7 +727,7 @@ end def  | of xtext_dict
           node 3 get {(Wait!\n) toconsole}  { 
             knode setbusy
             save 
-            node 2 get ~[line knode ~dvtexecsystem] send
+            node 2 get ~[~[line knode ~dvtexecsystem] ~lock] send
             restore
           }  ifelse
         } fornodes

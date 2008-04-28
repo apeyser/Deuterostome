@@ -461,34 +461,31 @@ end mkread /infoclasses name
 |-------- deleting pre-existing rightpage buffers to create a new set
 
 /newbuffers {
-   TheEye /currentbuffers known { currentbuffers restore } if
+   TheEye /currentbuffers known {currentbuffers restore} if
    save /currentbuffers name
    /nullclass theopen 0 put
 } def
 
 |-------- opening file directory
 /open_dir {
-   pathbuf 0 theobj 1 get fax
-     theobj 2 get dup length 0 eq { pop } { fax (/) fax } ifelse
-     0 exch getinterval
-     save /tempcbs name
-   { findfiles dup length /b array
-     theobj 1 get dup length /b array copy 
-     theobj 2 get dup length /b array copy
-   } stopped tempcbs capsave
-     { tempcbs restore stop }
-     { tempcbs capsave
-       theopen 2 put theopen 1 put 
-       /checkmarks name 0 checkmarks copy pop
-       /thefilelist name
-       theobj 0 get theopen 0 put
-       TheEye /currentbuffers known { currentbuffers restore } if
-       /currentbuffers tempcbs def
-       /ritepageT 0 def /ritepageU thefilelist length def
-       /showRpage /show_dir find def /fromRpage /from_dir find def
-       showRpage 
-     }
-     ifelse
+  pathbuf 0 theobj 1 get fax
+  theobj 2 get dup length 0 eq { pop } { fax (/) fax } ifelse
+  0 exch getinterval
+  save /tempcbs name { 
+    findfiles dup length /b array
+    theobj 1 get dup length /b array copy 
+    theobj 2 get dup length /b array copy
+  } stopped tempcbs capsave {tempcbs restore stop} if 
+
+  theopen 2 put theopen 1 put 
+  /checkmarks name 0 checkmarks copy pop
+  /thefilelist name
+  theobj 0 get theopen 0 put
+  TheEye /currentbuffers known {currentbuffers restore} if
+  /currentbuffers tempcbs def
+  /ritepageT 0 def /ritepageU thefilelist length def
+  /showRpage /show_dir find def /fromRpage /from_dir find def
+  showRpage 
 } def
 
 |-------- opening file system
@@ -507,7 +504,7 @@ end mkread /infoclasses name
   0 exch copy /checkmarks name
   /thefilelist name
   theobj 0 get theopen 0 put
-  TheEye /currentbuffers known { currentbuffers restore } if
+  TheEye /currentbuffers known {currentbuffers restore} if
   /currentbuffers tempcbs def
   /ritepageT 0 def /ritepageU thefilelist length def
   /showRpage /show_dir find def /fromRpage /from_fs find def
@@ -541,14 +538,14 @@ end mkread /infoclasses name
 
 |-------- opening array
 /open_array {
-   /ritepageT 0 def /ritepageU theobj 1 get length def
-   newbuffers
-   theobj 1 get length /b array /checkmarks name
-   0 checkmarks copy pop
-   theobj theopen copy pop
-   | ??? currentbuffers capsave ???
-   /showRpage /show_array find def /fromRpage /from_array find def
-   showRpage
+  /ritepageT 0 def /ritepageU theobj 1 get length def
+  newbuffers
+  theobj 1 get length /b array /checkmarks name
+  0 checkmarks copy pop
+  theobj theopen copy pop
+  currentbuffers capsave
+  /showRpage /show_array find def /fromRpage /from_array find def
+  showRpage
 } def
 
 |------------------------------ local error handling

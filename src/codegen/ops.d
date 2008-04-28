@@ -231,7 +231,7 @@ end def
 /node 2 dict dup begin |[
   /all 2 dict dup begin |[
     /commands [
-      /lock /serialize /threads /makethreads 
+      /lock /unlock /serialize /threads /makethreads 
       /tostderr 
       /halt /continue 
       /vmresize 

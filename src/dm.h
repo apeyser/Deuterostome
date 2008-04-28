@@ -391,25 +391,12 @@ extern "C" {
 
 #define BAD_ARR     (P)0x00000B00L /* dmnuminc debug error */
 
-#if DM_ENABLE_REGEX		
-#define REGEX_BADPAT   (P)0x00000C01L /* Invalid regular expression */
-#define REGEX_ECOLLATE (P)0x00000C02L /* Invalid collating element */
-#define REGEX_ECTYPE   (P)0x00000C03L /* Invalid character class */
-#define REGEX_EESCAPE  (P)0x00000C04L /* `\' applied to unescapable character */
-#define REGEX_ESUBREG  (P)0x00000C05L /* invalid backreference number */
-#define REGEX_EBRACK   (P)0x00000C06L /* brackets `[]' not balanced*/
-#define REGEX_EPAREN   (P)0x00000C07L /* paranthesis `()' not balanced */
-#define REGEX_EBRACE   (P)0x00000C08L /* braces `{}' not balanced */
-#define REGEX_BADBR    (P)0x00000C09L /* invalid repetition count(s) in `{}' */
-#define REGEX_ERANGE   (P)0x00000C0AL /* invalid character rangin in `[]' */
-#define REGEX_ESPACE   (P)0x00000C0BL /* ran out of memory */
-#define REGEX_BADRPT   (P)0x00000C0CL /* `?', `*', or `+' operand invalid */
-#define REGEX_UNKNOWN  (P)0x00000C0DL /* Unknown error */
+#if DM_ENABLE_REGEX
+#define REGEX_ERRS     (P)0x00000C00L /* 0C00:0D00-1 for errors in dregex.h */
 #endif // DM_ENABLE_REGEX
-
 #define MATRIX_ERRS    (P)0x00000D00L /* 0D00:0E00-1 for errors in matrix.h */
-
 #define PLUGIN_ERRS    (P)0x00000E00L /* 0E00L:0F00-1 for errors in plugin.h */
+#define NEXTEVENT_ERRS (P)0x00000F00L /* 0F00L:1000-1 for errors in dm-nexteven.h*/
 
 /* compare results */
 
@@ -464,7 +451,7 @@ DLL_SCOPE B* myname_frame;  //points to frame holding my hostname
 DLL_SCOPE B* myfqdn_frame; // point to frame holding my fully qualified domain name
 DLL_SCOPE B* myxname_frame; //points to the frame buffering the DISPLAY name
 
-DLL_SCOPE UW ascii[];
+DLL_SCOPE _dm_const UW ascii[];
 
 /*----------------------- operator hands ------------------------------*/
 

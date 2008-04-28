@@ -94,8 +94,8 @@ XHACK_UNUSED(static void xhack_longjmp(void)) {
 	H(xhackr_dr, xhackr_g, params))
 
 xhack0(XCloseDisplay);
+xhack0(XPending);
 xhack0(XFlush);
-xhack0(QLength);
 xhack(XNextEvent, H(XEvent* x), H(x));
 xhackr(XInternAtom, Atom, 0, H(char* a, Bool b), H(a, b));
 

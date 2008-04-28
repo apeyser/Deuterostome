@@ -31,8 +31,6 @@ DLL_SCOPE P nocloseonexec(P socketfd);
 DLL_SCOPE void addsocket(P socketfd);
 DLL_SCOPE void delsocket(P socketfd);
 
-DLL_SCOPE BOOLEAN moreX;
-
 DLL_SCOPE P init_sockaddr(struct sockaddr_in *name, 
 			  const char *hostname, 
 			  UW port);

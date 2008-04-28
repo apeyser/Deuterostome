@@ -330,28 +330,20 @@ P wm_delete_window(XEvent* event __attribute__ ((__unused__)),
 DM_INLINE_STATIC P wrap_stop(P retc) {
   if (retc) return retc;
 
-  if (o2 > CEILopds) return OPDS_OVF;
+  if (o1 >= CEILopds) return OPDS_OVF;
   if (x_1 < FLOORexecs) return EXECS_UNF;
-  if (x2 > CEILexecs) return EXECS_OVF;
 
   moveframe(x_1, o1);
+  FREEopds = o2;
+
   TAG(x_1) = OP;
   ATTR(x_1) = ACTIVE;
   OP_NAME(x_1) = (P) "pop";
   OP_CODE(x_1) = (P) op_pop;
 
-  TAG(x1) = OP;
-  ATTR(x1) = ACTIVE;
-  OP_NAME(x1) = (P) "stopped";
-  OP_CODE(x1) = (P) op_stopped;
-
-  FREEopds = o2;
-  FREEexecs = x2;
-
   ispending = TRUE;
-  return OK;
+  return op_stopped();
 }
-
 
 P wm_take_focus(XEvent* event, B* userdict) {
   return wrap_stop(wm_take_focus_(event, userdict));

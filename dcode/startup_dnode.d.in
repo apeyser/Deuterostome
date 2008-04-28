@@ -394,28 +394,42 @@ end def  | of xtext_dict
   pop myname getmyport (/socketdead) 533 error
 } bind def
 
+|============================= command line interface for dvt =====
+
 /linebuf2 8192 /b array def
 
+| dvt... expect to be locked when called
+
+|  {} -> active save knode | --
 /dvtreceive_base {
   userdict /knode put
-  dup capsave userdict /dvtsave put
-  stopped pop
+  dup userdict /dvtsave put
+  capsave
+  {unlock} stopped
   userdict /dvtsave get restore
+  save 
+  console ~[userdict /knode get ~dvt ~begin ~setready_dnode] send 
+  restore
 
-  save console ~[userdict /knode get ~dvt ~begin ~setready_dnode] send restore
+  {stop} if
 } bind def
 
+| save (line) knode | --
 /dvtreceive {
   exch mkact 3 1 roll dvtreceive_base
 } bind def
 
+| save (line) knode | --
 /dvtsystem {
   ~tosystem 4 -1 roll 3 -1 roll dvtreceive_base
 } bind def
 
 /dvtexecsystem {
-  {linebuf2 0 3 -1 roll mkact exec 0 exch getinterval tosystem}
-  4 -1 roll 3 -1 roll dvtreceive_base
+  {
+    {linebuf2 0 3 -1 roll mkact exec 0 exch getinterval tosystem}
+    4 -1 roll 3 -1 roll 
+    dvtreceive_base
+  } lock
 } bind def
 
 |====================== Support for toolboxes and projects =====================

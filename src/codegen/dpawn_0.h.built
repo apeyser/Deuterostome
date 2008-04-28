@@ -143,6 +143,7 @@ B* _sysop[] =
   (B*) "gethomedir", (B*) op_gethomedir,
   (B*) "getconfdir", (B*) op_getconfdir,
   (B*) "lock", (B*) op_lock,
+  (B*) "unlock", (B*) op_unlock,
   (B*) "serialize", (B*) op_serialize,
   (B*) "threads", (B*) op_threads,
   (B*) "makethreads", (B*) op_makethreads,

@@ -162,7 +162,6 @@ static P int_Xdisconnect(BOOLEAN nocheck) {
     dvtdisplay = NULL;
   }
   *displayname = '\0';
-  moreX = FALSE;
   return OK;
 #endif
 }
@@ -343,32 +342,6 @@ BOOLEAN masterinput(P* retc, B* bufferf __attribute__ ((__unused__)) ) {
 
 #if ! X_DISPLAY_MISSING
 
-static B* xstopped = NULL;
-static P addxstopped(void) {
-  static B _xstopped[FRAMEBYTES*3] = {};
-  if (FREEvm + sizeof(_xstopped) > CEILvm) return VM_OVF;
-  if (! xstopped) {
-    B* c = _xstopped;
-    TAG(c) = LIST;
-    ATTR(c) = (ACTIVE|PARENT);
-    c += FRAMEBYTES;
-    TAG(c) = OP;
-    ATTR(c) = ACTIVE;
-    OP_NAME(c) = (P) "stopped";
-    OP_CODE(c) = (P) op_stopped;
-    c += FRAMEBYTES;
-    TAG(c) = OP;
-    ATTR(c) = ACTIVE;
-    OP_NAME(c) = (P) "pop";
-    OP_CODE(c) = (P) op_pop;
-  }
-  xstopped = FREEvm;
-  moveframes(_xstopped, xstopped, sizeof(_xstopped)/FRAMEBYTES);
-  VALUE_PTR(xstopped) = xstopped+FRAMEBYTES;
-  LIST_CEIL_PTR(xstopped) = FREEvm = xstopped + sizeof(_xstopped);
-  return OK;
-}
-
 DM_INLINE_STATIC P wrap_lock(P retc) {
   if (retc) return retc;
 
@@ -376,15 +349,20 @@ DM_INLINE_STATIC P wrap_lock(P retc) {
   if (x_1 < FLOORexecs) return EXECS_UNF;
 
   moveframe(x_1, o1);
-  moveframe(xstopped, o2);
-  
-  TAG(x_1) = OP;
-  ATTR(x_1) = ACTIVE;
-  OP_NAME(x_1) = (P) "lock";
-  OP_CODE(x_1) = (P) op_lock;
+
+  TAG(o2) = OP;
+  ATTR(o2) = ACTIVE;
+  OP_NAME(o2) = (P) "stopped";
+  OP_CODE(o2) = (P) op_stopped;
 
   FREEopds = o3;
-  return OK;
+
+  TAG(x_1) = OP;
+  ATTR(x_1) = ACTIVE;
+  OP_NAME(x_1) = (P) "pop";
+  OP_CODE(x_1) = (P) op_pop;
+
+  return op_lock();
 }
 
 DM_INLINE_STATIC P wm_delete_window_(XEvent* event, B* userdict) {
@@ -659,10 +637,11 @@ P op_socketdead(void) {return DEAD_SOCKET;}
 
 P op_vmresize(void) {
   P retc = op_vmresize_();
+  if (retc) return retc;
 #if ! X_DISPLAY_MISSING
-  return retc ? op_Xdisconnect() : addxstopped();
+  return op_Xdisconnect();
 #else
-  return retc;
+  return OK;
 #endif //X_DISPLAY_MISSING
 }
 
@@ -691,9 +670,6 @@ void run_dnode_mill(void) {
 #endif //ENABLE_UNIX_SOCKETS
 
   maketinysetup(quithandler_);
-#if ! X_DISPLAY_MISSING
-  addxstopped();
-#endif //! X_DISPLAY_MISSING
 
 /*----------------- construct frames for use in execution of D code */
   makename((B*)"error", errorframe); 

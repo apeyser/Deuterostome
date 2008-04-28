@@ -81,28 +81,33 @@ P nocloseonexec(P socket) {
 }
 
 #if X_DISPLAY_MISSING
-#define moreX (0)
-#else
+
+P nextXevent(void) {return OK;}
+#define moreX() (0)
+
+#else // if ! X_DISPLAY_MISSING
+
 #include "dmx.h"
 #include "xhack.h"
 
-// moreX is true iff there are X events pending, but dequeued from
-// the xsocket
-BOOLEAN moreX = FALSE;
+DM_INLINE_STATIC BOOLEAN moreX(void) {
+  return dvtdisplay && HXPending(dvtdisplay);
+}
 
 // ---------- nextXevent ---------------------------
 // Call when there is an X event pending, either on 
 // the xsocket or in the pending queue.
-// Gets one X event from the queue, updates moreX
+// Gets one X event from the queue
 // and then, if it is a recognized X event, it calls
 // the associated handler (from dnode or dvt).
 // the base for the handlers are defined below (name handler_)
-DM_INLINE_STATIC P nextXevent(void) {
+P nextXevent(void) {
   XEvent event;
-  B* userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
+  B* userdict;
+  if (! moreX()) return OK;
 
+  userdict = (B *)VALUE_BASE(FLOORdicts + FRAMEBYTES);
   HXNextEvent(dvtdisplay, &event);
-  moreX = HQLength(dvtdisplay) ? TRUE : FALSE;
 
   switch(event.type) {
     case ClientMessage:
@@ -272,63 +277,43 @@ P wm_button_press_(XEvent* event, B* userdict) {
 }
 #endif //! X_DISPLAY_MISSING
 
-P waitsocket(BOOLEAN ispending, fd_set* out_fds, BOOLEAN* active) {
+P waitsocket(BOOLEAN ispending, fd_set* out_fds) {
   static const struct timeval zerosec_ = {0, 0};
   static struct timeval zerosec;
   fd_set read_fds, err_fds;
   P nact;
   P i;
-
-  if (! maxsocket) {
-    *active = FALSE;
-    return OK;
-  }
-
-#if ! X_DISPLAY_MISSING
-  if (dvtdisplay != NULL && ! moreX) {
-    HXFlush(dvtdisplay);
-    moreX = HQLength(dvtdisplay);
-  }
-#endif
+  if (! maxsocket) return NEXTEVENT_NOEVENT;
 
   zerosec = zerosec_;
   read_fds = sock_fds;
   err_fds = sock_fds;
   
   if ((nact = select(maxsocket, &read_fds, NULL, &err_fds, 
-		     ispending || moreX ? &zerosec : NULL)) == -1) {
-    if (errno == EINTR) {
-      *active = FALSE;
-      return OK;
-    }
+		     ispending || moreX() ? &zerosec : NULL)) == -1) {
+    if (errno == EINTR) return NEXTEVENT_NOEVENT;
     error(EXIT_FAILURE, -errno, "select");
   }
 
 #if ! X_DISPLAY_MISSING
-  if (dvtdisplay != NULL && FD_ISSET(xsocket, &read_fds)) {
-    moreX = TRUE;
-    FD_CLR(xsocket, &read_fds);
-    nact--;
+  if (dvtdisplay) {
+    if (FD_ISSET(xsocket, &read_fds)) {
+      FD_CLR(xsocket, &read_fds);
+      nact--;
+    }
+    if (FD_ISSET(xsocket, &err_fds)) {
+      FD_CLR(xsocket, &err_fds);
+      nact--;
+    }
   }
 #endif //! X_DISPLAY_MISSING
 
-  if (! nact) {
-#if ! X_DISPLAY_MISSING
-    P ret;
-    if (moreX && (ret = nextXevent())) {
-      errsource = "X service";
-      return ret;
-    }
-#endif
-    *active = FALSE;
-    return OK;
-  }
+  if (! nact) return NEXTEVENT_NOEVENT;
 
   *out_fds = read_fds;
   for (i = 0; i < maxsocket; ++i)
     if (FD_ISSET(i, &err_fds)) FD_SET(i, out_fds);
 
-  *active = TRUE;
   return OK;
 }
 

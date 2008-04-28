@@ -72,7 +72,6 @@ DM_INLINE_STATIC BOOLEAN nextsocket(fd_set* read_fds) {
 //    activity in the d-machine pending, it blocks until something
 //    happens on a socket. Activity in the d-machine is defined by
 //    the pending() function, which is defined in dvt.o or dnode.o.
-// 3) If there is activity on the X socket, moreX is set
 // 4) If no other activity is seen, handle the X event and return.
 // 5) Check for new connections via serverinput. If some exists, begin again.
 // 6) Check for activity on the rest of the sockets. The next active socket
@@ -87,13 +86,14 @@ DM_INLINE_STATIC BOOLEAN nextsocket(fd_set* read_fds) {
 P nextevent(B* buffer) {
   P retc = OK;
   fd_set read_fds;
-  BOOLEAN active;
 
   do {
     if (abortflag) return ABORT;
-    if ((retc = waitsocket(pending(), &read_fds, &active)))
-      return retc;
-    if (! active) continue;
+    if ((retc = waitsocket(pending(), &read_fds))) {
+      if (retc == NEXTEVENT_NOEVENT && (retc = nextXevent()))
+	errsource = "X service";
+      continue;
+    }
  
   /* starting from the first socket after the last serviced socket, we
      find the next active socket and service it */

@@ -727,14 +727,14 @@ DM_INLINE_STATIC int compare(const void *a, const void *b)
   LBIG ta, tb;
   P na, nb;
 
-  fpa = (B *)(VALUE_BASE(a) + 3 * FRAMEBYTES);
-  fpb = (B *)(VALUE_BASE(b) + 3 * FRAMEBYTES);
+  fpa = (B *)(VALUE_PTR((B*)a) + 3 * FRAMEBYTES);
+  fpb = (B *)(VALUE_PTR((B*)b) + 3 * FRAMEBYTES);
   VALUE(fpa,&ta); 
   VALUE(fpb,&tb);
-  fpa = (B *)(VALUE_BASE(a)); 
-  fpb = (B *)(VALUE_BASE(b));
-  sa = (B *)(VALUE_BASE(fpa)); 
-  sb = (B *)(VALUE_BASE(fpb));
+  fpa = VALUE_PTR((B*)a); 
+  fpb = VALUE_PTR((B*)b);
+  sa = VALUE_PTR(fpa); 
+  sb = VALUE_PTR(fpb);
   na = ARRAY_SIZE(fpa); 
   nb = ARRAY_SIZE(fpb);
 

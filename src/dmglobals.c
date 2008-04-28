@@ -77,7 +77,7 @@ String              01    00 (
                     01    02 possible only in string, no attention
 Garbage             00    00 none of the above                         */
 
-UW ascii[128] = {
+_dm_const UW ascii[128] = {
 /*                                                                     */
      0x0000, 0x0000, 0x0000, 0x0000,  0x0000, 0x0000, 0x0000, 0x0000,
 /*             TAB     LF                       CR                     */

@@ -273,6 +273,34 @@ P op_lock(void) {
   return OK;
 }
 
+/* ~active | -- */
+P op_unlock(void) {
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (CEILexecs < x5) return EXECS_OVF;
+  if (! (ATTR(o_1) & ACTIVE)) return OPD_ATR;
+
+  TAG(x1) = BOOL; 
+  ATTR(x1) = 0;
+  BOOL_VAL(x1) = locked;
+
+  TAG(x2) = OP; 
+  ATTR(x2) = ACTIVE;
+  OP_NAME(x2) = (P) "x_lock"; 
+  OP_CODE(x2) = (P) x_op_lock;
+
+  TAG(x3) = BOOL; 
+  ATTR(x3) = (STOPMARK | ACTIVE);
+  BOOL_VAL(x3) = FALSE;
+
+  moveframe(o_1, x4);
+  FREEexecs = x5;
+  FREEopds = o_1;
+  locked = FALSE;
+
+  return OK;
+}
+
+
 static P x_op_serialize(void) {
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (x_1 < FLOORexecs) return EXECS_UNF;

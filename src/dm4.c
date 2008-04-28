@@ -664,7 +664,7 @@ P op_dictstack(void)
   for (dframe = (B *)VALUE_BASE(o_1); 
        dframe < (B *)LIST_CEIL(o_1);
        dframe += FRAMEBYTES)
-    DICT_NB(dframe) = DICT_NB(VALUE_BASE(dframe) - FRAMEBYTES);
+    DICT_NB(dframe) = DICT_NB(VALUE_PTR(dframe) - FRAMEBYTES);
  
   return OK;
 }
