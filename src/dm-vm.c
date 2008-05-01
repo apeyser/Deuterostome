@@ -134,10 +134,12 @@ void maketinysetup(void (*quithandler)(int sig)) {
   moveframe(userdict-FRAMEBYTES,FREEdicts); 
   FREEdicts += FRAMEBYTES;
   TAG(msf) = (ARRAY | BYTETYPE); ATTR(msf) = READONLY;
-  if (FREEvm + 100000 + FRAMEBYTES > CEILvm)
+  if (FREEvm + MSF_SIZE + FRAMEBYTES > CEILvm)
     error(EXIT_FAILURE, 0, "VM chosen too small");
-  VALUE_BASE(msf) = (P)FREEvm + FRAMEBYTES; ARRAY_SIZE(msf) = 100000;
-  moveframe(msf, FREEvm); FREEvm += FRAMEBYTES + DALIGN(100000);
+  VALUE_BASE(msf) = (P)FREEvm + FRAMEBYTES; 
+  ARRAY_SIZE(msf) = MSF_SIZE;
+  moveframe(msf, FREEvm); 
+  FREEvm += FRAMEBYTES + DALIGN(MSF_SIZE);
   moveframe(msf,cmsf);
 
   if (! (original_dir = getcwd(NULL, 0))) 
@@ -147,7 +149,7 @@ void maketinysetup(void (*quithandler)(int sig)) {
 }
 
 /*-------------------------------------------- vmresize
-    <L nopds ndicts nexecs nVM/MB userdictsize > | bool
+    <X nopds ndicts nexecs nVM/MB userdictsize > | bool
                                             null | true
     
   - with NULL as operand, establishes the 'tiny' D workspace

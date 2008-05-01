@@ -179,6 +179,7 @@ B* _sysop[] =
 #endif //DM_ENABLE_REGEX
   (B*) "loadlib", (B*) op_loadlib,
   (B*) "nextlib", (B*) op_nextlib,
+  (B*) "quit", (B*) op_quit,
   (B*) "]", (B*) op_closelist,
   (B*) "", (B*) NULL
 };
@@ -271,8 +272,8 @@ B* _syserrm[] = {
   (B*) "** Execution stack overflow",
   (B*) "** Dictionary stack overflow",
   (B*) "** Operand stack underflow",
-  (B*) "** Execution stack undeflow",
-  (B*) "** Dictionary stack undeflow",
+  (B*) "** Execution stack underflow",
+  (B*) "** Dictionary stack underflow",
   (B*) "** Invalid exit",
   (B*) "** Invalid stop",
   (B*) "** Excution stack corrupted",

@@ -4,13 +4,16 @@
 #include <sys/wait.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #include "dm.h"
 #include "error-local.h"
 #include "dm3.h"
 #include "dm-nextevent.h"
+#include "dm2.h"
 #include "dqueen.h"
 
 #define SOCKET_TIMEOUT (60)
@@ -18,9 +21,64 @@
 static UL32 mpin = 0;
 static P socketfd = -1;
 static pid_t pid = -1;
+static P dest;
 
+static P wrap_writebox(B* buffer, P size) {
+  VALUE_BASE(buffer) = (dest == PINF) ? PINF : dest+1;
+  return writefd(socketfd, buffer, size, SOCKET_TIMEOUT);
+}
+
+static P wrap_writebody(B* buffer, P size) {
+  return writefd(socketfd, buffer, size, SOCKET_TIMEOUT);
+}
+
+static P torsocket(B* rootf) {
+  return tosource(rootf, TRUE, wrap_writebox, wrap_writebody);
+}
+
+// n active/(string) | --
+P op_rsend(void) {
+  static B rootf[FRAMEBYTES];
+  P retc;
+
+  if (socketfd == -1) return RTHREADS_UNSET;
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_2) != NUM) return OPD_CLA;
+  if (PVALUE(o_2, &dest) && (dest < 0 || dest >= mpin)) return RNG_CHK;
+
+  switch (CLASS(o_1)) {
+    case ARRAY:
+      if (TYPE(o_1) == BYTETYPE) {
+	if (dest != -1) return RNG_CHK;
+	dest = PINF;
+	ATTR(o_1) |= ACTIVE;
+      }
+      // fall through intentional
+    case DICT: case LIST: case NULLOBJ: case NUM: case NAME: case OP:
+    case BOOL:
+      moveframe(o_1, rootf);
+      break;
+      
+    default:
+      return OPD_CLA;
+  }
+
+  if (! (ATTR(rootf) & ACTIVE)) return OPD_ATR;
+  
+  if ((retc = torsocket(rootf)))
+    return makesocketdead(retc, socketfd, "rsend");
+
+  FREEopds = o_2;
+  return OK;
+}
+
+/////////////////////////// rthreads
+// -- | n
+// returns the number of created threads (0...)
+// Does not check whether the threads are actually
+//   alive - for that call checkrthreads.
 P op_rthreads(void) {
-  if (o1 <= CEILopds) return OPDS_OVF;
+  if (o1 >= CEILopds) return OPDS_OVF;
   TAG(o1) = (NUM | LONGBIGTYPE);
   ATTR(o1) = 0;
   LONGBIG_VAL(o1) = mpin;
@@ -29,23 +87,25 @@ P op_rthreads(void) {
   return OK;
 }
 
-P op_checkrthreads(void) {
-  BOOLEAN r;
-  if (o1 >= CEILopds) return OPDS_OVF;
-  if (! mpin) r = FALSE;
-  else {
-    pid_t pid_;
-    while ((pid_ = waitpid(pid, NULL, WNOHANG)) != pid) {
-      if (pid_ == -1 && errno != EINTR) return -errno;
-      else if (pid_ == 0) break;
-    }
 
-    if (pid_) {
+///////////////////////////// checkrthreads
+// -- | bool
+// returns true if the mpi threads are active.
+// This is true if makerthreads has been called with n>0
+//   and the rook thread has not died.
+// If the rook has died, resets the state of threads to uninitialized
+//   (0 rthreads available)
+P op_checkrthreads(void) {
+  BOOLEAN r = FALSE;
+  if (o1 >= CEILopds) return OPDS_OVF;
+  if (mpin) {
+    pid_t pid_ = waitpid(pid, NULL, WNOHANG);
+    if (! pid_) r = TRUE;
+    else {
+      if (pid_ == -1) return -errno;
       pid = -1;
       mpin = 0;
-      r = FALSE;
     }
-    else r = TRUE;
   }
 
   TAG(o1) = BOOL;
@@ -69,21 +129,20 @@ P killrthreads(void) {
       if (! r) r = -errno;
       kill(pid, SIGKILL);
     }
-    else {
-      alarm(10);
-      timeout = FALSE;
-      while (! timeout) {
-	if (waitpid(pid, NULL, 0) == -1) {
-	  if (errno == EINTR) continue;
-	  if (! r) r = -errno;
-	  kill(pid, SIGKILL);
-	  break;
-	}
-      }
-      if (timeout) {
+
+    alarm(10);
+    timeout = FALSE;
+    while (waitpid(pid, NULL, 0) == -1 && ! timeout) {
+      if (errno != EINTR) {
+	if (! r) r = -errno;
 	kill(pid, SIGKILL);
-	if (! r) r = TIMER;
-      }
+	break;
+      };
+    };
+
+    if (timeout) {
+      kill(pid, SIGKILL);
+      if (! r) r = TIMER;
     }
 
     pid = -1;
@@ -93,10 +152,28 @@ P killrthreads(void) {
   return r;
 }
 
+static void killrthreads_exit(void) {
+  killrthreads();
+}
+
+void rthreads_init(void) {
+  if (atexit(killrthreads_exit)) 
+    error(1, errno, "Unable to add rthread exit handler");
+}
+
+///////////////////// makerthreads
+// n>0 | socket
+//  0  | --
+//
+// Kills any current threads, then creates n mpi threads.
+// If n = 0, just kills current threads.
+// If n > 0, return a socket to broadcast to threads
+// registers the socket as a listener for next-event.
 P op_makerthreads(void) {
   UL32 mpin_, ok;
   P _mpin_;
   int sockets[2];
+  int rookfd;
   P r = OK;
   
 
@@ -107,11 +184,8 @@ P op_makerthreads(void) {
   mpin_ = (UL32) _mpin_;
 
   if ((r = killrthreads())) return r;
-
   if (! mpin_) {
-    mpin = 0;
-    TAG(o_1) = NULLOBJ;
-    ATTR(o_1) = 0;
+    FREEopds = o_1;
     return OK;
   }
 
@@ -119,33 +193,41 @@ P op_makerthreads(void) {
     return -errno;
 
   socketfd = sockets[0];
-  if ((r = closeonexec(socketfd))
-      || (r = nocloseonexec(sockets[1]))) {
-    close(sockets[1]);
+  rookfd = sockets[1];
+  if ((r = closeonexec(socketfd)) || (r = closeonexec(rookfd))) {
+    close(rookfd);
     killrthreads();
     return r;
   }
 
   if ((pid = fork()) == -1) {
     r = -errno;
-    close(sockets[1]);
+    close(rookfd);
     killrthreads();
     return r;
   }
 
   if (! pid) {
-    socketfd = sockets[1];
-
-    if (dup2(socketfd, 3) == -1) 
+    int stdin;
+    if (dup2(rookfd, 3) == -1)
       error(1, errno, "Error duping %i to %i", (int) socketfd, 3);
-    if ((socketfd != 3) && close(socketfd))
-      error(1, errno, "Error closing old socket fd %i", (int) socketfd);
+    if ((r = nocloseonexec(3)))
+      error(1, -r, "Error setting no close on exec for fd 3");
+
+    if ((stdin = open("/dev/null", O_RDONLY)) == -1)
+      error(1, errno, "Unable to open /dev/null for reading");
+    if (dup2(stdin, 0) == -1)
+      error(1, errno, "Error redirecting 0 from /dev/null");
+    if (stdin != 0 && close(stdin))
+      error(1, errno, "Unable to close fd %i", stdin);
+    if ((r = nocloseonexec(0)))
+      error(1, -r, "Error setting no close on exec for fd 0");
 
     execl("@drook@", "@drook@", NULL);
     error(1, errno, "Error starting `%s'", "@drook@");
   }
    
-  if (close(sockets[1])) {
+  if (close(rookfd)) {
     r = -errno;
     killrthreads();
     return r;

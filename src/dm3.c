@@ -377,7 +377,7 @@ DM_INLINE_STATIC P writefd_(P fd, B* where, P n, P secs) {
 }
 
 P writefd(P fd, B* where, P n, P secs) {
-  return writefd(fd, where, n, secs);
+  return writefd_(fd, where, n, secs);
 }
 
 /*--------------------------- initialize a socket address */
@@ -678,14 +678,20 @@ P op_send(void)
   if (TAG(o_2) != (NULLOBJ | SOCKETTYPE)) return(OPD_ERR);
   socketfd = (P) LONGBIG_VAL(o_2);
 
-  switch (TAG(o_1)) {
-    case ARRAY: case DICT: case LIST:
+  switch (CLASS(o_1)) {
+    case ARRAY:
+      if (TYPE(o_1) == BYTETYPE) ATTR(o_1) |= ACTIVE;
+      // fall through intentional
+    case DICT: case LIST: case NULLOBJ: case NUM: case NAME: case OP:
+    case BOOL:
       moveframe(o_1, rootf);
       break;
 
     default:
       return OPD_CLA;
   }
+
+  if (! (ATTR(rootf) & ACTIVE)) return OPD_ATR;
 	  
   if ((retc = tosocket(socketfd, rootf)))
     return makesocketdead(retc, socketfd, "send");

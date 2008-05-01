@@ -47,7 +47,7 @@ CF_IF_ENABLED([threads], [
   ])
 ])
 
-CF_AM_ENABLE([rthreads], [Activate mpi & petsc], [yes])
+CF_AC_ENABLE([rthreads], [Activate mpi], [yes])
 
 CF_AC_ARG_DIR([dmbindir], [location for dm binary], [${bindir}/${PACKAGE}])
 CF_AC_ARG_DIR([pkgdatadir], [location for data files], 
@@ -117,7 +117,11 @@ AC_CHECK_PROG([guipdf], [gv], [gv])
 AC_CHECK_PROG([guipdf], [gs], [gs])
 
 CF_ATLAS()
-CF_MPI()
+CF_IF_ENABLED([rthreads], [
+  CF_MPI([], [
+    AC_MSG_ERROR([No mpi found... needed for rthreads])
+  ])
+])
 #CF_PETSC()
 
 CF_AM_PROG([BASH], [bash])
@@ -151,7 +155,7 @@ CF_SET_TOP_DIR
 
 CF_IF_ENABLED([threads], [CF_ACX_PTHREAD_REQUIRE([no, please disable threads])])
 CF_IF_ENABLED([rthreads], [
-  CF_ACX_PTHREAD_REQUIRE([no, pleas disable rthreads])
+  CF_ACX_PTHREAD_REQUIRE([no, please disable rthreads])
   
 ])
 

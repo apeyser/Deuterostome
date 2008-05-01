@@ -386,13 +386,267 @@ end def  | of xtext_dict
 | just allocate it on startup
 /myname getmyname def
 
-|---------------- sourcedead
+|---------------- socketdead
 | socket | --
 | default handler just throws away the socket and signals an error
 
+| socket | -- <<error thrown>>
 /socketdead {
-  pop myname getmyport (/socketdead) 533 error
+  userdict /mpidata known {
+    mpidata /socket known {
+      mpidata begin {
+        dup socket eq {
+          (** rthreads socket dead\n) toconsole_
+          kill
+        } if
+      } stopped end {stop} if
+    } if
+  } if
+  pop myname getmyport (socketdead) 533 error
 } bind def
+
+@ENABLE_RTHREADS_START@
+/mpidata 200 dict dup begin | [
+  /cpawn -1 def
+  /pawns 0 def
+  /mpisize <x 100000 200 200 1000 200> def
+
+  /winmade false def
+  /pbuf 80 /b array def
+  
+  /updatet {
+    winmade {{currentdict begin drawwindow} stopped pop} {
+      pbuf 0 (pawn ) fax * cpawn * number (:\n) fax exch getinterval
+      toconsole_
+    } ifelse
+  } bind def
+
+  /checkbusy {
+    dup -1 eq {
+      pop
+      false pawnbusy {or} forall {(Pawn is busy!\n) toconsole_ stop} if
+    } {
+      pawnbusy exch get {(Pawn is busy!\n) toconsole_ stop} if
+    } ifelse
+  } bind def
+
+  /makebusy {
+    dup checkbusy
+    dup -1 eq {pop 0 1 pawns 1 sub {true pawnbusy 3 -1 roll put} forall} {
+      true pawnbusy 3 -1 roll put
+    } ifelse
+    updatet
+  } bind def
+
+  /makeready {
+    dup -1 eq {pop 0 1 pawns 1 sub {false pawnbusy 3 -1 roll put} forall} {
+      false pawnbusy 3 -1 roll put
+    } ifelse
+    updatet
+  } bind def
+
+  /makeready_dpawn {
+    makeready end restore
+  } bind def
+
+  /setcurrent {/cpawn name
+    updatet
+  } bind def
+
+  /kill {
+    {0 makerthreads} stopped
+    {winmade ~deletewin if} stopped pop
+    currentdict /save_ known {save_ restore} if
+    -1 setcurrent
+    /pawns 0 def
+    {stop} if
+  } bind def 
+
+  Xwindows {
+    /NORMALFONT {fontdict /NORMALFONT get} def
+    /BOLDFONT {fontdict /BOLDFONT get} def
+    
+    /BLACK <d 0 0 0 >      mapcolor def
+    /GRAY  <d 0.2 0.2 0.2> mapcolor def
+    /BLUE  <d 0 0 1 >      mapcolor def
+    /RED   <d 1 0 0 >      mapcolor def
+    /LBLUE <d 0.1 0.1 0.9> mapcolor def
+    
+    /BG <d 235 243 248 >  255 div mapcolor def
+    /HBG <d 166 219 160 > 255 div mapcolor def
+    
+    /NORMALTEXT ~NORMALFONT [null BLACK -1 0] makefont def
+    /HIGHTEXT ~BOLDFONT [null BLUE -1 0] makefont def
+    
+    /windowsize {
+      { [ | ]
+        wH ne exch wW ne or {
+          winmade not {stop} if
+          wid wW wH resizewindow
+        } if 
+      } stopped end {cleartomark stop} if
+    } bind def
+
+    /drawwindow {
+      { [ | ]
+        winmade not {stop} if
+        wid woutline BLACK drawline
+        0 1 mpidata /pawns get 1 sub {drawnode} for
+      } stopped end {cleartomark stop} if
+    } bind def
+
+    /drawnode {/kpawn name
+      wid noderects kpawn get
+      pawnbusy kpawn get ~HBG ~BG ifelse fillrectangle
+      wid nodelocs kpawn get exec
+      pbuf 0 * kpawn * number 0 exch getinterval
+      cpawn dup * eq exch kpawn eq or ~HIGHTEXT ~NORMALTEXT ifelse
+      drawtext pop pop pop
+    } bind def
+
+    /actions 3 dict dup begin | [
+      /click {kpawn setcurrent} bind def
+      /cancel {kpawn makeready} bind def
+      /group {* setcurrent} bind def
+      /remove {-1 setcurrent} bind def |]
+    end def
+
+    /mouseclick {
+      { [ 4 1 roll | ]
+        winmade not {stop} if
+        /mS name /mY name /mX name
+        /kpawn mY 1 sub 13 div def
+        mS /default actions mouseaction pop
+      } stopped end {cleartomark stop} if
+    } bind def
+
+    /newwin {
+      {[ | ]
+        screensize /scrH name /scrW name
+        
+        /wW 200 2 add def
+        /wH mpidata /pawns get 13 mul 2 add def
+        
+        /woutline [ 0 0 wW 1 sub 0 wW 1 sub wH 1 sub 0 wH 1 sub 0 0 ] def
+        
+        /noderects [
+          /x 1 def
+          1 13 mpidata /pawns get 1 sub 13 mul 1 add { /y name
+            /r 4 /w array def
+            x r 0 put  y r 1 put wW 2 sub r 2 put 13 r 3 put
+            r
+          } for
+        ] def
+
+        /nodelocs [
+          /x 5 def
+          12 13 mpidata /pawns get 1 sub 13 mul 12 add { /y name
+            ~[x y 6 sub]
+          } for
+        ] def
+
+        /wid [scrW wW sub 10 sub scrH WH sub 10 sub wW wH ]
+          (ThePawns) (Pawns) makewindow 
+        def
+        /winnamebuf 30 /b array def
+        /winname 
+          winnamebuf 0 (/w) fax * wid * number 0 exch getinterval mkact exec 
+        def
+        currentdict userdict winname put
+        wid true mapwindow
+        /winmade true def
+      } stopped {cleartomark stop} if
+    } bind def
+    
+    /deletewin {
+      {[ |]
+        /winmade false def
+        wid deletewindow
+      } stopped {cleartomark stop} if
+    } bind def
+
+    /delete_window {{deletewin} stopped end {stop} if} bind def
+  } if |]
+end def
+
+/rthread_ops {
+  /mpisize mpidata get 1 put
+} bind def
+
+/rthreads_dicts {
+  /mpisize mpidata get 2 put
+} bind def
+
+/rthreads_execs {
+  /mpisize mpidata get 3 put
+} bind def
+
+/rthread_memory {
+  /mpisize mpidata get 4 put
+} bind def
+
+/rthreads_user {
+  /mpisize mpidata get 5 put
+} bind def
+
+| n | --
+/rthreads_start {
+  {
+    mpidata begin {
+      pawns 0 gt {(** Rthreads already exist!\n) toconsole_ stop} if
+      save /save_ name {
+        dup makerthreads /socket name
+        dup /pawns name
+        [exch {true} repeat] /pawnbusy name
+        -1 setcurrent
+        currentdict /newwin known ~newwin if
+        
+        socket ~[mpisize {exch pop vmresize} ~lock] send
+        socket {
+          {
+            exch not {abort} if
+            /fbuf vmstatus sub 10 div /b array def
+            dup capsave
+            getstartupdir (startup_dpawn.d) fbuf readfile mkact exec
+            dnoderespond
+            restore
+          } lock
+        } send
+        save_ capsave
+      } stopped {kill stop} if
+    } stopped end {stop} if
+  } lock
+} bind def
+@ENABLE_RTHREADS_END@
+
+| active | ??
+| executes active on dnode if mpi hasn't been setup
+|   or no rthread active (cpawn == -1)
+| if all rthreads active (cpawn == *), executes on all rthreads,
+|  otherwise executes on the chosen rthread (cpawn)
+/rthreads_exec {unlock} bind def | Overridden immediately if ENABLE_RTHREADS
+@ENABLE_RTHREADS_START@
+/rthreads_exec {
+  mpidata /cpawn get dup -1 eq {pop unlock} {
+    mpidata begin {
+      dup makebusy
+      save exch ~[~[5 -1 roll ~dnodereceive] ~lock] rsend restore
+    } stopped end {stop} if
+  } ifelse
+} bind def
+
+| -- | --
+/rthreads_stop {
+  mpidata begin {
+    checkrthreads {(** Rthreads not running!\n) toconsole_} {
+      pawns 0 eq {(** No rthreads to stop!\n) toconsole_ stop} if
+      -1 checkbusy
+      kill
+    } ifelse
+  } stopped end {stop} if
+} bind def
+
+@ENABLE_RTHREADS_END@
 
 |============================= command line interface for dvt =====
 
@@ -400,26 +654,27 @@ end def  | of xtext_dict
 
 | dvt... expect to be locked when called
 
-|  {} -> active save knode | --
+|  ~exec save knode | ??
 /dvtreceive_base {
   userdict /knode put
-  dup userdict /dvtsave put
-  capsave
-  {unlock} stopped
+  dup capsave userdict /dvtsave put
+  ~rthreads_exec stopped pop
   userdict /dvtsave get restore
-  save 
-  console ~[userdict /knode get ~dvt ~begin ~setready_dnode] send 
-  restore
-
-  {stop} if
+  dvtrespond
 } bind def
 
-| save (line) knode | --
+/dvtrespond {
+  save
+  console ~[userdict /knode get {dvt begin setready_dnode} ~exec] send 
+  restore
+} bind def
+
+| save (line) knode | ??
 /dvtreceive {
   exch mkact 3 1 roll dvtreceive_base
 } bind def
 
-| save (line) knode | --
+| save (line) knode | ??
 /dvtsystem {
   ~tosystem 4 -1 roll 3 -1 roll dvtreceive_base
 } bind def

@@ -9,6 +9,7 @@ DLL_SCOPE void makeerror(P retc, B* error_source);
 DLL_SCOPE P op_error(void);
 DLL_SCOPE P op_errormessage(void);
 DLL_SCOPE P op_toconsole(void);
+DLL_SCOPE P op_quit(void);
 
 DLL_SCOPE P op_mpiprobe(void);
 DLL_SCOPE P op_mpiiprobe(void);

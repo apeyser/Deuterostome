@@ -57,6 +57,9 @@
 /* include regex */
 #undef ENABLE_REGEX
 
+/* Activate mpi */
+#undef ENABLE_RTHREADS
+
 /* Path to TAIL */
 #undef ENABLE_TAIL
 

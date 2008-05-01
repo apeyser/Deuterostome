@@ -118,7 +118,7 @@ libdmglobals_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libdmglobals_la_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 @ENABLE_DAEMON_TRUE@am__EXEEXT_1 = dnode-daemon$(EXEEXT)
-@ENABLE_MPI_TRUE@am__EXEEXT_2 = drook$(EXEEXT) dpawn$(EXEEXT)
+@ENABLE_RTHREADS_TRUE@am__EXEEXT_2 = drook$(EXEEXT) dpawn$(EXEEXT)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 @ENABLE_SETUID_TRUE@am__EXEEXT_3 = dnode-nice$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
@@ -128,7 +128,7 @@ dgen_OBJECTS = $(am_dgen_OBJECTS)
 dgen_DEPENDENCIES = $(am__DEPENDENCIES_1) libdmbootstrap.la
 am__dnode_SOURCES_DIST = dnode.c dnode_0.h dmx.h dm-nextevent.c \
 	dm-nextevent.h dm3.c dm-dnode.h dm-dnode.c dqueen.c dqueen.h
-@ENABLE_MPI_TRUE@am__objects_5 = dnode-dqueen.$(OBJEXT)
+@ENABLE_RTHREADS_TRUE@am__objects_5 = dnode-dqueen.$(OBJEXT)
 am_dnode_OBJECTS = dnode-dnode.$(OBJEXT) dnode-dm-nextevent.$(OBJEXT) \
 	dnode-dm3.$(OBJEXT) dnode-dm-dnode.$(OBJEXT) $(am__objects_5)
 dnode_OBJECTS = $(am_dnode_OBJECTS)
@@ -267,6 +267,7 @@ ENABLE_PERL = @ENABLE_PERL@
 ENABLE_PLUGINS_SUPPORT = @ENABLE_PLUGINS_SUPPORT@
 ENABLE_PSTPDF = @ENABLE_PSTPDF@
 ENABLE_REGEX = @ENABLE_REGEX@
+ENABLE_RTHREADS = @ENABLE_RTHREADS@
 ENABLE_TAIL = @ENABLE_TAIL@
 ENABLE_THREADS = @ENABLE_THREADS@
 ENABLE_UNIX_SOCKETS = @ENABLE_UNIX_SOCKETS@
@@ -444,8 +445,8 @@ edit = sed \
 @ENABLE_THREADS_TRUE@THREAD_HDR = threads.h
 @ENABLE_THREADS_TRUE@THREADSRC = threads.c
 @ENABLE_REGEX_TRUE@REGEX_SRC = dregex.c dregex.h
-@ENABLE_MPI_TRUE@MPI_PROGS = drook dpawn
-@ENABLE_MPI_TRUE@DNODE_MPI_SRCS = dqueen.c dqueen.h
+@ENABLE_RTHREADS_TRUE@MPI_PROGS = drook dpawn
+@ENABLE_RTHREADS_TRUE@DNODE_MPI_SRCS = dqueen.c dqueen.h
 EXTRA_DIST = dnode-nice.c.in dnode-daemon.c.in paths.h.in \
 	drook.c.in dqueen.c.in 
 

@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "dm-dpawn.h"
 #include "dm-vm.h"
@@ -29,6 +30,8 @@ static P wrap_mpisend_2(B* buffer, P size) {
 
 static P handle_error(P retc) {
   static B buf[FRAMEBYTES+1024];
+  if (! retc) return OK;
+
   if (o4 >= CEILopds) goto baderr;
 
   TAG(o1) = (NUM|LONGBIGTYPE);
@@ -54,7 +57,6 @@ static P handle_error(P retc) {
   error(1, 0, "Unable to compose error for %lli\n", (long long) retc);
   return retc;
 }
-    
 
 static P frommpi(B* bufferf, MPI_Comm parent, P src) {
   rank = src;
@@ -176,7 +178,6 @@ P op_mpiprobe(void) {
   
 P op_mpiiprobe(void) {
   P src, tag, retc, count;
-  BOOLEAN flag;
 
   if (o_2 < FLOORopds) return OPDS_UNF;
   if (o2 >= CEILopds) return OPDS_OVF;
@@ -188,30 +189,31 @@ P op_mpiiprobe(void) {
   if (! PVALUE(o_1, &tag)) tag = MPI_ANY_TAG;
   else if (tag < 0 || tag > 32376) return RNG_CHK;
 
-  if ((retc = mpiiprobe(getworldcomm(), &tag, &src, &flag, &count)))
-    return retc;
+  switch (mpiiprobe(getworldcomm(), &tag, &src, &count)) {
+    case OK:
+      TAG(o_2) = (NUM|LONGBIGTYPE);
+      LONGBIG_VAL(o_2) = src;
+      TAG(o_1) = (NUM|LONGBIGTYPE);
+      LONGBIG_VAL(o_1) = tag;
+      TAG(o1) = (NUM|LONGBIGTYPE);
+      ATTR(o1) = 0;
+      LONGBIG_VAL(o1) = count;
+      TAG(o2) = BOOL;
+      ATTR(o2) = 0;
+      BOOL_VAL(o2) = TRUE;
+      FREEopds = o3;
+      break;
+    case MPI_NOMSG:
+      TAG(o_2) = BOOL;
+      BOOL_VAL(o_2) = FALSE;
+      FREEopds = o_1;
+      break;
 
-  if (flag) {
-    TAG(o_2) = (NUM|LONGBIGTYPE);
-    LONGBIG_VAL(o_2) = src;
-    TAG(o_1) = (NUM|LONGBIGTYPE);
-    LONGBIG_VAL(o_1) = tag;
-    TAG(o1) = (NUM|LONGBIGTYPE);
-    ATTR(o1) = 0;
-    LONGBIG_VAL(o1) = count;
-    TAG(o2) = BOOL;
-    ATTR(o2) = 0;
-    BOOL_VAL(o2) = TRUE;
-    FREEopds = o3;
+    default:
+      return retc;
   }
-  else {
-    TAG(o_2) = BOOL;
-    BOOL_VAL(o_2) = FALSE;
-    FREEopds = o_1;
-  }
-
   return OK;
-} 
+}
 
 P op_vmresize(void) {
   return op_vmresize_();
@@ -245,7 +247,7 @@ void makeerror(P retc, B* error_source) {
   FREEexecs = x2;
 }
 
-BOOLEAN pending(void) {
+static BOOLEAN pending(void) {
   if (halt_flag) {
     if (x_1 >= FLOORexecs 
 	&& TAG(x_1) == OP 
@@ -256,11 +258,22 @@ BOOLEAN pending(void) {
   return (FREEexecs != FLOORexecs);
 }
 
+static P clientinput(B* bufferf, MPI_Comm parent) {
+  P retc;
+  if ((retc = frommpi(bufferf, parent, 0))) return retc;
+
+  if (x1 >= CEILexecs) return EXECS_OVF;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  moveframe(o_1, x1);
+  FREEopds = o_1;
+  FREEexecs = x2;
+
+  return OK;
+}
 
 static P nextevent(B* bufferf) {
   P src ;
   P tag;
-  BOOLEAN more;
   P count;
   P retc;
   MPI_Comm parent = getparentcomm();
@@ -270,13 +283,14 @@ static P nextevent(B* bufferf) {
     
     src = 0;
     tag = 1;
-    more = TRUE;
-    if ((retc = pending() ? mpiiprobe(parent, &tag, &src, &more, &count)
-	 : mpiprobe(parent, &tag, &src, &count))
-	|| ! more)
-      continue;
-
-    retc = frommpi(bufferf, parent, 0);
+    switch (retc = pending() ? mpiiprobe(parent, &tag, &src, &count)
+	                     : mpiprobe(parent, &tag, &src, &count)) {
+      case OK: break;
+      case MPI_NOMSG: retc = OK; continue;
+      default: continue;
+    }
+    
+    retc = clientinput(bufferf, parent);
   } while (! retc && ! pending());
 
   return retc;
@@ -410,19 +424,24 @@ P op_toconsole(void)
   B *p_;
   B *oldFREEvm;
   P retc;
+  const char saves[] = "save {(";
+  const char rests[] = ") toconsole restore} lock";
 
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
 
   B* max_ = VALUE_PTR(o_1) + ARRAY_SIZE(o_1);
-  if ((FREEvm + ARRAY_SIZE(o_1) + 25) > CEILvm) return VM_OVF;
+  if ((FREEvm + ARRAY_SIZE(o_1) + (sizeof(saves)-1) + (sizeof(rests)-1)) 
+      > CEILvm)
+    return VM_OVF;
   p_ = VALUE_PTR(o_1);
   do {
-    B* max = FREEvm + 8192 - 20;
+    B* max = FREEvm + MSF_SIZE - (sizeof(saves)-1) - (sizeof(rests)-1) - 1;
     if (max > CEILvm) max = CEILvm;
     
     p = FREEvm; 
-    moveB((B*)"save (", p, 6); p += 6;    
+    moveB((B*)saves, p, sizeof(saves)-1); 
+    p += sizeof(saves)-1;
     for (; p_ <  max_ && p < max; p_++) {
       switch (*p_) {
 	case ')': case '\\': 
@@ -444,16 +463,16 @@ P op_toconsole(void)
       }
       if (p == CEILvm) return VM_OVF;
     }
-    if (p + 19 > CEILvm) return VM_OVF;
-    moveB((B*)") toconsole restore",p,19); 
-    p += 19;
+    if (p + sizeof(saves)-1 > CEILvm) return VM_OVF;
+    moveB((B*)rests, p, sizeof(rests)-1); 
+    p += sizeof(rests)-1;
     TAG(stringf) = ARRAY | BYTETYPE; 
     ATTR(stringf) = 0;
     VALUE_PTR(stringf) = FREEvm; 
     ARRAY_SIZE(stringf) = p - FREEvm;
     oldFREEvm = FREEvm; 
     FREEvm = (B*)DALIGN(p);
-    if ((retc = tompi(stringf, getworldcomm(), FALSE, 0))) {
+    if ((retc = tompi(stringf, getparentcomm(), TRUE, 0))) {
       FREEvm = oldFREEvm;
       return retc;
     }
@@ -464,9 +483,12 @@ P op_toconsole(void)
   return OK;
 }
 
+P op_quit(void) {exit(0);}
+
 void run_dpawn_mill(void) {
   P retc;
 
+  fprintf(stderr, "Starting dpawn\n");
   initmpi();
   maketinysetup(quithandler);
 

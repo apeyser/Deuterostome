@@ -129,8 +129,8 @@
       /EXECS_OVF (** Execution stack overflow) def
       /DICTS_OVF (** Dictionary stack overflow) def
       /OPDS_UNF (** Operand stack underflow) def
-      /EXECS_UNF (** Execution stack undeflow) def
-      /DICTS_UNF (** Dictionary stack undeflow) def
+      /EXECS_UNF (** Execution stack underflow) def
+      /DICTS_UNF (** Dictionary stack underflow) def
       /INV_EXT (** Invalid exit) def
       /INV_STOP (** Invalid stop) def
       /EXECS_COR (** Excution stack corrupted) def
@@ -292,8 +292,11 @@ end def
       /DEAD_SOCKET (** Dead socket) def |]
     end def |]
   end def
-  /DM_ENABLE_MPI 1 dict dup begin  |[
-    /commands [/rthreads /checkrthreads /makerthreads] def |]
+  /DM_ENABLE_RTHREADS 2 dict dup begin  |[
+    /errors 1 dict dup begin |[
+      /RTHREADS_UNSET (** Rthreads are inactive) def |]
+    end def
+    /commands [/rthreads /checkrthreads /makerthreads /rsend] def |]
   end def
   /DM_HOST_IS_32_BIT 1 dict dup begin |[
     /commands [/readf32] def |]
@@ -330,7 +333,7 @@ end def
 end def
 
 /dpawn 1 dict dup begin |[
-  /parents [/common /node /pawn /regex /plugins] def |]
+  /parents [/common /node /pawn /regex /plugins /quitable] def |]
 end def
 
 end _module

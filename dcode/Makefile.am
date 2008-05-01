@@ -68,8 +68,7 @@ EMACSCLIENT_END = /^[[:space:]]*[@]ENABLE_EMACSCLIENT_END[@][[:space:]]*$$/
 
 if ENABLE_EMACS
 if ENABLE_EMACSCLIENT
-EMACSCLIENT_EDIT =  -e '$(EMACSCLIENT_START) d' \
-					-e '$(EMACSCLIENT_END) d'
+EMACSCLIENT_EDIT =  -e '$(EMACSCLIENT_START) d' -e '$(EMACSCLIENT_END) d'
 else !ENABLE_EMACSCLIENT
 EMACSCLIENT_EDIT =  -e '$(EMACSCLIENT_START),$(EMACSCLIENT_END) d'
 endif !ENABLE_EMACSCLIENT
@@ -81,11 +80,19 @@ ATLAS_START = /^[[:space:]]*[@]ENABLE_ATLAS_START[@][[:space:]]*$$/
 ATLAS_END   = /^[[:space:]]*[@]ENABLE_ATLAS_END[@][[:space:]]*$$/
 
 if ENABLE_ATLAS
-ATLAS_EDIT = -e '$(ATLAS_START) d' \
-						  -e '$(ATLAS_END) d'
+ATLAS_EDIT = -e '$(ATLAS_START) d' -e '$(ATLAS_END) d'
 else !ENABLE_ATLAS
 ATLAS_EDIT = -e '$(ATLAS_START),$(ATLAS_END) d'
 endif !ENABLE_ATLAS
+
+RTHREADS_START = /^[[:space:]]*[@]ENABLE_RTHREADS_START[@][[:space:]]*$$/
+RTHREADS_END   = /^[[:space:]]*[@]ENABLE_RTHREADS_END[@][[:space:]]*$$/
+
+if ENABLE_RTHREADS
+RTHREADS_EDIT = -e '$(RTHREADS_START) d' -e '$(RTHREADS_END) d'
+else !ENABLE_RTHREADS
+RTHREADS_EDIT = -e '$(RTHREADS_START),$(RTHREADS_END) d'
+endif !ENABLE_RTHREADS
 
 edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
@@ -96,6 +103,7 @@ edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			$(PERL_DELETE) \
 			$(EMACSCLIENT_EDIT) \
 			$(ATLAS_EDIT) \
+			$(RTHREADS_EDIT) \
 			$(REGEX_DELETE)
 
 theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in

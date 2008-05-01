@@ -357,27 +357,18 @@ end def  | of xtext_dict
 
 /linebuf2 8192 /b array def
 
-/dnodereceive_base {
-  dup mpirank eq exch * eq or not {restore} {
-    dup capsave userdict /dnodesave put
-    stopped pop
-    userdict /dnodesave get restore
-
-    save ~[mpirank ~dnode ~begin ~setready_dpawn] send restore
-  } ifelse
-} bind def
-
+| save executable | ??
 /dnodereceive {
-  exch mkact 3 1 roll dnodereceive_base
+  exch dup capsave userdict /dnodesave put
+  {unlock} stopped pop
+  userdict /dnodesave get restore 
+  dnoderespond
 } bind def
 
-/dnodesystem {
-  ~tosystem 4 -1 roll 3 -1 roll dnodereceive_base
-} bind def
-
-/dnodeexecsystem {
-  {linebuf2 0 3 -1 roll mkact exec 0 exch getinterval tosystem}
-  4 -1 roll 3 -1 roll dnodereceive_base
+/dnoderespond {
+  save
+  ~[~[mpirank ~mpidata ~begin ~makeready_dpawn] ~lock] ~send
+  restore
 } bind def
 
 |====================== Support for toolboxes and projects =====================

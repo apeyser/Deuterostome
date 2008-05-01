@@ -12,6 +12,7 @@
 #include "dm-vm.h"
 #include "dmx.h"
 #include "dm2.h"
+#include "dqueen.h"
 
 #if ! X_DISPLAY_MISSING
 #include "xhack.h"
@@ -603,7 +604,6 @@ P clientinput(void) {
 
   moveframe(o_1, x1);
   FREEopds = o_1;
-  ATTR(x1) = ACTIVE;
   FREEexecs = x2;
   
   return OK;
@@ -626,6 +626,8 @@ static void quithandler_(int sig) {
   exit(0);
 }
 
+static void quithandler_exit(void) {quithandler_(0);}
+
 /**********************************************vmreset
  * call right after vmresize, to reset sockets if
  * vmresize failed
@@ -638,6 +640,9 @@ P op_socketdead(void) {return DEAD_SOCKET;}
 P op_vmresize(void) {
   P retc = op_vmresize_();
   if (retc) return retc;
+#if DM_ENABLE_RTHREADS
+  if ((retc = killrthreads())) return retc;
+#endif
 #if ! X_DISPLAY_MISSING
   return op_Xdisconnect();
 #else
@@ -670,6 +675,11 @@ void run_dnode_mill(void) {
 #endif //ENABLE_UNIX_SOCKETS
 
   maketinysetup(quithandler_);
+  if (atexit(quithandler_exit))
+    error(1, errno, "Unable to add quit exit handler");
+#if DM_ENABLE_RTHREADS
+  rthreads_init();
+#endif //DM_ENABLE_RTHREADS
 
 /*----------------- construct frames for use in execution of D code */
   makename((B*)"error", errorframe); 

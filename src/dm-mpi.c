@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <errno.h>
+#include <stdio.h>
 
 #include "dm-mpi.h"
 #include "error-local.h"
@@ -34,8 +35,7 @@ static pthread_t mpithread_id;
 static pthread_cond_t mpithread_cond = PTHREAD_COND_INITIALIZER;
 
 static void exithandler(void) {
-  int eq;
-  if (! MPI_Comm_compare(rook, MPI_COMM_NULL, &eq) && eq != MPI_IDENT)
+  if (rook != MPI_COMM_NULL)
     MPI_Abort(rook, 0);
   else
     MPI_Abort(MPI_COMM_WORLD, 0);
@@ -43,7 +43,7 @@ static void exithandler(void) {
 
 static void mpihandler(MPI_Comm* comm, int* err, ...) {
   static char string[MPI_MAX_ERROR_STRING];
-  int len;
+  int len = MPI_MAX_ERROR_STRING;
   int eq = 0;
   static BOOLEAN inhandler = 0;
 
@@ -171,6 +171,8 @@ static void* mpifunc(void* unused __attribute__ ((__unused__)) ) {
   MPI_Comm_rank(world, &rank_);
   rank = rank_;
 
+  fprintf(stderr, "Started pawn %i of %i\n", rank_, universe_);
+
   while (1) {
     mpithread_func = NULL;
     mpithread_send_signal();
@@ -180,7 +182,7 @@ static void* mpifunc(void* unused __attribute__ ((__unused__)) ) {
   }
 }
 
-P mpiiprobe(MPI_Comm comm, P* tag, P* rank, BOOLEAN* flag, P* count) {
+P mpiiprobe(MPI_Comm comm, P* tag, P* rank, P* count) {
   P retc;
   mpithread_lock();
   currComm = comm;
@@ -188,12 +190,13 @@ P mpiiprobe(MPI_Comm comm, P* tag, P* rank, BOOLEAN* flag, P* count) {
   currRank = *rank;
   if ((retc = mpithread_exec(mpithread_iprobe))) return retc;
 
-  if (currFlag) {
+  if (! currFlag) return MPI_NOMSG;
+  else {
     *tag = currTag;
     *rank = currRank;
     *count = currSize;
   }
-  *flag = currFlag;
+
   return OK;
 }
 
@@ -254,7 +257,9 @@ void initmpi(void) {
 
   do {mpithread_recv_signal();} while (mpithread_func);
   
+  fprintf(stderr, "Child %i waiting for rook\n", (int) rank);
   currComm = rook;
   if (mpithread_exec(mpithread_barrier))
     error(1, 0, "Unable to barrier with rook");
+  fprintf(stderr, "Child %i heard rook\n", (int) rank);
 }

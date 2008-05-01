@@ -122,6 +122,9 @@ previous message whose execution has been interrupted.
 int main(int argc __attribute__ ((__unused__)), 
 	 char *argv[] __attribute__((__unused__)) )
 {
-  initmpi();
+  sysop = _sysop;
+  syserrm = _syserrm;
+  syserrc = _syserrc;
+
   run_dpawn_mill();
 }

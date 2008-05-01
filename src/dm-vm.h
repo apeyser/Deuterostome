@@ -16,6 +16,7 @@ DLL_SCOPE P op_continue(void);
 DLL_SCOPE P op_tostderr(void);
 DLL_SCOPE void setuphandlers(void (*quithandler)(int sig));
 
+#define MSF_SIZE (100000)
 DLL_SCOPE B msf[FRAMEBYTES];
 DLL_SCOPE B cmsf[FRAMEBYTES];
 

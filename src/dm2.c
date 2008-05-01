@@ -1209,7 +1209,7 @@ P tosource(B* rootf, BOOLEAN mksave, SourceFunc w1, SourceFunc w2) {
   if (FREEvm + FRAMEBYTES >= CEILvm) return VM_OVF;
   TAG(FREEvm) = BOX;
   ATTR(FREEvm) = 0;
-  VALUE_PTR(FREEvm) = 0;
+  VALUE_PTR(FREEvm) = NULL;
   FREEvm += FRAMEBYTES;
 
   switch (CLASS(rootf)) {

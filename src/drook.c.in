@@ -10,6 +10,7 @@
 
 #include "dm.h"
 #include "error-local.h"
+#include "dm2.h"
 
 #include <stdio.h>
 #include <mpi.h>
@@ -79,11 +80,24 @@ DM_INLINE_STATIC void initmpi(void) {
 	  MPI_THREAD_MULTIPLE, threadtype);
 }
 
-DM_INLINE_STATIC void mpiabort(void) __attribute__ ((__noreturn__));
-DM_INLINE_STATIC void mpiabort(void) {
+static void exithandler(void) {
+  static B boxf[2*FRAMEBYTES];
+  P i;
+
+  TAG(boxf) = BOX;
+  VALUE_PTR(boxf) = 0;
+  BOX_NB(boxf) = FRAMEBYTES;
+
+  makename("quit", boxf+FRAMEBYTES);
+  ATTR(boxf+FRAMEBYTES) = (ACTIVE|BIND);
   close(socketfd);
+
+  for (i = 0; i < nodes; i++)
+    MPI_Isend(boxf, 2*FRAMEBYTES, MPI_UNSIGNED_CHAR, 
+	      i, 1, children, &requests[i]);
+
+  MPI_Waitall(nodes, requests, MPI_STATUSES_IGNORE);
   MPI_Abort(children, 1);
-  exit(1);
 }
 
 static void mpihandler(MPI_Comm* comm __attribute__ ((__unused__)), 
@@ -95,6 +109,7 @@ static void mpihandler(MPI_Comm* comm __attribute__ ((__unused__)),
   if (inhandler) return;
   inhandler = TRUE;
 
+  close(socketfd);
   if (MPI_Error_string(*err, string, &len))
     error(1, 0, "Unable to produce error string (%i)", *err);
   else
@@ -109,10 +124,11 @@ DM_INLINE_STATIC void spawn(void) {
   unsigned int i, any = 0;
   MPI_Errhandler mpierr;
 
+  fprintf(stderr, "rook is spawning %i children\n", nodes);
   errors = (int*) malloc(sizeof(int)*nodes);
   MPI_Comm_spawn("@dpawn@", argv, nodes, MPI_INFO_NULL, 
 		 0, MPI_COMM_WORLD, &children, errors);
-  atexit(mpiabort);
+  atexit(exithandler);
   for (i = 0; i < nodes; i++) {
     if (errors[i]) {
       int len;
@@ -128,7 +144,9 @@ DM_INLINE_STATIC void spawn(void) {
   MPI_Comm_create_errhandler(mpihandler, &mpierr);
   MPI_Comm_set_errhandler(children, mpierr);
 
+  fprintf(stderr, "Rook will wait for children\n");
   MPI_Barrier(children);
+  fprintf(stderr, "Rook heard children\n");
 }
 
 DM_INLINE_STATIC void writesocketerror(char* type, char* info) {
@@ -191,16 +209,30 @@ DM_INLINE_STATIC void readsocket(void) {
 }
 
 DM_INLINE_STATIC void writempi(void) {
-  P i;
-  for (i = 0; i < nodes; i++) {
-    MPI_Isend(from_dnode_data, FRAMEBYTES*2, MPI_UNSIGNED_CHAR,
-	      i, 1, children, &requests[i]);
-    MPI_Isend(from_dnode_data+FRAMEBYTES*2, from_dnode_data_n-FRAMEBYTES*2, 
-	      MPI_UNSIGNED_CHAR,
-	      i, 2, children, &requests[i*2]);
+  P i, start, end, r;
+  P dest = VALUE_BASE(from_dnode_data);
+  VALUE_PTR(from_dnode_data) = NULL;
+  
+  if (nodes >= dest && dest > 0) {
+    start = dest-1;
+    end = dest;
+  }
+  else {
+    start = 0;
+    end = nodes;
   }
 
-  MPI_Waitall(nodes*2, requests, MPI_STATUSES_IGNORE);
+  r = 0;
+  for (i = start; i < end; i++) {
+    MPI_Isend(from_dnode_data, FRAMEBYTES*2, MPI_UNSIGNED_CHAR,
+	      i, 1, children, &requests[r++]);
+    if (from_dnode_data_n > FRAMEBYTES*2)
+      MPI_Isend(from_dnode_data+FRAMEBYTES*2, from_dnode_data_n-FRAMEBYTES*2, 
+		MPI_UNSIGNED_CHAR,
+		i, 2, children, &requests[r++]);
+  }
+
+  MPI_Waitall(r, requests, MPI_STATUSES_IGNORE);
   
   free(from_dnode_data);
   from_dnode_data = NULL;
@@ -252,7 +284,8 @@ DM_INLINE_STATIC void readmpi(void) {
   if (! (from_mpi_data = (B*) realloc(from_mpi_data, 
 				      from_mpi_data_n + more_data_n)))
     readmpierr("total size - latter frames");
-  read_mpi_int(from_mpi_data + from_mpi_data_n, more_data_n, source, 2);
+  if (more_data_n > 0)
+    read_mpi_int(from_mpi_data + from_mpi_data_n, more_data_n, source, 2);
   from_mpi_data_n += more_data_n;
 }
 

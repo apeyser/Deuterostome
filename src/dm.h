@@ -397,6 +397,8 @@ extern "C" {
 #define MATRIX_ERRS    (P)0x00000D00L /* 0D00:0E00-1 for errors in matrix.h */
 #define PLUGIN_ERRS    (P)0x00000E00L /* 0E00L:0F00-1 for errors in plugin.h */
 #define NEXTEVENT_ERRS (P)0x00000F00L /* 0F00L:1000-1 for errors in dm-nexteven.h*/
+#define MPI_ERRS       (P)0x00001000L /* 1000L:1100-1 for errors in dm-mpi.h */
+#define RTHREADS_ERRS  (P)0x00001100L /* 1100L:1100-1 for errror in dqueen.h */
 
 /* compare results */
 

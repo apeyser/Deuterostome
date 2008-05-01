@@ -68,10 +68,10 @@ if ENABLE_REGEX
   REGEX_SRC=dregex.c dregex.h
 endif ENABLE_REGEX
 
-if ENABLE_MPI
+if ENABLE_RTHREADS
 MPI_PROGS = drook dpawn
 DNODE_MPI_SRCS = dqueen.c dqueen.h
-endif ENABLE_MPI
+endif ENABLE_RTHREADS
 
 EXTRA_DIST =    dnode-nice.c.in dnode-daemon.c.in paths.h.in \
 	drook.c.in dqueen.c.in 

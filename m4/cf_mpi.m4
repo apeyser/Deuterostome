@@ -27,8 +27,8 @@ AC_DEFUN([CF_MPI], [
     if test "x$MPI_LIBS" != x; then
       LIBS="$MPI_LIBS $LIBS"
       CPPFLAGS="$CPPFLAGS $MPI_FLAGS"
-      AC_MSG_CHECKING([for MPI_Bcast in $MPI_LIBS])
-	AC_TRY_LINK_FUNC([MPI_Bcast], [cf_mpi_ok=yes], [MPI_LIBS=""])
+      AC_MSG_CHECKING([for MPI_Init_thread in $MPI_LIBS])
+	AC_TRY_LINK_FUNC([MPI_Init_thread], [cf_mpi_ok=yes], [MPI_LIBS=""])
 	AC_MSG_RESULT([$cf_mpi_ok])
       LIBS="$cf_mpi_save_LIBS"
       CPPFLAGS="$cf_mpi_save_CPPFLAGS"
@@ -39,8 +39,8 @@ AC_DEFUN([CF_MPI], [
   if test "$cf_mpi_ok" = no; then
      MPI_LIBS=""
      CPPFLAGS="$CPPFLAGS $MPI_FLAGS"
-     AC_SEARCH_LIBS([MPI_Bcast], [mpich],
-       [AC_MSG_CHECKING([for MPI_Bcast in $ac_res])
+     AC_SEARCH_LIBS([MPI_Init_thread], [mpich],
+       [AC_MSG_CHECKING([for MPI_Init_thread in $ac_res])
         if test -n "$ac_lib" ; then 
            MPI_LIBS="$ac_res $MPI_LIBS"
         fi
@@ -48,13 +48,13 @@ AC_DEFUN([CF_MPI], [
            cf_mpi_ok=yes
            break
         ], [
- 	  AC_MSG_CHECKING([for MPI_Bcast in $ac_res])
+ 	  AC_MSG_CHECKING([for MPI_Init_thread in $ac_res])
           AC_MSG_RESULT([no])
         ], 
         [$MPI_LIBS])
-     AC_MSG_CHECKING([for MPI_Bcast in mpich])
+     AC_MSG_CHECKING([for MPI_Init_thread in mpich])
      if test $cf_mpi_ok = no ; then
-        AC_MSG_RESULT([No mpich MPI_Bcast found])
+        AC_MSG_RESULT([No mpich MPI_Init_thread found])
      else
         AC_MSG_RESULT([yes, in $ac_res])
      fi
@@ -81,4 +81,9 @@ AC_DEFUN([CF_MPI], [
   AM_CONDITIONAL([ENABLE_MPI], [test "$cf_mpi_ok" = yes])
   AC_SUBST([MPI_LIBS])
   AC_SUBST([MPI_FLAGS])
+  if test "$cf_mpi_ok" = yes ; then
+    ifelse($1,,:,$1)
+  else
+    ifelse($2,,:,$2)
+  fi
 ])
