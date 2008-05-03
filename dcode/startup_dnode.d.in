@@ -489,7 +489,8 @@ end def  | of xtext_dict
         pawnbusy kpawn 1 sub get ~HBG ~BG ifelse
       } ifelse fillrectangle
       wid nodelocs kpawn get exec
-      pbuf 0 * kpawn 0 eq {*} {kpawn 1 sub} ifelse * number 0 exch getinterval
+      pbuf 0 * kpawn 0 eq {(-) text} {kpawn 1 sub * number} ifelse 
+      0 exch getinterval
 
       cpawn dup * eq kpawn 0 ne and 
       exch kpawn 1 sub eq or ~HIGHTEXT ~NORMALTEXT ifelse

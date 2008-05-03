@@ -559,8 +559,8 @@ end mkread def
 /error {
   errordict begin {
     | avoid stop loop
-    dup ERROR /INV_STOP get eq {error} {
-      dup ERROR /EXECS_UNF get eq {error} {
+    dup ERRORS /INV_STOP get eq {error} {
+      dup ERRORS /EXECS_UNF get eq {error} {
         wid inforect BG fillrectangle
         infoline errormessage dup length 1 sub 0 exch getinterval
         dup toconsole (\n) toconsole
