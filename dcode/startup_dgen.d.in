@@ -513,9 +513,7 @@ end def  | of xtext_dict
   def
 } bind def
 
-|----------------------------- start the dvt ------------------------------
-| A 'save' representing a clean dvt is associated with the name cleanDVT in
-| userdict.
+getstartupdir (errors.d) fromfiles
 
 (dgen) userdict /myid put
 

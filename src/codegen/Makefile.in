@@ -33,15 +33,15 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-noinst_PROGRAMS = dgen$(EXEEXT)
+noinst_PROGRAMS = dgen$(EXEEXT) dcoder$(EXEEXT)
 subdir = src/codegen
 DIST_COMMON = $(dist_noinst_DATA) $(dist_noinst_SCRIPTS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/dgen_0.h.built $(srcdir)/dmnuminc.d.in \
-	$(srcdir)/dmnuminc.h.built $(srcdir)/dnode_0.h.built \
-	$(srcdir)/dpawn_0.h.built $(srcdir)/dsp1f.h.built \
-	$(srcdir)/dsp2def.d.in $(srcdir)/dsp2def.h.built \
-	$(srcdir)/dvt_0.h.built $(top_srcdir)/dcode/startup_dgen.d.in
+	$(srcdir)/dgen_0.h.built $(srcdir)/dmnuminc.h.built \
+	$(srcdir)/dnode_0.h.built $(srcdir)/dpawn_0.h.built \
+	$(srcdir)/dsp1f.h.built $(srcdir)/dsp2def.h.built \
+	$(srcdir)/dvt_0.h.built $(srcdir)/errors.d \
+	$(srcdir)/startup_dgen.d
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
@@ -56,11 +56,10 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = dmnuminc.d dsp2def.d startup_dgen.d dmglobals.c \
-	dsp1.c dm1.c dm2.c dm2.h dm-swapbytes.h dm-conv.c dm3.c dm4.c \
-	dm5.c dm6.c dm7.c dm8.c dmnum.c dsp2.c dm-types.h dm-types.c \
-	paths.h.in dgen.c dgen_1.h dgen-build dmnum.h dm-nextevent.c \
-	dm-nextevent.h
+CONFIG_CLEAN_FILES = dmglobals.c dsp1.c dm1.c dm2.c dm2.h \
+	dm-swapbytes.h dm-conv.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c \
+	dmnum.c dsp2.c dm-types.h dm-types.c paths.h.in dgen.c \
+	dgen_1.h dgen-build dmnum.h dm-nextevent.c dm-nextevent.h
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libdmbootstrap_la_LIBADD =
 am_libdmbootstrap_la_OBJECTS = dmnum.lo dsp1.lo dsp2.lo dmglobals.lo \
@@ -68,6 +67,9 @@ am_libdmbootstrap_la_OBJECTS = dmnum.lo dsp1.lo dsp2.lo dmglobals.lo \
 	dm-types.lo
 libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
+am_dcoder_OBJECTS = dcoder-dcoder.$(OBJEXT)
+dcoder_OBJECTS = $(am_dcoder_OBJECTS)
+dcoder_LDADD = $(LDADD)
 am_dgen_OBJECTS = dgen-dgen.$(OBJEXT) dgen-dm-nextevent.$(OBJEXT) \
 	dgen-dm3.$(OBJEXT)
 dgen_OBJECTS = $(am_dgen_OBJECTS)
@@ -88,8 +90,10 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libdmbootstrap_la_SOURCES) $(dgen_SOURCES)
-DIST_SOURCES = $(libdmbootstrap_la_SOURCES) $(dgen_SOURCES)
+SOURCES = $(libdmbootstrap_la_SOURCES) $(dcoder_SOURCES) \
+	$(dgen_SOURCES)
+DIST_SOURCES = $(libdmbootstrap_la_SOURCES) $(dcoder_SOURCES) \
+	$(dgen_SOURCES)
 DATA = $(dist_noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -311,8 +315,26 @@ target_vendor = @target_vendor@
 tmp = @tmp@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-dist_noinst_DATA = dmnuminc.d dsp1f.d dsp2def.d
-dist_noinst_SCRIPTS = dgen-build
+PRODSRCS = $(srcdir)/dmnuminc.h.built \
+	$(srcdir)/dsp1f.h.built \
+	$(srcdir)/dsp2def.h.built \
+	$(srcdir)/dgen_0.h.built \
+	$(srcdir)/dnode_0.h.built \
+	$(srcdir)/dvt_0.h.built \
+	$(srcdir)/dpawn_0.h.built \
+	$(srcdir)/errors.d
+
+MAINTAINERCLEANFILES = $(PRODSRCS) \
+	$(srcdir)/dcoder.h \
+	$(srcdir)/startup_dgen.d
+
+dist_noinst_DATA = $(srcdir)/dmnuminc.d \
+	$(srcdir)/dsp1f.d \
+	$(srcdir)/dsp2def.d \
+	$(srcdir)/ops.d \
+	$(MAINTAINERCLEANFILES)
+
+dist_noinst_SCRIPTS = $(srcdir)/dgen-build
 AM_CFLAGS = $(GCC_CFLAGS)
 AM_CPPFLAGS = \
 	-DDM_DISABLE_THREADS=1 -DDM_HAVE_CONFIG_H -DDM_DISABLE_REGEX=1 \
@@ -321,14 +343,10 @@ AM_CPPFLAGS = \
 
 AM_LDFLAGS = -no-undefined
 INCLUDE = @INCLTDL@
-MAINTAINERCLEANFILES = *.built
 BUILT_SOURCES = paths.h
 CLEANFILES = $(BUILT_SOURCES)
 DISTCLEANFILES = dm-config.h
 noinst_LTLIBRARIES = libdmbootstrap.la
-PRODSRCS = dmnuminc.h.built dsp1f.h.built dsp2def.h.built \
-	dgen_0.h.built dnode_0.h.built dvt_0.h.built dpawn_0.h.built
-
 EXTRA_DIST = dmnuminc.d.in paths.h.in dsp2def.d.in
 libdmbootstrap_la_SOURCES = dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h \
 	dmglobals.c dm1.c dm2.c dm-conv.c dm-swapbytes.h \
@@ -337,11 +355,17 @@ libdmbootstrap_la_SOURCES = dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h \
 dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h dm3.c
 dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dgen_LDADD = libdmbootstrap.la
+dcoder_SOURCES = dcoder.c dcoder.h
+dcoder_CPPFLAGS = -I"$(top_srcdir)/src" -I"$(top_builddir)/src" \
+	-DDM_HAVE_CONFIG_H
+
 edit = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
-	-e 's,[@]dmstartdir[@],.,g' \
+	-e 's,[@]dmstartdir[@],$(srcdir),g' \
 	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
-	-e 's,[@]dmconfdir[@],$(dmconfdir),g'
+	-e 's,[@]dmconfdir[@],$(dmconfdir),g' \
+	-e 's,[@]ROLLBITS[@],$(ROLLBITS),g' \
+	-e 's,[@]BYTECORRECT[@],$(BYTECORRECT),g'
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -377,12 +401,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-dmnuminc.d: $(top_builddir)/config.status $(srcdir)/dmnuminc.d.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-dsp2def.d: $(top_builddir)/config.status $(srcdir)/dsp2def.d.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-startup_dgen.d: $(top_builddir)/config.status $(top_srcdir)/dcode/startup_dgen.d.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-noinstLTLIBRARIES:
 	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
@@ -401,6 +419,9 @@ clean-noinstPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+dcoder$(EXEEXT): $(dcoder_OBJECTS) $(dcoder_DEPENDENCIES) 
+	@rm -f dcoder$(EXEEXT)
+	$(LINK) $(dcoder_OBJECTS) $(dcoder_LDADD) $(LIBS)
 dgen$(EXEEXT): $(dgen_OBJECTS) $(dgen_DEPENDENCIES) 
 	@rm -f dgen$(EXEEXT)
 	$(dgen_LINK) $(dgen_OBJECTS) $(dgen_LDADD) $(LIBS)
@@ -411,6 +432,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dcoder-dcoder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dgen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dm-nextevent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dm3.Po@am__quote@
@@ -448,6 +470,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+dcoder-dcoder.o: dcoder.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dcoder_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dcoder-dcoder.o -MD -MP -MF $(DEPDIR)/dcoder-dcoder.Tpo -c -o dcoder-dcoder.o `test -f 'dcoder.c' || echo '$(srcdir)/'`dcoder.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dcoder-dcoder.Tpo $(DEPDIR)/dcoder-dcoder.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dcoder.c' object='dcoder-dcoder.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dcoder_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dcoder-dcoder.o `test -f 'dcoder.c' || echo '$(srcdir)/'`dcoder.c
+
+dcoder-dcoder.obj: dcoder.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dcoder_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dcoder-dcoder.obj -MD -MP -MF $(DEPDIR)/dcoder-dcoder.Tpo -c -o dcoder-dcoder.obj `if test -f 'dcoder.c'; then $(CYGPATH_W) 'dcoder.c'; else $(CYGPATH_W) '$(srcdir)/dcoder.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dcoder-dcoder.Tpo $(DEPDIR)/dcoder-dcoder.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dcoder.c' object='dcoder-dcoder.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dcoder_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dcoder-dcoder.obj `if test -f 'dcoder.c'; then $(CYGPATH_W) 'dcoder.c'; else $(CYGPATH_W) '$(srcdir)/dcoder.c'; fi`
 
 dgen-dgen.o: dgen.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -MT dgen-dgen.o -MD -MP -MF $(DEPDIR)/dgen-dgen.Tpo -c -o dgen-dgen.o `test -f 'dgen.c' || echo '$(srcdir)/'`dgen.c
@@ -544,33 +580,6 @@ GTAGS:
 
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
-
-distdir: $(DISTFILES)
-	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
-	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
-	list='$(DISTFILES)'; \
-	  dist_files=`for file in $$list; do echo $$file; done | \
-	  sed -e "s|^$$srcdirstrip/||;t" \
-	      -e "s|^$$topsrcdirstrip/|$(top_builddir)/|;t"`; \
-	case $$dist_files in \
-	  */*) $(MKDIR_P) `echo "$$dist_files" | \
-			   sed '/\//!d;s|^|$(distdir)/|;s,/[^/]*$$,,' | \
-			   sort -u` ;; \
-	esac; \
-	for file in $$dist_files; do \
-	  if test -f $$file || test -d $$file; then d=.; else d=$(srcdir); fi; \
-	  if test -d $$d/$$file; then \
-	    dir=`echo "/$$file" | sed -e 's,/[^/]*$$,,'`; \
-	    if test -d $(srcdir)/$$file && test $$d != $(srcdir); then \
-	      cp -pR $(srcdir)/$$file $(distdir)$$dir || exit 1; \
-	    fi; \
-	    cp -pR $$d/$$file $(distdir)$$dir || exit 1; \
-	  else \
-	    test -f $(distdir)/$$file \
-	    || cp -p $$d/$$file $(distdir)/$$file \
-	    || exit 1; \
-	  fi; \
-	done
 check-am: all-am
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
@@ -681,23 +690,21 @@ uninstall-am:
 	tags uninstall uninstall-am
 
 
-gencode: all $(PRODSRCS)
-
-dsp2def.h.built: dsp2def.d dgen dgen-build
+$(srcdir)/dsp2def.h.built: dsp2def.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dsp2def.d" "$@" 
 	(cd "$(srcdir)/.." ; \
 	 rm dsp2def.h ; \
 	 $(LN_S) codegen/dsp2def.h.built dsp2def.h)
 
-dmnuminc.h.built: dmnuminc.d dgen dgen-build
+$(srcdir)/dmnuminc.h.built: dmnuminc.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dmnuminc.d" "$@" 
 	(cd "$(srcdir)/.." ; \
 	 rm dmnuminc.h ; \
 	 $(LN_S) codegen/dmnuminc.h.built dmnuminc.h)
 
-dsp1f.h.built: dsp1f.d dgen dgen-build
+$(srcdir)/dsp1f.h.built: dsp1f.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dsp1f.d" "$@"
 	(cd "$(srcdir)/.." ; \
@@ -709,7 +716,17 @@ paths.h: paths.h.in Makefile
 	$(edit) $(srcdir)/paths.h.in >$@.tmp
 	mv $@.tmp $@
 
-dgen_0.h.built: ops.d dgen dgen-build
+dmnuminc.d: dmnuminc.d.in Makefile
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/dmnuminc.d.in >$@.tmp
+	mv $@.tmp $@
+
+dsp2def.d: dsp2def.d.in Makefile
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/dsp2def.d.in >$@.tmp
+	mv $@.tmp $@
+
+$(srcdir)/dgen_0.h.built: ops.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
 		"$@" "/dgen"
@@ -717,7 +734,7 @@ dgen_0.h.built: ops.d dgen dgen-build
 	rm dgen_0.h ; \
 	$(LN_S) codegen/dgen_0.h.built dgen_0.h)
 
-dvt_0.h.built: ops.d dgen dgen-build
+$(srcdir)/dvt_0.h.built: ops.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
 		"$@" "/dvt"
@@ -725,7 +742,7 @@ dvt_0.h.built: ops.d dgen dgen-build
 	rm dvt_0.h ; \
 	$(LN_S) codegen/dvt_0.h.built dvt_0.h)
 
-dnode_0.h.built: ops.d dgen dgen-build
+$(srcdir)/dnode_0.h.built: ops.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
 		"$@" "/dnode"
@@ -733,13 +750,51 @@ dnode_0.h.built: ops.d dgen dgen-build
 	rm dnode_0.h ; \
 	$(LN_S) codegen/dnode_0.h.built dnode_0.h)
 
-dpawn_0.h.built: ops.d dgen dgen-build
+$(srcdir)/dpawn_0.h.built: ops.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
 		"$@" "/dpawn"
 	(cd "$(srcdir)/.." ; \
 	rm dpawn_0.h ; \
 	$(LN_S) codegen/dpawn_0.h.built dpawn_0.h)
+
+$(srcdir)/dcoder.h: ops.d dgen dgen-build
+	"$(srcdir)/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
+		"$@" "/dcoder"
+
+$(srcdir)/errors.d: dcoder
+	"$(top_builddir)/src/codegen/dcoder" "$(srcdir)/errors.d"
+	(cd "$(srcdir)/../../dcode" ; \
+	rm errors.d ; \
+	$(LN_S) ../src/codegen/errors.d errors.d)
+
+distdir:
+	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
+	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
+	list='$(DISTFILES)'; \
+	  dist_files=`for file in $$list; do echo $$file; done | \
+	  sed -e "s|^$$srcdirstrip/||;t" \
+	      -e "s|^$$topsrcdirstrip/|$(top_builddir)/|;t"`; \
+	case $$dist_files in \
+	  */*) $(MKDIR_P) `echo "$$dist_files" | \
+			   sed '/\//!d;s|^|$(distdir)/|;s,/[^/]*$$,,' | \
+			   sort -u` ;; \
+	esac; \
+	for file in $$dist_files; do \
+	  if test -f $$file || test -d $$file; then d=.; else d=$(srcdir); fi; \
+	  if test -d $$d/$$file; then \
+	    dir=`echo "/$$file" | sed -e 's,/[^/]*$$,,'`; \
+	    if test -d $(srcdir)/$$file && test $$d != $(srcdir); then \
+	      cp -pR $(srcdir)/$$file $(distdir)$$dir || exit 1; \
+	    fi; \
+	    cp -pR $$d/$$file $(distdir)$$dir || exit 1; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || cp -p $$d/$$file $(distdir)/$$file \
+	    || exit 1; \
+	  fi; \
+	done
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

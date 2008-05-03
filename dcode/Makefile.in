@@ -48,7 +48,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = errors.d
 SOURCES =
 DIST_SOURCES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -283,7 +283,7 @@ target_vendor = @target_vendor@
 tmp = @tmp@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-dist_dmstart_DATA = color.d master.d sched.d plugin.d
+dist_dmstart_DATA = color.d master.d sched.d plugin.d errors.d
 nodist_dmstart_DATA = theeye.d startup_dnode.d startup_dpawn.d \
 	startup_dvt.d startup_dgen.d dvt_macros.d matrix.d
 
@@ -291,7 +291,7 @@ dist_dmconf_DATA = dvt.d
 nodist_dmconf_DATA = dnode.d
 EXTRA_DIST = theeye.d.in dnode.d.in dvt_macros.d.in \
 	startup_dvt.d.in startup_dnode.d.in startup_dpawn.d.in \
-	matrix.d.in
+	matrix.d.in startup_dgen.d.in
 
 CLEANFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
 XPS_START = /^[[:space:]]*[@]ENABLE_XPS_START[@][[:space:]]*$$/
@@ -337,6 +337,7 @@ RTHREADS_END = /^[[:space:]]*[@]ENABLE_RTHREADS_END[@][[:space:]]*$$/
 @ENABLE_RTHREADS_TRUE@RTHREADS_EDIT = -e '$(RTHREADS_START) d' -e '$(RTHREADS_END) d'
 edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
+			-e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
 			$(PLUGINS_DELETE) \
 			$(PLUGINS_SUPPORT_DELETE) \
 			$(THREADS_EDIT) \

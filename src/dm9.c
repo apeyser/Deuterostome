@@ -317,8 +317,9 @@ P op_makewindow(void)
   XTextProperty wname, icname;
 
   if (dvtdisplay == NULL) return NO_XWINDOWS;
-  attr.event_mask = ButtonPressMask | ExposureMask | StructureNotifyMask;
-  attr.override_redirect = True;
+  attr.event_mask = (ButtonPressMask | ExposureMask 
+		     | StructureNotifyMask);
+  attr.override_redirect = False;
 
   if (o_3 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
@@ -449,22 +450,22 @@ P op_deletewindow(void)
 */
 #if ! X_DISPLAY_MISSING
 void mapraisewindow(P win) {
-	XEvent event;
-	HXMapRaised(dvtdisplay, win);
-	event.xclient.type = ClientMessage;
-	event.xclient.display = dvtdisplay;
-	event.xclient.window = win;
-	event.xclient.message_type 
-	  = HXInternAtom(dvtdisplay, "_NET_ACTIVE_WINDOW", False);
-	event.xclient.format = 32;
-	event.xclient.data.l[0] = 2;
-	event.xclient.data.l[1] = time(NULL);
-	event.xclient.data.l[2] = 0;
-	event.xclient.data.l[3] = 0;
-	event.xclient.data.l[4] = 0;
-	HXSendEvent(dvtdisplay, XRootWindowOfScreen(dvtscreen), 
-		    False, (SubstructureNotifyMask|SubstructureRedirectMask), 
-		    &event);
+  XEvent event;
+  HXMapRaised(dvtdisplay, win);
+  event.xclient.type = ClientMessage;
+  event.xclient.display = dvtdisplay;
+  event.xclient.window = win;
+  event.xclient.message_type 
+    = HXInternAtom(dvtdisplay, "_NET_ACTIVE_WINDOW", False);
+  event.xclient.format = 32;
+  event.xclient.data.l[0] = 2;
+  event.xclient.data.l[1] = time(NULL);
+  event.xclient.data.l[2] = 0;
+  event.xclient.data.l[3] = 0;
+  event.xclient.data.l[4] = 0;
+  HXSendEvent(dvtdisplay, XRootWindowOfScreen(dvtscreen), 
+	      False, (SubstructureNotifyMask|SubstructureRedirectMask), 
+	      &event);
 }
 #endif //! X_DISPLAY_MISSING
 
@@ -478,34 +479,58 @@ P op_mapwindow(void)
   if (o_2 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != BOOL) return OPD_CLA;
 
-	switch (CLASS(o_2)) {
-		case NULLOBJ:
-			for (k = 0; k < ndvtwindows; k++)
-				if (BOOL_VAL(o_1)) mapraisewindow(dvtwindows[k]);
-				else HXUnmapWindow(dvtdisplay, dvtwindows[k]);
-			break;
-
-		case NUM:
-			if (!PVALUE(o_2,&wid)) return UNDF_VAL;
-			for (k = 0; k < ndvtwindows && dvtwindows[k] != wid; k++);
-			if (k == ndvtwindows) break;
-
-			if (BOOL_VAL(o_1)) mapraisewindow(wid);
-			else HXUnmapWindow(dvtdisplay,wid);
-			break;
-
-		default:
-			return OPD_CLA;
-	};
-
-	FREEopds = o_2;
-	return OK;
+  switch (CLASS(o_2)) {
+  case NULLOBJ:
+    for (k = 0; k < ndvtwindows; k++)
+      if (BOOL_VAL(o_1)) mapraisewindow(dvtwindows[k]);
+      else HXUnmapWindow(dvtdisplay, dvtwindows[k]);
+    break;
+    
+  case NUM:
+    if (!PVALUE(o_2,&wid)) return UNDF_VAL;
+    for (k = 0; k < ndvtwindows && dvtwindows[k] != wid; k++);
+    if (k == ndvtwindows) break;
+    
+    if (BOOL_VAL(o_1)) mapraisewindow(wid);
+    else HXUnmapWindow(dvtdisplay,wid);
+    break;
+    
+  default:
+    return OPD_CLA;
+  };
+  
+  FREEopds = o_2;
+  return OK;
 #endif
 }
 
 /*------------------------------------------------- resizewindow
    window# width height | --
 */
+
+#if ! X_DISPLAY_MISSING
+static void resizewindow(P width, P height) {
+  static XEvent c_;
+  static XClientMessageEvent* c = NULL;
+  if (! c) {
+    c = &c_.xclient;
+    c->type = ClientMessage;
+    c->format = 32;
+    c->data.l[0] = (1 << 10)|(1 << 11)|(1 << 12);
+  }
+
+  HXResizeWindow(dvtdisplay, wid, width, height);
+
+  c->display = dvtdisplay;
+  c->window = wid;
+  c->message_type = HXInternAtom(dvtdisplay, "_NET_MOVERESIZE_WINDOW", False);
+  c->data.l[3] = width;
+  c->data.l[4] = height;  
+  HXSendEvent(dvtdisplay, dvtrootwindow, False, 
+	      (SubstructureNotifyMask|SubstructureRedirectMask),
+	      &c_);
+}
+#endif //! X_DISPLAY_MISSING
 
 P op_resizewindow(void)
 {
@@ -523,12 +548,13 @@ P op_resizewindow(void)
   if (!PVALUE(o_2,&width)) return UNDF_VAL;
   if (CLASS(o_1) != NUM) return OPD_CLA;
   if (!PVALUE(o_1,&height)) return UNDF_VAL;
-  k = 0;
-  for (k = 0; k < ndvtwindows; k++)
-    if (dvtwindows[k] == wid) break;
-  if (k >= ndvtwindows) {FREEopds = o_3; return OK;}
 
-  HXResizeWindow(dvtdisplay,wid, width, height);
+  for (k = 0; k < ndvtwindows; k++)
+    if (dvtwindows[k] == wid) {
+      resizewindow(width, height);
+      break;
+    }
+
   FREEopds = o_3;
   return OK;
 #endif

@@ -97,6 +97,9 @@ xhack0(XCloseDisplay);
 xhack0(XPending);
 xhack0(XFlush);
 xhack(XNextEvent, H(XEvent* x), H(x));
+xhackr(XCheckIfEvent, Bool, 0, 
+       H(XEvent* e, Bool (*p)(Display* d, XEvent* e, XPointer a), XPointer a), 
+       H(e, p, a));
 xhackr(XInternAtom, Atom, 0, H(char* a, Bool b), H(a, b));
 
 xhack(XSetForeground, H(GC g, unsigned long p), H(g, p));

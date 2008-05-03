@@ -34880,10 +34880,10 @@ fi
 
 
 
-ac_config_links="$ac_config_links src/dsp1f.h:src/codegen/dsp1f.h.built src/dmnuminc.h:src/codegen/dmnuminc.h.built src/dsp2def.h:src/codegen/dsp2def.h.built src/dgen_0.h:src/codegen/dgen_0.h.built src/dnode_0.h:src/codegen/dnode_0.h.built src/dpawn_0.h:src/codegen/dpawn_0.h.built src/dvt_0.h:src/codegen/dvt_0.h.built src/codegen/dmglobals.c:src/dmglobals.c src/codegen/dsp1.c:src/dsp1.c src/codegen/dm1.c:src/dm1.c src/codegen/dm2.c:src/dm2.c src/codegen/dm2.h:src/dm2.h src/codegen/dm-swapbytes.h:src/dm-swapbytes.h src/codegen/dm-conv.c:src/dm-conv.c src/codegen/dm3.c:src/dm3.c src/codegen/dm4.c:src/dm4.c src/codegen/dm5.c:src/dm5.c src/codegen/dm6.c:src/dm6.c src/codegen/dm7.c:src/dm7.c src/codegen/dm8.c:src/dm8.c src/codegen/dmnum.c:src/dmnum.c src/codegen/dsp2.c:src/dsp2.c src/codegen/dm-types.h:src/dm-types.h src/codegen/dm-types.c:src/dm-types.c src/codegen/paths.h.in:src/paths.h.in src/codegen/dgen.c:src/dgen.c src/codegen/dgen_1.h:src/dgen_1.h src/codegen/dgen-build:src/dgen-build src/codegen/dmnum.h:src/dmnum.h src/codegen/dm-nextevent.c:src/dm-nextevent.c src/codegen/dm-nextevent.h:src/dm-nextevent.h plugins/plugin.d:dcode/plugin.d plugins/new-plugin.d:dcode/new-plugin.d"
+ac_config_links="$ac_config_links src/dsp1f.h:src/codegen/dsp1f.h.built src/dmnuminc.h:src/codegen/dmnuminc.h.built src/dsp2def.h:src/codegen/dsp2def.h.built src/dgen_0.h:src/codegen/dgen_0.h.built src/dnode_0.h:src/codegen/dnode_0.h.built src/dpawn_0.h:src/codegen/dpawn_0.h.built src/dvt_0.h:src/codegen/dvt_0.h.built src/codegen/dmglobals.c:src/dmglobals.c src/codegen/dsp1.c:src/dsp1.c src/codegen/dm1.c:src/dm1.c src/codegen/dm2.c:src/dm2.c src/codegen/dm2.h:src/dm2.h src/codegen/dm-swapbytes.h:src/dm-swapbytes.h src/codegen/dm-conv.c:src/dm-conv.c src/codegen/dm3.c:src/dm3.c src/codegen/dm4.c:src/dm4.c src/codegen/dm5.c:src/dm5.c src/codegen/dm6.c:src/dm6.c src/codegen/dm7.c:src/dm7.c src/codegen/dm8.c:src/dm8.c src/codegen/dmnum.c:src/dmnum.c src/codegen/dsp2.c:src/dsp2.c src/codegen/dm-types.h:src/dm-types.h src/codegen/dm-types.c:src/dm-types.c src/codegen/paths.h.in:src/paths.h.in src/codegen/dgen.c:src/dgen.c src/codegen/dgen_1.h:src/dgen_1.h src/codegen/dgen-build:src/dgen-build src/codegen/dmnum.h:src/dmnum.h src/codegen/dm-nextevent.c:src/dm-nextevent.c src/codegen/dm-nextevent.h:src/dm-nextevent.h plugins/plugin.d:dcode/plugin.d plugins/new-plugin.d:dcode/new-plugin.d dcode/errors.d:src/codegen/errors.d plugins/startup_dgen.d:src/codegen/startup_dgen.d"
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/codegen/Makefile src/codegen/dmnuminc.d src/codegen/dsp2def.d src/dm.pc plugins/Makefile plugins/dmflex.l ps/Makefile sh/Makefile emacs/Makefile emacs/d-mode.el dcode/Makefile src/codegen/startup_dgen.d:dcode/startup_dgen.d.in plugins/startup_dgen.d:dcode/startup_dgen.d.in test/Makefile m4/Makefile test/arr.d"
+ac_config_files="$ac_config_files Makefile src/Makefile src/codegen/Makefile src/dm.pc plugins/Makefile plugins/dmflex.l ps/Makefile sh/Makefile emacs/Makefile emacs/d-mode.el dcode/Makefile test/Makefile m4/Makefile test/arr.d"
 
 
 cat >confcache <<\_ACEOF
@@ -35758,11 +35758,11 @@ do
     "src/codegen/dm-nextevent.h") CONFIG_LINKS="$CONFIG_LINKS src/codegen/dm-nextevent.h:src/dm-nextevent.h" ;;
     "plugins/plugin.d") CONFIG_LINKS="$CONFIG_LINKS plugins/plugin.d:dcode/plugin.d" ;;
     "plugins/new-plugin.d") CONFIG_LINKS="$CONFIG_LINKS plugins/new-plugin.d:dcode/new-plugin.d" ;;
+    "dcode/errors.d") CONFIG_LINKS="$CONFIG_LINKS dcode/errors.d:src/codegen/errors.d" ;;
+    "plugins/startup_dgen.d") CONFIG_LINKS="$CONFIG_LINKS plugins/startup_dgen.d:src/codegen/startup_dgen.d" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "src/codegen/Makefile") CONFIG_FILES="$CONFIG_FILES src/codegen/Makefile" ;;
-    "src/codegen/dmnuminc.d") CONFIG_FILES="$CONFIG_FILES src/codegen/dmnuminc.d" ;;
-    "src/codegen/dsp2def.d") CONFIG_FILES="$CONFIG_FILES src/codegen/dsp2def.d" ;;
     "src/dm.pc") CONFIG_FILES="$CONFIG_FILES src/dm.pc" ;;
     "plugins/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/Makefile" ;;
     "plugins/dmflex.l") CONFIG_FILES="$CONFIG_FILES plugins/dmflex.l" ;;
@@ -35771,8 +35771,6 @@ do
     "emacs/Makefile") CONFIG_FILES="$CONFIG_FILES emacs/Makefile" ;;
     "emacs/d-mode.el") CONFIG_FILES="$CONFIG_FILES emacs/d-mode.el" ;;
     "dcode/Makefile") CONFIG_FILES="$CONFIG_FILES dcode/Makefile" ;;
-    "src/codegen/startup_dgen.d") CONFIG_FILES="$CONFIG_FILES src/codegen/startup_dgen.d:dcode/startup_dgen.d.in" ;;
-    "plugins/startup_dgen.d") CONFIG_FILES="$CONFIG_FILES plugins/startup_dgen.d:dcode/startup_dgen.d.in" ;;
     "test/Makefile") CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
     "m4/Makefile") CONFIG_FILES="$CONFIG_FILES m4/Makefile" ;;
     "test/arr.d") CONFIG_FILES="$CONFIG_FILES test/arr.d" ;;

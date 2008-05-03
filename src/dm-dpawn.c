@@ -488,7 +488,6 @@ P op_quit(void) {exit(0);}
 void run_dpawn_mill(void) {
   P retc;
 
-  fprintf(stderr, "Starting dpawn\n");
   initmpi();
   maketinysetup(quithandler);
 

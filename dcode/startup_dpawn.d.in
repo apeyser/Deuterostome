@@ -74,7 +74,7 @@ end mkread def
    /dictclass  { { exch
                    line 0
                    -16 4 -1 roll text 
-                   0 exch getinterval toconsole_ showobj pop
+                   0 exch getinterval toconsole showobj pop
                  } forall
                } bind def 
    /markclass  /_ mkact def
@@ -83,9 +83,9 @@ end mkread def
 end mkread def
 
 /showobj { dup /object name
-   /object find readonly { (r ) } { (  ) } ifelse toconsole_
+   /object find readonly { (r ) } { (  ) } ifelse toconsole
    line 0 /object find oclasses begin class mkact exec end
-   * (\n) text 0 exch getinterval toconsole_
+   * (\n) text 0 exch getinterval toconsole
 } bind def
 
 /tuples 6 dict dup begin
@@ -100,10 +100,10 @@ end def
 /intuples { /col 0 def
    { /value name tuples value type get /tuple name
      line 0 -80 tuple div value * number
-     0 exch getinterval toconsole_
-     /col col 1 add dup tuple ge { pop 0 (\n) toconsole_ } if def
+     0 exch getinterval toconsole
+     /col col 1 add dup tuple ge { pop 0 (\n) toconsole } if def
    } forall
-  col 0 ne { (\n) toconsole_ } if
+  col 0 ne { (\n) toconsole } if
 } bind def
 
 /topfirst {                        | show list value in reverse order
@@ -117,7 +117,7 @@ end def                            | of debug_dict
 
 /_ { debug_dict begin              | show top object on opd stack
    count 0 eq
-     { (OPDS is empty\n) toconsole_ }
+     { (OPDS is empty\n) toconsole }
      { showobj }
      ifelse
    end
@@ -135,8 +135,8 @@ end def                            | of debug_dict
 
 /s_ { dup                           | show text string at top of opd stack
 dup dup class /arrayclass eq exch type /B eq and
-  { { (\n) search { toconsole_ toconsole_ }
-                  { toconsole_ (\n) toconsole_ exit } ifelse
+  { { (\n) search { toconsole toconsole }
+                  { toconsole (\n) toconsole exit } ifelse
     } loop
   } { v_ } ifelse
 } bind def
@@ -148,18 +148,18 @@ dup dup class /arrayclass eq exch type /B eq and
            10 (EXECS) text
            10 (OPDS) text
            * (\n) text
-         0 exch getinterval toconsole_
+         0 exch getinterval toconsole
    line  0 -10 (max) text
             10 vmmax * number
             * (\n) text
-         0 exch getinterval toconsole_
+         0 exch getinterval toconsole
    line  0 -10 (used) text
             10 vmused * number
             10 countdictstack * number
             10 countexecstack * number
             10 count * number
             * (\n) text
-         0 exch getinterval toconsole_
+         0 exch getinterval toconsole
    end
 } bind def
 
@@ -367,7 +367,7 @@ end def  | of xtext_dict
 
 /dnoderespond {
   save
-  ~[~[mpirank ~mpidata ~begin ~makeready_dpawn] ~lock] ~send
+  ~[~[mpirank ~mpidata ~begin ~makeready_dpawn] ~lock] send
   restore
 } bind def
 
@@ -524,7 +524,7 @@ end def  | of xtext_dict
        def true
      } { pop pop false } ifelse
    } { pop pop pop false } ifelse
-  not { (Think!\n) toconsole_ } if
+  not { (Think!\n) toconsole } if
 } bind def
 
 |-------------------------------- restoremodule 
@@ -588,7 +588,7 @@ end def  | of xtext_dict
       * ( : ) text
       hi
       * (\n) text
-    0 exch getinterval toconsole_          | output used part
+    0 exch getinterval toconsole          | output used part
     
     end end                               | pop op lib, debug_dict
   } loop
@@ -602,13 +602,18 @@ end def  | of xtext_dict
 | -- | -- <<printout>>
 |
 /whoami ~[
-  1024 /b array {
-    * mpirank * number 
-    (\n) fax
-    0 exch getinterval toconsole_
-  } ~exec
+  1024 /b array 0 * mpirank * number (\n) fax 0 exch getinterval
+  ~toconsole
 ] bind def
 
 (Using startup_dpawn.d $Id: startup_dnode.d.in 1367 2008-04-24 01:36:55Z ap $ V@PACKAGE_VERSION@\n) toconsole
 
+getstartupdir (errors.d) fromfiles
 getstartupdir (matrix.d) fromfiles
+
+(Trying ) toconsole getconfdir toconsole (dpawn.d...\n) toconsole
+getconfdir (dpawn.d) fromxfiles {
+  (Read ) toconsole getconfdir toconsole (dpawn.d\n) toconsole
+} if
+(Trying ~/.dpawn ...\n) toconsole
+gethomedir (.dpawn) fromxfiles {(Read ~/.dnode\n) toconsole} if

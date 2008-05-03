@@ -141,9 +141,9 @@ DM_INLINE_STATIC P mpithread_exec(MpiThreadFunc func) {
 
 static void* mpifunc(void* unused) __attribute__ ((__noreturn__));
 
-static void* mpifunc(void* unused __attribute__ ((__unused__)) ) {
-  int argc =0;
-  char* argv[] = {NULL};
+static void* mpifunc(void* unused __attribute__ ((unused)) ) {
+  int argc = 0;
+  const char* argv[] = {NULL};
   int threadtype;
   MPI_Errhandler mpierr;
   sigset_t new;

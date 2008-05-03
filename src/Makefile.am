@@ -1,4 +1,4 @@
-SUBDIRS = codegen
+DIST_SUBDIRS = codegen
 
 dpawn = $(bindir)/dpawn
 drook = $(bindir)/drook
@@ -8,6 +8,26 @@ edit = sed \
 	-e 's,[@]srcdir[@],$(srcdir),g' \
 	-e 's,[@]dpawn[@],$(dpawn),g' \
 	-e 's,[@]drook[@],$(drook),g'
+
+# dist-hook:
+# 	list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
+# 	  if test "$$subdir" = .; then :; else \
+# 	    test -d "$(distdir)/$$subdir" \
+# 	    || $(MKDIR_P) "$(distdir)/$$subdir" \
+# 	    || exit 1; \
+# 	    distdir=`$(am__cd) $(distdir) && pwd`; \
+# 	    top_distdir=`$(am__cd) $(top_distdir) && pwd`; \
+# 	    (cd $$subdir && \
+# 	      $(MAKE) $(AM_MAKEFLAGS) \
+# 	        top_distdir="$$top_distdir" \
+# 	        distdir="$$distdir/$$subdir" \
+# 		am__remove_distdir=: \
+# 		am__skip_length_check=: \
+# 	        justdistdir) \
+# 	      || exit 1; \
+# 	  fi; \
+# 	done
+
 
 if ENABLE_SETUID
 
@@ -159,7 +179,7 @@ paths.h: paths.h.in Makefile
 .PHONY: gencode-all gencode
 gencode-all: gencode all
 gencode:
-	cd codegen && $(MAKE) $(AM_MAKEFLAGS) gencode
+	cd codegen && $(MAKE) $(AM_MAKEFLAGS)
 
 nodist_pkgconfiglib_DATA = dm.pc
 

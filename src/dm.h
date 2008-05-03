@@ -391,9 +391,7 @@ extern "C" {
 
 #define BAD_ARR     (P)0x00000B00L /* dmnuminc debug error */
 
-#if DM_ENABLE_REGEX
 #define REGEX_ERRS     (P)0x00000C00L /* 0C00:0D00-1 for errors in dregex.h */
-#endif // DM_ENABLE_REGEX
 #define MATRIX_ERRS    (P)0x00000D00L /* 0D00:0E00-1 for errors in matrix.h */
 #define PLUGIN_ERRS    (P)0x00000E00L /* 0E00L:0F00-1 for errors in plugin.h */
 #define NEXTEVENT_ERRS (P)0x00000F00L /* 0F00L:1000-1 for errors in dm-nexteven.h*/

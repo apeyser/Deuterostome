@@ -124,7 +124,7 @@ DM_INLINE_STATIC void spawn(void) {
   unsigned int i, any = 0;
   MPI_Errhandler mpierr;
 
-  fprintf(stderr, "rook is spawning %i children\n", nodes);
+  fprintf(stderr, "rook is spawning %i children as `%s'\n", nodes, "@dpawn@");
   errors = (int*) malloc(sizeof(int)*nodes);
   MPI_Comm_spawn("@dpawn@", argv, nodes, MPI_INFO_NULL, 
 		 0, MPI_COMM_WORLD, &children, errors);

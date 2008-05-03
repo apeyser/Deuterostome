@@ -120,7 +120,7 @@ previous message whose execution has been interrupted.
 */
 
 int main(int argc __attribute__ ((__unused__)), 
-	 char *argv[] __attribute__((__unused__)) )
+	 char *argv[] __attribute((__unused__)) )
 {
   sysop = _sysop;
   syserrm = _syserrm;

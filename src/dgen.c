@@ -134,6 +134,7 @@ int main(void)
 
   setupdirs();
 
+  fprintf(stderr, "Startup dir: %s\n", startup_dir);
 /*----------- read startup_dvt.d and push on execs ----------*/
   startup_dvt 
     = (B*)strcat(strcpy(malloc(strlen((char*)startup_dir) 

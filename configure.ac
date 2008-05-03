@@ -315,22 +315,20 @@ AC_CONFIG_LINKS([
   src/codegen/dm-nextevent.h:src/dm-nextevent.h
   plugins/plugin.d:dcode/plugin.d
   plugins/new-plugin.d:dcode/new-plugin.d
+  dcode/errors.d:src/codegen/errors.d
+  plugins/startup_dgen.d:src/codegen/startup_dgen.d
 ])
 
 AC_CONFIG_FILES([
   Makefile 
   src/Makefile 
   src/codegen/Makefile 
-  src/codegen/dmnuminc.d 
-  src/codegen/dsp2def.d
   src/dm.pc
   plugins/Makefile plugins/dmflex.l
   ps/Makefile 
   sh/Makefile
   emacs/Makefile emacs/d-mode.el
   dcode/Makefile
-  src/codegen/startup_dgen.d:dcode/startup_dgen.d.in
-  plugins/startup_dgen.d:dcode/startup_dgen.d.in
   test/Makefile
   m4/Makefile
   test/arr.d

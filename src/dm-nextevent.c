@@ -89,7 +89,7 @@ P nextevent(B* buffer) {
 
   do {
     if (abortflag) return ABORT;
-    if ((retc = waitsocket(pending(), &read_fds))) {
+    if ((retc = waitsocket(moreX() || pending(), &read_fds))) {
       if (retc == NEXTEVENT_NOEVENT && (retc = nextXevent()))
 	errsource = "X service";
       continue;

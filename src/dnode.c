@@ -22,6 +22,7 @@
 #include "pluginlib.h"
 #include "dm3.h"
 #include "dqueen.h"
+#include "dm-nextevent.h"
 #include "dnode_0.h"
 
 /*----------------- DM global variables -----------------------------*/

@@ -164,6 +164,8 @@ B* _sysop[] =
   (B*) "rotate_blas", (B*) op_rotate_blas,
   (B*) "xerbla_test", (B*) op_xerbla_test,
 #endif //BUILD_ATLAS
+#ifdef HAVE_ATLAS
+#endif //HAVE_ATLAS
   (B*) "send", (B*) op_send,
   (B*) "mpiprobe", (B*) op_mpiprobe,
   (B*) "mpiiprobe", (B*) op_mpiiprobe,
@@ -237,6 +239,8 @@ P _syserrc[] = {
   FOLD_OPAQUE,
   NO_PLUGINS,
 #ifdef BUILD_ATLAS
+#endif //BUILD_ATLAS
+#ifdef HAVE_ATLAS
   MATRIX_UNDEF_CUT,
   MATRIX_ILLEGAL_CUT,
   MATRIX_UNDER_CUT,
@@ -245,7 +249,8 @@ P _syserrc[] = {
   MATRIX_PARAM_ERROR,
   MATRIX_INT_ERR,
   MATRIX_SINGULAR,
-#endif //BUILD_ATLAS
+#endif //HAVE_ATLAS
+  MPI_NOMSG,
 #ifdef DM_ENABLE_REGEX
   REGEX_BADPAT,
   REGEX_ECOLLATE,
@@ -317,6 +322,8 @@ B* _syserrm[] = {
   (B*) "** Illegal attempt to fold opaque object",
   (B*) "** Compiled without plugin support",
 #ifdef BUILD_ATLAS
+#endif //BUILD_ATLAS
+#ifdef HAVE_ATLAS
   (B*) "Matrix Error: undefined value in cut",
   (B*) "Matrix Error: cut dimension less than 1",
   (B*) "Matrix Error: number of cut dimensions too small",
@@ -325,7 +332,8 @@ B* _syserrm[] = {
   (B*) "Matrix Error: parameters to clapack illegal",
   (B*) "Matrix Error: Internal Error - message on stack",
   (B*) "Matrix Error: lu matrix is singular",
-#endif //BUILD_ATLAS
+#endif //HAVE_ATLAS
+  (B*) "** No mpi message msg received -- internal",
 #ifdef DM_ENABLE_REGEX
   (B*) "Regex Error: Invalid regular expression",
   (B*) "Regex Error: Invalid collating element",

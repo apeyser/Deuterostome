@@ -290,7 +290,6 @@ userdict /dnode_setup known not {
 
 /drawwindow {
  [ {    | stop capsule + reentry prevention
-
 |-- show structural elements
   wid woutline BLACK drawline
   wid htdivider BLACK drawline
@@ -560,8 +559,8 @@ end mkread def
 /error {
   errordict begin {
     | avoid stop loop
-    dup 520 eq {error} {
-      dup 518 eq {error} {
+    dup ERROR /INV_STOP get eq {error} {
+      dup ERROR /EXECS_UNF get eq {error} {
         wid inforect BG fillrectangle
         infoline errormessage dup length 1 sub 0 exch getinterval
         dup toconsole (\n) toconsole

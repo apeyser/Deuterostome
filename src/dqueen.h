@@ -3,9 +3,9 @@
 
 #include "dm.h"
 
-#if DM_ENABLE_RTHREADS
-
 #define RTHREADS_UNSET (RTHREADS_ERRS+0)
+
+#if DM_ENABLE_RTHREADS
 
 DLL_SCOPE P op_rthreads(void);
 DLL_SCOPE P op_checkrthreads(void);

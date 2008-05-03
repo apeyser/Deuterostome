@@ -52,12 +52,8 @@
 /doerrstr {
   /doerrstr /errors {exch pop (  \(B*\) ")__ __ (",)__ nl} doall
 } bind def
-        
 
-/all {
-  /group name /file name /path name
-  ops group get /gdict name
-
+/h_produce {
   (// Automatically produced from src/codegen/ops.d)__ nl
   (// DO NOT EDIT HERE!)__ nl nl
 
@@ -79,6 +75,52 @@
   (};)__ nl
 
   buffer 0 buffern getinterval path file writefile
+} bind def
+
+{/dpawn /dgen /dnode /dvt} {
+  ~[
+    31 /b array 0 (/) fax * 4 index text (dict) fax 0 exch getinterval
+    mkact exec
+    {
+      ops exch get /gdict name
+      h_produce
+    } ~exec
+  ] bind def
+} forall
+
+/e_produce {
+  gdict {exch bifdef
+    dup /errors known not {pop} {
+      /errors get {pop
+        (  {\(B*\)")__ dup __ (", )__ __ (},)__ nl
+      } forall
+    } ifelse
+    eifdef
+  } forall
+} bind def
+
+/dcoder {
+  (// Automatically produced from src/codegen/ops.d)__ nl
+  (// DO NOT EDIT HERE!)__ nl nl
+
+  (struct emap emap[] = {)__ nl
+  {
+    /common /regex /quitable /net /x /node 
+    /xnode /master /plugins /socketevents
+    /terminal /pawn
+  } {
+    ops exch get /gdict name
+    e_produce
+  } forall
+  (  {\(B*\) NULL, 0})__ nl
+  (};)__ nl
+  
+  buffer 0 buffern getinterval path file writefile
+} bind def
+
+/all {
+  /group name /file name /path name
+  ops group get exec
 } bind def
 
 /common 2 dict dup begin |[
@@ -197,8 +239,7 @@ end def
       /connect /disconnect /send /getsocket
       /getmyname /getmyfqdn
     ] def
-    /error 2 dict dup begin |[
-      /DEAD_SOCKET (Dead source connection) def
+    /errors 1 dict dup begin |[
       /LOST_CONN (** Lost connection) def |]
     end def |]
   end def |]
@@ -228,7 +269,7 @@ end def
   end def |]
 end def
 
-/node 2 dict dup begin |[
+/node 3 dict dup begin |[
   /all 2 dict dup begin |[
     /commands [
       /lock /unlock /serialize /threads /makethreads 
@@ -253,7 +294,7 @@ end def
       /NO_PLUGINS (** Compiled without plugin support) def |]
     end def |]
   end def
-  /BUILD_ATLAS 2 dict dup begin |[
+  /BUILD_ATLAS 1 dict dup begin |[
     /commands [
       /matmul_blas
       /decompLU_lp
@@ -265,7 +306,9 @@ end def
       /givens_blas
       /rotate_blas
       /xerbla_test
-    ] def 
+    ] def  |]
+  end def
+  /HAVE_ATLAS 1 dict dup begin |[
     /errors 100 dict dup begin |[
       /MATRIX_UNDEF_CUT (Matrix Error: undefined value in cut) def
       /MATRIX_ILLEGAL_CUT (Matrix Error: cut dimension less than 1) def
@@ -307,32 +350,43 @@ end def
   /commands [/loadlib /nextlib] def |]
 end def end def
 
+/socketevents 1 dict dup begin /all 1 dict dup begin |[
+  /errors 1 dict dup begin |[
+    /NEXTEVENT_NOEVENT (** no socket events -- internal) def |]
+  end def |]
+end def end def
+
 /terminal 1 dict dup begin /all 1 dict dup begin |[
   /commands [/nextevent /aborted /regex] def |]
 end def end def
 
-/pawn 1 dict dup begin /all 1 dict dup begin |[
+/pawn 1 dict dup begin /all 2 dict dup begin |[
   /commands [
     /send 
     /mpiprobe /mpiiprobe /mpisend /mpirecv 
     /mpibarrier /mpibroadcast
     /mpirank /mpisize
-  ] def |]
+  ] def 
+  /errors 1 dict dup begin |[
+    /MPI_NOMSG (** No mpi message msg received -- internal) def |]
+  end def |]
 end def end def
 
-/dgen 1 dict dup begin |[
+/dgendict 1 dict dup begin |[
   /parents [/common /quitable] def |]
 end def
 
-/dvt 1 dict dup begin |[
-  /parents [/common /net /x /terminal /quitable] def |]
+/dvtdict 1 dict dup begin |[
+  /parents [/common /net /socketevents /x /terminal /quitable] def |]
 end def
 
-/dnode 1 dict dup begin |[
-  /parents [/common /net /node /x /xnode /master /regex /plugins] def |]
+/dnodedict 1 dict dup begin |[
+  /parents [
+    /common /net  /socketevents /node /x /xnode /master /regex /plugins
+  ] def |]
 end def
 
-/dpawn 1 dict dup begin |[
+/dpawndict 1 dict dup begin |[
   /parents [/common /node /pawn /regex /plugins /quitable] def |]
 end def
 

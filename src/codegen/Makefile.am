@@ -1,5 +1,22 @@
-dist_noinst_DATA = dmnuminc.d dsp1f.d dsp2def.d
-dist_noinst_SCRIPTS = dgen-build
+PRODSRCS = $(srcdir)/dmnuminc.h.built \
+	$(srcdir)/dsp1f.h.built \
+	$(srcdir)/dsp2def.h.built \
+	$(srcdir)/dgen_0.h.built \
+	$(srcdir)/dnode_0.h.built \
+	$(srcdir)/dvt_0.h.built \
+	$(srcdir)/dpawn_0.h.built \
+	$(srcdir)/errors.d
+
+MAINTAINERCLEANFILES = $(PRODSRCS) \
+	$(srcdir)/dcoder.h \
+	$(srcdir)/startup_dgen.d
+
+dist_noinst_DATA = $(srcdir)/dmnuminc.d \
+	$(srcdir)/dsp1f.d \
+	$(srcdir)/dsp2def.d \
+	$(srcdir)/ops.d \
+	$(MAINTAINERCLEANFILES)
+dist_noinst_SCRIPTS = $(srcdir)/dgen-build
 
 AM_CFLAGS = $(GCC_CFLAGS)
 AM_CPPFLAGS = \
@@ -8,20 +25,14 @@ AM_CPPFLAGS = \
 	-I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 AM_LDFLAGS = -no-undefined
 INCLUDE = @INCLTDL@
-MAINTAINERCLEANFILES = *.built
 BUILT_SOURCES = paths.h
 CLEANFILES = $(BUILT_SOURCES)
 DISTCLEANFILES = dm-config.h
 
 noinst_LTLIBRARIES = libdmbootstrap.la
-noinst_PROGRAMS = dgen
-
-PRODSRCS = dmnuminc.h.built dsp1f.h.built dsp2def.h.built \
-	dgen_0.h.built dnode_0.h.built dvt_0.h.built dpawn_0.h.built
+noinst_PROGRAMS = dgen dcoder
 
 EXTRA_DIST = dmnuminc.d.in paths.h.in dsp2def.d.in
-
-gencode: all $(PRODSRCS)
 
 libdmbootstrap_la_SOURCES = dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h \
 	dmglobals.c dm1.c dm2.c dm-conv.c dm-swapbytes.h \
@@ -31,21 +42,25 @@ dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h dm3.c
 dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dgen_LDADD = libdmbootstrap.la
 
-dsp2def.h.built: dsp2def.d dgen dgen-build
+dcoder_SOURCES = dcoder.c dcoder.h
+dcoder_CPPFLAGS = -I"$(top_srcdir)/src" -I"$(top_builddir)/src" \
+	-DDM_HAVE_CONFIG_H
+
+$(srcdir)/dsp2def.h.built: dsp2def.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dsp2def.d" "$@" 
 	(cd "$(srcdir)/.." ; \
 	 rm dsp2def.h ; \
 	 $(LN_S) codegen/dsp2def.h.built dsp2def.h)
 
-dmnuminc.h.built: dmnuminc.d dgen dgen-build
+$(srcdir)/dmnuminc.h.built: dmnuminc.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dmnuminc.d" "$@" 
 	(cd "$(srcdir)/.." ; \
 	 rm dmnuminc.h ; \
 	 $(LN_S) codegen/dmnuminc.h.built dmnuminc.h)
 
-dsp1f.h.built: dsp1f.d dgen dgen-build
+$(srcdir)/dsp1f.h.built: dsp1f.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dsp1f.d" "$@"
 	(cd "$(srcdir)/.." ; \
@@ -54,17 +69,28 @@ dsp1f.h.built: dsp1f.d dgen dgen-build
 
 edit = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
-	-e 's,[@]dmstartdir[@],.,g' \
+	-e 's,[@]dmstartdir[@],$(srcdir),g' \
 	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
-	-e 's,[@]dmconfdir[@],$(dmconfdir),g'
+	-e 's,[@]dmconfdir[@],$(dmconfdir),g' \
+	-e 's,[@]ROLLBITS[@],$(ROLLBITS),g' \
+	-e 's,[@]BYTECORRECT[@],$(BYTECORRECT),g'
 
 paths.h: paths.h.in Makefile
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/paths.h.in >$@.tmp
 	mv $@.tmp $@
 
+dmnuminc.d: dmnuminc.d.in Makefile
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/dmnuminc.d.in >$@.tmp
+	mv $@.tmp $@
 
-dgen_0.h.built: ops.d dgen dgen-build
+dsp2def.d: dsp2def.d.in Makefile
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/dsp2def.d.in >$@.tmp
+	mv $@.tmp $@
+
+$(srcdir)/dgen_0.h.built: ops.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
 		"$@" "/dgen"
@@ -72,7 +98,7 @@ dgen_0.h.built: ops.d dgen dgen-build
 	rm dgen_0.h ; \
 	$(LN_S) codegen/dgen_0.h.built dgen_0.h)
 
-dvt_0.h.built: ops.d dgen dgen-build
+$(srcdir)/dvt_0.h.built: ops.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
 		"$@" "/dvt"
@@ -80,7 +106,7 @@ dvt_0.h.built: ops.d dgen dgen-build
 	rm dvt_0.h ; \
 	$(LN_S) codegen/dvt_0.h.built dvt_0.h)
 
-dnode_0.h.built: ops.d dgen dgen-build
+$(srcdir)/dnode_0.h.built: ops.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
 		"$@" "/dnode"
@@ -88,10 +114,48 @@ dnode_0.h.built: ops.d dgen dgen-build
 	rm dnode_0.h ; \
 	$(LN_S) codegen/dnode_0.h.built dnode_0.h)
 
-dpawn_0.h.built: ops.d dgen dgen-build
+$(srcdir)/dpawn_0.h.built: ops.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
 		"$@" "/dpawn"
 	(cd "$(srcdir)/.." ; \
 	rm dpawn_0.h ; \
 	$(LN_S) codegen/dpawn_0.h.built dpawn_0.h)
+
+$(srcdir)/dcoder.h: ops.d dgen dgen-build
+	"$(srcdir)/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
+		"$@" "/dcoder"
+
+$(srcdir)/errors.d: dcoder
+	"$(top_builddir)/src/codegen/dcoder" "$(srcdir)/errors.d"
+	(cd "$(srcdir)/../../dcode" ; \
+	rm errors.d ; \
+	$(LN_S) ../src/codegen/errors.d errors.d)
+
+distdir:
+	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
+	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
+	list='$(DISTFILES)'; \
+	  dist_files=`for file in $$list; do echo $$file; done | \
+	  sed -e "s|^$$srcdirstrip/||;t" \
+	      -e "s|^$$topsrcdirstrip/|$(top_builddir)/|;t"`; \
+	case $$dist_files in \
+	  */*) $(MKDIR_P) `echo "$$dist_files" | \
+			   sed '/\//!d;s|^|$(distdir)/|;s,/[^/]*$$,,' | \
+			   sort -u` ;; \
+	esac; \
+	for file in $$dist_files; do \
+	  if test -f $$file || test -d $$file; then d=.; else d=$(srcdir); fi; \
+	  if test -d $$d/$$file; then \
+	    dir=`echo "/$$file" | sed -e 's,/[^/]*$$,,'`; \
+	    if test -d $(srcdir)/$$file && test $$d != $(srcdir); then \
+	      cp -pR $(srcdir)/$$file $(distdir)$$dir || exit 1; \
+	    fi; \
+	    cp -pR $$d/$$file $(distdir)$$dir || exit 1; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || cp -p $$d/$$file $(distdir)/$$file \
+	    || exit 1; \
+	  fi; \
+	done

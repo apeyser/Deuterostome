@@ -83,15 +83,33 @@ P nocloseonexec(P socket) {
 #if X_DISPLAY_MISSING
 
 P nextXevent(void) {return OK;}
-#define moreX() (0)
+BOOLEAN moreX(void) {return FALSE;}
 
 #else // if ! X_DISPLAY_MISSING
 
 #include "dmx.h"
 #include "xhack.h"
 
-DM_INLINE_STATIC BOOLEAN moreX(void) {
+BOOLEAN moreX(void) {
   return dvtdisplay && HXPending(dvtdisplay);
+}
+
+static Bool checkXmatch(Display* d __attribute__ ((__unused__)), 
+			XEvent* e, XPointer a) {
+  XEvent* ep = (XEvent*) a;
+  return (e->xany.window == ep->xany.window) && (e->type == ep->type);
+}
+
+static Bool checkXmatch_client(Display* d, XEvent* e, XPointer a) {
+  XEvent* ep = (XEvent*) a;
+  return checkXmatch(d, e, a)
+    && ((Atom) e->xclient.message_type == (Atom) ep->xclient.message_type)
+    && ((Atom) e->xclient.data.l[0] == (Atom) ep->xclient.data.l[0]);
+}
+
+DM_INLINE_STATIC void findLastXEvent(XEvent* e, 
+				Bool (*p)(Display* d, XEvent* e, XPointer a)) {
+  while (HXCheckIfEvent(dvtdisplay, e, p, (XPointer) e));
 }
 
 // ---------- nextXevent ---------------------------
@@ -115,9 +133,11 @@ P nextXevent(void) {
 	  != HXInternAtom(dvtdisplay, "WM_PROTOCOLS", False))
 	return OK;
 
+      findLastXEvent(&event, checkXmatch_client);
+
       if ((Atom) event.xclient.data.l[0] 
 	  == HXInternAtom(dvtdisplay, "WM_DELETE_WINDOW", False))
-	return wm_delete_window(&event, userdict); 
+	return wm_delete_window(&event, userdict);
 
       if ((Atom) event.xclient.data.l[0]
 	  == HXInternAtom(dvtdisplay, "WM_TAKE_FOCUS", False))
@@ -126,10 +146,12 @@ P nextXevent(void) {
       return OK;
 
     case ConfigureNotify:
+      findLastXEvent(&event, checkXmatch);
       return wm_configure_notify(&event, userdict);
 
     case Expose:
-      if (event.xexpose.count != 0) return OK;
+      findLastXEvent(&event, checkXmatch);
+      if (event.xexpose.count) return OK;
       return wm_expose(&event, userdict);
 
     case ButtonPress:
@@ -179,7 +201,7 @@ P wm_configure_notify_(XEvent* event, B* userdict) {
   makename(namestring, namef); 
   ATTR(namef) = ACTIVE;
         
-  if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
+  if (! (dictf = lookup(namef, userdict))) return UNDF;
   if (FREEdicts >= CEILdicts) return DICTS_OVF;
   if (x1 >= CEILexecs) return EXECS_OVF;
   if (o2 >= CEILopds) return OPDS_OVF;
@@ -290,7 +312,7 @@ P waitsocket(BOOLEAN ispending, fd_set* out_fds) {
   err_fds = sock_fds;
   
   if ((nact = select(maxsocket, &read_fds, NULL, &err_fds, 
-		     ispending || moreX() ? &zerosec : NULL)) == -1) {
+		     ispending ? &zerosec : NULL)) == -1) {
     if (errno == EINTR) return NEXTEVENT_NOEVENT;
     error(EXIT_FAILURE, -errno, "select");
   }
@@ -322,7 +344,7 @@ P waitsocket(BOOLEAN ispending, fd_set* out_fds) {
 // returns within secs seconds
 // uses SIGALRM internally
 
-// broken into readfd, writefd, and skipreadframefd:
+// broken into readfd, writefd:
 //   readfd -> read from fd n bytes into where
 //   writefd -> write to fd n bytes from where
 // The under score versions are for use in this modules,

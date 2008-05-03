@@ -170,6 +170,8 @@ B* _sysop[] =
   (B*) "rotate_blas", (B*) op_rotate_blas,
   (B*) "xerbla_test", (B*) op_xerbla_test,
 #endif //BUILD_ATLAS
+#ifdef HAVE_ATLAS
+#endif //HAVE_ATLAS
   (B*) "Xwindows", (B*) op_Xwindows,
   (B*) "Xdisplayname", (B*) op_Xdisplayname,
   (B*) "screensize", (B*) op_screensize,
@@ -254,6 +256,8 @@ P _syserrc[] = {
   BAD_ARR,
   CLOCK_ERR,
   LONG_OVF,
+  LOST_CONN,
+  NEXTEVENT_NOEVENT,
   LIB_LOAD,
   LIB_EXPORT,
   LIB_LINK,
@@ -268,6 +272,8 @@ P _syserrc[] = {
   FOLD_OPAQUE,
   NO_PLUGINS,
 #ifdef BUILD_ATLAS
+#endif //BUILD_ATLAS
+#ifdef HAVE_ATLAS
   MATRIX_UNDEF_CUT,
   MATRIX_ILLEGAL_CUT,
   MATRIX_UNDER_CUT,
@@ -276,7 +282,7 @@ P _syserrc[] = {
   MATRIX_PARAM_ERROR,
   MATRIX_INT_ERR,
   MATRIX_SINGULAR,
-#endif //BUILD_ATLAS
+#endif //HAVE_ATLAS
   NO_XWINDOWS,
   X_ERR,
   X_BADFONT,
@@ -348,6 +354,8 @@ B* _syserrm[] = {
   (B*) "** dmnuminc debug error",
   (B*) "** Error accessing clock",
   (B*) "** 64 bit integer overflow on load into 32 bit machine",
+  (B*) "** Lost connection",
+  (B*) "** no socket events -- internal",
   (B*) "** Unable to load dynamically linked library",
   (B*) "** Unable to find object in shared library",
   (B*) "** Library has not been loaded",
@@ -362,6 +370,8 @@ B* _syserrm[] = {
   (B*) "** Illegal attempt to fold opaque object",
   (B*) "** Compiled without plugin support",
 #ifdef BUILD_ATLAS
+#endif //BUILD_ATLAS
+#ifdef HAVE_ATLAS
   (B*) "Matrix Error: undefined value in cut",
   (B*) "Matrix Error: cut dimension less than 1",
   (B*) "Matrix Error: number of cut dimensions too small",
@@ -370,7 +380,7 @@ B* _syserrm[] = {
   (B*) "Matrix Error: parameters to clapack illegal",
   (B*) "Matrix Error: Internal Error - message on stack",
   (B*) "Matrix Error: lu matrix is singular",
-#endif //BUILD_ATLAS
+#endif //HAVE_ATLAS
   (B*) "** X windows unavailable",
   (B*) "** Error in X windows",
   (B*) "** Bad X windows font",

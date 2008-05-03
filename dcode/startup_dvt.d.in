@@ -25,7 +25,6 @@
     ~[exch 3 -1 roll 1 ~index 0 ~put] bind
 } bind def
 
-
 |------------------------ low-level information -------------------------
 | For debugging and quick information about objects, stacks, and system
 | resources use:
@@ -79,7 +78,7 @@ end mkread def
    /listclass  { { _ pop } forall } bind def
    /dictclass  { { exch
                    line 0
-                   -16 4 -1 roll text 
+                   -@NAMEBYTES@ 4 -1 roll text 
                    0 exch getinterval toconsole showobj pop
                  } forall
                } bind def 
@@ -2414,6 +2413,8 @@ Xwindows {
 (Starting...\n) toconsole
 (Home: ) toconsole gethomedir toconsole (\n) toconsole
 (Startup: ) toconsole getstartupdir toconsole (\n) toconsole
+
+getstartupdir (errors.d) fromfiles
 
 | Read ~/.dvt, if it exists    
 {

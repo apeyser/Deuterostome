@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-#define NO_PLUGINS PLUGIN_ERRS
+#define NO_PLUGINS (PLUGIN_ERRS+0)
 
 DLL_SCOPE void initialize_plugins(void);
 DLL_SCOPE void closealllibs(void);

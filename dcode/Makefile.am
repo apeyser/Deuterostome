@@ -1,4 +1,4 @@
-dist_dmstart_DATA = color.d master.d sched.d plugin.d
+dist_dmstart_DATA = color.d master.d sched.d plugin.d errors.d
 nodist_dmstart_DATA =  theeye.d startup_dnode.d startup_dpawn.d \
 	startup_dvt.d startup_dgen.d dvt_macros.d matrix.d
 dist_dmconf_DATA = dvt.d
@@ -6,7 +6,7 @@ nodist_dmconf_DATA = dnode.d
 
 EXTRA_DIST = theeye.d.in dnode.d.in dvt_macros.d.in \
 	startup_dvt.d.in startup_dnode.d.in startup_dpawn.d.in \
-	matrix.d.in
+	matrix.d.in startup_dgen.d.in
 
 CLEANFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
 
@@ -96,6 +96,7 @@ endif !ENABLE_RTHREADS
 
 edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
+			-e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
 			$(PLUGINS_DELETE) \
 			$(PLUGINS_SUPPORT_DELETE) \
 			$(THREADS_EDIT) \

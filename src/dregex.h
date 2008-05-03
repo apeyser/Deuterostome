@@ -1,10 +1,6 @@
 #ifndef DREGEX_H
 #define DREGEX_H
 
-#if DM_ENABLE_REGEX
-P op_regex(void);
-P op_regexi(void);
-
 #define REGEX_BADPAT   (REGEX_ERRS+0) /* Invalid regular expression */
 #define REGEX_ECOLLATE (REGEX_ERRS+1) /* Invalid collating element */
 #define REGEX_ECTYPE   (REGEX_ERRS+2) /* Invalid character class */
@@ -18,6 +14,11 @@ P op_regexi(void);
 #define REGEX_ESPACE   (REGEX_ERRS+10) /* ran out of memory */
 #define REGEX_BADRPT   (REGEX_ERRS+11) /* `?', `*', or `+' operand invalid */
 #define REGEX_UNKNOWN  (REGEX_ERRS+12) /* Unknown error */
+
+#if DM_ENABLE_REGEX
+
+P op_regex(void);
+P op_regexi(void);
 
 #endif //DM_ENABLE_REGEX
 
