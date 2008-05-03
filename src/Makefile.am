@@ -1,5 +1,14 @@
 DIST_SUBDIRS = codegen
 
+all-local:
+	cd codegen && $(MAKE) $(AM_MAKEFLAGS) dgen
+
+clean-local:
+	cd codegen && $(MAKE) $(AM_MAKEFLAGS) clean
+
+distclean-local:
+	cd codegen && $(MAKE) $(AM_MAKEFLAGS) distclean
+
 dpawn = $(bindir)/dpawn
 drook = $(bindir)/drook
 

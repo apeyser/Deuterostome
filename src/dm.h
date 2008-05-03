@@ -684,6 +684,7 @@ DLL_SCOPE P op_mattranspose(void);
 DLL_SCOPE P op_dilute_add(void);
 DLL_SCOPE P op_matvecmul(void);
 
+#define DVTSTRINGBUFSIZE 8192
 #define ERRLEN (1000)
 
 #include "error-local.h"

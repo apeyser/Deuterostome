@@ -51,7 +51,7 @@ DM_INLINE_STATIC P fromconsole(void)
 
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
-  if (ARRAY_SIZE(o_1) < 8192) return RNG_CHK;
+  if (ARRAY_SIZE(o_1) < DVTSTRINGBUFSIZE) return RNG_CHK;
 
   nsbuf = ARRAY_SIZE(o_1);
   sbuf = (B *)VALUE_BASE(o_1);
@@ -275,7 +275,7 @@ P op_nextevent(void)
   B bufferf[FRAMEBYTES];
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
-  if (ARRAY_SIZE(o_1) < 8192) return RNG_CHK;
+  if (ARRAY_SIZE(o_1) < DVTSTRINGBUFSIZE) return RNG_CHK;
   
   moveframe(o_1, bufferf);
   FREEopds = o_1;

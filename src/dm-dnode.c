@@ -530,7 +530,7 @@ P op_toconsole(void)
     if ((FREEvm + ARRAY_SIZE(o_1) + 25) > CEILvm) return VM_OVF;
     p_ = VALUE_PTR(o_1);
     do {
-      B* max = FREEvm + 8192 - 20;
+      B* max = FREEvm + DVTSTRINGBUFSIZE - 20;
       if (max > CEILvm) max = CEILvm;
 
       p = FREEvm; 
