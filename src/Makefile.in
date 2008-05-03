@@ -437,25 +437,6 @@ edit = sed \
 	-e 's,[@]dpawn[@],$(dpawn),g' \
 	-e 's,[@]drook[@],$(drook),g'
 
-
-# dist-hook:
-# 	list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
-# 	  if test "$$subdir" = .; then :; else \
-# 	    test -d "$(distdir)/$$subdir" \
-# 	    || $(MKDIR_P) "$(distdir)/$$subdir" \
-# 	    || exit 1; \
-# 	    distdir=`$(am__cd) $(distdir) && pwd`; \
-# 	    top_distdir=`$(am__cd) $(top_distdir) && pwd`; \
-# 	    (cd $$subdir && \
-# 	      $(MAKE) $(AM_MAKEFLAGS) \
-# 	        top_distdir="$$top_distdir" \
-# 	        distdir="$$distdir/$$subdir" \
-# 		am__remove_distdir=: \
-# 		am__skip_length_check=: \
-# 	        justdistdir) \
-# 	      || exit 1; \
-# 	  fi; \
-# 	done
 @ENABLE_SETUID_TRUE@nodist_dnode_nice_SOURCES = dnode-nice.c
 @ENABLE_SETUID_TRUE@DNODENICEBIN = dnode-nice
 @ENABLE_DAEMON_TRUE@nodist_dnode_daemon_SOURCES = dnode-daemon.c
@@ -1496,7 +1477,7 @@ check-am: all-am
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-recursive
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(SCRIPTS) $(DATA) \
-		$(HEADERS)
+		$(HEADERS) all-local
 install-binPROGRAMS: install-libLTLIBRARIES
 
 installdirs: installdirs-recursive
@@ -1537,7 +1518,7 @@ maintainer-clean-generic:
 clean: clean-recursive
 
 clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
-	clean-libtool clean-noinstPROGRAMS mostlyclean-am
+	clean-libtool clean-local clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -rf ./$(DEPDIR)
@@ -1603,8 +1584,8 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_pkgdataSCRIPTS \
 	install-strip
 
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
-	all all-am check check-am clean clean-binPROGRAMS \
-	clean-generic clean-libLTLIBRARIES clean-libtool \
+	all all-am all-local check check-am clean clean-binPROGRAMS \
+	clean-generic clean-libLTLIBRARIES clean-libtool clean-local \
 	clean-noinstPROGRAMS ctags ctags-recursive distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
@@ -1625,6 +1606,13 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_pkgdataSCRIPTS \
 	uninstall-local uninstall-nodist_pkgconfiglibDATA \
 	uninstall-nodist_pkgincludeHEADERS uninstall-pkgincludeHEADERS
 
+
+all-local:
+	cd codegen && $(MAKE) $(AM_MAKEFLAGS) dgen
+
+clean-local:
+	! test -e codegen/Makefile \
+	|| (cd codegen && $(MAKE) $(AM_MAKEFLAGS) clean)
 
 @ENABLE_SETUID_TRUE@install-exec-local:
 @ENABLE_SETUID_TRUE@	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
