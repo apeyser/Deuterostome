@@ -47,7 +47,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = d-mode.el
+CONFIG_CLEAN_FILES = d-mode.el d-mode-ops.el
 SOURCES =
 DIST_SOURCES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -60,7 +60,8 @@ am__installdirs = "$(DESTDIR)$(pkglispdir)" "$(DESTDIR)$(pkglispdir)"
 dist_pkglispLISP_INSTALL = $(INSTALL_DATA)
 nodist_pkglispLISP_INSTALL = $(INSTALL_DATA)
 LISP = $(dist_pkglisp_LISP) $(nodist_pkglisp_LISP)
-am__ELFILES = d-comint-mode.el d-mode.el dm-server.el init.el
+am__ELFILES = d-comint-mode.el d-mode-ops.el d-mode.el dm-server.el \
+	init.el
 am__ELCFILES = $(am__ELFILES:.el=.elc)
 ELCFILES = $(LISP:.el=.elc)
 elisp_comp = $(top_srcdir)/elisp-comp
@@ -283,7 +284,7 @@ tmp = @tmp@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 dist_pkglisp_LISP = dm-server.el
-nodist_pkglisp_LISP = d-comint-mode.el d-mode.el init.el
+nodist_pkglisp_LISP = d-comint-mode.el d-mode.el init.el d-mode-ops.el
 EXTRA_DIST = d-comint-mode.el.in init.el.in d-mode.el.in
 CLEANFILES = $(nodist_pkglisp_LISP)
 edit = sed \

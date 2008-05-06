@@ -8,6 +8,8 @@
 #include <errno.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <mpi.h>
+#include <string.h>
 
 #include "dm.h"
 #include "error-local.h"
@@ -162,32 +164,81 @@ void rthreads_init(void) {
 }
 
 ///////////////////// makerthreads
-// n>0 | socket
-//  0  | --
+// [n1 dict1 n2 dict2..] | socket
+//  null  | --
 //
 // Kills any current threads, then creates n mpi threads.
-// If n = 0, just kills current threads.
-// If n > 0, return a socket to broadcast to threads
+// If null is passed, just kills current threads.
+// If [dict..], return a socket to broadcast to threads,
+//  where each dict defines an MPI_Info for one thread
 // registers the socket as a listener for next-event.
 P op_makerthreads(void) {
   UL32 mpin_, ok;
-  P _mpin_;
   int sockets[2];
   int rookfd;
   P r = OK;
-  
 
   if (o_1 < FLOORopds) return OPDS_UNF;
-  if (CLASS(o_1) != NUM) return OPD_CLA;
-  if (! PVALUE(o_1, &_mpin_)) return UNDF_VAL;
-  if ((_mpin_ > L32MAX) || (_mpin_ < -L32MAX)) return RNG_CHK;
-  mpin_ = (UL32) _mpin_;
-
   if ((r = killrthreads())) return r;
-  if (! mpin_) {
-    FREEopds = o_1;
-    return OK;
-  }
+  
+  switch (TAG(o_1)) {
+    case NULLOBJ:
+      FREEopds = o_1;
+      return OK;
+    case LIST: break;
+    default: return OPD_CLA;
+  };
+  if (ATTR(o_1) & ACTIVE) return OPD_ATR;
+
+  do {
+    B* oldfreevm = FREEvm;
+    static B dlistf[FRAMEBYTES];
+    B* dlist;
+    P frames = (LIST_CEIL_PTR(o_1)-VALUE_PTR(o_1))/FRAMEBYTES;
+
+    if (! frames || (frames % 2)) return RNG_CHK;
+    mpin_ = 0;
+    
+    for (dlist = VALUE_PTR(o_1);
+	 dlist < LIST_CEIL_PTR(o_1); 
+	 dlist += 2*FRAMEBYTES) {
+      B* e;
+      B* dict;
+      P n;
+      if (CLASS(dlist) != NUM) return RTHREADS_NUMTYPE;
+      if (! PVALUE(dlist, &n)) return RTHREADS_NUMUNDF;
+      if (n <= 0 || n >= L32MAX) return RTHREADS_NUMRNG;
+      mpin_ += n;
+      
+      if (TAG(dlist+FRAMEBYTES) != DICT) return RTHREADS_DICTTYPE;
+      dict = VALUE_PTR(dlist+FRAMEBYTES);
+      for (e = (B*)DICT_ENTRIES(dict); 
+	   e < (B*)DICT_FREE(dict); 
+	   e += ENTRYBYTES) {
+	static B name[NAMEBYTES+1];
+	B* namef = ASSOC_NAME(e);
+	B* valf = ASSOC_FRAME(e);
+	if (TAG(valf) != (ARRAY|BYTETYPE)) return RTHREADS_VALTYPE;
+	if (ATTR(valf) & ACTIVE) return RTHREADS_VALATR;
+	if (ARRAY_SIZE(valf) >= MPI_MAX_INFO_VAL) return RTHREADS_VALSIZE;
+	if (! ARRAY_SIZE(valf)) return RTHREADS_VALEMPTY;
+	pullname(namef, name);
+	if (strlen(name) >= MPI_MAX_INFO_KEY) return RTHREADS_KEYSIZE;
+      }
+    }
+
+    TAG(FREEvm) = BOX;
+    ATTR(FREEvm) = 0;
+    VALUE_PTR(FREEvm) = NULL;
+    FREEvm += FRAMEBYTES;
+    moveframe(o_1, dlistf);
+    if ((r = foldobj(dlistf))) {
+      FREEvm = oldfreevm;
+      return r;
+    }
+    BOX_NB(oldfreevm) = FREEvm - oldfreevm - FRAMEBYTES*2;
+    FREEvm = oldfreevm;
+  } while (0);
 
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets))
     return -errno;
@@ -233,7 +284,9 @@ P op_makerthreads(void) {
     return r;
   }
 
-  if ((r = writefd(socketfd, (B*) &mpin_, sizeof(mpin_), SOCKET_TIMEOUT))
+  if ((r = writefd(socketfd, FREEvm, FRAMEBYTES*2, SOCKET_TIMEOUT))
+      || (r = writefd(socketfd, FREEvm+FRAMEBYTES*2, BOX_NB(FREEvm), 
+		      SOCKET_TIMEOUT))
       || (r = readfd(socketfd, (B*) &ok, sizeof(ok), SOCKET_TIMEOUT))) {
     killrthreads();
     return r;

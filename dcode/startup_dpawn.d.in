@@ -367,7 +367,7 @@ end def  | of xtext_dict
 
 /dnoderespond {
   save
-  ~[~[mpirank ~mpidata ~begin ~makeready_dpawn] ~lock] send
+  ~[~[mpirank ~mpidata ~begin ~makeready_dpawn] ~lock] rsend
   restore
 } bind def
 

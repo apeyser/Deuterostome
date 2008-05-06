@@ -413,6 +413,7 @@ end def  | of xtext_dict
 
   /winmade false def
   /pbuf 80 /b array def
+  /mpiinfo [] def
   
   /updatet {
     winmade {{currentdict begin drawwindow} stopped pop} {
@@ -454,7 +455,7 @@ end def  | of xtext_dict
   } bind def
 
   /kill {
-    {0 makerthreads} stopped
+    {null makerthreads} stopped
     {winmade ~deletewin if} stopped pop
     currentdict /save_ known {save_ restore} if
     -1 setcurrent
@@ -488,19 +489,19 @@ end def  | of xtext_dict
       kpawn 0 eq ~BG {
         pawnbusy kpawn 1 sub get ~HBG ~BG ifelse
       } ifelse fillrectangle
-      wid nodelocs kpawn get exec
-      pbuf 0 * kpawn 0 eq {(-) text} {kpawn 1 sub * number} ifelse 
-      0 exch getinterval
 
-      cpawn dup * eq kpawn 0 ne and 
-      exch kpawn 1 sub eq or ~HIGHTEXT ~NORMALTEXT ifelse
+      wid 
+      nodelocs kpawn get exec      
+      nodenames kpawn get
+      cpawn dup * eq kpawn 0 ne and exch kpawn 1 sub eq or 
+      ~HIGHTEXT ~NORMALTEXT ifelse
       drawtext pop pop pop
     } bind def
 
     /actions 3 dict dup begin | [
       /click {kpawn 1 sub setcurrent} bind def
       /cancel {kpawn 0 ne {kpawn 1 sub makeready} if} bind def
-      /group {* setcurrent} bind def
+      /group {* setcurrent} bind def |]
     end def
 
     /mouseclick {
@@ -530,7 +531,7 @@ end def  | of xtext_dict
     
         screensize /scrH name /scrW name
         
-        /wW 100 2 add def
+        /wW 200 2 add def
         /wH mpidata /pawns get 1 add 13 mul 2 add def
         
         /woutline [ 0 0 wW 1 sub 0 wW 1 sub wH 1 sub 0 wH 1 sub 0 0 ] def
@@ -548,6 +549,21 @@ end def  | of xtext_dict
           /x 5 def
           12 13 mpidata /pawns get 1 add 1 sub 13 mul 12 add { /y name
             ~[x y 6 sub]
+          } for
+        ] def
+
+        /nodenames [
+          255 /b array 0 dvtnodeid fax (:) fax * getmyport * number 
+          0 exch getinterval
+
+          /i 0 def
+          0 2 mpiinfo length 1 sub {/j name
+            mpiinfo j get {
+              255 /b array 0 * i * number ( ) fax
+              mpiinfo j 1 add get dup /host known {/host get fax} {pop} ifelse
+              0 exch getinterval
+              /i i 1 add def
+            } repeat
           } for
         ] def
 
@@ -572,7 +588,68 @@ end def  | of xtext_dict
     } bind def
 
     /delete_window {{deletewin} stopped end {stop} if} bind def
-  } if |]
+  } if
+
+  | [[n /key val ...]...] | --
+  /rthreads_multi_ {
+    [exch {
+      dup 0 get 1 index length 1 sub 2 div dict dup begin | [n /k v] n dict 
+      3 -1 roll 1 1 index length 1 sub getinterval  | n dict [/k v..]
+      0 2 2 index length 1 sub { | n dict [/k v..] i
+        2 copy get 3 1 roll      | n dict /k [/k v..] i
+        2 copy 1 add get         | n dict /k [/k v..] i v 
+        3 1 roll pop 3 1 roll    | n dict [/k v..] /k v 
+        def                      | n dict [/k v..]
+      } for pop end
+    } forall] /mpiinfo name
+  } bind def
+
+
+  | [n1 (host1) n2 (host2)... ] | --
+  /rthreads_hosts_ {
+    [exch
+      0 2 2 index length 1 sub {
+        [
+          2 index 2 index get
+          3 index 3 index 1 add get
+          1 dict exch 1 index /host put
+        ] 3 1 roll pop
+      } for pop
+    ] rthreads_multi_
+  } bind def
+
+  | n | --
+  /rthreads_single_ {
+    [exch 0 dict] /mpiinfo name
+  } bind def
+
+  | ~info-dict-setup | --
+  /rthreads_start {
+    {
+      pawns 0 gt {(** Rthreads already exist!\n) toconsole_ halt} if
+      save /save_ name {
+        exec
+        0 0 2 mpiinfo length 1 sub {mpiinfo exch get add} for /pawns name
+        /pawnbusy [pawns {true} repeat] def
+        mpiinfo makerthreads /socket name
+        -1 setcurrent
+        currentdict /newwin known ~newwin if
+        
+        socket ~[mpisize {exch pop vmresize} ~lock] send
+        socket {
+          {
+            exch not {abort} if
+            /fbuf vmstatus sub 10 div /b array def
+            dup capsave
+            getstartupdir (startup_dpawn.d) fbuf readfile mkact exec
+            dnoderespond
+            restore
+          } lock
+        } send
+        save_ capsave
+      } stopped {kill stop} if
+    } lock
+  } bind def |]
 end def
 
 /rthread_ops {
@@ -595,33 +672,25 @@ end def
   /mpisize mpidata get 5 put
 } bind def
 
+| [[n /key val ..]...] | --
+/rthreads_multi {
+  mpidata begin {
+    ~rthreads_multi_ rthreads_start
+  } stopped end {stop} if
+} bind def
+
 | n | --
-/rthreads_start {
-  {
-    mpidata begin {
-      pawns 0 gt {(** Rthreads already exist!\n) toconsole_ stop} if
-      save /save_ name {
-        dup makerthreads /socket name
-        dup /pawns name
-        [exch {true} repeat] /pawnbusy name
-        -1 setcurrent
-        currentdict /newwin known ~newwin if
-        
-        socket ~[mpisize {exch pop vmresize} ~lock] send
-        socket {
-          {
-            exch not {abort} if
-            /fbuf vmstatus sub 10 div /b array def
-            dup capsave
-            getstartupdir (startup_dpawn.d) fbuf readfile mkact exec
-            dnoderespond
-            restore
-          } lock
-        } send
-        save_ capsave
-      } stopped {kill stop} if
-    } stopped end {stop} if
-  } lock
+/rthreads_single {
+  mpidata begin {
+    ~rthreads_single_ rthreads_start
+  } stopped end {stop} if
+} bind def
+
+| [n1 (host1) n2 (host2)...]
+/rthreads_hosts {
+  mpidata begin {
+    ~rthreads_hosts_ rthreads_start
+  } stopped end {stop} if
 } bind def
 @ENABLE_RTHREADS_END@
 
@@ -644,8 +713,8 @@ end def
 | -- | --
 /rthreads_stop {
   mpidata begin {
-    checkrthreads {(** Rthreads not running!\n) toconsole_} {
-      pawns 0 eq {(** No rthreads to stop!\n) toconsole_ stop} if
+    checkrthreads not {(** Rthreads not running!\n) toconsole_ halt} {
+      pawns 0 eq {(** No rthreads to stop!\n) toconsole_ halt} if
       -1 checkbusy
       kill
     } ifelse

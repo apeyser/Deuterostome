@@ -88,7 +88,7 @@
   ] bind def
 } forall
 
-/e_produce {
+/derrors_produce {
   gdict {exch bifdef
     dup /errors known not {pop} {
       /errors get {pop
@@ -104,16 +104,38 @@
   (// DO NOT EDIT HERE!)__ nl nl
 
   (struct emap emap[] = {)__ nl
-  {
-    /common /regex /quitable /net /x /node 
-    /xnode /master /plugins /socketevents
-    /terminal /pawn
-  } {
+  alltypes {
     ops exch get /gdict name
-    e_produce
+    derrors_produce
   } forall
   (  {\(B*\) NULL, 0})__ nl
   (};)__ nl
+  
+  buffer 0 buffern getinterval path file writefile
+} bind def
+
+/demacs_produce {
+  gdict {exch pop
+    dup /commands known not {pop} {
+      /commands get {
+        (  ")__ __ (")__ nl
+      } forall
+    } ifelse
+  } forall
+} bind def
+
+/demacs {
+  (;; Automatically produced from src/codegen/ops.d)__ nl
+  (;; DO NOT EDIT HERE!)__ nl nl
+  
+  (\(provide 'd-mode-ops\))__ nl nl
+  (\(defconst d-mode-ops '\()__ nl
+  alltypes {
+    ops exch get /gdict name
+    demacs_produce
+  } forall
+  (  \))__ nl
+  ("Operator names for d-mode."\))__ nl
   
   buffer 0 buffern getinterval path file writefile
 } bind def
@@ -336,8 +358,17 @@ end def
     end def |]
   end def
   /DM_ENABLE_RTHREADS 2 dict dup begin  |[
-    /errors 1 dict dup begin |[
-      /RTHREADS_UNSET (** Rthreads are inactive) def |]
+    /errors 10 dict dup begin |[
+      /RTHREADS_UNSET (** Rthreads are inactive) def 
+      /RTHREADS_NUMTYPE (** Rthreads: nodes for dictionay not a numeral) def
+      /RTHREADS_NUMUNDF (** Rthreads: nodes for dictionary undefined) def
+      /RTHREADS_NUMRNG (** Rthreads: nodes for dictionary out of range) def
+      /RTHREADS_DICTTYPE (** Rthreads: illegal class for info dictionary) def
+      /RTHREADS_VALTYPE (** Rthreads: key/val pair: val not a string) def
+      /RTHREADS_VALSIZE (** Rthreads: key/val pair: val too long) def
+      /RTHREADS_VALEMPTY (** Rthreads: key/val pair: val empty) def
+      /RTHREADS_KEYSIZE (** Rthreads: key/val pair: key too long) def
+      /RTHREADS_VALATR (** Rthreads: key/val pair: val is active) def |]
     end def
     /commands [/rthreads /checkrthreads /makerthreads /rsend] def |]
   end def
@@ -362,7 +393,7 @@ end def end def
 
 /pawn 1 dict dup begin /all 2 dict dup begin |[
   /commands [
-    /send 
+    /rsend 
     /mpiprobe /mpiiprobe /mpisend /mpirecv 
     /mpibarrier /mpibroadcast
     /mpirank /mpisize
@@ -371,6 +402,12 @@ end def end def
     /MPI_NOMSG (** No mpi message msg received -- internal) def |]
   end def |]
 end def end def
+
+/alltypes [
+  /common /regex /quitable /net /x /node 
+  /xnode /master /plugins /socketevents
+  /terminal /pawn
+] def
 
 /dgendict 1 dict dup begin |[
   /parents [/common /quitable] def |]

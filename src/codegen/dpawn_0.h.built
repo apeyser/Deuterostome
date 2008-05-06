@@ -166,7 +166,7 @@ B* _sysop[] =
 #endif //BUILD_ATLAS
 #ifdef HAVE_ATLAS
 #endif //HAVE_ATLAS
-  (B*) "send", (B*) op_send,
+  (B*) "rsend", (B*) op_rsend,
   (B*) "mpiprobe", (B*) op_mpiprobe,
   (B*) "mpiiprobe", (B*) op_mpiiprobe,
   (B*) "mpisend", (B*) op_mpisend,

@@ -898,8 +898,8 @@ c_         list all connections
       node 6 put
       
       save
-      node 2 get ~[knode {
-        getsocket setconsole
+      node 2 get ~[node 0 get knode {
+        getsocket setconsole /dvtnodeid name
         console ~[3 -1 roll ~dvt ~begin ~_cc1] send
       } ~exec ~restore] send
       restore
@@ -939,8 +939,8 @@ c_         list all connections
         
         getdnodedisplay | needs to be outside of save box
         save
-        node 2 get ~[4 -1 roll knode fontdict mousedict {
-          getsocket setconsole 
+        node 2 get ~[4 -1 roll knode fontdict mousedict node 0 get {
+          getsocket setconsole /dvtnodeid name
           /mousedict name /fontdict name /knode name /getdnodedisplay name
           capsave
           
@@ -986,8 +986,8 @@ c_         list all connections
    
         getdnodedisplay 
         save
-        node 2 get ~[4 -1 roll knode fontdict mousedict {
-          getsocket setconsole
+        node 2 get ~[4 -1 roll knode fontdict mousedict node 0 get {
+          getsocket setconsole /dvtnodeid name
           /mousedict name /fontdict name /knode name /getdnodedisplay name
           capsave
 
@@ -1039,10 +1039,10 @@ c_         list all connections
 
       getdnodedisplay
       save
-      node 2 get ~[4 -1 roll Xwindows knode {
+      node 2 get ~[4 -1 roll Xwindows knode node 0 get {
         getsocket setconsole
-        5 -1 roll not {killsockets abort} if | bool from vmresize
-        /knode name 
+        6 -1 roll not {killsockets abort} if | bool from vmresize
+        /dvtnodeid name /knode name 
         Xwindows_ and /otherXwindows name 
         /getdnodedisplay name
         capsave
@@ -1119,7 +1119,8 @@ c_         list all connections
   /_csu2x {
     /knode name {
       nodelist knode get /node name
-      node 2 get ~[knode fontdict mousedict {
+      node 2 get ~[knode fontdict mousedict node 0 get {
+        /dvtnodeid name
         /mousedict name /fontdict name /knode name capsave
 
         /filesave save def

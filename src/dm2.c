@@ -810,70 +810,79 @@ static B** ceilmem = NULL;
 static B* vmalloc = NULL;
 DM_INLINE_STATIC P foldobj_int(B *frame, P base, W *depth);
 
-P foldobj(B *frame, P base, W *depth) 
+static P foldobj_(B *frame, P base, W *depth) 
 {
-		int retc;
-		
-		foldobj_free();
-		freemem = &FREEvm;
-		ceilmem = &CEILvm;
-		retc = foldobj_int(frame, base, depth);
-		foldobj_free();
+  int retc;
+  
+  foldobj_free();
+  freemem = &FREEvm;
+  ceilmem = &CEILvm;
+  retc = foldobj_int(frame, base, depth);
+  foldobj_free();
+  
+  return retc;
+}
 
-		return retc;
+P foldobj(B *frame) {
+  W depth = 0;
+  return foldobj_(frame, (P) FREEvm, &depth);
+}
+
+P transcribe(B *frame) {
+  W depth = 0;
+  return foldobj_(frame, 0, &depth);
 }
 
 P foldobj_ext(B* frame) 
 {
-		static B* freemem_ = NULL;
-		static B* ceilmem_ = NULL;
-		W depth = 0;
-		int retc;
-		static B frame_[FRAMEBYTES];
+  static B* freemem_ = NULL;
+  static B* ceilmem_ = NULL;
+  W depth = 0;
+  int retc;
+  static B frame_[FRAMEBYTES];
 
-		freemem_ = FREEvm;
-		moveframe(frame, frame_);		
-		if ((retc = foldobj(frame, (P)FREEvm, &depth)) != VM_OVF)
-				return retc;
+  freemem_ = FREEvm;
+  moveframe(frame, frame_);		
+  if ((retc = foldobj(frame)) != VM_OVF) return retc;
 
-		freemem = &freemem_;
-		ceilmem = &ceilmem_;
-		FREEvm = freemem_;
+  freemem = &freemem_;
+  ceilmem = &ceilmem_;
+  FREEvm = freemem_;
 
-		moveframe(frame_, frame);
-		depth = 0;
-		if (! (vmalloc = (B*) malloc((FREEvm - FLOORvm))))
-				return -errno;
+  moveframe(frame_, frame);
+  depth = 0;
+  if (! (vmalloc = (B*) malloc((FREEvm - FLOORvm))))
+    return -errno;
 		
-		freemem_ = vmalloc;
-		ceilmem_ = freemem_ + (FREEvm - FLOORvm);
-		if ((retc = foldobj_int(frame, (P)freemem_, &depth)) == OK)
-				return OK;
+  freemem_ = vmalloc;
+  ceilmem_ = freemem_ + (FREEvm - FLOORvm);
+  if ((retc = foldobj_int(frame, (P)freemem_, &depth)) == OK)
+    return OK;
 
-		foldobj_free();
-		if (retc != VM_OVF) return retc;
+  foldobj_free();
+  if (retc != VM_OVF) return retc;
 
-		moveframe(frame_, frame);
-		depth = 0;
-		if (! (vmalloc = (B*) malloc((CEILvm - FLOORvm))))
-				return -errno;
+  moveframe(frame_, frame);
+  depth = 0;
+  if (! (vmalloc = (B*) malloc((CEILvm - FLOORvm))))
+    return -errno;
 		
-		freemem_ = vmalloc;
-		ceilmem_ = freemem_ + (CEILvm - FLOORvm);
-		if ((retc = foldobj_int(frame, (P)freemem_, &depth)) == OK)
-				return OK;
+  freemem_ = vmalloc;
+  ceilmem_ = freemem_ + (CEILvm - FLOORvm);
+  if ((retc = foldobj_int(frame, (P)freemem_, &depth)) == OK)
+    return OK;
 
-		foldobj_free();
-		return retc;
+  foldobj_free();
+  return retc;
 }
 
 BOOLEAN foldobj_mem(B** base, B** top) 
 {
-		if (! vmalloc) return FALSE;
+  if (! vmalloc) return FALSE;
 
-		*base = vmalloc;
-		*top = *freemem;
-		return TRUE;
+  *base = vmalloc;
+  *top = *freemem;
+  return TRUE;
 }
 
 void foldobj_free(void) 
@@ -1227,8 +1236,7 @@ P tosource(B* rootf, BOOLEAN mksave, SourceFunc w1, SourceFunc w2) {
       // otherwise fall throught
 
     case LIST: case DICT: {
-      W d = 0;
-      retc = foldobj(rootf, (P) FREEvm, &d);
+      retc = foldobj(rootf);
     };
     break;
 

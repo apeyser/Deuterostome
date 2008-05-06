@@ -920,7 +920,6 @@ P op_findfile(void)
 P op_transcribe(void)
 {
   P retc; 
-  W depth;
   B *p;
 
   if (o_1 < FLOORopds) return OPDS_UNF;
@@ -929,10 +928,10 @@ P op_transcribe(void)
         || (CLASS(o_1) == DICT)))
     return OPD_ERR;
 
-  p = FREEvm; depth = 0;
-  if ((retc = foldobj(o_1,0L ,&depth)) != OK) {FREEvm = p; return retc;}
+  p = FREEvm;
+  if ((retc = transcribe(o_1)) != OK) {FREEvm = p; return retc;}
 
-  moveframe(p,o_1);
+  moveframe(p, o_1);
   return OK;
 }
 

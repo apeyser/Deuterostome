@@ -17,7 +17,7 @@ DLL_SCOPE P op_mpisend(void);
 DLL_SCOPE P op_mpirecv(void);
 DLL_SCOPE P op_mpibroadcast(void);
 DLL_SCOPE P op_mpibarrier(void);
-DLL_SCOPE P op_send(void);
+DLL_SCOPE P op_rsend(void);
 DLL_SCOPE P op_mpirank(void);
 DLL_SCOPE P op_mpisize(void);
 

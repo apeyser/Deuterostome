@@ -294,6 +294,15 @@ P _syserrc[] = {
   DEAD_SOCKET,
 #ifdef DM_ENABLE_RTHREADS
   RTHREADS_UNSET,
+  RTHREADS_NUMTYPE,
+  RTHREADS_NUMUNDF,
+  RTHREADS_NUMRNG,
+  RTHREADS_DICTTYPE,
+  RTHREADS_VALTYPE,
+  RTHREADS_VALSIZE,
+  RTHREADS_VALEMPTY,
+  RTHREADS_KEYSIZE,
+  RTHREADS_VALATR,
 #endif //DM_ENABLE_RTHREADS
 #ifdef DM_HOST_IS_32_BIT
 #endif //DM_HOST_IS_32_BIT
@@ -392,6 +401,15 @@ B* _syserrm[] = {
   (B*) "** Dead socket",
 #ifdef DM_ENABLE_RTHREADS
   (B*) "** Rthreads are inactive",
+  (B*) "** Rthreads: nodes for dictionay not a numeral",
+  (B*) "** Rthreads: nodes for dictionary undefined",
+  (B*) "** Rthreads: nodes for dictionary out of range",
+  (B*) "** Rthreads: illegal class for info dictionary",
+  (B*) "** Rthreads: key/val pair: val not a string",
+  (B*) "** Rthreads: key/val pair: val too long",
+  (B*) "** Rthreads: key/val pair: val empty",
+  (B*) "** Rthreads: key/val pair: key too long",
+  (B*) "** Rthreads: key/val pair: val is active",
 #endif //DM_ENABLE_RTHREADS
 #ifdef DM_HOST_IS_32_BIT
 #endif //DM_HOST_IS_32_BIT

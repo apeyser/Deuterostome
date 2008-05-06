@@ -105,7 +105,7 @@ P op_mpibarrier(void) {
   return mpibarrier(getworldcomm());
 }
 
-P op_send(void) {
+P op_rsend(void) {
   static B xrootf[FRAMEBYTES];
   if (o_1 < FLOORopds) return OPDS_UNF;
   moveframe(o_1, xrootf);

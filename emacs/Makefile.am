@@ -1,5 +1,5 @@
 dist_pkglisp_LISP = dm-server.el
-nodist_pkglisp_LISP = d-comint-mode.el d-mode.el init.el
+nodist_pkglisp_LISP = d-comint-mode.el d-mode.el init.el d-mode-ops.el
 EXTRA_DIST = d-comint-mode.el.in init.el.in d-mode.el.in
 CLEANFILES = $(nodist_pkglisp_LISP)
 

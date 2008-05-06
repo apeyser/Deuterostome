@@ -19,6 +19,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <string.h>
 
 UL32 nodes;
 P socketfd;
@@ -63,10 +64,84 @@ DM_INLINE_STATIC void write_socket_int(const void* where, size_t n) {
   } while (n > 0);
 }
 
-DM_INLINE_STATIC void usage(int argc, char* argv[]) {
+struct InfoPair {
+  char key[MPI_MAX_INFO_KEY];
+  char* val;
+};
+
+struct InfoDict {
+  size_t n;
+  P nodes;
+  struct InfoPair* pair;
+};
+
+struct InfoDicts {
+  P n;
+  struct InfoDict* dicts;
+};
+
+DM_INLINE_STATIC void usage(int argc, char* argv[], 
+			    struct InfoDicts* infodicts) {
+  B* infovm;
+  B* infovm_;
+  B* list;
+  P dlist;
+  size_t i;
   if (argc != 1) usage_error(argv[0]); 
   socketfd = 3;
-  read_socket_int(&nodes, sizeof(nodes));
+  
+  if (! (infovm = (B*) malloc(FRAMEBYTES*2)))
+    error(1, errno, "Unable to malloc %lli for infovm", 
+	  (long long) FRAMEBYTES*2);
+  read_socket_int(infovm, FRAMEBYTES*2);
+  if (! (infovm_ = (B*) realloc(infovm, FRAMEBYTES*2+BOX_NB(infovm))))
+    error(1, errno, "Unable to malloc %li for infovm", 
+	  BOX_NB(infovm));
+  infovm = infovm_;
+  read_socket_int(infovm+FRAMEBYTES*2, BOX_NB(infovm));
+
+  list = infovm+FRAMEBYTES;
+  nodes = 0;
+  infodicts->n = (LIST_CEIL(list) - VALUE_BASE(list))/FRAMEBYTES/2;
+  if (! (infodicts->dicts
+	 = (struct InfoDict*) malloc(infodicts->n*sizeof(struct InfoDict))))
+    error(1, errno, "Unable to malloc %li for infodicts", 
+	  infodicts->n*sizeof(struct InfoDict));
+
+  for (i = 0, dlist = VALUE_BASE(list); 
+       dlist < LIST_CEIL(list); 
+       i++, dlist += 2*FRAMEBYTES) {
+    P e;
+    B* dict = list+VALUE_BASE(list+dlist+FRAMEBYTES);
+    size_t j;
+
+    PVALUE(list+dlist, &infodicts->dicts[i].nodes);
+    nodes += infodicts->dicts[i].nodes;
+
+    infodicts->dicts[i].n = (DICT_FREE(dict)-DICT_ENTRIES(dict))/ENTRYBYTES;
+    if (! (infodicts->dicts[i].pair 
+	   = (struct InfoPair*) malloc(infodicts->dicts[i].n
+				       *sizeof(struct InfoPair)))
+	&& infodicts->dicts[i].n)
+      error(1, errno, "Unable to malloc %li for infopair", 
+	    infodicts->dicts[i].n*sizeof(struct InfoPair));
+    
+    for (j = 0, e = DICT_ENTRIES(dict); 
+	 e < DICT_FREE(dict); 
+	 j++, e += ENTRYBYTES) {
+      B* namef = ASSOC_NAME(list+e);
+      B* valf = ASSOC_FRAME(list+e);
+      size_t k = ARRAY_SIZE(valf);
+
+      pullname(namef, infodicts->dicts[i].pair[j].key);
+      if (! (infodicts->dicts[i].pair[j].val = (char*) malloc(k+1)))
+	error(1, errno, "Unable to malloc %li for valf", k);
+      strncpy(infodicts->dicts[i].pair[j].val, list + VALUE_BASE(valf), k);
+      infodicts->dicts[i].pair[j].val[k] = '\0';
+    }
+  }
+  
+  free(infovm);
 }
 
 DM_INLINE_STATIC void initmpi(void) {
@@ -118,16 +193,47 @@ static void mpihandler(MPI_Comm* comm __attribute__ ((__unused__)),
   inhandler = FALSE;
 }
 
-DM_INLINE_STATIC void spawn(void) {
+DM_INLINE_STATIC void spawn(struct InfoDicts* infodicts) {
   int* errors;
-  char* argv[] = {NULL};
-  unsigned int i, any = 0;
+  size_t i, any = 0;
   MPI_Errhandler mpierr;
+  char** comms;
+  int* maxprocs;
+  MPI_Info* info;
 
   fprintf(stderr, "rook is spawning %i children as `%s'\n", nodes, "@dpawn@");
   errors = (int*) malloc(sizeof(int)*nodes);
-  MPI_Comm_spawn("@dpawn@", argv, nodes, MPI_INFO_NULL, 
-		 0, MPI_COMM_WORLD, &children, errors);
+
+  if (! (comms = (char**) malloc(sizeof(char**)*infodicts->n)))
+    error(1, errno, "Unable to malloc for comm %lli",
+	  (long long) sizeof(char**)*infodicts->n);
+  
+  if (! (maxprocs = (int*) malloc(sizeof(int)*infodicts->n)))
+    error(1, errno, "Unable to malloc for maxprocs %lli",
+	  (long long) sizeof(int)*infodicts->n);
+
+  if (! (info = (int*) malloc(sizeof(MPI_Info)*infodicts->n)))
+    error(1, errno, "Unable to malloc for info %lli",
+	  (long long) sizeof(MPI_Info)*infodicts->n);
+
+  for (i = 0; i < (size_t) infodicts->n; i++) {
+    size_t j;
+    comms[i] = "@dpawn@";
+    maxprocs[i] = infodicts->dicts[i].nodes;
+    MPI_Info_create(info+i);
+    for (j = 0; j < infodicts->dicts[i].n; ++j) {
+      MPI_Info_set(info[i], 
+		   infodicts->dicts[i].pair[j].key,
+		   infodicts->dicts[i].pair[j].val);
+      free(infodicts->dicts[i].pair[j].val);
+    }
+    free(infodicts->dicts[i].pair);
+  }
+  free(infodicts->dicts);
+
+  MPI_Comm_spawn_multiple(infodicts->n, comms, MPI_ARGVS_NULL, maxprocs,
+			  info, 0, MPI_COMM_WORLD, &children, errors);
+			  
   atexit(exithandler);
   for (i = 0; i < nodes; i++) {
     if (errors[i]) {
@@ -135,14 +241,19 @@ DM_INLINE_STATIC void spawn(void) {
       static char string[MPI_MAX_ERROR_STRING];
       any = 1;
       MPI_Error_string(errors[i], string, &len);
-      error(0, 0, "For node %i, error %i, %s", i, errors[i], string);
+      error(0, 0, "For node %lli, error %i, %s", 
+	    (long long) i, errors[i], string);
     }
   }
   if (any) exit(1);
-  free(errors);
 
   MPI_Comm_create_errhandler(mpihandler, &mpierr);
   MPI_Comm_set_errhandler(children, mpierr);
+
+  free(errors);
+  free(comms);
+  free(maxprocs);
+  for (i = 0; i < (size_t) infodicts->n; i++) MPI_Info_free(info+i);
 
   fprintf(stderr, "Rook will wait for children\n");
   MPI_Barrier(children);
@@ -331,11 +442,12 @@ DM_INLINE_STATIC void blocksigs(void) {
 }
 
 int main(int argc, char* argv[]) {
-  usage(argc, argv);
+  struct InfoDicts infodicts;
+  usage(argc, argv, &infodicts);
 
   blocksigs();
   initmpi();
-  spawn();
+  spawn(&infodicts);
   
   makethread("mpi receive", from_mpi);
   makethread("dnode receive", from_dnode);

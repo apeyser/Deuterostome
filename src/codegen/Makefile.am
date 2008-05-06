@@ -5,7 +5,8 @@ PRODSRCS = $(srcdir)/dmnuminc.h.built \
 	$(srcdir)/dnode_0.h.built \
 	$(srcdir)/dvt_0.h.built \
 	$(srcdir)/dpawn_0.h.built \
-	$(srcdir)/errors.d
+	$(srcdir)/errors.d \
+	$(srcdir)/d-mode-ops.el
 
 MAINTAINERCLEANFILES = $(PRODSRCS) \
 	$(srcdir)/dcoder.h \
@@ -126,6 +127,11 @@ $(srcdir)/dcoder.h: ops.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
 		"$@" "/dcoder"
+
+$(srcdir)/d-mode-ops.el: ops.d dgen dgen-build
+	"$(srcdir)/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
+		"$@" "/demacs"
 
 $(srcdir)/errors.d: dcoder
 	"$(top_builddir)/src/codegen/dcoder" "$(srcdir)/errors.d"
