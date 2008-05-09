@@ -27,7 +27,7 @@ SLOT="0"
 
 KEYWORDS="~x86 ~amd64 ~ppc"
 
-IUSE="daemon emacs atlas setuid threads formats xclient X memory xauth"
+IUSE="daemon emacs atlas setuid threads formats xclient X memory xauth petsc"
 
 # A space delimited list of portage features to restrict. man 5 ebuild
 # for details.  Usually not needed.
@@ -46,6 +46,7 @@ xclient? (x11-libs/libX11)
 xauth? (x11-libs/libXext)
 mpi? (virtual/mpi)
 mpi? (! sys-cluster/mpich)
+petsc? (sci-mathematics/petsc >= 2.3.3_p11)
 sys-libs/glibc
 "
 
@@ -104,6 +105,21 @@ src_compile() {
 	    xclient X
 
 	add_enable rthreads mpi
+
+	if use petsc && ! use mpi ; then
+	    eerror "Use flag petsc requires use flag mpi"
+	    die
+	fi
+
+	add_with \
+	    petsc \
+	    /opt/petsc \
+	    petsc
+
+	ad_with \
+	    petsc-arch \
+	    linux_opt_d \
+	    petsc
 
 	add_myconf \
 	    $(use_with emacs) \
