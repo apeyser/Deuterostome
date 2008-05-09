@@ -27,7 +27,7 @@ SLOT="0"
 
 KEYWORDS="~x86 ~amd64 ~ppc"
 
-IUSE="daemon emacs atlas setuid threads formats xclient X memory xauth petsc"
+IUSE="daemon emacs atlas setuid threads formats xclient X memory xauth petsc mpi"
 
 # A space delimited list of portage features to restrict. man 5 ebuild
 # for details.  Usually not needed.
