@@ -44,8 +44,8 @@ X? (x11-base/xorg-server)
 atlas? (sci-libs/blas-atlas)
 xclient? (x11-libs/libX11)
 xauth? (x11-libs/libXext)
-mpi ? (virtual/mpi)
-mpi ? (! sys-cluster/mpich)
+mpi? (virtual/mpi)
+mpi? (! sys-cluster/mpich)
 sys-libs/glibc
 "
 
