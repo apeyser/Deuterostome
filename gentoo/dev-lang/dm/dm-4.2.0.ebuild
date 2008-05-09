@@ -113,12 +113,12 @@ src_compile() {
 
 	add_with \
 	    petsc \
-	    /opt/petsc \
+	    "${PETSC_DIR}" \
 	    petsc
 
 	add_with \
 	    petsc-arch \
-	    linux_opt_d \
+	    "${PETSC_ARCH}" \
 	    petsc
 
 	add_myconf \
