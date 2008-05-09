@@ -116,7 +116,7 @@ src_compile() {
 	    /opt/petsc \
 	    petsc
 
-	ad_with \
+	add_with \
 	    petsc-arch \
 	    linux_opt_d \
 	    petsc
