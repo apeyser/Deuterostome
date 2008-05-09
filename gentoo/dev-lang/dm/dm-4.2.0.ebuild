@@ -45,7 +45,7 @@ atlas? (sci-libs/blas-atlas)
 xclient? (x11-libs/libX11)
 xauth? (x11-libs/libXext)
 mpi? (virtual/mpi)
-mpi? (! sys-cluster/mpich)
+mpi? (!sys-cluster/mpich)
 petsc? (sci-mathematics/petsc >= 2.3.3_p11)
 sys-libs/glibc
 "
