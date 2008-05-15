@@ -122,7 +122,11 @@ CF_IF_ENABLED([rthreads], [
     AC_MSG_ERROR([No mpi found... needed for rthreads])
   ])
 ])
-#CF_PETSC()
+CF_PETSC()
+CF_IF_ENABLED([petsc], [
+  CF_CHECK_PETSC_SIZEOF([PetscInt], [4])
+  CF_CHECK_PETSC_SIZEOF([PetscScalar], [8])
+])
 
 CF_AM_PROG([BASH], [bash])
 CF_AM_PROG([ENV], [env], [/usr/bin])
@@ -314,10 +318,10 @@ AC_CONFIG_LINKS([
   src/codegen/dm-nextevent.c:src/dm-nextevent.c
   src/codegen/dm-nextevent.h:src/dm-nextevent.h
   plugins/plugin.d:dcode/plugin.d
-  plugins/new-plugin.d:dcode/new-plugin.d
   dcode/errors.d:src/codegen/errors.d
   plugins/startup_dgen.d:src/codegen/startup_dgen.d
   emacs/d-mode-ops.el:src/codegen/d-mode-ops.el
+  plugins/new-plugin.d.in:dcode/new-plugin.d.in
 ])
 
 AC_CONFIG_FILES([
@@ -325,11 +329,11 @@ AC_CONFIG_FILES([
   src/Makefile 
   src/codegen/Makefile 
   src/dm.pc
-  plugins/Makefile plugins/dmflex.l
+  plugins/Makefile plugins/dmflex.l 
   ps/Makefile 
   sh/Makefile
   emacs/Makefile emacs/d-mode.el
-  dcode/Makefile
+  dcode/Makefile 
   test/Makefile
   m4/Makefile
   test/arr.d

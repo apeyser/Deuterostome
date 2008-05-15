@@ -3,15 +3,14 @@
 dgen="$1" ; shift
 dirin="$1" ; shift
 basein="$1" ; shift
-baseout="$1" ; shift
-baseboot="`basename ${baseout} .built`"
-
-dictin=`basename "$basein" .d`
+baseout="`basename $1`" ; dirout="`dirname $1`"; shift
+dictin=`basename "$basein" .d | tr '-' '_'`
 
 ${dgen} <<EOF
 (${dirin}/) (${basein}) fromfiles 
-${dictin} begin 
-  (${dirin}/) (${baseout}) $@ all 
+/dictinname /${dictin} def
+${dictin} begin
+  (${dirout}) (${baseout}) $@ all 
 end 
 quit
 EOF

@@ -48,6 +48,9 @@
 /* Path to PERL */
 #undef ENABLE_PERL
 
+/* Define if enabling PETSC */
+#undef ENABLE_PETSC
+
 /* compile or install plugin support */
 #undef ENABLE_PLUGINS_SUPPORT
 
@@ -114,6 +117,12 @@
 
 /* Define to 1 if you have the <mpi.h> header file. */
 #undef HAVE_MPI_H
+
+/* Define if you have PETSC library. */
+#undef HAVE_PETSC
+
+/* Define to 1 if you have the <petsc.h> header file. */
+#undef HAVE_PETSC_H
 
 /* Define to 1 if you have the `prctl' function. */
 #undef HAVE_PRCTL
@@ -193,6 +202,12 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* Define to PETSC arch */
+#undef PETSC_ARCH
+
+/* Define to PETSC installation directory */
+#undef PETSC_DIR
+
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */
 #undef PTHREAD_CREATE_JOINABLE
@@ -202,6 +217,12 @@
 
 /* The size of `int', as computed by sizeof. */
 #undef SIZEOF_INT
+
+/* The size of `PetscInt', as computed by sizeof. */
+#undef SIZEOF_PETSCINT
+
+/* The size of `PetscScalar', as computed by sizeof. */
+#undef SIZEOF_PETSCSCALAR
 
 /* The size of `pid_t', as computed by sizeof. */
 #undef SIZEOF_PID_T

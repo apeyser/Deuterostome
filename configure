@@ -951,6 +951,13 @@ ENABLE_MPI_TRUE
 ENABLE_MPI_FALSE
 MPI_LIBS
 MPI_FLAGS
+PETSC_LIB
+PETSC_CCPPFLAGS
+PETSC_DIR
+PETSC_ARCH
+ENABLE_PETSC_TRUE
+ENABLE_PETSC_FALSE
+enable_petsc
 ENABLE_BASH
 ENABLE_BASH_TRUE
 ENABLE_BASH_FALSE
@@ -1714,6 +1721,9 @@ Optional Packages:
   --with-mpi=<lib>        use MPI libraries <lib>
   --with-mpi-flags=<flags>
                           use <flags> for mpi
+      --with-petsc=<dir>      use PETSC libraries in <dir>
+  --with-petsc-arch=<arch>
+                          use PETSC <arch>
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-pic              try to use only PIC/non-PIC objects [default=use
                           both]
@@ -8492,7 +8502,1187 @@ echo "$as_me: error: No mpi found... needed for rthreads" >&2;}
     fi
 
 
-#CF_PETSC()
+
+
+  cf_petsc_ok=no
+
+
+# Check whether --with-petsc was given.
+if test "${with_petsc+set}" = set; then
+  withval=$with_petsc;
+fi
+
+  { echo "$as_me:$LINENO: checking for petsc configuration" >&5
+echo $ECHO_N "checking for petsc configuration... $ECHO_C" >&6; }
+  case "${with_petsc-no}" in
+    yes | "") { { echo "$as_me:$LINENO: error: petsc dir not defined" >&5
+echo "$as_me: error: petsc dir not defined" >&2;}
+   { (exit 1); exit 1; }; };;
+    no) cf_petsc_ok=disable ;;
+    *) PETSC_DIR="$with_petsc" ;;
+  esac
+
+  if test "$cf_petsc_ok" == disable ; then
+    { echo "$as_me:$LINENO: result: no, petsc will not be configured" >&5
+echo "${ECHO_T}no, petsc will not be configured" >&6; }
+  else
+
+# Check whether --with-petsc-arch was given.
+if test "${with_petsc_arch+set}" = set; then
+  withval=$with_petsc_arch;
+fi
+
+    case "${with_petsc_arch-no}" in
+      yes | "") { { echo "$as_me:$LINENO: error: petsc arch not defined" >&5
+echo "$as_me: error: petsc arch not defined" >&2;}
+   { (exit 1); exit 1; }; };;
+      no) { { echo "$as_me:$LINENO: error: --with-petsc-arch must be called for petsc" >&5
+echo "$as_me: error: --with-petsc-arch must be called for petsc" >&2;}
+   { (exit 1); exit 1; }; };;
+      *) PETSC_ARCH="$with_petsc_arch";;
+    esac
+
+      PETSC_LIB=`    make -s -f ${srcdir}/m4/petsc.make     PETSC_ARCH=${PETSC_ARCH}     PETSC_DIR=${PETSC_DIR}     PETSC_LIB`
+
+      PETSC_CCPPFLAGS=`    make -s -f ${srcdir}/m4/petsc.make     PETSC_ARCH=${PETSC_ARCH}     PETSC_DIR=${PETSC_DIR}     PETSC_CCPPFLAGS`
+
+    PETSC_CCPPFLAGS=`echo "$PETSC_CCPPFLAGS" | sed s/\"/\'\"\'/g`
+
+    { echo "$as_me:$LINENO: result: yes, petsc will be configured with arch ${PETSC_ARCH}                   from ${PETSC_DIR}" >&5
+echo "${ECHO_T}yes, petsc will be configured with arch ${PETSC_ARCH}                   from ${PETSC_DIR}" >&6; }
+
+    cf_petsc_save_LIBS="$LIBS"
+    cf_petsc_save_CPPFLAGS="$CPPFLAGS"
+
+    LIBS="$LIBS $PETSC_LIB"
+    CPPFLAGS="$CPPFLAGS $PETSC_CCPPFLAGS"
+    { echo "$as_me:$LINENO: checking for VecCreate in $PETSC_LIB" >&5
+echo $ECHO_N "checking for VecCreate in $PETSC_LIB... $ECHO_C" >&6; }
+    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char VecCreate ();
+int
+main ()
+{
+return VecCreate ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  cf_petsc_ok=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	cf_petsc_ok=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+    if test "$cf_petsc_ok" = no ; then
+      { { echo "$as_me:$LINENO: error: unable to link VecCreate" >&5
+echo "$as_me: error: unable to link VecCreate" >&2;}
+   { (exit 1); exit 1; }; }
+    else
+      { echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+    fi
+    LIBS="$cf_petsc_save_LIBS"
+    CPPFLAGS="$cf_petsc_save_CPPFLAGS"
+
+    # check for headers
+    LIBS="$LIBS $PETSC_LIB"
+    CPPFLAGS="$CPPFLAGS $PETSC_CCPPFLAGS"
+
+for ac_header in petsc.h
+do
+as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
+if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
+  { echo "$as_me:$LINENO: checking for $ac_header" >&5
+echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6; }
+if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+ac_res=`eval echo '${'$as_ac_Header'}'`
+	       { echo "$as_me:$LINENO: result: $ac_res" >&5
+echo "${ECHO_T}$ac_res" >&6; }
+else
+  # Is the header compilable?
+{ echo "$as_me:$LINENO: checking $ac_header usability" >&5
+echo $ECHO_N "checking $ac_header usability... $ECHO_C" >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <$ac_header>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_header_compiler=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+{ echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6; }
+
+# Is the header present?
+{ echo "$as_me:$LINENO: checking $ac_header presence" >&5
+echo $ECHO_N "checking $ac_header presence... $ECHO_C" >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <$ac_header>
+_ACEOF
+if { (ac_try="$ac_cpp conftest.$ac_ext"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null && {
+	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       }; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+
+rm -f conftest.err conftest.$ac_ext
+{ echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6; }
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: $ac_header: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: $ac_header: present but cannot be compiled" >&5
+echo "$as_me: WARNING: $ac_header: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: $ac_header:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: $ac_header: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: $ac_header:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: $ac_header: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $ac_header: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: $ac_header: in the future, the compiler will take precedence" >&2;}
+    ( cat <<\_ASBOX
+## ----------------------------------------------------- ##
+## Report this to Alexander Peyser <a.peyser@umiami.edu> ##
+## ----------------------------------------------------- ##
+_ASBOX
+     ) | sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+{ echo "$as_me:$LINENO: checking for $ac_header" >&5
+echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6; }
+if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  eval "$as_ac_Header=\$ac_header_preproc"
+fi
+ac_res=`eval echo '${'$as_ac_Header'}'`
+	       { echo "$as_me:$LINENO: result: $ac_res" >&5
+echo "${ECHO_T}$ac_res" >&6; }
+
+fi
+if test `eval echo '${'$as_ac_Header'}'` = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+        { echo "$as_me:$LINENO: checking for $ac_header" >&5
+echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6; }
+	{ echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+
+else
+
+        { echo "$as_me:$LINENO: checking for $ac_header" >&5
+echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6; }
+        { { echo "$as_me:$LINENO: error: Not found" >&5
+echo "$as_me: error: Not found" >&2;}
+   { (exit 1); exit 1; }; }
+
+fi
+
+done
+
+    LIBS="$cf_petsc_save_LIBS"
+    CPPFLAGS="$cf_petsc_save_CPPFLAGS"
+
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_PETSC 1
+_ACEOF
+
+
+cat >>confdefs.h <<\_ACEOF
+#define ENABLE_PETSC 1
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define PETSC_DIR       $PETSC_DIR
+_ACEOF
+
+
+  PETSC_DIR="      $PETSC_DIR"
+
+cat >>confdefs.h <<_ACEOF
+#define PETSC_ARCH       $PETSC_ARCH
+_ACEOF
+
+
+  PETSC_ARCH="      $PETSC_ARCH"
+  fi
+
+     if test "$cf_petsc_ok" = yes; then
+  ENABLE_PETSC_TRUE=
+  ENABLE_PETSC_FALSE='#'
+else
+  ENABLE_PETSC_TRUE='#'
+  ENABLE_PETSC_FALSE=
+fi
+
+  if test "$cf_petsc_ok" = yes ; then
+    cf_enable_petsc=yes
+  else
+    cf_enable_petsc=no
+  fi
+      enable_petsc="$cf_enable_petsc"
+
+
+      if test x"${enable_petsc-no}" != x"no" ; then
+
+    cf_petsc_save_CPPFLAGS="$CPPFLAGS"
+  cf_petsc_save_LIBS="$LIBS"
+  CPPFLAGS="$CPPFLAGS $PETSC_CCPPFLAGS"
+  LIBS="$LIBS $PETSC_LIB"
+    { echo "$as_me:$LINENO: checking for PetscInt" >&5
+echo $ECHO_N "checking for PetscInt... $ECHO_C" >&6; }
+if test "${ac_cv_type_PetscInt+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <petsc.h>
+
+typedef PetscInt ac__type_new_;
+int
+main ()
+{
+if ((ac__type_new_ *) 0)
+  return 0;
+if (sizeof (ac__type_new_))
+  return 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_cv_type_PetscInt=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_type_PetscInt=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_type_PetscInt" >&5
+echo "${ECHO_T}$ac_cv_type_PetscInt" >&6; }
+
+# The cast to long int works around a bug in the HP C Compiler
+# version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
+# declarations like `int a3[[(sizeof (unsigned char)) >= 0]];'.
+# This bug is HP SR number 8606223364.
+{ echo "$as_me:$LINENO: checking size of PetscInt" >&5
+echo $ECHO_N "checking size of PetscInt... $ECHO_C" >&6; }
+if test "${ac_cv_sizeof_PetscInt+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test "$cross_compiling" = yes; then
+  # Depending upon the size, compute the lo and hi bounds.
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <petsc.h>
+
+   typedef PetscInt ac__type_sizeof_;
+int
+main ()
+{
+static int test_array [1 - 2 * !(((long int) (sizeof (ac__type_sizeof_))) >= 0)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_lo=0 ac_mid=0
+  while :; do
+    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <petsc.h>
+
+   typedef PetscInt ac__type_sizeof_;
+int
+main ()
+{
+static int test_array [1 - 2 * !(((long int) (sizeof (ac__type_sizeof_))) <= $ac_mid)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_hi=$ac_mid; break
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_lo=`expr $ac_mid + 1`
+			if test $ac_lo -le $ac_mid; then
+			  ac_lo= ac_hi=
+			  break
+			fi
+			ac_mid=`expr 2 '*' $ac_mid + 1`
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  done
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <petsc.h>
+
+   typedef PetscInt ac__type_sizeof_;
+int
+main ()
+{
+static int test_array [1 - 2 * !(((long int) (sizeof (ac__type_sizeof_))) < 0)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_hi=-1 ac_mid=-1
+  while :; do
+    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <petsc.h>
+
+   typedef PetscInt ac__type_sizeof_;
+int
+main ()
+{
+static int test_array [1 - 2 * !(((long int) (sizeof (ac__type_sizeof_))) >= $ac_mid)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_lo=$ac_mid; break
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_hi=`expr '(' $ac_mid ')' - 1`
+			if test $ac_mid -le $ac_hi; then
+			  ac_lo= ac_hi=
+			  break
+			fi
+			ac_mid=`expr 2 '*' $ac_mid`
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  done
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_lo= ac_hi=
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+# Binary search between lo and hi bounds.
+while test "x$ac_lo" != "x$ac_hi"; do
+  ac_mid=`expr '(' $ac_hi - $ac_lo ')' / 2 + $ac_lo`
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <petsc.h>
+
+   typedef PetscInt ac__type_sizeof_;
+int
+main ()
+{
+static int test_array [1 - 2 * !(((long int) (sizeof (ac__type_sizeof_))) <= $ac_mid)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_hi=$ac_mid
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_lo=`expr '(' $ac_mid ')' + 1`
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+done
+case $ac_lo in
+?*) ac_cv_sizeof_PetscInt=$ac_lo;;
+'') if test "$ac_cv_type_PetscInt" = yes; then
+     { { echo "$as_me:$LINENO: error: cannot compute sizeof (PetscInt)
+See \`config.log' for more details." >&5
+echo "$as_me: error: cannot compute sizeof (PetscInt)
+See \`config.log' for more details." >&2;}
+   { (exit 77); exit 77; }; }
+   else
+     ac_cv_sizeof_PetscInt=0
+   fi ;;
+esac
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <petsc.h>
+
+   typedef PetscInt ac__type_sizeof_;
+static long int longval () { return (long int) (sizeof (ac__type_sizeof_)); }
+static unsigned long int ulongval () { return (long int) (sizeof (ac__type_sizeof_)); }
+#include <stdio.h>
+#include <stdlib.h>
+int
+main ()
+{
+
+  FILE *f = fopen ("conftest.val", "w");
+  if (! f)
+    return 1;
+  if (((long int) (sizeof (ac__type_sizeof_))) < 0)
+    {
+      long int i = longval ();
+      if (i != ((long int) (sizeof (ac__type_sizeof_))))
+	return 1;
+      fprintf (f, "%ld\n", i);
+    }
+  else
+    {
+      unsigned long int i = ulongval ();
+      if (i != ((long int) (sizeof (ac__type_sizeof_))))
+	return 1;
+      fprintf (f, "%lu\n", i);
+    }
+  return ferror (f) || fclose (f) != 0;
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_sizeof_PetscInt=`cat conftest.val`
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+( exit $ac_status )
+if test "$ac_cv_type_PetscInt" = yes; then
+     { { echo "$as_me:$LINENO: error: cannot compute sizeof (PetscInt)
+See \`config.log' for more details." >&5
+echo "$as_me: error: cannot compute sizeof (PetscInt)
+See \`config.log' for more details." >&2;}
+   { (exit 77); exit 77; }; }
+   else
+     ac_cv_sizeof_PetscInt=0
+   fi
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+rm -f conftest.val
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_sizeof_PetscInt" >&5
+echo "${ECHO_T}$ac_cv_sizeof_PetscInt" >&6; }
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define SIZEOF_PETSCINT $ac_cv_sizeof_PetscInt
+_ACEOF
+
+        if test "$ac_cv_sizeof_PetscInt" == "0" ; then
+    { echo "$as_me:$LINENO: WARNING: sizeof(PetscInt) is unknown, confirm that it is 4 on target" >&5
+echo "$as_me: WARNING: sizeof(PetscInt) is unknown, confirm that it is 4 on target" >&2;}
+  elif test "$ac_cv_sizeof_PetscInt" != "4" ; then
+    { { echo "$as_me:$LINENO: error: sizeof(PetscInt) = $ac_cv_sizeof_PetscInt, must be 4" >&5
+echo "$as_me: error: sizeof(PetscInt) = $ac_cv_sizeof_PetscInt, must be 4" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+  LIBS="$cf_petsc_save_LIBS"
+  CPPFLAGS="$cf_petsc_save_CPPFLAGS"
+    cf_petsc_save_CPPFLAGS="$CPPFLAGS"
+  cf_petsc_save_LIBS="$LIBS"
+  CPPFLAGS="$CPPFLAGS $PETSC_CCPPFLAGS"
+  LIBS="$LIBS $PETSC_LIB"
+    { echo "$as_me:$LINENO: checking for PetscScalar" >&5
+echo $ECHO_N "checking for PetscScalar... $ECHO_C" >&6; }
+if test "${ac_cv_type_PetscScalar+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <petsc.h>
+
+typedef PetscScalar ac__type_new_;
+int
+main ()
+{
+if ((ac__type_new_ *) 0)
+  return 0;
+if (sizeof (ac__type_new_))
+  return 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_cv_type_PetscScalar=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_type_PetscScalar=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_type_PetscScalar" >&5
+echo "${ECHO_T}$ac_cv_type_PetscScalar" >&6; }
+
+# The cast to long int works around a bug in the HP C Compiler
+# version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
+# declarations like `int a3[[(sizeof (unsigned char)) >= 0]];'.
+# This bug is HP SR number 8606223364.
+{ echo "$as_me:$LINENO: checking size of PetscScalar" >&5
+echo $ECHO_N "checking size of PetscScalar... $ECHO_C" >&6; }
+if test "${ac_cv_sizeof_PetscScalar+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test "$cross_compiling" = yes; then
+  # Depending upon the size, compute the lo and hi bounds.
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <petsc.h>
+
+   typedef PetscScalar ac__type_sizeof_;
+int
+main ()
+{
+static int test_array [1 - 2 * !(((long int) (sizeof (ac__type_sizeof_))) >= 0)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_lo=0 ac_mid=0
+  while :; do
+    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <petsc.h>
+
+   typedef PetscScalar ac__type_sizeof_;
+int
+main ()
+{
+static int test_array [1 - 2 * !(((long int) (sizeof (ac__type_sizeof_))) <= $ac_mid)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_hi=$ac_mid; break
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_lo=`expr $ac_mid + 1`
+			if test $ac_lo -le $ac_mid; then
+			  ac_lo= ac_hi=
+			  break
+			fi
+			ac_mid=`expr 2 '*' $ac_mid + 1`
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  done
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <petsc.h>
+
+   typedef PetscScalar ac__type_sizeof_;
+int
+main ()
+{
+static int test_array [1 - 2 * !(((long int) (sizeof (ac__type_sizeof_))) < 0)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_hi=-1 ac_mid=-1
+  while :; do
+    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <petsc.h>
+
+   typedef PetscScalar ac__type_sizeof_;
+int
+main ()
+{
+static int test_array [1 - 2 * !(((long int) (sizeof (ac__type_sizeof_))) >= $ac_mid)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_lo=$ac_mid; break
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_hi=`expr '(' $ac_mid ')' - 1`
+			if test $ac_mid -le $ac_hi; then
+			  ac_lo= ac_hi=
+			  break
+			fi
+			ac_mid=`expr 2 '*' $ac_mid`
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  done
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_lo= ac_hi=
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+# Binary search between lo and hi bounds.
+while test "x$ac_lo" != "x$ac_hi"; do
+  ac_mid=`expr '(' $ac_hi - $ac_lo ')' / 2 + $ac_lo`
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <petsc.h>
+
+   typedef PetscScalar ac__type_sizeof_;
+int
+main ()
+{
+static int test_array [1 - 2 * !(((long int) (sizeof (ac__type_sizeof_))) <= $ac_mid)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_hi=$ac_mid
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_lo=`expr '(' $ac_mid ')' + 1`
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+done
+case $ac_lo in
+?*) ac_cv_sizeof_PetscScalar=$ac_lo;;
+'') if test "$ac_cv_type_PetscScalar" = yes; then
+     { { echo "$as_me:$LINENO: error: cannot compute sizeof (PetscScalar)
+See \`config.log' for more details." >&5
+echo "$as_me: error: cannot compute sizeof (PetscScalar)
+See \`config.log' for more details." >&2;}
+   { (exit 77); exit 77; }; }
+   else
+     ac_cv_sizeof_PetscScalar=0
+   fi ;;
+esac
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <petsc.h>
+
+   typedef PetscScalar ac__type_sizeof_;
+static long int longval () { return (long int) (sizeof (ac__type_sizeof_)); }
+static unsigned long int ulongval () { return (long int) (sizeof (ac__type_sizeof_)); }
+#include <stdio.h>
+#include <stdlib.h>
+int
+main ()
+{
+
+  FILE *f = fopen ("conftest.val", "w");
+  if (! f)
+    return 1;
+  if (((long int) (sizeof (ac__type_sizeof_))) < 0)
+    {
+      long int i = longval ();
+      if (i != ((long int) (sizeof (ac__type_sizeof_))))
+	return 1;
+      fprintf (f, "%ld\n", i);
+    }
+  else
+    {
+      unsigned long int i = ulongval ();
+      if (i != ((long int) (sizeof (ac__type_sizeof_))))
+	return 1;
+      fprintf (f, "%lu\n", i);
+    }
+  return ferror (f) || fclose (f) != 0;
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_sizeof_PetscScalar=`cat conftest.val`
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+( exit $ac_status )
+if test "$ac_cv_type_PetscScalar" = yes; then
+     { { echo "$as_me:$LINENO: error: cannot compute sizeof (PetscScalar)
+See \`config.log' for more details." >&5
+echo "$as_me: error: cannot compute sizeof (PetscScalar)
+See \`config.log' for more details." >&2;}
+   { (exit 77); exit 77; }; }
+   else
+     ac_cv_sizeof_PetscScalar=0
+   fi
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+rm -f conftest.val
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_sizeof_PetscScalar" >&5
+echo "${ECHO_T}$ac_cv_sizeof_PetscScalar" >&6; }
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define SIZEOF_PETSCSCALAR $ac_cv_sizeof_PetscScalar
+_ACEOF
+
+        if test "$ac_cv_sizeof_PetscScalar" == "0" ; then
+    { echo "$as_me:$LINENO: WARNING: sizeof(PetscScalar) is unknown, confirm that it is 8 on target" >&5
+echo "$as_me: WARNING: sizeof(PetscScalar) is unknown, confirm that it is 8 on target" >&2;}
+  elif test "$ac_cv_sizeof_PetscScalar" != "8" ; then
+    { { echo "$as_me:$LINENO: error: sizeof(PetscScalar) = $ac_cv_sizeof_PetscScalar, must be 8" >&5
+echo "$as_me: error: sizeof(PetscScalar) = $ac_cv_sizeof_PetscScalar, must be 8" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+  LIBS="$cf_petsc_save_LIBS"
+  CPPFLAGS="$cf_petsc_save_CPPFLAGS"
+
+    fi
+
+
 
   # Extract the first word of "bash", so it can be a program name with args.
 set dummy bash; ac_word=$2
@@ -9297,7 +10487,7 @@ echo "${ECHO_T}setting to ${guipdf}" >&6; }
   { echo "$as_me:$LINENO: checking if emacs is enabled (\$EMACS != no)" >&5
 echo $ECHO_N "checking if emacs is enabled (\$EMACS != no)... $ECHO_C" >&6; }
   if test x"$EMACS" = xno ; then
-   if false; then
+       if false; then
   ENABLE_EMACS_TRUE=
   ENABLE_EMACS_FALSE='#'
 else
@@ -9308,7 +10498,7 @@ fi
     { echo "$as_me:$LINENO: result: emacs NOT enabled" >&5
 echo "${ECHO_T}emacs NOT enabled" >&6; }
   else
-	 if :; then
+       if :; then
   ENABLE_EMACS_TRUE=
   ENABLE_EMACS_FALSE='#'
 else
@@ -9316,7 +10506,7 @@ else
   ENABLE_EMACS_FALSE=
 fi
 
-	{ echo "$as_me:$LINENO: result: emacs enabled" >&5
+    { echo "$as_me:$LINENO: result: emacs enabled" >&5
 echo "${ECHO_T}emacs enabled" >&6; }
   fi
 
@@ -11117,7 +12307,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 11120 "configure"' > conftest.$ac_ext
+  echo '#line 12310 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -13668,11 +14858,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13671: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14861: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13675: \$? = $ac_status" >&5
+   echo "$as_me:14865: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -13936,11 +15126,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13939: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15129: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13943: \$? = $ac_status" >&5
+   echo "$as_me:15133: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14040,11 +15230,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14043: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15233: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14047: \$? = $ac_status" >&5
+   echo "$as_me:15237: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16348,7 +17538,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 16351 "configure"
+#line 17541 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16448,7 +17638,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 16451 "configure"
+#line 17641 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -18788,11 +19978,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18791: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19981: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18795: \$? = $ac_status" >&5
+   echo "$as_me:19985: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18892,11 +20082,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18895: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:20085: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:18899: \$? = $ac_status" >&5
+   echo "$as_me:20089: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -20462,11 +21652,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:20465: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:21655: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:20469: \$? = $ac_status" >&5
+   echo "$as_me:21659: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -20566,11 +21756,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:20569: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:21759: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:20573: \$? = $ac_status" >&5
+   echo "$as_me:21763: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -22768,11 +23958,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:22771: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:23961: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:22775: \$? = $ac_status" >&5
+   echo "$as_me:23965: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -23036,11 +24226,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:23039: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:24229: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:23043: \$? = $ac_status" >&5
+   echo "$as_me:24233: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -23140,11 +24330,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:23143: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:24333: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:23147: \$? = $ac_status" >&5
+   echo "$as_me:24337: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -33181,11 +34371,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:33184: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:34374: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:33188: \$? = $ac_status" >&5
+    echo "$as_me:34378: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -33233,11 +34423,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:33236: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:34426: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:33240: \$? = $ac_status" >&5
+    echo "$as_me:34430: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -33433,11 +34623,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:33436: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:34626: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:33440: \$? = $ac_status" >&5
+    echo "$as_me:34630: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -33483,11 +34673,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:33486: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:34676: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:33490: \$? = $ac_status" >&5
+    echo "$as_me:34680: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -33534,11 +34724,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:33537: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:34727: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:33541: \$? = $ac_status" >&5
+    echo "$as_me:34731: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -33584,11 +34774,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:33587: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:34777: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:33591: \$? = $ac_status" >&5
+    echo "$as_me:34781: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -33634,11 +34824,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:33637: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:34827: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:33641: \$? = $ac_status" >&5
+    echo "$as_me:34831: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -33684,11 +34874,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:33687: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:34877: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:33691: \$? = $ac_status" >&5
+    echo "$as_me:34881: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -33734,11 +34924,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:33737: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:34927: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:33741: \$? = $ac_status" >&5
+    echo "$as_me:34931: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -33784,11 +34974,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:33787: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:34977: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:33791: \$? = $ac_status" >&5
+    echo "$as_me:34981: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -33834,11 +35024,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:33837: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35027: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:33841: \$? = $ac_status" >&5
+    echo "$as_me:35031: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -33884,11 +35074,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:33887: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35077: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:33891: \$? = $ac_status" >&5
+    echo "$as_me:35081: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -33950,11 +35140,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:33953: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35143: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:33957: \$? = $ac_status" >&5
+    echo "$as_me:35147: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -34002,11 +35192,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:34005: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35195: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:34009: \$? = $ac_status" >&5
+    echo "$as_me:35199: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -34059,11 +35249,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:34062: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35252: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:34066: \$? = $ac_status" >&5
+    echo "$as_me:35256: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -34109,11 +35299,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:34112: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35302: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:34116: \$? = $ac_status" >&5
+    echo "$as_me:35306: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -34160,11 +35350,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:34163: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35353: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:34167: \$? = $ac_status" >&5
+    echo "$as_me:35357: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -34210,11 +35400,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:34213: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35403: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:34217: \$? = $ac_status" >&5
+    echo "$as_me:35407: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -34260,11 +35450,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:34263: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35453: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:34267: \$? = $ac_status" >&5
+    echo "$as_me:35457: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -34310,11 +35500,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:34313: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35503: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:34317: \$? = $ac_status" >&5
+    echo "$as_me:35507: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -34360,11 +35550,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:34363: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35553: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:34367: \$? = $ac_status" >&5
+    echo "$as_me:35557: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -34410,11 +35600,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:34413: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35603: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:34417: \$? = $ac_status" >&5
+    echo "$as_me:35607: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -34460,11 +35650,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:34463: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:35653: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:34467: \$? = $ac_status" >&5
+    echo "$as_me:35657: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -34880,7 +36070,7 @@ fi
 
 
 
-ac_config_links="$ac_config_links src/dsp1f.h:src/codegen/dsp1f.h.built src/dmnuminc.h:src/codegen/dmnuminc.h.built src/dsp2def.h:src/codegen/dsp2def.h.built src/dgen_0.h:src/codegen/dgen_0.h.built src/dnode_0.h:src/codegen/dnode_0.h.built src/dpawn_0.h:src/codegen/dpawn_0.h.built src/dvt_0.h:src/codegen/dvt_0.h.built src/codegen/dmglobals.c:src/dmglobals.c src/codegen/dsp1.c:src/dsp1.c src/codegen/dm1.c:src/dm1.c src/codegen/dm2.c:src/dm2.c src/codegen/dm2.h:src/dm2.h src/codegen/dm-swapbytes.h:src/dm-swapbytes.h src/codegen/dm-conv.c:src/dm-conv.c src/codegen/dm3.c:src/dm3.c src/codegen/dm4.c:src/dm4.c src/codegen/dm5.c:src/dm5.c src/codegen/dm6.c:src/dm6.c src/codegen/dm7.c:src/dm7.c src/codegen/dm8.c:src/dm8.c src/codegen/dmnum.c:src/dmnum.c src/codegen/dsp2.c:src/dsp2.c src/codegen/dm-types.h:src/dm-types.h src/codegen/dm-types.c:src/dm-types.c src/codegen/paths.h.in:src/paths.h.in src/codegen/dgen.c:src/dgen.c src/codegen/dgen_1.h:src/dgen_1.h src/codegen/dgen-build:src/dgen-build src/codegen/dmnum.h:src/dmnum.h src/codegen/dm-nextevent.c:src/dm-nextevent.c src/codegen/dm-nextevent.h:src/dm-nextevent.h plugins/plugin.d:dcode/plugin.d plugins/new-plugin.d:dcode/new-plugin.d dcode/errors.d:src/codegen/errors.d plugins/startup_dgen.d:src/codegen/startup_dgen.d emacs/d-mode-ops.el:src/codegen/d-mode-ops.el"
+ac_config_links="$ac_config_links src/dsp1f.h:src/codegen/dsp1f.h.built src/dmnuminc.h:src/codegen/dmnuminc.h.built src/dsp2def.h:src/codegen/dsp2def.h.built src/dgen_0.h:src/codegen/dgen_0.h.built src/dnode_0.h:src/codegen/dnode_0.h.built src/dpawn_0.h:src/codegen/dpawn_0.h.built src/dvt_0.h:src/codegen/dvt_0.h.built src/codegen/dmglobals.c:src/dmglobals.c src/codegen/dsp1.c:src/dsp1.c src/codegen/dm1.c:src/dm1.c src/codegen/dm2.c:src/dm2.c src/codegen/dm2.h:src/dm2.h src/codegen/dm-swapbytes.h:src/dm-swapbytes.h src/codegen/dm-conv.c:src/dm-conv.c src/codegen/dm3.c:src/dm3.c src/codegen/dm4.c:src/dm4.c src/codegen/dm5.c:src/dm5.c src/codegen/dm6.c:src/dm6.c src/codegen/dm7.c:src/dm7.c src/codegen/dm8.c:src/dm8.c src/codegen/dmnum.c:src/dmnum.c src/codegen/dsp2.c:src/dsp2.c src/codegen/dm-types.h:src/dm-types.h src/codegen/dm-types.c:src/dm-types.c src/codegen/paths.h.in:src/paths.h.in src/codegen/dgen.c:src/dgen.c src/codegen/dgen_1.h:src/dgen_1.h src/codegen/dgen-build:src/dgen-build src/codegen/dmnum.h:src/dmnum.h src/codegen/dm-nextevent.c:src/dm-nextevent.c src/codegen/dm-nextevent.h:src/dm-nextevent.h plugins/plugin.d:dcode/plugin.d dcode/errors.d:src/codegen/errors.d plugins/startup_dgen.d:src/codegen/startup_dgen.d emacs/d-mode-ops.el:src/codegen/d-mode-ops.el plugins/new-plugin.d.in:dcode/new-plugin.d.in"
 
 
 ac_config_files="$ac_config_files Makefile src/Makefile src/codegen/Makefile src/dm.pc plugins/Makefile plugins/dmflex.l ps/Makefile sh/Makefile emacs/Makefile emacs/d-mode.el dcode/Makefile test/Makefile m4/Makefile test/arr.d"
@@ -35105,6 +36295,13 @@ if test -z "${ENABLE_MPI_TRUE}" && test -z "${ENABLE_MPI_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"ENABLE_MPI\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 echo "$as_me: error: conditional \"ENABLE_MPI\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${ENABLE_PETSC_TRUE}" && test -z "${ENABLE_PETSC_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"ENABLE_PETSC\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"ENABLE_PETSC\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -35757,10 +36954,10 @@ do
     "src/codegen/dm-nextevent.c") CONFIG_LINKS="$CONFIG_LINKS src/codegen/dm-nextevent.c:src/dm-nextevent.c" ;;
     "src/codegen/dm-nextevent.h") CONFIG_LINKS="$CONFIG_LINKS src/codegen/dm-nextevent.h:src/dm-nextevent.h" ;;
     "plugins/plugin.d") CONFIG_LINKS="$CONFIG_LINKS plugins/plugin.d:dcode/plugin.d" ;;
-    "plugins/new-plugin.d") CONFIG_LINKS="$CONFIG_LINKS plugins/new-plugin.d:dcode/new-plugin.d" ;;
     "dcode/errors.d") CONFIG_LINKS="$CONFIG_LINKS dcode/errors.d:src/codegen/errors.d" ;;
     "plugins/startup_dgen.d") CONFIG_LINKS="$CONFIG_LINKS plugins/startup_dgen.d:src/codegen/startup_dgen.d" ;;
     "emacs/d-mode-ops.el") CONFIG_LINKS="$CONFIG_LINKS emacs/d-mode-ops.el:src/codegen/d-mode-ops.el" ;;
+    "plugins/new-plugin.d.in") CONFIG_LINKS="$CONFIG_LINKS plugins/new-plugin.d.in:dcode/new-plugin.d.in" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "src/codegen/Makefile") CONFIG_FILES="$CONFIG_FILES src/codegen/Makefile" ;;
@@ -36062,17 +37259,17 @@ ENABLE_MPI_TRUE!$ENABLE_MPI_TRUE$ac_delim
 ENABLE_MPI_FALSE!$ENABLE_MPI_FALSE$ac_delim
 MPI_LIBS!$MPI_LIBS$ac_delim
 MPI_FLAGS!$MPI_FLAGS$ac_delim
+PETSC_LIB!$PETSC_LIB$ac_delim
+PETSC_CCPPFLAGS!$PETSC_CCPPFLAGS$ac_delim
+PETSC_DIR!$PETSC_DIR$ac_delim
+PETSC_ARCH!$PETSC_ARCH$ac_delim
+ENABLE_PETSC_TRUE!$ENABLE_PETSC_TRUE$ac_delim
+ENABLE_PETSC_FALSE!$ENABLE_PETSC_FALSE$ac_delim
+enable_petsc!$enable_petsc$ac_delim
 ENABLE_BASH!$ENABLE_BASH$ac_delim
 ENABLE_BASH_TRUE!$ENABLE_BASH_TRUE$ac_delim
 ENABLE_BASH_FALSE!$ENABLE_BASH_FALSE$ac_delim
 ENABLE_ENV!$ENABLE_ENV$ac_delim
-ENABLE_ENV_TRUE!$ENABLE_ENV_TRUE$ac_delim
-ENABLE_ENV_FALSE!$ENABLE_ENV_FALSE$ac_delim
-ENABLE_PERL!$ENABLE_PERL$ac_delim
-ENABLE_PERL_TRUE!$ENABLE_PERL_TRUE$ac_delim
-ENABLE_PERL_FALSE!$ENABLE_PERL_FALSE$ac_delim
-ENABLE_TAIL!$ENABLE_TAIL$ac_delim
-ENABLE_TAIL_TRUE!$ENABLE_TAIL_TRUE$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -36114,6 +37311,13 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+ENABLE_ENV_TRUE!$ENABLE_ENV_TRUE$ac_delim
+ENABLE_ENV_FALSE!$ENABLE_ENV_FALSE$ac_delim
+ENABLE_PERL!$ENABLE_PERL$ac_delim
+ENABLE_PERL_TRUE!$ENABLE_PERL_TRUE$ac_delim
+ENABLE_PERL_FALSE!$ENABLE_PERL_FALSE$ac_delim
+ENABLE_TAIL!$ENABLE_TAIL$ac_delim
+ENABLE_TAIL_TRUE!$ENABLE_TAIL_TRUE$ac_delim
 ENABLE_TAIL_FALSE!$ENABLE_TAIL_FALSE$ac_delim
 ENABLE_XTERM!$ENABLE_XTERM$ac_delim
 ENABLE_XTERM_TRUE!$ENABLE_XTERM_TRUE$ac_delim
@@ -36203,7 +37407,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 87; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 94; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

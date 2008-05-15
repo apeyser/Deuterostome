@@ -1182,7 +1182,7 @@ void setupdirs(void) {
     error(1, errno, "gethostname failure");
 
   if (! (h = gethostbyname(myname)))
-    error(1, h_errno, "gethostbyname failure");
+    error(1, h_errno, "gethostbyname failure: %s", myname);
   
   memset(myxname, '*', sizeof(myxname)-1);
 

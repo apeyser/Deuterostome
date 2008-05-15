@@ -1,12 +1,12 @@
 dist_dmstart_DATA = color.d master.d sched.d plugin.d errors.d
 nodist_dmstart_DATA =  theeye.d startup_dnode.d startup_dpawn.d \
-	startup_dvt.d startup_dgen.d dvt_macros.d matrix.d
+	startup_dvt.d startup_dgen.d dvt_macros.d matrix.d new-plugin.d
 dist_dmconf_DATA = dvt.d
 nodist_dmconf_DATA = dnode.d
 
 EXTRA_DIST = theeye.d.in dnode.d.in dvt_macros.d.in \
 	startup_dvt.d.in startup_dnode.d.in startup_dpawn.d.in \
-	matrix.d.in startup_dgen.d.in
+	matrix.d.in startup_dgen.d.in new-plugin.d.in
 
 CLEANFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
 
@@ -145,4 +145,9 @@ startup_dgen.d: $(srcdir)/Makefile $(srcdir)/startup_dgen.d.in
 matrix.d: $(srcdir)/Makefile $(srcdir)/matrix.d.in
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/matrix.d.in >$@.tmp
+	mv $@.tmp $@
+
+new-plugin.d: $(srcdir)/Makefile $(srcdir)/new-plugin.d.in
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/new-plugin.d.in >$@.tmp
 	mv $@.tmp $@

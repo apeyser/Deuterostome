@@ -164,8 +164,7 @@ int bigtester\(P size, Tester* t\) {
        t = \(Tester*\) ) /TESTER (o_1) handle (;
        check_ret\(finalize\(t\)\);
 
-       FREEopds = o_1; 
-       KILL_OPAQUE\(o1\); 
+       KILL_OPAQUE\(\); 
        return OK;
 )}
   ]

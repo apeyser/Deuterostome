@@ -19,7 +19,7 @@ AC_DEFUN([CF_AC_CHECK_HEADERS], [dnl
 ])
 
 AC_DEFUN([CF_AC_CHECK_SIZEOF], [dnl
-  AC_CHECK_SIZEOF([$1], [0])dnl
+  AC_CHECK_SIZEOF([$1], [0], [$3])dnl
   changequote(<<, >>)dnl
   define(<<AC_CV_NAME>>, translit(ac_cv_sizeof_$1, [ *], [_p]))dnl
   changequote([, ])dnl
@@ -30,6 +30,35 @@ AC_DEFUN([CF_AC_CHECK_SIZEOF], [dnl
   fi
   undefine([AC_CV_NAME])dnl
 ])
+
+dnl
+dnl CF_AC_COMP_SIZEOF([syma], [symb], [headersa], [headersb])
+dnl
+AC_DEFUN([CF_AC_COMP_SIZEOF], [dnl
+  AC_CHECK_SIZEOF([$1], [0], [$3])dnl
+  AC_CHECK_SIZEOF([$2], [0], [$4])dnl
+  changequote(<<, >>)dnl
+  define(<<AC_CV_NAMEA>>, translit(ac_cv_sizeof_$1, [ *], [_p]))dnl
+  changequote([, ])dnl
+  changequote(<<, >>)dnl
+  define(<<AC_CV_NAMEB>>, translit(ac_cv_sizeof_$2, [ *], [_p]))dnl
+  changequote([, ])dnl
+dnl
+  if test "$AC_CV_NAMEA" = "0" ; then
+    AC_MSG_WARN([sizeof($1) is unknown, ]dnl
+[confirm that it equals sizeof($2) == $AC_CV_NAMEB on target])
+  elif test "$AC_CV_NAMEB" = "0" ; then
+    AC_MSG_WARN([sizeof($2) is unknown, ]dnl
+[confirm that it equals sizeof($1) == $AC_CV_NAMEA on target])
+  elif test "$AC_CV_NAMEA" != "$AC_CV_NAMEB" ; then
+    AC_MSG_ERROR([sizeof($1) = $AC_CV_NAMEA, sizeof($2) = $AC_CV_NAMEB, ]dnl
+[not matching"])
+  fi dnl
+dnl
+  undefine([AC_CV_NAMEA])dnl
+  undefine([AC_CV_NAMEB])dnl
+])
+
 
 dnl
 dnl CF_DEF_TARGET([target-pattern], [var-to-define])
@@ -340,11 +369,11 @@ AC_DEFUN([CF_EMACS_ENABLED], [dnl
   AC_REQUIRE([AM_PATH_LISPDIR])
   AC_MSG_CHECKING([if emacs is enabled (\$EMACS != no)])
   if test x"$EMACS" = xno ; then 
-  AM_CONDITIONAL([ENABLE_EMACS], [false])
+    CF_AM_CONDITIONAL([EMACS], [false])
     AC_MSG_RESULT([emacs NOT enabled])
   else
-	AM_CONDITIONAL([ENABLE_EMACS], [:])
-	AC_MSG_RESULT([emacs enabled])
+    CF_AM_CONDITIONAL([EMACS], [:])
+    AC_MSG_RESULT([emacs enabled])
   fi dnl
 ])
 

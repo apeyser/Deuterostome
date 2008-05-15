@@ -162,8 +162,8 @@ P op_tosystem(void)
   moveB((B *)VALUE_BASE(o_1),FREEvm, nb-1);
   FREEvm[nb-1] = '\000';
 
-	if ((f = fork()) == -1) return -errno;
-	if (! f) {
+  if ((f = fork()) == -1) return -errno;
+  if (! f) {
     int retc2;
     while ((retc2 = open("/dev/null", O_RDWR, 0)) == -1 && errno == EINTR);
     if (retc2 == -1) {
@@ -187,13 +187,13 @@ P op_tosystem(void)
     execl(ENABLE_BASH, ENABLE_BASH, "-c", FREEvm, (char*) NULL);
     perror("Error exec'ing bash");
     exit(-1);
-	}
+  }
   
  wts:
   if (abortflag) {
     kill(f, SIGKILL);
     return ABORT;
-	};
+  };
   if ((r = waitpid(f, &status, 0)) == -1) {
     int errno_;
     if (errno == EINTR) goto wts;
@@ -393,19 +393,28 @@ P op_fromsystem(void)
 P op_readfile(void)
 {
   int fd;
-  P nb, atmost, npath;
+  P nb, atmost;
   B *p;
+  B* oldfreevm = FREEvm;
 
   if (o_3 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
   if (ATTR(o_1) & READONLY) return OPD_ATR;
   if (TAG(o_2) != (ARRAY | BYTETYPE)) return OPD_ERR;
   if (TAG(o_3) != (ARRAY | BYTETYPE)) return OPD_ERR;
-  npath = ARRAY_SIZE(o_3) + ARRAY_SIZE(o_2) + 1;
-  if (FREEvm + npath > CEILvm) return(VM_OVF);
-  moveB((B *)VALUE_BASE(o_3), FREEvm, ARRAY_SIZE(o_3));
-  moveB((B *)VALUE_BASE(o_2), FREEvm + ARRAY_SIZE(o_3), ARRAY_SIZE(o_2));
-  FREEvm[npath-1] = '\000';
+
+  if (FREEvm + ARRAY_SIZE(o_3)+1 > CEILvm) return VM_OVF;
+  moveB(VALUE_PTR(o_3), FREEvm, ARRAY_SIZE(o_3));
+  FREEvm += ARRAY_SIZE(o_3);
+  if (FREEvm[-1] != '/') (FREEvm++)[0] = '/';
+
+  if (FREEvm + ARRAY_SIZE(o_2) + 1 > CEILvm) {
+    FREEvm = oldfreevm;
+    return VM_OVF;
+  }
+  moveB(VALUE_PTR(o_2), FREEvm, ARRAY_SIZE(o_2));
+  FREEvm[ARRAY_SIZE(o_2)] = '\000';
+  FREEvm = oldfreevm;
 
   alarm(30);
   timeout = FALSE;
@@ -456,18 +465,27 @@ P op_readfile(void)
 P op_writefile(void)
 {
   int fd;
-  P nb, atmost, npath;
+  P nb, atmost;
   B *p;
+  B* oldfreevm = FREEvm;
 
   if (o_3 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
   if (TAG(o_2) != (ARRAY | BYTETYPE)) return OPD_ERR;
   if (TAG(o_3) != (ARRAY | BYTETYPE)) return OPD_ERR;
-  npath = ARRAY_SIZE(o_2) + ARRAY_SIZE(o_1) + 1;
-  if (FREEvm + npath > CEILvm) return VM_OVF;
-  moveB((B *)VALUE_BASE(o_2), FREEvm, ARRAY_SIZE(o_2));
-  moveB((B *)VALUE_BASE(o_1), FREEvm + ARRAY_SIZE(o_2), ARRAY_SIZE(o_1));
-  FREEvm[npath-1] = '\000';
+
+  if (FREEvm + ARRAY_SIZE(o_2) + 1 > CEILvm) return VM_OVF;
+  moveB(VALUE_PTR(o_2), FREEvm, ARRAY_SIZE(o_2));
+  FREEvm += ARRAY_SIZE(o_2);
+  if (FREEvm[-1] != '/') (FREEvm++)[0] = '/';
+
+  if (FREEvm + ARRAY_SIZE(o_1) + 1 > CEILvm) {
+    FREEvm = oldfreevm;
+    return VM_OVF;
+  }
+  moveB(VALUE_PTR(o_1), FREEvm, ARRAY_SIZE(o_1));
+  FREEvm[ARRAY_SIZE(o_1)] = '\000';
+  FREEvm = oldfreevm;
   
   alarm(30);
   timeout = FALSE;
@@ -550,18 +568,28 @@ DM_INLINE_STATIC void END_ALARM(void) {
 P op_readboxfile(void)
 {
   int fd;
-  P nb, atmost, npath, retc;
-  B *p; B isnonnative;
+  P nb, atmost, retc;
+  B *p; 
+  B isnonnative;
+  B* oldfreevm = FREEvm;
 
   if (o_2 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
   if (TAG(o_2) != (ARRAY | BYTETYPE)) return OPD_ERR;
-  npath = ARRAY_SIZE(o_1) + ARRAY_SIZE(o_2) + 1;
-  if (FREEvm + npath > CEILvm) return VM_OVF;
 
-  moveB((B *)VALUE_BASE(o_2), FREEvm, ARRAY_SIZE(o_2));
-  moveB((B *)VALUE_BASE(o_1), FREEvm + ARRAY_SIZE(o_2), ARRAY_SIZE(o_1));
-  FREEvm[npath-1] = '\000';
+  if (FREEvm + ARRAY_SIZE(o_2) + 1 > CEILvm) return VM_OVF;
+  moveB(VALUE_PTR(o_2), FREEvm, ARRAY_SIZE(o_2));
+  FREEvm += ARRAY_SIZE(o_2);
+  if (FREEvm[-1] != '/') (FREEvm++)[0] = '/';
+
+  if (FREEvm + ARRAY_SIZE(o_1) + 1 > CEILvm) {
+    FREEvm = oldfreevm;
+    return VM_OVF;
+  }
+  moveB(VALUE_PTR(o_1), FREEvm, ARRAY_SIZE(o_1));
+  FREEvm[ARRAY_SIZE(o_1)] = '\000';
+  FREEvm = oldfreevm;
+
   atmost = CEILvm - FREEvm;   
   START_ALARM();
  rb1:
@@ -617,8 +645,10 @@ P op_readboxfile(void)
 P op_writeboxfile(void) 
 {
   int fd;
-  P nb, atmost, retc, npath;
-  B *oldFREEvm, *base, *top, *freemem;
+  P nb, atmost, retc;
+  B *oldFREEvm = FREEvm;
+  B* oldfreemem;
+  B *base, *top, *freemem;
   B frame[FRAMEBYTES];
 
   if (o_3 < FLOORopds) return OPDS_UNF;
@@ -629,10 +659,7 @@ P op_writeboxfile(void)
   if (TAG(o_2) != (ARRAY | BYTETYPE)) return OPD_ERR;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
 
-  oldFREEvm = FREEvm;
   moveframe(o_3, frame);
-		
-  npath = ARRAY_SIZE(o_2) + ARRAY_SIZE(o_1) + 1;
   if ((retc = foldobj_ext(frame)) != OK) {
     FREEvm = oldFREEvm;
     return retc;
@@ -648,10 +675,19 @@ P op_writeboxfile(void)
   SETNATIVE(base);
   atmost = top - base;
   
-  if (freemem + npath > CEILvm) {foldobj_free(); return VM_OVF;}
-  moveB((B *)VALUE_BASE(o_2), freemem, ARRAY_SIZE(o_2));
-  moveB((B *)VALUE_BASE(o_1), freemem + ARRAY_SIZE(o_2), ARRAY_SIZE(o_1));
-  freemem[npath-1] = '\000';
+  oldfreemem = freemem;
+  if (freemem + ARRAY_SIZE(o_2) + 1 > CEILvm) return VM_OVF;
+  moveB(VALUE_PTR(o_2), freemem, ARRAY_SIZE(o_2));
+  freemem += ARRAY_SIZE(o_2);
+  if (freemem[-1] != '/') (freemem++)[0] = '/';
+
+  if (freemem + ARRAY_SIZE(o_1) + 1 > CEILvm) {
+    FREEvm = oldFREEvm;
+    return VM_OVF;
+  }
+  moveB(VALUE_PTR(o_1), freemem, ARRAY_SIZE(o_1));
+  freemem[ARRAY_SIZE(o_1)] = '\000';
+  freemem = oldfreemem;
 
   START_ALARM();
  wb1:

@@ -2,7 +2,12 @@ AM_CFLAGS =  $(GCC_CFLAGS) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
 AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 LIBS += $(LTLIBOBJS) $(top_builddir)/src/libdmglobals.la
-BUILT_SOURCES =
+
+BUILT_SOURCES = new-plugin.d
+new-plugin.d: $(srcdir)/Makefile new-plugin.d.in
+	rm -f $@ $@.tmp
+	$(edit) new-plugin.d.in >$@.tmp
+	mv $@.tmp $@
 
 if ENABLE_PLUGINS_SUPPORT
 
@@ -27,16 +32,16 @@ process_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
 process2_la_SOURCES = process2.c process2.h
 dist_noinst_DATA = process2.d
 
-stats.c: stats.d plugin.d
+dm-stats-main.h: stats.d new-plugin.d
 	"$(top_srcdir)/src/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "stats.d" "$@" true true
 
-stats.h: stats.d plugin.d
+dm-stats-header.h: stats.d new-plugin.d
 	"$(top_srcdir)/src/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "stats.d" "$@" false true
 
-BUILT_SOURCES += stats.c stats.h
-stats_la_SOURCES = stats.h stats.c
+BUILT_SOURCES += dm-stats-main.h dm-stats-header.h
+stats_la_SOURCES = dm-stats-main.h dm-stats-header.h stats.c
 stats_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
 dist_noinst_DATA += stats.d
 
@@ -59,22 +64,36 @@ cpptester_la_SOURCES = cpptester.c cpptester.h \
 cpptester_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
 dist_noinst_DATA += cpptester.d
 
-if ENABLE_RTHREADS
-RTHREADS_LIB=rthreads.la
-endif ENABLE_RTHREADS
+if ENABLE_PETSC
+IPETSC_LIB=dmpetsc.la
+IPETSC_D=petsc.d
+endif
 
-dm-rthreads-main.h: new-plugin.d rthreads.d
+dm-petsc-main.h: new-plugin.d dm-petsc.d
 	"$(top_srcdir)/src/dgen-build" \
-		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "rthreads.d" "$@" true true
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dm-petsc.d" "$@" true true
 
-dm-rthreads-header.h: new-plugin.d rthreads.d
+dm-petsc-header.h: new-plugin.d dm-petsc.d
 	"$(top_srcdir)/src/dgen-build" \
-		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "rthreads.d" "$@" false true
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dm-petsc.d" "$@" false true
 
-BUILT_SOURCES += dm-rthreads-main.h dm-rthreads-header.h
-rthreads_la_SOURCES = dm-rthreads-main.h dm-rthreads-header.h rthreads.h rthreads.h
-rthreads_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
-dist_noinst_DATA += rthreads.d
+BUILT_SOURCES += dm-petsc-main.h dm-petsc-header.h dm-petsc.c
+dmpetsc_la_SOURCES = dm-petsc-main.h dm-petsc-header.h dm-petsc.c dm-petsc.h
+dmpetsc_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@ 
+dmpetsc_la_LDFLAGS=$(AM_LDFLAGS) $(PETSC_LIB)
+dmpetsc_la_CPPFLAGS = $(PETSC_CCPPFLAGS) $(AM_CPPFLAGS)
+dist_noinst_DATA += dm-petsc.d dm-petsc.c.in
+
+edit = 	sed \
+	  -e 's,[@]PETSC_DIR[@],$(PETSC_DIR),g' \
+	  -e 's,[@]PETSC_ARCH[@],$(PETSC_ARCH),g' \
+	  -e 's,[@]dpawn[@],$(dpawn),g' \
+	  -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g'
+
+dm-petsc.c: Makefile $(srcdir)/dm-petsc.c.in
+	-rm -f $@ $@.tmp
+	$(edit) "$(srcdir)/dm-petsc.c.in" > $@.tmp
+	mv $@.tmp $@
 
 if ENABLE_DMFLEX
 DMFLEX_LIB=dmflex.la
@@ -92,7 +111,7 @@ endif !ENABLE_PLUGINS
 
 if ENABLE_PLUGINS
 PLUGINS = test.la test2.la $(PROCESS_LIB) throw.la \
-	$(DMFLEX_LIB) $(RTHREADS_LIB) \
+	$(DMFLEX_LIB) $(IPETSC_LIB) \
 	stats.la $(CPPPLUGIN_LIB)
 else !ENABLE_PLUGINS
 PLACEHOLDER = .plugins
@@ -108,7 +127,7 @@ throw_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
 endif ENABLE_PLUGINS
 
 pkglib_LTLIBRARIES = $(PLUGINS)
-pkglib_DATA = $(PLACEHOLDER)
+pkglib_DATA = $(PLACEHOLDER) $(IPETSC_D)
 
 CLEANFILES = $(BUILT_SOURCES)
 

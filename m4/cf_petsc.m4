@@ -1,71 +1,65 @@
-AC_DEFUN([CF_PETSC], [
+AC_DEFUN([CF_PETSC_MAKE], [`dnl 
+    make -s -f ${srcdir}/m4/petsc.make dnl
+    PETSC_ARCH=${PETSC_ARCH} dnl
+    PETSC_DIR=${PETSC_DIR} dnl
+    $1`dnl
+])
+
+AC_DEFUN([CF_PETSC_EXTRACT], [dnl
+  $1=CF_PETSC_MAKE([$1])
+  AC_SUBST([$1]) dnl
+])
+
+AC_DEFUN([CF_PETSC], [dnl
   AC_REQUIRE([CF_MPI])
   AC_PREREQ(2.50)
   cf_petsc_ok=no
 
-  AC_ARG_WITH([petsc],
-    [AC_HELP_STRING([--with-petsc=<lib>], [use PETSC libraries <lib>])])
-  case "$with_petsc" in
-    yes | "") ;;
+  AC_ARG_WITH([petsc], dnl
+    [AC_HELP_STRING([--with-petsc=<dir>], [use PETSC libraries in <dir>])])
+  AC_MSG_CHECKING([for petsc configuration])
+  case "${with_petsc-no}" in
+    yes | "") AC_MSG_ERROR([petsc dir not defined]);;
     no) cf_petsc_ok=disable ;;
-    -* | */* | *.a | *.so | *.so.* | *.o) PETSC_LIBS="$with_petsc" ;;
-    *) PETSC_LIBS="-l$with_petsc" ;;
+    *) PETSC_DIR="$with_petsc" ;;
   esac
 
-  AC_ARG_WITH([petsc-flags],
-    [AC_HELP_STRING([--with-petsc-flags=<flags>], [use <flags> for petsc])])
-  case "$with_petsc_flags" in
-    yes) ;;
-    "" | no) PETSC_FLAGS="" ;;
-    *) PETSC_FLAGS="$with_petsc_flags" ;;
-  esac
+  if test "$cf_petsc_ok" == disable ; then
+    AC_MSG_RESULT([no, petsc will not be configured])
+  else
+    AC_ARG_WITH([petsc-arch],
+      [AC_HELP_STRING([--with-petsc-arch=<arch>], [use PETSC <arch>])])
+    case "${with_petsc_arch-no}" in
+      yes | "") AC_MSG_ERROR([petsc arch not defined]);;
+      no) AC_MSG_ERROR([--with-petsc-arch must be called for petsc]);;
+      *) PETSC_ARCH="$with_petsc_arch";;
+    esac
 
-  cf_petsc_save_LIBS="$LIBS"
-  cf_petsc_save_CPPFLAGS="$CPPFLAGS"
+    CF_PETSC_EXTRACT([PETSC_LIB])
+    CF_PETSC_EXTRACT([PETSC_CCPPFLAGS])
+    PETSC_CCPPFLAGS=`echo "$PETSC_CCPPFLAGS" | sed s/\"/\'\"\'/g`
 
-  # First, check PETSC_LIBS environment variable
-  if test "$cf_petsc_ok" = no; then
-    if test "x$PETSC_LIBS" != x; then
-      LIBS="$PETSC_LIBS $LIBS"
-      CPPFLAGS="$CPPFLAGS $PETSC_FLAGS"
-      AC_MSG_CHECKING([for VecCreate in $PETSC_LIBS])
-	AC_TRY_LINK_FUNC([VecCreate], [cf_petsc_ok=yes], [PETSC_LIBS=""])
-	AC_MSG_RESULT([$cf_petsc_ok])
-      LIBS="$cf_petsc_save_LIBS"
-      CPPFLAGS="$cf_petsc_save_CPPFLAGS"
+    AC_MSG_RESULT([yes, petsc will be configured with arch ${PETSC_ARCH} ]dnl
+                  [from ${PETSC_DIR}])
+
+    cf_petsc_save_LIBS="$LIBS"
+    cf_petsc_save_CPPFLAGS="$CPPFLAGS"
+
+    LIBS="$LIBS $PETSC_LIB"
+    CPPFLAGS="$CPPFLAGS $PETSC_CCPPFLAGS"
+    AC_MSG_CHECKING([for VecCreate in $PETSC_LIB])
+    AC_TRY_LINK_FUNC([VecCreate], [cf_petsc_ok=yes], [cf_petsc_ok=no])
+    if test "$cf_petsc_ok" = no ; then
+      AC_MSG_ERROR([unable to link VecCreate])
+    else
+      AC_MSG_RESULT([yes])
     fi
-  fi
+    LIBS="$cf_petsc_save_LIBS"
+    CPPFLAGS="$cf_petsc_save_CPPFLAGS"
 
-  # petsc in PETSC library?
-  if test "$cf_petsc_ok" = no; then
-     PETSC_LIBS="-lpetsc"
-     CPPFLAGS="$CPPFLAGS $PETSC_FLAGS"
-     AC_SEARCH_LIBS([VecCreate], [petsc],
-       [AC_MSG_CHECKING([for VecCreate in $ac_res])
-        if test -n "$ac_lib" ; then 
-           PETSC_LIBS="$ac_res $PETSC_LIBS"
-        fi
-        AC_MSG_RESULT([yes])
-           cf_petsc_ok=yes
-           break
-        ], [
- 	  AC_MSG_CHECKING([for VecCreate in $ac_res])
-          AC_MSG_RESULT([no])
-        ], 
-        [$PETSC_LIBS])
-     AC_MSG_CHECKING([for VecCreate in petsc])
-     if test $cf_petsc_ok = no ; then
-        AC_MSG_ERROR([No petsc found])
-     else
-        AC_MSG_RESULT([yes, in $ac_res])
-     fi
-     CPPFLAGS="$cf_petsc_save_CPPFLAGS"
-  fi
-
-  LIBS="$cf_petsc_save_LIBS"
-  if test "$cf_petsc_ok" = yes; then
-    LIBS="$PETSC_LIBS $LIBS"
-    CPPFLAGS="$CPPFLAGS $PETSC_FLAGS"
+    # check for headers
+    LIBS="$LIBS $PETSC_LIB"
+    CPPFLAGS="$CPPFLAGS $PETSC_CCPPFLAGS"
     AC_CHECK_HEADERS([petsc.h], 
       [
         AC_MSG_CHECKING([for $ac_header]) 
@@ -73,13 +67,35 @@ AC_DEFUN([CF_PETSC], [
       ], [
         AC_MSG_CHECKING([for $ac_header])
         AC_MSG_ERROR([Not found])
-     ])
-     LIBS="$cf_petsc_save_LIBS"
-     CPPFLAGS="$cf_petsc_save_CPPFLAGS"
-     AC_DEFINE([HAVE_PETSC], 1, [Define if you have PETSC library.])
+    ])
+    LIBS="$cf_petsc_save_LIBS"
+    CPPFLAGS="$cf_petsc_save_CPPFLAGS"
+
+    AC_DEFINE([HAVE_PETSC], 1, [Define if you have PETSC library.])
+    AC_DEFINE([ENABLE_PETSC], 1, [Define if enabling PETSC])
+    CF_SUBST_DEFINE_UNQUOTED([PETSC_DIR], dnl
+      [$PETSC_DIR], dnl
+      [Define to PETSC installation directory])
+    CF_SUBST_DEFINE_UNQUOTED([PETSC_ARCH], dnl
+      [$PETSC_ARCH], dnl
+      [Define to PETSC arch])
   fi
 
-  AM_CONDITIONAL([ENABLE_PETSC], [test "$cf_petsc_ok" = yes])
-  AC_SUBST([PETSC_LIBS])
-  AC_SUBST([PETSC_FLAGS])
+  CF_AM_CONDITIONAL([PETSC], [test "$cf_petsc_ok" = yes])
+  if test "$cf_petsc_ok" = yes ; then
+    cf_enable_petsc=yes
+  else
+    cf_enable_petsc=no
+  fi
+  CF_AC_SUBST([enable_petsc], [$cf_enable_petsc])dnl
+])
+
+AC_DEFUN([CF_CHECK_PETSC_SIZEOF], [dnl
+  cf_petsc_save_CPPFLAGS="$CPPFLAGS"
+  cf_petsc_save_LIBS="$LIBS"
+  CPPFLAGS="$CPPFLAGS $PETSC_CCPPFLAGS"
+  LIBS="$LIBS $PETSC_LIB"
+  CF_AC_CHECK_SIZEOF([$1], [$2], [#include <petsc.h>])
+  LIBS="$cf_petsc_save_LIBS"
+  CPPFLAGS="$cf_petsc_save_CPPFLAGS" dnl
 ])

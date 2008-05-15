@@ -12,4 +12,5 @@ dist_noinst_DATA = acx_pthread.m4 ax_cflags_strict_prototypes.m4 \
 	basic-defs.m4 \
 	cf_petsc.m4 \
 	cf_mpi.m4 \
-	ax_set_version_info.m4
+	ax_set_version_info.m4 \
+	petsc.make

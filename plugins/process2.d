@@ -291,8 +291,7 @@ def
 	if \(close\() /STDOUT (o_1) handle (\) && ! errno_\) errno_ = errno; 
 	if \(errno_\) return -errno_;
 
-	FREEopds = o_1;
-	KILL_OPAQUE\(o1\);
+	KILL_OPAQUE\(\);
 	return OK;
 )
       }

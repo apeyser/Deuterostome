@@ -8,6 +8,7 @@
 ## modifications, as long as this notice is preserved.
 
 # serial 51 AC_PROG_LIBTOOL
+# serial 8 AC_LIB_LTDL
 
 
 # AC_PROVIDE_IFELSE(MACRO-NAME, IF-PROVIDED, IF-NOT-PROVIDED)
@@ -6589,8 +6590,6 @@ AC_MSG_RESULT([$SED])
 ## This file is free software; the Free Software Foundation gives
 ## unlimited permission to copy and/or distribute it, with or without
 ## modifications, as long as this notice is preserved.
-
-# serial 8 AC_LIB_LTDL
 
 # AC_WITH_LTDL
 # ------------

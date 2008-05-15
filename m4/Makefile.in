@@ -40,7 +40,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
 	$(top_srcdir)/m4/ax_set_version_info.m4 \
 	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/cf_mpi.m4 \
-	$(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/cf_petsc.m4 $(top_srcdir)/m4/configure.m4 \
 	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/acinclude.m4 $(top_srcdir)/m4/basic-defs.m4 \
 	$(top_srcdir)/configure.ac
@@ -64,7 +64,7 @@ am__dist_noinst_DATA_DIST = acx_pthread.m4 \
 	ax_cflags_strict_prototypes.m4 ax_prefix_config_h.m4 \
 	configure.m4 lf_x11.m4 cf_atlas.m4 lib_socket_nsl.m4 \
 	plugin-config.m4 basic-defs.m4 cf_petsc.m4 cf_mpi.m4 \
-	ax_set_version_info.m4
+	ax_set_version_info.m4 petsc.make
 DATA = $(dist_m4data_DATA) $(dist_noinst_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 pkgdatadir = @pkgdatadir@
@@ -185,6 +185,10 @@ PCCFLAGS = @PCCFLAGS@
 PCCXXFLAGS = @PCCXXFLAGS@
 PCLDFLAGS = @PCLDFLAGS@
 PCLIBS = @PCLIBS@
+PETSC_ARCH = @PETSC_ARCH@
+PETSC_CCPPFLAGS = @PETSC_CCPPFLAGS@
+PETSC_DIR = @PETSC_DIR@
+PETSC_LIB = @PETSC_LIB@
 PKGCONFIGLIBDIR = @PKGCONFIGLIBDIR@
 PKGDATADIR = @PKGDATADIR@
 PKGLISPDIR = @PKGLISPDIR@
@@ -242,6 +246,7 @@ dmsockdir = @dmsockdir@
 dmstartdir = @dmstartdir@
 docdir = @docdir@
 dvidir = @dvidir@
+enable_petsc = @enable_petsc@
 exec_prefix = @exec_prefix@
 guipdf = @guipdf@
 host = @host@
@@ -294,7 +299,8 @@ dist_noinst_DATA = acx_pthread.m4 ax_cflags_strict_prototypes.m4 \
 	basic-defs.m4 \
 	cf_petsc.m4 \
 	cf_mpi.m4 \
-	ax_set_version_info.m4
+	ax_set_version_info.m4 \
+	petsc.make
 
 all: all-am
 

@@ -215,8 +215,7 @@ P op_killtester(void) {
        t = (Tester*) CPPTESTER_TESTER(o_1);
        check_ret(finalize(t));
 
-       FREEopds = o_1; 
-       KILL_OPAQUE(o1); 
+       KILL_OPAQUE(); 
        return OK;
 
 }

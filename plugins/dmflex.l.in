@@ -584,8 +584,7 @@ P op_closestream(void) {
         return -errno;
   };
 
-  FREEopds = o_1;
-  KILL_OPAQUE(o_1);
+  KILL_OPAQUE();
   return OK;
 }
 
@@ -677,48 +676,51 @@ P x_op_execstream(void) {
   TEST_OPAQUE(o_1);
   if (TAG(o_2) != BOOL) return OPD_CLA;
 
-  FREEopds = o_2;
-
   if (CEILexecs < x4) {
-    DMFLEX_STATE(o2) = DMFLEX_ERR;
-    CLEAR_HANDLE(o2);
-    KILL_OPAQUE(o2);
+    DMFLEX_STATE(o_1) = DMFLEX_ERR;
+    CLEAR_HANDLE(o_1);
+    KILL_OPAQUE();
     return EXECS_OVF;
   }
 
-  if (BOOL_VAL(o1)) {
-    DMFLEX_STATE(o2) = DMFLEX_ERR;
-    CLEAR_HANDLE(o2);
-    KILL_OPAQUE(o2);
+  if (BOOL_VAL(o_2)) {
+    DMFLEX_STATE(o_1) = DMFLEX_ERR;
+    CLEAR_HANDLE(o_1);
+    KILL_OPAQUE();
     makename((B*)"stop", x1);
     FREEexecs = x2;
+    FREEopds = o_1;
     return OK;
   }
 
-  if (DMFLEX_STATE(o2) == DMFLEX_EOF) {
-    B* parent = OPAQUE_MEM(o2, DMFLEX_PARENT_N) ? DMFLEX_PARENT(o2) : NULL;
-    if (parent) 
-      moveframe(parent, o1);
+  if (DMFLEX_STATE(o_1) == DMFLEX_EOF) {
+    B* parent = OPAQUE_MEM(o_1, DMFLEX_PARENT_N) 
+      ? DMFLEX_PARENT(o_1) : NULL;
+    if (parent) moveframe(parent, o_2);
     else {
-      TAG(o1) = NULLOBJ; ATTR(o1) = 0;
+      TAG(o_2) = NULLOBJ; 
+      ATTR(o_2) = 0;
     }
      
-    FREEopds = o1;
-    DMFLEX_STATE(o1) = DMFLEX_ERR;
-    CLEAR_HANDLE(o1);
-    KILL_OPAQUE(o1);
+    DMFLEX_STATE(o_1) = DMFLEX_ERR;
+    CLEAR_HANDLE(o_1);
+    KILL_OPAQUE();
     return OK;
   }
   
-  moveframe(o1, x3); ATTR(x3) = (STOPMARK | ACTIVE);
-  moveframe(o2, x2);
+  moveframe(o_2, x3); 
+  ATTR(x3) = (STOPMARK | ACTIVE);
+  moveframe(o_1, x2);
 
-  TAG(x1) = OP; ATTR(x1) = ACTIVE;
-  OP_CODE(x1) = (P) x_op_execstream; OP_NAME(x1) = (P) x_op_execstream_name;
+  TAG(x1) = OP; 
+  ATTR(x1) = ACTIVE;
+  OP_CODE(x1) = (P) x_op_execstream; 
+  OP_NAME(x1) = (P) x_op_execstream_name;
   FREEexecs = x4;
 
   streamstate = x2;
   setbufstate(streamstate);
+  FREEopds = o_2;
   
   if ((ret = gettoken()) != OK) {
     if (ret == DONE) {

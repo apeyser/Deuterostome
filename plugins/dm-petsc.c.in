@@ -1,0 +1,659 @@
+#line 2 "./dm-petsc.c.in"
+#include <petscksp.h>
+
+#include <limits.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h>
+
+#include "dm.h"
+
+#define D_ARRAY_PTR(frame) (*(D**) &VALUE_PTR(frame))
+#define VECTOR_VAL(frame) (*(Vec*) VALUE_PTR(frame))
+#define MATRIX_VAL(frame) (*(Mat*) VALUE_PTR(frame))
+#define L32_VAL(frame) (*(L32*) NUM_VAL(frame))
+#define L32_ARRAY_PTR(frame) (*(L32**) &VALUE_PTR(frame))
+#define KSP_VAL(frame) (*(KSP*) VALUE_PTR(frame))
+
+#include "dm-petsc-header.h"
+
+static PetscErrorCode petscsig(int sig __attribute__ ((__unused__)), 
+			       void* ptr __attribute__ ((__unused__)) ) {
+  return PETSC_ERR_SIG;
+}
+
+static P errmap[PETSC_ERR_MAX_VALUE];
+
+DM_INLINE_STATIC P init_(void) {
+  int argc = 1;
+  char* argv[] = {"@dpawn@"};
+  PetscErrorCode r;
+
+  if (setenv("PETSC_DIR", "@PETSC_DIR@", 1))
+    return -errno;
+  if (setenv("PETSC_ARCH", "@PETSC_ARCH@", 1))
+    return -errno;
+
+  errmap[0] = OK;
+  errmap[PETSC_ERR_MEM] = PETSC_DM_ERR_MEM;
+  errmap[PETSC_ERR_SUP] = PETSC_DM_ERR_SUP;
+  errmap[PETSC_ERR_SUP_SYS] = PETSC_DM_ERR_SUP_SYS;
+  errmap[PETSC_ERR_ORDER] = PETSC_DM_ERR_ORDER;
+  errmap[PETSC_ERR_SIG] = PETSC_DM_ERR_SIG;
+  errmap[PETSC_ERR_FP] = PETSC_DM_ERR_FP;
+  errmap[PETSC_ERR_COR] = PETSC_DM_ERR_COR;
+  errmap[PETSC_ERR_LIB] = PETSC_DM_ERR_LIB;
+  errmap[PETSC_ERR_PLIB] = PETSC_DM_ERR_PLIB;
+  errmap[PETSC_ERR_MEMC] = PETSC_DM_ERR_MEMC;
+  errmap[PETSC_ERR_CONV_FAILED] = PETSC_DM_ERR_CONV_FAILED;
+  errmap[PETSC_ERR_USER] = PETSC_DM_ERR_USER;
+  errmap[PETSC_ERR_ARG_SIZ] = PETSC_DM_ERR_ARG_SIZ;
+  errmap[PETSC_ERR_ARG_IDN] = PETSC_DM_ERR_ARG_IDN;
+  errmap[PETSC_ERR_ARG_WRONG] = PETSC_DM_ERR_ARG_WRONG;
+  errmap[PETSC_ERR_ARG_CORRUPT] = PETSC_DM_ERR_ARG_CORRUPT;
+  errmap[PETSC_ERR_ARG_OUTOFRANGE] = PETSC_DM_ERR_ARG_OUTOFRANGE;
+  errmap[PETSC_ERR_ARG_BADPTR] = PETSC_DM_ERR_ARG_BADPTR;
+  errmap[PETSC_ERR_ARG_NOTSAMETYPE] = PETSC_DM_ERR_ARG_NOTSAMETYPE;
+  errmap[PETSC_ERR_ARG_NOTSAMECOMM] = PETSC_DM_ERR_ARG_NOTSAMECOMM;
+  errmap[PETSC_ERR_ARG_WRONGSTATE] = PETSC_DM_ERR_ARG_WRONGSTATE;
+  errmap[PETSC_ERR_ARG_INCOMP] = PETSC_DM_ERR_ARG_INCOMP;
+  errmap[PETSC_ERR_ARG_NULL] = PETSC_DM_ERR_ARG_NULL;
+  errmap[PETSC_ERR_ARG_UNKNOWN_TYPE] = PETSC_DM_ERR_ARG_UNKNOWN_TYPE;
+  errmap[PETSC_ERR_ARG_DOMAIN] = PETSC_DM_ERR_ARG_DOMAIN;
+  errmap[PETSC_ERR_FILE_OPEN] = PETSC_DM_ERR_FILE_OPEN;
+  errmap[PETSC_ERR_FILE_READ] = PETSC_DM_ERR_FILE_READ;
+  errmap[PETSC_ERR_FILE_WRITE] = PETSC_DM_ERR_FILE_WRITE;
+  errmap[PETSC_ERR_FILE_UNEXPECTED] = PETSC_DM_ERR_FILE_UNEXPECTED;
+  errmap[PETSC_ERR_MAT_LU_ZRPVT] = PETSC_DM_ERR_MAT_LU_ZRPVT;
+  errmap[PETSC_ERR_MAT_CH_ZRPVT] = PETSC_DM_ERR_MAT_CH_ZRPVT;
+
+  if (! getenv("PETSC_DM_INITD")) {
+    if (setenv("PETSC_DM_INITD", "yes", 1))
+      return -errno;
+    if ((r = PetscInitialize(&argc, (char***) argv, NULL, NULL)))
+      RETURN_ERROR(errmap[r]);
+  }
+
+  if ((r = PetscPushSignalHandler(petscsig, NULL)))
+    RETURN_ERROR(errmap[r]);
+
+  return OK;
+}
+
+DM_INLINE_STATIC P INIT_VEC_(B* frame, Vec* x) {
+  TEST_PETSC_VECTOR(frame);
+  if (! (*x = PETSC_VECTOR_VECTOR(frame))) 
+    RETURN_ERROR(PETSC_DM_INVVEC);
+  return OK;
+}
+
+#define INIT_VEC(frame, x) do {						\
+    P retc = INIT_VEC_(frame, &x);					\
+    if (retc) return retc;						\
+  } while (0)
+
+DM_INLINE_STATIC P INIT_MAT_(B* frame, Mat* A) {
+  TEST_PETSC_MATRIX(frame);
+  if (! (*A = PETSC_MATRIX_MATRIX(frame))) 
+    RETURN_ERROR(PETSC_DM_INVMAT);
+  return OK;
+}
+
+#define INIT_MAT(frame, A) do {						\
+    P retc = INIT_MAT_(frame, &A);					\
+    if (retc) return retc;						\
+  } while (0)
+
+DM_INLINE_STATIC P INIT_KSP_(B* frame, KSP* ksp) {
+  TEST_PETSC_KSP(frame);
+  if (! (*ksp = PETSC_KSP_KSP(frame)))
+    RETURN_ERROR(PETSC_DM_INVKSP);
+  return OK;
+}
+
+#define INIT_KSP(frame, ksp) do {		\
+    P retc = INIT_KSP_(frame, &ksp);		\
+    if (retc) return retc;			\
+  } while (0)
+
+#define PETSC_ERRCHECK(func) do {					\
+    PetscErrorCode r;							\
+    if ((r = func)) RETURN_ERROR(errmap[r]);				\
+  } while (0)
+
+
+//------------------------ petsc_vector_create
+// n | vec-handle
+// n is the size of the local portion of the vector.
+// the total size is n1+n2... over all mpi processes
+//
+DM_INLINE_STATIC P petsc_vec_create(void) {
+  PetscErrorCode r;
+  P n;
+  B* pframe;
+  B* oldfreevm = FREEvm;
+  Vec* x = NULL;
+
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != NUM) return OPD_CLA;
+  if (! PVALUE(o_1, &n)) return UNDF_VAL;
+
+  MAKE_PETSC_VECTOR(pframe, 0);
+  x = &PETSC_VECTOR_VECTOR(pframe);
+  *x = NULL;  
+  PETSC_VECTOR_N(pframe) = n;
+
+  if ((r = VecCreateMPI(PETSC_COMM_WORLD, n, PETSC_DECIDE, x)))
+    goto petscerr;
+
+  moveframe(pframe, o_1);
+  return OK;
+
+ petscerr:
+  if (x && *x) VecDestroy(*x);
+  *x = NULL;
+  FREEvm = oldfreevm;
+  RETURN_ERROR(errmap[r]);
+}
+
+// v1 v2 | v2
+DM_INLINE_STATIC P petsc_vec_copy(void) {
+  Vec x, y;
+  
+  if (o_2 > FLOORopds) return OPDS_UNF;
+  INIT_VEC(o_1, y);
+  INIT_VEC(o_2, x);
+  if (PETSC_VECTOR_N(o_1) != PETSC_VECTOR_N(o_2)) return RNG_CHK;
+  
+  PETSC_ERRCHECK(VecCopy(x, y));
+  
+  moveframe(o_1, o_2);
+  FREEopds = o_1;
+  return OK;
+}
+
+// <d > n v | v
+DM_INLINE_STATIC P petsc_vec_copyto(void) {
+  Vec x;
+  P n, len_arr, len_x;
+  D* a;
+  
+  if (o_3 < FLOORopds) return OPDS_UNF;
+  INIT_VEC(o_1, x);
+  if (CLASS(o_2) != NUM) return OPD_CLA;
+  if (! PVALUE(o_2, &n)) return UNDF_VAL;
+  if (TAG(o_3) != (ARRAY|DOUBLETYPE)) return OPD_ERR;
+
+  len_x = PETSC_VECTOR_N(o_1);
+  len_arr = ARRAY_SIZE(o_3);
+  if (n < 0 || n+len_arr > len_x) return RNG_CHK;
+
+  PETSC_ERRCHECK(VecGetArray(x, &a));
+  moveD((D*) VALUE_PTR(o_3), a+n, len_arr);
+  PETSC_ERRCHECK(VecRestoreArray(x, PETSC_NULL));
+
+  moveframe(o_1, o_3);
+  FREEopds = o_2;
+  return OK;
+}
+
+// v n <d > | <d >
+DM_INLINE_STATIC P petsc_vec_copyfrom(void) {
+  Vec x;
+  P n, len_arr, len_x;
+  D* a;
+
+  if (o_3 < FLOORopds) return OPDS_UNF;
+  INIT_VEC(o_3, x);
+  if (CLASS(o_2) != NUM) return OPD_CLA;
+  if (! PVALUE(o_2, &n)) return UNDF_VAL;
+  if (TAG(o_1) != (ARRAY|DOUBLETYPE)) return OPD_ERR;
+
+  len_x = PETSC_VECTOR_N(o_3);
+  len_arr = ARRAY_SIZE(o_1);
+  if (n < 0 || n+len_arr > len_x) return RNG_CHK;
+  
+  PETSC_ERRCHECK(VecGetArray(x, &a));
+  moveD(a+n, (D*) VALUE_PTR(o_3), len_arr);
+  PETSC_ERRCHECK(VecRestoreArray(x, PETSC_NULL));
+
+  FREEopds = o_2;
+  return OK;
+} 
+
+// vec-handle | max(v)
+DM_INLINE_STATIC P petsc_vec_max(void) {
+  Vec x;
+  D v;
+  PetscInt p;
+
+  if (FLOORopds > o_1) return OPDS_UNF;
+  INIT_VEC(o_1, x);
+  PETSC_ERRCHECK(VecMax(x, &p, &v));
+
+  TAG(o_1) = (NUM|DOUBLETYPE);
+  ATTR(o_1) = 0;
+  *(D*)NUM_VAL(o_1) = v;
+  return OK;
+}
+
+// vec-handle | min(v)
+DM_INLINE_STATIC P petsc_vec_min(void) {
+  Vec x;
+  D v;
+  PetscInt p;
+
+  if (FLOORopds > o_1) return OPDS_UNF;
+  INIT_VEC(o_1, x);
+  PETSC_ERRCHECK(VecMin(x, &p, &v));
+
+  TAG(o_1) = (NUM|DOUBLETYPE);
+  ATTR(o_1) = 0;
+  *(D*)NUM_VAL(o_1) = v;
+  return OK;
+}
+  
+// vec-handle | --
+DM_INLINE_STATIC P petsc_vec_destroy(void) {
+  Vec x;
+
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  INIT_VEC(o_1, x);
+
+  PETSC_ERRCHECK(VecDestroy(x));
+  PETSC_VECTOR_VECTOR(o_1) = NULL;
+
+  KILL_OPAQUE();
+  return OK;
+}
+
+// n <l irows> <l icols> | mat
+DM_INLINE_STATIC P petsc_mat_create(void) {
+  PetscErrorCode r;
+  P m, n;
+  L32* irows;
+  L32* icols;
+  L32 N;
+  B* pframe;
+  B* oldfreevm = FREEvm;
+  Mat* A = NULL;
+
+  if (FLOORopds > o_3) return OPDS_UNF;
+  if (CLASS(o_3) != NUM) return OPD_CLA;
+  if (! PVALUE(o_3, &n)) return UNDF_VAL;
+  if (TAG(o_2) != (ARRAY|LONG32TYPE) || TAG(o_1) != (ARRAY|LONG32TYPE))
+    return OPD_ERR;
+  if ((m = ARRAY_SIZE(o_2)-1) < 1) return RNG_CHK;
+  if ((N = ARRAY_SIZE(o_1)) > m*n) return RNG_CHK;
+
+  MAKE_PETSC_MATRIX(pframe, 0);
+  A = &PETSC_MATRIX_MATRIX(pframe);
+  *A = NULL;
+  PETSC_MATRIX_M(pframe) = m;
+  PETSC_MATRIX_N(pframe) = n;
+
+  irows = (L32*) VALUE_PTR(o_2);
+  icols = (L32*) VALUE_PTR(o_1);
+
+  if ((r = MatCreate(PETSC_COMM_WORLD, A))
+      || (r = MatSetType(*A, MATMPIMAIJ))
+      || (r = MatSetSizes(*A, m, n, PETSC_DETERMINE, PETSC_DETERMINE))
+      || (r = MatGetOwnershipRange(*A, &PETSC_MATRIX_GM(pframe), PETSC_NULL))
+      || (r = MatMPIAIJSetPreallocationCSR(*A, irows, icols, PETSC_NULL)))
+    goto petscerr;
+
+  moveframe(pframe, o_3);
+  FREEopds = o_2;
+  return OK;
+
+ petscerr:
+  if (A && *A) MatDestroy(*A);
+  *A = NULL;
+  FREEvm = oldfreevm;
+  RETURN_ERROR(errmap[r]);
+}
+
+DM_INLINE_STATIC P petsc_mat_destroy(void) {
+  Mat A;
+  
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  INIT_MAT(o_1, A);
+  
+  PETSC_ERRCHECK(MatDestroy(A));
+  PETSC_MATRIX_MATRIX(o_1) = NULL;
+  
+  KILL_OPAQUE();
+  return OK;
+}
+
+// A B | B
+DM_INLINE_STATIC P petsc_mat_copy(void) {
+  Mat A, B;
+  
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  INIT_MAT(o_2, A);
+  INIT_MAT(o_1, B);
+
+  PETSC_ERRCHECK(MatCopy(A, B, SAME_NONZERO_PATTERN));
+
+  moveframe(o_1, o_2);
+  FREEopds = o_1;
+  return OK;
+}
+
+// A | B(same shape as A)
+DM_INLINE_STATIC P petsc_mat_dup(void) {
+  PetscErrorCode r;
+  Mat A;
+  B* pframe;
+  Mat* Bm = NULL;
+  B* oldfreevm = FREEvm;
+  L32* row;
+  
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  INIT_MAT(o_1, A);
+
+  MAKE_PETSC_MATRIX(pframe, 0);
+  Bm = &PETSC_MATRIX_MATRIX(pframe);
+  *Bm = NULL;
+  PETSC_MATRIX_M(pframe) = PETSC_MATRIX_M(o_1);
+  PETSC_MATRIX_N(pframe) = PETSC_MATRIX_N(o_1);
+
+  row = &PETSC_MATRIX_GM(pframe);
+  if ((r = MatDuplicate(A, MAT_DO_NOT_COPY_VALUES, Bm))
+      || (r = MatGetOwnershipRange(*Bm, row, PETSC_NULL)))
+    goto petscerr;
+
+  if (PETSC_MATRIX_GM(o_1) != *row) {
+    MatDestroy(*Bm);
+    *Bm = NULL;
+    FREEvm = oldfreevm;
+    RETURN_ERROR(PETSC_DM_ILLEGAL_OWNERSHIP);
+  }
+
+  moveframe(pframe, o_1);
+  return OK;
+
+ petscerr:
+  if (Bm && *Bm) MatDestroy(*Bm);
+  *Bm = NULL;
+  FREEvm = oldfreevm;
+  RETURN_ERROR(errmap[r]);
+}
+
+// <d > m n A | A
+DM_INLINE_STATIC P petsc_mat_copyto(void) {
+  Mat A;
+  P m, n, len_arr, gm;
+  L32 ncols;
+  D* a;
+  D* row;
+
+  if (o_4 < FLOORopds) return OPDS_UNF;
+  INIT_MAT(o_1, A);
+  if (CLASS(o_2) != NUM || CLASS(o_3) != NUM) return OPD_CLA;
+  if (! PVALUE(o_2, &n) || ! PVALUE(o_3, &m)) return UNDF_VAL;
+  if (TAG(o_4) != (ARRAY|DOUBLETYPE)) return OPD_ERR;
+
+  gm = PETSC_MATRIX_GM(o_1);
+  PETSC_ERRCHECK(MatGetRow(A, gm+m, &ncols, PETSC_NULL, (const D**)&row));
+  if (FREEvm + sizeof(D)*ncols < CEILvm) moveD(row, (D*) FREEvm, ncols);
+  PETSC_ERRCHECK(MatRestoreRow(A, gm+m, &ncols, PETSC_NULL, (const D**)&row));
+  if (FREEvm + sizeof(L32)*ncols >= CEILvm) return VM_OVF;
+
+  row = (D*) FREEvm;  
+  len_arr = ARRAY_SIZE(o_4);
+  if (n < 0 || n + len_arr > ncols) return RNG_CHK;
+  a = (D*) VALUE_PTR(o_4);
+  moveD(a, row+n, len_arr);
+
+  PETSC_ERRCHECK(MatSetValuesRow(A, gm+m, row));
+
+  moveframe(o_1, o_4);
+  FREEopds = o_3;
+  return OK;
+}
+
+// A m n <d > | <d >
+DM_INLINE_STATIC P petsc_mat_copyfrom(void) {
+  Mat A;
+  P m, n, len_arr, gm;
+  L32 ncols;
+  D* a;
+  D* row;
+
+  if (o_4 < FLOORopds) return OPDS_UNF;
+  INIT_MAT(o_4, A);
+  if (CLASS(o_2) != NUM || CLASS(o_3) != NUM) return OPD_CLA;
+  if (! PVALUE(o_2, &n) || ! PVALUE(o_3, &m)) return UNDF_VAL;
+  if (TAG(o_1) != (ARRAY|DOUBLETYPE)) return OPD_ERR;
+
+  gm = PETSC_MATRIX_GM(o_4);
+  PETSC_ERRCHECK(MatGetRow(A, gm+m, &ncols, PETSC_NULL, (const D**)&row));
+  if (FREEvm + sizeof(D)*ncols < CEILvm) moveD(row, (D*) FREEvm, ncols);
+  PETSC_ERRCHECK(MatRestoreRow(A, gm+m, &ncols, PETSC_NULL, (const D**)&row));
+  if (FREEvm + sizeof(L32)*ncols >= CEILvm) return VM_OVF;
+
+  row = (D*) FREEvm;
+  len_arr = ARRAY_SIZE(o_1);
+  if (n < 0 || n + len_arr > ncols) return RNG_CHK;
+  a = (D*) VALUE_PTR(o_1);
+  moveD(row+n, a, len_arr);
+
+  moveframe(o_1, o_4);
+  FREEopds = o_3;
+  return OK;
+}
+
+// A x | Ax (in x)
+DM_INLINE_STATIC P petsc_mat_vecmul(void) {
+  Mat A;
+  Vec x;
+
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  INIT_MAT(o_2, A);
+  INIT_VEC(o_1, x);
+
+  if (PETSC_MATRIX_M(o_2) != PETSC_VECTOR_N(o_1))
+    RETURN_ERROR(PETSC_DM_NOMATCH);
+
+  PETSC_ERRCHECK(MatMult(A, x, x));
+
+  moveframe(o_1, o_2);
+  FREEopds = o_1;
+  return OK;
+}
+
+static KSPType ksptypes[] = {
+  KSPRICHARDSON,
+  KSPCHEBYCHEV,
+  KSPCG,
+  KSPCGNE,
+  KSPSTCG,
+  KSPGLTR,
+  KSPGMRES,
+  KSPFGMRES,
+  KSPLGMRES,
+  KSPTCQMR,
+  KSPBCGS,
+  KSPBCGSL,
+  KSPCGS,
+  KSPTFQMR,
+  KSPCR,
+  KSPLSQR,
+  KSPPREONLY,
+  KSPQCG,
+  KSPBICG,
+  KSPMINRES,
+  KSPSYMMLQ,
+  KSPLCD
+};
+
+static PCType pctypes[] = {
+  PCNONE,
+  PCJACOBI,
+  PCSOR,
+  PCLU,
+  PCSHELL,
+  PCBJACOBI,
+  PCMG,
+  PCEISENSTAT,
+  PCILU,
+  PCICC,
+  PCASM,
+  PCKSP,
+  PCCOMPOSITE,
+  PCREDUNDANT,
+  PCSPAI,
+  PCNN,
+  PCCHOLESKY,
+  PCSAMG,
+  PCPBJACOBI,
+  PCMAT,
+  PCHYPRE,
+  PCFIELDSPLIT,
+  PCTFS,
+  PCML,
+  PCPROMETHEUS,
+  PCGALERKIN,
+  PCOPENMP,
+};
+  
+// ksptype pctype | KSP
+DM_INLINE_STATIC P petsc_ksp_create(void) {
+  PetscErrorCode r;
+  B* pframe;
+  KSP* ksp = NULL;
+  PC pc;
+  P ksptype, pctype;
+  B* oldfreevm = FREEvm;
+
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_2) != NUM) return OPD_CLA;
+  if (! PVALUE(o_2, &ksptype)) return UNDF_VAL;
+  if (ksptype < 0 || ksptype >= (P) (sizeof(ksptypes)/sizeof(ksptypes[0]))) 
+    return RNG_CHK;
+  if (CLASS(o_1) != NUM) return OPD_CLA;
+  if (! PVALUE(o_1, &pctype)) return UNDF_VAL;
+  if (pctype < 0 || pctype >= (P) (sizeof(pctypes)/sizeof(pctypes[0])))
+    return RNG_CHK;
+
+  MAKE_PETSC_KSP(pframe, 0);
+  ksp = &PETSC_KSP_KSP(pframe);
+  *ksp = NULL;
+  PETSC_KSP_M(pframe) = 0;
+  PETSC_KSP_KSPTYPE(pframe) = ksptype;
+  PETSC_KSP_PCTYPE(pframe) = pctype;
+
+  if ((r = KSPCreate(PETSC_COMM_WORLD, ksp))
+      || (r = KSPSetType(*ksp, ksptypes[ksptype]))
+      || (r = KSPSetInitialGuessNonzero(*ksp, PETSC_TRUE))
+      || (r = KSPGetPC(*ksp, &pc))
+      || (r = PCSetType(pc, pctypes[pctype])))
+    goto petscerr;
+
+  moveframe(pframe, o_1);
+  return OK;
+
+ petscerr:
+  if (ksp && *ksp) KSPDestroy(*ksp);
+  *ksp = NULL;
+  FREEvm = oldfreevm;
+  RETURN_ERROR(errmap[r]);
+}
+
+// ksp | --
+DM_INLINE_STATIC P petsc_ksp_destroy(void) {
+  KSP ksp;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  INIT_KSP(o_1, ksp);
+
+  PETSC_ERRCHECK(KSPDestroy(ksp));
+  PETSC_KSP_KSP(o_1) = NULL;
+
+  KILL_OPAQUE();
+  return OK;
+}
+
+// rtol atol dtol maxits ksp | --
+DM_INLINE_STATIC P petsc_ksp_tol(void) {
+  D rtol, atol, dtol;
+  LBIG maxits;
+  KSP ksp;
+
+  if (o_5 < FLOORopds) return OPDS_UNF;
+  INIT_KSP(o_1, ksp);
+
+  if (CLASS(o_2) != NUM 
+      || CLASS(o_3) != NUM 
+      || CLASS(o_4) != NUM 
+      || CLASS(o_5) != NUM) return OPD_CLA;
+
+  VALUE(o_2, &maxits);
+  DVALUE(o_3, &dtol);
+  DVALUE(o_4, &atol);
+  DVALUE(o_5, &rtol);
+
+  PETSC_ERRCHECK(KSPSetTolerances(ksp, 
+				  ISUNDEF(rtol) ? rtol : PETSC_DEFAULT,
+				  ISUNDEF(atol) ? atol : PETSC_DEFAULT,
+  				  ISUNDEF(dtol) ? dtol : PETSC_DEFAULT,
+				  maxits != LBIGINF ? maxits : PETSC_DEFAULT));
+
+  FREEopds = o_5;
+  return OK;
+}
+
+// KSP A/null x b | x
+DM_INLINE_STATIC P petsc_ksp_solve(void) {
+  KSP ksp;
+  Mat A;
+  Vec x;
+  Vec b;
+  L32 its;
+  L32* m;
+  L32 n;
+
+  if (o_4 < FLOORopds) return OPDS_UNF;
+  INIT_VEC(o_1, b);
+  INIT_VEC(o_2, x);
+  if (CLASS(o_3) != NULLOBJ) INIT_MAT(o_3, A);
+  else A = NULL;
+  INIT_KSP(o_4, ksp);
+
+  m = &PETSC_KSP_M(o_4);
+  if (A) *m = PETSC_MATRIX_M(o_3);
+  else if (! *m) RETURN_ERROR(PETSC_DM_KSPSOLVE_NOINIT);
+  
+  n = PETSC_VECTOR_N(o_2);
+  if (*m !=  n || n != PETSC_VECTOR_N(o_1)) RETURN_ERROR(PETSC_DM_NOMATCH);
+  if (A) PETSC_ERRCHECK(KSPSetOperators(ksp, A, A, SAME_NONZERO_PATTERN));
+
+  PETSC_ERRCHECK(KSPSolve(ksp, b, x));
+
+  moveframe(o_2, o_4);
+  TAG(o_3) = (NUM|LONG32TYPE);
+  ATTR(o_3) = 0;
+  L32_VAL(o_3) = its;
+  FREEopds = o_2;
+  return OK;
+}
+
+// ksp | iterations
+DM_INLINE_STATIC P petsc_ksp_iterations(void) {
+  KSP ksp;
+  L32 its;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  INIT_KSP(o_1, ksp);
+
+  if (! PETSC_KSP_M(o_1)) RETURN_ERROR(PETSC_DM_KSPSOLVE_NOINIT);
+  PETSC_ERRCHECK(KSPGetIterationNumber(ksp, &its));
+
+  TAG(o_1) = (NUM|LONG32TYPE);
+  ATTR(o_1) = 0;
+  L32_VAL(o_1) = abs(its);
+
+  return OK;
+}
+
+#include "dm-petsc-main.h"

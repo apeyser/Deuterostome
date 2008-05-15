@@ -86,7 +86,7 @@ extern B buffernameframe[FRAMEBYTES];
 #define OPAQUE_BUFFER_GET(frame) OPAQUE_MEM(frame, buffernameframe)
 
 
-#define OPAQUE_MEM_SET_NR(frame, nameframe, newframe) do {	\
+#define OPAQUE_MEM_SET_NR(frame, nameframe, newframe) do {  \
     ATTR(newframe) &= ~READONLY;                            \
     moveframe(newframe, OPAQUE_MEM(frame, nameframe));      \
   } while (0)
@@ -94,12 +94,10 @@ extern B buffernameframe[FRAMEBYTES];
 #define MAKE_OPAQUE_DICT(n, ...)					\
   (make_opaque_frame(n, opaquename, __VA_ARGS__, NULL))
 
-// frame must be removed from the stack before call
-#define KILL_OPAQUE(frame) do {						\
+// dict should be o_1
+#define KILL_OPAQUE() do {						\
     P ret;								\
-    if (o1 >= CEILopds) return OPDS_OVF;				\
-    moveframe(OPAQUE_MEM(frame, saveboxname), o1);			\
-    FREEopds = o2;							\
+    moveframe(OPAQUE_MEM(o_1, saveboxname), o_1);			\
     if ((ret = op_restore()) != OK) return ret;				\
   } while (0)
 
