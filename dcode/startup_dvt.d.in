@@ -2327,8 +2327,8 @@ end mkmousedict def
 /mouseaction {/actiondict name
   | bottom 8 bits are the modifier keys, bottom 8 of top 16 is mouse button
   | Why? No clear reason.
-  exch dup -16 bitshift /mB name 255 and /mM name | /wintype
-  false mousedict 3 -1 roll get {                 | false /event {}
+  exch dup -16 bitshift _ /mB name 255 and _ /mM name | /wintype
+  false mousedict 3 -1 roll get {                     | false /event {}
     actiondict 2 index known not {pop pop} {
       exec {exch pop true exit} {pop} ifelse
     } ifelse

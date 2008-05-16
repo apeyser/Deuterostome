@@ -66,6 +66,8 @@ end def
 end def
 
 
+/caplayer {userdict /PETSC_ get capsave} bind def
+
 dm_type /dpawn eq {
   getplugindir (dm-petsc.la) loadlib /petsc name
 
@@ -83,7 +85,6 @@ dm_type /dpawn eq {
     PETSC begin /PETSC_ layer stopped /PETSC_ _layer {stop} if
   } bind def
 
-
   | /name <d ...> | --
   /vec_create {
     0 1 index length petsc_vec_create petsc_vec_copyto def
@@ -92,13 +93,12 @@ dm_type /dpawn eq {
   | /A n <l irows> <l icols> <d data> | --
   /mat_create {
     {/data name 1 index /irows name
-      petsc_mat_create /A name
+      caplayer petsc_mat_create 
+      dup /A name
       0 1 A /m get 1 sub {/i name
         data irow i get irow i 1 add get 1 index sub getinterval
         i 0 A petsc_mat_copyto pop
       } for
-
-      A
     } in_petsc
     def
   } bind def
@@ -106,11 +106,9 @@ dm_type /dpawn eq {
   | A x | -- (Ax on dnode)
   /get_matvecmul {
     {
-      save
       petsc_mat_vecmul 
       0 1 index /n get /d array petsc_vec_copyfrom 
       ~[exch n ~get_matvecmul_res] rsend
-      restore
     } in_petsc
   } bind def
 
@@ -118,6 +116,7 @@ dm_type /dpawn eq {
   /ksp_create {
     {
       begin {
+        caplayer
         ksptype kspparam pctype pcparam petsc_ksp_create
         dup rtol atol dtol maxits petsc_ksp_tol
       } stopped end {stop} if
