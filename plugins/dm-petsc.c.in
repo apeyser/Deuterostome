@@ -144,12 +144,12 @@ DM_INLINE_STATIC P petsc_vec_create(void) {
   PETSC_VECTOR_N(pframe) = n;
 
   if ((r = VecCreateMPI(PETSC_COMM_WORLD, n, PETSC_DECIDE, x)))
-    goto petscerr;
+    goto err;
 
   moveframe(pframe, o_1);
   return OK;
 
- petscerr:
+ err:
   if (x && *x) VecDestroy(*x);
   *x = NULL;
   FREEvm = oldfreevm;
@@ -300,13 +300,13 @@ DM_INLINE_STATIC P petsc_mat_create(void) {
       || (r = MatSetSizes(*A, m, n, PETSC_DETERMINE, PETSC_DETERMINE))
       || (r = MatGetOwnershipRange(*A, &PETSC_MATRIX_GM(pframe), PETSC_NULL))
       || (r = MatMPIAIJSetPreallocationCSR(*A, irows, icols, PETSC_NULL)))
-    goto petscerr;
+    goto err;
 
   moveframe(pframe, o_3);
   FREEopds = o_2;
   return OK;
 
- petscerr:
+ err:
   if (A && *A) MatDestroy(*A);
   *A = NULL;
   FREEvm = oldfreevm;
@@ -344,6 +344,7 @@ DM_INLINE_STATIC P petsc_mat_copy(void) {
 // A | B(same shape as A)
 DM_INLINE_STATIC P petsc_mat_dup(void) {
   PetscErrorCode r;
+  P retc = 0;
   Mat A;
   B* pframe;
   Mat* Bm = NULL;
@@ -362,23 +363,21 @@ DM_INLINE_STATIC P petsc_mat_dup(void) {
   row = &PETSC_MATRIX_GM(pframe);
   if ((r = MatDuplicate(A, MAT_DO_NOT_COPY_VALUES, Bm))
       || (r = MatGetOwnershipRange(*Bm, row, PETSC_NULL)))
-    goto petscerr;
+    goto err;
 
   if (PETSC_MATRIX_GM(o_1) != *row) {
-    MatDestroy(*Bm);
-    *Bm = NULL;
-    FREEvm = oldfreevm;
-    RETURN_ERROR(PETSC_DM_ILLEGAL_OWNERSHIP);
+    retc = PETSC_DM_ILLEGAL_OWNERSHIP;
+    goto err;
   }
 
   moveframe(pframe, o_1);
   return OK;
 
- petscerr:
+ err:
   if (Bm && *Bm) MatDestroy(*Bm);
   *Bm = NULL;
   FREEvm = oldfreevm;
-  RETURN_ERROR(errmap[r]);
+  RETURN_ERROR(retc ? retc : errmap[r]);
 }
 
 // <d > m n A | A
@@ -464,79 +463,95 @@ DM_INLINE_STATIC P petsc_mat_vecmul(void) {
   return OK;
 }
 
-static KSPType ksptypes[] = {
-  KSPRICHARDSON,
-  KSPCHEBYCHEV,
-  KSPCG,
-  KSPCGNE,
-  KSPSTCG,
-  KSPGLTR,
-  KSPGMRES,
-  KSPFGMRES,
-  KSPLGMRES,
-  KSPTCQMR,
-  KSPBCGS,
-  KSPBCGSL,
-  KSPCGS,
-  KSPTFQMR,
-  KSPCR,
-  KSPLSQR,
-  KSPPREONLY,
-  KSPQCG,
-  KSPBICG,
-  KSPMINRES,
-  KSPSYMMLQ,
-  KSPLCD
+typedef P (*KSPFunc)(KSP ksp, B* param);
+typedef struct {
+  KSPType t;
+  KSPFunc f;
+} KSPFlags;
+
+static const KSPFlags ksptypes[] = {
+  {KSPRICHARDSON, NULL},
+  {KSPCHEBYCHEV, NULL},
+  {KSPCG, NULL},
+  {KSPCGNE, NULL},
+  {KSPSTCG, NULL},
+  {KSPGLTR, NULL},
+  {KSPGMRES, NULL},
+  {KSPFGMRES, NULL},
+  {KSPLGMRES, NULL},
+  {KSPTCQMR, NULL},
+  {KSPBCGS, NULL},
+  {KSPBCGSL, NULL},
+  {KSPCGS, NULL},
+  {KSPTFQMR, NULL},
+  {KSPCR, NULL},
+  {KSPLSQR, NULL},
+  {KSPPREONLY, NULL},
+  {KSPQCG, NULL},
+  {KSPBICG, NULL},
+  {KSPMINRES, NULL},
+  {KSPSYMMLQ, NULL},
+  {KSPLCD, NULL}
 };
 
-static PCType pctypes[] = {
-  PCNONE,
-  PCJACOBI,
-  PCSOR,
-  PCLU,
-  PCSHELL,
-  PCBJACOBI,
-  PCMG,
-  PCEISENSTAT,
-  PCILU,
-  PCICC,
-  PCASM,
-  PCKSP,
-  PCCOMPOSITE,
-  PCREDUNDANT,
-  PCSPAI,
-  PCNN,
-  PCCHOLESKY,
-  PCSAMG,
-  PCPBJACOBI,
-  PCMAT,
-  PCHYPRE,
-  PCFIELDSPLIT,
-  PCTFS,
-  PCML,
-  PCPROMETHEUS,
-  PCGALERKIN,
-  PCOPENMP,
+typedef P (*PCFunc)(PC pc, B* param);
+typedef struct {
+  PCType t;
+  PCFunc f;
+} PCFlags;
+
+static const PCFlags pctypes[] = {
+  {PCNONE, NULL},
+  {PCJACOBI, NULL},
+  {PCSOR, NULL},
+  {PCLU, NULL},
+  {PCSHELL, NULL},
+  {PCBJACOBI, NULL},
+  {PCMG, NULL},
+  {PCEISENSTAT, NULL},
+  {PCILU, NULL},
+  {PCICC, NULL},
+  {PCASM, NULL},
+  {PCKSP, NULL},
+  {PCCOMPOSITE, NULL},
+  {PCREDUNDANT, NULL},
+  {PCSPAI, NULL},
+  {PCNN, NULL},
+  {PCCHOLESKY, NULL},
+  {PCSAMG, NULL},
+  {PCPBJACOBI, NULL},
+  {PCMAT, NULL},
+  {PCHYPRE, NULL},
+  {PCFIELDSPLIT, NULL},
+  {PCTFS, NULL},
+  {PCML, NULL},
+  {PCPROMETHEUS, NULL},
+  {PCGALERKIN, NULL},
+  {PCOPENMP, NULL}
 };
   
-// ksptype pctype | KSP
+// ksptype ksparam pctype pcparams | KSP
 DM_INLINE_STATIC P petsc_ksp_create(void) {
   PetscErrorCode r;
+  P retc = 0;
   B* pframe;
   KSP* ksp = NULL;
   PC pc;
   P ksptype, pctype;
   B* oldfreevm = FREEvm;
+  B* pcparam; B* kspparam;
 
-  if (o_2 < FLOORopds) return OPDS_UNF;
-  if (CLASS(o_2) != NUM) return OPD_CLA;
-  if (! PVALUE(o_2, &ksptype)) return UNDF_VAL;
-  if (ksptype < 0 || ksptype >= (P) (sizeof(ksptypes)/sizeof(ksptypes[0]))) 
+  if (o_4 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_4) != NUM) return OPD_CLA;
+  PVALUE(o_4, &ksptype);
+  if (ksptype < 0 || ksptype >= (P) (sizeof(ksptypes)/sizeof(ksptypes[0])))
     return RNG_CHK;
-  if (CLASS(o_1) != NUM) return OPD_CLA;
-  if (! PVALUE(o_1, &pctype)) return UNDF_VAL;
+  kspparam = o_3;
+  if (CLASS(o_2) != NUM) return OPD_CLA;
+  PVALUE(o_2, &pctype);
   if (pctype < 0 || pctype >= (P) (sizeof(pctypes)/sizeof(pctypes[0])))
     return RNG_CHK;
+  pcparam = o_1;
 
   MAKE_PETSC_KSP(pframe, 0);
   ksp = &PETSC_KSP_KSP(pframe);
@@ -546,19 +561,23 @@ DM_INLINE_STATIC P petsc_ksp_create(void) {
   PETSC_KSP_PCTYPE(pframe) = pctype;
 
   if ((r = KSPCreate(PETSC_COMM_WORLD, ksp))
-      || (r = KSPSetType(*ksp, ksptypes[ksptype]))
       || (r = KSPSetInitialGuessNonzero(*ksp, PETSC_TRUE))
-      || (r = KSPGetPC(*ksp, &pc))
-      || (r = PCSetType(pc, pctypes[pctype])))
-    goto petscerr;
+      || (ksptype != PINF && (r = KSPSetType(*ksp, ksptypes[ksptype].t)))
+      || (pctype != PINF && ((r = KSPGetPC(*ksp, &pc))
+			  || (r = PCSetType(pc, pctypes[pctype].t))))
+      || (ksptypes[ksptype].f && (retc = ksptypes[ksptype].f(*ksp, kspparam)))
+      || (pctypes[pctype].f && (retc = pctypes[pctype].f(pc, pcparam))))
+    goto err;
 
-  moveframe(pframe, o_1);
+  moveframe(pframe, o_4);
+  FREEopds = o_3;
   return OK;
 
- petscerr:
+ err:
   if (ksp && *ksp) KSPDestroy(*ksp);
   *ksp = NULL;
   FREEvm = oldfreevm;
+  if (retc) return retc;
   RETURN_ERROR(errmap[r]);
 }
 
@@ -575,24 +594,24 @@ DM_INLINE_STATIC P petsc_ksp_destroy(void) {
   return OK;
 }
 
-// rtol atol dtol maxits ksp | --
+// ksp rtol atol dtol maxits | --
 DM_INLINE_STATIC P petsc_ksp_tol(void) {
   D rtol, atol, dtol;
   LBIG maxits;
   KSP ksp;
 
   if (o_5 < FLOORopds) return OPDS_UNF;
-  INIT_KSP(o_1, ksp);
+  INIT_KSP(o_5, ksp);
 
-  if (CLASS(o_2) != NUM 
+  if (CLASS(o_1) != NUM 
+      || CLASS(o_2) != NUM 
       || CLASS(o_3) != NUM 
-      || CLASS(o_4) != NUM 
-      || CLASS(o_5) != NUM) return OPD_CLA;
+      || CLASS(o_4) != NUM) return OPD_CLA;
 
-  VALUE(o_2, &maxits);
-  DVALUE(o_3, &dtol);
-  DVALUE(o_4, &atol);
-  DVALUE(o_5, &rtol);
+  VALUE(o_1, &maxits);
+  DVALUE(o_2, &dtol);
+  DVALUE(o_3, &atol);
+  DVALUE(o_4, &rtol);
 
   PETSC_ERRCHECK(KSPSetTolerances(ksp, 
 				  ISUNDEF(rtol) ? rtol : PETSC_DEFAULT,
@@ -610,7 +629,6 @@ DM_INLINE_STATIC P petsc_ksp_solve(void) {
   Mat A;
   Vec x;
   Vec b;
-  L32 its;
   L32* m;
   L32 n;
 
@@ -632,10 +650,7 @@ DM_INLINE_STATIC P petsc_ksp_solve(void) {
   PETSC_ERRCHECK(KSPSolve(ksp, b, x));
 
   moveframe(o_2, o_4);
-  TAG(o_3) = (NUM|LONG32TYPE);
-  ATTR(o_3) = 0;
-  L32_VAL(o_3) = its;
-  FREEopds = o_2;
+  FREEopds = o_3;
   return OK;
 }
 

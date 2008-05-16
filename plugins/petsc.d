@@ -114,6 +114,47 @@ dm_type /dpawn eq {
     } in_petsc
   } bind def
 
+  | ksp kspsettings | --
+  /ksp_create {
+    {
+      begin {
+        ksptype kspparam pctype pcparam petsc_ksp_create
+        dup rtol atol dtol maxits petsc_ksp_tol
+      } stopped end {stop} if
+    } in_petsc
+    def
+  } bind def
+
+  /vec_destroy {
+    {petsc_vec_destroy} in_petsc
+  } bind def
+
+  /mat_destroy {
+    {petsc_mat_destroy} in_petsc
+  } bind def
+
+  /ksp_destroy {
+    {petsc_ksp_destroy} in_petsc
+  } bind def
+
+  /report true def
+  /repbuf 255 /b array def
+
+  | ksp A/null x b | --
+  /ksp_solve {
+    {3 index /ksp name
+      petsc_ksp_solve pop
+      n 0 eq {
+        report {
+          repbuf 0 (Convergence iterations: ) fax 
+                 * ksp petsc_ksp_iterations * number
+                 (\n) fax
+          0 exch getinterval toconsole
+        } if
+      } if
+    } in_petsc
+  } bind def
+
 } {
 
   /in_petsc {
@@ -162,15 +203,15 @@ dm_type /dpawn eq {
     } lock
   } bind def
 
+  | ~func-maker | --
+  /callwait {/cfunc name
+    {0 1 n 1 sub {dup cfunc call} for wait} in_petsc
+  } bind def
+
   | /x <d ...> | --
   /vec_create {
-    {
-      /v name /x name
-      0 1 n 1 sub {/i name
-        i ~[x v i v length range getinterval ~vec_create] call
-      } for wait
-
-      x v
+    {2 copy /v name /x name
+      {~[x v 4 -1 roll v length range getinterval ~vec_create]} callwait
     } in_petsc
     def
   } bind def
@@ -178,20 +219,19 @@ dm_type /dpawn eq {
   | /A n <l irows> <l icols> <d data> | -- 
   /mat_create {
     {
-      /data name /icols name /irows name /cols name /A name
-      /irows_ irows dup length /l array copy def
-      0 1 n 1 sub {/i name
+      dup 5 1 roll /data name /icols name /irows name /cols name
+      /irows_ irows length /l array def
+      {/i name
         i irows length 1 sub range /nl name /n0 name
-        i ~[
+        ~[
           A cols
-          irows_ n0 nl getinterval irows i get sub
+          irows  n0 nl 1 add getinterval  
+          irows_ n0 nl 1 add getinterval copy irows i get sub
           icols irows i get irows i 1 add get 1 index sub getinterval
           data  irows i get irows i 1 add get 1 index sub getinterval
           ~mat_create
-        ] call
-      } for wait
-
-      A data
+        ]
+      } callwait
     } in_petsc
     def
   } bind def
@@ -201,10 +241,7 @@ dm_type /dpawn eq {
     {
       /x name /A name
       /x_ x find def
-      0 1 n 1 sub {/i name
-        i ~[A mkact x mkact ~get_matvecmul] call
-      } for
-      wait
+      {pop ~[A mkact x mkact ~get_matvecmul]} callwait
     } in_petsc
   } bind def
 
@@ -212,6 +249,57 @@ dm_type /dpawn eq {
   /get_matvecmul_res {
     x_ exch 1 index length ~range lock getinterval copy pop
   } bind def
+
+  /kspsettings 8 dict dup begin |[
+    /rtol     1e-12                          def
+    /atol     *                              def
+    /dtol     {1d kspsettings /rtol get div} def
+    /maxits   *                              def
+    /pctype   *                              def
+    /kpstype  *                              def 
+    /kspparam null                           def
+    /pcparam  null                           def |]
+  end def
+
+  | /ksp | --
+  /ksp_create {
+    kspsettings {pop ~[3 index mkact 3 index ~ksp_create]} callwait pop pop
+  } bind def
+
+  | /x | --
+  /vec_destroy {
+    {pop ~[2 index mkact ~vec_destroy]} callwait pop
+  } bind def
+
+  | /A | --
+  /mat_destroy {
+    {pop ~[2 index mkact ~mat_destroy]} callwait pop
+  } bind def
+
+  | /ksp | --
+  /ksp_destroy {
+    {pop ~[2 index mkact ~ksp_destroy]} callwait pop
+  } bind def
+
+  | /ksp /A /x /b | --
+  /ksp_solve {
+    {pop 
+      ~[5 index mkact 5 index mkact 5 index mkact 5 index mkact ~ksp_solve]
+    } callwait pop pop pop pop
+  } bind def
+
+  | /ksp /x /b | --
+  /ksp_resolve {
+    {pop 
+      ~[4 index mkact null 5 index mkact 5 index mkact ~ksp_solve]
+    } callwait pop pop pop
+  } bind def
+
+  | bool | --
+  /report {
+    0 ~[3 -1 roll {{/report name} in_petsc} ~lock] rsend
+  } bind def
+
 } ifelse
 
 end _module
