@@ -22,7 +22,7 @@ static PetscErrorCode petscsig(int sig __attribute__ ((__unused__)),
   return PETSC_ERR_SIG;
 }
 
-static P errmap[PETSC_ERR_MAX_VALUE];
+static P errmap[PETSC_ERR_MAX_VALUE + (-KSP_DIVERGED_INDEFINITE_MAT) + 1];
 
 DM_INLINE_STATIC P init_(void) {
   int argc = 1;
@@ -67,6 +67,25 @@ DM_INLINE_STATIC P init_(void) {
   errmap[PETSC_ERR_MAT_LU_ZRPVT] = PETSC_DM_ERR_MAT_LU_ZRPVT;
   errmap[PETSC_ERR_MAT_CH_ZRPVT] = PETSC_DM_ERR_MAT_CH_ZRPVT;
 
+  errmap[PETSC_ERR_MAX_VALUE + (-KSP_DIVERGED_NULL)] 
+    = PETSC_DM_DIVERGED_NULL;
+  errmap[PETSC_ERR_MAX_VALUE + (-KSP_DIVERGED_ITS)] 
+    = PETSC_DM_DIVERGED_ITS;
+  errmap[PETSC_ERR_MAX_VALUE + (-KSP_DIVERGED_DTOL)] 
+    = PETSC_DM_DIVERGED_DTOL;
+  errmap[PETSC_ERR_MAX_VALUE + (-KSP_DIVERGED_BREAKDOWN)] 
+    = PETSC_DM_DIVERGED_BREAKDOWN;
+  errmap[PETSC_ERR_MAX_VALUE + (-KSP_DIVERGED_BREAKDOWN_BICG)] 
+    = PETSC_DM_DIVERGED_BREAKDOWN_BICG;
+  errmap[PETSC_ERR_MAX_VALUE + (-KSP_DIVERGED_NONSYMMETRIC)] 
+    = PETSC_DM_DIVERGED_NONSYMMETRIC;
+  errmap[PETSC_ERR_MAX_VALUE + (-KSP_DIVERGED_INDEFINITE_PC)] 
+    = PETSC_DM_DIVERGED_INDEFINITE_PC;
+  errmap[PETSC_ERR_MAX_VALUE + (-KSP_DIVERGED_NAN)] 
+    = PETSC_DM_DIVERGED_NAN;
+  errmap[PETSC_ERR_MAX_VALUE + (-KSP_DIVERGED_INDEFINITE_MAT)] 
+    = PETSC_DM_DIVERGED_INDEFINITE_MAT;
+
   if (! getenv("PETSC_DM_INITD")) {
     if (setenv("PETSC_DM_INITD", "yes", 1))
       return -errno;
@@ -79,6 +98,15 @@ DM_INLINE_STATIC P init_(void) {
 
   return OK;
 }
+
+DM_INLINE_STATIC P fini_(void) {
+  PetscErrorCode r;
+  if ((r = PetscPopSignalHandler()))
+    RETURN_ERROR(errmap[r]);
+  
+  return OK;
+}
+
 
 DM_INLINE_STATIC P INIT_VEC_(B* frame, Vec* x) {
   TEST_PETSC_VECTOR(frame);
@@ -197,10 +225,10 @@ DM_INLINE_STATIC P petsc_vec_copyto(void) {
   return OK;
 }
 
-// v n <d > | <d >
+// v n <d > | <d sub-array>
 DM_INLINE_STATIC P petsc_vec_copyfrom(void) {
   Vec x;
-  P n, len_arr, len_x;
+  P n, len_arr, len_x, ncols;
   D* a;
 
   if (o_3 < FLOORopds) return OPDS_UNF;
@@ -211,12 +239,15 @@ DM_INLINE_STATIC P petsc_vec_copyfrom(void) {
 
   len_x = PETSC_VECTOR_N(o_3);
   len_arr = ARRAY_SIZE(o_1);
-  if (n < 0 || n+len_arr > len_x) return RNG_CHK;
+  if (n < 0 || n >= len_x) return RNG_CHK;
   
+  ncols = (len_x - n < len_arr) ? len_x - n : len_arr;
   PETSC_ERRCHECK(VecGetArray(x, &a));
-  moveD(a+n, (D*) VALUE_PTR(o_3), len_arr);
+  moveD(a+n, (D*) VALUE_PTR(o_3), ncols);
   PETSC_ERRCHECK(VecRestoreArray(x, PETSC_NULL));
 
+  moveframe(o_1, o_3);
+  ARRAY_SIZE(o_3) = ncols;
   FREEopds = o_2;
   return OK;
 } 
@@ -413,11 +444,11 @@ DM_INLINE_STATIC P petsc_mat_copyto(void) {
   return OK;
 }
 
-// A m n <d > | <d >
+// A m n <d > | <d sub-array>
 DM_INLINE_STATIC P petsc_mat_copyfrom(void) {
   Mat A;
   P m, n, len_arr, gm;
-  L32 ncols;
+  L32 ncols, ncols_;
   D* a;
   D* row;
 
@@ -435,11 +466,13 @@ DM_INLINE_STATIC P petsc_mat_copyfrom(void) {
 
   row = (D*) FREEvm;
   len_arr = ARRAY_SIZE(o_1);
-  if (n < 0 || n + len_arr > ncols) return RNG_CHK;
+  if (n < 0 || n >= ncols) return RNG_CHK;
+  ncols_ = (len_arr < ncols - n) ? len_arr : ncols - n;
   a = (D*) VALUE_PTR(o_1);
-  moveD(row+n, a, len_arr);
+  moveD(row+n, a, ncols_);
 
   moveframe(o_1, o_4);
+  ARRAY_SIZE(o_4) = ncols_;
   FREEopds = o_3;
   return OK;
 }
@@ -631,6 +664,7 @@ DM_INLINE_STATIC P petsc_ksp_solve(void) {
   Vec b;
   L32* m;
   L32 n;
+  KSPConvergedReason r;
 
   if (o_4 < FLOORopds) return OPDS_UNF;
   INIT_VEC(o_1, b);
@@ -647,7 +681,11 @@ DM_INLINE_STATIC P petsc_ksp_solve(void) {
   if (*m !=  n || n != PETSC_VECTOR_N(o_1)) RETURN_ERROR(PETSC_DM_NOMATCH);
   if (A) PETSC_ERRCHECK(KSPSetOperators(ksp, A, A, SAME_NONZERO_PATTERN));
 
+  PETSC_ERRCHECK(KSPSetUp(ksp));
   PETSC_ERRCHECK(KSPSolve(ksp, b, x));
+  PETSC_ERRCHECK(KSPGetConvergedReason(ksp, &r));
+  if (r < 0) RETURN_ERROR(errmap[PETSC_ERR_MAX_VALUE + (-r)]);
+    
 
   moveframe(o_2, o_4);
   FREEopds = o_3;

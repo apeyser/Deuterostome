@@ -61,11 +61,21 @@ end def
   /DM_ERR_FILE_WRITE (unable to write to file) def
   /DM_ERR_FILE_UNEXPECTED (unexpected data in file) def
   /DM_ERR_MAT_LU_ZRPVT (detected a zero pivot during LU factorization) def
-  /DM_ERR_MAT_CH_ZRPVT (detected a zero pivot during Cholesky factorization) def |]
+  /DM_ERR_MAT_CH_ZRPVT (detected a zero pivot during Cholesky factorization) def 
+  /DM_DIVERGED_NULL (diverged due to null) def
+  /DM_DIVERGED_ITS (diverged due to iterations) def
+  /DM_DIVERGED_DTOL (diverged due to solution magnitude \(dtol\)) def
+  /DM_DIVERGED_BREAKDOWN (diverged due to breakdown) def
+  /DM_DIVERGED_BREAKDOWN_BICG (diverged due to breakdown bigcg \(\\?\\?\)) def
+  /DM_DIVERGED_NONSYMMETRIC (diverged due to nonsymmetric) def
+  /DM_DIVERGED_INDEFINITE_PC (diverged due to indefinite preconditioner) def
+  /DM_DIVERGED_NAN (diverged due to Not-A-Number) def
+  /DM_DIVERGED_INDEFINITE_MAT (diverged due to indefinite matrix) def |]
 end def
 
 /plugin_ops 100 dict dup begin |[
   /init_ null def
+  /fini_ null def
   /petsc_vec_create null def
   /petsc_vec_copy null def
   /petsc_vec_copyto null def

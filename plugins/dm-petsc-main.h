@@ -40,6 +40,15 @@ P ll_errc[] = {
   PETSC_DM_ERR_FILE_UNEXPECTED, 
   PETSC_DM_ERR_MAT_LU_ZRPVT, 
   PETSC_DM_ERR_MAT_CH_ZRPVT, 
+  PETSC_DM_DIVERGED_NULL, 
+  PETSC_DM_DIVERGED_ITS, 
+  PETSC_DM_DIVERGED_DTOL, 
+  PETSC_DM_DIVERGED_BREAKDOWN, 
+  PETSC_DM_DIVERGED_BREAKDOWN_BICG, 
+  PETSC_DM_DIVERGED_NONSYMMETRIC, 
+  PETSC_DM_DIVERGED_INDEFINITE_PC, 
+  PETSC_DM_DIVERGED_NAN, 
+  PETSC_DM_DIVERGED_INDEFINITE_MAT, 
   0L
 };
 
@@ -81,11 +90,21 @@ B* ll_errm[] = {
   (B*)"** petsc: unexpected data in file", 
   (B*)"** petsc: detected a zero pivot during LU factorization", 
   (B*)"** petsc: detected a zero pivot during Cholesky factorization", 
+  (B*)"** petsc: diverged due to null", 
+  (B*)"** petsc: diverged due to iterations", 
+  (B*)"** petsc: diverged due to solution magnitude (dtol)", 
+  (B*)"** petsc: diverged due to breakdown", 
+  (B*)"** petsc: diverged due to breakdown bigcg (\?\?)", 
+  (B*)"** petsc: diverged due to nonsymmetric", 
+  (B*)"** petsc: diverged due to indefinite preconditioner", 
+  (B*)"** petsc: diverged due to Not-A-Number", 
+  (B*)"** petsc: diverged due to indefinite matrix", 
   NULL
 };
 
 B* ll_export[] = { 
   PLUGIN_OPS,
+  PLUGIN_OP(FINI_),
   PLUGIN_OP(petsc_vec_create),
   PLUGIN_OP(petsc_vec_copy),
   PLUGIN_OP(petsc_vec_copyto),
@@ -125,6 +144,8 @@ P op_INIT_(void) {
   makename(KSP_PCTYPE_string, KSP_PCTYPE_frame);
   return init_();
 }
+
+P op_FINI_(void) {return fini_();}
 
 P op_petsc_vec_create(void) {return petsc_vec_create();}
 
