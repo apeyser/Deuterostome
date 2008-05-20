@@ -69,20 +69,20 @@ IPETSC_LIB=dmpetsc.la
 IPETSC_D=petsc.d
 endif
 
-dm-dmpetsc-main.h: new-plugin.d dm-dmpetsc.d
+dm-dmpetsc-main.h: new-plugin.d dmpetsc.d
 	"$(top_srcdir)/src/dgen-build" \
-		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dm-petsc.d" "$@" true true
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dmpetsc.d" "$@" true true
 
-dm-petsc-header.h: new-plugin.d dm-petsc.d
+dm-dmpetsc-header.h: new-plugin.d dmpetsc.d
 	"$(top_srcdir)/src/dgen-build" \
-		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dm-petsc.d" "$@" false true
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dmpetsc.d" "$@" false true
 
-BUILT_SOURCES += dm-petsc-main.h dm-petsc-header.h dm-petsc.c
-dmpetsc_la_SOURCES = dm-petsc-main.h dm-petsc-header.h dm-petsc.c dm-petsc.h
+BUILT_SOURCES += dm-dmpetsc-main.h dm-dmpetsc-header.h dmpetsc.c
+dmpetsc_la_SOURCES = dm-dmpetsc-main.h dm-dmpetsc-header.h dmpetsc.c dmpetsc.h
 dmpetsc_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@ 
 dmpetsc_la_LDFLAGS=$(AM_LDFLAGS) $(PETSC_LIB)
 dmpetsc_la_CPPFLAGS = $(PETSC_CCPPFLAGS) $(AM_CPPFLAGS)
-dist_noinst_DATA += dm-petsc.d dm-petsc.c.in
+dist_noinst_DATA += dmpetsc.d dmpetsc.c.in
 
 edit = 	sed \
 	  -e 's,[@]PETSC_DIR[@],$(PETSC_DIR),g' \
@@ -90,9 +90,9 @@ edit = 	sed \
 	  -e 's,[@]dpawn[@],$(dpawn),g' \
 	  -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g'
 
-dm-petsc.c: Makefile $(srcdir)/dm-petsc.c.in
+dmpetsc.c: Makefile $(srcdir)/dmpetsc.c.in
 	-rm -f $@ $@.tmp
-	$(edit) "$(srcdir)/dm-petsc.c.in" > $@.tmp
+	$(edit) "$(srcdir)/dmpetsc.c.in" > $@.tmp
 	mv $@.tmp $@
 
 if ENABLE_DMFLEX

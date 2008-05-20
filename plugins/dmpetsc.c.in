@@ -25,8 +25,6 @@ static PetscErrorCode petscsig(int sig __attribute__ ((__unused__)),
 static P errmap[PETSC_ERR_MAX_VALUE + (-KSP_DIVERGED_INDEFINITE_MAT) + 1];
 
 DM_INLINE_STATIC P init_(void) {
-  int argc = 1;
-  char* argv[] = {"@dpawn@"};
   PetscErrorCode r;
 
   if (setenv("PETSC_DIR", "@PETSC_DIR@", 1))
@@ -86,12 +84,8 @@ DM_INLINE_STATIC P init_(void) {
   errmap[PETSC_ERR_MAX_VALUE + (-KSP_DIVERGED_INDEFINITE_MAT)] 
     = DMPETSC_DIVERGED_INDEFINITE_MAT;
 
-  if (! getenv("DMPETSC_INITD")) {
-    if (setenv("DMPETSC_INITD", "yes", 1))
-      return -errno;
-    if ((r = PetscInitialize(&argc, (char***) argv, NULL, NULL)))
-      RETURN_ERROR(errmap[r]);
-  }
+  if ((r = PetscInitialize(PETSC_NULL, PETSC_NULL, PETSC_NULL, PETSC_NULL)))
+    RETURN_ERROR(errmap[r]);
 
   if ((r = PetscPushSignalHandler(petscsig, NULL)))
     RETURN_ERROR(errmap[r]);

@@ -122,13 +122,13 @@ P op_nextlib(void)
  * or an error will be signalled
  * */
 
-#define LIB_IMPORT(var, type, name)															\
+#define LIB_IMPORT(var, type, name)				\
   if (! (var = (type) lt_dlsym((lt_dlhandle)handle, #name))) {	\
     const char* e = lt_dlerror();                               \
-    if (e) fprintf(stderr, "%s\n", e);                          \
-    fprintf(stderr, "Symbol not found: %s in %s\n",							\
-						#name, FREEvm);																			\
-    return LIB_EXPORT;																					\
+    if (e) fprintf(stderr, "%s\n", e);					\
+    fprintf(stderr, "Symbol not found: %s in %s\n",			\
+	    #name, FREEvm);						\
+    return LIB_EXPORT;							\
   }
 
 P op_loadlib(void)

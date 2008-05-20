@@ -651,6 +651,16 @@ end def  | of xtext_dict
         save_ capsave
       } stopped {kill stop} if
     } lock
+  } bind def 
+
+  | save pawn# | --
+  /notify {
+    {
+      makeready
+      /nwait nwait 1 sub def
+      continue
+      restore
+    } lock
   } bind def |]
 end def
 
@@ -717,10 +727,42 @@ end def
   mpidata begin {
     checkrthreads not {(** Rthreads not running!\n) toconsole_ halt} {
       pawns 0 eq {(** No rthreads to stop!\n) toconsole_ halt} if
-      -1 checkbusy
+      * checkbusy
       kill
     } ifelse
   } stopped end {stop} if
+} bind def
+
+| ~func-maker: <<i | {}>> | --
+/waitforpawns {
+  {
+    mpidata begin {
+      save
+      0 1 pawns 1 sub {
+        dup makebusy
+        ~[
+          1 index 4 index exec dup class /listclass ne {~[exch]} if
+          ~wait_dnode
+        ] rsend
+      } for
+      restore
+      pop
+
+      /nwait pawns def
+      {
+        nwait 0 eq {exit} if
+        halt
+      } loop
+    } stopped end {stop} if
+  } lock
+} bind def
+
+| /modulename | --
+/module_send {
+  mpidata begin /module_send_ layer {
+    ~[userdict 3 -1 roll get ~recv_module] /module_cmd name
+    {pop /module_cmd find} waitforpawns
+  } stopped /module_send_ _layer end {stop} if
 } bind def
 
 @ENABLE_RTHREADS_END@

@@ -1,4 +1,4 @@
-/PETSC module 100 dict dup begin
+/PETSC_common module 100 dict dup begin
 
 | [/name] | dict
 /makeindexdict {
@@ -85,21 +85,18 @@
 /caplayer {PETSC_ capsave} bind def
 
 | ~act | --
-/petsc_layer {
+/in_petsc {
   PETSC begin /PETSC_ layer stopped end /PETSC_ _layer {stop} if
 } bind def
 
 end _module
 
-PETSC begin
-
 /PETSC_dpawn module 100 dict dup begin
 /init {
-  getplugindir (dmpetsc.la) loadlib /petsc name
+  /PETSC module 200 dict dup begin
+  PETSC_common {def} forall
 
-  /in_petsc {
-    {PETSC_dpawn begin stopped end {stop} if} petsc_layer
-  } bind def
+  getplugindir (dmpetsc.la) loadlib /petsc name
   
   | /x <d ...> | --
   /vec_create {
@@ -200,24 +197,35 @@ PETSC begin
   | ksp A/null x b | --
   /get_ksp_solve {
     1 index 5 1 roll ksp_solve get_vector
-  } bind def  
-} bind def 
+  } bind def
+
+  end _module
+} bind def
 
 end _module
 
-/PETSC_dnode module 100 dict dup begin
-  
-| ~act | act: <<??|??>>
-/in_petsc {
-  {PETSC_dnode begin stopped end {stop} if} petsc_layer
-} bind def
+/PETSC module 100 dict dup begin
 
-| i n | n0 n1
-/range {/n_ name /i_ name
-  i_ n_ n div mul
+PETSC_common {def} forall
   
-  n_ n div
-  i_ n 1 sub eq {n_ n mod add} if
+| pawnnum elements | offset length
+| /range {/elements name /pawnnum name 
+|   mpidata /pawns get /pawns name
+
+|   pawnnum elements pawns div mul
+|   elements pawns div pawnnum pawns 1 sub eq {elements pawns mod add} if
+| } bind def
+
+| pawnnum elements | offset length
+/range {
+  mpidata /pawns get         | p# es ps
+  3 copy div mul 4 -1 roll   | off p# es ps
+
+  3 copy div exch            | off p# es ps len p#
+  2 index 1 sub eq {         | off p# es ps len
+    3 copy pop mod add       | off p# es ps len
+  } if
+  4 -1 roll pop pop pop      | off len
 } bind def
 
 | dict | ~id
@@ -228,9 +236,9 @@ end _module
 
 | /x <d ...> | xdict
 /vec_create {
-  {/v name /x name
-    {~[x v 4 -1 roll v length range getinterval ~vec_create]} waitforpawns
-    2 dict dup begin v /data name x /id name end
+  {/v name /id name
+    {~[id v 4 -1 roll v length range getinterval ~vec_create]} waitforpawns
+    2 dict dup begin v /data name id /id name end
   } in_petsc
 } bind def
 
@@ -401,8 +409,8 @@ _makestruct def
   0 ~[3 -1 roll {{/report name} in_petsc restore} ~lock] rsend
 } bind def
 
-100 dict /petc_tester name
-/petc_test {
+100 dict /petsc_tester name
+/petsc_test {
   /petsc_tester_ layer petsc_tester begin  {
     {
       /petsc_tester_ layer 
@@ -439,11 +447,10 @@ _makestruct def
 
 | -- | --
 /petsc_su {
-  /PETSC module_send
+  /PETSC_common module_send
   /PETSC_dpawn module_send
-  * {PETSC begin PETSC_dpawn begin init} rsend
+  * {PETSC_dpawn /init get exec PETSC begin} rsend
 } bind def
 
 end _module
 
-end

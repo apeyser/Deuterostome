@@ -234,7 +234,7 @@ void makeerror(P retc, B* error_source) {
   if (x1 >= CEILexecs) FREEexecs = FLOORexecs;
   TAG(o1) = NUM | LONGBIGTYPE; 
   ATTR(o1) = 0;
-  LONGBIG_VAL(o1) = rank; 
+  LONGBIG_VAL(o1) = getworldrank(); 
   TAG(o2) = ARRAY | BYTETYPE; 
   ATTR(o2) = READONLY;
   VALUE_PTR(o2) = error_source; 

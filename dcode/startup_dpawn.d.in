@@ -373,6 +373,18 @@ end def  | of xtext_dict
   restore
 } bind def
 
+| save {} | --
+/wait_dnode {
+  1 index capsave exec {
+    save ~[mpirank ~notify] rsend restore
+    restore
+  } lock
+} bind def
+
+/recv_module {
+  dup /myName get module 3 -1 roll transcribe _module
+} bind def
+
 |====================== Support for toolboxes and projects =====================
 |
 | Toolboxes, projects, and snapshots all are modules. A module is a tree of

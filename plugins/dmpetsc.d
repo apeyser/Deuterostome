@@ -102,4 +102,4 @@ end def
   NEW_PLUGINS begin all end
 } bind def
 
-end userdict /dm_petsc put
+end userdict /dmpetsc put
