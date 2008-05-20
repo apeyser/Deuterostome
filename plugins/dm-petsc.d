@@ -1,7 +1,7 @@
 100 dict dup begin
 
 /plugin_version 1 def
-/plugin_name /petsc def
+/plugin_name /dmpetsc def
 
 /plugin_types 3 dict dup begin |[
   /vector 2 dict dup begin |[
@@ -25,52 +25,52 @@
 end def
 
 /plugin_errs 100 dict dup begin |[
-  /DM_INVVEC (Invalidated vector) def
-  /DM_INVMAT (Invalidated matrix) def
-  /DM_INVKSP (Invalidated ksp) def
-  /DM_ILLEGAL_OWNERSHIP (Changed ownership in dup) def
-  /DM_NOMATCH (Non matching dimensions) def
-  /DM_KSPSOLVE_NOINIT (Matrix for solution undefined) def
-  /DM_ERR_MEM (unable to allocate requested memory) def
-  /DM_ERR_SUP (no support for requested operation) def
-  /DM_ERR_SUP_SYS (no support for requested operation on this computer system) def
-  /DM_ERR_ORDER (operation done in wrong order) def
-  /DM_ERR_SIG (signal received) def
-  /DM_ERR_FP (floating point exception) def
-  /DM_ERR_COR (corrupted PETSc object) def
-  /DM_ERR_LIB (error in library called by PETSc) def
-  /DM_ERR_PLIB (PETSc library generated inconsistent data) def
-  /DM_ERR_MEMC (memory corruption) def
-  /DM_ERR_CONV_FAILED (iterative method \(KSP or SNES\) failed) def
-  /DM_ERR_USER (user has not provided needed function) def
-  /DM_ERR_ARG_SIZ (nonconforming object sizes used in operation) def
-  /DM_ERR_ARG_IDN (two arguments not allowed to be the same) def
-  /DM_ERR_ARG_WRONG (wrong argument \(but object probably ok\)) def
-  /DM_ERR_ARG_CORRUPT (null or corrupted PETSc object as argument) def
-  /DM_ERR_ARG_OUTOFRANGE (input argument, out of range) def
-  /DM_ERR_ARG_BADPTR (invalid pointer argument) def
-  /DM_ERR_ARG_NOTSAMETYPE (two args must be same object type) def
-  /DM_ERR_ARG_NOTSAMECOMM (two args must be same communicators) def
-  /DM_ERR_ARG_WRONGSTATE (object in argument is in wrong state, e.g. unassembled mat) def
-  /DM_ERR_ARG_INCOMP (two arguments are incompatible) def
-  /DM_ERR_ARG_NULL (argument is null that should not be) def
-  /DM_ERR_ARG_UNKNOWN_TYPE (type name doesn't match any registered type) def
-  /DM_ERR_ARG_DOMAIN (argument is not in domain of function) def
-  /DM_ERR_FILE_OPEN (unable to open file) def
-  /DM_ERR_FILE_READ (unable to read from file) def
-  /DM_ERR_FILE_WRITE (unable to write to file) def
-  /DM_ERR_FILE_UNEXPECTED (unexpected data in file) def
-  /DM_ERR_MAT_LU_ZRPVT (detected a zero pivot during LU factorization) def
-  /DM_ERR_MAT_CH_ZRPVT (detected a zero pivot during Cholesky factorization) def 
-  /DM_DIVERGED_NULL (diverged due to null) def
-  /DM_DIVERGED_ITS (diverged due to iterations) def
-  /DM_DIVERGED_DTOL (diverged due to solution magnitude \(dtol\)) def
-  /DM_DIVERGED_BREAKDOWN (diverged due to breakdown) def
-  /DM_DIVERGED_BREAKDOWN_BICG (diverged due to breakdown bigcg \(\\?\\?\)) def
-  /DM_DIVERGED_NONSYMMETRIC (diverged due to nonsymmetric) def
-  /DM_DIVERGED_INDEFINITE_PC (diverged due to indefinite preconditioner) def
-  /DM_DIVERGED_NAN (diverged due to Not-A-Number) def
-  /DM_DIVERGED_INDEFINITE_MAT (diverged due to indefinite matrix) def |]
+  /INVVEC (Invalidated vector) def
+  /INVMAT (Invalidated matrix) def
+  /INVKSP (Invalidated ksp) def
+  /ILLEGAL_OWNERSHIP (Changed ownership in dup) def
+  /NOMATCH (Non matching dimensions) def
+  /KSPSOLVE_NOINIT (Matrix for solution undefined) def
+  /ERR_MEM (unable to allocate requested memory) def
+  /ERR_SUP (no support for requested operation) def
+  /ERR_SUP_SYS (no support for requested operation on this computer system) def
+  /ERR_ORDER (operation done in wrong order) def
+  /ERR_SIG (signal received) def
+  /ERR_FP (floating point exception) def
+  /ERR_COR (corrupted PETSc object) def
+  /ERR_LIB (error in library called by PETSc) def
+  /ERR_PLIB (PETSc library generated inconsistent data) def
+  /ERR_MEMC (memory corruption) def
+  /ERR_CONV_FAILED (iterative method \(KSP or SNES\) failed) def
+  /ERR_USER (user has not provided needed function) def
+  /ERR_ARG_SIZ (nonconforming object sizes used in operation) def
+  /ERR_ARG_IDN (two arguments not allowed to be the same) def
+  /ERR_ARG_WRONG (wrong argument \(but object probably ok\)) def
+  /ERR_ARG_CORRUPT (null or corrupted PETSc object as argument) def
+  /ERR_ARG_OUTOFRANGE (input argument, out of range) def
+  /ERR_ARG_BADPTR (invalid pointer argument) def
+  /ERR_ARG_NOTSAMETYPE (two args must be same object type) def
+  /ERR_ARG_NOTSAMECOMM (two args must be same communicators) def
+  /ERR_ARG_WRONGSTATE (object in argument is in wrong state, e.g. unassembled mat) def
+  /ERR_ARG_INCOMP (two arguments are incompatible) def
+  /ERR_ARG_NULL (argument is null that should not be) def
+  /ERR_ARG_UNKNOWN_TYPE (type name doesn't match any registered type) def
+  /ERR_ARG_DOMAIN (argument is not in domain of function) def
+  /ERR_FILE_OPEN (unable to open file) def
+  /ERR_FILE_READ (unable to read from file) def
+  /ERR_FILE_WRITE (unable to write to file) def
+  /ERR_FILE_UNEXPECTED (unexpected data in file) def
+  /ERR_MAT_LU_ZRPVT (detected a zero pivot during LU factorization) def
+  /ERR_MAT_CH_ZRPVT (detected a zero pivot during Cholesky factorization) def 
+  /DIVERGED_NULL (diverged due to null) def
+  /DIVERGED_ITS (diverged due to iterations) def
+  /DIVERGED_DTOL (diverged due to solution magnitude \(dtol\)) def
+  /DIVERGED_BREAKDOWN (diverged due to breakdown) def
+  /DIVERGED_BREAKDOWN_BICG (diverged due to breakdown bigcg \(\\?\\?\)) def
+  /DIVERGED_NONSYMMETRIC (diverged due to nonsymmetric) def
+  /DIVERGED_INDEFINITE_PC (diverged due to indefinite preconditioner) def
+  /DIVERGED_NAN (diverged due to Not-A-Number) def
+  /DIVERGED_INDEFINITE_MAT (diverged due to indefinite matrix) def |]
 end def
 
 /plugin_ops 100 dict dup begin |[

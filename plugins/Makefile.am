@@ -69,7 +69,7 @@ IPETSC_LIB=dmpetsc.la
 IPETSC_D=petsc.d
 endif
 
-dm-petsc-main.h: new-plugin.d dm-petsc.d
+dm-dmpetsc-main.h: new-plugin.d dm-dmpetsc.d
 	"$(top_srcdir)/src/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dm-petsc.d" "$@" true true
 
