@@ -71,26 +71,21 @@ P op_FINI_(void);
 extern B opaquename[FRAMEBYTES];
 extern B buffernameframe[FRAMEBYTES];
 
-#define TEST_OPAQUE(frame)	do {                                        \
+#define TEST_OPAQUE(frame, nameframe)	do {				\
     if (TAG(frame) != (DICT | OPAQUETYPE)) return OPD_TYP;              \
-    if (! check_opaque_name(opaquename, VALUE_PTR(frame))) return ILL_OPAQUE; \
+    if (! check_opaque_name(nameframe, VALUE_PTR(frame)))		\
+      return ILL_OPAQUE;						\
   } while (0)
 
 #define OPAQUE_MEM(frame, nameframe) (lookup(nameframe, VALUE_PTR(frame)))
 
-#define OPAQUE_MEM_SET(frame, nameframe, newframe) do {	\
-    ATTR(newframe) |= READONLY;                         \
-    moveframe(newframe, OPAQUE_MEM(frame, nameframe));	\
-  } while (0)
-
-#define OPAQUE_BUFFER_GET(frame) OPAQUE_MEM(frame, buffernameframe)
-
-
-#define OPAQUE_MEM_SET_NR(frame, nameframe, newframe) do {  \
-    ATTR(newframe) &= ~READONLY;                            \
-    moveframe(newframe, OPAQUE_MEM(frame, nameframe));      \
-  } while (0)
+#define OPAQUE_MEM_SET(frame, nameframe, newframe)	\
+  moveframe(newframe, OPAQUE_MEM(frame, nameframe))
   
+#define OPAQUE_BUFFER_GET(frame)  (OPAQUE_MEM(frame, buffernameframe))
+#define OPAQUE_BUFFER_SIZE(frame) (ARRAY_SIZE(OPAQUE_BUFFER_GET(frame)))
+#define OPAQUE_BUFFER_PTR(frame)  (VALUE_PTR(OPAQUE_BUFFER_GET(frame)))
+
 #define MAKE_OPAQUE_DICT(n, ...)					\
   (make_opaque_frame(n, opaquename, __VA_ARGS__, NULL))
 
@@ -101,8 +96,7 @@ extern B buffernameframe[FRAMEBYTES];
     if ((ret = op_restore()) != OK) return ret;				\
   } while (0)
 
-#define PLUGIN_INTRO(version) PLUGIN_INTRO_(version, PLUGIN_NAME)
-#define PLUGIN_INTRO_(version, name)                 \
+#define PLUGIN_INTRO(version, name)                 \
   UP ll_type = 0; \
   P op_hi(void) {return wrap_hi(#name " V" #version);} \
   P op_libnum(void) {return wrap_libnum(ll_type);}

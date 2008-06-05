@@ -296,6 +296,34 @@ static P nextevent(B* bufferf) {
   return retc;
 }
 
+static BOOLEAN groupconsole = FALSE;
+static B groupconsole_buf[MSF_SIZE];
+static P groupconsole_len = 0;
+static const char saves[] = "save {(";
+static const char rests[] = ") toconsole restore} lock";
+
+DM_INLINE_STATIC P clear_toconsole(void) {
+  static B stringf[FRAMEBYTES];
+  P retc;
+
+  if (! groupconsole_len) return OK;
+
+  if (groupconsole_len + sizeof(rests) - 1 > sizeof(groupconsole_buf)) 
+    return BUF_OVF;
+  moveB((B*) rests, groupconsole_buf + groupconsole_len, sizeof(rests)-1);
+  groupconsole_len += sizeof(rests)-1;
+
+  TAG(stringf) = ARRAY | BYTETYPE; 
+  ATTR(stringf) = 0;
+  VALUE_PTR(stringf) = groupconsole_buf; 
+  ARRAY_SIZE(stringf) = groupconsole_len;
+  groupconsole_len = 0;
+  if ((retc = tompi(stringf, getparentcomm(), TRUE, 0)))
+    return retc;
+
+  return OK;
+}
+
 /*-------------------------------------- 'error'
   - expects on operand stack:
      error code    (top)
@@ -313,6 +341,7 @@ P op_error(void)
   P nb, atmost; 
   B *m, strb[256], *p;
   P ret;
+  BOOLEAN groupconsole_ = groupconsole;
 
   p = strb; 
   atmost = 255;
@@ -341,7 +370,10 @@ P op_error(void)
   VALUE_BASE(o_3) = (P)strb; 
   ARRAY_SIZE(o_3) = nb;
   FREEopds = o_2;
+  clear_toconsole();
+  groupconsole = FALSE;
   op_toconsole();
+  groupconsole = groupconsole_;
   if ((ret = op_halt()) == DONE) return DONE;
 
   nb = dm_snprintf((char*)p, atmost, "** Error in internal halt!\n");
@@ -408,7 +440,7 @@ P op_errormessage(void)
  baderror:
   printf("**Error with corrupted error info on operand stack!\n");
   return op_halt();
-}
+}  
 
 /*-------------------------------------- 'toconsole'
    (message) | -
@@ -419,67 +451,117 @@ P op_errormessage(void)
 
 P op_toconsole(void)
 {
-  static B stringf[FRAMEBYTES];
   B *p; 
   B *p_;
-  B *oldFREEvm;
   P retc;
-  const char saves[] = "save {(";
-  const char rests[] = ") toconsole restore} lock";
+  B* max_;
+  B* max;
+  static BOOLEAN nl = TRUE;
 
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
 
-  B* max_ = VALUE_PTR(o_1) + ARRAY_SIZE(o_1);
-  if ((FREEvm + ARRAY_SIZE(o_1) + (sizeof(saves)-1) + (sizeof(rests)-1)) 
-      > CEILvm)
-    return VM_OVF;
+  if (groupconsole_len
+      && (groupconsole_len + ARRAY_SIZE(o_1) + sizeof(rests) - 1 
+	  > sizeof(groupconsole_buf))
+      && ((retc = clear_toconsole()))) return retc;
+
+  if ((sizeof(saves) - 1 + ARRAY_SIZE(o_1) +  sizeof(rests) - 1 
+       > sizeof(groupconsole_buf)))
+    return BUF_OVF;
+  
   p_ = VALUE_PTR(o_1);
+  max_ = VALUE_PTR(o_1) + ARRAY_SIZE(o_1);
+  max = groupconsole_buf + sizeof(groupconsole_buf) - (sizeof(rests)-1);
   do {
-    B* max = FREEvm + MSF_SIZE - (sizeof(saves)-1) - (sizeof(rests)-1) - 1;
-    if (max > CEILvm) max = CEILvm;
-    
-    p = FREEvm; 
-    moveB((B*)saves, p, sizeof(saves)-1); 
-    p += sizeof(saves)-1;
-    for (; p_ <  max_ && p < max; p_++) {
+    p = groupconsole_buf + groupconsole_len; 
+    if (! groupconsole_len) {
+      moveB((B*)saves, p, sizeof(saves)-1); 
+      p += sizeof(saves)-1;
+    }
+    for (; p_ <  max_ && p < max;) {
+      if (nl) {
+	p += dm_snprintf((char*) p, max - p, "%lli: ", 
+			 (long long) getworldrank());
+	nl = FALSE;
+	continue;
+      }
       switch (*p_) {
 	case ')': case '\\': 
-	  p += dm_snprintf((char*)p, max - p, "\\%c", (unsigned int) *p_);
+	  p += dm_snprintf((char*)p, max - p, "\\%c", (unsigned int) *(p_++));
 	  break;
           
+	case 10: nl = TRUE;
+	  //intentional fall through
 	case 0: case 1: case 2: case 3: case 4: case 5: 
-	case 6: case 7: case 8: case 9: case 10: case 11: 
+	case 6: case 7: case 8: case 9: case 11: 
 	case 12: case 13: case 14: case 15: case 16: case 17: 
 	case 18: case 19: case 20: case 21: case 22: case 23: 
 	case 24: case 25: case 26: case 27: case 28: case 29: 
 	case 30: case 31: case 127:
-	  p += dm_snprintf((char*)p, max - p, "\\%.3o", (unsigned int) *p_);
+	  p += dm_snprintf((char*)p, max - p, "\\%.3o", (unsigned int) *(p_++));
 	  break;
 
 	default:
-	  *(p++) = *p_;
+	  *(p++) = *(p_++);
 	  break;
       }
-      if (p == CEILvm) return VM_OVF;
     }
-    if (p + sizeof(saves)-1 > CEILvm) return VM_OVF;
-    moveB((B*)rests, p, sizeof(rests)-1); 
-    p += sizeof(rests)-1;
-    TAG(stringf) = ARRAY | BYTETYPE; 
-    ATTR(stringf) = 0;
-    VALUE_PTR(stringf) = FREEvm; 
-    ARRAY_SIZE(stringf) = p - FREEvm;
-    oldFREEvm = FREEvm; 
-    FREEvm = (B*)DALIGN(p);
-    if ((retc = tompi(stringf, getparentcomm(), TRUE, 0))) {
-      FREEvm = oldFREEvm;
+
+    groupconsole_len = p - groupconsole_buf;
+    if ((p >= max || ! groupconsole)  && ((retc = clear_toconsole())))
       return retc;
-    }
-    FREEvm = oldFREEvm;
   } while (p_ < max_);
 
   FREEopds = o_1;
+  return OK;
+}
+
+static P x_op_groupconsole(void) {
+  BOOLEAN stopped;
+  groupconsole = FALSE;
+
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != BOOL) return OPD_CLA;
+  stopped = BOOL_VAL(o_1);
+
+  clear_toconsole();
+  
+  if (stopped) {
+    if (CEILexecs < x2) return EXECS_OVF;
+    TAG(x1) = OP;
+    ATTR(x1) = ACTIVE;
+    OP_NAME(x1) = (P) "stop";
+    OP_CODE(x1) = (P) op_stop;
+    FREEexecs = x2;
+  }
+  FREEopds = o_1;
+  
+  return OK;
+}
+
+// ~active | -- 
+P op_groupconsole(void) {
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (! (ATTR(o_1) & ACTIVE)) return OPD_ATR;
+  if (groupconsole) return op_exec();
+
+  if (CEILexecs < x4) return EXECS_OVF;
+
+  TAG(x1) = OP;
+  ATTR(x1) = ACTIVE;
+  OP_NAME(x1) = (P) "x_groupconsole";
+  OP_CODE(x1) = (P) x_op_groupconsole;
+  
+  TAG(x2) = BOOL;
+  ATTR(x2) = (STOPMARK | ACTIVE);
+  BOOL_VAL(x2) = FALSE;
+
+  moveframe(o_1, x3);
+  FREEexecs = x4;
+  FREEopds = o_1;
+  groupconsole = TRUE;
+
   return OK;
 }
 
@@ -506,6 +588,7 @@ void run_dpawn_mill(void) {
   moveframe(msf, cmsf);
   locked = FALSE;
   serialized = FALSE;
+  groupconsole = FALSE;
   while (1) {
     switch (retc = exec(100)) {
       case MORE: 
@@ -519,6 +602,7 @@ void run_dpawn_mill(void) {
 	if (FREEexecs == FLOORexecs) {
 	  moveframe(msf,cmsf);
 	  halt_flag = FALSE;
+	  groupconsole = FALSE;
 	}
 	retc = nextevent(cmsf);
 	break;

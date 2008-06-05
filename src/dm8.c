@@ -168,21 +168,28 @@ P op_merge(void)
 
   if (o_2 < FLOORopds) return OPDS_UNF;
   if ((CLASS(o_2) != DICT) || (CLASS(o_1) != DICT)) return OPD_CLA;
+  if ((TYPE(o_1))) return OPD_TYP;
+
   freevm = FREEvm;
   if (ATTR(o_2) & READONLY) return DICT_ATR;
   dict2 = (B *)VALUE_BASE(o_1);
   if ((freevm + DICT_NB(o_2)) > CEILvm) return VM_OVF;
+
   dict1 = freevm;
-  moveLBIG((LBIG *)VALUE_BASE(o_2), (LBIG *)dict1,DICT_NB(o_2)/sizeof(LBIG));
-  d_reloc(dict1,VALUE_BASE(o_2),(P)dict1);
+  moveLBIG((LBIG*) VALUE_PTR(o_2), (LBIG*) dict1, 
+	   DICT_NB(o_2)/sizeof(LBIG));
+  d_reloc(dict1, VALUE_BASE(o_2), (P)dict1);
+
   for (entry = (B *)DICT_ENTRIES(dict2); 
        entry < (B *)DICT_FREE(dict2); 
        entry += ENTRYBYTES) { 
-    if (!insert(ASSOC_NAME(entry),dict1,ASSOC_FRAME(entry)))
+    if (!insert(ASSOC_NAME(entry), dict1, ASSOC_FRAME(entry)))
       return DICT_OVF;
   }
-  d_rreloc(dict1,(P)dict1,VALUE_BASE(o_2));
-  moveLBIG((LBIG *)dict1,(LBIG *)VALUE_BASE(o_2),DICT_NB(o_2)/sizeof(LBIG));
+
+  d_rreloc(dict1,(P)dict1, VALUE_BASE(o_2));
+  moveLBIG((LBIG*) dict1, (LBIG*) VALUE_BASE(o_2),
+	   DICT_NB(o_2)/sizeof(LBIG));
 
   FREEopds = o_1;
   return OK;
@@ -204,37 +211,40 @@ P op_merge(void)
 
 P op_nextobject(void)
 {
-  B framebuf[FRAMEBYTES], *next;
+  B *next;
 
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) == NULLOBJ) { 
-    moveframe(FLOORvm,framebuf); 
-    goto n_pos; 
+    if (FLOORvm < FREEvm) {
+      next = FLOORvm;
+      goto n_pos; 
+    }
+    else goto n_neg;
   }
   else { /* next */
+    if (! (ATTR(o_1) & PARENT)) return OPD_ATR;
     switch(CLASS(o_1)) {
       case ARRAY:
-        next = (B *)VALUE_BASE(o_1) 
+        next = VALUE_PTR(o_1) 
           + DALIGN(ARRAY_SIZE(o_1) * VALUEBYTES(TYPE(o_1))); 
         break;
 
       case LIST: 
-        next = (B *)LIST_CEIL(o_1); 
+        next = LIST_CEIL_PTR(o_1); 
         break;
 
       case DICT: 
-        next = (B *)VALUE_BASE(o_1) + DICT_NB(o_1); 
+        next = VALUE_PTR(o_1) + DICT_NB(o_1); 
         break;
 
        case BOX:  
-         next = (B *)VALUE_BASE(o_1) + BOX_NB(o_1); 
+         next = VALUE_PTR(o_1) + BOX_NB(o_1); 
          break;
          
        default: 
          return OPD_CLA; 
     }
     if (next >= FREEvm) goto n_neg;
-    moveframe(next,framebuf); 
     goto n_pos;
   }
 
@@ -246,7 +256,8 @@ P op_nextobject(void)
 
  n_pos:
   if (o1 >= CEILopds) return OPDS_OVF;
-  moveframe(framebuf,o_1);
+  moveframe(next, o_1);
+  ATTR(o_1) |= PARENT; //should be, but confirm.
   TAG(o1) = BOOL; 
   ATTR(o1) = 0; 
   BOOL_VAL(o1) = TRUE;

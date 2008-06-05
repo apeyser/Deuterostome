@@ -431,6 +431,8 @@ P op_capsave(void)
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != BOX) return OPD_CLA;
 
+  if (SBOX_CAP(VALUE_PTR(o_1))) return ILL_RECAP;
+    
   SBOX_CAP(VALUE_PTR(o_1)) = FREEvm;
   FREEopds = o_1;
 
@@ -443,7 +445,40 @@ DM_INLINE_STATIC void shift_subframe(B* frame, P offset)
   if (CLASS(frame) == LIST) LIST_CEIL(frame) -= offset;
 }
 
+DM_INLINE_STATIC P clear_stack(B* savebox, B* caplevel, 
+			       B** stack, B* stackfloor,
+			       BOOLEAN capped) {
+  B* topframe;
+  B* cframe;
+  
+  for (topframe = cframe = *stack - FRAMEBYTES;
+       cframe >= stackfloor;
+       cframe -= FRAMEBYTES)
+    if (COMPOSITE(cframe)
+	&& (VALUE_PTR(cframe) >= savebox)
+	&& (VALUE_PTR(cframe) <= caplevel)) {
+      if (capped) return INV_REST;
+      moveframes(cframe + FRAMEBYTES, cframe, 
+		 (topframe-cframe)/FRAMEBYTES);
+      topframe -= FRAMEBYTES;
+      *stack -= FRAMEBYTES;
+    }
+  
+  return OK;
+}
 
+DM_INLINE_STATIC void shift_stack(B* caplevel, P offset,
+				  B* stack, B* stackfloor) {
+  B* cframe;
+  for (cframe = stack - FRAMEBYTES;
+       cframe >= stackfloor;
+       cframe -= FRAMEBYTES)
+    if (COMPOSITE(cframe)
+	&& (VALUE_PTR(cframe) > caplevel)
+	&& (VALUE_PTR(cframe) <= CEILvm))
+      shift_subframe(cframe, offset);
+}
+  
 /*----------------------------------------------- restore
      VM_box | ---
 
@@ -470,14 +505,15 @@ DM_INLINE_STATIC void shift_subframe(B* frame, P offset)
 P op_restore(void) 
 {
   B *cframe, *frame, *dict, *tdict, *entry, *box, *savebox,
-    *caplevel, *savefloor, *topframe;
+    *caplevel, *savefloor;
   P nb, offset;
   BOOLEAN capped;
+  P retc;
 
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != BOX) return OPD_CLA;
   savebox = VALUE_PTR(o_1);
-  savefloor = VALUE_PTR(o_1) - FRAMEBYTES;
+  savefloor = savebox - FRAMEBYTES;
   if ((caplevel = SBOX_CAP(savebox))) capped = TRUE;
   else {
     capped = FALSE; 
@@ -486,51 +522,13 @@ P op_restore(void)
   offset = caplevel - savefloor;
   FREEopds = o_1;
 
-  for (topframe = cframe = FREEexecs - FRAMEBYTES;
-       cframe >= FLOORexecs;
-       cframe -= FRAMEBYTES) {
-    if (COMPOSITE(cframe)
-	&& (VALUE_PTR(cframe) >= savebox)
-	&& (VALUE_PTR(cframe) <= caplevel)) {
-      if (capped) return INV_REST;
-      moveframes(cframe + FRAMEBYTES,
-		 cframe,
-		 (topframe - cframe)/FRAMEBYTES);
-      topframe -= FRAMEBYTES;
-      FREEexecs -= FRAMEBYTES;
-    }
-  }
- 
-  for (topframe = cframe = FREEdicts - FRAMEBYTES;
-       cframe >= FLOORdicts;
-       cframe -= FRAMEBYTES) {
-    if (COMPOSITE(cframe)
-	&& (VALUE_PTR(cframe) >= savebox)
-	&& (VALUE_PTR(cframe) <= caplevel)) {
-      if (capped) return INV_REST;
-      moveframes(cframe + FRAMEBYTES,
-		 cframe,
-		 (topframe - cframe)/FRAMEBYTES);
-      topframe -= FRAMEBYTES;
-      FREEdicts -= FRAMEBYTES;
-    }
-  }
- 
-  for (topframe = cframe = FREEopds - FRAMEBYTES;
-       cframe >= FLOORopds;
-       cframe -= FRAMEBYTES) {
-    if (COMPOSITE(cframe)
-	&& (VALUE_PTR(cframe) >= savebox)
-	&& (VALUE_PTR(cframe) <= caplevel)) {
-      if (capped) return INV_REST;
-      moveframes(cframe + FRAMEBYTES,
-		 cframe,
-		 (topframe - cframe)/FRAMEBYTES);
-      topframe -= FRAMEBYTES;
-      FREEopds -= FRAMEBYTES;
-    }
-  }
- 
+  if ((retc = clear_stack(savebox, caplevel, &FREEexecs, FLOORexecs, capped)))
+    return retc;
+  if ((retc = clear_stack(savebox, caplevel, &FREEdicts, FLOORdicts, capped)))
+    return retc;
+  if ((retc = clear_stack(savebox, caplevel, &FREEopds, FLOORopds, capped)))
+    return retc;
+
   if (capped)
     moveLBIG((LBIG*)caplevel, (LBIG*)savefloor, 
              (FREEvm - caplevel)/sizeof(LBIG));
@@ -544,7 +542,7 @@ P op_restore(void)
       break;
 							
     case LIST:  
-      if (VALUE_PTR(cframe) > caplevel) {
+      if (VALUE_PTR(cframe) > caplevel && VALUE_PTR(cframe) <= CEILvm) {
 	VALUE_BASE(cframe) -= offset; 
 	LIST_CEIL(cframe) -= offset; 
       }
@@ -553,7 +551,7 @@ P op_restore(void)
 	   frame += FRAMEBYTES) {
 	if (COMPOSITE(frame)) {  
 	  if ((VALUE_PTR(frame) > caplevel) &&
-	      (VALUE_PTR(frame) < CEILvm)) { 
+	      (VALUE_PTR(frame) <= CEILvm)) { 
 	    shift_subframe(frame, offset);
 	  }
 	  else if ((VALUE_PTR(frame) > savefloor) 
@@ -566,7 +564,7 @@ P op_restore(void)
       cframe = (B *)LIST_CEIL(cframe); 
       break;
 
-    case DICT:  
+    case DICT:
       if (VALUE_PTR(cframe) > caplevel) { 
 	VALUE_PTR(cframe) -= offset;
 	d_reloc(VALUE_PTR(cframe),
@@ -582,7 +580,7 @@ P op_restore(void)
 	   entry < (B *)DICT_FREE(dict); 
 	   entry += ENTRYBYTES) {
 	frame = ASSOC_FRAME(entry);
-	if (COMPOSITE(frame) && (VALUE_PTR(frame) < CEILvm)) { 
+	if (COMPOSITE(frame) && (VALUE_PTR(frame) <= CEILvm)) { 
 	  if (VALUE_PTR(frame) > caplevel) { 
 	    shift_subframe(frame, offset);
 	  }
@@ -613,29 +611,9 @@ P op_restore(void)
 
   if (! capped) return OK;
 
-  for (cframe = FREEexecs - FRAMEBYTES; 
-       cframe >= FLOORexecs; 
-       cframe -= FRAMEBYTES)
-    if (COMPOSITE(cframe)
-	&& (VALUE_PTR(cframe) > caplevel)
-	&& (VALUE_PTR(cframe) < CEILvm))
-      shift_subframe(cframe, offset);
-
-  for (cframe = FREEdicts - FRAMEBYTES; 
-       cframe >= FLOORdicts; 
-       cframe -= FRAMEBYTES)
-    if (COMPOSITE(cframe)
-	&& (VALUE_PTR(cframe) > caplevel)
-	&& (VALUE_PTR(cframe) < CEILvm))
-      shift_subframe(cframe, offset);
-
-  for (cframe = FREEopds - FRAMEBYTES; 
-       cframe >= FLOORopds; 
-       cframe -= FRAMEBYTES)
-    if (COMPOSITE(cframe)
-	&& (VALUE_PTR(cframe) > caplevel)
-	&& (VALUE_PTR(cframe) < CEILvm))
-      shift_subframe(cframe, offset);
+  shift_stack(caplevel, offset, FREEexecs, FLOORexecs);
+  shift_stack(caplevel, offset, FREEdicts, FLOORdicts);
+  shift_stack(caplevel, offset, FREEopds, FLOORopds);
 
   return OK;
 }

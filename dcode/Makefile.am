@@ -1,12 +1,14 @@
 dist_dmstart_DATA = color.d master.d sched.d plugin.d errors.d
 nodist_dmstart_DATA =  theeye.d startup_dnode.d startup_dpawn.d \
-	startup_dvt.d startup_dgen.d dvt_macros.d matrix.d new-plugin.d
-dist_dmconf_DATA = dvt.d
+	startup_dvt.d startup_dgen.d dvt_macros.d matrix.d new-plugin.d \
+	startup_common.d startup_libs.d
+dist_dmconf_DATA = dvt.d dpawn.d
 nodist_dmconf_DATA = dnode.d
 
 EXTRA_DIST = theeye.d.in dnode.d.in dvt_macros.d.in \
 	startup_dvt.d.in startup_dnode.d.in startup_dpawn.d.in \
-	matrix.d.in startup_dgen.d.in new-plugin.d.in
+	matrix.d.in startup_dgen.d.in new-plugin.d.in \
+	dpawn.d startup_common.d.in startup_libs.d.in
 
 CLEANFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
 
@@ -94,6 +96,25 @@ else !ENABLE_RTHREADS
 RTHREADS_EDIT = -e '$(RTHREADS_START),$(RTHREADS_END) d'
 endif !ENABLE_RTHREADS
 
+PETSC_START = /^[[:space:]]*[@]ENABLE_PETSC_START[@][[:space:]]*$$/
+PETSC_END   = /^[[:space:]]*[@]ENABLE_PETSC_END[@][[:space:]]*$$/
+
+PETSC_EDIT_ON = -e '$(PETSC_START) d' -e '$(PETSC_END) d'
+PETSC_EDIT_OFF = -e '$(PETSC_START),$(PETSC_END) d'
+if !ENABLE_PLUGINS_SUPPORT
+PETSC_EDIT = $(PETSC_EDIT_OFF)
+else ENABLE_PLUGINS_SUPPORT
+if !ENABLE_PLUGINS
+PETSC_EDIT = $(PETSC_EDIT_OFF)
+else ENABLE_PLUGINS
+if !ENABLE_PETSC
+PETSC_EDIT = $(PETSC_EDIT_OFF)
+else ENABLE_PETSC
+PETSC_EDIT = $(PETSC_EDIT_ON)
+endif ENABLE_PETSC
+endif ENABLE_PLUGINS
+endif ENABLE_PLUGINS_SUPPORT
+
 edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
 			-e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
@@ -105,7 +126,8 @@ edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			$(EMACSCLIENT_EDIT) \
 			$(ATLAS_EDIT) \
 			$(RTHREADS_EDIT) \
-			$(REGEX_DELETE)
+			$(REGEX_DELETE) \
+			$(PETSC_EDIT)
 
 theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in
 	rm -f $@ $@.tmp
@@ -140,6 +162,16 @@ startup_dpawn.d: $(srcdir)/Makefile $(srcdir)/startup_dpawn.d.in
 startup_dgen.d: $(srcdir)/Makefile $(srcdir)/startup_dgen.d.in 
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/startup_dgen.d.in >$@.tmp
+	mv $@.tmp $@
+
+startup_common.d: $(srcdir)/Makefile $(srcdir)/startup_common.d.in 
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/startup_common.d.in >$@.tmp
+	mv $@.tmp $@
+
+startup_libs.d: $(srcdir)/Makefile $(srcdir)/startup_libs.d.in 
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/startup_libs.d.in >$@.tmp
 	mv $@.tmp $@
 
 matrix.d: $(srcdir)/Makefile $(srcdir)/matrix.d.in

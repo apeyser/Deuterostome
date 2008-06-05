@@ -1,6 +1,6 @@
 #include "dm-stats-header.h"
 
-PLUGIN_INTRO(0);
+PLUGIN_INTRO(0, );
 
 P ll_errc[] = { 
   0L

@@ -293,7 +293,7 @@ static P x_op_forall(void)
         return OK; 
       }
       if (o2 >= CEILopds) return OPDS_OVF;
-      entry = (B *)DICT_CURR(x_2); 
+      entry = (B *)DICT_CURR(x_2);
       DICT_CURR(x_2) += ENTRYBYTES;
       moveframe(ASSOC_NAME(entry),o1);
       ATTR(o1) = 0;
@@ -320,7 +320,7 @@ P op_forall(void)
      case ARRAY: break;
      case LIST:  break;
      case DICT:  
-       dict = (B *)VALUE_BASE(o_2);
+       dict = VALUE_PTR(o_2);
        DICT_CURR(o_2) = DICT_ENTRIES(dict); 
        break;
      default: 
@@ -446,12 +446,12 @@ P op_execstack(void)
   moveframes(FLOORexecs, (B *)VALUE_BASE(o_1), n);
   ATTR(o_1) &= (~PARENT);
   LIST_CEIL(o_1) = VALUE_BASE(o_1) + nb;
-  for (eframe = (B *)VALUE_BASE(o_1); 
-       eframe < (B *)LIST_CEIL(o_1);
+  for (eframe = VALUE_PTR(o_1); 
+       eframe < LIST_CEIL_PTR(o_1);
        eframe += FRAMEBYTES) { 
     ATTR(eframe) &= (~XMARK);
     if (CLASS(eframe) == DICT)
-      moveframe((B *)VALUE_BASE(eframe)-FRAMEBYTES, eframe); 
+      moveframe(VALUE_PTR(eframe)-FRAMEBYTES, eframe); 
     /* restore frame's DICT_NB */
   }
   return OK;

@@ -74,10 +74,6 @@
   (OPAQUE_MEM_SET\(procframe, ) package (_) n (_N, initframe\))
 } bind def
 
-/make_handle_nr {textit /n name
-  (OPAQUE_MEM_SET_NR\(procframe, ) package (_) n (_N, initframe\))
-} bind def
-
 /textname_ 100 /b array def
 
 /textit_ 10 dict dup begin

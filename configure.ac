@@ -118,6 +118,12 @@ AC_CHECK_PROG([guipdf], [gs], [gs])
 
 CF_ATLAS()
 CF_IF_ENABLED([rthreads], [
+  AC_ARG_WITH([dpawn-command], dnl
+              [Program and arguments (before dpawn) to run ]dnl
+[dpawn under (like valgrind)], dnl
+              [dpawn_command="$withval"])
+  CF_AC_SUBST([DPAWN_COMMAND], [$dpawn_command])
+
   CF_MPI([], [
     AC_MSG_ERROR([No mpi found... needed for rthreads])
   ])

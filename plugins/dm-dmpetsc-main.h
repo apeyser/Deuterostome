@@ -1,6 +1,6 @@
 #include "dm-dmpetsc-header.h"
 
-PLUGIN_INTRO(1);
+PLUGIN_INTRO(1, );
 
 P ll_errc[] = { 
   DMPETSC_INVVEC, 
@@ -8,6 +8,7 @@ P ll_errc[] = {
   DMPETSC_INVKSP, 
   DMPETSC_ILLEGAL_OWNERSHIP, 
   DMPETSC_NOMATCH, 
+  DMPETSC_NONLOCAL, 
   DMPETSC_KSPSOLVE_NOINIT, 
   DMPETSC_ERR_MEM, 
   DMPETSC_ERR_SUP, 
@@ -58,6 +59,7 @@ B* ll_errm[] = {
   (B*)"** dmpetsc: Invalidated ksp", 
   (B*)"** dmpetsc: Changed ownership in dup", 
   (B*)"** dmpetsc: Non matching dimensions", 
+  (B*)"** dmpetsc: Accessing non-local data", 
   (B*)"** dmpetsc: Matrix for solution undefined", 
   (B*)"** dmpetsc: unable to allocate requested memory", 
   (B*)"** dmpetsc: no support for requested operation", 
@@ -109,6 +111,8 @@ B* ll_export[] = {
   PLUGIN_OP(petsc_vec_copy),
   PLUGIN_OP(petsc_vec_copyto),
   PLUGIN_OP(petsc_vec_copyfrom),
+  PLUGIN_OP(petsc_vec_syncto),
+  PLUGIN_OP(petsc_vec_syncfrom),
   PLUGIN_OP(petsc_vec_max),
   PLUGIN_OP(petsc_vec_min),
   PLUGIN_OP(petsc_vec_destroy),
@@ -116,6 +120,8 @@ B* ll_export[] = {
   PLUGIN_OP(petsc_mat_copy),
   PLUGIN_OP(petsc_mat_copyto),
   PLUGIN_OP(petsc_mat_copyfrom),
+  PLUGIN_OP(petsc_mat_syncto),
+  PLUGIN_OP(petsc_mat_syncfrom),
   PLUGIN_OP(petsc_mat_destroy),
   PLUGIN_OP(petsc_mat_dup),
   PLUGIN_OP(petsc_mat_vecmul),
@@ -132,11 +138,14 @@ P op_INIT_(void) {
   makename(DMPETSC_VECTOR_string, DMPETSC_VECTOR_frame);
   makename(VECTOR_VECTOR_string, VECTOR_VECTOR_frame);
   makename(VECTOR_N_string, VECTOR_N_frame);
+  makename(VECTOR_GN_string, VECTOR_GN_frame);
+  makename(VECTOR_ASS_string, VECTOR_ASS_frame);
   makename(DMPETSC_MATRIX_string, DMPETSC_MATRIX_frame);
   makename(MATRIX_MATRIX_string, MATRIX_MATRIX_frame);
   makename(MATRIX_M_string, MATRIX_M_frame);
   makename(MATRIX_N_string, MATRIX_N_frame);
   makename(MATRIX_GM_string, MATRIX_GM_frame);
+  makename(MATRIX_ASS_string, MATRIX_ASS_frame);
   makename(DMPETSC_KSP_string, DMPETSC_KSP_frame);
   makename(KSP_KSP_string, KSP_KSP_frame);
   makename(KSP_M_string, KSP_M_frame);
@@ -155,6 +164,10 @@ P op_petsc_vec_copyto(void) {return petsc_vec_copyto();}
 
 P op_petsc_vec_copyfrom(void) {return petsc_vec_copyfrom();}
 
+P op_petsc_vec_syncto(void) {return petsc_vec_syncto();}
+
+P op_petsc_vec_syncfrom(void) {return petsc_vec_syncfrom();}
+
 P op_petsc_vec_max(void) {return petsc_vec_max();}
 
 P op_petsc_vec_min(void) {return petsc_vec_min();}
@@ -168,6 +181,10 @@ P op_petsc_mat_copy(void) {return petsc_mat_copy();}
 P op_petsc_mat_copyto(void) {return petsc_mat_copyto();}
 
 P op_petsc_mat_copyfrom(void) {return petsc_mat_copyfrom();}
+
+P op_petsc_mat_syncto(void) {return petsc_mat_syncto();}
+
+P op_petsc_mat_syncfrom(void) {return petsc_mat_syncfrom();}
 
 P op_petsc_mat_destroy(void) {return petsc_mat_destroy();}
 

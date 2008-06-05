@@ -140,23 +140,25 @@ B *makedict(L32 n)
     };
   P k,nb,ne; W hcon; B *dict,*mframe;
 
-  k = 0;
   if ((n+n) >= lastprime) hcon = lastprime;
-  else while ((hcon = primes[k]) < (n+n)) k++;
+  else for (k = 0; (hcon = primes[k]) < (n+n); k++);
   ne = n * ENTRYBYTES;
-  nb = (P)(DALIGN(DICTBYTES + ne + (((P)hcon)*sizeof(LBIG))));
+  nb = (P) DALIGN(DICTBYTES + ne + ((P)hcon)*sizeof(LBIG));
   if ((FREEvm + nb + FRAMEBYTES) > CEILvm) return((B *)(-1L));
   dict = FREEvm + FRAMEBYTES;
-  mframe = FREEvm;  FREEvm += nb + FRAMEBYTES;
+  mframe = FREEvm;  
+  FREEvm += nb + FRAMEBYTES;
 
   DICT_ENTRIES(dict) = DICT_FREE(dict) = (P)dict + DICTBYTES;
   DICT_TABHASH(dict) = DICT_ENTRIES(dict) + ne;
   DICT_CONHASH(dict) = hcon;
   for (k=0; k < hcon; k++) DICT_TABHASH_ARR(dict, k) = -1L;
-  TAG(mframe) = DICT; ATTR(mframe) = 0; 
-  VALUE_BASE(mframe) = (P)dict; 
+  TAG(mframe) = DICT; 
+  ATTR(mframe) = 0; 
+  VALUE_PTR(mframe) = dict; 
   DICT_NB(mframe) = nb;
-  return(dict);
+
+  return dict;
 }
 
 /*----------------------------------- clear associations of dictionary */
@@ -212,7 +214,8 @@ B *makeopdictbase(B *opdefs, P *errc, B **errm, L32 n1)
   if ((dict = makedict(n1))== (B *)(-1L)) return((B *)(-1L));
   if (FREEvm + LIBBYTES > CEILvm) return((B*) -1L);
   frame = framebuf;
-  TAG(frame) = OP; ATTR(frame) = ACTIVE | READONLY;
+  TAG(frame) = OP; 
+  ATTR(frame) = ACTIVE | READONLY;
   for (opdef = opdefs; n; opdef += OPDEFBYTES, n--) {
     OP_NAME(frame) = OPDEF_NAME(opdef);
     OP_CODE(frame) = OPDEF_CODE(opdef);
@@ -225,7 +228,8 @@ B *makeopdictbase(B *opdefs, P *errc, B **errm, L32 n1)
   newdict = CEILvm + FRAMEBYTES;
   d_reloc(newdict, (P) dict, (P) newdict);
   VALUE_BASE(CEILvm) = (P) newdict;
-  TAG(CEILvm) |= OPLIBTYPE; ATTR(CEILvm) |= READONLY;
+  TAG(CEILvm) |= OPLIBTYPE;
+  ATTR(CEILvm) |= READONLY;
   LIB_TYPE(CEILvm) = 0;
   LIB_HANDLE(CEILvm) = 0;
   LIB_ERRC(CEILvm) = errc;
@@ -474,35 +478,35 @@ B *lookup(B *nameframe, B *dict)
   return 0L;
 }
 
-/* merge entries in socket into sink */
+/* merge entries in source into sink */
 /* return false if not enough space in sink */
-BOOLEAN mergedict(B *socket, B* sink) {
+BOOLEAN mergedict(B *source, B* sink) {
   B *entry;
-	size_t i;
-	static B excludes_ = TRUE;
-	static B *_excludes[] = {
-	  (B*)"hi", (B*)"libnum", (B*)"INIT_", (B*)"FINI_"
-	};
-	static B excludes[sizeof(_excludes)/sizeof(_excludes[0])][FRAMEBYTES];
+  size_t i;
+  static B excludes_ = TRUE;
+  static B *_excludes[] = {
+    (B*)"hi", (B*)"libnum", (B*)"INIT_", (B*)"FINI_"
+  };
+  static B excludes[sizeof(_excludes)/sizeof(_excludes[0])][FRAMEBYTES];
 
-	if (excludes_) {
-		for (i = 0; i < sizeof(_excludes)/sizeof(_excludes[0]); i++) {
-			makename(_excludes[i], excludes[i]);
-		}
-		excludes_ = FALSE;
-	}
+  if (excludes_) {
+    for (i = 0; i < sizeof(_excludes)/sizeof(_excludes[0]); i++) {
+      makename(_excludes[i], excludes[i]);
+    }
+    excludes_ = FALSE;
+  }
 
-  for (entry = (B*) DICT_ENTRIES(socket);
-       entry < (B*) DICT_FREE(socket);
+  for (entry = (B*) DICT_ENTRIES(source);
+       entry < (B*) DICT_FREE(source);
        entry += ENTRYBYTES) {
-		for (i = 0; i < sizeof(_excludes)/sizeof(_excludes[0]); i++) {
-			if (matchname(ASSOC_NAME(entry), excludes[i]))
-				goto nextentry;
-		}
-		if (! insert(ASSOC_NAME(entry), sink, ASSOC_FRAME(entry)))
-			return FALSE;
-
-	  nextentry: ;
+    for (i = 0; i < sizeof(_excludes)/sizeof(_excludes[0]); i++) {
+      if (matchname(ASSOC_NAME(entry), excludes[i]))
+	goto nextentry;
+    }
+    if (! insert(ASSOC_NAME(entry), sink, ASSOC_FRAME(entry)))
+      return FALSE;
+    
+  nextentry: ;
   }
   return TRUE;
 }
@@ -540,11 +544,12 @@ BOOLEAN insert(B *nameframe, B *dict, B *framedef)
 
  ins_name:
   DICT_FREE(dict) += ENTRYBYTES;
-  moveframe(nameframe, ASSOC_NAME(link)); ASSOC_NEXT(link) = -1L;
+  moveframe(nameframe, ASSOC_NAME(link)); 
+  ASSOC_NEXT(link) = -1L;
 
  ins_fra:
   moveframe(framedef, ASSOC_FRAME(link));
-  return(TRUE);
+  return TRUE;
 }
 
 /* ======================== executive ================================ 
@@ -564,86 +569,105 @@ BOOLEAN insert(B *nameframe, B *dict, B *framedef)
 
 P exec(L32 turns)
 {
-static B fetch_err[] = "fetch phase\n";
-static B transl_err[] = "translation phase\n";
-static B exec_err[] = "execution phase\n";
-static B undfn_buf[NAMEBYTES+1];
- B *f, *af, *dict; P  retc; UB fclass;
-OPER tmis;
+  static B fetch_err[] = "fetch phase\n";
+  static B transl_err[] = "translation phase\n";
+  static B exec_err[] = "execution phase\n";
+  static B undfn_buf[NAMEBYTES+1];
+  B *f, *af, *dict; P  retc; UB fclass;
+  OPER tmis;
 
 /* ------------------------------------------- test phase */
 
-x_t:
-if ( FREEexecs <= FLOORexecs) return(DONE);
- if (turns-- <= 0) return(MORE);
- if (abortflag) { abortflag = FALSE; return(ABORT); }
+ x_t:
+  if ( FREEexecs <= FLOORexecs) return(DONE);
+  if (turns-- <= 0) return(MORE);
+  if (abortflag) { abortflag = FALSE; return(ABORT); }
 
 /* ---------------------------------------- fetch phase */
  
-fclass = CLASS(x_1);
-if (fclass == LIST) goto f_list; 
-if (fclass == ARRAY) goto f_arr;
-if (fclass < BOX) { f = x_1; FREEexecs = x_1; goto x_e; }
-errsource = fetch_err; return(CORR_OBJ);
+  fclass = CLASS(x_1);
+  if (fclass == LIST) goto f_list; 
+  if (fclass == ARRAY) goto f_arr;
+  if (fclass < BOX) { f = x_1; FREEexecs = x_1; goto x_e; }
+  errsource = fetch_err; return(CORR_OBJ);
 
-f_arr:
-if (TAG(x_1) == (ARRAY | BYTETYPE))
-   { 
-     if ((retc = tokenize(x_1)) != OK)
-      { if (retc == DONE) { FREEexecs = x_1; goto x_t; }
-        errsource = transl_err; return(retc);
+ f_arr:
+  if (TAG(x_1) == (ARRAY | BYTETYPE)) { 
+    if ((retc = tokenize(x_1)) != OK) { 
+      if (retc == DONE) { 
+	FREEexecs = x_1; 
+	goto x_t; 
       }
-     f = FREEopds = o_1;
-   } else f = x_1;
-goto x_e;
+      errsource = transl_err; return(retc);
+    }
+    f = FREEopds = o_1;
+  } 
+  else f = x_1;
+  goto x_e;
 
-f_list:
-if (VALUE_BASE(x_1) >= LIST_CEIL(x_1))
-   { FREEexecs = x_1; goto x_t; }
-f = (B *)VALUE_BASE(x_1);
-if ((VALUE_BASE(x_1) += FRAMEBYTES) >= LIST_CEIL(x_1))
-   FREEexecs = x_1;
+ f_list:
+  if (VALUE_BASE(x_1) >= LIST_CEIL(x_1)) { 
+    FREEexecs = x_1; 
+    goto x_t; 
+  }
+  f = (B *)VALUE_BASE(x_1);
+  if ((VALUE_BASE(x_1) += FRAMEBYTES) >= LIST_CEIL(x_1))
+    FREEexecs = x_1;
 
 /* -----------------------------------------  execution phase */
-x_e:
-if ((ATTR(f) & ACTIVE) == 0) goto e_opd;
-if ((fclass = CLASS(f)) == OP) goto e_op;
-if (fclass == NAME) goto e_name;
-if (fclass == NULLOBJ) goto x_t;
-if (fclass > BOX) { retc = CORR_OBJ; goto e_er_1; }
+ x_e:
+  if ((ATTR(f) & ACTIVE) == 0) goto e_opd;
+  if ((fclass = CLASS(f)) == OP) goto e_op;
+  if (fclass == NAME) goto e_name;
+  if (fclass == NULLOBJ) goto x_t;
+  if (fclass > BOX) { 
+    retc = CORR_OBJ; 
+    goto e_er_1; 
+  }
 
-e_opd:                               /* push object on operand stack */
-if (FREEopds >= CEILopds) { retc = OPDS_OVF; goto e_er_1; }
-moveframe(f,o1);
-ATTR(o1) &= ~XMARK; // leave active alone -- might be procedure
-if ((CLASS(o1)== NAME) && ((ATTR(o1) & TILDE) != 0)) {
-		ATTR(o1) |= ACTIVE;
-		ATTR(o1) &= ~TILDE;
-}
+ e_opd:                               /* push object on operand stack */
+  if (FREEopds >= CEILopds) { 
+    retc = OPDS_OVF; 
+    goto e_er_1; 
+  }
+  moveframe(f, o1);
+  ATTR(o1) &= ~XMARK; // leave active alone -- might be procedure
+  if ((CLASS(o1)== NAME) && ((ATTR(o1) & TILDE) != 0)) {
+    ATTR(o1) |= ACTIVE;
+    ATTR(o1) &= ~TILDE;
+  }
 
-FREEopds = o2;
-goto x_t;
+  FREEopds = o2;
+  goto x_t;
 
-e_op:                                /* only C operators for the time! */
-tmis = (OPER)OP_CODE(f);
-if ((retc = (*tmis)()) != OK)
-   { errsource = (B *)OP_NAME(f); return(retc); }
-goto x_t;
+ e_op:                                /* only C operators for the time! */
+  tmis = (OPER)OP_CODE(f);
+  if ((retc = (*tmis)()) != OK) { 
+    errsource = (B *)OP_NAME(f); 
+    return retc; 
+  }
+  goto x_t;
 
-e_name:
-dict = FREEdicts;
-while ((dict -= FRAMEBYTES) >= FLOORdicts)
-   { if ((af = lookup(f, (B *)(VALUE_BASE(dict)))) != 0L)
-       { f = af;
-         if (ATTR(af) & ACTIVE) 
-          { if (FREEexecs >= CEILexecs) { retc = EXECS_OVF; goto e_er_1; }
-							moveframe(f,x1); FREEexecs = x2; goto x_t;
-          } else { goto e_opd; } 
-        }
-   }
-pullname(f,undfn_buf);  errsource = undfn_buf; return(UNDF);
+ e_name:
+  dict = FREEdicts;
+  while ((dict -= FRAMEBYTES) >= FLOORdicts) { 
+    if ((af = lookup(f, (B *)(VALUE_BASE(dict)))) != 0L) { 
+      f = af;
+      if (ATTR(af) & ACTIVE) { 
+	if (FREEexecs >= CEILexecs) { 
+	  retc = EXECS_OVF; 
+	  goto e_er_1; 
+	}
+	moveframe(f,x1); 
+	FREEexecs = x2; 
+	goto x_t;
+      }
+      else goto e_opd;
+    }
+  }
+  pullname(f,undfn_buf);  errsource = undfn_buf; return(UNDF);
 
-e_er_1:   errsource = exec_err; return(retc);
+ e_er_1:   errsource = exec_err; return(retc);
 }
 
 /*-------------------- tree handling support --------------------------*/

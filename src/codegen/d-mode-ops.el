@@ -217,5 +217,6 @@
   "mpibroadcast"
   "mpirank"
   "mpisize"
+  "groupconsole"
   )
 "Operator names for d-mode.")

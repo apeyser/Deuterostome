@@ -44,7 +44,8 @@ target_triplet = @target@
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	dmflex.c
 @ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@am__append_2 = .plugins
 subdir = plugins
-DIST_COMMON = $(am__dist_noinst_DATA_DIST) $(srcdir)/Makefile.am \
+DIST_COMMON = $(am__dist_dmstart_DATA_DIST) \
+	$(am__dist_noinst_DATA_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/dmflex.l.in dmflex.c
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
@@ -67,7 +68,8 @@ am__vpath_adj = case $$p in \
     *) f=$$p;; \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-am__installdirs = "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(pkglibdir)"
+am__installdirs = "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(dmstartdir)" \
+	"$(DESTDIR)$(pkglibdir)"
 pkglibLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(pkglib_LTLIBRARIES)
 cpptester_la_DEPENDENCIES =
@@ -176,10 +178,12 @@ DIST_SOURCES = $(am__cpptester_la_SOURCES_DIST) \
 	$(am__process_la_SOURCES_DIST) $(am__process2_la_SOURCES_DIST) \
 	$(am__stats_la_SOURCES_DIST) $(am__test_la_SOURCES_DIST) \
 	$(am__test2_la_SOURCES_DIST) $(am__throw_la_SOURCES_DIST)
+am__dist_dmstart_DATA_DIST = petsc.d
+dist_dmstartDATA_INSTALL = $(INSTALL_DATA)
 am__dist_noinst_DATA_DIST = process2.d stats.d cpptester.d dmpetsc.d \
 	dmpetsc.c.in
 pkglibDATA_INSTALL = $(INSTALL_DATA)
-DATA = $(dist_noinst_DATA) $(pkglib_DATA)
+DATA = $(dist_dmstart_DATA) $(dist_noinst_DATA) $(pkglib_DATA)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -217,6 +221,7 @@ DMSOCKDIR = @DMSOCKDIR@
 DMSTARTDIR = @DMSTARTDIR@
 DM_IPPORT_USERRESERVED = @DM_IPPORT_USERRESERVED@
 DM_IPPORT_USERRESERVED_STANDARD = @DM_IPPORT_USERRESERVED_STANDARD@
+DPAWN_COMMAND = @DPAWN_COMMAND@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -435,7 +440,6 @@ BUILT_SOURCES = new-plugin.d $(am__append_1) $(am__append_2)
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@edit = sed \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	  -e 's,[@]PETSC_DIR[@],$(PETSC_DIR),g' \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	  -e 's,[@]PETSC_ARCH[@],$(PETSC_ARCH),g' \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	  -e 's,[@]dpawn[@],$(dpawn),g' \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	  -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g'
 
 @ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@DMFLEX_LIB = dmflex.la
@@ -453,7 +457,8 @@ BUILT_SOURCES = new-plugin.d $(am__append_1) $(am__append_2)
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@throw_la_SOURCES = throw.c throw.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@throw_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
 @ENABLE_PLUGINS_SUPPORT_TRUE@pkglib_LTLIBRARIES = $(PLUGINS)
-@ENABLE_PLUGINS_SUPPORT_TRUE@pkglib_DATA = $(PLACEHOLDER) $(IPETSC_D)
+@ENABLE_PLUGINS_SUPPORT_TRUE@pkglib_DATA = $(PLACEHOLDER) 
+@ENABLE_PLUGINS_SUPPORT_TRUE@dist_dmstart_DATA = $(IPETSC_D)
 @ENABLE_PLUGINS_SUPPORT_TRUE@CLEANFILES = $(BUILT_SOURCES)
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -611,6 +616,23 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
+install-dist_dmstartDATA: $(dist_dmstart_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(dmstartdir)" || $(MKDIR_P) "$(DESTDIR)$(dmstartdir)"
+	@list='$(dist_dmstart_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(dist_dmstartDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(dmstartdir)/$$f'"; \
+	  $(dist_dmstartDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(dmstartdir)/$$f"; \
+	done
+
+uninstall-dist_dmstartDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(dist_dmstart_DATA)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(dmstartdir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(dmstartdir)/$$f"; \
+	done
 install-pkglibDATA: $(pkglib_DATA)
 	@$(NORMAL_INSTALL)
 	test -z "$(pkglibdir)" || $(MKDIR_P) "$(DESTDIR)$(pkglibdir)"
@@ -708,7 +730,7 @@ check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(LTLIBRARIES) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(pkglibdir)"; do \
+	for dir in "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(dmstartdir)" "$(DESTDIR)$(pkglibdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -760,7 +782,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-dist_dmstartDATA
 
 install-dvi: install-dvi-am
 
@@ -796,7 +818,8 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-pkglibDATA uninstall-pkglibLTLIBRARIES
+uninstall-am: uninstall-dist_dmstartDATA uninstall-pkglibDATA \
+	uninstall-pkglibLTLIBRARIES
 
 .MAKE: install-am install-strip
 
@@ -804,15 +827,16 @@ uninstall-am: uninstall-pkglibDATA uninstall-pkglibLTLIBRARIES
 	clean-libtool clean-pkglibLTLIBRARIES ctags distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-pkglibDATA \
-	install-pkglibLTLIBRARIES install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags uninstall uninstall-am \
+	install install-am install-data install-data-am \
+	install-dist_dmstartDATA install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-pkglibDATA install-pkglibLTLIBRARIES \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-dist_dmstartDATA \
 	uninstall-pkglibDATA uninstall-pkglibLTLIBRARIES
 
 new-plugin.d: $(srcdir)/Makefile new-plugin.d.in

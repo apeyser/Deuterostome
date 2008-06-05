@@ -13,8 +13,10 @@ drook = $(bindir)/drook
 edit = sed \
 	-e 's,[@]bindir[@],$(bindir),g' \
 	-e 's,[@]srcdir[@],$(srcdir),g' \
-	-e 's,[@]dpawn[@],$(dpawn),g' \
-	-e 's,[@]drook[@],$(drook),g'
+	-e 's,[@]drook[@],$(drook),g' \
+	-e "s,[@]DPAWN_EXEC[@],`for i in $(DPAWN_COMMAND) $(dpawn); do echo \\\"$$i\\\"; break; done | tr -d \"\n\"`,g" \
+	-e "s|[@]DPAWN_ARGS[@]|`first=:; for i in $(DPAWN_COMMAND) $(dpawn); do if $$first; then first=false; else echo \\\"$$i\\\",; fi ; done | tr -d \"\n\"`|g" \
+	-e 's,[@]DPAWN_COMMAND[@],$(DPAWN_COMMAND) $(dpawn),g'
 
 if ENABLE_SETUID
 

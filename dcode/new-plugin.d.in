@@ -80,9 +80,14 @@ end def
       (} while \(0\))__ nl nl
     } forall
 
-    (#define MAKE_)__ plugin_name_u __ (_)__ type_name_u __ (\(frame, size\) )__
+    (#define MAKE_)__ plugin_name_u __ (_)__ type_name_u __ (\(frame)__
+    plugin_types_opaque_mem type_name known {
+      plugin_types_opaque_mem type_name get
+    } {null} ifelse dup null eq {(, size)} {()} ifelse __ (\) )__
+
     (do { \\)__ nl
-    (  if \(! \(frame = make_opaque_frame\(size, )__ 
+    (  if \(! \(frame = make_opaque_frame\()__ 
+    dup null eq {pop (size)} if __ (, )__
     plugin_name_u __ (_)__ type_name_u __ (_frame, )__
 
     type_dict {pop /mem_name name
@@ -145,7 +150,7 @@ end def
   make_buffer
   (#include "dm-)__ plugin_name_l __ (-header.h")__ nl nl
 
-  (PLUGIN_INTRO\()__ plugin_version n_ (\);)__ nl nl
+  (PLUGIN_INTRO\()__ plugin_version n_ (, )__ plugin_name_l (\);)__ nl nl
 
   (P ll_errc[] = { )__ nl
   plugin_errs {pop /err_name name
@@ -213,11 +218,12 @@ end def
   /islocal name /isbody name /file name /path name
 
   currentdict end currentdict exch begin
-  dup /plugin_errs    known not {/plugin_errs    0 dict     def} if
+  {/plugin_errs /plugin_types /plugin_types_opaque_mem} {
+    2 copy known not {0 dict def} {pop} ifelse
+  } forall
   dup /plugin_version known not {/plugin_version 0          def} if
-  dup /plugin_types   known not {/plugin_types   0 dict     def} if
-  dup /plugin_name    known not {/plugin_name    dictinname _ def} if
-  pop   
+  dup /plugin_name    known not {/plugin_name    dictinname def} if
+  pop
 
   makename
   isbody ~makebody ~makeheader ifelse

@@ -37,6 +37,8 @@
   /BAD_ARR 2816x def
   /CLOCK_ERR 532x def
   /LONG_OVF 1800x def
+  /ILL_RECAP 1034x def
+  /BUF_OVF 534x def
   /REGEX_BADPAT 3072x def
   /REGEX_ECOLLATE 3073x def
   /REGEX_ECTYPE 3074x def

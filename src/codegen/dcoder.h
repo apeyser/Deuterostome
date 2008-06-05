@@ -40,6 +40,8 @@ struct emap emap[] = {
   {(B*)"BAD_ARR", BAD_ARR},
   {(B*)"CLOCK_ERR", CLOCK_ERR},
   {(B*)"LONG_OVF", LONG_OVF},
+  {(B*)"ILL_RECAP", ILL_RECAP},
+  {(B*)"BUF_OVF", BUF_OVF},
 #ifdef DM_ENABLE_REGEX
   {(B*)"REGEX_BADPAT", REGEX_BADPAT},
   {(B*)"REGEX_ECOLLATE", REGEX_ECOLLATE},

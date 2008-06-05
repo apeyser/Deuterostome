@@ -87,7 +87,6 @@ dist_noinst_DATA += dmpetsc.d dmpetsc.c.in
 edit = 	sed \
 	  -e 's,[@]PETSC_DIR[@],$(PETSC_DIR),g' \
 	  -e 's,[@]PETSC_ARCH[@],$(PETSC_ARCH),g' \
-	  -e 's,[@]dpawn[@],$(dpawn),g' \
 	  -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g'
 
 dmpetsc.c: Makefile $(srcdir)/dmpetsc.c.in
@@ -127,7 +126,8 @@ throw_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
 endif ENABLE_PLUGINS
 
 pkglib_LTLIBRARIES = $(PLUGINS)
-pkglib_DATA = $(PLACEHOLDER) $(IPETSC_D)
+pkglib_DATA = $(PLACEHOLDER) 
+dist_dmstart_DATA = $(IPETSC_D)
 
 CLEANFILES = $(BUILT_SOURCES)
 

@@ -223,7 +223,9 @@
       /MEM_OVF (** Memory exhausted) def
       /BAD_ARR (** dmnuminc debug error) def
       /CLOCK_ERR (** Error accessing clock) def
-      /LONG_OVF (** 64 bit integer overflow on load into 32 bit machine) def|]
+      /LONG_OVF (** 64 bit integer overflow on load into 32 bit machine) def
+      /ILL_RECAP (** Double capsave) def 
+      /BUF_OVF (** Internal buffer overflow) def |]
     end def |]
   end def |]
 end def
@@ -396,7 +398,7 @@ end def end def
     /rsend 
     /mpiprobe /mpiiprobe /mpisend /mpirecv 
     /mpibarrier /mpibroadcast
-    /mpirank /mpisize
+    /mpirank /mpisize /groupconsole
   ] def 
   /errors 1 dict dup begin |[
     /MPI_NOMSG (** No mpi message msg received -- internal) def |]

@@ -22,6 +22,7 @@ B saveboxname[FRAMEBYTES];
 B buffernameframe[FRAMEBYTES];
 B fininame[FRAMEBYTES];
 B initname[FRAMEBYTES];
+static B nullframe[FRAMEBYTES];
 
 void initialize_plugins(void) {
   if (lt_dlinit()) {
@@ -35,7 +36,8 @@ void initialize_plugins(void) {
   makename((B*)"BUFFER", buffernameframe);
   makename((B*)"INIT_", initname);
   makename((B*)"FINI_", fininame);
-  makename((B*)"BUFFER", buffernameframe);
+  TAG(nullframe) = NULLOBJ; 
+  ATTR(nullframe) = READONLY;
 }
 
 /*------------------------------------------------closealllibs
@@ -89,7 +91,7 @@ P op_nextlib(void)
         TAG(o_1) = BOOL;
         ATTR(o_1) = 0;
         BOOL_VAL(o_1) = FALSE;
-      return OK;
+	return OK;
       }
       break;
             
@@ -99,6 +101,12 @@ P op_nextlib(void)
 
   if (CEILopds < o2) return OPDS_OVF;
   if (! (lastlib = nextlib(lastlib))) return CORR_OBJ;
+  if (! LIB_TYPE(lastlib)) {
+    TAG(o_1) = BOOL;
+    ATTR(o_1) = 0;
+    BOOL_VAL(o_1) = FALSE;
+    return OK;
+  }
 
   moveframe(lastlib, o_1);
 
@@ -131,6 +139,7 @@ P op_nextlib(void)
     return LIB_EXPORT;							\
   }
 
+// (dir) (file) | lib
 P op_loadlib(void)
 {
   UP type;
@@ -142,6 +151,7 @@ P op_loadlib(void)
   B* oldCEILvm;
   B* oldFREEvm;
   B* sysdict;
+  B* eOPDS;
   
   B* frame;
   B* dict;
@@ -154,13 +164,15 @@ P op_loadlib(void)
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
   if (TAG(o_2) != (ARRAY | BYTETYPE)) return OPD_ERR;
   
-  if (FREEvm + ARRAY_SIZE(o_1) + ARRAY_SIZE(o_2) + 1 > CEILvm)
+  if (FREEvm + ARRAY_SIZE(o_1) + ARRAY_SIZE(o_2) + 2 > CEILvm)
     return VM_OVF;
   
   strncpy((char*)FREEvm, (char*)VALUE_PTR(o_2), ARRAY_SIZE(o_2));
-  strncpy((char*)FREEvm + ARRAY_SIZE(o_2), (char*)VALUE_PTR(o_1), 
-	  ARRAY_SIZE(o_1));
-  FREEvm[ARRAY_SIZE(o_2) + ARRAY_SIZE(o_1)] = '\0';
+  FREEvm += ARRAY_SIZE(o_2);
+  if (FREEvm[-1] != '/') FREEvm++[0] = '/';
+  strncpy((char*)FREEvm, (char*)VALUE_PTR(o_1), ARRAY_SIZE(o_1));
+  FREEvm[ARRAY_SIZE(o_1)] = '\0';
+  FREEvm = oldFREEvm;
   
   if (! (handle = (void*) lt_dlopen((char*)FREEvm))) {
     const char* e;                         
@@ -202,19 +214,20 @@ P op_loadlib(void)
     return VM_OVF;
   }
 
+  LIB_TYPE(dict - FRAMEBYTES) = type;
+  LIB_HANDLE(dict - FRAMEBYTES) = (P) handle;
+  moveframe(dict - FRAMEBYTES, o_2);
+  FREEopds = o_1;
+  eOPDS = o_2;
+
   if ((frame = lookup(initname, dict))
       && (retc = ((OPER) OP_CODE(frame))()) != OK) {
     lt_dlclose((lt_dlhandle) handle);
     FREEvm = oldFREEvm;
     CEILvm = oldCEILvm;
+    if (FREEopds > eOPDS) FREEopds = eOPDS;
     return LIB_INIT;
-  }
-
-  
-  LIB_TYPE(dict - FRAMEBYTES) = type;
-  LIB_HANDLE(dict - FRAMEBYTES) = (P) handle;
-  moveframe(dict - FRAMEBYTES, o_2);
-  FREEopds = o_1;
+  }  
   
   sysdict = VALUE_PTR(FLOORdicts);
   if (! mergedict(dict, sysdict)) return LIB_MERGE;
@@ -235,11 +248,8 @@ B* make_opaque_frame(P n, B* pluginnameframe, ...) {
   B* nameframe;
   va_list nameframes;
   B* dict;
-  B nullframe[FRAMEBYTES];
   B* oldFREEvm = FREEvm;
   B* buffer = NULL;
-  TAG(nullframe) = NULLOBJ; 
-  ATTR(nullframe) = READONLY;
 
   va_start(nameframes, pluginnameframe);
   while ((nameframe = va_arg(nameframes, B*))) ++len;
@@ -255,14 +265,15 @@ B* make_opaque_frame(P n, B* pluginnameframe, ...) {
   
   if (n) {
     n = DALIGN(n);
-    if (FREEvm + FRAMEBYTES + n >= CEILvm) {
-			FREEvm = oldFREEvm;
+    if (FREEvm + FRAMEBYTES + n > CEILvm) {
+      FREEvm = oldFREEvm;
       FREEopds = o_1;
       return NULL;
     }
 
     buffer = FREEvm;
-    TAG(FREEvm) = (ARRAY | BYTETYPE); ATTR(FREEvm) = READONLY;
+    TAG(FREEvm) = (ARRAY | BYTETYPE); 
+    ATTR(FREEvm) = READONLY;
     VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
     ARRAY_SIZE(FREEvm) = n;
     FREEvm += FRAMEBYTES + n;
@@ -296,7 +307,8 @@ P wrap_readcode(const char* file) {
   if (x2 > CEILexecs) return EXECS_OVF;
   if (o2 > CEILopds) return OPDS_OVF;
   
-  TAG(x1) = (ARRAY | BYTETYPE); ATTR(x1) = ACTIVE | READONLY;
+  TAG(x1) = (ARRAY | BYTETYPE); 
+  ATTR(x1) = (ACTIVE | READONLY);
   ARRAY_SIZE(x1) =  strlen((char*)(VALUE_PTR(x1) = (B*)"fromfiles"));
   FREEexecs = x2;
 

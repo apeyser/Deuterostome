@@ -100,6 +100,7 @@ DMSOCKDIR = @DMSOCKDIR@
 DMSTARTDIR = @DMSTARTDIR@
 DM_IPPORT_USERRESERVED = @DM_IPPORT_USERRESERVED@
 DM_IPPORT_USERRESERVED_STANDARD = @DM_IPPORT_USERRESERVED_STANDARD@
+DPAWN_COMMAND = @DPAWN_COMMAND@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -289,9 +290,10 @@ tmp = @tmp@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 dist_pkglisp_LISP = dm-server.el
-nodist_pkglisp_LISP = d-comint-mode.el d-mode.el init.el d-mode-ops.el
+NODISTFILES = d-comint-mode.el init.el 
+nodist_pkglisp_LISP = $(NODISTFILES) d-mode-ops.el d-mode.el
 EXTRA_DIST = d-comint-mode.el.in init.el.in d-mode.el.in
-CLEANFILES = $(nodist_pkglisp_LISP)
+CLEANFILES = $(NODISTFILES)
 edit = sed \
 	-e 's,@bindir\@,$(bindir),g' \
 	-e 's,@pkglispdir\@,$(pkglispdir),g'

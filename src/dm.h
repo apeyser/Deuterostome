@@ -267,23 +267,27 @@ extern "C" {
 
 #define PF_PTR(frame, offset) (((B*)(frame))+(offset)*PACK_FRAME)
 
-#define BOOL_VAL(frame)      (*((BOOLEAN *)((frame)+2)))
-#define NAME_KEY(frame)      (*((W *)((frame)+2)))
+#define BOOL_VAL(frame)      (*((BOOLEAN *)(((B*)(frame))+2)))
+#define NAME_KEY(frame)      (*((W *)      (((B*)(frame))+2)))
 
-#define NUM_VAL(frame)       ( ((B *)PF_PTR(frame,1)))
+#define NUM_VAL(frame)       ( ((B *)  PF_PTR(frame,1)))
 #define LONGBIG_VAL(frame)   (*((LBIG*)PF_PTR(frame,1)))
+#define LONG32_VAL(frame)    (*((L32*) PF_PTR(frame,1)))
+#define LONG64_VAL(frame)    (*((L64*) PF_PTR(frame,1)))
+#define BYTE_VAL(frame)      (*((B*)   PF_PTR(frame,1)))
+#define WORD_VAL(frame)      (*((W*)   PF_PTR(frame,1)))
 
-#define VALUE_BASE(frame)    (*((P *)PF_PTR(frame,1)))
-#define VALUE_PTR(frame)     (*((B**)PF_PTR(frame,1)))
+#define VALUE_BASE(frame)    (*((P *)  PF_PTR(frame,1)))
+#define VALUE_PTR(frame)     (*((B**)  PF_PTR(frame,1)))
+#define OP_CODE(frame)       (*((P *)  PF_PTR(frame,1)))
 
-#define OP_CODE(frame)       (*((P *)PF_PTR(frame,1)))
-#define OP_NAME(frame)       (*((P *)PF_PTR(frame,2)))
-#define LIST_CEIL(frame)     (*((P *)PF_PTR(frame,2)))
-#define ARRAY_SIZE(frame)    (*((P *)PF_PTR(frame,2)))
-#define DICT_NB(frame)       (*((P *)PF_PTR(frame,2)))
-#define DICT_CURR(frame)     (*((P *)PF_PTR(frame,2)))
-#define BOX_NB(frame)        (*((P *)PF_PTR(frame,2)))
-#define LIST_CEIL_PTR(frame) (*((B**)PF_PTR(frame,2)))
+#define OP_NAME(frame)       (*((P *)  PF_PTR(frame,2)))
+#define LIST_CEIL(frame)     (*((P *)  PF_PTR(frame,2)))
+#define ARRAY_SIZE(frame)    (*((P *)  PF_PTR(frame,2)))
+#define DICT_NB(frame)       (*((P *)  PF_PTR(frame,2)))
+#define DICT_CURR(frame)     (*((P *)  PF_PTR(frame,2)))
+#define BOX_NB(frame)        (*((P *)  PF_PTR(frame,2)))
+#define LIST_CEIL_PTR(frame) (*((B**)  PF_PTR(frame,2)))
 
 /*-------------------------------------------- dictionary */
  
@@ -302,7 +306,7 @@ extern "C" {
 
 #define DICTBYTES             DALIGN(4*PACK_FRAME)
 
-#define LIB_DATA(frame)       ((B*)(VALUE_BASE(frame) + DICT_NB(frame)))
+#define LIB_DATA(frame)       (VALUE_PTR(frame) + DICT_NB(frame))
 
 #define LIB_TYPE(frame)       (*(P*)   (LIB_DATA(frame)))
 #define LIB_HANDLE(frame)     (*(P*)   (PF_PTR(LIB_DATA(frame),1)))
@@ -350,10 +354,11 @@ extern "C" {
 
 #define VMR_ERR     (P)0x00000210L /* couldn't allocate memory              */
 #define VMR_STATE   (P)0x00000211L /* vm already tiny                       */
-#define KILL_SOCKETS (P)0x00000212L /* dvt must kill all non-server socks    */
+#define KILL_SOCKETS (P)0x00000212L /* dvt must kill all non-server socks   */
 #define MEM_OVF     (P)0x00000213L /* failed memory allocation              */
 #define CLOCK_ERR   (P)0x00000214L /* failed to get epoch                   */
 #define DEAD_SOCKET (P)0x00000215L /* socket died - no special handler      */
+#define BUF_OVF     (P)0x00000216L /* overflow in internal buffer           */
 
 #define BAD_TOK     (P)0x00000300L /* bad D token in socket string          */
 #define BAD_ASC     (P)0x00000301L /* bad ASCII character in socket string  */
@@ -371,6 +376,7 @@ extern "C" {
 #define DICT_OVF    (P)0x00000407L /* dictionary overflow                   */
 #define DICT_USED   (P)0x00000408L /* copying into used dictionary          */
 #define UNDF_VAL    (P)0x00000409L /* using undefined number (NAN)          */
+#define ILL_RECAP   (P)0x0000040AL /* Double capsave                        */
 #define DIR_NOSUCH  (P)0x00000501L /* no such directory/volume              */
 
 #define BADBOX      (P)0x00000701L /* file does not hold a box              */

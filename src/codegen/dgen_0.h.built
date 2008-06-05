@@ -186,6 +186,8 @@ P _syserrc[] = {
   BAD_ARR,
   CLOCK_ERR,
   LONG_OVF,
+  ILL_RECAP,
+  BUF_OVF,
   0L
 };
 
@@ -228,5 +230,7 @@ B* _syserrm[] = {
   (B*) "** dmnuminc debug error",
   (B*) "** Error accessing clock",
   (B*) "** 64 bit integer overflow on load into 32 bit machine",
+  (B*) "** Double capsave",
+  (B*) "** Internal buffer overflow",
   (B*) NULL
 };

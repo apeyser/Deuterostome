@@ -4,24 +4,33 @@
 /plugin_name /dmpetsc def
 
 /plugin_types 3 dict dup begin |[
-  /vector 2 dict dup begin |[
+  /vector 4 dict dup begin |[
     /vector [[/NUM /LONGBIGTYPE] /VECTOR_VAL /READONLY] def
-    /n      [[/NUM /LONG32TYPE] /L32_VAL /READONLY] def |]
+    /n      [[/NUM /LONG32TYPE] /LONG32_VAL 0] def 
+    /gn     [[/NUM /LONG32TYPE] /LONG32_VAL 0] def
+    /ass    [/BOOL /BOOL_VAL 0] def |]
   end def
 
-  /matrix 4 dict dup begin |[
+  /matrix 5 dict dup begin |[
     /matrix [[/NUM /LONGBIGTYPE] /MATRIX_VAL /READONLY] def
-    /m      [[/NUM /LONG32TYPE] /L32_VAL /READONLY] def
-    /n      [[/NUM /LONG32TYPE] /L32_VAL /READONLY] def
-    /gm     [[/NUM /LONG32TYPE] /L32_VAL /READONLY] def |]
+    /m      [[/NUM /LONG32TYPE] /LONG32_VAL 0] def
+    /n      [[/NUM /LONG32TYPE] /LONG32_VAL 0] def
+    /gm     [[/NUM /LONG32TYPE] /LONG32_VAL 0] def 
+    /ass    [/BOOL /BOOL_VAL 0] def |]
   end def
 
   /ksp 4 dict dup begin |[
     /ksp     [[/NUM /LONGBIGTYPE] /KSP_VAL /READONLY] def 
-    /m       [[/NUM /LONG32TYPE] /L32_VAL /READONLY] def 
-    /ksptype [[/NUM /LONG32TYPE] /L32_VAL /READONLY] def
-    /pctype  [[/NUM /LONG32TYPE] /L32_VAL /READONLY] def |]
+    /m       [[/NUM /LONG32TYPE] /LONG32_VAL 0] def 
+    /ksptype [[/NUM /LONG32TYPE] /LONG32_VAL /READONLY] def
+    /pctype  [[/NUM /LONG32TYPE] /LONG32_VAL /READONLY] def |]
   end def |]
+end def
+
+/plugin_types_opaque_mem 3 dict dup begin | [
+  /vector 0 def
+  /matrix 0 def
+  /ksp 0 def |]
 end def
 
 /plugin_errs 100 dict dup begin |[
@@ -30,6 +39,7 @@ end def
   /INVKSP (Invalidated ksp) def
   /ILLEGAL_OWNERSHIP (Changed ownership in dup) def
   /NOMATCH (Non matching dimensions) def
+  /NONLOCAL (Accessing non-local data) def
   /KSPSOLVE_NOINIT (Matrix for solution undefined) def
   /ERR_MEM (unable to allocate requested memory) def
   /ERR_SUP (no support for requested operation) def
@@ -80,6 +90,8 @@ end def
   /petsc_vec_copy null def
   /petsc_vec_copyto null def
   /petsc_vec_copyfrom null def
+  /petsc_vec_syncto null def
+  /petsc_vec_syncfrom null def
   /petsc_vec_max null def
   /petsc_vec_min null def
   /petsc_vec_destroy null def 
@@ -87,6 +99,8 @@ end def
   /petsc_mat_copy null def
   /petsc_mat_copyto null def
   /petsc_mat_copyfrom null def
+  /petsc_mat_syncto null def
+  /petsc_mat_syncfrom null def
   /petsc_mat_destroy null def
   /petsc_mat_dup null def
   /petsc_mat_vecmul null def 

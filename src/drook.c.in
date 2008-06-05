@@ -194,18 +194,26 @@ static void mpihandler(MPI_Comm* comm __attribute__ ((__unused__)),
 }
 
 DM_INLINE_STATIC void spawn(struct InfoDicts* infodicts) {
+  static char *argv[] = {@DPAWN_ARGS@ NULL};
+
   int* errors;
   size_t i, any = 0;
   MPI_Errhandler mpierr;
   char** comms;
   int* maxprocs;
   MPI_Info* info;
+  char*** argvs;
 
-  fprintf(stderr, "rook is spawning %i children as `%s'\n", nodes, "@dpawn@");
+  fprintf(stderr, "rook is spawning %i children as `%s'\n", 
+	  nodes, "@DPAWN_COMMAND@");
   errors = (int*) malloc(sizeof(int)*nodes);
 
-  if (! (comms = (char**) malloc(sizeof(char**)*infodicts->n)))
+  if (! (comms = (char**) malloc(sizeof(char*)*infodicts->n)))
     error(1, errno, "Unable to malloc for comm %lli",
+	  (long long) sizeof(char**)*infodicts->n);
+
+  if (! (argvs = (char***) malloc(sizeof(char**)*infodicts->n)))
+    error(1, errno, "Unable to malloc for argvs %lli",
 	  (long long) sizeof(char**)*infodicts->n);
   
   if (! (maxprocs = (int*) malloc(sizeof(int)*infodicts->n)))
@@ -218,7 +226,8 @@ DM_INLINE_STATIC void spawn(struct InfoDicts* infodicts) {
 
   for (i = 0; i < (size_t) infodicts->n; i++) {
     size_t j;
-    comms[i] = "@dpawn@";
+    comms[i] = @DPAWN_EXEC@;
+    argvs[i] = argv;
     maxprocs[i] = infodicts->dicts[i].nodes;
     MPI_Info_create(info+i);
     for (j = 0; j < infodicts->dicts[i].n; ++j) {
@@ -231,7 +240,7 @@ DM_INLINE_STATIC void spawn(struct InfoDicts* infodicts) {
   }
   free(infodicts->dicts);
 
-  MPI_Comm_spawn_multiple(infodicts->n, comms, MPI_ARGVS_NULL, maxprocs,
+  MPI_Comm_spawn_multiple(infodicts->n, comms, argvs, maxprocs,
 			  info, 0, MPI_COMM_WORLD, &children, errors);
 			  
   atexit(exithandler);
@@ -252,6 +261,7 @@ DM_INLINE_STATIC void spawn(struct InfoDicts* infodicts) {
 
   free(errors);
   free(comms);
+  free(argvs);
   free(maxprocs);
   for (i = 0; i < (size_t) infodicts->n; i++) MPI_Info_free(info+i);
 
