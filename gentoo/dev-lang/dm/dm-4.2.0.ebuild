@@ -110,6 +110,8 @@ src_compile() {
 	    eerror "Use flag petsc requires use flag mpi"
 	    die
 	fi
+	
+	use petsc && add_myconf --enable-plugins
 
 	add_with \
 	    petsc \
