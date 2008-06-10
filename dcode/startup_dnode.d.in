@@ -92,6 +92,16 @@ startup_common_save capsave {
     updatet
   } bind def
 
+  | save rank (name) | --
+  /sethostname {
+    2 index capsave 
+    255 /b array 0 * 4 index * number (: ) fax 3 -1 roll fax
+    0 exch getinterval
+    nodenames 3 -1 roll 1 add put
+    end
+    restore
+  } bind def
+
   /makeready_dpawn {
     {makeready} stopped end {stop} if restore
   } bind def
@@ -287,9 +297,14 @@ startup_common_save capsave {
           {
             exch not {abort} if
             /fbuf vmstatus sub 10 div /b array def
-            dup capsave
+            ~[~[
+              mpirank 
+              (hostname) fromsystem dup length 1 sub 0 exch getinterval
+              ~mpidata ~begin ~sethostname
+            ] ~lock]
+            1 index capsave
             getstartupdir (startup_dpawn.d) fbuf readfile mkact exec
-            dnoderespond
+            rsend dnoderespond
             restore
           } lock
         } send
