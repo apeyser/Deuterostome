@@ -83,6 +83,7 @@ static P broadcastmpi(B* rootf, MPI_Comm parent, P root) {
     return tosource(rootf, FALSE, wrap_mpibroadcast_1, wrap_mpibroadcast_1);
 }
 
+// -- | current-pawn-id
 P op_mpirank(void) {
   if (o1 >= CEILopds) return OPDS_OVF;
   TAG(o1) = (NUM | LONGBIGTYPE);
@@ -92,6 +93,7 @@ P op_mpirank(void) {
   return OK;
 }
 
+// -- | number-of-pawns
 P op_mpisize(void) {
   if (o1 >= CEILopds) return OPDS_OVF;
   TAG(o1) = (NUM | LONGBIGTYPE);
@@ -105,6 +107,7 @@ P op_mpibarrier(void) {
   return mpibarrier(getworldcomm());
 }
 
+// object | --
 P op_rsend(void) {
   static B xrootf[FRAMEBYTES];
   if (o_1 < FLOORopds) return OPDS_UNF;
@@ -113,6 +116,8 @@ P op_rsend(void) {
   return tompi(xrootf, getparentcomm(), TRUE, 0);
 }
 
+// rootid object | object
+// collective
 P op_mpibroadcast(void) {
   static B xrootf[FRAMEBYTES];
   P root;
@@ -126,6 +131,7 @@ P op_mpibroadcast(void) {
   return broadcastmpi(xrootf, getworldcomm(), root);
 }
 
+// destid object | --
 P op_mpisend(void) {
   static B xrootf[FRAMEBYTES];
   P dest;
@@ -139,6 +145,7 @@ P op_mpisend(void) {
   return tompi(xrootf, getworldcomm(), FALSE, dest);
 }
 
+// srcid | object
 P op_mpirecv(void) {
   P src;
   if (o_1 < FLOORopds) return OPDS_UNF;
@@ -149,6 +156,7 @@ P op_mpirecv(void) {
   return frommpi(NULL, getworldcomm(), src);
 }
 
+// srcid/* tagid/* | src tag count
 P op_mpiprobe(void) {
   P src, tag, retc, count;
   if (o_2 < FLOORopds) return OPDS_UNF;
@@ -175,7 +183,8 @@ P op_mpiprobe(void) {
 
   return OK;
 }
-  
+
+// srcid/* tagid/* | false/src tag size true  
 P op_mpiiprobe(void) {
   P src, tag, retc, count;
 
