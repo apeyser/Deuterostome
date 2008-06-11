@@ -207,7 +207,6 @@
   "nextlib"
   "nextevent"
   "aborted"
-  "regex"
   "rsend"
   "mpiprobe"
   "mpiiprobe"

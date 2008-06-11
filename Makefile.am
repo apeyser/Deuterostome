@@ -12,6 +12,7 @@ GENTOO_FILES = \
 	gentoo/dev-lang/dm/dm-4.0.ebuild \
 	gentoo/dev-lang/dm/dm-4.1.ebuild \
 	gentoo/dev-lang/dm/dm-4.2.0.ebuild \
+	gentoo/dev-lang/dm/dm-4.2.1.ebuild \
 	gentoo/dev-lang/dm/Manifest \
 	gentoo/dev-lang/dm/files/50dm-gentoo.el \
 	gentoo/dev-lang/dm/files/digest-dm-4.0 \

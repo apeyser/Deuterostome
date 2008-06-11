@@ -168,7 +168,10 @@ B* _sysop[] =
   (B*) "Xauthset", (B*) op_Xauthset,
   (B*) "nextevent", (B*) op_nextevent,
   (B*) "aborted", (B*) op_aborted,
+#ifdef DM_ENABLE_REGEX
   (B*) "regex", (B*) op_regex,
+  (B*) "regexi", (B*) op_regexi,
+#endif //DM_ENABLE_REGEX
   (B*) "quit", (B*) op_quit,
   (B*) "]", (B*) op_closelist,
   (B*) "", (B*) NULL
@@ -225,6 +228,21 @@ P _syserrc[] = {
   X_SEC_GEN,
   X_SEC_REV,
   X_SEC_LIB,
+#ifdef DM_ENABLE_REGEX
+  REGEX_BADPAT,
+  REGEX_ECOLLATE,
+  REGEX_ECTYPE,
+  REGEX_EESCAPE,
+  REGEX_ESUBREG,
+  REGEX_EBRACK,
+  REGEX_EPAREN,
+  REGEX_EBRACE,
+  REGEX_BADBR,
+  REGEX_ERANGE,
+  REGEX_ESPACE,
+  REGEX_BADRPT,
+  REGEX_UNKNOWN,
+#endif //DM_ENABLE_REGEX
   0L
 };
 
@@ -279,5 +297,20 @@ B* _syserrm[] = {
   (B*) "** X Security Extension unable to generate",
   (B*) "** X Security Extension unable to revoke",
   (B*) "** X Security library missing",
+#ifdef DM_ENABLE_REGEX
+  (B*) "Regex Error: Invalid regular expression",
+  (B*) "Regex Error: Invalid collating element",
+  (B*) "Regex Error: Invalid character class",
+  (B*) "Regex Error: `\' applied to unescapable character",
+  (B*) "Regex Error: invalid backreference number",
+  (B*) "Regex Error: brackets `[]' not balanced",
+  (B*) "Regex Error: paranthesis `()' not balanced",
+  (B*) "Regex Error: braces `{}' not balanced",
+  (B*) "Regex Error: invalid repetition count(s) in `{}'",
+  (B*) "Regex Error: invalid character range in `[]'",
+  (B*) "Regex Error: ran out of memory",
+  (B*) "Regex Error: `?', `*', or `+' operand invalid",
+  (B*) "Regex Error: Unknown error",
+#endif //DM_ENABLE_REGEX
   (B*) NULL
 };

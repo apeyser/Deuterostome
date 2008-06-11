@@ -390,7 +390,7 @@ end def end def
 end def end def
 
 /terminal 1 dict dup begin /all 1 dict dup begin |[
-  /commands [/nextevent /aborted /regex] def |]
+  /commands [/nextevent /aborted] def |]
 end def end def
 
 /pawn 1 dict dup begin /all 2 dict dup begin |[
@@ -416,7 +416,7 @@ end def end def
 end def
 
 /dvtdict 1 dict dup begin |[
-  /parents [/common /net /socketevents /x /terminal /quitable] def |]
+  /parents [/common /net /socketevents /x /terminal /regex /quitable] def |]
 end def
 
 /dnodedict 1 dict dup begin |[
