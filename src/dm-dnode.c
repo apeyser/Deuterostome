@@ -264,7 +264,7 @@ P op_getmyport(void)
   if (CEILopds < o2) return OPDS_OVF;
   TAG(o1) = (NUM | LONGBIGTYPE);
   ATTR(o1) = 0;
-  LONGBIG_VAL(o1) = serverport - DM_IPPORT_USERRESERVED;
+  LONGBIG_VAL(o1) = serverport - getportoffset();
   FREEopds = o2;
 
   return OK;
@@ -452,7 +452,7 @@ void makeerror(P retc, B* error_source) {
   ARRAY_SIZE(o1) = strlen((char*)hostname);
   TAG(o2) = NUM | LONGBIGTYPE; 
   ATTR(o2) = 0;
-  LONGBIG_VAL(o2) = serverport - DM_IPPORT_USERRESERVED;
+  LONGBIG_VAL(o2) = serverport - getportoffset();
   TAG(o3) = ARRAY | BYTETYPE; 
   ATTR(o3) = READONLY;
   VALUE_BASE(o3) = (P)error_source; 

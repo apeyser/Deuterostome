@@ -34,6 +34,7 @@ DLL_SCOPE void delsocket(P socketfd);
 DLL_SCOPE P init_sockaddr(struct sockaddr_in *name, 
 			  const char *hostname, 
 			  UW port);
+DLL_SCOPE UW getportoffset(void);
 
 #if ! DM_X_DISPLAY_MISSING
 

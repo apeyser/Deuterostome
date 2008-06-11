@@ -192,11 +192,7 @@ int main(int argc, char *argv[])
   }
   if (! *(argv[1]) || *endptr) usage_error(errno);
 
-  if (DM_IPPORT_USERRESERVED != DM_IPPORT_USERRESERVED_STANDARD)
-    fprintf(stderr, 
-	    "Unusual value for IPPORT_USERRESERVED: %i instead of %i\n",
-	    DM_IPPORT_USERRESERVED, DM_IPPORT_USERRESERVED_STANDARD);
-  serverport += DM_IPPORT_USERRESERVED;
+  serverport += getportoffset();
 
 /*-------------------- prime the socket table -----------------------
   We use a fd_set bit array to keep track of active sockets. Hence,

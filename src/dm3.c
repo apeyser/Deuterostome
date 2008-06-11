@@ -36,6 +36,26 @@ extern int h_errno;
 
 /*---------------------------- support -------------------------------------*/
 
+static UW portoffset = 0;
+static BOOLEAN portoffset_ = FALSE;
+UW getportoffset(void) {
+    if (! portoffset_) {
+      struct servent* sv;
+      portoffset_ = TRUE;
+      if ((sv = getservbyname("dnode", "tcp")))
+	portoffset = sv->s_port;
+      else {
+	if (DM_IPPORT_USERRESERVED != DM_IPPORT_USERRESERVED_STANDARD)
+	  fprintf(stderr, 
+		  "Unusual value for IPPORT_USERRESERVED: %i instead of %i\n",
+		  DM_IPPORT_USERRESERVED, DM_IPPORT_USERRESERVED_STANDARD);
+	portoffset = DM_IPPORT_USERRESERVED;
+      }
+    };
+    return portoffset;
+}
+
+
 
 // -------- delsocket ---------------------------
 // After a socket has been closed, call delsocket to cleanup maxsocket
@@ -429,7 +449,7 @@ P init_unix_sockaddr(struct sockaddr_un *name, UW port) {
 
   name->sun_family = AF_UNIX;
   snprintf(name->sun_path, sizeof(name->sun_path)-1, "%s/dnode-%i",
-           sock_path, port - DM_IPPORT_USERRESERVED);
+           sock_path, port - getportoffset());
 
   return OK;
 }
@@ -613,11 +633,7 @@ P op_connect(void)
   if (TAG(o_2) != (ARRAY | BYTETYPE)) return(OPD_ERR);
   if (CLASS(o_1) != NUM) return(OPD_CLA);
   if (!VALUE(o_1,&port_)) return(UNDF_VAL);
-  port_ += DM_IPPORT_USERRESERVED;
-  if (DM_IPPORT_USERRESERVED != DM_IPPORT_USERRESERVED_STANDARD)
-    fprintf(stderr, 
-	    "Unusual value for IPPORT_USERRESERVED: %i instead of %i\n",
-	    DM_IPPORT_USERRESERVED, DM_IPPORT_USERRESERVED_STANDARD);
+  port_ += getportoffset();
 
   if (port_ >= WMAX) return RNG_CHK;
   port = (UW) port_;
