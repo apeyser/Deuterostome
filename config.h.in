@@ -3,7 +3,8 @@
 /* align to this many bytes */
 #undef BYTECORRECT
 
-/* Symbol or integer value to use for default port base */
+/* Symbol or integer value to use for default port base if dnode not in
+   services */
 #undef DM_IPPORT_USERRESERVED
 
 /* Fail if DM_IPPORT_USERRESERVED_SET != DM_IPPORT_USERRESERVED */

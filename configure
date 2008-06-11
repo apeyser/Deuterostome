@@ -1749,8 +1749,8 @@ Some influential environment variables:
   MAX_USER_DICT_SIZE
               maximum user dict size, default=5000
   DM_IPPORT_USERRESERVED
-              Symbol or integer value to use for default port base,
-              default=IPPORT_USERRESERVED
+              Symbol or integer value to use for default port base if dnode
+              not in services, default=IPPORT_USERRESERVED
   DM_IPPORT_USERRESERVED_STANDARD
               Fail if DM_IPPORT_USERRESERVED_SET != DM_IPPORT_USERRESERVED,
               default=5000
