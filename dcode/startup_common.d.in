@@ -13,7 +13,7 @@ userdict /toconsole_ known not {/toconsole_ /toconsole find def} if
     ~[exch 3 -1 roll 1 ~index 0 ~put] bind
 } bind def
 
-| [/name] | dict
+| [/name...] | dict
 /makeenum {
   dup length dict dup begin
   0 3 -1 roll {
@@ -42,6 +42,18 @@ userdict /toconsole_ known not {/toconsole_ /toconsole find def} if
     exec {3 1 roll pop pop true exit} {pop} ifelse | val {} false
   } for {exch pop exec} {pop pop} ifelse
 } bind def
+
+| these must be in the same order as sigmap in dm-vm.c
+/SIGNALS [
+  /SIGQUIT 
+  /SIGKILL
+  /SIGABRT 
+  /SIGTERM
+  /SIGHUP 
+  /SIGINT
+  /SIGALRM
+  /SIGFPE
+] makeenum def
 
 |------------------------ low-level information -------------------------
 | For debugging and quick information about objects, stacks, and system

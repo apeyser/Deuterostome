@@ -440,7 +440,7 @@ P init_sockaddr(struct sockaddr_in *name,
 }
 
 #if ENABLE_UNIX_SOCKETS
-P init_unix_sockaddr(struct sockaddr_un *name, UW port) {
+P init_unix_sockaddr(struct sockaddr_un *name, UW port, BOOLEAN isseq) {
   char* sock_path = getenv("DMSOCKDIR");
   memset(name, 0, sizeof(struct sockaddr_un));
   if (! sock_path || ! *sock_path) sock_path = DMSOCKDIR;
@@ -448,8 +448,8 @@ P init_unix_sockaddr(struct sockaddr_un *name, UW port) {
     sock_path[strlen(sock_path)-1] = '\0';
 
   name->sun_family = AF_UNIX;
-  snprintf(name->sun_path, sizeof(name->sun_path)-1, "%s/dnode-%i",
-           sock_path, port - getportoffset());
+  snprintf(name->sun_path, sizeof(name->sun_path)-1, "%s/dnode-%i-%s",
+           sock_path, port - getportoffset(), isseq ? "seq" : "dgram");
 
   return OK;
 }
@@ -457,14 +457,22 @@ P init_unix_sockaddr(struct sockaddr_un *name, UW port) {
 
 /*--------------------------- make a server socket */
 
-P make_socket(UW port)
+P make_socket(UW port, BOOLEAN isseq)
 {
   P sock;
+  P size = isseq ? PACKET_SIZE : 1;
   struct sockaddr_in name;
   memset(&name, 0, sizeof(struct sockaddr_in));
 
-  sock = socket(PF_INET, SOCK_STREAM, 0);
-  if (sock < 0) return(-1);
+  if ((sock = socket(PF_INET, isseq ? SOCK_STREAM : SOCK_DGRAM, 0)) < 0)
+    return -1;
+
+  if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &size, sizeof(P)) == -1
+      || setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &size, sizeof(P)) == -1) {
+    close(sock);
+    return -1;
+  }
+
   name.sin_family = AF_INET;
   name.sin_port = htons(port);
   name.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -476,6 +484,7 @@ P make_socket(UW port)
 #if ENABLE_UNIX_SOCKETS
 typedef struct port_list {
   UW port;
+  BOOLEAN isseq;
   struct port_list* next;
 } port_list;
 static port_list* ports_first = NULL;
@@ -485,11 +494,11 @@ DM_INLINE_STATIC void unlink_socketfile(void) {
   struct sockaddr_un name;
   port_list* i;
   for (i = ports_first; i; i = i->next)
-    if (init_unix_sockaddr(&name, i->port) >= 0)
+    if (init_unix_sockaddr(&name, i->port, i->isseq) >= 0)
       unlink(name.sun_path);
 }
 
-void set_atexit_socks(P port) {
+void set_atexit_socks(P port, BOOLEAN isseq) {
   if (! ports_first) {
     if (atexit(unlink_socketfile))
       error(EXIT_FAILURE, 0, "Can't set exit function");
@@ -501,18 +510,27 @@ void set_atexit_socks(P port) {
     ports_last = ports_last->next;
   };
   ports_last->port = port;
+  ports_last->isseq = isseq;
   ports_last->next = NULL;
 }
 
-P make_unix_socket(UW port) {
+P make_unix_socket(UW port, BOOLEAN isseq) {
   char* sock_dir; char* i;
   P sock;
+  P size = isseq ? PACKET_SIZE : 1;
   struct sockaddr_un name;
   struct stat buf;
   mode_t mask;
   
-  if (init_unix_sockaddr(&name, port) != OK) return -1;
-  if ((sock = socket(PF_UNIX, SOCK_STREAM, 0)) < 0) return -1;
+  if (init_unix_sockaddr(&name, port, isseq) != OK) return -1;
+  if ((sock = socket(PF_UNIX, isseq ? SOCK_STREAM : SOCK_DGRAM, 0)) < 0) 
+    return -1;
+
+  if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &size, sizeof(P)) == -1
+      || setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &size, sizeof(P)) == -1) {
+    close(sock);
+    return -1;
+  }
 
   mask = umask(0);
   if (! (i = sock_dir = strdup(name.sun_path))) return -1;
@@ -551,7 +569,7 @@ P make_unix_socket(UW port) {
       return -1;
   }
   
-  set_atexit_socks(port);
+  set_atexit_socks(port, isseq);
 
   umask(mask);
   return sock;
@@ -626,7 +644,7 @@ P op_connect(void)
 {
   UW port;
   LBIG port_;
-  P sock, retc, size = PACKET_SIZE;
+  P sock, dgram, retc, size = PACKET_SIZE;
   struct sockaddr_in serveraddr;
 
   if (o_2 < FLOORopds) return(OPDS_UNF);
@@ -645,15 +663,22 @@ P op_connect(void)
 #if ENABLE_UNIX_SOCKETS
   {
     struct sockaddr_un unixserveraddr;
+    sock = -1;
+    dgram = -1;
     if (! strcmp("localhost", (char*)FREEvm)
-        && init_unix_sockaddr(&unixserveraddr, port) == OK
-        && (sock = socket(PF_UNIX, SOCK_STREAM, 0)) != -1) {
-      if (connect(sock, (struct sockaddr *) &unixserveraddr, 
-                  sizeof(unixserveraddr.sun_family)
-                  + strlen(unixserveraddr.sun_path)))
-        close(sock);
-      else goto goodsocket;
-    };
+        && init_unix_sockaddr(&unixserveraddr, port, TRUE) == OK
+        && (sock = socket(PF_UNIX, SOCK_STREAM, 0)) != -1
+	&& ! connect(sock, (struct sockaddr *) &unixserveraddr, 
+		     sizeof(unixserveraddr.sun_family)
+		     + strlen(unixserveraddr.sun_path))
+	&& init_unix_sockaddr(&unixserveraddr, port, FALSE) == OK
+	&& (dgram = socket(PF_UNIX, SOCK_DGRAM, 0)) != -1
+	&& ! connect(dgram, (struct sockaddr *) &unixserveraddr,
+		     sizeof(unixserveraddr.sun_family)
+		     + strlen(unixserveraddr.sun_path)))
+      goto goodsocket;
+    if (sock != -1) close(sock);
+    if (dgram != -1) close(dgram);
   };
 #endif //ENABLE_UNIX_SOCKETS
 
@@ -668,17 +693,31 @@ P op_connect(void)
     close(sock);
     return -errno_;
   };
-  if ((retc = closeonexec(sock))) {
+
+  size = 1;
+  if ((dgram = socket(PF_INET, SOCK_DGRAM, 0)) == -1) return -errno;
+  if (setsockopt(dgram, SOL_SOCKET, SO_SNDBUF, &size, sizeof(P)) == -1
+      || setsockopt(dgram, SOL_SOCKET, SO_RCVBUF, &size, sizeof(P)) == -1
+      || connect(dgram, (struct sockaddr *)&serveraddr,
+                 sizeof(serveraddr)) == -1) {
+    int errno_ = errno;
     close(sock);
-    return retc;
-  }
+    close(dgram);
+    return -errno_;
+  };
   
  goodsocket:
-  //  if (fcntl(sock, F_SETFL, O_NONBLOCK) == -1)   /* make non-blocking  */
-  //  error(EXIT_FAILURE, errno, "fcntl");
+  if ((retc = closeonexec(sock)) || (retc = closeonexec(dgram))) {
+    close(sock);
+    close(dgram);
+    return retc;
+  }
+
   addsocket(sock);
-  TAG(o_2) = NULLOBJ | SOCKETTYPE; ATTR(o_2) = 0;
-  LONGBIG_VAL(o_2) = sock;
+  TAG(o_2) = NULLOBJ | SOCKETTYPE; 
+  ATTR(o_2) = 0;
+  SOCKET_VAL(o_2) = sock;
+  DGRAM_VAL(o_2) = dgram;
   FREEopds = o_1;
   return OK;
 }
@@ -690,11 +729,43 @@ P op_connect(void)
 
 P op_disconnect(void)
 {
-  if (o_1 < FLOORopds) return(OPDS_UNF);
-  if (TAG(o_1) != (NULLOBJ | SOCKETTYPE)) return(OPD_ERR);
-  delsocket((P) LONGBIG_VAL(o_1));
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != (NULLOBJ | SOCKETTYPE)) return OPD_ERR;
+  delsocket(SOCKET_VAL(o_1));
+  if (DGRAM_VAL(o_1) != -1) close(DGRAM_VAL(o_1));
   FREEopds = o_1;
-  return(OK);
+  return OK;
+}
+
+/*------------------------------------------------ sendsig
+  socket sig | --
+
+  sends signal to dnode, where signal is defined by a mapping 
+  in dm-vm.c (sigmap), and is between 0 and up to 255 (as defined 
+  in sigmap)
+*/
+
+P op_sendsig(void) {
+  B sig;
+  P sig_;
+  P socketfd;
+
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_2) != (NULLOBJ | SOCKETTYPE)) return OPD_ERR;
+  if (CLASS(o_1) != NUM) return OPD_CLA;
+  if (! PVALUE(o_1, &sig_)) return UNDF_VAL;
+  if (sig_ < 0 || sig_ >= 256) return RNG_CHK;
+
+  sig = (B) sig_;
+  if ((socketfd = DGRAM_VAL(o_2)) == -1) return ILL_SOCK;
+
+  while (send(socketfd, &sig, 1, 0) == -1) {
+    if (errno != EINTR) return -errno;
+    if (abortflag) return ABORT;
+  };
+
+  FREEopds = o_2;
+  return OK;
 }
 
 /*----------------------------------------------- send
@@ -712,9 +783,9 @@ P op_send(void)
   static B rootf[FRAMEBYTES];
   P socketfd;
 
-  if (o_2 < FLOORopds) return(OPDS_UNF);
-  if (TAG(o_2) != (NULLOBJ | SOCKETTYPE)) return(OPD_ERR);
-  socketfd = (P) LONGBIG_VAL(o_2);
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_2) != (NULLOBJ | SOCKETTYPE)) return OPD_ERR;
+  socketfd = SOCKET_VAL(o_2);
 
   switch (CLASS(o_1)) {
     case ARRAY:
@@ -749,7 +820,8 @@ P op_getsocket(void)
   if (o1 >= CEILopds) return(OPDS_OVF);
   TAG(o1) = NULLOBJ | SOCKETTYPE; 
   ATTR(o1) = 0;
-  LONGBIG_VAL(o1) = recsocket;
+  SOCKET_VAL(o1) = recsocket;
+  DGRAM_VAL(o1) = -1;
   FREEopds = o2;
   return(OK);
 }

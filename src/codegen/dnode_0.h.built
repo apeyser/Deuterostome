@@ -146,6 +146,7 @@ B* _sysop[] =
   (B*) "disconnect", (B*) op_disconnect,
   (B*) "send", (B*) op_send,
   (B*) "getsocket", (B*) op_getsocket,
+  (B*) "sendsig", (B*) op_sendsig,
   (B*) "getmyname", (B*) op_getmyname,
   (B*) "getmyfqdn", (B*) op_getmyfqdn,
   (B*) "lock", (B*) op_lock,
@@ -203,6 +204,7 @@ B* _sysop[] =
   (B*) "checkrthreads", (B*) op_checkrthreads,
   (B*) "makerthreads", (B*) op_makerthreads,
   (B*) "rsend", (B*) op_rsend,
+  (B*) "rsendsig", (B*) op_rsendsig,
 #endif //DM_ENABLE_RTHREADS
 #ifdef DM_HOST_IS_32_BIT
   (B*) "readf32", (B*) op_readf32,
@@ -259,6 +261,7 @@ P _syserrc[] = {
   ILL_RECAP,
   BUF_OVF,
   LOST_CONN,
+  ILL_SOCK,
   NEXTEVENT_NOEVENT,
   LIB_LOAD,
   LIB_EXPORT,
@@ -368,6 +371,7 @@ B* _syserrm[] = {
   (B*) "** Double capsave",
   (B*) "** Internal buffer overflow",
   (B*) "** Lost connection",
+  (B*) "** Attempted to send a signal to a socket without that capability",
   (B*) "** no socket events -- internal",
   (B*) "** Unable to load dynamically linked library",
   (B*) "** Unable to find object in shared library",

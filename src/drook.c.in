@@ -422,6 +422,31 @@ DM_INLINE_STATIC void* from_mpi(void* arg __attribute__ ((__unused__))) {
   exit(1);
 }
 
+void to_sig_exiter(void* sigfd) {close(*(P*)sigfd);}
+
+DM_INLINE_STATIC void* to_sig(void* arg) __attribute__ ((__noreturn__));
+DM_INLINE_STATIC void* to_sig(void* arg __attribute__ ((__unused__))) {
+  P sigfd = 4;
+  MPI_Comm childrensig;
+  MPI_Comm_dup(children, &childrensig);
+
+  pthread_cleanup_push(to_sig_exiter, &sigfd);  
+  while (1) {
+    B sig;
+    switch (recv(sigfd, &sig, 1, 0)) {
+      case 0:
+	error(1, 0, "drook signal socket received close on recv");
+	close(sigfd);
+	pthread_exit(NULL);
+
+      case -1:
+	error(1, errno, "drook signal socket");
+    };
+    MPI_Bcast(&sig, 1, MPI_UNSIGNED_CHAR, MPI_ROOT, childrensig);
+  }
+  pthread_cleanup_pop(1);
+}
+
 DM_INLINE_STATIC void makethread(char* name, void* (*func)(void*)) {
   pthread_t thread;
   if (pthread_create(&thread, NULL, func, NULL))
@@ -461,5 +486,6 @@ int main(int argc, char* argv[]) {
   
   makethread("mpi receive", from_mpi);
   makethread("dnode receive", from_dnode);
+  makethread("mpi sig", to_sig);
   mainthread();
 }

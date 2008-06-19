@@ -8,8 +8,8 @@
          (  Copy) KEY (  Save) KEY (  Load) KEY (  Open) KEY NL
       11 GAP () PRE (Lib) KEY (  Rsync) KEY (  Rsync-del) KEY NL
     
-      (Dnode:) PRE (  Setup) KEY (  Connect) KEY (  Talk) KEY
-         (  Disconnect) KEY (  Shrink) KEY NL
+      (Dnode:) PRE (  Setup) KEY (  Connect) KEY (  Talk) KEY NL
+      11 GAP () PRE (Disconnect) KEY (  Shrink) KEY (  Abort) NL
 @ENABLE_PERL_START@
       (PrintFrom:) PRE (  Talk) KEY (  Ascii) KEY (  PS) KEY
 @ENABLE_XPS_START@    
@@ -44,6 +44,7 @@
      (% dvt begin ~_c ~_cc dnode_up end\n)
      (% dvt begin {knode _dx} fornodes end\n)
      (% dvt begin {knode _kill} fornodes end\n)
+     (% dvt begin {knode _sendabort} fornodes end\n)
 @ENABLE_PERL_START@     
 |-- PrintFrom
      (@getstartupdir fax \(print.pl talk \) fax )

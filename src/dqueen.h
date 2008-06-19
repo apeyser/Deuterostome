@@ -21,6 +21,7 @@ DLL_SCOPE P op_rthreads(void);
 DLL_SCOPE P op_checkrthreads(void);
 DLL_SCOPE P op_makerthreads(void);
 DLL_SCOPE P op_rsend(void);
+DLL_SCOPE P op_rsendsig(void);
 
 DLL_SCOPE void rthreads_init(void);
 DLL_SCOPE P killrthreads(void);

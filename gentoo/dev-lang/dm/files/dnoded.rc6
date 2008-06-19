@@ -10,7 +10,9 @@ depend() {
 
 start() {
     ebegin "Starting ${SVCNAME}"
+    eindent 2
     einfo "For ports ${DNODED_PORTS[@]}"
+    eoutdent 2
     start-stop-daemon -S \
 	-p ${DNODED_PID} \
 	-x /usr/bin/dnode-daemon \

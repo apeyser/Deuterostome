@@ -486,11 +486,11 @@ P op_eq(void)
         break;
 
       case NULLOBJ: 
-				if (TYPE(o_1) != TYPE(o_2)) t = FALSE;
-				else if (TYPE(o_1) == SOCKETTYPE)
-          t = (LONGBIG_VAL(o_1) == LONGBIG_VAL(o_2)) ? TRUE : FALSE;
-				else t = TRUE;
-				break;
+	if (TYPE(o_1) != TYPE(o_2)) t = FALSE;
+	else if (TYPE(o_1) == SOCKETTYPE)
+          t = (SOCKET_VAL(o_1) == SOCKET_VAL(o_2)) ? TRUE : FALSE;
+	else t = TRUE;
+	break;
 
       case NUM: 
         t = COMPARE(o_2,o_1);
@@ -564,7 +564,7 @@ P op_ne(void)
         if (TYPE(o_1) != TYPE(o_2)) 
           t = TRUE;
         else if (TYPE(o_1) == SOCKETTYPE)
-          t = (LONGBIG_VAL(o_1) != LONGBIG_VAL(o_2)) ? TRUE : FALSE;
+          t = (SOCKET_VAL(o_1) != SOCKET_VAL(o_2)) ? TRUE : FALSE;
         else 
           t=FALSE;
         break;

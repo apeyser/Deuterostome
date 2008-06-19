@@ -17,11 +17,13 @@
 #include "dm-nextevent.h"
 #include "dm2.h"
 #include "dqueen.h"
+#include "dm-vm.h"
 
 #define SOCKET_TIMEOUT (60)
 
 static UL32 mpin = 0;
 static P socketfd = -1;
+static P sigfd = -1;
 static pid_t pid = -1;
 static P dest;
 
@@ -36,6 +38,27 @@ static P wrap_writebody(B* buffer, P size) {
 
 static P torsocket(B* rootf) {
   return tosource(rootf, TRUE, wrap_writebox, wrap_writebody);
+}
+
+// sig | --
+P op_rsendsig(void) {
+  B sig;
+  P sig_;
+  
+  if (socketfd == -1) return RTHREADS_UNSET;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != NUM) return OPD_CLA;
+  if (! PVALUE(o_1, &sig_)) return UNDF_VAL;
+  if (sig_ < 0 || sig_ >= 256) return RNG_CHK;
+  
+  sig = (B) sig_;
+  while (send(sigfd, &sig, 1, 0) == -1) {
+    if (errno != EINTR) return -errno;
+    if (abortflag) return ABORT;
+  };
+
+  FREEopds = o_1;
+  return OK;
 }
 
 // n active/(string) | --
@@ -126,6 +149,16 @@ P killrthreads(void) {
     socketfd = -1;
   }
 
+  if (sigfd != -1) {
+    B sig = SIGMAP_QUIT;
+    send(sigfd, &sig, 1, 0);
+    sleep(5);
+    sig = SIGMAP_KILL;
+    send(sigfd, &sig, 1, 0);
+    if (close(sigfd) && ! r) r = -errno;
+    sigfd = -1;
+  }
+
   if (pid != -1) {
     if (kill(pid, SIGTERM)) {
       if (! r) r = -errno;
@@ -175,7 +208,9 @@ void rthreads_init(void) {
 P op_makerthreads(void) {
   UL32 mpin_, ok;
   int sockets[2];
+  int sigs[2];
   int rookfd;
+  int rooksigfd;
   P r = OK;
 
   if (o_1 < FLOORopds) return OPDS_UNF;
@@ -242,11 +277,30 @@ P op_makerthreads(void) {
 
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets))
     return -errno;
+  
+  if (socketpair(AF_UNIX, SOCK_DGRAM, 0, sigs)) {
+    int errno_ = errno;
+    close(sockets[0]);
+    close(sockets[1]);
+    killrthreads();
+    return -errno_;
+  }    
 
   socketfd = sockets[0];
   rookfd = sockets[1];
   if ((r = closeonexec(socketfd)) || (r = closeonexec(rookfd))) {
     close(rookfd);
+    close(sigs[0]);
+    close(sigs[1]);
+    killrthreads();
+    return r;
+  }
+
+  sigfd = sockets[0];
+  rooksigfd = sockets[1];
+  if ((r = closeonexec(sigfd)) || (r = closeonexec(rooksigfd))) {
+    close(rookfd);
+    close(rooksigfd);
     killrthreads();
     return r;
   }
@@ -254,6 +308,7 @@ P op_makerthreads(void) {
   if ((pid = fork()) == -1) {
     r = -errno;
     close(rookfd);
+    close(rooksigfd);
     killrthreads();
     return r;
   }
@@ -261,9 +316,13 @@ P op_makerthreads(void) {
   if (! pid) {
     int stdin;
     if (dup2(rookfd, 3) == -1)
-      error(1, errno, "Error duping %i to %i", (int) socketfd, 3);
+      error(1, errno, "Error duping %i to %i", (int) rookfd, 3);
     if ((r = nocloseonexec(3)))
       error(1, -r, "Error setting no close on exec for fd 3");
+    if (dup2(rooksigfd, 4) == -1)
+      error(1, errno, "Error duping %i to %i", (int) rooksigfd, 4);
+    if ((r = nocloseonexec(4)))
+      error(1, -r, "Error setting no close on exec for fd 4");
 
     if ((stdin = open("/dev/null", O_RDONLY)) == -1)
       error(1, errno, "Unable to open /dev/null for reading");
@@ -280,6 +339,14 @@ P op_makerthreads(void) {
    
   if (close(rookfd)) {
     r = -errno;
+    close(rooksigfd);
+    killrthreads();
+    return r;
+  }
+
+  if (close(rooksigfd)) {
+    r = -errno;
+    close(rookfd);
     killrthreads();
     return r;
   }
@@ -296,7 +363,8 @@ P op_makerthreads(void) {
   addsocket(socketfd);
   TAG(o_1) = (NULLOBJ | SOCKETTYPE);
   ATTR(o_1) = 0;
-  LONGBIG_VAL(o_1) = socketfd;
+  SOCKET_VAL(o_1) = socketfd;
+  DGRAM_VAL(o_1) = sigfd;
 
   return OK;
 }

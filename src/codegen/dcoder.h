@@ -58,6 +58,7 @@ struct emap emap[] = {
   {(B*)"REGEX_UNKNOWN", REGEX_UNKNOWN},
 #endif //DM_ENABLE_REGEX
   {(B*)"LOST_CONN", LOST_CONN},
+  {(B*)"ILL_SOCK", ILL_SOCK},
   {(B*)"NO_XWINDOWS", NO_XWINDOWS},
   {(B*)"X_ERR", X_ERR},
   {(B*)"X_BADFONT", X_BADFONT},

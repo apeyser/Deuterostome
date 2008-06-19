@@ -8,6 +8,7 @@
 
 #include "dm-mpi.h"
 #include "error-local.h"
+#include "dm-vm.h"
 
 static MPI_Comm rook = MPI_COMM_NULL;
 static MPI_Comm world = MPI_COMM_NULL;
@@ -32,6 +33,8 @@ static P mpithread_retc;
 
 static pthread_mutex_t mpithread_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_t mpithread_id;
+static pthread_t sigthread_id;
+static pthread_t mainthread_id;
 static pthread_cond_t mpithread_cond = PTHREAD_COND_INITIALIZER;
 
 static void exithandler(void) {
@@ -139,9 +142,24 @@ DM_INLINE_STATIC P mpithread_exec(MpiThreadFunc func) {
   return abortflag ? ABORT : retc;
 }
 
-static void* mpifunc(void* unused) __attribute__ ((__noreturn__));
+static void redirect_sig(int sig) {
+  if (pthread_kill(mainthread_id, sig))
+    error(1, errno, "pthread_kill %i", sig);
+}
 
-static void* mpifunc(void* unused __attribute__ ((unused)) ) {
+__attribute__ ((__noreturn__))
+static void* sigfunc(void* unused __attribute__ ((__unused__)) ) {
+  MPI_Comm rooksig;
+  MPI_Comm_dup(rook, &rooksig);
+  while (1) {
+    B sig;
+    MPI_Bcast(&sig, 1, MPI_UNSIGNED_CHAR, 0, rooksig);
+    propagate_sig(sig, redirect_sig);
+  }
+}
+
+__attribute__ ((__noreturn__))
+static void* mpifunc(void* unused __attribute__ ((__unused__)) ) {
   int argc = 0;
   const char* argv[] = {NULL};
   int threadtype;
@@ -164,12 +182,15 @@ static void* mpifunc(void* unused __attribute__ ((unused)) ) {
   MPI_Comm_create_errhandler(mpihandler, &mpierr);
   MPI_Comm_dup(MPI_COMM_WORLD, &world);
   MPI_Comm_set_errhandler(world, mpierr);
-  MPI_Comm_get_parent(&rook);  
+  MPI_Comm_get_parent(&rook);
   MPI_Comm_set_errhandler(rook, mpierr);
   MPI_Comm_size(world, &universe_);
   universe = universe_;
   MPI_Comm_rank(world, &rank_);
   rank = rank_;
+
+  if (pthread_create(&sigthread_id, NULL, sigfunc, NULL))
+    error(1, errno, "Failed resignal thread create");
 
   fprintf(stderr, "Started pawn %i of %i\n", rank_, universe_);
 
@@ -251,6 +272,7 @@ P mpibarrier(MPI_Comm comm) {
 }
 
 void initmpi(void) {
+  mainthread_id = pthread_self();
   mpithread_lock();
   if (pthread_create(&mpithread_id, NULL, mpifunc, NULL))
     error(1, errno, "Failed thread create");

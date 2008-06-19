@@ -26,7 +26,8 @@ P makesocketdead(P retc, P socketfd, B* error_source) {
 
   TAG(o1) = NULLOBJ | SOCKETTYPE; 
   ATTR(o1) = 0; 
-  LONGBIG_VAL(o1) = socketfd;
+  SOCKET_VAL(o1) = socketfd;
+  DGRAM_VAL(o1) = -1;
   FREEopds = o2;
 
   makename((B*)"socketdead", x1);

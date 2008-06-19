@@ -53,6 +53,7 @@
   /REGEX_BADRPT 3083x def
   /REGEX_UNKNOWN 3084x def
   /LOST_CONN 258x def
+  /ILL_SOCK 259x def
   /NO_XWINDOWS 2561x def
   /X_ERR 2562x def
   /X_BADFONT 2563x def

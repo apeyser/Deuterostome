@@ -692,6 +692,7 @@ c_         list all connections
       1 1 nodelist length 1 sub {/knode name
         nodelist knode get /node name
         node 2 get deadsocket eq {
+          node 2 get disconnect
           loadcolor
           socketmsg 0 [/red] {
             (** [) fax * knode * number (] Dead connection on: ) fax
@@ -746,6 +747,19 @@ c_         list all connections
       check_kbdowner
     } if
     end    
+  } bind userdict 3 -1 roll put
+
+  /_sendabort {
+    dvt begin /knode name
+    knode 0 ne {
+      nodelist knode get /node name
+      node 0 get class /nullclass ne {
+        node 2 get /SIGABORT SIGNALS get sendsig
+        nodeclear
+        check_kbdowner
+      } if
+    } if
+    end
   } bind userdict 3 -1 roll put
 
 |---------------------------------------------------- connection convenience

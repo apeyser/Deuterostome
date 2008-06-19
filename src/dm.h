@@ -276,6 +276,7 @@ extern "C" {
 #define LONG64_VAL(frame)    (*((L64*) PF_PTR(frame,1)))
 #define BYTE_VAL(frame)      (*((B*)   PF_PTR(frame,1)))
 #define WORD_VAL(frame)      (*((W*)   PF_PTR(frame,1)))
+#define SOCKET_VAL(frame)    (*((P*)   PF_PTR(frame,1)))
 
 #define VALUE_BASE(frame)    (*((P *)  PF_PTR(frame,1)))
 #define VALUE_PTR(frame)     (*((B**)  PF_PTR(frame,1)))
@@ -288,6 +289,7 @@ extern "C" {
 #define DICT_CURR(frame)     (*((P *)  PF_PTR(frame,2)))
 #define BOX_NB(frame)        (*((P *)  PF_PTR(frame,2)))
 #define LIST_CEIL_PTR(frame) (*((B**)  PF_PTR(frame,2)))
+#define DGRAM_VAL(frame)     (*((P *)  PF_PTR(frame,2)))
 
 /*-------------------------------------------- dictionary */
  
@@ -337,6 +339,8 @@ extern "C" {
 
 #define CORR_OBJ    (P)0x00000101L /* corrupted object                      */
 #define LOST_CONN   (P)0x00000102L /* network connection lost               */
+#define ILL_SOCK    (P)0x00000103L /* sent signal to non-signalling socket  */
+
 
 #define VM_OVF      (P)0x00000200L /* VM overflow                           */
 #define OPDS_OVF    (P)0x00000201L /* operand stack overflow                */

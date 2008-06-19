@@ -260,11 +260,13 @@ end def
 /net 1 dict dup begin |[
   /all 2 dict dup begin |[
     /commands [
-      /connect /disconnect /send /getsocket
+      /connect /disconnect /send /getsocket /sendsig
       /getmyname /getmyfqdn
     ] def
-    /errors 1 dict dup begin |[
-      /LOST_CONN (** Lost connection) def |]
+    /errors 2 dict dup begin |[
+      /LOST_CONN (** Lost connection) def 
+      /ILL_SOCK (** Attempted to send a signal to a socket without that capability) def
+      |]
     end def |]
   end def |]
 end def
@@ -372,7 +374,7 @@ end def
       /RTHREADS_KEYSIZE (** Rthreads: key/val pair: key too long) def
       /RTHREADS_VALATR (** Rthreads: key/val pair: val is active) def |]
     end def
-    /commands [/rthreads /checkrthreads /makerthreads /rsend] def |]
+    /commands [/rthreads /checkrthreads /makerthreads /rsend /rsendsig] def |]
   end def
   /DM_HOST_IS_32_BIT 1 dict dup begin |[
     /commands [/readf32] def |]

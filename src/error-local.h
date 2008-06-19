@@ -9,9 +9,9 @@
 #include <string.h>
 #include <stdarg.h>
 __attribute__ ((unused, format (printf, 3, 4)))
-  static void error(int __status, 
-                    int __errnum, 
-                    const char* __format, ...)
+static void error(int __status, 
+		  int __errnum, 
+		  const char* __format, ...)
 {
     va_list ap;
     va_start(ap, __format);

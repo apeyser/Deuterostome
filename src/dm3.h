@@ -6,8 +6,8 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 
-DLL_SCOPE P make_socket(UW port);
-DLL_SCOPE P make_unix_socket(UW port);
+DLL_SCOPE P make_socket(UW port, BOOLEAN isseq);
+DLL_SCOPE P make_unix_socket(UW port, BOOLEAN isseq);
 DLL_SCOPE P toconsole(B *string, P stringlength);
 DLL_SCOPE P fromsocket(P socket, B* buffer);
 DLL_SCOPE P tosocket(P socket, B* rootf);
@@ -15,6 +15,7 @@ DLL_SCOPE P tosocket(P socket, B* rootf);
 DLL_SCOPE P op_connect(void);
 DLL_SCOPE P op_disconnect(void);
 DLL_SCOPE P op_send(void);
+DLL_SCOPE P op_sendsig(void);
 DLL_SCOPE P op_getsocket(void);
 DLL_SCOPE P op_getmyname(void);
 DLL_SCOPE P op_getmyfqdn(void);

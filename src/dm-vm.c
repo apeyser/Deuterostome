@@ -462,3 +462,25 @@ P op_abort(void)
   moveframe(msf,cmsf);
   return DONE;
 }
+
+// these must be kept in the same order as SIGMAP_* in dm-vm.h
+// and SIGNALS in startup_common.d.in
+static int sigmap[] = {
+  SIGQUIT, 
+  SIGKILL,
+  SIGABRT, 
+  SIGTERM, 
+  SIGHUP, 
+  SIGINT, 
+  SIGALRM, 
+  SIGFPE
+};
+
+void propagate_sig(B sig, void (*redirect_sigf)(int sig)) {
+  if (sig > (B) (sizeof(sigmap)/sizeof(sigmap[0])) || sig < 0) {
+    error(0, 0, "received illegal signal %i", sig);
+    return;
+  }
+
+  redirect_sigf(sigmap[sig]);
+}

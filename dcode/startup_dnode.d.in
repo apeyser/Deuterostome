@@ -60,6 +60,8 @@ startup_common_save capsave {
   /winmade false def
   /pbuf 80 /b array def
   /mpiinfo [] def
+  /precall {} def
+  /postcall {} def
   
   /updatet {
     winmade {{currentdict begin drawwindow} stopped pop} {
@@ -111,7 +113,7 @@ startup_common_save capsave {
   } bind def
 
   /kill {
-    {null makerthreads} stopped
+    {null makerthreads postcall} stopped
     {winmade ~deletewin if} stopped pop
     currentdict /save_ known {save_ restore} if
     -1 setcurrent
@@ -288,6 +290,7 @@ startup_common_save capsave {
         exec
         0 0 2 mpiinfo length 1 sub {mpiinfo exch get add} for /pawns name
         /pawnbusy [pawns {true} repeat] def
+        precall
         mpiinfo makerthreads /socket name
         -1 setcurrent
         currentdict /newwin known ~newwin if

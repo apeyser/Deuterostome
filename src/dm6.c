@@ -723,8 +723,8 @@ P op_type(void)
 
   switch (CLASS(o_1)) {
     case NULLOBJ:
-			*c = (TYPE(o_1) == SOCKETTYPE) ? 'T' : 'N';
-			break;
+      *c = (TYPE(o_1) == SOCKETTYPE) ? 'T' : 'N';
+      break;
 
     case DICT:
       switch (TYPE(o_1)) {

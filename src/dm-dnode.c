@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <string.h>
+#include <sys/wait.h>
 
 #include "dm-dnode.h"
 #include "dm-nextevent.h"
@@ -294,9 +295,11 @@ P op_Xwindows_()
 }
 
 #if ENABLE_UNIX_SOCKETS
-static P unixserversocket;
+static P unixserversocket = -1;
+static P unixsigsocket = -1;
 #endif
-static P serversocket;
+static P serversocket = -1;
+static P sigsocket = -1;
 
 DM_INLINE_STATIC P handleserverinput(void) {
   struct sockaddr clientname;
@@ -480,7 +483,7 @@ P op_setconsole(void)
 {
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != NULLOBJ) return OPD_CLA;
-  if (TYPE(o_1) == SOCKETTYPE) consolesocket = (P) LONGBIG_VAL(o_1);
+  if (TYPE(o_1) == SOCKETTYPE) consolesocket = SOCKET_VAL(o_1);
   else  consolesocket = PINF;
   FREEopds = o_1;
   return OK;
@@ -498,7 +501,8 @@ P op_console(void) {
   TAG(o1) = NULLOBJ;
   if (consolesocket != PINF) {
     TAG(o1) |= SOCKETTYPE;
-    LONGBIG_VAL(o1) = consolesocket;
+    SOCKET_VAL(o1) = consolesocket;
+    DGRAM_VAL(o1) = -1;
   }
   FREEopds = o2;
   return OK;
@@ -650,6 +654,123 @@ P op_vmresize(void) {
 #endif //X_DISPLAY_MISSING
 }
 
+DM_INLINE_STATIC void sock_error(BOOLEAN ex, P errno_, const char* msg) {
+  if (ex && serversocket != -1) close(serversocket);
+  if (ex && sigsocket != -1) close(sigsocket);
+
+#if ENABLE_UNIX_SOCKETS
+  if (unixserversocket != -1) delsocket(unixserversocket);
+  if (unixsigsocket != -1) close(unixsigsocket);
+  unixserversocket = -1;
+  unixsigsocket = -1;
+#endif //ENABLE_UNIX_SOCKETS
+
+  error(ex ? EXIT_FAILURE : 0, errno_, msg);
+}
+
+static pid_t redirector = -1;
+void redirector_killer(void) {
+  if (kill(redirector, SIGTERM)) {
+    error(0, errno, "Killing redirector");
+    return;
+  }
+
+  while (waitpid(redirector, NULL, 0) == -1 
+	 && errno == EINTR);
+  return;
+}
+
+__attribute__ ((__noreturn__))
+static void redirector_quit(int sig __attribute__ ((__unused__)) ) {
+  close(sigsocket);
+#if ENABLE_UNIX_SOCKETS
+  if (unixsigsocket != -1) close(unixsigsocket);
+#endif
+
+  exit(0);
+}
+
+static void redirect_sig(int sig) {
+  if (kill(getppid(), sig))
+    error(EXIT_FAILURE, errno, "redirector unable to signal parent");
+}
+
+static void handle_redirect(P socket) {
+  B sig;
+
+  switch (recv(socket, &sig, 1, 0)) {
+    case 0:
+      error(1, 0, "redirector received close on recv");
+    case -1:
+      error(EXIT_FAILURE, errno, "redirector recv");
+  };
+
+  propagate_sig(sig, redirect_sig);
+}
+
+
+static void sethandler(int sig, void (*handler)(int sig)) {
+  struct sigaction sa;
+  
+  sa.sa_handler = handler;
+  sigfillset(&sa.sa_mask);
+  sa.sa_flags = 0;
+  if (sigaction(sig, &sa, NULL))
+    error(1, errno, "Unable to set signal handler for %i", sig);
+}
+
+__attribute__ ((noreturn))
+static void redirectorf(void) {
+  fd_set rin, rout;
+  int nfds = 1;
+  int quitsigs[] = {SIGQUIT, SIGTERM, SIGINT, 0};
+  int *i;
+  for (i = quitsigs; *i; i++) sethandler(*i, redirector_quit);
+
+  FD_ZERO(&rin);
+  FD_SET(sigsocket, &rin);
+#if ENABLE_UNIX_SOCKETS
+  if (unixsigsocket != -1) {
+    nfds++;
+    FD_SET(sigsocket, &rin);
+  }
+#endif // ENABLE_UNIX_SOCKET
+
+  for (rout = rin; 
+       select(nfds, &rout, NULL, NULL, NULL) != -1
+	 || errno == EINTR;
+       rout = rin) {
+    if (FD_ISSET(sigsocket, &rout)) handle_redirect(sigsocket);
+#if ENABLUE_UNIX_SOCKETS
+    if (unixsigsocket != -1 && FD_ISSET(unixsigsocket, &rout))
+      handle_redirect(unixsigsocket);
+#endif //ENABLE_UNIX_SOCKET
+  }
+
+  error(EXIT_FAILURE, errno, "select failed in redirector");
+  exit(1);
+}
+
+static void sig_redirect(void) {
+  redirector = fork();
+  if (redirector == -1) 
+    sock_error(TRUE, errno, "forking for signal redirector");
+  if (redirector) {
+    if (atexit(redirector_killer))
+      sock_error(TRUE, errno, "atexit for signal redirector");
+    
+    close(sigsocket);
+    sigsocket = -1;
+#if ENABLE_UNIX_SOCKETS
+    if (unixsigsocket != -1) close(unixsigsocket);
+    unixsigsocket = -1;
+#endif //ENABLE_UNIX_SOCKETS
+    return;
+  }
+
+  redirectorf();
+}
+
 void run_dnode_mill(void) {
   P retc;
 
@@ -657,23 +778,39 @@ void run_dnode_mill(void) {
   defaultdisplay = getenv("DISPLAY");
 #endif
 
-  if ((serversocket = make_socket(serverport)) < 0) 
-    error(EXIT_FAILURE, errno, "making internet server socket");
+  if ((serversocket = make_socket(serverport, TRUE)) < 0)
+    sock_error(TRUE, errno, "making internet server socket");
   if ((retc = closeonexec(serversocket)))
-    error(EXIT_FAILURE, -retc, "setting close on exec on server socket");
+    sock_error(TRUE, -retc, "setting close on exec on server socket");
   addsocket(serversocket);
-  if (listen(serversocket,5) < 0) error(EXIT_FAILURE,errno,"listen");
+  if (listen(serversocket,5) < 0) 
+    sock_error(TRUE, errno,"listen");
+
+  if ((sigsocket = make_socket(serverport, FALSE)) < 0)
+    sock_error(TRUE, errno, "making internet signal socket");
+  if ((retc = closeonexec(sigsocket)))
+    sock_error(TRUE, -retc, "setting close on exec on signal socket");
 
 #if ENABLE_UNIX_SOCKETS
-  if ((unixserversocket = make_unix_socket(serverport)) < 0)
-    error(0, errno, "making unix server socket");
+  if ((unixserversocket = make_unix_socket(serverport, TRUE)) < 0) {
+    sock_error(FALSE, errno, "making unix server socket");
+    goto socksdone;
+  }
   else if ((retc = closeonexec(unixserversocket)))
-    error(EXIT_FAILURE, -retc, "setting close on exec on unix server socket");
+    sock_error(TRUE, -retc, "setting close on exec on unix server socket");
 
   addsocket(unixserversocket);
-  if (listen(unixserversocket,5) < 0) error(EXIT_FAILURE,errno,"listen");
+  if (listen(unixserversocket,5) < 0)
+    sock_error(TRUE,errno,"listen");
+
+  if ((unixsigsocket = make_unix_socket(serverport, FALSE)) < 0)
+    sock_error(FALSE, errno, "making unix signal socket");
+  else if ((retc = closeonexec(unixsigsocket)))
+    sock_error(TRUE, -retc, "setting close on exec on unix signal socket");
 #endif //ENABLE_UNIX_SOCKETS
 
+socksdone:
+  sig_redirect();
   maketinysetup(quithandler_);
   if (atexit(quithandler_exit))
     error(1, errno, "Unable to add quit exit handler");
