@@ -25,6 +25,7 @@
   "list"
   "used"
   "length"
+  "last"
   "begin"
   "end"
   "def"

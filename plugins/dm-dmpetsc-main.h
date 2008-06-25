@@ -3,6 +3,7 @@
 PLUGIN_INTRO(1, );
 
 P ll_errc[] = { 
+  DMPETSC_MATOVF, 
   DMPETSC_INVVEC, 
   DMPETSC_INVMAT, 
   DMPETSC_INVKSP, 
@@ -10,6 +11,7 @@ P ll_errc[] = {
   DMPETSC_NOMATCH, 
   DMPETSC_NONLOCAL, 
   DMPETSC_KSPSOLVE_NOINIT, 
+  DMPETSC_KSPSOLVE_NODUP, 
   DMPETSC_ERR_MEM, 
   DMPETSC_ERR_SUP, 
   DMPETSC_ERR_SUP_SYS, 
@@ -54,6 +56,7 @@ P ll_errc[] = {
 };
 
 B* ll_errm[] = { 
+  (B*)"** dmpetsc: Woww!! 2^32 matrices created -- impressive!", 
   (B*)"** dmpetsc: Invalidated vector", 
   (B*)"** dmpetsc: Invalidated matrix", 
   (B*)"** dmpetsc: Invalidated ksp", 
@@ -61,6 +64,7 @@ B* ll_errm[] = {
   (B*)"** dmpetsc: Non matching dimensions", 
   (B*)"** dmpetsc: Accessing non-local data", 
   (B*)"** dmpetsc: Matrix for solution undefined", 
+  (B*)"** dmpetsc: Matrix for solution is not a dup of last one", 
   (B*)"** dmpetsc: unable to allocate requested memory", 
   (B*)"** dmpetsc: no support for requested operation", 
   (B*)"** dmpetsc: no support for requested operation on this computer system", 
@@ -116,7 +120,8 @@ B* ll_export[] = {
   PLUGIN_OP(petsc_vec_max),
   PLUGIN_OP(petsc_vec_min),
   PLUGIN_OP(petsc_vec_destroy),
-  PLUGIN_OP(petsc_mat_create),
+  PLUGIN_OP(petsc_mat_sparse_create),
+  PLUGIN_OP(petsc_mat_dense_create),
   PLUGIN_OP(petsc_mat_copy),
   PLUGIN_OP(petsc_mat_copyto),
   PLUGIN_OP(petsc_mat_copyfrom),
@@ -146,11 +151,13 @@ P op_INIT_(void) {
   makename(MATRIX_N_string, MATRIX_N_frame);
   makename(MATRIX_GM_string, MATRIX_GM_frame);
   makename(MATRIX_ASS_string, MATRIX_ASS_frame);
+  makename(MATRIX_DUPID_string, MATRIX_DUPID_frame);
   makename(DMPETSC_KSP_string, DMPETSC_KSP_frame);
   makename(KSP_KSP_string, KSP_KSP_frame);
-  makename(KSP_M_string, KSP_M_frame);
+  makename(KSP_N_string, KSP_N_frame);
   makename(KSP_KSPTYPE_string, KSP_KSPTYPE_frame);
   makename(KSP_PCTYPE_string, KSP_PCTYPE_frame);
+  makename(KSP_DUPID_string, KSP_DUPID_frame);
   return init_();
 }
 
@@ -174,7 +181,9 @@ P op_petsc_vec_min(void) {return petsc_vec_min();}
 
 P op_petsc_vec_destroy(void) {return petsc_vec_destroy();}
 
-P op_petsc_mat_create(void) {return petsc_mat_create();}
+P op_petsc_mat_sparse_create(void) {return petsc_mat_sparse_create();}
+
+P op_petsc_mat_dense_create(void) {return petsc_mat_dense_create();}
 
 P op_petsc_mat_copy(void) {return petsc_mat_copy();}
 

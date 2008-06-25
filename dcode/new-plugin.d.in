@@ -55,7 +55,8 @@ end def
   
   plugin_types {/type_dict name /type_name name
     /type_name_u type_name toupper def
-    type_dict {
+    /member_dict type_dict /members get def
+    member_dict {
       {} forall /mem_attr name /mem_type name /mem_tag name /mem_name name
       /mem_name_u mem_name toupper def
       (#define )__ plugin_name_u __ (_)__ type_name_u __ (_)__ 
@@ -81,8 +82,8 @@ end def
     } forall
 
     (#define MAKE_)__ plugin_name_u __ (_)__ type_name_u __ (\(frame)__
-    plugin_types_opaque_mem type_name known {
-      plugin_types_opaque_mem type_name get
+    type_dict /opaque known {
+      type_dict /opaque get
     } {null} ifelse dup null eq {(, size)} {()} ifelse __ (\) )__
 
     (do { \\)__ nl
@@ -90,13 +91,13 @@ end def
     dup null eq {pop (size)} if __ (, )__
     plugin_name_u __ (_)__ type_name_u __ (_frame, )__
 
-    type_dict {pop /mem_name name
+    member_dict {pop /mem_name name
       /mem_name_u mem_name toupper def
       type_name_u __ (_)__ mem_name_u __ (_frame, )__
     } forall
     (NULL\)\)\) \\)__ nl
     (    return VM_OVF; \\)__ nl
-    type_dict {pop /mem_name name
+    member_dict {pop /mem_name name
       /mem_name_u mem_name toupper def
       (  )__ plugin_name_u __ (_)__ type_name_u __ (_)__ mem_name_u __ 
       (_INIT\(frame\); \\)__ nl
@@ -132,7 +133,8 @@ end def
     (_frame[FRAMEBYTES];)__ nl
     (static B* )__ plugin_name_u __ (_)__ type_name_u __
     (_string = ")__ plugin_name_u __ (_)__ type_name_u __ (";)__ nl
-    type_dict {pop /mem_name name
+    /member_dict type_dict /members get def
+    member_dict {pop /mem_name name
       /mem_name_u mem_name toupper def
       (static B )__ type_name_u __ (_)__ mem_name_u __ 
       (_frame[FRAMEBYTES];)__ nl
@@ -186,7 +188,8 @@ end def
       /type_name_u type_name toupper def
       (  makename\()__ plugin_name_u __ (_) __ type_name_u __ 
         (_string, )__ plugin_name_u __ (_)__ type_name_u __ (_frame\);)__ nl
-      type_dict {pop /mem_name name
+      /member_dict type_dict /members get def
+      member_dict {pop /mem_name name
         /mem_name_u mem_name toupper def
         (  makename\()__ type_name_u __ (_)__ mem_name_u __ (_string, )__
                          type_name_u __ (_)__ mem_name_u __ (_frame\);)__ nl
@@ -218,7 +221,7 @@ end def
   /islocal name /isbody name /file name /path name
 
   currentdict end currentdict exch begin
-  {/plugin_errs /plugin_types /plugin_types_opaque_mem} {
+  {/plugin_errs /plugin_types} {
     2 copy known not {0 dict def} {pop} ifelse
   } forall
   dup /plugin_version known not {/plugin_version 0          def} if

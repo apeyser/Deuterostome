@@ -38,10 +38,11 @@ subdir = src/codegen
 DIST_COMMON = $(dist_noinst_DATA) $(dist_noinst_SCRIPTS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/d-mode-ops.el $(srcdir)/dgen_0.h.built \
-	$(srcdir)/dmnuminc.h.built $(srcdir)/dnode_0.h.built \
-	$(srcdir)/dpawn_0.h.built $(srcdir)/dsp1f.h.built \
-	$(srcdir)/dsp2def.h.built $(srcdir)/dvt_0.h.built \
-	$(srcdir)/errors.d $(srcdir)/startup_dgen.d
+	$(srcdir)/dm-errs.h.built $(srcdir)/dmnuminc.h.built \
+	$(srcdir)/dnode_0.h.built $(srcdir)/dpawn_0.h.built \
+	$(srcdir)/dsp1f.h.built $(srcdir)/dsp2def.h.built \
+	$(srcdir)/dvt_0.h.built $(srcdir)/errors.d \
+	$(srcdir)/startup_dgen.d
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
@@ -56,7 +57,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = dmglobals.c dsp1.c dm1.c dm2.c dm2.h \
+CONFIG_CLEAN_FILES = dm.h dmglobals.c dsp1.c dm1.c dm2.c dm2.h dm3.h \
 	dm-swapbytes.h dm-conv.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c \
 	dmnum.c dsp2.c dm-types.h dm-types.c paths.h.in dgen.c \
 	dgen_1.h dgen-build dmnum.h dm-nextevent.c dm-nextevent.h
@@ -321,7 +322,8 @@ target_vendor = @target_vendor@
 tmp = @tmp@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-PRODSRCS = $(srcdir)/dmnuminc.h.built \
+PRODSRCS = \
+	$(srcdir)/dmnuminc.h.built \
 	$(srcdir)/dsp1f.h.built \
 	$(srcdir)/dsp2def.h.built \
 	$(srcdir)/dgen_0.h.built \
@@ -329,16 +331,18 @@ PRODSRCS = $(srcdir)/dmnuminc.h.built \
 	$(srcdir)/dvt_0.h.built \
 	$(srcdir)/dpawn_0.h.built \
 	$(srcdir)/errors.d \
-	$(srcdir)/d-mode-ops.el
+	$(srcdir)/d-mode-ops.el \
+	$(srcdir)/dm-errs.h.built
 
 MAINTAINERCLEANFILES = $(PRODSRCS) \
 	$(srcdir)/dcoder.h \
 	$(srcdir)/startup_dgen.d
 
-dist_noinst_DATA = $(srcdir)/dmnuminc.d \
+dist_noinst_DATA = \
+	$(srcdir)/dmnuminc.d \
+	$(srcdir)/ops.d \
 	$(srcdir)/dsp1f.d \
 	$(srcdir)/dsp2def.d \
-	$(srcdir)/ops.d \
 	$(MAINTAINERCLEANFILES)
 
 dist_noinst_SCRIPTS = $(srcdir)/dgen-build
@@ -354,7 +358,7 @@ BUILT_SOURCES = paths.h
 CLEANFILES = $(BUILT_SOURCES)
 DISTCLEANFILES = dm-config.h
 noinst_LTLIBRARIES = libdmbootstrap.la
-EXTRA_DIST = dmnuminc.d.in paths.h.in dsp2def.d.in
+EXTRA_DIST = dmnuminc.d.in ops.d.in paths.h.in dsp2def.d.in
 libdmbootstrap_la_SOURCES = dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h \
 	dmglobals.c dm1.c dm2.c dm-conv.c dm-swapbytes.h \
 	dm4.c dm5.c dm6.c dm7.c dm8.c dm-types.c 
@@ -362,7 +366,7 @@ libdmbootstrap_la_SOURCES = dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h \
 dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h dm3.c
 dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dgen_LDADD = libdmbootstrap.la
-dcoder_SOURCES = dcoder.c dcoder.h
+dcoder_SOURCES = dcoder.c dcoder.h dm-errs.h.built
 dcoder_CPPFLAGS = -I"$(top_srcdir)/src" -I"$(top_builddir)/src" \
 	-DDM_HAVE_CONFIG_H
 
@@ -372,7 +376,8 @@ edit = sed \
 	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 	-e 's,[@]dmconfdir[@],$(dmconfdir),g' \
 	-e 's,[@]ROLLBITS[@],$(ROLLBITS),g' \
-	-e 's,[@]BYTECORRECT[@],$(BYTECORRECT),g'
+	-e 's,[@]BYTECORRECT[@],$(BYTECORRECT),g' \
+	-e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g'
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -723,6 +728,16 @@ paths.h: paths.h.in Makefile
 	$(edit) $(srcdir)/paths.h.in >$@.tmp
 	mv $@.tmp $@
 
+ops.d: ops.d.in Makefile
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/ops.d.in >$@.tmp
+	mv $@.tmp $@
+
+dcoder.c: dcoder.c.in Makefile
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/dcoder.c.in >$@.tmp
+	mv $@.tmp $@
+
 dmnuminc.d: dmnuminc.d.in Makefile
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/dmnuminc.d.in >$@.tmp
@@ -769,6 +784,11 @@ $(srcdir)/dcoder.h: ops.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
 		"$@" "/dcoder"
+
+$(srcdir)/dm-errs.h.built: ops.d dgen dgen-build
+	"$(srcdir)/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
+		"$@" "/derr"
 
 $(srcdir)/d-mode-ops.el: ops.d dgen dgen-build
 	"$(srcdir)/dgen-build" \

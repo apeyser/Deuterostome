@@ -298,12 +298,15 @@ AC_CONFIG_LINKS([
   src/dgen_0.h:src/codegen/dgen_0.h.built
   src/dnode_0.h:src/codegen/dnode_0.h.built
   src/dpawn_0.h:src/codegen/dpawn_0.h.built
+  src/dm-errs.h:src/codegen/dm-errs.h.built
   src/dvt_0.h:src/codegen/dvt_0.h.built
+  src/codegen/dm.h:src/dm.h
   src/codegen/dmglobals.c:src/dmglobals.c
   src/codegen/dsp1.c:src/dsp1.c
   src/codegen/dm1.c:src/dm1.c
   src/codegen/dm2.c:src/dm2.c
   src/codegen/dm2.h:src/dm2.h
+  src/codegen/dm3.h:src/dm3.h
   src/codegen/dm-swapbytes.h:src/dm-swapbytes.h
   src/codegen/dm-conv.c:src/dm-conv.c
   src/codegen/dm3.c:src/dm3.c

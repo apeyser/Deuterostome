@@ -24,6 +24,7 @@ B* _sysop[] =
   (B*) "list", (B*) op_list,
   (B*) "used", (B*) op_used,
   (B*) "length", (B*) op_length,
+  (B*) "last", (B*) op_last,
   (B*) "begin", (B*) op_begin,
   (B*) "end", (B*) op_end,
   (B*) "def", (B*) op_def,
@@ -148,6 +149,10 @@ B* _sysop[] =
 };
 
 P _syserrc[] = {
+  ABORT,
+  QUIT,
+  MORE,
+  DONE,
   TIMER,
   CORR_OBJ,
   VM_OVF,
@@ -187,11 +192,16 @@ P _syserrc[] = {
   CLOCK_ERR,
   LONG_OVF,
   ILL_RECAP,
+  UNDF_LAST,
   BUF_OVF,
   0L
 };
 
 B* _syserrm[] = {
+  (B*) "** Internal ABORT returned -- should never appear as error",
+  (B*) "** Internal QUIT returned -- should never appear as error",
+  (B*) "** Internal MORE returned -- should never appear as error",
+  (B*) "** Internal DONE returned -- should never appear as error",
   (B*) "** Timeout",
   (B*) "** Corrupted object",
   (B*) "** VM overflow",
@@ -231,6 +241,7 @@ B* _syserrm[] = {
   (B*) "** Error accessing clock",
   (B*) "** 64 bit integer overflow on load into 32 bit machine",
   (B*) "** Double capsave",
+  (B*) "** No last -- 0 length array or list",
   (B*) "** Internal buffer overflow",
   (B*) NULL
 };

@@ -11,6 +11,7 @@
 #define VECTOR_VAL(frame)    (*(Vec*) NUM_VAL(frame))
 #define MATRIX_VAL(frame)    (*(Mat*) NUM_VAL(frame))
 #define KSP_VAL(frame)       (*(KSP*) NUM_VAL(frame))
+#define ULONG64_VAL(frame)   (*(UL64*) &LONG64_VAL(frame))
 
 #include "dm-dmpetsc-header.h"
 
@@ -177,8 +178,7 @@ DM_INLINE_STATIC P petsc_vec_create(void) {
   if (! PVALUE(o_1, &n)) return UNDF_VAL;
 
   MAKE_DMPETSC_VECTOR(pframe);
-  x = &DMPETSC_VECTOR_VECTOR(pframe);
-  *x = NULL;
+  *(x = &DMPETSC_VECTOR_VECTOR(pframe)) = NULL;
   DMPETSC_VECTOR_N(pframe) = n;
   DMPETSC_VECTOR_ASS(pframe) = FALSE;
 
@@ -192,7 +192,6 @@ DM_INLINE_STATIC P petsc_vec_create(void) {
 
  err:
   if (x && *x) VecDestroy(*x);
-  *x = NULL;
   FREEvm = oldfreevm;
   RETURN_ERROR(errmap[r]);
 }
@@ -341,55 +340,111 @@ DM_INLINE_STATIC P petsc_vec_destroy(void) {
   return OK;
 }
 
-// <l irows> <l icols> | mat
-DM_INLINE_STATIC P petsc_mat_create(void) {
-  PetscErrorCode r;
-  P m, n;
-  L32* irows;
-  L32* icols;
+static UL64 dupid = 1;
+typedef P (*PreassFunc)(B* pframe, void* arg);
+
+DM_INLINE_STATIC P mat_create(P m, P n, char* type, B* rpframe,
+			      PreassFunc preass, void* arg) {
   B* pframe;
+  PetscErrorCode r;
+  P retc = OK;
   B* oldfreevm = FREEvm;
   Mat* A = NULL;
-  int i;
-
-  if (FLOORopds > o_2) return OPDS_UNF;
-  if (TAG(o_2) != (ARRAY|LONG32TYPE) || TAG(o_1) != (ARRAY|LONG32TYPE))
-    return OPD_ERR;
-  if ((m = ARRAY_SIZE(o_2)-1) < 1) return RNG_CHK;
-  if (ARRAY_SIZE(o_1) > m*n) return RNG_CHK;
+  if (! dupid) RETURN_ERROR(DMPETSC_MATOVF);
 
   MAKE_DMPETSC_MATRIX(pframe);
-  A = &DMPETSC_MATRIX_MATRIX(pframe);
-  *A = NULL;
+  *(A = &DMPETSC_MATRIX_MATRIX(pframe)) = NULL;
   DMPETSC_MATRIX_M(pframe) = m;
+  DMPETSC_MATRIX_N(pframe) = n;
   DMPETSC_MATRIX_ASS(pframe) = FALSE;
+  DMPETSC_MATRIX_DUPID(pframe) = dupid++;
 
-  irows = (L32*) VALUE_PTR(o_2);
-  icols = (L32*) VALUE_PTR(o_1);
-
-  n = 0;
-  for (i = 0; i < ARRAY_SIZE(o_1); ++i)
-    if (icols[i] > n) n = icols[i];
-  DMPETSC_MATRIX_N(pframe) = n+1;
-
-  if ((r = MatCreate(PETSC_COMM_WORLD, A))) goto err;
-  if ((r = MatSetSizes(*A, m, m, PETSC_DETERMINE, PETSC_DETERMINE))) goto err;
-  if ((r = MatSetType(*A, MATMPIAIJ))) goto err;
-  if ((r = MatMPIAIJSetPreallocationCSR(*A, irows, icols, PETSC_NULL))) goto err;
+  if ((r = MatCreate(PETSC_COMM_WORLD, A))) 
+    goto err;
+  if ((r = MatSetSizes(*A, m, n, PETSC_DETERMINE, PETSC_DETERMINE))) 
+    goto err;
+  if ((r = MatSetType(*A, type))) 
+    goto err;
   if ((r = MatGetOwnershipRange(*A, &DMPETSC_MATRIX_GM(pframe), PETSC_NULL)))
     goto err;
-  //  if ((r = MatSetOption(*A, MAT_DO_NOT_USE_INODES))) goto err;
-  if ((r = MatAssemblyBegin(*A, MAT_FINAL_ASSEMBLY))) goto err;
+  if (preass && (retc = preass(pframe, arg)))
+    goto err;
+  if ((r = MatAssemblyBegin(*A, MAT_FINAL_ASSEMBLY)))
+    goto err;
 
-  moveframe(pframe, o_2);
-  FREEopds = o_1;
+  moveframe(pframe, rpframe);
   return OK;
 
  err:
   if (A && *A) MatDestroy(*A);
-  *A = NULL;
   FREEvm = oldfreevm;
+  if (retc) return retc;
   RETURN_ERROR(errmap[r]);
+}
+
+// m n | mat
+DM_INLINE_STATIC P petsc_mat_dense_create(void) {
+  static B pframe[FRAMEBYTES];
+  P retc;
+  P m, n;
+
+  if (FLOORopds > o_2) return OPDS_UNF;
+  if (CLASS(o_2) != NUM || CLASS(o_1) != NUM) 
+    return RNG_CHK;
+  if (! PVALUE(o_2, &m) || m > L32MAX
+      || ! PVALUE(o_1, &n) || n > L32MAX) 
+    return UNDF_VAL;
+  if (m < 1 || n < 1)
+    return RNG_CHK;
+
+  if ((retc = mat_create(m, n, MATMPIDENSE, pframe, NULL, NULL)))
+    return retc;
+
+  moveframe(pframe, o_2);
+  FREEopds = o_1;
+  return OK;
+}
+
+struct SparsePreass {
+  L32* irows;
+  L32* icols;
+};
+  
+DM_INLINE_STATIC P petsc_mat_sparse_preass(B* pframe, void* arg) {
+  PetscErrorCode r;
+  Mat A = DMPETSC_MATRIX_MATRIX(pframe);
+  struct SparsePreass* params = (struct SparsePreass*) arg;
+  if ((r = MatMPIAIJSetPreallocationCSR(A, params->irows, params->icols, 
+					PETSC_NULL))) 
+    RETURN_ERROR(errmap[r]);
+
+  return OK;
+}
+
+// <l irows> <l icols> n | mat
+DM_INLINE_STATIC P petsc_mat_sparse_create(void) {
+  static B pframe[FRAMEBYTES];
+  P retc;
+  P m, n;
+  struct SparsePreass params;
+
+  if (FLOORopds > o_3) return OPDS_UNF;
+  if (TAG(o_3) != (ARRAY|LONG32TYPE) || TAG(o_2) != (ARRAY|LONG32TYPE))
+    return OPD_ERR;
+  if ((m = ARRAY_SIZE(o_3)-1) < 1) return RNG_CHK;
+  if (! PVALUE(o_1, &n) || n > L32MAX) return UNDF_VAL;
+  if (n < 1) return RNG_CHK;
+  if (ARRAY_SIZE(o_2) > m*n) return RNG_CHK;
+
+  params.irows = (L32*) VALUE_PTR(o_2);
+  params.icols = (L32*) VALUE_PTR(o_1);
+  if ((retc = mat_create(m, n, MATMPIAIJ, pframe,
+			 petsc_mat_sparse_preass, &params)))
+    return retc;
+
+  moveframe(pframe, o_3);
+  FREEopds = o_2;
+  return OK;
 }
 
 DM_INLINE_STATIC P petsc_mat_destroy(void) {
@@ -423,7 +478,7 @@ DM_INLINE_STATIC P petsc_mat_copy(void) {
 // A | B(same shape as A)
 DM_INLINE_STATIC P petsc_mat_dup(void) {
   PetscErrorCode r;
-  P retc = 0;
+  P retc = OK;
   Mat A;
   B* pframe;
   Mat* Bm = NULL;
@@ -434,16 +489,17 @@ DM_INLINE_STATIC P petsc_mat_dup(void) {
   INIT_MAT(o_1, A);
 
   MAKE_DMPETSC_MATRIX(pframe);
-  Bm = &DMPETSC_MATRIX_MATRIX(pframe);
-  *Bm = NULL;
+  *(Bm = &DMPETSC_MATRIX_MATRIX(pframe)) = NULL;
   DMPETSC_MATRIX_M(pframe) = DMPETSC_MATRIX_M(o_1);
   DMPETSC_MATRIX_N(pframe) = DMPETSC_MATRIX_N(o_1);
+  DMPETSC_MATRIX_ASS(pframe) = TRUE;
+  DMPETSC_MATRIX_DUPID(pframe) = DMPETSC_MATRIX_DUPID(o_1);
 
   row = &DMPETSC_MATRIX_GM(pframe);
   if ((r = MatDuplicate(A, MAT_DO_NOT_COPY_VALUES, Bm))
       || (r = MatGetOwnershipRange(*Bm, row, PETSC_NULL)))
     goto err;
-
+  
   if (DMPETSC_MATRIX_GM(o_1) != *row) {
     retc = DMPETSC_ILLEGAL_OWNERSHIP;
     goto err;
@@ -454,7 +510,6 @@ DM_INLINE_STATIC P petsc_mat_dup(void) {
 
  err:
   if (Bm && *Bm) MatDestroy(*Bm);
-  *Bm = NULL;
   FREEvm = oldfreevm;
   RETURN_ERROR(retc ? retc : errmap[r]);
 }
@@ -670,9 +725,10 @@ DM_INLINE_STATIC P petsc_ksp_create(void) {
   MAKE_DMPETSC_KSP(pframe);
   ksp = &DMPETSC_KSP_KSP(pframe);
   *ksp = NULL;
-  DMPETSC_KSP_M(pframe) = 0;
   DMPETSC_KSP_KSPTYPE(pframe) = ksptype;
   DMPETSC_KSP_PCTYPE(pframe) = pctype;
+  DMPETSC_KSP_DUPID(pframe) = 0;
+  DMPETSC_KSP_N(pframe) = 0;
 
   if ((r = KSPCreate(PETSC_COMM_WORLD, ksp))) goto err;
   if ((r = KSPSetInitialGuessNonzero(*ksp, PETSC_TRUE))) goto err;
@@ -751,30 +807,37 @@ DM_INLINE_STATIC P petsc_ksp_solve(void) {
   Mat A;
   Vec x;
   Vec b;
-  L32* m;
-  L32 n;
+  UL64* ldupid;
+  L32* n;
   KSPConvergedReason rzn;
 
   if (o_4 < FLOORopds) return OPDS_UNF;
   INIT_VEC(o_1, b);
   INIT_VEC(o_2, x);
-  if (CLASS(o_3) != NULLOBJ) INIT_MAT(o_3, A);
+  if (TAG(o_3) != NULLOBJ) INIT_MAT(o_3, A);
   else A = NULL;
   INIT_KSP(o_4, ksp);
 
-  m = &DMPETSC_KSP_M(o_4);
-  if (A) *m = DMPETSC_MATRIX_M(o_3);
-  else if (! *m) RETURN_ERROR(DMPETSC_KSPSOLVE_NOINIT);
-  
-  n = DMPETSC_VECTOR_N(o_2);
-  if (*m !=  n || n != DMPETSC_VECTOR_N(o_1)) RETURN_ERROR(DMPETSC_NOMATCH);
+  ldupid = &DMPETSC_KSP_DUPID(o_4);
+  n      = &DMPETSC_KSP_N(o_4);
+  if (! A) {
+    if (! *ldupid) RETURN_ERROR(DMPETSC_KSPSOLVE_NOINIT);
+  }
+  else if (! *ldupid) {
+    *ldupid = DMPETSC_MATRIX_DUPID(o_3);
+    *n      = DMPETSC_MATRIX_N(o_3);
+  }
+  else if (*ldupid != DMPETSC_MATRIX_DUPID(o_3))
+    RETURN_ERROR(DMPETSC_KSPSOLVE_NODUP);
+
+  if (*n !=  DMPETSC_VECTOR_N(o_2) || *n != DMPETSC_VECTOR_N(o_1)) 
+    RETURN_ERROR(DMPETSC_NOMATCH);
   if (A) DMPETSC_ERRCHECK(KSPSetOperators(ksp, A, A, SAME_NONZERO_PATTERN));
 
   DMPETSC_ERRCHECK(KSPSetUp(ksp));
   DMPETSC_ERRCHECK(KSPSolve(ksp, b, x));
   DMPETSC_ERRCHECK(KSPGetConvergedReason(ksp, &rzn));
   if (rzn < 0) RETURN_ERROR(errmap[PETSC_ERR_MAX_VALUE + (-rzn)]);
-    
 
   moveframe(o_2, o_4);
   FREEopds = o_3;
@@ -788,7 +851,8 @@ DM_INLINE_STATIC P petsc_ksp_iterations(void) {
   if (o_1 < FLOORopds) return OPDS_UNF;
   INIT_KSP(o_1, ksp);
 
-  if (! DMPETSC_KSP_M(o_1)) RETURN_ERROR(DMPETSC_KSPSOLVE_NOINIT);
+  if (! DMPETSC_KSP_DUPID(o_1))
+    RETURN_ERROR(DMPETSC_KSPSOLVE_NOINIT);
   DMPETSC_ERRCHECK(KSPGetIterationNumber(ksp, &its));
 
   TAG(o_1) = (NUM|LONG32TYPE);

@@ -396,7 +396,7 @@ end def
 } bind def
 
 | ~func-maker: <<i | {}>> | --
-/waitforpawns {
+/execpawns {
   {
     mpidata begin {
       save
@@ -419,11 +419,17 @@ end def
   } lock
 } bind def
 
+| {} | --
+/sexecpawns {
+  mpidata /cfunc put
+  {pop /cfunc find} execpawns
+} bind def
+
 | /modulename | --
 /module_send {
   mpidata begin /module_send_ layer {
     ~[userdict 3 -1 roll get ~recv_module] /module_cmd name
-    {pop /module_cmd find} waitforpawns
+    {pop /module_cmd find} execpawns
   } stopped /module_send_ _layer end {stop} if
 } bind def
 

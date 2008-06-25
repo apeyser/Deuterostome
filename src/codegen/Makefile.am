@@ -1,4 +1,5 @@
-PRODSRCS = $(srcdir)/dmnuminc.h.built \
+PRODSRCS = \
+	$(srcdir)/dmnuminc.h.built \
 	$(srcdir)/dsp1f.h.built \
 	$(srcdir)/dsp2def.h.built \
 	$(srcdir)/dgen_0.h.built \
@@ -6,17 +7,20 @@ PRODSRCS = $(srcdir)/dmnuminc.h.built \
 	$(srcdir)/dvt_0.h.built \
 	$(srcdir)/dpawn_0.h.built \
 	$(srcdir)/errors.d \
-	$(srcdir)/d-mode-ops.el
+	$(srcdir)/d-mode-ops.el \
+	$(srcdir)/dm-errs.h.built
 
 MAINTAINERCLEANFILES = $(PRODSRCS) \
 	$(srcdir)/dcoder.h \
 	$(srcdir)/startup_dgen.d
 
-dist_noinst_DATA = $(srcdir)/dmnuminc.d \
+dist_noinst_DATA = \
+	$(srcdir)/dmnuminc.d \
+	$(srcdir)/ops.d \
 	$(srcdir)/dsp1f.d \
 	$(srcdir)/dsp2def.d \
-	$(srcdir)/ops.d \
 	$(MAINTAINERCLEANFILES)
+
 dist_noinst_SCRIPTS = $(srcdir)/dgen-build
 
 AM_CFLAGS = $(GCC_CFLAGS)
@@ -33,7 +37,7 @@ DISTCLEANFILES = dm-config.h
 noinst_LTLIBRARIES = libdmbootstrap.la
 noinst_PROGRAMS = dgen dcoder
 
-EXTRA_DIST = dmnuminc.d.in paths.h.in dsp2def.d.in
+EXTRA_DIST = dmnuminc.d.in ops.d.in paths.h.in dsp2def.d.in
 
 libdmbootstrap_la_SOURCES = dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h \
 	dmglobals.c dm1.c dm2.c dm-conv.c dm-swapbytes.h \
@@ -43,7 +47,7 @@ dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h dm3.c
 dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dgen_LDADD = libdmbootstrap.la
 
-dcoder_SOURCES = dcoder.c dcoder.h
+dcoder_SOURCES = dcoder.c dcoder.h dm-errs.h.built
 dcoder_CPPFLAGS = -I"$(top_srcdir)/src" -I"$(top_builddir)/src" \
 	-DDM_HAVE_CONFIG_H
 
@@ -74,11 +78,22 @@ edit = sed \
 	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 	-e 's,[@]dmconfdir[@],$(dmconfdir),g' \
 	-e 's,[@]ROLLBITS[@],$(ROLLBITS),g' \
-	-e 's,[@]BYTECORRECT[@],$(BYTECORRECT),g'
+	-e 's,[@]BYTECORRECT[@],$(BYTECORRECT),g' \
+	-e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g'
 
 paths.h: paths.h.in Makefile
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/paths.h.in >$@.tmp
+	mv $@.tmp $@
+
+ops.d: ops.d.in Makefile
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/ops.d.in >$@.tmp
+	mv $@.tmp $@
+
+dcoder.c: dcoder.c.in Makefile
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/dcoder.c.in >$@.tmp
 	mv $@.tmp $@
 
 dmnuminc.d: dmnuminc.d.in Makefile
@@ -127,6 +142,11 @@ $(srcdir)/dcoder.h: ops.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
 		"$@" "/dcoder"
+
+$(srcdir)/dm-errs.h.built: ops.d dgen dgen-build
+	"$(srcdir)/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
+		"$@" "/derr"
 
 $(srcdir)/d-mode-ops.el: ops.d dgen dgen-build
 	"$(srcdir)/dgen-build" \

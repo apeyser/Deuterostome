@@ -3,15 +3,6 @@
 
 #include "dm.h" 
 
-#define MATRIX_UNDEF_CUT        (MATRIX_ERRS+0)
-#define MATRIX_ILLEGAL_CUT      (MATRIX_ERRS+1)
-#define MATRIX_UNDER_CUT        (MATRIX_ERRS+2)
-#define MATRIX_NONMATCH_CUT     (MATRIX_ERRS+3)
-#define MATRIX_NONMATCH_SHAPE   (MATRIX_ERRS+4)
-#define MATRIX_PARAM_ERROR      (MATRIX_ERRS+5)
-#define MATRIX_SINGULAR         (MATRIX_ERRS+6)
-#define MATRIX_INT_ERR          (MATRIX_ERRS+7)
-
 #if HAVE_ATLAS && ATLAS_LIB
 
 #define BUILD_ATLAS 1

@@ -2,19 +2,20 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#include "dm.h"
-#include "dmx.h"
+#include "dm-config.h"
+#ifdef DM_HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "dm-errs.h.built"
 #include "error-local.h"
-#include "dqueen.h"
-#include "dm-mpi.h"
-#include "matrix.h"
-#include "dm-nextevent.h"
-#include "pluginlib.h"
-#include "dregex.h"
+
+
+typedef long P;
 
 struct emap {
-  B* str;
-  P val;
+  char* str;
+  long val;
 };
 
 #include "dcoder.h"
@@ -37,7 +38,7 @@ int main(int argc, char* argv[]) {
   i++;
 
   for (cemap = emap; cemap->str; cemap++, i++)
-    if (fprintf(fd, "  /%s %lldx def\n", 
+    if (fprintf(fd, "  /%-@NAMEBYTES@s %8lldx def\n", 
 		cemap->str, (long long) cemap->val) < 0)
       error(1, errno, "Unable to write line# %i", i);
 

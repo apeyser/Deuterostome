@@ -40,6 +40,34 @@ P op_used(void)
   return OK;
 }
 
+/*------------------------------------- last
+  dict/list | length-1 (unless length == 0)
+*/
+P op_last(void) {
+  P n;
+
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  switch (CLASS(o_1)) {
+    case ARRAY:
+      n = ARRAY_SIZE(o_1);
+      break;
+
+    case LIST:
+      n = (LIST_CEIL(o_1) - VALUE_BASE(o_1))/FRAMEBYTES;  
+      break;
+      
+    default:
+      return OPD_CLA;
+  }
+      
+  if (! n) return UNDF_LAST;
+  TAG(o_1) = NUM | LONGBIGTYPE; 
+  ATTR(o_1) = 0; 
+  LONGBIG_VAL(o_1) = n-1;
+
+  return OK;
+}
+
 /*------------------------------------ length
   dict/array/list/box | int
 

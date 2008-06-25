@@ -1,6 +1,6 @@
 /ops module 1000 dict dup begin 
 
-/NAMEBYTES 29 def
+/NAMEBYTES @NAMEBYTES@ def
 
 /mksmap {/errs name /cmds name /parents name
   2 dict dup begin |[

@@ -4,36 +4,42 @@
 /plugin_name /dmpetsc def
 
 /plugin_types 3 dict dup begin |[
-  /vector 4 dict dup begin |[
-    /vector [[/NUM /LONGBIGTYPE] /VECTOR_VAL /READONLY] def
-    /n      [[/NUM /LONG32TYPE] /LONG32_VAL 0] def 
-    /gn     [[/NUM /LONG32TYPE] /LONG32_VAL 0] def
-    /ass    [/BOOL /BOOL_VAL 0] def |]
+  /vector 2 dict dup begin |[
+    /opaque 0 def
+    /members 4 dict dup begin |[
+      /vector [[/NUM /LONGBIGTYPE] /VECTOR_VAL /READONLY] def
+      /n      [[/NUM /LONG32TYPE] /LONG32_VAL 0] def 
+      /gn     [[/NUM /LONG32TYPE] /LONG32_VAL 0] def
+      /ass    [/BOOL /BOOL_VAL 0] def |]
+    end def |]
   end def
 
-  /matrix 5 dict dup begin |[
-    /matrix [[/NUM /LONGBIGTYPE] /MATRIX_VAL /READONLY] def
-    /m      [[/NUM /LONG32TYPE] /LONG32_VAL 0] def
-    /n      [[/NUM /LONG32TYPE] /LONG32_VAL 0] def
-    /gm     [[/NUM /LONG32TYPE] /LONG32_VAL 0] def 
-    /ass    [/BOOL /BOOL_VAL 0] def |]
+  /matrix 2 dict dup begin |[
+    /opaque 0 def
+    /members 6 dict dup begin |[
+      /matrix [[/NUM /LONGBIGTYPE] /MATRIX_VAL /READONLY] def
+      /m      [[/NUM /LONG32TYPE] /LONG32_VAL 0] def
+      /n      [[/NUM /LONG32TYPE] /LONG32_VAL 0] def
+      /gm     [[/NUM /LONG32TYPE] /LONG32_VAL 0] def 
+      /ass    [/BOOL /BOOL_VAL 0] def 
+      /dupid  [[/NUM /LONG64TYPE] /ULONG64_VAL /READONLY] def |]
+    end def |]
   end def
 
-  /ksp 4 dict dup begin |[
-    /ksp     [[/NUM /LONGBIGTYPE] /KSP_VAL /READONLY] def 
-    /m       [[/NUM /LONG32TYPE] /LONG32_VAL 0] def 
-    /ksptype [[/NUM /LONG32TYPE] /LONG32_VAL /READONLY] def
-    /pctype  [[/NUM /LONG32TYPE] /LONG32_VAL /READONLY] def |]
+  /ksp 5 dict dup begin |[
+    /opaque 0 def
+    /members 5 dict dup begin |[
+      /ksp     [[/NUM /LONGBIGTYPE] /KSP_VAL /READONLY] def 
+      /n       [[/NUM /LONG32TYPE] /LONG32_VAL 0] def 
+      /ksptype [[/NUM /LONG32TYPE] /LONG32_VAL /READONLY] def
+      /pctype  [[/NUM /LONG32TYPE] /LONG32_VAL /READONLY] def 
+      /dupid   [[/NUM /LONG64TYPE] /ULONG64_VAL /READONLY] def |]
+    end def |]
   end def |]
 end def
 
-/plugin_types_opaque_mem 3 dict dup begin | [
-  /vector 0 def
-  /matrix 0 def
-  /ksp 0 def |]
-end def
-
 /plugin_errs 100 dict dup begin |[
+  /MATOVF (Woww!! 2^32 matrices created -- impressive!) def
   /INVVEC (Invalidated vector) def
   /INVMAT (Invalidated matrix) def
   /INVKSP (Invalidated ksp) def
@@ -41,6 +47,7 @@ end def
   /NOMATCH (Non matching dimensions) def
   /NONLOCAL (Accessing non-local data) def
   /KSPSOLVE_NOINIT (Matrix for solution undefined) def
+  /KSPSOLVE_NODUP (Matrix for solution is not a dup of last one) def
   /ERR_MEM (unable to allocate requested memory) def
   /ERR_SUP (no support for requested operation) def
   /ERR_SUP_SYS (no support for requested operation on this computer system) def
@@ -95,7 +102,8 @@ end def
   /petsc_vec_max null def
   /petsc_vec_min null def
   /petsc_vec_destroy null def 
-  /petsc_mat_create null def 
+  /petsc_mat_sparse_create null def 
+  /petsc_mat_dense_create null def 
   /petsc_mat_copy null def
   /petsc_mat_copyto null def
   /petsc_mat_copyfrom null def
