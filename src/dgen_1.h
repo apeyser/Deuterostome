@@ -183,8 +183,8 @@ P op_abort(void)
   }
     
   TAG(x1) = OP; ATTR(x1) = ACTIVE;
-  OP_NAME(x1) = (P) "x_op_abort"; 
-  OP_CODE(x1) = (P) x_op_abort;
+  OP_NAME(x1) = "x_op_abort"; 
+  OP_CODE(x1) = x_op_abort;
   TAG(x2) = ARRAY | BYTETYPE; 
   ATTR(x2) = ACTIVE;
   VALUE_PTR(x2) = FREEvm;

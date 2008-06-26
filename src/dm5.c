@@ -162,8 +162,8 @@ P op_for(void)
   moveframes(o_4,x1,4L);
   TAG(x5) = OP; 
   ATTR(x5) = ACTIVE;
-  OP_NAME(x5) = (P)"x_for"; 
-  OP_CODE(x5) = (P)x_op_for;
+  OP_NAME(x5) = "x_for"; 
+  OP_CODE(x5) = x_op_for;
   FREEexecs = x6; 
   FREEopds = o_4;
 
@@ -209,8 +209,10 @@ P op_repeat(void)
   ATTR(o_2) |= EXITMARK;
   moveframes(o_2, x1, 2L);
   TAG(x3) = OP; ATTR(x3) = ACTIVE;
-  OP_NAME(x3) = (P)"x_repeat"; OP_CODE(x3) = (P)x_op_repeat;
-  FREEopds = o_2; FREEexecs = x4;
+  OP_NAME(x3) = "x_repeat"; 
+  OP_CODE(x3) = x_op_repeat;
+  FREEopds = o_2; 
+  FREEexecs = x4;
 
   return OK;
 }
@@ -238,10 +240,13 @@ P op_loop(void)
   if (x4 >= CEILexecs) return EXECS_OVF;
   if (CLASS(o_1) == NAME) replace_active_name(o_1); 
 
-  ATTR(o_1) |= EXITMARK; moveframes(o_1, x1, 1L);
+  ATTR(o_1) |= EXITMARK; 
+  moveframe(o_1, x1);
   TAG(x2) = OP; ATTR(x2) = ACTIVE;
-  OP_NAME(x2) = (P)"x_loop"; OP_CODE(x2) = (P)x_op_loop;
-  FREEexecs = x3; FREEopds = o_1;
+  OP_NAME(x2) = "x_loop"; 
+  OP_CODE(x2) = x_op_loop;
+  FREEexecs = x3; 
+  FREEopds = o_1;
 
   return OK;
 }
@@ -332,8 +337,8 @@ P op_forall(void)
   ATTR(x1) |= EXITMARK;
   TAG(x3) = OP; 
   ATTR(x3) = ACTIVE;
-  OP_NAME(x3) = (P)"x_forall"; 
-  OP_CODE(x3) = (P)x_op_forall;
+  OP_NAME(x3) = "x_forall"; 
+  OP_CODE(x3) = x_op_forall;
   FREEexecs = x4; 
   FREEopds = o_2;
 

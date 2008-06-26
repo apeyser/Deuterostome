@@ -53,9 +53,8 @@ void closealllibs(void)
   
   while((lib = nextlib(lib)) !=  NULL)
     if ((handle = (void*) LIB_HANDLE(lib)) != NULL) {
-      if ((frame =
-           lookup(fininame, VALUE_PTR(lib)))) 
-        ((OPER)OP_CODE(frame))();
+      if ((frame = lookup(fininame, VALUE_PTR(lib))))
+        OP_CODE(frame)();
 
       if (lt_dlclose((lt_dlhandle)handle)) {
         e = lt_dlerror();
@@ -221,7 +220,7 @@ P op_loadlib(void)
   eOPDS = o_2;
 
   if ((frame = lookup(initname, dict))
-      && (retc = ((OPER) OP_CODE(frame))()) != OK) {
+      && (retc = OP_CODE(frame)()) != OK) {
     lt_dlclose((lt_dlhandle) handle);
     FREEvm = oldFREEvm;
     CEILvm = oldCEILvm;

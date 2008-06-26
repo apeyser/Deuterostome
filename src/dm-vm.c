@@ -241,8 +241,8 @@ static P x_op_lock(void) {
   else {
     TAG(x_1) = OP;
     ATTR(x_1) = ACTIVE;
-    OP_NAME(x_1) = (P) "stop"; 
-    OP_CODE(x_1) = (P) op_stop;
+    OP_NAME(x_1) = "stop"; 
+    OP_CODE(x_1) = op_stop;
   }
   FREEopds = o_1;
   return OK;
@@ -260,8 +260,8 @@ P op_lock(void) {
 
   TAG(x2) = OP; 
   ATTR(x2) = ACTIVE;
-  OP_NAME(x2) = (P) "x_lock"; 
-  OP_CODE(x2) = (P) x_op_lock;
+  OP_NAME(x2) = "x_lock"; 
+  OP_CODE(x2) = x_op_lock;
 
   TAG(x3) = BOOL; 
   ATTR(x3) = (STOPMARK | ACTIVE);
@@ -287,8 +287,8 @@ P op_unlock(void) {
 
   TAG(x2) = OP; 
   ATTR(x2) = ACTIVE;
-  OP_NAME(x2) = (P) "x_lock"; 
-  OP_CODE(x2) = (P) x_op_lock;
+  OP_NAME(x2) = "x_lock"; 
+  OP_CODE(x2) = x_op_lock;
 
   TAG(x3) = BOOL; 
   ATTR(x3) = (STOPMARK | ACTIVE);
@@ -313,7 +313,8 @@ static P x_op_serialize(void) {
   if (! BOOL_VAL(o_1)) FREEexecs = x_1;
   else {
     TAG(x_1) = OP; ATTR(x_1) = ACTIVE;
-    OP_NAME(x_1) = (P) "stop"; OP_CODE(x_1) = (P) op_stop;
+    OP_NAME(x_1) = "stop"; 
+    OP_CODE(x_1) = op_stop;
   }
   FREEopds = o_1;
   return OK;
@@ -329,7 +330,8 @@ P op_serialize(void) {
   BOOL_VAL(x1) = serialized;
 
   TAG(x2) = OP; ATTR(x2) = ACTIVE;
-  OP_NAME(x2) = (P) "x_serialize"; OP_CODE(x2) = (P) x_op_serialize;
+  OP_NAME(x2) = "x_serialize"; 
+  OP_CODE(x2) = x_op_serialize;
 
   TAG(x3) = BOOL; ATTR(x3) = (STOPMARK | ACTIVE);
   BOOL_VAL(x3) = FALSE;
@@ -375,8 +377,8 @@ static P x_op_halt_stop(void) {
   else {
     TAG(x_2) = OP;
     ATTR(x_2) = ACTIVE;
-    OP_NAME(x_2) = (P) "stop";
-    OP_CODE(x_2) = (P) op_stop;
+    OP_NAME(x_2) = "stop";
+    OP_CODE(x_2) = op_stop;
     FREEexecs = x_1;
   }
   FREEopds = o_1;
@@ -397,8 +399,8 @@ P op_halt(void)
 
   TAG(x3) = OP;
   ATTR(x3) = ACTIVE;
-  OP_NAME(x3) = (P) "x_halt_stop";
-  OP_CODE(x3) = (P) x_op_halt_stop;
+  OP_NAME(x3) = "x_halt_stop";
+  OP_CODE(x3) = x_op_halt_stop;
 
   TAG(x4) = BOOL;
   ATTR(x4) = (STOPMARK|ACTIVE);
@@ -406,8 +408,8 @@ P op_halt(void)
 
   TAG(x5) = OP;
   ATTR(x5) = ACTIVE;
-  OP_NAME(x5) = (P) "x_halt";
-  OP_CODE(x5) = (P) x_op_halt;
+  OP_NAME(x5) = "x_halt";
+  OP_CODE(x5) = x_op_halt;
 
 
   FREEexecs = x6;

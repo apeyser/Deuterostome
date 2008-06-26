@@ -48,7 +48,7 @@ P op_null(void)
   return OK;
 }
 
-/*------------------------------------- ]
+/*------------------------------------- closelist/]
 searches for most recent mark on operand stack, moves
 objects down to mark as list value into VM, and replaces
 mark object by list object; if the [ operator carried the TILDE
@@ -60,22 +60,34 @@ P op_closelist(void)
   B *frame, *mframe;
   P nframes, nb;
 
-  frame = o_1; nframes = 0;
-  while (CLASS(frame) != MARK) { 
-    frame -= FRAMEBYTES; nframes++;
-    if (frame < FLOORopds) return OPDS_UNF; 
-  }
+  for (frame = o_1, nframes = 0; 
+       frame >= FLOORopds && CLASS(frame) != MARK;
+       frame -= FRAMEBYTES, nframes++);
+  if (frame < FLOORopds) return OPDS_UNF;
+
   nb = FREEopds - frame - FRAMEBYTES;
   if ((FREEvm + nb + FRAMEBYTES) > CEILvm)  return VM_OVF;
   mframe = FREEvm; 
   FREEvm += FRAMEBYTES;
   TAG(mframe) = LIST;
-  ATTR(mframe) = PARENT | ((ATTR(frame) & TILDE)? ACTIVE : 0);
-  VALUE_BASE(mframe) = (P)FREEvm;
+  ATTR(mframe) = PARENT | ((ATTR(frame) & TILDE) ? ACTIVE : 0);
+  VALUE_PTR(mframe) = FREEvm;
   moveframes(frame + FRAMEBYTES, FREEvm, nframes);
-  LIST_CEIL(mframe) = (P)(FREEvm += nb);
+  LIST_CEIL_PTR(mframe) = (FREEvm += nb);
   moveframe(mframe,frame);
   FREEopds = frame + FRAMEBYTES;
+  return OK;
+}
+
+/*------------------------------------ openlist/[
+ * pushes mark on the stack 
+ */
+P op_openlist(void)
+{
+  if (o2 > CEILopds) return OPDS_OVF;
+  TAG(o1) = MARK;
+  ATTR(o1) = 0;
+  FREEopds = o2;
   return OK;
 }
 

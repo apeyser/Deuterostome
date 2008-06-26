@@ -270,26 +270,26 @@ extern "C" {
 #define BOOL_VAL(frame)      (*((BOOLEAN *)(((B*)(frame))+2)))
 #define NAME_KEY(frame)      (*((W *)      (((B*)(frame))+2)))
 
-#define NUM_VAL(frame)       ( ((B *)  PF_PTR(frame,1)))
-#define LONGBIG_VAL(frame)   (*((LBIG*)PF_PTR(frame,1)))
-#define LONG32_VAL(frame)    (*((L32*) PF_PTR(frame,1)))
-#define LONG64_VAL(frame)    (*((L64*) PF_PTR(frame,1)))
-#define BYTE_VAL(frame)      (*((B*)   PF_PTR(frame,1)))
-#define WORD_VAL(frame)      (*((W*)   PF_PTR(frame,1)))
-#define SOCKET_VAL(frame)    (*((P*)   PF_PTR(frame,1)))
+#define NUM_VAL(frame)       ( ((B *)    PF_PTR(frame,1)))
+#define LONGBIG_VAL(frame)   (*((LBIG*)  PF_PTR(frame,1)))
+#define LONG32_VAL(frame)    (*((L32*)   PF_PTR(frame,1)))
+#define LONG64_VAL(frame)    (*((L64*)   PF_PTR(frame,1)))
+#define BYTE_VAL(frame)      (*((B*)     PF_PTR(frame,1)))
+#define WORD_VAL(frame)      (*((W*)     PF_PTR(frame,1)))
+#define SOCKET_VAL(frame)    (*((P*)     PF_PTR(frame,1)))
 
-#define VALUE_BASE(frame)    (*((P *)  PF_PTR(frame,1)))
-#define VALUE_PTR(frame)     (*((B**)  PF_PTR(frame,1)))
-#define OP_CODE(frame)       (*((P *)  PF_PTR(frame,1)))
+#define VALUE_BASE(frame)    (*((P *)    PF_PTR(frame,1)))
+#define VALUE_PTR(frame)     (*((B**)    PF_PTR(frame,1)))
+#define OP_CODE(frame)       (*((OPER*)  PF_PTR(frame,1)))
 
-#define OP_NAME(frame)       (*((P *)  PF_PTR(frame,2)))
-#define LIST_CEIL(frame)     (*((P *)  PF_PTR(frame,2)))
-#define ARRAY_SIZE(frame)    (*((P *)  PF_PTR(frame,2)))
-#define DICT_NB(frame)       (*((P *)  PF_PTR(frame,2)))
-#define DICT_CURR(frame)     (*((P *)  PF_PTR(frame,2)))
-#define BOX_NB(frame)        (*((P *)  PF_PTR(frame,2)))
-#define LIST_CEIL_PTR(frame) (*((B**)  PF_PTR(frame,2)))
-#define DGRAM_VAL(frame)     (*((P *)  PF_PTR(frame,2)))
+#define OP_NAME(frame)       (*((char**) PF_PTR(frame,2)))
+#define LIST_CEIL(frame)     (*((P *)    PF_PTR(frame,2)))
+#define ARRAY_SIZE(frame)    (*((P *)    PF_PTR(frame,2)))
+#define DICT_NB(frame)       (*((P *)    PF_PTR(frame,2)))
+#define DICT_CURR(frame)     (*((P *)    PF_PTR(frame,2)))
+#define BOX_NB(frame)        (*((P *)    PF_PTR(frame,2)))
+#define LIST_CEIL_PTR(frame) (*((B**)    PF_PTR(frame,2)))
+#define DGRAM_VAL(frame)     (*((P *)    PF_PTR(frame,2)))
 
 /*-------------------------------------------- dictionary */
  
@@ -319,8 +319,8 @@ extern "C" {
 
 /*---------------------------------- C Operator definition */
 
-#define OPDEF_NAME(operator)  (((P*)(operator))[0])
-#define OPDEF_CODE(operator)  (((P*)(operator))[1])
+#define OPDEF_NAME(operator)  (*(char**) (((P*)(operator))+0))
+#define OPDEF_CODE(operator)  (*(OPER*)  (((P*)(operator))+1))
 #define OPDEFBYTES            (2*sizeof(P))
 
 /*---------------------------------------- save box */
@@ -482,6 +482,7 @@ DLL_SCOPE P op_counttomark(void);
 /*-- dictionary, array, list */
 DLL_SCOPE P op_currentdict(void);
 DLL_SCOPE P op_closelist(void); 
+DLL_SCOPE P op_openlist(void);
 DLL_SCOPE P op_dict(void);
 DLL_SCOPE P op_cleardict(void);
 DLL_SCOPE P op_array(void);
@@ -565,6 +566,7 @@ DLL_SCOPE P op_tilde(void);
 DLL_SCOPE P op_mkread(void);
 DLL_SCOPE P op_mkact(void);
 DLL_SCOPE P op_mkpass(void);
+DLL_SCOPE P op_mktilde(void);
 DLL_SCOPE P op_ctype(void);
 DLL_SCOPE P op_parcel(void);
 DLL_SCOPE P op_text(void);

@@ -211,7 +211,8 @@
       /sin /tan /atan /floor /ceil /acos
       /eq /ne /ge /gt /le /lt /and /or /xor
       /bitshift /class /type /readonly
-      /active /tilde /mkread /mkact /mkpass
+      /active /tilde /mkread /mkact /mkpass /mktilde
+      /closelist /openlist
       /ctype /parcel /text /number
       /token /search /anchorsearch 
       /gettime /localtime /getwdir /setwdir
@@ -271,7 +272,6 @@
       /CLOCK_ERR (** Error accessing clock) def
       /LONG_OVF (** 64 bit integer overflow on load into 32 bit machine) def
       /ILL_RECAP (** Double capsave) def 
-      /UNDF_LAST (** No last -- 0 length array or list) def
       /BUF_OVF (** Internal buffer overflow) def |]
     end def |]
   end def |]

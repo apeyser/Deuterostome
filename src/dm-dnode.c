@@ -356,15 +356,15 @@ DM_INLINE_STATIC P wrap_lock(P retc) {
 
   TAG(o2) = OP;
   ATTR(o2) = ACTIVE;
-  OP_NAME(o2) = (P) "stopped";
-  OP_CODE(o2) = (P) op_stopped;
+  OP_NAME(o2) = "stopped";
+  OP_CODE(o2) = op_stopped;
 
   FREEopds = o3;
 
   TAG(x_1) = OP;
   ATTR(x_1) = ACTIVE;
-  OP_NAME(x_1) = (P) "pop";
-  OP_CODE(x_1) = (P) op_pop;
+  OP_NAME(x_1) = "pop";
+  OP_CODE(x_1) = op_pop;
 
   return op_lock();
 }
@@ -432,8 +432,8 @@ P killsockets(void) {
 
   TAG(x1) = OP; 
   ATTR(x1) = ACTIVE;
-  OP_NAME(x1) = (P) "abort"; 
-  OP_CODE(x1) = (P) op_abort;
+  OP_NAME(x1) = "abort"; 
+  OP_CODE(x1) = op_abort;
   FREEexecs = x2;
   
   return OK;
@@ -595,7 +595,7 @@ BOOLEAN pending(void) {
   if (halt_flag) {
     if (x_1 >= FLOORexecs 
 	&& TAG(x_1) == OP 
-	&& OP_CODE(x_1) == (P) x_op_halt)
+	&& OP_CODE(x_1) == x_op_halt)
       return FALSE;
   }
 

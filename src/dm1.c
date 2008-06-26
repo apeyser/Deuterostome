@@ -23,14 +23,15 @@ static B *sframe;     /* ->socket string frame                       */
 
 DM_INLINE_STATIC B GETC(void)
 {
-if (ARRAY_SIZE(sframe) <= 0L) return(0);
-ARRAY_SIZE(sframe)--; 
-return((*(B *)((VALUE_BASE(sframe))++)) & 0x7F);
+  if (ARRAY_SIZE(sframe) <= 0L) return(0);
+  ARRAY_SIZE(sframe)--; 
+  return((*(B *)((VALUE_BASE(sframe))++)) & 0x7F);
 }
 
 DM_INLINE_STATIC void UNGETC(void)
 {
-ARRAY_SIZE(sframe)++; VALUE_BASE(sframe)--;
+  ARRAY_SIZE(sframe)++; 
+  VALUE_BASE(sframe)--;
 }
 
 /*----------------------------- scanner ---------------------------------
@@ -313,155 +314,178 @@ to strings or arrays, which are assembled in VM.
 
 P tokenize(B *stringframe)
 {
+  P nframes, nb, arrnum;
+  W level, t;
+  B *frame, *vm_stoken,  *oldfree;
 
-P nframes, nb, arrnum;
-W level, t;
-B *frame, *vm_stoken,  *oldfree;
+  sframe = stringframe; 
+  ATTR(sframe) &= ~PARENT;
+  level = 0; 
+  oldfree = FREEopds;
 
-sframe = stringframe; ATTR(sframe) &= (~PARENT);
-level = 0; oldfree = FREEopds;
-iterate:
-vm_free = CEILvm - FREEvm;
-vm_stoken = vm_token = FREEvm;
-if (FREEopds >= CEILopds) { FREEopds = oldfree; return(OPDS_OVF); }
-frame = FREEopds;
-switch((t = scan()) & 0xFF)
-     {
-     case 0:   if (level == 0)   return(DONE); 
-                  else { FREEopds = oldfree; return(PRO_CLO); }   
-     case 1:   FREEopds = oldfree; return(VM_OVF); 
-     case 2:   FREEopds = oldfree; return(BAD_TOK);
-     case 3:   FREEopds = oldfree; return(BAD_ASC);
-     case 4:   goto numeral;
-     case 5:   goto passname;
-     case 6:   goto actname;
-     case 7:   goto string;
-     case 8:   goto array;
-     case 9:   FREEopds = oldfree; return(ARR_CLO);
-     case 10:  goto procon;
-     case 11:  goto procoff;
-     case 12:  goto mark;
-     case 13:  goto endmark;
-     }
+ iterate:
+  vm_free = CEILvm - FREEvm;
+  vm_stoken = vm_token = FREEvm;
+  if (FREEopds >= CEILopds) { 
+    FREEopds = oldfree; return(OPDS_OVF); 
+  }
+  frame = FREEopds;
+  switch((t = scan()) & 0xFF) {
+    case 0:   if (! level) return DONE; 
+              else {FREEopds = oldfree; return PRO_CLO;}
+    case 1:   FREEopds = oldfree; return VM_OVF; 
+    case 2:   FREEopds = oldfree; return BAD_TOK;
+    case 3:   FREEopds = oldfree; return BAD_ASC;
+    case 4:   goto numeral;
+    case 5:   goto passname;
+    case 6:   goto actname;
+    case 7:   goto string;
+    case 8:   goto array;
+    case 9:   FREEopds = oldfree; return ARR_CLO;
+    case 10:  goto procon;
+    case 11:  goto procoff;
+    case 12:  goto mark;
+    case 13:  goto endmark;
+  }
 
-/*------------------------------ mark */
-mark:
-TAG(frame) = MARK; ATTR(frame) = (t & 0x0100)? TILDE : 0;
-FREEopds += FRAMEBYTES;
-goto next;
+  /*------------------------------ mark */
+ mark:
+  TAG(frame) = MARK; 
+  ATTR(frame) = (t & 0x0100)? TILDE : 0;
+  FREEopds += FRAMEBYTES;
+  goto next;
 
 /*------------------------------ endmark */
-endmark:
-makename((B*)"]",frame);
-ATTR(frame) = ACTIVE;
-FREEopds += FRAMEBYTES;
-goto next;
+ endmark:
+  TAG(frame) = OP;
+  OP_CODE(frame) = op_closelist;
+  OP_NAME(frame) = "]";
+  ATTR(frame) = ACTIVE;
+  FREEopds += FRAMEBYTES;
+  goto next;
 
-/*------------------------------ numeral */
-numeral:
-t = ENCODE((t>>8) & 0xFF,vm_stoken,NUM_VAL(frame));
-TAG(frame) = NUM | t; ATTR(frame) = 0;
-FREEopds += FRAMEBYTES;
-goto next;
+  /*------------------------------ numeral */
+ numeral:
+  t = ENCODE((t>>8) & 0xFF, vm_stoken, NUM_VAL(frame));
+  TAG(frame) = NUM | t; 
+  ATTR(frame) = 0;
+  FREEopds += FRAMEBYTES;
+  goto next;
 
-/*------------------------------- name */
-passname:
-makename(vm_stoken,frame);
-FREEopds += FRAMEBYTES;
-if (t & 0x0100) ATTR(frame) = TILDE;
-goto next;
+  /*------------------------------- name */
+ passname:
+  makename(vm_stoken,frame);
+  FREEopds += FRAMEBYTES;
+  if (t & 0x0100) ATTR(frame) = TILDE;
+  goto next;
 
-actname:
-makename(vm_stoken,frame);
-FREEopds += FRAMEBYTES;
-ATTR(frame) = ACTIVE;
-goto next;
+ actname:
+  makename(vm_stoken, frame);
+  FREEopds += FRAMEBYTES;
+  ATTR(frame) = ACTIVE;
+  goto next;
 
-/*---------------------------- string -> byte array
- NB: string value starts above freespace for master frame 
-*/
+  /*---------------------------- string -> byte array
+    NB: string value starts above freespace for master frame 
+  */
 
-string:
-TAG(frame) = ARRAY | BYTETYPE; ATTR(frame) = PARENT;
-VALUE_BASE(frame) = (P)(vm_stoken + FRAMEBYTES);
-vm_bytes--;                              /* strip terminating null */
-ARRAY_SIZE(frame) = vm_bytes - FRAMEBYTES;
-moveframes(FREEopds,FREEvm,1L);      /* master frame */
-ARRAY_SIZE(FREEvm) = (vm_bytes = (P)(DALIGN(vm_bytes))) - FRAMEBYTES;
-if ((FREEvm + vm_bytes) >= CEILvm) { FREEopds = oldfree; return(VM_OVF); }
-FREEvm += vm_bytes;
-FREEopds += FRAMEBYTES;
-goto next;
+ string:
+  TAG(frame) = ARRAY | BYTETYPE; 
+  ATTR(frame) = PARENT;
+  VALUE_PTR(frame) = vm_stoken + FRAMEBYTES;
+  vm_bytes--;                              /* strip terminating null */
+  ARRAY_SIZE(frame) = vm_bytes - FRAMEBYTES;
+  moveframe(FREEopds,FREEvm);      /* master frame */
+  ARRAY_SIZE(FREEvm) = (vm_bytes = DALIGN(vm_bytes)) - FRAMEBYTES;
+  if ((FREEvm + vm_bytes) >= CEILvm) { 
+    FREEopds = oldfree; 
+    return(VM_OVF); 
+  }
+  FREEvm += vm_bytes;
+  FREEopds += FRAMEBYTES;
+  goto next;
 
-/*---------------------------- <> array */
-array:
-TAG(frame) = ARRAY | ((t>>8) & 0x0F); ATTR(frame) = PARENT;
-arrnum = VALUE_BASE(frame) = (P)(FREEvm + FRAMEBYTES); ARRAY_SIZE(frame) = 0;
-nb = VALUEBYTES(TYPE(frame));
+  /*---------------------------- <> array */
+ array:
+  TAG(frame) = ARRAY | ((t>>8) & 0x0F); 
+  ATTR(frame) = PARENT;
+  arrnum = VALUE_BASE(frame) = (P)(FREEvm + FRAMEBYTES); 
+  ARRAY_SIZE(frame) = 0;
+  nb = VALUEBYTES(TYPE(frame));
 
-arrnext:
-switch((t = scan()) & 0xFF)
-     {
-     case 1:   FREEopds = oldfree; return(VM_OVF);   /* VM overflow     */
-     case 2:   FREEopds = oldfree; return(BAD_TOK);  /* scrambled token */
-     case 3:   FREEopds = oldfree; return(BAD_ASC);  /* garbage stream  */
-     case 4:   goto arrapp;
-     case 9:   goto arrend;
-     case 0:   FREEopds = oldfree; return(ARR_CLO);  /* incomplete      */
-     default:  FREEopds = oldfree; return(CLA_ARR);  /* not in array!   */
-     }
+ arrnext:
+  switch((t = scan()) & 0xFF) {
+    case 1:   FREEopds = oldfree; return VM_OVF;   /* VM overflow     */
+    case 2:   FREEopds = oldfree; return BAD_TOK;  /* scrambled token */
+    case 3:   FREEopds = oldfree; return BAD_ASC;  /* garbage stream  */
+    case 4:   goto arrapp;
+    case 9:   goto arrend;
+    case 0:   FREEopds = oldfree; return ARR_CLO;  /* incomplete      */
+    default:  FREEopds = oldfree; return CLA_ARR;  /* not in array!   */
+  }
 
-arrapp:
-t = 0x40 | TYPE(frame) | ((t>>8) & 0x30);
-ENCODE(t,vm_stoken,(B *)arrnum);
-if ((arrnum + nb) >= (P)CEILvm) { FREEopds = oldfree; return(VM_OVF); }
+ arrapp:
+  t = 0x40 | TYPE(frame) | ((t>>8) & 0x30);
+  ENCODE(t, vm_stoken, (B *)arrnum);
+  if ((arrnum + nb) >= (P)CEILvm) { 
+    FREEopds = oldfree; 
+    return(VM_OVF); 
+  }
 
-ARRAY_SIZE(frame) += 1;
-arrnum += nb;
-vm_free = (P)CEILvm - arrnum;
-vm_stoken = vm_token = (B *)arrnum;
-goto arrnext;
+  ARRAY_SIZE(frame) += 1;
+  arrnum += nb;
+  vm_free = (P)CEILvm - arrnum;
+  vm_stoken = vm_token = (B *)arrnum;
+  goto arrnext;
 
-arrend:
-moveframes(FREEopds,FREEvm,1L);              /* master frame */
-vm_bytes = (P)(DALIGN(nb * ARRAY_SIZE(FREEopds))) + FRAMEBYTES; 
-if ((FREEvm + vm_bytes) >= CEILvm) { FREEopds = oldfree; return(VM_OVF); }
-//ARRAY_SIZE(FREEvm) = (vm_bytes - FRAMEBYTES) / nb;
-FREEvm += vm_bytes;                          /* update VM */
-FREEopds += FRAMEBYTES;
-goto next;
+ arrend:
+  moveframes(FREEopds,FREEvm,1L);              /* master frame */
+  vm_bytes = DALIGN(nb * ARRAY_SIZE(FREEopds)) + FRAMEBYTES; 
+  if (FREEvm + vm_bytes >= CEILvm) { 
+    FREEopds = oldfree; 
+    return VM_OVF; 
+  }
+  //ARRAY_SIZE(FREEvm) = (vm_bytes - FRAMEBYTES) / nb;
+  FREEvm += vm_bytes;                          /* update VM */
+  FREEopds += FRAMEBYTES;
+  goto next;
 
-/*---------------------------------------- { - start of procedure */
-procon:
-TAG(frame) = PROC; ATTR(frame) = ACTIVE | PARENT;
-LIST_CEIL(frame) = -1L;        /* mark as preliminary proc object */
-FREEopds += FRAMEBYTES;
-level++;
-goto iterate;
+  /*---------------------------------------- { - start of procedure */
+ procon:
+  TAG(frame) = PROC; 
+  ATTR(frame) = ACTIVE | PARENT;
+  LIST_CEIL(frame) = -1L;        /* mark as preliminary proc object */
+  FREEopds += FRAMEBYTES;
+  level++;
+  goto iterate;
 
-/*----------------------------------------- } - end of procedure */
-procoff:
-if (level == 0) return(PRO_CLO);
-nframes = 0; frame = FREEopds;
-do { frame -= FRAMEBYTES; if (frame < oldfree) return(PRO_CLO);
-     nframes++;
-   } while (!((TAG(frame) == PROC) && (LIST_CEIL(frame) == (-1L))));
-nb = FREEopds - frame - FRAMEBYTES;
-if ((FREEvm + nb + FRAMEBYTES) >= CEILvm)
-    { FREEopds = oldfree; return(VM_OVF); }
-moveframes(frame+FRAMEBYTES, FREEvm + FRAMEBYTES, nframes-1);
-VALUE_BASE(frame) = (P)(FREEvm + FRAMEBYTES);
-LIST_CEIL(frame) = (P)(VALUE_BASE(frame) + nb);
-moveframe(frame,FREEvm);         /* master frame */
-FREEvm += nb + FRAMEBYTES;
-FREEopds = frame + FRAMEBYTES;
-level--;
+  /*----------------------------------------- } - end of procedure */
+ procoff:
+  if (level == 0) return PRO_CLO;
+  nframes = 0; 
+  frame = FREEopds;
+  do { 
+    frame -= FRAMEBYTES; 
+    if (frame < oldfree) return PRO_CLO;
+    nframes++;
+  } while (! ((TAG(frame) == PROC) && (LIST_CEIL(frame) == -1L)));
+  nb = FREEopds - frame - FRAMEBYTES;
+  if ((FREEvm + nb + FRAMEBYTES) >= CEILvm) { 
+    FREEopds = oldfree; 
+    return VM_OVF; 
+  }
+  moveframes(frame+FRAMEBYTES, FREEvm + FRAMEBYTES, nframes-1);
+  VALUE_PTR(frame) = FREEvm + FRAMEBYTES;
+  LIST_CEIL_PTR(frame) = VALUE_PTR(frame) + nb;
+  moveframe(frame, FREEvm);         /* master frame */
+  FREEvm += nb + FRAMEBYTES;
+  FREEopds = frame + FRAMEBYTES;
+  level--;
 
-/*---------------------------------- next iteration or exit */
-next:
-if (level == 0) return(OK);
-goto iterate;
-
+  /*---------------------------------- next iteration or exit */
+ next:
+  if (level == 0) return OK;
+  goto iterate;
 } /* of tokenizer */
 
 

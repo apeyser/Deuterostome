@@ -24,11 +24,15 @@ const char* x_op_thrown_name = "x_op_thrown";
 P op_thrown(void) {
 	if (o_1 < FLOORopds) return OPDS_UNF;
 	if (! (ATTR(o_1) & ACTIVE)) return OPD_ATR;
-
 	if (x3 > CEILexecs) return EXECS_OVF;
-	TAG(x1) = OP; ATTR(x1) = ACTIVE;
-	OP_CODE(x1) = (P) x_op_thrown; OP_NAME(x1) = (P) x_op_thrown_name;
-	moveframe(o_1, x2); ATTR(x2) = 0;
+
+	TAG(x1) = OP; 
+	ATTR(x1) = ACTIVE;
+	OP_CODE(x1) = x_op_thrown; 
+	OP_NAME(x1) = (char*) x_op_thrown_name;
+
+	moveframe(o_1, x2); 
+	ATTR(x2) = 0;
 	FREEexecs = x3;
 	FREEopds = o_1;
 	return OK;
@@ -51,7 +55,7 @@ P op_throw(void) {
             RETURN_ERROR(INV_THROW);
         }
 
-        if ((TAG(x1) == OP) && (OP_NAME(x1) == (P) x_op_thrown_name)) {
+        if ((TAG(x1) == OP) && (OP_NAME(x1) == x_op_thrown_name)) {
             TAG(o1) = BOOL; ATTR(o1) = 0;
             BOOL_VAL(o1) = TRUE;
             FREEopds = o2;

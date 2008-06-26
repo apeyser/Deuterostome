@@ -46,7 +46,6 @@ struct emap emap[] = {
   {"CLOCK_ERR", CLOCK_ERR},
   {"LONG_OVF", LONG_OVF},
   {"ILL_RECAP", ILL_RECAP},
-  {"UNDF_LAST", UNDF_LAST},
   {"BUF_OVF", BUF_OVF},
 #ifdef DM_ENABLE_REGEX
   {"REGEX_BADPAT", REGEX_BADPAT},

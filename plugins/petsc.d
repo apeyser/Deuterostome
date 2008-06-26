@@ -1,5 +1,7 @@
 /PETSC module 200 dict dup begin
 
+|============== Global definitions ==========================
+
 /ksptypes {
   /KSPRICHARDSON
   /KSPCHEBYCHEV
@@ -60,50 +62,50 @@
   PETSC begin stopped end {stop} if
 } bind def
 
-| ~act | --
-/out_petsc {
-  end stopped PETSC begin {stop} if
-} bind def
-
+|================= dpawn definitions ===========================
 /dpawn {
   getplugindir (dmpetsc.la) loadlib /petsc_oplib name
   
-  | <d ...>  save /x | save
+  | /x n | --
   /vec_create {
-    {
-      3 -1 roll
-      0 1 index length petsc_vec_create petsc_vec_copyto | /x x
-    } in_petsc def
+    {petsc_vec_create} in_petsc def
   } bind def
 
-|       irows length 1 sub range /nl name /n0 name
-|       irows n0 nl 1 add getinterval
-|       irows_ n0 nl 1 add getinterval copy irows n0 get sub
-|       icols irows n0 get irows n0 nl add get 1 index sub getinterval
-|       n
-|     {} bind
+  | x <d > | --
+  /vec_fill {
+    0 3 -1 roll petsc_vec_copyto pop
+  } bind def
 
-
-  /mat_creators [
+  /mat_creators {
     | n <l irows> <l icols> | A
     /sparse {
-      3 -1 roll 3 copy /N name /icols name /irows name
-      irows 0 get dup irows exch sub pop
-      petsc_mat_sparse_create
-      exch irows exch add pop
+      3 -1 roll petsc_mat_sparse_create
     } bind
 
     | m n | A
-    /dense {
-      dup /N name 
-      petsc_mat_dense_create
-    } bind
-  ] makestruct def
+    /dense ~petsc_mat_dense_create bind
+  } makestruct def
 
-  /mat_choppers [
+  | /A .... /type | --
+  /mat_create {
+    {mat_creators exch get exec} in_petsc def
+  } bind def
+
+  | ... | --
+  /mat_fillers_set {
+    | irows | --
+    /sparse {/irows name} bind
+    | N | --
+    /dense {/N name} bind
+  } makestruct def
+
+  /mat_fillers_get [
     | <d data> | <d row>
     /sparse {
-      irows row get dup irows row 1 add get 1 index sub getinterval
+      irows row get 
+      dup irows 0 get sub 
+      irows row 1 add get 3 -1 roll sub 
+      getinterval
     } bind
 
     | <d data> | <d row>
@@ -112,19 +114,19 @@
     } bind
   ] def
   
-  | data save /A .... /type mmax | save
-  /mat_create {
+  | A data mmax ... /type | --
+  /mat_fill {
     {
-      /mmax name /mtype name
-      mat_creator mtype get exec
-      dup /A name
-      4 -1 roll /data name
-      mat_choppers /mtype get /chopper name
+      /mtype name
+      mat_fillers_set mtype get exec
+      /mmax name /data name /A name
+      mat_fillers_get mtype get /filler name
+
       0 1 A /MATRIX_M get 1 sub {/row name
-        data chopper row 0 A petsc_mat_copyto pop
+        data filler row 0 A petsc_mat_copyto pop
       } for
-      mmax 1 index /MATRIX_M get sub {petsc_mat_syncto} repeat
-    } in_petsc def
+      mmax A /MATRIX_M get sub {petsc_mat_syncto} repeat
+    } in_petsc
   } bind def
 
   | A x | --
@@ -146,35 +148,37 @@
   } bind def
 
   | ... | --
-  /set_matrixers [
+  /matrixers_set {
     | irows | --
     /sparse {/irows name} bind
     | -- | --
     /dense  {}
-  ] makestruct def
+  } makestruct def
 
   | A | global_interval_start
-  /get_matrixers [
+  /matrixers_get {
     /sparse {
       pop irows row get
     } bind
     /dense {
       /MATRIX_GM get row add N mul
     } bind
-  ] makestruct def
+  } makestruct def
   
   | A N mmax ... /type | --
   /get_matrix {
     {
       /mtype name
-      set_matrixers mtype get exec
+      matrixers_set mtype get exec
       /mmax name /N name
       dup /A name 
       N /d array /t name
       0 1 A /MATRIX_M get {/row name
         A row 0 t petsc_mat_copyfrom
         ~[
-          exch row mpirank A get_matrixers mtype get exec ~recv_matrix_result
+          exch 
+          A matrixers_get mtype get exec 
+          ~recv_matrix_result
         ] rsend
       } for
       mmax 1 index /MATRIX_M get sub {petsc_mat_syncfrom} repeat pop
@@ -258,6 +262,7 @@
   } bind def
 } def
 
+|=================== dnode definitions ======================
 /dnode {
   | pawnnum elements | offset length
   /range {
@@ -271,6 +276,12 @@
     4 1 roll pop pop pop    | off len
   } bind def
 
+  | pawnnum elements | length
+  /rangesize {range exch pop} bind def
+
+  | pawnnum elements | offset
+  /rangestart {range pop} bind def
+
   | obj-dict | ~id
   /getid {/id get mkact} bind def
   | funcdict matrix-dict | ~func
@@ -279,35 +290,82 @@
   /gettype {/mtype get} bind def
   
   | /x N | xdict
-  | on dpawn: <d data>
   /vec_create {
     {
       2 dict dup begin /N name /id name end dup /xval name
-      {~[xval /id get ~vec_create]} execpawns
+      {~[
+        xval /id get
+        3 -1 roll xval /N get rangesize 
+        ~vec_create
+      ]} execpawns
     } in_petsc
   } bind def
 
+  | xval ~data | --
+  /vec_fill {
+    {
+      ~[3 -1 roll getid 3 -1 roll construct_exec ~vec_fill] sexecpawns
+    } in_petsc
+  } bind def
+
+  | ~irows ~icols | --
+  /condense_sparse {
+    {
+      /icols name /irows name
+      /icols_len mpi /pawns get list def
+      ~[
+        /icols construct_execn
+        {~[exch length mpirank ~condense_recv] rsend} ~in_petsc
+      ] sexecpawns
+
+      1 1 icols_len last {
+        icols_len 1 index 1 sub get icols_len 2 index get add
+        icols_len 3 -1 roll put
+      } for
+      
+      {
+        dup 0 eq {pop null} {
+          ~[
+            icols_len 3 -1 roll 1 sub get 
+            /irows construct_execn {
+              exch add pop
+            } ~exec
+          ]
+        } ifelse
+      } execpawns
+    } in_petsc
+  } bind def
+
+  | save icols_length pawn-num | --
+  /condense_recv {
+    {
+      icols_len exch put
+      restore
+    } lock
+  } bind def
+
   | pawn | sub-params...
-  /mat_creators [
+  /mat_creators_get {
     | pawn | n ~sub-irows ~sub-icols
     /sparse {
-      Aval /n get range exch pop
-      Aval /params get /icols get dup class /listclass eq {~exec} if
-      Aval /params get /irows get dup class /listclass eq {~exec} if
+      Aval /n get rangesize
+      Aval /params get /icols get construct_exec
+      Aval /params get /irows get construct_exec
     } bind
 
     | pawn | m n
     /dense {
-      dup  m range exch pop
-      exch n range exch pop
+      dup  m rangesize
+      exch n rangesize
     } bind
-  ] makestruct def
+  } makestruct def
 
   | ... | param-dict
-  /mat_creators_params [
+  /mat_creators_set {
     | ~irows ~icols | param-dict
     /sparse {
-      3 dict dup begin {
+      2 copy condense_sparse
+      2 dict dup begin {
         /icols name
         /irows name
       } stopped end {stop} if
@@ -315,25 +373,52 @@
 
     | -- | param-dictdict
     /dense {0 dict} bind
-  ] makestruct def
+  } makestruct def
 
   | /A .... /type m n | Adict
   | on dpawn: <d data>
   /mat_create {
     {
-                                          /Aval 6 dict def
-                                           Aval /n       put
-                                           Aval /m       put
-                                           Aval /mtype   put
-      mat_creators_params Aval exectype    Aval /params  put
-      mpidata /pawns get 1 sub exch range  Aval /mmax    put   pop
-                                           Aval /id      put
+      /Aval 6 dict def
+      Aval /n       put
+      Aval /m       put
+      Aval /mtype   put mat_creators_set Aval exectype
+      Aval /params  put mpidata /pawns get 1 sub exch range 
+      Aval /mmax    put pop
+      Aval /id      put
       {~[
         Aval /id get
-        3 -1 roll mat_creators Aval exectype
-        Aval gettype mmax ~mat_create
+        3 -1 roll mat_creators_get Aval exectype
+        Aval gettype 
+        ~mat_create
       ]} execpawns
       Aval
+    } in_petsc
+  } bind def
+
+  | -- | ...
+  /mat_fillers {
+    | -- | irows
+    /sparse {
+      Aval /params get /irows get construct_exec
+    } bind
+
+    | -- | N
+    /dense {Aval /n get} bind
+  } makestruct def
+
+  | A ~data | --
+  /mat_fill {
+    {
+      /data name /Aval name
+      ~[
+        Aval getid
+        /data construct_execn
+        Aval /mmax get
+        mat_fillers Aval exectype
+        Aval gettype 
+        ~mat_fill
+      ] sexecpawns
     } in_petsc
   } bind def
 
@@ -341,7 +426,7 @@
   /pmatvecmul {
     {
       2 {getid exch} repeat
-      ~[3 1 roll ~pmatvecmul] sexecpawn
+      ~[3 1 roll ~pmatvecmul] sexecpawns
     } in_petsc
   } bind def
   
@@ -355,7 +440,7 @@
     {/data name /Aval name} in_petsc
   } bind def
 
-  | <d sub-vec> interval_start | --
+  | save <d sub-vec> interval_start | --
   /recv_vector_result {
     {
       data exch 2 index length getinterval copy pop
@@ -363,7 +448,7 @@
     } lock
   } bind def
     
-  | <d sub-vec> interval_start | --
+  | save <d sub-vec> interval_start | --
   /recv_matrix_result {
     {
       data exch 2 index length getinterval copy pop
@@ -375,21 +460,20 @@
   /get_vector {
     {
       vector_result
-      ~[xval getid ~get_vector] sexecpawn
+      ~[xval getid ~get_vector] sexecpawns
       data
     } in_petsc
   } bind def
 
   | A | ...
-  /get_matrixers [
+  /matrixers {
     | A | ~irows
     /sparse {
-      /params get /irows get 
-        dup class /listclass eq {~exec} if
+      /params get /irows get construct_exec
     } bind
     | A | --
     /dense  {pop}
-  ] makestruct def
+  } makestruct def
   
   | A <d data> | <d data>
   /get_matrix {
@@ -399,10 +483,10 @@
         Aval getid 
         Aval /n get 
         Aval /mmax get 
-        Aval get_matrixers Aval exectype
+        Aval matrixers Aval exectype
         Aval gettype
         ~get_matrix
-      ] sexecpawn
+      ] sexecpawns
       data
     } in_petsc
   } bind def
@@ -411,7 +495,7 @@
   /get_matvecmul {
     {
       vector_result
-      ~[exch getid xval getid ~get_matvecmul] sexecpawn
+      ~[exch getid xval getid ~get_matvecmul] sexecpawns
       data
     } in_petsc
   } bind def
@@ -431,42 +515,47 @@
   /ksp_create {
     kspsettings dup used 1 add dict exch {merge
       2 copy /id put
-      ~[3 -1 roll 2 index ~ksp_create] sexecpawn
+      ~[3 -1 roll 2 index ~ksp_create] sexecpawns
     } in_petsc
   } bind def
   
   | x | --
   /vec_destroy {
     {
-      ~[exch getid ~vec_destroy] sexecpawn
+      ~[exch getid ~vec_destroy] sexecpawns
     } in_petsc
   } bind def
   
   | A | --
   /mat_destroy {
     {
-      ~[exch getid ~mat_destroy] sexecpawn
+      ~[exch getid ~mat_destroy] sexecpawns
     } in_petsc
   } bind def
   
   | ksp | --
   /ksp_destroy {
     {
-      ~[exch getid ~ksp_destroy] sexecpawn
+      ~[exch getid ~ksp_destroy] sexecpawns
     } in_petsc
   } bind def
 
   | ksp A x b | --
   /ksp_solve {
     {
-      ~[5 1 roll 4 {getid 4 1 roll} repeat ~ksp_solve] sexecpawn
+      ~[5 1 roll 4 {getid 4 1 roll} repeat ~ksp_solve] sexecpawns
     } in_petsc
   } bind def
   
   | ksp x b | --
   /ksp_resolve {
     {
-      ~[4 1 roll 3 {getid 3 1 roll} repeat null 3 1 roll ~ksp_solve] sexecpawn
+      ~[
+        4 1 roll 3 {getid 3 1 roll} repeat 
+        null 
+        3 1 roll 
+        ~ksp_solve
+      ] sexecpawns
     } in_petsc
   } bind def
 
@@ -474,7 +563,10 @@
   /get_ksp_solve {
     {
       2 index exch vector_result
-      ~[5 1 roll 4 {getid 4 1 roll} repeat ~get_ksp_solve] sexecpawn
+      ~[
+        5 1 roll 4 {getid 4 1 roll} repeat 
+        ~get_ksp_solve
+      ] sexecpawns
       data
     } in_petsc
   } bind def
@@ -483,9 +575,13 @@
   /get_ksp_resolve {
     {
       2 index exch vector_result
-      ~[4 1 roll 
-        3 {getid 3 1 roll} repeat null 3 1 roll ~get_ksp_solve
-      ] sexecpawn
+      ~[
+        4 1 roll 
+        3 {getid 3 1 roll} repeat 
+        null 
+        3 1 roll 
+        ~get_ksp_solve
+      ] sexecpawns
     } in_petsc
   } bind def
   
@@ -498,102 +594,74 @@
   /execrange {
     {/proc name /len name
       {
-        ~[exch len range /proc find dup /listclass eq {/exec find} if]
-      } execpawns
-    } in_petsc
-  } bind def
-
-  | ~icols ~irows | --
-  /condense_sparse {
-    {
-      /irows name /icols name
-      /icols_len mpi /pawns get list def
-      /irows_g mpi /pawns get list def
-      ~[
-        /icols find dup class /listclass eq {~exec} if
-        {/icols name
-          {
-            ~[icols length mpirank {
-              icols_len exch put
-            }] rsend
-          } in_petsc
-        } ~exec
-      ] sexecpawns
-
-      1 1 icols_len length 1 sub {
-        icols_len 1 index 1 sub get icols_len 2 index get add
-        icols_len 3 -1 roll put
-      } for
-      
-      {
-        dup 0 eq {pop {}} {
-          ~[icols_len 3 -1 roll 1 sub get 
-            /irows find dup class /listclass eq {~exec} if {
-              exch add pop
-          } ~exec]
-        } ifelse
+        ~[exch len range /proc construct_execn]
       } execpawns
     } in_petsc
   } bind def
   
   100 dict /petsc_tester name
   /petsc_test {
-    /petsc_tester_ layer petsc_tester begin  {
+    /petsc_tester_ layer petsc_tester begin {
       {
         /petsc_tester_ layer 
         100 dict dup /petsc_tester name begin
-      } sexecpawn
+      } sexecpawns
 
-      5 {/nl name /n0 name
-        0 nl 5 mul /d array copy /matDdata name
-        0 1 nl 1 sub {/row name
-          1 matDdata row 5 mul 5 getinterval 
-          n0 row add dup 5 1 index sub getinterval copy pop
-        } for
-        matDdata
-      } execrange
       /matD dup /dense 5 dup mat_create def
+      {
+        0 matD /MATRIX_M get dup mul /d array copy /matDdata name
+        0 1 matD /MATRIX_M get 1 sub {/row name
+          matDdata row 5 mul 5 getinterval 
+          matD /MATRIX_GM row add 5 1 index sub getinterval
+          1 exch copy pop
+        } for
+      } sexecpawns
+      matD ~matDdata mat_fill
       
-      5 {/d array 5 exch copy /vecxdata name pop vecxdata} execrange
       /vecx dup 5 vec_create def
+      {
+        5 vecx /VECTOR_N get /d array copy /vecxdata name
+      } sexecpawns
+      vecx ~vecxdata vec_fill
 
       5 {/nl name /n0 name
         /matSrows 0 nl 1 add /d array copy def
-        0 n0 1 add 1 n0 nl add {/i name
-          5 i 1 sub sub add dup matSrows i put
+        1 1 matSrows last {/row name
+          5 n0 row add 1 sub sub 
+          matSrows row 1 sub get add
+          matSrows row put
         } for
-        /matScols matSrows dup length 1 sub get /d array def
-        0 1 matScols length 1 sub {/i name
-          
-        } for
-        
-        /matScols  <l 0 1 2 3 4 1 2 3 4 2 3 4 3 4>             def
-        /matSrows  <l 0 5 9 12 14 15>                          def
-        /matSrows  matSrows n0 nl 1 add getinterval            def
-        /matSstart matSrows 0 get                              def
-        /matSsize  matSrows dup length 1 sub get matSstart sub def
-
-        /matScols matScols matSstart matSsize getinterval      def
-        /matSdata 1 matSsize /d array copy                     def
-
-        matSdata
+        /matScols matSrows last get /d array def
+        matScols 0
+        1 1 matSrows last {
+          matSrows exch get 1 index sub
+          5 1 index sub
+          1
+          ramp 
+        } for pop pop
       } execrange
-      ~matScols ~matSrows condense_sparse
       /matS dup ~matSrows ~matScols /sparse 5 dup mat_create def
+      {
+        /matSdata 1 matScols length /d array copy def
+      } sexecpawns
+      matS ~matSdata mat_fill
       
       /kS dup ksp_create def
       /kD dup ksp_create def
-      5 {/nl name /n0 name
-        /vecbdata nl /d array 0 nl 5 n0 sub -1 ramp pop def
-        vecbdata
-      } execrange
+
       /vecb dup 5 vec_create def
-      
+      {
+        /vecbdata vecb /VECTOR_N get /d array
+          0 vecb /VECTOR_N get 5 vecb /VECTOR_GN get sub -1 ramp pop
+        def
+      } sexecpawns
+      vecb ~vecbdata vec_fill
+
+      /vecb2 dup 5 vec_create def
       {
         /vecb2data vecbdata dup length /d array copy 2 mul def
-        vecb2data
       } sexecpawns
-      /vecb2 dup 5 vec_create def
+      vecb2 ~vecb2data vec_fill
       
       /res 5 /d array def
       {matS matD} {/mat name
@@ -610,7 +678,7 @@
       {
         end
         false /petsc_tester_ _layer pop
-      } sexecpawn
+      } sexecpawns
     } stopped end /petsc_tester_ _layer {stop} if
   } bind def
 
@@ -644,6 +712,7 @@
 | } bind def 
 } def
 
+| define on basis of node/pawn type
 dm_type mkact exec
 
 end _module

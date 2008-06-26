@@ -1,3 +1,5 @@
+#line 2 "./dcoder.c.in"
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>

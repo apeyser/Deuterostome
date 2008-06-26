@@ -260,7 +260,7 @@ static BOOLEAN pending(void) {
   if (halt_flag) {
     if (x_1 >= FLOORexecs 
 	&& TAG(x_1) == OP 
-	&& OP_CODE(x_1) == (P) x_op_halt)
+	&& OP_CODE(x_1) == x_op_halt)
       return FALSE;
   }
 
@@ -540,8 +540,8 @@ static P x_op_groupconsole(void) {
     if (CEILexecs < x2) return EXECS_OVF;
     TAG(x1) = OP;
     ATTR(x1) = ACTIVE;
-    OP_NAME(x1) = (P) "stop";
-    OP_CODE(x1) = (P) op_stop;
+    OP_NAME(x1) = "stop";
+    OP_CODE(x1) = op_stop;
     FREEexecs = x2;
   }
   FREEopds = o_1;
@@ -559,8 +559,8 @@ P op_groupconsole(void) {
 
   TAG(x1) = OP;
   ATTR(x1) = ACTIVE;
-  OP_NAME(x1) = (P) "x_groupconsole";
-  OP_CODE(x1) = (P) x_op_groupconsole;
+  OP_NAME(x1) = "x_groupconsole";
+  OP_CODE(x1) = x_op_groupconsole;
   
   TAG(x2) = BOOL;
   ATTR(x2) = (STOPMARK | ACTIVE);

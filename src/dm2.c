@@ -207,8 +207,12 @@ B *makeopdictbase(B *opdefs, P *errc, B **errm, L32 n1)
     *oldFREEvm, *newdict;
 
   oldFREEvm = FREEvm;
-  n = 0; opdef = opdefs;
-  while (OPDEF_CODE(opdef) != 0) { n++; opdef += OPDEFBYTES; };
+  n = 0; 
+  opdef = opdefs;
+  while (OPDEF_CODE(opdef)) { 
+    n++; 
+    opdef += OPDEFBYTES; 
+  };
   if (! n1) n1 = n;
 
   if ((dict = makedict(n1))== (B *)(-1L)) return((B *)(-1L));
@@ -219,7 +223,7 @@ B *makeopdictbase(B *opdefs, P *errc, B **errm, L32 n1)
   for (opdef = opdefs; n; opdef += OPDEFBYTES, n--) {
     OP_NAME(frame) = OPDEF_NAME(opdef);
     OP_CODE(frame) = OPDEF_CODE(opdef);
-    makename(((B *)OP_NAME(frame)),nameframe);
+    makename(((B*) OP_NAME(frame)), nameframe);
     if (!insert(nameframe,dict,frame)) return((B *)(-1L));
   }
   FREEvm = oldFREEvm; 
@@ -472,10 +476,10 @@ B *lookup(B *nameframe, B *dict)
   do { 
     if (key == NAME_KEY(ASSOC_NAME(link)))
       if (matchname(nameframe, ASSOC_NAME(link)))
-        return(ASSOC_FRAME(link));
+        return ASSOC_FRAME(link);
   } while ((link = (B*) ASSOC_NEXT(link)) != (B*) -1L);
 
-  return 0L;
+  return NULL;
 }
 
 /* merge entries in source into sink */
@@ -632,18 +636,21 @@ P exec(L32 turns)
   }
   moveframe(f, o1);
   ATTR(o1) &= ~XMARK; // leave active alone -- might be procedure
-  if ((CLASS(o1)== NAME) && ((ATTR(o1) & TILDE) != 0)) {
-    ATTR(o1) |= ACTIVE;
-    ATTR(o1) &= ~TILDE;
+  switch (CLASS(o1)) {
+    case NAME: case OP:
+      if (ATTR(o1) & TILDE) {
+	ATTR(o1) |= ACTIVE;
+	ATTR(o1) &= ~TILDE;
+      }
   }
 
   FREEopds = o2;
   goto x_t;
 
  e_op:                                /* only C operators for the time! */
-  tmis = (OPER)OP_CODE(f);
+  tmis = OP_CODE(f);
   if ((retc = (*tmis)()) != OK) { 
-    errsource = (B *)OP_NAME(f); 
+    errsource = (B*) OP_NAME(f); 
     return retc; 
   }
   goto x_t;
@@ -665,9 +672,13 @@ P exec(L32 turns)
       else goto e_opd;
     }
   }
-  pullname(f,undfn_buf);  errsource = undfn_buf; return(UNDF);
+  pullname(f,undfn_buf);  
+  errsource = undfn_buf; 
+  return UNDF;
 
- e_er_1:   errsource = exec_err; return(retc);
+ e_er_1:   
+  errsource = exec_err; 
+  return retc;
 }
 
 /*-------------------- tree handling support --------------------------*/
@@ -810,23 +821,25 @@ NB: a dict is relocated in 2 steps: 1 - to the new physical mem loc
 #define MAXDEPTH 50  /* counts depth of object nesting (<= 20) */
 
 DM_INLINE_STATIC BOOLEAN foldsubframe(B* lframe) {
-	switch (CLASS(lframe)) {
-		case OP:
-			makename((B *)OP_NAME(lframe),lframe);
-			ATTR(lframe) |= (BIND | ACTIVE); 
-			return FALSE;
-		case BOX: case NULLOBJ:
-			TAG(lframe) = NULLOBJ; ATTR(lframe) = 0;
-			return FALSE;
-	    case DICT:
-		  if (TYPE(lframe) == OPAQUETYPE) {
-			TAG(lframe) = NULLOBJ; ATTR(lframe) = 0;
-			return FALSE;
-		  }
-		  return TRUE;
-		default:
-			return COMPOSITE(lframe);
-	}
+  switch (CLASS(lframe)) {
+    case OP:
+      makename((B*) OP_NAME(lframe), lframe);
+      ATTR(lframe) |= (BIND | ACTIVE); 
+      return FALSE;
+    case BOX: case NULLOBJ:
+      TAG(lframe) = NULLOBJ; 
+      ATTR(lframe) = 0;
+      return FALSE;
+    case DICT:
+      if (TYPE(lframe) == OPAQUETYPE) {
+	TAG(lframe) = NULLOBJ; 
+	ATTR(lframe) = 0;
+	return FALSE;
+      }
+      return TRUE;
+    default:
+      return COMPOSITE(lframe);
+  }
 }
 
 static B** freemem = NULL;

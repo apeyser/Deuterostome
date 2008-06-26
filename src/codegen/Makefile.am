@@ -79,7 +79,8 @@ edit = sed \
 	-e 's,[@]dmconfdir[@],$(dmconfdir),g' \
 	-e 's,[@]ROLLBITS[@],$(ROLLBITS),g' \
 	-e 's,[@]BYTECORRECT[@],$(BYTECORRECT),g' \
-	-e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g'
+	-e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
+	-e 's,[@]srcdir[@],$(srcdir),g'
 
 paths.h: paths.h.in Makefile
 	rm -f $@ $@.tmp

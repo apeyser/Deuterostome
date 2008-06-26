@@ -60,7 +60,7 @@ P op_last(void) {
       return OPD_CLA;
   }
       
-  if (! n) return UNDF_LAST;
+  if (! n) return RNG_CHK;
   TAG(o_1) = NUM | LONGBIGTYPE; 
   ATTR(o_1) = 0; 
   LONGBIG_VAL(o_1) = n-1;

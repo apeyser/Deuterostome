@@ -42,7 +42,7 @@ typedef L64 P;
 
 typedef W BOOLEAN;
 
-typedef  P  (*OPER)(void);
+typedef P (*OPER)(void);
 
 #ifndef TRUE
 #define TRUE -1

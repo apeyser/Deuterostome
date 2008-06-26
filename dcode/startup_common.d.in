@@ -13,7 +13,7 @@ userdict /toconsole_ known not {/toconsole_ /toconsole find def} if
     ~[exch 3 -1 roll 1 ~index 0 ~put] bind
 } bind def
 
-| [/name...] | dict
+| [/name|num...] | dict == /name0 num, /name1 num+1 ...
 /makeenum {
   dup length dict dup begin
   0 3 -1 roll {
@@ -25,23 +25,35 @@ userdict /toconsole_ known not {/toconsole_ /toconsole find def} if
   end
 } bind def
 
-| [/name val /name2 val2 ...] | dict
+| [/name val /name2 val2 ...] | dict == /name val, /name2 val2 ...
 /makestruct {
-  dup length dup dict dup begin {3 1 roll      | dict [/name val ...] length
-  0 2 3 -1 roll 1 sub {                        | dict [/name val ...] i
-    1 index exch 2 getinterval {} forall def   | dict [/name val ...]
-  } for} stopped end {stop} if
+  dup length dup 2 div dict dup begin {3 1 roll| dict [/name val ...] length
+    0 2 3 -1 roll 1 sub {                      | dict [/name val ...] i
+      1 index exch 2 getinterval {} forall def | dict [/name val ...]
+    } for
+  } stopped end {stop} if
   pop
 } bind def
 
-| val { ~test ~exec ~test2 ~exec2...} | <<anything left by ~execn>>
-/switch {
-  false 0 2 2 index length 1 sub {                 | val {} false i 
-    2 index exch 2 getinterval {} forall exch      | val {} false ~exec ~test
-    4 index exch                                   | val {} false ~exec val ~test
-    exec {3 1 roll pop pop true exit} {pop} ifelse | val {} false
-  } for {exch pop exec} {pop pop} ifelse
+| anything | anything or {proc} ~exec
+/construct_exec {
+  dup active {
+    dup class /listclass eq {~exec} if
+  } if
 } bind def
+
+| anything | anything or {~active}
+/destruct_exec {
+  dup active {
+    dup class /listclass ne {~[exch]} if
+  } if
+} bind def
+
+| /name-for-anything | anything or {proc} ~exec
+/construct_execn {find construct_exec} bind def
+
+| /name-for-anything | anything or {~active}
+/destruct_execn {find destruct_exec} bind def
 
 | these must be in the same order as sigmap in dm-vm.c
 /SIGNALS [

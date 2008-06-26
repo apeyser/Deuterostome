@@ -40,9 +40,11 @@
           - type
           - readonly
           - active
+	  - tilde
           - mkread
           - mkact
           - mkpass
+	  - mktilde
           - ctype
           - parcel
           - text
@@ -71,7 +73,7 @@ P op_checkFPU(void)
 {
   if (o1 > CEILopds) return OPDS_OVF;
   TAG(o1) = BOOL; 
-  ATTR(o1) = 0; 
+  ATTR(o1) = 0;
   BOOL_VAL(o1) = numovf;
   numovf = FALSE;
   FREEopds = o2;
@@ -283,7 +285,7 @@ static P monop(void)
 P op_neg(void)
 {
   P retc;
-  if ((retc = monop()) != OK) return retc;
+  if ((retc = monop())) return retc;
   NEG(o_1);
   return OK;
 }
@@ -291,7 +293,7 @@ P op_neg(void)
 P op_abs(void)
 {
   P retc;
-  if ((retc = monop()) != OK) return retc;
+  if ((retc = monop())) return retc;
   ABS(o_1);
   return OK;
 }
@@ -299,7 +301,7 @@ P op_abs(void)
 P op_sqrt(void)
 {
   P retc;
-  if ((retc = monop()) != OK) return retc;
+  if ((retc = monop())) return retc;
   SQRT(o_1);
   return OK;
 }
@@ -307,7 +309,7 @@ P op_sqrt(void)
 P op_exp(void)
 {
   P retc;
-  if ((retc = monop()) != OK) return retc;
+  if ((retc = monop())) return retc;
   EXP(o_1);
   return OK;
 }
@@ -315,7 +317,7 @@ P op_exp(void)
 P op_ln(void)
 {
   P retc;
-  if ((retc = monop()) != OK) return retc;
+  if ((retc = monop())) return retc;
   LN(o_1);
   return OK;
 }
@@ -323,7 +325,7 @@ P op_ln(void)
 P op_lg(void)
 {
   P retc;
-  if ((retc = monop()) != OK) return retc;
+  if ((retc = monop())) return retc;
   LG(o_1);
   return OK;
 }
@@ -331,7 +333,7 @@ P op_lg(void)
 P op_cos(void)
 {
   P retc;
-  if ((retc = monop()) != OK) return retc;
+  if ((retc = monop())) return retc;
   COS(o_1);
   return OK;
 }
@@ -339,7 +341,7 @@ P op_cos(void)
 P op_sin(void)
 {
   P retc;
-  if ((retc = monop()) != OK) return retc;
+  if ((retc = monop())) return retc;
   SIN(o_1);
   return OK;
 }
@@ -347,7 +349,7 @@ P op_sin(void)
 P op_tan(void)
 {
   P retc;
-  if ((retc = monop()) != OK) return retc;
+  if ((retc = monop())) return retc;
   TAN(o_1);
   return OK;
 }
@@ -355,7 +357,7 @@ P op_tan(void)
 P op_atan(void)
 {
   P retc;
-  if ((retc = monop()) != OK) return retc;
+  if ((retc = monop())) return retc;
   ATAN(o_1);
   return OK;
 }
@@ -363,7 +365,7 @@ P op_atan(void)
 P op_floor(void)
 {
   P retc;
-  if ((retc = monop()) != OK) return retc;
+  if ((retc = monop())) return retc;
   FLOOR(o_1);
   return OK;
 }
@@ -371,7 +373,7 @@ P op_floor(void)
 P op_ceil(void)
 {
   P retc;
-  if ((retc = monop()) != OK) return retc;
+  if ((retc = monop())) return retc;
   CEIL(o_1);
   return OK;
 }
@@ -379,7 +381,7 @@ P op_ceil(void)
 P op_asin(void)
 {
   P retc;
-  if ((retc = monop()) != OK) return retc;
+  if ((retc = monop())) return retc;
   ASIN(o_1);
   return OK;
 }
@@ -387,7 +389,7 @@ P op_asin(void)
 P op_acos(void)
 {
   P retc;
-  if ((retc = monop()) != OK) return retc;
+  if ((retc = monop())) return retc;
   ACOS(o_1);
   return OK;
 }
@@ -643,34 +645,54 @@ P op_vmstatus(void)
  - does not distinguish between system and dynamic operators
 */
 
+DM_INLINE_STATIC P dmnamebind(B* nframe) {  
+  B *xframe, *dframe, *dict;
+
+  if (! ((ATTR(nframe) & (ACTIVE|TILDE)))
+      || ATTR(nframe) & READONLY)
+    return OK;
+
+  xframe = NULL;
+  for (dframe = FREEdicts - FRAMEBYTES; 
+       dframe >= FLOORdicts;
+       dframe -= FRAMEBYTES) { 
+    dict = VALUE_PTR(dframe);
+    if ((xframe = lookup(nframe,dict))) 
+      break;
+  }
+  if (xframe && CLASS(xframe) == OP) {
+    UB attr = ATTR(nframe);
+    moveframe(xframe, nframe);
+    if (attr & TILDE) {
+      ATTR(nframe) |= TILDE;
+      ATTR(nframe) &= ~ACTIVE;
+    }
+  }
+
+  return OK;
+}
+
 // name bind conflicts with socket bind function, changed to dmbind
-DM_INLINE_STATIC P dmbind(B *pframe)
+DM_INLINE_STATIC P dmprocbind(B *pframe)
 {
   P retc; 
-  B *frame, *xframe, *dframe, *dict;
+  B *frame;
 
-  if ((ATTR(pframe) & (READONLY | ACTIVE)) != ACTIVE) return OK;
-  frame = (B *)VALUE_BASE(pframe);
-  while (frame < (B *)LIST_CEIL(pframe)) { 
+  if ((ATTR(pframe) & (READONLY | ACTIVE)) != ACTIVE)
+    return OK;
+
+  for (frame = VALUE_PTR(pframe); 
+       frame < LIST_CEIL_PTR(pframe);
+       frame += FRAMEBYTES) 
     switch(CLASS(frame)) {
       case PROC: 
-        if ((retc = dmbind(frame)) != OK) return retc; 
+        if ((retc = dmprocbind(frame))) return retc; 
         break;
 
       case NAME: 
-        if ((ATTR(frame) & ACTIVE) == 0) break;
-        dframe = FREEdicts - FRAMEBYTES; xframe = 0;
-        while ((dframe >= FLOORdicts) && (xframe == 0L)) { 
-          dict = (B *)VALUE_BASE(dframe);
-          xframe = lookup(frame,dict);
-          dframe -= FRAMEBYTES;
-        }
-        if ((P)xframe > 0 && CLASS(xframe) == OP)
-          moveframes(xframe,frame,1L);
-        break;
+	if ((retc = dmnamebind(frame))) return retc;
+	break;
     }
-    frame += FRAMEBYTES;
-  }
 
   ATTR(pframe) |= READONLY;
   return OK;
@@ -678,9 +700,14 @@ DM_INLINE_STATIC P dmbind(B *pframe)
 
 P op_bind(void)
 {
-  if (o_1 < FLOORopds) return OPDS_UNF;
-  if (CLASS(o_1) != PROC) return OK;
-  return dmbind(o_1);
+  if (o_1 < FLOORopds) 
+    return OPDS_UNF;
+
+  switch (CLASS(o_1)) {
+    case PROC: return dmprocbind(o_1);
+    case NAME: return dmnamebind(o_1);
+    default:   return OK;
+  };
 }
 
 /*------------------------------------------- class
@@ -757,8 +784,9 @@ P op_type(void)
 P op_readonly(void)
 {
   if (o_1 < FLOORopds) return OPDS_UNF;
-  BOOL_VAL(o_1) = ((ATTR(o_1) & READONLY) != 0);
-  TAG(o_1) = BOOL; ATTR(o_1) = 0; 
+  BOOL_VAL(o_1) = (ATTR(o_1) & READONLY) ? TRUE : FALSE;
+  TAG(o_1) = BOOL; 
+  ATTR(o_1) = 0; 
   return OK;
 }
 
@@ -769,8 +797,9 @@ P op_readonly(void)
 P op_active(void)
 {
   if (o_1 < FLOORopds) return OPDS_UNF;
-  BOOL_VAL(o_1) = ((ATTR(o_1) & ACTIVE) != 0);
-  TAG(o_1) = BOOL; ATTR(o_1) = 0;
+  BOOL_VAL(o_1) = (ATTR(o_1) & ACTIVE) ? TRUE : FALSE;
+  TAG(o_1) = BOOL; 
+  ATTR(o_1) = 0;
   return OK;
 }
 
@@ -781,8 +810,9 @@ P op_active(void)
 P op_tilde(void)
 {
   if (o_1 < FLOORopds) return OPDS_UNF;
-  BOOL_VAL(o_1) = ((ATTR(o_1) & TILDE) != 0);
-  TAG(o_1) = BOOL; ATTR(o_1) = 0;
+  BOOL_VAL(o_1) = (ATTR(o_1) & TILDE) ? TRUE : FALSE;
+  TAG(o_1) = BOOL; 
+  ATTR(o_1) = 0;
   return OK;
 }
 
@@ -806,7 +836,9 @@ P op_mkread(void)
 P op_mkact(void)
 {
   if (o_1 < FLOORopds) return OPDS_UNF;
+  if (ATTR(o_1) & READONLY) return OPD_ATR;
   ATTR(o_1) |= ACTIVE;
+  ATTR(o_1) &= ~TILDE;
   return OK;
 }
 
@@ -817,7 +849,20 @@ P op_mkact(void)
 P op_mkpass(void)
 {
   if (o_1 < FLOORopds) return OPDS_UNF;
-  ATTR(o_1) &= (~ACTIVE);
+  if (ATTR(o_1) & READONLY) return OPD_ATR;
+  ATTR(o_1) &= ~(ACTIVE|TILDE);
+  return OK;
+}
+
+/*----------------------------------------- mktilde
+  object | tilded_object
+*/
+
+P op_mktilde(void) {
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (ATTR(o_1) & READONLY) return OPD_ATR;
+  ATTR(o_1) &= ~ACTIVE;
+  ATTR(o_1) |= TILDE; 
   return OK;
 }
 
@@ -942,7 +987,7 @@ P op_text(void)
       break;
 
     case OP: 
-      src = (B *)OP_NAME(o_1); 
+      src = (B*) OP_NAME(o_1); 
       length = strlen((char*)src); 
       break;
 

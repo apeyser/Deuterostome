@@ -338,8 +338,8 @@ DM_INLINE_STATIC P wrap_stop(P retc) {
 
   TAG(x_1) = OP;
   ATTR(x_1) = ACTIVE;
-  OP_NAME(x_1) = (P) "pop";
-  OP_CODE(x_1) = (P) op_pop;
+  OP_NAME(x_1) = "pop";
+  OP_CODE(x_1) = op_pop;
 
   ispending = TRUE;
   return op_stopped();
