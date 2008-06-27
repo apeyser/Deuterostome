@@ -398,6 +398,12 @@ static void SIGINThandler(int sig __attribute__ ((__unused__)) )
   fprintf(stderr, "\n"); // just skipped the current input line
 }
 
+static void SIGQUIThandler(int sig __attribute__ ((__unused__)) )
+{
+  recvd_quit = TRUE;
+  fprintf(stderr, "Received quit signal\n");
+}
+
 void run_dvt_mill(void) {
   P retc;
   B abortframe[FRAMEBYTES], *sf;
@@ -417,6 +423,7 @@ void run_dvt_mill(void) {
 
   setuphandlers(NULL);
   sethandler(SIGINT, SIGINThandler); //override quit on int
+  sethandler(SIGQUIT, SIGQUIThandler); //override quit on quit
 
 /* The system dictionary is created in the workspace of the tiny D machine.
    If the operator 'makeVM' is used to create a large D machine, this larger
