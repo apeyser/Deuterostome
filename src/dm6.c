@@ -836,7 +836,6 @@ P op_mkread(void)
 P op_mkact(void)
 {
   if (o_1 < FLOORopds) return OPDS_UNF;
-  if (ATTR(o_1) & READONLY) return OPD_ATR;
   ATTR(o_1) |= ACTIVE;
   ATTR(o_1) &= ~TILDE;
   return OK;
@@ -849,7 +848,6 @@ P op_mkact(void)
 P op_mkpass(void)
 {
   if (o_1 < FLOORopds) return OPDS_UNF;
-  if (ATTR(o_1) & READONLY) return OPD_ATR;
   ATTR(o_1) &= ~(ACTIVE|TILDE);
   return OK;
 }
@@ -860,7 +858,6 @@ P op_mkpass(void)
 
 P op_mktilde(void) {
   if (o_1 < FLOORopds) return OPDS_UNF;
-  if (ATTR(o_1) & READONLY) return OPD_ATR;
   ATTR(o_1) &= ~ACTIVE;
   ATTR(o_1) |= TILDE; 
   return OK;

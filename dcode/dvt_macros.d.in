@@ -9,7 +9,7 @@
       11 GAP () PRE (Lib) KEY (  Rsync) KEY (  Rsync-del) KEY NL
     
       (Dnode:) PRE (  Setup) KEY (  Connect) KEY (  Talk) KEY NL
-      11 GAP () PRE (Disconnect) KEY (  Shrink) KEY (  Abort) NL
+      11 GAP () PRE (Disconnect) KEY (  Shrink) KEY (  Abort) KEY NL
 @ENABLE_PERL_START@
       (PrintFrom:) PRE (  Talk) KEY (  Ascii) KEY (  PS) KEY
 @ENABLE_XPS_START@    

@@ -1681,7 +1681,12 @@ end mkread def
   ] bind
 } bind def
 
-/basemousedesc 13 dict dup begin | {
+/basemousedesc 15 dict dup begin | {
+  /ignore     [/capslock /numlock] def | ignore for all
+  /macros 1 dict dup begin |{ ignore for macros
+    /ignore [/capslock /numlock /ctrl /shift /alt /super] def |]
+  end def
+
   /click      [/plain /left       mkmousepair] def | all 
   /remove     [/shift /left       mkmousepair] def | theeye
   /scrollUp   [/plain /scrollUp   mkmousepair] def | theeye
@@ -1737,7 +1742,7 @@ end def
     {
       /scrollProp /scrollUp /scrollDown /pageUp /pageDown 
       /click /open /check /remove
-      /cancel /group /map /raise
+      /cancel /group /map /raise /ignore
     } 
     dup length dict 2 index mousepage put 
     {/event name
@@ -1766,19 +1771,25 @@ end def
   
   dup {/mousepage name pop
     mousepage {
-      ~[
+      1 index /ignore eq {
+        dup class /listclass ne {mousekeys exch get} {
+          0 exch {mousekeys exch get or} forall
+        } ifelse not
+      } {
         ~[
-          false 4 -1 roll {
-            dup active {
-              dup class /listclass eq {~exec} if
-            } {
-              (Warning illegal mouse command: ) toconsole _ pop
-            } ifelse
-            {pop true exit} ~if
-          } forall 
-          ~exit
-        ] ~loop
-      ] bind mousepage 3 -1 roll put
+          ~[
+            false 4 -1 roll {
+              dup active {
+                dup class /listclass eq {~exec} if
+              } {
+                (Warning illegal mouse command: ) toconsole _ pop
+              } ifelse
+              {pop true exit} ~if
+            } forall 
+            ~exit
+          ] ~loop
+        ] bind 
+      } ifelse mousepage 3 -1 roll put
     } forall
   } forall
   mkread
@@ -1818,10 +1829,13 @@ end mkmousedict def
 /mouseaction {/actiondict name
   | bottom 8 bits are the modifier keys, bottom 8 of top 16 is mouse button
   | Why? No clear reason.
-  exch dup -16 bitshift /mB name 255 and /mM name | /wintype
-  false mousedict 3 -1 roll get {                     | false /event {}
-    actiondict 2 index known not {pop pop} {
-      exec {exch pop true exit} {pop} ifelse
+  exch dup -16 bitshift /mB name 255 and /mM name   | /wintype
+  mousedict 1 index get /ignore get mM and /mM name | /wintype
+  false mousedict 3 -1 roll get {                   | false /event {}
+    1 index /ignore eq {pop pop} {
+      actiondict 2 index known not {pop pop} {
+        exec {exch pop true exit} {pop} ifelse
+      } ifelse
     } ifelse
   } forall
   {actiondict exch get exec true} {false} ifelse

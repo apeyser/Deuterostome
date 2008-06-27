@@ -16,6 +16,7 @@ DLL_SCOPE P op_continue(void);
 DLL_SCOPE P op_tostderr(void);
 
 DLL_SCOPE void setuphandlers(void (*quithandler)(int sig));
+DLL_SCOPE void sethandler(int sig, void (*handler)(int sig));
 
 // these must be in the same order as sigmap in dm-vm.c
 #define SIGMAP_QUIT  0

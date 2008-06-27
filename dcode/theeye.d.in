@@ -565,7 +565,7 @@ end mkread def
         infoline errormessage dup length 1 sub 0 exch getinterval
         dup toconsole (\n) toconsole
         wid 2 12 4 -1 roll INFOTEXT drawtext   | put err -newline in eye
-        stop
+        dstate_ stop
       } ifelse
     } ifelse
   } stopped end {stop} if

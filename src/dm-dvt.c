@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <signal.h>
 
 #include "dmx.h"
 #if ! X_DISPLAY_MISSING
@@ -44,6 +45,7 @@ P toconsole(B *p, P atmost)
     returns can occur.
  */
 
+static BOOLEAN recvd_quit = FALSE;
 DM_INLINE_STATIC P fromconsole(void)
 {
   P nb, nsbuf, atmost;
@@ -65,12 +67,17 @@ DM_INLINE_STATIC P fromconsole(void)
  rc1:
   if (atmost <= 0) return RNG_CHK;
   if (timeout) return BAD_MSG;
-  nb = read(0, p, atmost);
-  if (nb < 0) {
+  if (abortflag) return ABORT;
+  if ((nb = read(0, p, atmost)) < 0) {
     if ((errno == EAGAIN) || (errno == EINTR)) goto rc1;
     else return -errno;
   }
-  if (nb == 0) {p++; goto ec1;}
+  if (nb == 0) {
+    fprintf(stderr, "Received end-of-stdin\n");
+    recvd_quit = TRUE;
+    p++;
+    goto ec1;
+  }
   p += nb; 
   atmost -= nb;
   if (*(p-1) != '\n') goto rc1;
@@ -272,7 +279,9 @@ static BOOLEAN ispending;
 
 P op_nextevent(void)
 {
-  B bufferf[FRAMEBYTES];
+  static B bufferf[FRAMEBYTES];
+  if (recvd_quit) return QUIT;
+
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
   if (ARRAY_SIZE(o_1) < DVTSTRINGBUFSIZE) return RNG_CHK;
@@ -284,7 +293,7 @@ P op_nextevent(void)
   return nextevent(bufferf);
 }
 
-BOOLEAN pending(void) {return ispending;}
+BOOLEAN pending(void) {return ispending || recvd_quit;}
 
 P clientinput(void) {
   if (x1 >= CEILexecs) return EXECS_OVF;
@@ -307,7 +316,7 @@ BOOLEAN masterinput(P* retc, B* bufferf) {
   moveframe(bufferf, o1);
   FREEopds = o2;
 
-  if ((*retc = fromconsole()) != OK) return TRUE;
+  if ((*retc = fromconsole())) return TRUE;
   if (x1 >= CEILexecs) {
     *retc = EXECS_OVF;
     return TRUE;
@@ -383,6 +392,12 @@ void makeerror(P retc, B* error_source) {
   FREEexecs = x2;
 }
 
+static void SIGINThandler(int sig __attribute__ ((__unused__)) )
+{
+  abortflag = TRUE;
+  fprintf(stderr, "\n"); // just skipped the current input line
+}
+
 void run_dvt_mill(void) {
   P retc;
   B abortframe[FRAMEBYTES], *sf;
@@ -401,6 +416,8 @@ void run_dvt_mill(void) {
   makeDmemory(Dmemory,memsetup);
 
   setuphandlers(NULL);
+  sethandler(SIGINT, SIGINThandler); //override quit on int
+
 /* The system dictionary is created in the workspace of the tiny D machine.
    If the operator 'makeVM' is used to create a large D machine, this larger
    machine inherits the system dictionary of the tiny machine. We memorize
@@ -455,13 +472,14 @@ void run_dvt_mill(void) {
 
   while (1) {
     switch(retc = exec(1000)) {
-      case MORE: case DONE: continue;
+      case MORE: case DONE: continue; 
 
       case QUIT:     
 #if ! X_DISPLAY_MISSING
 	if (dvtdisplay) HXCloseDisplay(dvtdisplay);
 	*displayname = '\0';
 #endif
+	fprintf(stderr, "Quitting...\n");
 	exit(EXIT_SUCCESS);
 
       case ABORT:    

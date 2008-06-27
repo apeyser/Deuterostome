@@ -39,7 +39,7 @@ static void SIGABRThandler(int sig __attribute__ ((__unused__)) )
   abortflag = TRUE;
 }
 
-static void sethandler(int sig, void (*handler)(int sig)) {
+void sethandler(int sig, void (*handler)(int sig)) {
   struct sigaction sa;
   
   sa.sa_handler = handler;

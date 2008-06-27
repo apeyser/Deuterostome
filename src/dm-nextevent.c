@@ -16,6 +16,8 @@
 // and then, in all cases:
 //     pushes the socket on the opstack, and ~socketdead on the exec stack
 P makesocketdead(P retc, P socketfd, B* error_source) {
+  if (retc == QUIT) return QUIT;
+
   if (socketfd == consolesocket) consolesocket = PINF;
   if (retc && retc != LOST_CONN) makeerror(retc, error_source);
 
