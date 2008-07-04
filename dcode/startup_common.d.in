@@ -99,9 +99,14 @@ userdict /toconsole_ known not {/toconsole_ /toconsole find def} if
 
 /line @NAMEBYTES@ 2 mul 20 add /b array def
 
+/nulltypes 3 dict dup begin
+  /T (:socket) def
+  /P (:pid) def
+  /N () def
+end mkread def
+
 /oclasses 12 dict dup begin                      | object
-   /nullclass  { * (null) text } bind def
-   /handleclass {(handle:) fax * object handleid mkact text} bind def
+   /nullclass  { (null) fax nulltypes object type get fax} bind def
    /numclass   { * object * number } bind def
    /opclass    { * (op: ) text * /object find text } bind def
    /nameclass  { /object find active not { * (/) text } if
@@ -274,7 +279,6 @@ dup dup class /arrayclass eq exch type /B eq and
 /objstr @NAMEBYTES@ 2 mul /b array def
 
 /nullclass  { pop (null) ftext } bind def
-/handleclass {pop (null) ftext } bind def
 /numclass   { dup type mkact exec } bind def
 /opclass    { objstr 0 * 4 -1 roll text 0 exch getinterval ftext
             } bind def
