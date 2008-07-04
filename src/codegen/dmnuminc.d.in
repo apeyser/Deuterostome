@@ -9,6 +9,7 @@
 /ROLLBITS @ROLLBITS@ def
 /BYTECORRECT @BYTECORRECT@ def
 /UNROLLS  2 ROLLBITS pwr def
+/ABORTCYCLES UNROLLS 1024 mul 1 sub def
 
 /__   { * exch text} def
 /st__ { st mkact __ } def
@@ -130,7 +131,7 @@ end def
 | (framename) { body_constructor }  | --
 
 /FOR { pushA pushA
-NL (for \(n = \(UP\)ARRAY_SIZE\()__ popA __ (\); n>0; n--\) {)__
+NL (for \(n = \(UP\)ARRAY_SIZE\()__ popA __ (\); n; n--\) {)__
 popA exec
 NL (})__
 } def
@@ -147,16 +148,22 @@ NL (})__
           n__ /= sizeof\()__  popA __ (\);
           if \(n__ > \(UP\)ARRAY_SIZE\()__ peekA __(\)\)
             n__ = \(UP\)ARRAY_SIZE\()__ peekA __(\);
-          for \(n = n__; n > 0; n--\) {)__
+          for \(n = n__; n; n--\) {)__
             1 indexA exec
-          NL (})__
-    NL (})__
-    NL (for \(n = \(\(\(UP\)ARRAY_SIZE\()__ peekA __ (\)-n__\)>>)__
-      ROLLBITS n__  (\); n>0; n--\) {)__
+          NL (}
+    }
+    {
+      P abortcycle = 0;
+      for \(n = \(\(\(UP\)ARRAY_SIZE\()__ peekA __ (\)-n__\)>>)__
+      ROLLBITS n__  (\); 
+            n && \(\(++abortcycle, abortcycle &= )__ 
+                     ABORTCYCLES n__ (\) || ! abortflag\);
+            n--\) {)__
       exchA UNROLLS {peekA exec} repeat exchA
-    NL (})__
-    NL (for \(n = \(\(\(UP\)ARRAY_SIZE\()__ popA __(\)-n__\)&)__
-                UNROLLS 1 sub n__ (\); n>0; n--\) {)__
+    NL (}
+    }
+    for \(n = \(\(\(UP\)ARRAY_SIZE\()__ popA __(\)-n__\)&)__
+                UNROLLS 1 sub n__ (\); n; n--\) {)__
     popA exec
     NL (}})__
 } def
@@ -172,28 +179,34 @@ NL (})__
       }
       n__ /= sizeof\(*)__ fixsource __ (\);
       if \(n__ > n_\) n__ = n_;
-      for \(n = n__; n > 0; n--\) {)__
+      for \(n = n__; n; n--\) {)__
         peekA exec
-      NL (})__
-    NL (})__
-    NL (for \(n = \(\(n_-n__\) >> )__ ROLLBITS n__ (\); n>0; n--\) {)__
+      NL (}
+    }
+    {
+      P abortcycle = 0;
+      for \(n = \(\(n_-n__\) >> )__ ROLLBITS n__ (\); 
+            n && \(\(++abortcycle, abortcycle &= )__ 
+                     ABORTCYCLES n__ (\) || ! abortflag\);
+            n--\) {)__
     UNROLLS {peekA exec} repeat
-    NL (})__
-    NL (for \(n = \(\(n_-n__\) & )__ UNROLLS 1 sub n__
-         (\); n>0; n--\) {)__
+    NL (}
+    }
+    for \(n = \(\(n_-n__\) & )__ UNROLLS 1 sub n__
+         (\); n; n--\) {)__
     popA exec
     NL (}})__ 
 } def
 
 
 /FOR_mod4 { pushA pushA
-NL (for \(n = \(\(UP\)ARRAY_SIZE\()__ popA __ (\)>>2\); n>0; n--\) {)__
+NL (for \(n = \(\(UP\)ARRAY_SIZE\()__ popA __ (\)>>2\); n; n--\) {)__
 popA exec
 NL (})__
 } def
 
 /FOR_mod1 { pushA pushA
-NL (for \(n = \(\(UP\)ARRAY_SIZE\()__ popA __ (\)&3\); n>0; n--\) {)__
+NL (for \(n = \(\(UP\)ARRAY_SIZE\()__ popA __ (\)&3\); n; n--\) {)__
 popA exec
 NL (})__
 } def

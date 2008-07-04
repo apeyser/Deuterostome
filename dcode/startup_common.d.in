@@ -55,16 +55,25 @@ userdict /toconsole_ known not {/toconsole_ /toconsole find def} if
 | /name-for-anything | anything or {~active}
 /destruct_execn {find destruct_exec} bind def
 
-| these must be in the same order as sigmap in dm-vm.c
+| these must be in the same order as sigmap in dm-signals.c
 /SIGNALS [
   /SIGQUIT 
   /SIGKILL
-  /SIGABRT 
   /SIGTERM
   /SIGHUP 
   /SIGINT
   /SIGALRM
   /SIGFPE
+] makeenum def
+
+/OPEN_MODES [
+  /r     | read-only
+  /w     | write-only
+  /wc    | write & create
+  /wcx   | write & create excluse
+  /wt    | write & truncate
+  /wct   | write & create & truncate
+  /wctx  | write & create & truncate excluse
 ] makeenum def
 
 |------------------------ low-level information -------------------------
@@ -90,7 +99,7 @@ userdict /toconsole_ known not {/toconsole_ /toconsole find def} if
 
 /line @NAMEBYTES@ 2 mul 20 add /b array def
 
-/oclasses 11 dict dup begin                      | object
+/oclasses 12 dict dup begin                      | object
    /nullclass  { * (null) text } bind def
    /handleclass {(handle:) fax * object handleid mkact text} bind def
    /numclass   { * object * number } bind def
@@ -109,9 +118,14 @@ userdict /toconsole_ known not {/toconsole_ /toconsole find def} if
    /boolclass  { * object {(true)} {(false)} ifelse text } bind def
    /boxclass   { * (box of ) text
                  * object length * number * ( bytes) text } bind def
+   /streamclass { * (stream: ) text
+                      object closedfd {
+                        * (closed) text object used 1 eq {* (, buffd) text} if
+                      } {* (open) text} ifelse
+                } bind def
 end mkread def
 
-/vclasses 11 dict dup begin                  | value
+/vclasses 12 dict dup begin                  | value
    /nullclass  /_ mkact def
    /handleclass ~_ def
    /numclass   /_ mkact def
@@ -128,6 +142,7 @@ end mkread def
    /markclass  /_ mkact def
    /boolclass  /_ mkact def
    /boxclass   /_ mkact def
+   /streamclass /_ mkact def
 end mkread def
 
 /showobj { dup /object name
@@ -325,6 +340,7 @@ end mkread def
             } bind def
 /boxclass   { pop (null) ftext} bind def | discard a box object
 /markclass  { pop * ([) text } bind def
+/streamclass {pop (null) ftext} bind def
 /boolclass  { {(true)} {(false)} ifelse ftext } bind def
 
 /_stringclass { /obj name

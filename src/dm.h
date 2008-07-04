@@ -148,7 +148,8 @@ extern "C" {
 #define LIST                       ((UB) 0x70)
 #define PROC                       ((UB) 0x70)
 #define DICT                       ((UB) 0x80)
-#define BOX                        ((UB) 0x90)
+#define STREAM                     ((UB) 0x90)
+#define BOX                        ((UB) 0xA0)
 	
 #define COMPOSITE(frame)           ((UB)(CLASS(frame)) > (UB)(MARK))
 
@@ -161,6 +162,8 @@ extern "C" {
 #define DOUBLETYPE                 ((UB) 0x05)
 
 #define SOCKETTYPE                 ((UB) 0x01)      /* null types */
+#define PIDTYPE                    ((UB) 0x02)
+
 #define OPLIBTYPE                  ((UB) 0x02)      /* operator lib type */
 #define OPAQUETYPE                 ((UB) 0x03)      /* opaque dictionary */
 
@@ -277,6 +280,7 @@ extern "C" {
 #define BYTE_VAL(frame)      (*((B*)     PF_PTR(frame,1)))
 #define WORD_VAL(frame)      (*((W*)     PF_PTR(frame,1)))
 #define SOCKET_VAL(frame)    (*((P*)     PF_PTR(frame,1)))
+#define PID_VAL(frame)       (*((pid_t*) PF_PTR(frame,1)))
 
 #define VALUE_BASE(frame)    (*((P *)    PF_PTR(frame,1)))
 #define VALUE_PTR(frame)     (*((B**)    PF_PTR(frame,1)))
@@ -327,6 +331,14 @@ extern "C" {
 #define SBOXBYTES             DALIGN(1*PACK_FRAME)
 #define SBOX_CAP(box)         (*(B **) PF_PTR(box,0))
 
+/*------------------------------------- stream box */
+#define STREAMBOXBYTES         DALIGN(4*PACK_FRAME)
+#define STREAM_FD(fdbox)       (*(int*)     PF_PTR(fdbox,0))
+#define STREAM_BUFFERED(fdbox) (*(BOOLEAN*) PF_PTR(fdbox,1))
+#define STREAM_CHAR(fdbox)     (*(B*)       PF_PTR(fdbox,2))
+#define STREAM_RO(fdbox)       (*(BOOLEAN*) PF_PTR(fdbox,3))
+
+
 /*--------------------------------------------- Internal message codes */
 #include "dm-errs.h"
 
@@ -363,9 +375,9 @@ DLL_SCOPE B serialized;
 
 DLL_SCOPE BOOLEAN halt_flag;          /* execution block due to 'halt'     */
 DLL_SCOPE fd_set sock_fds;
-DLL_SCOPE BOOLEAN timeout;             /* for I/O operations          */
-DLL_SCOPE BOOLEAN abortflag;
-DLL_SCOPE BOOLEAN numovf;             /* FPU overflow status            */
+DLL_SCOPE volatile BOOLEAN timeout; /* for I/O operations          */
+DLL_SCOPE volatile BOOLEAN abortflag;
+DLL_SCOPE volatile BOOLEAN numovf; /* FPU overflow status            */
 DLL_SCOPE BOOLEAN tinymemory;
 DLL_SCOPE P recsocket;
 DLL_SCOPE P maxsocket;
@@ -423,7 +435,10 @@ DLL_SCOPE _dm_const UW ascii[];
 /*----------------------- function prototypes ------------------------*/
 
 /*--- DM1 */
+DLL_SCOPE P tokenize_gen(void);
 DLL_SCOPE P tokenize(B *stringframe);
+DLL_SCOPE B (*getc_func)(P* retc);
+DLL_SCOPE void (*ungetc_func)(P* retc);
 
 /*-- dm-conv.c */
 DLL_SCOPE void moveframe(B *socket, B *dest);
@@ -487,6 +502,7 @@ DLL_SCOPE P op_dict(void);
 DLL_SCOPE P op_cleardict(void);
 DLL_SCOPE P op_array(void);
 DLL_SCOPE P op_list(void);
+DLL_SCOPE P (*usedfd_func)(void);
 DLL_SCOPE P op_used(void);
 DLL_SCOPE P op_length(void); 
 DLL_SCOPE P op_last(void);
@@ -571,6 +587,7 @@ DLL_SCOPE P op_ctype(void);
 DLL_SCOPE P op_parcel(void);
 DLL_SCOPE P op_text(void);
 DLL_SCOPE P op_number(void);
+DLL_SCOPE P (*tokenfd_func)(void);
 DLL_SCOPE P op_token(void);
 DLL_SCOPE P op_search(void);
 DLL_SCOPE P op_anchorsearch(void);

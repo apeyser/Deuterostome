@@ -20,9 +20,9 @@ B locked = FALSE;
 B serialized = FALSE;
 
 fd_set sock_fds;
-BOOLEAN timeout;             /* for I/O operations          */
-BOOLEAN abortflag;
-BOOLEAN numovf;             /* FPU overflow status            */
+volatile BOOLEAN timeout;             /* for I/O operations          */
+volatile BOOLEAN abortflag;
+volatile BOOLEAN numovf;             /* FPU overflow status            */
 BOOLEAN tinymemory;
 P recsocket = -1;
 P maxsocket = 0;            // maxsocket = max(socketfd)+1

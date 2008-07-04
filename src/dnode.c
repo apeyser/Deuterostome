@@ -23,6 +23,10 @@
 #include "dm3.h"
 #include "dqueen.h"
 #include "dm-nextevent.h"
+#include "dm-proc.h"
+#include "dm-glob.h"
+#include "dm-prop.h"
+
 #include "dnode_0.h"
 
 /*----------------- DM global variables -----------------------------*/

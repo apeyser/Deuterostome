@@ -80,11 +80,11 @@
     | n <l irows> <l icols> | A
     /sparse {
       3 -1 roll petsc_mat_sparse_create
-    } bind
+    }
 
     | m n | A
-    /dense ~petsc_mat_dense_create bind
-  } makestruct def
+    /dense ~petsc_mat_dense_create
+  } bind makestruct def
 
   | /A .... /type | --
   /mat_create {
@@ -94,10 +94,10 @@
   | ... | --
   /mat_fillers_set {
     | irows | --
-    /sparse {/irows name} bind
+    /sparse {/irows name}
     | N | --
-    /dense {/N name} bind
-  } makestruct def
+    /dense {/N name}
+  } bind makestruct def
 
   /mat_fillers_get [
     | <d data> | <d row>
@@ -150,20 +150,20 @@
   | ... | --
   /matrixers_set {
     | irows | --
-    /sparse {/irows name} bind
+    /sparse {/irows name}
     | -- | --
     /dense  {}
-  } makestruct def
+  } bind makestruct def
 
   | A | global_interval_start
   /matrixers_get {
     /sparse {
       pop irows row get
-    } bind
+    }
     /dense {
       /MATRIX_GM get row add N mul
-    } bind
-  } makestruct def
+    }
+  } bind makestruct def
   
   | A N mmax ... /type | --
   /get_matrix {
@@ -351,14 +351,14 @@
       Aval /n get rangesize
       Aval /params get /icols get construct_exec
       Aval /params get /irows get construct_exec
-    } bind
+    }
 
     | pawn | m n
     /dense {
       dup  m rangesize
       exch n rangesize
-    } bind
-  } makestruct def
+    }
+  } bind makestruct def
 
   | ... | param-dict
   /mat_creators_set {
@@ -369,11 +369,11 @@
         /icols name
         /irows name
       } stopped end {stop} if
-    } bind
+    }
 
     | -- | param-dictdict
-    /dense {0 dict} bind
-  } makestruct def
+    /dense {0 dict}
+  } bind makestruct def
 
   | /A .... /type m n | Adict
   | on dpawn: <d data>
@@ -401,11 +401,11 @@
     | -- | irows
     /sparse {
       Aval /params get /irows get construct_exec
-    } bind
+    }
 
     | -- | N
-    /dense {Aval /n get} bind
-  } makestruct def
+    /dense {Aval /n get}
+  } bind makestruct def
 
   | A ~data | --
   /mat_fill {
@@ -470,10 +470,10 @@
     | A | ~irows
     /sparse {
       /params get /irows get construct_exec
-    } bind
+    }
     | A | --
     /dense  {pop}
-  } makestruct def
+  } bind makestruct def
   
   | A <d data> | <d data>
   /get_matrix {
@@ -509,7 +509,7 @@
     /ksptype  *
     /kspparam null
     /pcparam  null
-  } makestruct def
+  } bind makestruct def
   
   | /ksp | kspsettings
   /ksp_create {

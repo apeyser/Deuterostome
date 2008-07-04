@@ -540,7 +540,7 @@ P op_restore(void)
     case ARRAY: 
       nb = DALIGN(ARRAY_SIZE(cframe) * VALUEBYTES(TYPE(cframe)));
       if (VALUE_PTR(cframe) > caplevel) VALUE_PTR(cframe) -= offset;
-      cframe += nb + FRAMEBYTES; 
+      cframe += FRAMEBYTES + nb ; 
       break;
 							
     case LIST:  
@@ -593,7 +593,7 @@ P op_restore(void)
       d_rreloc(tdict,(P)tdict,(P)dict);
       moveLBIG((LBIG *)tdict, (LBIG *)dict, DICT_NB(cframe)/sizeof(LBIG));
       FREEvm = tdict - FRAMEBYTES;
-      cframe += DICT_NB(cframe) + FRAMEBYTES; 
+      cframe += FRAMEBYTES + DICT_NB(cframe); 
       break;
 
     case BOX:
@@ -604,7 +604,13 @@ P op_restore(void)
 	else if (SBOX_CAP(box) > savefloor)
 	  SBOX_CAP(box) = savefloor;
       }
-      cframe += BOX_NB(cframe) + FRAMEBYTES; 
+      cframe += FRAMEBYTES + BOX_NB(cframe); 
+      break;
+
+    case STREAM:
+      if (VALUE_PTR(cframe) > caplevel)
+	VALUE_PTR(cframe) -= offset;
+      cframe += FRAMEBYTES + STREAMBOXBYTES;
       break;
 
     default:
@@ -721,16 +727,17 @@ P op_class(void)
   if (o_1 < FLOORopds) return OPDS_UNF;
   switch(CLASS(o_1)) {
     case NULLOBJ:  s = "nullclass"; break;
-    case NUM:   s = "numclass"; break;
-    case OP:    s = "opclass"; break;
-    case NAME:  s = "nameclass"; break;
-    case BOOL:  s = "boolclass"; break;
-    case MARK:  s = "markclass"; break;
-    case ARRAY: s = "arrayclass"; break;
-    case LIST:  s = "listclass"; break;
-    case DICT:  s = "dictclass"; break;
-    case BOX:   s = "boxclass"; break;
-    default: return CORR_OBJ;
+    case NUM:      s = "numclass"; break;
+    case OP:       s = "opclass"; break;
+    case NAME:     s = "nameclass"; break;
+    case BOOL:     s = "boolclass"; break;
+    case MARK:     s = "markclass"; break;
+    case ARRAY:    s = "arrayclass"; break;
+    case LIST:     s = "listclass"; break;
+    case DICT:     s = "dictclass"; break;
+    case BOX:      s = "boxclass"; break;
+    case STREAM:   s = "streamclass"; break;
+    default:       return CORR_OBJ;
   }
   makename((B*)s,o_1);
   return OK;
@@ -750,7 +757,11 @@ P op_type(void)
 
   switch (CLASS(o_1)) {
     case NULLOBJ:
-      *c = (TYPE(o_1) == SOCKETTYPE) ? 'T' : 'N';
+      switch (TYPE(o_1)) {
+	case SOCKETTYPE: *c = 'T'; break;
+	case PIDTYPE:    *c = 'P'; break;
+	default:         *c = 'N'; break;
+      };
       break;
 
     case DICT:
@@ -1058,9 +1069,11 @@ P op_number(void)
 }
 
 /*------------------------------------------ token
-     string | remainder_of_string object true
-              string false
+     string/stream | remainder_of_string/stream object true
+                     string false
 */    
+
+P (*tokenfd_func)(void) = NULL;
 
 P op_token(void)
 {
@@ -1068,10 +1081,27 @@ P op_token(void)
   BOOLEAN bool;
 
   if (o_1 < FLOORopds) return OPDS_UNF;
-  if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
-  if ((retc = tokenize(o_1)) == OK) bool = TRUE;
-  else if (retc == DONE) bool = FALSE;
-  else return retc;
+  switch (TAG(o_1)) {
+    case ARRAY|BYTETYPE:
+      switch ((retc = tokenize(o_1))) {
+	case OK:   bool = TRUE; break;
+	case DONE: bool = FALSE; break;
+	default:   return retc;
+      }
+      break;
+
+    case STREAM: 
+      if (!tokenfd_func) return OPD_CLA;
+      switch ((retc = tokenfd_func())) {
+	case OK:   bool = TRUE;  break;
+	case DONE: bool = FALSE; break;
+	default:   return retc;
+      }
+      break;
+
+    default:
+      return OPD_CLA;
+  };
   if (o1 >= CEILopds) return OPDS_OVF;
 
   TAG(o1) = BOOL; 

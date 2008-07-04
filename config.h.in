@@ -3,6 +3,12 @@
 /* align to this many bytes */
 #undef BYTECORRECT
 
+/* Symbol for glob */
+#undef DM_GLOB_BRACE
+
+/* Symbol for glob */
+#undef DM_GLOB_TILDE
+
 /* Symbol or integer value to use for default port base if dnode not in
    services */
 #undef DM_IPPORT_USERRESERVED

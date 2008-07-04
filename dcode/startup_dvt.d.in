@@ -683,30 +683,30 @@ c_         list all connections
     end
   } bind userdict 3 -1 roll put
 
-| nullsock true/false | --
+| socket aborted | --
   /socketmsg 1024 /b array def
   /socketdead {
-    exch dup null eq {pop} {
-      dvt begin
-      /deadsocket name
-      1 1 nodelist length 1 sub {/knode name
-        nodelist knode get /node name
-        node 2 get deadsocket eq {
-          node 2 get disconnect
-          loadcolor
-          socketmsg 0 [/red] {
-            (** [) fax * knode * number (] Dead connection on: ) fax
-            node 0 get fax (:) fax * node 1 get * number
-            (\n) fax
-          } color_text 0 exch getinterval toconsole
-          nodeclear
-        } if
-      } for
-      check_kbdowner
-      end
-    } ifelse
-  
-    {abort} if
+    dvt begin
+    exch /deadsocket name
+    true 1 1 nodelist length 1 sub {/knode name
+      nodelist knode get /node name
+      node 2 get deadsocket eq {
+        node 2 get disconnect
+        loadcolor
+        socketmsg 0 {/red} mkpass {
+          (** [) fax * knode * number (] Dead connection on ) fax
+          node 0 get fax (:) fax * node 1 get * number
+          (\n) fax
+        } color_text 0 exch getinterval toconsole
+        nodeclear
+        check_kbdowner
+        pop false exit
+      } if
+    } for {
+      (socketdead) ERRORS /DEAD_SOCKET get 
+      socketmsg errormessage toconsole
+    } if ~abort if
+    end
   } bind def
 
   /loadcolor {
@@ -754,9 +754,8 @@ c_         list all connections
     knode 0 ne {
       nodelist knode get /node name
       node 0 get class /nullclass ne {
-        node 2 get /SIGABORT SIGNALS get sendsig
-        nodeclear
-        check_kbdowner
+        node 2 get SIGNALS /SIGINT get sendsig
+        knode setready
       } if
     } if
     end
@@ -1376,7 +1375,7 @@ Xwindows {
       5 xname /y y rowH add def
       newmacros { ] [ } if
     } bind def
-    
+
     /PRE { /s name x line 0 put /ul true def
       wid x y s TEXT drawtext pop xname pop
     } bind def

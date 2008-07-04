@@ -26,6 +26,8 @@
 #include "dm-vm.h"
 #include "dm-dvt.h"
 #include "dm2.h"
+#include "dm-proc.h"
+#include "dm-glob.h"
 
 /*----------------- DM global variables -----------------------------*/
 
@@ -96,7 +98,7 @@ int main(void)
   FD_ZERO(&sock_fds);
 
  /*----------------- include stdin into socket table */ 
-  addsocket(0);                 /* we monitor console input */
+  addsocket(0, 0, TRUE, TRUE, -1); /* we monitor console input */
 
  /*-------------- fire up Xwindows (if there is) -----------------------*/
 #if ! X_DISPLAY_MISSING
@@ -112,7 +114,7 @@ int main(void)
     ncachedfonts = 0;
     dvtgc = HXCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
     xsocket = ConnectionNumber(dvtdisplay);
-    addsocket(xsocket);
+    addsocket(xsocket, 0, FALSE, TRUE, -1);
   }
   else {
     dvtdisplay = NULL;

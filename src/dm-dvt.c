@@ -17,6 +17,8 @@
 #include "dm3.h"
 #include "dm-vm.h"
 #include "dm2.h"
+#include "dm-proc.h"
+#include "dm-signals.h"
 
 static LBIG memsetup[5] = { 1000, 100, 20, 10, 200 };
 
@@ -45,7 +47,7 @@ P toconsole(B *p, P atmost)
     returns can occur.
  */
 
-static BOOLEAN recvd_quit = FALSE;
+static volatile BOOLEAN recvd_quit = FALSE;
 DM_INLINE_STATIC P fromconsole(void)
 {
   P nb, nsbuf, atmost;
@@ -174,28 +176,6 @@ P op_errormessage(void)
   return OK;
 }
 
-/*--------------------------------------- aborted
-   use:  active_object | --
-
-   - pushes boolean FALSE with ABORTMARK attribute on execution stack
-   - pops operand and pushes it on execution stack
-
-*/
-
-P op_aborted(void)
-{
-  if (o_1 < FLOORopds) return OPDS_UNF;
-  if ((ATTR(o_1) & ACTIVE) == 0) return OPD_ATR;
-  if (x3 > CEILexecs) return EXECS_OVF;
-  TAG(x1) = BOOL; 
-  ATTR(x1) = (ABORTMARK | ACTIVE);
-  BOOL_VAL(x1) = FALSE;
-  moveframe(o_1,x2); 
-  FREEopds = o_1;
-  FREEexecs = x3;
-  return OK;
-}
-
 /*--------------------------------------- abort
    - drops execution stack to level above nearest ABORTMARK object (a BOOL)
    - sets the boolean object that carries ABORTMARK to TRUE
@@ -203,15 +183,18 @@ P op_aborted(void)
 
 P op_abort(void)
 {
-  B *frame; 
+  B *frame;
+  abortflag = FALSE;
 
   frame = FREEexecs;
   while ((frame -= FRAMEBYTES) >= FLOORexecs) {
-    if ((ATTR(frame) & ABORTMARK) != 0){ 
+    if (ATTR(frame) & ABORTMARK) {
       BOOL_VAL(frame) = TRUE;
-      FREEexecs = frame + FRAMEBYTES; return OK;
+      FREEexecs = frame + FRAMEBYTES;
+      return OK;
     }
   }
+
   toconsole((B*)"**Execution stack of dvt exhausted!\n", -1L);
   return QUIT;
 }
@@ -413,15 +396,14 @@ void run_dvt_mill(void) {
   B* userdict;
   B* p;
   int sufd;
-  B *Dmemory;
 
-  nb = FRAMEBYTES * (memsetup[0] + memsetup[1] + memsetup[2])
-    + memsetup[3] * 1000000;
-  Dmemory = (B *)malloc(nb+9);
-  if (Dmemory == 0) error(EXIT_FAILURE, 0, "D memory");
-  makeDmemory(Dmemory,memsetup);
+  set_closesockets_atexit();
+  setupfd();
 
-  setuphandlers(NULL);
+  if (makeDmemory(memsetup))
+    error(EXIT_FAILURE, 0, "D memory");
+
+  setuphandlers();
   sethandler(SIGINT, SIGINThandler); //override quit on int
   sethandler(SIGQUIT, SIGQUIThandler); //override quit on quit
 
@@ -482,19 +464,15 @@ void run_dvt_mill(void) {
       case MORE: case DONE: continue; 
 
       case QUIT:     
-#if ! X_DISPLAY_MISSING
-	if (dvtdisplay) HXCloseDisplay(dvtdisplay);
-	*displayname = '\0';
-#endif
 	fprintf(stderr, "Quitting...\n");
 	exit(EXIT_SUCCESS);
 
       case ABORT:    
 	if (x1 < CEILexecs) {
-	  moveframe(abortframe,x1); 
-	  FREEexecs = x2; 
+	  moveframe(abortframe, x1); 
+	  FREEexecs = x2;
 	  continue;
-	};
+	}
 
 	retc = EXECS_OVF; 
 	errsource = (B*)"supervisor"; 

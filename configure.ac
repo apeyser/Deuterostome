@@ -193,6 +193,16 @@ CF_AC_CHECK_HEADER([math.h])
 CF_AC_CHECK_HEADER([stdlib.h])
 CF_AC_CHECK_HEADER([stdio.h])
 CF_AC_CHECK_HEADER([sys/socket.h])
+CF_AC_CHECK_HEADER([glob.h])
+CF_AC_CHECK_SYM([glob.h], [DM], [GLOB_TILDE], [
+#undef _XOPEN_SOURCE
+#undef _POSIX_C_SOURCE
+])
+CF_AC_CHECK_SYM([glob.h], [DM], [GLOB_BRACE], [
+#undef _XOPEN_SOURCE
+#undef _POSIX_C_SOURCE
+])
+CF_AC_CHECK_HEADER([limits.h])
 CF_AC_CHECK_HEADER([sys/un.h])
 CF_AC_CHECK_HEADER([sys/select.h])
 CF_AC_CHECK_HEADER([netinet/in.h])
@@ -307,9 +317,15 @@ AC_CONFIG_LINKS([
   src/codegen/dm2.c:src/dm2.c
   src/codegen/dm2.h:src/dm2.h
   src/codegen/dm3.h:src/dm3.h
+  src/codegen/dm-prop.h:src/dm-prop.h
+  src/codegen/dm-signals.h:src/dm-signals.h
+  src/codegen/dm-vm.h:src/dm-vm.h
   src/codegen/dm-swapbytes.h:src/dm-swapbytes.h
   src/codegen/dm-conv.c:src/dm-conv.c
   src/codegen/dm3.c:src/dm3.c
+  src/codegen/dm-prop.c.in:src/dm-prop.c.in
+  src/codegen/dm-signals.c:src/dm-signals.c
+  src/codegen/dm-vm.c:src/dm-vm.c
   src/codegen/dm4.c:src/dm4.c
   src/codegen/dm5.c:src/dm5.c
   src/codegen/dm6.c:src/dm6.c

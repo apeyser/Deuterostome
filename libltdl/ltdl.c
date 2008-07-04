@@ -1111,7 +1111,7 @@ lt_estrdup (str)
 
 static lt_module
 sys_dl_open (loader_data, filename)
-     lt_user_data loader_data;
+     lt_user_data loader_data __attribute__ ((__unused__));
      const char *filename;
 {
   lt_module   module   = dlopen (filename, LT_GLOBAL | LT_LAZY_OR_NOW);
@@ -1126,7 +1126,7 @@ sys_dl_open (loader_data, filename)
 
 static int
 sys_dl_close (loader_data, module)
-     lt_user_data loader_data;
+     lt_user_data loader_data __attribute__ ((__unused__));
      lt_module module;
 {
   int errors = 0;
@@ -1142,7 +1142,7 @@ sys_dl_close (loader_data, module)
 
 static lt_ptr
 sys_dl_sym (loader_data, module, symbol)
-     lt_user_data loader_data;
+     lt_user_data loader_data __attribute__ ((__unused__));
      lt_module module;
      const char *symbol;
 {
@@ -1967,7 +1967,7 @@ static	lt_dlsymlists_t	       *preloaded_symbols		= 0;
 
 static int
 presym_init (loader_data)
-     lt_user_data loader_data;
+     lt_user_data loader_data __attribute__ ((__unused__));
 {
   int errors = 0;
 
@@ -2008,7 +2008,7 @@ presym_free_symlists ()
 
 static int
 presym_exit (loader_data)
-     lt_user_data loader_data;
+     lt_user_data loader_data __attribute__ ((__unused__));
 {
   presym_free_symlists ();
   return 0;
@@ -2054,7 +2054,7 @@ presym_add_symlist (preloaded)
 
 static lt_module
 presym_open (loader_data, filename)
-     lt_user_data loader_data;
+     lt_user_data loader_data __attribute__ ((__unused__));
      const char *filename;
 {
   lt_dlsymlists_t *lists;
@@ -2104,7 +2104,7 @@ presym_open (loader_data, filename)
 
 static int
 presym_close (loader_data, module)
-     lt_user_data loader_data;
+     lt_user_data loader_data __attribute__ ((__unused__));
      lt_module module;
 {
   /* Just to silence gcc -Wall */
@@ -2114,7 +2114,7 @@ presym_close (loader_data, module)
 
 static lt_ptr
 presym_sym (loader_data, module, symbol)
-     lt_user_data loader_data;
+     lt_user_data loader_data __attribute__ ((__unused__));
      lt_module module;
      const char *symbol;
 {
@@ -2715,7 +2715,7 @@ foreach_dirinpath (search_path, base_name, func, data1, data2)
       {
 	size_t lendir = LT_STRLEN (dir_name);
 
-	if (lendir +1 +lenbase >= filenamesize)
+	if (lendir +1 +lenbase >= (size_t) filenamesize)
 	{
 	  LT_DLFREE (filename);
 	  filenamesize	= lendir +1 +lenbase +1; /* "/d" + '/' + "f" + '\0' */
@@ -2724,7 +2724,7 @@ foreach_dirinpath (search_path, base_name, func, data1, data2)
 	    goto cleanup;
 	}
 
-	assert (filenamesize > lendir);
+	assert ((size_t) filenamesize > lendir);
 	strcpy (filename, dir_name);
 
 	if (base_name && *base_name)
@@ -2800,7 +2800,7 @@ static int
 find_handle_callback (filename, data, ignored)
      char *filename;
      lt_ptr data;
-     lt_ptr ignored;
+     lt_ptr ignored __attribute__ ((__unused__));
 {
   lt_dlhandle  *handle		= (lt_dlhandle *) data;
   int		notfound	= access (filename, R_OK);
@@ -2838,7 +2838,7 @@ find_handle (search_path, base_name, handle)
 static int
 load_deplibs (handle, deplibs)
      lt_dlhandle handle;
-     char *deplibs;
+     char *deplibs __attribute__ ((__unused__));
 {
 #if LTDL_DLOPEN_DEPLIBS
   char	*p, *save_search_path = 0;
@@ -3172,7 +3172,7 @@ try_dlopen (phandle, filename)
 
       /* canonicalize the module name */
       {
-        size_t i;
+        ssize_t i;
         for (i = 0; i < ext - base_name; ++i)
 	  {
 	    if (isalnum ((int)(base_name[i])))
@@ -3217,7 +3217,7 @@ try_dlopen (phandle, filename)
 	    }
 #endif
 #ifdef LTDL_SYSSEARCHPATH
-	  if (!file && sys_search_path)
+	  if (!file && sys_search_path != NULL)
 	    {
 	      file = find_file (sys_search_path, base_name, &dir);
 	    }
@@ -4032,7 +4032,7 @@ lt_dlpath_insertdir (ppath, before, dir)
   if (before)
     {
       assert (*ppath <= before);
-      assert (before - *ppath <= strlen (*ppath));
+      assert ((size_t) (before - *ppath) <= strlen (*ppath));
 
       before = before - *ppath + argz;
     }

@@ -5,11 +5,22 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <errno.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "dm.h"
 #include "dm2.h"
+#include "dm3.h"
 
 /* NOTE: the '~' enjoys some fortuitous encoding */
+
+B (*getc_func)(P* retc);
+void (*ungetc_func)(P* retc);
+
+#define GETC() getc_func(retc)
+#define UNGETC() ungetc_func(retc)
 
 /*--------------- temporary VM space management shared by scanner and
  tokenizer; plus other shared variables  */
@@ -21,15 +32,25 @@ static B *sframe;     /* ->socket string frame                       */
 
 /*--------------- GETC, UNGETC for feeding string object to scanner */
 
-DM_INLINE_STATIC B GETC(void)
+DM_INLINE_STATIC B getc_string(P* retc)
 {
-  if (ARRAY_SIZE(sframe) <= 0L) return(0);
+  if (abortflag) {
+    *retc = ABORT;
+    return 0;
+  }
+
+  if (ARRAY_SIZE(sframe) <= 0L) return 0;
   ARRAY_SIZE(sframe)--; 
   return((*(B *)((VALUE_BASE(sframe))++)) & 0x7F);
 }
 
-DM_INLINE_STATIC void UNGETC(void)
+DM_INLINE_STATIC void ungetc_string(P* retc)
 {
+  if (abortflag) {
+    *retc = ABORT;
+    return;
+  }
+
   ARRAY_SIZE(sframe)++; 
   VALUE_BASE(sframe)--;
 }
@@ -99,134 +120,133 @@ The lower nipple of a numeral type specifies one of:
 */
 
 #define RET_BAD_TOK do {                                                \
-        fprintf(stderr, "Bad Char: %hhx, %c\n",                       \
-                (unsigned char) c, (unsigned char) c);                  \
-        return 3;                                                       \
-    } while (0)
+    fprintf(stderr, "Bad Char: %hhx, %c\n",				\
+	    (unsigned char) c, (unsigned char) c);			\
+    return 3;								\
+  } while (0)
 
-DM_INLINE_STATIC W scan(void)
+DM_INLINE_STATIC W scan(P* retc)
 {
-W kk,type,num;  UW k;
-B c;
+  W kk,type,num;  UW k;
+  B c;
+  *retc = OK;
 
-vm_bytes = 0;
-do {                                              /* white space      */
-                      
-   if (0 == (c = GETC())) return(0);
-   k = ascii[c];
-   if ((k & 0x8001) == 0x8001)                    /* comment          */
-     {
-     do {
-        if (0 == (c = GETC())) return(0);
+  vm_bytes = 0;
+  /* white space      */
+  do {
+    if (0 == (c = GETC())) return 0;
+    k = ascii[c];
+    /* comment          */
+    if ((k & 0x8001) == 0x8001) {
+      do {
+        if (0 == (c = GETC())) return 0;
         k = ascii[c];
-        } while ((k & 0x8002) != 0x8002);         /* til newline      */
-     }
-   }  while (k & 0x8000);
-if ((k & 0x401E) == 0x4000)                       /* numeral          */
-     {
-     type = 0; 
-     do {
-        switch(k & 0x30)
-          {
-          case 0x00: break;
-          case 0x10: type |= 0x2000; break;
-          case 0x20: type |= 0x1000; break;
-          case 0x30: type = (type & 0x30FF) | ((k<<8) & 0xF00) | 0x4000;
-                     goto num_1;
-          }
-        if (vm_free-- == 0) return(1);
-        *(vm_token++) = c; vm_bytes++;
-        if (0 == (c = GETC())) goto num_1;
-        k = ascii[c];
-        if (k == 0) RET_BAD_TOK;
-        } while (k & 0x4000);
-     UNGETC();
-num_1:
-     if (vm_free-- == 0) return(1);
-     *(vm_token++) = '\000'; vm_bytes++;
-     return(type | 0x4);
-     }
-else if ((k & 0x1003) == 0x1000)                 /* /name            */
-     {
-     type = 0x05;
-     if (0 == (c = GETC())) return(2);
-     k = ascii[c];
-     if (k == 0) RET_BAD_TOK;
-     if (((k & 0x0800) == 0) || ((k & 0x403F) == 4000)) return(2);
-     goto name_1; 
-     }
-else if ((k & 0x1003) == 0x1002)                 /* ~                */
-     {
-     type = 0x0105;
-     if (0 == (c = GETC())) return(2);
-     k = ascii[c];
-     if (k == 0) RET_BAD_TOK;
-     if ((k & 0x0404) == 0x0404) return(0x010C); /* ~[               */
-     if (((k & 0x0800) == 0) || ((k & 0x403F) == 4000)) return(2);
-     goto name_1;                                /* ~name            */
-     }
-else if (k & 0x0800)                             /* name             */
-     {
-     type = 0x06;
-name_1:
-     do {
-        if (vm_free-- == 0) return(1);
-        *(vm_token++) = c; vm_bytes++;
-        if (0 == (c = GETC())) goto name_2;;
-        k = ascii[c];
-        if (k == 0) RET_BAD_TOK;
-        } while (k & 0x0800);
-     UNGETC();
-name_2:
-     if (vm_free-- == 0) return(1);
-     *(vm_token++) = '\000'; vm_bytes++;
-     return(type);
-     }
-else if (k & 0x0400)                           /* special            */
-     {
-     kk = (k & 0x7);
-     if (kk == 0)           /* < needs by followed by type specifier */
-          {
-          if (0 == (c = GETC())) return(2);
-          if (((k = ascii[c]) & 0x4030) != 0x4030) return(2);
-          kk = (k<<8) & 0x0F00;
-          }
-     return(kk + 8);
-     }
-else if ((k & 0x0103)  == 0x0100)               /* string  */
-     {
-     if ((vm_free -= FRAMEBYTES) < 0) return(1);
-     vm_token += FRAMEBYTES; vm_bytes += FRAMEBYTES;
-string_1:
-     if (0 == (c = GETC())) return(2);
-     k = ascii[c];
-     if (k == 0) RET_BAD_TOK;
-     if (k == 0x0101) goto string_2;
-     if ((k & 0x1001) == 0x1001)              /* control sequence   */
-        {
-        if (0 == (c = GETC())) return(2);
-        k = ascii[c];
-        if (k == 0) RET_BAD_TOK;
-        if ((k & 0x4040) == 0x4040)
-          {
-          num = c - '0';
-          if (0 == (c = GETC())) return(2);
-          k = ascii[c];
-          if (k == 0) RET_BAD_TOK;
-          if ((k & 0x4040) == 0x4040)
-               {
-               num = 8 * num + c - '0';
-               if (0 == (c = GETC())) return(2);
-               k = ascii[c];
-               if (k == 0) RET_BAD_TOK;
-               if ((k & 0x4040) == 0x4040)
-                  num = 8 * num + c - '0';
-                  else  UNGETC();
-               } else UNGETC();
-          c = num; 
-          }
-        else switch(c)
-          {
+	/* til newline      */
+      } while ((k & 0x8002) != 0x8002);
+    }
+  }  while (k & 0x8000);
+  /* numeral          */
+  if ((k & 0x401E) == 0x4000) {
+    type = 0; 
+    do {
+      switch(k & 0x30) {
+	case 0x00: break;
+	case 0x10: type |= 0x2000; break;
+	case 0x20: type |= 0x1000; break;
+	case 0x30: type = (type & 0x30FF) | ((k<<8) & 0xF00) | 0x4000;
+	  goto num_1;
+      }
+      if (vm_free-- == 0) return 1 ;
+      *(vm_token++) = c; vm_bytes++;
+      if (0 == (c = GETC())) goto num_1;
+      k = ascii[c];
+      if (k == 0) RET_BAD_TOK;
+    } while (k & 0x4000);
+    UNGETC();
+
+  num_1:
+    if (vm_free-- == 0) return 1;
+    *(vm_token++) = '\000'; vm_bytes++;
+    return(type | 0x4);
+  }
+  /* /name            */
+  else if ((k & 0x1003) == 0x1000) {
+    type = 0x05;
+    if (0 == (c = GETC())) return 2;
+    k = ascii[c];
+    if (k == 0) RET_BAD_TOK;
+    if (((k & 0x0800) == 0) || ((k & 0x403F) == 4000)) return(2);
+    goto name_1; 
+  }
+  /* ~                */
+  else if ((k & 0x1003) == 0x1002) {
+    type = 0x0105;
+    if (0 == (c = GETC())) return 2;
+    k = ascii[c];
+    if (k == 0) RET_BAD_TOK;
+    if ((k & 0x0404) == 0x0404) return(0x010C); /* ~[               */
+    if (((k & 0x0800) == 0) || ((k & 0x403F) == 4000)) return(2);
+    goto name_1;                                /* ~name            */
+  }
+  /* name             */
+  else if (k & 0x0800) {
+    type = 0x06;
+  name_1:
+    do {
+      if (vm_free-- == 0) return(1);
+      *(vm_token++) = c; vm_bytes++;
+      if (0 == (c = GETC())) goto name_2;;
+      k = ascii[c];
+      if (k == 0) RET_BAD_TOK;
+    } while (k & 0x0800);
+    UNGETC();
+  name_2:
+    if (vm_free-- == 0) return 1;
+    *(vm_token++) = '\000'; vm_bytes++;
+    return type;
+  }
+  /* special            */
+  else if (k & 0x0400) {
+    kk = (k & 0x7);
+    /* < needs by followed by type specifier */
+    if (kk == 0) {
+      if (0 == (c = GETC())) return 2;
+      if (((k = ascii[c]) & 0x4030) != 0x4030) return(2);
+      kk = (k<<8) & 0x0F00;
+    }
+    return(kk + 8);
+  }
+  /* string  */
+  else if ((k & 0x0103)  == 0x0100) {
+    if ((vm_free -= FRAMEBYTES) < 0) return 1;
+    vm_token += FRAMEBYTES; vm_bytes += FRAMEBYTES;
+  string_1:
+    if (0 == (c = GETC())) return 2;
+    k = ascii[c];
+    if (k == 0) RET_BAD_TOK;
+    if (k == 0x0101) goto string_2;
+    /* control sequence   */
+    if ((k & 0x1001) == 0x1001) {
+      if (0 == (c = GETC())) return 2;
+      k = ascii[c];
+      if (k == 0) RET_BAD_TOK;
+      if ((k & 0x4040) == 0x4040) {
+	num = c - '0';
+	if (0 == (c = GETC())) return 2;
+	k = ascii[c];
+	if (k == 0) RET_BAD_TOK;
+	if ((k & 0x4040) == 0x4040) {
+	  num = 8 * num + c - '0';
+	  if (0 == (c = GETC())) return 2;
+	  k = ascii[c];
+	  if (k == 0) RET_BAD_TOK;
+	  if ((k & 0x4040) == 0x4040)
+	    num = 8 * num + c - '0';
+	  else  UNGETC();
+	} else UNGETC();
+	c = num; 
+      }
+      else switch(c) {
           case 'n':  c = '\n'; break;
           case 'r':  c = '\r'; break;
           case '(':  c = '('; break;
@@ -234,19 +254,20 @@ string_1:
           case '\\': c = '\\'; break;
           case '\n': goto string_1;
           default: if (vm_free-- == 0) return(1);
-                   *(vm_token++) = '\\'; vm_bytes++;
+	    *(vm_token++) = '\\'; vm_bytes++;
                    break;
-          }
-        }      /* of control sequence */
-     if (vm_free-- == 0) return(1);
-     *(vm_token++) = c; vm_bytes++;
-     goto string_1;
-string_2:
-     if (vm_free-- == 0) return(1);
-     *(vm_token++) = '\000'; vm_bytes++;
-     return(7);
-     }
-else RET_BAD_TOK;                               /* garbage            */     
+      }
+    } /* of control sequence */
+    if (vm_free-- == 0) return 1;
+    *(vm_token++) = c; vm_bytes++;
+    goto string_1;
+  string_2:
+    if (vm_free-- == 0) return(1);
+    *(vm_token++) = '\000'; vm_bytes++;
+    return(7);
+  }
+  /* garbage            */     
+  else RET_BAD_TOK;
 }  /* of scanner */
 
 /*--------------------------- Tokenizer ---------------------------------
@@ -312,14 +333,13 @@ to strings or arrays, which are assembled in VM.
         level 0: return, else re-iterate 
 */
 
-P tokenize(B *stringframe)
+P tokenize_gen(void)
 {
   P nframes, nb, arrnum;
   W level, t;
   B *frame, *vm_stoken,  *oldfree;
+  P retc;
 
-  sframe = stringframe; 
-  ATTR(sframe) &= ~PARENT;
   level = 0; 
   oldfree = FREEopds;
 
@@ -330,7 +350,10 @@ P tokenize(B *stringframe)
     FREEopds = oldfree; return(OPDS_OVF); 
   }
   frame = FREEopds;
-  switch((t = scan()) & 0xFF) {
+
+  t = scan(&retc);
+  if (retc) return retc;
+  switch(t & 0xFF) {
     case 0:   if (! level) return DONE; 
               else {FREEopds = oldfree; return PRO_CLO;}
     case 1:   FREEopds = oldfree; return VM_OVF; 
@@ -414,7 +437,9 @@ P tokenize(B *stringframe)
   nb = VALUEBYTES(TYPE(frame));
 
  arrnext:
-  switch((t = scan()) & 0xFF) {
+  t = scan(&retc);
+  if (retc) return retc;
+  switch(t & 0xFF) {
     case 1:   FREEopds = oldfree; return VM_OVF;   /* VM overflow     */
     case 2:   FREEopds = oldfree; return BAD_TOK;  /* scrambled token */
     case 3:   FREEopds = oldfree; return BAD_ASC;  /* garbage stream  */
@@ -488,4 +513,12 @@ P tokenize(B *stringframe)
   goto iterate;
 } /* of tokenizer */
 
+
+P tokenize(B *stringframe) {
+  sframe = stringframe; 
+  ATTR(sframe) &= ~PARENT;
+  getc_func = getc_string;
+  ungetc_func = ungetc_string;
+  return tokenize_gen();
+}
 

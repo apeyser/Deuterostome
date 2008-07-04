@@ -7,7 +7,6 @@ DLL_SCOPE P op_quit(void);
 DLL_SCOPE P toconsole(B *p, P atmost);
 DLL_SCOPE P op_error(void);
 DLL_SCOPE P op_errormessage(void);
-DLL_SCOPE P op_aborted(void);
 DLL_SCOPE P op_abort(void);
 DLL_SCOPE P op_toconsole(void);
 DLL_SCOPE P op_nextevent(void);

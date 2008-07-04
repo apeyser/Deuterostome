@@ -294,6 +294,39 @@ AC_DEFUN([CF_AM_ENABLE], [dnl
     ifelse([$4], , [[$3]], [[$4]]))dnl
 ])
 
+# $1 = headers
+# $2 = prefix
+# $3 = numeric symbols
+# $4... = pre-defines
+# $5 = undefined values
+AC_DEFUN([CF_AC_CHECK_SYM], [dnl
+  AC_MSG_CHECKING([if macro $3 is defined in headers $1])
+  changequote(<<, >>)dnl
+  define(<<CF_AC_CHECK_SYM_DEF>>, <<$2>>_<<$3>>)dnl
+  changequote([, ])dnl
+  incls="$4
+"
+  for incl in [$1] ; do
+    incls="${incls}
+#include <${incl}>
+"
+  done
+  AC_TRY_LINK([${incls}],
+              [double test = (double) $3;],
+	      [cf_ac_check_sym_succ=:],
+	      [cf_ac_check_sym_succ=false])
+  if $cf_ac_check_sym_succ ; then
+    AC_DEFINE(CF_AC_CHECK_SYM_DEF, [$3], [Symbol for glob])
+    AC_MSG_RESULT([defined, defining ]CF_AC_CHECK_SYM_DEF[ as $3]);
+  else
+    AC_DEFINE(CF_AC_CHECK_SYM_DEF, 
+              ifelse([$5], , [0], [$5]), 
+	      [Symbol for glob])
+    AC_MSG_RESULT([not defined, defining ]CF_AC_CHECK_SYM_DEF[ as ]dnl
+ifelse([$5], , [0], [$5]))
+  fi dnl
+])
+
 AC_DEFUN([CF_AC_DEFINE_IF_ENABLED_DEFINE], [dnl
   case "${enable_$2-no}" in
     yes) cf_ac_define_if_enabled_define=1 ;;

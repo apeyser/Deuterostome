@@ -20,24 +20,34 @@
 #include "dm2.h"
 
 /*------------------------------------ used
-  dict | int
+  dict/stream | int
 
 returns number of entries used in a dictionary.
 */
+
+P (*usedfd_func)(void) = NULL;
 
 P op_used(void)
 {
   B *dict; 
   P nd;
-
-  nd = (P)DICTBYTES;
-  if (o_1 < FLOORopds) return(OPDS_UNF);
-  if (CLASS(o_1) != DICT) return(OPD_CLA);
-  dict = (B *)VALUE_BASE(o_1);
-  LONGBIG_VAL(o_1) = (DICT_FREE(dict)-DICT_ENTRIES(dict))/ENTRYBYTES;
-  TAG(o_1) = NUM | LONGBIGTYPE; 
-  ATTR(o_1) = 0;
-  return OK;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  switch (CLASS(o_1)) {
+    case STREAM:
+      if (! usedfd_func) return OPD_CLA;
+      return usedfd_func();
+  
+    case DICT:
+      nd =  DICTBYTES;
+      dict = (B *)VALUE_BASE(o_1);
+      TAG(o_1) = NUM | LONGBIGTYPE; 
+      ATTR(o_1) = 0;
+      LONGBIG_VAL(o_1) = (DICT_FREE(dict)-DICT_ENTRIES(dict))/ENTRYBYTES;
+      return OK;
+      
+    default:
+      return OPD_CLA;
+  }
 }
 
 /*------------------------------------- last
@@ -256,7 +266,7 @@ P op_nextobject(void)
         next = VALUE_PTR(o_1) 
           + DALIGN(ARRAY_SIZE(o_1) * VALUEBYTES(TYPE(o_1))); 
         break;
-
+	
       case LIST: 
         next = LIST_CEIL_PTR(o_1); 
         break;
@@ -265,12 +275,16 @@ P op_nextobject(void)
         next = VALUE_PTR(o_1) + DICT_NB(o_1); 
         break;
 
-       case BOX:  
-         next = VALUE_PTR(o_1) + BOX_NB(o_1); 
-         break;
+      case BOX:  
+	next = VALUE_PTR(o_1) + BOX_NB(o_1); 
+	break;
+
+      case STREAM:
+	next = VALUE_PTR(o_1) + STREAMBOXBYTES;
+	break;
          
-       default: 
-         return OPD_CLA; 
+      default: 
+	return OPD_CLA; 
     }
     if (next >= FREEvm) goto n_neg;
     goto n_pos;

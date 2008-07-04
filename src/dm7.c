@@ -201,7 +201,7 @@ P op_tosystem(void)
     kill(f, SIGKILL);
     return -errno_;
   }
-	else if (r != f) goto wts;
+  else if (r != f) goto wts;
   if (status != 0) return NOSYSTEM;
 	
   FREEopds = o_1;

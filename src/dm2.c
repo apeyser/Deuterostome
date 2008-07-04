@@ -16,7 +16,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <netdb.h>
-
+#include <signal.h>
 
 #include "dm.h"
 #include "paths.h"
@@ -58,38 +58,43 @@ P wrap_hi(B* hival)
 
 B* nextlib(B* frame)
 {
-    if (frame == NULL)
-        frame = CEILvm;
-    else
-        frame += FRAMEBYTES + DICT_NB(frame) + LIBBYTES;
+  if (frame == NULL)
+    frame = CEILvm;
+  else
+    frame += FRAMEBYTES + DICT_NB(frame) + LIBBYTES;
+  
+  while (1) {
+    if (frame >= TOPvm) 
+      return NULL;
     
-  ll_nextdict:
-    if (frame > TOPvm) return NULL;
-    
-    switch (CLASS(frame))
-    {
-        case DICT:
-            if (TYPE(frame) == OPLIBTYPE)
-              return frame;
-            
-            frame += FRAMEBYTES + DICT_NB(frame);
-            goto ll_nextdict;
+    switch (CLASS(frame)) {
+      case DICT:
+	if (TYPE(frame) == OPLIBTYPE)
+	  return frame;
+	
+	frame += FRAMEBYTES + DICT_NB(frame);
+	break;
+	
+      case BOX:
+	frame += FRAMEBYTES + BOX_NB(frame);
+	break;
+	
+      case STREAM:
+	frame += FRAMEBYTES + STREAMBOXBYTES;
+	break;
+        
+      case ARRAY:
+	frame += DALIGN(ARRAY_SIZE(frame) * VALUEBYTES(TYPE(frame)));
+	break;
 
-        case BOX:
-            frame += FRAMEBYTES + BOX_NB(frame);
-            goto ll_nextdict;
-            
-        case ARRAY:
-            frame += DALIGN(ARRAY_SIZE(frame) * VALUEBYTES(TYPE(frame)));
-            goto ll_nextdict;
+      case LIST:
+	frame = (B*) LIST_CEIL(frame);
+	break;
 
-        case LIST:
-            frame = (B*) LIST_CEIL(frame);
-            goto ll_nextdict;
-
-        default:
-          return NULL;
+      default:
+	return NULL;
     };
+  };
 }
 
 static B unknown[] = "** Unknown error";
@@ -571,6 +576,8 @@ BOOLEAN insert(B *nameframe, B *dict, B *framedef)
  of an error, '_errsource' points to a string identifying the instance.
 */
 
+P (*execfd_func)(void) = NULL;
+
 P exec(L32 turns)
 {
   static B fetch_err[] = "fetch phase\n";
@@ -583,30 +590,58 @@ P exec(L32 turns)
 /* ------------------------------------------- test phase */
 
  x_t:
-  if ( FREEexecs <= FLOORexecs) return(DONE);
-  if (turns-- <= 0) return(MORE);
-  if (abortflag) { abortflag = FALSE; return(ABORT); }
+  if (FREEexecs <= FLOORexecs) return DONE;
+  if (turns-- <= 0) return MORE;
+  if (abortflag) { 
+    abortflag = FALSE; 
+    return ABORT;
+  }
 
 /* ---------------------------------------- fetch phase */
  
-  fclass = CLASS(x_1);
-  if (fclass == LIST) goto f_list; 
-  if (fclass == ARRAY) goto f_arr;
-  if (fclass < BOX) { f = x_1; FREEexecs = x_1; goto x_e; }
-  errsource = fetch_err; return(CORR_OBJ);
-
+  switch (fclass = CLASS(x_1)) {
+    case LIST: goto f_list;
+    case ARRAY: goto f_arr;
+    case STREAM: if (execfd_func) goto f_str;
+    // otherwise fall through
+    default:
+      if (fclass < BOX) {
+	f = x_1; 
+	FREEexecs = x_1; 
+	goto x_e; 
+      }
+  };
+  errsource = fetch_err; 
+  return CORR_OBJ;
+  
  f_arr:
-  if (TAG(x_1) == (ARRAY | BYTETYPE)) { 
-    if ((retc = tokenize(x_1)) != OK) { 
-      if (retc == DONE) { 
+  if (TAG(x_1) == (ARRAY | BYTETYPE)) {
+    switch((retc = tokenize(x_1))) {
+      case OK: break;
+      case DONE: 
 	FREEexecs = x_1; 
 	goto x_t; 
-      }
-      errsource = transl_err; return(retc);
+    
+      default:
+	errsource = transl_err; 
+	return retc;
     }
     f = FREEopds = o_1;
-  } 
+  }
   else f = x_1;
+  goto x_e;
+
+ f_str:
+  switch ((retc = execfd_func())) {
+    case OK: break;
+    case DONE: 
+      FREEexecs = x_1;
+      goto x_t;
+    default:
+      errsource = transl_err;
+      return retc;
+  }
+  f = FREEopds = o_1;
   goto x_e;
 
  f_list:
@@ -614,13 +649,14 @@ P exec(L32 turns)
     FREEexecs = x_1; 
     goto x_t; 
   }
-  f = (B *)VALUE_BASE(x_1);
+  f = VALUE_PTR(x_1);
   if ((VALUE_BASE(x_1) += FRAMEBYTES) >= LIST_CEIL(x_1))
     FREEexecs = x_1;
+  goto x_e;
 
 /* -----------------------------------------  execution phase */
  x_e:
-  if ((ATTR(f) & ACTIVE) == 0) goto e_opd;
+  if (! (ATTR(f) & ACTIVE)) goto e_opd;
   if ((fclass = CLASS(f)) == OP) goto e_op;
   if (fclass == NAME) goto e_name;
   if (fclass == NULLOBJ) goto x_t;
@@ -649,9 +685,9 @@ P exec(L32 turns)
 
  e_op:                                /* only C operators for the time! */
   tmis = OP_CODE(f);
-  if ((retc = (*tmis)()) != OK) { 
+  if ((retc = tmis())) {
     errsource = (B*) OP_NAME(f); 
-    return retc; 
+    return retc;
   }
   goto x_t;
 
@@ -821,12 +857,14 @@ NB: a dict is relocated in 2 steps: 1 - to the new physical mem loc
 #define MAXDEPTH 50  /* counts depth of object nesting (<= 20) */
 
 DM_INLINE_STATIC BOOLEAN foldsubframe(B* lframe) {
+  UB oldattr;
   switch (CLASS(lframe)) {
     case OP:
+      oldattr = (ATTR(lframe) & (ACTIVE|TILDE));
       makename((B*) OP_NAME(lframe), lframe);
-      ATTR(lframe) |= (BIND | ACTIVE); 
+      ATTR(lframe) |= (BIND|oldattr);
       return FALSE;
-    case BOX: case NULLOBJ:
+    case BOX: case NULLOBJ: case STREAM:
       TAG(lframe) = NULLOBJ; 
       ATTR(lframe) = 0;
       return FALSE;
@@ -1053,16 +1091,22 @@ P unfoldobj(B *frame, P base, B isnonnative)
            lframe < (B *)LIST_CEIL(frame); 
            lframe += FRAMEBYTES) { 
         if (ATTR(lframe) & BIND) { 
-          dframe = FREEdicts - FRAMEBYTES; xframe = 0L;
-          while ((dframe >= FLOORdicts) && (xframe == 0L)) { 
+          dframe = FREEdicts - FRAMEBYTES; 
+	  xframe = NULL;
+          while ((dframe >= FLOORdicts) && ! xframe) { 
             ldict = (B *)VALUE_BASE(dframe);
-            xframe = lookup(lframe,ldict);//lframe not frame
+            xframe = lookup(lframe, ldict);//lframe not frame
             dframe -= FRAMEBYTES;
           }
-          if ((P)xframe > 0) moveframe(xframe,lframe); 
-          else ATTR(lframe) &= (~BIND); 
+	  if (! xframe || CLASS(xframe) != OP) ATTR(lframe) &= ~BIND;
+          else {
+	    UB oldattr = (ATTR(lframe) & (ACTIVE|TILDE));
+	    moveframe(xframe, lframe);
+	    ATTR(lframe) &= ~(ACTIVE|TILDE);
+	    ATTR(lframe) |= oldattr;
+	  }
           continue;
-        }   
+        }
         if (!COMPOSITE(lframe)) continue;
         if ((retc = unfoldobj(lframe, base, isnonnative)) != OK) return(retc);
       }
@@ -1094,16 +1138,21 @@ P unfoldobj(B *frame, P base, B isnonnative)
         lframe = ASSOC_FRAME(entry);
         if (ATTR(lframe) & BIND) { 
           dframe = FREEdicts - FRAMEBYTES; xframe = 0L;
-          while ((dframe >= FLOORdicts) && (xframe == 0L)) { 
+          while ((dframe >= FLOORdicts) && xframe) { 
             ldict = (B *)VALUE_BASE(dframe);
             xframe = lookup(lframe,ldict);//lframe, not frame
             dframe -= FRAMEBYTES;
           }
 
-          if ((P)xframe > 0) moveframe(xframe,lframe); 
-          else ATTR(lframe) &= (~BIND); 
+          if (! xframe || CLASS(xframe) != OP) ATTR(lframe) &= ~BIND;
+	  else {
+	    UB oldattr = (ATTR(lframe) & (ACTIVE|TILDE));
+	    moveframe(xframe, lframe);
+	    ATTR(lframe) &= ~(ACTIVE|TILDE);
+	    ATTR(lframe) |= oldattr;
+	  }
           continue;
-        } 
+        }
         if (!COMPOSITE(lframe)) continue;
         if ((retc = unfoldobj(lframe,base,isnonnative)) != OK) return(retc);
       }
@@ -1232,9 +1281,16 @@ void setupdirs(void) {
   setupname(&myxname_frame, myxname, FALSE);
 }
 
-void makeDmemory(B *em, LBIG specs[5])
+P makeDmemory(LBIG specs[5])
 {
-  FREEopds = FLOORopds = (B*)(((((size_t) em) >> 3) + 1) << 3);
+  static B* Dmemory = NULL;
+  B* lDmemory 
+    = realloc(Dmemory, ((specs[0] + specs[1] + specs[2]) * FRAMEBYTES
+			+ specs[3] * 1000000 + PACK_FRAME));
+  if (! lDmemory) return MEM_OVF;
+  Dmemory = lDmemory;
+
+  FREEopds = FLOORopds = (B*) DALIGN(Dmemory);
   CEILopds = FLOORopds + specs[0] * FRAMEBYTES;
 
   FLOORexecs = FREEexecs = CEILopds;
@@ -1245,12 +1301,15 @@ void makeDmemory(B *em, LBIG specs[5])
 
   FLOORvm = FREEvm = CEILdicts;
   TOPvm = CEILvm  = FLOORvm + specs[3] * 1000000;
+
+  return OK;
 }
 
 P tosource(B* rootf, BOOLEAN mksave, SourceFunc w1, SourceFunc w2) {
   P retc = OK;
   P nb;
   B* oldFREEvm = FREEvm;
+  UB oldattr;
 
   if (FREEvm + FRAMEBYTES >= CEILvm) return VM_OVF;
   TAG(FREEvm) = BOX;
@@ -1278,8 +1337,9 @@ P tosource(B* rootf, BOOLEAN mksave, SourceFunc w1, SourceFunc w2) {
     break;
 
     case OP:
+      oldattr = (ATTR(rootf) & (ACTIVE|TILDE));
       makename((B*) OP_NAME(rootf), rootf);
-      ATTR(rootf) |= (BIND|ACTIVE);
+      ATTR(rootf) |= (BIND|oldattr);
       //intentional fall through
     case NULLOBJ: case NUM: case BOOL: case MARK: case NAME:
       moveframe(rootf, FREEvm);
@@ -1390,16 +1450,21 @@ P fromsource(B* bufferf, SourceFunc r1, SourceFunc r2) {
     };
 
     case NAME:
-      if ((ATTR(xrootf) & (BIND|ACTIVE)) == (BIND|ACTIVE)) {
+      if (ATTR(xrootf) & BIND) {
 	B* dframe;
 	B* xframe = NULL;
 	for (dframe = FREEdicts - FRAMEBYTES; 
 	     dframe >= FLOORdicts; 
-	     dframe -= FRAMEBYTES) {
+	     dframe -= FRAMEBYTES)
 	  if ((xframe = lookup(xrootf, VALUE_PTR(dframe)))) break;
+
+	if (! xframe || CLASS(xframe) != OP) ATTR(xrootf) &= ~BIND;
+	else {
+	  UB oldattr = (ATTR(xrootf) & (TILDE|ACTIVE));
+	  moveframe(xframe, xrootf);
+	  ATTR(xrootf) &= ~(TILDE|ACTIVE);
+	  ATTR(xrootf) |= oldattr;
 	}
-	if (! xframe) ATTR(xrootf) &= ~BIND;
-	else moveframe(xframe, xrootf);
       }
       // intentional fall through
     case NULLOBJ: case NUM: case BOOL: case MARK:
@@ -1415,5 +1480,28 @@ P fromsource(B* bufferf, SourceFunc r1, SourceFunc r2) {
   if (o1 >= CEILopds) return OPDS_OVF;
   moveframe(irootf, o1);
   FREEopds = o2;
+  return OK;
+}
+
+/*--------------------------------------- aborted
+   use:  active_object | --
+
+   - pushes boolean FALSE with ABORTMARK attribute on execution stack
+   - pops operand and pushes it on execution stack
+
+*/
+
+P op_aborted(void)
+{
+  abortflag = FALSE;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if ((ATTR(o_1) & ACTIVE) == 0) return OPD_ATR;
+  if (x3 > CEILexecs) return EXECS_OVF;
+  TAG(x1) = BOOL; 
+  ATTR(x1) = (ABORTMARK | ACTIVE);
+  BOOL_VAL(x1) = FALSE;
+  moveframe(o_1,x2); 
+  FREEopds = o_1;
+  FREEexecs = x3;
   return OK;
 }

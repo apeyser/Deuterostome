@@ -8,7 +8,7 @@ typedef P (*SourceFunc)(B* buffer, P size);
 DLL_SCOPE P fromsource(B* bufferf, SourceFunc r1, SourceFunc r2);
 DLL_SCOPE P tosource(B* rootf, BOOLEAN mksave, SourceFunc w1, SourceFunc w2);
 
-DLL_SCOPE void makeDmemory(B *em, LBIG specs[5]);
+DLL_SCOPE P makeDmemory(LBIG specs[5]);
 DLL_SCOPE P wrap_hi(B* hival);
 DLL_SCOPE P wrap_libnum(UP libnum);
 DLL_SCOPE B* nextlib(B* frame);
@@ -26,6 +26,7 @@ DLL_SCOPE BOOLEAN matchname(B *nameframe1, B *nameframe2);
 DLL_SCOPE B *lookup(B *nameframe, B *dict);
 DLL_SCOPE BOOLEAN insert(B *nameframe, B *dict, B *framedef);
 DLL_SCOPE BOOLEAN mergedict(B *socket, B *sink);
+DLL_SCOPE P (*execfd_func)(void);
 DLL_SCOPE P exec(L32 turns);
 DLL_SCOPE P foldobj(B *frame);
 DLL_SCOPE P transcribe(B* frame);
@@ -48,5 +49,6 @@ DLL_SCOPE P op_getmyport(void);
 DLL_SCOPE P op_syshi(void);
 DLL_SCOPE P op_syslibnum(void);
 
+DLL_SCOPE P op_aborted(void);
 
 #endif //DM_2_H

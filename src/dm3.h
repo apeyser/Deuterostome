@@ -6,8 +6,8 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 
-DLL_SCOPE P make_socket(UW port, BOOLEAN isseq);
-DLL_SCOPE P make_unix_socket(UW port, BOOLEAN isseq);
+DLL_SCOPE P make_socket(UW port, BOOLEAN isseq, P* retc);
+DLL_SCOPE P make_unix_socket(UW port, BOOLEAN isseq, P* retc);
 DLL_SCOPE P toconsole(B *string, P stringlength);
 DLL_SCOPE P fromsocket(P socket, B* buffer);
 DLL_SCOPE P tosocket(P socket, B* rootf);
@@ -20,22 +20,29 @@ DLL_SCOPE P op_getsocket(void);
 DLL_SCOPE P op_getmyname(void);
 DLL_SCOPE P op_getmyfqdn(void);
 
-DLL_SCOPE P closeonexec(P socket);
-DLL_SCOPE P nocloseonexec(P socket);
-
 DLL_SCOPE P readfd(P fd, B* where, P n, P secs);
 DLL_SCOPE P writefd(P fd, B* where, P n, P secs);
 
 DLL_SCOPE P closeonexec(P socketfd);
 DLL_SCOPE P nocloseonexec(P socketfd);
 
-DLL_SCOPE void addsocket(P socketfd);
-DLL_SCOPE void delsocket(P socketfd);
+DLL_SCOPE P addsocket(P socketfd, 
+		      P unixserverport, 
+		      BOOLEAN protected,
+		      BOOLEAN listener,
+		      P sigfd);
+DLL_SCOPE P delsocket(P socketfd);
+DLL_SCOPE void closesockets(void);
+DLL_SCOPE void set_closesockets_atexit(void);
+DLL_SCOPE void set_unixowner(BOOLEAN state);
+DLL_SCOPE P dm_setsockopts(P fd, P size);
 
 DLL_SCOPE P init_sockaddr(struct sockaddr_in *name, 
 			  const char *hostname, 
 			  UW port);
-DLL_SCOPE UW getportoffset(void);
+
+DLL_SCOPE void forksighandler(P sigsocket, P serverport);
+
 
 #if ! DM_X_DISPLAY_MISSING
 

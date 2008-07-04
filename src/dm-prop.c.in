@@ -1,0 +1,165 @@
+#line 2 "@srcdir@/dm-prop.c.in"
+
+#include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
+#include <errno.h>
+#include <netinet/in.h>
+#include <sys/un.h>
+#include <sys/wait.h>
+#include <netdb.h>
+
+#include "dm-prop.h"
+#include "dm-signals.h"
+#include "paths.h"
+
+/****************** signal redirector ********************/
+
+static P serverport = 0;
+
+__attribute__ ((__noreturn__))
+static void redirector_quit(int sig __attribute__ ((__unused__)) ) {
+  exit(0);
+}
+
+static void redirect_sig(int sig) {
+  if (kill(getppid(), sig))
+    error(EXIT_FAILURE, errno, "redirector unable to signal parent");
+}
+
+static void redirector_exit(void) {
+  struct sockaddr_un name;
+  if (serverport && init_unix_sockaddr(&name, serverport, FALSE))
+    unlink(name.sun_path);
+}
+
+static void handle_redirect(void) {
+  B sig;
+
+  switch (recv(0, &sig, 1, 0)) {
+    case 0:
+      error(1, 0, "redirector received close on recv");
+    case -1:
+      error(EXIT_FAILURE, errno, "redirector recv");
+  };
+
+  propagate_sig(sig, redirect_sig);
+}
+
+int prop_main(void) {
+  fd_set rin, rout;
+  int nfds = 1;
+  int quitsigs[] = {SIGQUIT, SIGTERM, SIGINT, SIGABRT, 0};
+  int *i;
+
+  if (atexit(redirector_exit))
+    error(1, errno, "atexit for redirector");
+
+  for (i = quitsigs; *i; i++) sethandler(*i, redirector_quit);
+
+  FD_ZERO(&rin);
+  FD_SET(0, &rin);
+
+  for (rout = rin; 
+       select(nfds, &rout, NULL, NULL, NULL) != -1
+	 || errno == EINTR;
+       rout = rin)
+    if (FD_ISSET(0, &rout)) handle_redirect();
+
+  error(EXIT_FAILURE, errno, "select failed in redirector");
+  return 1;
+}
+
+#if DM_PROP_MAIN
+int main(void) {return prop_main();}
+#endif //DM_PROP_MAIN
+
+
+__attribute__ ((__noreturn__))
+static void execsighandler(P sigsocket, P serverport_) {
+  serverport = serverport_;
+  if (dup2(sigsocket, 0) == -1) 
+    error(1, errno, "Unable to dup sigsocket %li to stdin", 
+	  (long) sigsocket);
+  if (close(sigsocket))
+    error(1, errno, "Unable to close sigsocket %li", 
+	  (long) sigsocket);
+
+  if (close(1))
+    error(1, errno, "Unable to close stdout");
+
+  execl("@dmprop@", "@dmprop@", NULL);
+  error(1, errno, "Unable to exec: @dmprop@");
+  exit(1);
+}
+  
+/****************** signal redirector ********************/
+
+static pid_t redirector = -1;
+
+static void redirector_killer(void) {
+  if (kill(redirector, SIGTERM)) {
+    error(0, errno, "Killing redirector");
+    return;
+  }
+
+  while (waitpid(redirector, NULL, 0) == -1 
+	 && errno == EINTR);
+}
+
+void spawnsighandler(P sigsocket, P serverport,
+		     void (*set_unixowner_func)(BOOLEAN state),
+		     void (*closesockets_func)(void)) {
+  BOOLEAN subfork = (redirector != -1) ? TRUE : FALSE;
+  switch ((redirector = fork())) {
+    case -1:
+      error(1, errno, "forking for signal redirector");
+
+    case 0:
+      set_unixowner_func(FALSE);
+      closesockets_func();
+      execsighandler(sigsocket, serverport);
+
+    default:
+      if (! subfork && atexit(redirector_killer))
+	error(TRUE, errno, "atexit for signal redirector");
+      close(sigsocket);
+      return;
+  }
+}
+
+
+#if ENABLE_UNIX_SOCKETS
+P init_unix_sockaddr(struct sockaddr_un *name, UW port, BOOLEAN isseq) {
+  char* sock_path = getenv("DMSOCKDIR");
+  memset(name, 0, sizeof(struct sockaddr_un));
+  if (! sock_path || ! *sock_path) sock_path = DMSOCKDIR;
+  if (sock_path[strlen(sock_path)-1] == '/')
+    sock_path[strlen(sock_path)-1] = '\0';
+
+  name->sun_family = AF_UNIX;
+  snprintf(name->sun_path, sizeof(name->sun_path)-1, "%s/dnode-%i-%s",
+           sock_path, port - getportoffset(), isseq ? "seq" : "dgram");
+
+  return OK;
+}
+#endif //ENABLE_UNIX_SOCKETS
+
+static UW portoffset = 0;
+static BOOLEAN portoffset_ = FALSE;
+UW getportoffset(void) {
+    if (! portoffset_) {
+      struct servent* sv;
+      portoffset_ = TRUE;
+      if ((sv = getservbyname("dnode", "tcp")))
+	portoffset = ntohs(sv->s_port);
+      else {
+	if (DM_IPPORT_USERRESERVED != DM_IPPORT_USERRESERVED_STANDARD)
+	  fprintf(stderr, 
+		  "Unusual value for IPPORT_USERRESERVED: %i instead of %i\n",
+		  DM_IPPORT_USERRESERVED, DM_IPPORT_USERRESERVED_STANDARD);
+	portoffset = DM_IPPORT_USERRESERVED;
+      }
+    };
+    return portoffset;
+}

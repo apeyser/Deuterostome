@@ -126,7 +126,8 @@
 /derr_produce {
   gdict {exch bifdef
     dup /errors known not {pop} {
-      /errors get {pop
+      /errors get {
+        (// )__ __ nl
         (#define )__ NAMEBYTES neg exch __w ( \(\(P\) )__ 
         8 derr_num __w (L\))__ nl
         /derr_num derr_num 1 add def
@@ -190,7 +191,7 @@
 /common 2 dict dup begin |[
   /all 2 dict dup begin |[
     /commands [
-      /error /errormessage /abort
+      /error /errormessage /abort /aborted
       /toconsole 
       /pop /exch /dup /copy /index /roll /clear
       /count /cleartomark /counttomark
@@ -272,10 +273,29 @@
       /CLOCK_ERR (** Error accessing clock) def
       /LONG_OVF (** 64 bit integer overflow on load into 32 bit machine) def
       /ILL_RECAP (** Double capsave) def 
+      /READ_ERROR (** Internal Read error) def
+      /UNKNOWN_ERR (** Internal Unknown error) def
       /BUF_OVF (** Internal buffer overflow) def |]
     end def |]
   end def |]
 end def
+
+/proc 1 dict dup begin |[
+  /all 2 dict dup begin |[
+    /commands [
+      /fork /makefd /dupfd /glob /spawn /setenv /getenv
+      /persistfd /pipefd /killpid /waitpid /checkpid
+      /openfd /readfd /suckfd /closedfd /ungetfd
+      /writefd /closefd /lockfd /unlockfd /trylockfd
+    ] def
+    /errors 4 dict dup begin |[
+      /STREAM_CLOSED (*** Operation on closed stream) def
+      /STREAM_DIR (*** operation on wrong direction stream) def
+      /STREAM_EPIPE (*** Stream closed while attempting to write) def
+      /STREAM_OVF (*** double unget on stream) def |]
+    end def |]
+  end def |]
+end def |]
 
 /regex 2 dict dup begin |[
   /DM_ENABLE_REGEX 2 dict dup begin |[
@@ -304,15 +324,22 @@ end def
   end def |]
 end def
 
+/dies 1 dict dup begin |[
+  /all 1 dict dup begin |[
+    /commands [/die] def |]
+  end def |]
+end def
+
 /net 1 dict dup begin |[
   /all 2 dict dup begin |[
     /commands [
       /connect /disconnect /send /getsocket /sendsig
       /getmyname /getmyfqdn
     ] def
-    /errors 2 dict dup begin |[
+    /errors 3 dict dup begin |[
       /LOST_CONN (** Lost connection) def 
       /ILL_SOCK (** Attempted to send a signal to a socket without that capability) def
+      /DEAD_SOCKET (** Dead socket) def |]
       |]
     end def |]
   end def |]
@@ -404,9 +431,8 @@ end def
 /master 3 dict dup begin |[
   /all 2 dict dup begin |[
     /commands [/getmyport /setconsole /console /killsockets /socketdead] def 
-    /errors 2 dict dup begin |[
-      /KILL_SOCKETS (** Internal KILL_SOCKETS return -- should never appear as error) def
-      /DEAD_SOCKET (** Dead socket) def |]
+    /errors 1 dict dup begin |[
+      /KILL_SOCKETS (** Internal KILL_SOCKETS return -- should never appear as error) def |]
     end def |]
   end def
   /DM_ENABLE_RTHREADS 2 dict dup begin  |[
@@ -440,7 +466,7 @@ end def end def
 end def end def
 
 /terminal 1 dict dup begin /all 1 dict dup begin |[
-  /commands [/nextevent /aborted] def |]
+  /commands [/nextevent] def |]
 end def end def
 
 /pawn 1 dict dup begin /all 2 dict dup begin |[
@@ -456,9 +482,9 @@ end def end def
 end def end def
 
 /alltypes [
-  /common /regex /quitable /net /x /node 
+  /common /regex /quitable /proc /net /x /node 
   /xnode /master /plugins /socketevents
-  /terminal /pawn
+  /terminal /pawn /dies
 ] def
 
 /dgendict 1 dict dup begin |[
@@ -466,12 +492,16 @@ end def end def
 end def
 
 /dvtdict 1 dict dup begin |[
-  /parents [/common /net /socketevents /x /terminal /regex /quitable] def |]
+  /parents [
+    /common /net /socketevents /x /terminal /regex 
+    /quitable /proc
+  ] def |]
 end def
 
 /dnodedict 1 dict dup begin |[
   /parents [
-    /common /net  /socketevents /node /x /xnode /master /regex /plugins
+    /common /net /socketevents /node /x /xnode /master /regex /plugins
+    /dies /proc
   ] def |]
 end def
 

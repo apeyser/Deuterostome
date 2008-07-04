@@ -36,19 +36,27 @@ startup_common_save capsave {
 | socket | --
 | default handler just throws away the socket and signals an error
 
-| socket | -- <<error thrown>>
+| socket aborted | -- <<error thrown>>
+/socketmsg 1024 /b array def
 /socketdead {
-  userdict /mpidata known {
-    mpidata /socket known {
+  true 3 -1 roll
+  userdict /mpidata known not {pop} {
+    mpidata /socket known not {pop} {
       mpidata begin {
-        dup socket eq {
-          (** rthreads socket dead\n) toconsole_
+        socket eq a_ (\n) toconsole {
+          socketmsg 0 {/red} mkpass {
+            (On ) fax myname fax ( port ) fax * getmyport * number (: ) fax
+            (** rthreads socket dead\n) fax
+          } color_text 0 exch getinterval toconsole
           kill
+          pop false
         } if
       } stopped end {stop} if
-    } if
-  } if
-  pop myname getmyport (socketdead) ERRORS /DEAD_SOCKET get error
+    } ifelse
+  } ifelse {
+    myname getmyport (socketdead) ERRORS /DEAD_SOCKET get 
+    socketmsg errormessage toconsole
+  } if ~abort if
 } bind def
 
 @ENABLE_RTHREADS_START@

@@ -14,6 +14,8 @@
 #include "dmx.h"
 #include "dm2.h"
 #include "dqueen.h"
+#include "dm-proc.h"
+#include "dm-prop.h"
 
 #if ! X_DISPLAY_MISSING
 #include "xhack.h"
@@ -42,7 +44,6 @@ P op_error(void)
   LBIG e;
   P nb, atmost; 
   B *m, strb[256], *p;
-  P ret;
 
   p = strb; 
   atmost = 255;
@@ -73,7 +74,7 @@ P op_error(void)
   ARRAY_SIZE(o_4) = nb;
   FREEopds = o_3;
   op_toconsole();
-  if ((ret = op_halt()) == DONE) return DONE;
+  if (op_halt() == DONE) return DONE;
 
   nb = dm_snprintf((char*)p, atmost, "** Error in internal halt!\n");
   goto baderror2;
@@ -234,7 +235,7 @@ P op_Xconnect(void)
   ncachedfonts = 0;
   dvtgc = HXCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
   xsocket = ConnectionNumber(dvtdisplay);
-  addsocket(xsocket);
+  addsocket(xsocket, 0, FALSE, TRUE, -1);
   FREEopds = o_1; 
   XSetErrorHandler(xerrorhandler);
   XSetIOErrorHandler(xioerrorhandler);
@@ -305,27 +306,23 @@ DM_INLINE_STATIC P handleserverinput(void) {
   struct sockaddr clientname;
   socklen_t size = sizeof(clientname);
   P newfd; 
-  P psize = PACKET_SIZE;
   P retc;
 
-  if ((newfd = accept(recsocket, &clientname, &size)) == -1)
-    goto ERR;
-  if (setsockopt(newfd, SOL_SOCKET, SO_SNDBUF, (B *)&psize, sizeof(P)) == -1) 
-    goto ERR;
-  if (setsockopt(newfd, SOL_SOCKET, SO_RCVBUF, (B *)&psize, sizeof(P)) == -1)
-    goto ERR;
-  if ((retc = closeonexec(newfd)))
-    goto ERR;
-
-  addsocket(newfd);
-  return OK;
-
-  ERR: {
-    P e = errno;
+  if ((newfd = accept(recsocket, &clientname, &size)) == -1) {
+    P errno_ = -errno;
     delsocket(recsocket);
-    if (newfd != -1) close(newfd);
-    return -e;
+    return errno_;
   }
+
+  if ((retc = dm_setsockopts(newfd, PACKET_SIZE))) {
+    delsocket(recsocket);
+    return retc;
+  }
+  
+  if ((retc = addsocket(newfd, 0, FALSE, TRUE, -1)))
+    return retc;
+    
+  return OK;
 }
 
 BOOLEAN masterinput(P* retc, B* bufferf __attribute__ ((__unused__)) ) {
@@ -415,28 +412,9 @@ P wm_button_press(XEvent* event, B* userdict) {
 #endif //X_DISPLAY_MISSING
 
 P killsockets(void) {
-  int i;
   op_Xdisconnect();
-
-  for (i = 0; i < FD_SETSIZE; ++i)
-    if (FD_ISSET(i, &sock_fds) 
-#if ENABLE_UNIX_SOCKETS
-	&& (i != unixserversocket)
-#endif //ENABLE_UNIX_SOCKETS
-	&& (i != serversocket)) {
-      delsocket(i);
-    }
-
-  if (x1 >= CEILexecs)
-    return EXECS_OVF; 
-
-  TAG(x1) = OP; 
-  ATTR(x1) = ACTIVE;
-  OP_NAME(x1) = "abort"; 
-  OP_CODE(x1) = op_abort;
-  FREEexecs = x2;
-  
-  return OK;
+  closesockets();
+  return ABORT;
 }
 
 /* push on operand stack:
@@ -613,25 +591,6 @@ P clientinput(void) {
   return OK;
 }
 
-/*---------- singnal handler: quit's */
-static void quithandler_(int sig) __attribute__ ((__noreturn__));
-static void quithandler_(int sig) {
-  int i;
-  fprintf(stderr, "Exiting dnode on signal: %i\n", sig);
-#if ! X_DISPLAY_MISSING
-  if (dvtdisplay) {
-    HXCloseDisplay(dvtdisplay); 
-    displayname[0] = '\0';
-  }
-#endif
-    
-  for (i = 0; i < FD_SETSIZE; i++)
-    if (FD_ISSET(i, &sock_fds) && (i != xsocket)) close(i);
-  exit(0);
-}
-
-static void quithandler_exit(void) {quithandler_(0);}
-
 /**********************************************vmreset
  * call right after vmresize, to reset sockets if
  * vmresize failed
@@ -655,7 +614,7 @@ P op_vmresize(void) {
 }
 
 DM_INLINE_STATIC void sock_error(BOOLEAN ex, P errno_, const char* msg) {
-  if (ex && serversocket != -1) close(serversocket);
+  if (ex && serversocket != -1) delsocket(serversocket);
   if (ex && sigsocket != -1) close(sigsocket);
 
 #if ENABLE_UNIX_SOCKETS
@@ -668,152 +627,39 @@ DM_INLINE_STATIC void sock_error(BOOLEAN ex, P errno_, const char* msg) {
   error(ex ? EXIT_FAILURE : 0, errno_, msg);
 }
 
-static pid_t redirector = -1;
-void redirector_killer(void) {
-  if (kill(redirector, SIGTERM)) {
-    error(0, errno, "Killing redirector");
-    return;
-  }
-
-  while (waitpid(redirector, NULL, 0) == -1 
-	 && errno == EINTR);
-  return;
-}
-
-__attribute__ ((__noreturn__))
-static void redirector_quit(int sig __attribute__ ((__unused__)) ) {
-  close(sigsocket);
-#if ENABLE_UNIX_SOCKETS
-  if (unixsigsocket != -1) close(unixsigsocket);
-#endif
-
-  exit(0);
-}
-
-static void redirect_sig(int sig) {
-  if (kill(getppid(), sig))
-    error(EXIT_FAILURE, errno, "redirector unable to signal parent");
-}
-
-static void handle_redirect(P socket) {
-  B sig;
-
-  switch (recv(socket, &sig, 1, 0)) {
-    case 0:
-      error(1, 0, "redirector received close on recv");
-    case -1:
-      error(EXIT_FAILURE, errno, "redirector recv");
-  };
-
-  propagate_sig(sig, redirect_sig);
-}
-
-
-void sethandler(int sig, void (*handler)(int sig)) {
-  struct sigaction sa;
-  
-  sa.sa_handler = handler;
-  sigfillset(&sa.sa_mask);
-  sa.sa_flags = 0;
-  if (sigaction(sig, &sa, NULL))
-    error(1, errno, "Unable to set signal handler for %i", sig);
-}
-
-__attribute__ ((noreturn))
-static void redirectorf(void) {
-  fd_set rin, rout;
-  int nfds = 1;
-  int quitsigs[] = {SIGQUIT, SIGTERM, SIGINT, 0};
-  int *i;
-  for (i = quitsigs; *i; i++) sethandler(*i, redirector_quit);
-
-  FD_ZERO(&rin);
-  FD_SET(sigsocket, &rin);
-#if ENABLE_UNIX_SOCKETS
-  if (unixsigsocket != -1) {
-    nfds++;
-    FD_SET(sigsocket, &rin);
-  }
-#endif // ENABLE_UNIX_SOCKET
-
-  for (rout = rin; 
-       select(nfds, &rout, NULL, NULL, NULL) != -1
-	 || errno == EINTR;
-       rout = rin) {
-    if (FD_ISSET(sigsocket, &rout)) handle_redirect(sigsocket);
-#if ENABLUE_UNIX_SOCKETS
-    if (unixsigsocket != -1 && FD_ISSET(unixsigsocket, &rout))
-      handle_redirect(unixsigsocket);
-#endif //ENABLE_UNIX_SOCKET
-  }
-
-  error(EXIT_FAILURE, errno, "select failed in redirector");
-  exit(1);
-}
-
-static void sig_redirect(void) {
-  redirector = fork();
-  if (redirector == -1) 
-    sock_error(TRUE, errno, "forking for signal redirector");
-  if (redirector) {
-    if (atexit(redirector_killer))
-      sock_error(TRUE, errno, "atexit for signal redirector");
-    
-    close(sigsocket);
-    sigsocket = -1;
-#if ENABLE_UNIX_SOCKETS
-    if (unixsigsocket != -1) close(unixsigsocket);
-    unixsigsocket = -1;
-#endif //ENABLE_UNIX_SOCKETS
-    return;
-  }
-
-  redirectorf();
-}
-
 void run_dnode_mill(void) {
   P retc;
+  B abortframe[FRAMEBYTES];
 
 #if ! X_DISPLAY_MISSING
   defaultdisplay = getenv("DISPLAY");
 #endif
 
-  if ((serversocket = make_socket(serverport, TRUE)) < 0)
-    sock_error(TRUE, errno, "making internet server socket");
-  if ((retc = closeonexec(serversocket)))
-    sock_error(TRUE, -retc, "setting close on exec on server socket");
-  addsocket(serversocket);
-  if (listen(serversocket,5) < 0) 
-    sock_error(TRUE, errno,"listen");
+  set_closesockets_atexit();
+  setupfd();
 
-  if ((sigsocket = make_socket(serverport, FALSE)) < 0)
-    sock_error(TRUE, errno, "making internet signal socket");
-  if ((retc = closeonexec(sigsocket)))
-    sock_error(TRUE, -retc, "setting close on exec on signal socket");
+  if ((serversocket = make_socket(serverport, TRUE, &retc)) == -1)
+    sock_error(TRUE, retc < 0 ? -retc : 0, "making internet server socket");
+
+  if ((sigsocket = make_socket(serverport, FALSE, &retc)) == -1)
+    sock_error(TRUE, retc < 0 ? -retc : 0, "making internet signal socket");
 
 #if ENABLE_UNIX_SOCKETS
-  if ((unixserversocket = make_unix_socket(serverport, TRUE)) < 0) {
-    sock_error(FALSE, errno, "making unix server socket");
+  if ((unixserversocket = make_unix_socket(serverport, TRUE, &retc)) < 0) {
+    sock_error(FALSE, retc < 0 ? -retc : 0, "making unix server socket");
     goto socksdone;
   }
-  else if ((retc = closeonexec(unixserversocket)))
-    sock_error(TRUE, -retc, "setting close on exec on unix server socket");
 
-  addsocket(unixserversocket);
-  if (listen(unixserversocket,5) < 0)
-    sock_error(TRUE,errno,"listen");
-
-  if ((unixsigsocket = make_unix_socket(serverport, FALSE)) < 0)
+  if ((unixsigsocket = make_unix_socket(serverport, FALSE, &retc)) < 0)
     sock_error(FALSE, errno, "making unix signal socket");
-  else if ((retc = closeonexec(unixsigsocket)))
-    sock_error(TRUE, -retc, "setting close on exec on unix signal socket");
 #endif //ENABLE_UNIX_SOCKETS
 
 socksdone:
-  sig_redirect();
-  maketinysetup(quithandler_);
-  if (atexit(quithandler_exit))
-    error(1, errno, "Unable to add quit exit handler");
+#if ENABLE_UNIX_SOCKETS
+  forksighandler(unixsigsocket, serverport);
+#endif //ENABLE_UNIX_SOCKETS
+  forksighandler(sigsocket, 0);
+  maketinysetup();
 #if DM_ENABLE_RTHREADS
   rthreads_init();
 #endif //DM_ENABLE_RTHREADS
@@ -821,6 +667,9 @@ socksdone:
 /*----------------- construct frames for use in execution of D code */
   makename((B*)"error", errorframe); 
   ATTR(errorframe) = ACTIVE;
+
+  makename((B*)"abort",abortframe); 
+  ATTR(abortframe) = ACTIVE;
 
 /*-------------- you are entering the scheduler -------------------*/\
 /* We start with no D code on the execution stack, so we doze
@@ -859,7 +708,18 @@ socksdone:
     }
     switch (retc) {
       case OK: continue;
-      case ABORT: op_abort(); continue;
+      case ABORT: 
+	abortflag = FALSE;
+	if (x1 < CEILexecs) {
+	  moveframe(abortframe, x1);
+	  FREEexecs = x2;
+	  continue;
+	}
+	
+	retc = EXECS_OVF; 
+	errsource = (B*)"supervisor"; 
+	break;
+
       default: break;
     }
 

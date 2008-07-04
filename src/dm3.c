@@ -13,15 +13,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
-#include <sys/un.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <errno.h>
 #include <netdb.h>
-#include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
+#include <fcntl.h>
+#include <signal.h>
 
 #ifndef h_errno
 extern int h_errno;
@@ -31,55 +31,31 @@ extern int h_errno;
 #include "paths.h"
 #include "dm-nextevent.h"
 #include "dm2.h"
+#include "dm-vm.h"
+#include "dmx.h"
+#include "xhack.h"
+#include "dm-signals.h"
+#include "dm-prop.h"
 
 #define SOCK_TIMEOUT (60)
 
 /*---------------------------- support -------------------------------------*/
 
-static UW portoffset = 0;
-static BOOLEAN portoffset_ = FALSE;
-UW getportoffset(void) {
-    if (! portoffset_) {
-      struct servent* sv;
-      portoffset_ = TRUE;
-      if ((sv = getservbyname("dnode", "tcp")))
-	portoffset = sv->s_port;
-      else {
-	if (DM_IPPORT_USERRESERVED != DM_IPPORT_USERRESERVED_STANDARD)
-	  fprintf(stderr, 
-		  "Unusual value for IPPORT_USERRESERVED: %i instead of %i\n",
-		  DM_IPPORT_USERRESERVED, DM_IPPORT_USERRESERVED_STANDARD);
-	portoffset = DM_IPPORT_USERRESERVED;
-      }
-    };
-    return portoffset;
-}
+/*--------------------------- initialize a socket address */
 
+P init_sockaddr(struct sockaddr_in *name, 
+                const char *hostname,
+                UW port)
+{
+  struct hostent *hostinfo;
+  memset(name, 0, sizeof(struct sockaddr_in));
+  name->sin_family = AF_INET;
+  name->sin_port = htons(port);
+  hostinfo = gethostbyname(hostname);
+  if (! hostinfo) return -h_errno;
+  name->sin_addr = *(struct in_addr *) hostinfo->h_addr;
 
-
-// -------- delsocket ---------------------------
-// After a socket has been closed, call delsocket to cleanup maxsocket
-// and recsocket, and clear flag from sock_fds
-void delsocket(P socketfd) {
-  FD_CLR(socketfd, &sock_fds);
-  if (socketfd == maxsocket-1) {
-    P i, j = -1;
-    for (i = 0; i < socketfd; i++)
-      if (FD_ISSET(i, &sock_fds)) j = i;
-    maxsocket = j+1;
-  }
-
-  if (recsocket >= maxsocket) recsocket = maxsocket-1;
-  close(socketfd);
-}
-
-// -------- addsocket -----------------------------
-// After opening a socket, call addsocket to increase maxsocket,
-// care for recsocket, and add socket to sock_fds.
-void addsocket(P socketfd) {
-  FD_SET(socketfd, &sock_fds);
-  if (socketfd >= maxsocket) maxsocket = socketfd+1;
-  if (recsocket < 0) recsocket = socketfd;
+  return OK;
 }
 
 //-------------------------------- set close-on-exec value for sockets
@@ -100,15 +76,137 @@ P nocloseonexec(P socket) {
   return OK;
 }
 
+static struct socketstore {
+  int sock;
+  P unixserverport;
+  P sigfd;
+  struct socketstore* next;
+  struct socketstore* last;
+} *socketstore = NULL, *socketstore_ = NULL;
+
+// -------- delsocket ---------------------------
+// After a socket has been closed, call delsocket to cleanup maxsocket
+// and recsocket, and clear flag from sock_fds
+static BOOLEAN unix_owner = TRUE;
+void set_unixowner(BOOLEAN state) {unix_owner = state;}
+P delsocket(P socketfd) {
+  struct socketstore* next;
+  P retc = OK;
+
+  FD_CLR(socketfd, &sock_fds);
+  if (socketfd == maxsocket-1) {
+    P i, j = -1;
+    for (i = 0; i < socketfd; i++)
+      if (FD_ISSET(i, &sock_fds)) j = i;
+    maxsocket = j+1;
+  }
+
+  if (recsocket >= maxsocket) recsocket = maxsocket-1;
+  if (close(socketfd)) retc = -errno;
+
+  for (next = socketstore_; next; next = next->next) 
+    if (next->sock == socketfd) {
+      if (next->sigfd != -1) close(next->sigfd);
+#if ENABLE_UNIX_SOCKETS
+      if (unix_owner && next->unixserverport > 0) {
+	struct sockaddr_un name;
+	if (init_unix_sockaddr(&name, next->unixserverport, TRUE))
+	  if (unlink(name.sun_path) && ! retc) retc = -errno;
+      }
+#endif //ENABLE_UNIX_SOCKETS
+      if (! next->next)
+	socketstore = next->last;
+      else 
+	next->next->last = next->last;
+      if (! next->last)
+	socketstore_ = next->next;
+      else
+	next->last->next = next->next;
+      free(next);
+      break;
+    }
+
+  return retc;
+}
+
+// -------- addsocket -----------------------------
+// After opening a socket, call addsocket to increase maxsocket,
+// care for recsocket, and add socket to sock_fds.
+P addsocket(P socketfd, 
+	    P unixserverport, 
+	    BOOLEAN protected, 
+	    BOOLEAN listener,
+	    P sigfd) {
+  P retc;
+  struct socketstore* next;
+
+  if (! protected && (retc = closeonexec(socketfd))) {
+    close(socketfd);
+    return retc;
+  }
+
+  if (! protected && sigfd != -1 && (retc = closeonexec(sigfd))) {
+    close(socketfd);
+    close(sigfd);
+    return retc;
+  }
+
+  if (listener) FD_SET(socketfd, &sock_fds);
+  if (socketfd >= maxsocket) maxsocket = socketfd+1;
+  if (recsocket < 0) recsocket = socketfd;
+  
+  if (! protected) {
+    if (! (next
+	   = (struct socketstore*) malloc(sizeof(struct socketstore))))
+      error(1, errno, "Malloc failure creating socketstore");
+
+    next->sock = socketfd;
+    next->sigfd = sigfd;
+    next->unixserverport = unixserverport;
+    next->next = NULL;
+    next->last = socketstore;
+    if (socketstore) socketstore->next = next;
+    else             socketstore_ = next;
+    socketstore = next;
+  }
+
+  return OK;
+}
+
+void closesockets(void) {
+  struct socketstore* next = socketstore_;
+  while (next) {
+    struct socketstore* last = next;
+    next = next->next;
+    delsocket(last->sock);
+  }
+}
+
+static void closedisplay(void) {
+#if ! X_DISPLAY_MISSING
+  if (dvtdisplay) {
+    HXCloseDisplay(dvtdisplay);
+    displayname[0] = '\0';
+    dvtdisplay = NULL;
+  }
+#endif
+}
+
+void set_closesockets_atexit(void) {
+  if (atexit(closesockets))
+    error(1, -errno, "Setting atexit closesockets");
+  if (atexit(closedisplay))
+    error(1, -errno, "Setting atexit closedisplay");
+}
+
+
+
 #if X_DISPLAY_MISSING
 
 P nextXevent(void) {return OK;}
 BOOLEAN moreX(void) {return FALSE;}
 
 #else // if ! X_DISPLAY_MISSING
-
-#include "dmx.h"
-#include "xhack.h"
 
 BOOLEAN moreX(void) {
   return dvtdisplay && HXPending(dvtdisplay);
@@ -334,7 +432,7 @@ P waitsocket(BOOLEAN ispending, fd_set* out_fds) {
   if ((nact = select(maxsocket, &read_fds, NULL, &err_fds, 
 		     ispending ? &zerosec : NULL)) == -1) {
     if (errno == EINTR) return NEXTEVENT_NOEVENT;
-    error(EXIT_FAILURE, -errno, "select");
+    error(EXIT_FAILURE, errno, "select");
   }
 
 #if ! X_DISPLAY_MISSING
@@ -422,118 +520,74 @@ P writefd(P fd, B* where, P n, P secs) {
   return writefd_(fd, where, n, secs);
 }
 
-/*--------------------------- initialize a socket address */
-
-P init_sockaddr(struct sockaddr_in *name, 
-                const char *hostname,
-                UW port)
-{
-  struct hostent *hostinfo;
-  memset(name, 0, sizeof(struct sockaddr_in));
-  name->sin_family = AF_INET;
-  name->sin_port = htons(port);
-  hostinfo = gethostbyname(hostname);
-  if (hostinfo == 0) return(-h_errno);
-  name->sin_addr = *(struct in_addr *) hostinfo->h_addr;
-
-  return OK;
-}
-
-#if ENABLE_UNIX_SOCKETS
-P init_unix_sockaddr(struct sockaddr_un *name, UW port, BOOLEAN isseq) {
-  char* sock_path = getenv("DMSOCKDIR");
-  memset(name, 0, sizeof(struct sockaddr_un));
-  if (! sock_path || ! *sock_path) sock_path = DMSOCKDIR;
-  if (sock_path[strlen(sock_path)-1] == '/')
-    sock_path[strlen(sock_path)-1] = '\0';
-
-  name->sun_family = AF_UNIX;
-  snprintf(name->sun_path, sizeof(name->sun_path)-1, "%s/dnode-%i-%s",
-           sock_path, port - getportoffset(), isseq ? "seq" : "dgram");
-
-  return OK;
-}
-#endif //ENABLE_UNIX_SOCKETS
-
 /*--------------------------- make a server socket */
 
-P make_socket(UW port, BOOLEAN isseq)
+P make_socket(UW port, BOOLEAN isseq, P* retc)
 {
   P sock;
-  P size = isseq ? PACKET_SIZE : 1;
   struct sockaddr_in name;
   memset(&name, 0, sizeof(struct sockaddr_in));
 
-  if ((sock = socket(PF_INET, isseq ? SOCK_STREAM : SOCK_DGRAM, 0)) < 0)
-    return -1;
-
-  if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &size, sizeof(P)) == -1
-      || setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &size, sizeof(P)) == -1) {
-    close(sock);
+  if ((sock = socket(PF_INET, isseq ? SOCK_STREAM : SOCK_DGRAM, 0)) < 0) {
+    *retc = -errno;
     return -1;
   }
+
+  if ((*retc = dm_setsockopts(sock, isseq ? PACKET_SIZE : 1)))
+    return -1;
 
   name.sin_family = AF_INET;
   name.sin_port = htons(port);
   name.sin_addr.s_addr = htonl(INADDR_ANY);
-  if (bind(sock, (struct sockaddr *) &name, sizeof(name)) < 0)
-    return(-1);
-  return(sock);
-}
-
-#if ENABLE_UNIX_SOCKETS
-typedef struct port_list {
-  UW port;
-  BOOLEAN isseq;
-  struct port_list* next;
-} port_list;
-static port_list* ports_first = NULL;
-static port_list* ports_last = NULL;
-
-DM_INLINE_STATIC void unlink_socketfile(void) {
-  struct sockaddr_un name;
-  port_list* i;
-  for (i = ports_first; i; i = i->next)
-    if (init_unix_sockaddr(&name, i->port, i->isseq) >= 0)
-      unlink(name.sun_path);
-}
-
-void set_atexit_socks(P port, BOOLEAN isseq) {
-  if (! ports_first) {
-    if (atexit(unlink_socketfile))
-      error(EXIT_FAILURE, 0, "Can't set exit function");
-    ports_last = ports_first = malloc(sizeof(port_list));
-  }
-  else {
-    if (! (ports_last->next = malloc(sizeof(port_list))))
-      error(EXIT_FAILURE, errno, "Mem alloc error");
-    ports_last = ports_last->next;
-  };
-  ports_last->port = port;
-  ports_last->isseq = isseq;
-  ports_last->next = NULL;
-}
-
-P make_unix_socket(UW port, BOOLEAN isseq) {
-  char* sock_dir; char* i;
-  P sock;
-  P size = isseq ? PACKET_SIZE : 1;
-  struct sockaddr_un name;
-  struct stat buf;
-  mode_t mask;
-  
-  if (init_unix_sockaddr(&name, port, isseq) != OK) return -1;
-  if ((sock = socket(PF_UNIX, isseq ? SOCK_STREAM : SOCK_DGRAM, 0)) < 0) 
+  if (bind(sock, (struct sockaddr *) &name, sizeof(name)) < 0) {
+    *retc = -errno;
     return -1;
+  }
 
-  if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &size, sizeof(P)) == -1
-      || setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &size, sizeof(P)) == -1) {
+  if (isseq) {
+    if (listen(sock, 5) < 0) {
+      *retc = -errno;
+      close(sock);
+      return -1;
+    }
+    if((*retc = addsocket(sock, 0, FALSE, TRUE, -1))) {
+      close(sock);
+      return -1;
+    }
+  }
+  else if ((*retc = closeonexec(sock))) {
     close(sock);
     return -1;
   }
 
+  return sock;
+}
+
+#if ENABLE_UNIX_SOCKETS
+
+P make_unix_socket(UW port, BOOLEAN isseq, P* retc) {
+  char* sock_dir; char* i;
+  P sock;
+  struct sockaddr_un name;
+  struct stat buf;
+  mode_t mask;
+  
+  if ((*retc = init_unix_sockaddr(&name, port, isseq))) 
+    return -1;
+  if ((sock = socket(PF_UNIX, isseq ? SOCK_STREAM : SOCK_DGRAM, 0)) < 0) {
+    *retc = -errno;
+    return -1;
+  }
+
+  if ((*retc = dm_setsockopts(sock, isseq ? PACKET_SIZE : 1)))
+    return -1;
+
   mask = umask(0);
-  if (! (i = sock_dir = strdup(name.sun_path))) return -1;
+  if (! (i = sock_dir = strdup(name.sun_path))) {
+    close(sock);
+    return -1;
+  }
+
   while ((i = strchr(++i, '/'))) {
     *i = '\0';
     if (stat(sock_dir, &buf)) {
@@ -542,6 +596,7 @@ P make_unix_socket(UW port, BOOLEAN isseq) {
 	fprintf(stderr, "Unable to mkdir: %s\n", sock_dir);
         free(sock_dir);
         umask(mask);
+	close(sock);
         return -1;
       }
     }
@@ -549,6 +604,7 @@ P make_unix_socket(UW port, BOOLEAN isseq) {
       errno = ENOTDIR;
       free(sock_dir);
       umask(mask);
+      close(sock);
       return -1;
     }
     *i = '/';
@@ -558,6 +614,7 @@ P make_unix_socket(UW port, BOOLEAN isseq) {
   if (! stat(name.sun_path, &buf) && unlink(name.sun_path)) {
       fprintf(stderr, "Unable to unlink: %s\n", name.sun_path);
       umask(mask);
+      close(sock);
       return -1;
   }
     
@@ -566,10 +623,28 @@ P make_unix_socket(UW port, BOOLEAN isseq) {
       < 0) {
       fprintf(stderr, "Unable to bind: %s\n", name.sun_path);
       umask(mask);
+      close(sock);
       return -1;
   }
   
-  set_atexit_socks(port, isseq);
+  if (isseq) {
+    if (listen(sock, 5) < 0) {
+      *retc = -errno;
+      close(sock);
+      unlink(name.sun_path);
+      return -1;
+    }
+    if ((*retc = addsocket(sock, port, FALSE, TRUE, -1))) {
+      close(sock);
+      unlink(name.sun_path);
+      return -1;
+    }
+  }
+  else if ((*retc = closeonexec(sock))) {
+    close(sock);
+    unlink(name.sun_path);
+    return -1;
+  }
 
   umask(mask);
   return sock;
@@ -632,6 +707,17 @@ P tosocket(P socket, B* rootf) {
   return tosource(rootf, TRUE, wrap_writefd, wrap_writefd);
 }
 
+/////////////////////////// dm_setsockopts //////////////////
+P dm_setsockopts(P sock, P size) {
+  if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &size, sizeof(P)) == -1
+      || setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &size, sizeof(P)) == -1) {
+    close(sock);
+    return -errno;
+  }
+
+  return OK;
+}
+
 /*----------------------------------------------- connect
     servername port | socket
 
@@ -644,7 +730,7 @@ P op_connect(void)
 {
   UW port;
   LBIG port_;
-  P sock, dgram, retc, size = PACKET_SIZE;
+  P sock, dgram, retc;
   struct sockaddr_in serveraddr;
 
   if (o_2 < FLOORopds) return(OPDS_UNF);
@@ -665,41 +751,55 @@ P op_connect(void)
     struct sockaddr_un unixserveraddr;
     sock = -1;
     dgram = -1;
-    if (! strcmp("localhost", (char*)FREEvm)
-        && init_unix_sockaddr(&unixserveraddr, port, TRUE) == OK
-        && (sock = socket(PF_UNIX, SOCK_STREAM, 0)) != -1
-	&& ! connect(sock, (struct sockaddr *) &unixserveraddr, 
-		     sizeof(unixserveraddr.sun_family)
-		     + strlen(unixserveraddr.sun_path))
-	&& init_unix_sockaddr(&unixserveraddr, port, FALSE) == OK
-	&& (dgram = socket(PF_UNIX, SOCK_DGRAM, 0)) != -1
-	&& ! connect(dgram, (struct sockaddr *) &unixserveraddr,
-		     sizeof(unixserveraddr.sun_family)
-		     + strlen(unixserveraddr.sun_path)))
-      goto goodsocket;
-    if (sock != -1) close(sock);
-    if (dgram != -1) close(dgram);
+    if (strcmp("localhost", (char*)FREEvm) 
+	|| init_unix_sockaddr(&unixserveraddr, port, TRUE)
+	|| (sock = socket(PF_UNIX, SOCK_STREAM, 0)) == -1
+	|| dm_setsockopts(sock, PACKET_SIZE))
+      goto ipsocket;
+
+    if (connect(sock, (struct sockaddr *) &unixserveraddr, 
+		sizeof(unixserveraddr.sun_family)
+		+ strlen(unixserveraddr.sun_path))
+	|| init_unix_sockaddr(&unixserveraddr, port, FALSE)
+	|| (dgram = socket(PF_UNIX, SOCK_DGRAM, 0)) == -1
+	|| dm_setsockopts(dgram, 1)) {
+      close(sock);
+      goto ipsocket;
+    }
+    
+    if (connect(dgram, (struct sockaddr *) &unixserveraddr,
+		sizeof(unixserveraddr.sun_family)
+		+ strlen(unixserveraddr.sun_path))) {
+      close(sock);
+      close(dgram);
+      goto ipsocket;
+    }
+
+    goto goodsocket;
   };
+ ipsocket:
 #endif //ENABLE_UNIX_SOCKETS
 
-  if ((retc = init_sockaddr(&serveraddr, (char*)FREEvm, port)) != OK) 
+  if ((retc = init_sockaddr(&serveraddr, (char*)FREEvm, port))) 
     return retc;
-  if ((sock = socket(PF_INET, SOCK_STREAM, 0)) == -1) return -errno;
-  if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &size, sizeof(P)) == -1
-      || setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &size, sizeof(P)) == -1
-      || connect(sock, (struct sockaddr *)&serveraddr,
-                 sizeof(serveraddr)) == -1) {
+  if ((sock = socket(PF_INET, SOCK_STREAM, 0)) == -1) 
+    return -errno;
+  if ((retc = dm_setsockopts(sock, PACKET_SIZE)))
+    return retc;
+  if (connect(sock, (struct sockaddr *)&serveraddr,
+	      sizeof(serveraddr)) == -1) {
     int errno_ = errno;
     close(sock);
     return -errno_;
   };
 
-  size = 1;
   if ((dgram = socket(PF_INET, SOCK_DGRAM, 0)) == -1) return -errno;
-  if (setsockopt(dgram, SOL_SOCKET, SO_SNDBUF, &size, sizeof(P)) == -1
-      || setsockopt(dgram, SOL_SOCKET, SO_RCVBUF, &size, sizeof(P)) == -1
-      || connect(dgram, (struct sockaddr *)&serveraddr,
-                 sizeof(serveraddr)) == -1) {
+  if ((retc = dm_setsockopts(dgram, 1))) {
+    close(sock);
+    return retc;
+  }
+  if (connect(dgram, (struct sockaddr *)&serveraddr,
+	      sizeof(serveraddr)) == -1) {
     int errno_ = errno;
     close(sock);
     close(dgram);
@@ -707,13 +807,8 @@ P op_connect(void)
   };
   
  goodsocket:
-  if ((retc = closeonexec(sock)) || (retc = closeonexec(dgram))) {
-    close(sock);
-    close(dgram);
+  if ((retc = addsocket(sock, 0, FALSE, TRUE, dgram)))
     return retc;
-  }
-
-  addsocket(sock);
   TAG(o_2) = NULLOBJ | SOCKETTYPE; 
   ATTR(o_2) = 0;
   SOCKET_VAL(o_2) = sock;
@@ -732,7 +827,6 @@ P op_disconnect(void)
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (NULLOBJ | SOCKETTYPE)) return OPD_ERR;
   delsocket(SOCKET_VAL(o_1));
-  if (DGRAM_VAL(o_1) != -1) close(DGRAM_VAL(o_1));
   FREEopds = o_1;
   return OK;
 }
@@ -741,7 +835,7 @@ P op_disconnect(void)
   socket sig | --
 
   sends signal to dnode, where signal is defined by a mapping 
-  in dm-vm.c (sigmap), and is between 0 and up to 255 (as defined 
+  in dm-signals.c (sigmap), and is between 0 and up to 255 (as defined 
   in sigmap)
 */
 
@@ -854,4 +948,8 @@ P op_getmyfqdn(void)
   moveframe(myfqdn_frame, o1);
   FREEopds = o2;
   return OK;
+}
+
+void forksighandler(P sigsocket, P serverport) {
+  spawnsighandler(sigsocket, serverport, set_unixowner, closesockets);
 }

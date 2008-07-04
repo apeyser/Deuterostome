@@ -9,6 +9,7 @@
 #include "dm-mpi.h"
 #include "error-local.h"
 #include "dm-vm.h"
+#include "dm-signals.h"
 
 static MPI_Comm rook = MPI_COMM_NULL;
 static MPI_Comm world = MPI_COMM_NULL;

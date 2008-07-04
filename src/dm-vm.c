@@ -7,6 +7,7 @@
 #include "error-local.h"
 #include "pluginlib.h"
 #include "dm2.h"
+#include "dm-signals.h"
 
 // original directory for vmresize
 static char* original_dir;
@@ -33,47 +34,38 @@ static void SIGALRMhandler(int sig __attribute__ ((__unused__)) )
 
 /*---------- signal handler: SIGINT */
 
-static void SIGABRThandler(int sig __attribute__ ((__unused__)) )
-{
-  fprintf(stderr, "Aborting on SIGABORT\n");
-  abortflag = TRUE;
-}
-
-void sethandler(int sig, void (*handler)(int sig)) {
-  struct sigaction sa;
-  
-  sa.sa_handler = handler;
-  sigfillset(&sa.sa_mask);
-  sa.sa_flags = 0;
-  if (sigaction(sig, &sa, NULL))
-    error(1, errno, "Unable to set signal handler for %i", sig);
-}
-
-static void quithandler_(int sig) __attribute__ ((__noreturn__));
-static void quithandler_(int sig __attribute__ ((__unused__)) ) {
-  int i;
-  for (i = 0; i < FD_SETSIZE; i++)
-    if (FD_ISSET(i, &sock_fds)) close(i);
+static void quithandler(int sig) __attribute__ ((__noreturn__));
+static void quithandler(int sig __attribute__ ((__unused__)) ) {
   exit(0);
 }
 
-static void (*quithandler)(int sig) = quithandler_;
+static void aborthandler(int sig) {
+  fprintf(stderr, "Aborting on signal %i\n", sig);
+  abortflag = TRUE;
+}
+
+static void makeaborthandler(void)
+{
+  int abortsigs[] = {SIGINT, 0};
+  int* i;
+  for (i = abortsigs; *i; i++) sethandler(*i, aborthandler);
+}
 
 static void makequithandler(void) 
 {
-  int quitsigs[] = {SIGQUIT, SIGTERM, SIGINT, 0};
+  int quitsigs[] = {SIGQUIT, SIGTERM, 0};
   int* i;
   for (i = quitsigs; *i; i++) sethandler(*i, quithandler);
 }
 
-static void ignorequithandler(void)
+static void makeignorehandler(void)
 {
   int quitsigs[] = {SIGHUP, 0};
   int* i;
   for (i = quitsigs; *i; i++) sethandler(*i, SIG_IGN);
 }
 
-void setuphandlers(void (*_quithandler)(int sig)) {
+void setuphandlers(void) {
 /*----------------- SIGNALS that we wish to handle */
 /* FPU indigestion is recorded in the numovf flag;
    we do not wish to be killed by it
@@ -100,40 +92,19 @@ void setuphandlers(void (*_quithandler)(int sig)) {
    console keyboard, it triggers the execution of 'abort'
 */
   abortflag = FALSE;
-  sethandler(SIGABRT, SIGABRThandler);
-
-  if (_quithandler) quithandler = _quithandler;
-  else _quithandler = quithandler;
 
   makequithandler();
-  ignorequithandler();
+  makeaborthandler();
+  makeignorehandler();
 }
 
-/*------------------------------------------------maketinysetup
-  - creates a 'tiny' memory, just enough to bootstrap
-    vmresize.  Sysdict is at the bottom of vm, not top
-*/
-  
-void maketinysetup(void (*quithandler)(int sig)) {
-  B *sysdict, *userdict;
-  LBIG tinysetup[5] = { 100, 50, 10, 1 , 100 };
-  P nb = FRAMEBYTES * (tinysetup[0] + tinysetup[1] + tinysetup[2])
-         + tinysetup[3] * 1000000;
-  B* tinyDmemory = (B*) malloc(nb+FRAMEBYTES/2+1);
-  if (! tinyDmemory) error(1, errno, "Insufficient memory");
-  
-  makeDmemory(tinyDmemory,tinysetup);
-  if ((sysdict = makeopdict((B*) sysop,syserrc,syserrm)) == (B*) -1L)
-    error(EXIT_FAILURE, 0, "Cannot make system dictionary");;
-  if ((userdict = makedict(tinysetup[4])) == (B *)(-1L))
-    error(EXIT_FAILURE, 0, "Cannot make user dictionary");
-  tinymemory = TRUE;
-
+static void setupbase(B* sysdict, B* userdict) {
   moveframe(sysdict-FRAMEBYTES,FREEdicts);
   FREEdicts += FRAMEBYTES;
   moveframe(userdict-FRAMEBYTES,FREEdicts); 
   FREEdicts += FRAMEBYTES;
-  TAG(msf) = (ARRAY | BYTETYPE); ATTR(msf) = READONLY;
+  TAG(msf) = (ARRAY | BYTETYPE); 
+  ATTR(msf) = READONLY;
   if (FREEvm + MSF_SIZE + FRAMEBYTES > CEILvm)
     error(EXIT_FAILURE, 0, "VM chosen too small");
   VALUE_BASE(msf) = (P)FREEvm + FRAMEBYTES; 
@@ -141,11 +112,30 @@ void maketinysetup(void (*quithandler)(int sig)) {
   moveframe(msf, FREEvm); 
   FREEvm += FRAMEBYTES + DALIGN(MSF_SIZE);
   moveframe(msf,cmsf);
+}
+
+/*------------------------------------------------maketinysetup
+  - creates a 'tiny' memory, just enough to bootstrap
+    vmresize.  Sysdict is at the bottom of vm, not top
+*/
+  
+void maketinysetup(void) {
+  B *sysdict, *userdict;
+  LBIG tinysetup[5] = { 100, 50, 10, 1 , 100 };
+  
+  if (makeDmemory(tinysetup))
+    error(1, errno, "Insufficient memory");
+  if ((sysdict = makeopdict((B*) sysop,syserrc,syserrm)) == (B*) -1L)
+    error(EXIT_FAILURE, 0, "Cannot make system dictionary");;
+  if ((userdict = makedict(tinysetup[4])) == (B *)(-1L))
+    error(EXIT_FAILURE, 0, "Cannot make user dictionary");
+  tinymemory = TRUE;
+  setupbase(sysdict, userdict);
 
   if (! (original_dir = getcwd(NULL, 0))) 
     error(EXIT_FAILURE,errno,"getcwd");  
 
-  setuphandlers(quithandler);
+  setuphandlers();
 }
 
 /*-------------------------------------------- vmresize
@@ -171,20 +161,18 @@ static P VMRESIZE_ERR(P err, BOOLEAN bool) {
 
 P op_vmresize_(void)
 {
-  static B* Dmemory = NULL;
-  P nb; 
   B *userdict, *sysdict;
-  B* newDmemory;
 
   if (o_1 < FLOORopds) return VMRESIZE_ERR(OPDS_UNF, FALSE);
 	FREEopds = o_1;
   if (CLASS(o1) == NULLOBJ) { 
-    if (tinymemory) {op_abort(); return VMRESIZE_ERR(VMR_STATE, FALSE);};
+    if (tinymemory) {
+      op_abort(); 
+      return VMRESIZE_ERR(VMR_STATE, FALSE);
+    };
     closealllibs();
-    maketinysetup(NULL);
-    free(Dmemory);
-    Dmemory = NULL;
-  } 
+    maketinysetup();
+  }
   else { 
     if (TAG(o1) != (ARRAY | LONGBIGTYPE)) return VMRESIZE_ERR(OPD_ERR, FALSE);
     if (ARRAY_SIZE(o1) < 5) return VMRESIZE_ERR(RNG_CHK, FALSE);
@@ -198,15 +186,14 @@ P op_vmresize_(void)
         || (setup[4] > MAX_USER_DICT_SIZE))
       return VMRESIZE_ERR(RNG_CHK, FALSE);
     
-    if (!tinymemory) {closealllibs(); maketinysetup(NULL);}
+    if (!tinymemory) {
+      closealllibs(); 
+      maketinysetup();
+    }
     
-    nb = (setup[0] + setup[1] + setup[2]) * FRAMEBYTES
-      + setup[3] * 1000000;
-    newDmemory = (B *) realloc(Dmemory, nb+FRAMEBYTES/2+1);
-    if (! newDmemory) return VMRESIZE_ERR(VMR_ERR, FALSE);
-    Dmemory = newDmemory;
-    makeDmemory(Dmemory,setup);
-    
+    if (makeDmemory(setup)) 
+      return VMRESIZE_ERR(VMR_ERR, FALSE);
+
     if ((sysdict = makeopdictbase((B*) sysop,syserrc,syserrm,SYS_DICT_SIZE))
         == (B*) -1L)
       error(EXIT_FAILURE, 0, "systemdict > vm");
@@ -214,11 +201,7 @@ P op_vmresize_(void)
       error(EXIT_FAILURE, 0, "userdict > vm");
     tinymemory = FALSE;
 
-    moveframe(sysdict-FRAMEBYTES,FREEdicts); 
-    FREEdicts += FRAMEBYTES;
-    moveframe(userdict-FRAMEBYTES,FREEdicts);
-    FREEdicts += FRAMEBYTES;
-    
+    setupbase(sysdict, userdict);    
     initialize_plugins();
     setupdirs();
   }
@@ -458,6 +441,18 @@ P op_tostderr(void)
 
 P op_abort(void)
 {
+  B *frame;
+  abortflag = FALSE;
+
+  frame = FREEexecs;
+  while ((frame -= FRAMEBYTES) >= FLOORexecs) {
+    if (ATTR(frame) & ABORTMARK) {
+      BOOL_VAL(frame) = TRUE;
+      FREEexecs = frame + FRAMEBYTES;
+      return OK;
+    }
+  }
+
   FREEopds = FLOORopds;
   FREEexecs = FLOORexecs;
   FREEdicts = FLOORdicts + FRAMEBYTES + FRAMEBYTES;
@@ -465,24 +460,3 @@ P op_abort(void)
   return DONE;
 }
 
-// these must be kept in the same order as SIGMAP_* in dm-vm.h
-// and SIGNALS in startup_common.d.in
-static int sigmap[] = {
-  SIGQUIT, 
-  SIGKILL,
-  SIGABRT, 
-  SIGTERM, 
-  SIGHUP, 
-  SIGINT, 
-  SIGALRM, 
-  SIGFPE
-};
-
-void propagate_sig(B sig, void (*redirect_sigf)(int sig)) {
-  if (sig > (B) (sizeof(sigmap)/sizeof(sigmap[0])) || sig < 0) {
-    error(0, 0, "received illegal signal %i", sig);
-    return;
-  }
-
-  redirect_sigf(sigmap[sig]);
-}

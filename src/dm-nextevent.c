@@ -34,11 +34,12 @@ P makesocketdead(P retc, P socketfd, B* error_source) {
 
   makename((B*)"socketdead", x1);
   ATTR(x1) = ACTIVE; 
+
   TAG(x2) = BOOL; 
   ATTR(x2) = (ABORTMARK | ACTIVE); 
   BOOL_VAL(x2) = FALSE;
-  FREEexecs = x3;
 
+  FREEexecs = x3;
   return OK;
 }
 

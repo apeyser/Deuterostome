@@ -18,6 +18,7 @@
 #include "dm2.h"
 #include "dqueen.h"
 #include "dm-vm.h"
+#include "dm-signals.h"
 
 #define SOCKET_TIMEOUT (60)
 
@@ -211,10 +212,10 @@ P op_makerthreads(void) {
   int sigs[2];
   int rookfd;
   int rooksigfd;
-  P r = OK;
+  P retc = OK;
 
   if (o_1 < FLOORopds) return OPDS_UNF;
-  if ((r = killrthreads())) return r;
+  if ((retc = killrthreads())) return retc;
   
   switch (TAG(o_1)) {
     case NULLOBJ:
@@ -267,9 +268,9 @@ P op_makerthreads(void) {
     VALUE_PTR(FREEvm) = NULL;
     FREEvm += FRAMEBYTES;
     moveframe(o_1, dlistf);
-    if ((r = foldobj(dlistf))) {
+    if ((retc = foldobj(dlistf))) {
       FREEvm = oldfreevm;
-      return r;
+      return retc;
     }
     BOX_NB(oldfreevm) = FREEvm - oldfreevm - FRAMEBYTES*2;
     FREEvm = oldfreevm;
@@ -277,7 +278,7 @@ P op_makerthreads(void) {
 
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets))
     return -errno;
-  
+
   if (socketpair(AF_UNIX, SOCK_DGRAM, 0, sigs)) {
     int errno_ = errno;
     close(sockets[0]);
@@ -286,43 +287,54 @@ P op_makerthreads(void) {
     return -errno_;
   }    
 
+  if ((retc = dm_setsockopts(sockets[0], PACKET_SIZE))
+      || (retc = dm_setsockopts(sockets[1], PACKET_SIZE))
+      || (retc = dm_setsockopts(sigs[0], 1))
+      || (retc = dm_setsockopts(sigs[1], 1))) {
+    close(sockets[0]);
+    close(sockets[1]);
+    close(sigs[0]);
+    close(sigs[1]);
+    return retc;
+  }
+
   socketfd = sockets[0];
   rookfd = sockets[1];
-  if ((r = closeonexec(socketfd)) || (r = closeonexec(rookfd))) {
+  if ((retc = closeonexec(socketfd)) || (retc = closeonexec(rookfd))) {
     close(rookfd);
     close(sigs[0]);
     close(sigs[1]);
     killrthreads();
-    return r;
+    return retc;
   }
 
   sigfd = sockets[0];
   rooksigfd = sockets[1];
-  if ((r = closeonexec(sigfd)) || (r = closeonexec(rooksigfd))) {
+  if ((retc = closeonexec(sigfd)) || (retc = closeonexec(rooksigfd))) {
     close(rookfd);
     close(rooksigfd);
     killrthreads();
-    return r;
+    return retc;
   }
 
   if ((pid = fork()) == -1) {
-    r = -errno;
+    retc = -errno;
     close(rookfd);
     close(rooksigfd);
     killrthreads();
-    return r;
+    return retc;
   }
 
   if (! pid) {
     int stdin;
     if (dup2(rookfd, 3) == -1)
       error(1, errno, "Error duping %i to %i", (int) rookfd, 3);
-    if ((r = nocloseonexec(3)))
-      error(1, -r, "Error setting no close on exec for fd 3");
+    if ((retc = nocloseonexec(3)))
+      error(1, -retc, "Error setting no close on exec for fd 3");
     if (dup2(rooksigfd, 4) == -1)
       error(1, errno, "Error duping %i to %i", (int) rooksigfd, 4);
-    if ((r = nocloseonexec(4)))
-      error(1, -r, "Error setting no close on exec for fd 4");
+    if ((retc = nocloseonexec(4)))
+      error(1, -retc, "Error setting no close on exec for fd 4");
 
     if ((stdin = open("/dev/null", O_RDONLY)) == -1)
       error(1, errno, "Unable to open /dev/null for reading");
@@ -330,37 +342,41 @@ P op_makerthreads(void) {
       error(1, errno, "Error redirecting 0 from /dev/null");
     if (stdin != 0 && close(stdin))
       error(1, errno, "Unable to close fd %i", stdin);
-    if ((r = nocloseonexec(0)))
-      error(1, -r, "Error setting no close on exec for fd 0");
+    if ((retc = nocloseonexec(0)))
+      error(1, -retc, "Error setting no close on exec for fd 0");
 
     execl("@drook@", "@drook@", NULL);
     error(1, errno, "Error starting `%s'", "@drook@");
   }
    
   if (close(rookfd)) {
-    r = -errno;
+    retc = -errno;
     close(rooksigfd);
     killrthreads();
-    return r;
+    return retc;
   }
 
   if (close(rooksigfd)) {
-    r = -errno;
+    retc = -errno;
     close(rookfd);
     killrthreads();
-    return r;
+    return retc;
   }
 
-  if ((r = writefd(socketfd, FREEvm, FRAMEBYTES*2, SOCKET_TIMEOUT))
-      || (r = writefd(socketfd, FREEvm+FRAMEBYTES*2, BOX_NB(FREEvm), 
-		      SOCKET_TIMEOUT))
-      || (r = readfd(socketfd, (B*) &ok, sizeof(ok), SOCKET_TIMEOUT))) {
+  if ((retc = writefd(socketfd, FREEvm, FRAMEBYTES*2, SOCKET_TIMEOUT))
+      || (retc = writefd(socketfd, FREEvm+FRAMEBYTES*2, BOX_NB(FREEvm), 
+			 SOCKET_TIMEOUT))
+      || (retc = readfd(socketfd, (B*) &ok, sizeof(ok), SOCKET_TIMEOUT))) {
     killrthreads();
-    return r;
+    return retc;
   }
   
   mpin = mpin_;
-  addsocket(socketfd);
+  if ((retc = addsocket(socketfd, 0, FALSE, TRUE, sigfd))) {
+    killrthreads();
+    return retc;
+  }
+
   TAG(o_1) = (NULLOBJ | SOCKETTYPE);
   ATTR(o_1) = 0;
   SOCKET_VAL(o_1) = socketfd;

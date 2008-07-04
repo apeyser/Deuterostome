@@ -228,10 +228,6 @@ P op_vmresize(void) {
   return op_vmresize_();
 }
 
-static void quithandler(int sig __attribute__ ((__unused__))) {
-  exit(0);
-}
-
 /* push on operand stack:
    error code    (top)
    errsource string
@@ -578,13 +574,17 @@ P op_quit(void) {exit(0);}
 
 void run_dpawn_mill(void) {
   P retc;
+  B abortframe[FRAMEBYTES];
 
   initmpi();
-  maketinysetup(quithandler);
+  maketinysetup();
 
 /*----------------- construct frames for use in execution of D code */
   makename((B*)"error", errorframe); 
   ATTR(errorframe) = ACTIVE;
+
+  makename((B*)"abort",abortframe); 
+  ATTR(abortframe) = ACTIVE;
 
 /*-------------- you are entering the scheduler -------------------*/\
 /* We start with no D code on the execution stack, so we doze
@@ -621,7 +621,18 @@ void run_dpawn_mill(void) {
     }
     switch (retc) {
       case OK: continue;
-      case ABORT: op_abort(); continue;
+      case ABORT:
+	abortflag = FALSE;
+	if (x1 < CEILexecs) {
+	  moveframe(abortframe, x1);
+	  FREEexecs = x2;
+	  continue;
+	}
+
+	retc = EXECS_OVF; 
+	errsource = (B*)"supervisor"; 
+	break;
+
       default: break;
     }
 

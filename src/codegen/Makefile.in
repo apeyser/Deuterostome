@@ -58,21 +58,22 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = dm.h dmglobals.c dsp1.c dm1.c dm2.c dm2.h dm3.h \
-	dm-swapbytes.h dm-conv.c dm3.c dm4.c dm5.c dm6.c dm7.c dm8.c \
-	dmnum.c dsp2.c dm-types.h dm-types.c paths.h.in dgen.c \
+	dm-prop.h dm-signals.h dm-vm.h dm-swapbytes.h dm-conv.c dm3.c \
+	dm-prop.c.in dm-signals.c dm-vm.c dm4.c dm5.c dm6.c dm7.c \
+	dm8.c dmnum.c dsp2.c dm-types.h dm-types.c paths.h.in dgen.c \
 	dgen_1.h dgen-build dmnum.h dm-nextevent.c dm-nextevent.h
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libdmbootstrap_la_LIBADD =
 am_libdmbootstrap_la_OBJECTS = dmnum.lo dsp1.lo dsp2.lo dmglobals.lo \
 	dm1.lo dm2.lo dm-conv.lo dm4.lo dm5.lo dm6.lo dm7.lo dm8.lo \
-	dm-types.lo
+	dm-types.lo dm-signals.lo
 libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
 am_dcoder_OBJECTS = dcoder-dcoder.$(OBJEXT)
 dcoder_OBJECTS = $(am_dcoder_OBJECTS)
 dcoder_LDADD = $(LDADD)
 am_dgen_OBJECTS = dgen-dgen.$(OBJEXT) dgen-dm-nextevent.$(OBJEXT) \
-	dgen-dm3.$(OBJEXT)
+	dgen-dm3.$(OBJEXT) dgen-dm-prop.$(OBJEXT)
 dgen_OBJECTS = $(am_dgen_OBJECTS)
 dgen_DEPENDENCIES = libdmbootstrap.la
 dgen_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -350,20 +351,24 @@ AM_CFLAGS = $(GCC_CFLAGS)
 AM_CPPFLAGS = \
 	-DDM_DISABLE_THREADS=1 -DDM_HAVE_CONFIG_H -DDM_DISABLE_REGEX=1 \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 \
+	-DDM_NO_PROP=1 \
 	-I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 
 AM_LDFLAGS = -no-undefined
 INCLUDE = @INCLTDL@
-BUILT_SOURCES = paths.h
+BUILT_SOURCES = paths.h dm-prop.c
 CLEANFILES = $(BUILT_SOURCES)
 DISTCLEANFILES = dm-config.h
 noinst_LTLIBRARIES = libdmbootstrap.la
 EXTRA_DIST = dmnuminc.d.in ops.d.in paths.h.in dsp2def.d.in
 libdmbootstrap_la_SOURCES = dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h \
 	dmglobals.c dm1.c dm2.c dm-conv.c dm-swapbytes.h \
-	dm4.c dm5.c dm6.c dm7.c dm8.c dm-types.c 
+	dm4.c dm5.c dm6.c dm7.c dm8.c dm-types.c \
+	dm-signals.c dm-signals.h
 
-dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h dm3.c
+dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h \
+	dm3.c dm3.h dm-prop.c dm-prop.h
+
 dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dgen_LDADD = libdmbootstrap.la
 dcoder_SOURCES = dcoder.c dcoder.h dm-errs.h.built
@@ -448,8 +453,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dcoder-dcoder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dgen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dm-nextevent.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dm-prop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dm3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm-conv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm-signals.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm-types.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm2.Plo@am__quote@
@@ -539,6 +546,20 @@ dgen-dm3.obj: dm3.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm3.c' object='dgen-dm3.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dm3.obj `if test -f 'dm3.c'; then $(CYGPATH_W) 'dm3.c'; else $(CYGPATH_W) '$(srcdir)/dm3.c'; fi`
+
+dgen-dm-prop.o: dm-prop.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -MT dgen-dm-prop.o -MD -MP -MF $(DEPDIR)/dgen-dm-prop.Tpo -c -o dgen-dm-prop.o `test -f 'dm-prop.c' || echo '$(srcdir)/'`dm-prop.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dgen-dm-prop.Tpo $(DEPDIR)/dgen-dm-prop.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-prop.c' object='dgen-dm-prop.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dm-prop.o `test -f 'dm-prop.c' || echo '$(srcdir)/'`dm-prop.c
+
+dgen-dm-prop.obj: dm-prop.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -MT dgen-dm-prop.obj -MD -MP -MF $(DEPDIR)/dgen-dm-prop.Tpo -c -o dgen-dm-prop.obj `if test -f 'dm-prop.c'; then $(CYGPATH_W) 'dm-prop.c'; else $(CYGPATH_W) '$(srcdir)/dm-prop.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dgen-dm-prop.Tpo $(DEPDIR)/dgen-dm-prop.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-prop.c' object='dgen-dm-prop.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dm-prop.obj `if test -f 'dm-prop.c'; then $(CYGPATH_W) 'dm-prop.c'; else $(CYGPATH_W) '$(srcdir)/dm-prop.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -801,6 +822,11 @@ $(srcdir)/errors.d: dcoder
 	(cd "$(srcdir)/../../dcode" ; \
 	rm errors.d ; \
 	$(LN_S) ../src/codegen/errors.d errors.d)
+
+dm-prop.c: Makefile $(top_builddir)/src/codegen/dm-prop.c.in
+	-rm -f $@ $@.tmp
+	$(edit) "$(top_builddir)/src/codegen/dm-prop.c.in" > $@.tmp
+	mv $@.tmp $@
 
 distdir:
 	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \

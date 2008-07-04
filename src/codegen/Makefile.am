@@ -27,10 +27,11 @@ AM_CFLAGS = $(GCC_CFLAGS)
 AM_CPPFLAGS = \
 	-DDM_DISABLE_THREADS=1 -DDM_HAVE_CONFIG_H -DDM_DISABLE_REGEX=1 \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 \
+	-DDM_NO_PROP=1 \
 	-I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 AM_LDFLAGS = -no-undefined
 INCLUDE = @INCLTDL@
-BUILT_SOURCES = paths.h
+BUILT_SOURCES = paths.h dm-prop.c
 CLEANFILES = $(BUILT_SOURCES)
 DISTCLEANFILES = dm-config.h
 
@@ -41,9 +42,12 @@ EXTRA_DIST = dmnuminc.d.in ops.d.in paths.h.in dsp2def.d.in
 
 libdmbootstrap_la_SOURCES = dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h \
 	dmglobals.c dm1.c dm2.c dm-conv.c dm-swapbytes.h \
-	dm4.c dm5.c dm6.c dm7.c dm8.c dm-types.c 
+	dm4.c dm5.c dm6.c dm7.c dm8.c dm-types.c \
+	dm-signals.c dm-signals.h
 
-dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h dm3.c
+dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h \
+	dm3.c dm3.h dm-prop.c dm-prop.h
+
 dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dgen_LDADD = libdmbootstrap.la
 
@@ -159,6 +163,11 @@ $(srcdir)/errors.d: dcoder
 	(cd "$(srcdir)/../../dcode" ; \
 	rm errors.d ; \
 	$(LN_S) ../src/codegen/errors.d errors.d)
+
+dm-prop.c: Makefile $(top_builddir)/src/codegen/dm-prop.c.in
+	-rm -f $@ $@.tmp
+	$(edit) "$(top_builddir)/src/codegen/dm-prop.c.in" > $@.tmp
+	mv $@.tmp $@
 
 distdir:
 	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \

@@ -86,7 +86,7 @@ LT_BEGIN_C_DECLS
 #endif
 
 /* LT_STRLEN can be used safely on NULL pointers.  */
-#define LT_STRLEN(s)	(((s) && (s)[0]) ? strlen (s) : 0)
+#define LT_STRLEN(s)	(((s != NULL) && (s)[0]) ? strlen (s) : 0)
 
 
 

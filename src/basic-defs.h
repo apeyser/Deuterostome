@@ -87,7 +87,8 @@ NOTE: all objects that can populate the D machine's workspace must
       be aligned using the macro defined here.
 */
 
-#define DALIGN(bytes)         (((P)(bytes)+7) & ~((P) 7)) /* 8 bytes */
+  /* 8 bytes */
+#define DALIGN(bytes) (((P)(bytes)+(P)(PACK_FRAME-1)) & ~((P) (PACK_FRAME-1)))
 
 /* NB: Attention to moveframe & moveframes in dm2.c whenever
    framebytes is changed */

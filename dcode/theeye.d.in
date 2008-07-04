@@ -47,11 +47,12 @@
   /RITE  <d 1 0 0 > mapcolor def
   /BG <d 235 243 248 > 255 div mapcolor def
 
-  /DIRCOLOR   <d 231 214 227 > 255 div mapcolor def
-  /LISTCOLOR  <d 204 235 197 > 255 div mapcolor def
-  /ARRAYCOLOR <d 204 235 197 > 255 div mapcolor def
-  /DICTCOLOR  <d 166 219 160 > 255 div mapcolor def
-  /BOXCOLOR   <d 166 219 160 > 255 div mapcolor def 
+  /DIRCOLOR    <d 231 214 227 > 255 div mapcolor def
+  /LISTCOLOR   <d 204 235 197 > 255 div mapcolor def
+  /ARRAYCOLOR  <d 204 235 197 > 255 div mapcolor def
+  /DICTCOLOR   <d 166 219 160 > 255 div mapcolor def
+  /BOXCOLOR    <d 166 219 160 > 255 div mapcolor def 
+  /STREAMCOLOR <d 135 204 129 > 255 div mapcolor def
   
 |-- priming geometrical templates
 
@@ -400,7 +401,7 @@ end def
 
 /Kb { * exch 999 add 1000 div * number } def
 
-15 dict dup begin
+16 dict dup begin
 /VMclass     { * (VM: ) text vmstatus /bused name Kb
                * ( total Kb, ) text bused Kb * ( used) text
              } def
@@ -448,6 +449,8 @@ end def
                * ( used) text
              } def
 /boxclass    { * ('save' box) text 
+             } def
+/streamclass { * (stream) text
              } def
 /numclass    { * theobj 1 get * number * theobj 1 get type mkact text
              } def
@@ -841,7 +844,7 @@ end def
 
 |--------------- opening rightpage object (by control/click)
 
-12 dict dup begin
+13 dict dup begin
   
 /dirclass    { open_dir } bind def
 /fileclass   { stop } def
@@ -850,6 +853,7 @@ end def
 /dictclass   { open_dict } def
   
 /boxclass    { stop } def 
+/streamclass { stop } def
 /nullclass   { stop } def
 /opclass     { stop } def
 /boolclass   { stop } def
@@ -875,7 +879,7 @@ end mkread /dupchecks name
 |------------- representing a right-page D object value
 | expects 'Rvaluerect' to be established for placing value
 
-11 dict dup begin
+12 dict dup begin
 /nullclass   {
   {(null) fax theitem type /T eq {(:socket) fax} if} BG show_value
 } bind def
@@ -913,6 +917,14 @@ end mkread /dupchecks name
              } bind def
 /boxclass    { { * (|_| of ) text * theitem length * number
                } BOXCOLOR show_value
+             } bind def
+/streamclass { { * (<=>: ) text theitem closedfd {
+                   * (closed) text
+                   theitem used 1 eq {* (, buffd) text} if
+                 } {
+                   * (open) text
+                 } ifelse
+               } STREAMCOLOR show_value
              } bind def
 end mkread /valuepresenters name
 

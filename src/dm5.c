@@ -492,9 +492,17 @@ P op_eq(void)
 
       case NULLOBJ: 
 	if (TYPE(o_1) != TYPE(o_2)) t = FALSE;
-	else if (TYPE(o_1) == SOCKETTYPE)
-          t = (SOCKET_VAL(o_1) == SOCKET_VAL(o_2)) ? TRUE : FALSE;
-	else t = TRUE;
+	else switch (TYPE(o_1)) {
+	  case SOCKETTYPE:
+	    t = (SOCKET_VAL(o_1) == SOCKET_VAL(o_2)) ? TRUE : FALSE;
+	    break;
+	  case PIDTYPE:
+	    t = (PID_VAL(o_1) == PID_VAL(o_2)) ? TRUE : FALSE;
+	    break;
+	  default: 
+	    t = TRUE;
+	    break;
+	}
 	break;
 
       case NUM: 
@@ -533,6 +541,11 @@ P op_eq(void)
         t = ((VALUE_BASE(o_2) == VALUE_BASE(o_1)) 
              && (ARRAY_SIZE(o_2) == ARRAY_SIZE(o_1)));
         break;
+
+      case STREAM:
+	t = ((STREAM_FD(VALUE_PTR(o_2)) == STREAM_FD(VALUE_PTR(o_1))));
+	break;
+
       default: return OPD_CLA; // never happen
     } 
   }
@@ -568,11 +581,18 @@ P op_ne(void)
       case NULLOBJ: 
         if (TYPE(o_1) != TYPE(o_2)) 
           t = TRUE;
-        else if (TYPE(o_1) == SOCKETTYPE)
-          t = (SOCKET_VAL(o_1) != SOCKET_VAL(o_2)) ? TRUE : FALSE;
-        else 
-          t=FALSE;
-        break;
+	else switch (TYPE(o_1)) {
+	  case SOCKETTYPE:
+	    t = (SOCKET_VAL(o_1) != SOCKET_VAL(o_2)) ? TRUE : FALSE;
+	    break;
+	  case PIDTYPE:
+	    t = (PID_VAL(o_1) != PID_VAL(o_2)) ? TRUE : FALSE;
+	    break;
+	  default:
+	    t = FALSE;
+	    break;
+	};
+	break;
 
       case NUM: 
         t = COMPARE(o_2,o_1);
@@ -611,6 +631,10 @@ P op_ne(void)
              || (ARRAY_SIZE(o_2) != ARRAY_SIZE(o_1)));
         break;
 
+      case STREAM:
+	t = (STREAM_FD(VALUE_PTR(o_2)) != STREAM_FD(VALUE_PTR(o_1)));
+	break;
+	
       default: 
         return OPD_CLA; //never happen
     } 

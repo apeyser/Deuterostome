@@ -19,6 +19,7 @@
 #include "dm.h"
 #include "dmx.h"
 #include "dm3.h"
+#include "dm-proc.h"
 
 /*---------- include modules of dgen --------------*/
 
@@ -62,7 +63,7 @@ int main(void)
   B* startup_dvt;    
   B fromconsoleframe[FRAMEBYTES], *sf;
   P nb, retc,tnb;
-  B *sysdict, *userdict, *Dmemory, *p;
+  B *sysdict, *userdict, *p;
   int sufd;
 
   sysop = _sysop;
@@ -98,11 +99,8 @@ int main(void)
    Not so tiny for the dvt, this should be good for most work
 */
 
-  nb = FRAMEBYTES * (memsetup[0] + memsetup[1] + memsetup[2])
-    + memsetup[3] * 1000000;
-  Dmemory = (B *)malloc(nb+9);
-  if (Dmemory == 0) error(EXIT_FAILURE, 0, "D memory");
-  makeDmemory(Dmemory,memsetup);
+  if (makeDmemory(memsetup))
+    error(EXIT_FAILURE, 0, "D memory");
   
 /*----------------- construct frames for use in execution of D code */
   makename((B*)"error",errorframe); ATTR(errorframe) = ACTIVE;

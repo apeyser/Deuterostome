@@ -6,6 +6,7 @@ B* _sysop[] =
   (B*) "error", (B*) op_error,
   (B*) "errormessage", (B*) op_errormessage,
   (B*) "abort", (B*) op_abort,
+  (B*) "aborted", (B*) op_aborted,
   (B*) "toconsole", (B*) op_toconsole,
   (B*) "pop", (B*) op_pop,
   (B*) "exch", (B*) op_exch,
@@ -195,6 +196,8 @@ P _syserrc[] = {
   CLOCK_ERR,
   LONG_OVF,
   ILL_RECAP,
+  READ_ERROR,
+  UNKNOWN_ERR,
   BUF_OVF,
   0L
 };
@@ -243,6 +246,8 @@ B* _syserrm[] = {
   (B*) "** Error accessing clock",
   (B*) "** 64 bit integer overflow on load into 32 bit machine",
   (B*) "** Double capsave",
+  (B*) "** Internal Read error",
+  (B*) "** Internal Unknown error",
   (B*) "** Internal buffer overflow",
   (B*) NULL
 };
