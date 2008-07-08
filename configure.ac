@@ -187,6 +187,7 @@ AC_DEFINE([_POSIX_C_SOURCE], [200112L], [Define to 200112L - we are POSIXY])
 AC_DEFINE([_XOPEN_SOURCE], [(_XOPEN_SOURCE < 500 ? 500 : _XOPEN_SOURCE)], 
   [Define to >500 - we are POSIXY])
 
+AC_CHECK_HEADERS([feautures.h])
 CF_AC_CHECK_HEADERS([endian.h machine/endian.h], [ENDIAN_HDR], 
   [Header for endianness], [NO_ENDIAN_HDR])
 CF_AC_CHECK_HEADER([math.h])

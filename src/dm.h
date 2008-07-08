@@ -30,8 +30,9 @@
 #include "config.h"
 #endif
 
+#ifdef DM_HAVE_FEATURES_H
 #include <features.h>
-
+#endif //DM_HAVE_FEATURES_H
 #include "basic-defs.h"
 
 #if __cplusplus
