@@ -120,7 +120,7 @@ libdmglobals_la_OBJECTS = $(am_libdmglobals_la_OBJECTS)
 libdmglobals_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libdmglobals_la_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-libdmnodal_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
+libdmnodal_la_DEPENDENCIES = $(am__DEPENDENCIES_1) libdmglobals.la
 am__libdmnodal_la_SOURCES_DIST = dm-vm.c dm-vm.h plugin.h pluginlib.h \
 	cppplugin.h plugin.c
 am__objects_5 =
@@ -545,7 +545,7 @@ libdmglobals_la_SOURCES = $(globsrcs) \
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)
 libdmnodal_la_SOURCES = dm-vm.c dm-vm.h $(PLUGIN_HDR) $(PLUGIN_SRC)
-libdmnodal_la_LIBADD = $(PLUGIN_LD) 
+libdmnodal_la_LIBADD = $(PLUGIN_LD) libdmglobals.la
 editpaths = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
 	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \

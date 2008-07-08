@@ -170,7 +170,7 @@ libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)
 
 libdmnodal_la_SOURCES = dm-vm.c dm-vm.h $(PLUGIN_HDR) $(PLUGIN_SRC)
-libdmnodal_la_LIBADD = $(PLUGIN_LD) 
+libdmnodal_la_LIBADD = $(PLUGIN_LD) libdmglobals.la
 
 editpaths = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
