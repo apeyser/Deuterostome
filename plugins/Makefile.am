@@ -3,6 +3,11 @@ AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 LIBS += $(LTLIBOBJS) $(top_builddir)/src/libdmglobals.la
 
+edit = 	sed \
+	  -e 's,[@]PETSC_DIR[@],$(PETSC_DIR),g' \
+	  -e 's,[@]PETSC_ARCH[@],$(PETSC_ARCH),g' \
+	  -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g'
+
 BUILT_SOURCES = new-plugin.d
 new-plugin.d: $(srcdir)/Makefile new-plugin.d.in
 	rm -f $@ $@.tmp
@@ -83,11 +88,6 @@ dmpetsc_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
 dmpetsc_la_LDFLAGS=$(AM_LDFLAGS) $(PETSC_LIB)
 dmpetsc_la_CPPFLAGS = $(PETSC_CCPPFLAGS) $(AM_CPPFLAGS)
 dist_noinst_DATA += dmpetsc.d dmpetsc.c.in
-
-edit = 	sed \
-	  -e 's,[@]PETSC_DIR[@],$(PETSC_DIR),g' \
-	  -e 's,[@]PETSC_ARCH[@],$(PETSC_ARCH),g' \
-	  -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g'
 
 dmpetsc.c: Makefile $(srcdir)/dmpetsc.c.in
 	-rm -f $@ $@.tmp
