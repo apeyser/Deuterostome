@@ -8,6 +8,7 @@
 #include <netdb.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <limits.h>
 
 #include "dm.h"
 #include "dmx.h"

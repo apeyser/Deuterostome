@@ -219,7 +219,7 @@ P op_setenv(void) {
     FREEvm[ARRAY_SIZE(o_1)] = '\0';
     if (setenv(str, (char*) FREEvm, 1)) return -errno;
   }
-  else if (unsetenv(str)) return -errno;
+  else unsetenv(str);
 
   FREEopds = o_2;
   return OK;
