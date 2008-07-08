@@ -95,17 +95,16 @@
   /MATRIX_PARAM_ERROR                  93x def
   /MATRIX_INT_ERR                      94x def
   /MATRIX_SINGULAR                     95x def
-  /KILL_SOCKETS                        96x def
-  /RTHREADS_UNSET                      97x def
-  /RTHREADS_NUMTYPE                    98x def
-  /RTHREADS_NUMUNDF                    99x def
-  /RTHREADS_NUMRNG                    100x def
-  /RTHREADS_DICTTYPE                  101x def
-  /RTHREADS_VALTYPE                   102x def
-  /RTHREADS_VALSIZE                   103x def
-  /RTHREADS_VALEMPTY                  104x def
-  /RTHREADS_KEYSIZE                   105x def
-  /RTHREADS_VALATR                    106x def
-  /NEXTEVENT_NOEVENT                  107x def
-  /MPI_NOMSG                          108x def
+  /RTHREADS_UNSET                      96x def
+  /RTHREADS_NUMTYPE                    97x def
+  /RTHREADS_NUMUNDF                    98x def
+  /RTHREADS_NUMRNG                     99x def
+  /RTHREADS_DICTTYPE                  100x def
+  /RTHREADS_VALTYPE                   101x def
+  /RTHREADS_VALSIZE                   102x def
+  /RTHREADS_VALEMPTY                  103x def
+  /RTHREADS_KEYSIZE                   104x def
+  /RTHREADS_VALATR                    105x def
+  /NEXTEVENT_NOEVENT                  106x def
+  /MPI_NOMSG                          107x def
 end _module

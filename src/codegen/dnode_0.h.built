@@ -331,7 +331,6 @@ P _syserrc[] = {
   X_SEC_GEN,
   X_SEC_REV,
   X_SEC_LIB,
-  KILL_SOCKETS,
 #ifdef DM_ENABLE_RTHREADS
   RTHREADS_UNSET,
   RTHREADS_NUMTYPE,
@@ -452,7 +451,6 @@ B* _syserrm[] = {
   (B*) "** X Security Extension unable to generate",
   (B*) "** X Security Extension unable to revoke",
   (B*) "** X Security library missing",
-  (B*) "** Internal KILL_SOCKETS return -- should never appear as error",
 #ifdef DM_ENABLE_RTHREADS
   (B*) "** Rthreads are inactive",
   (B*) "** Rthreads: nodes for dictionay not a numeral",

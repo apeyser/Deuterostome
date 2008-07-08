@@ -21,17 +21,18 @@
 #include <errno.h>
 #include <string.h>
 
-UL32 nodes;
-P socketfd;
-MPI_Comm children;
-MPI_Request* requests;
+static UL32 nodes;
+static MPI_Comm children;
+static MPI_Comm childrensig;
+static MPI_Request* requests;
 
 DM_INLINE_STATIC void usage_error(const char* name) 
   __attribute__ ((__noreturn__));
-void usage_error(const char* name) {
+static void usage_error(const char* name) {
   error(1, 0, 
 	"Usage: %s\n"
 	"Unix socket is available on fd 3\n"
+	"Unix dgram signal socket is available on fd 4\n"
 	"Number of jobs is 32 bit number available on socket", name);
   exit(1);
 }
@@ -39,7 +40,7 @@ void usage_error(const char* name) {
 DM_INLINE_STATIC void read_socket_int(void* where, size_t n) {
   ssize_t r, off = 0;
   do {
-    switch ((r = read(socketfd, where+off, n))) {
+    switch ((r = read(3, where+off, n))) {
       case 0: 
 	error(1, 0, "EOF from dnode");
 
@@ -56,7 +57,7 @@ DM_INLINE_STATIC void read_socket_int(void* where, size_t n) {
 DM_INLINE_STATIC void write_socket_int(const void* where, size_t n) {
   ssize_t r, off = 0;
   do {
-    if ((r = write(socketfd, where+off, n)) < 0)
+    if ((r = write(3, where+off, n)) < 0)
       error(1, errno, "Error in socket write");
 
     n -= r;
@@ -88,7 +89,6 @@ DM_INLINE_STATIC void usage(int argc, char* argv[],
   P dlist;
   size_t i;
   if (argc != 1) usage_error(argv[0]); 
-  socketfd = 3;
   
   if (! (infovm = (B*) malloc(FRAMEBYTES*2)))
     error(1, errno, "Unable to malloc %lli for infovm", 
@@ -165,7 +165,7 @@ static void exithandler(void) {
 
   makename("quit", boxf+FRAMEBYTES);
   ATTR(boxf+FRAMEBYTES) = (ACTIVE|BIND);
-  close(socketfd);
+  close(3);
 
   for (i = 0; i < nodes; i++)
     MPI_Isend(boxf, 2*FRAMEBYTES, MPI_UNSIGNED_CHAR, 
@@ -184,7 +184,7 @@ static void mpihandler(MPI_Comm* comm __attribute__ ((__unused__)),
   if (inhandler) return;
   inhandler = TRUE;
 
-  close(socketfd);
+  close(3);
   if (MPI_Error_string(*err, string, &len))
     error(1, 0, "Unable to produce error string (%i)", *err);
   else
@@ -268,6 +268,11 @@ DM_INLINE_STATIC void spawn(struct InfoDicts* infodicts) {
   fprintf(stderr, "Rook will wait for children\n");
   MPI_Barrier(children);
   fprintf(stderr, "Rook heard children\n");
+
+  MPI_Comm_dup(children, &childrensig);
+  //fprintf(stderr, "Rook will wait for children sig\n");
+  //MPI_Barrier(childrensig);
+  //fprintf(stderr, "Rook heard children sig\n");
 }
 
 DM_INLINE_STATIC void writesocketerror(char* type, char* info) {
@@ -422,21 +427,17 @@ DM_INLINE_STATIC void* from_mpi(void* arg __attribute__ ((__unused__))) {
   exit(1);
 }
 
-void to_sig_exiter(void* sigfd) {close(*(P*)sigfd);}
+static void to_sig_exiter(void* unused __attribute__ ((__unused__))) {close(4);}
 
 DM_INLINE_STATIC void* to_sig(void* arg) __attribute__ ((__noreturn__));
 DM_INLINE_STATIC void* to_sig(void* arg __attribute__ ((__unused__))) {
-  P sigfd = 4;
-  MPI_Comm childrensig;
-  MPI_Comm_dup(children, &childrensig);
-
-  pthread_cleanup_push(to_sig_exiter, &sigfd);  
+  pthread_cleanup_push(to_sig_exiter, NULL);  
   while (1) {
     B sig;
-    switch (recv(sigfd, &sig, 1, 0)) {
+    switch (recv(4, &sig, 1, 0)) {
       case 0:
 	error(1, 0, "drook signal socket received close on recv");
-	close(sigfd);
+	close(4);
 	pthread_exit(NULL);
 
       case -1:
@@ -449,8 +450,9 @@ DM_INLINE_STATIC void* to_sig(void* arg __attribute__ ((__unused__))) {
 
 DM_INLINE_STATIC void makethread(char* name, void* (*func)(void*)) {
   pthread_t thread;
-  if (pthread_create(&thread, NULL, func, NULL))
-    error(1, errno, "Unable to create %s thread", name);
+  int errno_;
+  if ((errno_ = pthread_create(&thread, NULL, func, NULL)))
+    error(1, errno_, "Unable to create %s thread", name);
 }
 
 DM_INLINE_STATIC void mainthread(void) __attribute__ ((__noreturn__));
@@ -464,7 +466,7 @@ void mainthread(void) {
       || sigaddset(&set, SIGPIPE))
     error(1, errno, "sigset failure");
       
-  while (! sigwait(&set, &sig)) exit(0);
+  if (! sigwait(&set, &sig)) exit(0);
   error(1, errno, "Sigwait failure");
   exit(1);
 }
@@ -484,8 +486,8 @@ int main(int argc, char* argv[]) {
   initmpi();
   spawn(&infodicts);
   
+  makethread("mpi sig", to_sig);
   makethread("mpi receive", from_mpi);
   makethread("dnode receive", from_dnode);
-  makethread("mpi sig", to_sig);
   mainthread();
 }

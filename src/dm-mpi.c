@@ -15,6 +15,7 @@ static MPI_Comm rook = MPI_COMM_NULL;
 static MPI_Comm world = MPI_COMM_NULL;
 static P rank = -1;
 static P universe = 0;
+static MPI_Comm rooksig;
 
 MPI_Comm getworldcomm(void) {return world;}
 P getworldsize(void) {return universe;}
@@ -38,12 +39,12 @@ static pthread_t sigthread_id;
 static pthread_t mainthread_id;
 static pthread_cond_t mpithread_cond = PTHREAD_COND_INITIALIZER;
 
-static void exithandler(void) {
-  if (rook != MPI_COMM_NULL)
-    MPI_Abort(rook, 0);
-  else
-    MPI_Abort(MPI_COMM_WORLD, 0);
-}
+/* static void exithandler(void) { */
+/*   if (rook != MPI_COMM_NULL) */
+/*     MPI_Abort(rook, 0); */
+/*   else */
+/*     MPI_Abort(MPI_COMM_WORLD, 0); */
+/* } */
 
 static void mpihandler(MPI_Comm* comm, int* err, ...) {
   static char string[MPI_MAX_ERROR_STRING];
@@ -112,23 +113,27 @@ static P mpithread_barrier(void) {
 }
 
 DM_INLINE_STATIC void mpithread_lock(void) {
-  if (pthread_mutex_lock(&mpithread_mutex)) 
-    error(1, errno, "Failed lock");
+  int errno_;
+  if ((errno_ = pthread_mutex_lock(&mpithread_mutex)))
+    error(1, errno_, "Failed lock");
 }
 
 DM_INLINE_STATIC void mpithread_recv_signal(void) {
-  if (pthread_cond_wait(&mpithread_cond, &mpithread_mutex))
-    error(1, errno, "Failed cond");
+  int errno_;
+  if ((errno_ = pthread_cond_wait(&mpithread_cond, &mpithread_mutex)))
+    error(1, errno_, "Failed cond");
 }
 
 DM_INLINE_STATIC void mpithread_send_signal(void) {
-  if (pthread_cond_signal(&mpithread_cond)) 
-    error(1, errno, "Failed signal");
+  int errno_;
+  if ((errno_ = pthread_cond_signal(&mpithread_cond)))
+    error(1, errno_, "Failed signal");
 }
 
 DM_INLINE_STATIC void mpithread_unlock(void) {
-  if (pthread_mutex_unlock(&mpithread_mutex)) 
-    error(1, errno, "Failed unlock");
+  int errno_;
+  if ((errno_ = pthread_mutex_unlock(&mpithread_mutex)))
+    error(1, errno_, "Failed unlock");
 }
 
 DM_INLINE_STATIC P mpithread_exec(MpiThreadFunc func) {
@@ -136,7 +141,7 @@ DM_INLINE_STATIC P mpithread_exec(MpiThreadFunc func) {
   mpithread_func = func;
   mpithread_send_signal();
 
-  while (!abortflag && mpithread_func) mpithread_recv_signal();
+  do {mpithread_recv_signal();} while (!abortflag && mpithread_func);
   retc = mpithread_retc;
 
   mpithread_unlock();  
@@ -144,14 +149,13 @@ DM_INLINE_STATIC P mpithread_exec(MpiThreadFunc func) {
 }
 
 static void redirect_sig(int sig) {
-  if (pthread_kill(mainthread_id, sig))
-    error(1, errno, "pthread_kill %i", sig);
+  int errno_;
+  if ((errno_ = pthread_kill(mainthread_id, sig)))
+    error(1, errno_, "pthread_kill %i", sig);
 }
 
 __attribute__ ((__noreturn__))
-static void* sigfunc(void* unused __attribute__ ((__unused__)) ) {
-  MPI_Comm rooksig;
-  MPI_Comm_dup(rook, &rooksig);
+static void sigfunc(void) {
   while (1) {
     B sig;
     MPI_Bcast(&sig, 1, MPI_UNSIGNED_CHAR, 0, rooksig);
@@ -160,22 +164,18 @@ static void* sigfunc(void* unused __attribute__ ((__unused__)) ) {
 }
 
 __attribute__ ((__noreturn__))
-static void* mpifunc(void* unused __attribute__ ((__unused__)) ) {
+static void mpifunc(void) {
   int argc = 0;
   const char* argv[] = {NULL};
   int threadtype;
   MPI_Errhandler mpierr;
-  sigset_t new;
   int universe_;
   int rank_;
 
   mpithread_lock();
 
-  if (sigfillset(&new) || pthread_sigmask(SIG_BLOCK, &new, NULL))
-    error(1, errno, "Failed sigmask");
-
   MPI_Init_thread(&argc, (char***) &argv, MPI_THREAD_MULTIPLE, &threadtype);
-  atexit(exithandler);
+  //  atexit(exithandler);
   if (threadtype < MPI_THREAD_MULTIPLE)
     error(1, 0, "MPI_Init_thread: Requested %i, received %i",
 	  MPI_THREAD_MULTIPLE, threadtype);
@@ -190,10 +190,15 @@ static void* mpifunc(void* unused __attribute__ ((__unused__)) ) {
   MPI_Comm_rank(world, &rank_);
   rank = rank_;
 
-  if (pthread_create(&sigthread_id, NULL, sigfunc, NULL))
-    error(1, errno, "Failed resignal thread create");
-
   fprintf(stderr, "Started pawn %i of %i\n", rank_, universe_);
+
+  fprintf(stderr, "Child %i waiting for rook\n", (int) rank);
+  MPI_Barrier(rook);
+  fprintf(stderr, "Child %i heard from rook\n", (int) rank);
+  MPI_Comm_dup(rook, &rooksig);
+  //  fprintf(stderr, "Child %i waiting for rooksig\n", (int) rank);
+  //MPI_Barrier(rooksig);
+  //fprintf(stderr, "Child %i heard from rooksig\n", (int) rank);
 
   while (1) {
     mpithread_func = NULL;
@@ -272,17 +277,34 @@ P mpibarrier(MPI_Comm comm) {
   return mpithread_exec(mpithread_barrier);
 }
 
+DM_INLINE_STATIC void* startthread(void* threadfunc_) {
+  void (*threadfunc)(void) = threadfunc_;
+  threadfunc();
+  return NULL;
+}
+
+DM_INLINE_STATIC void makethread(pthread_t* threadid, 
+				 void (*threadfunc)(void)) {
+  sigset_t set, oset;
+  int errno_;
+  if (sigfillset(&set))
+    error(1, errno, "Unable to empty sigset");
+  if ((errno_ = pthread_sigmask(SIG_BLOCK, &set, &oset)))
+    error(1, errno_, "Unable to block sigs");
+
+  if ((errno_ = pthread_create(threadid, NULL, startthread, threadfunc)))
+    error(1, errno_, "Failed thread create");
+
+  if ((errno_ = pthread_sigmask(SIG_SETMASK, &oset, NULL)))
+    error(1, errno_, "Unable to unblock sigs");
+}
+
 void initmpi(void) {
   mainthread_id = pthread_self();
   mpithread_lock();
-  if (pthread_create(&mpithread_id, NULL, mpifunc, NULL))
-    error(1, errno, "Failed thread create");
 
-  do {mpithread_recv_signal();} while (mpithread_func);
-  
-  fprintf(stderr, "Child %i waiting for rook\n", (int) rank);
-  currComm = rook;
-  if (mpithread_exec(mpithread_barrier))
-    error(1, 0, "Unable to barrier with rook");
-  fprintf(stderr, "Child %i heard rook\n", (int) rank);
+  makethread(&mpithread_id, mpifunc);
+  do {mpithread_recv_signal();} while (!abortflag && mpithread_func);
+  mpithread_unlock();
+  makethread(&sigthread_id, sigfunc);
 }

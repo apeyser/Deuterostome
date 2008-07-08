@@ -13,33 +13,54 @@
 // This closes a socket, 
 // then, if an error is pending:
 //     pushes an error info on the opstack, and error on the exec stack
+//     and true
+//     replaces error with ~socketdead
+// else
+//    false on opstack
+//    ~socketdead on execstack
 // and then, in all cases:
-//     pushes the socket on the opstack, and ~socketdead on the exec stack
+//     pushes the socket on the opstack.
 P makesocketdead(P retc, P socketfd, B* error_source) {
   if (retc == QUIT) return QUIT;
 
   if (socketfd == consolesocket) consolesocket = PINF;
-  if (retc && retc != LOST_CONN) makeerror(retc, error_source);
+  switch (retc) {
+    case OK: case LOST_CONN: break;
+    default: 
+      makeerror(retc, error_source);
+      if (FLOORexecs == FREEexecs) return EXECS_OVF;
+      break;
+  }
 
   delsocket(socketfd);
 
-  if (x3 > CEILexecs) return EXECS_OVF;
-  if (o2 > CEILopds) return OPDS_OVF;
+  if (o3 > CEILopds) return OPDS_OVF;
 
-  TAG(o1) = NULLOBJ | SOCKETTYPE; 
-  ATTR(o1) = 0; 
-  SOCKET_VAL(o1) = socketfd;
-  DGRAM_VAL(o1) = -1;
-  FREEopds = o2;
+  TAG(o1) = BOOL;
+  ATTR(o1) = 0;
 
-  makename((B*)"socketdead", x1);
-  ATTR(x1) = ACTIVE; 
+  TAG(o2) = NULLOBJ | SOCKETTYPE; 
+  ATTR(o2) = 0; 
+  SOCKET_VAL(o2) = socketfd;
+  DGRAM_VAL(o2) = -1;
 
-  TAG(x2) = BOOL; 
-  ATTR(x2) = (ABORTMARK | ACTIVE); 
-  BOOL_VAL(x2) = FALSE;
+  switch (retc) {
+    case OK: case LOST_CONN: 
+      if (x2 > CEILexecs) return EXECS_OVF;
+      makename((B*)"socketdead", x1);
+      ATTR(x1) = ACTIVE; 
+      BOOL_VAL(o1) = FALSE;
+      FREEexecs = x2;
+      break;
 
-  FREEexecs = x3;
+    default:
+      makename((B*) "socketdead", x_1);
+      ATTR(x_1) = ACTIVE;
+      BOOL_VAL(o1) = TRUE;
+      break;
+  }
+  FREEopds = o3;
+    
   return OK;
 }
 

@@ -687,7 +687,7 @@ c_         list all connections
   /socketmsg 1024 /b array def
   /socketdead {
     dvt begin
-    exch /deadsocket name
+    /deadsocket name
     true 1 1 nodelist length 1 sub {/knode name
       nodelist knode get /node name
       node 2 get deadsocket eq {
@@ -705,7 +705,7 @@ c_         list all connections
     } for {
       (socketdead) ERRORS /DEAD_SOCKET get 
       socketmsg errormessage toconsole
-    } if ~abort if
+    } if ~error ~abort ifelse
     end
   } bind def
 

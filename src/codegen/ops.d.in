@@ -429,11 +429,8 @@ end def
 end def
 
 /master 3 dict dup begin |[
-  /all 2 dict dup begin |[
+  /all 1 dict dup begin |[
     /commands [/getmyport /setconsole /console /killsockets /socketdead] def 
-    /errors 1 dict dup begin |[
-      /KILL_SOCKETS (** Internal KILL_SOCKETS return -- should never appear as error) def |]
-    end def |]
   end def
   /DM_ENABLE_RTHREADS 2 dict dup begin  |[
     /errors 10 dict dup begin |[

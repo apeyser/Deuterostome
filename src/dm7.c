@@ -416,10 +416,10 @@ P op_readfile(void)
   FREEvm[ARRAY_SIZE(o_2)] = '\000';
   FREEvm = oldfreevm;
 
-  alarm(30);
-  timeout = FALSE;
+  //  alarm(30);
+  //  timeout = FALSE;
  rf1:
-  if (timeout) return TIMER; 
+  //  if (timeout) return TIMER; 
   if (abortflag) return ABORT;
   fd = open((char*)FREEvm, O_RDONLY | O_NONBLOCK);
   if (fd == -1) {
@@ -429,7 +429,7 @@ P op_readfile(void)
   }
   p = (B *)VALUE_BASE(o_1); atmost = ARRAY_SIZE(o_1);
  rf2:
-  if (timeout) return TIMER; 
+  //if (timeout) return TIMER; 
   if (abortflag) return ABORT;
   nb = read(fd, p, atmost);
   if (nb == -1) {
@@ -441,7 +441,7 @@ P op_readfile(void)
   if (atmost == 0) return RNG_CHK;
   goto rf2;
  rf3:
-  if (timeout) return TIMER; 
+  //if (timeout) return TIMER; 
   if (abortflag) return ABORT;
   if (close(fd) == -1) {
     if (errno == EINTR) goto rf3; 
@@ -487,10 +487,10 @@ P op_writefile(void)
   FREEvm[ARRAY_SIZE(o_1)] = '\000';
   FREEvm = oldfreevm;
   
-  alarm(30);
-  timeout = FALSE;
+  //  alarm(30);
+  //timeout = FALSE;
  wf1:
-  if (timeout) return TIMER; 
+  //if (timeout) return TIMER; 
   if (abortflag) return ABORT;
   fd = open((char*)FREEvm, O_CREAT | O_RDWR | O_TRUNC | O_NONBLOCK,
             S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
@@ -500,7 +500,7 @@ P op_writefile(void)
   }
   p = (B *)VALUE_BASE(o_3); atmost = ARRAY_SIZE(o_3);
  wf2:
-  if (timeout) return TIMER; 
+  //if (timeout) return TIMER; 
   if (abortflag) return ABORT;
   nb = write(fd, p, atmost);
   if (nb == -1) {
@@ -510,7 +510,7 @@ P op_writefile(void)
   p += nb; atmost -= nb;
   if (atmost > 0) goto wf2;
  wf3:
-  if (timeout) return TIMER; 
+  //if (timeout) return TIMER; 
   if (abortflag) return ABORT;
   if (close(fd) == -1) {
     if (errno == EINTR) goto wf3; 
@@ -527,33 +527,33 @@ P op_writefile(void)
 
 #define TIMEOUT_SECS (3*60)
 
-static clock_t endclock;
+//static clock_t endclock;
 static P chunk_size;
 
 DM_INLINE_STATIC void START_ALARM(void) {
-		endclock = clock() + TIMEOUT_SECS*CLOCKS_PER_SEC;
-		timeout = FALSE;
+  //		endclock = clock() + TIMEOUT_SECS*CLOCKS_PER_SEC;
+  //		timeout = FALSE;
 }
 
 #define MAX_CHUNK (32000)
 //100mbit/s*1/8mbyte/mbit*1024byte/mbyte*5s*1/2minrate*/
 
 DM_INLINE_STATIC P CHECK_ALARM(void) {
-  int timeout_;
-  alarm(0);
+  //  int timeout_;
+  //alarm(0);
   
-  timeout_ = timeout;
-  timeout = FALSE;
-  if (clock() > endclock || timeout_) return TIMER;
+  //timeout_ = timeout;
+  //timeout = FALSE;
+  //if (clock() > endclock || timeout_) return TIMER;
   if (abortflag) return ABORT;
 	
-  alarm(10);
+  //alarm(10);
   return OK;
 }
 
 DM_INLINE_STATIC void END_ALARM(void) {
-  alarm(0);
-  timeout = FALSE;
+  //alarm(0);
+  //timeout = FALSE;
 }
 
 /*---------------------------------------------------- readboxfile

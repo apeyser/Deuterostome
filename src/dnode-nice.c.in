@@ -8,8 +8,8 @@
 #include <sys/wait.h>
 #include <signal.h>
 
-char quit = 0;
-void sigint(int sig __attribute__((__unused__))) {quit = 1;}
+static char quit = 0;
+static void sigint(int sig __attribute__((__unused__))) {quit = 1;}
 
 int main(int argc, char* argv[]) {
   long port;

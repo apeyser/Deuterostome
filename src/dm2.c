@@ -685,10 +685,8 @@ P exec(L32 turns)
 
  e_op:                                /* only C operators for the time! */
   tmis = OP_CODE(f);
-  if ((retc = tmis())) {
-    errsource = (B*) OP_NAME(f); 
-    return retc;
-  }
+  errsource = (B*) OP_NAME(f);
+  if ((retc = tmis())) return retc;
   goto x_t;
 
  e_name:

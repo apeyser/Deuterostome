@@ -411,12 +411,6 @@ P wm_button_press(XEvent* event, B* userdict) {
 }
 #endif //X_DISPLAY_MISSING
 
-P killsockets(void) {
-  op_Xdisconnect();
-  closesockets();
-  return ABORT;
-}
-
 /* push on operand stack:
    error code    (top)
    errsocket string
@@ -436,12 +430,12 @@ void makeerror(P retc, B* error_source) {
   LONGBIG_VAL(o2) = serverport - getportoffset();
   TAG(o3) = ARRAY | BYTETYPE; 
   ATTR(o3) = READONLY;
-  VALUE_BASE(o3) = (P)error_source; 
+  VALUE_PTR(o3) = (B*) error_source; 
   ARRAY_SIZE(o3) = strlen((char*)error_source);
   TAG(o4) = NUM | LONGBIGTYPE; 
   ATTR(o4) = 0; 
   LONGBIG_VAL(o4) = retc;
-  moveframe(errorframe,x1);
+  moveframe(errorframe, x1);
   FREEopds = o5; 
   FREEexecs = x2;
 }
@@ -596,9 +590,20 @@ P clientinput(void) {
  * vmresize failed
  * --- | --- <<all non-server sockets closed>>
  */
-P op_killsockets(void) {return KILL_SOCKETS;}
+P op_killsockets(void) {
+  op_Xdisconnect();
+  closesockets();
+  return ABORT;
+}
 
-P op_socketdead(void) {return DEAD_SOCKET;}
+P op_socketdead(void) {
+  if (o_2 < FLOORopds) return DEAD_SOCKET;
+  if (CLASS(o_2) != BOOL) return DEAD_SOCKET;
+
+  FREEopds = o_2;
+  if (BOOL_VAL(o1)) return op_error();
+  return DEAD_SOCKET;
+}
 
 P op_vmresize(void) {
   P retc = op_vmresize_();
@@ -697,10 +702,6 @@ socksdone:
 	  halt_flag = FALSE;
 	}
 	retc = nextevent(cmsf);
-	break;
-
-      case KILL_SOCKETS:
-	retc = killsockets();
 	break;
 
       default:

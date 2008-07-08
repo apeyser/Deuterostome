@@ -203,35 +203,33 @@
 // Matrix Error: lu matrix is singular
 #define MATRIX_SINGULAR               ((P)       95L)
 #endif //HAVE_ATLAS
-// ** Internal KILL_SOCKETS return -- should never appear as error
-#define KILL_SOCKETS                  ((P)       96L)
 #ifdef DM_ENABLE_RTHREADS
 // ** Rthreads are inactive
-#define RTHREADS_UNSET                ((P)       97L)
+#define RTHREADS_UNSET                ((P)       96L)
 // ** Rthreads: nodes for dictionay not a numeral
-#define RTHREADS_NUMTYPE              ((P)       98L)
+#define RTHREADS_NUMTYPE              ((P)       97L)
 // ** Rthreads: nodes for dictionary undefined
-#define RTHREADS_NUMUNDF              ((P)       99L)
+#define RTHREADS_NUMUNDF              ((P)       98L)
 // ** Rthreads: nodes for dictionary out of range
-#define RTHREADS_NUMRNG               ((P)      100L)
+#define RTHREADS_NUMRNG               ((P)       99L)
 // ** Rthreads: illegal class for info dictionary
-#define RTHREADS_DICTTYPE             ((P)      101L)
+#define RTHREADS_DICTTYPE             ((P)      100L)
 // ** Rthreads: key/val pair: val not a string
-#define RTHREADS_VALTYPE              ((P)      102L)
+#define RTHREADS_VALTYPE              ((P)      101L)
 // ** Rthreads: key/val pair: val too long
-#define RTHREADS_VALSIZE              ((P)      103L)
+#define RTHREADS_VALSIZE              ((P)      102L)
 // ** Rthreads: key/val pair: val empty
-#define RTHREADS_VALEMPTY             ((P)      104L)
+#define RTHREADS_VALEMPTY             ((P)      103L)
 // ** Rthreads: key/val pair: key too long
-#define RTHREADS_KEYSIZE              ((P)      105L)
+#define RTHREADS_KEYSIZE              ((P)      104L)
 // ** Rthreads: key/val pair: val is active
-#define RTHREADS_VALATR               ((P)      106L)
+#define RTHREADS_VALATR               ((P)      105L)
 #endif //DM_ENABLE_RTHREADS
 #ifdef DM_HOST_IS_32_BIT
 #endif //DM_HOST_IS_32_BIT
 // ** no socket events -- internal
-#define NEXTEVENT_NOEVENT             ((P)      107L)
+#define NEXTEVENT_NOEVENT             ((P)      106L)
 // ** No mpi message msg received -- internal
-#define MPI_NOMSG                     ((P)      108L)
+#define MPI_NOMSG                     ((P)      107L)
 
 #endif //DM_ERRS_H

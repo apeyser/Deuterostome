@@ -61,14 +61,14 @@ DM_INLINE_STATIC P fromconsole(void)
   sbuf = (B *)VALUE_BASE(o_1);
 
 /*----- we give ourselves 10 sec */
-  alarm(10);
-  timeout = FALSE;
+  //alarm(10);
+  //timeout = FALSE;
 /* we read until we have a \n-terminated string */
   p = sbuf; 
   atmost = nsbuf;
  rc1:
   if (atmost <= 0) return RNG_CHK;
-  if (timeout) return BAD_MSG;
+  //if (timeout) return BAD_MSG;
   if (abortflag) return ABORT;
   if ((nb = read(0, p, atmost)) < 0) {
     if ((errno == EAGAIN) || (errno == EINTR)) goto rc1;
@@ -404,7 +404,7 @@ void run_dvt_mill(void) {
     error(EXIT_FAILURE, 0, "D memory");
 
   setuphandlers();
-  sethandler(SIGINT, SIGINThandler); //override quit on int
+  sethandler(SIGINT, SIGINThandler); //override abort on int
   sethandler(SIGQUIT, SIGQUIThandler); //override quit on quit
 
 /* The system dictionary is created in the workspace of the tiny D machine.

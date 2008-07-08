@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <sys/un.h>
 #include <sys/wait.h>
+#include <sys/time.h>
 #include <netdb.h>
 
 #include "dm-prop.h"
@@ -22,6 +23,11 @@ static void redirector_quit(int sig __attribute__ ((__unused__)) ) {
   exit(0);
 }
 
+#ifndef KILL_TIME
+#define KILL_TIME (60)
+#endif
+
+#if DM_PROP_MAIN
 static void redirect_sig(int sig) {
   if (kill(getppid(), sig))
     error(EXIT_FAILURE, errno, "redirector unable to signal parent");
@@ -36,26 +42,36 @@ static void redirector_exit(void) {
 static void handle_redirect(void) {
   B sig;
 
+ repeat:
   switch (recv(0, &sig, 1, 0)) {
     case 0:
       error(1, 0, "redirector received close on recv");
     case -1:
+      if (errno == EINTR) goto repeat;
       error(EXIT_FAILURE, errno, "redirector recv");
   };
 
   propagate_sig(sig, redirect_sig);
 }
 
-int prop_main(void) {
+static void redirector_alarm(int sig __attribute ((__unused__)) ) {
+  if (kill(getppid(), 0) && errno == ESRCH) exit(0);
+}
+
+int main(void) {
   fd_set rin, rout;
   int nfds = 1;
-  int quitsigs[] = {SIGQUIT, SIGTERM, SIGINT, SIGABRT, 0};
+  int quitsigs[] = {SIGQUIT, SIGTERM, SIGINT, SIGHUP, 0};
   int *i;
+  struct itimerval timer = {{KILL_TIME, 0}, {KILL_TIME, 0}};
 
   if (atexit(redirector_exit))
     error(1, errno, "atexit for redirector");
 
   for (i = quitsigs; *i; i++) sethandler(*i, redirector_quit);
+  sethandler(SIGALRM, redirector_alarm);
+  if (setitimer(ITIMER_REAL, &timer, NULL))
+    error(1, errno, "setitimer for redirector");
 
   FD_ZERO(&rin);
   FD_SET(0, &rin);
@@ -69,9 +85,6 @@ int prop_main(void) {
   error(EXIT_FAILURE, errno, "select failed in redirector");
   return 1;
 }
-
-#if DM_PROP_MAIN
-int main(void) {return prop_main();}
 #endif //DM_PROP_MAIN
 
 

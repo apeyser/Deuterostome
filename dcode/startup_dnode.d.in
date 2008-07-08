@@ -36,14 +36,15 @@ startup_common_save capsave {
 | socket | --
 | default handler just throws away the socket and signals an error
 
-| socket aborted | -- <<error thrown>>
+| error-pending socket | -- <<error thrown>>
 /socketmsg 1024 /b array def
 /socketdead {
-  true 3 -1 roll
+  true exch
   userdict /mpidata known not {pop} {
     mpidata /socket known not {pop} {
       mpidata begin {
         socket eq a_ (\n) toconsole {
+          loadcolor
           socketmsg 0 {/red} mkpass {
             (On ) fax myname fax ( port ) fax * getmyport * number (: ) fax
             (** rthreads socket dead\n) fax
@@ -56,7 +57,7 @@ startup_common_save capsave {
   } ifelse {
     myname getmyport (socketdead) ERRORS /DEAD_SOCKET get 
     socketmsg errormessage toconsole
-  } if ~abort if
+  } if ~error ~abort ifelse
 } bind def
 
 @ENABLE_RTHREADS_START@
@@ -403,6 +404,10 @@ end def
   } stopped end {stop} if
 } bind def
 
+/rthreads_clear {
+  mpidata begin {* makeready} stopped end ~stop if
+} bind def
+
 | ~func-maker: <<i | {}>> | --
 /execpawns {
   {
@@ -484,11 +489,13 @@ end def
 |----------------------- color loader and setup
 | [/color_name ...] | -- <<redefines toconsole>>
 /make_toconsole {
-  userdict /color known not {
-    getstartupdir (/color.d) fromfiles
-  } if
+  loadcolor
   color /make_toconsole get exec
   whoami
+} bind def
+
+/loadcolor {
+  userdict /color known not {getstartupdir (color.d) fromfiles} if
 } bind def
 
 | mousestate /wintype actiondict | -- <<action exec'd>> 

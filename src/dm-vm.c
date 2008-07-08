@@ -53,7 +53,7 @@ static void makeaborthandler(void)
 
 static void makequithandler(void) 
 {
-  int quitsigs[] = {SIGQUIT, SIGTERM, 0};
+  int quitsigs[] = {SIGQUIT, SIGTERM, SIGHUP, 0};
   int* i;
   for (i = quitsigs; *i; i++) sethandler(*i, quithandler);
 }

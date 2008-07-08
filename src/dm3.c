@@ -468,21 +468,23 @@ P waitsocket(BOOLEAN ispending, fd_set* out_fds) {
 // The under score versions are for use in this modules,
 //   the non under score version are externally linkable.
 
-DM_INLINE_STATIC P readfd_(P fd, B* where, P n, P secs) {
+DM_INLINE_STATIC P readfd_(P fd, B* where, P n, 
+			   P secs __attribute__ ((__unused__)) ) {
   P r, off = 0;
 
-  alarm(secs);
-  timeout = 0;
+  //  alarm(secs);
+  //  timeout = 0;
   do {
-    if (timeout) return TIMER;
+    //if (timeout) return TIMER;
     switch ((r = read(fd, where+off, n))) {
       case 0: 
 	if (n) return LOST_CONN;
 	break;
 
       case -1:
-	if (errno == EINTR) continue;
-	return -errno;
+	if (errno != EINTR) return -errno;
+	if (abortflag) return ABORT;
+	continue;
 
       default:
 	n -= r;
@@ -497,14 +499,15 @@ P readfd(P fd, B* where, P n, P secs) {
   return readfd_(fd, where, n, secs);
 }
 
-DM_INLINE_STATIC P writefd_(P fd, B* where, P n, P secs) {
+DM_INLINE_STATIC P writefd_(P fd, B* where, P n, 
+			    P secs __attribute__ ((__unused__)) ) {
   ssize_t r, off = 0;
-  alarm(secs);
-  timeout = 0;
+  //  alarm(secs);
+  //timeout = 0;
   do {
-    if (timeout) return TIMER;
+    //if (timeout) return TIMER;
     if ((r = write(fd, where+off, n)) < 0) switch (errno) {
-      case EINTR: continue;
+      case EINTR: if (abortflag) return ABORT; continue;
       case EPIPE: return LOST_CONN;
       default: return -errno;
     }
