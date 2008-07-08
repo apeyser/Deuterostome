@@ -723,7 +723,7 @@ uninstall-am:
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am
 
-dgen.c: paths.h
+dm3.c: paths.h
 
 $(srcdir)/dsp2def.h.built: dsp2def.d dgen dgen-build
 	"$(srcdir)/dgen-build" \
