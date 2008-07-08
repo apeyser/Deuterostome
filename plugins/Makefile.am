@@ -3,6 +3,8 @@ AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 LIBS += $(LTLIBOBJS) $(top_builddir)/src/libdmglobals.la
 
+if ENABLE_PLUGINS_SUPPORT
+
 edit = 	sed \
 	  -e 's,[@]PETSC_DIR[@],$(PETSC_DIR),g' \
 	  -e 's,[@]PETSC_ARCH[@],$(PETSC_ARCH),g' \
@@ -13,8 +15,6 @@ new-plugin.d: $(srcdir)/Makefile new-plugin.d.in
 	rm -f $@ $@.tmp
 	$(edit) new-plugin.d.in >$@.tmp
 	mv $@.tmp $@
-
-if ENABLE_PLUGINS_SUPPORT
 
 if ENABLE_PLUGINS
 
