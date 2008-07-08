@@ -413,7 +413,13 @@ top_srcdir = @top_srcdir@
 AM_CFLAGS = $(GCC_CFLAGS) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
 AM_LDFLAGS = -module -no-undefined $(X_LDFLAGS)
 AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
-BUILT_SOURCES = new-plugin.d $(am__append_1) $(am__append_2)
+@ENABLE_PLUGINS_SUPPORT_TRUE@edit = sed \
+@ENABLE_PLUGINS_SUPPORT_TRUE@	  -e 's,[@]PETSC_DIR[@],$(PETSC_DIR),g' \
+@ENABLE_PLUGINS_SUPPORT_TRUE@	  -e 's,[@]PETSC_ARCH[@],$(PETSC_ARCH),g' \
+@ENABLE_PLUGINS_SUPPORT_TRUE@	  -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g'
+
+@ENABLE_PLUGINS_SUPPORT_TRUE@BUILT_SOURCES = new-plugin.d \
+@ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__append_1) $(am__append_2)
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@PROCESS_LIB = process.la process2.la
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process_la_SOURCES = process.c process.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
@@ -437,11 +443,6 @@ BUILT_SOURCES = new-plugin.d $(am__append_1) $(am__append_2)
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dmpetsc_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@ 
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dmpetsc_la_LDFLAGS = $(AM_LDFLAGS) $(PETSC_LIB)
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dmpetsc_la_CPPFLAGS = $(PETSC_CCPPFLAGS) $(AM_CPPFLAGS)
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@edit = sed \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	  -e 's,[@]PETSC_DIR[@],$(PETSC_DIR),g' \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	  -e 's,[@]PETSC_ARCH[@],$(PETSC_ARCH),g' \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	  -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g'
-
 @ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@DMFLEX_LIB = dmflex.la
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dmflex_la_SOURCES = dmflex.l dmflex.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dmflex_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
@@ -839,10 +840,10 @@ uninstall-am: uninstall-dist_dmstartDATA uninstall-pkglibDATA \
 	tags uninstall uninstall-am uninstall-dist_dmstartDATA \
 	uninstall-pkglibDATA uninstall-pkglibLTLIBRARIES
 
-new-plugin.d: $(srcdir)/Makefile new-plugin.d.in
-	rm -f $@ $@.tmp
-	$(edit) new-plugin.d.in >$@.tmp
-	mv $@.tmp $@
+@ENABLE_PLUGINS_SUPPORT_TRUE@new-plugin.d: $(srcdir)/Makefile new-plugin.d.in
+@ENABLE_PLUGINS_SUPPORT_TRUE@	rm -f $@ $@.tmp
+@ENABLE_PLUGINS_SUPPORT_TRUE@	$(edit) new-plugin.d.in >$@.tmp
+@ENABLE_PLUGINS_SUPPORT_TRUE@	mv $@.tmp $@
 
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process2.c: process2.d plugin.d
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
