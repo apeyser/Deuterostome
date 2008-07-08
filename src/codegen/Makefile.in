@@ -377,7 +377,7 @@ dcoder_CPPFLAGS = -I"$(top_srcdir)/src" -I"$(top_builddir)/src" \
 
 edit = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
-	-e 's,[@]dmstartdir[@],$(srcdir),g' \
+	-e 's,[@]dmstartdir[@],.,g' \
 	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 	-e 's,[@]dmconfdir[@],$(dmconfdir),g' \
 	-e 's,[@]ROLLBITS[@],$(ROLLBITS),g' \
