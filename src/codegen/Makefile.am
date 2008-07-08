@@ -78,7 +78,7 @@ $(srcdir)/dsp1f.h.built: dsp1f.d dgen dgen-build
 
 edit = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
-	-e 's,[@]dmstartdir[@],$(srcdir),g' \
+	-e 's,[@]dmstartdir[@],.,g' \
 	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 	-e 's,[@]dmconfdir[@],$(dmconfdir),g' \
 	-e 's,[@]ROLLBITS[@],$(ROLLBITS),g' \
