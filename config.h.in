@@ -113,6 +113,9 @@
 /* Define to 1 if you have <error.h> */
 #undef HAVE_ERROR_H
 
+/* Define to 1 if you have the <feautures.h> header file. */
+#undef HAVE_FEAUTURES_H
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 

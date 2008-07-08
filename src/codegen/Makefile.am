@@ -11,14 +11,13 @@ PRODSRCS = \
 	$(srcdir)/dm-errs.h.built
 
 MAINTAINERCLEANFILES = $(PRODSRCS) \
-	$(srcdir)/dcoder.h \
-	$(srcdir)/startup_dgen.d
-
+	$(srcdir)/dcoder.h
 dist_noinst_DATA = \
 	$(srcdir)/dmnuminc.d \
 	$(srcdir)/ops.d \
 	$(srcdir)/dsp1f.d \
 	$(srcdir)/dsp2def.d \
+	$(srcdir)/startup_dgen.d \
 	$(MAINTAINERCLEANFILES)
 
 dist_noinst_SCRIPTS = $(srcdir)/dgen-build
