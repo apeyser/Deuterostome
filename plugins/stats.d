@@ -6,8 +6,8 @@
 end def
   
 /all {
-  1024 /b array getwdir _ pop 
-  getstartupdir _ (new-plugin.d) fromfiles
+  1024 /b array getwdir s_ pop 
+  getstartupdir s_ (new-plugin.d) fromfiles
   NEW_PLUGINS begin all end
 } bind def
 
