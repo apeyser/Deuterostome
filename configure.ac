@@ -346,6 +346,7 @@ AC_CONFIG_LINKS([
   plugins/plugin.d:dcode/plugin.d
   dcode/errors.d:src/codegen/errors.d
   plugins/startup_dgen.d:src/codegen/startup_dgen.d
+  plugins/errors.d:src/codegen/errors.d
   emacs/d-mode-ops.el:src/codegen/d-mode-ops.el
   plugins/new-plugin.d.in:dcode/new-plugin.d.in
 ])
