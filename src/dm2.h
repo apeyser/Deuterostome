@@ -50,5 +50,8 @@ DLL_SCOPE P op_syshi(void);
 DLL_SCOPE P op_syslibnum(void);
 
 DLL_SCOPE P op_aborted(void);
+DLL_SCOPE void setuphandlers(void);
+
+
 
 #endif //DM_2_H

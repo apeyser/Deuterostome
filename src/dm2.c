@@ -22,6 +22,7 @@
 #include "paths.h"
 #include "dm-swapbytes.h"
 #include "dm2.h"
+#include "dm-signals.h"
 
 static char sys_hi[] = "System Operators V" PACKAGE_VERSION;
 P op_syshi(void)   {return wrap_hi((B*)sys_hi);}
@@ -1503,3 +1504,86 @@ P op_aborted(void)
   FREEexecs = x3;
   return OK;
 }
+
+/////////////////////////////////////////// signal handling code
+
+/*--------- signal handler: SIGFPE */
+
+static void SIGFPEhandler(int sig __attribute__ ((__unused__)) )
+{
+  numovf = TRUE;
+}
+
+/*---------- signal handler: SIGALRM */
+
+static void SIGALRMhandler(int sig __attribute__ ((__unused__)) )
+{
+  timeout = TRUE;
+}
+
+/*---------- signal handler: SIGINT */
+
+static void quithandler(int sig) __attribute__ ((__noreturn__));
+static void quithandler(int sig __attribute__ ((__unused__)) ) {
+  exit(0);
+}
+
+static void aborthandler(int sig) {
+  fprintf(stderr, "Aborting on signal %i\n", sig);
+  abortflag = TRUE;
+}
+
+static void makeaborthandler(void)
+{
+  int abortsigs[] = {SIGINT, 0};
+  int* i;
+  for (i = abortsigs; *i; i++) sethandler(*i, aborthandler);
+}
+
+static void makequithandler(void) 
+{
+  int quitsigs[] = {SIGQUIT, SIGTERM, SIGHUP, 0};
+  int* i;
+  for (i = quitsigs; *i; i++) sethandler(*i, quithandler);
+}
+
+static void makeignorehandler(void)
+{
+  int quitsigs[] = {SIGHUP, 0};
+  int* i;
+  for (i = quitsigs; *i; i++) sethandler(*i, SIG_IGN);
+}
+
+void setuphandlers(void) {
+/*----------------- SIGNALS that we wish to handle */
+/* FPU indigestion is recorded in the numovf flag;
+   we do not wish to be killed by it
+*/
+
+  numovf = FALSE;
+  sethandler(SIGFPE, SIGFPEhandler);
+
+/* The broken pipe signal is ignored, so it cannot kill us;
+   it will pop up in attempts to send on a broken connection
+*/
+
+  sethandler(SIGPIPE, SIG_IGN);
+
+/* We use alarms to limit read/write operations on sockets  */
+
+  timeout = FALSE;
+  sethandler(SIGALRM, SIGALRMhandler);
+
+// Switched the following to SIGABRT, produced by kill -ABRT
+// rather than control-c, that normally terminates the job
+//
+/* The interrupt signal is produced by the control-c key of the
+   console keyboard, it triggers the execution of 'abort'
+*/
+  abortflag = FALSE;
+
+  makequithandler();
+  makeaborthandler();
+  makeignorehandler();
+}
+

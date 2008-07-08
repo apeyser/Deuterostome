@@ -81,16 +81,14 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(pkgincludedir)" "$(DESTDIR)$(pkgincludedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
-am__DEPENDENCIES_1 =
-libdmbootstrap_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
+libdmbootstrap_la_DEPENDENCIES =
 am__objects_1 = libdmbootstrap_la-dmglobals.lo \
 	libdmbootstrap_la-dmnum.lo libdmbootstrap_la-dsp1.lo \
 	libdmbootstrap_la-dsp2.lo libdmbootstrap_la-dm2.lo \
 	libdmbootstrap_la-dm-conv.lo libdmbootstrap_la-dm4.lo \
 	libdmbootstrap_la-dm5.lo libdmbootstrap_la-dm6.lo \
 	libdmbootstrap_la-dm7.lo libdmbootstrap_la-dm8.lo \
-	libdmbootstrap_la-dm9.lo libdmbootstrap_la-plugin.lo \
-	libdmbootstrap_la-dm-types.lo libdmbootstrap_la-dm-vm.lo \
+	libdmbootstrap_la-dm9.lo libdmbootstrap_la-dm-types.lo \
 	libdmbootstrap_la-dm1.lo libdmbootstrap_la-dm-signals.lo
 am_libdmbootstrap_la_OBJECTS = $(am__objects_1)
 libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
@@ -98,22 +96,20 @@ libdmbootstrap_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(libdmbootstrap_la_CFLAGS) $(CFLAGS) \
 	$(libdmbootstrap_la_LDFLAGS) $(LDFLAGS) -o $@
-libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+am__DEPENDENCIES_1 =
+libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am__libdmglobals_la_SOURCES_DIST = dmglobals.c dmnuminc.h dmnum.c \
 	dsp1f.h dsp1.c dsp2.c paths.h dm2.c dm2.h dm-conv.c \
-	dm-swapbytes.h dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c pluginlib.h \
-	plugin.c dm-types.c xhack.h dm-vm.h dm-vm.c dm1.c dm-signals.c \
-	dm-signals.h matrix.c matrix.h threads.c dregex.c dregex.h \
-	dm-convert.h dm-convert.c
+	dm-swapbytes.h dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c dm-types.c \
+	xhack.h dm1.c dm-signals.c dm-signals.h matrix.c matrix.h \
+	threads.c dregex.c dregex.h dm-convert.h dm-convert.c
 am__objects_2 = libdmglobals_la-dmglobals.lo libdmglobals_la-dmnum.lo \
 	libdmglobals_la-dsp1.lo libdmglobals_la-dsp2.lo \
 	libdmglobals_la-dm2.lo libdmglobals_la-dm-conv.lo \
 	libdmglobals_la-dm4.lo libdmglobals_la-dm5.lo \
 	libdmglobals_la-dm6.lo libdmglobals_la-dm7.lo \
 	libdmglobals_la-dm8.lo libdmglobals_la-dm9.lo \
-	libdmglobals_la-plugin.lo libdmglobals_la-dm-types.lo \
-	libdmglobals_la-dm-vm.lo libdmglobals_la-dm1.lo \
+	libdmglobals_la-dm-types.lo libdmglobals_la-dm1.lo \
 	libdmglobals_la-dm-signals.lo
 @ENABLE_THREADS_TRUE@am__objects_3 = libdmglobals_la-threads.lo
 @ENABLE_REGEX_TRUE@am__objects_4 = libdmglobals_la-dregex.lo
@@ -124,6 +120,14 @@ libdmglobals_la_OBJECTS = $(am_libdmglobals_la_OBJECTS)
 libdmglobals_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libdmglobals_la_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+libdmnodal_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
+am__libdmnodal_la_SOURCES_DIST = dm-vm.c dm-vm.h plugin.h pluginlib.h \
+	cppplugin.h plugin.c
+am__objects_5 =
+@ENABLE_PLUGINS_SUPPORT_TRUE@am__objects_6 = $(am__objects_5)
+@ENABLE_PLUGINS_SUPPORT_TRUE@am__objects_7 = plugin.lo
+am_libdmnodal_la_OBJECTS = dm-vm.lo $(am__objects_6) $(am__objects_7)
+libdmnodal_la_OBJECTS = $(am_libdmnodal_la_OBJECTS)
 @ENABLE_DAEMON_TRUE@am__EXEEXT_1 = dnode-daemon$(EXEEXT)
 @ENABLE_RTHREADS_TRUE@am__EXEEXT_2 = drook$(EXEEXT) dpawn$(EXEEXT)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
@@ -132,7 +136,7 @@ PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_dgen_OBJECTS = dgen-dgen.$(OBJEXT) dgen-dm-nextevent.$(OBJEXT) \
 	dgen-dm3.$(OBJEXT) dgen-dm-prop.$(OBJEXT)
 dgen_OBJECTS = $(am_dgen_OBJECTS)
-dgen_DEPENDENCIES = $(am__DEPENDENCIES_1) libdmbootstrap.la
+dgen_DEPENDENCIES = libdmbootstrap.la
 am_dmprop_OBJECTS = dmprop-dm-prop.$(OBJEXT) \
 	dmprop-dm-signals.$(OBJEXT)
 dmprop_OBJECTS = $(am_dmprop_OBJECTS)
@@ -140,14 +144,14 @@ dmprop_LDADD = $(LDADD)
 am__dnode_SOURCES_DIST = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
 	dm-nextevent.c dm-nextevent.h dm3.c dm3.h dm-proc.c dm-proc.h \
 	dm-glob.c dm-glob.h dm-prop.c dm-prop.h dqueen.c dqueen.h
-am__objects_5 = dnode-dm-nextevent.$(OBJEXT) dnode-dm3.$(OBJEXT) \
+am__objects_8 = dnode-dm-nextevent.$(OBJEXT) dnode-dm3.$(OBJEXT) \
 	dnode-dm-proc.$(OBJEXT) dnode-dm-glob.$(OBJEXT) \
 	dnode-dm-prop.$(OBJEXT)
-@ENABLE_RTHREADS_TRUE@am__objects_6 = dnode-dqueen.$(OBJEXT)
+@ENABLE_RTHREADS_TRUE@am__objects_9 = dnode-dqueen.$(OBJEXT)
 am_dnode_OBJECTS = dnode-dnode.$(OBJEXT) dnode-dm-dnode.$(OBJEXT) \
-	$(am__objects_5) $(am__objects_6)
+	$(am__objects_8) $(am__objects_9)
 dnode_OBJECTS = $(am_dnode_OBJECTS)
-dnode_DEPENDENCIES = libdmglobals.la
+dnode_DEPENDENCIES = libdmglobals.la libdmnodal.la
 dnode_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(dnode_CFLAGS) $(CFLAGS) $(dnode_LDFLAGS) \
 	$(LDFLAGS) -o $@
@@ -161,7 +165,7 @@ dnode_nice_LDADD = $(LDADD)
 am_dpawn_OBJECTS = dpawn-dpawn.$(OBJEXT) dpawn-dm-dpawn.$(OBJEXT) \
 	dpawn-dm-mpi.$(OBJEXT)
 dpawn_OBJECTS = $(am_dpawn_OBJECTS)
-dpawn_DEPENDENCIES = libdmglobals.la
+dpawn_DEPENDENCIES = libdmglobals.la libdmnodal.la
 dpawn_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(dpawn_CFLAGS) $(CFLAGS) $(dpawn_LDFLAGS) \
 	$(LDFLAGS) -o $@
@@ -171,11 +175,11 @@ drook_DEPENDENCIES = libdmbootstrap.la
 drook_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(drook_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am__objects_7 = dvt-dm-nextevent.$(OBJEXT) dvt-dm3.$(OBJEXT) \
+am__objects_10 = dvt-dm-nextevent.$(OBJEXT) dvt-dm3.$(OBJEXT) \
 	dvt-dm-proc.$(OBJEXT) dvt-dm-glob.$(OBJEXT) \
 	dvt-dm-prop.$(OBJEXT)
 am_dvt_OBJECTS = dvt-dvt.$(OBJEXT) dvt-dm-dvt.$(OBJEXT) \
-	$(am__objects_7)
+	$(am__objects_10)
 dvt_OBJECTS = $(am_dvt_OBJECTS)
 dvt_DEPENDENCIES = libdmglobals.la
 dvt_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -199,12 +203,13 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libdmbootstrap_la_SOURCES) $(libdmglobals_la_SOURCES) \
-	$(dgen_SOURCES) $(dmprop_SOURCES) $(dnode_SOURCES) \
-	$(nodist_dnode_daemon_SOURCES) $(nodist_dnode_nice_SOURCES) \
-	$(dpawn_SOURCES) $(drook_SOURCES) $(dvt_SOURCES) \
-	$(testwordorder_SOURCES)
+	$(libdmnodal_la_SOURCES) $(dgen_SOURCES) $(dmprop_SOURCES) \
+	$(dnode_SOURCES) $(nodist_dnode_daemon_SOURCES) \
+	$(nodist_dnode_nice_SOURCES) $(dpawn_SOURCES) $(drook_SOURCES) \
+	$(dvt_SOURCES) $(testwordorder_SOURCES)
 DIST_SOURCES = $(libdmbootstrap_la_SOURCES) \
-	$(am__libdmglobals_la_SOURCES_DIST) $(dgen_SOURCES) \
+	$(am__libdmglobals_la_SOURCES_DIST) \
+	$(am__libdmnodal_la_SOURCES_DIST) $(dgen_SOURCES) \
 	$(dmprop_SOURCES) $(am__dnode_SOURCES_DIST) $(dpawn_SOURCES) \
 	$(drook_SOURCES) $(dvt_SOURCES) $(testwordorder_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -489,6 +494,7 @@ AM_LDFLAGS = $(PTHREAD_LIBS) $(X_LDFLAGS) -no-undefined
 INCLUDE = @INCLTDL@
 @ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@CPPPLUGIN_HDR = cppplugin.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_HDR = plugin.h pluginlib.h $(CPPPLUGIN_HDR)
+@ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_SRC = plugin.c
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_LD = @LIBLTDL@
 pkginclude_HEADERS = dm.h dm-errs.h dm3.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
 	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h \
@@ -512,12 +518,12 @@ dnode_SOURCES = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
 	$(socksrcs) \
 	$(DNODE_MPI_SRCS)
 
-dnode_LDADD = libdmglobals.la 
+dnode_LDADD = libdmglobals.la libdmnodal.la
 dnode_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS) $(MPI_LIBS)
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
 dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS) $(MPI_FLAGS)
 dpawn_SOURCES = dpawn.c dpawn_0.h dm-dpawn.h dm-dpawn.c dm-mpi.h dm-mpi.c
-dpawn_LDADD = libdmglobals.la
+dpawn_LDADD = libdmglobals.la libdmnodal.la
 dpawn_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS) $(MPI_LIBS)
 dpawn_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dpawn_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS) $(MPI_FLAGS)
@@ -526,20 +532,20 @@ globsrcs = dmglobals.c \
 	dmnuminc.h dmnum.c dsp1f.h dsp1.c dsp2.c \
 	paths.h dm2.c dm2.h dm-conv.c dm-swapbytes.h\
 	dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
-	pluginlib.h plugin.c \
 	dm-types.c xhack.h \
-	dm-vm.h dm-vm.c \
 	dm1.c \
 	dm-signals.c dm-signals.h
 
-lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la
-libdmglobals_la_LIBADD = $(PLUGIN_LD) $(ATLAS_LIBS) @VERSION_INFO@ @RELEASE_INFO@
+lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la libdmnodal.la
+libdmglobals_la_LIBADD = $(ATLAS_LIBS) @VERSION_INFO@ @RELEASE_INFO@
 libdmglobals_la_SOURCES = $(globsrcs) \
 	matrix.c matrix.h \
 	$(THREADSRC) $(REGEX_SRC) dm-convert.h dm-convert.c
 
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)
+libdmnodal_la_SOURCES = dm-vm.c dm-vm.h $(PLUGIN_HDR) $(PLUGIN_SRC)
+libdmnodal_la_LIBADD = $(PLUGIN_LD) 
 editpaths = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
 	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \
@@ -556,7 +562,7 @@ dgen_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 \
 	@LIBDM_DLL_IMPORT@ 
 
-dgen_LDADD = $(PLUGIN_LD) libdmbootstrap.la 
+dgen_LDADD = libdmbootstrap.la 
 drook_SOURCES = drook.c
 drook_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_REGEX=1 -DDM_DISABLE_XDISPLAY \
@@ -570,7 +576,7 @@ dmprop_SOURCES = \
 	dm-signals.c dm-signals.h 
 
 dmprop_CPPFLAGS = $(AM_CPPFLAGS) -DDM_PROP_MAIN
-libdmbootstrap_la_LIBADD = $(PLUGIN_LD) @VERSION_INFO@ @RELEASE_INFO@
+libdmbootstrap_la_LIBADD = @VERSION_INFO@ @RELEASE_INFO@
 libdmbootstrap_la_SOURCES = $(globsrcs) 
 libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_THREADS=1 -DDM_DISABLE_REGEX=1 \
@@ -645,6 +651,8 @@ libdmbootstrap.la: $(libdmbootstrap_la_OBJECTS) $(libdmbootstrap_la_DEPENDENCIES
 	$(libdmbootstrap_la_LINK) -rpath $(libdir) $(libdmbootstrap_la_OBJECTS) $(libdmbootstrap_la_LIBADD) $(LIBS)
 libdmglobals.la: $(libdmglobals_la_OBJECTS) $(libdmglobals_la_DEPENDENCIES) 
 	$(libdmglobals_la_LINK) -rpath $(libdir) $(libdmglobals_la_OBJECTS) $(libdmglobals_la_LIBADD) $(LIBS)
+libdmnodal.la: $(libdmnodal_la_OBJECTS) $(libdmnodal_la_DEPENDENCIES) 
+	$(LINK) -rpath $(libdir) $(libdmnodal_la_OBJECTS) $(libdmnodal_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
@@ -737,6 +745,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dm-nextevent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dm-prop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgen-dm3.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dm-vm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmprop-dm-prop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmprop-dm-signals.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-daemon.Po@am__quote@
@@ -763,7 +772,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm-conv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm-signals.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm-types.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm-vm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm4.Plo@am__quote@
@@ -776,12 +784,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dmnum.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dsp1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dsp2.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-plugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm-conv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm-convert.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm-signals.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm-types.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm-vm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm4.Plo@am__quote@
@@ -796,8 +802,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dsp1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dsp2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-matrix.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-plugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-threads.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-word-order.Po@am__quote@
 
 .c.o:
@@ -905,26 +911,12 @@ libdmbootstrap_la-dm9.lo: dm9.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(libdmbootstrap_la_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dm9.lo `test -f 'dm9.c' || echo '$(srcdir)/'`dm9.c
 
-libdmbootstrap_la-plugin.lo: plugin.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(libdmbootstrap_la_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-plugin.lo -MD -MP -MF $(DEPDIR)/libdmbootstrap_la-plugin.Tpo -c -o libdmbootstrap_la-plugin.lo `test -f 'plugin.c' || echo '$(srcdir)/'`plugin.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmbootstrap_la-plugin.Tpo $(DEPDIR)/libdmbootstrap_la-plugin.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='plugin.c' object='libdmbootstrap_la-plugin.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(libdmbootstrap_la_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-plugin.lo `test -f 'plugin.c' || echo '$(srcdir)/'`plugin.c
-
 libdmbootstrap_la-dm-types.lo: dm-types.c
 @am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(libdmbootstrap_la_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dm-types.lo -MD -MP -MF $(DEPDIR)/libdmbootstrap_la-dm-types.Tpo -c -o libdmbootstrap_la-dm-types.lo `test -f 'dm-types.c' || echo '$(srcdir)/'`dm-types.c
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmbootstrap_la-dm-types.Tpo $(DEPDIR)/libdmbootstrap_la-dm-types.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-types.c' object='libdmbootstrap_la-dm-types.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(libdmbootstrap_la_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dm-types.lo `test -f 'dm-types.c' || echo '$(srcdir)/'`dm-types.c
-
-libdmbootstrap_la-dm-vm.lo: dm-vm.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(libdmbootstrap_la_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dm-vm.lo -MD -MP -MF $(DEPDIR)/libdmbootstrap_la-dm-vm.Tpo -c -o libdmbootstrap_la-dm-vm.lo `test -f 'dm-vm.c' || echo '$(srcdir)/'`dm-vm.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmbootstrap_la-dm-vm.Tpo $(DEPDIR)/libdmbootstrap_la-dm-vm.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-vm.c' object='libdmbootstrap_la-dm-vm.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(libdmbootstrap_la_CFLAGS) $(CFLAGS) -c -o libdmbootstrap_la-dm-vm.lo `test -f 'dm-vm.c' || echo '$(srcdir)/'`dm-vm.c
 
 libdmbootstrap_la-dm1.lo: dm1.c
 @am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmbootstrap_la_CPPFLAGS) $(CPPFLAGS) $(libdmbootstrap_la_CFLAGS) $(CFLAGS) -MT libdmbootstrap_la-dm1.lo -MD -MP -MF $(DEPDIR)/libdmbootstrap_la-dm1.Tpo -c -o libdmbootstrap_la-dm1.lo `test -f 'dm1.c' || echo '$(srcdir)/'`dm1.c
@@ -1024,26 +1016,12 @@ libdmglobals_la-dm9.lo: dm9.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -c -o libdmglobals_la-dm9.lo `test -f 'dm9.c' || echo '$(srcdir)/'`dm9.c
 
-libdmglobals_la-plugin.lo: plugin.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -MT libdmglobals_la-plugin.lo -MD -MP -MF $(DEPDIR)/libdmglobals_la-plugin.Tpo -c -o libdmglobals_la-plugin.lo `test -f 'plugin.c' || echo '$(srcdir)/'`plugin.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmglobals_la-plugin.Tpo $(DEPDIR)/libdmglobals_la-plugin.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='plugin.c' object='libdmglobals_la-plugin.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -c -o libdmglobals_la-plugin.lo `test -f 'plugin.c' || echo '$(srcdir)/'`plugin.c
-
 libdmglobals_la-dm-types.lo: dm-types.c
 @am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -MT libdmglobals_la-dm-types.lo -MD -MP -MF $(DEPDIR)/libdmglobals_la-dm-types.Tpo -c -o libdmglobals_la-dm-types.lo `test -f 'dm-types.c' || echo '$(srcdir)/'`dm-types.c
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmglobals_la-dm-types.Tpo $(DEPDIR)/libdmglobals_la-dm-types.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-types.c' object='libdmglobals_la-dm-types.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -c -o libdmglobals_la-dm-types.lo `test -f 'dm-types.c' || echo '$(srcdir)/'`dm-types.c
-
-libdmglobals_la-dm-vm.lo: dm-vm.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -MT libdmglobals_la-dm-vm.lo -MD -MP -MF $(DEPDIR)/libdmglobals_la-dm-vm.Tpo -c -o libdmglobals_la-dm-vm.lo `test -f 'dm-vm.c' || echo '$(srcdir)/'`dm-vm.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmglobals_la-dm-vm.Tpo $(DEPDIR)/libdmglobals_la-dm-vm.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-vm.c' object='libdmglobals_la-dm-vm.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -c -o libdmglobals_la-dm-vm.lo `test -f 'dm-vm.c' || echo '$(srcdir)/'`dm-vm.c
 
 libdmglobals_la-dm1.lo: dm1.c
 @am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(libdmglobals_la_CFLAGS) $(CFLAGS) -MT libdmglobals_la-dm1.lo -MD -MP -MF $(DEPDIR)/libdmglobals_la-dm1.Tpo -c -o libdmglobals_la-dm1.lo `test -f 'dm1.c' || echo '$(srcdir)/'`dm1.c

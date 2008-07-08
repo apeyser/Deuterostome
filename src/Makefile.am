@@ -112,6 +112,7 @@ if ENABLE_CPPPLUGIN
 CPPPLUGIN_HDR = cppplugin.h
 endif ENABLE_CPPPLUGIN
 PLUGIN_HDR = plugin.h pluginlib.h $(CPPPLUGIN_HDR)
+PLUGIN_SRC = plugin.c
 PLUGIN_LD = @LIBLTDL@
 endif ENABLE_PLUGINS_SUPPORT
 
@@ -138,13 +139,13 @@ dnode_SOURCES = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
 	$(socksrcs) \
 	$(DNODE_MPI_SRCS)
 
-dnode_LDADD = libdmglobals.la 
+dnode_LDADD = libdmglobals.la libdmnodal.la
 dnode_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS) $(MPI_LIBS)
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
 dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS) $(MPI_FLAGS)
 
 dpawn_SOURCES = dpawn.c dpawn_0.h dm-dpawn.h dm-dpawn.c dm-mpi.h dm-mpi.c
-dpawn_LDADD = libdmglobals.la
+dpawn_LDADD = libdmglobals.la libdmnodal.la
 dpawn_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS) $(MPI_LIBS)
 dpawn_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dpawn_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS) $(MPI_FLAGS)
@@ -155,20 +156,21 @@ globsrcs = dmglobals.c \
 	dmnuminc.h dmnum.c dsp1f.h dsp1.c dsp2.c \
 	paths.h dm2.c dm2.h dm-conv.c dm-swapbytes.h\
 	dm4.c dm5.c dm6.c dm7.c dm8.c dm9.c \
-	pluginlib.h plugin.c \
 	dm-types.c xhack.h \
-	dm-vm.h dm-vm.c \
 	dm1.c \
 	dm-signals.c dm-signals.h
 
-lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la
-libdmglobals_la_LIBADD = $(PLUGIN_LD) $(ATLAS_LIBS) @VERSION_INFO@ @RELEASE_INFO@
+lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la libdmnodal.la
+libdmglobals_la_LIBADD = $(ATLAS_LIBS) @VERSION_INFO@ @RELEASE_INFO@
 libdmglobals_la_SOURCES = $(globsrcs) \
 	matrix.c matrix.h \
 	$(THREADSRC) $(REGEX_SRC) dm-convert.h dm-convert.c
 
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)
+
+libdmnodal_la_SOURCES = dm-vm.c dm-vm.h $(PLUGIN_HDR) $(PLUGIN_SRC)
+libdmnodal_la_LIBADD = $(PLUGIN_LD) 
 
 editpaths = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
@@ -196,7 +198,7 @@ dgen_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DBOOTSTRAP_PLUGIN=1 -DDM_DISABLE_REGEX=1 \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 \
 	@LIBDM_DLL_IMPORT@ 
-dgen_LDADD = $(PLUGIN_LD) libdmbootstrap.la 
+dgen_LDADD = libdmbootstrap.la 
 
 drook_SOURCES = drook.c
 drook_CPPFLAGS = $(AM_CPPFLAGS) \
@@ -211,7 +213,7 @@ dmprop_SOURCES = \
 	dm-signals.c dm-signals.h 
 dmprop_CPPFLAGS = $(AM_CPPFLAGS) -DDM_PROP_MAIN
 
-libdmbootstrap_la_LIBADD = $(PLUGIN_LD) @VERSION_INFO@ @RELEASE_INFO@
+libdmbootstrap_la_LIBADD = @VERSION_INFO@ @RELEASE_INFO@
 libdmbootstrap_la_SOURCES = $(globsrcs) 
 libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_THREADS=1 -DDM_DISABLE_REGEX=1 \
