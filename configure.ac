@@ -127,7 +127,7 @@ CF_IF_ENABLED([rthreads], [
   CF_MPI([], [
     AC_MSG_ERROR([No mpi found... needed for rthreads])
   ])
-])
+], [AM_CONDITIONAL([ENABLE_MPI], [false])])
 CF_PETSC()
 CF_IF_ENABLED([petsc], [
   CF_CHECK_PETSC_SIZEOF([PetscInt], [4])
