@@ -22,21 +22,15 @@
 
 #define SOCKET_TIMEOUT (60)
 
-#if HAVE_PTHREAD
-#define dmqueen_sigmask pthread_sigmask
-#else
-#defime dmqueen_sigmask sigprocmask
-#endif
-
 DM_INLINE_STATIC void setalarm(int secs) {
   sigset_t alm;
   sigemptyset(&alm);
   sigaddset(&alm, SIGALRM);
   
-  dmqueen_sigmask(SIG_BLOCK, &alm, NULL);
+  pthread_sigmask(SIG_BLOCK, &alm, NULL);
   timeout = FALSE;
   alarm(secs);
-  dmqueen_sigmask(SIG_UNBLOCK, &alm, NULL);
+  pthread_sigmask(SIG_UNBLOCK, &alm, NULL);
 }
 
 static UL32 mpin = 0;
@@ -161,12 +155,6 @@ P op_checkrthreads(void) {
 P killrthreads(void) {
   P r = OK;
 
-  if (socketfd != -1) {
-    if (close(socketfd)) r = -errno;
-    delsocket(socketfd);
-    socketfd = -1;
-  }
-
   if (sigfd != -1) {
     B sig = SIGMAP_QUIT;
     send(sigfd, &sig, 1, 0);
@@ -175,6 +163,12 @@ P killrthreads(void) {
     send(sigfd, &sig, 1, 0);
     if (close(sigfd) && ! r) r = -errno;
     sigfd = -1;
+  }
+
+  if (socketfd != -1) {
+    if (close(socketfd)) r = -errno;
+    delsocket(socketfd);
+    socketfd = -1;
   }
 
   if (pid != -1) {

@@ -152,6 +152,7 @@ P op_INIT_(void) {
   makename(MATRIX_GM_string, MATRIX_GM_frame);
   makename(MATRIX_ASS_string, MATRIX_ASS_frame);
   makename(MATRIX_DUPID_string, MATRIX_DUPID_frame);
+  makename(MATRIX_MTYPE_string, MATRIX_MTYPE_frame);
   makename(DMPETSC_KSP_string, DMPETSC_KSP_frame);
   makename(KSP_KSP_string, KSP_KSP_frame);
   makename(KSP_N_string, KSP_N_frame);

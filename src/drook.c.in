@@ -270,9 +270,6 @@ DM_INLINE_STATIC void spawn(struct InfoDicts* infodicts) {
   fprintf(stderr, "Rook heard children\n");
 
   MPI_Comm_dup(children, &childrensig);
-  //fprintf(stderr, "Rook will wait for children sig\n");
-  //MPI_Barrier(childrensig);
-  //fprintf(stderr, "Rook heard children sig\n");
 }
 
 DM_INLINE_STATIC void writesocketerror(char* type, char* info) {

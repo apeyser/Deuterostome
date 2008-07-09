@@ -341,15 +341,33 @@ DM_INLINE_STATIC P petsc_vec_destroy(void) {
 }
 
 static UL64 dupid = 1;
-typedef P (*PreassFunc)(B* pframe, void* arg);
 
-DM_INLINE_STATIC P mat_create(P m, P n, char* type, B* rpframe,
-			      PreassFunc preass, void* arg) {
+typedef P (*PreassFunc)(B* pframe, void* arg);
+typedef P (*MatCopytoFunc)(Mat A, P grow, D* row, L32 ncols);
+
+// table defined at end of file
+static struct MatTypeStruct {
+  char* type;
+  PreassFunc preass;
+  MatCopytoFunc copyto;
+} matType[];
+
+// and these are the types/indexes.
+enum DMMatrixType {
+  DENSETYPE = 0,
+  SPARSETYPE = 1
+};
+
+DM_INLINE_STATIC P mat_create(P m, P n, enum DMMatrixType mtype, 
+			      B* restrict rpframe, void* restrict arg) {
   B* pframe;
   PetscErrorCode r;
   P retc = OK;
   B* oldfreevm = FREEvm;
   Mat* A = NULL;
+  char* type = matType[mtype].type;
+  PreassFunc preass = matType[mtype].preass;
+
   if (! dupid) RETURN_ERROR(DMPETSC_MATOVF);
 
   MAKE_DMPETSC_MATRIX(pframe);
@@ -358,6 +376,7 @@ DM_INLINE_STATIC P mat_create(P m, P n, char* type, B* rpframe,
   DMPETSC_MATRIX_N(pframe) = n;
   DMPETSC_MATRIX_ASS(pframe) = FALSE;
   DMPETSC_MATRIX_DUPID(pframe) = dupid++;
+  DMPETSC_MATRIX_MTYPE(pframe) = mtype;
 
   if ((r = MatCreate(PETSC_COMM_WORLD, A))) 
     goto err;
@@ -367,8 +386,17 @@ DM_INLINE_STATIC P mat_create(P m, P n, char* type, B* rpframe,
     goto err;
   if ((r = MatGetOwnershipRange(*A, &DMPETSC_MATRIX_GM(pframe), PETSC_NULL)))
     goto err;
+  
   if (preass && (retc = preass(pframe, arg)))
     goto err;
+
+  if ((r = MatSetOption(*A, MAT_ROWS_SORTED)))
+    goto err;
+  if ((r = MatSetOption(*A, MAT_COLUMNS_SORTED)))
+    goto err;
+  if ((r = MatSetOption(*A, MAT_NO_NEW_NONZERO_LOCATIONS)))
+    goto err;
+
   if ((r = MatAssemblyBegin(*A, MAT_FINAL_ASSEMBLY)))
     goto err;
 
@@ -397,7 +425,7 @@ DM_INLINE_STATIC P petsc_mat_dense_create(void) {
   if (m < 1 || n < 1)
     return RNG_CHK;
 
-  if ((retc = mat_create(m, n, MATMPIDENSE, pframe, NULL, NULL)))
+  if ((retc = mat_create(m, n, DENSETYPE, pframe, NULL)))
     return retc;
 
   moveframe(pframe, o_2);
@@ -410,7 +438,8 @@ struct SparsePreass {
   L32* icols;
 };
   
-DM_INLINE_STATIC P petsc_mat_sparse_preass(B* pframe, void* arg) {
+DM_INLINE_STATIC P petsc_mat_sparse_preass(B* restrict pframe, 
+					   void* restrict arg) {
   PetscErrorCode r;
   Mat A = DMPETSC_MATRIX_MATRIX(pframe);
   struct SparsePreass* params = (struct SparsePreass*) arg;
@@ -438,8 +467,7 @@ DM_INLINE_STATIC P petsc_mat_sparse_create(void) {
 
   params.irows = (L32*) VALUE_PTR(o_2);
   params.icols = (L32*) VALUE_PTR(o_1);
-  if ((retc = mat_create(m, n, MATMPIAIJ, pframe,
-			 petsc_mat_sparse_preass, &params)))
+  if ((retc = mat_create(m, n, SPARSETYPE, pframe, &params)))
     return retc;
 
   moveframe(pframe, o_3);
@@ -526,14 +554,40 @@ DM_INLINE_STATIC P petsc_mat_syncto(void) {
   return OK;
 }
 
+DM_INLINE_STATIC P petsc_mat_dense_copyto(Mat A, P grow, 
+					  D* restrict row, L32 ncols) {
+  const PetscInt idxm[] = {grow};
+  PetscInt* const idxn = (PetscInt*) (row + ncols);
+  PetscInt* c;
+  PetscInt i;
+
+  if ((B*) idxn >= CEILvm) return VM_OVF;
+  for (c = idxn, i = 0; c < idxn+ncols; c++, i++) *c = i;
+    
+  DMPETSC_ERRCHECK(MatSetValues(A, 1, idxm, ncols, idxn, row, 
+				INSERT_VALUES));
+
+  return OK;
+}
+
+DM_INLINE_STATIC P petsc_mat_sparse_copyto(
+  Mat A, P grow, D* restrict row, 
+  L32 ncols __attribute__ ((__unused__)) ) 
+{
+  DMPETSC_ERRCHECK(MatSetValuesRow(A, grow, row));
+  return OK;
+}
+
 // <d > m n A | A
 DM_INLINE_STATIC P petsc_mat_copyto(void) {
+  P retc;
   Mat A;
   P m, n, len_arr, gm;
   L32 ncols;
   D* a;
   D* row;
   const D* data;
+  MatCopytoFunc copyto;
 
   if (o_4 < FLOORopds) return OPDS_UNF;
   INIT_MAT(o_1, A);
@@ -561,7 +615,9 @@ DM_INLINE_STATIC P petsc_mat_copyto(void) {
   a = (D*) VALUE_PTR(o_4);
   moveD(a, row+n, len_arr);
 
-  DMPETSC_ERRCHECK(MatSetValuesRow(A, gm+m, row));
+  copyto = matType[DMPETSC_MATRIX_MTYPE(o_1)].copyto;
+  if ((retc = copyto(A, gm+m, row, ncols))) return retc;
+
   DMPETSC_ERRCHECK(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
   DMPETSC_MATRIX_ASS(o_1) = FALSE;
 
@@ -861,5 +917,18 @@ DM_INLINE_STATIC P petsc_ksp_iterations(void) {
 
   return OK;
 }
+
+static struct MatTypeStruct matType[] = {
+  {
+    MATMPIDENSE,
+    NULL,
+    petsc_mat_dense_copyto,
+  },
+  {
+    MATMPIAIJ,
+    petsc_mat_sparse_preass,
+    petsc_mat_sparse_copyto,
+  }
+};
 
 #include "dm-dmpetsc-main.h"

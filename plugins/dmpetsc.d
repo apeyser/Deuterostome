@@ -16,13 +16,14 @@
 
   /matrix 2 dict dup begin |[
     /opaque 0 def
-    /members 6 dict dup begin |[
+    /members 7 dict dup begin |[
       /matrix [[/NUM /LONGBIGTYPE] /MATRIX_VAL /READONLY] def
       /m      [[/NUM /LONG32TYPE] /LONG32_VAL 0] def
       /n      [[/NUM /LONG32TYPE] /LONG32_VAL 0] def
       /gm     [[/NUM /LONG32TYPE] /LONG32_VAL 0] def 
       /ass    [/BOOL /BOOL_VAL 0] def 
-      /dupid  [[/NUM /LONG64TYPE] /ULONG64_VAL /READONLY] def |]
+      /dupid  [[/NUM /LONG64TYPE] /ULONG64_VAL /READONLY] def 
+      /mtype  [[/NUM /LONG32TYPE] /LONG32_VAL 0] def |]
     end def |]
   end def
 

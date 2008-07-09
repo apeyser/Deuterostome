@@ -83,7 +83,7 @@
     }
 
     | m n | A
-    /dense ~petsc_mat_dense_create
+    /dense petsc_mat_dense_create
   } bind makestruct def
 
   | /A .... /type | --
@@ -99,20 +99,20 @@
     /dense {/N name}
   } bind makestruct def
 
-  /mat_fillers_get [
+  /mat_fillers_get {
     | <d data> | <d row>
     /sparse {
       irows row get 
       dup irows 0 get sub 
       irows row 1 add get 3 -1 roll sub 
       getinterval
-    } bind
+    }
 
     | <d data> | <d row>
     /dense {
       row N mul N getinterval
-    } bind
-  ] def
+    }
+  } bind makestruct def
   
   | A data mmax ... /type | --
   /mat_fill {
@@ -355,8 +355,8 @@
 
     | pawn | m n
     /dense {
-      dup  m rangesize
-      exch n rangesize
+      dup  Aval /m get rangesize
+      exch Aval /n get rangesize
     }
   } bind makestruct def
 
@@ -383,7 +383,7 @@
       Aval /n       put
       Aval /m       put
       Aval /mtype   put mat_creators_set Aval exectype
-      Aval /params  put mpidata /pawns get 1 sub exch range 
+      Aval /params  put mpidata /pawns get 1 sub Aval /m get range 
       Aval /mmax    put pop
       Aval /id      put
       {~[
@@ -472,7 +472,7 @@
       /params get /irows get construct_exec
     }
     | A | --
-    /dense  {pop}
+    /dense  pop
   } bind makestruct def
   
   | A <d data> | <d data>
@@ -604,15 +604,16 @@
     /petsc_tester_ layer petsc_tester begin {
       {
         /petsc_tester_ layer 
+        PETSC begin
         100 dict dup /petsc_tester name begin
       } sexecpawns
 
       /matD dup /dense 5 dup mat_create def
       {
-        0 matD /MATRIX_M get dup mul /d array copy /matDdata name
+        0 matD /MATRIX_M get 5 mul /d array copy /matDdata name
         0 1 matD /MATRIX_M get 1 sub {/row name
           matDdata row 5 mul 5 getinterval 
-          matD /MATRIX_GM row add 5 1 index sub getinterval
+          matD /MATRIX_GM get row add 5 1 index sub getinterval
           1 exch copy pop
         } for
       } sexecpawns
@@ -676,6 +677,7 @@
       {kS kD}           ~ksp_destroy forall
       
       {
+        end
         end
         false /petsc_tester_ _layer pop
       } sexecpawns

@@ -85,8 +85,7 @@ int main(void) {
   error(EXIT_FAILURE, errno, "select failed in redirector");
   return 1;
 }
-#endif //DM_PROP_MAIN
-
+#else
 
 __attribute__ ((__noreturn__))
 static void execsighandler(P sigsocket, P serverport_) {
@@ -108,16 +107,43 @@ static void execsighandler(P sigsocket, P serverport_) {
   
 /****************** signal redirector ********************/
 
+#if HAVE_PTHREAD
+#define dmsigmask sigprocmask
+#else
+#define dmsigmask pthread_sigmask
+#endif //HAVE_PTHREAD
+
+DM_INLINE_STATIC void setalarm(int secs) {
+  sigset_t alm;
+  sigemptyset(&alm);
+  sigaddset(&alm, SIGALRM);
+  
+  dmsigmask(SIG_BLOCK, &alm, NULL);
+  timeout = FALSE;
+  alarm(secs);
+  dmsigmask(SIG_UNBLOCK, &alm, NULL);
+}
+
 static pid_t redirector = -1;
 
 static void redirector_killer(void) {
+  P pid;
+
   if (kill(redirector, SIGTERM)) {
     error(0, errno, "Killing redirector");
     return;
   }
 
-  while (waitpid(redirector, NULL, 0) == -1 
-	 && errno == EINTR);
+  setalarm(5);
+  while ((pid = waitpid(redirector, NULL, 0)) == -1 
+	 && errno == EINTR && ! timeout);
+  
+  if (pid == -1) {
+    kill(redirector, SIGKILL);
+    setalarm(5);
+    while ((pid = waitpid(redirector, NULL, 0)) == -1 
+	   && errno == EINTR && ! timeout);
+  }
 }
 
 void spawnsighandler(P sigsocket, P serverport,
@@ -140,6 +166,7 @@ void spawnsighandler(P sigsocket, P serverport,
       return;
   }
 }
+#endif //DM_PROP_MAIN
 
 
 #if ENABLE_UNIX_SOCKETS

@@ -161,11 +161,11 @@ property."
 
 (defun d-comint-mode-highlight-input (string)
   (when (string= string "")
-	(if d-comint-mode-activate-highlight-input
-		(put-text-property comint-last-input-start comint-last-input-end 
-						   'font-lock-face 'd-comint-mode-highlight-input)
-	  (remove-text-properties comint-last-input-start comint-last-input-end
-							  '(font-lock-face nil)))))
+    (if d-comint-mode-activate-highlight-input
+	(put-text-property comint-last-input-start comint-last-input-end 
+			   'font-lock-face 'd-comint-mode-highlight-input)
+      (remove-text-properties comint-last-input-start comint-last-input-end
+			      '(font-lock-face nil)))))
 
 (require 'd-mode)
 (define-derived-mode d-comint-mode comint-mode "DVT"
@@ -201,6 +201,12 @@ Derived from `comint-mode' with font-lock from `d-mode'.
   (insert (mapconcat (lambda (s) s) strings ""))
   (comint-send-input))
 
+(defun d-comint-mode-send-line (&rest strings)
+  (goto-char (point-max))
+  (delete-region (line-beginning-position) (line-end-position))
+  (insert (mapconcat (lambda (s) s) strings ""))
+  (comint-send-input))
+
 (defun d-comint-mode-dabort ()
   (interactive)
   (d-comint-mode-send 
@@ -213,24 +219,28 @@ Derived from `comint-mode' with font-lock from `d-mode'.
 
 (defun d-comint-mode-stop ()
   (interactive)
-  (goto-char (point-max))
-  (delete-region (line-beginning-position) (line-end-position))
-  (d-comint-mode-send "! stop")
-  (d-comint-mode-scream 0))
-
-(defun d-comint-mode-abort ()
-  (interactive)
-  (goto-char (point-max))
-  (delete-region (line-beginning-position) (line-end-position))
-  (d-comint-mode-send "! abort")
+  (d-comint-mode-send-line "! stop")
   (d-comint-mode-scream 0))
 
 (defun d-comint-mode-continue ()
   (interactive)
-  (goto-char (point-max))
-  (delete-region (line-beginning-position) (line-end-position))
-  (d-comint-mode-send "! continue")
+  (d-comint-mode-send-line "! continue")
   (d-comint-mode-scream 0))
+
+(defun d-comint-mode-abort ()
+  (interactive)
+  (d-comint-mode-send-line "! abort")
+  (d-comint-mode-scream 0))
+
+(defun d-comint-mode-next-talk ()
+  (interactive)
+  (d-comint-mode-send-line "% dvt begin emacs_next_talk")
+)
+
+(defun d-comint-mode-next-talk ()
+  (interactive)
+  (d-comint-mode-send-line "% dvt begin emacs_last_talk")
+)
 
 (defun d-comint-mode-scream-and-send ()
   (interactive)
@@ -348,6 +358,8 @@ Derived from `comint-mode' with font-lock from `d-mode'.
   (define-key d-comint-mode-map [?\C-x ?n ?w] 'd-comint-mode-widen)
   (define-key d-comint-mode-map [?~] 'd-mode-insert-squiggle)
   (define-key d-comint-mode-map [?/] 'd-mode-insert-squiggle)
+  (define-key d-comint-mode-map [?\M-s-down] 'd-comint-mode-next-talk)
+  (define-key d-comint-mode-map [?\M-s-up]   'd-comint-mode-last-talk)
 )
 ;;(eval-when-compile (setq d-comint-mode-map-setup t))
 ;;(if (not d-comint-mode-map-setup) (d-comint-mode-setup-map))

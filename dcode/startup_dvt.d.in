@@ -858,6 +858,32 @@ c_         list all connections
     end
   } bind userdict 3 -1 roll put
 
+  /emacs_next_talk {
+    kbdowner {
+      1 add nodelist length mod
+      dup kbdowner eq {false exit} if
+      nodelist 1 index get 2 get null ne 1 index 0 eq or {
+        true exit
+      } if
+    } loop
+
+    ~_t ~pop ifelse
+    end
+  } bind def
+
+  /emacs_last_talk {
+    kbdowner {
+      1 sub dup 0 lt {pop nodelist length 1 sub} if
+      dup kbdowner eq {false exit} if
+      nodelist 1 index get 2 get null ne 1 index 0 eq or {
+        true exit 
+      } if
+    } loop
+
+    ~_t ~pop ifelse
+    end
+  } bind def
+
 |------------------------ front end support ------------------------
 
 |-------------------------------------- print node info

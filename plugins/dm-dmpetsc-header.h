@@ -129,8 +129,19 @@
   OPAQUE_MEM_SET(dframe, MATRIX_DUPID_frame, frame); \
 } while (0)
 
+#define DMPETSC_MATRIX_MTYPE_FRAME(dframe) OPAQUE_MEM(dframe, MATRIX_MTYPE_frame)
+
+#define DMPETSC_MATRIX_MTYPE(dframe) (LONG32_VAL(DMPETSC_MATRIX_MTYPE_FRAME(dframe)))
+
+#define DMPETSC_MATRIX_MTYPE_INIT(dframe)do { \
+  B frame[FRAMEBYTES]; \
+  TAG(frame) = (NUM|LONG32TYPE); \
+  ATTR(frame) = 0; \
+  OPAQUE_MEM_SET(dframe, MATRIX_MTYPE_frame, frame); \
+} while (0)
+
 #define MAKE_DMPETSC_MATRIX(frame) do { \
-  if (! (frame = make_opaque_frame(0, DMPETSC_MATRIX_frame, MATRIX_MATRIX_frame, MATRIX_M_frame, MATRIX_N_frame, MATRIX_GM_frame, MATRIX_ASS_frame, MATRIX_DUPID_frame, NULL))) \
+  if (! (frame = make_opaque_frame(0, DMPETSC_MATRIX_frame, MATRIX_MATRIX_frame, MATRIX_M_frame, MATRIX_N_frame, MATRIX_GM_frame, MATRIX_ASS_frame, MATRIX_DUPID_frame, MATRIX_MTYPE_frame, NULL))) \
     return VM_OVF; \
   DMPETSC_MATRIX_MATRIX_INIT(frame); \
   DMPETSC_MATRIX_M_INIT(frame); \
@@ -138,6 +149,7 @@
   DMPETSC_MATRIX_GM_INIT(frame); \
   DMPETSC_MATRIX_ASS_INIT(frame); \
   DMPETSC_MATRIX_DUPID_INIT(frame); \
+  DMPETSC_MATRIX_MTYPE_INIT(frame); \
 } while (0)
 
 #define TEST_DMPETSC_MATRIX(frame) do { \
@@ -361,6 +373,8 @@ static B MATRIX_ASS_frame[FRAMEBYTES];
 static B* MATRIX_ASS_string = "MATRIX_ASS";
 static B MATRIX_DUPID_frame[FRAMEBYTES];
 static B* MATRIX_DUPID_string = "MATRIX_DUPID";
+static B MATRIX_MTYPE_frame[FRAMEBYTES];
+static B* MATRIX_MTYPE_string = "MATRIX_MTYPE";
 static B DMPETSC_KSP_frame[FRAMEBYTES];
 static B* DMPETSC_KSP_string = "DMPETSC_KSP";
 static B KSP_KSP_frame[FRAMEBYTES];
