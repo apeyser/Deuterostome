@@ -16,6 +16,7 @@
 #include "dm-nextevent.h"
 #include "dm-mpi.h"
 #include "dm-vm.h"
+#include "dm7.h"
 
 /*----------------- DM global variables -----------------------------*/
 

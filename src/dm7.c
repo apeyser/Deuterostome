@@ -12,7 +12,7 @@
           - writeboxfile
           - readboxfile
           - findfiles
-					- findfile
+	  - findfile
           - tosystem
           - fromsystem
           - transcribe
@@ -33,8 +33,9 @@
 #include <math.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <sys/time.h>
 
-#include "dm.h"
+#include "dm7.h"
 #include "dm2.h"
 
 /*--------------------------------------------------- gettime
@@ -46,16 +47,46 @@
 
 P op_gettime(void)
 {
-  time_t t;
-  if (o1 > CEILopds) return OPDS_OVF;
+  struct timeval t;
+  if (o2 > CEILopds) return OPDS_OVF;
   
-  if (((t = time(NULL)) == -1) && errno)
-    return CLOCK_ERR;
+  errno = 0;
+  if (gettimeofday(&t, NULL)) 
+    return errno ? -errno : CLOCK_ERR;
 
   TAG(o1) = NUM | LONGBIGTYPE; 
   ATTR(o1) = 0;
-  LONGBIG_VAL(o1) = (LBIG) t;
+  LONGBIG_VAL(o1) = (LBIG) t.tv_sec;
+
   FREEopds = o2;
+  return OK;
+}
+
+/*--------------------------------------------------- gettimeofday
+   -- | time-secs time-usecs
+
+ - returns compacted time as long numeral (seconds since something)
+ -  and a long numeral of microsecs
+ - use 'localtime' on time-secs to convert into date and time
+*/
+
+P op_gettimeofday(void)
+{
+  struct timeval t;
+  if (o3 > CEILopds) return OPDS_OVF;
+  
+  errno = 0;
+  if (gettimeofday(&t, NULL)) 
+    return errno ? -errno : CLOCK_ERR;
+
+  TAG(o1) = NUM | LONGBIGTYPE; 
+  ATTR(o1) = 0;
+  LONGBIG_VAL(o1) = (LBIG) t.tv_sec;
+  TAG(o2) = NUM | LONGBIGTYPE;
+  ATTR(o2) = 0;
+  LONGBIG_VAL(o2) = (LBIG) t.tv_usec;
+
+  FREEopds = o3;
   return OK;
 }
 

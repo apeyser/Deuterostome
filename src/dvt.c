@@ -28,6 +28,7 @@
 #include "dm2.h"
 #include "dm-proc.h"
 #include "dm-glob.h"
+#include "dm7.h"
 
 /*----------------- DM global variables -----------------------------*/
 

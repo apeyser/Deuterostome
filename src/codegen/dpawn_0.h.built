@@ -107,6 +107,7 @@ B* _sysop[] =
   (B*) "search", (B*) op_search,
   (B*) "anchorsearch", (B*) op_anchorsearch,
   (B*) "gettime", (B*) op_gettime,
+  (B*) "gettimeofday", (B*) op_gettimeofday,
   (B*) "localtime", (B*) op_localtime,
   (B*) "getwdir", (B*) op_getwdir,
   (B*) "setwdir", (B*) op_setwdir,

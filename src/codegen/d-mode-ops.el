@@ -108,6 +108,7 @@
   "search"
   "anchorsearch"
   "gettime"
+  "gettimeofday"
   "localtime"
   "getwdir"
   "setwdir"

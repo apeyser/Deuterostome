@@ -27,6 +27,7 @@
 #include "dm-proc.h"
 #include "dm-glob.h"
 #include "dm-prop.h"
+#include "dm7.h"
 
 #include "dnode_0.h"
 

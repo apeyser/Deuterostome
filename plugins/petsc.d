@@ -606,36 +606,54 @@
     } in_petsc
   } bind def
   
-  100 dict /petsc_tester name
+  /petsc_tester 100 dict dup begin |[
+    /dim 5 def
+    /show true def 
+    /timediff {
+      4 1 roll exch 4 1 roll
+      sub 3 1 roll sub 1e-6 exch mul exch add
+    } bind def |]
+  end def
+
   /petsc_test {
     /petsc_tester_ layer petsc_tester begin {
-      {
-        /petsc_tester_ layer 
-        PETSC begin
-        100 dict dup /petsc_tester name begin
-      } sexecpawns
+      ~[
+        {
+          /petsc_tester_ layer 
+          PETSC begin
+          100 dict dup /petsc_tester name begin
+        } ~exec
+        /dim dim ~def
+      ] sexecpawns
 
-      /matD dup /dense 5 dup mat_create def
+      gettimeofday
+      /matD dup /dense dim dup mat_create def
       {
-        0 matD /MATRIX_M get 5 mul /d array copy /matDdata name
+        /matDdata 0 matD /MATRIX_M get dim mul /d array copy def
         0 1 matD /MATRIX_M get 1 sub {/row name
-          matDdata row 5 mul 5 getinterval 
-          matD /MATRIX_GM get row add 5 1 index sub getinterval
+          matDdata row dim mul dim getinterval 
+          matD /MATRIX_GM get row add dim 1 index sub getinterval
           1 exch copy pop
         } for
       } sexecpawns
       matD ~matDdata mat_fill
+      gettimeofday (matD build: ) toconsole timediff neg _ pop
       
-      /vecx dup 5 vec_create def
+      /vecxS  dup dim vec_create def
+      /vecxD  dup dim vec_create def
+      /vecxSD dup dim vec_create def
       {
-        5 vecx /VECTOR_N get /d array copy /vecxdata name
+        5 vecxS /VECTOR_N get /d array copy /vecxdata name
       } sexecpawns
-      vecx ~vecxdata vec_fill
+      vecxS  ~vecxdata vec_fill
+      vecxD  ~vecxdata vec_fill
+      vecxSD ~vecxdata vec_fill
 
-      5 {/nl name /n0 name
+      gettimeofday
+      dim {/nl name /n0 name
         /matSrows 0 nl 1 add /l array copy def
         1 1 matSrows last {/row name
-          5 n0 row add 1 sub sub 
+          dim n0 row add 1 sub sub 
           matSrows row 1 sub get add
           matSrows row put
         } for
@@ -643,40 +661,74 @@
         matScols 0
         1 1 matSrows last {
           matSrows exch get 1 index sub
-          5 1 index sub
+          dim 1 index sub
           1
           ramp 
         } for pop pop
       } execrange
-      /matS dup ~matSrows ~matScols /sparse 5 dup mat_create def
+      /matS dup ~matSrows ~matScols /sparse dim dup mat_create def
       {
         /matSdata 1 matScols length /d array copy def
       } sexecpawns
       matS ~matSdata mat_fill
-      
-      /kS dup ksp_create def
-      /kD dup ksp_create def
+      gettimeofday (matS build: ) toconsole timediff neg _ pop
 
-      /vecb dup 5 vec_create def
+      gettimeofday
+      dim {/nl name /n0 name
+        /matSDrows nl 1 add /l array 
+          0 1 index length 0 dim ramp pop 
+        def
+        /matSDcols matSDrows dup last get /l array 
+          0 nl {dim 0 1 ramp} repeat pop
+        def
+      } execrange
+      /matSD dup ~matSDrows ~matSDcols /sparse dim dup mat_create def
+      {
+        /matSDdata 0 matSDcols length /d array copy def
+        0 1 matSD /MATRIX_M get 1 sub {/row name
+          matSDdata row dim mul dim getinterval
+          matSD /MATRIX_GM get row add dim 1 index sub getinterval
+          1 exch copy pop
+        } for
+      } sexecpawns
+      matS ~matSdata mat_fill
+      gettimeofday (matSD build: ) toconsole timediff neg _ pop
+      
+      /kS  dup ksp_create def
+      /kD  dup ksp_create def
+      /kSD dup ksp_create def
+
+      /vecb dup dim vec_create def
       {
         /vecbdata vecb /VECTOR_N get /d array
-          0 vecb /VECTOR_N get 5 vecb /VECTOR_GN get sub -1 ramp pop
+          0 vecb /VECTOR_N get dim vecb /VECTOR_GN get sub -1 ramp pop
         def
       } sexecpawns
       vecb ~vecbdata vec_fill
 
-      /vecb2 dup 5 vec_create def
+      /vecb2 dup dim vec_create def
       {
         /vecb2data vecbdata dup length /d array copy 2 mul def
       } sexecpawns
       vecb2 ~vecb2data vec_fill
       
-      /res 5 /d array def
-      {{kS matS} {kD matD}} {exec /mat name /k name
+      /res dim /d array def
+      {
+        {(sparse) kS matS vecxS}
+        {(sparse dense) kSD matSD vecxSD}
+        {(dense) kD matD vecxD}
+      } {exec /vecx name /mat name /k name /mt name
+        (Testing: ) toconsole mt toconsole (\n) toconsole
         (Solution: \n) toconsole
-        k mat vecx vecb  res get_ksp_solve   v_ pop
+        gettimeofday k mat vecx vecb  res get_ksp_solve gettimeofday
+        3 -1 roll show {v_} if pop
+        timediff neg _ pop
+
+        vecx ~vecxdata vec_fill
         (Solution x2: \n) toconsole
-        k     vecx vecb2 res get_ksp_resolve v_ pop
+        gettimeofday k vecx vecb2 res get_ksp_resolve gettimeofday
+        3 -1 roll show {v_} if pop
+        timediff neg _ pop
       } forall
       
       {vecx vecb vecb2} {exec vec_destroy} forall
