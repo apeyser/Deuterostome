@@ -34,6 +34,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <sys/time.h>
+#include <sys/resource.h>
 
 #include "dm7.h"
 #include "dm2.h"
@@ -89,6 +90,104 @@ P op_gettimeofday(void)
   FREEopds = o3;
   return OK;
 }
+
+/*---------------------------------------------------- profiletime
+  ~active <x of >=8> | ... <x of 8>
+  0,1 = user time
+  2,3 = system time
+  4,5 = user time of children
+  6.7 = system time of children
+  times are in seconds, useconds
+*/
+
+#define reterr(errv) do {retc = errv; goto err;} while (0)
+#define upusage(index, group, ctype, ttype)		\
+  ((L64*) VALUE_PTR(x_1))[index]			\
+    = usage_##group.ru_##ctype##time.tv_##ttype		\
+      - ((L64*) VALUE_PTR(x_1))[index]
+    
+static P x_op_profiletime(void) {
+  struct rusage usage_self;
+  struct rusage usage_children;
+  P retc;
+
+  if (getrusage(RUSAGE_SELF, &usage_self)
+      || getrusage(RUSAGE_CHILDREN, &usage_children)) 
+    reterr(-errno);
+  if (x_1 < FLOORexecs) reterr(EXECS_UNF);
+  if (TAG(x_1) != (ARRAY|LONG64TYPE)) reterr(EXECS_COR);
+  if (ARRAY_SIZE(x_1) != 8) reterr(EXECS_COR);
+  if (o2 > CEILopds) reterr(OPDS_OVF);
+
+  upusage(0, self,     u, sec);
+  upusage(1, self,     u, usec);
+  upusage(2, self,     s, sec);
+  upusage(3, self,     s, usec);
+  upusage(4, children, u, sec);
+  upusage(5, children, u, usec);
+  upusage(6, children, s, sec);
+  upusage(7, children, s, usec);
+
+  moveframe(x_1, o1);
+  FREEopds = o2;
+  FREEexecs = x_1;
+
+  return OK;
+
+ err:
+  if (x_1 >= FLOORexecs && TAG(x_1) == (ARRAY|LONG64TYPE))
+    FREEexecs = x_1;
+  return retc;
+}
+
+#undef upusage
+#undef reterr
+
+#define upusage(index, group, ctype, ttype) \
+  ((L64*) VALUE_PTR(x1))[index] \
+    = usage_##group.ru_##ctype##time.tv_##ttype
+
+P op_profiletime(void) {
+  struct rusage usage_self;
+  struct rusage usage_children;
+
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (! (ATTR(o_2) & ACTIVE)) return OPD_ATR;
+  if (TAG(o_1) != (ARRAY|LONG64TYPE)) return OPD_TYP;
+  if (ARRAY_SIZE(o_1) < 8) return RNG_CHK;
+  if (x5 < CEILexecs) return EXECS_OVF;  
+
+  moveframe(o_1, x1);
+  ARRAY_SIZE(x1) = 8;
+
+  TAG(x2) = OP;
+  ATTR(x2) = ACTIVE;
+  OP_NAME(x2) = "x_profiletime";
+  OP_CODE(x2) = x_op_profiletime;
+  
+  moveframe(o_2, x3);
+  ATTR(x3) &= ~PARENT;
+
+  if (getrusage(RUSAGE_SELF, &usage_self)
+      || getrusage(RUSAGE_CHILDREN, &usage_children))
+    return -errno;
+
+  upusage(0, self,     u, sec);
+  upusage(1, self,     u, usec);
+  upusage(2, self,     s, sec);
+  upusage(3, self,     s, usec);
+  upusage(4, children, u, sec);
+  upusage(5, children, u, usec);
+  upusage(6, children, s, sec);
+  upusage(7, children, s, usec);
+
+  FREEopds = o_2;
+  FREEexecs = x4;
+
+  return OK;
+}
+
+#undef upusage
 
 /*--------------------------------------------------- localtime
   time  <L of >=6 > | <L year month day hour min sec >

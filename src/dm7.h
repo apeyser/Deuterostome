@@ -6,6 +6,7 @@
 /*-- time/date and file access  */
 DLL_SCOPE P op_gettime(void);
 DLL_SCOPE P op_gettimeofday(void);
+DLL_SCOPE P op_profiletime(void);
 DLL_SCOPE P op_localtime(void);
 DLL_SCOPE P op_getwdir(void);
 DLL_SCOPE P op_setwdir(void);

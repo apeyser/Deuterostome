@@ -216,7 +216,7 @@
       /closelist /openlist
       /ctype /parcel /text /number
       /token /search /anchorsearch 
-      /gettime /gettimeofday /localtime /getwdir /setwdir
+      /gettime /gettimeofday /profiletime /localtime /getwdir /setwdir
       /readfile /writefile /findfiles /findfile
       /tosystem /fromsystem /transcribe
       /fax /merge /nextobject
