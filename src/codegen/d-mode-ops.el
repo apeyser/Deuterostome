@@ -150,6 +150,8 @@
   "getconfdir"
   "regex"
   "regexi"
+  "regexs"
+  "regexsi"
   "quit"
   "fork"
   "makefd"

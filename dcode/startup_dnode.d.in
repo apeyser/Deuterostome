@@ -121,6 +121,18 @@ startup_common_save capsave {
     updatet
   } bind def
 
+  /emacs_next_talk {
+    cpawn 1 add dup pawns eq {pop -1} if
+    dup cpawn ne ~setcurrent ~pop ifelse
+    end
+  } bind def
+
+  /emacs_last_talk {
+    cpawn dup 0 lt {pop pawns} if 1 sub
+    dup cpawn ne ~setcurrent ~pop ifelse
+    end
+  } bind def
+
   /kill {
     {null makerthreads postcall} stopped
     {winmade ~deletewin if} stopped pop
@@ -404,8 +416,18 @@ end def
   } stopped end {stop} if
 } bind def
 
-/rthreads_clear {
-  mpidata begin {* makeready} stopped end ~stop if
+/rthreads_r {
+  * mpidata begin ~makeready stopped end ~stop if
+} bind def
+
+/rthreads_kill {
+  mpidata begin ~kill stopped pop end
+} bind def
+
+/rthreads_t {
+  mpidata begin {
+    dup cpawn ne ~setcurrent ~pop ifelse
+  } stopped end ~stop if
 } bind def
 
 | ~func-maker: <<i | {}>> | --
@@ -413,17 +435,18 @@ end def
   {
     mpidata begin {
       save
+      /nwait 0 def
       0 1 pawns 1 sub {
-        dup makebusy
         dup 3 index exec 
         dup null eq {pop pop} {
+          1 index makebusy
           ~[exch destruct_exec ~wait_dnode] rsend
+          /nwait nwait 1 add def
         } ifelse
       } for
       restore
       pop
 
-      /nwait pawns def
       {
         nwait 0 eq {exit} if
         halt

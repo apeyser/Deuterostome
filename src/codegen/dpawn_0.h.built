@@ -184,6 +184,8 @@ B* _sysop[] =
 #ifdef DM_ENABLE_REGEX
   (B*) "regex", (B*) op_regex,
   (B*) "regexi", (B*) op_regexi,
+  (B*) "regexs", (B*) op_regexs,
+  (B*) "regexsi", (B*) op_regexsi,
 #endif //DM_ENABLE_REGEX
   (B*) "loadlib", (B*) op_loadlib,
   (B*) "nextlib", (B*) op_nextlib,

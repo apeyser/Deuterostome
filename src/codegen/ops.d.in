@@ -299,7 +299,7 @@ end def |]
 
 /regex 2 dict dup begin |[
   /DM_ENABLE_REGEX 2 dict dup begin |[
-    /commands [/regex /regexi] def
+    /commands [/regex /regexi /regexs /regexsi] def
     /errors 100 dict dup begin |[
       /REGEX_BADPAT (Regex Error: Invalid regular expression) def
       /REGEX_ECOLLATE (Regex Error: Invalid collating element) def

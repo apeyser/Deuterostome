@@ -126,6 +126,9 @@ startup_common_save capsave {
 | on the 'nodes' window.
 
   /consoleline {
+@ENABLE_REGEX_START@
+    (^[ \n]+) regexsi {pop pop} if
+@ENABLE_REGEX_END@
     dup /line name length 0 gt {
       (%!$#@) line 0 1 getinterval search { 
         length 1 add /linetag name pop pop
@@ -834,7 +837,7 @@ c_         list all connections
   /_t {
     dvt begin {/target name
       target 0 ge { 
-        target nodelist length gt ~stop if
+        target nodelist length ge ~stop if
         nodelist target get /node name 
         node 0 get class /nullclass ne { 
           target /kbdowner name /knode target def
@@ -855,6 +858,16 @@ c_         list all connections
       } for
 
     } stopped { (Think!\n) toconsole } if
+    end
+  } bind userdict 3 -1 roll put
+
+  /_r {
+    dvt begin {
+      dup * eq {{pop knode setready} fornodes} {
+        dup nodelist length ge {pop stop} if
+        setready
+      } ifelse
+    } stopped {(Think!\n) toconsole} if
     end
   } bind userdict 3 -1 roll put
 

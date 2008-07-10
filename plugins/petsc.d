@@ -77,9 +77,11 @@
   } bind def
 
   /mat_creators {
-    | n <l irows> <l icols> | A
+    | <l irows> <l icols> n | A
     /sparse {
-      3 -1 roll petsc_mat_sparse_create
+      2 index dup 0 get 2 copy sub pop 5 2 roll
+      petsc_mat_sparse_create
+      3 1 roll add pop
     }
 
     | m n | A
@@ -125,7 +127,7 @@
       0 1 A /MATRIX_M get 1 sub {/row name
         data filler row 0 A petsc_mat_copyto pop
       } for
-      mmax A /MATRIX_M get sub {petsc_mat_syncto} repeat
+      A mmax A /MATRIX_M get sub ~petsc_mat_syncto repeat pop
     } in_petsc
   } bind def
 
@@ -292,7 +294,10 @@
   | /x N | xdict
   /vec_create {
     {
-      2 dict dup begin /N name /id name end dup /xval name
+      2 dict dup begin |[
+        exch /N name 
+        exch /id name |]
+      end dup /xval name 
       {~[
         xval /id get
         3 -1 roll xval /N get rangesize 
@@ -312,7 +317,7 @@
   /condense_sparse {
     {
       /icols name /irows name
-      /icols_len mpi /pawns get list def
+      /icols_len mpidata /pawns get list def
       ~[
         /icols construct_execn
         {~[exch length mpirank ~condense_recv] rsend} ~in_petsc
@@ -346,11 +351,12 @@
 
   | pawn | sub-params...
   /mat_creators_get {
-    | pawn | n ~sub-irows ~sub-icols
+    | pawn | ~sub-irows ~sub-icols n
     /sparse {
-      Aval /n get rangesize
-      Aval /params get /icols get construct_exec
+      Aval /n get rangesize openlist
       Aval /params get /irows get construct_exec
+      Aval /params get /icols get construct_exec
+      counttomark 2 add -2 roll pop
     }
 
     | pawn | m n
@@ -366,8 +372,8 @@
     /sparse {
       2 copy condense_sparse
       2 dict dup begin {
-        /icols name
-        /irows name
+        exch /icols name
+        exch /irows name
       } stopped end {stop} if
     }
 
@@ -582,6 +588,7 @@
         3 1 roll 
         ~get_ksp_solve
       ] sexecpawns
+      data
     } in_petsc
   } bind def
   
@@ -626,13 +633,13 @@
       vecx ~vecxdata vec_fill
 
       5 {/nl name /n0 name
-        /matSrows 0 nl 1 add /d array copy def
+        /matSrows 0 nl 1 add /l array copy def
         1 1 matSrows last {/row name
           5 n0 row add 1 sub sub 
           matSrows row 1 sub get add
           matSrows row put
         } for
-        /matScols matSrows last get /d array def
+        /matScols matSrows dup last get /l array def
         matScols 0
         1 1 matSrows last {
           matSrows exch get 1 index sub
@@ -665,16 +672,16 @@
       vecb2 ~vecb2data vec_fill
       
       /res 5 /d array def
-      {matS matD} {/mat name
+      {{kS matS} {kD matD}} {exec /mat name /k name
         (Solution: \n) toconsole
         k mat vecx vecb  res get_ksp_solve   v_ pop
         (Solution x2: \n) toconsole
         k     vecx vecb2 res get_ksp_resolve v_ pop
       } forall
       
-      {vecx vecb vecb2} ~vec_destroy forall
-      {matS matD}       ~mat_destroy forall
-      {kS kD}           ~ksp_destroy forall
+      {vecx vecb vecb2} {exec vec_destroy} forall
+      {matS matD}       {exec mat_destroy} forall
+      {kS kD}           {exec ksp_destroy} forall
       
       {
         end

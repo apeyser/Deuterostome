@@ -207,6 +207,11 @@ Derived from `comint-mode' with font-lock from `d-mode'.
   (insert (mapconcat (lambda (s) s) strings ""))
   (comint-send-input))
 
+(defun d-comint-mode-send-quiet (&rest strings)
+  (process-send-string
+   (get-buffer-process (current-buffer))
+   (concat "\n" (mapconcat (lambda (s) s) strings "") "\n")))
+
 (defun d-comint-mode-dabort ()
   (interactive)
   (d-comint-mode-send 
@@ -234,13 +239,26 @@ Derived from `comint-mode' with font-lock from `d-mode'.
 
 (defun d-comint-mode-next-talk ()
   (interactive)
-  (d-comint-mode-send-line "% dvt begin emacs_next_talk")
+  (d-comint-mode-send-quiet "% dvt begin emacs_next_talk")
 )
 
 (defun d-comint-mode-last-talk ()
   (interactive)
-  (d-comint-mode-send-line "% dvt begin emacs_last_talk")
+  (d-comint-mode-send-quiet "% dvt begin emacs_last_talk")
 )
+
+(defun d-comint-mode-next-pawn-talk ()
+  (interactive)
+  (d-comint-mode-send-quiet 
+   "userdict /mpidata known {mpidata begin emacs_next_talk} if")
+)
+
+(defun d-comint-mode-last-pawn-talk ()
+  (interactive)
+  (d-comint-mode-send-quiet 
+   "userdict /mpidata known {mpidata begin emacs_last_talk} if")
+)
+
 
 (defun d-comint-mode-scream-and-send ()
   (interactive)
@@ -261,33 +279,33 @@ Derived from `comint-mode' with font-lock from `d-mode'.
 
 (defun d-comint-mode-redirect-process-open ()
   (let ((log-name (if (string= (buffer-name) "*dvt*") "dvt.log" 
-					(concat (buffer-name) ".log"))))
-	(let ((d-comint-mode-redirect-ignore t)
-		  (string1 (concat "[31m" 
-			(if d-comint-mode-redirect-mode 
-				(concat "*** Emacs: Redirecting output from dvt terminal to file "
-						log-name " ***")
-			  (concat "*** Emacs: Redirecting output from file " log-name
-					  " to dvt terminal ***"))
-				  "[0m\n")))
-	  (comint-output-filter (get-buffer-process (current-buffer)) string1))
+		    (concat (buffer-name) ".log"))))
+    (let ((d-comint-mode-redirect-ignore t)
+	  (string1 (concat "[31m" 
+	     (if d-comint-mode-redirect-mode 
+		 (concat "*** Emacs: Redirecting output from dvt terminal to file "
+			 log-name " ***")
+	       (concat "*** Emacs: Redirecting output from file " log-name
+		       " to dvt terminal ***"))
+	     "[0m\n")))
+      (comint-output-filter (get-buffer-process (current-buffer)) string1))
 
-	(when (and d-comint-mode-redirect-mode (not d-comint-mode-redirect-process))
-	  (setq d-comint-mode-redirect-process
-			(start-process (concat log-name "-redirect") nil
-						   "/bin/bash" "-c" 
-						   (concat d-comint-mode-redirect-command 
-								   "\'" log-name "\'")))
-	  (set-process-query-on-exit-flag d-comint-mode-redirect-process nil)
-    ;;(process-kill-without-query d-comint-mode-redirect-process)
-	  (add-hook 'kill-buffer-hook 'd-comint-mode-redirect-kill-process
-				nil t)))
+    (when (and d-comint-mode-redirect-mode (not d-comint-mode-redirect-process))
+      (setq d-comint-mode-redirect-process
+	    (start-process (concat log-name "-redirect") nil
+			   "/bin/bash" "-c" 
+			   (concat d-comint-mode-redirect-command 
+				   "\'" log-name "\'")))
+      (set-process-query-on-exit-flag d-comint-mode-redirect-process nil)
+      ;;(process-kill-without-query d-comint-mode-redirect-process)
+      (add-hook 'kill-buffer-hook 'd-comint-mode-redirect-kill-process
+		nil t)))
 
   (process-send-string d-comint-mode-redirect-process
-					   (format-time-string
-						(if d-comint-mode-redirect-mode
-						  "--- Start: %Y-%m-%d %T%z ---\n" 
-						  "--- Stop: %Y-%m-%d %T%z ---\n")))
+		       (format-time-string
+			(if d-comint-mode-redirect-mode
+			    "--- Start: %Y-%m-%d %T%z ---\n" 
+			  "--- Stop: %Y-%m-%d %T%z ---\n")))
   )
 
 (define-minor-mode d-comint-mode-redirect-mode "" nil " >"
@@ -347,19 +365,24 @@ Derived from `comint-mode' with font-lock from `d-mode'.
       (global-set-key (vconcat d-comint-mode-focus-raise-global) 
                       'd-comint-mode-focus-raise-switch))
   (define-key d-comint-mode-map [f8] 'dnode)
-  (define-key d-comint-mode-map [?\C-h ?d] 'd-comint-mode-help)
+  (define-key d-comint-mode-map [(control ?h) ?d] 'd-comint-mode-help)
   (define-key d-comint-mode-map [(control !)] 'd-comint-mode-scream)
-  (define-key d-comint-mode-map [?\C-1] 'd-comint-mode-scream)
+  (define-key d-comint-mode-map [(control ?1)] 'd-comint-mode-scream)
   ;;(define-key d-comint-mode-map [?\C-c ?\C-c] 'd-comint-mode-clear)
-  (define-key d-comint-mode-map [?\C-c ?c] 'd-comint-mode-clear)
-  (define-key d-comint-mode-map [?\C-c ?\C-a] 'd-comint-mode-dabort)
+  (define-key d-comint-mode-map [(control ?c) ?c] 'd-comint-mode-clear)
+  (define-key d-comint-mode-map [(control ?c) (control ?a)] 
+    'd-comint-mode-dabort)
   (define-key d-comint-mode-map [(control >)] 'd-comint-mode-redirect-mode)
-  (define-key d-comint-mode-map [?\C-x ?n ?p] 'd-comint-mode-narrow)
-  (define-key d-comint-mode-map [?\C-x ?n ?w] 'd-comint-mode-widen)
+  (define-key d-comint-mode-map [(control ?x) ?n ?p] 'd-comint-mode-narrow)
+  (define-key d-comint-mode-map [(control ?x) ?n ?w] 'd-comint-mode-widen)
   (define-key d-comint-mode-map [?~] 'd-mode-insert-squiggle)
   (define-key d-comint-mode-map [?/] 'd-mode-insert-squiggle)
   (define-key d-comint-mode-map [(meta down)] 'd-comint-mode-next-talk)
   (define-key d-comint-mode-map [(meta up)]   'd-comint-mode-last-talk)
+  (define-key d-comint-mode-map [(meta shift down)] 
+    'd-comint-mode-next-pawn-talk)
+  (define-key d-comint-mode-map [(meta shift up)]   
+    'd-comint-mode-last-pawn-talk)
 )
 ;;(eval-when-compile (setq d-comint-mode-map-setup t))
 ;;(if (not d-comint-mode-map-setup) (d-comint-mode-setup-map))
@@ -431,30 +454,30 @@ Otherwise, one argument `-i' is passed to the shell.
 	     (xargs-name 'dvt-args)
 	     (cdir default-directory)
 	     dvt-buffer)
-		(save-excursion
-		  (set-buffer
-		   (setq dvt-buffer 
-				 (apply 'make-comint-in-buffer "dvt" buffer prog
-						(when (file-exists-p startfile) startfile)
-						(when (and xargs-name (boundp xargs-name))
-						  (symbol-value xargs-name)))))
-		  (d-comint-mode)
-		  (d-comint-mode-server)
-		  (when dm-server-process
-			(process-send-string 
-			 (get-buffer-process dvt-buffer)
-			 (concat 
-			  "Xwindows {(" (d-comint-mode-shell-quote dm-server-name) ") ("
-			  (d-comint-mode-shell-quote (buffer-name dvt-buffer)) 
-			  ") take_input_setup} if\n"))))
-
-		(when (or d-comint-mode-keep-focus override)
-		  (dvt-special-frame buffer)
-		  (dvt-scroll-special buffer))
-
-		(switch-to-buffer dvt-buffer)
-		(goto-char (point-max)))
-	(switch-to-buffer buffer)))
+	(save-excursion
+	  (set-buffer
+	   (setq dvt-buffer 
+		 (apply 'make-comint-in-buffer "dvt" buffer prog
+			(when (file-exists-p startfile) startfile)
+			(when (and xargs-name (boundp xargs-name))
+			  (symbol-value xargs-name)))))
+	  (d-comint-mode)
+	  (d-comint-mode-server)
+	  (when dm-server-process
+	    (process-send-string 
+	     (get-buffer-process dvt-buffer)
+	     (concat 
+	      "Xwindows {(" (d-comint-mode-shell-quote dm-server-name) ") ("
+	      (d-comint-mode-shell-quote (buffer-name dvt-buffer)) 
+	      ") take_input_setup} if\n"))))
+	
+	(when (or d-comint-mode-keep-focus override)
+	  (dvt-special-frame buffer)
+	  (dvt-scroll-special buffer))
+	
+	(switch-to-buffer dvt-buffer)
+	(goto-char (point-max)))
+    (switch-to-buffer buffer)))
 
 (defun d-comint-mode-quote (string)
   "Quote a string to be sent to and interpreted by the dvt.
@@ -580,30 +603,22 @@ dvt buffer. Used from global key-binding"
 (defun d-comint-mode-help ()
   "Tell dvt to output help info"
   (interactive)
-  (process-send-string
-   (get-buffer-process (current-buffer))
-   "hk_\nh_\n"))
+  (d-comint-mode-send-quiet "% hk_\n% h_"))
 
 (defun d-comint-mode-raise-thehorses ()
   "Tell dvt to raise TheHorses window."
   (interactive)
-  (process-send-string 
-   (get-buffer-process (current-buffer))
-   "% userdict begin raise_thehorses\n"))
+  (d-comint-mode-send-quiet "% userdict begin raise_thehorses"))
 
 (defun d-comint-mode-raise-all ()
   "Tell dvt to raise all dvt windows"
   (interactive)
-  (process-send-string
-   (get-buffer-process (current-buffer))
-   "% userdict begin raise_all\n"))
+  (d-comint-mode-send-quiet "% userdict begin raise_all"))
 
 (defun d-comint-mode-hide-all ()
   "Tell dvt to hide all dvt windows"
   (interactive)
-  (process-send-string
-   (get-buffer-process (current-buffer))
-   "% userdict begin hide_all\n"))
+  (d-comint-mode-send-quiet "% userdict begin hide_all"))
 
 (defcustom d-comint-dnode-mode-dnode-args nil 
   "*Options to dnode program"

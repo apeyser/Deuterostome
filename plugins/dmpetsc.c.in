@@ -463,10 +463,9 @@ DM_INLINE_STATIC P petsc_mat_sparse_create(void) {
   if ((m = ARRAY_SIZE(o_3)-1) < 1) return RNG_CHK;
   if (! PVALUE(o_1, &n) || n > L32MAX) return UNDF_VAL;
   if (n < 1) return RNG_CHK;
-  if (ARRAY_SIZE(o_2) > m*n) return RNG_CHK;
 
-  params.irows = (L32*) VALUE_PTR(o_2);
-  params.icols = (L32*) VALUE_PTR(o_1);
+  params.irows = (L32*) VALUE_PTR(o_3);
+  params.icols = (L32*) VALUE_PTR(o_2);
   if ((retc = mat_create(m, n, SPARSETYPE, pframe, &params)))
     return retc;
 
