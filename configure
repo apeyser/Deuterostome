@@ -1745,7 +1745,7 @@ Some influential environment variables:
   MAX_NUM_EXECS
               maximum exec stack size in frame, default=5000
   MAX_MEM_SIZE
-              maximum vm allocation size in mb, default=1000
+              maximum vm allocation size in mb, default=4000
   MAX_USER_DICT_SIZE
               maximum user dict size, default=5000
   DM_IPPORT_USERRESERVED
@@ -3146,7 +3146,7 @@ echo "${ECHO_T}setting to ${MAX_NUM_EXECS}" >&6; }
   { echo "$as_me:$LINENO: checking if ${cf_ac_cv_arg_val} is set" >&5
 echo $ECHO_N "checking if ${cf_ac_cv_arg_val} is set... $ECHO_C" >&6; }
 
-  if test "${MAX_MEM_SIZE-set}" == set ; then MAX_MEM_SIZE="1000"; fi
+  if test "${MAX_MEM_SIZE-set}" == set ; then MAX_MEM_SIZE="4000"; fi
 
 cat >>confdefs.h <<_ACEOF
 #define MAX_MEM_SIZE ${MAX_MEM_SIZE}

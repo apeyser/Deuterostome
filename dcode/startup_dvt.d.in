@@ -130,7 +130,7 @@ startup_common_save capsave {
     (^[ \n]+) regexsi {pop pop} if
 @ENABLE_REGEX_END@
     dup /line name length 0 gt {
-      (%!$#@) line 0 1 getinterval search { 
+      (%!$#@^) line 0 1 getinterval search { 
         length 1 add /linetag name pop pop
         /line line 1 line length 1 sub getinterval def
       } { pop 0 /linetag name } ifelse
@@ -156,7 +156,7 @@ startup_common_save capsave {
       } fornodes} ifelse
     } bind
   
-    |-- *
+    |-- %
     | dvt - execute phrase
     | dnode - execute phrase on dvt
     {
@@ -238,7 +238,21 @@ startup_common_save capsave {
         } fornodes
       } ifelse
     } bind
-    
+
+    |-- ^
+    | dvt   - execute phrase
+    | dnode - execute on dnode, not pawns
+
+    { 
+      kbdowner 0 eq {line end mkact exec dvt begin} { { 
+        node 3 get {node 2 get line send} { 
+          knode setbusy 
+          save
+          node 2 get ~[~[line knode ~dvtreceive_np] ~lock] send
+          restore
+        } ifelse
+      } fornodes} ifelse
+    } bind
   ] def
 
   |-- loop operator to invoke an individual dnode or group of dnodes

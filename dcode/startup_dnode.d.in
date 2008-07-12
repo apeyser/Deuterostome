@@ -349,23 +349,23 @@ startup_common_save capsave {
 end def
 
 /rthread_ops {
-  /memsize mpidata get 1 put
+  mpidata /memsize get 0 put
 } bind def
 
 /rthreads_dicts {
-  /memsize mpidata get 2 put
+  mpidata /memsize get 1 put
 } bind def
 
 /rthreads_execs {
-  /memsize mpidata get 3 put
+  mpidata /memsize get 2 put
 } bind def
 
-/rthread_memory {
-  /memsize mpidata get 4 put
+/rthreads_memory {
+  mpidata /memsize get 3 put
 } bind def
 
 /rthreads_user {
-  /memsize mpidata get 5 put
+  mpidata /memsize get 4 put
 } bind def
 
 | [[n /key val ..]...] | --
@@ -395,7 +395,7 @@ end def
 |   or no rthread active (cpawn == -1)
 | if all rthreads active (cpawn == *), executes on all rthreads,
 |  otherwise executes on the chosen rthread (cpawn)
-/rthreads_exec {unlock} bind def | Overridden immediately if ENABLE_RTHREADS
+/rthreads_exec ~unlock bind def | Overridden immediately if ENABLE_RTHREADS
 @ENABLE_RTHREADS_START@
 /rthreads_exec {
   mpidata /cpawn get dup -1 eq {pop unlock} {
@@ -475,12 +475,12 @@ end def
 
 | dvt... expect to be locked when called
 
-|  ~exec save knode | ??
+|  ~exec save knode true-if-send-to-active-pawn | ??
 /dvtreceive_base {
-  userdict /knode put
-  dup capsave userdict /dvtsave put
-  ~rthreads_exec stopped pop
-  userdict /dvtsave get restore
+  exch userdict /knode put
+  exch dup capsave userdict /dvtsave put
+  {~rthreads_exec ~unlock ifelse} stopped pop
+  userdict /dvtsave known {userdict /dvtsave get restore} if
   dvtrespond
 } bind def
 
@@ -492,12 +492,17 @@ end def
 
 | save (line) knode | ??
 /dvtreceive {
-  exch mkact 3 1 roll dvtreceive_base
+  exch mkact 3 1 roll true dvtreceive_base
+} bind def
+
+| save (line) knode | ??
+/dvtreceive_np {
+  exch mkact 3 1 roll false dvtreceive_base
 } bind def
 
 | save (line) knode | ??
 /dvtsystem {
-  ~tosystem 4 -1 roll 3 -1 roll dvtreceive_base
+  ~tosystem 4 -1 roll 3 -1 roll true dvtreceive_base
 } bind def
 
 /linebuf 8192 /b array def
@@ -505,7 +510,7 @@ end def
   {
     {linebuf 0 3 -1 roll mkact exec 0 exch getinterval tosystem}
     4 -1 roll 3 -1 roll 
-    dvtreceive_base
+    true dvtreceive_base
   } lock
 } bind def
 
