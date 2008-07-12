@@ -21,7 +21,7 @@
       /m      [[/NUM /LONG32TYPE] /LONG32_VAL 0] def
       /n      [[/NUM /LONG32TYPE] /LONG32_VAL 0] def
       /gm     [[/NUM /LONG32TYPE] /LONG32_VAL 0] def 
-      /ass    [/BOOL /BOOL_VAL 0] def 
+      /ass    [[/NUM /LONGBIGTYPE] /ASS_STATE /READONLY] def 
       /dupid  [[/NUM /LONG64TYPE] /ULONG64_VAL /READONLY] def 
       /mtype  [[/NUM /LONG32TYPE] /LONG32_VAL 0] def |]
     end def |]
@@ -105,6 +105,7 @@ end def
   /petsc_vec_destroy null def 
   /petsc_mat_sparse_create null def 
   /petsc_mat_dense_create null def 
+  /petsc_mat_blockdense_create null def
   /petsc_mat_copy null def
   /petsc_mat_copyto null def
   /petsc_mat_copyfrom null def

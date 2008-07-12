@@ -86,6 +86,9 @@
 
     | m n | A
     /dense petsc_mat_dense_create
+
+    | m n M N | A
+    /blockdense petsc_mat_blockdense_create
   } bind makestruct def
 
   | /A .... /type | --
@@ -99,6 +102,9 @@
     /sparse {/irows name}
     | N | --
     /dense {/N name}
+
+    | N | --
+    /blockdense {/N name}
   } bind makestruct def
 
   /mat_fillers_get {
@@ -112,6 +118,11 @@
 
     | <d data> | <d row>
     /dense {
+      row N mul N getinterval
+    }
+
+    | <d data> | <d row>
+    /blockdense {
       row N mul N getinterval
     }
   } bind makestruct def
@@ -155,6 +166,8 @@
     /sparse {/irows name}
     | -- | --
     /dense  {}
+    | -- | --
+    /blockdense {}
   } bind makestruct def
 
   | A | global_interval_start
@@ -163,6 +176,9 @@
       pop irows row get
     }
     /dense {
+      /MATRIX_GM get row add N mul
+    }
+    /blockdense {
       /MATRIX_GM get row add N mul
     }
   } bind makestruct def
@@ -364,6 +380,14 @@
       dup  Aval /m get rangesize
       exch Aval /n get rangesize
     }
+
+    | pawn | m n M N
+    /blockdense {
+      dup Aval /m get rangesize
+      exch Aval /n get rangesize
+      Aval /m get
+      Aval /n get 
+    }
   } bind makestruct def
 
   | ... | param-dict
@@ -377,8 +401,11 @@
       } stopped end {stop} if
     }
 
-    | -- | param-dictdict
+    | -- | param-dict
     /dense {0 dict}
+
+    | -- | param-dict
+    /blockdense {0 dict}
   } bind makestruct def
 
   | /A .... /type m n | Adict
@@ -411,6 +438,9 @@
 
     | -- | N
     /dense {Aval /n get}
+
+    | -- | N
+    /blockdense {Aval /n get}
   } bind makestruct def
 
   | A ~data | --
@@ -479,6 +509,8 @@
     }
     | A | --
     /dense  pop
+    | A | --
+    /blockdense pop
   } bind makestruct def
   
   | A <d data> | <d data>
@@ -609,10 +641,19 @@
   /petsc_tester 100 dict dup begin |[
     /dim 5 def
     /show true def 
+
+    | (name) ~active:--|-- | --
+    /timer {
+      gettimeofday 3 -1 roll exec 
+      gettimeofday timediff neg
+      exch toconsole (: ) toconsole _ pop
+    } bind def
+
     /timediff {
       4 1 roll exch 4 1 roll
       sub 3 1 roll sub 1e-6 exch mul exch add
     } bind def |]
+
   end def
 
   /petsc_test {
@@ -626,77 +667,104 @@
         /dim dim ~def
       ] sexecpawns
 
-      gettimeofday
-      /matD dup /dense dim dup mat_create def
-      {
-        /matDdata 0 matD /MATRIX_M get dim mul /d array copy def
-        0 1 matD /MATRIX_M get 1 sub {/row name
-          matDdata row dim mul dim getinterval 
-          matD /MATRIX_GM get row add dim 1 index sub getinterval
-          1 exch copy pop
-        } for
-      } sexecpawns
-      matD ~matDdata mat_fill
-      gettimeofday (matD build: ) toconsole timediff neg _ pop
+      (\n) toconsole
+      (matD create) {/matD dup /dense dim dup mat_create def} timer
+      (matD data) {
+        {
+          /matDdata 0 matD /MATRIX_M get dim mul /d array copy def
+          0 1 matD /MATRIX_M get 1 sub {/row name
+            matDdata row dim mul dim getinterval 
+            matD /MATRIX_GM get row add dim 1 index sub getinterval
+            1 exch copy pop
+          } for
+        } sexecpawns
+      } timer
+      (matD fill) {matD ~matDdata mat_fill} timer
       
       /vecxS  dup dim vec_create def
       /vecxD  dup dim vec_create def
       /vecxSD dup dim vec_create def
+      /vecxBD dup dim vec_create def
       {
         5 vecxS /VECTOR_N get /d array copy /vecxdata name
       } sexecpawns
       vecxS  ~vecxdata vec_fill
       vecxD  ~vecxdata vec_fill
       vecxSD ~vecxdata vec_fill
+      vecxBD ~vecxdata vec_fill
 
-      gettimeofday
-      dim {/nl name /n0 name
-        /matSrows 0 nl 1 add /l array copy def
-        1 1 matSrows last {/row name
-          dim n0 row add 1 sub sub 
-          matSrows row 1 sub get add
-          matSrows row put
-        } for
-        /matScols matSrows dup last get /l array def
-        matScols 0
-        1 1 matSrows last {
-          matSrows exch get 1 index sub
-          dim 1 index sub
-          1
-          ramp 
-        } for pop pop
-      } execrange
-      /matS dup ~matSrows ~matScols /sparse dim dup mat_create def
-      {
-        /matSdata 1 matScols length /d array copy def
-      } sexecpawns
-      matS ~matSdata mat_fill
-      gettimeofday (matS build: ) toconsole timediff neg _ pop
-
-      gettimeofday
-      dim {/nl name /n0 name
-        /matSDrows nl 1 add /l array 
+      (\n) toconsole
+      (matS init) {
+        dim {/nl name /n0 name
+          /matSrows 0 nl 1 add /l array copy def
+          1 1 matSrows last {/row name
+            dim n0 row add 1 sub sub 
+            matSrows row 1 sub get add
+            matSrows row put
+          } for
+          /matScols matSrows dup last get /l array def
+          matScols 0
+          1 1 matSrows last {
+            matSrows exch get 1 index sub
+            dim 1 index sub
+            1
+            ramp 
+          } for pop pop
+        } execrange
+      } timer
+      (matS create) {
+        /matS dup ~matSrows ~matScols /sparse dim dup mat_create def
+      } timer
+      (matS data) {
+        {
+          /matSdata 1 matScols length /d array copy def
+        } sexecpawns
+      } timer
+      (matS fill) {matS ~matSdata mat_fill} timer
+      
+      (\n) toconsole
+      (matSD init) {
+        dim {/nl name /n0 name
+          /matSDrows nl 1 add /l array 
           0 1 index length 0 dim ramp pop 
-        def
-        /matSDcols matSDrows dup last get /l array 
+          def
+          /matSDcols matSDrows dup last get /l array 
           0 nl {dim 0 1 ramp} repeat pop
-        def
-      } execrange
-      /matSD dup ~matSDrows ~matSDcols /sparse dim dup mat_create def
-      {
-        /matSDdata 0 matSDcols length /d array copy def
-        0 1 matSD /MATRIX_M get 1 sub {/row name
-          matSDdata row dim mul dim getinterval
-          matSD /MATRIX_GM get row add dim 1 index sub getinterval
-          1 exch copy pop
-        } for
-      } sexecpawns
-      matS ~matSdata mat_fill
-      gettimeofday (matSD build: ) toconsole timediff neg _ pop
+          def
+        } execrange
+      } timer
+      (matSD create) {
+        /matSD dup ~matSDrows ~matSDcols /sparse dim dup mat_create def
+      } timer
+      (matSD data) {
+        {
+          /matSDdata 0 matSDcols length /d array copy def
+          0 1 matSD /MATRIX_M get 1 sub {/row name
+            matSDdata row dim mul dim getinterval
+            matSD /MATRIX_GM get row add dim 1 index sub getinterval
+            1 exch copy pop
+          } for
+        } sexecpawns
+      } timer
+      (matSD fill) {matSD ~matSDdata mat_fill} timer
+
+|       gettimeofday
+|       /matBD dup /blockdense dim dup mat_create def
+|       {
+|         /matBDdata 0 matBD /MATRIX_M get dim mul /d array copy def
+|         0 1 matBD /MATRIX_M get 1 sub {/row name
+|           matBDdata row dim mul dim getinterval 
+|           matBD /MATRIX_GM get row add dim 1 index sub getinterval
+|           1 exch copy pop
+|         } for
+|       } sexecpawns
+|       matBD ~matBDdata mat_fill
+|       gettimeofday (matBD build: ) toconsole timediff neg _ pop
       
       /kS  dup ksp_create def
       /kD  dup ksp_create def
       /kSD dup ksp_create def
+|      /kBD dup ksp_create def
 
       /vecb dup dim vec_create def
       {
@@ -714,10 +782,12 @@
       
       /res dim /d array def
       {
-        {(sparse) kS matS vecxS}
+        {(sparse)       kS  matS  vecxS}
+|        {(blockdense)   kBD matBD vecxBD}
         {(sparse dense) kSD matSD vecxSD}
-        {(dense) kD matD vecxD}
+        {(dense)        kD  matD  vecxD}
       } {exec /vecx name /mat name /k name /mt name
+        (\n) toconsole
         (Testing: ) toconsole mt toconsole (\n) toconsole
         (Solution: \n) toconsole
         gettimeofday k mat vecx vecb  res get_ksp_solve gettimeofday

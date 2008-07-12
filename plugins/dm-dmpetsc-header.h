@@ -109,12 +109,12 @@
 
 #define DMPETSC_MATRIX_ASS_FRAME(dframe) OPAQUE_MEM(dframe, MATRIX_ASS_frame)
 
-#define DMPETSC_MATRIX_ASS(dframe) (BOOL_VAL(DMPETSC_MATRIX_ASS_FRAME(dframe)))
+#define DMPETSC_MATRIX_ASS(dframe) (ASS_STATE(DMPETSC_MATRIX_ASS_FRAME(dframe)))
 
 #define DMPETSC_MATRIX_ASS_INIT(dframe)do { \
   B frame[FRAMEBYTES]; \
-  TAG(frame) = (BOOL); \
-  ATTR(frame) = 0; \
+  TAG(frame) = (NUM|LONGBIGTYPE); \
+  ATTR(frame) = READONLY; \
   OPAQUE_MEM_SET(dframe, MATRIX_ASS_frame, frame); \
 } while (0)
 
@@ -309,6 +309,9 @@ P op_petsc_mat_sparse_create(void);
 
 #define op_petsc_mat_dense_create EXPORTNAME(op_petsc_mat_dense_create)
 P op_petsc_mat_dense_create(void);
+
+#define op_petsc_mat_blockdense_create EXPORTNAME(op_petsc_mat_blockdense_create)
+P op_petsc_mat_blockdense_create(void);
 
 #define op_petsc_mat_copy EXPORTNAME(op_petsc_mat_copy)
 P op_petsc_mat_copy(void);

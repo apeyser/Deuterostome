@@ -122,6 +122,7 @@ B* ll_export[] = {
   PLUGIN_OP(petsc_vec_destroy),
   PLUGIN_OP(petsc_mat_sparse_create),
   PLUGIN_OP(petsc_mat_dense_create),
+  PLUGIN_OP(petsc_mat_blockdense_create),
   PLUGIN_OP(petsc_mat_copy),
   PLUGIN_OP(petsc_mat_copyto),
   PLUGIN_OP(petsc_mat_copyfrom),
@@ -185,6 +186,8 @@ P op_petsc_vec_destroy(void) {return petsc_vec_destroy();}
 P op_petsc_mat_sparse_create(void) {return petsc_mat_sparse_create();}
 
 P op_petsc_mat_dense_create(void) {return petsc_mat_dense_create();}
+
+P op_petsc_mat_blockdense_create(void) {return petsc_mat_blockdense_create();}
 
 P op_petsc_mat_copy(void) {return petsc_mat_copy();}
 
