@@ -1,6 +1,6 @@
 Package: dm
 Version: 4.2
-Revision: 1
+Revision: 2
 
 Type: nosource
 
@@ -18,7 +18,7 @@ CompileScript: <<
 	   ppc7450) CFLAGS="$CFLAGS -mcpu=7450" ;; \
   esac && \
   cd %n-%v && ./configure %c CFLAGS="$CFLAGS" --disable-rthreads \
-  	 $confflag --disable-plugins && make -j3
+  	 $confflag && make -j3
 <<
 # confflag="--without-atlas" ;; 
 
