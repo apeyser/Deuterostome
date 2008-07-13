@@ -847,10 +847,11 @@ DM_INLINE_STATIC P petsc_mat_syncfrom(void) {
 
 // A m n <d > | <d sub-array>
 DM_INLINE_STATIC P petsc_mat_copyfrom(void) {
+	P retc;
   Mat A;
   P m, n, len_arr, gm;
   L32 ncols, ncols_;
-  const D* row;
+  D* row;
 	MatGetrowFunc getrow;
 
   if (o_4 < FLOORopds) return OPDS_UNF;
