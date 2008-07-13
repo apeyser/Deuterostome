@@ -851,6 +851,7 @@ DM_INLINE_STATIC P petsc_mat_copyfrom(void) {
   P m, n, len_arr, gm;
   L32 ncols, ncols_;
   const D* row;
+	MatGetrowFunc getrow;
 
   if (o_4 < FLOORopds) return OPDS_UNF;
   INIT_MAT(o_4, A);
@@ -861,15 +862,13 @@ DM_INLINE_STATIC P petsc_mat_copyfrom(void) {
   if (m >= DMPETSC_MATRIX_M(o_4) || m < 0) RETURN_ERROR(DMPETSC_NONLOCAL);
 
   gm = DMPETSC_MATRIX_GM(o_4);
-  DMPETSC_ERRCHECK(MatGetRow(A, gm+m, &ncols, PETSC_NULL, &row));
+	getrow = matType[DMPETSC_MATRIX_MTYPE(o_4)].getrow;
+	if ((retc = getrow(A, &ncols, gm+m)));
   len_arr = ARRAY_SIZE(o_1);
-  if (n >= ncols) {
-    DMPETSC_ERRCHECK(MatRestoreRow(A, gm+m, &ncols, PETSC_NULL, &row));
-    return RNG_CHK;
-  }
+  if (n >= ncols) return RNG_CHK;
   ncols_ = (len_arr < ncols - n) ? len_arr : ncols - n;
-  moveD((D*) row+n, (D*) VALUE_PTR(o_1), ncols_);
-  DMPETSC_ERRCHECK(MatRestoreRow(A, gm+m, &ncols, PETSC_NULL, &row));
+	row = (D*) FREEvm;
+	moveD(row+n, (D*) VALUE_PTR(o_1), ncols_);
 
   moveframe(o_1, o_4);
   ARRAY_SIZE(o_4) = ncols_;

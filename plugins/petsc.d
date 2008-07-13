@@ -138,7 +138,8 @@
       0 1 A /MATRIX_M get 1 sub {/row name
         data filler row 0 A petsc_mat_copyto pop
       } for
-      A mmax A /MATRIX_M get sub ~petsc_mat_syncto repeat pop
+      A mmax A /MATRIX_M get sub ~petsc_mat_syncto repeat
+      petsc_mat_endto pop
     } in_petsc
   } bind def
 
