@@ -570,8 +570,6 @@ P op_groupconsole(void) {
   return OK;
 }
 
-P op_quit(void) {exit(0);}
-
 void run_dpawn_mill(void) {
   P retc;
   B abortframe[FRAMEBYTES];
@@ -615,6 +613,10 @@ void run_dpawn_mill(void) {
 	}
 	retc = nextevent(cmsf);
 	break;
+
+      case QUIT:
+	fprintf(stderr, "Quitting...\n");
+	exit(EXIT_SUCCESS);  
 	
       default:
 	break;
