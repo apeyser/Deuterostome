@@ -220,7 +220,7 @@ DM_INLINE_STATIC void spawn(struct InfoDicts* infodicts) {
     error(1, errno, "Unable to malloc for maxprocs %lli",
 	  (long long) sizeof(int)*infodicts->n);
 
-  if (! (info = (int*) malloc(sizeof(MPI_Info)*infodicts->n)))
+  if (! (info = (MPI_Info*) malloc(sizeof(MPI_Info)*infodicts->n)))
     error(1, errno, "Unable to malloc for info %lli",
 	  (long long) sizeof(MPI_Info)*infodicts->n);
 
@@ -382,7 +382,7 @@ DM_INLINE_STATIC void read_mpi_int(B* where, size_t n, int source, int tag)
 DM_INLINE_STATIC void probe_mpi_int(P* count, P* src, P tag) {
   MPI_Status status;
   MPI_Probe(*src, tag, children, &status);
-  *count = status.count;
+  MPI_Get_count(&status, MPI_UNSIGNED_CHAR, count);
   *src = status.MPI_SOURCE;
 }
 

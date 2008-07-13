@@ -69,10 +69,12 @@ static void mpihandler(MPI_Comm* comm, int* err, ...) {
 
 static P mpithread_probe(void) {
   MPI_Status status;
+  int count;
   MPI_Probe(currRank, currTag, currComm, &status);
   currRank = status.MPI_SOURCE;
   currTag = status.MPI_TAG;
-  currSize = (P) status.count;
+  MPI_Get_count(&status, MPI_UNSIGNED_CHAR, &count);
+  currSize = count;
   return OK;
 }
 
@@ -81,9 +83,11 @@ static P mpithread_iprobe(void) {
   int flag;
   MPI_Iprobe(currRank, currTag, currComm, &flag, &status);
   if (flag) {
+    int count;
     currRank = status.MPI_SOURCE;
     currTag = status.MPI_TAG;
-    currSize = (P) status.count;
+    MPI_Get_count(&status, MPI_UNSIGNED_CHAR, &count);
+    currSize = count;
   }
   currFlag = (BOOLEAN) currFlag;
   return OK;

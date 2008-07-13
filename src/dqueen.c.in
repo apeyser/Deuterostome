@@ -336,7 +336,7 @@ P op_makerthreads(void) {
   }
 
   if (! pid) {
-    int stdin;
+    int stdinfd;
     if (dup2(rookfd, 3) == -1)
       error(1, errno, "Error duping %i to %i", (int) rookfd, 3);
     if ((retc = nocloseonexec(3)))
@@ -346,12 +346,12 @@ P op_makerthreads(void) {
     if ((retc = nocloseonexec(4)))
       error(1, -retc, "Error setting no close on exec for fd 4");
 
-    if ((stdin = open("/dev/null", O_RDONLY)) == -1)
+    if ((stdinfd = open("/dev/null", O_RDONLY)) == -1)
       error(1, errno, "Unable to open /dev/null for reading");
-    if (dup2(stdin, 0) == -1)
+    if (dup2(stdinfd, 0) == -1)
       error(1, errno, "Error redirecting 0 from /dev/null");
-    if (stdin != 0 && close(stdin))
-      error(1, errno, "Unable to close fd %i", stdin);
+    if (stdinfd != 0 && close(stdinfd))
+      error(1, errno, "Unable to close fd %i", stdinfd);
     if ((retc = nocloseonexec(0)))
       error(1, -retc, "Error setting no close on exec for fd 0");
 
