@@ -8,7 +8,7 @@ PatchScript: svn co svn://klutz0.nonnerlab/svn/%n-4/trunk %n-%v
 
 ConfigureParams: MAX_MEM_SIZE=3000
 
-SetLDFLAGS: -L%p/lib -L%p/%lib -L/usr/X11R6/lib
+SetLDFLAGS: -L%p/lib -L%p/%lib -L/usr/X11R6/lib -lgcc_s.1
 SetCFLAGS: -g -O2
 #  CFLAGS="-g -O2"
 

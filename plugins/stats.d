@@ -6,7 +6,7 @@
 end def
   
 /all {
-  getstartupdir _ (new-plugin.d) fromfiles
+  getstartupdir (new-plugin.d) fromfiles
   NEW_PLUGINS begin all end
 } bind def
 

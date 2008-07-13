@@ -661,7 +661,7 @@ P exec(L32 turns)
   if ((fclass = CLASS(f)) == OP) goto e_op;
   if (fclass == NAME) goto e_name;
   if (fclass == NULLOBJ) goto x_t;
-  if (fclass > BOX) { 
+  if (fclass > BOX) {
     retc = CORR_OBJ; 
     goto e_er_1; 
   }
