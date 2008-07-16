@@ -328,6 +328,15 @@ P op_petsc_mat_syncto(void);
 #define op_petsc_mat_syncfrom EXPORTNAME(op_petsc_mat_syncfrom)
 P op_petsc_mat_syncfrom(void);
 
+#define op_petsc_mat_endfill EXPORTNAME(op_petsc_mat_endfill)
+P op_petsc_mat_endfill(void);
+
+#define op_petsc_mat_fill EXPORTNAME(op_petsc_mat_fill)
+P op_petsc_mat_fill(void);
+
+#define op_petsc_mat_syncfill EXPORTNAME(op_petsc_mat_syncfill)
+P op_petsc_mat_syncfill(void);
+
 #define op_petsc_mat_destroy EXPORTNAME(op_petsc_mat_destroy)
 P op_petsc_mat_destroy(void);
 

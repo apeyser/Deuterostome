@@ -128,6 +128,9 @@ B* ll_export[] = {
   PLUGIN_OP(petsc_mat_copyfrom),
   PLUGIN_OP(petsc_mat_syncto),
   PLUGIN_OP(petsc_mat_syncfrom),
+  PLUGIN_OP(petsc_mat_endfill),
+  PLUGIN_OP(petsc_mat_fill),
+  PLUGIN_OP(petsc_mat_syncfill),
   PLUGIN_OP(petsc_mat_destroy),
   PLUGIN_OP(petsc_mat_dup),
   PLUGIN_OP(petsc_mat_vecmul),
@@ -198,6 +201,12 @@ P op_petsc_mat_copyfrom(void) {return petsc_mat_copyfrom();}
 P op_petsc_mat_syncto(void) {return petsc_mat_syncto();}
 
 P op_petsc_mat_syncfrom(void) {return petsc_mat_syncfrom();}
+
+P op_petsc_mat_endfill(void) {return petsc_mat_endfill();}
+
+P op_petsc_mat_fill(void) {return petsc_mat_fill();}
+
+P op_petsc_mat_syncfill(void) {return petsc_mat_syncfill();}
 
 P op_petsc_mat_destroy(void) {return petsc_mat_destroy();}
 

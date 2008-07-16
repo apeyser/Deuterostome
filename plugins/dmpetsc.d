@@ -111,6 +111,9 @@ end def
   /petsc_mat_copyfrom null def
   /petsc_mat_syncto null def
   /petsc_mat_syncfrom null def
+  /petsc_mat_endfill null def
+  /petsc_mat_fill null def
+  /petsc_mat_syncfill null def
   /petsc_mat_destroy null def
   /petsc_mat_dup null def
   /petsc_mat_vecmul null def 
