@@ -26,6 +26,7 @@ startup_common_save capsave {
 
 |============================= userdict =================================
 
+|==================================================== dnode communications
 | save executable | ??
 /dnodereceive {
   exch dup capsave userdict /dnodesave put

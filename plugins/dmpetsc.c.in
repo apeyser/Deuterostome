@@ -827,6 +827,7 @@ DM_INLINE_STATIC P petsc_mat_fill(void) {
 				(L32) n, icols, 
 				row, INSERT_VALUES));
 
+  moveframe(o_1, o_4);
   FREEopds = o_3;
   return OK;
 }

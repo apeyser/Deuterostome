@@ -60,18 +60,40 @@ startup_common_save capsave {
   } if ~error ~abort ifelse
 } bind def
 
+|============================= pawns =========================
+|
 @ENABLE_RTHREADS_START@
+|--------------------------- mpidata
+| dictionary for mpi pawns
+|
 /mpidata 200 dict dup begin | [
+  | cpawn: keyboard owning pawn by rank, -1 for node
   /cpawn -1 def
+  | pawns: number of currently active pawns
   /pawns 0 def
+  | memsize: array for vmresize on pawns
   /memsize <x 100000 200 200 1000 200> def
 
+  | winmade: true iff ThePawns window has been built
   /winmade false def
+  | pbuf: locale buffer for text writing into ThePawn
   /pbuf 80 /b array def
+  | mpiinfo: list describing pawns
+  |  [n1 dict1 n2 dict2...], where n is the number of pawns
+  |  described by dictn, and dictn is a is a dictionary that maps
+  |  onto the MPI_Info for those pawns. See MPI_Info 
+  |  and MPI_Comm_spawn_multiple for a description of 
+  |  pairs in MPI_Info (for example, /host=(host.domain))
+  |  The values should always be strings.
   /mpiinfo [] def
+  | precall: a procedure called before creating the threads,
+  |  for example: (mpdboot) tosystem to start the mpd servers
   /precall {} def
+  | postcall: a procedure called after destroying mpi threads,
+  |  for example: (mpdallexit) tosystem to stop the mpd servers
   /postcall {} def
   
+  | updatet: updates ThePawns and prints the current keyboard owner.
   /updatet {
     winmade {{currentdict begin drawwindow} stopped pop} {
       pbuf 0 (pawn ) fax * cpawn * number (:\n) fax 0 exch getinterval
@@ -79,6 +101,9 @@ startup_common_save capsave {
     } ifelse
   } bind def
 
+  | pawn#/* checkbusy --
+  | if pawn number (or all(*)) are busy, print error message and
+  |  stop
   /checkbusy {
     dup * eq {
       pop
@@ -88,6 +113,8 @@ startup_common_save capsave {
     } ifelse
   } bind def
 
+  | pawn#/* makebusy --
+  | sets pawn# or all(*) busy.
   /makebusy {
     dup checkbusy
     dup * eq {pop 0 1 pawns 1 sub {true pawnbusy 3 -1 roll put} for} {
@@ -96,6 +123,8 @@ startup_common_save capsave {
     updatet
   } bind def
 
+  | pawn#/* makeready --
+  | sets pawn# or all(*) not busy
   /makeready {
     dup * eq {pop 0 1 pawns 1 sub {false pawnbusy 3 -1 roll put} for} {
       false pawnbusy 3 -1 roll put
@@ -103,7 +132,9 @@ startup_common_save capsave {
     updatet
   } bind def
 
-  | save rank (name) | --
+  | save rank (name) sethostname --
+  | sets the hostname for ThePawns for a given rank
+  | and restores the save. Intended for use by a call from pawn.
   /sethostname {
     2 index capsave 
     255 /b array 0 * 4 index * number (: ) fax 3 -1 roll fax
@@ -113,26 +144,40 @@ startup_common_save capsave {
     restore
   } bind def
 
+  | save pawn# makeready_dpawn --
+  | call to makeready from pawn
   /makeready_dpawn {
     {makeready} stopped end {stop} if restore
   } bind def
 
+  | pawn#/-1 setcurrent --
+  | sets the keyboard owner and updates ThePawns
   /setcurrent {/cpawn name
     updatet
   } bind def
 
+  | pawn#/-1 emacs_next_talk --
+  | sets the keyboard owner to the next pawn (or the dnode)
+  | wrapping around. Then ends mpidata.
   /emacs_next_talk {
     cpawn 1 add dup pawns eq {pop -1} if
     dup cpawn ne ~setcurrent ~pop ifelse
     end
   } bind def
 
+  | pawn#/-1 emacs_last_talk --
+  | sets the keyboard owner to the previous pawn (or the dnode)
+  | wrapping around. Then ends mpidata.
   /emacs_last_talk {
     cpawn dup 0 lt {pop pawns} if 1 sub
     dup cpawn ne ~setcurrent ~pop ifelse
     end
   } bind def
 
+  | -- kill --
+  | kills all mpi threads, makes postcall,
+  | destroys ThePawns window, resets keyboard owner
+  | and restores all data used by mpidate procedures
   /kill {
     {null makerthreads postcall} stopped
     {winmade ~deletewin if} stopped pop
@@ -142,6 +187,7 @@ startup_common_save capsave {
     {stop} if
   } bind def 
 
+  |=========== mpidata Xwindows ===================
   Xwindows_ {
     /NORMALFONT {fontdict /NORMALFONT get} bind def
     /BOLDFONT {fontdict /BOLDFONT get} bind def
@@ -267,10 +313,15 @@ startup_common_save capsave {
       } stopped {cleartomark stop} if pop
     } bind def
 
+    | -- delete_window --
+    | procedure call to deletewin.
     /delete_window {{deletewin} stopped end {stop} if} bind def
   } if
 
-  | [[n /key val ...]...] | --
+  | [[n /key val ...]...] rthreads_multi_ --
+  | creates the mpiinfo from the nested lists,
+  | where each n is the number of pawns, the key value pairs
+  |  are put into the mpiinfo dictionary.
   /rthreads_multi_ {
     [exch {
       dup 0 get 1 index length 1 sub 2 div dict dup begin | [n /k v] n dict 
@@ -285,7 +336,9 @@ startup_common_save capsave {
   } bind def
 
 
-  | [n1 (host1) n2 (host2)... ] | --
+  | [n1 (host1) n2 (host2)... ] rthreads_hosts_ --
+  | creates an mpiinfo, where the dictionaries only consist
+  | of the pair /host=(host)
   /rthreads_hosts_ {
     [exch
       0 2 2 index length 1 sub {
@@ -298,12 +351,19 @@ startup_common_save capsave {
     ] rthreads_multi_
   } bind def
 
-  | n | --
+  | n rthreads_single_ --
+  | creates the mpiinfo dictionaries, where there is only
+  | one empty dictionary
   /rthreads_single_ {
     [exch 0 dict] /mpiinfo name
   } bind def
 
-  | ~info-dict-setup | --
+  | ~info-dict-setup rthreads_start --
+  | Starts up the pawns by setting up mpidata,
+  | calling ~info-dict-setup to create the pawn-number, mpiinfo 
+  | dictionary pairs, vmresize the pawns and create ThePawns window,
+  | and read in startup file on the pawns.
+  | All of this is put in a save to be restored by kill
   /rthreads_start {
     {
       pawns 0 gt {(** Rthreads already exist!\n) toconsole_ halt} if
@@ -337,7 +397,11 @@ startup_common_save capsave {
     } lock
   } bind def 
 
-  | save pawn# | --
+  | save pawn# notify --
+  | intended to be called by dpawn to notify the node
+  | that it has ended it's part of a job previously allocated
+  | to it. nwait should be set to the total number of jobs.
+  | sets the pawn ready for more jobs.
   /notify {
     {
       makeready
@@ -346,43 +410,60 @@ startup_common_save capsave {
       restore
     } lock
   } bind def |]
-end def
+end def |========= end of mpi data ================
 
+|============================================= pawn functions
+
+| Xint rthread_ops --
+| set the size of the operand stack for pawns
 /rthread_ops {
   mpidata /memsize get 0 put
 } bind def
 
+| Xint rthreads_dicts --
+| set the size of the dictionary stack for pawns
 /rthreads_dicts {
   mpidata /memsize get 1 put
 } bind def
 
+| Xint rthreads_execs --
+| set the size of the execution stack for pawns
 /rthreads_execs {
   mpidata /memsize get 2 put
 } bind def
 
+| Xint rthreads_memory --
+| set the memory size in MB for the pawns
 /rthreads_memory {
   mpidata /memsize get 3 put
 } bind def
 
+| Xint rthreads_user --
+| sets the size of the user dictionary for pawns
 /rthreads_user {
   mpidata /memsize get 4 put
 } bind def
 
-| [[n /key val ..]...] | --
+| [[n /key val ..]...] rthreads_multi --
+| creates pawns, with each group of n pawns defined by the 
+| associate key-value pairs.
 /rthreads_multi {
   mpidata begin {
     ~rthreads_multi_ rthreads_start
   } stopped end {stop} if
 } bind def
 
-| n | --
+| n rthreads_single --
+| Creates pawns (n of them) with an empty MPI_Info dictionary,
+| in most implementations on the local machine
 /rthreads_single {
   mpidata begin {
     ~rthreads_single_ rthreads_start
   } stopped end {stop} if
 } bind def
 
-| [n1 (host1) n2 (host2)...]
+| [n1 (host1) n2 (host2)...] rthreads_hosts
+| Creates pawns on hosts, n on hostn.
 /rthreads_hosts {
   mpidata begin {
     ~rthreads_hosts_ rthreads_start
@@ -390,12 +471,14 @@ end def
 } bind def
 @ENABLE_RTHREADS_END@
 
-| active | ??
+| active rthreads_exec ??
 | executes active on dnode if mpi hasn't been setup
 |   or no rthread active (cpawn == -1)
 | if all rthreads active (cpawn == *), executes on all rthreads,
 |  otherwise executes on the chosen rthread (cpawn)
-/rthreads_exec ~unlock bind def | Overridden immediately if ENABLE_RTHREADS
+/rthreads_exec ~unlock bind def 
+| Overridden immediately if ENABLE_RTHREADS
+
 @ENABLE_RTHREADS_START@
 /rthreads_exec {
   mpidata /cpawn get dup -1 eq {pop unlock} {
@@ -406,7 +489,9 @@ end def
   } ifelse
 } bind def
 
-| -- | --
+| -- rthreads_stop --
+| kill pawns, destroy ThePawns window, recover allocated
+| memory
 /rthreads_stop {
   mpidata begin {
     checkrthreads not {(** Rthreads not running!\n) toconsole_} if
@@ -416,21 +501,36 @@ end def
   } stopped end {stop} if
 } bind def
 
+| -- rthreads_r --
+| Set all pawns as not busy.
 /rthreads_r {
   * mpidata begin ~makeready stopped end ~stop if
 } bind def
 
+| -- rthread_kill --
+| destroy pawns (and windows, etc) without checking the pawns' status.
 /rthreads_kill {
   mpidata begin ~kill stopped pop end
 } bind def
 
+| pawn#/-1 | --
+| set keyboard owner pawn (or dnode if -1).
 /rthreads_t {
   mpidata begin {
     dup cpawn ne ~setcurrent ~pop ifelse
   } stopped end ~stop if
 } bind def
 
-| ~func-maker: <<i | {}>> | --
+| ~func-maker: <<i | {}/null>> execpawns --
+| execute a job on each pawn and wait until
+|   they've all been finished.
+| func-maker is executed for each pawn, with the intended
+|   recipients rank on the stack, and the job for that
+|   rank shall be returned.
+|   If func-maker returns a null, that pawn is not given
+|   a job.
+| Waits in a halt-loop until all pawns have signalled that
+|  their jobs have been completed.
 /execpawns {
   {
     mpidata begin {
@@ -455,20 +555,27 @@ end def
   } lock
 } bind def
 
-| {} | --
+| ~job sexecpawns --
+| a Simplified version of execpawns. It executes ~job on
+| all pawns, and waits for them to be done.
 /sexecpawns {
   mpidata /cfunc put
   {pop /cfunc find} execpawns
 } bind def
 
-| /modulename | --
+| /modulename module_send --
+| sends a module to all pawns. Pawns shall recieve the modules
+| and reset the save box for the module to a local value.
+| I.e., it will active as if the module had been created locally
+| as if by a module _module pair.
 /module_send {
   mpidata begin /module_send_ layer {
     ~[userdict 3 -1 roll get ~recv_module] /module_cmd name
     {pop /module_cmd find} execpawns
-  } stopped /module_send_ _layer end {stop} if
+  } stopped /module_send_ _layer end ~stop if
 } bind def
 
+|==================================== end of pawn functions
 @ENABLE_RTHREADS_END@
 
 |============================= command line interface for dvt =====

@@ -13,7 +13,19 @@ userdict /toconsole_ known not {/toconsole_ /toconsole find def} if
     ~[exch 3 -1 roll 1 ~index 0 ~put] bind
 } bind def
 
+|====================================== dictionary builders
+|
+|------------- makeenum -----------------
 | [/name|num...] | dict == /name0 num, /name1 num+1 ...
+|
+| Creates a dictionary that represents an enumerated type
+| The names in the dictionary will represent integers,
+| which start from 0 to n. If, instead of a name, an integer
+| is in the list, the current intenger will be replaced with
+| that value. For ex:
+| [/a /b 5 /c /d] makeenum 
+| will create a dict with the elements: a=0, b=1, c=5, d=6
+|
 /makeenum {
   dup length dict dup begin
   0 3 -1 roll {
@@ -25,7 +37,14 @@ userdict /toconsole_ known not {/toconsole_ /toconsole find def} if
   end
 } bind def
 
+|------------------ makestruct ----------------
 | [/name val /name2 val2 ...] | dict == /name val, /name2 val2 ...
+|
+| Creates a dictionary with exactly the size to fit every name
+| in the list, with the values from the list
+| So: {/a 1 /b {doit} /c 1e-9} makestruct
+|  returns a dictionary 3 long, with a=1, b={doit}, c=1e-9
+|
 /makestruct {
   dup length dup 2 div dict dup begin {3 1 roll| dict [/name val ...] length
     0 2 3 -1 roll 1 sub {                      | dict [/name val ...] i
@@ -35,27 +54,68 @@ userdict /toconsole_ known not {/toconsole_ /toconsole find def} if
   pop
 } bind def
 
+|===================================== executable wrappers
+|
+|------------- construct_exec ------------------
 | anything | anything or {proc} ~exec
+|
+| takes an object, and wraps it up for use in a 
+|  on-the-fly procedure so that it will get executed
+|  in that procedure
+|
 /construct_exec {
   dup active {
     dup class /listclass eq {~exec} if
   } if
 } bind def
 
+|-------------- destruct_exec ------------------
 | anything | anything or {~active}
+|
+| takes an object, and wraps it up for use in a
+|  on-the-fly procedure so that it will ||not|| get
+|  executed in that procedure, but left on the stack.
+|
 /destruct_exec {
   dup active {
     dup class /listclass ne {~[exch]} if
   } if
 } bind def
 
+|------------- construct_execn -----------------
 | /name-for-anything | anything or {proc} ~exec
+|
+| take a name, finds it and then wraps it up for
+|  use in an on-the-fly procedure so that it will
+|  be executed in that procedure
+|
 /construct_execn {find construct_exec} bind def
 
+|-------------- destruct_execn
 | /name-for-anything | anything or {~active}
+|
+| takes a name, finds it and then wraps it up for
+|  use in an on-the-fly procedure so that it will
+|  ||not|| be executed in that procedure, but
+|  left on the stack
+|
 /destruct_execn {find destruct_exec} bind def
 
+|=================================== indict convenience
+|
+|----------------- indict -----------------
+| ~exec dict | ...
+|
+| executes ~exec in dictionary dict,
+| wrapped with a stopped
+|
+/indict {begin stopped end ~stop if} bind def
+
+|============================================ SIGNALS
+|
 | these must be in the same order as sigmap in dm-signals.c
+| for the use of sendsig, rsendsig.
+|
 /SIGNALS [
   /SIGQUIT 
   /SIGKILL
