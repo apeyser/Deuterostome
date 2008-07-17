@@ -28,7 +28,6 @@ Info4: <<
   <<
 
   ConfigureParams: MAX_MEM_SIZE=3000 --with-mpi=mpi
-
   SetLDFLAGS: -L%p/lib -L%p/%lib -L/usr/X11R6/lib -lgcc_s.1 -L/%p/lib/openmpi
   SetCFLAGS: -g -O2
 
