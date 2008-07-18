@@ -181,22 +181,22 @@
 
 #define DMPETSC_KSP_KSPTYPE_FRAME(dframe) OPAQUE_MEM(dframe, KSP_KSPTYPE_frame)
 
-#define DMPETSC_KSP_KSPTYPE(dframe) (LONG32_VAL(DMPETSC_KSP_KSPTYPE_FRAME(dframe)))
+#define DMPETSC_KSP_KSPTYPE(dframe) (VALUE_BASE(DMPETSC_KSP_KSPTYPE_FRAME(dframe)))
 
 #define DMPETSC_KSP_KSPTYPE_INIT(dframe)do { \
   B frame[FRAMEBYTES]; \
-  TAG(frame) = (NUM|LONG32TYPE); \
+  TAG(frame) = (NUM|LONGBIGTYPE); \
   ATTR(frame) = READONLY; \
   OPAQUE_MEM_SET(dframe, KSP_KSPTYPE_frame, frame); \
 } while (0)
 
 #define DMPETSC_KSP_PCTYPE_FRAME(dframe) OPAQUE_MEM(dframe, KSP_PCTYPE_frame)
 
-#define DMPETSC_KSP_PCTYPE(dframe) (LONG32_VAL(DMPETSC_KSP_PCTYPE_FRAME(dframe)))
+#define DMPETSC_KSP_PCTYPE(dframe) (VALUE_BASE(DMPETSC_KSP_PCTYPE_FRAME(dframe)))
 
 #define DMPETSC_KSP_PCTYPE_INIT(dframe)do { \
   B frame[FRAMEBYTES]; \
-  TAG(frame) = (NUM|LONG32TYPE); \
+  TAG(frame) = (NUM|LONGBIGTYPE); \
   ATTR(frame) = READONLY; \
   OPAQUE_MEM_SET(dframe, KSP_PCTYPE_frame, frame); \
 } while (0)
@@ -212,17 +212,6 @@
   OPAQUE_MEM_SET(dframe, KSP_DUPID_frame, frame); \
 } while (0)
 
-#define DMPETSC_KSP_PCSETUPF_FRAME(dframe) OPAQUE_MEM(dframe, KSP_PCSETUPF_frame)
-
-#define DMPETSC_KSP_PCSETUPF(dframe) (PCSETUPF(DMPETSC_KSP_PCSETUPF_FRAME(dframe)))
-
-#define DMPETSC_KSP_PCSETUPF_INIT(dframe)do { \
-  B frame[FRAMEBYTES]; \
-  TAG(frame) = (NUM|LONGBIGTYPE); \
-  ATTR(frame) = READONLY; \
-  OPAQUE_MEM_SET(dframe, KSP_PCSETUPF_frame, frame); \
-} while (0)
-
 #define DMPETSC_KSP_PCSETUPFD_FRAME(dframe) OPAQUE_MEM(dframe, KSP_PCSETUPFD_frame)
 
 #define DMPETSC_KSP_PCSETUPFD(dframe) (VALUE_PTR(DMPETSC_KSP_PCSETUPFD_FRAME(dframe)))
@@ -232,17 +221,6 @@
   TAG(frame) = (NUM|LONGBIGTYPE); \
   ATTR(frame) = READONLY; \
   OPAQUE_MEM_SET(dframe, KSP_PCSETUPFD_frame, frame); \
-} while (0)
-
-#define DMPETSC_KSP_KSPSETUPF_FRAME(dframe) OPAQUE_MEM(dframe, KSP_KSPSETUPF_frame)
-
-#define DMPETSC_KSP_KSPSETUPF(dframe) (KSPSETUPF(DMPETSC_KSP_KSPSETUPF_FRAME(dframe)))
-
-#define DMPETSC_KSP_KSPSETUPF_INIT(dframe)do { \
-  B frame[FRAMEBYTES]; \
-  TAG(frame) = (NUM|LONGBIGTYPE); \
-  ATTR(frame) = READONLY; \
-  OPAQUE_MEM_SET(dframe, KSP_KSPSETUPF_frame, frame); \
 } while (0)
 
 #define DMPETSC_KSP_KSPSETUPFD_FRAME(dframe) OPAQUE_MEM(dframe, KSP_KSPSETUPFD_frame)
@@ -257,16 +235,14 @@
 } while (0)
 
 #define MAKE_DMPETSC_KSP(frame) do { \
-  if (! (frame = make_opaque_frame(0, DMPETSC_KSP_frame, KSP_KSP_frame, KSP_N_frame, KSP_KSPTYPE_frame, KSP_PCTYPE_frame, KSP_DUPID_frame, KSP_PCSETUPF_frame, KSP_PCSETUPFD_frame, KSP_KSPSETUPF_frame, KSP_KSPSETUPFD_frame, NULL))) \
+  if (! (frame = make_opaque_frame(0, DMPETSC_KSP_frame, KSP_KSP_frame, KSP_N_frame, KSP_KSPTYPE_frame, KSP_PCTYPE_frame, KSP_DUPID_frame, KSP_PCSETUPFD_frame, KSP_KSPSETUPFD_frame, NULL))) \
     return VM_OVF; \
   DMPETSC_KSP_KSP_INIT(frame); \
   DMPETSC_KSP_N_INIT(frame); \
   DMPETSC_KSP_KSPTYPE_INIT(frame); \
   DMPETSC_KSP_PCTYPE_INIT(frame); \
   DMPETSC_KSP_DUPID_INIT(frame); \
-  DMPETSC_KSP_PCSETUPF_INIT(frame); \
   DMPETSC_KSP_PCSETUPFD_INIT(frame); \
-  DMPETSC_KSP_KSPSETUPF_INIT(frame); \
   DMPETSC_KSP_KSPSETUPFD_INIT(frame); \
 } while (0)
 
@@ -447,12 +423,8 @@ static B KSP_PCTYPE_frame[FRAMEBYTES];
 static B* KSP_PCTYPE_string = "KSP_PCTYPE";
 static B KSP_DUPID_frame[FRAMEBYTES];
 static B* KSP_DUPID_string = "KSP_DUPID";
-static B KSP_PCSETUPF_frame[FRAMEBYTES];
-static B* KSP_PCSETUPF_string = "KSP_PCSETUPF";
 static B KSP_PCSETUPFD_frame[FRAMEBYTES];
 static B* KSP_PCSETUPFD_string = "KSP_PCSETUPFD";
-static B KSP_KSPSETUPF_frame[FRAMEBYTES];
-static B* KSP_KSPSETUPF_string = "KSP_KSPSETUPF";
 static B KSP_KSPSETUPFD_frame[FRAMEBYTES];
 static B* KSP_KSPSETUPFD_string = "KSP_KSPSETUPFD";
 #endif //DM_DMPETSC_H

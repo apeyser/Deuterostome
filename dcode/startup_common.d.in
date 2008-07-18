@@ -26,6 +26,8 @@ userdict /toconsole_ known not {/toconsole_ /toconsole find def} if
 | [/a /b 5 /c /d] makeenum 
 | will create a dict with the elements: a=0, b=1, c=5, d=6
 |
+| Dict is read only.
+|
 /makeenum {
   dup length dict dup begin
   0 3 -1 roll {
@@ -34,7 +36,7 @@ userdict /toconsole_ known not {/toconsole_ /toconsole find def} if
       1 add
     } ifelse
   } forall pop
-  end
+  end mkread
 } bind def
 
 |------------------ makestruct ----------------
@@ -117,14 +119,28 @@ userdict /toconsole_ known not {/toconsole_ /toconsole find def} if
 | for the use of sendsig, rsendsig.
 |
 /SIGNALS [
-  /SIGQUIT 
-  /SIGKILL
-  /SIGTERM
-  /SIGHUP 
-  /SIGINT
-  /SIGALRM
-  /SIGFPE
+  /QUIT 
+  /KILL
+  /TERM
+  /HUP 
+  /INT
+  /ALRM
+  /FPE
 ] makeenum def
+
+|------------ signal ---------------
+| socket /SIGNAL | --
+|
+| send signal to a node by name
+|
+/signal ~[SIGNALS ~exch ~get ~sendsig] bind def
+
+|------------- rsignal ---------------
+| /SIGNAL | --
+|
+| send signal to all pawns by name (only if you have pawns!)
+|
+/rsignal ~[SIGNALS ~exch ~get ~rsendsig] bind def
 
 /OPEN_MODES [
   /r     | read-only

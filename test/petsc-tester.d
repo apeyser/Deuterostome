@@ -3,11 +3,11 @@
 /dim 5 def
 /show true def 
 
-/pctype /PCDEFAULT def
+/pctype /DEFAULT def
 /sparse_pctype ~pctype def
 /dense_pctype ~pctype def
 
-/ksptype /KSPDEFAULT def
+/ksptype /DEFAULT def
 /sparse_ksptype ~ksptype def
 /dense_ksptype ~ksptype def
 
@@ -143,33 +143,35 @@
       {(sparse)       kS  matS  vecxS  activeS}
       {(sparse dense) kSD matSD vecxSD activeSD}
       {(dense)        kD  matD  vecxD  activeD}
-    } {exec not {3 ~pop repeat
-      (Skipping: ) toconsole toconsole (\n) toconsole
-    } {/vecx name /mat name /k name /mt name
-      vecx ~vecxdata vec_fill
+    } {
       (\n==============================\n) toconsole
-      (Testing: ) toconsole mt toconsole (\n\n) toconsole
-      (Solution: \n) toconsole
-      gettimeofday k mat vecx vecb res get_ksp_solve gettimeofday
-      3 -1 roll show {v_} if 
-      1 sub dup mul 0d exch add sqrt (Distance: ) toconsole _ pop
-      timediff neg (Time: ) toconsole _ pop
-      
-      (\n) toconsole
-      (Resolve: \n) toconsole
-      gettimeofday k vecx vecb res get_ksp_resolve gettimeofday
-      3 -1 roll show {v_} if 
-      1 sub dup mul 0d exch add sqrt (Distance: ) toconsole _ pop
-      timediff neg (Time: ) toconsole _ pop
+      exec not {3 ~pop repeat
+        (Skipping: ) toconsole toconsole (\n) toconsole
+      } {/vecx name /mat name /k name /mt name
+        vecx ~vecxdata vec_fill
+        (Testing: ) toconsole mt toconsole (\n\n) toconsole
+        (Solution: \n) toconsole
+        gettimeofday k mat vecx vecb res get_ksp_solve gettimeofday
+        3 -1 roll show {v_} if 
+        1 sub dup mul 0d exch add sqrt (Distance: ) toconsole _ pop
+        timediff neg (Time: ) toconsole _ pop
+        
+        (\n) toconsole
+        (Resolve: \n) toconsole
+        gettimeofday k vecx vecb res get_ksp_resolve gettimeofday
+        3 -1 roll show {v_} if 
+        1 sub dup mul 0d exch add sqrt (Distance: ) toconsole _ pop
+        timediff neg (Time: ) toconsole _ pop
 
-      vecx ~vecxdata vec_fill
-      (\n) toconsole
-      (Solution x2: \n) toconsole
-      gettimeofday k vecx vecb2 res get_ksp_resolve gettimeofday
-      3 -1 roll show {v_} if
-      2 sub dup mul 0d exch add sqrt (Distance: ) toconsole _ pop
-      timediff neg (Time: ) toconsole _ pop
-    } ifelse} forall
+        vecx ~vecxdata vec_fill
+        (\n) toconsole
+        (Solution x2: \n) toconsole
+        gettimeofday k vecx vecb2 res get_ksp_resolve gettimeofday
+        3 -1 roll show {v_} if
+        2 sub dup mul 0d exch add sqrt (Distance: ) toconsole _ pop
+        timediff neg (Time: ) toconsole _ pop
+      } ifelse
+    } forall
     
     {
       {vecxS  matS  kS}

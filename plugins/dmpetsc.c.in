@@ -19,11 +19,6 @@ enum AssState {
 #define MATRIX_VAL(frame)    (*(Mat*) NUM_VAL(frame))
 #define KSP_VAL(frame)       (*(KSP*) NUM_VAL(frame))
 #define ULONG64_VAL(frame)   (*(UL64*) &LONG64_VAL(frame))
-#define PCSETUPF(frame)      (*(ksp_pcsetupf*) &LONGBIG_VAL(frame))
-#define KSPSETUPF(frame)     (*(ksp_kspsetupf*) &LONGBIG_VAL(frame))
-
-typedef P (*ksp_pcsetupf)(KSP ksp, B* kspframe);
-typedef P (*ksp_kspsetupf)(KSP ksp, B* kspframe);
 				   
 #include "dm-dmpetsc-header.h"
 
@@ -416,12 +411,14 @@ DM_INLINE_STATIC P petsc_vec_destroy(void) {
 
 static UL64 dupid = 1;
 
-typedef P (*PreassFunc)(B* pframe, void* arg);
-typedef P (*MatCopytoFunc)(Mat A, P grow, D* row, L32 ncols);
-typedef P (*MatGetrowFunc)(Mat A, L32* ncols, L32 growi);
+typedef P (*PreassFunc)(Mat A, B *restrict pframe, void *restrict arg);
+typedef P (*MatCopytoFunc)(Mat A, P grow, D *restrict row, L32 ncols);
+typedef P (*MatGetrowFunc)(Mat A, L32 *restrict ncols, L32 growi);
 
-DM_INLINE_STATIC P petsc_mat_dense_copyto(Mat A, P grow, 
-					  D* restrict row, L32 ncols) {
+DM_INLINE_STATIC P petsc_mat_dense_copyto(
+  Mat A, P grow, 
+  D* restrict row, L32 ncols) 
+{
   const PetscInt idxm[] = {grow};
   PetscInt* const idxn = (PetscInt*) (row + ncols);
   PetscInt* c;
@@ -444,7 +441,8 @@ DM_INLINE_STATIC P petsc_mat_sparse_copyto(
   return OK;
 }
 
-DM_INLINE_STATIC P petsc_mat_getrow(Mat A, L32* ncols, L32 gm) {
+DM_INLINE_STATIC P petsc_mat_getrow(Mat A, L32 *restrict ncols, L32 gm) 
+{
   const D* data;
   DMPETSC_ERRCHECK(MatGetRow(A, gm, ncols, PETSC_NULL, &data));
   if (FREEvm + sizeof(D)*(*ncols) > CEILvm) {
@@ -457,7 +455,8 @@ DM_INLINE_STATIC P petsc_mat_getrow(Mat A, L32* ncols, L32 gm) {
   return OK;
 }
 
-DM_INLINE_STATIC P petsc_mat_getvalues(Mat A, L32* ncols, L32 gm) {
+DM_INLINE_STATIC P petsc_mat_getvalues(Mat A, L32 *restrict ncols, L32 gm) 
+{
   PetscInt* idxn;
   L32 i;
   DMPETSC_ERRCHECK(MatGetSize(A, PETSC_NULL, ncols));
@@ -472,23 +471,22 @@ DM_INLINE_STATIC P petsc_mat_getvalues(Mat A, L32* ncols, L32 gm) {
 }
 
 struct SparsePreass {
-  L32* irows;
-  L32* icols;
+  L32 *restrict irows;
+  L32 *restrict icols;
 };
   
-DM_INLINE_STATIC P petsc_mat_sparse_preass(B* restrict pframe, 
-					   void* restrict arg) {
-  PetscErrorCode r;
-  Mat A = DMPETSC_MATRIX_MATRIX(pframe);
+DM_INLINE_STATIC P petsc_mat_sparse_preass(
+  Mat A,
+  B* restrict pframe __attribute__ ((__unused__)), 
+  void* restrict arg)
+{
   struct SparsePreass *const params = (struct SparsePreass*) arg;
 
-  if ((r = MatSetOption(A, MAT_DO_NOT_USE_INODES)))
-    RETURN_ERROR(errmap[r]);
-
-  if ((r = MatMPIAIJSetPreallocationCSR(A, params->irows, params->icols, 
-					PETSC_NULL))) 
-    RETURN_ERROR(errmap[r]);
-
+  DMPETSC_ERRCHECK(MatSetOption(A, MAT_DO_NOT_USE_INODES));
+  DMPETSC_ERRCHECK(MatMPIAIJSetPreallocationCSR(A, 
+						params->irows, 
+						params->icols, 
+						PETSC_NULL));
   return OK;
 }
 
@@ -498,17 +496,24 @@ struct BlockDensePreass {
   PetscInt Nb;
 };
 
-DM_INLINE_STATIC 
-P petsc_mat_blockdense_preass(B* restrict pframe, void* restrict arg) {
-  PetscErrorCode r;
-  struct BlockDensePreass* params = (struct BlockDensePreass*) arg;
-  
-  Mat A = DMPETSC_MATRIX_MATRIX(pframe);
-  if ((r = MatMPIBAIJSetPreallocation(A, params->bs, 
-				      params->nb, PETSC_NULL,
-				      params->Nb, PETSC_NULL)))
-    RETURN_ERROR(errmap[r]);
+DM_INLINE_STATIC P petsc_mat_blockdense_preass(
+  Mat A,
+  B* restrict pframe __attribute__ ((__unused__)), 
+  void* restrict arg) 
+{
+  struct BlockDensePreass *params = (struct BlockDensePreass*) arg;
+  DMPETSC_ERRCHECK(MatMPIBAIJSetPreallocation(A, params->bs, 
+					      params->nb, PETSC_NULL,
+					      params->Nb, PETSC_NULL));
+  return OK;
+}
 
+DM_INLINE_STATIC P petsc_mat_dense_preass(
+  Mat A,
+  B* restrict pframe __attribute__ ((__unused__)), 
+  void* restrict arg __attribute__ ((__unused__)) )
+{
+  DMPETSC_ERRCHECK(MatSetOption(A, MAT_ROW_ORIENTED));
   return OK;
 }
 
@@ -520,14 +525,14 @@ enum DMMatrixType {
 };
 
 static const struct {
-  char* type;
+  char *restrict type;
   PreassFunc preass;
   MatCopytoFunc copyto;
   MatGetrowFunc getrow;
 } matType[] = {
   {
     MATMPIDENSE,
-    NULL,
+    petsc_mat_dense_preass,
     petsc_mat_dense_copyto,
     petsc_mat_getrow,
   },
@@ -545,8 +550,10 @@ static const struct {
   },
 };
 
-DM_INLINE_STATIC P mat_create(P m, P n, enum DMMatrixType mtype, 
-			      B* restrict rpframe, void* restrict arg) {
+DM_INLINE_STATIC P mat_create(
+  P m, P n, enum DMMatrixType mtype, 
+  B* restrict rpframe, void* restrict arg) 
+{
   B* pframe;
   PetscErrorCode r;
   P retc = OK;
@@ -573,7 +580,7 @@ DM_INLINE_STATIC P mat_create(P m, P n, enum DMMatrixType mtype,
   if ((r = MatGetOwnershipRange(*A, &DMPETSC_MATRIX_GM(pframe), PETSC_NULL)))
     goto err;
   
-  if (preass && (retc = preass(pframe, arg)))
+  if (preass && (retc = preass(*A, pframe, arg)))
     goto err;
 
   if ((r = MatSetOption(*A, MAT_ROWS_SORTED)))
@@ -936,37 +943,41 @@ DM_INLINE_STATIC P petsc_mat_vecmul(void) {
   return OK;
 }
 
-typedef P (*KSPFunc)(KSP ksp, B* param, B* kspframe);
+typedef P (*KSPFunc)(KSP ksp, B *restrict param, B *restrict kspframe);
+typedef P (*KSPPostFunc)(KSP ksp, B *restrict kspframe);
 static const struct {
   KSPType t;
   KSPFunc f;
+  KSPPostFunc pf;
 } ksptypes[] = {
-  {KSPRICHARDSON, NULL},
-  {KSPCHEBYCHEV, NULL},
-  {KSPCG, NULL},
-  {KSPCGNE, NULL},
-  {KSPSTCG, NULL},
-  {KSPGLTR, NULL},
-  {KSPGMRES, NULL},
-  {KSPFGMRES, NULL},
-  {KSPLGMRES, NULL},
-  {KSPTCQMR, NULL},
-  {KSPBCGS, NULL},
-  {KSPBCGSL, NULL},
-  {KSPCGS, NULL},
-  {KSPTFQMR, NULL},
-  {KSPCR, NULL},
-  {KSPLSQR, NULL},
-  {KSPPREONLY, NULL},
-  {KSPQCG, NULL},
-  {KSPBICG, NULL},
-  {KSPMINRES, NULL},
-  {KSPSYMMLQ, NULL},
-  {KSPLCD, NULL}
+  {KSPRICHARDSON, NULL, NULL},
+  {KSPCHEBYCHEV, NULL, NULL},
+  {KSPCG, NULL, NULL},
+  {KSPCGNE, NULL, NULL},
+  {KSPSTCG, NULL, NULL},
+  {KSPGLTR, NULL, NULL},
+  {KSPGMRES, NULL, NULL},
+  {KSPFGMRES, NULL, NULL},
+  {KSPLGMRES, NULL, NULL},
+  {KSPTCQMR, NULL, NULL},
+  {KSPBCGS, NULL, NULL},
+  {KSPBCGSL, NULL, NULL},
+  {KSPCGS, NULL, NULL},
+  {KSPTFQMR, NULL, NULL},
+  {KSPCR, NULL, NULL},
+  {KSPLSQR, NULL, NULL},
+  {KSPPREONLY, NULL, NULL},
+  {KSPQCG, NULL, NULL},
+  {KSPBICG, NULL, NULL},
+  {KSPMINRES, NULL, NULL},
+  {KSPSYMMLQ, NULL, NULL},
+  {KSPLCD, NULL, NULL}
 };
 
-DM_INLINE_STATIC P finalize_BJACOBI_ILU(KSP ksp, B* kspframe 
-					__attribute__ ((__unused__)) ) {
+DM_INLINE_STATIC P finalize_BJACOBI_ILU(
+  KSP ksp, 
+  B *restrict kspframe __attribute__ ((__unused__)) ) 
+{
   PetscInt n_local;
   PC pc;
   KSP* subksp; 
@@ -979,13 +990,17 @@ DM_INLINE_STATIC P finalize_BJACOBI_ILU(KSP ksp, B* kspframe
     DMPETSC_ERRCHECK(KSPSetType(*i, KSPPREONLY));
     DMPETSC_ERRCHECK(KSPGetPC(*i, &subpc));
     DMPETSC_ERRCHECK(PCSetType(subpc, PCILU));
+    //DMPETSC_ERRCHECK(PCFactorSetReuseFill(subpc, PETSC_TRUE));
+    //DMPETSC_ERRCHECK(PCFactorSetReuseOrdering(subpc, PETSC_TRUE));
   }
 
   return OK;
 }
 
-DM_INLINE_STATIC P finalize_BJACOBI_LU(KSP ksp, B* kspframe 
-				       __attribute__ ((__unused__)) ) {
+DM_INLINE_STATIC P finalize_BJACOBI_LU(
+  KSP ksp, 
+  B *restrict kspframe __attribute__ ((__unused__)) ) 
+{
   PetscInt n_local;
   PC pc;
   KSP* subksp; 
@@ -1003,58 +1018,76 @@ DM_INLINE_STATIC P finalize_BJACOBI_LU(KSP ksp, B* kspframe
   return OK;
 }
 
-DM_INLINE_STATIC P setup_BJACOBI_ILU(PC pc
-				     __attribute__ ((__unused__)),
-				     B* param, 
-				     B* kspframe) {
+DM_INLINE_STATIC P setup_LU(
+  PC pc __attribute__ ((__unused__)),
+  B* restrict param,
+  B* restrict kspframe __attribute__ ((__unused__)) ) 
+{
   if (TAG(param) != NULLOBJ) return OPD_ERR;
-  DMPETSC_KSP_PCSETUPF(kspframe) = finalize_BJACOBI_ILU;  
+  //DMPETSC_ERRCHECK(PCFactorSetUseInPlace(pc));
   return OK;
 }
 
-DM_INLINE_STATIC P setup_BJACOBI_LU(PC pc 
-				    __attribute__ ((__unused__)), 
-				    B* param, 
-				    B* kspframe) {
+DM_INLINE_STATIC P setup_ILU(
+  PC pc __attribute__ ((__unused__)),
+  B* restrict param,
+  B* restrict kspframe __attribute__ ((__unused__)) ) 
+{
   if (TAG(param) != NULLOBJ) return OPD_ERR;
-  DMPETSC_KSP_PCSETUPF(kspframe) = finalize_BJACOBI_LU;  
+  //DMPETSC_ERRCHECK(PCFactorSetUseInPlace(pc));
+  //DMPETSC_ERRCHECK(PCFactorSetReuseFill(pc, PETSC_TRUE));
+  //DMPETSC_ERRCHECK(PCFactorSetReuseOrdering(pc, PETSC_TRUE));
   return OK;
 }
 
-typedef P (*PCFunc)(PC pc, B* param, B* kspframe);
+DM_INLINE_STATIC P setup_ICC(
+  PC pc __attribute__ ((__unused__)),
+  B* restrict param,
+  B* restrict kspframe __attribute__ ((__unused__)) )
+{
+  if (TAG(param) != NULLOBJ) return OPD_ERR;
+  //DMPETSC_ERRCHECK(PCFactorSetUseInPlace(pc));
+  //DMPETSC_ERRCHECK(PCFactorSetReuseFill(pc, PETSC_TRUE));
+  //DMPETSC_ERRCHECK(PCFactorSetReuseOrdering(pc, PETSC_TRUE));
+  return OK;
+}
+
+typedef P (*PCFunc)(PC pc, B *restrict param, B *restrict kspframe);
+typedef P (*PCPostFunc)(KSP ksp, B *restrict kspframe);
 static const struct {
   PCType t;
   PCFunc f;
+  PCPostFunc pf;
 } pctypes[] = {
-  {PCNONE, NULL},
-  {PCJACOBI, NULL},
-  {PCSOR, NULL},
-  {PCLU, NULL},
-  {PCSHELL, NULL},
-  {PCBJACOBI, NULL},
-  {PCMG, NULL},
-  {PCEISENSTAT, NULL},
-  {PCILU, NULL},
-  {PCICC, NULL},
-  {PCASM, NULL},
-  {PCKSP, NULL},
-  {PCCOMPOSITE, NULL},
-  {PCREDUNDANT, NULL},
-  {PCSPAI, NULL},
-  {PCNN, NULL},
-  {PCCHOLESKY, NULL},
-  {PCSAMG, NULL},
-  {PCPBJACOBI, NULL},
-  {PCMAT, NULL},
-  {PCHYPRE, NULL},
-  {PCFIELDSPLIT, NULL},
-  {PCTFS, NULL},
-  {PCML, NULL},
-  {PCPROMETHEUS, NULL},
-  {PCGALERKIN, NULL},
-  {PCOPENMP, NULL},
-  {PCBJACOBI, setup_BJACOBI_ILU},
-  {PCBJACOBI, setup_BJACOBI_LU}
+  {PCNONE, NULL, NULL},
+  {PCJACOBI, NULL, NULL},
+  {PCSOR, NULL, NULL},
+  {PCLU, setup_LU, NULL},
+  {PCSHELL, NULL, NULL},
+  {PCBJACOBI, NULL, NULL},
+  {PCMG, NULL, NULL},
+  {PCEISENSTAT, NULL, NULL},
+  {PCILU, setup_ILU, NULL},
+  {PCICC, setup_ICC, NULL},
+  {PCASM, NULL, NULL},
+  {PCKSP, NULL, NULL},
+  {PCCOMPOSITE, NULL, NULL},
+  {PCREDUNDANT, NULL, NULL},
+  {PCSPAI, NULL, NULL},
+  {PCNN, NULL, NULL},
+  {PCCHOLESKY, NULL, NULL},
+  {PCSAMG, NULL, NULL},
+  {PCPBJACOBI, NULL, NULL},
+  {PCMAT, NULL, NULL},
+  {PCHYPRE, NULL, NULL},
+  {PCFIELDSPLIT, NULL, NULL},
+  {PCTFS, NULL, NULL},
+  {PCML, NULL, NULL},
+  {PCPROMETHEUS, NULL, NULL},
+  {PCGALERKIN, NULL, NULL},
+  {PCOPENMP, NULL, NULL},
+  {PCBJACOBI, NULL, finalize_BJACOBI_ILU},
+  {PCBJACOBI, NULL, finalize_BJACOBI_LU}
 };
 
 typedef PetscErrorCode (*monitorfunc)(KSP ksp, PetscInt i, 
@@ -1066,6 +1099,11 @@ static const struct {
   {KSPMonitorTrueResidualNorm},
   {KSPMonitorSingularValue},
 };
+
+#define kspretc(retc_code) do {				\
+    retc = retc_code;					\
+    goto err;						\
+  } while (0)
 
 // ksptype ksparam pctype pcparams monitor | KSP
 DM_INLINE_STATIC P petsc_ksp_create(void) {
@@ -1106,10 +1144,7 @@ DM_INLINE_STATIC P petsc_ksp_create(void) {
   DMPETSC_KSP_PCTYPE(pframe) = pctype;
   DMPETSC_KSP_DUPID(pframe) = 0;
   DMPETSC_KSP_N(pframe) = 0;
-
-  DMPETSC_KSP_PCSETUPF(pframe) = NULL;
   DMPETSC_KSP_PCSETUPFD(pframe) = NULL;
-  DMPETSC_KSP_KSPSETUPF(pframe) = NULL;
   DMPETSC_KSP_KSPSETUPFD(pframe) = NULL;
 
   if ((r = KSPCreate(PETSC_COMM_WORLD, ksp))) goto err;
@@ -1122,16 +1157,24 @@ DM_INLINE_STATIC P petsc_ksp_create(void) {
   if (ksptype != PINF) {
     if ((r = KSPSetType(*ksp, ksptypes[ksptype].t))) goto err;
     if ((r = KSPSetUp(*ksp))) goto err;
-    if (ksptypes[ksptype].f 
-	&& (retc = ksptypes[ksptype].f(*ksp, kspparam, pframe))) goto err;
+    if (ksptypes[ksptype].f) { 
+      if ((retc = ksptypes[ksptype].f(*ksp, kspparam, pframe)))
+	goto err;
+    }
+    else if (TAG(kspparam) != NULLOBJ) kspretc(OPD_ERR);
   }
+  else if (TAG(kspparam) != NULLOBJ) kspretc(OPD_ERR);
 
   if (pctype != PINF) {
     if ((r = KSPGetPC(*ksp, &pc))) goto err;
     if ((r = PCSetType(pc, pctypes[pctype].t))) goto err;
-    if (pctypes[pctype].f 
-	&& (retc = pctypes[pctype].f(pc, pcparam, pframe))) goto err;
+    if (pctypes[pctype].f) {
+      if ((retc = pctypes[pctype].f(pc, pcparam, pframe))) 
+	goto err;
+    }
+    else if (TAG(pcparam) != NULLOBJ) kspretc(OPD_ERR);
   }
+  else if (TAG(pcparam) != NULLOBJ) kspretc(OPD_ERR);
 
   moveframe(pframe, o_5);
   FREEopds = o_4;
@@ -1144,6 +1187,8 @@ DM_INLINE_STATIC P petsc_ksp_create(void) {
   if (retc) return retc;
   RETURN_ERROR(errmap[r]);
 }
+
+#undef kspretc
 
 // ksp | --
 DM_INLINE_STATIC P petsc_ksp_destroy(void) {
@@ -1189,14 +1234,16 @@ DM_INLINE_STATIC P petsc_ksp_tol(void) {
 }
 
 DM_INLINE_STATIC P petsc_ksp_pcsetup(B* kspframe, KSP ksp) {
-  const ksp_pcsetupf kspsetup = DMPETSC_KSP_PCSETUPF(kspframe);
-  if (kspsetup) return kspsetup(ksp, kspframe);
+  const P pctype = DMPETSC_KSP_PCTYPE(kspframe);
+  if (pctype != PINF && pctypes[pctype].pf) 
+    return pctypes[pctype].pf(ksp, kspframe);
   return OK;
 }
 
 DM_INLINE_STATIC P petsc_ksp_kspsetup(B* kspframe, KSP ksp) {
-  const ksp_kspsetupf kspsetup = DMPETSC_KSP_PCSETUPF(kspframe);
-  if (kspsetup) return kspsetup(ksp, kspframe);
+  const P ksptype = DMPETSC_KSP_KSPTYPE(kspframe);
+  if (ksptype != PINF && ksptypes[ksptype].pf) 
+    return ksptypes[ksptype].pf(ksp, kspframe);
   return OK;
 }
 

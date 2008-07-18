@@ -9,29 +9,29 @@
 |  (kspparam) defined by petsc_ksp_create in dmpetsc.c.in
 |
 /ksptypes {
-  /KSPRICHARDSON
-  /KSPCHEBYCHEV
-  /KSPCG
-  /KSPCGNE
-  /KSPSTCG
-  /KSPGLTR
-  /KSPGMRES
-  /KSPFGMRES
-  /KSPLGMRES
-  /KSPTCQMR
-  /KSPBCGS
-  /KSPBCGSL
-  /KSPCGS
-  /KSPTFQMR
-  /KSPCR
-  /KSPLSQR
-  /KSPPREONLY
-  /KSPQCG
-  /KSPBICG
-  /KSPMINRES
-  /KSPSYMMLQ
-  /KSPLCD
-  * /KSPDEFAULT
+  /RICHARDSON
+  /CHEBYCHEV
+  /CG
+  /CGNE
+  /STCG
+  /GLTR
+  /GMRES
+  /FGMRES
+  /LGMRES
+  /TCQMR
+  /BCGS
+  /BCGSL
+  /CGS
+  /TFQMR
+  /CR
+  /LSQR
+  /PREONLY
+  /QCG
+  /BICG
+  /MINRES
+  /SYMMLQ
+  /LCD
+  * /DEFAULT
 } makeenum def
 
 |------------------ pctypes -----------------------
@@ -42,43 +42,43 @@
 |  (pcparam) defined by petsc_ksp_create in dmpetsc.c.in
 |
 /pctypes {
-  /PCNONE
-  /PCJACOBI
-  /PCSOR
-  /PCLU
-  /PCSHELL
-  /PCBJACOBI
-  /PCMG
-  /PCEISENSTAT
-  /PCILU
-  /PCICC
-  /PCASM
-  /PCKSP
-  /PCCOMPOSITE
-  /PCREDUNDANT
-  /PCSPAI
-  /PCNN
-  /PCCHOLESKY
-  /PCSAMG
-  /PCPBJACOBI
-  /PCMAT
-  /PCHYPRE
-  /PCFIELDSPLIT
-  /PCTFS
-  /PCML
-  /PCPROMETHEUS
-  /PCGALERKIN
-  /PCOPENMP
-  /PCJACOBI_ILU
-  /PCJACOBI_LU
-  * /PCDEFAULT
+  /NONE
+  /JACOBI
+  /SOR
+  /LU
+  /SHELL
+  /BJACOBI
+  /MG
+  /EISENSTAT
+  /ILU
+  /ICC
+  /ASM
+  /KSP
+  /COMPOSITE
+  /REDUNDANT
+  /SPAI
+  /NN
+  /CHOLESKY
+  /SAMG
+  /PBJACOBI
+  /MAT
+  /HYPRE
+  /FIELDSPLIT
+  /TFS
+  /ML
+  /PROMETHEUS
+  /GALERKIN
+  /OPENMP
+  /BJACOBI_ILU
+  /BJACOBI_LU
+  * /DEFAULT
 } makeenum def
 
 /monitortypes {
-  /KSPMonitorOff
-  /KSPMonitorTrueResidualNorm
-  /KSPMonitorSingularValue
-  * /KSPMonitorDefault
+  /Off
+  /TrueResidualNorm
+  /SingularValue
+  * /Default
 } makeenum def
 
 |------------------------- in_petsc -----------------

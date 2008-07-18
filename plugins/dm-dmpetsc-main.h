@@ -163,9 +163,7 @@ P op_INIT_(void) {
   makename(KSP_KSPTYPE_string, KSP_KSPTYPE_frame);
   makename(KSP_PCTYPE_string, KSP_PCTYPE_frame);
   makename(KSP_DUPID_string, KSP_DUPID_frame);
-  makename(KSP_PCSETUPF_string, KSP_PCSETUPF_frame);
   makename(KSP_PCSETUPFD_string, KSP_PCSETUPFD_frame);
-  makename(KSP_KSPSETUPF_string, KSP_KSPSETUPF_frame);
   makename(KSP_KSPSETUPFD_string, KSP_KSPSETUPFD_frame);
   return init_();
 }

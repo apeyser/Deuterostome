@@ -771,7 +771,7 @@ c_         list all connections
     knode 0 ne {
       nodelist knode get /node name
       node 0 get class /nullclass ne {
-        node 2 get SIGNALS /SIGINT get sendsig
+        node 2 get /INT signal
         knode setready
       } if
     } if
