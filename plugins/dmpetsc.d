@@ -23,18 +23,22 @@
       /gm     [[/NUM /LONG32TYPE] /LONG32_VAL 0] def 
       /ass    [[/NUM /LONGBIGTYPE] /ASS_STATE /READONLY] def 
       /dupid  [[/NUM /LONG64TYPE] /ULONG64_VAL /READONLY] def 
-      /mtype  [[/NUM /LONG32TYPE] /LONG32_VAL 0] def |]
+      /mtype  [[/NUM /LONG32TYPE] /LONG32_VAL 0] def 
     end def |]
   end def
 
   /ksp 5 dict dup begin |[
     /opaque 0 def
-    /members 5 dict dup begin |[
-      /ksp     [[/NUM /LONGBIGTYPE] /KSP_VAL /READONLY] def 
-      /n       [[/NUM /LONG32TYPE] /LONG32_VAL 0] def 
-      /ksptype [[/NUM /LONG32TYPE] /LONG32_VAL /READONLY] def
-      /pctype  [[/NUM /LONG32TYPE] /LONG32_VAL /READONLY] def 
-      /dupid   [[/NUM /LONG64TYPE] /ULONG64_VAL /READONLY] def |]
+    /members 9 dict dup begin |[
+      /ksp        [[/NUM /LONGBIGTYPE] /KSP_VAL /READONLY] def 
+      /n          [[/NUM /LONG32TYPE] /LONG32_VAL 0] def 
+      /ksptype    [[/NUM /LONG32TYPE] /LONG32_VAL /READONLY] def
+      /pctype     [[/NUM /LONG32TYPE] /LONG32_VAL /READONLY] def 
+      /dupid      [[/NUM /LONG64TYPE] /ULONG64_VAL /READONLY] def |]
+      /pcsetupf   [[/NUM /LONGBIGTYPE] /PCSETUPF /READONLY] def 
+      /pcsetupfd  [[/NUM /LONGBIGTYPE] /VALUE_PTR /READONLY] def
+      /kspsetupf  [[/NUM /LONGBIGTYPE] /KSPSETUPF /READONLY] def
+      /kspsetupfd [[/NUM /LONGBIGTYPE] /VALUE_PTR /READONLY] def |]
     end def |]
   end def |]
 end def

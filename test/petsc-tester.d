@@ -3,6 +3,18 @@
 /dim 5 def
 /show true def 
 
+/pctype /PCDEFAULT def
+/sparse_pctype ~pctype def
+/dense_pctype ~pctype def
+
+/ksptype /KSPDEFAULT def
+/sparse_ksptype ~ksptype def
+/dense_ksptype ~ksptype def
+
+/activeS true def
+/activeSD true def
+/activeD true def
+
 | (name) ~active:--|-- | --
 /timer {
   gettimeofday 3 -1 roll exec 
@@ -101,10 +113,16 @@
       } sexecpawns
     } timer
     (matSD fill) {matSD ~matSDdata mat_fill_data} timer
-    
-    /kS  dup ksp_create def
-    /kD  dup ksp_create def
-    /kSD dup ksp_create def
+
+    {
+      {/kS  sparse_pctype sparse_ksptype}
+      {/kSD sparse_pctype sparse_ksptype}
+      {/kD  dense_pctype  dense_ksptype}
+    } {exec /ksptype_name name /pctype_name name /ksp_name name
+      pctypes  pctype_name  get kspsettings /pctype  put
+      ksptypes ksptype_name get kspsettings /ksptype put
+      ksp_name dup ksp_create def
+    } forall
     
     /vecb dup dim vec_create def
     {
@@ -122,13 +140,15 @@
       
     /res dim /d array def
     {
-      {(sparse)       kS  matS  vecxS}
-      {(sparse dense) kSD matSD vecxSD}
-      {(dense)        kD  matD  vecxD}
-    } {exec /vecx name /mat name /k name /mt name
+      {(sparse)       kS  matS  vecxS  activeS}
+      {(sparse dense) kSD matSD vecxSD activeSD}
+      {(dense)        kD  matD  vecxD  activeD}
+    } {exec not {3 ~pop repeat
+      (Skipping: ) toconsole toconsole (\n) toconsole
+    } {/vecx name /mat name /k name /mt name
       vecx ~vecxdata vec_fill
-      (\n) toconsole
-      (Testing: ) toconsole mt toconsole (\n) toconsole
+      (\n==============================\n) toconsole
+      (Testing: ) toconsole mt toconsole (\n\n) toconsole
       (Solution: \n) toconsole
       gettimeofday k mat vecx vecb res get_ksp_solve gettimeofday
       3 -1 roll show {v_} if 
@@ -143,12 +163,13 @@
       timediff neg (Time: ) toconsole _ pop
 
       vecx ~vecxdata vec_fill
+      (\n) toconsole
       (Solution x2: \n) toconsole
       gettimeofday k vecx vecb2 res get_ksp_resolve gettimeofday
       3 -1 roll show {v_} if
       2 sub dup mul 0d exch add sqrt (Distance: ) toconsole _ pop
       timediff neg (Time: ) toconsole _ pop
-    } forall
+    } ifelse} forall
     
     {
       {vecxS  matS  kS}

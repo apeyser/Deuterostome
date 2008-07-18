@@ -31,6 +31,7 @@
   /KSPMINRES
   /KSPSYMMLQ
   /KSPLCD
+  * /KSPDEFAULT
 } makeenum def
 
 |------------------ pctypes -----------------------
@@ -68,6 +69,16 @@
   /PCPROMETHEUS
   /PCGALERKIN
   /PCOPENMP
+  /PCJACOBI_ILU
+  /PCJACOBI_LU
+  * /PCDEFAULT
+} makeenum def
+
+/monitortypes {
+  /KSPMonitorOff
+  /KSPMonitorTrueResidualNorm
+  /KSPMonitorSingularValue
+  * /KSPMonitorDefault
 } makeenum def
 
 |------------------------- in_petsc -----------------
@@ -354,7 +365,7 @@
     {
       dup /kspsettings name
       {
-        ksptype kspparam pctype pcparam petsc_ksp_create
+        ksptype kspparam pctype pcparam monitortype petsc_ksp_create
         dup rtol atol dtol maxits petsc_ksp_tol
       } exch indict
     } in_petsc def
@@ -992,6 +1003,8 @@
   |   Default is gmres, with classical Gram-Schmidt orthogonalization.
   | pcparam, kspparam: parameter for pctype, ksptype that requires
   |   additional data for initialization.
+  | monitortype: one of the monitortypes defining monitoring output
+  |  during the solver.
   |
   /kspsettings {
     /rtol     1e-12
@@ -1002,6 +1015,7 @@
     /ksptype  *
     /kspparam null
     /pcparam  null
+    /monitortype *
   } bind makestruct def
   
   |------------------------ kspcreate ----------------

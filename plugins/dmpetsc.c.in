@@ -19,7 +19,12 @@ enum AssState {
 #define MATRIX_VAL(frame)    (*(Mat*) NUM_VAL(frame))
 #define KSP_VAL(frame)       (*(KSP*) NUM_VAL(frame))
 #define ULONG64_VAL(frame)   (*(UL64*) &LONG64_VAL(frame))
+#define PCSETUPF(frame)      (*(ksp_pcsetupf*) &LONGBIG_VAL(frame))
+#define KSPSETUPF(frame)     (*(ksp_kspsetupf*) &LONGBIG_VAL(frame))
 
+typedef P (*ksp_pcsetupf)(KSP ksp, B* kspframe);
+typedef P (*ksp_kspsetupf)(KSP ksp, B* kspframe);
+				   
 #include "dm-dmpetsc-header.h"
 
 static PetscErrorCode petscsig(int sig __attribute__ ((__unused__)), 
@@ -931,13 +936,11 @@ DM_INLINE_STATIC P petsc_mat_vecmul(void) {
   return OK;
 }
 
-typedef P (*KSPFunc)(KSP ksp, B* param);
-typedef struct {
+typedef P (*KSPFunc)(KSP ksp, B* param, B* kspframe);
+static const struct {
   KSPType t;
   KSPFunc f;
-} KSPFlags;
-
-static const KSPFlags ksptypes[] = {
+} ksptypes[] = {
   {KSPRICHARDSON, NULL},
   {KSPCHEBYCHEV, NULL},
   {KSPCG, NULL},
@@ -962,13 +965,67 @@ static const KSPFlags ksptypes[] = {
   {KSPLCD, NULL}
 };
 
-typedef P (*PCFunc)(PC pc, B* param);
-typedef struct {
+DM_INLINE_STATIC P finalize_BJACOBI_ILU(KSP ksp, B* kspframe 
+					__attribute__ ((__unused__)) ) {
+  PetscInt n_local;
+  PC pc;
+  KSP* subksp; 
+  KSP* i;
+  
+  DMPETSC_ERRCHECK(KSPGetPC(ksp, &pc));
+  DMPETSC_ERRCHECK(PCBJacobiGetSubKSP(pc, &n_local, PETSC_NULL, &subksp));
+  for (i = subksp; i < subksp + n_local; i++) {
+    PC subpc;
+    DMPETSC_ERRCHECK(KSPSetType(*i, KSPPREONLY));
+    DMPETSC_ERRCHECK(KSPGetPC(*i, &subpc));
+    DMPETSC_ERRCHECK(PCSetType(subpc, PCILU));
+  }
+
+  return OK;
+}
+
+DM_INLINE_STATIC P finalize_BJACOBI_LU(KSP ksp, B* kspframe 
+				       __attribute__ ((__unused__)) ) {
+  PetscInt n_local;
+  PC pc;
+  KSP* subksp; 
+  KSP* i;
+  
+  DMPETSC_ERRCHECK(KSPGetPC(ksp, &pc));
+  DMPETSC_ERRCHECK(PCBJacobiGetSubKSP(pc, &n_local, PETSC_NULL, &subksp));
+  for (i = subksp; i < subksp + n_local; i++) {
+    PC subpc;
+    DMPETSC_ERRCHECK(KSPSetType(*i, KSPPREONLY));
+    DMPETSC_ERRCHECK(KSPGetPC(*i, &subpc));
+    DMPETSC_ERRCHECK(PCSetType(subpc, PCLU));
+  }
+
+  return OK;
+}
+
+DM_INLINE_STATIC P setup_BJACOBI_ILU(PC pc
+				     __attribute__ ((__unused__)),
+				     B* param, 
+				     B* kspframe) {
+  if (TAG(param) != NULLOBJ) return OPD_ERR;
+  DMPETSC_KSP_PCSETUPF(kspframe) = finalize_BJACOBI_ILU;  
+  return OK;
+}
+
+DM_INLINE_STATIC P setup_BJACOBI_LU(PC pc 
+				    __attribute__ ((__unused__)), 
+				    B* param, 
+				    B* kspframe) {
+  if (TAG(param) != NULLOBJ) return OPD_ERR;
+  DMPETSC_KSP_PCSETUPF(kspframe) = finalize_BJACOBI_LU;  
+  return OK;
+}
+
+typedef P (*PCFunc)(PC pc, B* param, B* kspframe);
+static const struct {
   PCType t;
   PCFunc f;
-} PCFlags;
-
-static const PCFlags pctypes[] = {
+} pctypes[] = {
   {PCNONE, NULL},
   {PCJACOBI, NULL},
   {PCSOR, NULL},
@@ -995,10 +1052,22 @@ static const PCFlags pctypes[] = {
   {PCML, NULL},
   {PCPROMETHEUS, NULL},
   {PCGALERKIN, NULL},
-  {PCOPENMP, NULL}
+  {PCOPENMP, NULL},
+  {PCBJACOBI, setup_BJACOBI_ILU},
+  {PCBJACOBI, setup_BJACOBI_LU}
 };
-  
-// ksptype ksparam pctype pcparams | KSP
+
+typedef PetscErrorCode (*monitorfunc)(KSP ksp, PetscInt i, 
+				      PetscReal r, void* v);
+static const struct {
+  monitorfunc f;
+} monitors[] = {
+  {PETSC_NULL},
+  {KSPMonitorTrueResidualNorm},
+  {KSPMonitorSingularValue},
+};
+
+// ksptype ksparam pctype pcparams monitor | KSP
 DM_INLINE_STATIC P petsc_ksp_create(void) {
   PetscErrorCode r;
   P retc = 0;
@@ -1008,18 +1077,27 @@ DM_INLINE_STATIC P petsc_ksp_create(void) {
   P ksptype, pctype;
   B* oldfreevm = FREEvm;
   B* pcparam; B* kspparam;
+  P monitor;
 
-  if (o_4 < FLOORopds) return OPDS_UNF;
-  if (CLASS(o_4) != NUM) return OPD_CLA;
-  if (PVALUE(o_4, &ksptype) 
-      && (ksptype < 0 || ksptype >= (P) (sizeof(ksptypes)/sizeof(ksptypes[0]))))
+  if (o_5 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_5) != NUM) return OPD_CLA;
+  if (PVALUE(o_5, &ksptype) 
+      && (ksptype < 0 
+	  || ksptype >= (P) (sizeof(ksptypes)/sizeof(ksptypes[0]))))
     return RNG_CHK;
-  kspparam = o_3;
-  if (CLASS(o_2) != NUM) return OPD_CLA;
-  if (PVALUE(o_2, &pctype)
+  kspparam = o_4;
+
+  if (CLASS(o_3) != NUM) return OPD_CLA;
+  if (PVALUE(o_3, &pctype)
       && (pctype < 0 || pctype >= (P) (sizeof(pctypes)/sizeof(pctypes[0]))))
     return RNG_CHK;
-  pcparam = o_1;
+  pcparam = o_2;
+
+  if (CLASS(o_1) != NUM) return OPD_CLA;
+  if (PVALUE(o_1, &monitor)
+      && (monitor < 0 
+	  || monitor >= (P) (sizeof(monitors)/sizeof(monitors[0]))))
+    return RNG_CHK;
 
   MAKE_DMPETSC_KSP(pframe);
   ksp = &DMPETSC_KSP_KSP(pframe);
@@ -1029,24 +1107,34 @@ DM_INLINE_STATIC P petsc_ksp_create(void) {
   DMPETSC_KSP_DUPID(pframe) = 0;
   DMPETSC_KSP_N(pframe) = 0;
 
+  DMPETSC_KSP_PCSETUPF(pframe) = NULL;
+  DMPETSC_KSP_PCSETUPFD(pframe) = NULL;
+  DMPETSC_KSP_KSPSETUPF(pframe) = NULL;
+  DMPETSC_KSP_KSPSETUPFD(pframe) = NULL;
+
   if ((r = KSPCreate(PETSC_COMM_WORLD, ksp))) goto err;
   if ((r = KSPSetInitialGuessNonzero(*ksp, PETSC_TRUE))) goto err;
-  if ((r = KSPMonitorSet(*ksp, KSPMonitorDefault, 
+  if ((r = KSPMonitorSet(*ksp, 
+			 ((monitor == PINF) 
+			  ? KSPMonitorDefault : monitors[monitor].f),
 			 PETSC_NULL, PETSC_NULL))) goto err;
+
   if (ksptype != PINF) {
     if ((r = KSPSetType(*ksp, ksptypes[ksptype].t))) goto err;
+    if ((r = KSPSetUp(*ksp))) goto err;
     if (ksptypes[ksptype].f 
-	&& (retc = ksptypes[ksptype].f(*ksp, kspparam))) goto err;
+	&& (retc = ksptypes[ksptype].f(*ksp, kspparam, pframe))) goto err;
   }
+
   if (pctype != PINF) {
     if ((r = KSPGetPC(*ksp, &pc))) goto err;
     if ((r = PCSetType(pc, pctypes[pctype].t))) goto err;
-    if ((pctypes[pctype].f 
-	 && (retc = pctypes[pctype].f(pc, pcparam)))) goto err;
+    if (pctypes[pctype].f 
+	&& (retc = pctypes[pctype].f(pc, pcparam, pframe))) goto err;
   }
 
-  moveframe(pframe, o_4);
-  FREEopds = o_3;
+  moveframe(pframe, o_5);
+  FREEopds = o_4;
   return OK;
 
  err:
@@ -1100,6 +1188,18 @@ DM_INLINE_STATIC P petsc_ksp_tol(void) {
   return OK;
 }
 
+DM_INLINE_STATIC P petsc_ksp_pcsetup(B* kspframe, KSP ksp) {
+  const ksp_pcsetupf kspsetup = DMPETSC_KSP_PCSETUPF(kspframe);
+  if (kspsetup) return kspsetup(ksp, kspframe);
+  return OK;
+}
+
+DM_INLINE_STATIC P petsc_ksp_kspsetup(B* kspframe, KSP ksp) {
+  const ksp_kspsetupf kspsetup = DMPETSC_KSP_PCSETUPF(kspframe);
+  if (kspsetup) return kspsetup(ksp, kspframe);
+  return OK;
+}
+
 // KSP A/null x b | x
 DM_INLINE_STATIC P petsc_ksp_solve(void) {
   KSP ksp;
@@ -1131,9 +1231,15 @@ DM_INLINE_STATIC P petsc_ksp_solve(void) {
 
   if (*n !=  DMPETSC_VECTOR_N(o_2) || *n != DMPETSC_VECTOR_N(o_1)) 
     RETURN_ERROR(DMPETSC_NOMATCH);
-  if (A) DMPETSC_ERRCHECK(KSPSetOperators(ksp, A, A, SAME_NONZERO_PATTERN));
 
-  DMPETSC_ERRCHECK(KSPSetUp(ksp));
+  if (A) {
+    P retc;
+    DMPETSC_ERRCHECK(KSPSetOperators(ksp, A, A, SAME_NONZERO_PATTERN));
+    DMPETSC_ERRCHECK(KSPSetUp(ksp));
+    if ((retc = petsc_ksp_kspsetup(o_4, ksp))) return retc;
+    if ((retc = petsc_ksp_pcsetup(o_4, ksp))) return retc;
+  }
+
   DMPETSC_ERRCHECK(KSPSolve(ksp, b, x));
   DMPETSC_ERRCHECK(KSPGetConvergedReason(ksp, &rzn));
   if (rzn < 0) RETURN_ERROR(errmap[PETSC_ERR_MAX_VALUE + (-rzn)]);
