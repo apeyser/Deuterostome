@@ -111,6 +111,8 @@ B* ll_errm[] = {
 B* ll_export[] = { 
   PLUGIN_OPS,
   PLUGIN_OP(FINI_),
+  PLUGIN_OP(petsc_log_begin),
+  PLUGIN_OP(pets_log_summary),
   PLUGIN_OP(petsc_vec_create),
   PLUGIN_OP(petsc_vec_copy),
   PLUGIN_OP(petsc_vec_copyto),
@@ -119,6 +121,7 @@ B* ll_export[] = {
   PLUGIN_OP(petsc_vec_syncfrom),
   PLUGIN_OP(petsc_vec_max),
   PLUGIN_OP(petsc_vec_min),
+  PLUGIN_OP(petsc_vec_norm),
   PLUGIN_OP(petsc_vec_destroy),
   PLUGIN_OP(petsc_mat_sparse_create),
   PLUGIN_OP(petsc_mat_dense_create),
@@ -134,6 +137,8 @@ B* ll_export[] = {
   PLUGIN_OP(petsc_mat_destroy),
   PLUGIN_OP(petsc_mat_dup),
   PLUGIN_OP(petsc_mat_vecmul),
+  PLUGIN_OP(petsc_mat_transpose),
+  PLUGIN_OP(petsc_mat_matmul),
   PLUGIN_OP(petsc_ksp_create),
   PLUGIN_OP(petsc_ksp_destroy),
   PLUGIN_OP(petsc_ksp_tol),
@@ -170,6 +175,10 @@ P op_INIT_(void) {
 
 P op_FINI_(void) {return fini_();}
 
+P op_petsc_log_begin(void) {return petsc_log_begin();}
+
+P op_pets_log_summary(void) {return pets_log_summary();}
+
 P op_petsc_vec_create(void) {return petsc_vec_create();}
 
 P op_petsc_vec_copy(void) {return petsc_vec_copy();}
@@ -185,6 +194,8 @@ P op_petsc_vec_syncfrom(void) {return petsc_vec_syncfrom();}
 P op_petsc_vec_max(void) {return petsc_vec_max();}
 
 P op_petsc_vec_min(void) {return petsc_vec_min();}
+
+P op_petsc_vec_norm(void) {return petsc_vec_norm();}
 
 P op_petsc_vec_destroy(void) {return petsc_vec_destroy();}
 
@@ -215,6 +226,10 @@ P op_petsc_mat_destroy(void) {return petsc_mat_destroy();}
 P op_petsc_mat_dup(void) {return petsc_mat_dup();}
 
 P op_petsc_mat_vecmul(void) {return petsc_mat_vecmul();}
+
+P op_petsc_mat_transpose(void) {return petsc_mat_transpose();}
+
+P op_petsc_mat_matmul(void) {return petsc_mat_matmul();}
 
 P op_petsc_ksp_create(void) {return petsc_ksp_create();}
 

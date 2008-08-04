@@ -301,6 +301,12 @@
 #define DMPETSC_DIVERGED_NAN (48L)
 #define DMPETSC_DIVERGED_INDEFINITE_MAT (49L)
 
+#define op_petsc_log_begin EXPORTNAME(op_petsc_log_begin)
+P op_petsc_log_begin(void);
+
+#define op_pets_log_summary EXPORTNAME(op_pets_log_summary)
+P op_pets_log_summary(void);
+
 #define op_petsc_vec_create EXPORTNAME(op_petsc_vec_create)
 P op_petsc_vec_create(void);
 
@@ -324,6 +330,9 @@ P op_petsc_vec_max(void);
 
 #define op_petsc_vec_min EXPORTNAME(op_petsc_vec_min)
 P op_petsc_vec_min(void);
+
+#define op_petsc_vec_norm EXPORTNAME(op_petsc_vec_norm)
+P op_petsc_vec_norm(void);
 
 #define op_petsc_vec_destroy EXPORTNAME(op_petsc_vec_destroy)
 P op_petsc_vec_destroy(void);
@@ -369,6 +378,12 @@ P op_petsc_mat_dup(void);
 
 #define op_petsc_mat_vecmul EXPORTNAME(op_petsc_mat_vecmul)
 P op_petsc_mat_vecmul(void);
+
+#define op_petsc_mat_transpose EXPORTNAME(op_petsc_mat_transpose)
+P op_petsc_mat_transpose(void);
+
+#define op_petsc_mat_matmul EXPORTNAME(op_petsc_mat_matmul)
+P op_petsc_mat_matmul(void);
 
 #define op_petsc_ksp_create EXPORTNAME(op_petsc_ksp_create)
 P op_petsc_ksp_create(void);

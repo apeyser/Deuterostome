@@ -52,7 +52,7 @@ gentoo-setup: rsync
 
 .PHONY: rsync
 rsync: dist
-	scp $(DIST_ARCHIVES) root@deli1:/usr/local/portage/distfiles/
+	scp $(DIST_ARCHIVES) root@gentoo:/usr/local/portage/distfiles/
 	source /etc/make.conf \
 	&& if test -z "$$DISTDIR" ; then DISTDIR=/usr/portage/distfiles; fi \
 	&& if test -e $$DISTDIR/$(DIST_ARCHIVES); then \

@@ -73,7 +73,7 @@ end def
   } forall
 end def
 
-/tests [/thread /parallel /serial /byhand /tiny] def
+/tests [/thread /parallel /serial /byhand /tiny /atlas /petsc] def
 
 /text_tests tests length dict dup begin
   /thread {(thread[) fax * threads * number (]) fax} bind def
@@ -83,6 +83,8 @@ end def
     (tiny[) fax * threads * number
     (][) fax * inner_reps * number (]) fax
   } bind def
+  /atlas {(atlas) fax} bind def
+  /petsc {(petsc) fax} bind def
 end def
 
 /AA_dy_test tests length dict dup begin
@@ -101,6 +103,12 @@ end def
       } for
     } ifelse
   } bind def
+  /atlas {
+    aA1 aA2 AAatlas op get exec pop
+  } bind def
+  /petsc {
+    A13 A14 AApetsc op get exec pop
+  } bind def
 end def
 
 /n 1.02d def
@@ -113,6 +121,12 @@ end def
     0 1 A7 length 1 sub {/i name
       A7 i get n op mkact exec A7 i put
     } for
+  } bind def
+  /atlas {
+    aA1 n ASatlas op get exec pop
+  } bind def
+  /petsc {
+    A13 n ASpetsc op get exec pop
   } bind def
 end def
 
@@ -127,6 +141,12 @@ end def
     } {
       n 0 1 A7 length 1 sub {A7 exch get op mkact exec} for /a4 name
     } ifelse
+  } bind def
+  /atlas {
+    n aA1 SAatlas op get exec pop
+  } bind def
+  /petsc {
+    n A13 SApetsc op get exec pop
   } bind def
 end def
 
@@ -148,6 +168,12 @@ end def
             A10 i get j put
           } for
         } for
+      } bind def
+      /atlas {
+        aA1 aA2 aA3 matmul_simple pop pop
+      } bind def
+      /petsc {
+        pA1 pA2 pA3 pmatmul pop
       } bind def
     end def
     /mattranspose tests length dict dup begin
