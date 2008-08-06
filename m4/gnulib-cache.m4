@@ -15,14 +15,14 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --aux-dir=. --avoid=alloca --avoid=alloca-opt --avoid=getlogin_r --avoid=malloc-posix --avoid=mempcpy --avoid=stdbool --avoid=stdlib --avoid=strdup --avoid=string --avoid=sys_stat --avoid=unistd --avoid=wchar --avoid=wctype --libtool --macro-prefix=gl glob
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --aux-dir=. --avoid=getlogin_r --avoid=malloc-posix --avoid=stdbool --avoid=stdlib --avoid=strdup --avoid=sys_stat --avoid=unistd --avoid=wchar --avoid=wctype --libtool --macro-prefix=gl glob
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
 gl_MODULES([
   glob
 ])
-gl_AVOID([alloca alloca-opt getlogin_r malloc-posix mempcpy stdbool stdlib strdup string sys_stat unistd wchar wctype])
+gl_AVOID([getlogin_r malloc-posix stdbool stdlib strdup sys_stat unistd wchar wctype])
 gl_SOURCE_BASE([lib])
 gl_M4_BASE([m4])
 gl_PO_BASE([])

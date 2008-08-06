@@ -1,1 +1,1 @@
-gnulib-tool --avoid=wctype --avoid=wchar --avoid=unistd --avoid=sys_stat --avoid=string --avoid=strdup --avoid=stdlib --avoid=stdlib --avoid=stdbool --avoid=mempcpy --avoid=malloc-posix --avoid=getlogin_r --avoid=alloca --avoid=alloca-opt --import glob
+gnulib-tool --avoid=wctype --avoid=wchar --avoid=unistd --avoid=sys_stat --avoid=strdup --avoid=stdlib --avoid=stdlib --avoid=stdbool --avoid=malloc-posix --avoid=getlogin_r --import glob

@@ -3,6 +3,14 @@
 /* align to this many bytes */
 #undef BYTECORRECT
 
+/* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
+   systems. This function is required for `alloca.c' support on those systems.
+   */
+#undef CRAY_STACKSEG_END
+
+/* Define to 1 if using `alloca.c'. */
+#undef C_ALLOCA
+
 /* the name of the file descriptor member of DIR */
 #undef DIR_FD_MEMBER_NAME
 
@@ -102,6 +110,14 @@
 /* Define to 1 if compiler has inline */
 #undef HAS_INLINE
 
+/* Define to 1 if you have 'alloca' after including <alloca.h>, a header that
+   may be supplied by this distribution. */
+#undef HAVE_ALLOCA
+
+/* Define to 1 if you have <alloca.h> and it should be used (not on Ultrix).
+   */
+#undef HAVE_ALLOCA_H
+
 /* Define if you have ATLAS library. */
 #undef HAVE_ATLAS
 
@@ -139,11 +155,17 @@
 /* Define to 1 if you have the <glob.h> header file. */
 #undef HAVE_GLOB_H
 
+/* Define if your compiler supports the #include_next directive. */
+#undef HAVE_INCLUDE_NEXT
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the `mempcpy' function. */
+#undef HAVE_MEMPCPY
 
 /* Define if you have MPI library. */
 #undef HAVE_MPI
@@ -269,6 +291,14 @@
 
 /* The size of `void*', as computed by sizeof. */
 #undef SIZEOF_VOIDP
+
+/* If using the C implementation of alloca, define if you know the
+   direction of stack growth for your system; otherwise it will be
+   automatically deduced at runtime.
+	STACK_DIRECTION > 0 => grows toward higher addresses
+	STACK_DIRECTION < 0 => grows toward lower addresses
+	STACK_DIRECTION = 0 => direction of growth unknown */
+#undef STACK_DIRECTION
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS

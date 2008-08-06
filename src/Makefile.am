@@ -103,7 +103,6 @@ AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
 AM_CXXFLAGS = $(GCC_CXXFLAGS)
 AM_LDFLAGS = $(PTHREAD_LIBS) $(X_LDFLAGS) -no-undefined 
 INCLUDE = @INCLTDL@
-LDADD = $(top_builddir)/lib/libgnu.la
 
 bin_PROGRAMS = dvt dnode dgen $(DNODEDAEMONBIN) $(MPI_PROGS) dmprop
 noinst_PROGRAMS = testwordorder $(DNODENICEBIN)
@@ -131,7 +130,7 @@ socksrcs = \
 dvt_SOURCES = dvt.c dvt_0.h dm-dvt.h dm-dvt.c \
 	$(socksrcs)
 
-dvt_LDADD = libdmglobals.la $(LDADD)
+dvt_LDADD = libdmglobals.la $(top_builddir)/lib/libgnu.la
 dvt_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS)
 dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS)
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
@@ -140,7 +139,7 @@ dnode_SOURCES = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
 	$(socksrcs) \
 	$(DNODE_MPI_SRCS)
 
-dnode_LDADD = libdmglobals.la libdmnodal.la $(LDADD)
+dnode_LDADD = libdmglobals.la libdmnodal.la $(top_builddir)/lib/libgnu.la
 dnode_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS) $(MPI_LIBS)
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
 dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS) $(MPI_FLAGS)

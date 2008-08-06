@@ -41,10 +41,18 @@ AC_DEFUN([gl_INIT],
   m4_pushdef([gl_LIBSOURCES_DIR], [])
   gl_COMMON
   gl_source_base='lib'
+changequote(,)dnl
+LTALLOCA=`echo "$ALLOCA" | sed 's/\.[^.]* /.lo /g;s/\.[^.]*$/.lo/'`
+changequote([, ])dnl
+AC_SUBST([LTALLOCA])
+  gl_FUNC_ALLOCA
   gl_CHECK_TYPE_STRUCT_DIRENT_D_TYPE
   gl_FUNC_DIRFD
   # No macro. You should also use one of fnmatch-posix or fnmatch-gnu.
   gl_GLOB
+  gl_FUNC_MEMPCPY
+  gl_STRING_MODULE_INDICATOR([mempcpy])
+  gl_HEADER_STRING_H
   m4_ifval(gl_LIBSOURCES_LIST, [
     m4_syscmd([test ! -d ]m4_defn([gl_LIBSOURCES_DIR])[ ||
       for gl_file in ]gl_LIBSOURCES_LIST[ ; do
@@ -173,6 +181,9 @@ AC_DEFUN([gltests_LIBSOURCES], [
 # This macro records the list of files which have been installed by
 # gnulib-tool and may be removed by future gnulib-tool invocations.
 AC_DEFUN([gl_FILE_LIST], [
+  build-aux/link-warning.h
+  lib/alloca.c
+  lib/alloca.in.h
   lib/dirfd.c
   lib/dirfd.h
   lib/dummy.c
@@ -182,12 +193,18 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/glob-libc.h
   lib/glob.c
   lib/glob.in.h
+  lib/mempcpy.c
+  lib/string.in.h
+  m4/alloca.m4
   m4/d-type.m4
   m4/dirfd.m4
   m4/extensions.m4
   m4/fnmatch.m4
   m4/glob.m4
   m4/gnulib-common.m4
+  m4/include_next.m4
   m4/mbstate_t.m4
+  m4/mempcpy.m4
   m4/onceonly.m4
+  m4/string_h.m4
 ])
