@@ -26,7 +26,7 @@ P op_glob(void) {
   FREEvm[ARRAY_SIZE(o_1)] = '\0';
   
   switch (glob((char*) FREEvm, 
-	       DM_GLOB_BRACE|DM_GLOB_TILDE, 
+	       GLOB_BRACE|GLOB_TILDE, 
 	       NULL, &gl)) {
     case GLOB_NOMATCH:
       if (FREEvm + FRAMEBYTES >= CEILopds) {

@@ -13,3 +13,4 @@ done
 
 $LIBTOOL && libtoolize "$@" -c --ltdl
 autoreconf "$@" -v --install
+

@@ -21,7 +21,9 @@ GENTOO_FILES = \
 	gentoo/dev-lang/dm/files/dnoded.rc6
 
 
-EXTRA_DIST = bootstrap autom4te.cfg $(DEBIAN_FILES) $(GENTOO_FILES)
+EXTRA_DIST = bootstrap autom4te.cfg \
+	gnulib-tool-import.sh link-warning.h \
+	$(DEBIAN_FILES) $(GENTOO_FILES)
 
 if ENABLE_EMACS
 EMACS_DIR=emacs
@@ -33,7 +35,7 @@ BASH_DIR=sh
 endif ENABLE_ENV
 endif ENABLE_BASH
 
-SUBDIRS = libltdl src plugins $(BASH_DIR) ps \
+SUBDIRS = libltdl lib src plugins $(BASH_DIR) ps \
 	$(EMACS_DIR) dcode test \
 	m4
 ACLOCAL_AMFLAGS = -I m4

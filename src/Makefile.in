@@ -61,9 +61,13 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_set_version_info.m4 \
 	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/cf_mpi.m4 \
 	$(top_srcdir)/m4/cf_petsc.m4 $(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/d-type.m4 $(top_srcdir)/m4/dirfd.m4 \
+	$(top_srcdir)/m4/extensions.m4 $(top_srcdir)/m4/glob.m4 \
+	$(top_srcdir)/m4/gnulib-common.m4 \
+	$(top_srcdir)/m4/gnulib-comp.m4 \
 	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/acinclude.m4 $(top_srcdir)/m4/basic-defs.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/onceonly.m4 $(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/m4/basic-defs.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -136,11 +140,12 @@ PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_dgen_OBJECTS = dgen-dgen.$(OBJEXT) dgen-dm-nextevent.$(OBJEXT) \
 	dgen-dm3.$(OBJEXT) dgen-dm-prop.$(OBJEXT)
 dgen_OBJECTS = $(am_dgen_OBJECTS)
-dgen_DEPENDENCIES = libdmbootstrap.la
+dgen_DEPENDENCIES = libdmbootstrap.la $(LDADD)
 am_dmprop_OBJECTS = dmprop-dm-prop.$(OBJEXT) \
 	dmprop-dm-signals.$(OBJEXT)
 dmprop_OBJECTS = $(am_dmprop_OBJECTS)
 dmprop_LDADD = $(LDADD)
+dmprop_DEPENDENCIES = $(top_builddir)/lib/libgnu.la
 am__dnode_SOURCES_DIST = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
 	dm-nextevent.c dm-nextevent.h dm3.c dm3.h dm-proc.c dm-proc.h \
 	dm-glob.c dm-glob.h dm-prop.c dm-prop.h dqueen.c dqueen.h
@@ -151,7 +156,7 @@ am__objects_8 = dnode-dm-nextevent.$(OBJEXT) dnode-dm3.$(OBJEXT) \
 am_dnode_OBJECTS = dnode-dnode.$(OBJEXT) dnode-dm-dnode.$(OBJEXT) \
 	$(am__objects_8) $(am__objects_9)
 dnode_OBJECTS = $(am_dnode_OBJECTS)
-dnode_DEPENDENCIES = libdmglobals.la libdmnodal.la
+dnode_DEPENDENCIES = libdmglobals.la libdmnodal.la $(LDADD)
 dnode_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(dnode_CFLAGS) $(CFLAGS) $(dnode_LDFLAGS) \
 	$(LDFLAGS) -o $@
@@ -159,19 +164,21 @@ dnode_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 @ENABLE_DAEMON_TRUE@	dnode-daemon.$(OBJEXT)
 dnode_daemon_OBJECTS = $(nodist_dnode_daemon_OBJECTS)
 dnode_daemon_LDADD = $(LDADD)
+dnode_daemon_DEPENDENCIES = $(top_builddir)/lib/libgnu.la
 @ENABLE_SETUID_TRUE@nodist_dnode_nice_OBJECTS = dnode-nice.$(OBJEXT)
 dnode_nice_OBJECTS = $(nodist_dnode_nice_OBJECTS)
 dnode_nice_LDADD = $(LDADD)
+dnode_nice_DEPENDENCIES = $(top_builddir)/lib/libgnu.la
 am_dpawn_OBJECTS = dpawn-dpawn.$(OBJEXT) dpawn-dm-dpawn.$(OBJEXT) \
 	dpawn-dm-mpi.$(OBJEXT)
 dpawn_OBJECTS = $(am_dpawn_OBJECTS)
-dpawn_DEPENDENCIES = libdmglobals.la libdmnodal.la
+dpawn_DEPENDENCIES = libdmglobals.la libdmnodal.la $(LDADD)
 dpawn_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(dpawn_CFLAGS) $(CFLAGS) $(dpawn_LDFLAGS) \
 	$(LDFLAGS) -o $@
 am_drook_OBJECTS = drook-drook.$(OBJEXT)
 drook_OBJECTS = $(am_drook_OBJECTS)
-drook_DEPENDENCIES = libdmbootstrap.la
+drook_DEPENDENCIES = libdmbootstrap.la $(LDADD)
 drook_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(drook_LDFLAGS) \
 	$(LDFLAGS) -o $@
@@ -181,13 +188,14 @@ am__objects_10 = dvt-dm-nextevent.$(OBJEXT) dvt-dm3.$(OBJEXT) \
 am_dvt_OBJECTS = dvt-dvt.$(OBJEXT) dvt-dm-dvt.$(OBJEXT) \
 	$(am__objects_10)
 dvt_OBJECTS = $(am_dvt_OBJECTS)
-dvt_DEPENDENCIES = libdmglobals.la
+dvt_DEPENDENCIES = libdmglobals.la $(LDADD)
 dvt_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(dvt_CFLAGS) $(CFLAGS) $(dvt_LDFLAGS) \
 	$(LDFLAGS) -o $@
 am_testwordorder_OBJECTS = test-word-order.$(OBJEXT)
 testwordorder_OBJECTS = $(am_testwordorder_OBJECTS)
 testwordorder_LDADD = $(LDADD)
+testwordorder_DEPENDENCIES = $(top_builddir)/lib/libgnu.la
 dist_pkgdataSCRIPT_INSTALL = $(INSTALL_SCRIPT)
 SCRIPTS = $(dist_pkgdata_SCRIPTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -302,8 +310,10 @@ F77 = @F77@
 FFLAGS = @FFLAGS@
 GCC_CFLAGS = @GCC_CFLAGS@
 GCC_CXXFLAGS = @GCC_CXXFLAGS@
+GLOB_H = @GLOB_H@
 GREP = @GREP@
 GUIPDF = @GUIPDF@
+HAVE_SYS_CDEFS_H = @HAVE_SYS_CDEFS_H@
 INCLTDL = @INCLTDL@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -415,6 +425,10 @@ docdir = @docdir@
 dvidir = @dvidir@
 enable_petsc = @enable_petsc@
 exec_prefix = @exec_prefix@
+gl_LIBOBJS = @gl_LIBOBJS@
+gl_LTLIBOBJS = @gl_LTLIBOBJS@
+gltests_LIBOBJS = @gltests_LIBOBJS@
+gltests_LTLIBOBJS = @gltests_LTLIBOBJS@
 guipdf = @guipdf@
 host = @host@
 host_alias = @host_alias@
@@ -487,11 +501,12 @@ BUILT_SOURCES = dnode-nice.c    dnode-daemon.c    paths.h    \
 
 CLEANFILES = $(BUILT_SOURCES)
 DISTCLEANFILES = dm-config.h
-AM_CPPFLAGS = -DDM_HAVE_CONFIG_H
+AM_CPPFLAGS = -DDM_HAVE_CONFIG_H -I$(top_builddir)/lib -I$(top_srcdir)/lib
 AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
 AM_CXXFLAGS = $(GCC_CXXFLAGS)
 AM_LDFLAGS = $(PTHREAD_LIBS) $(X_LDFLAGS) -no-undefined 
 INCLUDE = @INCLTDL@
+LDADD = $(top_builddir)/lib/libgnu.la
 @ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@CPPPLUGIN_HDR = cppplugin.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_HDR = plugin.h pluginlib.h $(CPPPLUGIN_HDR)
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_SRC = plugin.c
@@ -510,7 +525,7 @@ socksrcs = \
 dvt_SOURCES = dvt.c dvt_0.h dm-dvt.h dm-dvt.c \
 	$(socksrcs)
 
-dvt_LDADD = libdmglobals.la
+dvt_LDADD = libdmglobals.la $(LDADD)
 dvt_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS)
 dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS)
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
@@ -518,12 +533,12 @@ dnode_SOURCES = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
 	$(socksrcs) \
 	$(DNODE_MPI_SRCS)
 
-dnode_LDADD = libdmglobals.la libdmnodal.la
+dnode_LDADD = libdmglobals.la libdmnodal.la $(LDADD)
 dnode_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS) $(MPI_LIBS)
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
 dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS) $(MPI_FLAGS)
 dpawn_SOURCES = dpawn.c dpawn_0.h dm-dpawn.h dm-dpawn.c dm-mpi.h dm-mpi.c
-dpawn_LDADD = libdmglobals.la libdmnodal.la
+dpawn_LDADD = libdmglobals.la libdmnodal.la $(LDADD)
 dpawn_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS) $(MPI_LIBS)
 dpawn_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dpawn_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS) $(MPI_FLAGS)
@@ -562,7 +577,7 @@ dgen_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 \
 	@LIBDM_DLL_IMPORT@ 
 
-dgen_LDADD = libdmbootstrap.la 
+dgen_LDADD = libdmbootstrap.la $(LDADD)
 drook_SOURCES = drook.c
 drook_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_REGEX=1 -DDM_DISABLE_XDISPLAY \
@@ -570,7 +585,7 @@ drook_CPPFLAGS = $(AM_CPPFLAGS) \
 	@LIBDM_DLL_IMPORT@ 
 
 drook_LDFLAGS = $(AM_LDFLAGS) $(MPI_LIBS)
-drook_LDADD = libdmbootstrap.la
+drook_LDADD = libdmbootstrap.la $(LDADD)
 dmprop_SOURCES = \
 	dm-prop.c dm-prop.h \
 	dm-signals.c dm-signals.h 

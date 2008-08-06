@@ -42,9 +42,13 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/ax_set_version_info.m4 \
 	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/cf_mpi.m4 \
 	$(top_srcdir)/m4/cf_petsc.m4 $(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/d-type.m4 $(top_srcdir)/m4/dirfd.m4 \
+	$(top_srcdir)/m4/extensions.m4 $(top_srcdir)/m4/glob.m4 \
+	$(top_srcdir)/m4/gnulib-common.m4 \
+	$(top_srcdir)/m4/gnulib-comp.m4 \
 	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/acinclude.m4 $(top_srcdir)/m4/basic-defs.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/onceonly.m4 $(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/m4/basic-defs.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
@@ -65,7 +69,7 @@ RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = libltdl src plugins sh ps emacs dcode test m4
+DIST_SUBDIRS = libltdl lib src plugins sh ps emacs dcode test m4
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -146,8 +150,10 @@ F77 = @F77@
 FFLAGS = @FFLAGS@
 GCC_CFLAGS = @GCC_CFLAGS@
 GCC_CXXFLAGS = @GCC_CXXFLAGS@
+GLOB_H = @GLOB_H@
 GREP = @GREP@
 GUIPDF = @GUIPDF@
+HAVE_SYS_CDEFS_H = @HAVE_SYS_CDEFS_H@
 INCLTDL = @INCLTDL@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -259,6 +265,10 @@ docdir = @docdir@
 dvidir = @dvidir@
 enable_petsc = @enable_petsc@
 exec_prefix = @exec_prefix@
+gl_LIBOBJS = @gl_LIBOBJS@
+gl_LTLIBOBJS = @gl_LTLIBOBJS@
+gltests_LIBOBJS = @gltests_LIBOBJS@
+gltests_LTLIBOBJS = @gltests_LTLIBOBJS@
 guipdf = @guipdf@
 host = @host@
 host_alias = @host_alias@
@@ -322,10 +332,13 @@ GENTOO_FILES = \
 	gentoo/dev-lang/dm/files/dnoded.conf \
 	gentoo/dev-lang/dm/files/dnoded.rc6
 
-EXTRA_DIST = bootstrap autom4te.cfg $(DEBIAN_FILES) $(GENTOO_FILES)
+EXTRA_DIST = bootstrap autom4te.cfg \
+	gnulib-tool-import.sh link-warning.h \
+	$(DEBIAN_FILES) $(GENTOO_FILES)
+
 @ENABLE_EMACS_TRUE@EMACS_DIR = emacs
 @ENABLE_BASH_TRUE@@ENABLE_ENV_TRUE@BASH_DIR = sh
-SUBDIRS = libltdl src plugins $(BASH_DIR) ps \
+SUBDIRS = libltdl lib src plugins $(BASH_DIR) ps \
 	$(EMACS_DIR) dcode test \
 	m4
 

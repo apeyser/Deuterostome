@@ -76,6 +76,7 @@ CF_IF_ENABLED([unix-sockets], [
 ])
 
 AC_PROG_CC
+gl_EARLY
 AM_PROG_CC_C_O
 AC_PROG_CC_STDC
 AC_C_CONST
@@ -194,15 +195,15 @@ CF_AC_CHECK_HEADER([math.h])
 CF_AC_CHECK_HEADER([stdlib.h])
 CF_AC_CHECK_HEADER([stdio.h])
 CF_AC_CHECK_HEADER([sys/socket.h])
-CF_AC_CHECK_HEADER([glob.h])
-CF_AC_CHECK_SYM([glob.h], [DM], [GLOB_TILDE], [
-#undef _XOPEN_SOURCE
-#undef _POSIX_C_SOURCE
-])
-CF_AC_CHECK_SYM([glob.h], [DM], [GLOB_BRACE], [
-#undef _XOPEN_SOURCE
-#undef _POSIX_C_SOURCE
-])
+# CF_AC_CHECK_HEADER([glob.h])
+# CF_AC_CHECK_SYM([glob.h], [DM], [GLOB_TILDE], [
+# #undef _XOPEN_SOURCE
+# #undef _POSIX_C_SOURCE
+# ])
+# CF_AC_CHECK_SYM([glob.h], [DM], [GLOB_BRACE], [
+# #undef _XOPEN_SOURCE
+# #undef _POSIX_C_SOURCE
+# ])
 CF_AC_CHECK_HEADER([limits.h])
 CF_AC_CHECK_HEADER([sys/un.h])
 CF_AC_CHECK_HEADER([sys/select.h])
@@ -303,6 +304,8 @@ CF_IF_ENABLED([cppplugin], [
   PCCXXFLAGS=''
 ])
 
+gl_INIT
+
 AC_CONFIG_LINKS([
   src/dsp1f.h:src/codegen/dsp1f.h.built
   src/dmnuminc.h:src/codegen/dmnuminc.h.built
@@ -365,6 +368,7 @@ AC_CONFIG_FILES([
   test/Makefile
   m4/Makefile
   test/arr.d
+  lib/Makefile
 ])
 
 AC_OUTPUT
