@@ -97,7 +97,7 @@ end def
   /init_ null def
   /fini_ null def
   /petsc_log_begin null def
-  /pets_log_summary null def
+  /petsc_log_summary null def
   /petsc_vec_create null def
   /petsc_vec_copy null def
   /petsc_vec_copyto null def
@@ -123,7 +123,6 @@ end def
   /petsc_mat_dup null def
   /petsc_mat_vecmul null def 
   /petsc_mat_transpose null def
-  /petsc_mat_matmul null def
   /petsc_ksp_create null def
   /petsc_ksp_destroy null def
   /petsc_ksp_tol null def

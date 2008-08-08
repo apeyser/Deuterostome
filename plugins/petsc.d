@@ -156,6 +156,52 @@
     {mat_creators exch get exec} in_petsc def
   } bind def
 
+  |------------------------------------ mat_transpose
+  |
+  | .. /type A | -- (A=At)
+  |
+  /mat_transpose {
+    {
+      petsc_mat_transpose pop
+      mat_transposers exch get exec
+    } in_petsc
+  } bind def
+
+  | ... | --
+  /mat_transposers {
+    | -- | --
+    /dense {}
+    | /icolsnew /irowsnew icols irows 
+    /sparse {
+      /irows name /icols name /irowsn name /icolsn name
+      irows length /l array dup /irowsn_ name
+      irowsn end name PETSC begin
+      icols length /l array dup /icolsn_ name
+      icolsn end name PETSC begin
+
+      0 irowsn_ 0 put
+      1 1 irowsn_ last {/i name
+        irows dup last i 1 sub sub get
+        irows dup last i       sub get sub
+        irowsn_        i 1 sub     get add 
+        irowsn_ i put
+      } for
+
+      0 1 irown_ last 1 sub {/i name
+        icols 
+          irows dup last i 1 add sub get
+          irows dup last i       sub get
+          1 index exch sub getinterval
+        icolsn_
+          irowsn_ i       get
+          irowsn_ i 1 add get
+          1 index exch sub getinterval
+        copy pop
+      } for
+    }
+  } bind makestruct def
+      
+
   |------------------------------------ mat_fill
 
 
@@ -263,21 +309,22 @@
   |----------------------------------------------mat vec mul
   |
   |---------------------- pmatvecmul ----------------------
-  | A x | --
+  | y beta A trans x alpha | y
   | 
-  | Multiply Ax, store in x. A is square.
+  | y = beta*y + alpha*A*x
   |
   /pmatvecmul {
-    {petsc_mat_vecmul} in_petsc
+    {petsc_mat_vecmul} in_petsc pop
   } bind def
   
   |----------------------- get_matvecmul ----------------------
-  | A x | -- (Ax on dnode)
-  |
-  | Multiply Ax, store in x, return x's elements to node.
+  | y beta A trans x alpha | y
+  | 
+  | y = beta*y + alpha*A*x
+  | return y to node
   |
   /get_matvecmul {
-    dup 3 1 roll pmatvecmul get_vector
+    {petsc_mat_vecmul get_vector} in_petsc
   } bind def
   
   |--------------------------------------------------- get_vector 
@@ -387,6 +434,25 @@
   |
   /mat_destroy {
     {petsc_mat_destroy} in_petsc
+  } bind def
+
+  |--------------------------------------------- mat_dup
+  | /B A | --
+  |
+  /mat_dup {
+    {
+      dup petsc_mat_dup | /B A B
+      dup 3 1 roll      | /B B A B
+      petsc_mat_copy
+    } in_petsc
+    def
+  } bind def
+
+  |------------------------------------------- mat_transpose
+  | A | --
+  |
+  /mat_transpose {
+    {petsc_mat_transpose pop} in_petsc
   } bind def
   
   |---------------------------------------------- ksp_destroy
@@ -724,6 +790,15 @@
     } in_petsc
   } bind def
 
+  |------------------------------------------ mat_transpose
+  | Adict | -- (A=At)
+  |
+  /mat_transpose {
+    {
+      ~[exch getid ~mat_transpose] sexecpawns
+    } in_petsc
+  } bind def
+
   |------------------------------------------------- mat_fill
   |
   |---------------------- mat_fillers ----------------------
@@ -802,16 +877,22 @@
   } bind def
 
   |------------------------------------------------------ pmatvecmul
-  | A x | --
+  | y beta A trans x alpha | --
   |
   | Call pmatvecmul on pawns.
   | A: dictionary describing matrix from mat_create
   | x: dictionary describing vector from vec_create
+  | y: dictionary describing vector from vec_create
+  | trans: A'= At iff trans, else A' = A
+  | beta, alpha: scaling constants
+  | y = beta*y + alpha*A'*x
   |
   /pmatvecmul {
     {
-      2 {getid exch} repeat
-      ~[3 1 roll ~pmatvecmul] sexecpawns
+      exch getid exch
+      4 -1 roll getid 4 1 roll
+      6 -1 roll getid 6 1 roll
+      ~[7 1 roll ~pmatvecmul] sexecpawns
     } in_petsc
   } bind def  
 
@@ -866,20 +947,25 @@
   } bind def
 
   |------------------------------------------------------- get_matvecmul
-  | A x <d data> | <d data>
+  |  <d data> y beta A trans x alpha |  <d data>
   |
-  | Multiplies Ax (into x) on pawns and returns the the data for x.
-  | Calls get_matvecmul on pawns. Must be square.
-  | A: dictionary for matrix from mat_create.
-  | x: dictionary for vector from vec_create.
+  | Call get_matvecmul on pawns.
+  | A: dictionary describing matrix from mat_create
+  | x: dictionary describing vector from vec_create
+  | y: dictionary describing vector from vec_create
+  | trans: A'= At iff trans, else A' = A
+  | beta, alpha: scaling constants
+  | y = beta*y + alpha*A'*x
   | data: d-array into which the results of the multiplication will
   |  be stored on node.
   |
   /get_matvecmul {
     {
-      vector_result
-      ~[exch getid xval getid ~get_matvecmul] sexecpawns
-      data
+      5 index 7 index vector_result
+      exch getid exch
+      4 -1 roll getid 4 1 roll
+      6 -1 roll getid 6 1 roll
+      ~[7 1 roll ~get_matvecmul] sexecpawns
     } in_petsc
   } bind def
   
@@ -1056,6 +1142,99 @@
       ~[exch getid ~mat_destroy] sexecpawns
     } in_petsc
   } bind def
+
+  |------------------------------------------------ mat_dup 
+  |
+  | /B A | B
+  |
+  /mat_dup {
+    {
+      dup 3 1 roll
+      ~[3 1 roll getid ~mat_dup] sexecpawns
+      dup used dict exch merge
+      dup /params get mat_dupers 2 index exectype
+          /params 2 index put
+    } in_petsc
+  } bind def
+      
+  | oldparamsdict | newparamsdict
+  /mat_dupers {
+    /dense {pop 0 dict}
+    /sparse {
+      3 dict {
+        1 index /icols_off get dup length list copy 
+                           /icols_off name
+        1 index /icols get /icols name
+        exch    /irows get /irows name
+      } 1 index indict
+    }
+  } bind makestruct def
+
+  |--------------------------------------------- mat_transpose
+  |
+  | A | --
+  |
+  /mat_transpose {
+    {
+      /Aval name
+      mat_transposers_set Aval exectype
+      ~[
+        mat_transposers_get Aval exectype
+        Aval gettype Aval getid ~mat_transpose
+      ] sexecpawns
+
+      Aval /n get 
+      Aval /m get 
+      Aval /n put 
+      Aval /m put
+
+      mpidata /pawns get 1 sub Aval /m get range Aval /mmax put pop
+      mat_transposers_condense Aval exectype
+    } in_petsc
+  } bind def
+
+  /mat_transposers_buf 31 /b array def
+  | -- | --
+  /mat_transposers_set {
+    | -- | --
+    /dense {}
+    | -- | --
+    /sparse {
+      mat_transposers_buf 0
+        * Aval /params get /irows get mkpass text
+        (_tr) fax
+        0 exch getinterval token pop exch pop
+        /irowsn name
+      mat_transposers_buf 0
+        * Aval /params get /icols get mkpass text
+        (_tr) fax
+        0 exch getinterval token pop exch pop
+        /icolsn name
+    }
+  } bind makestruct def
+
+  | -- | ...
+  /mat_transposers_get {
+    | -- | --
+    /dense {}
+    | -- | /icolsn /irowsn ~icols ~irows
+    /sparse {
+      icolsn irowsn 
+      Aval /params get /icols get construct_exec
+      Aval /params get /irows get construct_exec
+    }
+  } bind makestruct def
+
+  | -- | --
+  /mat_transposers_condense {
+    /dense {}
+    /sparse {
+      icolsn mkact Aval /params get /icols put
+      irowsn mkact Aval /params get /irows put
+      icolsn mkact irowsn mkact condense_sparse
+      Aval /params get /icols_off put
+    }
+  } bind makestruct def
   
   |----------------------------------------------- ksp_destroy
   | ksp | --

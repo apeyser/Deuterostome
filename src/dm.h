@@ -282,6 +282,7 @@ extern "C" {
 #define WORD_VAL(frame)      (*((W*)     PF_PTR(frame,1)))
 #define SOCKET_VAL(frame)    (*((P*)     PF_PTR(frame,1)))
 #define PID_VAL(frame)       (*((pid_t*) PF_PTR(frame,1)))
+#define DOUBLE_VAL(frame)    (*((D*)     PF_PTR(frame,1)))
 
 #define VALUE_BASE(frame)    (*((P *)    PF_PTR(frame,1)))
 #define VALUE_PTR(frame)     (*((B**)    PF_PTR(frame,1)))

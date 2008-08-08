@@ -304,8 +304,8 @@
 #define op_petsc_log_begin EXPORTNAME(op_petsc_log_begin)
 P op_petsc_log_begin(void);
 
-#define op_pets_log_summary EXPORTNAME(op_pets_log_summary)
-P op_pets_log_summary(void);
+#define op_petsc_log_summary EXPORTNAME(op_petsc_log_summary)
+P op_petsc_log_summary(void);
 
 #define op_petsc_vec_create EXPORTNAME(op_petsc_vec_create)
 P op_petsc_vec_create(void);
@@ -381,9 +381,6 @@ P op_petsc_mat_vecmul(void);
 
 #define op_petsc_mat_transpose EXPORTNAME(op_petsc_mat_transpose)
 P op_petsc_mat_transpose(void);
-
-#define op_petsc_mat_matmul EXPORTNAME(op_petsc_mat_matmul)
-P op_petsc_mat_matmul(void);
 
 #define op_petsc_ksp_create EXPORTNAME(op_petsc_ksp_create)
 P op_petsc_ksp_create(void);

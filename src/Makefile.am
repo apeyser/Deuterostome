@@ -98,7 +98,7 @@ CLEANFILES = $(BUILT_SOURCES)
 
 DISTCLEANFILES = dm-config.h
 
-AM_CPPFLAGS = -DDM_HAVE_CONFIG_H -I$(top_builddir)/lib -I$(top_srcdir)/lib
+AM_CPPFLAGS = -DDM_HAVE_CONFIG_H
 AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
 AM_CXXFLAGS = $(GCC_CXXFLAGS)
 AM_LDFLAGS = $(PTHREAD_LIBS) $(X_LDFLAGS) -no-undefined 
@@ -132,7 +132,8 @@ dvt_SOURCES = dvt.c dvt_0.h dm-dvt.h dm-dvt.c \
 
 dvt_LDADD = libdmglobals.la $(top_builddir)/lib/libgnu.la
 dvt_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS)
-dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS)
+dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS) \
+	-I$(top_builddir)/lib -I$(top_srcdir)/lib
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 
 dnode_SOURCES = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
@@ -142,7 +143,9 @@ dnode_SOURCES = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
 dnode_LDADD = libdmglobals.la libdmnodal.la $(top_builddir)/lib/libgnu.la
 dnode_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS) $(MPI_LIBS)
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
-dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS) $(MPI_FLAGS)
+dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) \
+	$(ATLAS_FLAGS) $(MPI_FLAGS) \
+	-I$(top_builddir)/lib -I$(top_srcdir)/lib
 
 dpawn_SOURCES = dpawn.c dpawn_0.h dm-dpawn.h dm-dpawn.c dm-mpi.h dm-mpi.c
 dpawn_LDADD = libdmglobals.la libdmnodal.la $(LDADD)

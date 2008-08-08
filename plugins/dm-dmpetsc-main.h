@@ -112,7 +112,7 @@ B* ll_export[] = {
   PLUGIN_OPS,
   PLUGIN_OP(FINI_),
   PLUGIN_OP(petsc_log_begin),
-  PLUGIN_OP(pets_log_summary),
+  PLUGIN_OP(petsc_log_summary),
   PLUGIN_OP(petsc_vec_create),
   PLUGIN_OP(petsc_vec_copy),
   PLUGIN_OP(petsc_vec_copyto),
@@ -138,7 +138,6 @@ B* ll_export[] = {
   PLUGIN_OP(petsc_mat_dup),
   PLUGIN_OP(petsc_mat_vecmul),
   PLUGIN_OP(petsc_mat_transpose),
-  PLUGIN_OP(petsc_mat_matmul),
   PLUGIN_OP(petsc_ksp_create),
   PLUGIN_OP(petsc_ksp_destroy),
   PLUGIN_OP(petsc_ksp_tol),
@@ -177,7 +176,7 @@ P op_FINI_(void) {return fini_();}
 
 P op_petsc_log_begin(void) {return petsc_log_begin();}
 
-P op_pets_log_summary(void) {return pets_log_summary();}
+P op_petsc_log_summary(void) {return petsc_log_summary();}
 
 P op_petsc_vec_create(void) {return petsc_vec_create();}
 
@@ -228,8 +227,6 @@ P op_petsc_mat_dup(void) {return petsc_mat_dup();}
 P op_petsc_mat_vecmul(void) {return petsc_mat_vecmul();}
 
 P op_petsc_mat_transpose(void) {return petsc_mat_transpose();}
-
-P op_petsc_mat_matmul(void) {return petsc_mat_matmul();}
 
 P op_petsc_ksp_create(void) {return petsc_ksp_create();}
 
