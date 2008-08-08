@@ -74,6 +74,11 @@ IPETSC_LIB=dmpetsc.la
 IPETSC_D=petsc.d
 endif
 
+petsc.d: Makefile $(srcdir)/petsc.d.in
+	-rm -f $@ $@.tmp
+	$(edit) "$(srcdir)/petsc.d.in" > $@.tmp
+	mv $@.tmp $@
+
 dm-dmpetsc-main.h: new-plugin.d dmpetsc.d
 	"$(top_srcdir)/src/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dmpetsc.d" "$@" true true
@@ -127,8 +132,10 @@ endif ENABLE_PLUGINS
 
 pkglib_LTLIBRARIES = $(PLUGINS)
 pkglib_DATA = $(PLACEHOLDER) 
-dist_dmstart_DATA = $(IPETSC_D)
+nodist_dmstart_DATA = $(IPETSC_D)
+EXTRA_DIST = petsc.d.in
+BUILT_SOURCES += $(IPETSC_D)
 
-CLEANFILES = $(BUILT_SOURCES)
+CLEANFILES = $(BUILT_SOURCES) $(PETSC_D)
 
 endif ENABLE_PLUGINS_SUPPORT

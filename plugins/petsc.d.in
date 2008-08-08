@@ -1193,21 +1193,21 @@
     } in_petsc
   } bind def
 
-  /mat_transposers_buf 31 /b array def
+  /mat_transposers_buf @NAMEBYTES@ 1 add /b array def
   | -- | --
   /mat_transposers_set {
     | -- | --
     /dense {}
     | -- | --
     /sparse {
-      mat_transposers_buf 0
+      mat_transposers_buf 0 (/) fax
         * Aval /params get /irows get mkpass text
-        (_tr) fax
+        (_) fax
         0 exch getinterval token pop exch pop
         /irowsn name
-      mat_transposers_buf 0
+      mat_transposers_buf 0 (/) fax
         * Aval /params get /icols get mkpass text
-        (_tr) fax
+        (_) fax
         0 exch getinterval token pop exch pop
         /icolsn name
     }
