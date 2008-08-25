@@ -1,7 +1,7 @@
 Info4: <<
   Package: dm
-  Version: 4.2
-  Revision: 3
+  Version: 4.2.2
+  Revision: 1
 
   Maintainer: Alex Peyser <a.peyser@umiami.edu>
   Type: nosource
