@@ -440,7 +440,7 @@ end mkread def
 /D { objstr 0 dprec 8 add 4 -1 roll dprec number
      0 exch getinterval ftext } bind def
 
-/totext {find /arrayclass name find /obj name
+/totext {find /arrayclass name /obj name
    /indents 0 def newline
    /obj find inword
    newline
