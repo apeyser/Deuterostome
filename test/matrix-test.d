@@ -4,22 +4,78 @@
 /n ~m def
 /k ~m def
 
+/ksptype /DEFAULT def
+/sparse_ksptype {/DEFAULT} def
+/dense_ksptype {/GMRES} def
+
+/pctype /DEFAULT def
+/sparse_pctype {/DEFAULT} def
+/dense_pctype {/BJACOBI_LU} def
+
+/mtypes [
+  /default {
+    /ksptype ksptype
+    /pctype pctype
+  } makestruct
+  /sparse {
+    /ksptype sparse_ksptype
+    /pctype sparse_pctype
+  } makestruct
+  /dense {
+    /ksptype dense_ksptype
+    /pctype dense_pctype
+  } makestruct
+] makestruct def
+
+/makeksp {/mtype_ name
+  pctypes  mtypes mtype_ get /pctype  get exec get kspsettings /pctype  put
+  ksptypes mtypes mtype_ get /ksptype get exec get kspsettings /ksptype put
+  ksp_create
+} bind def
+
 /done {(Finished test: ) toconsole toconsole (\n) toconsole} bind def
 /test_eps 1e-12 def
+/report_iterations false def
 
-/compare {/temp name /a name /b name
-  0d a temp copy b sub dup mul add sqrt
-  0d b dup mul add sqrt div dup test_eps lt {exch pop} {
-    (Test error: ) toconsole exch toconsole _
-    halt
+/halt_on_error true def
+/halt {halt_on_error ~halt if} bind def
+
+/compare {/temp name /a name /b name /cs name
+  0d a temp copy b sub dup mul add sqrt dup
+  0d b temp copy dup mul add sqrt div dup * eq ~pop {exch pop} ifelse
+  dup * eq {(Test error undefined: ) toconsole cs toconsole _ halt} {
+    dup test_eps gt {(Test error: ) toconsole cs toconsole _ halt} if
   } ifelse
   pop
 } bind def
 
-/compare3 {/temp name /a name /b name /c name
-  b a temp compare
-  c a temp compare
+/cmpstring 1024 /b array def
+/compare3 {/temp name /oldop name /newop name /petop name /cmps name
+  cmpstring 0 cmps fax (:old-new) fax 0 exch getinterval
+    oldop newop temp compare
+  cmpstring 0 cmps fax (:old-pet) fax 0 exch getinterval
+    oldop petop temp compare
+  cmpstring 0 cmps fax (:new-pet) fax 0 exch getinterval
+    newop petop temp compare
 } bind def
+
+/cmpstring 1024 /b array def
+/compare4 {/temp name /oldop name /newop name /petop name /petop2 name 
+  /cmps name
+  cmpstring 0 cmps fax (:old-new) fax 0 exch getinterval
+    oldop newop temp compare
+  cmpstring 0 cmps fax (:old-pet) fax 0 exch getinterval
+    oldop petop temp compare
+  cmpstring 0 cmps fax (:new-pet) fax 0 exch getinterval
+    newop petop temp compare
+  cmpstring 0 cmps fax (:old-pet2) fax 0 exch getinterval
+    oldop petop2 temp compare
+  cmpstring 0 cmps fax (:new-pet2) fax 0 exch getinterval
+    newop petop2 temp compare
+  cmpstring 0 cmps fax (:pet-pet2) fax 0 exch getinterval
+    petop petop2 temp compare
+} bind def
+
 
 /matmul_test {/beta name /alpha name settrans 
   C1 C_cuts beta A1_ A_cuts_ transA B1_ B_cuts_ transB alpha
@@ -40,7 +96,7 @@
 } bind def
 
 /gmres_cmp {
-  x3 x3_data get_vector x1 x2 x_temp compare3
+  x4 x4_data get_vector x3 x3_data get_vector x1 x2 x_temp compare4
 } bind def
 
 /lu_test {
@@ -75,7 +131,11 @@
 } bind def
 
 /ksp_test {
-  ksp A3 y3 x3 ksp_solve
+  ksp A3 x3 y3 ksp_solve
+} bind def
+
+/ksp2_test {
+  ksp2 A4 x4 y4 ksp_solve
 } bind def
 
 /settrans {/transB name /transA name
@@ -112,7 +172,7 @@
   add pop
 } bind def
 
-/matvecmulp_test {
+/matvecmulp_test {/beta name /alpha name false settrans
   y3 beta A3_ transA x3 alpha pmatvecmul
 } bind def
 
@@ -143,7 +203,7 @@
 
 | [ [[test1 test2 comparator] [(name) params...]]... ]
 /base_tests [
-  [2 [~matmul_test ~matmulold_test ~matmul_cmp ~do_full] [
+  [[~matmul_test ~matmulold_test ] ~matmul_cmp ~do_full [
     [(matmul01nn) false false 0 1]
     [(matmul10nn) false false 1 0]
     [(matmul02nn) false false 0 2]
@@ -165,11 +225,11 @@
     [(matmul11nt) true true 1 1]
     [(matmul12nt) true true 1 2]
   ]]
-  [2 [~luinv_test ~luinvold_test ~luinv_cmp {symmetric do_full and}] [
+  [[~luinv_test ~luinvold_test] ~luinv_cmp {symmetric do_full and} [
     [(luinv)]
   ]]
-  [3 [~matvecmul_test ~matvecmulold_test ~matvecmulp_test 
-    ~matvecmul_cmp ~do_full] [
+  [[~matvecmul_test ~matvecmulold_test ~matvecmulp_test] 
+    ~matvecmul_cmp ~do_full [
     [(matvecmul01n) false 0 1]
     [(matvecmul01t) true 0 1]
     [(matvecmul10n) false 1 0]
@@ -181,43 +241,52 @@
     [(matvecmul12n) false 1 2]
     [(matvecmul12t) true 1 2]
   ]]
-  [2 [~trisolve_test ~trisolveold_test ~trisolve_cmp
-    {triagonal do_full and symmetric and}][
+  [[~trisolve_test ~trisolveold_test] ~trisolve_cmp
+    {triagonal do_full and symmetric and} [
     [(trisolven) false]
     [(trisolvet) true]
   ]]
-  [3 [~lu_test ~luold_test ~ksp_test ~gmres_cmp ~symmetric] [
+  [[~lu_test ~luold_test ~ksp_test ~ksp2_test] ~gmres_cmp ~symmetric [
     [(lu)]
   ]]
-  [3 [~gmres_test ~luold_test ~ksp_test 
-    ~gmres_cmp {symmetric gmres_on and do_full and}] [
+  [[~gmres_test ~luold_test ~ksp_test]
+    ~gmres_cmp {symmetric gmres_on and do_full and} [
     [(gmres)]
   ]]
 ] def
 
 /gmres_on false def
 
+| (name) ~active:--|-- | --
+/timer {
+  gettimeofday 3 -1 roll exec 
+  gettimeofday timediff neg
+  exch toconsole (: ) toconsole _ pop
+} bind def
+
+/timediff {
+  4 1 roll exch 4 1 roll
+  sub 3 1 roll sub 1e-6 exch mul exch add
+} bind def
+
 /run_tests {
   base_tests {/itest name
-    /testn itest 0 get def
-    /test1   itest 1 get 0 get def
-    /test2   itest 1 get 1 get def
-    /test3   testn 2 gt {itest 1 get testn 1 sub get} ~null ifelse def
-    /testcmp itest 1 get testn get def
-    /conds   itest 1 get testn 1 add get def
-    itest 1 get {/ktest name
+    /testsn itest 0 get def
+    /testcmp itest 1 get def
+    /conds itest 2 get def
+
+    itest 3 get {/ktest name
       dup propagate
       conds {
         (Starting: ) toconsole ktest 0 get toconsole (\n) toconsole
-        {{1 test1} {2 test2} {3 test3}} {/ctest name
-          /ctest find 1 get null ne {
-            gettime
-            (Starting test#) toconsole /ctest find 0 get _ pop
+        /ntestsn 1 def
+        testsn {/ctest name
+          (Starting test#) toconsole ntestsn _ pop          
+          (Time) ~[
             ktest 1 ktest length 1 sub getinterval {} forall
-            /ctest find 1 get exec
-            gettime exch sub
-            (Time: ) toconsole _ pop
-          } if
+            ~ctest
+          ] timer
+          /ntestsn ntestsn 1 add def
         } forall
         ktest 0 get testcmp
         ktest 0 get done
@@ -246,11 +315,13 @@
   0 1 n 1 sub {x1 1 index put} for
   0 1 m 1 sub {y1 1 index put} for
 
-  /ksp dup ksp_create def
+  /ksp  dup /default makeksp def
+  /ksp2 dup mtype    makeksp def
 } bind def
  
 /identity_tests {
   {
+    /mtype /sparse def
     base_setup
 
     0 A1 copy pop
@@ -260,7 +331,7 @@
 
     m ~[m n {/n name /m name /nl name /n0 name
       /matArows nl 1 add /l array 
-        0 n1 1 add 0 1 ramp pop
+        0 nl 1 add 0 1 ramp pop
       def
       /matAcols nl /l array 
         0 1 nl 1 sub {/i name
@@ -272,7 +343,8 @@
 
     /A3 dup ~matArows ~matAcols /sparse m n mat_create def
     A3 ~matAdata mat_fill_data
-    /A3t dup A3 mat_dup dup mat_transpose def
+    /A3t dup A3 mat_dup def
+    ~matAtrows ~matAtcols A3t mat_transpose
 
     {}
  } run_tests
@@ -280,6 +352,7 @@
 
 /triagonal_nu_tests {
   {
+    /mtype /sparse def
     base_setup
     triagonal_setup
   } run_tests
@@ -287,6 +360,7 @@
 
 /triagonal_u_tests {
   {
+    /mtype /sparse def
     base_setup
     /triagonal_u true def
     triagonal_setup
@@ -319,29 +393,32 @@
     } for
 
     /matAcols matArows dup last get /l array def
-    matScols 0
+    matAcols 0
     1 1 matArows last {
       matArows exch get 1 index sub
-      n 1 index sub
+      m 1 index sub
       1 ramp
     } for pop pop
 
     /matAdata matAcols length /d array def
     0 1 matArows last 1 sub {/row name
-      matAcols
+      matAdata
       matArows row get matArows row 1 add get 1 index sub
       getinterval
-      0 1 3 index last {/i name
-        triagonal_u {1} {n0 row add i 1 add add} ifelse
-        0.5 i pwr mul
+      0 1 2 index last {/i name
+        /c matAcols matArows row get i add get def
+        triagonal_u {1} {c 1 add} ifelse
+        0.5 c n0 row add sub pwr exch mul
         1 index i put 
-      } for pop
+      } for
+      pop
     } for
   } ~exec] execrange
 
   /A3 dup ~matArows ~matAcols /sparse m n mat_create def
   A3 ~matAdata mat_fill_data
-  /A3t dup A3 mat_dup dup mat_transpose def
+  /A3t dup A3 mat_dup def
+  ~matAtrows ~matAtcols A3t mat_transpose
 
   {}
 } bind def
@@ -355,6 +432,7 @@
 /full_tests {
   {
     full_on {
+      /mtype /dense def
       base_setup
       /full true def
       
@@ -368,19 +446,21 @@
         A1 A_cuts i cut pop copy pop
       } for
       /gatData name
-
-      /A3 dup /dense m n mat_create def
-      {~[
-        exch m getrange /nl name /n0 name
-        gatData n0 n mul nl n mul getinterval {
-          dup length /d array copy /matAdata name
-        } ~exec
-      ]} execpawns
-      A3 ~matAdata mat_fill_data
-      /A3t dup A3 mat_dup dup mat_transpose def
       
       GAT /MODEL get /myName get forgetmodule
     } if
+
+    /A3 dup /dense m n mat_create def
+    {~[
+      exch m range /nl name /n0 name
+      A1 n0 n mul nl n mul getinterval {
+        dup length /d array copy /matAdata name
+      } ~exec
+    ]} execpawns
+    A3 ~matAdata mat_fill_data
+    /A3t dup A3 mat_dup def
+    A3t mat_transpose
+
     {}
   } run_tests
 } bind def
@@ -403,10 +483,15 @@
 
   {~[exch x1 length range x1 3 1 roll getinterval {
     0 x3 petsc_vec_copyto pop
-  } ~exec]} ~execpawns
+  } ~exec]} execpawns
   {~[exch y1 length range y1 3 1 roll getinterval {
     0 y3 petsc_vec_copyto pop
-  } ~exec]} ~execpawns
+  } ~exec]} execpawns
+
+  /x4 dup x3 vec_dup def
+  /y4 dup y3 vec_dup def
+  /A4 dup A3 mat_dup def
+  /A4t dup A3t mat_dup def
 
   exec
 } bind def
@@ -454,20 +539,25 @@
     {(big symm) bsymmetric}
     {(big asymm) bassymmetric}
   } {
-    (Starting mode: ) toconsole 
-    exec toconsole (\n) toconsole
-    
-    currentdict /A3 known {A3 mat_destroy} if
-    currentdict /x3 known {x3 vec_destroy} if
-    currentdict /y3 known {y3 vec_destroy} if
-    currentdict /ksp known {ksp ksp_destroy} if
-
-    /matrix_test_ layer {
-      {
+    /matrix_test_ layer currentdict PETSC begin begin {
+      (Starting mode: ) toconsole 
+      exec toconsole (\n) toconsole
+      
+      currentdict /A3 known {A3 mat_destroy} if
+      currentdict /x3 known {x3 vec_destroy} if
+      currentdict /y3 known {y3 vec_destroy} if
+      currentdict /ksp known {ksp ksp_destroy} if
+      
+      ~[report_iterations {
         /matrix_test_ layer
         PETSC begin
-        100 dict dup /matrix_test name begin
-      } sexecpawns
+        /report_ report def
+        /report name
+        100 dict dup /matrix_test name begin kick_dnode end
+        /report report_ def
+        end
+        /matrix_test_ _layer ~stop if
+      } ~exec] sexecpawns
 
       /A1 m n mul /d array def
       /A_cuts m n 1 3 cutsn def
@@ -526,6 +616,7 @@
 
       /x3_data n /d array def
       /x3 dup n vec_create def
+      /x4_data n /d array def
 
       /y3_data m /d array def
       /y3 dup m vec_create def
@@ -535,12 +626,8 @@
         dup 1 get exec 0 get done
       } forall
 
-      {
-        end
-        end
-        false /matrix_test_ _layer pop
-      } sexecpawns
-    } stopped /matrix_test_ _layer {stop} if
+      kickpawns
+    } stopped end end /matrix_test_ _layer {stop} if
   } forall
 } bind def
 

@@ -16,8 +16,8 @@
     (Dnode:) PRE     (  Setup) KEY 
                      (  Connect) KEY 
                      (  Talk) KEY NL
-    15 GAP () PRE    (Disconnect) KEY 
-                     (  Shrink) KEY 
+    15 GAP () PRE    (Shrink) KEY 
+                     (  Disconnect) KEY 
                      (  Abort) KEY NL
 @ENABLE_PERL_START@
     (PrintFrom:) PRE (  Talk) KEY 
@@ -62,8 +62,8 @@
     (% dvt begin dnode_resize end\n)
     (% dvt begin ~_cx ~_ccx dnode_up end\n)
     (% dvt begin ~_c ~_cc dnode_up end\n)
-    (% dvt begin {knode _dx} fornodes end\n)
     (% dvt begin {knode _kill} fornodes end\n)
+    (% dvt begin {knode _dx} fornodes end\n)
     (% dvt begin {knode _sendabort} fornodes end\n)
 @ENABLE_PERL_START@     
 |-- PrintFrom

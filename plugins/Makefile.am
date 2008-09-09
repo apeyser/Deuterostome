@@ -88,7 +88,8 @@ dm-dmpetsc-header.h: new-plugin.d dmpetsc.d
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dmpetsc.d" "$@" false true
 
 BUILT_SOURCES += dm-dmpetsc-main.h dm-dmpetsc-header.h dmpetsc.c
-dmpetsc_la_SOURCES = dm-dmpetsc-main.h dm-dmpetsc-header.h dmpetsc.c dmpetsc.h
+dmpetsc_la_SOURCES = dm-dmpetsc-main.h dm-dmpetsc-header.h \
+	dmpetsc.c dmpetsc.h dmpetsc-bug.c
 dmpetsc_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@ 
 dmpetsc_la_LDFLAGS=$(AM_LDFLAGS) $(PETSC_LIB)
 dmpetsc_la_CPPFLAGS = $(PETSC_CCPPFLAGS) $(AM_CPPFLAGS)

@@ -162,42 +162,26 @@
   |
   /mat_transpose {
     {
-      petsc_mat_transpose pop
-      mat_transposers exch get exec
+      petsc_mat_transpose
+      mat_transposers 3 -1 roll get exec
     } in_petsc
   } bind def
 
   | ... | --
   /mat_transposers {
     | -- | --
-    /dense {}
-    | /icolsnew /irowsnew icols irows 
+    /dense pop
+    | /icolsnew /irowsnew At | --
     /sparse {
-      /irows name /icols name /irowsn name /icolsn name
-      irows length /l array dup /irowsn_ name
-      irowsn end name PETSC begin
-      icols length /l array dup /icolsn_ name
-      icolsn end name PETSC begin
+           dup /MATRIX_M get 1 add /l array
+      exch dup petsc_mat_getnzs /l array 
+      exch petsc_mat_getcsr
 
-      0 irowsn_ 0 put
-      1 1 irowsn_ last {/i name
-        irows dup last i 1 sub sub get
-        irows dup last i       sub get sub
-        irowsn_        i 1 sub     get add 
-        irowsn_ i put
-      } for
-
-      0 1 irown_ last 1 sub {/i name
-        icols 
-          irows dup last i 1 add sub get
-          irows dup last i       sub get
-          1 index exch sub getinterval
-        icolsn_
-          irowsn_ i       get
-          irowsn_ i 1 add get
-          1 index exch sub getinterval
-        copy pop
-      } for
+      | ~icolsnew ~irowsnew irows icols
+      end
+      4 -1 roll name
+      exch      name
+      PETSC begin
     }
   } bind makestruct def
       
@@ -440,21 +424,16 @@
   | /B A | --
   |
   /mat_dup {
-    {
-      dup petsc_mat_dup | /B A B
-      dup 3 1 roll      | /B B A B
-      petsc_mat_copy
-    } in_petsc
-    def
+    {dup petsc_mat_dup petsc_mat_copy} in_petsc def
   } bind def
 
-  |------------------------------------------- mat_transpose
-  | A | --
+  |--------------------------------------------- vec_dup
+  | /x x | --
   |
-  /mat_transpose {
-    {petsc_mat_transpose pop} in_petsc
+  /vec_dup {
+    {dup petsc_vec_dup petsc_vec_copy} in_petsc def
   } bind def
-  
+
   |---------------------------------------------- ksp_destroy
   | ksp | --
   |
@@ -594,6 +573,31 @@
         3 -1 roll xval /N get rangesize 
         ~vec_create
       ]} execpawns
+    } in_petsc
+  } bind def
+
+  |------------------------------------- vec_dup
+  | /x x | y
+  |
+  | Call vec_dup on pawns.
+  | Takes the name for the destination vector on the pawns,
+  |  and the source diction of the vector,
+  |  and creates a duplicate (including data) with the name
+  |  on the pawns.
+  | Returns a new dictionary referring to the duplicate vector.
+  |
+  /vec_dup {
+    {
+      2 dict {
+        1 index /N get /N name
+        3 -1 roll /id name
+      } 1 index indict
+      dup /xval name
+      ~[
+        xval /id get
+        4 -1 roll getid
+        ~vec_dup
+      ] sexecpawns
     } in_petsc
   } bind def
 
@@ -777,8 +781,8 @@
       Aval /n       put
       Aval /m       put
       Aval /mtype   put mat_creators_set Aval exectype
-      Aval /params  put mpidata /pawns get 1 sub Aval /m get range 
-      Aval /mmax    put pop
+      Aval /params  put mpidata /pawns get 1 sub Aval /m get rangesize 
+      Aval /mmax    put 
       Aval /id      put
       {~[
         Aval /id get
@@ -787,15 +791,6 @@
         ~mat_create
       ]} execpawns
       Aval
-    } in_petsc
-  } bind def
-
-  |------------------------------------------ mat_transpose
-  | Adict | -- (A=At)
-  |
-  /mat_transpose {
-    {
-      ~[exch getid ~mat_transpose] sexecpawns
     } in_petsc
   } bind def
 
@@ -1149,11 +1144,12 @@
   |
   /mat_dup {
     {
-      dup 3 1 roll
-      ~[3 1 roll getid ~mat_dup] sexecpawns
-      dup used dict exch merge
-      dup /params get mat_dupers 2 index exectype
-          /params 2 index put
+      2 copy                                       | /B A /B A
+      ~[3 1 roll getid ~mat_dup] sexecpawns        | /B A
+      dup used dict exch merge                     | /B B
+      dup /params get mat_dupers 2 index exectype  | /B B params
+      1 index /params put                          | /B B
+      dup 3 1 roll /id put                         | B
     } in_petsc
   } bind def
       
@@ -1172,7 +1168,7 @@
 
   |--------------------------------------------- mat_transpose
   |
-  | A | --
+  | ... A | --
   |
   /mat_transpose {
     {
@@ -1184,32 +1180,24 @@
       ] sexecpawns
 
       Aval /n get 
-      Aval /m get 
-      Aval /n put 
+      Aval /m get Aval /n put 
       Aval /m put
 
-      mpidata /pawns get 1 sub Aval /m get range Aval /mmax put pop
+      mpidata /pawns get 1 sub Aval /m get rangesize Aval /mmax put
       mat_transposers_condense Aval exectype
     } in_petsc
   } bind def
 
   /mat_transposers_buf @NAMEBYTES@ 1 add /b array def
+  /mat_transposers_num 0 def
   | -- | --
   /mat_transposers_set {
     | -- | --
     /dense {}
-    | -- | --
+    | ~irows ~icols | --
     /sparse {
-      mat_transposers_buf 0 (/) fax
-        * Aval /params get /irows get mkpass text
-        (_) fax
-        0 exch getinterval token pop exch pop
-        /irowsn name
-      mat_transposers_buf 0 (/) fax
-        * Aval /params get /icols get mkpass text
-        (_) fax
-        0 exch getinterval token pop exch pop
-        /icolsn name
+      /icolsn name
+      /irowsn name
     }
   } bind makestruct def
 
@@ -1217,11 +1205,10 @@
   /mat_transposers_get {
     | -- | --
     /dense {}
-    | -- | /icolsn /irowsn ~icols ~irows
+    | -- | /icolsn /irowsn
     /sparse {
-      icolsn irowsn 
-      Aval /params get /icols get construct_exec
-      Aval /params get /irows get construct_exec
+      /icolsn find mkpass
+      /irowsn find mkpass
     }
   } bind makestruct def
 
@@ -1229,9 +1216,9 @@
   /mat_transposers_condense {
     /dense {}
     /sparse {
-      icolsn mkact Aval /params get /icols put
-      irowsn mkact Aval /params get /irows put
-      icolsn mkact irowsn mkact condense_sparse
+      /icolsn find Aval /params get /icols put
+      /irowsn find Aval /params get /irows put
+      /icolsn find /irowsn find condense_sparse
       Aval /params get /icols_off put
     }
   } bind makestruct def

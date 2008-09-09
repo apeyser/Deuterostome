@@ -96,8 +96,9 @@ dmflex_la_OBJECTS = $(am_dmflex_la_OBJECTS)
 @ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
 dmpetsc_la_DEPENDENCIES =
 am__dmpetsc_la_SOURCES_DIST = dm-dmpetsc-main.h dm-dmpetsc-header.h \
-	dmpetsc.c dmpetsc.h
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_dmpetsc_la_OBJECTS = dmpetsc_la-dmpetsc.lo
+	dmpetsc.c dmpetsc.h dmpetsc-bug.c
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_dmpetsc_la_OBJECTS = dmpetsc_la-dmpetsc.lo \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	dmpetsc_la-dmpetsc-bug.lo
 dmpetsc_la_OBJECTS = $(am_dmpetsc_la_OBJECTS)
 dmpetsc_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -510,7 +511,9 @@ AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@cpptester_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@IPETSC_LIB = dmpetsc.la
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@IPETSC_D = petsc.d
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dmpetsc_la_SOURCES = dm-dmpetsc-main.h dm-dmpetsc-header.h dmpetsc.c dmpetsc.h
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dmpetsc_la_SOURCES = dm-dmpetsc-main.h dm-dmpetsc-header.h \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	dmpetsc.c dmpetsc.h dmpetsc-bug.c
+
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dmpetsc_la_LIBADD = @RELEASE_INFO@ @VERSION_INFO@ 
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dmpetsc_la_LDFLAGS = $(AM_LDFLAGS) $(PETSC_LIB)
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dmpetsc_la_CPPFLAGS = $(PETSC_CCPPFLAGS) $(AM_CPPFLAGS)
@@ -624,6 +627,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpptester.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpptestercode.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmflex.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmpetsc_la-dmpetsc-bug.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmpetsc_la-dmpetsc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process2.Plo@am__quote@
@@ -659,6 +663,13 @@ dmpetsc_la-dmpetsc.lo: dmpetsc.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dmpetsc.c' object='dmpetsc_la-dmpetsc.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmpetsc_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dmpetsc_la-dmpetsc.lo `test -f 'dmpetsc.c' || echo '$(srcdir)/'`dmpetsc.c
+
+dmpetsc_la-dmpetsc-bug.lo: dmpetsc-bug.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmpetsc_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dmpetsc_la-dmpetsc-bug.lo -MD -MP -MF $(DEPDIR)/dmpetsc_la-dmpetsc-bug.Tpo -c -o dmpetsc_la-dmpetsc-bug.lo `test -f 'dmpetsc-bug.c' || echo '$(srcdir)/'`dmpetsc-bug.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dmpetsc_la-dmpetsc-bug.Tpo $(DEPDIR)/dmpetsc_la-dmpetsc-bug.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dmpetsc-bug.c' object='dmpetsc_la-dmpetsc-bug.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmpetsc_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dmpetsc_la-dmpetsc-bug.lo `test -f 'dmpetsc-bug.c' || echo '$(srcdir)/'`dmpetsc-bug.c
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

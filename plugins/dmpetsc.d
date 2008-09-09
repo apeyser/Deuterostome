@@ -47,6 +47,7 @@ end def
   /INVMAT (Invalidated matrix) def
   /INVKSP (Invalidated ksp) def
   /ILLEGAL_OWNERSHIP (Changed ownership in dup) def
+  /ILLEGAL_OP (Illegal operation on matrix type) def
   /NOMATCH (Non matching dimensions) def
   /NONLOCAL (Accessing non-local data) def
   /KSPSOLVE_NOINIT (Matrix for solution undefined) def
@@ -100,6 +101,7 @@ end def
   /petsc_log_summary null def
   /petsc_vec_create null def
   /petsc_vec_copy null def
+  /petsc_vec_dup null def
   /petsc_vec_copyto null def
   /petsc_vec_copyfrom null def
   /petsc_vec_syncto null def
@@ -123,6 +125,8 @@ end def
   /petsc_mat_dup null def
   /petsc_mat_vecmul null def 
   /petsc_mat_transpose null def
+  /petsc_mat_getcsr null def
+  /petsc_mat_getnzs null def
   /petsc_ksp_create null def
   /petsc_ksp_destroy null def
   /petsc_ksp_tol null def

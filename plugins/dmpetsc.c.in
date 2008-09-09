@@ -20,6 +20,9 @@
 
 #include "dm.h"
 
+#include <stdio.h>
+#include "dm-mpi.h"
+
 enum AssState {
   ASSEMBLED,
   ASSEMBLING,
@@ -241,7 +244,7 @@ DM_INLINE_STATIC P INIT_KSP_(B* frame, KSP* ksp) {
   } while (0)
 
 
-//------------------------ petsc_vector_create
+//------------------------ petsc_vec_create
 // n | vec-handle
 // n is the size of the local portion of the vector.
 // the total size is n1+n2... over all mpi processes
@@ -277,11 +280,34 @@ DM_INLINE_STATIC P petsc_vec_create(void) {
   RETURN_ERROR(errmap[r]);
 }
 
+//--------------------------------- petsc_vec_dup
+// x | y
+// y is a duplicate of x in structure
+//   -- the data is not copied.
+//
+DM_INLINE_STATIC P petsc_vec_dup(void) {
+  Vec x, y;
+  B* pframe;
+
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  INIT_VEC(o_1, x);
+
+  DMPETSC_ERRCHECK(VecDuplicate(x, &y));
+  MAKE_DMPETSC_VECTOR(pframe);
+  DMPETSC_VECTOR_VECTOR(pframe) = y;
+  DMPETSC_VECTOR_N(pframe) = DMPETSC_VECTOR_N(o_1);
+  DMPETSC_VECTOR_GN(pframe) = DMPETSC_VECTOR_GN(o_1);
+  DMPETSC_VECTOR_ASS(pframe) = TRUE;
+
+  moveframe(pframe, o_1);
+  return OK;
+}
+
 // v1 v2 | v2
 DM_INLINE_STATIC P petsc_vec_copy(void) {
   Vec x, y;
   
-  if (o_2 > FLOORopds) return OPDS_UNF;
+  if (o_2 < FLOORopds) return OPDS_UNF;
   INIT_VEC(o_1, y);
   INIT_VEC(o_2, x);
   if (DMPETSC_VECTOR_N(o_1) != DMPETSC_VECTOR_N(o_2)) return RNG_CHK;
@@ -381,7 +407,7 @@ DM_INLINE_STATIC P petsc_vec_max(void) {
   D v;
   PetscInt p;
 
-  if (FLOORopds > o_1) return OPDS_UNF;
+  if (o_1 < FLOORopds) return OPDS_UNF;
   INIT_VEC(o_1, x);
   DMPETSC_ERRCHECK(VecMax(x, &p, &v));
 
@@ -397,7 +423,7 @@ DM_INLINE_STATIC P petsc_vec_min(void) {
   D v;
   PetscInt p;
 
-  if (FLOORopds > o_1) return OPDS_UNF;
+  if (o_1 < FLOORopds) return OPDS_UNF;
   INIT_VEC(o_1, x);
   DMPETSC_ERRCHECK(VecMin(x, &p, &v));
 
@@ -426,6 +452,7 @@ static UL64 dupid = 1;
 typedef P (*PreassFunc)(Mat A, B *restrict pframe, void *restrict arg);
 typedef P (*MatCopytoFunc)(Mat A, P grow, D *restrict row, L32 ncols);
 typedef P (*MatGetrowFunc)(Mat A, L32 *restrict ncols, L32 growi);
+typedef P (*MatGetnzsFunc)(Mat A, L32 *restrict nzs, L32 gm, L32 m);
 
 DM_INLINE_STATIC P petsc_mat_dense_copyto(
   Mat A, P grow, 
@@ -467,6 +494,19 @@ DM_INLINE_STATIC P petsc_mat_getrow(Mat A, L32 *restrict ncols, L32 gm)
   return OK;
 }
 
+DM_INLINE_STATIC P petsc_mat_sparse_getnzs(Mat A, L32 *restrict nzs, 
+					   L32 gm, L32 m) {
+  L32 ncols;
+  L32 i;
+  *nzs = 0;
+  for (i = gm; i < gm+m; i++) {
+    DMPETSC_ERRCHECK(MatGetRow(A, i, &ncols, PETSC_NULL, PETSC_NULL));
+    *nzs += ncols;
+    DMPETSC_ERRCHECK(MatRestoreRow(A, i, &ncols, PETSC_NULL, PETSC_NULL));
+  }
+  return OK;
+}
+
 DM_INLINE_STATIC P petsc_mat_getvalues(Mat A, L32 *restrict ncols, L32 gm) 
 {
   PetscInt* idxn;
@@ -479,6 +519,15 @@ DM_INLINE_STATIC P petsc_mat_getvalues(Mat A, L32 *restrict ncols, L32 gm)
   for (i = 0; i < *ncols; ++i) idxn[i] = i;
   DMPETSC_ERRCHECK(MatGetValues(A, 1, &gm, *ncols, idxn, (D*) FREEvm));
 
+  return OK;
+}
+
+DM_INLINE_STATIC P petsc_mat_dense_getnzs(Mat A, L32 *restrict nzs,
+					  L32 gm __attribute__((__unused__)),
+					  L32 m)
+{
+  DMPETSC_ERRCHECK(MatGetSize(A, PETSC_NULL, nzs));
+  *nzs *= m;
   return OK;
 }
 
@@ -529,6 +578,21 @@ DM_INLINE_STATIC P petsc_mat_dense_preass(
   return OK;
 }
 
+typedef P (*MatTransposeFunc)(Mat A, Mat *At);
+
+DM_INLINE_STATIC P petsc_mat_dense_transpose(Mat A, Mat *At) {
+  extern PetscErrorCode dm_MatTranspose_MPIDense(Mat A,Mat *matout);
+ 
+  DMPETSC_ERRCHECK(dm_MatTranspose_MPIDense(A, At));
+  return OK;
+}
+
+DM_INLINE_STATIC P petsc_mat_other_transpose(Mat A, Mat *At) {
+  DMPETSC_ERRCHECK(MatTranspose(A, At));
+  return OK;
+}
+
+
 // these are the types/indexes.
 enum DMMatrixType {
   DENSETYPE = 0,
@@ -541,24 +605,36 @@ static const struct {
   PreassFunc preass;
   MatCopytoFunc copyto;
   MatGetrowFunc getrow;
+  MatGetnzsFunc getnzs;
+  BOOLEAN hascsr;
+  MatTransposeFunc trans;
 } matType[] = {
   {
     MATMPIDENSE,
     petsc_mat_dense_preass,
     petsc_mat_dense_copyto,
     petsc_mat_getrow,
+    petsc_mat_dense_getnzs,
+    FALSE,
+    petsc_mat_dense_transpose,
   },
   {
     MATMPIAIJ,
     petsc_mat_sparse_preass,
     petsc_mat_sparse_copyto,
     petsc_mat_getrow,
+    petsc_mat_sparse_getnzs,
+    TRUE,
+    petsc_mat_other_transpose,
   },
   {
     MATMPIBAIJ,
     petsc_mat_blockdense_preass,
     petsc_mat_dense_copyto,
     petsc_mat_getvalues,
+    petsc_mat_sparse_getnzs,
+    TRUE,
+    petsc_mat_other_transpose,
   },
 };
 
@@ -622,7 +698,7 @@ DM_INLINE_STATIC P petsc_mat_dense_create(void) {
   P retc;
   P m, n;
 
-  if (FLOORopds > o_2) return OPDS_UNF;
+  if (o_2 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_2) != NUM || CLASS(o_1) != NUM) 
     return RNG_CHK;
   if (! PVALUE(o_2, &m) || m > L32MAX
@@ -646,7 +722,7 @@ DM_INLINE_STATIC P petsc_mat_sparse_create(void) {
   P m, n;
   struct SparsePreass params;
 
-  if (FLOORopds > o_3) return OPDS_UNF;
+  if (o_3 < FLOORopds) return OPDS_UNF;
   if (TAG(o_3) != (ARRAY|LONG32TYPE) || TAG(o_2) != (ARRAY|LONG32TYPE))
     return OPD_ERR;
   if ((m = ARRAY_SIZE(o_3)-1) < 1) return RNG_CHK;
@@ -697,7 +773,7 @@ DM_INLINE_STATIC P petsc_mat_blockdense_create(void) {
   struct BlockDensePreass params;
   P retc;
 
-  if (FLOORopds > o_4) return OPDS_UNF;
+  if (o_4 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_4) != NUM 
       || CLASS(o_3) != NUM 
       || CLASS(o_2) != NUM 
@@ -764,6 +840,8 @@ DM_INLINE_STATIC P petsc_mat_dup(void) {
   B* oldfreevm = FREEvm;
   L32* row;
   
+  if (! dupid) RETURN_ERROR(DMPETSC_MATOVF);
+
   if (o_1 < FLOORopds) return OPDS_UNF;
   INIT_MAT(o_1, A);
 
@@ -771,8 +849,8 @@ DM_INLINE_STATIC P petsc_mat_dup(void) {
   *(Bm = &DMPETSC_MATRIX_MATRIX(pframe)) = NULL;
   DMPETSC_MATRIX_M(pframe) = DMPETSC_MATRIX_M(o_1);
   DMPETSC_MATRIX_N(pframe) = DMPETSC_MATRIX_N(o_1);
-  DMPETSC_MATRIX_ASS(pframe) = ASSEMBLED;
   DMPETSC_MATRIX_DUPID(pframe) = DMPETSC_MATRIX_DUPID(o_1);
+  DMPETSC_MATRIX_MTYPE(pframe) = DMPETSC_MATRIX_MTYPE(o_1);
 
   row = &DMPETSC_MATRIX_GM(pframe);
   if ((r = MatDuplicate(A, MAT_DO_NOT_COPY_VALUES, Bm))
@@ -784,6 +862,7 @@ DM_INLINE_STATIC P petsc_mat_dup(void) {
     goto err;
   }
 
+  DMPETSC_MATRIX_ASS(pframe) = ASSEMBLED;
   moveframe(pframe, o_1);
   return OK;
 
@@ -935,27 +1014,6 @@ DM_INLINE_STATIC P petsc_mat_copyfrom(void) {
   FREEopds = o_3;
   return OK;
 }
-
-/* // A x y | y=Ax */
-/* DM_INLINE_STATIC P petsc_mat_vecmul(void) { */
-/*   Mat A; */
-/*   Vec x, y; */
-
-/*   if (o_3 < FLOORopds) return OPDS_UNF; */
-/*   INIT_MAT(o_3, A); */
-/*   INIT_VEC(o_2, x); */
-/*   INIT_VEC(o_1, y); */
-
-/*   if (DMPETSC_MATRIX_N(o_3) != DMPETSC_VECTOR_N(o_2) */
-/*       || DMPETSC_MATRIX_M(o_3) != DMPETSC_VECTOR_N(o_1)) */
-/*     RETURN_ERROR(DMPETSC_NOMATCH); */
-
-/*   DMPETSC_ERRCHECK(MatMult(A, x, y)); */
-
-/*   moveframe(o_1, o_3); */
-/*   FREEopds = o_2; */
-/*   return OK; */
-/* } */
 
 typedef P (*KSPFunc)(KSP ksp, B *restrict param, B *restrict kspframe);
 typedef P (*KSPPostFunc)(KSP ksp, B *restrict kspframe);
@@ -1366,24 +1424,122 @@ DM_INLINE_STATIC P petsc_vec_norm(void) {
   return OK;
 }
 
+
+/*   { */
+/*     PetscInt m1, n1, m2, n2, m3, n3; */
+/*     P r = getworldrank(); */
+/*     MatGetOwnershipRange(A, &m1, &n1); */
+/*     MatGetLocalSize(A, &m2, &n2); */
+/*     MatGetSize(A, &m3, &n3); */
+/*     fprintf(stderr, "Post: Rank: %i, Range: (%i,%i), LSize: (%i,%i), Size(%i,%i)\n", */
+/* 	    (int) r, (int) m1, (int) n1, (int) m2, (int) n2,  */
+/* 	    (int) m3, (int) n3); */
+/*   } */
+
 // MatA | MatA(transposed)
 DM_INLINE_STATIC P petsc_mat_transpose(void) {
-  Mat A;
-  L32 m, n;
+  Mat A, At;
+  L32 m, n, gm;
+  P retc;
+  MatTransposeFunc trans;
 
+  if (! dupid) RETURN_ERROR(DMPETSC_MATOVF);
   if (o_1 < FLOORopds) return OPDS_UNF;
   INIT_MAT(o_1, A);
-  DMPETSC_ERRCHECK(MatTranspose(A, PETSC_NULL));
-  DMPETSC_MATRIX_DUPID(o_1) = dupid++;
+
   m = DMPETSC_MATRIX_M(o_1);
   n = DMPETSC_MATRIX_N(o_1);
-  DMPETSC_MATRIX_M(o_1) = n;
-  DMPETSC_MATRIX_N(o_1) = m;
-  DMPETSC_ERRCHECK(MatGetOwnershipRange(A, &DMPETSC_MATRIX_GM(o_1), 
-					PETSC_NULL));
+  gm = DMPETSC_MATRIX_GM(o_1);
+  trans = matType[DMPETSC_MATRIX_MTYPE(o_1)].trans;
+
+  if ((retc = trans(A, /*m == n ? PETSC_NULL :*/ &At)))
+    return retc;
+  //  if (m != n) {
+    DMPETSC_ERRCHECK(MatDestroy(A));
+    A = DMPETSC_MATRIX_MATRIX(o_1) = At;
+    DMPETSC_MATRIX_M(o_1) = n;
+    DMPETSC_MATRIX_N(o_1) = m;
+    DMPETSC_ERRCHECK(MatGetOwnershipRange(A, &DMPETSC_MATRIX_GM(o_1), 
+					  PETSC_NULL));
+    //  }
+  DMPETSC_MATRIX_DUPID(o_1) = dupid++;
 
   return OK;
 }
+
+// MatA | number-of-local-nonzeros
+DM_INLINE_STATIC P petsc_mat_getnzs(void) {
+  Mat A;
+  L32 nzs, gm, m;
+  P retc;
+  enum DMMatrixType mtype;
+  MatGetnzsFunc getnzs;
+
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  INIT_MAT(o_1, A);
+
+  gm = DMPETSC_MATRIX_GM(o_1);
+  m = DMPETSC_MATRIX_M(o_1);
+  mtype = DMPETSC_MATRIX_MTYPE(o_1);
+  getnzs = matType[mtype].getnzs;
+  
+
+  if ((retc = getnzs(A, &nzs, gm, m))) return retc;
+
+  TAG(o_1) = (NUM|LONG32TYPE);
+  ATTR(o_1) = 0;
+  LONG32_VAL(o_1) = nzs;
+  return OK;
+}
+
+// <l irows> <l icols> MatA | <l irows> <l icols>
+// icols is allocated by getcsr
+DM_INLINE_STATIC P petsc_mat_getcsr(void) {
+  Mat A;
+  L32 m, gm;
+  L32* crows;
+  L32* ccols;
+
+  L32 ncols;
+  const L32* cols;
+  P i, j;
+  P left, used;
+
+  if (o_3 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_3) != (ARRAY|LONG32TYPE)
+      || TAG(o_2) != (ARRAY|LONG32TYPE)) 
+    return OPD_ERR;
+  INIT_MAT(o_1, A);
+  if (! matType[DMPETSC_MATRIX_MTYPE(o_1)].hascsr)
+    RETURN_ERROR(DMPETSC_ILLEGAL_OP);
+
+  gm = DMPETSC_MATRIX_GM(o_1);
+  m = DMPETSC_MATRIX_M(o_1);
+  if (ARRAY_SIZE(o_3) <= m) return RNG_CHK;  
+
+  crows = (L32*) VALUE_PTR(o_3);
+  ccols = (L32*) VALUE_PTR(o_2);
+  left = ARRAY_SIZE(o_2);
+  used = 0;
+
+  for (i = 0; i < m; i++) {
+    DMPETSC_ERRCHECK(MatGetRow(A, gm+i, &ncols, &cols, PETSC_NULL));
+    if ((left -= ncols) < 0) return RNG_CHK;
+    *(crows++) = used;
+    used += ncols;
+    for (j = 0; j < ncols; j++) *(ccols++) = cols[j];
+    DMPETSC_ERRCHECK(MatRestoreRow(A, gm+i, &ncols, &cols, PETSC_NULL));
+  }
+
+  ARRAY_SIZE(o_2) = *crows = used;
+  ATTR(o_2) &= ~PARENT;
+  ARRAY_SIZE(o_3) = m+1;
+  ATTR(o_3) &= ~PARENT;
+  FREEopds = o_1;
+  return OK;
+}
+  
+  
 
 // y beta A trans x alpha | y=beta*y+alpha*A'*x
 // there are shortcuts for integers 1,0 in alpha,beta
@@ -1395,7 +1551,7 @@ DM_INLINE_STATIC P petsc_mat_vecmul(void) {
   BOOLEAN alpha_ = TRUE, beta_ = TRUE, 
     alpha_0 = FALSE, beta_0 = FALSE;
 
-  if (o_6 < FREEopds) return OPDS_UNF;
+  if (o_6 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_3) != BOOL) return OPD_CLA;
   trans = BOOL_VAL(o_3);
   if (CLASS(o_1) != NUM || CLASS(o_5) != NUM)
@@ -1426,8 +1582,11 @@ DM_INLINE_STATIC P petsc_mat_vecmul(void) {
     INIT_MAT(o_4, A);
     INIT_VEC(o_2, x);
 
-    if (DMPETSC_MATRIX_N(o_4) != DMPETSC_VECTOR_N(o_2)
-	|| DMPETSC_MATRIX_M(o_4) != DMPETSC_VECTOR_N(o_6))
+    if (trans
+	? (DMPETSC_MATRIX_M(o_4) != DMPETSC_VECTOR_N(o_2)
+	   || DMPETSC_MATRIX_N(o_4) != DMPETSC_VECTOR_N(o_6))
+	: (DMPETSC_MATRIX_N(o_4) != DMPETSC_VECTOR_N(o_2)
+	   || DMPETSC_MATRIX_M(o_4) != DMPETSC_VECTOR_N(o_6)))
       RETURN_ERROR(DMPETSC_NOMATCH);
 
     if (alpha_) DMPETSC_ERRCHECK(VecScale(x, alpha));

@@ -8,6 +8,7 @@ P ll_errc[] = {
   DMPETSC_INVMAT, 
   DMPETSC_INVKSP, 
   DMPETSC_ILLEGAL_OWNERSHIP, 
+  DMPETSC_ILLEGAL_OP, 
   DMPETSC_NOMATCH, 
   DMPETSC_NONLOCAL, 
   DMPETSC_KSPSOLVE_NOINIT, 
@@ -61,6 +62,7 @@ B* ll_errm[] = {
   (B*)"** dmpetsc: Invalidated matrix", 
   (B*)"** dmpetsc: Invalidated ksp", 
   (B*)"** dmpetsc: Changed ownership in dup", 
+  (B*)"** dmpetsc: Illegal operation on matrix type", 
   (B*)"** dmpetsc: Non matching dimensions", 
   (B*)"** dmpetsc: Accessing non-local data", 
   (B*)"** dmpetsc: Matrix for solution undefined", 
@@ -115,6 +117,7 @@ B* ll_export[] = {
   PLUGIN_OP(petsc_log_summary),
   PLUGIN_OP(petsc_vec_create),
   PLUGIN_OP(petsc_vec_copy),
+  PLUGIN_OP(petsc_vec_dup),
   PLUGIN_OP(petsc_vec_copyto),
   PLUGIN_OP(petsc_vec_copyfrom),
   PLUGIN_OP(petsc_vec_syncto),
@@ -138,6 +141,8 @@ B* ll_export[] = {
   PLUGIN_OP(petsc_mat_dup),
   PLUGIN_OP(petsc_mat_vecmul),
   PLUGIN_OP(petsc_mat_transpose),
+  PLUGIN_OP(petsc_mat_getcsr),
+  PLUGIN_OP(petsc_mat_getnzs),
   PLUGIN_OP(petsc_ksp_create),
   PLUGIN_OP(petsc_ksp_destroy),
   PLUGIN_OP(petsc_ksp_tol),
@@ -181,6 +186,8 @@ P op_petsc_log_summary(void) {return petsc_log_summary();}
 P op_petsc_vec_create(void) {return petsc_vec_create();}
 
 P op_petsc_vec_copy(void) {return petsc_vec_copy();}
+
+P op_petsc_vec_dup(void) {return petsc_vec_dup();}
 
 P op_petsc_vec_copyto(void) {return petsc_vec_copyto();}
 
@@ -227,6 +234,10 @@ P op_petsc_mat_dup(void) {return petsc_mat_dup();}
 P op_petsc_mat_vecmul(void) {return petsc_mat_vecmul();}
 
 P op_petsc_mat_transpose(void) {return petsc_mat_transpose();}
+
+P op_petsc_mat_getcsr(void) {return petsc_mat_getcsr();}
+
+P op_petsc_mat_getnzs(void) {return petsc_mat_getnzs();}
 
 P op_petsc_ksp_create(void) {return petsc_ksp_create();}
 

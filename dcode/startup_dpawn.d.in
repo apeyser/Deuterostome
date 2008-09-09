@@ -43,10 +43,25 @@ startup_common_save capsave {
 
 | save {} | --
 /wait_dnode {
-  1 index capsave exec {
+  {
+    1 index capsave 
+    ~unlock stopped
     save ~[mpirank ~notify] rsend restore
-    restore
+    exch restore ~stop if
   } lock
+} bind def
+
+| -- | stopped
+/kick_dnode {
+  {
+    save ~[mpirank ~notify] rsend restore
+    ~halt stopped
+  } lock
+} bind def
+
+| save null | --
+/recv_kick_dnode {
+  {continue pop restore} lock
 } bind def
 
 /recv_module {

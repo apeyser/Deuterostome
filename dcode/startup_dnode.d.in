@@ -147,7 +147,13 @@ startup_common_save capsave {
   | save pawn# makeready_dpawn --
   | call to makeready from pawn
   /makeready_dpawn {
-    {makeready} stopped end {stop} if restore
+    ~makeready stopped end {stop} if restore
+  } bind def
+
+  | save pawn# makebusy_dpawn --
+  | call to makebusy from pawn
+  /makebusy_dpawn {
+    ~makebusy stopped end {stop} if restore
   } bind def
 
   | pawn#/-1 setcurrent --
@@ -531,16 +537,22 @@ end def |========= end of mpi data ================
 |   a job.
 | Waits in a halt-loop until all pawns have signalled that
 |  their jobs have been completed.
-/execpawns {
+/execpawns {~wait_dnode execpawns_} bind def
+
+/execkickpawns {~recv_kick_dnode execpawns_} bind def
+
+| ~func-maker: <<i | {}/null>> kicker-func execpawns --
+/execpawns_ {
   {
     mpidata begin {
+      /kicker_func name
       save
       /nwait 0 def
       0 1 pawns 1 sub {
         dup 3 index exec 
         dup null eq {pop pop} {
           1 index makebusy
-          ~[exch destruct_exec ~wait_dnode] rsend
+          ~[exch destruct_exec /kicker_func find] rsend
           /nwait nwait 1 add def
         } ifelse
       } for
@@ -558,9 +570,17 @@ end def |========= end of mpi data ================
 | ~job sexecpawns --
 | a Simplified version of execpawns. It executes ~job on
 | all pawns, and waits for them to be done.
-/sexecpawns {
-  mpidata /cfunc put
-  {pop /cfunc find} execpawns
+/sexecpawns {~execpawns sexecpawns_} bind def
+
+| ~job ~execpawns-version sexecpawns_ --
+/sexecpawns_ {
+  exch mpidata /cfunc put
+  {pop /cfunc find} exch exec
+} bind def
+
+| -- | --
+/kickpawns {
+  null ~execkickpawns sexecpawns_
 } bind def
 
 | /modulename module_send --
