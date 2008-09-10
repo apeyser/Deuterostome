@@ -503,13 +503,13 @@
   [(full) ~full_tests]
 ] def
 
-/modes_do {
+/modes_do [
   /lsymmetric true
   /lasymmetric true
   /bsymmetric true
   /basymmetric true
   /bbsymmetric true
-} makestruct def
+] makestruct def
 
 /modes_su {
   /lsymmetric {
