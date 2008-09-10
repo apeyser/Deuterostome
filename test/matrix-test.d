@@ -532,12 +532,20 @@
   /k 991 def
 } bind def
 
+/bbsymmetric {
+  /symmetric true def
+  /m 5000 def
+  /n ~m def
+  /k ~m def
+} bind def
+
 /test {
   {
     {(little symm) lsymmetric}
     {(little asymm) lassymmetric}
     {(big symm) bsymmetric}
     {(big asymm) bassymmetric}
+    {(really big symm) bbsymmetric}
   } {
     /matrix_test_ layer currentdict PETSC begin begin {
       (Starting mode: ) toconsole 
