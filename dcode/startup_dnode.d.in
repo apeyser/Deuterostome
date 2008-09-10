@@ -345,16 +345,25 @@ startup_common_save capsave {
   | [n1 (host1) n2 (host2)... ] rthreads_hosts_ --
   | creates an mpiinfo, where the dictionaries only consist
   | of the pair /host=(host)
-  /rthreads_hosts_ {
+  /rthreads_mhosts_ {
     [exch
-      0 2 2 index length 1 sub {
-        [
-          2 index 2 index get
-          3 index 3 index 1 add get
-          1 dict exch 1 index /host put
-        ] 3 1 roll pop
-      } for pop
+      0 2 2 index length 1 sub {    |[.. [n1 (host1) ..] i             |]
+        [                           |[.. [n1 (host1) ..] i [           |]]
+          2 index 2 index get       |[.. [n1 (host1) ..] i [ni         |]]
+          3 index 3 index 1 add get |[.. [n1 (host1) ..] i [ni (hosti) |]]
+          /host exch                |[.. [n1 (host1) ..] i [ni /host (hosti) |]]
+        ] 3 1 roll pop              |[.. [ni /host (hosti)] [n1 (host1)...] |]
+      } for pop                     |[[n1 /host (host1)] ... ] 
     ] rthreads_multi_
+  } bind def
+
+  | [(host1) ...] rthreads_hosts --
+  | creates an mpiinfo, where the dictionaries only consist 
+  | of the pair /host=(host), and where the number for each host is 1
+  /rthreads_hosts_ {
+    [exch {
+      [ 1 /host 4 -1 roll ]
+    } forall] rthreads_multi_
   } bind def
 
   | n rthreads_single_ --
@@ -470,11 +479,20 @@ end def |========= end of mpi data ================
 
 | [n1 (host1) n2 (host2)...] rthreads_hosts
 | Creates pawns on hosts, n on hostn.
+/rthreads_mhosts {
+  mpidata begin {
+    ~rthreads_mhosts_ rthreads_start
+  } stopped end {stop} if
+} bind def
+
+| [(host1) (host2)...] rthreads_hosts
+| Creates pawns on hosts, 1 on hostn.
 /rthreads_hosts {
   mpidata begin {
     ~rthreads_hosts_ rthreads_start
   } stopped end {stop} if
 } bind def
+
 @ENABLE_RTHREADS_END@
 
 | active rthreads_exec ??

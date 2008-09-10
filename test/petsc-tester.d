@@ -28,7 +28,7 @@
 } bind def
 
 /petsc_test {
-  /PETSC_TESTER_ layer PETSC_TESTER begin {
+  /PETSC_TESTER_ layer PETSC begin PETSC_TESTER begin {
     ~[
       {
         /PETSC_TESTER_ layer 
@@ -186,7 +186,7 @@
       end
       false /PETSC_TESTER_ _layer pop
     } sexecpawns
-  } stopped end /PETSC_TESTER_ _layer {stop} if
+  } stopped end end /PETSC_TESTER_ _layer {stop} if
 } bind def
 
 end _module
