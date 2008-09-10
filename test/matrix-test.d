@@ -503,139 +503,161 @@
   [(full) ~full_tests]
 ] def
 
+/modes_do {
+  /lsymmetric true
+  /lasymmetric true
+  /bsymmetric true
+  /basymmetric true
+  /bbsymmetric true
+} makestruct def
 
-/lsymmetric {
-  /symmetric true def
-  /m 5 def
-  /n ~m def
-  /k ~m def
-} bind def
+/modes_su {
+  /lsymmetric {
+    /symmetric true def
+    /m 5 def
+    /n ~m def
+    /k ~m def
+  }
 
-/lassymmetric {
-  /symmetric false def
-  /m 5 def
-  /n 7 def
-  /k 11 def
-} bind def
+  /lasymmetric {
+    /symmetric false def
+    /m 5 def
+    /n 7 def
+    /k 11 def
+  }
 
-/bsymmetric {
-  /symmetric true def
-  /m 1000 def
-  /n ~m def
-  /k ~m def
-} bind def
+  /bsymmetric {
+    /symmetric true def
+    /m 1000 def
+    /n ~m def
+    /k ~m def
+  }
 
-/bassymmetric {
-  /symmetric false def
-  /m 1000 def
-  /n 1007 def
-  /k 991 def
-} bind def
+  /basymmetric {
+    /symmetric false def
+    /m 1000 def
+    /n 1007 def
+    /k 991 def
+  }
 
-/bbsymmetric {
-  /symmetric true def
-  /m 5000 def
-  /n ~m def
-  /k ~m def
-} bind def
+  /bbsymmetric {
+    /symmetric true def
+    /m 5000 def
+    /n ~m def
+    /k ~m def
+  }
+} bind makestruct def
+
+/modes_name {
+  /lsymmetric (little symm)
+  /lasymmetric (little asym)
+  /bsymmetric (big symm)
+  /basymmetric (big asymm)
+  /bbsymmetric (really big symm)
+} makestruct def
 
 /test {
   {
-    {(little symm) lsymmetric}
-    {(little asymm) lassymmetric}
-    {(big symm) bsymmetric}
-    {(big asymm) bassymmetric}
-    {(really big symm) bbsymmetric}
+    /lsymmetric
+    /lasymmetric
+    /bsymmetric
+    /basymmetric
+    /bbsymmetric
   } {
-    /matrix_test_ layer currentdict PETSC begin begin {
-      (Starting mode: ) toconsole 
-      exec toconsole (\n) toconsole
-      
-      currentdict /A3 known {A3 mat_destroy} if
-      currentdict /x3 known {x3 vec_destroy} if
-      currentdict /y3 known {y3 vec_destroy} if
-      currentdict /ksp known {ksp ksp_destroy} if
-      
-      ~[report_iterations {
-        /matrix_test_ layer
-        PETSC begin
-        /report_ report def
-        /report name
-        100 dict dup /matrix_test name begin kick_dnode end
-        /report report_ def
-        end
-        /matrix_test_ _layer ~stop if
-      } ~exec] sexecpawns
+    modes_do 1 index get not ~pop {
+      modes_su   1 index   get
+      modes_name 3 -1 roll get
 
-      /A1 m n mul /d array def
-      /A_cuts m n 1 3 cutsn def
-      /A1_old [A1 m {n /d parcel exch} repeat pop] def
+      /matrix_test_ layer currentdict PETSC begin begin {
+        (Starting mode: ) toconsole toconsole (\n) toconsole
+        exec
       
-      /A1t n m mul /d array def
-      /At_cuts n m 1 3 cutsn def
-      /A1t_old [A1t n {m /d parcel exch} repeat pop] def
+        currentdict /A3 known {A3 mat_destroy} if
+        currentdict /x3 known {x3 vec_destroy} if
+        currentdict /y3 known {y3 vec_destroy} if
+        currentdict /ksp known {ksp ksp_destroy} if
       
-      /B1 n k mul /d array def
-      /B_cuts n k 1 3 cutsn def
-      /B1_old [B1 n {k /d parcel exch} repeat pop] def
-      
-      /B1t k n mul /d array def
-      /Bt_cuts k n 1 3 cutsn def
-      /B1t_old [B1t k {n /d parcel exch} repeat pop] def
-      
-      /C_temp m k mul /d array def
-      /Cold_temp [C_temp m {k /d parcel exch} repeat pop] def
-      
-      /C1 m k mul /d array def
-      /C_cuts m k 1 3 cutsn def
-      /C1_old [C1 m {k /d parcel exch} repeat pop] def
-      
-      /C1t k m mul /d array def
-      /Ct_cuts k m 1 3 cutsn def
-      /C1t_old [C1t k {m /d parcel exch} repeat pop] def
+        ~[report_iterations {
+          /matrix_test_ layer
+          PETSC begin
+          /report_ report def
+          /report name
+          100 dict dup /matrix_test name begin kick_dnode end
+          /report report_ def
+          end
+          /matrix_test_ _layer ~stop if
+        } ~exec] sexecpawns
 
-      /piv1 n /l array def
-      /x_temp n /d array def
-      /x1 n /d array def
-      /y_temp m /d array def
-      /y1 m /d array def
-    
-      /A2 m n mul /d array def
-      /A2_old [A2 m {n /d parcel exch} repeat pop] def
-      
-      /A2t n m mul /d array def
-      /A2t_old [A2t n {m /d parcel exch} repeat pop] def
-      
-      /B2 n k mul /d array def
-      /B2_old [B2 n {k /d parcel exch} repeat pop] def
-      
-      /B2t k n mul /d array def
-      /B2t_old [B2t k {n /d parcel exch} repeat pop] def
-      
-      /C2 m k mul /d array def
-      /C2_old [C2 m {k /d parcel exch} repeat pop] def
-      
-      /C2t k m mul /d array def
-      /C2t_old [C2t k {m /d parcel exch} repeat pop] def
+        /A1 m n mul /d array def
+        /A_cuts m n 1 3 cutsn def
+        /A1_old [A1 m {n /d parcel exch} repeat pop] def
+        
+        /A1t n m mul /d array def
+        /At_cuts n m 1 3 cutsn def
+        /A1t_old [A1t n {m /d parcel exch} repeat pop] def
+        
+        /B1 n k mul /d array def
+        /B_cuts n k 1 3 cutsn def
+        /B1_old [B1 n {k /d parcel exch} repeat pop] def
+        
+        /B1t k n mul /d array def
+        /Bt_cuts k n 1 3 cutsn def
+        /B1t_old [B1t k {n /d parcel exch} repeat pop] def
+        
+        /C_temp m k mul /d array def
+        /Cold_temp [C_temp m {k /d parcel exch} repeat pop] def
+        
+        /C1 m k mul /d array def
+        /C_cuts m k 1 3 cutsn def
+        /C1_old [C1 m {k /d parcel exch} repeat pop] def
+        
+        /C1t k m mul /d array def
+        /Ct_cuts k m 1 3 cutsn def
+        /C1t_old [C1t k {m /d parcel exch} repeat pop] def
 
-      /piv2 n /x array def
-      /x2 n /d array def
-      /y2 m /d array def
+        /piv1 n /l array def
+        /x_temp n /d array def
+        /x1 n /d array def
+        /y_temp m /d array def
+        /y1 m /d array def
+        
+        /A2 m n mul /d array def
+        /A2_old [A2 m {n /d parcel exch} repeat pop] def
+        
+        /A2t n m mul /d array def
+        /A2t_old [A2t n {m /d parcel exch} repeat pop] def
+        
+        /B2 n k mul /d array def
+        /B2_old [B2 n {k /d parcel exch} repeat pop] def
+        
+        /B2t k n mul /d array def
+        /B2t_old [B2t k {n /d parcel exch} repeat pop] def
+      
+        /C2 m k mul /d array def
+        /C2_old [C2 m {k /d parcel exch} repeat pop] def
+        
+        /C2t k m mul /d array def
+        /C2t_old [C2t k {m /d parcel exch} repeat pop] def
+        
+        /piv2 n /x array def
+        /x2 n /d array def
+        /y2 m /d array def
+        
+        /x3_data n /d array def
+        /x3 dup n vec_create def
+        /x4_data n /d array def
 
-      /x3_data n /d array def
-      /x3 dup n vec_create def
-      /x4_data n /d array def
-
-      /y3_data m /d array def
-      /y3 dup m vec_create def
-
-      tests {
-        dup 0 get (Starting test type: ) toconsole toconsole (\n) toconsole
-        dup 1 get exec 0 get done
-      } forall
-
-      kickpawns
-    } stopped end end /matrix_test_ _layer {stop} if
+        /y3_data m /d array def
+        /y3 dup m vec_create def
+        
+        tests {
+          dup 0 get (Starting test type: ) toconsole toconsole (\n) toconsole
+          dup 1 get exec 0 get done
+        } forall
+        
+        kickpawns
+      } stopped end end /matrix_test_ _layer {stop} if
+    } if
   } forall
 } bind def
 
