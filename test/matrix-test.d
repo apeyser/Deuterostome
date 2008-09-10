@@ -657,7 +657,7 @@
         
         kickpawns
       } stopped end end /matrix_test_ _layer {stop} if
-    } if
+    } ifelse
   } forall
 } bind def
 
