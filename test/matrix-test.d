@@ -1,6 +1,17 @@
 /MATRIX_TEST module 200 dict dup begin
 
 /m 1000 def
+
+/mlittle 5 def
+/nlittle 7 def
+/klittle 11 def
+
+/mbig 1000 def
+/nbig 1007 def
+/kbig 991 def
+
+/mrbig 5000 def
+
 /n ~m def
 /k ~m def
 
@@ -514,35 +525,35 @@
 /modes_su {
   /lsymmetric {
     /symmetric true def
-    /m 5 def
+    /m ~mlittle def
     /n ~m def
     /k ~m def
   }
 
   /lasymmetric {
     /symmetric false def
-    /m 5 def
-    /n 7 def
-    /k 11 def
+    /m ~mlittle def
+    /n ~nlittle def
+    /k ~klittle def
   }
 
   /bsymmetric {
     /symmetric true def
-    /m 1000 def
+    /m ~mbig def
     /n ~m def
     /k ~m def
   }
 
   /basymmetric {
     /symmetric false def
-    /m 1000 def
-    /n 1007 def
-    /k 991 def
+    /m ~mbig def
+    /n ~nbig def
+    /k ~kbig def
   }
 
   /bbsymmetric {
     /symmetric true def
-    /m 5000 def
+    /m ~mrbig def
     /n ~m def
     /k ~m def
   }
