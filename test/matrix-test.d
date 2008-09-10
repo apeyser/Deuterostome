@@ -214,7 +214,7 @@
 
 | [ [[test1 test2 comparator] [(name) params...]]... ]
 /base_tests [
-  [[~matmul_test ~matmulold_test ] ~matmul_cmp ~do_full [
+  [[~matmul_test ~matmulold_test ] ~matmul_cmp {do_matmul do_full and} [
     [(matmul01nn) false false 0 1]
     [(matmul10nn) false false 1 0]
     [(matmul02nn) false false 0 2]
@@ -236,11 +236,12 @@
     [(matmul11nt) true true 1 1]
     [(matmul12nt) true true 1 2]
   ]]
-  [[~luinv_test ~luinvold_test] ~luinv_cmp {symmetric do_full and} [
+  [[~luinv_test ~luinvold_test] ~luinv_cmp 
+    {symmetric do_full and do_luinv and} [
     [(luinv)]
   ]]
   [[~matvecmul_test ~matvecmulold_test ~matvecmulp_test] 
-    ~matvecmul_cmp ~do_full [
+    ~matvecmul_cmp {do_full do_matvecmul and} [
     [(matvecmul01n) false 0 1]
     [(matvecmul01t) true 0 1]
     [(matvecmul10n) false 1 0]
@@ -253,11 +254,12 @@
     [(matvecmul12t) true 1 2]
   ]]
   [[~trisolve_test ~trisolveold_test] ~trisolve_cmp
-    {triagonal do_full and symmetric and} [
+    {triagonal do_full and symmetric and do_trisolve and} [
     [(trisolven) false]
     [(trisolvet) true]
   ]]
-  [[~lu_test ~luold_test ~ksp_test ~ksp2_test] ~gmres_cmp ~symmetric [
+  [[~lu_test ~luold_test ~ksp_test ~ksp2_test] ~gmres_cmp 
+    {symmetric do_lu and} [
     [(lu)]
   ]]
   [[~gmres_test ~luold_test ~ksp_test]
@@ -439,6 +441,11 @@
 /full_on false def
 
 /do_full {full_on full not or} def
+/do_matmul true def
+/do_luinv true def
+/do_matvecmul true def
+/do_trisolve true def
+/do_lu true def
 
 /full_tests {
   {
