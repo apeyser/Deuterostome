@@ -478,6 +478,10 @@ end def end def
   end def |]
 end def end def
 
+/gen 1 dict dup begin /all 1 dict dup begin |[
+  /commands [/fromconsole] def |]
+end def end def
+
 /alltypes [
   /common /regex /quitable /proc /net /x /node 
   /xnode /master /plugins /socketevents
@@ -485,7 +489,7 @@ end def end def
 ] def
 
 /dgendict 1 dict dup begin |[
-  /parents [/common /quitable] def |]
+  /parents [/common /quitable /gen] def |]
 end def
 
 /dvtdict 1 dict dup begin |[

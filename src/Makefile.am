@@ -118,7 +118,7 @@ endif ENABLE_PLUGINS_SUPPORT
 
 pkginclude_HEADERS = dm.h dm-errs.h dm3.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
 	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h \
-	basic-defs.h dm-types.h dm-nextevent.h
+	basic-defs.h dm-types.h dm-nextevent.h dm2.h cppplugin.h
 nodist_pkginclude_HEADERS = dm-config.h paths.h
 
 socksrcs = \

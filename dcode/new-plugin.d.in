@@ -132,14 +132,14 @@ end def
     (static B )__ plugin_name_u __ (_)__ type_name_u __  
     (_frame[FRAMEBYTES];)__ nl
     (static B* )__ plugin_name_u __ (_)__ type_name_u __
-    (_string = ")__ plugin_name_u __ (_)__ type_name_u __ (";)__ nl
+    (_string = \(B*\) ")__ plugin_name_u __ (_)__ type_name_u __ (";)__ nl
     /member_dict type_dict /members get def
     member_dict {pop /mem_name name
       /mem_name_u mem_name toupper def
       (static B )__ type_name_u __ (_)__ mem_name_u __ 
       (_frame[FRAMEBYTES];)__ nl
       (static B* )__ type_name_u __ (_)__ mem_name_u __
-      (_string = ")__ type_name_u __ (_)__ mem_name_u __ (";)__ nl
+      (_string = \(B*\) ")__ type_name_u __ (_)__ mem_name_u __ (";)__ nl
     } forall
   } forall
 
