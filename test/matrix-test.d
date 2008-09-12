@@ -212,63 +212,81 @@
   y1 y2 y_temp compare
 } bind def
 
+/base_tests_do [
+  /matmul true
+  /luinv true
+  /matvecmul true
+  /trisolve true
+  /lu true
+  /gmres false
+] makestruct def
+
 | [ [[test1 test2 comparator] [(name) params...]]... ]
 /base_tests [
-  [[~matmul_test ~matmulold_test ] ~matmul_cmp {do_matmul do_full and} [
-    [(matmul01nn) false false 0 1]
-    [(matmul10nn) false false 1 0]
-    [(matmul02nn) false false 0 2]
-    [(matmul11nn) false false 1 1]
-    [(matmul12nn) false false 1 2]
-    [(matmul01nt) false true 0 1]
-    [(matmul10nt) false true 1 0]
-    [(matmul02nt) false true 0 2]
-    [(matmul11nt) false true 1 1]
-    [(matmul12nt) false true 1 2]
-    [(matmul01tn) true false 0 1]
-    [(matmul10tn) true false 1 0]
-    [(matmul02tn) true false 0 2]
-    [(matmul11tn) true false 1 1]
-    [(matmul12tn) true false 1 2]
-    [(matmul01nt) true true 0 1]
-    [(matmul10nt) true true 1 0]
-    [(matmul02nt) true true 0 2]
-    [(matmul11nt) true true 1 1]
-    [(matmul12nt) true true 1 2]
+  /matmul
+  [[~matmul_test ~matmulold_test ] ~matmul_cmp ~do_full [
+    [(01nn) false false 0 1]
+    [(10nn) false false 1 0]
+    [(02nn) false false 0 2]
+    [(11nn) false false 1 1]
+    [(12nn) false false 1 2]
+    [(01nt) false true 0 1]
+    [(10nt) false true 1 0]
+    [(02nt) false true 0 2]
+    [(11nt) false true 1 1]
+    [(12nt) false true 1 2]
+    [(01tn) true false 0 1]
+    [(10tn) true false 1 0]
+    [(02tn) true false 0 2]
+    [(11tn) true false 1 1]
+    [(12tn) true false 1 2]
+    [(01nt) true true 0 1]
+    [(10nt) true true 1 0]
+    [(02nt) true true 0 2]
+    [(11nt) true true 1 1]
+    [(12nt) true true 1 2]
   ]]
-  [[~luinv_test ~luinvold_test] ~luinv_cmp 
-    {symmetric do_full and do_luinv and} [
-    [(luinv)]
-  ]]
-  [[~matvecmul_test ~matvecmulold_test ~matvecmulp_test] 
-    ~matvecmul_cmp {do_full do_matvecmul and} [
-    [(matvecmul01n) false 0 1]
-    [(matvecmul01t) true 0 1]
-    [(matvecmul10n) false 1 0]
-    [(matvecmul10t) true 1 0]
-    [(matvecmul11n) false 1 1]
-    [(matvecmul11t) true 1 1]
-    [(matvecmul02n) false 0 2]
-    [(matvecmul02t) true 0 2]
-    [(matvecmul12n) false 1 2]
-    [(matvecmul12t) true 1 2]
-  ]]
-  [[~trisolve_test ~trisolveold_test] ~trisolve_cmp
-    {triagonal do_full and symmetric and do_trisolve and} [
-    [(trisolven) false]
-    [(trisolvet) true]
-  ]]
-  [[~lu_test ~luold_test ~ksp_test ~ksp2_test] ~gmres_cmp 
-    {symmetric do_lu and} [
-    [(lu)]
-  ]]
-  [[~gmres_test ~luold_test ~ksp_test]
-    ~gmres_cmp {symmetric gmres_on and do_full and} [
-    [(gmres)]
-  ]]
-] def
 
-/gmres_on false def
+  /luinv
+  [[~luinv_test ~luinvold_test] ~luinv_cmp 
+    {symmetric do_full and} [
+    [()]
+  ]]
+
+  /matvecmul
+  [[~matvecmul_test ~matvecmulold_test ~matvecmulp_test] 
+    ~matvecmul_cmp ~do_full [
+    [(01n) false 0 1]
+    [(01t) true 0 1]
+    [(10n) false 1 0]
+    [(10t) true 1 0]
+    [(11n) false 1 1]
+    [(11t) true 1 1]
+    [(02n) false 0 2]
+    [(02t) true 0 2]
+    [(12n) false 1 2]
+    [(12t) true 1 2]
+  ]]
+
+  /trisolve
+  [[~trisolve_test ~trisolveold_test] ~trisolve_cmp
+    {triagonal do_full and symmetric and} [
+    [(n) false]
+    [(t) true]
+  ]]
+
+  /lu
+  [[~lu_test ~luold_test ~ksp_test ~ksp2_test] ~gmres_cmp 
+    ~symmetric [
+    [()]
+  ]]
+
+  /gmres
+  [[~gmres_test ~luold_test ~ksp_test]
+    ~gmres_cmp {symmetric do_full and} [
+    [()]
+  ]]
+] makestruct def
 
 | (name) ~active:--|-- | --
 /timer {
@@ -282,29 +300,35 @@
   sub 3 1 roll sub 1e-6 exch mul exch add
 } bind def
 
+/run_tests_buf 80 /b array def
 /run_tests {
-  base_tests {/itest name
-    /testsn itest 0 get def
-    /testcmp itest 1 get def
-    /conds itest 2 get def
+  base_tests {/itest name /itestdo name
+    base_tests_do itestdo get {
+      /testsn itest 0 get def
+      /testcmp itest 1 get def
+      /conds itest 2 get def
 
-    itest 3 get {/ktest name
-      dup propagate
-      conds {
-        (Starting: ) toconsole ktest 0 get toconsole (\n) toconsole
-        /ntestsn 1 def
-        testsn {/ctest name
-          (Starting test#) toconsole ntestsn _ pop          
-          (Time) ~[
-            ktest 1 ktest length 1 sub getinterval {} forall
-            ~ctest
-          ] timer
-          /ntestsn ntestsn 1 add def
-        } forall
-        ktest 0 get testcmp
-        ktest 0 get done
-      } if
-    } forall
+      itest 3 get {/ktest name
+        dup propagate
+        conds {
+          /itestnm run_tests_buf 0 
+            * itestdo mkact text ktest 0 get fax 
+            0 exch getinterval def
+          (Starting: ) toconsole itestnm toconsole (\n) toconsole
+          /ntestsn 1 def
+          testsn {/ctest name
+            (Starting test#) toconsole ntestsn _ pop          
+            (Time) ~[
+              ktest 1 ktest length 1 sub getinterval {} forall
+              ~ctest
+            ] timer
+            /ntestsn ntestsn 1 add def
+          } forall
+          itestnm testcmp 
+          itestnm done
+        } if
+      } forall
+    } if
   } forall
   pop
 } bind def
@@ -396,6 +420,7 @@
   } for
 
   m ~[m n triagonal_u {/triagonal_u name /n name /m name /nl name /n0 name
+    |{(matArows) toconsole mpirank _ pop} groupconsole
     /matArows nl 1 add /l array def
     0        matArows 0 put
     m n0 sub matArows 1 put
@@ -405,6 +430,7 @@
       1 sub matArows row put
     } for
 
+    |{(matAcols) toconsole mpirank _ pop} groupconsole
     /matAcols matArows dup last get /l array def
     matAcols 0
     1 1 matArows last {
@@ -413,6 +439,7 @@
       1 ramp
     } for pop pop
 
+    |{(matAdata) toconsole mpirank _ pop} groupconsole
     /matAdata matAcols length /d array def
     0 1 matArows last 1 sub {/row name
       matAdata
@@ -428,10 +455,15 @@
     } for
   } ~exec] execrange
 
+  |(A3 create\n) toconsole
   /A3 dup ~matArows ~matAcols /sparse m n mat_create def
+  |(A3 fill\n) toconsole
   A3 ~matAdata mat_fill_data
+  |(A3 dup\n) toconsole
   /A3t dup A3 mat_dup def
+  |(A3t transpose\n) toconsole
   ~matAtrows ~matAtcols A3t mat_transpose
+  |(A3t transpose end\n) toconsole
 
   {}
 } bind def
@@ -441,11 +473,6 @@
 /full_on false def
 
 /do_full {full_on full not or} def
-/do_matmul true def
-/do_luinv true def
-/do_matvecmul true def
-/do_trisolve true def
-/do_lu true def
 
 /full_tests {
   {
@@ -514,12 +541,26 @@
   exec
 } bind def
 
-/tests [
-  [(identity) ~identity_tests]
-  [(triagonal_nu) ~triagonal_nu_tests]
-  [(triagonal_u) ~triagonal_u_tests]
-  [(full) ~full_tests]
-] def
+/tests_name {
+  /id (identity)
+  /trinu (triagonal_nu)
+  /triu (triagonal_u)
+  /full (full)
+} makestruct def
+
+/tests_func {
+  /id identity_tests
+  /trinu triagonal_nu_tests
+  /triu triagonal_u_tests
+  /full full_tests
+} bind makestruct def
+
+/tests_do [
+  /id true 
+  /trinu true
+  /triu true
+  /full true
+] makestruct def
 
 /modes_do [
   /lsymmetric true
@@ -668,9 +709,16 @@
         /y3_data m /d array def
         /y3 dup m vec_create def
         
-        tests {
-          dup 0 get (Starting test type: ) toconsole toconsole (\n) toconsole
-          dup 1 get exec 0 get done
+        tests_do {
+          not ~pop {
+            tests_name 1 index get /tests_name_n name
+            (Starting test type: ) toconsole 
+            tests_name_n toconsole 
+            (\n) toconsole
+            
+            tests_func exch get exec 
+            tests_name_n done
+          } ifelse
         } forall
         
         kickpawns
