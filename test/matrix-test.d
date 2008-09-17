@@ -17,7 +17,8 @@
 
 /ksptype /DEFAULT def
 /sparse_ksptype {/DEFAULT} def
-/dense_ksptype {/GMRES} def
+|/dense_ksptype {/GMRES} def
+/dense_ksptype {/DEFAULT} def
 
 /pctype /DEFAULT def
 /sparse_pctype {/DEFAULT} def
@@ -476,9 +477,10 @@
 
 /full_tests {
   {
+    /mtype /dense def
+    base_setup
+
     full_on {
-      /mtype /dense def
-      base_setup
       /full true def
       
       GAT begin
@@ -615,6 +617,11 @@
   /bbsymmetric (really big symm)
 } makestruct def
 
+| /name ~destroy | --
+/pdestroy {
+  exch currentdict 1 index known not {pop pop} {find exch exec} ifelse
+} bind def
+
 /test {
   {
     /lsymmetric
@@ -631,10 +638,10 @@
         (Starting mode: ) toconsole toconsole (\n) toconsole
         exec
       
-        currentdict /A3 known {A3 mat_destroy} if
-        currentdict /x3 known {x3 vec_destroy} if
-        currentdict /y3 known {y3 vec_destroy} if
-        currentdict /ksp known {ksp ksp_destroy} if
+        {/A3 /A4 /A3t /A4t} {~mat_destroy pdestroy} forall
+        {/x3 /y3 /x4 /y4} {~vec_destroy pdestroy} forall
+        {/ksp /ksp2} {~ksp_destroy pdestroy} forall
+        
       
         ~[report_iterations {
           /matrix_test_ layer
