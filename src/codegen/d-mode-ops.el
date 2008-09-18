@@ -117,6 +117,8 @@
   "writefile"
   "findfiles"
   "findfile"
+  "readboxfile"
+  "writeboxfile"
   "tosystem"
   "fromsystem"
   "transcribe"

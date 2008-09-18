@@ -217,7 +217,7 @@
       /ctype /parcel /text /number
       /token /search /anchorsearch 
       /gettime /gettimeofday /profiletime /localtime /getwdir /setwdir
-      /readfile /writefile /findfiles /findfile
+      /readfile /writefile /findfiles /findfile /readboxfile /writeboxfile
       /tosystem /fromsystem /transcribe
       /fax /merge /nextobject
       /interpolate /integrateOH /extrema 

@@ -116,6 +116,8 @@ B* _sysop[] =
   (B*) "writefile", (B*) op_writefile,
   (B*) "findfiles", (B*) op_findfiles,
   (B*) "findfile", (B*) op_findfile,
+  (B*) "readboxfile", (B*) op_readboxfile,
+  (B*) "writeboxfile", (B*) op_writeboxfile,
   (B*) "tosystem", (B*) op_tosystem,
   (B*) "fromsystem", (B*) op_fromsystem,
   (B*) "transcribe", (B*) op_transcribe,
