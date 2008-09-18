@@ -17,10 +17,9 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "dm.h"
-
-#include <stdio.h>
 #include "dm-mpi.h"
 
 enum AssState {
@@ -588,7 +587,9 @@ DM_INLINE_STATIC P petsc_mat_dense_transpose(Mat A, Mat *At) {
 }
 
 DM_INLINE_STATIC P petsc_mat_other_transpose(Mat A, Mat *At) {
-  DMPETSC_ERRCHECK(MatTranspose(A, At));
+  extern PetscErrorCode dm_MatTranspose_MPIAIJ(Mat A,Mat *matout);
+
+  DMPETSC_ERRCHECK(dm_MatTranspose_MPIAIJ(A, At));
   return OK;
 }
 
@@ -988,7 +989,7 @@ DM_INLINE_STATIC P petsc_mat_copyfrom(void) {
   P m, n, len_arr, gm;
   L32 ncols, ncols_;
   D* row;
-	MatGetrowFunc getrow;
+  MatGetrowFunc getrow;
 
   if (o_4 < FLOORopds) return OPDS_UNF;
   INIT_MAT(o_4, A);
@@ -1054,7 +1055,7 @@ DM_INLINE_STATIC P finalize_BJACOBI_ILU(
   PC pc;
   KSP* subksp; 
   KSP* i;
-  
+
   DMPETSC_ERRCHECK(KSPGetPC(ksp, &pc));
   DMPETSC_ERRCHECK(PCBJacobiGetSubKSP(pc, &n_local, PETSC_NULL, &subksp));
   for (i = subksp; i < subksp + n_local; i++) {
@@ -1228,7 +1229,6 @@ DM_INLINE_STATIC P petsc_ksp_create(void) {
 
   if (ksptype != PINF) {
     if ((r = KSPSetType(*ksp, ksptypes[ksptype].t))) goto err;
-    if ((r = KSPSetUp(*ksp))) goto err;
     if (ksptypes[ksptype].f) { 
       if ((retc = ksptypes[ksptype].f(*ksp, kspparam, pframe)))
 	goto err;
@@ -1253,8 +1253,10 @@ DM_INLINE_STATIC P petsc_ksp_create(void) {
   return OK;
 
  err:
-  if (ksp && *ksp) KSPDestroy(*ksp);
-  *ksp = NULL;
+  if (ksp && *ksp) {
+    KSPDestroy(*ksp);
+    *ksp = NULL;
+  }
   FREEvm = oldfreevm;
   if (retc) return retc;
   RETURN_ERROR(errmap[r]);
@@ -1447,23 +1449,32 @@ DM_INLINE_STATIC P petsc_mat_transpose(void) {
   if (o_1 < FLOORopds) return OPDS_UNF;
   INIT_MAT(o_1, A);
 
+  //fprintf(stderr, "transpose: start\n");
   m = DMPETSC_MATRIX_M(o_1);
   n = DMPETSC_MATRIX_N(o_1);
   gm = DMPETSC_MATRIX_GM(o_1);
   trans = matType[DMPETSC_MATRIX_MTYPE(o_1)].trans;
+  //fprintf(stderr, "transpose: m=%i, n=%i, gm=%i, mtype=%i\n",
+  //	  (int) m, (int) n, (int) gm, (int) DMPETSC_MATRIX_MTYPE(o_1));
 
-  if ((retc = trans(A, /*m == n ? PETSC_NULL :*/ &At)))
+  if ((retc = trans(A, /*m == n ? PETSC_NULL :*/ &At))) {
+    //fprintf(stderr, "transpose: err\n");
     return retc;
+  }
+
+  //fprintf(stderr, "transpose: destroy\n");
   //  if (m != n) {
     DMPETSC_ERRCHECK(MatDestroy(A));
     A = DMPETSC_MATRIX_MATRIX(o_1) = At;
     DMPETSC_MATRIX_M(o_1) = n;
     DMPETSC_MATRIX_N(o_1) = m;
+    //fprintf(stderr, "transpose: ownershiprange\n");
     DMPETSC_ERRCHECK(MatGetOwnershipRange(A, &DMPETSC_MATRIX_GM(o_1), 
 					  PETSC_NULL));
     //  }
   DMPETSC_MATRIX_DUPID(o_1) = dupid++;
 
+  //fprintf(stderr, "transpose: return\n");
   return OK;
 }
 

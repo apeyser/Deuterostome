@@ -166,7 +166,8 @@ startup_common_save capsave {
   | sets the keyboard owner to the next pawn (or the dnode)
   | wrapping around. Then ends mpidata.
   /emacs_next_talk {
-    cpawn 1 add dup pawns eq {pop -1} if
+    cpawn dup * eq {pop pawns 1 sub} if
+    1 add dup pawns eq {pop -1} if
     dup cpawn ne ~setcurrent ~pop ifelse
     end
   } bind def
@@ -175,7 +176,8 @@ startup_common_save capsave {
   | sets the keyboard owner to the previous pawn (or the dnode)
   | wrapping around. Then ends mpidata.
   /emacs_last_talk {
-    cpawn dup 0 lt {pop pawns} if 1 sub
+    cpawn dup * eq {pop 0} if
+    dup 0 lt {pop pawns} if 1 sub
     dup cpawn ne ~setcurrent ~pop ifelse
     end
   } bind def
