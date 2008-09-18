@@ -17,8 +17,8 @@
 
 /ksptype /DEFAULT def
 /sparse_ksptype {/DEFAULT} def
-|/dense_ksptype {/GMRES} def
-/dense_ksptype {/DEFAULT} def
+/dense_ksptype {/GMRES} def
+|/dense_ksptype {/DEFAULT} def
 
 /pctype /DEFAULT def
 /sparse_pctype {/DEFAULT} def
