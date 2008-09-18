@@ -10,7 +10,7 @@
 /nbig 1007 def
 /kbig 991 def
 
-/mrbig 5000 def
+/mrbig 4500 def
 
 /n ~m def
 /k ~m def
