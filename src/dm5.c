@@ -407,7 +407,7 @@ P op_stopped(void)
   if ((ATTR(o_1) & ACTIVE) == 0) return OPD_ATR;
   if (x3 > CEILexecs) return EXECS_OVF;
   TAG(x1) = BOOL; 
-  ATTR(x1) |= STOPMARK;
+  ATTR(x1) = STOPMARK;
   BOOL_VAL(x1) = FALSE;
   moveframe(o_1, x2); 
   FREEexecs = x3;
