@@ -382,7 +382,7 @@ DEBIAN_FILES = \
 	debian/dm.doc-base.EX debian/manpage.xml.ex debian/watch.ex
 
 GENTOO_FILES = \
-	gentoo/dev-lang/dm/dm-4.3.1.ebuild \
+	gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild \
 	gentoo/dev-lang/dm/Manifest \
 	gentoo/dev-lang/dm/files/50dm-gentoo.el \
 	gentoo/dev-lang/dm/files/dnoded.conf \
@@ -850,6 +850,12 @@ uninstall-am:
 
 #--disable-process
 
+gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild:
+	svn mv gentoo/dev-lang/dm/dm-*.ebuild $@
+
+.PHONY: update-version
+update-version: gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild
+
 .PHONY: gentoo-setup
 gentoo-setup: rsync
 	find $(srcdir)/gentoo -name "*~" -print0 | xargs -r0 rm
@@ -870,11 +876,12 @@ rsync: dist
 	fi
 
 .PHONY: ebuild
-ebuild: gentoo-setup
+ebuild: update-version gentoo-setup
 	svn ci -m '' gentoo
 	sudo layman -s gentoo-local
 
 gencode-all: gencode all
+
 .PHONY: gencode
 gencode: 
 	cd libltdl && $(MAKE) $(AM_MAKEFLAGS) all
