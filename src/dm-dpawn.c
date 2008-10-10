@@ -11,13 +11,25 @@
 
 static P rank;
 static MPI_Comm comm;
+static unsigned char stype;
+
+static P wrap_mpirook_1(B* buffer, P size) {
+  mpirecv(getparentcomm(), 1, 0, (B*) &stype, sizeof(stype));
+  if (stype) return mpibroadcast(getparentcomm(), 0, buffer, size);
+  return mpirecv(getparentcomm(), 2, 0, buffer, size);
+}
+
+static P wrap_mpirook_2(B* buffer, P size) {
+  if (stype) return mpibroadcast(getparentcomm(), 0, buffer, size);
+  return mpirecv(getparentcomm(), 3, 0, buffer, size);
+}
 
 static P wrap_mpirecv_1(B* buffer, P size) {
-  return mpirecv(comm, 1, rank, buffer, size);
+  return mpirecv(getworldcomm(), 1, rank, buffer, size);
 }
 
 static P wrap_mpirecv_2(B* buffer, P size) {
-  return mpirecv(comm, 2, rank, buffer, size);
+  return mpirecv(getworldcomm(), 2, rank, buffer, size);
 }
 
 static P wrap_mpisend_1(B* buffer, P size) {
@@ -58,10 +70,13 @@ static P handle_error(P retc) {
   return retc;
 }
 
-static P frommpi(B* bufferf, MPI_Comm parent, P src) {
+static P fromrook(B* bufferf) {
+  return handle_error(fromsource(bufferf, wrap_mpirook_1, wrap_mpirook_2));
+}
+
+static P frommpi(P src) {
   rank = src;
-  comm = parent;
-  return handle_error(fromsource(bufferf, wrap_mpirecv_1, wrap_mpirecv_2));
+  return handle_error(fromsource(NULL, wrap_mpirecv_1, wrap_mpirecv_2));
 }
 
 static P tompi(B* rootf, MPI_Comm parent, BOOLEAN mksave, P dest) {
@@ -153,7 +168,7 @@ P op_mpirecv(void) {
   if (! PVALUE(o_2, &src) || src < 0 || src >= getworldsize())
     return RNG_CHK;
 
-  return frommpi(NULL, getworldcomm(), src);
+  return frommpi(src);
 }
 
 // srcid/* tagid/* | src tag count
@@ -263,9 +278,9 @@ static BOOLEAN pending(void) {
   return (FREEexecs != FLOORexecs);
 }
 
-static P clientinput(B* bufferf, MPI_Comm parent) {
+static P clientinput(B* bufferf) {
   P retc;
-  if ((retc = frommpi(bufferf, parent, 0))) return retc;
+  if ((retc = fromrook(bufferf))) return retc;
 
   if (x1 >= CEILexecs) return EXECS_OVF;
   if (o_1 < FLOORopds) return OPDS_UNF;
@@ -295,7 +310,7 @@ static P nextevent(B* bufferf) {
       default: continue;
     }
     
-    retc = clientinput(bufferf, parent);
+    retc = clientinput(bufferf);
   } while (! retc && ! pending());
 
   return retc;

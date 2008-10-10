@@ -9,7 +9,7 @@ DEBIAN_FILES = \
 	debian/dm.doc-base.EX debian/manpage.xml.ex debian/watch.ex
 
 GENTOO_FILES = \
-	gentoo/dev-lang/dm/dm-4.2.4.ebuild \
+	gentoo/dev-lang/dm/dm-4.3.0.ebuild \
 	gentoo/dev-lang/dm/Manifest \
 	gentoo/dev-lang/dm/files/50dm-gentoo.el \
 	gentoo/dev-lang/dm/files/dnoded.conf \

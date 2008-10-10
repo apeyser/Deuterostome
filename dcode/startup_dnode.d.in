@@ -344,7 +344,7 @@ startup_common_save capsave {
   } bind def
 
 
-  | [n1 (host1) n2 (host2)... ] rthreads_hosts_ --
+  | [n1 (host1) n2 (host2)... ] rthreads_mhosts_ --
   | creates an mpiinfo, where the dictionaries only consist
   | of the pair /host=(host)
   /rthreads_mhosts_ {
@@ -479,7 +479,7 @@ end def |========= end of mpi data ================
   } stopped end {stop} if
 } bind def
 
-| [n1 (host1) n2 (host2)...] rthreads_hosts
+| [n1 (host1) n2 (host2)...] rthreads_mhosts
 | Creates pawns on hosts, n on hostn.
 /rthreads_mhosts {
   mpidata begin {

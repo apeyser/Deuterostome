@@ -332,29 +332,39 @@ DM_INLINE_STATIC void readsocket(void) {
 }
 
 DM_INLINE_STATIC void writempi(void) {
-  P i, start, end, r;
+  P i, r;
   P dest = VALUE_BASE(from_dnode_data);
+  unsigned char stype;
   VALUE_PTR(from_dnode_data) = NULL;
   
+  r = 0;
   if (nodes >= dest && dest > 0) {
-    start = dest-1;
-    end = dest;
+    stype = 0;
+    MPI_Isend(&stype, sizeof(stype), MPI_UNSIGNED_CHAR, 
+	      dest-1, 1, children, &requests[r++]);
+
+    MPI_Isend(from_dnode_data, FRAMEBYTES*2, MPI_UNSIGNED_CHAR,
+	      dest-1, 2, children, &requests[r++]);
+    if (from_dnode_data_n > FRAMEBYTES*2) 
+      MPI_Isend(from_dnode_data+FRAMEBYTES*2, 
+		from_dnode_data_n-FRAMEBYTES*2,
+		MPI_UNSIGNED_CHAR,
+		dest-1, 3, children, &requests[r++]);
   }
   else {
-    start = 0;
-    end = nodes;
-  }
+    stype = 1;
+    for (i = 0, r = 0; i < nodes; i++) 
+      MPI_Isend(&stype, sizeof(stype), MPI_UNSIGNED_CHAR, 
+		i, 1, children, &requests[r++]);
 
-  r = 0;
-  for (i = start; i < end; i++) {
-    MPI_Isend(from_dnode_data, FRAMEBYTES*2, MPI_UNSIGNED_CHAR,
-	      i, 1, children, &requests[r++]);
+    MPI_Bcast(from_dnode_data, FRAMEBYTES*2, MPI_UNSIGNED_CHAR,
+	      MPI_ROOT, children);
     if (from_dnode_data_n > FRAMEBYTES*2)
-      MPI_Isend(from_dnode_data+FRAMEBYTES*2, from_dnode_data_n-FRAMEBYTES*2, 
+      MPI_Bcast(from_dnode_data+FRAMEBYTES*2,
+		from_dnode_data_n-FRAMEBYTES*2,
 		MPI_UNSIGNED_CHAR,
-		i, 2, children, &requests[r++]);
+		MPI_ROOT, children);
   }
-
   MPI_Waitall(r, requests, MPI_STATUSES_IGNORE);
   
   free(from_dnode_data);
@@ -364,7 +374,7 @@ DM_INLINE_STATIC void writempi(void) {
 DM_INLINE_STATIC void* from_dnode(void* arg) __attribute__ ((__noreturn__));
 DM_INLINE_STATIC void* from_dnode(void* arg __attribute__ ((__unused__))) {
   UL32 ok;
-  if (! (requests = (MPI_Request*) malloc(sizeof(MPI_Request)*nodes*2)))
+  if (! (requests = (MPI_Request*) malloc(sizeof(MPI_Request)*nodes*3)))
     error(1, errno, "Unable to malloc requests");
   write_socket_int(&ok, sizeof(ok));
 
