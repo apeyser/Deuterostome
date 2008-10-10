@@ -648,7 +648,7 @@
           PETSC begin
           /report_ report def
           /report name
-          100 dict dup /matrix_test name begin kick_dnode end
+          100 dict dup /matrix_test name begin kickdnode end
           /report report_ def
           end
           /matrix_test_ _layer ~stop if

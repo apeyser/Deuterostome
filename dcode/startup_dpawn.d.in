@@ -52,7 +52,7 @@ startup_common_save capsave {
 } bind def
 
 | -- | stopped
-/kick_dnode {
+/kickdnode {
   {
     save ~[mpirank ~notify] rsend restore
     ~halt stopped
