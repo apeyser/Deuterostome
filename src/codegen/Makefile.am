@@ -49,7 +49,7 @@ dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h \
 dm3.c: paths.h
 
 dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
-dgen_LDADD = libdmbootstrap.la
+dgen_LDADD = $(builddir)/libdmbootstrap.la
 
 dcoder_SOURCES = dcoder.c dcoder.h dm-errs.h.built
 dcoder_CPPFLAGS = -I"$(top_srcdir)/src" -I"$(top_builddir)/src" \

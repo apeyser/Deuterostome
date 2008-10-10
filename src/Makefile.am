@@ -130,7 +130,7 @@ socksrcs = \
 dvt_SOURCES = dvt.c dvt_0.h dm-dvt.h dm-dvt.c \
 	$(socksrcs)
 
-dvt_LDADD = libdmglobals.la $(top_builddir)/lib/libgnu.la
+dvt_LDADD = $(builddir)/libdmglobals.la $(top_builddir)/lib/libgnu.la
 dvt_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS)
 dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS) \
 	-I$(top_builddir)/lib -I$(top_srcdir)/lib
@@ -140,7 +140,9 @@ dnode_SOURCES = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
 	$(socksrcs) \
 	$(DNODE_MPI_SRCS)
 
-dnode_LDADD = libdmglobals.la libdmnodal.la $(top_builddir)/lib/libgnu.la
+dnode_LDADD = $(builddir)/libdmglobals.la \
+	$(builddir)/libdmnodal.la \
+	$(top_builddir)/lib/libgnu.la
 dnode_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS) $(MPI_LIBS)
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
 dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) \
@@ -148,7 +150,9 @@ dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) \
 	-I$(top_builddir)/lib -I$(top_srcdir)/lib
 
 dpawn_SOURCES = dpawn.c dpawn_0.h dm-dpawn.h dm-dpawn.c dm-mpi.h dm-mpi.c
-dpawn_LDADD = libdmglobals.la libdmnodal.la $(LDADD)
+dpawn_LDADD = $(builddir)/libdmglobals.la \
+	$(builddir)/libdmnodal.la \
+	$(LDADD)
 dpawn_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS) $(MPI_LIBS) #-rdynamic
 dpawn_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dpawn_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS) $(MPI_FLAGS)
@@ -173,7 +177,9 @@ libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)
 
 libdmnodal_la_SOURCES = dm-vm.c dm-vm.h $(PLUGIN_HDR) $(PLUGIN_SRC)
-libdmnodal_la_LIBADD = $(PLUGIN_LD) libdmglobals.la
+libdmnodal_la_LIBADD = $(PLUGIN_LD) \
+	$(builddir)/libdmglobals.la \
+	@VERSION_INFO@ @RELEASE_INFO@
 
 editpaths = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
@@ -201,7 +207,7 @@ dgen_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DBOOTSTRAP_PLUGIN=1 -DDM_DISABLE_REGEX=1 \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 \
 	@LIBDM_DLL_IMPORT@ 
-dgen_LDADD = libdmbootstrap.la $(LDADD)
+dgen_LDADD = $(builddir)/libdmbootstrap.la $(LDADD)
 
 drook_SOURCES = drook.c
 drook_CPPFLAGS = $(AM_CPPFLAGS) \
@@ -209,7 +215,7 @@ drook_CPPFLAGS = $(AM_CPPFLAGS) \
 	$(MPI_FLAGS) \
 	@LIBDM_DLL_IMPORT@ 
 drook_LDFLAGS = $(AM_LDFLAGS) $(MPI_LIBS)
-drook_LDADD = libdmbootstrap.la $(LDADD)
+drook_LDADD = $(builddir)/libdmbootstrap.la $(LDADD)
 
 dmprop_SOURCES = \
 	dm-prop.c dm-prop.h \
