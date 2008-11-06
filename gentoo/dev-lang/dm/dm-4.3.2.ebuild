@@ -34,19 +34,19 @@ IUSE="daemon emacs atlas setuid threads formats xclient X memory xauth petsc mpi
 RESTRICT="strip mirror primaryuri"
 
 DEPEND="
-emacs? (virtual/emacs)
-formats? (app-text/a2ps)
-formats? (virtual/ghostscript)
-formats? (dev-lang/perl)
-X? (app-text/xdvik)
-X? (x11-terms/xterm)
-X? (x11-base/xorg-server)
-atlas? (sci-libs/blas-atlas)
-xclient? (x11-libs/libX11)
-xauth? (x11-libs/libXext)
-mpi? (virtual/mpi)
-mpi? (!sys-cluster/mpich)
-petsc? (>=sci-mathematics/petsc-2.3.3_p11)
+emacs? ( virtual/emacs )
+formats? ( app-text/a2ps )
+formats? ( virtual/ghostscript )
+formats? ( dev-lang/perl )
+X? ( app-text/xdvik )
+X? ( x11-terms/xterm )
+X? ( x11-base/xorg-server )
+atlas? ( sci-libs/blas-atlas )
+xclient? ( x11-libs/libX11 )
+xauth? ( x11-libs/libXext )
+mpi? ( virtual/mpi )
+mpi? ( !sys-cluster/mpich )
+petsc? ( >=sci-mathematics/petsc-2.3.3_p11 )
 sys-libs/glibc
 "
 
