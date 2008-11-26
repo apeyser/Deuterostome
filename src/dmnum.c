@@ -106,7 +106,7 @@ void DECODE(B *frame, BOOLEAN fauto, W prec, B *buf)
 /*------------------------------------- ENCODE
  converts numeral from ASCII code in 'string' into binary form and
  places the binary value at 'dnum'. Encoding is directed by 'type' bits:
-     #0-3:  predefined type (B/W/L/M/S/D) if bit #6 is true
+     #0-3:  predefined type (B/W/L/X/S/D) if bit #6 is true
      #4:    to be undefined (U)
      #5:    string has float characteristic (F)
      #6:    type is predefined (T)

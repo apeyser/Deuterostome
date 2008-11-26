@@ -1,4 +1,4 @@
- /*================== D Machine 3.0 (dsp1.c) ======================
+   /*================== D Machine 3.0 (dsp1.c) ======================
     - digital signal processing and math operators
 
           - interpolate
@@ -9,9 +9,6 @@
           - solvetridiag
           - tile
           - ramp
-          - extract
-          - dispense
-          - rand
           - extract
           - dilute
           - dilute_add

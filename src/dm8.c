@@ -1,14 +1,13 @@
 /*=================== D Machine 3.0 (dm8.c) =========================
 
-     - operators inquiring about composite (VM or eVM) objects
+     - operators inquiring about composite VM objects
           - used
           - length
-          - valid
           - parent
-     - operators for exchanging contents of external and internal objects
+     - operators for exchanging contents of objects
           - fax
           - merge
-     - operator for accessing eVM objects sequentially
+     - operator for accessing VM objects sequentially
           - nextobject
 
 ========================================================================*/

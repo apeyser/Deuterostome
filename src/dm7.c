@@ -1079,7 +1079,7 @@ P op_findfile(void)
 
  - creates a replica of the given original object
  - applies itself recursively to objects nested in the original,
-   thus replicating the object tree; the nes root object is returned
+   thus replicating the object tree; the root object is returned
    as the replica
 */
 

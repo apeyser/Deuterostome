@@ -1,8 +1,34 @@
-\documentclass[11pts]{book}
+ \documentclass[12pts]{book}
 \usepackage{array}
+\usepackage{makeidx}
+\usepackage{amsmath}
+\usepackage{supertabular} 
 
+\title{D\\(A Manual)}
+\author{Wolfgang Nonner and Alex Peyser}
+\makeindex
 \begin{document}
- \include{chap1}
- \include{chap2}
+\maketitle
+\tableofcontents
+\include{chap1}
+\include{chap2}
 \include{chap3}
+\printindex   
+
+\newpage
+
+\noindent-- we should not put high-math stuff into the dvt\\
+-- which new operators create VM objects? - summarize\\
+-- fix name thearc to acos2\\
+-- make `last' operator for Dirk \\
+-- divide up dsp1.c into common and dnode operators\\
+-- make a save box around received tree\\
+-- environmental dictionary   \\
+-- xauth* should be X*; remove timeout in Xauthgen (use fixed 60 sec)\\ 
+-- fix some blas op names\\
+-- tilde on objects other than name; check bind, (un)foldobj
+-- add MPI operator descriptions to dnode
+-- describe pawn and rook
+-- include `unlock'   
+
 \end{document}
