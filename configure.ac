@@ -363,7 +363,7 @@ AC_CONFIG_FILES([
   plugins/Makefile plugins/dmflex.l 
   ps/Makefile 
   sh/Makefile
-  emacs/Makefile emacs/d-mode.el
+  emacs/Makefile
   dcode/Makefile 
   test/Makefile
   m4/Makefile

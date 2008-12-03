@@ -1,4 +1,4 @@
-(defconst d-mode-version "$Id$"
+(defconst d-mode-version "$Id$ V@PACKAGE_VERSION@ svn-@SVNVERSION@"
   "Revision number of d-mode.")
 
 (require 'font-lock)

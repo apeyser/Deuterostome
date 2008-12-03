@@ -32,7 +32,7 @@ host_triplet = @host@
 target_triplet = @target@
 subdir = emacs
 DIST_COMMON = $(dist_pkglisp_LISP) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/d-mode.el.in
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/alloca.m4 \
@@ -54,7 +54,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = d-mode.el d-mode-ops.el
+CONFIG_CLEAN_FILES = d-mode-ops.el
 SOURCES =
 DIST_SOURCES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -272,6 +272,7 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRINGBUF = @STRINGBUF@
 STRIP = @STRIP@
+SVNVERSION = @SVNVERSION@
 SYS_DICT_SIZE = @SYS_DICT_SIZE@
 THREADMUL = @THREADMUL@
 THREADNUM = @THREADNUM@
@@ -361,13 +362,16 @@ tmp = @tmp@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 dist_pkglisp_LISP = dm-server.el
-NODISTFILES = d-comint-mode.el init.el 
-nodist_pkglisp_LISP = $(NODISTFILES) d-mode-ops.el d-mode.el
+NODISTFILES = d-comint-mode.el init.el d-mode.el
+nodist_pkglisp_LISP = $(NODISTFILES) d-mode-ops.el
 EXTRA_DIST = d-comint-mode.el.in init.el.in d-mode.el.in
 CLEANFILES = $(NODISTFILES)
 edit = sed \
 	-e 's,@bindir\@,$(bindir),g' \
-	-e 's,@pkglispdir\@,$(pkglispdir),g'
+	-e 's,@pkglispdir\@,$(pkglispdir),g' \
+	-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
+	-e 's,[@]NAMEBYTES[@],@NAMEBYTES@,g' \
+	-e 's,[@]SVNVERSION[@],@SVNVERSION@,g'
 
 all: all-am
 
@@ -401,8 +405,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-d-mode.el: $(top_builddir)/config.status $(srcdir)/d-mode.el.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -623,6 +625,11 @@ uninstall-am: uninstall-dist_pkglispLISP uninstall-nodist_pkglispLISP
 	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
 	uninstall-dist_pkglispLISP uninstall-nodist_pkglispLISP
 
+
+d-mode.el: Makefile $(srcdir)/d-mode.el.in
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/$@.in >$@.tmp
+	mv $@.tmp $@
 
 d-comint-mode.el: Makefile $(srcdir)/d-comint-mode.el.in
 	rm -f $@ $@.tmp

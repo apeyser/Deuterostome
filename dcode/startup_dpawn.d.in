@@ -78,7 +78,7 @@ startup_common_save capsave {
   ~toconsole
 ] bind def
 
-(Using startup_dpawn.d $Id$ V@PACKAGE_VERSION@ $SVNVERSION$\n) toconsole
+(Using startup_dpawn.d $Id$ V@PACKAGE_VERSION@ svn-@SVNVERSION@\n) toconsole
 
 getstartupdir (errors.d) fromfiles
 getstartupdir (matrix.d) fromfiles

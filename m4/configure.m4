@@ -520,6 +520,7 @@ AC_DEFUN([CF_BASIC_DEFS], [
       AC_MSG_ERROR([Unable to compute NAMEBYTES])
     ])
     AC_LANG_POP()
+    
     if test $NAMEBYTES == $NAMEBYTES_NEW ; then
       AC_MSG_RESULT([unchanged, NAMEBYTES = $NAMEBYTES])
     else
@@ -534,7 +535,29 @@ AC_DEFUN([CF_BASIC_DEFS], [
       fi
     fi
   fi
-  AC_SUBST([NAMEBYTES])dnl
+  AC_SUBST([NAMEBYTES])
+
+  AC_MSG_CHECKING([for SVNVERSION value])
+  if test $USE_MAINTAINER_MODE != yes; then
+     AC_MSG_RESULT([SVNVERSION = $SVNVERSION])
+  else
+    if ! cf_basic_defs_svnversion=`svnversion 2>/dev/null` \
+      || test "$cf_basic_defs_svnversion" == 'exported' \
+      || test "$cf_basic_defs_svnversion" == "$SVNVERSION" ; then
+      AC_MSG_RESULT([unchanged, SVNVERSION = $SVNVERSION"])
+    else
+      AC_MSG_RESULT([changed, SVNVERSION = $SVNVERSION, SVNVERSION_NEW = $cf_basic_defs_svnversion])
+      [SVNVERSION="$cf_basic_defs_svnversion"]
+      AC_MSG_CHECKING([Updating "$srcdir"/m4/basic-defs.m4])
+      if echo "[[SVNVERSION=$SVNVERSION]]" >> "$srcdir"/m4/basic-defs.m4
+      then
+        AC_MSG_RESULT([successful])
+      else
+        AC_MSG_ERROR([failed])
+      fi
+    fi
+  fi
+  AC_SUBST([SVNVERSION])dnl
 ])
 
 AC_DEFUN([CF_C_INLINE], [dnl
