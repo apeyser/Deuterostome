@@ -128,8 +128,7 @@ edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			$(ATLAS_EDIT) \
 			$(RTHREADS_EDIT) \
 			$(REGEX_DELETE) \
-			$(PETSC_EDIT) \
-			$(SVNVER_EDIT)
+			$(PETSC_EDIT) 
 
 theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in
 	rm -f $@ $@.tmp
