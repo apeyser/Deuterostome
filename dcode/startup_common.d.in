@@ -699,7 +699,7 @@ end def  | of xtext_dict
     userdict /d_dictstack put
 } bind def
 
-(Using startup_common.d $Id: startup_common.d.in 1404 2008-05-20 02:36:11Z ap $ V@PACKAGE_VERSION@ $SVNVERSION$\n) toconsole
+(Using startup_common.d $Id$ V@PACKAGE_VERSION@ $SVNVERSION$\n) toconsole
 
 save 1024 /b array
   dup 0 (Home:  )   fax gethomedir    fax (\n) fax 0 exch getinterval toconsole
