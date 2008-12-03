@@ -5,7 +5,7 @@
 |   - viewed objects are made available to other D code
 
 200 dict dup begin  | of eyedict
-(Loading TheEye.d  $Id$ V@PACKAGE_VERSION@\n) toconsole
+(Loading TheEye.d  $Id$ V@PACKAGE_VERSION@ $SVNVERSION$\n) toconsole
 
 |=========================== window layout =================================
 |  - horizontal:

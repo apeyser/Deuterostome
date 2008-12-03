@@ -422,6 +422,8 @@ PETSC_EDIT_OFF = -e '$(PETSC_START),$(PETSC_END) d'
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@PETSC_EDIT = $(PETSC_EDIT_ON)
 @ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@PETSC_EDIT = $(PETSC_EDIT_OFF)
 @ENABLE_PLUGINS_SUPPORT_FALSE@PETSC_EDIT = $(PETSC_EDIT_OFF)
+SVNVERSION = $(shell )
+SVNVER_EDIT = -e "s/\\\$$SVNVERSION\\(:[^$$]*\\)\\?\\\$$/\\\$$SVNVERSION: `svnversion || echo exported`\\\$$/"
 edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
 			-e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
@@ -434,7 +436,8 @@ edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			$(ATLAS_EDIT) \
 			$(RTHREADS_EDIT) \
 			$(REGEX_DELETE) \
-			$(PETSC_EDIT)
+			$(PETSC_EDIT) \
+			$(SVNVER_EDIT)
 
 all: all-am
 

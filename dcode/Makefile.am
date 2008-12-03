@@ -115,6 +115,10 @@ endif ENABLE_PETSC
 endif ENABLE_PLUGINS
 endif ENABLE_PLUGINS_SUPPORT
 
+SVNVERSION = $(shell )
+
+SVNVER_EDIT = -e "s/\\\$$SVNVERSION\\(:[^$$]*\\)\\?\\\$$/\\\$$SVNVERSION: `svnversion || echo exported`\\\$$/"
+
 edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
 			-e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
@@ -127,7 +131,8 @@ edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			$(ATLAS_EDIT) \
 			$(RTHREADS_EDIT) \
 			$(REGEX_DELETE) \
-			$(PETSC_EDIT)
+			$(PETSC_EDIT) \
+			$(SVNVER_EDIT)
 
 theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in
 	rm -f $@ $@.tmp

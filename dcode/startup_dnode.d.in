@@ -770,7 +770,7 @@ Xwindows_ {
   /delete_window {end} bind def | default delete action is nothing.
 } if
 
-(Using startup_dnode.d $Id$ V@PACKAGE_VERSION@\n) toconsole
+(Using startup_dnode.d $Id$ V@PACKAGE_VERSION@ $SVNVERSION$\n) toconsole
   
 getstartupdir (matrix.d) fromfiles
 
