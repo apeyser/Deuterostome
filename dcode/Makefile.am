@@ -117,8 +117,7 @@ endif ENABLE_PLUGINS_SUPPORT
 
 SVNVERSION = $(shell )
 
-SVNVER_EDIT = -e \
-	"s/\\\$$SVNVERSION\\(:[^$$]*\\)\\?\\\$$/\\\$$SVNVERSION: `svnversion || echo exported`\\\$$/"
+SVNVER_EDIT = -e "s/\\\$$SVNVERSION\\(:[^$$]*\\)\\?\\\$$/\\\$$SVNVERSION: `svnversion || echo exported`\\\$$/"
 
 edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
