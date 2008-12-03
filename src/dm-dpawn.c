@@ -538,21 +538,33 @@ P op_toconsole(void)
 }
 
 static P x_op_groupconsole(void) {
-  BOOLEAN stopped;
+  BOOLEAN stopped = FALSE;
+  BOOLEAN aborted = FALSE;
   groupconsole = FALSE;
 
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != BOOL) return OPD_CLA;
-  stopped = BOOL_VAL(o_1);
+  if (BOOL_VAL(o_1)) {
+    if (ATTR(o_1) & STOPMARK)
+      stopped = TRUE;
+    else
+      aborted = TRUE;
+  }
 
   clear_toconsole();
   
-  if (stopped) {
+  if (stopped || aborted) {
     if (CEILexecs < x2) return EXECS_OVF;
     TAG(x1) = OP;
     ATTR(x1) = ACTIVE;
-    OP_NAME(x1) = "stop";
-    OP_CODE(x1) = op_stop;
+    if (stopped) {
+      OP_NAME(x1) = "stop";
+      OP_CODE(x1) = op_stop;
+    }
+    else {
+      OP_NAME(x1) = "abort";
+      OP_CODE(x1) = op_abort;
+    }
     FREEexecs = x2;
   }
   FREEopds = o_1;
@@ -574,7 +586,7 @@ P op_groupconsole(void) {
   OP_CODE(x1) = x_op_groupconsole;
   
   TAG(x2) = BOOL;
-  ATTR(x2) = (STOPMARK | ACTIVE);
+  ATTR(x2) = (STOPMARK | ABORTMARK | ACTIVE);
   BOOL_VAL(x2) = FALSE;
 
   moveframe(o_1, x3);
@@ -631,7 +643,7 @@ void run_dpawn_mill(void) {
 
       case QUIT:
 	fprintf(stderr, "Quitting...\n");
-	exit(EXIT_SUCCESS);  
+	exit(EXIT_SUCCESS);
 	
       default:
 	break;
@@ -657,3 +669,48 @@ void run_dpawn_mill(void) {
     makeerror(retc, errsource);
   }  /* we never return */
 }
+
+static P x_op_done(void) {
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != BOOL) return OPD_CLA;
+
+  FREEopds = o_1;
+  return BOOL_VAL(o1) ? ABORT : DONE;
+}
+
+P recur_dpawn_mill(B* execf) {
+  P retc;
+  B* done;
+
+  if (CEILexecs < x4) return EXECS_OVF;
+  
+  done = x1;
+  TAG(x1) = OP;
+  ATTR(x1) = ACTIVE;
+  OP_NAME(x1) = "x_done";
+  OP_CODE(x1) = x_op_done;
+
+  TAG(x2) = BOOL;
+  ATTR(x2) = (ABORTMARK | ACTIVE);
+  BOOL_VAL(x2) = FALSE;
+
+  moveframe(execf, x3);
+  FREEexecs = x4;
+
+  while (1) {
+    switch (retc = exec(100)) {
+      case DONE:
+	return OK;
+
+      case MORE:
+	if (locked) continue;
+	if (! (retc = nextevent(cmsf))) break;
+	//else fall through to default
+      
+      default:
+	if (FREEexecs > done) FREEexecs = done;
+	return retc;
+    }
+  }
+}
+

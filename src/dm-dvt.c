@@ -190,6 +190,7 @@ P op_abort(void)
   while ((frame -= FRAMEBYTES) >= FLOORexecs) {
     if (ATTR(frame) & ABORTMARK) {
       BOOL_VAL(frame) = TRUE;
+      ATTR(frame) = (ABORTMARK | ACTIVE);
       FREEexecs = frame + FRAMEBYTES;
       return OK;
     }

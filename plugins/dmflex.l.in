@@ -658,7 +658,8 @@ P op_execstream(void) {
   lasthandle = NULL;
   setbufstate(streamstate);
 
-  TAG(o_1) = BOOL; ATTR(o_1) = 0;
+  TAG(o_1) = BOOL; 
+  ATTR(o_1) = 0;
   BOOL_VAL(o_1) = FALSE;
   moveframe(streamstate, o1);
   FREEopds = o2;
@@ -684,10 +685,12 @@ P x_op_execstream(void) {
   }
 
   if (BOOL_VAL(o_2)) {
+    BOOLEAN aborted = (ATTR(o_2) & ABORTMARK);
     DMFLEX_STATE(o_1) = DMFLEX_ERR;
     CLEAR_HANDLE(o_1);
     KILL_OPAQUE();
-    makename((B*)"stop", x1);
+    makename((B*) (aborted ? "abort" : "stop"), x1);
+    ATTR(x1) = ACTIVE;
     FREEexecs = x2;
     FREEopds = o_1;
     return OK;
@@ -709,7 +712,7 @@ P x_op_execstream(void) {
   }
   
   moveframe(o_2, x3); 
-  ATTR(x3) = (STOPMARK | ACTIVE);
+  ATTR(x3) = (STOPMARK | ABORTMARK | ACTIVE);
   moveframe(o_1, x2);
 
   TAG(x1) = OP; 

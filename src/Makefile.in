@@ -129,8 +129,8 @@ libdmglobals_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 libdmnodal_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(builddir)/libdmglobals.la
-am__libdmnodal_la_SOURCES_DIST = dm-vm.c dm-vm.h plugin.h pluginlib.h \
-	cppplugin.h plugin.c
+am__libdmnodal_la_SOURCES_DIST = dm-vm.c dm-vm.h dm-dvt-vm.h plugin.h \
+	pluginlib.h cppplugin.h plugin.c
 am__objects_5 =
 @ENABLE_PLUGINS_SUPPORT_TRUE@am__objects_6 = $(am__objects_5)
 @ENABLE_PLUGINS_SUPPORT_TRUE@am__objects_7 = plugin.lo
@@ -151,7 +151,8 @@ dmprop_OBJECTS = $(am_dmprop_OBJECTS)
 dmprop_LDADD = $(LDADD)
 am__dnode_SOURCES_DIST = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
 	dm-nextevent.c dm-nextevent.h dm3.c dm3.h dm-proc.c dm-proc.h \
-	dm-glob.c dm-glob.h dm-prop.c dm-prop.h dqueen.c dqueen.h
+	dm-glob.c dm-glob.h dm-prop.c dm-prop.h dm-dvt-vm.h dqueen.c \
+	dqueen.h
 am__objects_8 = dnode-dm-nextevent.$(OBJEXT) dnode-dm3.$(OBJEXT) \
 	dnode-dm-proc.$(OBJEXT) dnode-dm-glob.$(OBJEXT) \
 	dnode-dm-prop.$(OBJEXT)
@@ -580,7 +581,7 @@ socksrcs = \
 	dm-nextevent.c dm-nextevent.h \
 	dm3.c dm3.h \
 	dm-proc.c dm-proc.h dm-glob.c dm-glob.h \
-	dm-prop.c dm-prop.h 
+	dm-prop.c dm-prop.h dm-dvt-vm.h 
 
 dvt_SOURCES = dvt.c dvt_0.h dm-dvt.h dm-dvt.c \
 	$(socksrcs)
@@ -630,7 +631,9 @@ libdmglobals_la_SOURCES = $(globsrcs) \
 
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)
-libdmnodal_la_SOURCES = dm-vm.c dm-vm.h $(PLUGIN_HDR) $(PLUGIN_SRC)
+libdmnodal_la_SOURCES = dm-vm.c dm-vm.h dm-dvt-vm.h \
+	$(PLUGIN_HDR) $(PLUGIN_SRC)
+
 libdmnodal_la_LIBADD = $(PLUGIN_LD) \
 	$(builddir)/libdmglobals.la \
 	@VERSION_INFO@ @RELEASE_INFO@

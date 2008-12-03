@@ -3,9 +3,10 @@
 
 #include "dm.h"
 
+#include "dm-dvt-vm.h"
+
 DLL_SCOPE P op_vmresize(void);
 DLL_SCOPE void maketinysetup(void);
-DLL_SCOPE P op_abort(void);
 DLL_SCOPE P op_vmresize_(void);
 DLL_SCOPE P op_lock(void);
 DLL_SCOPE P op_unlock(void);

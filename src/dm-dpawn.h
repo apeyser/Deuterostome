@@ -22,5 +22,7 @@ DLL_SCOPE P op_rsend(void);
 DLL_SCOPE P op_mpirank(void);
 DLL_SCOPE P op_mpisize(void);
 
+DLL_SCOPE P recur_dpawn_mill(B* execf);
+
 
 #endif //DM_DPAWN_H

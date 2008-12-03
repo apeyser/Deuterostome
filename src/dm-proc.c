@@ -13,6 +13,7 @@
 #include "dm3.h"
 #include "dm-proc.h"
 #include "dm-prop.h"
+#include "dm-dvt-vm.h"
 
 // -- | socket pid false
 //    | socket true
@@ -636,8 +637,14 @@ P x_op_lockfd(void) {
   else {
     TAG(x_1) = OP;
     ATTR(x_1) = ACTIVE;
-    OP_NAME(x_1) = "stop";
-    OP_CODE(x_1) = op_stop;
+    if (ATTR(o_1) & STOPMARK) {
+      OP_NAME(x_1) = "stop";
+      OP_CODE(x_1) = op_stop;
+    }
+    else {
+      OP_NAME(x_1) = "abort"; 
+      OP_CODE(x_1) = op_abort;
+    }
   }
   
   FREEopds = o_1;
@@ -657,12 +664,19 @@ P x_op_unlockfd(void) {
       if (errno != EINTR) return -errno;
       if (abortflag) return ABORT;
     }
+
   if (! BOOL_VAL(o_1)) FREEexecs = x_1;
   else {
     TAG(x_1) = OP;
     ATTR(x_1) = ACTIVE;
-    OP_NAME(x_1) = "stop";
-    OP_CODE(x_1) = op_stop;
+    if (ATTR(o_1) & STOPMARK) {
+      OP_NAME(x_1) = "stop";
+      OP_CODE(x_1) = op_stop;
+    }
+    else {
+      OP_NAME(x_1) = "abort"; 
+      OP_CODE(x_1) = op_abort;
+    }
   }
   
   FREEopds = o_1;
@@ -682,6 +696,7 @@ P x_op_trylockfd(void) {
       if (errno != EINTR) return -errno;
       if (abortflag) return ABORT;
     }
+
   if (! BOOL_VAL(o_1)) {
     FREEexecs = x_1;
     BOOL_VAL(o_1) = TRUE;
@@ -690,9 +705,15 @@ P x_op_trylockfd(void) {
   else {
     TAG(x_1) = OP;
     ATTR(x_1) = ACTIVE;
-    OP_NAME(x_1) = "stop";
-    OP_CODE(x_1) = op_stop;
-  
+    if (ATTR(o_1) & STOPMARK) {
+      OP_NAME(x_1) = "stop";
+      OP_CODE(x_1) = op_stop;
+    }
+    else {
+      OP_NAME(x_1) = "abort"; 
+      OP_CODE(x_1) = op_abort;
+    }
+
     FREEopds = o_1;
     return OK;
   }
@@ -722,7 +743,7 @@ P op_lockfd(void) {
   OP_CODE(x2) = x_op_lockfd;
 
   TAG(x3) = BOOL;
-  ATTR(x3) = (STOPMARK|ACTIVE);
+  ATTR(x3) = (STOPMARK|ABORTMARK|ACTIVE);
   BOOL_VAL(x3) = FALSE;
 
   moveframe(o_2, x4);
@@ -756,7 +777,7 @@ P op_unlockfd(void) {
   OP_CODE(x2) = x_op_unlockfd;
 
   TAG(x3) = BOOL;
-  ATTR(x3) = (STOPMARK|ACTIVE);
+  ATTR(x3) = (STOPMARK|ABORTMARK|ACTIVE);
   BOOL_VAL(x3) = FALSE;
 
   moveframe(o_2, x4);
@@ -801,7 +822,7 @@ P op_trylockfd(void) {
   OP_CODE(x2) = x_op_trylockfd;
 
   TAG(x3) = BOOL;
-  ATTR(x3) = (STOPMARK|ACTIVE);
+  ATTR(x3) = (STOPMARK|ABORTMARK|ACTIVE);
   BOOL_VAL(x3) = FALSE;
 
   moveframe(o_2, x4);

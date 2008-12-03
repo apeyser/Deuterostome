@@ -56,7 +56,8 @@ P op_throw(void) {
         }
 
         if ((TAG(x1) == OP) && (OP_NAME(x1) == x_op_thrown_name)) {
-            TAG(o1) = BOOL; ATTR(o1) = 0;
+            TAG(o1) = BOOL; 
+	    ATTR(o1) = 0;
             BOOL_VAL(o1) = TRUE;
             FREEopds = o2;
             return OK;
@@ -72,7 +73,8 @@ P op_throw(void) {
 P x_op_thrown(void) {
 	if (o2 > CEILopds) return OPDS_OVF;
 
-	TAG(o1) = BOOL; ATTR(o1) = 0;
+	TAG(o1) = BOOL; 
+	ATTR(o1) = 0;
 	BOOL_VAL(o1) = FALSE;
 	FREEopds = o2;
 

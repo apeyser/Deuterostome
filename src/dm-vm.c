@@ -142,8 +142,14 @@ static P x_op_lock(void) {
   else {
     TAG(x_1) = OP;
     ATTR(x_1) = ACTIVE;
-    OP_NAME(x_1) = "stop"; 
-    OP_CODE(x_1) = op_stop;
+    if (ATTR(o_1) & STOPMARK) {
+      OP_NAME(x_1) = "stop"; 
+      OP_CODE(x_1) = op_stop;
+    }
+    else {
+      OP_NAME(x_1) = "abort"; 
+      OP_CODE(x_1) = op_abort;
+    }
   }
   FREEopds = o_1;
   return OK;
@@ -165,7 +171,7 @@ P op_lock(void) {
   OP_CODE(x2) = x_op_lock;
 
   TAG(x3) = BOOL; 
-  ATTR(x3) = (STOPMARK | ACTIVE);
+  ATTR(x3) = (STOPMARK | ABORTMARK | ACTIVE);
   BOOL_VAL(x3) = FALSE;
 
   moveframe(o_1, x4);
@@ -192,7 +198,7 @@ P op_unlock(void) {
   OP_CODE(x2) = x_op_lock;
 
   TAG(x3) = BOOL; 
-  ATTR(x3) = (STOPMARK | ACTIVE);
+  ATTR(x3) = (STOPMARK | ABORTMARK | ACTIVE);
   BOOL_VAL(x3) = FALSE;
 
   moveframe(o_1, x4);
@@ -213,9 +219,16 @@ static P x_op_serialize(void) {
   serialized = BOOL_VAL(x_1);
   if (! BOOL_VAL(o_1)) FREEexecs = x_1;
   else {
-    TAG(x_1) = OP; ATTR(x_1) = ACTIVE;
-    OP_NAME(x_1) = "stop"; 
-    OP_CODE(x_1) = op_stop;
+    TAG(x_1) = OP; 
+    ATTR(x_1) = ACTIVE;
+    if (ATTR(o_1) & STOPMARK) {
+      OP_NAME(x_1) = "stop"; 
+      OP_CODE(x_1) = op_stop;
+    }
+    else {
+      OP_NAME(x_1) = "abort"; 
+      OP_CODE(x_1) = op_abort;
+    }
   }
   FREEopds = o_1;
   return OK;
@@ -234,7 +247,7 @@ P op_serialize(void) {
   OP_NAME(x2) = "x_serialize"; 
   OP_CODE(x2) = x_op_serialize;
 
-  TAG(x3) = BOOL; ATTR(x3) = (STOPMARK | ACTIVE);
+  TAG(x3) = BOOL; ATTR(x3) = (STOPMARK | ABORTMARK | ACTIVE);
   BOOL_VAL(x3) = FALSE;
 
   moveframe(o_1, x4);
@@ -278,8 +291,14 @@ static P x_op_halt_stop(void) {
   else {
     TAG(x_2) = OP;
     ATTR(x_2) = ACTIVE;
-    OP_NAME(x_2) = "stop";
-    OP_CODE(x_2) = op_stop;
+    if (ATTR(o_1) & STOPMARK) {
+      OP_NAME(x_2) = "stop";
+      OP_CODE(x_2) = op_stop;
+    }
+    else {
+      OP_NAME(x_2) = "abort"; 
+      OP_CODE(x_2) = op_abort;
+    }
     FREEexecs = x_1;
   }
   FREEopds = o_1;
@@ -304,7 +323,7 @@ P op_halt(void)
   OP_CODE(x3) = x_op_halt_stop;
 
   TAG(x4) = BOOL;
-  ATTR(x4) = (STOPMARK|ACTIVE);
+  ATTR(x4) = (STOPMARK|ABORTMARK|ACTIVE);
   BOOL_VAL(x4) = FALSE;
 
   TAG(x5) = OP;
@@ -366,6 +385,7 @@ P op_abort(void)
   while ((frame -= FRAMEBYTES) >= FLOORexecs) {
     if (ATTR(frame) & ABORTMARK) {
       BOOL_VAL(frame) = TRUE;
+      ATTR(frame) = (ABORTMARK | ACTIVE);
       FREEexecs = frame + FRAMEBYTES;
       return OK;
     }

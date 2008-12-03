@@ -358,7 +358,7 @@ P op_exit(void)
   frame = FREEexecs;
   while ((frame -= FRAMEBYTES) >= FLOORexecs) {
     if ((m = ATTR(frame) & XMARK))  {
-      if (m == EXITMARK) { 
+      if (m & EXITMARK) {
         FREEexecs = frame; 
         return OK; 
       }
@@ -382,12 +382,13 @@ P op_stop(void)
   frame = FREEexecs;
   while ((frame -= FRAMEBYTES) >= FLOORexecs) {
     if ((m = ATTR(frame) & XMARK)) {
-      if (m == STOPMARK) { 
-        BOOL_VAL(frame) = TRUE; 
+      if (m & STOPMARK) { 
+        BOOL_VAL(frame) = TRUE;
+	ATTR(frame) = (STOPMARK | ACTIVE);
         FREEexecs = frame + FRAMEBYTES; 
         return OK; 
       }
-      else if (m == ABORTMARK) return INV_STOP;
+      else if (m & ABORTMARK) return INV_STOP;
     }
   }
 
@@ -407,7 +408,7 @@ P op_stopped(void)
   if ((ATTR(o_1) & ACTIVE) == 0) return OPD_ATR;
   if (x3 > CEILexecs) return EXECS_OVF;
   TAG(x1) = BOOL; 
-  ATTR(x1) = STOPMARK;
+  ATTR(x1) = (STOPMARK | ACTIVE);
   BOOL_VAL(x1) = FALSE;
   moveframe(o_1, x2); 
   FREEexecs = x3;

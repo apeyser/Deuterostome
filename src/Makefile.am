@@ -125,7 +125,7 @@ socksrcs = \
 	dm-nextevent.c dm-nextevent.h \
 	dm3.c dm3.h \
 	dm-proc.c dm-proc.h dm-glob.c dm-glob.h \
-	dm-prop.c dm-prop.h 
+	dm-prop.c dm-prop.h dm-dvt-vm.h 
 
 dvt_SOURCES = dvt.c dvt_0.h dm-dvt.h dm-dvt.c \
 	$(socksrcs)
@@ -176,7 +176,8 @@ libdmglobals_la_SOURCES = $(globsrcs) \
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 libdmglobals_la_CFLAGS = $(AM_CFLAGS)
 
-libdmnodal_la_SOURCES = dm-vm.c dm-vm.h $(PLUGIN_HDR) $(PLUGIN_SRC)
+libdmnodal_la_SOURCES = dm-vm.c dm-vm.h dm-dvt-vm.h \
+	$(PLUGIN_HDR) $(PLUGIN_SRC)
 libdmnodal_la_LIBADD = $(PLUGIN_LD) \
 	$(builddir)/libdmglobals.la \
 	@VERSION_INFO@ @RELEASE_INFO@
