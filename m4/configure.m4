@@ -576,7 +576,12 @@ AC_DEFUN([CF_SVNVERSION], [dnl
   MAKE_SVNVERSION_M4=".m4.svnversion.make"
 
   CF_INSERT([$MAKE_SVNVERSION], 
-[am__CONFIG_DISTCLEAN_FILES += $MAKE_SVNVERSION $MAKE_SVNVERSION_M4
+[.PHONY: svnversion
+
+svnversion:
+	./config.status --recheck && ./config.status
+
+am__CONFIG_DISTCLEAN_FILES += $MAKE_SVNVERSION $MAKE_SVNVERSION_M4
 am__aclocal_m4_deps += m4/svnversion.m4])
 
   if test "$USE_MAINTAINER_MODE" = yes ; then
@@ -585,10 +590,11 @@ am__aclocal_m4_deps += m4/svnversion.m4])
 	if svn=\`svnversion 2>/dev/null\` \\
 	   && test -n "\$\$svn" \\
 	   && test "\$\$svn" != "exported" ; then \\
-	   echo "SVNVERSION=\$\$svn" >"\[$]@" ; \\
+	   echo "SVNVERSION=\$\$svn" >"\$][@" ; \\
 	else \\
-	   echo "SVNVERSION=unknown" >"\[$]@" ; \\
-	fi])
+	   echo "SVNVERSION=unknown" >"\$][@" ; \\
+	fi
+	\$(MAKE) \$(AM_MAKEFLAGS) svnversion])
   else
     CF_APPEND([$MAKE_SVNVERSION], [.PHONY: m4/svnversion.m4])
   fi
@@ -599,9 +605,9 @@ am__aclocal_m4_deps += m4/svnversion.m4])
 	if svn=\`svnversion 2>/dev/null\` \\
 	   && test -n "\$\$svn" \\
 	   && test "\$\$svn" != "exported" ; then \\
-	   echo "SVNVERSION=\$\$svn" >"\[$]@" ; \\
+	   echo "SVNVERSION=\$\$svn" >"\$][@" ; \\
 	else \\
-	   echo "SVNVERSION=unknown" >"\[$]@" ; \\
+	   echo "SVNVERSION=unknown" >"\$][@" ; \\
 	fi
 ])
   else
