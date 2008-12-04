@@ -51,7 +51,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/mempcpy.m4 $(top_srcdir)/m4/onceonly.m4 \
 	$(top_srcdir)/m4/string_h.m4 $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/m4/basic-defs.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/basic-defs.m4 $(top_srcdir)/m4/svnversion.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
@@ -849,6 +850,7 @@ uninstall-am:
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags tags-recursive uninstall uninstall-am
 
+@MAKE_SVNVERSION@
 #--disable-process
 
 gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild:

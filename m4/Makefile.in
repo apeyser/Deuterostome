@@ -50,7 +50,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/mempcpy.m4 $(top_srcdir)/m4/onceonly.m4 \
 	$(top_srcdir)/m4/string_h.m4 $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/m4/basic-defs.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/basic-defs.m4 $(top_srcdir)/m4/svnversion.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -71,7 +72,7 @@ am__dist_noinst_DATA_DIST = acx_pthread.m4 \
 	ax_cflags_strict_prototypes.m4 ax_prefix_config_h.m4 \
 	configure.m4 lf_x11.m4 cf_atlas.m4 lib_socket_nsl.m4 \
 	plugin-config.m4 basic-defs.m4 cf_petsc.m4 cf_mpi.m4 \
-	ax_set_version_info.m4 petsc.make
+	ax_set_version_info.m4 petsc.make svnversion.m4
 DATA = $(dist_m4data_DATA) $(dist_noinst_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 pkgdatadir = @pkgdatadir@
@@ -373,7 +374,8 @@ dist_noinst_DATA = acx_pthread.m4 ax_cflags_strict_prototypes.m4 \
 	cf_petsc.m4 \
 	cf_mpi.m4 \
 	ax_set_version_info.m4 \
-	petsc.make
+	petsc.make \
+	svnversion.m4
 
 EXTRA_DIST = gnulib-cache.m4 dirfd.m4 d-type.m4 extensions.m4 fnmatch.m4 glob.m4 gnulib-common.m4 gnulib-comp.m4 gnulib-tool.m4 libtool.m4 onceonly.m4
 all: all-am
@@ -563,6 +565,8 @@ uninstall-am: uninstall-dist_m4dataDATA
 	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
 	ps ps-am uninstall uninstall-am uninstall-dist_m4dataDATA
 
+
+@MAKE_SVNVERSION_M4@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -34,6 +34,7 @@ SUBDIRS = libltdl lib src plugins $(BASH_DIR) ps \
 	$(EMACS_DIR) dcode test \
 	m4
 ACLOCAL_AMFLAGS = -I m4
+@MAKE_SVNVERSION@
 DISTCHECK_CONFIGURE_FLAGS = --enable-plugins --enable-daemon
 #--disable-process
 
@@ -73,4 +74,3 @@ gencode-all: gencode all
 gencode: 
 	cd libltdl && $(MAKE) $(AM_MAKEFLAGS) all
 	cd src && $(MAKE) $(AM_MAKEFLAGS) gencode
-

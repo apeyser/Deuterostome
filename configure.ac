@@ -82,7 +82,8 @@ AC_PROG_CC_STDC
 AC_C_CONST
 AC_C_RESTRICT
 CF_C_INLINE
-CF_BASIC_DEFS()
+CF_BASIC_DEFS
+CF_SVNVERSION
 
 CF_AC_ENABLE([plugins-support], [compile or install plugin support], [yes])
 CF_AM_ENABLE([plugins], [compile or install plugins], [yes])

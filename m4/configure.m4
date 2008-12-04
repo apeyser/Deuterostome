@@ -536,7 +536,19 @@ AC_DEFUN([CF_BASIC_DEFS], [
     fi
   fi
   AC_SUBST([NAMEBYTES])
+])
 
+AC_DEFUN([CF_INSERT_], [[cat $1"$2" <<EOF
+$3
+EOF
+]])
+
+AC_DEFUN([CF_INSERT], [CF_INSERT_([>], [$1], [$2])])
+AC_DEFUN([CF_APPEND], [CF_INSERT_([>>], [$1], [$2])])
+
+AC_DEFUN([CF_SVNVERSION], [dnl
+  m4_sinclude([m4/svnversion.m4])
+  [test -z "$SVNVERSION" && SVNVERSION='unknown']
   AC_MSG_CHECKING([for SVNVERSION value])
   if test $USE_MAINTAINER_MODE != yes; then
      AC_MSG_RESULT([SVNVERSION = $SVNVERSION])
@@ -548,14 +560,52 @@ AC_DEFUN([CF_BASIC_DEFS], [
     else
       AC_MSG_RESULT([changed, SVNVERSION = $SVNVERSION, SVNVERSION_NEW = $cf_basic_defs_svnversion])
       [SVNVERSION="$cf_basic_defs_svnversion"]
-      AC_MSG_CHECKING([Updating "$srcdir"/m4/basic-defs.m4])
-      if echo "[[SVNVERSION=$SVNVERSION]]" >> "$srcdir"/m4/basic-defs.m4
+      AC_MSG_CHECKING([Updating m4/svnversion.m4])
+      if echo "[[SVNVERSION=$SVNVERSION]]" > m4/svnversion.m4
       then
         AC_MSG_RESULT([successful])
       else
         AC_MSG_ERROR([failed])
       fi
     fi
+  fi
+
+  AC_SUBST_FILE([MAKE_SVNVERSION])
+  AC_SUBST_FILE([MAKE_SVNVERSION_M4]) dnl
+  MAKE_SVNVERSION=".svnversion.make"
+  MAKE_SVNVERSION_M4=".m4.svnversion.make"
+
+  CF_INSERT([$MAKE_SVNVERSION], 
+[am__CONFIG_DISTCLEAN_FILES += $MAKE_SVNVERSION $MAKE_SVNVERSION_M4
+am__aclocal_m4_deps += m4/svnversion.m4])
+
+  if test "$USE_MAINTAINER_MODE" = yes ; then
+    CF_APPEND([$MAKE_SVNVERSION], 
+[m4/svnversion.m4:
+	if svn=\`svnversion 2>/dev/null\` \\
+	   && test -n "\$\$svn" \\
+	   && test "\$\$svn" != "exported" ; then \\
+	   echo "SVNVERSION=\$\$svn" >"\[$]@" ; \\
+	else \\
+	   echo "SVNVERSION=unknown" >"\[$]@" ; \\
+	fi])
+  else
+    CF_APPEND([$MAKE_SVNVERSION], [.PHONY: m4/svnversion.m4])
+  fi
+  CF_APPEND([$MAKE_SVNVERSION], [])
+
+  if test "$USE_MAINTAINER_MODE" = yes ; then
+    CF_INSERT([$MAKE_SVNVERSION_M4], [svnversion.m4:
+	if svn=\`svnversion 2>/dev/null\` \\
+	   && test -n "\$\$svn" \\
+	   && test "\$\$svn" != "exported" ; then \\
+	   echo "SVNVERSION=\$\$svn" >"\[$]@" ; \\
+	else \\
+	   echo "SVNVERSION=unknown" >"\[$]@" ; \\
+	fi
+])
+  else
+    CF_INSERT([$MAKE_MAINTAINER_MODE], [.PHONY: svnversion.m4])
   fi
   AC_SUBST([SVNVERSION])dnl
 ])

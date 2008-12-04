@@ -13,6 +13,9 @@ dist_noinst_DATA = acx_pthread.m4 ax_cflags_strict_prototypes.m4 \
 	cf_petsc.m4 \
 	cf_mpi.m4 \
 	ax_set_version_info.m4 \
-	petsc.make
+	petsc.make \
+	svnversion.m4
 
 EXTRA_DIST = gnulib-cache.m4 dirfd.m4 d-type.m4 extensions.m4 fnmatch.m4 glob.m4 gnulib-common.m4 gnulib-comp.m4 gnulib-tool.m4 libtool.m4 onceonly.m4
+
+@MAKE_SVNVERSION_M4@
