@@ -7304,7 +7304,7 @@ echo "$as_me: error: failed" >&2;}
     fi
   fi
 
-  SVNVERSION=1613:1614M
+  SVNVERSION=1615M
 
   test -z "$SVNVERSION" && SVNVERSION='unknown'
   { echo "$as_me:$LINENO: checking for SVNVERSION value" >&5
