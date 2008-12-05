@@ -130,57 +130,59 @@ edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 			$(REGEX_DELETE) \
 			$(PETSC_EDIT) 
 
-theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in
+theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/theeye.d.in >$@.tmp
 	mv $@.tmp $@
 
-dnode.d: $(srcdir)/Makefile $(srcdir)/dnode.d.in
+dnode.d: $(srcdir)/Makefile $(srcdir)/dnode.d.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/dnode.d.in >$@.tmp
 	mv $@.tmp $@
 
-dvt_macros.d: $(srcdir)/Makefile $(srcdir)/dvt_macros.d.in 
+dvt_macros.d: $(srcdir)/Makefile $(srcdir)/dvt_macros.d.in  @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/dvt_macros.d.in >$@.tmp
 	mv $@.tmp $@
 
-startup_dvt.d: $(srcdir)/Makefile $(srcdir)/startup_dvt.d.in 
+startup_dvt.d: $(srcdir)/Makefile $(srcdir)/startup_dvt.d.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/startup_dvt.d.in >$@.tmp
 	mv $@.tmp $@
 
-startup_dnode.d: $(srcdir)/Makefile $(srcdir)/startup_dnode.d.in 
+startup_dnode.d: $(srcdir)/Makefile $(srcdir)/startup_dnode.d.in  @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/startup_dnode.d.in >$@.tmp
 	mv $@.tmp $@
 
-startup_dpawn.d: $(srcdir)/Makefile $(srcdir)/startup_dpawn.d.in 
+startup_dpawn.d: $(srcdir)/Makefile $(srcdir)/startup_dpawn.d.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/startup_dpawn.d.in >$@.tmp
 	mv $@.tmp $@
 
-startup_dgen.d: $(srcdir)/Makefile $(srcdir)/startup_dgen.d.in 
+startup_dgen.d: $(srcdir)/Makefile $(srcdir)/startup_dgen.d.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/startup_dgen.d.in >$@.tmp
 	mv $@.tmp $@
 
-startup_common.d: $(srcdir)/Makefile $(srcdir)/startup_common.d.in 
+startup_common.d: $(srcdir)/Makefile $(srcdir)/startup_common.d.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/startup_common.d.in >$@.tmp
 	mv $@.tmp $@
 
-startup_libs.d: $(srcdir)/Makefile $(srcdir)/startup_libs.d.in 
+startup_libs.d: $(srcdir)/Makefile $(srcdir)/startup_libs.d.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/startup_libs.d.in >$@.tmp
 	mv $@.tmp $@
 
-matrix.d: $(srcdir)/Makefile $(srcdir)/matrix.d.in
+matrix.d: $(srcdir)/Makefile $(srcdir)/matrix.d.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/matrix.d.in >$@.tmp
 	mv $@.tmp $@
 
-new-plugin.d: $(srcdir)/Makefile $(srcdir)/new-plugin.d.in
+new-plugin.d: $(srcdir)/Makefile $(srcdir)/new-plugin.d.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/new-plugin.d.in >$@.tmp
 	mv $@.tmp $@
+
+@MAKE_SVNVERSION_TOP@

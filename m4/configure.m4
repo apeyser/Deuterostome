@@ -1,7 +1,7 @@
 AC_DEFUN([CF_AC_CHECK_HEADER], [AC_CHECK_HEADER([$1], [], [dnl
   AC_MSG_ERROR([Header $1 not found])])dnl
-])
-
+]) dnl
+dnl
 AC_DEFUN([CF_AC_CHECK_HEADERS], [dnl
   for cf_ac_hdr in $1 ; do
       AC_CHECK_HEADER($cf_ac_hdr, [cf_ac_hdr_fnd=yes ; break], [])
@@ -15,9 +15,9 @@ AC_DEFUN([CF_AC_CHECK_HEADERS], [dnl
     fi
   else
     AC_DEFINE_UNQUOTED([$2], [<$cf_ac_hdr>], [$3])dnl
-  fi
-])
-
+  fi dnl
+])dnl
+dnl
 AC_DEFUN([CF_AC_CHECK_SIZEOF], [dnl
   AC_CHECK_SIZEOF([$1], [0], [$3])dnl
   changequote(<<, >>)dnl
@@ -29,8 +29,8 @@ AC_DEFUN([CF_AC_CHECK_SIZEOF], [dnl
     AC_MSG_ERROR([sizeof($1) = $AC_CV_NAME, must be $2])
   fi
   undefine([AC_CV_NAME])dnl
-])
-
+])dnl
+dnl
 dnl
 dnl CF_AC_COMP_SIZEOF([syma], [symb], [headersa], [headersb])
 dnl
@@ -57,9 +57,8 @@ dnl
 dnl
   undefine([AC_CV_NAMEA])dnl
   undefine([AC_CV_NAMEB])dnl
-])
-
-
+])dnl
+dnl
 dnl
 dnl CF_DEF_TARGET([target-pattern], [var-to-define])
 dnl wildcard matches target-pattern to target, and if matches, var is defined
@@ -74,24 +73,24 @@ AC_DEFUN([CF_DEF_TARGET], [dnl
     *)
         AC_MSG_RESULT([no, not defining $2]);;
   esac dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_ON_TARGET], [dnl
   case "$target" in
     $1) $2;;
     *)  $3;;
   esac dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_CLEAR_DEF], [dnl
   if test "${$1-set}" == set ; then 
      $1=""
      cf_cleared_$1=:
   else
      cf_cleared_$1=false 
-  fi
-])
-
+  fi dnl
+])dnl
+dnl
 AC_DEFUN([CF_IF_UNDEF], [dnl
   AC_MSG_CHECKING([if $1 is set])
   if test "${$1-set}" == set \
@@ -102,22 +101,22 @@ AC_DEFUN([CF_IF_UNDEF], [dnl
     $2
   else
     AC_MSG_RESULT([yes, `${$1}'])
-  fi
-])
-
+  fi dnl
+])dnl
+dnl
 AC_DEFUN([CF_GCC_COMPILER_OPTION], [dnl
   AC_REQUIRE([AC_PROG_CC])dnl
   AC_REQUIRE([AC_PROG_LIBTOOL])dnl
-  CF_GCC_COMPILER_OPTION_INT([$1], [GCC], [C], ifelse([$2],[],[CFLAGS],[$2]))
-])
-
+  CF_GCC_COMPILER_OPTION_INT([$1], [GCC], [C], ifelse([$2],[],[CFLAGS],[$2]))dnl
+])dnl
+dnl
 AC_DEFUN([CF_GXX_COMPILER_OPTION], [dnl
   AC_REQUIRE([AC_PROG_CXX])dnl
   AC_REQUIRE([AC_PROG_LIBTOOL])dnl
-  CF_GCC_COMPILER_OPTION_INT([$1], [GXX], [C++], ifelse([$2],[],[CXXFLAGS],[$2]))
-])
-
-AC_DEFUN([CF_GCC_COMPILER_OPTION_INT], [
+  CF_GCC_COMPILER_OPTION_INT([$1], [GXX], [C++], ifelse([$2],[],[CXXFLAGS],[$2]))dnl
+])dnl
+dnl
+AC_DEFUN([CF_GCC_COMPILER_OPTION_INT], [dnl
   AC_SUBST([$4])dnl
   if test "x$$2" == "xyes" ; then
     AC_REQUIRE([LT_AC_PROG_SED])dnl
@@ -146,7 +145,7 @@ AC_DEFUN([CF_GCC_COMPILER_OPTION_INT], [
       fi
     fi
     $rm conftest*
- 
+ dnl
     if test x"$CF_GCO_S" = xyes ; then
         AC_MSG_RESULT([Adding])
         $4="$$4 $1"
@@ -155,8 +154,8 @@ AC_DEFUN([CF_GCC_COMPILER_OPTION_INT], [
     fi
     AC_LANG_POP($3)
   fi dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_AC_ARG_VAR], [dnl
   changequote(<<, >>)dnl
   define(<<CF_AC_CV_ARG>>, translit($1, [a-z], [A-Z]))dnl
@@ -168,8 +167,8 @@ AC_DEFUN([CF_AC_ARG_VAR], [dnl
   AC_SUBST($1)dnl
   AC_DEFINE_UNQUOTED(CF_AC_CV_ARG, [${$1}], [$2])
   AC_MSG_RESULT([setting to ${$1}])dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_AC_ARG_VAR_SUBST], [dnl
   changequote(<<, >>)dnl
   define(<<CF_AC_CV_ARG>>, translit($1, [a-z], [A-Z]))dnl
@@ -180,8 +179,8 @@ AC_DEFUN([CF_AC_ARG_VAR_SUBST], [dnl
   if test "${CF_AC_CV_ARG-set}" == set ; then $1="$3"; fi
   CF_AC_SUBST([$1])dnl
   AC_MSG_RESULT([setting to ${$1}])dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_AC_ARG_VAR_SUBST_EVAL], [dnl
   changequote(<<, >>)dnl
   define(<<CF_AC_CV_ARG>>, translit($1, [a-z], [A-Z]))dnl
@@ -192,8 +191,8 @@ AC_DEFUN([CF_AC_ARG_VAR_SUBST_EVAL], [dnl
   if test "${CF_AC_CV_ARG-set}" == set ; then $1="$3"; fi
   CF_AC_SUBST_EVAL([$1])
   AC_MSG_RESULT([setting to ${$1}])dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_AC_ARG_VAR_QUOTE], [dnl
   changequote(<<, >>)dnl
   define(<<CF_AC_CV_ARG>>, translit($1, [a-z], [A-Z]))dnl
@@ -210,8 +209,8 @@ AC_DEFUN([CF_AC_ARG_VAR_QUOTE], [dnl
   AC_SUBST($1)dnl
   AC_DEFINE_UNQUOTED(CF_AC_CV_ARG, ["${$1}"], [$2])dnl
   AC_MSG_RESULT([setting to ${$1}])dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_AC_ARG_DIR], [dnl
   changequote(<<, >>)dnl
   define(<<CF_AC_CV_DIR>>, translit($1, [a-z], [A-Z]))dnl
@@ -226,8 +225,8 @@ AC_DEFUN([CF_AC_ARG_DIR], [dnl
   fi
   AC_SUBST([$1])dnl
   AC_MSG_RESULT([setting to ${$1}])dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_WIN_DLL_IMPORT], [dnl
   AC_REQUIRE([AC_CANONICAL_SYSTEM])dnl
   case "$host" in
@@ -239,34 +238,33 @@ AC_DEFUN([CF_WIN_DLL_IMPORT], [dnl
       ;;
   esac
   AC_SUBST(LIB$1_DLL_IMPORT)dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_SET_TOP_DIR], [dnl
   for top_builddir in . .. ../.. $ac_auxdir $ac_auxdir/.. ; do
     test -f $top_builddir/configure && break
-  done
-  echo $ac_auxdir dnl
-])
-
+  done dnl
+])dnl
+dnl
 AC_DEFUN([CF_PREPEND_VARS], [dnl
   for cf_prepend_var in $2 ; do
     eval $1="\"\$$cf_prepend_var \$$1\""
   done
   AC_SUBST($1)dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_SAVE_VAR], [dnl
   cf_save_var_$1="$$1" dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_UNSAVE_VAR], [dnl
   $1="$cf_save_var_$1" dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_AM_CONDITIONAL], [dnl
   AM_CONDITIONAL([ENABLE_$1], [$2]) dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_AM_ENABLE_DO], [dnl
   if test "${enable_$4-set}" == set ; then enable_$4='$3'; fi
   if test x"${enable_$4}" == x"yes" ; then enable_$4='$6'; fi
@@ -277,8 +275,8 @@ AC_DEFUN([CF_AM_ENABLE_DO], [dnl
   else
     AC_MSG_RESULT([yes, enabled (${enable_$4})])
   fi dnl
-])
-
+])dnl
+dnl
 dnl $1 = feauture
 dnl $2 = comment
 dnl $3 = default
@@ -292,8 +290,8 @@ AC_DEFUN([CF_AM_ENABLE], [dnl
   changequote([, ])dnl
   CF_AM_ENABLE_DO([$1], [$2], [$3], CF_AM_CVS_ENABLE, CF_AM_CV_ENABLE, 
     ifelse([$4], , [[$3]], [[$4]]))dnl
-])
-
+])dnl
+dnl
 # $1 = headers
 # $2 = prefix
 # $3 = numeric symbols
@@ -325,25 +323,24 @@ AC_DEFUN([CF_AC_CHECK_SYM], [dnl
     AC_MSG_RESULT([not defined, defining ]CF_AC_CHECK_SYM_DEF[ as ]dnl
 ifelse([$5], , [0], [$5]))
   fi dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_AC_DEFINE_IF_ENABLED_DEFINE], [dnl
   case "${enable_$2-no}" in
     yes) cf_ac_define_if_enabled_define=1 ;;
 	*) cf_ac_define_if_enabled_define="${enable_$2-no}" ;;
   esac
-  dnl
+dnl
   if test "${cf_ac_define_if_enabled_define}" != "no" ; then
     AC_DEFINE_UNQUOTED([ENABLE_$1], [${cf_ac_define_if_enabled_define}], [$3])
-  fi
-  dnl
-])
-
+  fi dnl
+])dnl
+dnl
 AC_DEFUN([CF_AC_DEFINE_IF_ENABLED_SUBST], [dnl
   AC_SUBST([ENABLE_$1])
-  ENABLE_$1="${enable_$2-no}"
-])
-
+  ENABLE_$1="${enable_$2-no}" dnl
+])dnl
+dnl
 AC_DEFUN([CF_AC_DEFINE_IF_ENABLED], [dnl
   changequote(<<, >>)dnl
   define(<<CF_AC_DEFINE_IF_ENABLED_CV>>, 
@@ -355,19 +352,19 @@ AC_DEFUN([CF_AC_DEFINE_IF_ENABLED], [dnl
     CF_AC_DEFINE_IF_ENABLED_CVS, [$2])
   ])
   CF_AC_DEFINE_IF_ENABLED_SUBST(CF_AC_DEFINE_IF_ENABLED_CV, 
-    CF_AC_DEFINE_IF_ENABLED_CVS)
+    CF_AC_DEFINE_IF_ENABLED_CVS)dnl
 ])
-
+dnl
 dnl $1 = feauture
 dnl $2 = comment
 dnl $3 = default
 dnl $4 = value if value passed is yes (defaults to $3)
 AC_DEFUN([CF_AC_ENABLE], [dnl
   CF_AM_ENABLE([$1], [$2], [$3], [$4])
-  CF_AC_DEFINE_IF_ENABLED([$1], [$2])
-])
-
-AC_DEFUN([CF_IF_ENABLED_DO], [
+  CF_AC_DEFINE_IF_ENABLED([$1], [$2])dnl
+])dnl
+dnl
+AC_DEFUN([CF_IF_ENABLED_DO], [dnl
   ifelse([$2],[],,[dnl
     if test x"${enable_$1-no}" != x"no" ; then 
        $2 
@@ -378,26 +375,26 @@ AC_DEFUN([CF_IF_ENABLED_DO], [
       $3 
     fi
   ])dnl
-])
-
-# $1 = feature
-# $2 = if enabled != no (and not empty)
-# $3 = if enabled == no (or is empty)
+])dnl
+dnl
+dnl $1 = feature
+dnl $2 = if enabled != no (and not empty)
+dnl $3 = if enabled == no (or is empty)
 AC_DEFUN([CF_IF_ENABLED], [dnl
   changequote(<<, >>)dnl
   define(<<CF_IF_ENABLED_CVS>>, patsubst($1, <<->>, <<_>>))dnl
   changequote([, ])dnl
   CF_IF_ENABLED_DO(CF_IF_ENABLED_CVS, [$2], [$3])
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_AM_PROG], [dnl
   AC_CHECK_PROG([ENABLE_$1], [$2], [$as_dir/$ac_word$ac_exec_ext], [$4], [$3])
   if test -n "$ENABLE_$1" ; then
     AC_DEFINE_UNQUOTED([ENABLE_$1], ["${ENABLE_$1}"], [Path to $1])
   fi
-  AM_CONDITIONAL([ENABLE_$1], [test "${ENABLE_$1+set}" = set]) dnl
-])
-
+  AM_CONDITIONAL([ENABLE_$1], [test "${ENABLE_$1+set}" = set])dnl
+])dnl
+dnl
 AC_DEFUN([CF_EMACS_ENABLED], [dnl
   AC_REQUIRE([AM_PATH_LISPDIR])
   AC_MSG_CHECKING([if emacs is enabled (\$EMACS != no)])
@@ -408,25 +405,25 @@ AC_DEFUN([CF_EMACS_ENABLED], [dnl
     CF_AM_CONDITIONAL([EMACS], [:])
     AC_MSG_RESULT([emacs enabled])
   fi dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_SET_EXPR], [dnl
   AC_SUBST([$1])
   $1=`expr $2` dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_SUBST_DEFINE], [dnl
   AC_DEFINE([$1], [$2], [$3])
   AC_SUBST([$1])
   $1='ifelse([$4], ,[$2],[$4])'dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_SUBST_DEFINE_UNQUOTED], [dnl
   AC_DEFINE_UNQUOTED([$1], [$2], [$3])
   AC_SUBST([$1])
   $1="ifelse([$4], ,[$2],[$4])" dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_AC_PATH_XTRA], [dnl
   AC_REQUIRE([AC_PATH_XTRA])
   if test x"$no_x" == xyes ; then
@@ -437,9 +434,9 @@ AC_DEFUN([CF_AC_PATH_XTRA], [dnl
     X_LDFLAGS='$(X_LIBS) $(X_PRE_LIBS) -lX11 $(X_EXTRA_LIBS)'
   fi
   AC_SUBST(X_DISPLAY_MISSING) 
-  AC_SUBST(X_LDFLAGS) dnl
-])
-
+  AC_SUBST(X_LDFLAGS)dnl
+])dnl
+dnl
 AC_DEFUN([CF_ACX_PTHREAD], [dnl
   case x"$cf_acx_pthread_check" in
     x)
@@ -465,23 +462,24 @@ AC_DEFUN([CF_ACX_PTHREAD], [dnl
       	cf_acx_pthread_check="no"
       ])
       ;;
-      
+dnl      
     xyes)
       AC_MSG_CHECKING([flags for pthreads])
       AC_MSG_RESULT([found(cached)])
       ;;
-
+dnl
     xno)
       AC_MSG_CHECKING([flags for pthreads])
       AC_MSG_WARN([No threads found(cached)])
       ;;
+dnl
     *)
       AC_MSG_CHECKING([flags for pthreads])
       AC_MSG_ERROR([Internal error in caching ($cf_acx_pthread_check)])
       ;;
-  esac
-])
-
+  esac dnl
+])dnl
+dnl
 AC_DEFUN([CF_ACX_PTHREAD_REQUIRE], [dnl
   CF_ACX_PTHREAD()
   AC_MSG_CHECKING([Checking if required pthreads available])
@@ -489,19 +487,19 @@ AC_DEFUN([CF_ACX_PTHREAD_REQUIRE], [dnl
     AC_MSG_RESULT([yes])
   else
     AC_MSG_ERROR([$1])
-  fi
-])
-
+  fi dnl
+])dnl
+dnl
 AC_DEFUN([CF_AC_SUBST], [dnl
   AC_SUBST([$1])dnl
   ifelse([$2], , , [$1="$2"])
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_AC_SUBST_EVAL], [dnl
   AC_SUBST([$1])dnl
-  ifelse([$2], , [eval $1="${$1}"], [eval $1="$2"])
-])
-
+  ifelse([$2], , [eval $1="${$1}"], [eval $1="$2"])dnl
+])dnl
+dnl
 dnl 
 dnl CF_BASIC_DEFS
 dnl
@@ -527,7 +525,7 @@ AC_DEFUN([CF_BASIC_DEFS], [dnl
       AC_MSG_ERROR([Unable to compute NAMEBYTES])
     ])
     AC_LANG_POP()
-    dnl
+dnl
     if test $NAMEBYTES == $NAMEBYTES_NEW ; then
       AC_MSG_RESULT([unchanged, NAMEBYTES = $NAMEBYTES])
     else
@@ -542,9 +540,9 @@ AC_DEFUN([CF_BASIC_DEFS], [dnl
       fi
     fi
   fi
-  AC_SUBST([NAMEBYTES]) dnl
-])
-
+  AC_SUBST([NAMEBYTES])dnl
+])dnl
+dnl
 dnl 
 dnl CF_INSERT_([> or >>], [file], [text])
 dnl
@@ -552,103 +550,107 @@ dnl cat text + newline into file -- either using > or >>
 dnl
 AC_DEFUN([CF_INSERT_], [[cat $1"$2" <<EOF
 $3
-EOF
-]])
-
+EOF]])dnl
+dnl
 dnl
 dnl CF_INSERT([file], [text])
 dnl
 dnl overwrites file with 'text' + newline
 dnl
-AC_DEFUN([CF_INSERT], [CF_INSERT_([>], [$1], [$2])])
-
+AC_DEFUN([CF_INSERT], [CF_INSERT_([>], [$1], [$2])])dnl
+dnl
 dnl
 dnl CF_APPEND([file], [text])
 dnl
 dnl appends 'text' + newline to file
 dnl
-AC_DEFUN([CF_APPEND], [CF_INSERT_([>>], [$1], [$2])])
-
+AC_DEFUN([CF_APPEND], [CF_INSERT_([>>], [$1], [$2])])dnl
+dnl
+AC_DEFUN([CF_SVNVERSION_CHECK], [dnl
+  test -n "$cf_svnversion$1" \
+    && test "$cf_svnversion$1" != "unknown" \
+    && test "$cf_svnversion$1" != "exported" \
+    && SVNVERSION="$cf_svnversion$1" dnl
+])dnl
+dnl
+AC_DEFUN([CF_SVNVERSION_READ], [dnl
+  ifelse([$#], [2], [dnl
+    test -e "$2$cf_svnversion_stamp" \
+      && cf_svnversion$1=`cat "$2$cf_svnversion_stamp" 2>/dev/null`], dnl
+    [cf_svnversion$1=`$3 2>/dev/null`])dnl
+])dnl
+dnl
+AC_DEFUN([CF_SVNVERSION_WRITE], [dnl
+  test "$SVNVERSION" != "$cf_svnversion$1" \
+    && echo "$SVNVERSION" >"$2$cf_svnversion_stamp" dnl
+])dnl
+dnl
 dnl
 dnl CF_SVNVERSION
 dnl
 dnl during configuration, runs svnversion and
-dnl  if the version has changed (or m4/svnversion.m4 is missing)
-dnl  stores it in m4/svnversion as SVNVERSION, which gets
-dnl  AC_SUBST'D into files.
+dnl  if the version has changed, stores it in svnversion.stamp
+dnl  and $srcdir/svnversion.stamp if maintainter mode is on.
 dnl Also, sets up dependencies and inital setup in makefiles,
 dnl  using @MAKE_SVNVERSION@ for the top-level Makefile,
-dnl  and @MAKE_SVNVERSION_M4@ for the Makefile in m4
-dnl 
+dnl SVNVERSION then gets AC_SUBST'D, and SVNVERSION_STAMP is SUBST'D
+dnl  for dependencies in Makefiles.
+dnl
 AC_DEFUN([CF_SVNVERSION], [dnl
-  m4_sinclude([m4/svnversion.m4])
-  [test -z "$SVNVERSION" && SVNVERSION='unknown']
   AC_MSG_CHECKING([for SVNVERSION value])
-  if test $USE_MAINTAINER_MODE != yes; then
-     AC_MSG_RESULT([SVNVERSION = $SVNVERSION])
-  else
-    if ! cf_basic_defs_svnversion=`svnversion 2>/dev/null` \
-      || test "$cf_basic_defs_svnversion" = 'exported' \
-      || test "$cf_basic_defs_svnversion" = "$SVNVERSION" ; then
-      AC_MSG_RESULT([unchanged, SVNVERSION = $SVNVERSION])
-    else
-      AC_MSG_RESULT([changed, SVNVERSION = $SVNVERSION, SVNVERSION_NEW = $cf_basic_defs_svnversion])
-      [SVNVERSION="$cf_basic_defs_svnversion"]
-      AC_MSG_CHECKING([Updating m4/svnversion.m4])
-      if echo "[[SVNVERSION=$SVNVERSION]]" > m4/svnversion.m4
-      then
-        AC_MSG_RESULT([successful])
-      else
-        AC_MSG_ERROR([failed])
-      fi
-    fi
-  fi
-  AC_SUBST([SVNVERSION])
-  AC_SUBST_FILE([MAKE_SVNVERSION])
-  AC_SUBST_FILE([MAKE_SVNVERSION_M4])
+dnl
+  SVNVERSION="unknown"
+  cf_svnversion_stamp="svnversion.stamp"
   MAKE_SVNVERSION=".svnversion.make"
-  MAKE_SVNVERSION_M4=".m4.svnversion.make"
-  dnl
+  MAKE_SVNVERSION_TOP=".svnversion.top.make"
+  SVNVERSION_STAMP="\$(top_srcdir)/$cf_svnversion_stamp \$(top_builddir)/$cf_svnversion_stamp"
+dnl
+  CF_SVNVERSION_READ([_src], [$srcdir/])
+  CF_SVNVERSION_READ([_build], [])
+  CF_SVNVERSION_READ([], [], [svnversion])
+dnl
+  CF_SVNVERSION_CHECK([_src])
+  CF_SVNVERSION_CHECK([_build])
+  CF_SVNVERSION_CHECK([])
+dnl
+  if test $USE_MAINTAINER_MODE = yes; then
+     CF_SVNVERSION_WRITE([_src], [$srcdir/])
+  fi
+  CF_SVNVERSION_WRITE([_build], [])
+dnl
   CF_INSERT([$MAKE_SVNVERSION], dnl
 [.PHONY: svnversion
-svnversion: \$(top_srcdir)/configure
-	./config.status --recheck && ./config.status
+$cf_svnversion_stamp svnversion: \$(top_srcdir)/configure
+	cd \$(top_srcdir) && ./config.status --recheck && ./config.status
 
-am__CONFIG_DISTCLEAN_FILES += $MAKE_SVNVERSION $MAKE_SVNVERSION_M4])
-
-  if test "$USE_MAINTAINER_MODE" = yes ; then
-    CF_APPEND([$MAKE_SVNVERSION], dnl
-[m4/svnversion.m4:
-	cd m4 && \$(MAKE) \$(AM_MAKEFLAGS) svnversion.m4
-	\$(MAKE) \$(AM_MAKEFLAGS) svnversion
-
-am__aclocal_m4_deps += m4/svnversion.m4])
-  else
-    CF_APPEND([$MAKE_SVNVERSION], [.PHONY: m4/svnversion.m4])
-  fi
-  CF_APPEND([$MAKE_SVNVERSION], [])
-  dnl
-  if test "$USE_MAINTAINER_MODE" = yes ; then
-    CF_INSERT([$MAKE_SVNVERSION_M4], dnl
-[svnversion.m4 \$(top_srcdir)/m4/svnversion.m4:
-	if svn=\`svnversion 2>/dev/null\` \\
-	   && test -n "\$\$svn" \\
-	   && test "\$\$svn" != "exported" ; then \\
-	   echo "SVNVERSION=\$\$svn" >"\$][@" ; \\
-	else \\
-	   echo "SVNVERSION=unknown" >"\$][@" ; \\
+EXTRA_DIST += $cf_svnversion_stamp
+distclean: distclean-local-svnversion
+.PHONY: distclean-local-svnversion
+distclean-local-svnversion:
+	if test "\$(abs_top_srcdir)" != "\$(abs_top_builddir)" ; then \\
+	  cd "\$(top_builddir)" \\
+	  && rm $cf_svnversion_stamp \\
+	     	$MAKE_SVNVERSION \\
+		$MAKE_SVNVERSION_TOP ; \\
 	fi
-
-am__aclocal_m4_deps += svnversion.m4])
-  else
-    CF_INSERT([$MAKE_SVNVERSION_M4], [.PHONY: svnversion.m4])
-  fi
-  CF_APPEND([$MAKE_SVNVERSION_M4], dnl
-[dist_noinst_DATA += svnversion.m4
-am__dist_noinst_DATA_DIST += svnversion.m4
-]) dnl
 ])
+dnl
+  CF_INSERT([$MAKE_SVNVERSION_TOP], dnl
+[\$(top_builddir)/$cf_svnversion_stamp:
+	cd \$(top_builddir) && \$(MAKE) \$(AM_MAKEFLAGS) $cf_svnversion_stamp
 
+\$(top_srcdir)/$cf_svnversion_stamp:
+	cd \$(top_builddir) && \$(MAKE) \$(AM_MAKEFLAGS) $cf_svnversion_stamp
+])
+dnl
+  AC_SUBST([SVNVERSION])
+  AC_SUBST([SVNVERSION_STAMP])
+  AC_SUBST_FILE([MAKE_SVNVERSION])
+  AC_SUBST_FILE([MAKE_SVNVERSION_TOP])
+dnl
+  AC_MSG_RESULT([src stamp = $cf_svnversion_src, build stamp = $cf_svnversion_build, svnversion = $cf_svnversion, SVNVERSION = $SVNVERSION]) dnl
+])dnl
+dnl
 AC_DEFUN([CF_C_INLINE], [dnl
   AC_C_INLINE
   if test $ac_cv_c_inline = "no" ; then
@@ -666,9 +668,9 @@ AC_DEFUN([CF_AC_CHECK_HEADER_WITH], [dnl
 "
   done
   AC_CHECK_HEADER([$1], [$3], [$4])
-  ac_includes_default="${ac_includes_default}"
-])
-
+  ac_includes_default="${ac_includes_default}" dnl
+])dnl
+dnl
 AC_DEFUN([CF_AC_CHECK_XSEC], [dnl
   cf_check_sec=false
   CF_AC_CHECK_HEADER_WITH([X11/extensions/security.h], 
@@ -684,5 +686,5 @@ AC_DEFUN([CF_AC_CHECK_XSEC], [dnl
     ], [
       AC_MSG_ERROR([Checking for Xext library for XSecurity... not found])
     ])
-  fi
-])
+  fi dnl
+])dnl

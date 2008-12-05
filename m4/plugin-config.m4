@@ -1,4 +1,3 @@
-
 AC_DEFUN([CF_PKG_CHECK_MODULES_], [dnl
   ifelse([$3], , , [dnl
     changequote(<<, >>)dnl
@@ -27,10 +26,10 @@ AC_DEFUN([CF_PKG_CHECK_MODULES_], [dnl
     CF_PKG_CHECK_MODULES_VAR[_BASE=${]CF_PACKAGE_MODULES_VAR[}]
     AC_MSG_RESULT([found, is \`${]CF_PKG_CHECK_MODULES_VAR[}'])
     AC_SUBST(CF_PKG_CHECK_MODULES_VAR)
-    CF_PKG_CHECK_MODULES_([$1], [$2], m4_shift(m4_shift(m4_shift($@))))
-  ])
-])
-
+    CF_PKG_CHECK_MODULES_([$1], [$2], m4_shift(m4_shift(m4_shift($@))))dnl
+  ])dnl
+])dnl
+dnl
 AC_DEFUN([CF_PKG_CHECK_FLAGS_], [dnl
   ifelse([$3], , , [dnl
     changequote(<<, >>)dnl
@@ -51,10 +50,10 @@ AC_DEFUN([CF_PKG_CHECK_FLAGS_], [dnl
     CF_PKG_CHECK_MODULES_VAR[_BASE=${]CF_PACKAGE_MODULES_VAR[}]
     AC_MSG_RESULT([found, is \`${]CF_PKG_CHECK_MODULES_VAR[}'])
     AC_SUBST(CF_PKG_CHECK_MODULES_VAR)
-    CF_PKG_CHECK_MODULES_([$1], [$2], m4_shift(m4_shift(m4_shift($@))))
-  ])
-])
-
+    CF_PKG_CHECK_MODULES_([$1], [$2], m4_shift(m4_shift(m4_shift($@))))dnl
+  ])dnl
+])dnl
+dnl
 AC_DEFUN([CF_PKG_CHECK_MODULES], [dnl
   changequote(<<, >>)dnl
   define(<<CF_PKG_CHECK_MODULES_NAME>>, translit(<<$1>>, [a-z-], [A-Z_])) dnl
@@ -63,9 +62,9 @@ AC_DEFUN([CF_PKG_CHECK_MODULES], [dnl
   if test $pkg_failed = untried ; then
     AC_MSG_ERROR([Failed to find pkg-config])
   fi
-  CF_PKG_CHECK_MODULES_(CF_PKG_CHECK_MODULES_NAME, $@)
-])
-
+  CF_PKG_CHECK_MODULES_(CF_PKG_CHECK_MODULES_NAME, $@)dnl
+])dnl
+dnl
 AC_DEFUN([CF_PKG_CHECK_FLAGS], [dnl
   changequote(<<, >>)dnl
   define(<<CF_PKG_CHECK_MODULES_NAME>>, translit(<<$1>>, [a-z-], [A-Z_])) dnl
@@ -74,5 +73,6 @@ AC_DEFUN([CF_PKG_CHECK_FLAGS], [dnl
   if test $pkg_failed = untried ; then
     AC_MSG_ERROR([Failed to find pkg-config])
   fi
-  CF_PKG_CHECK_FLAGS_(CF_PKG_CHECK_MODULES_NAME, $@)
-])
+  CF_PKG_CHECK_FLAGS_(CF_PKG_CHECK_MODULES_NAME, $@)dnl
+])dnl
+dnl

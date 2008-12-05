@@ -34,9 +34,10 @@ SUBDIRS = libltdl lib src plugins $(BASH_DIR) ps \
 	$(EMACS_DIR) dcode test \
 	m4
 ACLOCAL_AMFLAGS = -I m4
-@MAKE_SVNVERSION@
 DISTCHECK_CONFIGURE_FLAGS = --enable-plugins --enable-daemon
 #--disable-process
+
+@MAKE_SVNVERSION@
 
 gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild:
 	svn mv gentoo/dev-lang/dm/dm-*.ebuild $@

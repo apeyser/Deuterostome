@@ -50,8 +50,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/mempcpy.m4 $(top_srcdir)/m4/onceonly.m4 \
 	$(top_srcdir)/m4/string_h.m4 $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/m4/basic-defs.m4 $(top_srcdir)/m4/svnversion.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/basic-defs.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -274,6 +273,7 @@ SHELL = @SHELL@
 STRINGBUF = @STRINGBUF@
 STRIP = @STRIP@
 SVNVERSION = @SVNVERSION@
+SVNVERSION_STAMP = @SVNVERSION_STAMP@
 SYS_DICT_SIZE = @SYS_DICT_SIZE@
 THREADMUL = @THREADMUL@
 THREADNUM = @THREADNUM@
@@ -685,60 +685,62 @@ uninstall-am: uninstall-dist_dmconfDATA uninstall-dist_dmstartDATA \
 	uninstall-nodist_dmstartDATA
 
 
-theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in
+theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/theeye.d.in >$@.tmp
 	mv $@.tmp $@
 
-dnode.d: $(srcdir)/Makefile $(srcdir)/dnode.d.in
+dnode.d: $(srcdir)/Makefile $(srcdir)/dnode.d.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/dnode.d.in >$@.tmp
 	mv $@.tmp $@
 
-dvt_macros.d: $(srcdir)/Makefile $(srcdir)/dvt_macros.d.in 
+dvt_macros.d: $(srcdir)/Makefile $(srcdir)/dvt_macros.d.in  @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/dvt_macros.d.in >$@.tmp
 	mv $@.tmp $@
 
-startup_dvt.d: $(srcdir)/Makefile $(srcdir)/startup_dvt.d.in 
+startup_dvt.d: $(srcdir)/Makefile $(srcdir)/startup_dvt.d.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/startup_dvt.d.in >$@.tmp
 	mv $@.tmp $@
 
-startup_dnode.d: $(srcdir)/Makefile $(srcdir)/startup_dnode.d.in 
+startup_dnode.d: $(srcdir)/Makefile $(srcdir)/startup_dnode.d.in  @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/startup_dnode.d.in >$@.tmp
 	mv $@.tmp $@
 
-startup_dpawn.d: $(srcdir)/Makefile $(srcdir)/startup_dpawn.d.in 
+startup_dpawn.d: $(srcdir)/Makefile $(srcdir)/startup_dpawn.d.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/startup_dpawn.d.in >$@.tmp
 	mv $@.tmp $@
 
-startup_dgen.d: $(srcdir)/Makefile $(srcdir)/startup_dgen.d.in 
+startup_dgen.d: $(srcdir)/Makefile $(srcdir)/startup_dgen.d.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/startup_dgen.d.in >$@.tmp
 	mv $@.tmp $@
 
-startup_common.d: $(srcdir)/Makefile $(srcdir)/startup_common.d.in 
+startup_common.d: $(srcdir)/Makefile $(srcdir)/startup_common.d.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/startup_common.d.in >$@.tmp
 	mv $@.tmp $@
 
-startup_libs.d: $(srcdir)/Makefile $(srcdir)/startup_libs.d.in 
+startup_libs.d: $(srcdir)/Makefile $(srcdir)/startup_libs.d.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/startup_libs.d.in >$@.tmp
 	mv $@.tmp $@
 
-matrix.d: $(srcdir)/Makefile $(srcdir)/matrix.d.in
+matrix.d: $(srcdir)/Makefile $(srcdir)/matrix.d.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/matrix.d.in >$@.tmp
 	mv $@.tmp $@
 
-new-plugin.d: $(srcdir)/Makefile $(srcdir)/new-plugin.d.in
+new-plugin.d: $(srcdir)/Makefile $(srcdir)/new-plugin.d.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/new-plugin.d.in >$@.tmp
 	mv $@.tmp $@
+
+@MAKE_SVNVERSION_TOP@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

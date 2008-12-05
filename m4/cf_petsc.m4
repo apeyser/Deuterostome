@@ -3,18 +3,18 @@ AC_DEFUN([CF_PETSC_MAKE], [`dnl
     PETSC_ARCH=${PETSC_ARCH} dnl
     PETSC_DIR=${PETSC_DIR} dnl
     $1`dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_PETSC_EXTRACT], [dnl
   $1=CF_PETSC_MAKE([$1])
   AC_SUBST([$1]) dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_PETSC], [dnl
   AC_REQUIRE([CF_MPI])
   AC_PREREQ(2.50)
   cf_petsc_ok=no
-
+dnl
   AC_ARG_WITH([petsc], dnl
     [AC_HELP_STRING([--with-petsc=<dir>], [use PETSC libraries in <dir>])])
   AC_MSG_CHECKING([for petsc configuration])
@@ -23,7 +23,7 @@ AC_DEFUN([CF_PETSC], [dnl
     no) cf_petsc_ok=disable ;;
     *) PETSC_DIR="$with_petsc" ;;
   esac
-
+dnl
   if test "$cf_petsc_ok" == disable ; then
     AC_MSG_RESULT([no, petsc will not be configured])
   else
@@ -34,17 +34,17 @@ AC_DEFUN([CF_PETSC], [dnl
       no) AC_MSG_ERROR([--with-petsc-arch must be called for petsc]);;
       *) PETSC_ARCH="$with_petsc_arch";;
     esac
-
+dnl
     CF_PETSC_EXTRACT([PETSC_LIB])
     CF_PETSC_EXTRACT([PETSC_CCPPFLAGS])
     PETSC_CCPPFLAGS=`echo "$PETSC_CCPPFLAGS" | sed s/\"/\'\"\'/g`
-
+dnl
     AC_MSG_RESULT([yes, petsc will be configured with arch ${PETSC_ARCH} ]dnl
-                  [from ${PETSC_DIR}])
-
+[from ${PETSC_DIR}])
+dnl
     cf_petsc_save_LIBS="$LIBS"
     cf_petsc_save_CPPFLAGS="$CPPFLAGS"
-
+dnl
     LIBS="$LIBS $PETSC_LIB"
     CPPFLAGS="$CPPFLAGS $PETSC_CCPPFLAGS"
     AC_MSG_CHECKING([for VecCreate in $PETSC_LIB])
@@ -56,8 +56,8 @@ AC_DEFUN([CF_PETSC], [dnl
     fi
     LIBS="$cf_petsc_save_LIBS"
     CPPFLAGS="$cf_petsc_save_CPPFLAGS"
-
-    # check for headers
+dnl
+dnl check for headers
     LIBS="$LIBS $PETSC_LIB"
     CPPFLAGS="$CPPFLAGS $PETSC_CCPPFLAGS"
     AC_CHECK_HEADERS([petsc.h], 
@@ -80,7 +80,7 @@ AC_DEFUN([CF_PETSC], [dnl
       [$PETSC_ARCH], dnl
       [Define to PETSC arch])
   fi
-
+dnl
   CF_AM_CONDITIONAL([PETSC], [test "$cf_petsc_ok" = yes])
   if test "$cf_petsc_ok" = yes ; then
     cf_enable_petsc=yes
@@ -88,8 +88,8 @@ AC_DEFUN([CF_PETSC], [dnl
     cf_enable_petsc=no
   fi
   CF_AC_SUBST([enable_petsc], [$cf_enable_petsc])dnl
-])
-
+])dnl
+dnl
 AC_DEFUN([CF_CHECK_PETSC_SIZEOF], [dnl
   cf_petsc_save_CPPFLAGS="$CPPFLAGS"
   cf_petsc_save_LIBS="$LIBS"
@@ -98,4 +98,4 @@ AC_DEFUN([CF_CHECK_PETSC_SIZEOF], [dnl
   CF_AC_CHECK_SIZEOF([$1], [$2], [#include <petsc.h>])
   LIBS="$cf_petsc_save_LIBS"
   CPPFLAGS="$cf_petsc_save_CPPFLAGS" dnl
-])
+])dnl

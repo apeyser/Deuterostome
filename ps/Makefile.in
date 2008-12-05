@@ -49,8 +49,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/mempcpy.m4 $(top_srcdir)/m4/onceonly.m4 \
 	$(top_srcdir)/m4/string_h.m4 $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/m4/basic-defs.m4 $(top_srcdir)/m4/svnversion.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/basic-defs.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -270,6 +269,7 @@ SHELL = @SHELL@
 STRINGBUF = @STRINGBUF@
 STRIP = @STRIP@
 SVNVERSION = @SVNVERSION@
+SVNVERSION_STAMP = @SVNVERSION_STAMP@
 SYS_DICT_SIZE = @SYS_DICT_SIZE@
 THREADMUL = @THREADMUL@
 THREADNUM = @THREADNUM@

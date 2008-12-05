@@ -11,19 +11,19 @@ edit = sed \
 	-e 's,[@]NAMEBYTES[@],@NAMEBYTES@,g' \
 	-e 's,[@]SVNVERSION[@],@SVNVERSION@,g'
 
-d-mode.el: Makefile $(srcdir)/d-mode.el.in
+d-mode.el: Makefile $(srcdir)/d-mode.el.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/$@.in >$@.tmp
 	mv $@.tmp $@
 
-d-comint-mode.el: Makefile $(srcdir)/d-comint-mode.el.in
+d-comint-mode.el: Makefile $(srcdir)/d-comint-mode.el.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/$@.in >$@.tmp
 	mv $@.tmp $@
 
-init.el: Makefile $(srcdir)/init.el.in
+init.el: Makefile $(srcdir)/init.el.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/$@.in >$@.tmp
 	mv $@.tmp $@
 
-
+@MAKE_SVNVERSION_TOP@

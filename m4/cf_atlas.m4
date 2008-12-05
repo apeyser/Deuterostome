@@ -1,7 +1,7 @@
-AC_DEFUN([CF_ATLAS], [
+AC_DEFUN([CF_ATLAS], [dnl
   AC_PREREQ(2.50)
   cf_atlas_ok=no
-
+dnl
   AC_ARG_WITH([atlas],
 	  [AC_HELP_STRING([--with-atlas=<lib>], [use ATLAS libraries <lib>])])
   case "$with_atlas" in
@@ -17,11 +17,11 @@ AC_DEFUN([CF_ATLAS], [
     "" | no) ATLAS_FLAGS="" ;;
     *) ATLAS_FLAGS="$with_atlas_flags" ;;
   esac
-
+dnl
   cf_atlas_save_LIBS="$LIBS"
   cf_atlas_save_CPPFLAGS="$CPPFLAGS"
-
-  # First, check ATLAS_LIBS environment variable
+dnl
+  dnl First, check ATLAS_LIBS environment variable
   if test $cf_atlas_ok = no; then
     if test "x$ATLAS_LIBS" != x; then
 	    LIBS="$ATLAS_LIBS $LIBS"
@@ -39,8 +39,8 @@ AC_DEFUN([CF_ATLAS], [
       CPPFLAGS="$cf_atlas_save_CPPFLAGS"
     fi
   fi
-
-  # BLAS in ATLAS library? (http://math-atlas.sourceforge.net/)
+dnl
+  dnl BLAS in ATLAS library? (http://math-atlas.sourceforge.net/)
   if test $cf_atlas_ok = no; then
      ATLAS_LIBS="-latlas"
      CPPFLAGS="$CPPFLAGS $ATLAS_FLAGS"
@@ -85,7 +85,7 @@ AC_DEFUN([CF_ATLAS], [
      fi
      CPPFLAGS="$cf_atlas_save_CPPFLAGS"
   fi
-
+dnl
   LIBS="$cf_atlas_save_LIBS"
   if test x"$cf_atlas_ok" = xyes; then
     LIBS="$ATLAS_LIBS $LIBS"
@@ -99,8 +99,8 @@ AC_DEFUN([CF_ATLAS], [
      CPPFLAGS="$cf_atlas_save_CPPFLAGS"
      AC_DEFINE([HAVE_ATLAS], 1, [Define if you have ATLAS library.])
   fi
-
+dnl
   AM_CONDITIONAL([ENABLE_ATLAS], [test x"$cf_atlas_ok" = xyes])
   AC_SUBST([ATLAS_LIBS])
-  AC_SUBST([ATLAS_FLAGS])
-])
+  AC_SUBST([ATLAS_FLAGS])dnl
+])dnl
