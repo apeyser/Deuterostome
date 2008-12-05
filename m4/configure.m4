@@ -601,8 +601,8 @@ AC_DEFUN([CF_SVNVERSION], [dnl
 dnl
   SVNVERSION="unknown"
   cf_svnversion_stamp="svnversion.stamp"
-  MAKE_SVNVERSION=".svnversion.make"
-  MAKE_SVNVERSION_TOP=".svnversion.top.make"
+  MAKE_SVNVERSION="svnversion.make"
+  MAKE_SVNVERSION_TOP="svnversion-top.make"
   SVNVERSION_STAMP="\$(top_srcdir)/$cf_svnversion_stamp \$(top_builddir)/$cf_svnversion_stamp"
 dnl
   CF_SVNVERSION_READ([_src], [$srcdir/])
@@ -627,7 +627,8 @@ EXTRA_DIST += $cf_svnversion_stamp
 distclean: distclean-local-svnversion
 .PHONY: distclean-local-svnversion
 distclean-local-svnversion:
-	if test "\$(abs_top_srcdir)" != "\$(abs_top_builddir)" ; then \\
+	if test \`cd "\$(top_srcdir)" && pwd -P\` \\
+	   	!= \`cd "\$(top_builddir)" && pwd -P\` ; then \\
 	  cd "\$(top_builddir)" \\
 	  && rm $cf_svnversion_stamp \\
 	     	$MAKE_SVNVERSION \\
