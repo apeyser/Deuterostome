@@ -33,7 +33,7 @@ endif ENABLE_BASH
 SUBDIRS = libltdl lib src plugins $(BASH_DIR) ps \
 	$(EMACS_DIR) dcode test \
 	m4
-ACLOCAL_AMFLAGS = -I m4
+ACLOCAL_AMFLAGS = -I m4 -I m4/autoconf
 DISTCHECK_CONFIGURE_FLAGS = --enable-plugins --enable-daemon
 #--disable-process
 
