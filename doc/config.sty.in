@@ -1,0 +1,24 @@
+%
+% Package: config.sty
+%
+% Put configure dependant latex code here.
+%
+\ProvidesPackage{config}%
+%
+% \id must be defined before use (preferably as \verbdef\id$Id$)
+%   \verbdef is defined in verbdef!
+% You should put a \\ before \titleversion
+%  in \title
+%
+\newcommand\titleversion{%
+  \vspace{0.5\baselineskip}%
+  {\small Version: \id,\\[-\baselineskip]
+    V@PACKAGE_VERSION@, svn-@SVNVERSION@}%
+}%
+%
+% This is the \usepackage line for amsmath out of configure
+% It'll be either \usepackage{amsmath}
+%   \usepackage{amsmath,amsfonts}
+%
+@amsmath@
+%

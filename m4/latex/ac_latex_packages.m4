@@ -34,7 +34,7 @@ dnl
 dnl @version 1.3
 dnl @author Mathieu Boretti boretti@eig.unige.ch
 dnl
-define(_AC_LATEX_PACKAGE_INTERNE,[
+define([_AC_LATEX_PACKAGE_INTERNE],[
 	ifelse($#,0,[],$#,1,[],$#,2,[],$#,3,[
 		AC_LATEX_PACKAGE($3,$2,$1)
 	],[
@@ -48,7 +48,7 @@ define(_AC_LATEX_PACKAGE_INTERNE,[
 	])
 ])
 
-AC_DEFUN(AC_LATEX_PACKAGES,[
+AC_DEFUN([AC_LATEX_PACKAGES],[
 	_AC_LATEX_PACKAGE_INTERNE($3,$2,$1)
 	AC_SUBST($3)
 ])

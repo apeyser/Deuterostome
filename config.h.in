@@ -40,6 +40,9 @@
 /* enable extra debug in dmnum */
 #undef ENABLE_DEBUG_DMNUM
 
+/* compile and install documentation */
+#undef ENABLE_DOC
+
 /* Path to DVIPDF */
 #undef ENABLE_DVIPDF
 

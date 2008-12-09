@@ -1,6 +1,6 @@
 \documentclass[12pt]{article}
 
-\usepackage[dvips]{geometry}
+\usepackage[pdftex]{geometry}
 
 \usepackage{pdf}
 \usepackage{hyperref}
@@ -14,9 +14,14 @@
   \addcontentsline{toc}{section}{\refname}%
 }
 
+\usepackage{verbdef}
+\verbdef\id$Id$
+\usepackage{config}
+
 \title{
   \vspace*{-2\baselineskip}
-  D-machine 3.0 Extensions and DVT interface
+  D-machine 3.0 Extensions and DVT interface\\
+  \titleversion
 }
 \author{Alexander Peyser}
 

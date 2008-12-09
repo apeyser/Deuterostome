@@ -75,6 +75,22 @@ CF_IF_ENABLED([unix-sockets], [
     [${real_tmp}/${PACKAGE}/sockets])
 ])
 
+CF_AC_ENABLE([doc], [compile and install documentation], [yes])
+CF_IF_ENABLED([doc], [
+  CF_PROG_PDFLATEX
+  CF_PROG_BIBTEX
+  CF_PROG_MAKEINDEX
+  CF_LATEX_BIBSTYLE([plainnat])
+  CF_LATEX_CLASS_ARTICLE
+  CF_LATEX_CLASS_BOOK
+  AC_LATEX_PACKAGE_AMSMATH
+  CF_LATEX_PACKAGES([array,makeidx,supertabular], [book])
+  CF_LATEX_PACKAGES([pdf,hyperref,natbib,redefs], [article], [$srcdir/doc])
+  CF_LATEX_PACKAGE_OPT([geometry], [article], [pdftex])
+  CF_LATEX_PACKAGES([verbdef], [book])
+  CF_LATEX_PACKAGES([verbdef], [article])
+])
+
 AC_PROG_CC
 gl_EARLY
 AM_PROG_CC_C_O
@@ -354,6 +370,8 @@ AC_CONFIG_LINKS([
   plugins/errors.d:src/codegen/errors.d
   emacs/d-mode-ops.el:src/codegen/d-mode-ops.el
   plugins/new-plugin.d.in:dcode/new-plugin.d.in
+  doc/dvt-3.0.bib:doc/dvt.bib
+  doc/dvt-emacs.bib:doc/dvt.bib
 ])
 
 AC_CONFIG_FILES([
@@ -370,6 +388,7 @@ AC_CONFIG_FILES([
   m4/Makefile
   test/arr.d
   lib/Makefile
+  doc/Makefile doc/config.sty
 ])
 
 AC_OUTPUT

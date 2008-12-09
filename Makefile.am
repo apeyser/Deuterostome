@@ -30,10 +30,14 @@ BASH_DIR=sh
 endif ENABLE_ENV
 endif ENABLE_BASH
 
+if ENABLE_DOC
+DOC_DIR=doc
+endif ENABLE_DOC
+
 SUBDIRS = libltdl lib src plugins $(BASH_DIR) ps \
 	$(EMACS_DIR) dcode test \
-	m4
-ACLOCAL_AMFLAGS = -I m4 -I m4/autoconf
+	m4 $(DOC_DIR)
+ACLOCAL_AMFLAGS = -I m4 -I m4/latex
 DISTCHECK_CONFIGURE_FLAGS = --enable-plugins --enable-daemon
 #--disable-process
 

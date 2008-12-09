@@ -35,8 +35,18 @@ DIST_COMMON = $(am__dist_m4data_DATA_DIST) \
 	$(am__dist_noinst_DATA_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
-	$(top_srcdir)/m4/alloca.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
+	$(top_srcdir)/m4/latex/ac_prog_bibtex.m4 \
+	$(top_srcdir)/m4/latex/ac_latex_package_amsmath.m4 \
+	$(top_srcdir)/m4/latex/ac_latex_package_opt.m4 \
+	$(top_srcdir)/m4/latex/ac_latex_package.m4 \
+	$(top_srcdir)/m4/latex/ac_latex_class_article.m4 \
+	$(top_srcdir)/m4/latex/ac_latex_class_book.m4 \
+	$(top_srcdir)/m4/latex/ac_latex_class.m4 \
+	$(top_srcdir)/m4/latex/_ac_latex_test.m4 \
+	$(top_srcdir)/m4/latex/ac_prog_pdflatex.m4 \
+	$(top_srcdir)/m4/latex/ac_prog_latex.m4 \
+	$(top_srcdir)/m4/acx_pthread.m4 $(top_srcdir)/m4/alloca.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
 	$(top_srcdir)/m4/ax_set_version_info.m4 \
@@ -71,7 +81,7 @@ am__dist_noinst_DATA_DIST = acx_pthread.m4 \
 	ax_cflags_strict_prototypes.m4 ax_prefix_config_h.m4 \
 	configure.m4 lf_x11.m4 cf_atlas.m4 lib_socket_nsl.m4 \
 	plugin-config.m4 basic-defs.m4 cf_petsc.m4 cf_mpi.m4 \
-	ax_set_version_info.m4 petsc.make
+	ax_set_version_info.m4 petsc.make cf_latex.m4
 DATA = $(dist_m4data_DATA) $(dist_noinst_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 pkgdatadir = @pkgdatadir@
@@ -93,6 +103,8 @@ BYTECORRECT = @BYTECORRECT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CF_LATEX_PACKAGES_TMP = @CF_LATEX_PACKAGES_TMP@
+CF_LATEX_PACKAGE_OPT_TMP = @CF_LATEX_PACKAGE_OPT_TMP@
 CONFIG_STATUS_DEPENDENCIES = @CONFIG_STATUS_DEPENDENCIES@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
@@ -121,6 +133,7 @@ EMACSLOADPATH = @EMACSLOADPATH@
 ENABLE_ATPS = @ENABLE_ATPS@
 ENABLE_BASH = @ENABLE_BASH@
 ENABLE_DEBUG_DMNUM = @ENABLE_DEBUG_DMNUM@
+ENABLE_DOC = @ENABLE_DOC@
 ENABLE_DVIPDF = @ENABLE_DVIPDF@
 ENABLE_EMACSCLIENT = @ENABLE_EMACSCLIENT@
 ENABLE_ENV = @ENABLE_ENV@
@@ -301,7 +314,12 @@ am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
+amsmath = @amsmath@
+article = @article@
+bibtex = @bibtex@
 bindir = @bindir@
+book = @book@
+boretti_classesansparametre = @boretti_classesansparametre@
 build = @build@
 build_alias = @build_alias@
 build_cpu = @build_cpu@
@@ -332,16 +350,19 @@ htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
+latex = @latex@
 libdir = @libdir@
 libexecdir = @libexecdir@
 lispdir = @lispdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
 m4datadir = @m4datadir@
+makeindex = @makeindex@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
+pdflatex = @pdflatex@
 pkgconfiglibdir = @pkgconfiglibdir@
 pkglispdir = @pkglispdir@
 pkgpsdatadir = @pkgpsdatadir@
@@ -366,7 +387,8 @@ top_srcdir = @top_srcdir@
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGINDISTR = plugin-config.m4
 @ENABLE_PLUGINS_SUPPORT_FALSE@PLUGINNODISTR = plugin-config.m4
 dist_m4data_DATA = $(PLUGINDISTR)
-dist_noinst_DATA = acx_pthread.m4 ax_cflags_strict_prototypes.m4 \
+dist_noinst_DATA = \
+	acx_pthread.m4 ax_cflags_strict_prototypes.m4 \
 	ax_prefix_config_h.m4 configure.m4 lf_x11.m4 \
 	cf_atlas.m4 \
 	lib_socket_nsl.m4 $(PLUGINNODISTR) \
@@ -374,9 +396,39 @@ dist_noinst_DATA = acx_pthread.m4 ax_cflags_strict_prototypes.m4 \
 	cf_petsc.m4 \
 	cf_mpi.m4 \
 	ax_set_version_info.m4 \
-	petsc.make
+	petsc.make \
+	cf_latex.m4
 
-EXTRA_DIST = gnulib-cache.m4 dirfd.m4 d-type.m4 extensions.m4 fnmatch.m4 glob.m4 gnulib-common.m4 gnulib-comp.m4 gnulib-tool.m4 libtool.m4 onceonly.m4
+EXTRA_DIST = \
+	gnulib-cache.m4 dirfd.m4 d-type.m4 extensions.m4 \
+	fnmatch.m4 glob.m4 gnulib-common.m4 gnulib-comp.m4 \
+	gnulib-tool.m4 libtool.m4 onceonly.m4 \
+	latex/ac_latex_class_article.m4 latex/ac_latex_class_book.m4 \
+	latex/ac_latex_classes.m4 latex/ac_latex_class.m4 \
+	latex/ac_latex_class_report.m4 latex/ac_latex_dvips_o_stdout.m4 \
+	latex/ac_latex_dvips_t_a4_landscape.m4 latex/ac_latex_dvips_t_a4.m4 \
+	latex/ac_latex_dvips_t_letter_landscape.m4 \
+	latex/ac_latex_dvips_t_letter.m4 latex/ac_latex_dvips_t.m4 \
+	latex/ac_latex_package_amsmath.m4 latex/ac_latex_package_fontenc.m4 \
+	latex/ac_latex_package_input.m4 latex/ac_latex_package.m4 \
+	latex/ac_latex_package_opt.m4 latex/ac_latex_packages.m4 \
+	latex/_ac_latex_test.m4 latex/ac_prog_bibtex.m4 \
+	latex/ac_prog_dvibook.m4 latex/ac_prog_dvipdf.m4 \
+	latex/ac_prog_dvips.m4 latex/ac_prog_fig2dev.m4 \
+	latex/ac_prog_gnuplot.m4 latex/ac_prog_gunzip.m4 \
+	latex/ac_prog_gzip.m4 latex/ac_prog_jpeg2ps.m4 \
+	latex/ac_prog_jpegtopnm.m4 latex/ac_prog_kpsewhich.m4 \
+	latex/ac_prog_latex2html.m4 latex/ac_prog_latex2man.m4 \
+	latex/ac_prog_latex2png.m4 latex/ac_prog_latex2rtf.m4 \
+	latex/ac_prog_latex.m4 latex/ac_prog_makeindex.m4 \
+	latex/ac_prog_mf.m4 latex/ac_prog_mktexpk.m4 \
+	latex/ac_prog_pdflatex.m4 latex/ac_prog_pngtopnm.m4 \
+	latex/ac_prog_pnmtops.m4 latex/ac_prog_ps2pdf.m4 \
+	latex/ac_prog_psbook.m4 latex/ac_prog_psnup.m4 \
+	latex/ac_prog_psresize.m4 latex/ac_prog_psselect.m4 \
+	latex/ac_prog_texhash.m4 latex/ac_texmf_path.m4 latex/latex.m4 \
+	latex/LICENSE latex/README
+
 all: all-am
 
 .SUFFIXES:

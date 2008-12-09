@@ -907,6 +907,19 @@ ENABLE_UNIX_SOCKETS_FALSE
 ENABLE_UNIX_SOCKETS
 DMSOCKDIR
 dmsockdir
+ENABLE_DOC_TRUE
+ENABLE_DOC_FALSE
+ENABLE_DOC
+pdflatex
+bibtex
+makeindex
+latex
+article
+book
+amsmath
+boretti_classesansparametre
+CF_LATEX_PACKAGES_TMP
+CF_LATEX_PACKAGE_OPT_TMP
 CC
 CFLAGS
 LDFLAGS
@@ -1768,6 +1781,7 @@ Optional Features:
                           (1)
   --enable-rthreads       Activate mpi (yes)
   --enable-unix-sockets   compile and install unix domain sockets (yes)
+  --enable-doc            compile and install documentation (yes)
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
   --enable-plugins-support
@@ -3697,6 +3711,1429 @@ echo $ECHO_N "checking if ${cf_ac_cv_dir_val} is set... $ECHO_C" >&6; }
   fi
     { echo "$as_me:$LINENO: result: setting to ${dmsockdir}" >&5
 echo "${ECHO_T}setting to ${dmsockdir}" >&6; }
+
+    fi
+
+
+
+    { echo "$as_me:$LINENO: checking if doc is enabled" >&5
+echo $ECHO_N "checking if doc is enabled... $ECHO_C" >&6; }
+            if test "${enable_doc-set}" == set ; then enable_doc='yes'; fi
+  if test x"${enable_doc}" == x"yes" ; then enable_doc='yes'; fi
+  # Check whether --enable-doc was given.
+if test "${enable_doc+set}" = set; then
+  enableval=$enable_doc;
+fi
+
+     if test "${enable_doc-no}" != "no"; then
+  ENABLE_DOC_TRUE=
+  ENABLE_DOC_FALSE='#'
+else
+  ENABLE_DOC_TRUE='#'
+  ENABLE_DOC_FALSE=
+fi
+
+  if test "${enable_doc-no}" == "no" ; then
+    { echo "$as_me:$LINENO: result: no, not enabled" >&5
+echo "${ECHO_T}no, not enabled" >&6; }
+  else
+    { echo "$as_me:$LINENO: result: yes, enabled (${enable_doc})" >&5
+echo "${ECHO_T}yes, enabled (${enable_doc})" >&6; }
+  fi
+                          if test x"${enable_doc-no}" != x"no" ; then
+
+      case "${enable_doc-no}" in
+    yes) cf_ac_define_if_enabled_define=1 ;;
+	*) cf_ac_define_if_enabled_define="${enable_doc-no}" ;;
+  esac
+  if test "${cf_ac_define_if_enabled_define}" != "no" ; then
+
+cat >>confdefs.h <<_ACEOF
+#define ENABLE_DOC ${cf_ac_define_if_enabled_define}
+_ACEOF
+
+  fi
+
+    fi
+
+
+
+  ENABLE_DOC="${enable_doc-no}"
+
+for ac_prog in latex elatex lambda
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_latex+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$latex"; then
+  ac_cv_prog_latex="$latex" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_latex="$ac_prog"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+latex=$ac_cv_prog_latex
+if test -n "$latex"; then
+  { echo "$as_me:$LINENO: result: $latex" >&5
+echo "${ECHO_T}$latex" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+  test -n "$latex" && break
+done
+test -n "$latex" || latex="no"
+
+export latex;
+if test $latex = "no" ;
+then
+	{ { echo "$as_me:$LINENO: error: Unable to find a LaTeX application" >&5
+echo "$as_me: error: Unable to find a LaTeX application" >&2;}
+   { (exit 1); exit 1; }; };
+fi
+
+
+              if test x"${enable_doc-no}" != x"no" ; then
+
+
+for ac_prog in pdflatex
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_pdflatex+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$pdflatex"; then
+  ac_cv_prog_pdflatex="$pdflatex" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_pdflatex="$ac_prog"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+pdflatex=$ac_cv_prog_pdflatex
+if test -n "$pdflatex"; then
+  { echo "$as_me:$LINENO: result: $pdflatex" >&5
+echo "${ECHO_T}$pdflatex" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+  test -n "$pdflatex" && break
+done
+test -n "$pdflatex" || pdflatex="no"
+
+export pdflatex;
+if test $pdflatex = "no" ;
+then
+	{ { echo "$as_me:$LINENO: error: Unable to find a PDFLaTeX application" >&5
+echo "$as_me: error: Unable to find a PDFLaTeX application" >&2;}
+   { (exit 1); exit 1; }; };
+fi
+
+
+
+for ac_prog in bibtex
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_bibtex+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$bibtex"; then
+  ac_cv_prog_bibtex="$bibtex" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_bibtex="$ac_prog"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+bibtex=$ac_cv_prog_bibtex
+if test -n "$bibtex"; then
+  { echo "$as_me:$LINENO: result: $bibtex" >&5
+echo "${ECHO_T}$bibtex" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+  test -n "$bibtex" && break
+done
+test -n "$bibtex" || bibtex="no"
+
+export bibtex;
+if test $bibtex = "no" ;
+then
+	{ { echo "$as_me:$LINENO: error: Unable to find a BiTex application" >&5
+echo "$as_me: error: Unable to find a BiTex application" >&2;}
+   { (exit 1); exit 1; }; };
+fi
+
+
+
+for ac_prog in makeindex
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_makeindex+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$makeindex"; then
+  ac_cv_prog_makeindex="$makeindex" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_makeindex="$ac_prog"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+makeindex=$ac_cv_prog_makeindex
+if test -n "$makeindex"; then
+  { echo "$as_me:$LINENO: result: $makeindex" >&5
+echo "${ECHO_T}$makeindex" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+  test -n "$makeindex" && break
+done
+test -n "$makeindex" || makeindex="no"
+
+export makeindex;
+if test $makeindex = "no" ;
+then
+	{ { echo "$as_me:$LINENO: error: Unable to find a MakeIndex application" >&5
+echo "$as_me: error: Unable to find a MakeIndex application" >&2;}
+   { (exit 1); exit 1; }; };
+fi
+
+
+        { echo "$as_me:$LINENO: checking for bibstyle plainnat in class book class and package natbib" >&5
+echo $ECHO_N "checking for bibstyle plainnat in class book class and package natbib... $ECHO_C" >&6; }
+if test "${cf_cv_latex_bibstyle_plainnat_book_natbib+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+cf_cv_latex_bibstyle_plainnat_book_natbib="no"; export cf_cv_latex_bibstyle_plainnat_book_natbib;
+cat > testconf.tex << \EOF
+
+\documentclass{book}
+\usepackage{natbib}
+\bibliographystyle{plainnat}
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && cf_cv_latex_bibstyle_plainnat_book_natbib=yes; export cf_cv_latex_bibstyle_plainnat_book_natbib;
+cd ..
+rm -rf .tmps_latex
+
+fi
+{ echo "$as_me:$LINENO: result: $cf_cv_latex_bibstyle_plainnat_book_natbib" >&5
+echo "${ECHO_T}$cf_cv_latex_bibstyle_plainnat_book_natbib" >&6; }
+  if test "$cf_cv_latex_bibstyle_plainnat_book_natbib" = "no" ; then
+    { { echo "$as_me:$LINENO: error: bibstyle plainnat not found" >&5
+echo "$as_me: error: bibstyle plainnat not found" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+
+{ echo "$as_me:$LINENO: checking for class article" >&5
+echo $ECHO_N "checking for class article... $ECHO_C" >&6; }
+if test "${ac_cv_latex_class_article+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+echo "\\documentclass{article}" > testconf.tex
+cat >> testconf.tex << \EOF
+
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_class_article=yes; export ac_cv_latex_class_article;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_class_article" >&5
+echo "${ECHO_T}$ac_cv_latex_class_article" >&6; }
+article=$ac_cv_latex_class_article ; export article;
+
+
+
+        if test "$article" = "no" ;
+        then
+            { { echo "$as_me:$LINENO: error: Unable to find the article class" >&5
+echo "$as_me: error: Unable to find the article class" >&2;}
+   { (exit 1); exit 1; }; }
+        fi
+
+
+
+
+
+
+
+{ echo "$as_me:$LINENO: checking for class book" >&5
+echo $ECHO_N "checking for class book... $ECHO_C" >&6; }
+if test "${ac_cv_latex_class_book+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+echo "\\documentclass{book}" > testconf.tex
+cat >> testconf.tex << \EOF
+
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_class_book=yes; export ac_cv_latex_class_book;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_class_book" >&5
+echo "${ECHO_T}$ac_cv_latex_class_book" >&6; }
+book=$ac_cv_latex_class_book ; export book;
+
+
+
+        if test "$book" = "no" ;
+        then
+            { { echo "$as_me:$LINENO: error: Unable to find the book class" >&5
+echo "$as_me: error: Unable to find the book class" >&2;}
+   { (exit 1); exit 1; }; }
+        fi
+
+
+
+
+
+
+
+
+{ echo "$as_me:$LINENO: checking for class book" >&5
+echo $ECHO_N "checking for class book... $ECHO_C" >&6; }
+if test "${ac_cv_latex_class_book+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+echo "\\documentclass{book}" > testconf.tex
+cat >> testconf.tex << \EOF
+
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_class_book=yes; export ac_cv_latex_class_book;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_class_book" >&5
+echo "${ECHO_T}$ac_cv_latex_class_book" >&6; }
+book=$ac_cv_latex_class_book ; export book;
+
+
+
+        if test "$book" = "no" ;
+        then
+            { { echo "$as_me:$LINENO: error: Unable to find the book class" >&5
+echo "$as_me: error: Unable to find the book class" >&2;}
+   { (exit 1); exit 1; }; }
+        fi
+
+
+
+
+
+{ echo "$as_me:$LINENO: checking for amsmath" >&5
+echo $ECHO_N "checking for amsmath... $ECHO_C" >&6; }
+if test "${ac_cv_latex_package_f_amsmath+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+ac_cv_latex_package_f_amsmath="no"; export ac_cv_latex_package_f_amsmath;
+cat > testconf.tex << \EOF
+
+\documentclass{book}
+\usepackage{amsmath,amsfonts}
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_package_f_amsmath=yes; export ac_cv_latex_package_f_amsmath;
+cd ..
+rm -rf .tmps_latex
+
+if test $ac_cv_latex_package_f_amsmath = "yes" ;
+then
+    ac_cv_latex_package_f_amsmath="\\usepackage{amsmath,amsfonts}" ; export ac_cv_latex_package_f_amsmath ;
+else
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+ac_cv_latex_package_f_amsmath="no"; export ac_cv_latex_package_f_amsmath;
+cat > testconf.tex << \EOF
+
+    \documentclass{book}
+    \usepackage{amstex}
+    \begin{document}
+    \end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_package_f_amsmath=yes; export ac_cv_latex_package_f_amsmath;
+cd ..
+rm -rf .tmps_latex
+
+    if test $ac_cv_latex_package_f_amsmath = "yes" ;
+    then
+        ac_cv_latex_package_f_amsmath="\\usepackage{amstex}" ; export ac_cv_latex_package_f_amsmath ;
+    else
+        { { echo "$as_me:$LINENO: error: Unable to find amsmath" >&5
+echo "$as_me: error: Unable to find amsmath" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+fi
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_package_f_amsmath" >&5
+echo "${ECHO_T}$ac_cv_latex_package_f_amsmath" >&6; }
+amsmath=$ac_cv_latex_package_f_amsmath; export amsmath;
+
+
+      CF_LATEX_PACKAGES_TEXINPUTS="$TEXINPUTS"
+
+
+if test "$ac_cv_latex_class_book" = "" ;
+then
+
+{ echo "$as_me:$LINENO: checking for class book" >&5
+echo $ECHO_N "checking for class book... $ECHO_C" >&6; }
+if test "${ac_cv_latex_class_book+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+echo "\\documentclass{book}" > testconf.tex
+cat >> testconf.tex << \EOF
+
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_class_book=yes; export ac_cv_latex_class_book;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_class_book" >&5
+echo "${ECHO_T}$ac_cv_latex_class_book" >&6; }
+boretti_classesansparametre=$ac_cv_latex_class_book ; export boretti_classesansparametre;
+
+
+
+
+	export boretti_classesansparametre;
+else
+	boretti_classesansparametre=$ac_cv_latex_class_book ;
+	export boretti_classesansparemetre;
+fi;
+if test $boretti_classesansparametre = "no" ;
+then
+    { { echo "$as_me:$LINENO: error: Unable to find book class" >&5
+echo "$as_me: error: Unable to find book class" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+{ echo "$as_me:$LINENO: checking for array in class book" >&5
+echo $ECHO_N "checking for array in class book... $ECHO_C" >&6; }
+if test "${ac_cv_latex_array_book+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+ac_cv_latex_array_book="no"; export ac_cv_latex_array_book;
+cat > testconf.tex << \EOF
+
+\documentclass{book}
+\usepackage{array}
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_array_book=yes; export ac_cv_latex_array_book;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_array_book" >&5
+echo "${ECHO_T}$ac_cv_latex_array_book" >&6; }
+CF_LATEX_PACKAGES_TMP=$ac_cv_latex_array_book; export CF_LATEX_PACKAGES_TMP;
+
+
+
+    if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
+      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular in class book with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages array,makeidx,supertabular in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { { echo "$as_me:$LINENO: error: array not found" >&5
+echo "$as_me: error: array not found" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+
+if test "$ac_cv_latex_class_book" = "" ;
+then
+
+{ echo "$as_me:$LINENO: checking for class book" >&5
+echo $ECHO_N "checking for class book... $ECHO_C" >&6; }
+if test "${ac_cv_latex_class_book+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+echo "\\documentclass{book}" > testconf.tex
+cat >> testconf.tex << \EOF
+
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_class_book=yes; export ac_cv_latex_class_book;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_class_book" >&5
+echo "${ECHO_T}$ac_cv_latex_class_book" >&6; }
+boretti_classesansparametre=$ac_cv_latex_class_book ; export boretti_classesansparametre;
+
+
+
+
+	export boretti_classesansparametre;
+else
+	boretti_classesansparametre=$ac_cv_latex_class_book ;
+	export boretti_classesansparemetre;
+fi;
+if test $boretti_classesansparametre = "no" ;
+then
+    { { echo "$as_me:$LINENO: error: Unable to find book class" >&5
+echo "$as_me: error: Unable to find book class" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+{ echo "$as_me:$LINENO: checking for makeidx in class book" >&5
+echo $ECHO_N "checking for makeidx in class book... $ECHO_C" >&6; }
+if test "${ac_cv_latex_makeidx_book+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+ac_cv_latex_makeidx_book="no"; export ac_cv_latex_makeidx_book;
+cat > testconf.tex << \EOF
+
+\documentclass{book}
+\usepackage{makeidx}
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_makeidx_book=yes; export ac_cv_latex_makeidx_book;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_makeidx_book" >&5
+echo "${ECHO_T}$ac_cv_latex_makeidx_book" >&6; }
+CF_LATEX_PACKAGES_TMP=$ac_cv_latex_makeidx_book; export CF_LATEX_PACKAGES_TMP;
+
+
+
+    if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
+      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular in class book with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages array,makeidx,supertabular in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { { echo "$as_me:$LINENO: error: makeidx not found" >&5
+echo "$as_me: error: makeidx not found" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+
+if test "$ac_cv_latex_class_book" = "" ;
+then
+
+{ echo "$as_me:$LINENO: checking for class book" >&5
+echo $ECHO_N "checking for class book... $ECHO_C" >&6; }
+if test "${ac_cv_latex_class_book+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+echo "\\documentclass{book}" > testconf.tex
+cat >> testconf.tex << \EOF
+
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_class_book=yes; export ac_cv_latex_class_book;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_class_book" >&5
+echo "${ECHO_T}$ac_cv_latex_class_book" >&6; }
+boretti_classesansparametre=$ac_cv_latex_class_book ; export boretti_classesansparametre;
+
+
+
+
+	export boretti_classesansparametre;
+else
+	boretti_classesansparametre=$ac_cv_latex_class_book ;
+	export boretti_classesansparemetre;
+fi;
+if test $boretti_classesansparametre = "no" ;
+then
+    { { echo "$as_me:$LINENO: error: Unable to find book class" >&5
+echo "$as_me: error: Unable to find book class" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+{ echo "$as_me:$LINENO: checking for supertabular in class book" >&5
+echo $ECHO_N "checking for supertabular in class book... $ECHO_C" >&6; }
+if test "${ac_cv_latex_supertabular_book+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+ac_cv_latex_supertabular_book="no"; export ac_cv_latex_supertabular_book;
+cat > testconf.tex << \EOF
+
+\documentclass{book}
+\usepackage{supertabular}
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_supertabular_book=yes; export ac_cv_latex_supertabular_book;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_supertabular_book" >&5
+echo "${ECHO_T}$ac_cv_latex_supertabular_book" >&6; }
+CF_LATEX_PACKAGES_TMP=$ac_cv_latex_supertabular_book; export CF_LATEX_PACKAGES_TMP;
+
+
+
+    if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
+      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular in class book with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages array,makeidx,supertabular in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { { echo "$as_me:$LINENO: error: supertabular not found" >&5
+echo "$as_me: error: supertabular not found" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+    { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular in class book with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages array,makeidx,supertabular in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+  { echo "$as_me:$LINENO: result: found" >&5
+echo "${ECHO_T}found" >&6; }
+    TEXINPUTS="$CF_LATEX_PACKAGES_TEXINPUTS"
+      CF_LATEX_PACKAGES_TEXINPUTS="$TEXINPUTS"
+  TEXINPUTS="$srcdir/doc:$TEXINPUTS"
+
+if test "$ac_cv_latex_class_article" = "" ;
+then
+
+{ echo "$as_me:$LINENO: checking for class article" >&5
+echo $ECHO_N "checking for class article... $ECHO_C" >&6; }
+if test "${ac_cv_latex_class_article+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+echo "\\documentclass{article}" > testconf.tex
+cat >> testconf.tex << \EOF
+
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_class_article=yes; export ac_cv_latex_class_article;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_class_article" >&5
+echo "${ECHO_T}$ac_cv_latex_class_article" >&6; }
+boretti_classesansparametre=$ac_cv_latex_class_article ; export boretti_classesansparametre;
+
+
+
+
+	export boretti_classesansparametre;
+else
+	boretti_classesansparametre=$ac_cv_latex_class_article ;
+	export boretti_classesansparemetre;
+fi;
+if test $boretti_classesansparametre = "no" ;
+then
+    { { echo "$as_me:$LINENO: error: Unable to find article class" >&5
+echo "$as_me: error: Unable to find article class" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+{ echo "$as_me:$LINENO: checking for pdf in class article" >&5
+echo $ECHO_N "checking for pdf in class article... $ECHO_C" >&6; }
+if test "${ac_cv_latex_pdf_article+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+ac_cv_latex_pdf_article="no"; export ac_cv_latex_pdf_article;
+cat > testconf.tex << \EOF
+
+\documentclass{article}
+\usepackage{pdf}
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_pdf_article=yes; export ac_cv_latex_pdf_article;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_pdf_article" >&5
+echo "${ECHO_T}$ac_cv_latex_pdf_article" >&6; }
+CF_LATEX_PACKAGES_TMP=$ac_cv_latex_pdf_article; export CF_LATEX_PACKAGES_TMP;
+
+
+
+    if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
+      { echo "$as_me:$LINENO: checking for packages pdf,hyperref,natbib,redefs in class article with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages pdf,hyperref,natbib,redefs in class article with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { { echo "$as_me:$LINENO: error: pdf not found" >&5
+echo "$as_me: error: pdf not found" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+
+if test "$ac_cv_latex_class_article" = "" ;
+then
+
+{ echo "$as_me:$LINENO: checking for class article" >&5
+echo $ECHO_N "checking for class article... $ECHO_C" >&6; }
+if test "${ac_cv_latex_class_article+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+echo "\\documentclass{article}" > testconf.tex
+cat >> testconf.tex << \EOF
+
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_class_article=yes; export ac_cv_latex_class_article;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_class_article" >&5
+echo "${ECHO_T}$ac_cv_latex_class_article" >&6; }
+boretti_classesansparametre=$ac_cv_latex_class_article ; export boretti_classesansparametre;
+
+
+
+
+	export boretti_classesansparametre;
+else
+	boretti_classesansparametre=$ac_cv_latex_class_article ;
+	export boretti_classesansparemetre;
+fi;
+if test $boretti_classesansparametre = "no" ;
+then
+    { { echo "$as_me:$LINENO: error: Unable to find article class" >&5
+echo "$as_me: error: Unable to find article class" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+{ echo "$as_me:$LINENO: checking for hyperref in class article" >&5
+echo $ECHO_N "checking for hyperref in class article... $ECHO_C" >&6; }
+if test "${ac_cv_latex_hyperref_article+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+ac_cv_latex_hyperref_article="no"; export ac_cv_latex_hyperref_article;
+cat > testconf.tex << \EOF
+
+\documentclass{article}
+\usepackage{hyperref}
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_hyperref_article=yes; export ac_cv_latex_hyperref_article;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_hyperref_article" >&5
+echo "${ECHO_T}$ac_cv_latex_hyperref_article" >&6; }
+CF_LATEX_PACKAGES_TMP=$ac_cv_latex_hyperref_article; export CF_LATEX_PACKAGES_TMP;
+
+
+
+    if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
+      { echo "$as_me:$LINENO: checking for packages pdf,hyperref,natbib,redefs in class article with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages pdf,hyperref,natbib,redefs in class article with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { { echo "$as_me:$LINENO: error: hyperref not found" >&5
+echo "$as_me: error: hyperref not found" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+
+if test "$ac_cv_latex_class_article" = "" ;
+then
+
+{ echo "$as_me:$LINENO: checking for class article" >&5
+echo $ECHO_N "checking for class article... $ECHO_C" >&6; }
+if test "${ac_cv_latex_class_article+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+echo "\\documentclass{article}" > testconf.tex
+cat >> testconf.tex << \EOF
+
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_class_article=yes; export ac_cv_latex_class_article;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_class_article" >&5
+echo "${ECHO_T}$ac_cv_latex_class_article" >&6; }
+boretti_classesansparametre=$ac_cv_latex_class_article ; export boretti_classesansparametre;
+
+
+
+
+	export boretti_classesansparametre;
+else
+	boretti_classesansparametre=$ac_cv_latex_class_article ;
+	export boretti_classesansparemetre;
+fi;
+if test $boretti_classesansparametre = "no" ;
+then
+    { { echo "$as_me:$LINENO: error: Unable to find article class" >&5
+echo "$as_me: error: Unable to find article class" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+{ echo "$as_me:$LINENO: checking for natbib in class article" >&5
+echo $ECHO_N "checking for natbib in class article... $ECHO_C" >&6; }
+if test "${ac_cv_latex_natbib_article+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+ac_cv_latex_natbib_article="no"; export ac_cv_latex_natbib_article;
+cat > testconf.tex << \EOF
+
+\documentclass{article}
+\usepackage{natbib}
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_natbib_article=yes; export ac_cv_latex_natbib_article;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_natbib_article" >&5
+echo "${ECHO_T}$ac_cv_latex_natbib_article" >&6; }
+CF_LATEX_PACKAGES_TMP=$ac_cv_latex_natbib_article; export CF_LATEX_PACKAGES_TMP;
+
+
+
+    if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
+      { echo "$as_me:$LINENO: checking for packages pdf,hyperref,natbib,redefs in class article with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages pdf,hyperref,natbib,redefs in class article with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { { echo "$as_me:$LINENO: error: natbib not found" >&5
+echo "$as_me: error: natbib not found" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+
+if test "$ac_cv_latex_class_article" = "" ;
+then
+
+{ echo "$as_me:$LINENO: checking for class article" >&5
+echo $ECHO_N "checking for class article... $ECHO_C" >&6; }
+if test "${ac_cv_latex_class_article+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+echo "\\documentclass{article}" > testconf.tex
+cat >> testconf.tex << \EOF
+
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_class_article=yes; export ac_cv_latex_class_article;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_class_article" >&5
+echo "${ECHO_T}$ac_cv_latex_class_article" >&6; }
+boretti_classesansparametre=$ac_cv_latex_class_article ; export boretti_classesansparametre;
+
+
+
+
+	export boretti_classesansparametre;
+else
+	boretti_classesansparametre=$ac_cv_latex_class_article ;
+	export boretti_classesansparemetre;
+fi;
+if test $boretti_classesansparametre = "no" ;
+then
+    { { echo "$as_me:$LINENO: error: Unable to find article class" >&5
+echo "$as_me: error: Unable to find article class" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+{ echo "$as_me:$LINENO: checking for redefs in class article" >&5
+echo $ECHO_N "checking for redefs in class article... $ECHO_C" >&6; }
+if test "${ac_cv_latex_redefs_article+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+ac_cv_latex_redefs_article="no"; export ac_cv_latex_redefs_article;
+cat > testconf.tex << \EOF
+
+\documentclass{article}
+\usepackage{redefs}
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_redefs_article=yes; export ac_cv_latex_redefs_article;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_redefs_article" >&5
+echo "${ECHO_T}$ac_cv_latex_redefs_article" >&6; }
+CF_LATEX_PACKAGES_TMP=$ac_cv_latex_redefs_article; export CF_LATEX_PACKAGES_TMP;
+
+
+
+    if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
+      { echo "$as_me:$LINENO: checking for packages pdf,hyperref,natbib,redefs in class article with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages pdf,hyperref,natbib,redefs in class article with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { { echo "$as_me:$LINENO: error: redefs not found" >&5
+echo "$as_me: error: redefs not found" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+    { echo "$as_me:$LINENO: checking for packages pdf,hyperref,natbib,redefs in class article with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages pdf,hyperref,natbib,redefs in class article with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+  { echo "$as_me:$LINENO: result: found" >&5
+echo "${ECHO_T}found" >&6; }
+    TEXINPUTS="$CF_LATEX_PACKAGES_TEXINPUTS"
+      CF_LATEX_PACKAGES_TEXINPUTS="$TEXINPUTS"
+
+
+if test "$ac_cv_latex_class_article" = "" ;
+then
+
+{ echo "$as_me:$LINENO: checking for class article" >&5
+echo $ECHO_N "checking for class article... $ECHO_C" >&6; }
+if test "${ac_cv_latex_class_article+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+echo "\\documentclass{article}" > testconf.tex
+cat >> testconf.tex << \EOF
+
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_class_article=yes; export ac_cv_latex_class_article;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_class_article" >&5
+echo "${ECHO_T}$ac_cv_latex_class_article" >&6; }
+boretti_classesansparametre=$ac_cv_latex_class_article ; export boretti_classesansparametre;
+
+
+
+
+	export boretti_classesansparametre;
+else
+	boretti_classesansparametre=$ac_cv_latex_class_article ;
+	export boretti_classesansparemetre;
+fi;
+if test $boretti_classesansparametre = "no" ;
+then
+    { { echo "$as_me:$LINENO: error: Unable to find geometry class" >&5
+echo "$as_me: error: Unable to find geometry class" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+{ echo "$as_me:$LINENO: checking for geometry in class article with pdftex as option" >&5
+echo $ECHO_N "checking for geometry in class article with pdftex as option... $ECHO_C" >&6; }
+if test "${ac_cv_latex_geometry_article_pdftex+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+ac_cv_latex_geometry_article_pdftex="no"; export ac_cv_latex_geometry_article_pdftex;
+cat > testconf.tex << \EOF
+
+
+\documentclass{article}
+\usepackage[pdftex]{geometry}
+\begin{document}
+\end{document}
+
+
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_geometry_article_pdftex=yes; export ac_cv_latex_geometry_article_pdftex;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_geometry_article_pdftex" >&5
+echo "${ECHO_T}$ac_cv_latex_geometry_article_pdftex" >&6; }
+CF_LATEX_PACKAGE_OPT_TMP=$ac_cv_latex_geometry_article_pdftex; export CF_LATEX_PACKAGE_OPT_TMP;
+
+
+  { echo "$as_me:$LINENO: checking for package geometry in class article with option pdftex and tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for package geometry in class article with option pdftex and tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+  if test "$CF_LATEX_PACKAGE_OPT_TMP" = "no" ; then
+    { { echo "$as_me:$LINENO: error: not found" >&5
+echo "$as_me: error: not found" >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+  { echo "$as_me:$LINENO: result: found" >&5
+echo "${ECHO_T}found" >&6; }
+    TEXINPUTS="$CF_LATEX_PACKAGES_TEXINPUTS"
+      CF_LATEX_PACKAGES_TEXINPUTS="$TEXINPUTS"
+
+
+if test "$ac_cv_latex_class_book" = "" ;
+then
+
+{ echo "$as_me:$LINENO: checking for class book" >&5
+echo $ECHO_N "checking for class book... $ECHO_C" >&6; }
+if test "${ac_cv_latex_class_book+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+echo "\\documentclass{book}" > testconf.tex
+cat >> testconf.tex << \EOF
+
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_class_book=yes; export ac_cv_latex_class_book;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_class_book" >&5
+echo "${ECHO_T}$ac_cv_latex_class_book" >&6; }
+boretti_classesansparametre=$ac_cv_latex_class_book ; export boretti_classesansparametre;
+
+
+
+
+	export boretti_classesansparametre;
+else
+	boretti_classesansparametre=$ac_cv_latex_class_book ;
+	export boretti_classesansparemetre;
+fi;
+if test $boretti_classesansparametre = "no" ;
+then
+    { { echo "$as_me:$LINENO: error: Unable to find book class" >&5
+echo "$as_me: error: Unable to find book class" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+{ echo "$as_me:$LINENO: checking for verbdef in class book" >&5
+echo $ECHO_N "checking for verbdef in class book... $ECHO_C" >&6; }
+if test "${ac_cv_latex_verbdef_book+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+ac_cv_latex_verbdef_book="no"; export ac_cv_latex_verbdef_book;
+cat > testconf.tex << \EOF
+
+\documentclass{book}
+\usepackage{verbdef}
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_verbdef_book=yes; export ac_cv_latex_verbdef_book;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_verbdef_book" >&5
+echo "${ECHO_T}$ac_cv_latex_verbdef_book" >&6; }
+CF_LATEX_PACKAGES_TMP=$ac_cv_latex_verbdef_book; export CF_LATEX_PACKAGES_TMP;
+
+
+
+    if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
+      { echo "$as_me:$LINENO: checking for packages verbdef in class book with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages verbdef in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { { echo "$as_me:$LINENO: error: verbdef not found" >&5
+echo "$as_me: error: verbdef not found" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+    { echo "$as_me:$LINENO: checking for packages verbdef in class book with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages verbdef in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+  { echo "$as_me:$LINENO: result: found" >&5
+echo "${ECHO_T}found" >&6; }
+    TEXINPUTS="$CF_LATEX_PACKAGES_TEXINPUTS"
+      CF_LATEX_PACKAGES_TEXINPUTS="$TEXINPUTS"
+
+
+if test "$ac_cv_latex_class_article" = "" ;
+then
+
+{ echo "$as_me:$LINENO: checking for class article" >&5
+echo $ECHO_N "checking for class article... $ECHO_C" >&6; }
+if test "${ac_cv_latex_class_article+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+echo "\\documentclass{article}" > testconf.tex
+cat >> testconf.tex << \EOF
+
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_class_article=yes; export ac_cv_latex_class_article;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_class_article" >&5
+echo "${ECHO_T}$ac_cv_latex_class_article" >&6; }
+boretti_classesansparametre=$ac_cv_latex_class_article ; export boretti_classesansparametre;
+
+
+
+
+	export boretti_classesansparametre;
+else
+	boretti_classesansparametre=$ac_cv_latex_class_article ;
+	export boretti_classesansparemetre;
+fi;
+if test $boretti_classesansparametre = "no" ;
+then
+    { { echo "$as_me:$LINENO: error: Unable to find article class" >&5
+echo "$as_me: error: Unable to find article class" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+{ echo "$as_me:$LINENO: checking for verbdef in class article" >&5
+echo $ECHO_N "checking for verbdef in class article... $ECHO_C" >&6; }
+if test "${ac_cv_latex_verbdef_article+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+ac_cv_latex_verbdef_article="no"; export ac_cv_latex_verbdef_article;
+cat > testconf.tex << \EOF
+
+\documentclass{article}
+\usepackage{verbdef}
+\begin{document}
+\end{document}
+
+EOF
+
+cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_verbdef_article=yes; export ac_cv_latex_verbdef_article;
+cd ..
+rm -rf .tmps_latex
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_verbdef_article" >&5
+echo "${ECHO_T}$ac_cv_latex_verbdef_article" >&6; }
+CF_LATEX_PACKAGES_TMP=$ac_cv_latex_verbdef_article; export CF_LATEX_PACKAGES_TMP;
+
+
+
+    if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
+      { echo "$as_me:$LINENO: checking for packages verbdef in class article with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages verbdef in class article with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { { echo "$as_me:$LINENO: error: verbdef not found" >&5
+echo "$as_me: error: verbdef not found" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+    { echo "$as_me:$LINENO: checking for packages verbdef in class article with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages verbdef in class article with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+  { echo "$as_me:$LINENO: result: found" >&5
+echo "${ECHO_T}found" >&6; }
+    TEXINPUTS="$CF_LATEX_PACKAGES_TEXINPUTS"
 
     fi
 
@@ -12717,7 +14154,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 12720 "configure"' > conftest.$ac_ext
+  echo '#line 14157 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -15268,11 +16705,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15271: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16708: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15275: \$? = $ac_status" >&5
+   echo "$as_me:16712: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -15536,11 +16973,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15539: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16976: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15543: \$? = $ac_status" >&5
+   echo "$as_me:16980: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -15640,11 +17077,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15643: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17080: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15647: \$? = $ac_status" >&5
+   echo "$as_me:17084: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17948,7 +19385,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 17951 "configure"
+#line 19388 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -18048,7 +19485,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 18051 "configure"
+#line 19488 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -20388,11 +21825,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:20391: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:21828: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:20395: \$? = $ac_status" >&5
+   echo "$as_me:21832: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -20492,11 +21929,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:20495: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:21932: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:20499: \$? = $ac_status" >&5
+   echo "$as_me:21936: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -22062,11 +23499,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:22065: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:23502: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:22069: \$? = $ac_status" >&5
+   echo "$as_me:23506: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -22166,11 +23603,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:22169: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:23606: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:22173: \$? = $ac_status" >&5
+   echo "$as_me:23610: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -24368,11 +25805,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:24371: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:25808: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:24375: \$? = $ac_status" >&5
+   echo "$as_me:25812: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -24636,11 +26073,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:24639: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:26076: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:24643: \$? = $ac_status" >&5
+   echo "$as_me:26080: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -24740,11 +26177,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:24743: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:26180: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:24747: \$? = $ac_status" >&5
+   echo "$as_me:26184: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -35204,11 +36641,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:35207: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:36644: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:35211: \$? = $ac_status" >&5
+    echo "$as_me:36648: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -35253,11 +36690,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:35256: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:36693: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:35260: \$? = $ac_status" >&5
+    echo "$as_me:36697: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -35449,11 +36886,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:35452: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:36889: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:35456: \$? = $ac_status" >&5
+    echo "$as_me:36893: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -35496,11 +36933,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:35499: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:36936: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:35503: \$? = $ac_status" >&5
+    echo "$as_me:36940: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -35544,11 +36981,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:35547: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:36984: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:35551: \$? = $ac_status" >&5
+    echo "$as_me:36988: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -35591,11 +37028,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:35594: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37031: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:35598: \$? = $ac_status" >&5
+    echo "$as_me:37035: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -35638,11 +37075,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:35641: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37078: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:35645: \$? = $ac_status" >&5
+    echo "$as_me:37082: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -35685,11 +37122,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:35688: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37125: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:35692: \$? = $ac_status" >&5
+    echo "$as_me:37129: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -35732,11 +37169,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:35735: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37172: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:35739: \$? = $ac_status" >&5
+    echo "$as_me:37176: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -35779,11 +37216,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:35782: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37219: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:35786: \$? = $ac_status" >&5
+    echo "$as_me:37223: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -35826,11 +37263,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:35829: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37266: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:35833: \$? = $ac_status" >&5
+    echo "$as_me:37270: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -35873,11 +37310,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:35876: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37313: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:35880: \$? = $ac_status" >&5
+    echo "$as_me:37317: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -35935,11 +37372,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:35938: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37375: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:35942: \$? = $ac_status" >&5
+    echo "$as_me:37379: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -35984,11 +37421,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:35987: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37424: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:35991: \$? = $ac_status" >&5
+    echo "$as_me:37428: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -36037,11 +37474,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:36040: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37477: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:36044: \$? = $ac_status" >&5
+    echo "$as_me:37481: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -36084,11 +37521,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:36087: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37524: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:36091: \$? = $ac_status" >&5
+    echo "$as_me:37528: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -36132,11 +37569,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:36135: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37572: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:36139: \$? = $ac_status" >&5
+    echo "$as_me:37576: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -36179,11 +37616,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:36182: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37619: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:36186: \$? = $ac_status" >&5
+    echo "$as_me:37623: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -36226,11 +37663,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:36229: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37666: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:36233: \$? = $ac_status" >&5
+    echo "$as_me:37670: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -36273,11 +37710,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:36276: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37713: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:36280: \$? = $ac_status" >&5
+    echo "$as_me:37717: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -36320,11 +37757,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:36323: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37760: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:36327: \$? = $ac_status" >&5
+    echo "$as_me:37764: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -36367,11 +37804,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:36370: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37807: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:36374: \$? = $ac_status" >&5
+    echo "$as_me:37811: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -36414,11 +37851,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:36417: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37854: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:36421: \$? = $ac_status" >&5
+    echo "$as_me:37858: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38666,10 +40103,10 @@ done
 
 
 
-ac_config_links="$ac_config_links src/dsp1f.h:src/codegen/dsp1f.h.built src/dmnuminc.h:src/codegen/dmnuminc.h.built src/dsp2def.h:src/codegen/dsp2def.h.built src/dgen_0.h:src/codegen/dgen_0.h.built src/dnode_0.h:src/codegen/dnode_0.h.built src/dpawn_0.h:src/codegen/dpawn_0.h.built src/dm-errs.h:src/codegen/dm-errs.h.built src/dvt_0.h:src/codegen/dvt_0.h.built src/codegen/dm.h:src/dm.h src/codegen/dmglobals.c:src/dmglobals.c src/codegen/dsp1.c:src/dsp1.c src/codegen/dm1.c:src/dm1.c src/codegen/dm2.c:src/dm2.c src/codegen/dm2.h:src/dm2.h src/codegen/dm3.h:src/dm3.h src/codegen/dm-prop.h:src/dm-prop.h src/codegen/dm-signals.h:src/dm-signals.h src/codegen/dm-vm.h:src/dm-vm.h src/codegen/dm-swapbytes.h:src/dm-swapbytes.h src/codegen/dm-conv.c:src/dm-conv.c src/codegen/dm3.c:src/dm3.c src/codegen/dm-prop.c.in:src/dm-prop.c.in src/codegen/dm-signals.c:src/dm-signals.c src/codegen/dm-vm.c:src/dm-vm.c src/codegen/dm4.c:src/dm4.c src/codegen/dm5.c:src/dm5.c src/codegen/dm6.c:src/dm6.c src/codegen/dm7.c:src/dm7.c src/codegen/dm8.c:src/dm8.c src/codegen/dmnum.c:src/dmnum.c src/codegen/dsp2.c:src/dsp2.c src/codegen/dm-types.h:src/dm-types.h src/codegen/dm-types.c:src/dm-types.c src/codegen/paths.h.in:src/paths.h.in src/codegen/dgen.c:src/dgen.c src/codegen/dgen_1.h:src/dgen_1.h src/codegen/dgen-build:src/dgen-build src/codegen/dmnum.h:src/dmnum.h src/codegen/dm-nextevent.c:src/dm-nextevent.c src/codegen/dm-nextevent.h:src/dm-nextevent.h plugins/plugin.d:dcode/plugin.d dcode/errors.d:src/codegen/errors.d plugins/startup_dgen.d:src/codegen/startup_dgen.d plugins/errors.d:src/codegen/errors.d emacs/d-mode-ops.el:src/codegen/d-mode-ops.el plugins/new-plugin.d.in:dcode/new-plugin.d.in"
+ac_config_links="$ac_config_links src/dsp1f.h:src/codegen/dsp1f.h.built src/dmnuminc.h:src/codegen/dmnuminc.h.built src/dsp2def.h:src/codegen/dsp2def.h.built src/dgen_0.h:src/codegen/dgen_0.h.built src/dnode_0.h:src/codegen/dnode_0.h.built src/dpawn_0.h:src/codegen/dpawn_0.h.built src/dm-errs.h:src/codegen/dm-errs.h.built src/dvt_0.h:src/codegen/dvt_0.h.built src/codegen/dm.h:src/dm.h src/codegen/dmglobals.c:src/dmglobals.c src/codegen/dsp1.c:src/dsp1.c src/codegen/dm1.c:src/dm1.c src/codegen/dm2.c:src/dm2.c src/codegen/dm2.h:src/dm2.h src/codegen/dm3.h:src/dm3.h src/codegen/dm-prop.h:src/dm-prop.h src/codegen/dm-signals.h:src/dm-signals.h src/codegen/dm-vm.h:src/dm-vm.h src/codegen/dm-swapbytes.h:src/dm-swapbytes.h src/codegen/dm-conv.c:src/dm-conv.c src/codegen/dm3.c:src/dm3.c src/codegen/dm-prop.c.in:src/dm-prop.c.in src/codegen/dm-signals.c:src/dm-signals.c src/codegen/dm-vm.c:src/dm-vm.c src/codegen/dm4.c:src/dm4.c src/codegen/dm5.c:src/dm5.c src/codegen/dm6.c:src/dm6.c src/codegen/dm7.c:src/dm7.c src/codegen/dm8.c:src/dm8.c src/codegen/dmnum.c:src/dmnum.c src/codegen/dsp2.c:src/dsp2.c src/codegen/dm-types.h:src/dm-types.h src/codegen/dm-types.c:src/dm-types.c src/codegen/paths.h.in:src/paths.h.in src/codegen/dgen.c:src/dgen.c src/codegen/dgen_1.h:src/dgen_1.h src/codegen/dgen-build:src/dgen-build src/codegen/dmnum.h:src/dmnum.h src/codegen/dm-nextevent.c:src/dm-nextevent.c src/codegen/dm-nextevent.h:src/dm-nextevent.h plugins/plugin.d:dcode/plugin.d dcode/errors.d:src/codegen/errors.d plugins/startup_dgen.d:src/codegen/startup_dgen.d plugins/errors.d:src/codegen/errors.d emacs/d-mode-ops.el:src/codegen/d-mode-ops.el plugins/new-plugin.d.in:dcode/new-plugin.d.in doc/dvt-3.0.bib:doc/dvt.bib doc/dvt-emacs.bib:doc/dvt.bib"
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/codegen/Makefile src/dm.pc plugins/Makefile plugins/dmflex.l ps/Makefile sh/Makefile emacs/Makefile dcode/Makefile test/Makefile m4/Makefile test/arr.d lib/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/codegen/Makefile src/dm.pc plugins/Makefile plugins/dmflex.l ps/Makefile sh/Makefile emacs/Makefile dcode/Makefile test/Makefile m4/Makefile test/arr.d lib/Makefile doc/Makefile doc/config.sty"
 
 
 cat >confcache <<\_ACEOF
@@ -38828,6 +40265,13 @@ if test -z "${ENABLE_UNIX_SOCKETS_TRUE}" && test -z "${ENABLE_UNIX_SOCKETS_FALSE
   { { echo "$as_me:$LINENO: error: conditional \"ENABLE_UNIX_SOCKETS\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 echo "$as_me: error: conditional \"ENABLE_UNIX_SOCKETS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${ENABLE_DOC_TRUE}" && test -z "${ENABLE_DOC_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"ENABLE_DOC\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"ENABLE_DOC\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -39610,6 +41054,8 @@ do
     "plugins/errors.d") CONFIG_LINKS="$CONFIG_LINKS plugins/errors.d:src/codegen/errors.d" ;;
     "emacs/d-mode-ops.el") CONFIG_LINKS="$CONFIG_LINKS emacs/d-mode-ops.el:src/codegen/d-mode-ops.el" ;;
     "plugins/new-plugin.d.in") CONFIG_LINKS="$CONFIG_LINKS plugins/new-plugin.d.in:dcode/new-plugin.d.in" ;;
+    "doc/dvt-3.0.bib") CONFIG_LINKS="$CONFIG_LINKS doc/dvt-3.0.bib:doc/dvt.bib" ;;
+    "doc/dvt-emacs.bib") CONFIG_LINKS="$CONFIG_LINKS doc/dvt-emacs.bib:doc/dvt.bib" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "src/codegen/Makefile") CONFIG_FILES="$CONFIG_FILES src/codegen/Makefile" ;;
@@ -39624,6 +41070,8 @@ do
     "m4/Makefile") CONFIG_FILES="$CONFIG_FILES m4/Makefile" ;;
     "test/arr.d") CONFIG_FILES="$CONFIG_FILES test/arr.d" ;;
     "lib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
+    "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
+    "doc/config.sty") CONFIG_FILES="$CONFIG_FILES doc/config.sty" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
@@ -39878,6 +41326,19 @@ ENABLE_UNIX_SOCKETS_FALSE!$ENABLE_UNIX_SOCKETS_FALSE$ac_delim
 ENABLE_UNIX_SOCKETS!$ENABLE_UNIX_SOCKETS$ac_delim
 DMSOCKDIR!$DMSOCKDIR$ac_delim
 dmsockdir!$dmsockdir$ac_delim
+ENABLE_DOC_TRUE!$ENABLE_DOC_TRUE$ac_delim
+ENABLE_DOC_FALSE!$ENABLE_DOC_FALSE$ac_delim
+ENABLE_DOC!$ENABLE_DOC$ac_delim
+pdflatex!$pdflatex$ac_delim
+bibtex!$bibtex$ac_delim
+makeindex!$makeindex$ac_delim
+latex!$latex$ac_delim
+article!$article$ac_delim
+book!$book$ac_delim
+amsmath!$amsmath$ac_delim
+boretti_classesansparametre!$boretti_classesansparametre$ac_delim
+CF_LATEX_PACKAGES_TMP!$CF_LATEX_PACKAGES_TMP$ac_delim
+CF_LATEX_PACKAGE_OPT_TMP!$CF_LATEX_PACKAGE_OPT_TMP$ac_delim
 CC!$CC$ac_delim
 CFLAGS!$CFLAGS$ac_delim
 LDFLAGS!$LDFLAGS$ac_delim
@@ -39916,19 +41377,6 @@ ENABLE_DMFLEX_FALSE!$ENABLE_DMFLEX_FALSE$ac_delim
 STRINGBUF!$STRINGBUF$ac_delim
 NAMEBYTES_1!$NAMEBYTES_1$ac_delim
 LEX!$LEX$ac_delim
-LEX_OUTPUT_ROOT!$LEX_OUTPUT_ROOT$ac_delim
-LEXLIB!$LEXLIB$ac_delim
-guipdf!$guipdf$ac_delim
-ENABLE_ATLAS_TRUE!$ENABLE_ATLAS_TRUE$ac_delim
-ENABLE_ATLAS_FALSE!$ENABLE_ATLAS_FALSE$ac_delim
-ATLAS_LIBS!$ATLAS_LIBS$ac_delim
-ATLAS_FLAGS!$ATLAS_FLAGS$ac_delim
-DPAWN_COMMAND!$DPAWN_COMMAND$ac_delim
-ENABLE_MPI_TRUE!$ENABLE_MPI_TRUE$ac_delim
-ENABLE_MPI_FALSE!$ENABLE_MPI_FALSE$ac_delim
-MPI_LIBS!$MPI_LIBS$ac_delim
-MPI_FLAGS!$MPI_FLAGS$ac_delim
-PETSC_LIB!$PETSC_LIB$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -39970,6 +41418,19 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+LEX_OUTPUT_ROOT!$LEX_OUTPUT_ROOT$ac_delim
+LEXLIB!$LEXLIB$ac_delim
+guipdf!$guipdf$ac_delim
+ENABLE_ATLAS_TRUE!$ENABLE_ATLAS_TRUE$ac_delim
+ENABLE_ATLAS_FALSE!$ENABLE_ATLAS_FALSE$ac_delim
+ATLAS_LIBS!$ATLAS_LIBS$ac_delim
+ATLAS_FLAGS!$ATLAS_FLAGS$ac_delim
+DPAWN_COMMAND!$DPAWN_COMMAND$ac_delim
+ENABLE_MPI_TRUE!$ENABLE_MPI_TRUE$ac_delim
+ENABLE_MPI_FALSE!$ENABLE_MPI_FALSE$ac_delim
+MPI_LIBS!$MPI_LIBS$ac_delim
+MPI_FLAGS!$MPI_FLAGS$ac_delim
+PETSC_LIB!$PETSC_LIB$ac_delim
 PETSC_CCPPFLAGS!$PETSC_CCPPFLAGS$ac_delim
 PETSC_DIR!$PETSC_DIR$ac_delim
 PETSC_ARCH!$PETSC_ARCH$ac_delim
@@ -40054,19 +41515,6 @@ X_CFLAGS!$X_CFLAGS$ac_delim
 X_PRE_LIBS!$X_PRE_LIBS$ac_delim
 X_LIBS!$X_LIBS$ac_delim
 X_EXTRA_LIBS!$X_EXTRA_LIBS$ac_delim
-X_DISPLAY_MISSING_TRUE!$X_DISPLAY_MISSING_TRUE$ac_delim
-X_DISPLAY_MISSING_FALSE!$X_DISPLAY_MISSING_FALSE$ac_delim
-X_DISPLAY_MISSING!$X_DISPLAY_MISSING$ac_delim
-X_LDFLAGS!$X_LDFLAGS$ac_delim
-GCC_CFLAGS!$GCC_CFLAGS$ac_delim
-GCC_CXXFLAGS!$GCC_CXXFLAGS$ac_delim
-INCLTDL!$INCLTDL$ac_delim
-LIBLTDL!$LIBLTDL$ac_delim
-subdirs!$subdirs$ac_delim
-LIBDM_DLL_IMPORT!$LIBDM_DLL_IMPORT$ac_delim
-LIBPLUGIN_DLL_IMPORT!$LIBPLUGIN_DLL_IMPORT$ac_delim
-pkglibdir!$pkglibdir$ac_delim
-pkgincludedir!$pkgincludedir$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -40108,6 +41556,19 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+X_DISPLAY_MISSING_TRUE!$X_DISPLAY_MISSING_TRUE$ac_delim
+X_DISPLAY_MISSING_FALSE!$X_DISPLAY_MISSING_FALSE$ac_delim
+X_DISPLAY_MISSING!$X_DISPLAY_MISSING$ac_delim
+X_LDFLAGS!$X_LDFLAGS$ac_delim
+GCC_CFLAGS!$GCC_CFLAGS$ac_delim
+GCC_CXXFLAGS!$GCC_CXXFLAGS$ac_delim
+INCLTDL!$INCLTDL$ac_delim
+LIBLTDL!$LIBLTDL$ac_delim
+subdirs!$subdirs$ac_delim
+LIBDM_DLL_IMPORT!$LIBDM_DLL_IMPORT$ac_delim
+LIBPLUGIN_DLL_IMPORT!$LIBPLUGIN_DLL_IMPORT$ac_delim
+pkglibdir!$pkglibdir$ac_delim
+pkgincludedir!$pkgincludedir$ac_delim
 PCLIBS!$PCLIBS$ac_delim
 PCCFLAGS!$PCCFLAGS$ac_delim
 PCLDFLAGS!$PCLDFLAGS$ac_delim
@@ -40182,7 +41643,7 @@ gltests_LIBOBJS!$gltests_LIBOBJS$ac_delim
 gltests_LTLIBOBJS!$gltests_LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 72; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 85; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

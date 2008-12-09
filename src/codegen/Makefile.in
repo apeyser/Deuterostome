@@ -44,8 +44,18 @@ DIST_COMMON = $(dist_noinst_DATA) $(dist_noinst_SCRIPTS) \
 	$(srcdir)/dvt_0.h.built $(srcdir)/errors.d \
 	$(srcdir)/startup_dgen.d
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
-	$(top_srcdir)/m4/alloca.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
+	$(top_srcdir)/m4/latex/ac_prog_bibtex.m4 \
+	$(top_srcdir)/m4/latex/ac_latex_package_amsmath.m4 \
+	$(top_srcdir)/m4/latex/ac_latex_package_opt.m4 \
+	$(top_srcdir)/m4/latex/ac_latex_package.m4 \
+	$(top_srcdir)/m4/latex/ac_latex_class_article.m4 \
+	$(top_srcdir)/m4/latex/ac_latex_class_book.m4 \
+	$(top_srcdir)/m4/latex/ac_latex_class.m4 \
+	$(top_srcdir)/m4/latex/_ac_latex_test.m4 \
+	$(top_srcdir)/m4/latex/ac_prog_pdflatex.m4 \
+	$(top_srcdir)/m4/latex/ac_prog_latex.m4 \
+	$(top_srcdir)/m4/acx_pthread.m4 $(top_srcdir)/m4/alloca.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
 	$(top_srcdir)/m4/ax_set_version_info.m4 \
@@ -126,6 +136,8 @@ BYTECORRECT = @BYTECORRECT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CF_LATEX_PACKAGES_TMP = @CF_LATEX_PACKAGES_TMP@
+CF_LATEX_PACKAGE_OPT_TMP = @CF_LATEX_PACKAGE_OPT_TMP@
 CONFIG_STATUS_DEPENDENCIES = @CONFIG_STATUS_DEPENDENCIES@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
@@ -154,6 +166,7 @@ EMACSLOADPATH = @EMACSLOADPATH@
 ENABLE_ATPS = @ENABLE_ATPS@
 ENABLE_BASH = @ENABLE_BASH@
 ENABLE_DEBUG_DMNUM = @ENABLE_DEBUG_DMNUM@
+ENABLE_DOC = @ENABLE_DOC@
 ENABLE_DVIPDF = @ENABLE_DVIPDF@
 ENABLE_EMACSCLIENT = @ENABLE_EMACSCLIENT@
 ENABLE_ENV = @ENABLE_ENV@
@@ -334,7 +347,12 @@ am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
+amsmath = @amsmath@
+article = @article@
+bibtex = @bibtex@
 bindir = @bindir@
+book = @book@
+boretti_classesansparametre = @boretti_classesansparametre@
 build = @build@
 build_alias = @build_alias@
 build_cpu = @build_cpu@
@@ -365,16 +383,19 @@ htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
+latex = @latex@
 libdir = @libdir@
 libexecdir = @libexecdir@
 lispdir = @lispdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
 m4datadir = @m4datadir@
+makeindex = @makeindex@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
+pdflatex = @pdflatex@
 pkgconfiglibdir = @pkgconfiglibdir@
 pkglispdir = @pkglispdir@
 pkgpsdatadir = @pkgpsdatadir@

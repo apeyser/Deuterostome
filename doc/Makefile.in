@@ -30,9 +30,10 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-subdir = emacs
-DIST_COMMON = $(dist_pkglisp_LISP) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+subdir = doc
+DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in $(srcdir)/config.sty.in \
+	$(srcdir)/dvt.bib
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/latex/ac_prog_bibtex.m4 \
@@ -64,7 +65,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = d-mode-ops.el
+CONFIG_CLEAN_FILES = config.sty dvt-3.0.bib dvt-emacs.bib
 SOURCES =
 DIST_SOURCES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -73,15 +74,9 @@ am__vpath_adj = case $$p in \
     *) f=$$p;; \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-am__installdirs = "$(DESTDIR)$(pkglispdir)" "$(DESTDIR)$(pkglispdir)"
-dist_pkglispLISP_INSTALL = $(INSTALL_DATA)
-nodist_pkglispLISP_INSTALL = $(INSTALL_DATA)
-LISP = $(dist_pkglisp_LISP) $(nodist_pkglisp_LISP)
-am__ELFILES = d-comint-mode.el d-mode-ops.el d-mode.el dm-server.el \
-	init.el
-am__ELCFILES = $(am__ELFILES:.el=.elc)
-ELCFILES = $(LISP:.el=.elc)
-elisp_comp = $(top_srcdir)/elisp-comp
+am__installdirs = "$(DESTDIR)$(docdir)"
+docDATA_INSTALL = $(INSTALL_DATA)
+DATA = $(dist_noinst_DATA) $(doc_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 pkgdatadir = @pkgdatadir@
 pkglibdir = @pkglibdir@
@@ -383,21 +378,22 @@ target_vendor = @target_vendor@
 tmp = @tmp@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-dist_pkglisp_LISP = dm-server.el
-NODISTFILES = d-comint-mode.el init.el d-mode.el
-nodist_pkglisp_LISP = $(NODISTFILES) d-mode-ops.el
-EXTRA_DIST = d-comint-mode.el.in init.el.in d-mode.el.in
-CLEANFILES = $(NODISTFILES)
-edit = sed \
-	-e 's,@bindir\@,$(bindir),g' \
-	-e 's,@pkglispdir\@,$(pkglispdir),g' \
-	-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
-	-e 's,[@]NAMEBYTES[@],@NAMEBYTES@,g' \
-	-e 's,[@]SVNVERSION[@],@SVNVERSION@,g'
+doc_DATA = dvt-3.0.pdf dvt-emacs.pdf newbook.pdf
+dist_noinst_DATA = chap1.tex chap2.tex chap3.tex \
+	dvt.bib \
+	redefs.sty \
+	dvt-3.0.tex dvt-emacs.tex newbook.tex
+
+EXTRA_DIST = 2ND_PRNT.PS \
+	contents1.doc contents2.doc Contents3.doc \
+	dd1.doc dd2.doc dd3.doc \
+	part1.doc part2.doc part3.doc part4.doc \
+	title.doc
 
 all: all-am
 
 .SUFFIXES:
+.SUFFIXES: .bbl .bib .idx .ind .pdf .tex
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -407,9 +403,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  emacs/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  doc/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  emacs/Makefile
+	  $(AUTOMAKE) --gnu  doc/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -427,91 +423,31 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+config.sty: $(top_builddir)/config.status $(srcdir)/config.sty.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
-
-elc-stamp: $(LISP)
-	@echo 'WARNING: Warnings can be ignored. :-)'
-	@rm -f elc-temp && touch elc-temp
-	if test "$(EMACS)" != no; then \
-	  set x; \
-	  list='$(LISP)'; for p in $$list; do \
-	    if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	    set x "$$@" "$$d$$p"; shift; \
-	  done; \
-	  shift; \
-	  EMACS="$(EMACS)" $(SHELL) $(elisp_comp) "$$@" || exit 1; \
-	else : ; fi
-	@mv -f elc-temp $@
-$(am__ELCFILES): elc-stamp
-	@if test "$(EMACS)" != no && test ! -f $@; then \
-	  trap 'rm -rf elc-lock elc-stamp' 1 2 13 15; \
-	  if mkdir elc-lock 2>/dev/null; then \
-	    rm -f elc-stamp; \
-	    $(MAKE) $(AM_MAKEFLAGS) elc-stamp; \
-	    rmdir elc-lock; \
-	  else \
-	    while test -d elc-lock; do sleep 1; done; \
-	    test -f elc-stamp; exit $$?; \
-	  fi; \
-	else : ; fi
-install-dist_pkglispLISP: $(dist_pkglisp_LISP) $(ELCFILES)
+install-docDATA: $(doc_DATA)
 	@$(NORMAL_INSTALL)
-	@if test "$(EMACS)" != no; then \
-	  test -z "$(pkglispdir)" || $(MKDIR_P) "$(DESTDIR)$(pkglispdir)"; \
-	  list='$(dist_pkglisp_LISP)'; for p in $$list; do \
-	    if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	    f=$(am__strip_dir) \
-	    echo " $(dist_pkglispLISP_INSTALL) '$$d$$p' '$(DESTDIR)$(pkglispdir)/$$f'"; \
-	    $(dist_pkglispLISP_INSTALL) "$$d$$p" "$(DESTDIR)$(pkglispdir)/$$f"; \
-	    if test -f $${p}c; then \
-	      echo " $(dist_pkglispLISP_INSTALL) '$${p}c' '$(DESTDIR)$(pkglispdir)/$${f}c'"; \
-	      $(dist_pkglispLISP_INSTALL) "$${p}c" "$(DESTDIR)$(pkglispdir)/$${f}c"; \
-	    else : ; fi; \
-	  done; \
-	else : ; fi
+	test -z "$(docdir)" || $(MKDIR_P) "$(DESTDIR)$(docdir)"
+	@list='$(doc_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(docDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(docdir)/$$f'"; \
+	  $(docDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(docdir)/$$f"; \
+	done
 
-uninstall-dist_pkglispLISP:
+uninstall-docDATA:
 	@$(NORMAL_UNINSTALL)
-	@if test "$(EMACS)" != no; then \
-	  list='$(dist_pkglisp_LISP)'; for p in $$list; do \
-	    f=$(am__strip_dir) \
-	    echo " rm -f '$(DESTDIR)$(pkglispdir)/$$f' '$(DESTDIR)$(pkglispdir)/$${f}c'"; \
-	    rm -f "$(DESTDIR)$(pkglispdir)/$$f" "$(DESTDIR)$(pkglispdir)/$${f}c"; \
-	  done; \
-	else : ; fi
-
-clean-lisp:
-	-rm -f elc-stamp $(ELCFILES)
-install-nodist_pkglispLISP: $(nodist_pkglisp_LISP) $(ELCFILES)
-	@$(NORMAL_INSTALL)
-	@if test "$(EMACS)" != no; then \
-	  test -z "$(pkglispdir)" || $(MKDIR_P) "$(DESTDIR)$(pkglispdir)"; \
-	  list='$(nodist_pkglisp_LISP)'; for p in $$list; do \
-	    if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	    f=$(am__strip_dir) \
-	    echo " $(nodist_pkglispLISP_INSTALL) '$$d$$p' '$(DESTDIR)$(pkglispdir)/$$f'"; \
-	    $(nodist_pkglispLISP_INSTALL) "$$d$$p" "$(DESTDIR)$(pkglispdir)/$$f"; \
-	    if test -f $${p}c; then \
-	      echo " $(nodist_pkglispLISP_INSTALL) '$${p}c' '$(DESTDIR)$(pkglispdir)/$${f}c'"; \
-	      $(nodist_pkglispLISP_INSTALL) "$${p}c" "$(DESTDIR)$(pkglispdir)/$${f}c"; \
-	    else : ; fi; \
-	  done; \
-	else : ; fi
-
-uninstall-nodist_pkglispLISP:
-	@$(NORMAL_UNINSTALL)
-	@if test "$(EMACS)" != no; then \
-	  list='$(nodist_pkglisp_LISP)'; for p in $$list; do \
-	    f=$(am__strip_dir) \
-	    echo " rm -f '$(DESTDIR)$(pkglispdir)/$$f' '$(DESTDIR)$(pkglispdir)/$${f}c'"; \
-	    rm -f "$(DESTDIR)$(pkglispdir)/$$f" "$(DESTDIR)$(pkglispdir)/$${f}c"; \
-	  done; \
-	else : ; fi
+	@list='$(doc_DATA)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(docdir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(docdir)/$$f"; \
+	done
 tags: TAGS
 TAGS:
 
@@ -547,9 +483,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LISP) $(ELCFILES)
+all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(pkglispdir)" "$(DESTDIR)$(pkglispdir)"; do \
+	for dir in "$(DESTDIR)$(docdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -569,7 +505,6 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -579,7 +514,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libtool clean-lisp mostlyclean-am
+clean-am: clean-generic clean-libtool clean-local mostlyclean-am
 
 distclean: distclean-am
 	-rm -f Makefile
@@ -595,7 +530,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dist_pkglispLISP install-nodist_pkglispLISP
+install-data-am: install-docDATA
 
 install-dvi: install-dvi-am
 
@@ -629,41 +564,53 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-dist_pkglispLISP uninstall-nodist_pkglispLISP
+uninstall-am: uninstall-docDATA
 
 .MAKE: install-am install-strip
 
 .PHONY: all all-am check check-am clean clean-generic clean-libtool \
-	clean-lisp distclean distclean-generic distclean-libtool \
+	clean-local distclean distclean-generic distclean-libtool \
 	distdir dvi dvi-am html html-am info info-am install \
-	install-am install-data install-data-am \
-	install-dist_pkglispLISP install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man \
-	install-nodist_pkglispLISP install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
-	uninstall-dist_pkglispLISP uninstall-nodist_pkglispLISP
+	install-am install-data install-data-am install-docDATA \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-html install-html-am install-info install-info-am \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
+	ps ps-am uninstall uninstall-am uninstall-docDATA
 
 
-d-mode.el: Makefile $(srcdir)/d-mode.el.in @SVNVERSION_STAMP@
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/$@.in >$@.tmp
-	mv $@.tmp $@
+.tex.pdf:
+	TEXINPUTS="$(srcdir):$(builddir):$$TEXINPUTS" \
+		$(pdflatex) -interaction nonstopmode $<
+	TEXINPUTS="$(srcdir):$(builddir):$$TEXINPUTS" \
+		$(pdflatex) -interaction nonstopmode $<
 
-d-comint-mode.el: Makefile $(srcdir)/d-comint-mode.el.in @SVNVERSION_STAMP@
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/$@.in >$@.tmp
-	mv $@.tmp $@
+.bib.bbl:
+	TEXINPUTS="$(srcdir):$(builddir):$$TEXINPUTS" \
+		$(pdflatex) -interaction nonstopmode `basename $< .bib`
+	TEXINPUTS="$(srcdir):$(builddir):$$TEXINPUTS" \
+		BIBINPUTS="$(srcdir):$(builddir):$$BIBINPUTS" \
+		$(bibtex) `basename $@ .bbl`
 
-init.el: Makefile $(srcdir)/init.el.in @SVNVERSION_STAMP@
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/$@.in >$@.tmp
-	mv $@.tmp $@
+.idx.ind:
+	$(makeindex) $<
 
-@MAKE_SVNVERSION_TOP@
+.tex.idx:
+	TEXINPUTS="$(srcdir):$(builddir):$$TEXINPUTS" \
+		$(pdflatex) -interaction nonstopmode $<
+	TEXINPUTS="$(srcdir):$(builddir):$$TEXINPUTS" \
+		$(pdflatex) -interaction nonstopmode $<
+
+dvt-emacs.bbl: dvt-emacs.tex
+dvt-emacs.pdf: dvt-emacs.bbl config.sty
+dvt-3.0.bbl: dvt-3.0.tex
+dvt-3.0.pdf: dvt-3.0.bbl config.sty
+newbook.pdf: newbook.ind chap1.tex chap2.tex chap3.tex config.sty
+
+clean-local:
+	-rm *.aux *.bbl *.log *.toc *.out *.blg *.pdf *.ilg *.ind
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
