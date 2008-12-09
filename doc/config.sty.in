@@ -11,14 +11,25 @@
 %  in \title
 %
 \newcommand\titleversion{%
-  \vspace{0.5\baselineskip}%
-  {\small Version: \id,\\[-\baselineskip]
-    V@PACKAGE_VERSION@, svn-@SVNVERSION@}%
+  \begingroup%
+    \def\verbatim@font{}%
+    \vspace{0.5\baselineskip}%
+    {%
+      \titleversionfont%
+      Version: @PACKAGE_VERSION@, SVN: @SVNVERSION@\\[-\baselineskip]
+      \id%
+    }%
+  \endgroup%
 }%
+%
+% Call \renewcommand\titleversionfont{\big} or some other
+%  non-parameter taking font command
+%
+\newcommand\titleversionfont{\small}%
 %
 % This is the \usepackage line for amsmath out of configure
 % It'll be either \usepackage{amsmath}
 %   \usepackage{amsmath,amsfonts}
 %
-@amsmath@
+@amsmath@%
 %
