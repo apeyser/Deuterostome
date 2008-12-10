@@ -15,7 +15,6 @@ GENTOO_FILES = \
 	gentoo/dev-lang/dm/files/dnoded.conf \
 	gentoo/dev-lang/dm/files/dnoded.rc6
 
-
 EXTRA_DIST = bootstrap autom4te.cfg \
 	gnulib-tool-import.sh link-warning.h \
 	$(DEBIAN_FILES) $(GENTOO_FILES)
@@ -40,8 +39,6 @@ SUBDIRS = libltdl lib src plugins $(BASH_DIR) ps \
 ACLOCAL_AMFLAGS = -I m4 -I m4/latex
 DISTCHECK_CONFIGURE_FLAGS = --enable-plugins --enable-daemon
 #--disable-process
-
-@MAKE_SVNVERSION@
 
 gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild:
 	svn mv gentoo/dev-lang/dm/dm-*.ebuild $@
@@ -79,3 +76,5 @@ gencode-all: gencode all
 gencode: 
 	cd libltdl && $(MAKE) $(AM_MAKEFLAGS) all
 	cd src && $(MAKE) $(AM_MAKEFLAGS) gencode
+
+include $(srcdir)/m4/cf_svnversion-top.make

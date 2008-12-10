@@ -185,4 +185,5 @@ new-plugin.d: $(srcdir)/Makefile $(srcdir)/new-plugin.d.in @SVNVERSION_STAMP@
 	$(edit) $(srcdir)/new-plugin.d.in >$@.tmp
 	mv $@.tmp $@
 
-@MAKE_SVNVERSION_TOP@
+include $(top_srcdir)/m4/cf_svnversion.make
+

@@ -30,10 +30,10 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-subdir = doc
 DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.sty.in \
-	$(srcdir)/dvt.bib
+	$(srcdir)/dvt.bib $(top_srcdir)/m4/cf_latex.make
+subdir = doc
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/latex/ac_prog_bibtex.m4 \
@@ -50,11 +50,12 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
 	$(top_srcdir)/m4/ax_set_version_info.m4 \
-	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/cf_mpi.m4 \
-	$(top_srcdir)/m4/cf_petsc.m4 $(top_srcdir)/m4/configure.m4 \
-	$(top_srcdir)/m4/d-type.m4 $(top_srcdir)/m4/dirfd.m4 \
-	$(top_srcdir)/m4/extensions.m4 $(top_srcdir)/m4/glob.m4 \
-	$(top_srcdir)/m4/gnulib-common.m4 \
+	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/cf_latex.m4 \
+	$(top_srcdir)/m4/cf_mpi.m4 $(top_srcdir)/m4/cf_petsc.m4 \
+	$(top_srcdir)/m4/cf_svnversion.m4 \
+	$(top_srcdir)/m4/configure.m4 $(top_srcdir)/m4/d-type.m4 \
+	$(top_srcdir)/m4/dirfd.m4 $(top_srcdir)/m4/extensions.m4 \
+	$(top_srcdir)/m4/glob.m4 $(top_srcdir)/m4/gnulib-common.m4 \
 	$(top_srcdir)/m4/gnulib-comp.m4 \
 	$(top_srcdir)/m4/include_next.m4 \
 	$(top_srcdir)/m4/lib_socket_nsl.m4 $(top_srcdir)/m4/libtool.m4 \
@@ -394,7 +395,7 @@ all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .bbl .bib .idx .ind .pdf .tex
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_latex.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -581,6 +582,12 @@ uninstall-am: uninstall-docDATA
 	ps ps-am uninstall uninstall-am uninstall-docDATA
 
 
+dvt-emacs.bbl: dvt-emacs.tex
+dvt-emacs.tex: dvt-emacs.bbl config.sty
+dvt-3.0.bbl: dvt-3.0.tex
+dvt-3.0.tex: dvt-3.0.bbl config.sty
+newbook.tex: chap1.tex chap2.tex chap3.tex config.sty
+newbook.pdf: newbook.ind
 .tex.pdf:
 	TEXINPUTS="$(srcdir):$(builddir):$$TEXINPUTS" \
 		$(pdflatex) -interaction nonstopmode $<
@@ -603,14 +610,12 @@ uninstall-am: uninstall-docDATA
 	TEXINPUTS="$(srcdir):$(builddir):$$TEXINPUTS" \
 		$(pdflatex) -interaction nonstopmode $<
 
-dvt-emacs.bbl: dvt-emacs.tex
-dvt-emacs.pdf: dvt-emacs.bbl config.sty
-dvt-3.0.bbl: dvt-3.0.tex
-dvt-3.0.pdf: dvt-3.0.bbl config.sty
-newbook.pdf: newbook.ind chap1.tex chap2.tex chap3.tex config.sty
+.PHONY: clean-local-latex
 
-clean-local:
+clean-local-latex:
 	-rm *.aux *.bbl *.log *.toc *.out *.blg *.pdf *.ilg *.ind
+
+clean-local: clean-local-latex
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -544,13 +544,13 @@ dnl
 ])dnl
 dnl
 dnl 
-dnl CF_INSERT_([> or >>], [file], [text])
+dnl CF_INSERT_([> or >>], [file], [text], [quote])
 dnl
 dnl cat text + newline into file -- either using > or >>
 dnl
-AC_DEFUN([CF_INSERT_], [[cat $1"$2" <<EOF
+AC_DEFUN([CF_INSERT_], [[cat $1"$2" <<$4_CF_INSERT_EOF_
 $3
-EOF]])dnl
+_CF_INSERT_EOF_]])dnl
 dnl
 dnl
 dnl CF_INSERT([file], [text])
@@ -566,111 +566,20 @@ dnl appends 'text' + newline to file
 dnl
 AC_DEFUN([CF_APPEND], [CF_INSERT_([>>], [$1], [$2])])dnl
 dnl
-AC_DEFUN([CF_SVNVERSION_CHECK], [dnl
-  test -n "$cf_svnversion$1" \
-    && test "$cf_svnversion$1" != "unknown" \
-    && test "$cf_svnversion$1" != "exported" \
-    && SVNVERSION="$cf_svnversion$1" dnl
-])dnl
+dnl CF_INSERT_LITERAL([file], [text])
 dnl
-AC_DEFUN([CF_SVNVERSION_READ], [dnl
-  ifelse([$#], [2], [dnl
-    test -e "$2$cf_svnversion_stamp" \
-      && cf_svnversion$1=`cat "$2$cf_svnversion_stamp" 2>/dev/null`], dnl
-    [cf_svnversion$1=`$3 2>/dev/null`])dnl
-])dnl
+dnl overwrites file with 'text' + newline
+dnl The 'literal' series inserts without expansion
 dnl
-AC_DEFUN([CF_SVNVERSION_WRITE], [dnl
-  test "$SVNVERSION" != "$cf_svnversion$1" \
-    && echo "$SVNVERSION" >"$2$cf_svnversion_stamp" dnl
-])dnl
+AC_DEFUN([CF_INSERT_LITERAL], [CF_INSERT_([>], [$1], [$2], [\])])dnl
 dnl
 dnl
-dnl CF_SVNVERSION
+dnl CF_APPEND_LITERAL([file], [text])
 dnl
-dnl during configuration, runs svnversion and
-dnl  if the version has changed, stores it in svnversion.stamp
-dnl  and $srcdir/svnversion.stamp if maintainter mode is on.
-dnl Also, sets up dependencies and inital setup in makefiles,
-dnl  using @MAKE_SVNVERSION@ for the top-level Makefile,
-dnl SVNVERSION then gets AC_SUBST'D, and SVNVERSION_STAMP is SUBST'D
-dnl  for dependencies in Makefiles.
+dnl appends 'text' + newline to file
+dnl The 'literal' series inserts without expansion
 dnl
-AC_DEFUN([CF_SVNVERSION], [dnl
-  AC_MSG_CHECKING([for SVNVERSION value])
-dnl
-  SVNVERSION="unknown"
-  cf_svnversion_stamp="svnversion.stamp"
-  MAKE_SVNVERSION="svnversion.make"
-  MAKE_SVNVERSION_TOP="svnversion-top.make"
-  SVNVERSION_STAMP="\$(top_srcdir)/$cf_svnversion_stamp \$(top_builddir)/$cf_svnversion_stamp"
-dnl
-  CF_SVNVERSION_READ([_src], [$srcdir/])
-  CF_SVNVERSION_READ([_build], [])
-  CF_SVNVERSION_READ([], [], [svnversion])
-dnl
-  CF_SVNVERSION_CHECK([_src])
-  CF_SVNVERSION_CHECK([_build])
-  CF_SVNVERSION_CHECK([])
-dnl
-  if test $USE_MAINTAINER_MODE = yes; then
-     CF_SVNVERSION_WRITE([_src], [$srcdir/])
-  fi
-  CF_SVNVERSION_WRITE([_build], [])
-dnl
-  CF_INSERT([$MAKE_SVNVERSION], dnl
-[.PHONY: svnversion
-$cf_svnversion_stamp svnversion: \$(top_srcdir)/configure
-	cd \$(top_srcdir) && ./config.status --recheck && ./config.status
-
-EXTRA_DIST += $cf_svnversion_stamp
-distclean: distclean-local-svnversion
-.PHONY: distclean-local-svnversion
-distclean-local-svnversion:
-	if test \`cd "\$(top_srcdir)" && pwd -P\` \\
-	   	!= \`cd "\$(top_builddir)" && pwd -P\` ; then \\
-	  cd "\$(top_builddir)" \\
-	  && rm $cf_svnversion_stamp \\
-	     	$MAKE_SVNVERSION \\
-		$MAKE_SVNVERSION_TOP ; \\
-	fi
-])
-dnl
-  CF_INSERT([$MAKE_SVNVERSION_TOP], dnl
-[\$(top_builddir)/$cf_svnversion_stamp:
-	cd \$(top_builddir) && \$(MAKE) \$(AM_MAKEFLAGS) $cf_svnversion_stamp
-
-\$(top_srcdir)/$cf_svnversion_stamp:
-	cd \$(top_builddir) && \$(MAKE) \$(AM_MAKEFLAGS) $cf_svnversion_stamp
-])
-dnl
-  AC_SUBST([SVNVERSION])
-  AC_SUBST([SVNVERSION_STAMP])
-  AC_SUBST_FILE([MAKE_SVNVERSION])
-  AC_SUBST_FILE([MAKE_SVNVERSION_TOP])
-dnl
-  AC_MSG_RESULT([src stamp = $cf_svnversion_src, build stamp = $cf_svnversion_build, svnversion = $cf_svnversion, SVNVERSION = $SVNVERSION]) dnl
-])dnl
-dnl
-AC_DEFUN([CF_C_INLINE], [dnl
-  AC_C_INLINE
-  if test $ac_cv_c_inline = "no" ; then
-    AC_DEFINE([inline], [static])
-  else
-    AC_DEFINE([HAS_INLINE], [1], [Define to 1 if compiler has inline])
-  fi dnl
-])
-
-AC_DEFUN([CF_AC_CHECK_HEADER_WITH], [dnl
-  cf_ac_includes_default="${ac_includes_default}"
-  for i in $2 ; do
-      ac_includes_default="
-#include <$i>
-"
-  done
-  AC_CHECK_HEADER([$1], [$3], [$4])
-  ac_includes_default="${ac_includes_default}" dnl
-])dnl
+AC_DEFUN([CF_APPEND_LITERAL], [CF_INSERT_([>>], [$1], [$2], [\])])dnl
 dnl
 AC_DEFUN([CF_AC_CHECK_XSEC], [dnl
   cf_check_sec=false
@@ -690,91 +599,23 @@ AC_DEFUN([CF_AC_CHECK_XSEC], [dnl
   fi dnl
 ])dnl
 dnl
-dnl CF_LATEX_PUSH_TEXINPUTS([extra directories])
-dnl
-AC_DEFUN([CF_LATEX_PUSH_TEXINPUTS], [dnl
-  CF_LATEX_PACKAGES_TEXINPUTS="$TEXINPUTS"
-  ifelse($1, , , [TEXINPUTS="$1:$TEXINPUTS"])dnl
-])dnl
-dnl
-dnl CF_LATEX_POP_TEXINPUTS
-AC_DEFUN([CF_LATEX_POP_TEXINPUTS], [dnl
-  TEXINPUTS="$CF_LATEX_PACKAGES_TEXINPUTS" dnl
-])dnl
-dnl
-dnl CF_LATEX_PACKAGES([packages,...], [class], [extra directories -- opt])
-dnl
-AC_DEFUN([CF_LATEX_PACKAGES], [dnl
-  CF_LATEX_PUSH_TEXINPUTS([$3])
-  m4_foreach([CF_LATEX_PACKAGES_PACKAGE], [$1], [dnl
-    AC_LATEX_PACKAGE(CF_LATEX_PACKAGES_PACKAGE, [$2], [CF_LATEX_PACKAGES_TMP])
-    if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
-      AC_MSG_CHECKING([for packages $1 in class $2 with tex directories \`$TEXINPUTS'])
-      AC_MSG_ERROR(CF_LATEX_PACKAGES_PACKAGE[ not found])
-    fi
-  ])dnl
-  AC_MSG_CHECKING([for packages $1 in class $2 with tex directories \`$TEXINPUTS'])
-  AC_MSG_RESULT([found])
-  CF_LATEX_POP_TEXINPUTS dnl
-])dnl
-dnl
-dnl CF_LATEX_PACKAGE_OPT([package], [class], [opts], [extra directories -- opt])
-dnl
-AC_DEFUN([CF_LATEX_PACKAGE_OPT], [dnl
-  CF_LATEX_PUSH_TEXINPUTS([$4])
-  AC_LATEX_PACKAGE_OPT([$1], [$2], [CF_LATEX_PACKAGE_OPT_TMP], [$3])
-  AC_MSG_CHECKING([for package $1 in class $2 with option $3 and tex directories `$TEXINPUTS'])
-  if test "$CF_LATEX_PACKAGE_OPT_TMP" = "no" ; then
-    AC_MSG_ERROR([not found])
-  fi
-  AC_MSG_RESULT([found])
-  CF_LATEX_POP_TEXINPUTS dnl
-])dnl
-dnl
-dnl
-dnl CF_PROG_PDFLATEX
-dnl
-AC_DEFUN([CF_PROG_PDFLATEX], [AC_PROG_PDFLATEX])dnl
-dnl
-AC_DEFUN([CF_PROG_BIBTEX], [AC_PROG_BIBTEX])dnl
-dnl
-AC_DEFUN([CF_PROG_MAKEINDEX], [AC_PROG_MAKEINDEX])dnl
-dnl
-AC_DEFUN([CF_LATEX_CLASS_ARTICLE], [AC_LATEX_CLASS_ARTICLE])dnl
-dnl
-AC_DEFUN([CF_LATEX_CLASS_BOOK], [AC_LATEX_CLASS_BOOK])dnl
-dnl
-AC_DEFUN([CF_LATEX_PACKAGE_AMSMATH], [dnl
-  AC_MSG_CHECKING([for package amsmath])
-  AC_LATEX_CLASS_ARTICLE
-  AC_MSG_RESULT([found amsmath: $amsmath])dnl
-])dnl
-dnl
-dnl CF_LATEX_BIBSTYLE([bibstyle], [class opt], [bibpackage opt])
-dnl
-AC_DEFUN([CF_LATEX_BIBSTYLE], [dnl
-  CF_LATEX_BIBSTYLE_([$1],dnl
-ifelse([$#], [1],[book],[$2]),dnl
-ifelse([$#],[1], [natbib],[$\#],[2],[natbib],[$3]))dnl
-])dnl
-dnl
-AC_DEFUN([CF_LATEX_BIBSTYLE_], [dnl
-  CF_LATEX_BIBSTYLE__([$1], [$2], [$3],dnl
-[cf_cv_latex_bibstyle_]translit($1_$2_$3,[-],[_]))dnl
-])dnl
-dnl
-AC_DEFUN([CF_LATEX_BIBSTYLE__], [dnl
-  AC_CACHE_CHECK([for bibstyle $1 in class $2 class and package $3],[$4],dnl
-[_AC_LATEX_TEST([
-\documentclass{$2}
-\usepackage{$3}
-\bibliographystyle{$1}
-\begin{document}
-\end{document}
-],[$4])])
-dnl
-  if test "$$4" = "no" ; then
-    AC_MSG_ERROR([bibstyle $1 not found])
+AC_DEFUN([CF_C_INLINE], [dnl
+  AC_C_INLINE
+  if test $ac_cv_c_inline = "no" ; then
+    AC_DEFINE([inline], [static])
+  else
+    AC_DEFINE([HAS_INLINE], [1], [Define to 1 if compiler has inline])
   fi dnl
+])dnl
+dnl
+AC_DEFUN([CF_AC_CHECK_HEADER_WITH], [dnl
+  cf_ac_includes_default="${ac_includes_default}"
+  for i in $2 ; do
+      ac_includes_default="
+#include <$i>
+"
+  done
+  AC_CHECK_HEADER([$1], [$3], [$4])
+  ac_includes_default="${ac_includes_default}" dnl
 ])dnl
 dnl

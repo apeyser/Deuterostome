@@ -1,3 +1,17 @@
+dnl ------------------------------------------------------------------
+dnl cf_latex: macros && stuff for building pdflatex documentation
+dnl include $(top_srcdir)/m4/cf_latex.makefile in Makefile.am's to get
+dnl   basic rules
+dnl
+dnl Call CF_PROG_{PDFLATEX,BIBTEX,MAKEINDEX} to get the proper programs,
+dnl   CF_LATEX_BIBSTYLE to guarantee bibstyle availability,
+dnl   CF_LATEX_CLASS_{ARTICLE,BOOK} to guarantee class availability,
+dnl   CF_LATEX_PACKAGE_AMSMATH to guarantee amsmath availability
+dnl   CF_LATEX_PACKAGES to guarantee package availability
+dnl   CF_LATEX_PACKAGE_OPT to guarantee package with option availability
+dnl
+dnl They all depend on m4/latex/... packages.
+dnl ------------------------------------------------------------------
 dnl
 dnl CF_LATEX_PUSH_TEXINPUTS([extra directories])
 dnl
@@ -52,6 +66,10 @@ dnl
 AC_DEFUN([CF_LATEX_CLASS_ARTICLE], [AC_LATEX_CLASS_ARTICLE])dnl
 dnl
 AC_DEFUN([CF_LATEX_CLASS_BOOK], [AC_LATEX_CLASS_BOOK])dnl
+dnl
+dnl CF_LATEX_PACKAGE_AMSMATH
+dnl Sets up @amsmath@ AC_SUBST:
+dnl  either \usepackage{amsmath} or \usepackage{amsmath,amsfonts}
 dnl
 AC_DEFUN([CF_LATEX_PACKAGE_AMSMATH], [dnl
   AC_MSG_CHECKING([for package amsmath])
