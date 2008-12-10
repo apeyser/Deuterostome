@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-#EAPI="prefix"
+EAPI="1"
 
 inherit eutils elisp-common
 
@@ -27,20 +27,37 @@ SLOT="0"
 
 KEYWORDS="~x86 ~amd64 ~ppc"
 
-IUSE="daemon emacs atlas setuid threads formats xclient X memory xauth petsc mpi"
+IUSE="+daemon +emacs +atlas +setuid +threads formats
+	  +xclient X +memory +xauth +petsc +mpi doc
+	  plugins +plugins-support"
 
 # A space delimited list of portage features to restrict. man 5 ebuild
 # for details.  Usually not needed.
 RESTRICT="strip mirror primaryuri"
 
-DEPEND="
+RDEPEND="
 emacs? ( virtual/emacs )
 formats? ( app-text/a2ps )
 formats? ( virtual/ghostscript )
 formats? ( dev-lang/perl )
-X? ( app-text/xdvik )
-X? ( x11-terms/xterm )
+formats? ( xclient? ( app-text/xdvik ) )
+formats? ( xclient? ( x11-terms/xterm ) )
+xclient? ( app-shells/bash )
+formats? ( xclient? ( sys-apps/coreutils ) )
+formats? ( xclient? ( net-print/cups ) )
+formats? ( xclient? ( app-text/texlive-core ) )
+formats? ( xclient? ( dev-texlive/texlive-latex ) )
 X? ( x11-base/xorg-server )
+formats? ( xclient? ( || (
+		  kde-base/konqueror
+		  gnome-base/libgnome
+		  kde-base/kpdf
+		  app-text/xpdf
+		  app-text/gv
+		  virtual/ghostscript
+		 )
+	)
+)
 atlas? ( sci-libs/blas-atlas )
 xclient? ( x11-libs/libX11 )
 xauth? ( x11-libs/libXext )
@@ -48,9 +65,17 @@ mpi? ( virtual/mpi )
 mpi? ( !sys-cluster/mpich )
 petsc? ( >=sci-mathematics/petsc-2.3.3_p11 )
 sys-libs/glibc
+plugins-support? ( dev-util/pkgconfig )
 "
 
-RDEPEND="${DEPEND}"
+DEPEND="${RDEPEND}
+plugins? ( sys-devel/flex )
+sys-devel/libtool
+doc? ( app-text/texlive-core )
+doc? ( dev-texlive/texlive-latex )
+doc? ( dev-texlive/texlive-latexextra )
+sys-devel/gcc
+"
 
 add_myconf() {
 	myconf=("${myconf[@]}" "$@")
@@ -111,6 +136,9 @@ src_compile() {
 		die
 	fi
 
+	add_enable plugins
+	add_enable plugins-support
+
 	use petsc && add_myconf --enable-plugins
 
 	add_with \
@@ -158,6 +186,12 @@ src_install() {
 }
 
 pkg_setup() {
+	if use plugins \
+		&& built_with_use --missing false sys-devel/gcc nocxx ; then
+		eerror "Please reemerge sys-devel/gcc without the nocxx USE flag enabled"
+		die
+	fi
+
 	if use daemon ; then
 		enewgroup dnode
 		enewuser dnode -1 -1 -1 dnode

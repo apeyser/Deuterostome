@@ -1,8 +1,15 @@
-dev-lang/dm:atlas - enable atlas blas operators
 dev-lang/dm:daemon - enable dnode daemon
-dev-lang/dm:formats - enable formats like ps2pdf
+dev-lang/dm:emacs - enable emacs interface
+dev-lang/dm:atlas - enable atlas blas operators
 dev-lang/dm:setuid - enable setuid re-nice
+dev-lang/dm:threads - enable multi-threaded math operators
+dev-lang/dm:formats - enable formats like ps2pdf
 dev-lang/dm:xclient - enable minimal Xorg interface
 dev-lang/dm:X - enable maximal Xorg interface
 dev-lang/dm:memory - set max memory for vm to approx. build-time physical memory
 dev-lang/dm:xauth - enable xauth operators
+dev-lang/dm:petsc - enable petsc library operators
+dev-lang/dm:mpi - enable mpi operators
+dev-lang/dm:doc - build pdf documentation
+dev-lang/dm:plugins - build the built-in plugins
+dev-lang/dm:plugins-support - install files for external plugins
