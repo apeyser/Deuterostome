@@ -29,7 +29,7 @@ KEYWORDS="~x86 ~amd64 ~ppc"
 
 IUSE="+daemon +emacs +atlas +setuid +threads +formats
 	  +xclient X +memory +xauth +petsc +mpi doc
-	  plugins +plugins-support"
+	  +plugins +plugins-support"
 
 # A space delimited list of portage features to restrict. man 5 ebuild
 # for details.  Usually not needed.
