@@ -27,7 +27,7 @@ SLOT="0"
 
 KEYWORDS="~x86 ~amd64 ~ppc"
 
-IUSE="+daemon +emacs +atlas +setuid +threads formats
+IUSE="+daemon +emacs +atlas +setuid +threads +formats
 	  +xclient X +memory +xauth +petsc +mpi doc
 	  plugins +plugins-support"
 
