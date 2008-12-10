@@ -77,6 +77,10 @@ doc? ( dev-texlive/texlive-latexextra )
 sys-devel/gcc
 "
 
+SITEFILE="50${PN}-gentoo.el"
+RCFILE="dnoded.rc6"
+CONFFILE="dnoded.conf"
+
 add_myconf() {
 	myconf=("${myconf[@]}" "$@")
 }
@@ -178,10 +182,10 @@ src_install() {
 	emake DESTDIR="${D}" install || die "emake install failed"
 	elisp-site-file-install "${FILESDIR}/${SITEFILE}" || die
 	if use daemon ; then
-		newinitd "${FILESDIR}"/dnoded.rc6 dnoded
-		newconfd "${FILESDIR}"/dnoded.conf dnoded
-		fowners dnode:dnode /usr/bin/dnode-daemon
-		fperms ug+s /usr/bin/dnode-daemon
+		newinitd "${FILESDIR}/${RCFILE}" dnoded || die
+		newconfd "${FILESDIR}/${CONFFILE}" dnoded || die
+		fowners dnode:dnode /usr/bin/dnode-daemon || die
+		fperms ug+s /usr/bin/dnode-daemon || die
 	fi
 }
 
@@ -193,8 +197,8 @@ pkg_setup() {
 	fi
 
 	if use daemon ; then
-		enewgroup dnode
-		enewuser dnode -1 -1 -1 dnode
+		enewgroup dnode || die
+		enewuser dnode -1 -1 -1 dnode || die
 	fi
 }
 
