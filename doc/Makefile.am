@@ -2,7 +2,7 @@ doc_DATA = dvt-3.0.pdf dvt-emacs.pdf newbook.pdf
 
 dist_noinst_DATA = chap1.tex chap2.tex chap3.tex \
 	dvt.bib \
-	redefs.sty pdf.sty \
+	redefs.sty pdf.sty options.sty \
 	dvt-3.0.tex dvt-emacs.tex newbook.tex
 
 EXTRA_DIST = 2ND_PRNT.PS \
