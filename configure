@@ -4210,7 +4210,7 @@ amsmath=$ac_cv_latex_package_f_amsmath; export amsmath;
 
 
       CF_LATEX_PACKAGES_TEXINPUTS="$TEXINPUTS"
-
+  TEXINPUTS="$srcdir/doc:$TEXINPUTS"
 
 if test "$ac_cv_latex_class_book" = "" ;
 then
