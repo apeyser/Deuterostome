@@ -85,11 +85,12 @@ add_use() {
 	local on_flag="$1"; shift
 	local off_flag="$1"; shift
 	local state=false
-	for i ; do
+	local i
+	for i; do
 		use $i && state=:
 	done
 
-	if $state ; then
+	if $state; then
 		add_myconf "$on_flag"
 	else
 		add_myconf "$off_flag"
@@ -99,62 +100,61 @@ add_use() {
 add_with() {
 	local flag=$1; shift
 	local val=$1; shift
+	local useflags=("$@")
+	[[ -z "${useflags[*]}" ]] && useflags=($flag)
+
 	if [[ -n $val ]] ; then
-		add_use --with-$flag="$val" --without-$flag "$@"
+		add_use --with-$flag="$val" --without-$flag "${useflags[@]}"
 	else
-		add_use --with-$flag --without-$flag "$@"
+		add_use --with-$flag --without-$flag "${useflags[@]}"
 	fi
 }
 
 add_enable() {
 	local flag=$1; shift
-	add_use --enable-$flag --disable-$flag "$@"
+	local useflags=("$@")
+	[[ -z "${useflags[*]}" ]] && useflags=($flag)
+
+	add_use --enable-$flag --disable-$flag "${useflags[@]}"
+}
+
+test_dep() {
+	local on=$1; shift
+	local req
+
+	if use $on; then
+		for req; do
+			if ! use $req; then
+				eerror "USE flag $on requires use flag $req"
+				die
+			fi
+		done
+	fi
 }
 
 src_compile() {
-		local myconf
+	local myconf
 
-	add_with \
-		atlas \
-		"`pkg-config --libs-only-L cblas`" \
-		atlas
-
-	add_with \
-		atlas-flags \
+	add_with atlas "`pkg-config --libs-only-L cblas`"
+	add_with atlas-flags \
 		"-I`pkg-config --variable=includedir cblas`/atlas" \
 		atlas
-
-	add_with \
-		x \
-		'' \
-		xclient X
+	add_with x '' xclient X
 
 	add_enable rthreads mpi
 
-	if use petsc && ! use mpi ; then
-		eerror "Use flag petsc requires use flag mpi"
-		die
-	fi
+	test_dep petsc mpi plugins
+	test_dep plugins plugins-support
 
-	add_enable plugins
-	add_enable plugins-support
-
-	use petsc && add_myconf --enable-plugins
-
-	add_with \
-		petsc \
-		"${PETSC_DIR}" \
-		petsc
-
-	add_with \
-		petsc-arch \
-		"${PETSC_ARCH}" \
-		petsc
+	add_with petsc "${PETSC_DIR}"
+	add_with petsc-arch "${PETSC_ARCH}" petsc
 
 	add_myconf \
 		$(use_with emacs) \
 		$(use_enable setuid) \
 		$(use_enable daemon) \
+		$(use_enable plugins) \
+		$(use_enable plugins-support)
 
 	add_myconf REAL_TMP=/tmp
 
