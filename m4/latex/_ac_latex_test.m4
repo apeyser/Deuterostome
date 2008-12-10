@@ -40,7 +40,11 @@ echo "\\usepackage{$4}" > testconf.tex
 cat >> testconf.tex << \EOF
 $1
 ])
-cat testconf.tex | $latex 2>&1 1>/dev/null && $2=yes; export $2;
-cd .. 
-rm -rf .tmps_latex 
+if cat testconf.tex | $latex 2>&1 1>/dev/null && $2=yes; then
+  cd .. 
+  rm -rf .tmps_latex 
+else
+  cd ..
+fi
+export $2
 ])
