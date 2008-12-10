@@ -4234,7 +4234,7 @@ amsmath=$ac_cv_latex_package_f_amsmath; export amsmath;
 
 
       CF_LATEX_PACKAGES_TEXINPUTS="$TEXINPUTS"
-  TEXINPUTS="$srcdir/doc:$TEXINPUTS"
+  TEXINPUTS="`cd $srcdir; pwd -P`/doc:$TEXINPUTS"
 
 if test "$ac_cv_latex_class_book" = "" ;
 then
@@ -4823,7 +4823,7 @@ echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyper
 echo "${ECHO_T}found" >&6; }
     TEXINPUTS="$CF_LATEX_PACKAGES_TEXINPUTS"
       CF_LATEX_PACKAGES_TEXINPUTS="$TEXINPUTS"
-  TEXINPUTS="$srcdir/doc:$TEXINPUTS"
+  TEXINPUTS="`cd $srcdir; pwd -P`/doc:$TEXINPUTS"
 
 if test "$ac_cv_latex_class_article" = "" ;
 then
