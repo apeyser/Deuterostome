@@ -199,7 +199,7 @@ AC_CHECK_LIBM
 CF_AC_PATH_XTRA
 CF_PREPEND_VARS([LIBS], [XLIB LIBM])
 AC_C_BIGENDIAN
-# check pid_t for plugins/process.c
+dnl check pid_t for plugins/process.c
 CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([pid_t], [4])])
 CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([int], [4])])
 
@@ -214,15 +214,6 @@ CF_AC_CHECK_HEADER([math.h])
 CF_AC_CHECK_HEADER([stdlib.h])
 CF_AC_CHECK_HEADER([stdio.h])
 CF_AC_CHECK_HEADER([sys/socket.h])
-# CF_AC_CHECK_HEADER([glob.h])
-# CF_AC_CHECK_SYM([glob.h], [DM], [GLOB_TILDE], [
-# #undef _XOPEN_SOURCE
-# #undef _POSIX_C_SOURCE
-# ])
-# CF_AC_CHECK_SYM([glob.h], [DM], [GLOB_BRACE], [
-# #undef _XOPEN_SOURCE
-# #undef _POSIX_C_SOURCE
-# ])
 CF_AC_CHECK_HEADER([limits.h])
 CF_AC_CHECK_HEADER([sys/un.h])
 CF_AC_CHECK_HEADER([sys/select.h])
