@@ -41,7 +41,7 @@ DISTCHECK_CONFIGURE_FLAGS = --enable-plugins --enable-daemon
 #--disable-process
 
 gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild:
-	svn mv gentoo/dev-lang/dm/dm-*.ebuild $@
+	svn cp `echo gentoo/dev-lang/dm/dm-*.ebuild | sort | tail -n 1` $@
 
 .PHONY: update-version
 update-version: gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild
