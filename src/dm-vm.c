@@ -105,7 +105,7 @@ P op_vmresize_(void)
       return VMRESIZE_ERR(RNG_CHK, FALSE);
     
     if (!tinymemory) {
-      closealllibs(); 
+      closealllibs();
       maketinysetup();
     }
     
@@ -119,7 +119,7 @@ P op_vmresize_(void)
       error(EXIT_FAILURE, 0, "userdict > vm");
     tinymemory = FALSE;
 
-    setupbase(sysdict, userdict);    
+    setupbase(sysdict, userdict);
     initialize_plugins();
     setupdirs();
   }

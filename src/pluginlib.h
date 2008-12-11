@@ -14,9 +14,9 @@ DLL_SCOPE void closealllibs(void);
 #include "dm2.h"
 
 // for LL
-DLL_SCOPE P op_getplugindir(void);
 DLL_SCOPE P op_loadlib(void);
 DLL_SCOPE P op_nextlib(void);
+DLL_SCOPE P op_getplugindir(void);
 
 #if DM_ENABLE_PLUGINS_SUPPORT
 

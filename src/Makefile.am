@@ -1,3 +1,12 @@
+AM_CPPFLAGS = -DDM_HAVE_CONFIG_H
+AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
+AM_CXXFLAGS = $(GCC_CXXFLAGS)
+AM_LDFLAGS = -no-undefined 
+AM_LIBS = $(PTHREAD_LIBS) $(X_LDFLAGS) 
+AM_LIBADD = $(AM_LIBS) @RELEASE_INFO@ @VERSION_INFO@
+AM_LDADD = $(AM_LIBS)
+INCLUDE = @INCLTDL@
+
 DIST_SUBDIRS = codegen
 
 all-local:
@@ -98,12 +107,6 @@ CLEANFILES = $(BUILT_SOURCES)
 
 DISTCLEANFILES = dm-config.h
 
-AM_CPPFLAGS = -DDM_HAVE_CONFIG_H
-AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
-AM_CXXFLAGS = $(GCC_CXXFLAGS)
-AM_LDFLAGS = $(PTHREAD_LIBS) $(X_LDFLAGS) -no-undefined 
-INCLUDE = @INCLTDL@
-
 bin_PROGRAMS = dvt dnode dgen $(DNODEDAEMONBIN) $(MPI_PROGS) dmprop
 noinst_PROGRAMS = testwordorder $(DNODENICEBIN)
 
@@ -111,12 +114,12 @@ if ENABLE_PLUGINS_SUPPORT
 if ENABLE_CPPPLUGIN
 CPPPLUGIN_HDR = cppplugin.h
 endif ENABLE_CPPPLUGIN
-PLUGIN_HDR = plugin.h pluginlib.h $(CPPPLUGIN_HDR)
-PLUGIN_SRC = plugin.c
+PLUGIN_HDR = plugin.h $(CPPPLUGIN_HDR)
 PLUGIN_LD = @LIBLTDL@
 endif ENABLE_PLUGINS_SUPPORT
 
-pkginclude_HEADERS = dm.h dm-errs.h dm3.h $(PLUGIN_HDR) dmx.h $(THREAD_HDR) \
+pkginclude_HEADERS = dm.h dm-errs.h dm3.h pluginlib.h $(PLUGIN_HDR) \
+	dmx.h $(THREAD_HDR) \
 	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h \
 	basic-defs.h dm-types.h dm-nextevent.h dm2.h cppplugin.h
 nodist_pkginclude_HEADERS = dm-config.h paths.h
@@ -130,8 +133,9 @@ socksrcs = \
 dvt_SOURCES = dvt.c dvt_0.h dm-dvt.h dm-dvt.c \
 	$(socksrcs)
 
-dvt_LDADD = $(builddir)/libdmglobals.la $(top_builddir)/lib/libgnu.la
-dvt_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS)
+dvt_LDADD = $(builddir)/libdmglobals.la \
+	$(top_builddir)/lib/libgnu.la \
+	$(AM_LDADD) $(ATLAS_LIBS)
 dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS) \
 	-I$(top_builddir)/lib -I$(top_srcdir)/lib
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
@@ -142,8 +146,8 @@ dnode_SOURCES = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
 
 dnode_LDADD = $(builddir)/libdmglobals.la \
 	$(builddir)/libdmnodal.la \
-	$(top_builddir)/lib/libgnu.la
-dnode_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS) $(MPI_LIBS)
+	$(top_builddir)/lib/libgnu.la \
+	$(AM_LDADD) $(ATLAS_LIBS) $(MPI_LIBS)
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
 dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) \
 	$(ATLAS_FLAGS) $(MPI_FLAGS) \
@@ -152,8 +156,7 @@ dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) \
 dpawn_SOURCES = dpawn.c dpawn_0.h dm-dpawn.h dm-dpawn.c dm-mpi.h dm-mpi.c
 dpawn_LDADD = $(builddir)/libdmglobals.la \
 	$(builddir)/libdmnodal.la \
-	$(LDADD)
-dpawn_LDFLAGS = $(AM_LDFLAGS) $(ATLAS_LIBS) $(MPI_LIBS) #-rdynamic
+	$(AM_LDADD) $(ATLAS_LIBS) $(MPI_LIBS)
 dpawn_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dpawn_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS) $(MPI_FLAGS)
 
@@ -168,19 +171,16 @@ globsrcs = dmglobals.c \
 	dm-signals.c dm-signals.h
 
 lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la libdmnodal.la
-libdmglobals_la_LIBADD = $(ATLAS_LIBS) @VERSION_INFO@ @RELEASE_INFO@
+libdmglobals_la_LIBADD = $(ATLAS_LIBS) $(AM_LIBADD)
 libdmglobals_la_SOURCES = $(globsrcs) \
 	matrix.c matrix.h \
 	$(THREADSRC) $(REGEX_SRC) dm-convert.h dm-convert.c
-
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
-libdmglobals_la_CFLAGS = $(AM_CFLAGS)
 
 libdmnodal_la_SOURCES = dm-vm.c dm-vm.h dm-dvt-vm.h \
-	$(PLUGIN_HDR) $(PLUGIN_SRC)
-libdmnodal_la_LIBADD = $(PLUGIN_LD) \
-	$(builddir)/libdmglobals.la \
-	@VERSION_INFO@ @RELEASE_INFO@
+	$(PLUGIN_HDR) pluginlib.h plugin.c
+libdmnodal_la_LIBADD = $(builddir)/libdmglobals.la \
+	$(AM_LIBADD) $(PLUGIN_LD) 
 
 editpaths = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
@@ -206,27 +206,22 @@ dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c \
 	dm-nextevent.h dm3.c dm3.h dm-prop.c dm-prop.h
 dgen_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DBOOTSTRAP_PLUGIN=1 -DDM_DISABLE_REGEX=1 \
-	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 \
-	@LIBDM_DLL_IMPORT@ 
+	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 @LIBDM_DLL_IMPORT@ 
 dgen_LDADD = $(builddir)/libdmbootstrap.la $(LDADD)
 
 drook_SOURCES = drook.c
 drook_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_REGEX=1 -DDM_DISABLE_XDISPLAY \
-	$(MPI_FLAGS) \
-	@LIBDM_DLL_IMPORT@ 
-drook_LDFLAGS = $(AM_LDFLAGS) $(MPI_LIBS)
-drook_LDADD = $(builddir)/libdmbootstrap.la $(LDADD)
+	$(MPI_FLAGS) @LIBDM_DLL_IMPORT@ 
+drook_LDADD = $(builddir)/libdmbootstrap.la $(AM_LDADD) $(MPI_LIBS)
 
 dmprop_SOURCES = \
 	dm-prop.c dm-prop.h \
 	dm-signals.c dm-signals.h 
 dmprop_CPPFLAGS = $(AM_CPPFLAGS) -DDM_PROP_MAIN
 
-libdmbootstrap_la_LIBADD = @VERSION_INFO@ @RELEASE_INFO@
+libdmbootstrap_la_LIBADD = $(AM_LIBADD)
 libdmbootstrap_la_SOURCES = $(globsrcs) 
 libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_THREADS=1 -DDM_DISABLE_REGEX=1 \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1
-libdmbootstrap_la_CFLAGS = $(AM_CFLAGS)
-libdmbootstrap_la_LDFLAGS = $(AM_LDFLAGS)

@@ -452,7 +452,7 @@ end def
   end def |]
 end def
 
-/plugins 1 dict dup begin /all 1 dict dup begin |[
+/plugins 1 dict dup begin /ENABLE_PLUGINS_SUPPORT 1 dict dup begin |[
   /commands [/loadlib /nextlib] def |]
 end def end def
 
