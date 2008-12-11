@@ -227,6 +227,8 @@
 #endif //DM_ENABLE_RTHREADS
 #ifdef DM_HOST_IS_32_BIT
 #endif //DM_HOST_IS_32_BIT
+#ifdef DM_ENABLE_PLUGINS_SUPPORT
+#endif //DM_ENABLE_PLUGINS_SUPPORT
 // ** no socket events -- internal
 #define NEXTEVENT_NOEVENT             ((P)      106L)
 // ** No mpi message msg received -- internal

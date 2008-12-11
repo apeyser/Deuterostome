@@ -191,8 +191,10 @@ B* _sysop[] =
   (B*) "regexs", (B*) op_regexs,
   (B*) "regexsi", (B*) op_regexsi,
 #endif //DM_ENABLE_REGEX
+#ifdef DM_ENABLE_PLUGINS_SUPPORT
   (B*) "loadlib", (B*) op_loadlib,
   (B*) "nextlib", (B*) op_nextlib,
+#endif //DM_ENABLE_PLUGINS_SUPPORT
   (B*) "quit", (B*) op_quit,
   (B*) "]", (B*) op_closelist,
   (B*) "", (B*) NULL
@@ -286,6 +288,8 @@ P _syserrc[] = {
   REGEX_BADRPT,
   REGEX_UNKNOWN,
 #endif //DM_ENABLE_REGEX
+#ifdef DM_ENABLE_PLUGINS_SUPPORT
+#endif //DM_ENABLE_PLUGINS_SUPPORT
   0L
 };
 
@@ -377,5 +381,7 @@ B* _syserrm[] = {
   (B*) "Regex Error: `?', `*', or `+' operand invalid",
   (B*) "Regex Error: Unknown error",
 #endif //DM_ENABLE_REGEX
+#ifdef DM_ENABLE_PLUGINS_SUPPORT
+#endif //DM_ENABLE_PLUGINS_SUPPORT
   (B*) NULL
 };
