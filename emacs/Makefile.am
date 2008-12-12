@@ -1,6 +1,6 @@
 dist_pkglisp_LISP = dm-server.el
 BUILT = d-comint-mode.el init.el d-mode.el 
-nodist_pkglisp_LISP = $(BUILT_LISP) d-mode-ops.el
+nodist_pkglisp_LISP = $(BUILT) d-mode-ops.el
 dist_noinst_DATA = d-comint-mode.el.in init.el.in d-mode.el.in
 CLEANFILES = $(BUILT)
 

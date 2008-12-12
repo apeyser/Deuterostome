@@ -82,7 +82,8 @@ am__installdirs = "$(DESTDIR)$(pkglispdir)" "$(DESTDIR)$(pkglispdir)"
 dist_pkglispLISP_INSTALL = $(INSTALL_DATA)
 nodist_pkglispLISP_INSTALL = $(INSTALL_DATA)
 LISP = $(dist_pkglisp_LISP) $(nodist_pkglisp_LISP)
-am__ELFILES = d-mode-ops.el dm-server.el
+am__ELFILES = d-comint-mode.el d-mode-ops.el d-mode.el dm-server.el \
+	init.el
 am__ELCFILES = $(am__ELFILES:.el=.elc)
 ELCFILES = $(LISP:.el=.elc)
 elisp_comp = $(top_srcdir)/elisp-comp
@@ -389,7 +390,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 dist_pkglisp_LISP = dm-server.el
 BUILT = d-comint-mode.el init.el d-mode.el 
-nodist_pkglisp_LISP = $(BUILT_LISP) d-mode-ops.el
+nodist_pkglisp_LISP = $(BUILT) d-mode-ops.el
 dist_noinst_DATA = d-comint-mode.el.in init.el.in d-mode.el.in
 CLEANFILES = $(BUILT)
 edit = sed \
