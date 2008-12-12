@@ -16,7 +16,8 @@ dist_noinst_DATA = \
 	ax_set_version_info.m4 \
 	petsc.make \
 	cf_latex.m4 cf_latex.make \
-	cf_svnversion.m4 cf_svnversion.make cf_svnversion-top.make
+	cf_svnversion.m4 cf_svnversion.make cf_svnversion-top.make \
+	cf_gentoo.make cf_debian.make
 
 EXTRA_DIST = \
 	gnulib-cache.m4 dirfd.m4 d-type.m4 extensions.m4 \

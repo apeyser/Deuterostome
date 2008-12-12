@@ -1,3 +1,5 @@
+# -*- mode: makefile; -*-
+
 if MAINTAINER_MODE
 $(top_srcdir)/svnversion.stamp:
 	cd $(top_srcdir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp

@@ -12,9 +12,13 @@ EXTRA_DIST = 2ND_PRNT.PS \
 	title.doc
 
 dvt-emacs.bbl: dvt-emacs.tex
-dvt-emacs.tex: dvt-emacs.bbl config.sty
+dvt-emacs.tex: config.sty
+dvt-emacs.pdf: dvt-emacs.bbl
+
 dvt-3.0.bbl: dvt-3.0.tex
-dvt-3.0.tex: dvt-3.0.bbl config.sty
+dvt-3.0.tex: config.sty
+dvt-3.0.pdf: dvt-3.0.bbl
+
 newbook.tex: chap1.tex chap2.tex chap3.tex config.sty
 newbook.pdf: newbook.ind
 

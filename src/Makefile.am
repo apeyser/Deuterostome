@@ -207,7 +207,7 @@ dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c \
 dgen_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DBOOTSTRAP_PLUGIN=1 -DDM_DISABLE_REGEX=1 \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 @LIBDM_DLL_IMPORT@ 
-dgen_LDADD = $(builddir)/libdmbootstrap.la $(LDADD)
+dgen_LDADD = $(builddir)/libdmbootstrap.la $(AM_LDADD)
 
 drook_SOURCES = drook.c
 drook_CPPFLAGS = $(AM_CPPFLAGS) \

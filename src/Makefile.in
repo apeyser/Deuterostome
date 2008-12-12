@@ -150,7 +150,8 @@ PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_dgen_OBJECTS = dgen-dgen.$(OBJEXT) dgen-dm-nextevent.$(OBJEXT) \
 	dgen-dm3.$(OBJEXT) dgen-dm-prop.$(OBJEXT)
 dgen_OBJECTS = $(am_dgen_OBJECTS)
-dgen_DEPENDENCIES = $(builddir)/libdmbootstrap.la
+dgen_DEPENDENCIES = $(builddir)/libdmbootstrap.la \
+	$(am__DEPENDENCIES_3)
 am_dmprop_OBJECTS = dmprop-dm-prop.$(OBJEXT) \
 	dmprop-dm-signals.$(OBJEXT)
 dmprop_OBJECTS = $(am_dmprop_OBJECTS)
@@ -676,7 +677,7 @@ dgen_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DBOOTSTRAP_PLUGIN=1 -DDM_DISABLE_REGEX=1 \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 @LIBDM_DLL_IMPORT@ 
 
-dgen_LDADD = $(builddir)/libdmbootstrap.la $(LDADD)
+dgen_LDADD = $(builddir)/libdmbootstrap.la $(AM_LDADD)
 drook_SOURCES = drook.c
 drook_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_REGEX=1 -DDM_DISABLE_XDISPLAY \

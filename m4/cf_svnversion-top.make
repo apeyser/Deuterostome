@@ -1,3 +1,5 @@
+# -*- mode: makefile; -*-
+
 .PHONY: svnversion
 
 svnversion.stamp svnversion: $(top_srcdir)/configure
@@ -19,3 +21,7 @@ distclean-local-svnversion:
 	  fi ; \
 	else : ; \
 	fi
+
+dist-hook: svnversion
+	cp -p $(builddir)/svnversion.stamp $(distdir)/svnversion.stamp
+

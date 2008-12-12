@@ -13,6 +13,12 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
+
+# -*- mode: makefile; -*-
+
+# -*- mode: makefile; -*-
+
+# -*- mode: makefile; -*-
 VPATH = @srcdir@
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
@@ -31,6 +37,7 @@ host_triplet = @host@
 target_triplet = @target@
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
+	$(srcdir)/m4/cf_debian.make $(srcdir)/m4/cf_gentoo.make \
 	$(srcdir)/m4/cf_svnversion-top.make $(top_srcdir)/configure \
 	AUTHORS COPYING ChangeLog INSTALL NEWS compile config.guess \
 	config.sub depcomp elisp-comp install-sh ltmain.sh missing \
@@ -396,26 +403,8 @@ target_vendor = @target_vendor@
 tmp = @tmp@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-DEBIAN_FILES = \
-	debian/changelog debian/docs debian/menu.ex \
-	debian/compat debian/emacsen-install.ex debian/postinst.ex \
-	debian/control debian/emacsen-remove.ex debian/postrm.ex \
-	debian/copyright debian/emacsen-startup.ex debian/preinst.ex \
-	debian/cron.d.ex debian/init.d.ex debian/prerm.ex \
-	debian/dirs debian/manpage.1.ex debian/README.Debian \
-	debian/dm-default.ex debian/manpage.sgml.ex debian/rules \
-	debian/dm.doc-base.EX debian/manpage.xml.ex debian/watch.ex
-
-GENTOO_FILES = \
-	gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild \
-	gentoo/dev-lang/dm/Manifest \
-	gentoo/dev-lang/dm/files/50dm-gentoo.el \
-	gentoo/dev-lang/dm/files/dnoded.conf \
-	gentoo/dev-lang/dm/files/dnoded.rc6
-
 EXTRA_DIST = bootstrap autom4te.cfg gnulib-tool-import.sh \
-	link-warning.h $(DEBIAN_FILES) $(GENTOO_FILES) \
-	svnversion.stamp
+	link-warning.h svnversion.stamp
 @ENABLE_EMACS_TRUE@EMACS_DIR = emacs
 @ENABLE_BASH_TRUE@@ENABLE_ENV_TRUE@BASH_DIR = sh
 @ENABLE_DOC_TRUE@DOC_DIR = doc
@@ -431,7 +420,7 @@ all: config.h
 .SUFFIXES:
 am--refresh:
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/m4/cf_svnversion-top.make $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/m4/cf_svnversion-top.make $(srcdir)/m4/cf_gentoo.make $(srcdir)/m4/cf_debian.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -664,6 +653,9 @@ distdir: $(DISTFILES)
 	      || exit 1; \
 	  fi; \
 	done
+	$(MAKE) $(AM_MAKEFLAGS) \
+	  top_distdir="$(top_distdir)" distdir="$(distdir)" \
+	  dist-hook
 	-find $(distdir) -type d ! -perm -777 -exec chmod a+rwx {} \; -o \
 	  ! -type d ! -perm -444 -links 1 -exec chmod a+r {} \; -o \
 	  ! -type d ! -perm -400 -exec chmod a+r {} \; -o \
@@ -860,20 +852,51 @@ uninstall-am:
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am am--refresh check check-am clean clean-generic \
 	clean-libtool ctags ctags-recursive dist dist-all dist-bzip2 \
-	dist-gzip dist-lzma dist-shar dist-tarZ dist-zip distcheck \
-	distclean distclean-generic distclean-hdr distclean-libtool \
-	distclean-local distclean-tags distcleancheck distdir \
-	distuninstallcheck dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
-	ps ps-am tags tags-recursive uninstall uninstall-am
+	dist-gzip dist-hook dist-lzma dist-shar dist-tarZ dist-zip \
+	distcheck distclean distclean-generic distclean-hdr \
+	distclean-libtool distclean-local distclean-tags \
+	distcleancheck distdir distuninstallcheck dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs installdirs-am maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
+	uninstall uninstall-am
 
 #--disable-process
+
+gencode-all: gencode all
+
+.PHONY: gencode
+gencode: 
+	cd libltdl && $(MAKE) $(AM_MAKEFLAGS) all
+	cd src && $(MAKE) $(AM_MAKEFLAGS) gencode
+
+.PHONY: svnversion
+
+svnversion.stamp svnversion: $(top_srcdir)/configure
+	$(SHELL) ./config.status --recheck \
+	  && ./config.status
+
+distclean-local: distclean-local-svnversion
+
+.PHONY: distclean-local-svnversion
+
+distclean-local-svnversion:
+	if test `cd "$(top_srcdir)" && pwd -P` \
+	   	!= `cd "$(top_builddir)" && pwd -P` ; then \
+	  if cd "$(top_builddir)" ; then \
+	    rm svnversion.stamp || : ; \
+	  else false; \
+	  fi ; \
+	else : ; \
+	fi
+
+dist-hook: svnversion
+	cp -p $(builddir)/svnversion.stamp $(distdir)/svnversion.stamp
 
 gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild:
 	svn cp `echo gentoo/dev-lang/dm/dm-*.ebuild | sort | tail -n 1` $@
@@ -882,7 +905,7 @@ gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild:
 update-version: gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild
 
 .PHONY: gentoo-setup
-gentoo-setup: rsync
+gentoo-setup: update-version
 	find $(srcdir)/gentoo -name "*~" -print0 | xargs -r0 rm
 	( \
 		cd $(srcdir)/gentoo ; \
@@ -903,36 +926,17 @@ rsync: dist
 		sudo rm $$DISTDIR/$(DIST_ARCHIVES); \
 	fi
 
+.PHONY: gentoo-ci
+gentoo-ci: gentoo-setup
+	svn ci -m 'Update ebuilds' gentoo
+
 .PHONY: ebuild
-ebuild: update-version gentoo-setup
-	svn ci -m '' gentoo
+ebuild: rsync gentoo-ci
 	sudo layman -s gentoo-local
 
-gencode-all: gencode all
-
-.PHONY: gencode
-gencode: 
-	cd libltdl && $(MAKE) $(AM_MAKEFLAGS) all
-	cd src && $(MAKE) $(AM_MAKEFLAGS) gencode
-.PHONY: svnversion
-
-svnversion.stamp svnversion: $(top_srcdir)/configure
-	$(SHELL) ./config.status --recheck \
-	  && ./config.status
-
-distclean-local: distclean-local-svnversion
-
-.PHONY: distclean-local-svnversion
-
-distclean-local-svnversion:
-	if test `cd "$(top_srcdir)" && pwd -P` \
-	   	!= `cd "$(top_builddir)" && pwd -P` ; then \
-	  if cd "$(top_builddir)" ; then \
-	    rm svnversion.stamp || : ; \
-	  else false; \
-	  fi ; \
-	else : ; \
-	fi
+.PHONY: debian
+debian:
+	pdebuild
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -1,26 +1,28 @@
 PRODSRCS = \
-	$(srcdir)/dmnuminc.h.built \
-	$(srcdir)/dsp1f.h.built \
-	$(srcdir)/dsp2def.h.built \
-	$(srcdir)/dgen_0.h.built \
-	$(srcdir)/dnode_0.h.built \
-	$(srcdir)/dvt_0.h.built \
-	$(srcdir)/dpawn_0.h.built \
-	$(srcdir)/errors.d \
-	$(srcdir)/d-mode-ops.el \
-	$(srcdir)/dm-errs.h.built
+	dmnuminc.h.built \
+	dsp1f.h.built \
+	dsp2def.h.built \
+	dgen_0.h.built \
+	dnode_0.h.built \
+	dvt_0.h.built \
+	dpawn_0.h.built \
+	errors.d \
+	d-mode-ops.el \
+	dm-errs.h.built
 
 MAINTAINERCLEANFILES = $(PRODSRCS) \
-	$(srcdir)/dcoder.h
+	dcoder.h
+
 dist_noinst_DATA = \
-	$(srcdir)/dmnuminc.d \
-	$(srcdir)/ops.d \
-	$(srcdir)/dsp1f.d \
-	$(srcdir)/dsp2def.d \
-	$(srcdir)/startup_dgen.d \
+	dmnuminc.d \
+	ops.d \
+	dsp1f.d \
+	dsp2def.d \
+	startup_dgen.d \
+	dmnuminc.d.in ops.d.in paths.h.in dsp2def.d.in \
 	$(MAINTAINERCLEANFILES)
 
-dist_noinst_SCRIPTS = $(srcdir)/dgen-build
+dist_noinst_SCRIPTS = dgen-build
 
 AM_CFLAGS = $(GCC_CFLAGS)
 AM_CPPFLAGS = \
@@ -29,7 +31,9 @@ AM_CPPFLAGS = \
 	-DDM_NO_PROP=1 \
 	-I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 AM_LDFLAGS = -no-undefined
+AM_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
 INCLUDE = @INCLTDL@
+
 BUILT_SOURCES = paths.h dm-prop.c
 CLEANFILES = $(BUILT_SOURCES)
 DISTCLEANFILES = dm-config.h
@@ -37,12 +41,13 @@ DISTCLEANFILES = dm-config.h
 noinst_LTLIBRARIES = libdmbootstrap.la
 noinst_PROGRAMS = dgen dcoder
 
-EXTRA_DIST = dmnuminc.d.in ops.d.in paths.h.in dsp2def.d.in
+dist_noinst_DATA = 
 
 libdmbootstrap_la_SOURCES = dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h \
 	dmglobals.c dm1.c dm2.c dm-conv.c dm-swapbytes.h \
 	dm4.c dm5.c dm6.c dm7.c dm8.c dm-types.c \
 	dm-signals.c dm-signals.h
+libdmbootstrap_la_LIBADD = $(AM_LIBADD)
 
 dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h \
 	dm3.c dm3.h dm-prop.c dm-prop.h paths.h
@@ -88,7 +93,7 @@ edit = sed \
 
 paths.h: paths.h.in Makefile
 	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/paths.h.in >$@.tmp
+	$(edit) $(builddir)/paths.h.in >$@.tmp
 	mv $@.tmp $@
 
 ops.d: ops.d.in Makefile
@@ -108,7 +113,7 @@ dmnuminc.d: dmnuminc.d.in Makefile
 
 dsp2def.d: dsp2def.d.in Makefile
 	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/dsp2def.d.in >$@.tmp
+	$(edit) $(builddir)/dsp2def.d.in >$@.tmp
 	mv $@.tmp $@
 
 $(srcdir)/dgen_0.h.built: ops.d dgen dgen-build
