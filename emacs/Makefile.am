@@ -1,7 +1,8 @@
 dist_pkglisp_LISP = dm-server.el
-nodist_pkglisp_LISP = d-comint-mode.el init.el d-mode.el
+BUILT = d-comint-mode.el init.el d-mode.el 
+nodist_pkglisp_LISP = $(BUILT_LISP) d-mode-ops.el
 dist_noinst_DATA = d-comint-mode.el.in init.el.in d-mode.el.in
-CLEANFILES = $(nodist_pkglisp_LISP)
+CLEANFILES = $(BUILT)
 
 edit = sed \
 	-e 's,@bindir\@,$(bindir),g' \
