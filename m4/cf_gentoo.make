@@ -36,3 +36,5 @@ gentoo-ci: gentoo-setup
 .PHONY: ebuild
 ebuild: rsync gentoo-ci
 	sudo layman -s gentoo-local
+
+bundle += gentoo

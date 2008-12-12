@@ -19,6 +19,8 @@
 # -*- mode: makefile; -*-
 
 # -*- mode: makefile; -*-
+
+# -*- mode: makefile; -*-
 VPATH = @srcdir@
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
@@ -37,7 +39,8 @@ host_triplet = @host@
 target_triplet = @target@
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
-	$(srcdir)/m4/cf_debian.make $(srcdir)/m4/cf_gentoo.make \
+	$(srcdir)/m4/cf_bundle.make $(srcdir)/m4/cf_debian.make \
+	$(srcdir)/m4/cf_gentoo.make \
 	$(srcdir)/m4/cf_svnversion-top.make $(top_srcdir)/configure \
 	AUTHORS COPYING ChangeLog INSTALL NEWS compile config.guess \
 	config.sub depcomp elisp-comp install-sh ltmain.sh missing \
@@ -413,13 +416,14 @@ SUBDIRS = libltdl lib src plugins $(BASH_DIR) ps \
 
 ACLOCAL_AMFLAGS = -I m4 -I m4/latex
 DISTCHECK_CONFIGURE_FLAGS = --enable-plugins --enable-daemon
+bundle = gentoo debian
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 .SUFFIXES:
 am--refresh:
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/m4/cf_svnversion-top.make $(srcdir)/m4/cf_gentoo.make $(srcdir)/m4/cf_debian.make $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/m4/cf_svnversion-top.make $(srcdir)/m4/cf_bundle.make $(srcdir)/m4/cf_gentoo.make $(srcdir)/m4/cf_debian.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -893,6 +897,12 @@ distclean-local-svnversion:
 
 dist-hook: svnversion
 	cp -p $(builddir)/svnversion.stamp $(distdir)/svnversion.stamp
+
+bundle: distdir
+	rm $(distdir) $(bundle)
+	cp -aH $(bundle) $(distdir)
+	tardir=$(distdir) && $(am__tar) | bzip2 -9 -c >$(distdir).tar.bz2
+	$(am__remove_distdir)
 
 gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild:
 	svn cp `echo gentoo/dev-lang/dm/dm-*.ebuild | sort | tail -n 1` $@

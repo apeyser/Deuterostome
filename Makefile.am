@@ -30,5 +30,6 @@ gencode:
 	cd src && $(MAKE) $(AM_MAKEFLAGS) gencode
 
 include $(srcdir)/m4/cf_svnversion-top.make
+include $(srcdir)/m4/cf_bundle.make
 include $(srcdir)/m4/cf_gentoo.make
 include $(srcdir)/m4/cf_debian.make
