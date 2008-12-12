@@ -73,7 +73,7 @@ dnl  either \usepackage{amsmath} or \usepackage{amsmath,amsfonts}
 dnl
 AC_DEFUN([CF_LATEX_PACKAGE_AMSMATH], [dnl
   AC_MSG_CHECKING([for package amsmath])
-  AC_LATEX_CLASS_ARTICLE
+  AC_LATEX_PACKAGE_AMSMATH
   AC_MSG_RESULT([found amsmath: $amsmath])dnl
 ])dnl
 dnl
@@ -82,7 +82,7 @@ dnl
 AC_DEFUN([CF_LATEX_BIBSTYLE], [dnl
   CF_LATEX_BIBSTYLE_([$1],dnl
 ifelse([$#], [1],[book],[$2]),dnl
-ifelse([$#],[1], [natbib],[$\#],[2],[natbib],[$3]))dnl
+ifelse([$#],[1], [natbib],[$#],[2],[natbib],[$3]))dnl
 ])dnl
 dnl
 dnl CF_LATEX_BIBSTYLE_([bibstyle], [class], [bibpackage])

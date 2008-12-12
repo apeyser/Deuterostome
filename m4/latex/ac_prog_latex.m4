@@ -30,12 +30,16 @@ dnl
 dnl @version 1.3
 dnl @author Mathieu Boretti boretti@eig.unige.ch
 dnl
-AC_DEFUN([AC_PROG_LATEX],[
-AC_CHECK_PROGS(latex,[latex elatex lambda],no)
+AC_DEFUN([_AC_PROG_LATEX], [
+AC_CHECK_PROGS([latex],[latex elatex lambda],[no])
 export latex;
+AC_SUBST(latex)
+])
+
+AC_DEFUN([AC_PROG_LATEX],[
+AC_REQUIRE([_AC_PROG_LATEX])
 if test $latex = "no" ;
 then
 	AC_MSG_ERROR([Unable to find a LaTeX application]);
 fi
-AC_SUBST(latex)
 ])

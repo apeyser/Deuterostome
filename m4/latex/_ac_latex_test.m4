@@ -20,7 +20,7 @@
 #
 
 AC_DEFUN([_AC_LATEX_TEST],[
-AC_REQUIRE([AC_PROG_LATEX])
+AC_PROG_LATEX
 rm -rf .tmps_latex 
 mkdir .tmps_latex 
 cd .tmps_latex 

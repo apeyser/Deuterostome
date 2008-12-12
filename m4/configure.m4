@@ -267,7 +267,7 @@ AC_DEFUN([CF_AM_CONDITIONAL], [dnl
 dnl
 AC_DEFUN([CF_AM_ENABLE_DO], [dnl
   if test "${enable_$4-set}" == set ; then enable_$4='$3'; fi
-  if test x"${enable_$4}" == x"yes" ; then enable_$4='$6'; fi
+  if test "${enable_$4}" == "yes" ; then enable_$4='$6'; fi
   AC_ARG_ENABLE([$1], [AC_HELP_STRING([--enable-$1], [$2 ($3)])])
   CF_AM_CONDITIONAL($5, [test "${enable_$4-no}" != "no"])
   if test "${enable_$4-no}" == "no" ; then 
@@ -292,11 +292,11 @@ AC_DEFUN([CF_AM_ENABLE], [dnl
     ifelse([$4], , [[$3]], [[$4]]))dnl
 ])dnl
 dnl
-# $1 = headers
-# $2 = prefix
-# $3 = numeric symbols
-# $4... = pre-defines
-# $5 = undefined values
+dnl $1 = headers
+dnl $2 = prefix
+dnl $3 = numeric symbols
+dnl $4... = pre-defines
+dnl $5 = undefined values
 AC_DEFUN([CF_AC_CHECK_SYM], [dnl
   AC_MSG_CHECKING([if macro $3 is defined in headers $1])
   changequote(<<, >>)dnl
@@ -366,12 +366,12 @@ AC_DEFUN([CF_AC_ENABLE], [dnl
 dnl
 AC_DEFUN([CF_IF_ENABLED_DO], [dnl
   ifelse([$2],[],,[dnl
-    if test x"${enable_$1-no}" != x"no" ; then 
+    if test "${enable_$1-no}" != "no" ; then
        $2 
     fi
   ]) dnl
   ifelse([$3],[],,[dnl 
-    if test x"${enable_$1-no}" = x"no" ; then 
+    if test "${enable_$1-no}" = "no" ; then
       $3 
     fi
   ])dnl

@@ -83,7 +83,7 @@ CF_IF_ENABLED([doc], [
   CF_LATEX_BIBSTYLE([plainnat])
   CF_LATEX_CLASS_ARTICLE
   CF_LATEX_CLASS_BOOK
-  AC_LATEX_PACKAGE_AMSMATH
+  CF_LATEX_PACKAGE_AMSMATH
   CF_LATEX_PACKAGES([array,makeidx,supertabular,pdf,options,hyperref], 
                     [book], [`cd $srcdir; pwd -P`/doc])
   CF_LATEX_PACKAGES([pdf,hyperref,natbib,redefs], 
