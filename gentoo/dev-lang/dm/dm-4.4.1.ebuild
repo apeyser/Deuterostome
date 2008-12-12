@@ -158,7 +158,8 @@ src_compile() {
 		$(use_enable setuid) \
 		$(use_enable daemon) \
 		$(use_enable plugins) \
-		$(use_enable plugins-support)
+		$(use_enable plugins-support) \
+		$(use_enable doc)
 
 	add_myconf REAL_TMP=/tmp
 
