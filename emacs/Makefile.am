@@ -1,15 +1,14 @@
 dist_pkglisp_LISP = dm-server.el
-NODISTFILES = d-comint-mode.el init.el d-mode.el
-nodist_pkglisp_LISP = $(NODISTFILES) d-mode-ops.el
-EXTRA_DIST = d-comint-mode.el.in init.el.in d-mode.el.in
-CLEANFILES = $(NODISTFILES)
+nodist_pkglisp_LISP = d-comint-mode.el init.el d-mode.el
+dist_noinst_DATA = d-comint-mode.el.in init.el.in d-mode.el.in
+CLEANFILES = $(nodist_pkglisp_LISP)
 
 edit = sed \
 	-e 's,@bindir\@,$(bindir),g' \
 	-e 's,@pkglispdir\@,$(pkglispdir),g' \
 	-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
 	-e 's,[@]NAMEBYTES[@],@NAMEBYTES@,g' \
-	-e 's,[@]SVNVERSION[@],@SVNVERSION@,g'
+	$(SVNVERSION_EDIT)
 
 d-mode.el: Makefile $(srcdir)/d-mode.el.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp

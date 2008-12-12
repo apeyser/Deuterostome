@@ -1,17 +1,14 @@
 # -*- mode: makefile; -*-
 
 .PHONY: svnversion
-
 svnversion.stamp svnversion: $(top_srcdir)/configure
-	$(SHELL) ./config.status --recheck \
-	  && ./config.status
+	$(SHELL) ./config.status svnversion.stamp
 
 EXTRA_DIST += svnversion.stamp
 
 distclean-local: distclean-local-svnversion
 
 .PHONY: distclean-local-svnversion
-
 distclean-local-svnversion:
 	if test `cd "$(top_srcdir)" && pwd -P` \
 	   	!= `cd "$(top_builddir)" && pwd -P` ; then \

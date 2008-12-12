@@ -305,7 +305,6 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRINGBUF = @STRINGBUF@
 STRIP = @STRIP@
-SVNVERSION = @SVNVERSION@
 SVNVERSION_STAMP = @SVNVERSION_STAMP@
 SYS_DICT_SIZE = @SYS_DICT_SIZE@
 THREADMUL = @THREADMUL@
@@ -876,15 +875,12 @@ gencode:
 	cd src && $(MAKE) $(AM_MAKEFLAGS) gencode
 
 .PHONY: svnversion
-
 svnversion.stamp svnversion: $(top_srcdir)/configure
-	$(SHELL) ./config.status --recheck \
-	  && ./config.status
+	$(SHELL) ./config.status svnversion.stamp
 
 distclean-local: distclean-local-svnversion
 
 .PHONY: distclean-local-svnversion
-
 distclean-local-svnversion:
 	if test `cd "$(top_srcdir)" && pwd -P` \
 	   	!= `cd "$(top_builddir)" && pwd -P` ; then \

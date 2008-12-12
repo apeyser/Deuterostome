@@ -16,6 +16,7 @@
 
 # -*- mode: makefile; -*-
 
+
 VPATH = @srcdir@
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
@@ -32,8 +33,9 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-DIST_COMMON = $(dist_pkglisp_LISP) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(top_srcdir)/m4/cf_svnversion.make
+DIST_COMMON = $(dist_noinst_DATA) $(dist_pkglisp_LISP) \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(top_srcdir)/m4/cf_svnversion.make
 subdir = emacs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
@@ -80,11 +82,11 @@ am__installdirs = "$(DESTDIR)$(pkglispdir)" "$(DESTDIR)$(pkglispdir)"
 dist_pkglispLISP_INSTALL = $(INSTALL_DATA)
 nodist_pkglispLISP_INSTALL = $(INSTALL_DATA)
 LISP = $(dist_pkglisp_LISP) $(nodist_pkglisp_LISP)
-am__ELFILES = d-comint-mode.el d-mode-ops.el d-mode.el dm-server.el \
-	init.el
+am__ELFILES = d-comint-mode.el d-mode.el dm-server.el init.el
 am__ELCFILES = $(am__ELFILES:.el=.elc)
 ELCFILES = $(LISP:.el=.elc)
 elisp_comp = $(top_srcdir)/elisp-comp
+DATA = $(dist_noinst_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 pkgdatadir = @pkgdatadir@
 pkglibdir = @pkglibdir@
@@ -288,7 +290,6 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRINGBUF = @STRINGBUF@
 STRIP = @STRIP@
-SVNVERSION = @SVNVERSION@
 SVNVERSION_STAMP = @SVNVERSION_STAMP@
 SYS_DICT_SIZE = @SYS_DICT_SIZE@
 THREADMUL = @THREADMUL@
@@ -387,16 +388,18 @@ tmp = @tmp@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 dist_pkglisp_LISP = dm-server.el
-NODISTFILES = d-comint-mode.el init.el d-mode.el
-nodist_pkglisp_LISP = $(NODISTFILES) d-mode-ops.el
-EXTRA_DIST = d-comint-mode.el.in init.el.in d-mode.el.in
-CLEANFILES = $(NODISTFILES)
+nodist_pkglisp_LISP = d-comint-mode.el init.el d-mode.el
+dist_noinst_DATA = d-comint-mode.el.in init.el.in d-mode.el.in
+CLEANFILES = $(nodist_pkglisp_LISP)
 edit = sed \
 	-e 's,@bindir\@,$(bindir),g' \
 	-e 's,@pkglispdir\@,$(pkglispdir),g' \
 	-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
 	-e 's,[@]NAMEBYTES[@],@NAMEBYTES@,g' \
-	-e 's,[@]SVNVERSION[@],@SVNVERSION@,g'
+	$(SVNVERSION_EDIT)
+
+SVNVERSION_EDIT = \
+	-e "s,[@]SVNVERSION[@],`cat $(top_builddir)/svnversion.stamp`,g"
 
 all: all-am
 
@@ -550,7 +553,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LISP) $(ELCFILES)
+all-am: Makefile $(LISP) $(ELCFILES) $(DATA)
 installdirs:
 	for dir in "$(DESTDIR)$(pkglispdir)" "$(DESTDIR)$(pkglispdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \

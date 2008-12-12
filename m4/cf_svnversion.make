@@ -7,3 +7,7 @@ else !MAINTAINER_MODE
 $(top_builddir)/svnversion.stamp:
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
 endif !MAINTAINER_MODE
+
+SVNVERSION_EDIT = \
+	-e "s,[@]SVNVERSION[@],`cat $(top_builddir)/svnversion.stamp`,g"
+

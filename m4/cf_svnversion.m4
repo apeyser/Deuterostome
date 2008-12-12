@@ -48,33 +48,39 @@ dnl during configuration, runs svnversion and
 dnl  if the version has changed, stores it in svnversion.stamp
 dnl  and $srcdir/svnversion.stamp if maintainter mode is on.
 dnl Also, sets up dependencies and inital setup in makefiles,
-dnl  using @SVNVERSION_TOP_MAKE@ for the top-level Makefile,
-dnl  and @SVNVERSION_MAKE@ for Makefiles that insert svnverions.
+dnl  @SVNVERSION_MAKE@ for Makefiles that insert svnverions.
 dnl SVNVERSION then gets AC_SUBST'D, and SVNVERSION_STAMP is SUBST'D
 dnl  for dependencies in Makefiles.
 dnl
 AC_DEFUN([CF_SVNVERSION], [dnl
-  AC_MSG_CHECKING([for SVNVERSION value])
+  AC_MSG_CHECKING([adding SVNVERSION to config.status])
 dnl
-  SVNVERSION="unknown"
-  SVNVERSION_STAMP="\$(top_srcdir)/svnversion.stamp \$(top_builddir)/svnversion.stamp"
+  AC_CONFIG_COMMANDS([svnversion.stamp], [
+    SVNVERSION="unknown"
 dnl
-  CF_SVNVERSION_READ([_src], [$srcdir/])
-  CF_SVNVERSION_READ([_build], [])
-  CF_SVNVERSION_READ([], [], [svnversion])
+    CF_SVNVERSION_READ([_src], [$srcdir/])
+    CF_SVNVERSION_READ([_build], [])
+    CF_SVNVERSION_READ([], [], [svnversion])
 dnl
-  CF_SVNVERSION_CHECK([_src])
-  CF_SVNVERSION_CHECK([_build])
-  CF_SVNVERSION_CHECK([])
+    CF_SVNVERSION_CHECK([_src])
+    CF_SVNVERSION_CHECK([_build])
+    CF_SVNVERSION_CHECK([])
 dnl
-  if test $USE_MAINTAINER_MODE = yes; then
-     CF_SVNVERSION_WRITE([_src], [$srcdir/])
-  fi
-  CF_SVNVERSION_WRITE([_build], [])
+    if test $USE_MAINTAINER_MODE = yes; then
+       CF_SVNVERSION_WRITE([_src], [$srcdir/])
+    fi
+    CF_SVNVERSION_WRITE([_build])
+    AC_MSG_NOTICE([src stamp = $cf_svnversion_src])
+    AC_MSG_NOTICE([build stamp = $cf_svnversion_build])
+    AC_MSG_NOTICE([svnversion = $cf_svnversion])
+    AC_MSG_NOTICE([SVNVERSION = $SVNVERSION])
+], [
+    USE_MAINTAINER_MODE=$USE_MAINTAINER_MODE
+])
 dnl
-  AC_SUBST([SVNVERSION])
-  AC_SUBST([SVNVERSION_STAMP])
+    SVNVERSION_STAMP="\$(top_srcdir)/svnversion.stamp \$(top_builddir)/svnversion.stamp"
+    AC_SUBST([SVNVERSION_STAMP])
 dnl
-  AC_MSG_RESULT([src stamp = $cf_svnversion_src, build stamp = $cf_svnversion_build, svnversion = $cf_svnversion, SVNVERSION = $SVNVERSION]) dnl
+  AC_MSG_RESULT([instantiated]) dnl
 ])dnl
 dnl

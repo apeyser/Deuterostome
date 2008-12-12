@@ -381,7 +381,7 @@ AC_CONFIG_FILES([
   m4/Makefile
   test/arr.d
   lib/Makefile
-  doc/Makefile doc/config.sty
+  doc/Makefile
 ])
 
 AC_OUTPUT

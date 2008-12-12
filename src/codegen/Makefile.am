@@ -41,8 +41,6 @@ DISTCLEANFILES = dm-config.h
 noinst_LTLIBRARIES = libdmbootstrap.la
 noinst_PROGRAMS = dgen dcoder
 
-dist_noinst_DATA = 
-
 libdmbootstrap_la_SOURCES = dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h \
 	dmglobals.c dm1.c dm2.c dm-conv.c dm-swapbytes.h \
 	dm4.c dm5.c dm6.c dm7.c dm8.c dm-types.c \

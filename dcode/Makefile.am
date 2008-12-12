@@ -5,7 +5,7 @@ nodist_dmstart_DATA =  theeye.d startup_dnode.d startup_dpawn.d \
 dist_dmconf_DATA = dvt.d dpawn.d
 nodist_dmconf_DATA = dnode.d
 
-EXTRA_DIST = theeye.d.in dnode.d.in dvt_macros.d.in \
+dist_noinst_DATA = theeye.d.in dnode.d.in dvt_macros.d.in \
 	startup_dvt.d.in startup_dnode.d.in startup_dpawn.d.in \
 	matrix.d.in startup_dgen.d.in new-plugin.d.in \
 	dpawn.d startup_common.d.in startup_libs.d.in
@@ -116,19 +116,19 @@ endif ENABLE_PLUGINS
 endif ENABLE_PLUGINS_SUPPORT
 
 edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
-			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
-			-e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
-			-e 's,[@]SVNVERSION[@],$(SVNVERSION),g' \
-			$(PLUGINS_DELETE) \
-			$(PLUGINS_SUPPORT_DELETE) \
-			$(THREADS_EDIT) \
-			$(XPS_DELETE) \
-			$(PERL_DELETE) \
-			$(EMACSCLIENT_EDIT) \
-			$(ATLAS_EDIT) \
-			$(RTHREADS_EDIT) \
-			$(REGEX_DELETE) \
-			$(PETSC_EDIT) 
+	-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
+	-e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
+	$(SVNVERSION_EDIT) \
+	$(PLUGINS_DELETE) \
+	$(PLUGINS_SUPPORT_DELETE) \
+	$(THREADS_EDIT) \
+	$(XPS_DELETE) \
+	$(PERL_DELETE) \
+	$(EMACSCLIENT_EDIT) \
+	$(ATLAS_EDIT) \
+	$(RTHREADS_EDIT) \
+	$(REGEX_DELETE) \
+	$(PETSC_EDIT) 
 
 theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in @SVNVERSION_STAMP@
 	rm -f $@ $@.tmp

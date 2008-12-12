@@ -321,7 +321,6 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRINGBUF = @STRINGBUF@
 STRIP = @STRIP@
-SVNVERSION = @SVNVERSION@
 SVNVERSION_STAMP = @SVNVERSION_STAMP@
 SYS_DICT_SIZE = @SYS_DICT_SIZE@
 THREADMUL = @THREADMUL@
@@ -434,7 +433,15 @@ PRODSRCS = \
 MAINTAINERCLEANFILES = $(PRODSRCS) \
 	dcoder.h
 
-dist_noinst_DATA = 
+dist_noinst_DATA = \
+	dmnuminc.d \
+	ops.d \
+	dsp1f.d \
+	dsp2def.d \
+	startup_dgen.d \
+	dmnuminc.d.in ops.d.in paths.h.in dsp2def.d.in \
+	$(MAINTAINERCLEANFILES)
+
 dist_noinst_SCRIPTS = dgen-build
 AM_CFLAGS = $(GCC_CFLAGS)
 AM_CPPFLAGS = \

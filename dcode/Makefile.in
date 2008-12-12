@@ -33,9 +33,9 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 DIST_COMMON = $(dist_dmconf_DATA) $(dist_dmstart_DATA) \
-	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/new-plugin.d.in $(srcdir)/plugin.d \
-	$(top_srcdir)/m4/cf_svnversion.make
+	$(dist_noinst_DATA) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in $(srcdir)/new-plugin.d.in \
+	$(srcdir)/plugin.d $(top_srcdir)/m4/cf_svnversion.make
 subdir = dcode
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
@@ -84,8 +84,8 @@ dist_dmconfDATA_INSTALL = $(INSTALL_DATA)
 dist_dmstartDATA_INSTALL = $(INSTALL_DATA)
 nodist_dmconfDATA_INSTALL = $(INSTALL_DATA)
 nodist_dmstartDATA_INSTALL = $(INSTALL_DATA)
-DATA = $(dist_dmconf_DATA) $(dist_dmstart_DATA) $(nodist_dmconf_DATA) \
-	$(nodist_dmstart_DATA)
+DATA = $(dist_dmconf_DATA) $(dist_dmstart_DATA) $(dist_noinst_DATA) \
+	$(nodist_dmconf_DATA) $(nodist_dmstart_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 pkgdatadir = @pkgdatadir@
 pkglibdir = @pkglibdir@
@@ -289,7 +289,6 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRINGBUF = @STRINGBUF@
 STRIP = @STRIP@
-SVNVERSION = @SVNVERSION@
 SVNVERSION_STAMP = @SVNVERSION_STAMP@
 SYS_DICT_SIZE = @SYS_DICT_SIZE@
 THREADMUL = @THREADMUL@
@@ -394,7 +393,7 @@ nodist_dmstart_DATA = theeye.d startup_dnode.d startup_dpawn.d \
 
 dist_dmconf_DATA = dvt.d dpawn.d
 nodist_dmconf_DATA = dnode.d
-EXTRA_DIST = theeye.d.in dnode.d.in dvt_macros.d.in \
+dist_noinst_DATA = theeye.d.in dnode.d.in dvt_macros.d.in \
 	startup_dvt.d.in startup_dnode.d.in startup_dpawn.d.in \
 	matrix.d.in startup_dgen.d.in new-plugin.d.in \
 	dpawn.d startup_common.d.in startup_libs.d.in
@@ -450,19 +449,22 @@ PETSC_EDIT_OFF = -e '$(PETSC_START),$(PETSC_END) d'
 @ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@PETSC_EDIT = $(PETSC_EDIT_OFF)
 @ENABLE_PLUGINS_SUPPORT_FALSE@PETSC_EDIT = $(PETSC_EDIT_OFF)
 edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
-			-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
-			-e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
-			-e 's,[@]SVNVERSION[@],$(SVNVERSION),g' \
-			$(PLUGINS_DELETE) \
-			$(PLUGINS_SUPPORT_DELETE) \
-			$(THREADS_EDIT) \
-			$(XPS_DELETE) \
-			$(PERL_DELETE) \
-			$(EMACSCLIENT_EDIT) \
-			$(ATLAS_EDIT) \
-			$(RTHREADS_EDIT) \
-			$(REGEX_DELETE) \
-			$(PETSC_EDIT) 
+	-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
+	-e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
+	$(SVNVERSION_EDIT) \
+	$(PLUGINS_DELETE) \
+	$(PLUGINS_SUPPORT_DELETE) \
+	$(THREADS_EDIT) \
+	$(XPS_DELETE) \
+	$(PERL_DELETE) \
+	$(EMACSCLIENT_EDIT) \
+	$(ATLAS_EDIT) \
+	$(RTHREADS_EDIT) \
+	$(REGEX_DELETE) \
+	$(PETSC_EDIT) 
+
+SVNVERSION_EDIT = \
+	-e "s,[@]SVNVERSION[@],`cat $(top_builddir)/svnversion.stamp`,g"
 
 all: all-am
 
