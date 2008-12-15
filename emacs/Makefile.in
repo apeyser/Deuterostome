@@ -403,6 +403,7 @@ edit = sed \
 SVNVERSION_EDIT = \
 	-e "s,[@]SVNVERSION[@],`cat $(top_builddir)/svnversion.stamp`,g"
 
+SVNVERSION_TARGET = svnversion
 all: all-am
 
 .SUFFIXES:

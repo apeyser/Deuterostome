@@ -37,4 +37,4 @@ gentoo-ci: gentoo-setup
 ebuild: rsync gentoo-ci
 	sudo layman -s gentoo-local
 
-bundle += gentoo
+GENTOO_BUNDLE = gentoo

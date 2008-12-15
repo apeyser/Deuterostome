@@ -1,8 +1,16 @@
 # -*- mode: makefile; -*-
 
-bundle =
+BUNDLE = $(GENTOO_BUNDLE) $(DEBIAN_BUNDLE)
 
-bundle: svnversion distdir
-	cp -pRH $(bundle) $(distdir)
+include $(srcdir)/m4/cf_gentoo.make
+include $(srcdir)/m4/cf_debian.make
+
+.PHONY: bundle
+bundle: $(SVNVERSION_TARGET) $(distdir).tar.bz2
+
+$(distdir).tar.bz2: distdir
+	cp -pRH $(BUNDLE) $(distdir)
 	tardir=$(distdir) && $(am__tar) | bzip2 -9 -c >$(distdir).tar.bz2
 	$(am__remove_distdir)
+
+BUNDLE_CLEANFILES = $(distdir).tar.bz2

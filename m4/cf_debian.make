@@ -4,4 +4,4 @@
 debian:
 	pdebuild
 
-bundle += debian
+DEBIAN_BUNDLE = debian

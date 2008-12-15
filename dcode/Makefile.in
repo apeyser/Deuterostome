@@ -466,6 +466,7 @@ edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 SVNVERSION_EDIT = \
 	-e "s,[@]SVNVERSION[@],`cat $(top_builddir)/svnversion.stamp`,g"
 
+SVNVERSION_TARGET = svnversion
 all: all-am
 
 .SUFFIXES:

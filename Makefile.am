@@ -1,5 +1,8 @@
 EXTRA_DIST = bootstrap autom4te.cfg \
-	gnulib-tool-import.sh link-warning.h
+	gnulib-tool-import.sh link-warning.h \
+	$(SVNVERSION_EXTRA_DIST)
+
+CLEANFILES = $(BUNDLE_CLEANFILES)
 
 if ENABLE_EMACS
 EMACS_DIR=emacs
@@ -31,5 +34,3 @@ gencode:
 
 include $(srcdir)/m4/cf_svnversion-top.make
 include $(srcdir)/m4/cf_bundle.make
-include $(srcdir)/m4/cf_gentoo.make
-include $(srcdir)/m4/cf_debian.make

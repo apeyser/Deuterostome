@@ -405,8 +405,11 @@ target_vendor = @target_vendor@
 tmp = @tmp@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-EXTRA_DIST = bootstrap autom4te.cfg gnulib-tool-import.sh \
-	link-warning.h svnversion.stamp
+EXTRA_DIST = bootstrap autom4te.cfg \
+	gnulib-tool-import.sh link-warning.h \
+	$(SVNVERSION_EXTRA_DIST)
+
+CLEANFILES = $(BUNDLE_CLEANFILES)
 @ENABLE_EMACS_TRUE@EMACS_DIR = emacs
 @ENABLE_BASH_TRUE@@ENABLE_ENV_TRUE@BASH_DIR = sh
 @ENABLE_DOC_TRUE@DOC_DIR = doc
@@ -416,7 +419,12 @@ SUBDIRS = libltdl lib src plugins $(BASH_DIR) ps \
 
 ACLOCAL_AMFLAGS = -I m4 -I m4/latex
 DISTCHECK_CONFIGURE_FLAGS = --enable-plugins --enable-daemon
-bundle = gentoo debian
+SVNVERSION_TARGET = svnversion
+SVNVERSION_EXTRA_DIST = svnversion.stamp
+BUNDLE = $(GENTOO_BUNDLE) $(DEBIAN_BUNDLE)
+GENTOO_BUNDLE = gentoo
+DEBIAN_BUNDLE = debian
+BUNDLE_CLEANFILES = $(distdir).tar.bz2
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -784,6 +792,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -877,9 +886,8 @@ gencode-all: gencode all
 gencode: 
 	cd libltdl && $(MAKE) $(AM_MAKEFLAGS) all
 	cd src && $(MAKE) $(AM_MAKEFLAGS) gencode
-
-.PHONY: svnversion
-svnversion.stamp svnversion: $(top_srcdir)/configure
+.PHONY: $(SVNVERSION_TARGET)
+svnversion.stamp $(SVNVERSION_TARGET): $(top_srcdir)/configure
 	$(SHELL) ./config.status svnversion.stamp
 
 distclean-local: distclean-local-svnversion
@@ -895,13 +903,8 @@ distclean-local-svnversion:
 	else : ; \
 	fi
 
-dist-hook: svnversion
+dist-hook: $(SVNVERSION_TARGET)
 	cp -p $(builddir)/svnversion.stamp $(distdir)/svnversion.stamp
-
-bundle: svnversion distdir
-	cp -pRH $(bundle) $(distdir)
-	tardir=$(distdir) && $(am__tar) | bzip2 -9 -c >$(distdir).tar.bz2
-	$(am__remove_distdir)
 
 gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild:
 	svn cp `echo gentoo/dev-lang/dm/dm-*.ebuild | sort | tail -n 1` $@
@@ -942,6 +945,14 @@ ebuild: rsync gentoo-ci
 .PHONY: debian
 debian:
 	pdebuild
+
+.PHONY: bundle
+bundle: $(SVNVERSION_TARGET) $(distdir).tar.bz2
+
+$(distdir).tar.bz2: distdir
+	cp -pRH $(BUNDLE) $(distdir)
+	tardir=$(distdir) && $(am__tar) | bzip2 -9 -c >$(distdir).tar.bz2
+	$(am__remove_distdir)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

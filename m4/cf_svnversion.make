@@ -11,3 +11,4 @@ endif !MAINTAINER_MODE
 SVNVERSION_EDIT = \
 	-e "s,[@]SVNVERSION[@],`cat $(top_builddir)/svnversion.stamp`,g"
 
+SVNVERSION_TARGET = svnversion
