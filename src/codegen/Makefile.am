@@ -198,3 +198,6 @@ distdir:
 	    || exit 1; \
 	  fi; \
 	done
+
+include $(top_srcdir)/m4/cf_bundle_sub.make
+

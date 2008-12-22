@@ -16,3 +16,5 @@ tuesday.ps: Makefile $(srcdir)/tuesday.ps.in
 	rm -f $@ $@.tmp
 	$(edit) $(srcdir)/tuesday.ps.in >$@.tmp
 	mv $@.tmp $@
+include $(top_srcdir)/m4/cf_bundle_sub.make
+

@@ -225,3 +225,6 @@ libdmbootstrap_la_SOURCES = $(globsrcs)
 libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_THREADS=1 -DDM_DISABLE_REGEX=1 \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1
+
+include $(top_srcdir)/m4/cf_bundle_sub.make
+

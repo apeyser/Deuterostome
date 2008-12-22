@@ -149,3 +149,6 @@ BUILT_SOURCES += $(IPETSC_D)
 CLEANFILES = $(BUILT_SOURCES) $(PETSC_D)
 
 endif ENABLE_PLUGINS_SUPPORT
+
+include $(top_srcdir)/m4/cf_bundle_sub.make
+

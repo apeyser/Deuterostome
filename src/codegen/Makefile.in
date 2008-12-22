@@ -14,6 +14,8 @@
 
 @SET_MAKE@
 
+# -*- mode: makefile; -*-
+
 
 
 
@@ -34,7 +36,6 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 noinst_PROGRAMS = dgen$(EXEEXT) dcoder$(EXEEXT)
-subdir = src/codegen
 DIST_COMMON = $(dist_noinst_DATA) $(dist_noinst_SCRIPTS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/d-mode-ops.el $(srcdir)/dgen_0.h.built \
@@ -42,7 +43,8 @@ DIST_COMMON = $(dist_noinst_DATA) $(dist_noinst_SCRIPTS) \
 	$(srcdir)/dnode_0.h.built $(srcdir)/dpawn_0.h.built \
 	$(srcdir)/dsp1f.h.built $(srcdir)/dsp2def.h.built \
 	$(srcdir)/dvt_0.h.built $(srcdir)/errors.d \
-	$(srcdir)/startup_dgen.d
+	$(srcdir)/startup_dgen.d $(top_srcdir)/m4/cf_bundle_sub.make
+subdir = src/codegen
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/latex/ac_prog_bibtex.m4 \
@@ -487,7 +489,7 @@ all: $(BUILT_SOURCES)
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_bundle_sub.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -951,6 +953,25 @@ distdir:
 	    || exit 1; \
 	  fi; \
 	done
+
+.PHONY: distsvn-recursive
+distsvn-recursive:
+	list='$(DIST_SUBDIRS)'; for subdir in $$list ; do \
+	  if test "$$subdir" = .; then :; else \
+	    distdir=`$(am__cd) $(distdir) && pwd`; \
+	    top_distdir=`$(am__cd) $(top_distdir) && pwd`; \
+	    (cd $$subdir && \
+	      $(MAKE) $(AM_MAKEFLAGS) \
+	        top_distdir="$$top_distdir" \
+	        distdir="$$distdir/$$subdir" \
+		distsvn) \
+	    || exit 1; \
+	  fi; \
+	done
+
+.PHONY: distsvn
+distsvn: distsvn-recursive
+	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

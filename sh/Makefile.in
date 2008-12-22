@@ -14,6 +14,8 @@
 
 @SET_MAKE@
 
+# -*- mode: makefile; -*-
+
 VPATH = @srcdir@
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
@@ -33,8 +35,9 @@ target_triplet = @target@
 @ENABLE_BASH_TRUE@am__append_1 = dnode.sh
 @ENABLE_PERL_TRUE@am__append_2 = print.pl
 @ENABLE_EMACSCLIENT_TRUE@@ENABLE_EMACS_TRUE@am__append_3 = emacsclient-run.sh
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(top_srcdir)/m4/cf_bundle_sub.make
 subdir = sh
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/latex/ac_prog_bibtex.m4 \
@@ -406,7 +409,7 @@ edit = sed \
 all: all-am
 
 .SUFFIXES:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_bundle_sub.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -617,6 +620,25 @@ runtool.sh: Makefile $(srcdir)/runtool.sh.in
 @ENABLE_EMACSCLIENT_TRUE@@ENABLE_EMACS_TRUE@	rm -f $@ $@.tmp
 @ENABLE_EMACSCLIENT_TRUE@@ENABLE_EMACS_TRUE@	$(edit) $(srcdir)/emacsclient-run.sh.in >$@.tmp
 @ENABLE_EMACSCLIENT_TRUE@@ENABLE_EMACS_TRUE@	mv $@.tmp $@
+
+.PHONY: distsvn-recursive
+distsvn-recursive:
+	list='$(DIST_SUBDIRS)'; for subdir in $$list ; do \
+	  if test "$$subdir" = .; then :; else \
+	    distdir=`$(am__cd) $(distdir) && pwd`; \
+	    top_distdir=`$(am__cd) $(top_distdir) && pwd`; \
+	    (cd $$subdir && \
+	      $(MAKE) $(AM_MAKEFLAGS) \
+	        top_distdir="$$top_distdir" \
+	        distdir="$$distdir/$$subdir" \
+		distsvn) \
+	    || exit 1; \
+	  fi; \
+	done
+
+.PHONY: distsvn
+distsvn: distsvn-recursive
+	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

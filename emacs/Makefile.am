@@ -27,4 +27,5 @@ init.el: Makefile $(srcdir)/init.el.in @SVNVERSION_STAMP@
 	mv $@.tmp $@
 
 include $(top_srcdir)/m4/cf_svnversion.make
+include $(top_srcdir)/m4/cf_bundle_sub.make
 

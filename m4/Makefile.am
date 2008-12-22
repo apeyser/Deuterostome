@@ -48,3 +48,6 @@ EXTRA_DIST = \
 	latex/ac_prog_psresize.m4 latex/ac_prog_psselect.m4 \
 	latex/ac_prog_texhash.m4 latex/ac_texmf_path.m4 latex/latex.m4 \
 	latex/LICENSE latex/README
+
+include $(top_srcdir)/m4/cf_bundle_sub.make
+

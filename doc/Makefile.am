@@ -38,3 +38,6 @@ config.sty: Makefile $(srcdir)/config.sty.in @SVNVERSION_STAMP@
 
 include $(top_srcdir)/m4/cf_latex.make
 include $(top_srcdir)/m4/cf_svnversion.make
+
+include $(top_srcdir)/m4/cf_bundle_sub.make
+

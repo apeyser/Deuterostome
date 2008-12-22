@@ -16,6 +16,8 @@
 
 # -*- mode: makefile; -*-
 
+# -*- mode: makefile; -*-
+
 VPATH = @srcdir@
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
@@ -34,6 +36,7 @@ host_triplet = @host@
 target_triplet = @target@
 DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/dvt.bib \
+	$(top_srcdir)/m4/cf_bundle_sub.make \
 	$(top_srcdir)/m4/cf_latex.make \
 	$(top_srcdir)/m4/cf_svnversion.make
 subdir = doc
@@ -408,7 +411,7 @@ all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .bbl .bib .idx .ind .pdf .tex
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_latex.make $(top_srcdir)/m4/cf_svnversion.make $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_latex.make $(top_srcdir)/m4/cf_svnversion.make $(top_srcdir)/m4/cf_bundle_sub.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -634,7 +637,7 @@ config.sty: Makefile $(srcdir)/config.sty.in @SVNVERSION_STAMP@
 .PHONY: clean-local-latex
 
 clean-local-latex:
-	-rm *.aux *.bbl *.log *.toc *.out *.blg *.pdf *.ilg *.ind
+	-rm *.aux *.bbl *.log *.toc *.out *.blg *.pdf *.ilg *.ind *.lot
 
 clean-local: clean-local-latex
 
@@ -642,6 +645,25 @@ clean-local: clean-local-latex
 @MAINTAINER_MODE_TRUE@	cd $(top_srcdir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
 @MAINTAINER_MODE_FALSE@$(top_builddir)/svnversion.stamp:
 @MAINTAINER_MODE_FALSE@	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+
+.PHONY: distsvn-recursive
+distsvn-recursive:
+	list='$(DIST_SUBDIRS)'; for subdir in $$list ; do \
+	  if test "$$subdir" = .; then :; else \
+	    distdir=`$(am__cd) $(distdir) && pwd`; \
+	    top_distdir=`$(am__cd) $(top_distdir) && pwd`; \
+	    (cd $$subdir && \
+	      $(MAKE) $(AM_MAKEFLAGS) \
+	        top_distdir="$$top_distdir" \
+	        distdir="$$distdir/$$subdir" \
+		distsvn) \
+	    || exit 1; \
+	  fi; \
+	done
+
+.PHONY: distsvn
+distsvn: distsvn-recursive
+	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

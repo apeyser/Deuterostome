@@ -17,7 +17,7 @@ dnl CF_LATEX_PUSH_TEXINPUTS([extra directories])
 dnl
 AC_DEFUN([CF_LATEX_PUSH_TEXINPUTS], [dnl
   CF_LATEX_PACKAGES_TEXINPUTS="$TEXINPUTS"
-  ifelse($1, , , [TEXINPUTS="$1:$TEXINPUTS"; export TEXINPUTS])dnl
+  ifelse($1, , , [TEXINPUTS="$1:$TEXINPUTS"; export TEXINPUTS]) dnl
 ])dnl
 dnl
 dnl CF_LATEX_POP_TEXINPUTS

@@ -23,6 +23,6 @@
 .PHONY: clean-local-latex
 
 clean-local-latex:
-	-rm *.aux *.bbl *.log *.toc *.out *.blg *.pdf *.ilg *.ind
+	-rm *.aux *.bbl *.log *.toc *.out *.blg *.pdf *.ilg *.ind *.lot
 
 clean-local: clean-local-latex

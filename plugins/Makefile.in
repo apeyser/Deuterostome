@@ -14,6 +14,8 @@
 
 @SET_MAKE@
 
+# -*- mode: makefile; -*-
+
 
 VPATH = @srcdir@
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
@@ -45,9 +47,10 @@ target_triplet = @target@
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	stats.d \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptester.d
 @ENABLE_PETSC_FALSE@@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@am__append_4 = .plugins
-subdir = plugins
 DIST_COMMON = $(am__dist_noinst_DATA_DIST) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/dmflex.l.in dmflex.c
+	$(srcdir)/Makefile.in $(srcdir)/dmflex.l.in \
+	$(top_srcdir)/m4/cf_bundle_sub.make dmflex.c
+subdir = plugins
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/latex/ac_prog_bibtex.m4 \
@@ -572,7 +575,7 @@ all: $(BUILT_SOURCES)
 
 .SUFFIXES:
 .SUFFIXES: .c .cpp .l .lo .o .obj
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_bundle_sub.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -1002,6 +1005,25 @@ uninstall-am: uninstall-nodist_dmstartDATA uninstall-pkglibDATA \
 
 @ENABLE_PETSC_FALSE@@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@.plugins:
 @ENABLE_PETSC_FALSE@@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@	touch "$@"
+
+.PHONY: distsvn-recursive
+distsvn-recursive:
+	list='$(DIST_SUBDIRS)'; for subdir in $$list ; do \
+	  if test "$$subdir" = .; then :; else \
+	    distdir=`$(am__cd) $(distdir) && pwd`; \
+	    top_distdir=`$(am__cd) $(top_distdir) && pwd`; \
+	    (cd $$subdir && \
+	      $(MAKE) $(AM_MAKEFLAGS) \
+	        top_distdir="$$top_distdir" \
+	        distdir="$$distdir/$$subdir" \
+		distsvn) \
+	    || exit 1; \
+	  fi; \
+	done
+
+.PHONY: distsvn
+distsvn: distsvn-recursive
+	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

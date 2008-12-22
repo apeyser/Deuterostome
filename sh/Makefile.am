@@ -77,3 +77,6 @@ emacsclient-run.sh: Makefile $(srcdir)/emacsclient-run.sh.in
 	mv $@.tmp $@
 endif ENABLE_EMACSCLIENT
 endif ENABLE_EMACS
+
+include $(top_srcdir)/m4/cf_bundle_sub.make
+

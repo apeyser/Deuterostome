@@ -14,6 +14,8 @@
 
 @SET_MAKE@
 
+# -*- mode: makefile; -*-
+
 
 
 
@@ -37,8 +39,6 @@ target_triplet = @target@
 bin_PROGRAMS = dvt$(EXEEXT) dnode$(EXEEXT) dgen$(EXEEXT) \
 	$(am__EXEEXT_1) $(am__EXEEXT_2) dmprop$(EXEEXT)
 noinst_PROGRAMS = testwordorder$(EXEEXT) $(am__EXEEXT_3)
-subdir = src
-SUBDIRS =
 DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(dist_pkgdata_SCRIPTS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/dgen-build $(srcdir)/dgen.c $(srcdir)/dgen_1.h \
@@ -53,7 +53,9 @@ DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(dist_pkgdata_SCRIPTS) \
 	$(srcdir)/dm5.c $(srcdir)/dm6.c $(srcdir)/dm7.c \
 	$(srcdir)/dm8.c $(srcdir)/dmglobals.c $(srcdir)/dmnum.c \
 	$(srcdir)/dmnum.h $(srcdir)/dsp1.c $(srcdir)/dsp2.c \
-	$(srcdir)/paths.h.in
+	$(srcdir)/paths.h.in $(top_srcdir)/m4/cf_bundle_sub.make
+subdir = src
+SUBDIRS =
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/latex/ac_prog_bibtex.m4 \
@@ -699,7 +701,7 @@ all: $(BUILT_SOURCES)
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_bundle_sub.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -1939,6 +1941,25 @@ paths.h: paths.h.in Makefile
 gencode-all: gencode all
 gencode:
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS)
+
+.PHONY: distsvn-recursive
+distsvn-recursive:
+	list='$(DIST_SUBDIRS)'; for subdir in $$list ; do \
+	  if test "$$subdir" = .; then :; else \
+	    distdir=`$(am__cd) $(distdir) && pwd`; \
+	    top_distdir=`$(am__cd) $(top_distdir) && pwd`; \
+	    (cd $$subdir && \
+	      $(MAKE) $(AM_MAKEFLAGS) \
+	        top_distdir="$$top_distdir" \
+	        distdir="$$distdir/$$subdir" \
+		distsvn) \
+	    || exit 1; \
+	  fi; \
+	done
+
+.PHONY: distsvn
+distsvn: distsvn-recursive
+	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
