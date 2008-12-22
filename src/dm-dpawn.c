@@ -171,66 +171,49 @@ P op_mpirecv(void) {
   return frommpi(src);
 }
 
-// srcid/* tagid/* | src tag count
+// srcid/* | src
 P op_mpiprobe(void) {
   P src, tag, retc, count;
-  if (o_2 < FLOORopds) return OPDS_UNF;
-  if (o1 >= CEILopds) return OPDS_OVF;
+  if (o_1 < FLOORopds) return OPDS_UNF;
 
   if (CLASS(o_1) != NUM) return OPD_CLA;
-  if (CLASS(o_2) != NUM) return OPD_CLA;
-  if (! PVALUE(o_2, &src)) src = MPI_ANY_SOURCE;
+  if (! PVALUE(o_1, &src)) src = MPI_ANY_SOURCE;
   else if (src < 0 || src >= getworldsize()) return RNG_CHK;
-  if (! PVALUE(o_1, &tag)) tag = MPI_ANY_TAG;
-  else if (tag < 0 || tag > 32376) return RNG_CHK;
+  tag = MPI_ANY_TAG;
 
   if ((retc = mpiprobe(getworldcomm(), &tag, &src, &count)))
     return retc;
   
-  TAG(o_2) = (NUM|LONGBIGTYPE);
-  LONGBIG_VAL(o_2) = src;
   TAG(o_1) = (NUM|LONGBIGTYPE);
-  LONGBIG_VAL(o_1) = tag;
-  TAG(o1) = (NUM|LONGBIGTYPE);
-  ATTR(o1) = 0;
-  LONGBIG_VAL(o1) = count;
-  FREEopds = o2;
-
+  LONGBIG_VAL(o_1) = src;
   return OK;
 }
 
-// srcid/* tagid/* | false/src tag size true  
+// srcid/* | false/src true  
 P op_mpiiprobe(void) {
   P src, tag, retc, count;
 
-  if (o_2 < FLOORopds) return OPDS_UNF;
-  if (o2 >= CEILopds) return OPDS_OVF;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (o1 >= CEILopds) return OPDS_OVF;
 
   if (CLASS(o_1) != NUM) return OPD_CLA;
-  if (CLASS(o_2) != NUM) return OPD_CLA;
-  if (! PVALUE(o_2, &src)) src = MPI_ANY_SOURCE;
+  if (! PVALUE(o_1, &src)) src = MPI_ANY_SOURCE;
   else if (src < 0 || src >= getworldsize()) return RNG_CHK;
-  if (! PVALUE(o_1, &tag)) tag = MPI_ANY_TAG;
-  else if (tag < 0 || tag > 32376) return RNG_CHK;
+  tag = MPI_ANY_TAG;
 
   switch (mpiiprobe(getworldcomm(), &tag, &src, &count)) {
     case OK:
-      TAG(o_2) = (NUM|LONGBIGTYPE);
-      LONGBIG_VAL(o_2) = src;
       TAG(o_1) = (NUM|LONGBIGTYPE);
-      LONGBIG_VAL(o_1) = tag;
-      TAG(o1) = (NUM|LONGBIGTYPE);
+      LONGBIG_VAL(o_1) = src;
+      TAG(o1) = BOOL;
       ATTR(o1) = 0;
-      LONGBIG_VAL(o1) = count;
-      TAG(o2) = BOOL;
-      ATTR(o2) = 0;
-      BOOL_VAL(o2) = TRUE;
-      FREEopds = o3;
+      BOOL_VAL(o1) = TRUE;
+      FREEopds = o2;
       break;
     case MPI_NOMSG:
-      TAG(o_2) = BOOL;
-      BOOL_VAL(o_2) = FALSE;
-      FREEopds = o_1;
+      TAG(o_1) = BOOL;
+      BOOL_VAL(o_1) = FALSE;
+      FREEopds = o1;
       break;
 
     default:

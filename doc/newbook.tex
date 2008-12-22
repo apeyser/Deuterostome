@@ -1,5 +1,6 @@
 \documentclass[12pt]{book}
-\usepackage{array}
+\usepackage{newbook}
+
 \usepackage{makeidx}
 \usepackage{supertabular}
 \usepackage{pdf}
@@ -18,9 +19,13 @@
 
 \makeindex
 
+\parindent=0pt
+\parskip=0.5\baselineskip
+
 \begin{document}
 \maketitle
 \tableofcontents
+\listoftables
 \include{chap1}
 \include{chap2}
 \include{chap3}

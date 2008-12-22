@@ -84,7 +84,7 @@ CF_IF_ENABLED([doc], [
   CF_LATEX_CLASS_ARTICLE
   CF_LATEX_CLASS_BOOK
   CF_LATEX_PACKAGE_AMSMATH
-  CF_LATEX_PACKAGES([array,makeidx,supertabular,pdf,options,hyperref], 
+  CF_LATEX_PACKAGES([array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo], 
                     [book], [`cd $srcdir; pwd -P`/doc])
   CF_LATEX_PACKAGES([pdf,hyperref,natbib,redefs], 
                     [article], [`cd $srcdir; pwd -P`/doc])

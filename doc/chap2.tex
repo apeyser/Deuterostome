@@ -270,7 +270,6 @@ There  is no text representation of the null or  boolean  objects. Associations 
 \subsection{Mathematical operations}\label{ssec:mathops}
 
 MONADIC operators are used in one of two possible ways:
-\nopagebreak \\
 
 \begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l} 
 num & operator & num (modified)\\
@@ -278,9 +277,8 @@ array & operator & array (modified)\\\\
 \end{tabular}
 
 \noindent where the operator is one of:
-\nopagebreak \\
 
-\begin{tabular}{>{\sffamily\bfseries}l>{\normalfont}l}
+\begin{supertabular}{>{\sffamily\bfseries}l>{\normalfont}l}
 abs   & `take absolute value'\\
 neg   & `negate'\\
 sqrt  & `square root'\\
@@ -295,7 +293,7 @@ ln    & `logarithm, base $e$'\\
 lg    & `logarithm, base $10$'\\
 floor & `round down to nearest integer'\\
 ceil  & `round up to nearest integer'\\\\
-\end{tabular}
+\end{supertabular}
 
 \index{operator!abs}
 \index{operator!neg}
@@ -313,7 +311,6 @@ ceil  & `round up to nearest integer'\\\\
 \index{operator!ceil}
 
 \noindent DYADIC operators are used in one of four possible ways:
-\nopagebreak \\
 
 \begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
 num$_a$ num$_b$ & operator & num (result)\\
@@ -322,8 +319,7 @@ num$_a$ array$_b$ & operator & num (result)\\
 array$_a$ array$_b$ & operator & array$_a$ (modified)\\\\
 \end{tabular}
 
-\noindent where the operator is one of:\\
-\nopagebreak
+\noindent where the operator is one of:
 
 \begin{tabular}{>{\sffamily\bfseries}l>{\normalfont}l}
 add  & `sum, $a+b$'\\
@@ -363,9 +359,8 @@ Each class of composite object is created by a specific  operator, \emph{array},
 Several  operators  perform  analogous  tasks  on  composite  objects  of several classes. They inquire the dimension of the object (\emph{length}), access or replace individual elements (\emph{get}, \emph{put}), physically copy the elements of the object value to another object (\emph{copy}),  or present the elements of  the value successively to a procedure, which is invoked once for every element (\emph{forall}).  Arrays  or  lists  (but  not  dictionaries)  may  be  logically subdivided into subarrays or sublists (\emph{getinterval}). Subarrays or sublists physically  share their elements with their parents and  siblings;  hence, changes  made  to  one  member of the object  family  affect  others  that represent  concerned elements of the value.\\
 
 \noindent The following operators work on ARRAYS:
-\nopagebreak \\
 
-\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+\begin{supertabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
 n /type & array & array\\
 array & length & n\\
 array index & get & num\\
@@ -392,7 +387,7 @@ string regexpr & regex & post match pre [submatches] true\\
                &       & string false\\
 string regexpr & regexi & post match pre [submatches] true\\
                &       & string false\\\\
-\end{tabular}
+\end{supertabular}
 
 
 \index{operator!array}
@@ -434,9 +429,9 @@ To tile the contents of one array into successive subarrays of a larger array, u
 Five array operators specialize in strings (byte arrays).  These dissect  a string after seeking for a pattern that defines the  breakpoint. \emph{search} looks for the seek pattern anywhere in the string, whereas \emph{anchorsearch} checks if the seek pattern leads the string. \emph{token} parses the string using the rules of the D grammar and, when successful, returns the remainder of the string and the (first) D object found, in translated form. \emph{regex}, and its case-insensitive kin \emph{regexi}, also search a string for a matching pattern. They differ from \emph{search} in that the match is defined not by a simple string literal, but is described by a \emph{regular expression} (see C library manual page `man:regex.7' for a definition). A regular expression can specify a great variety of patterns that are searched for in a single pass through the string. When a match is obtained, the returned list contains literal strings showing what was matched in second or later pieces of the search pattern; the string \emph{match} includes the entire substring of \emph{string} that generated the match, including characters that were not match criteria. The regular expression itself is an (interpreted) string (mind the composition rules for D string literals). \emph{regex} and \emph{regexi} allocate VM space for the list and strings of submatches.\\
 
 
-\noindent The following operators deal with LIST objects:\\
+\noindent The following operators deal with LIST objects:
 
-\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+\begin{supertabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
 n & list & list\\
 -- & [ & mark\\
 mark obj$_0$ \ldots obj$_{n-1}$ & ] & list\\
@@ -448,7 +443,7 @@ list$_1$ index list$_2$ & fax & list$_1$ index\\
 oldmin oldmax list & extrema & newmin newmax\\
 list proc & forall & --\\
 list & transcribe & list\\\\
-\end{tabular}
+\end{supertabular}
 
 \index{operator!list}
 \index{operator![}
@@ -936,3 +931,8 @@ x y modifiers & mouseclick & -- `react to mouseclick'\\\\
 \emph{drawtext} draws text starting at the position given by \emph{x} and \emph{y} and returns the window\# and coordinates (only \emph{x} is modified) of the position following the last written character for a subsequent use of \emph{drawtext}. Details are specified in the list operand: the string \emph{font\_spec} selects a font name in the X windows convention; \emph{col\_idx} a color; \emph{h\_align} and \emph{v\_align} an alignment ($<$0 - left (bottom); 0 - center; $>0$ - right (top)). Note that X windows caches up to 10 fonts so that their alternating uses do not produce unreasonable delays.
  
 The X window library buffers X window commands prior to transmitting them to the X server. \emph{Xsync} transmits that buffer instantly.
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "newbook"
+%%% End: 

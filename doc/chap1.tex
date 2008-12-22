@@ -47,9 +47,9 @@ The C statement:  & y = 9.8 * exp(-x/tau);\\\\
 could read in D:  & /y 9.8 x neg tau div exp mul def\\\\
 \end{tabular}
 
-\noindent The  C code assigns the result of an algebraic expression to a variable and neatly concludes the statement with a semicolon.  The D code is an open-ended  string of objects.  Like you walk by putting one foot in front of the other,  the D machine computes by executing one object in the  string after the other:\\
+The  C code assigns the result of an algebraic expression to a variable and neatly concludes the statement with a semicolon.  The D code is an open-ended  string of objects.  Like you walk by putting one foot in front of the other,  the D machine computes by executing one object in the  string after the other:
 
-\begin{tabular}{>{\sffamily\bfseries}p{1cm}>{\normalfont}p{9cm}}
+\begin{supertabular}{>{\sffamily\bfseries}p{1cm}>{\normalfont}p{9cm}}
 /y & pushes a name object of value `y' onto the operand stack; the `/' gives the name the \emph{passive} attribute, designating it for use as an operand (a literal)\\\\
  
 9.8 & pushes  a  numeral  object of value `9.8' onto  the  operand  stack (thereby `executing' the numeral)\\\\
@@ -68,7 +68,7 @@ mul & an operator, which multiplies  the  top two elements of the operand stack 
 
 def & this  name resolves to an essential operator,  which  associates the  object at the top of the stack (the numeral result  of  the expression) with the name (`y',  now the next-to-top element  of the stack), and places the new association pair into the current dictionary for future reference.\\\\
 
-\end{tabular}
+\end{supertabular}
 
 \noindent D  code  thus  builds  on operands and operators  held  together  by  an invisible  glue,  the \emph{reverse Polish notation}.  The rule is  minimal:  an operator  expects that the operand stack contain a sufficient  number  of suitable operands.  Beyond that, there are \emph{no other formal constraints} on the order or choice of objects that form a D script.
 
@@ -220,3 +220,8 @@ In  the  recent  examples,  no equivalent C phrases  have  been  listed, because
 This concludes our first tour of D. The following chapters will give a reference of the machine model and operators.  The best way to learn D,  as always,  is by example.  The D machine comes with a stock of useful D objects in text files. These implement basic utilities that you likely will use in most work on the D machine. They include operator-like extensions of  the D machine in the form of procedure libraries, including a mouse-operated universal browser that lets you inspect and select any information organized by the D machine (called `TheEye'). These use some of the capacities that set D apart from other language models, and thus may serve you also as a grab bag.
 
 A D machine is embedded in the operating system of its host. In particular, it cooperates with a resident editor (\emph{emacs}) and countless other useful programs of the host that you do not want duplicate in D. The current D machine is designed for use in a networked cluster of hosts. Multiple D machines can exist in each host and communicate with one another and across hosts for distributed processing. In fact, there are three flavors of D machine, one slightly specialized to communicate with you (the D virtual terminal, \emph{dvt}), one slightly specialized to work with other D machines (called a D node, \emph{dnode}), and one specialized to do linear algebra using many machines in a cluster (\emph{dpawn}. 
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "newbook"
+%%% End: 

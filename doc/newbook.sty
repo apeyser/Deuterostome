@@ -1,0 +1,420 @@
+\ProvidesPackage{newbook}%
+%
+\RequirePackage{array}%
+\RequirePackage[osf]{mathpazo}
+\RequirePackage{avant}
+\RequirePackage{calc}
+\RequirePackage[tableposition=top,labelfont=bf]{caption}
+
+%
+% sffamilysize
+% set to ratio to scale sans-serif fonts
+%
+\newcommand\sffamilysize{0.90}%
+%
+% \literal|...|
+% typesets ... literally. The characters:
+%  {}%_#^~$&-<> are typeset literally
+%  and the sequences: \| and \\ are typeset
+%  as the following literal (| and \)
+% Uses current type face, and other backslash sequences
+%  are not literalized.
+%
+\newcommand\literal{\@literal@bar}%
+%
+% Names for index groups:
+%  \procname  = Procedures
+%  \opname    = Operands
+%  \dcompname = Components
+%  \filename  = Files
+%
+\newcommand\procname{Procedures}%
+\newcommand\opname{Operands}%
+\newcommand\dcompname{Components}%
+\newcommand\filename{Files}%
+%
+% \procfront
+% Font for procedure names.
+%
+\newcommand\procfont{\sffamily\bfseries\itshape}%
+%
+% \opfont
+% Font for operand names.
+%
+\newcommand\opfont{\sffamily\bfseries}%
+%
+% \dcompfont
+% Font for d-components
+%
+\newcommand\dcompfont{\itshape}%
+%
+% \filefont
+% Font for file names
+%
+\newcommand\filefont{\ttfamily}%
+%
+% \textproc{proc}
+% typesets proc with \procfont
+%
+\newcommand\textproc[1]{{\procfont#1}}%
+%
+% \textop{op}
+% typesets op with \opfont
+%
+\newcommand\textop[1]{{\opfont#1}}%
+%
+% \textdcomp{dcomp}
+% typesets proc with \dcompfont
+%
+\newcommand\textdcomp[1]{{\dcompfont#1}}%
+%
+% \textfile{file}
+% typesets file with \filefont
+%
+\newcommand\textfile[1]{{\filefont#1}}%
+%
+% \proc{proc} or \proc*{proc}
+% Inserts `proc', with underscores literal, 
+%  and inserts proc into index table procedures.
+% Without a star, calls \procfont{proc} to insert.
+%
+\newcommand\proc{\@ifnextchar*\@procstar\@procmain}%
+%
+% \op{op} or \op*{op}
+% Inserts `op', with underscores literal, 
+%  and inserts op into index table operands.
+% Without a star, calls \opfont{op} to insert.
+%
+\newcommand\op{\@ifnextchar*\@opstar\@opmain}%
+%
+% \file{file} or \file*{file}
+% Inserts `file', with underscores literal, 
+%  and inserts file into index table files.
+% Without a star, calls \filefont{file} to insert.
+%
+\newcommand\file{\@ifnextchar*\file@under@star\file@under}%
+%
+% \dcomp[dcomp]{dcomp-text}.
+% Inserts `dcomp', with underscores literal, 
+%  and inserts dcomp into index table dcomps.
+% If [dcomp] is not passed, uses dcomp-text as
+%  the index for index components.
+%
+\DeclareRobustCommand\dcomp{%
+  \@ifnextchar[%]
+  \dcomp@int\dcomp@int@nobrace%
+}%
+%
+% Column types for tabular:
+%   R: Right justified, san-serif.
+%   L: Left justified, san-serif.
+%   C: Centered, san-serif.
+%   O: Left-justified, operand font.
+%   P: Left-justified, procedure font.
+%
+\newcolumntype{R}{>{\sffamily}r}%
+\newcolumntype{C}{>{\sffamily}c}%
+\newcolumntype{O}{>{\opfont}l}%
+\newcolumntype{P}{>{\procfont}l}%
+\newcolumntype{L}{>{\sffamily}l}%
+%
+% \begin{supertable}[pos]{tabular prologue}{caption}{settings}
+%  x & y & z\\
+% \end{supertable}
+% Defines a supertabular environment, with pos defaulting to c,
+%  a caption above, and any settings such as \label or \lasttail.
+%  The prologue is exactly the embedded supertabular's prologue.
+\newenvironment{supertable}{%
+  \def\supertabular@star{\supertabular}%
+  \def\endsupertabular@star{\endsupertabular}%
+  \supertable@int%
+}{%
+  \endsupertable@int%
+}%
+%
+% \begin{supertable*}{width}[pos]{tabular prologue}{caption}{settings}
+%  x & y & z\\
+% \end{supertable*}
+% Defines a supertabular environment, with pos defaulting to c,
+%  a caption above, and any settings such as \label or \lasttail.
+%  The prologue is exactly the embedded supertabular's prologue.
+%  This starred version has a fixed width.
+\newenvironment{supertable*}[1]{%
+  \def\supertabular@star{\csname supertabular*\endcsname{#1}}%
+  \def\endsupertabular@star{\csname endsupertabular*\endcsname}%
+  \supertable@int%
+} {%
+  \endsupertable@int%
+}%
+%
+% \begin{ctable}[pos]{tabular prologue}{caption}{settings}
+%   x & y & z\\
+% \end{ctable}
+% Defines a tabular environment, with pos defaulting to c,
+%  a caption above, and any settings such as \label.
+%  The prologue is exactly the embedded tabular's prologue.
+% 
+\newenvironment{ctable}{%
+  \def\ctable@star{\tabular}%
+  \def\endctable@star{\endtabular}%
+  \ctable@int%
+}{%
+  \endctable@int%
+}%
+%
+% \begin{ctable*}{width}[pos]{tabular prologue}{caption}{settings}
+%   x & y & z\\
+% \end{ctable*}
+% Defines a tabular environment, with pos defaulting to c,
+%  a caption above, and any settings such as \label.
+%  The prologue is exactly the embedded tabular's prologue.
+%  This starred version has a fixed width.
+% 
+\newenvironment{ctable*}[1]{%
+  \def\ctable@star{\csname tabular*\endcsname{#1}}%
+  \def\endctable@star{\csname endtabular*\endcsname}%
+  \ctable@int%
+}{%
+  \endctable@int%
+}
+%
+\begingroup%
+%
+  \catcode`\-=11%
+  \begingroup%
+    \catcode`\|=\active%
+    \gdef\literal-export{%
+      \catcode`\|=\active%
+      \def |{\@literal}%
+    }%
+  \endgroup%
+  %
+  \catcode`\@=\active%
+%
+% \begin{ops}
+%   |in-params| & @op@ & |out-params|
+% \end{ops}
+% Defines a supertabular environment 
+%   with prologue ROL (see column types above).
+% Within it, |...| is defined as literal|...|
+%  and @op@ is defined as \op*{op}.
+%
+  \gdef\ops{%
+    \literal-export%
+    \catcode`\@=\active%
+    \let @=\op-at%
+    \begin{supertabular}{ROL}%
+  }%
+  \global\def\endops{\end{supertabular}}%
+%
+% \begin{procs}
+%   |in-params| & @proc@ & |out-params|
+% \end{procs}
+% Defines a supertabular environment 
+%   with prologue RPL (see column types above).
+% Within it, |...| is defined as literal|...|
+%  and @proc@ is defined as \proc*{proc}.
+%
+  \gdef\procs{%
+    \literal-export%
+    \catcode`\@=\active%
+    \let @=\proc-at%
+    \begin{supertabular}{RPL}%
+  }%
+  \global\def\endprocs{\end{supertabular}}%
+%
+\endgroup%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                      Internal                                 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\newcounter{newbook}%
+\newcommand\newbook@size{%
+  \setcounter{newbook}{\f@size*\real{\sffamilysize}}%
+  \edef\newbook@f@size{\number\c@newbook}%
+  \edef\newbook@f@baselineskip{\f@baselineskip}%
+  \set@fontsize\f@linespread\newbook@f@size\newbook@f@baselineskip%
+}
+\DeclareRobustCommand\newbook@sffamily{%
+  \newbook@size\newbook@sffamily@old%
+}%
+\let\newbook@sffamily@old=\sffamily%
+\let\sffamily=\newbook@sffamily%
+%
+\newcommand\dcomp@int@nobrace[1]{\dcomp@int[#1]{#1}}%
+\newcommand\dcomp@int[2][]{\textdcomp{#2}\index{\dcompname!#1}}%
+%
+\newcommand\@procstar[1]{\@procmain[]}%
+\newcommand\@procmain[1][\textproc]{%
+  \def\@textproc{#1}%
+  \proc@under%
+}%
+\def\@@procmain#1\@@@under{\@textproc{#1}\index{\procname!#1}}%
+%
+\newcommand\@opstar[1]{\@opmain[]}%
+\newcommand\@opmain[1][\textop]{%
+  \def\@textop{#1}%
+  \op@under%
+}%
+%
+\def\@@opmain#1\@@@under{\@textop{#1}\index{\opname!#1}}%
+%
+\begingroup%
+  \catcode`\-=11%
+  \catcode`\_=\active%
+  \catcode`\@=11%
+  \gdef\proc-at{%
+    \def\@textproc{}%
+    \begingroup%
+    \catcode`\_=\active%
+    \catcode`\@=11%
+    \def _{\_}%
+    \def\@@under##1@{##1\@@@under\endgroup}%
+    \expandafter\@@procmain\@@under%
+  }%
+\endgroup%
+%
+\begingroup%
+  \catcode`\-=11%
+  \catcode`\_=\active%
+  \catcode`\@=11%
+  \gdef\op-at{%
+    \def\@textop{}%
+    \begingroup%
+    \catcode`\_=\active%
+    \catcode`\@=11%
+    \def _{\_}%
+    \def\@@under##1@{##1\@@@under\endgroup}%
+    \expandafter\@@opmain\@@under%
+  }%
+\endgroup%
+%    
+\begingroup%
+  \catcode`\_=\active%
+  \gdef\proc@under{%
+    \begingroup%
+    \catcode`\_=\active%
+    \def _{\_}%
+    \def\@@under##1{##1\@@@under\endgroup}%
+    \expandafter\@@procmain\@@under%
+  }%
+\endgroup%
+%
+\begingroup%
+  \catcode`\_=\active%
+  \gdef\op@under{%
+    \begingroup%
+    \catcode`\_=\active%
+    \def _{\_}%
+    \def\@@under##1{##1\@@@under\endgroup}%
+    \expandafter\@@opmain\@@under%
+  }%
+\endgroup%
+%
+\def\@file#1\@@@under{\textfile{#1}\iffile@star\else\index{\filename!#1}\fi}%
+\def\file@under@star*{\let\iffile@star=\iftrue\file@under@}%
+\def\file@under{\let\iffile@star=\iffalse\file@under@}%
+\begingroup%
+  \catcode`\_=\active%
+  \gdef\file@under@{%
+    \begingroup%
+    \catcode`\_=\active%
+    \def _{\_}%
+    \def\@@under##1{##1\@@@under\endgroup}%
+    \expandafter\@file\@@under%
+  }%
+\endgroup%
+%
+\def\@literal@bar|{\@literal}%
+%
+\begingroup%
+  \begingroup%
+    \catcode`\-=\active%
+    \catcode`\{=\active%
+    \catcode`\}=\active%
+    \catcode`\(=1%
+    \catcode`\)=2%
+    \catcode`\#=14%
+    \catcode`\%=\active#
+    \gdef\@literal@pre(#
+      \catcode`\-=\active#
+      \catcode`\{=\active#
+      \catcode`\}=\active#
+      \catcode`\%=\active#
+      \let -=\textendash#
+      \let {=\textbraceleft#
+      \let }=\textbraceright#
+      \let %=\@percentchar#
+    )#
+  \endgroup%
+  %
+  \catcode`\_=\active%
+  \catcode`\#=\active%
+  \catcode`\^=\active%
+  \catcode`\~=\active%
+  \catcode`\$=\active%
+  \catcode`\&=\active%
+  \catcode`\-=6%
+  \catcode`\|=11%
+  \catcode`\<=\active%
+  \catcode`\>=\active%
+  \gdef\@literal{%
+    \begingroup%
+    \@literal@pre%
+    \catcode`\<=\active%
+    \catcode`\>=\active%
+    \catcode`\_=\active%
+    \catcode`\#=\active%
+    \catcode`\^=\active%
+    \catcode`\~=\active%
+    \catcode`\|=11%
+    \catcode`\$=\active%
+    \catcode`\&=\active%
+    \let\\=\textbackslash%
+    \let <=\textless%
+    \let >=\textgreater%
+    \let _=\textunderscore%
+    \let #=\#%
+    \let ^=\textasciicircum%
+    \let ~=\textasciitilde%
+    \let $=\textdollar%$
+    \let &=\&%
+    \let\|=\textbar%
+    \def\@@under--1|{--1\@@@under\endgroup}%
+    \expandafter\@@literal\@@under%
+  }%
+\endgroup%
+\def\@@literal#1\@@@under{#1}%
+%
+\newcommand\supertable@int[4][c]{%
+  \let\supertable@abovecaptionskip=\belowcaptionskip%
+  \let\belowcaptionskip=\abovecaptionskip%
+  \let\abovecaptionskip=\supertable@abovecaptionskip%
+  \tablecaption{#3}%
+  #4%
+  \supertabular@star[#1]{#2}%
+}%
+\def\endsupertable@int{%
+  \endsupertabular@star%
+  \tablehead{}%
+  \tablefirsthead{}%
+  \tabletail{}%
+  \tablelasttail{}%
+}%
+%
+%
+\newcommand\ctable@int[4][c]{%
+  \let\ctable@abovecaptionskip=\belowcaptionskip%
+  \let\belowcaptionskip=\abovecaptionskip%
+  \let\abovecaptionskip=\ctable@abovecaptionskip%
+  \minipage{\textwidth}%
+  \captionof{table}{#3}%
+  #4%
+  \ctable@star[#1]{#2}%
+}%
+\def\endctable@int{%
+  \endctable@star%
+  \endminipage%
+}%
+%

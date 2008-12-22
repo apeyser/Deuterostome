@@ -2,7 +2,7 @@ doc_DATA = dvt-3.0.pdf dvt-emacs.pdf newbook.pdf
 
 dist_noinst_DATA = chap1.tex chap2.tex chap3.tex \
 	dvt.bib \
-	redefs.sty pdf.sty options.sty \
+	redefs.sty pdf.sty options.sty newbook.sty \
 	dvt-3.0.tex dvt-emacs.tex newbook.tex \
 	config.sty.in
 
@@ -24,7 +24,7 @@ dvt-3.0.bbl: dvt-3.0.tex
 dvt-3.0.tex: config.sty
 dvt-3.0.pdf: dvt-3.0.bbl
 
-newbook.tex: chap1.tex chap2.tex chap3.tex config.sty
+newbook.tex: chap1.tex chap2.tex chap3.tex config.sty newbook.sty
 newbook.pdf: newbook.ind
 
 edit = sed -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
