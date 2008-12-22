@@ -413,6 +413,7 @@ EXTRA_DIST = bootstrap autom4te.cfg \
 	testboxes/dict.box testboxes/list.box testboxes/longarray.box \
 	$(SVNVERSION_EXTRA_DIST)
 
+EXTRA_DIST_SVN = testboxes fink
 CLEANFILES = $(BUNDLE_CLEANFILES)
 @ENABLE_EMACS_TRUE@EMACS_DIR = emacs
 @ENABLE_BASH_TRUE@@ENABLE_ENV_TRUE@BASH_DIR = sh
@@ -973,8 +974,15 @@ distsvn-recursive:
 	  fi; \
 	done
 
+.PHONY: distsvn-extra
+distsvn-extra:
+	list='$(EXTRA_DIST_SVN)'; for subdir in $$list ; do \
+	  ! test -d $$subdir/.svn \
+	  || cp -pRH $$subdir/.svn "$(distdir)/$$subdir/.svn"; \
+	done
+
 .PHONY: distsvn
-distsvn: distsvn-recursive
+distsvn: distsvn-extra distsvn-recursive
 	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

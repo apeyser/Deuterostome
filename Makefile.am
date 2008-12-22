@@ -4,6 +4,8 @@ EXTRA_DIST = bootstrap autom4te.cfg \
 	testboxes/dict.box testboxes/list.box testboxes/longarray.box \
 	$(SVNVERSION_EXTRA_DIST)
 
+EXTRA_DIST_SVN = testboxes fink
+
 CLEANFILES = $(BUNDLE_CLEANFILES)
 
 if ENABLE_EMACS

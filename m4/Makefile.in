@@ -390,6 +390,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGINDISTR = plugin-config.m4
 @ENABLE_PLUGINS_SUPPORT_FALSE@PLUGINNODISTR = plugin-config.m4
+EXTRA_DIST_SVN = latex
 dist_m4data_DATA = $(PLUGINDISTR)
 dist_noinst_DATA = \
 	acx_pthread.m4 ax_cflags_strict_prototypes.m4 \
@@ -638,8 +639,15 @@ distsvn-recursive:
 	  fi; \
 	done
 
+.PHONY: distsvn-extra
+distsvn-extra:
+	list='$(EXTRA_DIST_SVN)'; for subdir in $$list ; do \
+	  ! test -d $$subdir/.svn \
+	  || cp -pRH $$subdir/.svn "$(distdir)/$$subdir/.svn"; \
+	done
+
 .PHONY: distsvn
-distsvn: distsvn-recursive
+distsvn: distsvn-extra distsvn-recursive
 	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

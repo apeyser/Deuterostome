@@ -4,6 +4,8 @@ else !ENABLE_PLUGINS_SUPPORT
 PLUGINNODISTR = plugin-config.m4
 endif !ENABLE_PLUGINS_SUPPORT
 
+EXTRA_DIST_SVN = latex
+
 dist_m4data_DATA = $(PLUGINDISTR)
 dist_noinst_DATA = \
 	acx_pthread.m4 ax_cflags_strict_prototypes.m4 \

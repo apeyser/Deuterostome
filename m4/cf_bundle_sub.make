@@ -15,6 +15,13 @@ distsvn-recursive:
 	  fi; \
 	done
 
+.PHONY: distsvn-extra
+distsvn-extra:
+	list='$(EXTRA_DIST_SVN)'; for subdir in $$list ; do \
+	  ! test -d $$subdir/.svn \
+	  || cp -pRH $$subdir/.svn "$(distdir)/$$subdir/.svn"; \
+	done
+
 .PHONY: distsvn
-distsvn: distsvn-recursive
+distsvn: distsvn-extra distsvn-recursive
 	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
