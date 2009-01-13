@@ -400,9 +400,9 @@ end def
       /decompLU_lp
       /backsubLU_lp
       /invertLU_lp
-      /norm2
+      /norm2_blas
       /matvecmul_blas
-      /triangular_solve
+      /solvetriang_blas
       /givens_blas
       /rotate_blas
       /xerbla_test

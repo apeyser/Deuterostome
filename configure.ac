@@ -365,6 +365,7 @@ AC_CONFIG_LINKS([
   plugins/new-plugin.d.in:dcode/new-plugin.d.in
   doc/dvt-3.0.bib:doc/dvt.bib
   doc/dvt-emacs.bib:doc/dvt.bib
+  doc/newbook.bib:doc/dvt.bib
 ])
 
 AC_CONFIG_FILES([

@@ -734,7 +734,7 @@
     | ~irows ~icols | param-dict
     | ~irows: an executable for the pawns that returns the local offsets
     |   of the rows in icols.
-    | ~icols: an executable for the pawns that returns the column number
+    | ~icols_off: an executable for the pawns that returns the column number
     |   for each non-zero data element in the sparse matrix.
     |
     | Calls condense_sparse and requests from each pawn the size of ~icols

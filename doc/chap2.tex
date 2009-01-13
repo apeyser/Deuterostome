@@ -194,15 +194,15 @@ xa\_ & `show all objects on execution stack in brief form'\\
 m\_  & `show current stack and VM usage'\\\\
 \end{tabular}
 
-\index{operator!\_}
-\index{operator!v\_}
-\index{operator!s\_}
-\index{operator!a\_}
-\index{operator!d\_}
-\index{operator!da\_}
-\index{operator!xa\_}
-\index{operator!m\_}
-\index{operator!vm\_}
+\index{Operators!\_}
+\index{Operators!v\_}
+\index{Operators!s\_}
+\index{Operators!a\_}
+\index{Operators!d\_}
+\index{Operators!da\_}
+\index{Operators!xa\_}
+\index{Operators!m\_}
+\index{Operators!vm\_}
 
 To copy an object from the dictionary or execution stack to the operand stack (where you can further analyze it), use:\\
 
@@ -211,8 +211,8 @@ k & dg\_ & obj$_k$\\
 k & xg\_ & obj$_k$\\\\
 \end{tabular}
 
-\index{operator!dg\_}
-\index{operator!xg\_}
+\index{Operators!dg\_}
+\index{Operators!xg\_}
 
 \noindent where $k$ is the index of the targeted object, counting from the top down (the top element is $k=0$).
 
@@ -240,22 +240,22 @@ obj$_1$ \ldots obj$_n$ & counttomark &  mark obj$_1$ \ldots obj$_n$ n\\
 -- & false & false\\\\
 \end{tabular}
 
-\index{operator!pop}
-\index{operator!exch}
-\index{operator!dup}
-\index{operator!copy}
-\index{operator!index}
-\index{operator!roll}
-\index{operator!clear}
-\index{operator!count}
-\index{operator![}
-\index{operator!mark}
-\index{operator!]}
-\index{operator!cleartomark}
-\index{operator!counttomark}
-\index{operator!null}
-\index{operator!true}
-\index{operator!false}
+\index{Operators!pop}
+\index{Operators!exch}
+\index{Operators!dup}
+\index{Operators!copy}
+\index{Operators!index}
+\index{Operators!roll}
+\index{Operators!clear}
+\index{Operators!count}
+\index{Operators![}
+\index{Operators!mark}
+\index{Operators!]}
+\index{Operators!cleartomark}
+\index{Operators!counttomark}
+\index{Operators!null}
+\index{Operators!true}
+\index{Operators!false}
  
 
 Manipulation of objects on the operand stack becomes necessary,  for  instance, when  the  results  left on the stack by one operator  do  not  match  the 
@@ -295,20 +295,20 @@ floor & `round down to nearest integer'\\
 ceil  & `round up to nearest integer'\\\\
 \end{supertabular}
 
-\index{operator!abs}
-\index{operator!neg}
-\index{operator!sqrt}
-\index{operator!cos}
-\index{operator!sin}
-\index{operator!acos}
-\index{operator!asin}
-\index{operator!tan}
-\index{operator!atan}
-\index{operator!exp}
-\index{operator!ln}
-\index{operator!lg}
-\index{operator!floor}
-\index{operator!ceil}
+\index{Operators!abs}
+\index{Operators!neg}
+\index{Operators!sqrt}
+\index{Operators!cos}
+\index{Operators!sin}
+\index{Operators!acos}
+\index{Operators!asin}
+\index{Operators!tan}
+\index{Operators!atan}
+\index{Operators!exp}
+\index{Operators!ln}
+\index{Operators!lg}
+\index{Operators!floor}
+\index{Operators!ceil}
 
 \noindent DYADIC operators are used in one of four possible ways:
 
@@ -331,13 +331,13 @@ mod  & `modulus, $a \mod{b}$\\
 acos2  & `extended $\arccos(\frac{a}{\sqrt{a^2+b^2}})$'\\\\ 
 \end{tabular}
 
-\index{operator!add}
-\index{operator!sub}
-\index{operator!mul}
-\index{operator!div}
-\index{operator!pwr}
-\index{operator!mod}
-\index{operator!acos2}
+\index{Operators!add}
+\index{Operators!sub}
+\index{Operators!mul}
+\index{Operators!div}
+\index{Operators!pwr}
+\index{Operators!mod}
+\index{Operators!acos2}
 
 
 The monadic operators take one operand. When given a numeral (scalar), they return a scalar. When given an array, they operate on all elements of the array, replace them with the results, and return the modified array. The dyadic operators take a pair of operands. With two scalar operands, they return a scalar result. With a pivotal scalar operand and a second array operand, they repeat the operation with each array element as the second operand and the scalar as the first operand; the scalar value is replaced by the running  result. In the converse operand configuration, a pivotal array and a second scalar operand, the operation is performed on each array element as the first operand always using the scalar as the second operand; the results overwrite the original array elements. With two arrays as operands, the operation is performed with the corresponding elements (array dimensions need to be matched) and the results overwrite the pivotal array.
@@ -390,27 +390,27 @@ string regexpr & regexi & post match pre [submatches] true\\
 \end{supertabular}
 
 
-\index{operator!array}
-\index{operator!length}
-\index{operator!get}
-\index{operator!put}
-\index{operator!getinterval}
-\index{operator!copy}
-\index{operator!fax}
-\index{operator!tile}
-\index{operator!ramp}
-\index{operator!extract}
-\index{operator!dilute}
-\index{operator!dilute\_add}
-\index{operator!forall}
-\index{operator!parcel}
-\index{operator!extrema}
-\index{operator!ran1}
-\index{operator!anchorsearch}
-\index{operator!search}
-\index{operator!token}
-\index{operator!regex}
-\index{operator!regexi}
+\index{Operators!array}
+\index{Operators!length}
+\index{Operators!get}
+\index{Operators!put}
+\index{Operators!getinterval}
+\index{Operators!copy}
+\index{Operators!fax}
+\index{Operators!tile}
+\index{Operators!ramp}
+\index{Operators!extract}
+\index{Operators!dilute}
+\index{Operators!dilute\_add}
+\index{Operators!forall}
+\index{Operators!parcel}
+\index{Operators!extrema}
+\index{Operators!ran1}
+\index{Operators!anchorsearch}
+\index{Operators!search}
+\index{Operators!token}
+\index{Operators!regex}
+\index{Operators!regexi}
 
  Mathematical operators working with arrays have been described in \ref{ssec:mathops}. More mathematical operators for arrays are provided in a \emph{dnode} and are described in Chapter \ref{chap:cluster}.
 
@@ -445,17 +445,17 @@ list proc & forall & --\\
 list & transcribe & list\\\\
 \end{supertabular}
 
-\index{operator!list}
-\index{operator![}
-\index{operator!]}
-\index{operator!get}
-\index{operator!put}
-\index{operator!getinterval}
-\index{operator!copy}
-\index{operator!fax}
-\index{operator!extrema}
-\index{operator!forall}
-\index{operator!transcribe}
+\index{Operators!list}
+\index{Operators![}
+\index{Operators!]}
+\index{Operators!get}
+\index{Operators!put}
+\index{Operators!getinterval}
+\index{Operators!copy}
+\index{Operators!fax}
+\index{Operators!extrema}
+\index{Operators!forall}
+\index{Operators!transcribe}
 
 The square bracket operators,  `[ ]', serve to construct a list, element for element,  on the operand stack.  First,  a mark object is laid down  by the `[' operator. Subsequent  activity  produces  objects  that  accumulate  on  the   stack following the mark.  Finally, the `]' operator counts the objects down to the nearest mark, creates a list of matched size, copies all objects following that mark into the list's value,  pops these stack objects including the mark, and pushes   the  list object.  Note  that the similarity with array or procedure enumeration  is superficial:  the objects enclosed between `[ ]' are \emph{executed} like any other objects (they are NOT included literally into the body of the list as would be the case for objects enclosed between `\{\}').
 
@@ -490,26 +490,26 @@ list & dictstack & sublist\\
 dict & transcribe & dict\\\\
 \end{tabular}
 
-\index{operator!dict}
-\index{operator!length}
-\index{operator!used}
-\index{operator!begin}
-\index{operator!end}
-\index{operator!def}
-\index{operator!name}
-\index{operator!get}
-\index{operator!put}
-\index{operator!known}
-\index{operator!find}
-\index{operator!merge}
-\index{operator!cleardict}
-\index{operator!forall}
-\index{operator!systemdict}
-\index{operator!userdict}
-\index{operator!currentdict}
-\index{operator!countdictstack}
-\index{operator!dictstack}
-\index{operator!transcribe}
+\index{Operators!dict}
+\index{Operators!length}
+\index{Operators!used}
+\index{Operators!begin}
+\index{Operators!end}
+\index{Operators!def}
+\index{Operators!name}
+\index{Operators!get}
+\index{Operators!put}
+\index{Operators!known}
+\index{Operators!find}
+\index{Operators!merge}
+\index{Operators!cleardict}
+\index{Operators!forall}
+\index{Operators!systemdict}
+\index{Operators!userdict}
+\index{Operators!currentdict}
+\index{Operators!countdictstack}
+\index{Operators!dictstack}
+\index{Operators!transcribe}
 
 
 The  total capacity (\emph{length}) or used capacity (\emph{used}) of a dictionary  can be inquired (as the number of association pairs). Other operators move  a dictionary  to  and from the dictionary stack (\emph{begin}, \emph{end})  in  order  to control  the lexical scope of name searches. Name-object associations are formed in the current dictionary (\emph{def},  \emph{name}) or  in  any  dictionary  explicitly  specified  (\emph{put}). All entries of a dictionary are discarded by \emph{cleardict}, returning an empty dictionary. You  can determine  whether a name is defined  in  a  particular dictionary (\emph{known}) or retrieve the associated object (\emph{get}). All active dictionaries (i.e. those present on the dictionary stack) are searched for an  association  by \emph{find}.  The associations in one dictionary are merged into another dictionary (\emph{merge}, as  by repeated \emph{def} operations). 
@@ -527,10 +527,10 @@ box & restore & --\\
 box & length & num (\# of bytes)\\\\
 \end{tabular}
 
-\index{operator!save}
-\index{operator!capsave}
-\index{operator!restore}
-\index{operator!length}
+\index{Operators!save}
+\index{Operators!capsave}
+\index{Operators!restore}
+\index{Operators!length}
 
 
 \emph{save}, \emph{capsave}, and \emph{restore} manage VM space. \emph{save} creates a box object that represents all composite objects created following the execution of \emph{save}. \emph{capsave} caps the box object (objects created in VM following \emph{capsave} are outside the box). \emph{restore} removes the VM objects contained in the box from the VM, nulling all references made to these objects in remaining objects (no reference to objects in the box must exist on stacks by the time \emph{restore} is applied). The VM is compacted, such that all remaining composite objects are stored contiguously. The size of the box object can be inquired by \emph{length}. (Boxes containing a tree of objects can be stored in a file or retrieved from a file by \emph{toboxfile}, \emph{fromboxfile}.)
@@ -549,13 +549,13 @@ The VM management operators are used by a set of procedures (included in \emph{u
 boolean /layer\_name & \_layer & boolean\\\\
 \end{tabular}
 
-\index{operator!module}
-\index{operator!\_module}
-\index{operator!forgetmodule}
-\index{operator!savemodule}
-\index{operator!restoremodule}
-\index{operator!layer}
-\index{operator!\_layer}
+\index{Operators!module}
+\index{Operators!\_module}
+\index{Operators!forgetmodule}
+\index{Operators!savemodule}
+\index{Operators!restoremodule}
+\index{Operators!layer}
+\index{Operators!\_layer}
 
 
 To construct a module, put the name of the new module on the operand stack, execute \emph{module}, define your module tree with a dictionary as root, put the dictionary on the operand stack, and execute \emph{\_module}. The construct is analogous to defining a procedure, using the \emph{module} and \emph{\_module} operators in place of the delimitors '\{...\}'. \emph{module} deletes a previously existing object matching \emph{module\_name} from the VM, and executes \emph{save}. \emph{\_module} defines the dictionary under \emph{module\_name} in \emph{userdict}, executes \emph{capsave}, and saves the savebox and module\_name in the module dictionary. Each time you define a new module under an existing module name, the old version is deleted from the VM so that dead wood will not accumulate.
@@ -583,18 +583,18 @@ bool/num & not & bool/num\\
 num shift & bitshift & num\\\\
 \end{tabular}
 
-\index{operator!eq}
-\index{operator!ne}
-\index{operator!gt}
-\index{operator!lt}
-\index{operator!le}
-\index{operator!and}
-\index{operator!or}
-\index{operator!xor}
-\index{operator!not}
-\index{operator!true}
-\index{operator!false}
-\index{operator!bitshift}
+\index{Operators!eq}
+\index{Operators!ne}
+\index{Operators!gt}
+\index{Operators!lt}
+\index{Operators!le}
+\index{Operators!and}
+\index{Operators!or}
+\index{Operators!xor}
+\index{Operators!not}
+\index{Operators!true}
+\index{Operators!false}
+\index{Operators!bitshift}
 
 The  relational  operators  compare two operands  and  return  a  boolean indicating whether or not the relation holds.  Any two objects of matching class are tested for equality (\emph{eq}, \emph{ne}) of their values (simple objects) or identity of their values (composite objects). Only numerals are tested for the other relations (\emph{ge},  \emph{gt}, \emph{le} \emph{lt}). \emph{eq} and \emph{ne} accept numerals of value \emph{undefined}, so they can test for the occurrence of this value.
 
@@ -620,20 +620,20 @@ list & execstack & sublist\\\\
 
 \end{tabular}
 
-\index{operator!start}
-\index{operator!exec}
-\index{operator!if}
-\index{operator!ifelse}
-\index{operator!for}
-\index{operator!repeat}
-\index{operator!loop}
-\index{operator!forall}
-\index{operator!exit}
-\index{operator!stopped}
-\index{operator!stop}
-\index{operator!abort}
-\index{operator!countexecstack}
-\index{operator!execstack}
+\index{Operators!start}
+\index{Operators!exec}
+\index{Operators!if}
+\index{Operators!ifelse}
+\index{Operators!for}
+\index{Operators!repeat}
+\index{Operators!loop}
+\index{Operators!forall}
+\index{Operators!exit}
+\index{Operators!stopped}
+\index{Operators!stop}
+\index{Operators!abort}
+\index{Operators!countexecstack}
+\index{Operators!execstack}
 
 
 Control operators modify the usual linear execution of objects. Many work with a procedure operand that they execute conditionally or repeatedly. In addition to the control operators listed in this section, other events, like those originating from communication with connected D machines or X Windows can also schedule objects for execution.
@@ -664,20 +664,20 @@ stringbuf index width num format & number & stringbuf index\\
 proc & bind & proc\\\\
 \end{tabular}
 
-\index{operator!class}
-\index{operator!readonly}
-\index{operator!type}
-\index{operator!active}
-\index{operator!parent}
-\index{operator!tilde}
-\index{operator!mkread}
-\index{operator!mkact}
-\index{operator!mkpass}
-\index{operator!ctype}
-\index{operator!parcel}
-\index{operator!text}
-\index{operator!number}
-\index{operator!bind}
+\index{Operators!class}
+\index{Operators!readonly}
+\index{Operators!type}
+\index{Operators!active}
+\index{Operators!parent}
+\index{Operators!tilde}
+\index{Operators!mkread}
+\index{Operators!mkact}
+\index{Operators!mkpass}
+\index{Operators!ctype}
+\index{Operators!parcel}
+\index{Operators!text}
+\index{Operators!number}
+\index{Operators!bind}
 
 The  class,  numeral type,  and attributes of an object are  inquired by specific operators. \emph{class} or  \emph{type} return passive names such as  `/nameclass'  or  `/b'. The attributes of an object are inquired by \emph{readonly}, \emph{active}, \emph{parent}, or \emph{tilde}.  \emph{mkread}, \emph{mkact}, \emph{mkpass} change an attribute; the \emph{readonly} attribute cannot be reversed once established. An object carrying the \emph{tilde} attribute is treated as passive object when it is executed and the \emph{tilde} attribute is automatically removed (a tilded name object would turn active thereby). Uses of \emph{tilde} are described in \ref{sec:textobjects}.
 
@@ -698,11 +698,11 @@ null or parent & nextobject & obj true\\
             &            & or false\\\\
 \end{tabular} 
 
-\index{operator!vmstatus}
-\index{operator!save}
-\index{operator!capsave}
-\index{operator!restore}
-\index{operator!nextobject}
+\index{Operators!vmstatus}
+\index{Operators!save}
+\index{Operators!capsave}
+\index{Operators!restore}
+\index{Operators!nextobject}
 
 The  values of internal objects that are created during a D  session  are accumulated  in  the  virtual memory (VM),  eventually  filling  all  available physical space. \emph{vmstatus} lets you examine the current capacity and usage of VM space (returned as number of bytes). \emph{save}, \emph{capsave}, and \emph{restore} let you mark and reclaim used VM space.
 
@@ -728,15 +728,15 @@ string & tosystem & --\\
 string$_1$ & fromsystem & string$_2$\\\\
 \end{tabular}
 
-\index{operator!getwdir}
-\index{operator!setwdir}
-\index{operator!readfile}
-\index{operator!writefile}
-\index{operator!readboxfile}
-\index{operator!writeboxfile}
-\index{operator!findfiles}
-\index{operator!tosystem}
-\index{operator!fromsystem}
+\index{Operators!getwdir}
+\index{Operators!setwdir}
+\index{Operators!readfile}
+\index{Operators!writefile}
+\index{Operators!readboxfile}
+\index{Operators!writeboxfile}
+\index{Operators!findfiles}
+\index{Operators!tosystem}
+\index{Operators!fromsystem}
 
 
 The path operand of file operators is a directory tree following the Linux convention and concluded by `/'. \emph{readfile} reads the file contents into the buffer \emph{string} and returns the filled substring (if \emph{string} cannot hold the entire file, an error results). Box files contain a folded tree of objects that is described to \emph{writeboxfile} by the root object (a list or dictionary); \emph{readboxfile} copies the objects of the tree to the VM and returns the root object of the tree. Box files could be written and read by different generations of D machine and/or D machines running on different platforms. For interconversion issues see \ref{ssec:network}.
@@ -754,48 +754,111 @@ The path operand of file operators is a directory tree following the Linux conve
 time long-array-of-6 & localtime & array\\\\
 \end{tabular}
 
-\index{operator!gettime}
-\index{operator!localtime}
+\index{Operators!gettime}
+\index{Operators!localtime}
 
 
-\emph{gettime} returns compacted Linux time as an extended numeral (seconds since something). \emph{localtime} converts this long numeral into a local time and date and deposits the detailed result in the array; the entries are: year month day hour min sec. The time of day is the military version of the Babylonian, or whatever they call it.
+\emph{gettime} returns compacted Linux time as an extended numeral
+(seconds since something). \emph{localtime} converts this long numeral
+into a local time and date and deposits the detailed result in the
+array; the entries are: year month day hour min sec. The time of day
+is the military version of the Babylonian, or whatever they call it.
 
 \subsection{Networking}\label{ssec:network}
 
-\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
-(servername) port & connect & socket\\
-socket & disconnect & --\\
-socket string & send & --\\
-socket comp\_obj & send & --\\
--- & getsocket & socket\\\\
-\end{tabular}
+\begin{ops}
+(servername) port & connect    & socket \\
+socket            & disconnect & --     \\
+socket string     & send       & --     \\
+socket comp_obj   & send       & --     \\
+--                & getsocket  & socket \\
+socket sig        & sendsig    & --     \\
+\end{ops}
 
-\index{operator!connect}
-\index{operator!disconnect}
-\index{operator!send}
-\index{operator!getsocket}
+A connection between two D machines is established when one of the
+machines establishes it (\op{connect}). The target of the connection
+is always a \dcomp{dnode} described by the network name of its host
+and by the number of the port where that \dcomp{dnode} is listening
+for connection requests (a \dcomp{dvt} does not listen for connection
+requests). The port number is an offset into the range of user
+reserved ports, starting with `0'; it is assigned to the \dcomp{dnode}
+when the \dcomp{dnode} process is started up by a shell command to the
+respective host. \op{connect} returns a socket number opaquely stored
+as the value of a typed \emph{null} object (you cannot play with it,
+but you can pass it around in the D machine). The connection is closed
+by \op{disconnect}.
 
-A connection between two D machines is established when one of the machines establishes it (\emph{connect}). The target of the connection is always a \emph{dnode} described by the network name of its host and by the number of the port where that \emph{dnode} is listening for connection requests (a \emph{dvt} does not listen for connection requests). The port number is an offset into the range of user reserved ports, starting with `0'; it is assigned to the \emph{dnode} when the \emph{dnode} process is started up by a shell command to the respective host. \emph{connect} returns a socket number opaquely stored as the value of a typed \emph{null} object (you cannot play with it, but you can pass it around in the D machine). The connection is closed by \emph{disconnect}.
-
-Two forms of message can be sent by connected machines to ane another (regardless of who established the connection). The first form submits a string; the receiving machine makes the string active and transfers it to the execution stack, so that the string is interpreted by the receiving machine. The second form of message folds the tree that originates from the composite operand object into a temporary box object and transmits the box object. The receiving machine executes \emph{save}, unfolds the tree in the received box object into its VM, and transfers the root object with its active/passive attribute set to active onto the execution stack, thereby executing the root object. The composite object can be a list, dictionary, or array (except string). In other words, the difference between the two forms is that with a non-string composite operand object the receiving machine invokes \emph{save} prior to executing the object, whereas with a string operand \emph{save} is not invoked.
+Two forms of message can be sent by connected machines to ane another
+(regardless of who established the connection). The first form submits
+a string; the receiving machine makes the string active and transfers
+it to the execution stack, so that the string is interpreted by the
+receiving machine. The second form of message folds the tree that
+originates from the composite operand object into a temporary box
+object and transmits the box object. The receiving machine executes
+\op{save}, unfolds the tree in the received box object into its VM,
+and transfers the root object with its active/passive attribute set to
+active onto the execution stack, thereby executing the root
+object. The composite object can be a list, dictionary, or array
+(except string). In other words, the difference between the two forms
+is that with a non-string composite operand object the receiving
+machine invokes \op{save} prior to executing the object, whereas with
+a string operand \op{save} is not invoked.
 
 The example\\
 
 \begin{tabular}{>{\sffamily\bfseries}l}
-[ $\sim$dup $\sim$capsave somedict $\sim$begin $\sim$proc-name $\sim$end $\sim$restore ]\\\\
+  [ $\sim$dup $\sim$capsave somedict $\sim$begin $\sim$proc-name $\sim$end $\sim$restore ]\\\\
 \end{tabular}
 
-\noindent caps the save object that contains the downloaded tree (whose root is the list object), executes a procedure with a downloaded dictionary (a node of the tree) as the curent dictionary, and discards the tree from the VM of the receiving machine.
+\noindent caps the save object that contains the downloaded tree
+(whose root is the list object), executes a procedure with a
+downloaded dictionary (a node of the tree) as the curent dictionary,
+and discards the tree from the VM of the receiving machine.
 
-The receiving machine also performs necessary conversions when it receives D objects from a machine that invokes \emph{send}. This is done during the unfolding of the received tree (\emph{readboxfile} proceeds similarly when it recovers a tree from a box file). Interconversion of little and big Endian formats are done automatically when two different platforms communicate. On the other hand, the communicating D machines must use the 64-bit binary format for their objects (note: these D machines can be implemented on 32 and 64 bit platforms; the point is that the D object formats must be the same). Older D machines using the 32-bit object format do not communicate with the current 64-bit D machines (there exists, however, an undocumented operator to rescue box files that use the now obsolete 32-bit object format).
+The receiving machine also performs necessary conversions when it
+receives D objects from a machine that invokes \op{send}. This is done
+during the unfolding of the received tree (\op{readboxfile} proceeds
+similarly when it recovers a tree from a box file). Interconversion of
+little and big Endian formats are done automatically when two
+different platforms communicate. On the other hand, the communicating
+D machines must use the 64-bit binary format for their objects (note:
+these D machines can be implemented on 32 and 64 bit platforms; the
+point is that the D object formats must be the same). Older D machines
+using the 32-bit object format do not communicate with the current
+64-bit D machines (there exists, however, an undocumented operator to
+rescue box files that use the now obsolete 32-bit object format).
   
 
-A \emph{dvt} receives a \emph{send} message through the \emph{nextevent} operator; in a \emph{dnode} it is the mill that receives and executes the message. A difference between the two machine types is that the \emph{dvt} will not process a message before it has completed an ongoing activity, whereas a \emph{dnode} will interrupt an ongoing activity (within a limited number of mill cycles) to attend to the message.
+A \dcomp{dvt} receives a \op{send} message through the \op{nextevent}
+operator; in a \dcomp{dnode} it is the mill that receives and executes
+the message. A difference between the two machine types is that the
+\dcomp{dvt} will not process a message before it has completed an
+ongoing activity, whereas a \dcomp{dnode} will interrupt an ongoing
+activity (within a limited number of mill cycles) to attend to the
+message.
 
-\emph{getsocket} returns the socket number of the socket through which the most recent message was received. There is a grace period of 100 mill cycles before another message will be accepted. In this period the activity started by the message can execute \emph{getsocket} with results that are guaranteed to be correct.
+\op{getsocket} returns the socket number of the socket through which
+the most recent message was received. There is a grace period of 100
+mill cycles before another message will be accepted. In this period
+the activity started by the message can execute \op{getsocket} with
+results that are guaranteed to be correct.
 
-The operators described in this group effect point-to-point network communication between two D machines using a bi-directional stream protocol. Another group of network operators effect point-to-many-points communication among D machines using the MPI (Message Protocol Interface). The second group of network operators is available only to \emph{dnodes} and \emph{dpawns}, and is described in Chapter \ref{chap:cluster}.
+The operators described in this group effect point-to-point network
+communication between two D machines using a bi-directional stream
+protocol. Another group of network operators effect
+point-to-many-points communication among D machines using the MPI
+(Message Protocol Interface). The second group of network operators is
+available only to \dcomp[dnode]{dnodes} and \dcomp[dpawn]{dpawns}, and
+is described in Chapter \ref{chap:cluster}.
 
+\op{sendsig} sends a `signal' to a \dcomp{dvt} or \dcomp{dnode}. The
+signal is a platform independent integer, that maps to a
+platform-dependent POSIX signal number on the receiving end; these are
+mapped in \file{dm-signals.c} in the \texttt{sigmap} array. That
+mapping is accessible directly in \emph{D} via the \proc{SIGNALS}
+dictionary, which maps the names of signals (such as \textproc{QUIT}
+for \texttt{SIGQUIT} or \texttt{KILL} for \texttt{SIGKILL}) to the
+platform neutral \emph{D} enumerations.
 
 \subsection{Configuration inquiries}\label{ssec:confops}
 
@@ -808,18 +871,17 @@ The operators described in this group effect point-to-point network communicatio
 -- & gethomedir & string 'your home dir on this host'\\\\
 \end{tabular}
 
-\index{operator!getstartupdir}
-\index{operator!getmyname}
-\index{operator!getmyport}
-\index{operator!getmyfqdn}
-\index{operator!getconfdir}
-\index{operator!gethomedir}
+\index{Operators!getstartupdir}
+\index{Operators!getmyname}
+\index{Operators!getmyport}
+\index{Operators!getmyfqdn}
+\index{Operators!getconfdir}
+\index{Operators!gethomedir}
 
 
-Most of these operators return a readonly string object that is created once when the D machine is started and has a fixed value (changing only when \emph{vmresize} is executed in a \emph{dnode}).
-
-
-
+Most of these operators return a readonly string object that is
+created once when the D machine is started and has a fixed value
+(changing only when \emph{vmresize} is executed in a \emph{dnode}).
 
 \subsection{Windows and graphics}\label{ssec:windows}
 
@@ -849,24 +911,24 @@ window\# xy (text) [ \ldots ] & drawtext & window\# x y\\
 -- & Xsync & --\\\\
 \end{tabular}
 
-\index{operator!Xwindows}
-\index{operator!Xsync}
-\index{operator!Xdisplayname}
-\index{operator!makewindow}
-\index{operator!deletewindow}
-\index{operator!mapwindow}
-\index{operator!resizewindow}
-\index{operator!mapcolor}
-\index{operator!drawline}
-\index{operator!drawsymbols}
-\index{operator!fillrectangle}
-\index{operator!drawtext}
-\index{operator!screensize}
-\index{operator!topwindow}
-\index{operator!Xauthrev}
-\index{operator!Xauthset}
-\index{operator!Xauthgen}
-\index{operator!Xauth}
+\index{Operators!Xwindows}
+\index{Operators!Xsync}
+\index{Operators!Xdisplayname}
+\index{Operators!makewindow}
+\index{Operators!deletewindow}
+\index{Operators!mapwindow}
+\index{Operators!resizewindow}
+\index{Operators!mapcolor}
+\index{Operators!drawline}
+\index{Operators!drawsymbols}
+\index{Operators!fillrectangle}
+\index{Operators!drawtext}
+\index{Operators!screensize}
+\index{Operators!topwindow}
+\index{Operators!Xauthrev}
+\index{Operators!Xauthset}
+\index{Operators!Xauthgen}
+\index{Operators!Xauth}
 
 Hooking up a \emph{dvt} and its \emph{dnodes} to an X window server is rather complicated because the X window system involves security issues because it allows transfer of information among hosts. When a \emph{dvt} process is started from a shell, it will connect automatically to the local X server (it is authorized by the shell). When the \emph{dvt} thereafter connects to a \emph{dnode} it checks whether the security extension is built into the local X windows server (\emph{Xauth}). If the extension does not exist the \emph{dnode} will not be given authorization info and will be instructed to simply attempt to connect to the X server. If the extension does exist the \emph{dvt} generates an authorization using \emph{Xauthgen} and instructs the \emph{dnode} to give its X library that authorization (\emph{Xauthset}). From then on, the \emph{dnode} can execute \emph{Xconnect} to connect to the X server and use X windows services (see also X window operators for \emph{dnodes} in \ref{ssec:opsdnode}).
 

@@ -371,7 +371,7 @@ P op_invertLU_lp(void) {
 }
 
 // array | ||array||_2
-P op_norm2(void) {
+P op_norm2_blas(void) {
   D r;
   if (FLOORopds > o_1) return OPDS_UNF;
   if (CLASS(o_1) != ARRAY) return OPD_CLA;
@@ -413,7 +413,7 @@ P op_matvecmul_blas(void) {
 }
 
 // x A <cuts> trans upper unit | x=A^(-1)x
-P op_triangular_solve(void) {
+P op_solvetriang_blas(void) {
   enum CBLAS_TRANSPOSE trans;
   BOOLEAN uplo, unit, trans_;
   P N;

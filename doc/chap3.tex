@@ -1,8 +1,3 @@
-%%% Local Variables: 
-%%% mode: latex
-%%% TeX-master: "newbook"
-%%% End: 
-
 \chapter{THE  MACHINES}\label{chap:cluster}
 
 D machines work in a group. The smallest group might include two D
@@ -90,30 +85,35 @@ for one or more varieties of D machine, or whose behaviors differ
 among machines. Only actual operators are included. These specific
 operators are complemented by machine-specific procedures (`operators
 written in D') that the different D machines derive from their
-specific \file*{startup_xxx.d} files.
+specific \file{startup_xxx.d} files.
 
-\begin{supertable}{OCCC}{Operators for dvt, dnode and dpawn machines}{
-\label{table:ops}
-\tablefirsthead{
-  operator & dvt & dnode & dpawn\\
-  \hline\vspace{-0.5\baselineskip}\\
-}
-\tablehead{
-  \multicolumn{4}{l}{\small\sl continued from previous page}\\
-  \vspace{-0.5\baselineskip}\\
-  operator & dvt & dnode & dpawn\\
-  \hline\vspace{-0.5\baselineskip}\\
-}
-\tabletail{
-  \\\vspace{-1.5\baselineskip}\\
-  \hline%\\\vspace{-1.5\baselineskip}\\
-  \multicolumn{4}{r}{\small\sl continued on next page}\\
-}
-\tablelasttail{}
-}
+\begin{supertable}
+  {>{\opfont}l*{3}{>{\sffamily}c}}
+  {Operators for dvt, dnode and dpawn machines}
+  {
+    \label{table:ops}
+    \tablefirsthead{
+      operator & dvt & dnode & dpawn\\
+      \hline\vspace{-0.5\baselineskip}\\
+    }
+    \tablehead{
+      \multicolumn{4}{l}{\small\sl continued from previous page}\\
+      \vspace{-0.5\baselineskip}\\
+      operator & dvt & dnode & dpawn\\
+      \hline\vspace{-0.5\baselineskip}\\
+    }
+    \tabletail{
+      \\\vspace{-1.5\baselineskip}\\
+      \hline%\\\vspace{-1.5\baselineskip}\\
+      \multicolumn{4}{r}{\small\sl continued on next page}\\
+    }
+    \tablelasttail{}
+  }
 \op*{connect} & + & + & - \\
 \op*{disconnect} & + & + & - \\
 \op*{send} & + & + & - \\
+\op*{sendsig} & + & + & - \\
+\op*{rsendsig} & - & + & - \\
 \op*{getsocket} & + & + & - \\
 \op*{getmyname} & + & + & - \\
 \op*{getmyfqdn} & + & + & - \\\\
@@ -280,11 +280,11 @@ way. Many of these `operators' actually are D procedures defined in
 the file \file{startup_dvt.d}.
 
 \begin{ops}
-  stringbuf                           & @nextevent@    & eventparams...\\
-  active-obj                          & @aborted@      & --\\
-  instance-string error-num           & @error@        & --\\
-  instance-string error-num stringbuf & @errormessage@ & message\_substring\\
-  --                                  & @quit@         & --\\
+  stringbuf                           & nextevent    & eventparams...\\
+  active-obj                          & aborted      & --\\
+  instance-string error-num           & error        & --\\
+  instance-string error-num stringbuf & errormessage & message\_substring\\
+--                                  & quit         & --\\
 \end{ops}
 
 \op{nextevent} takes a string buffer as operand and blocks
@@ -307,7 +307,7 @@ Additional information relevant for the event is communicated by
 \item[\proc*{consoleline}] The keyboard phrase is returned in a
   substring of the string buffer operand
 \item[\proc{nodemessage}] Dependent on the form of the message used in the
-  \emph{send} operator executed in the \dcomp{dnode}, a \op{save}
+  \op{send} operator executed in the \dcomp{dnode}, a \op{save}
   operation is performed, and/or the root object of a received object
   tree is pushed on the operand stack. In all usages of \op{send},
   the received message string (substring of the string buffer) is
@@ -365,16 +365,16 @@ hooked up to it. Initially, the console targets the \dcomp{dvt}'s D
 machine itself.
 
 \begin{procs}
-                                 -- & @h_@   & --\\
-                                 -- & @hk_@  & --\\
-          |(hostname) port# group#| & @_c@   & --\\
-|(hostname) port# group# dim_array| & @_csu@ & --\\
-                                 -- & @c_@   & --\\
-                            |node#| & @_dc@  & --\\
-                            |node#| & @_dx@  & --\\
-                            |node#| & @kill@ & --\\
-                  |node#-or-group#| & @_t@   & --\\
-                            |node#| & @_r@   & --\\\\
+                               -- & h_ & -- \\
+                               -- & hk_  & -- \\
+          (hostname) port# group# & _c   & -- \\
+(hostname) port# group# dim_array & _csu & -- \\
+                               -- & c_   & -- \\
+                            node# & _dc  & -- \\
+                            node# & _dx  & -- \\
+                            node# & kill & -- \\
+                  node#-or-group# & _t   & -- \\
+                            node# & _r   & -- \\\\
 \end{procs}
 
 \proc{h_} prints a help message summarizing all `operators' that are
@@ -460,43 +460,47 @@ can override this mechanism by prefixing your console phrase with a
 tag (see below). Note that this mechanism belongs to the \dcomp{dvt}
 --- \dcomp[dnode]{dnodes} are unaware of its existence.
 
-Many of the \dcomp{dvt} operators described above can be invoked, in a more convenient interface, by selecting from an \emph{X Window} window entitled ``TheHorses'' (described later in this section).
+Many of the \dcomp{dvt} operators described above can be invoked, in a
+more convenient interface, by selecting from an \emph{X Window} window
+entitled ``TheHorses'' (described later in this section).
 
 \subsection{Tagged console phrases}
 
 Certain characters when appearing as the first character of a console phrase direct the \dcomp{dvt} to treat the remainder of the console phrase in some special way. The effect of the tag will also depend on the currently selected target type, \dcomp{dvt} or \dcomp{dnode}.\\
 
-\begin{supertabular}{>{\bfseries}L>{\itshape}LL}
-
-No tag & dvt   & execute phrase as D code\\
-       & dnode & transmit phrase as D code to the \dcomp{dnode}, observing\\
-       &       & the `ready/busy` rule\\\\
-!      & dvt   & execute phrase as D code\\
-       & dnode & transmit phrase as D code to the \dcomp{dnode}, disregarding\\
-       &       & the `ready/busy` rule\\\\ 
-\$     & dvt   & submit phrase as Unix shell command to the host of the \dcomp{dvt}\\
-       & dnode & transmit phrase and submit it as Unix shell command to the\\
-       &       & host of the \dcomp{dnode}, observing the `ready/busy' rule\\\\
-\#     & dvt   & execute phrase in the D machine of the \dcomp{dvt}, use results to\\
-       &       & build a Unix shell command, submit the shell command\\
-       &       & to the host of the \dcomp{dvt}\\
-       & dnode & execute phrase in the D machine of the \dcomp{dvt}, use results to\\
-       &       & build a Unix shell command, submit the shell command\\
-       &       &  to the host of the \dcomp{dnode}, observing the `ready/busy' rule\\\\
-@      & dvt   & execute phrase in the D machine of the \dcomp{dvt}, use results to\\
-       &       & build a Unix shell command, submit the shell command\\
-       &       &  to the host of the \dcomp{dvt}\\
-       & dnode & transmit the phrase to the \dcomp{dnode} and execute it in the D\\
-       &       & machine of the \dcomp{dnode}; make the \dcomp{dnode} build\\
-       &       & a Unix shell command from the results, and submit it\\
-       &       &  to the host of the \dcomp{dnode}, observing the `ready/busy' rule\\\\
-\literal|^|       & dvt   & execute phrase as D code\\
-       & dnode & execute phrase as D code\\
-       & dpawn & execute phrase as D code on the \dcomp{dnode}, disregarding\\
-       &       &   which \dcomp{dpawn} owns the keyboard.\\\\
-\%     & dvt   & execute phrase as D code\\
-       & dnode & execute phrase as D code on the \dcomp{dvt}, disregarding\\
-       &       &   which \dcomp{dnode} owns the keyboard.\\
+\begin{supertabular}{>{\bfseries}L>{\itshape}L>{\sffamily}p{0.75\textwidth}}
+  No tag  & dvt   & execute phrase as D code  \\
+          & dnode & transmit phrase as D code to the \dcomp{dnode}, 
+                    observing the `ready/busy` rule\\\\
+  !      & dvt    & execute phrase as D code\\
+         & dnode  & transmit phrase as D code to the \dcomp{dnode}, 
+                    disregarding  the `ready/busy` rule \\\\
+  \$     & dvt    & submit phrase as Unix shell command to the host of the \dcomp{dvt} \\
+         & dnode  & transmit phrase and submit it as Unix shell command to the 
+                    host of the \dcomp{dnode}, observing the 
+                    `ready/busy' rule\\\\
+  \#     & dvt    & execute phrase in the D machine of the \dcomp{dvt}, 
+                    use results to build a Unix shell command, 
+                    submit the shell command to the host of the \dcomp{dvt} \\
+         & dnode  & execute phrase in the D machine of the \dcomp{dvt}, 
+                    use results to build a Unix shell command, 
+                    submit the shell command to the host of the \dcomp{dnode}, 
+                    observing the `ready/busy' rule  \\\\
+  @      & dvt    & execute phrase in the D machine of the \dcomp{dvt}, 
+                    use results to build a Unix shell command, 
+                    submit the shell command to the host of the \dcomp{dvt}\\
+         & dnode  & transmit the phrase to the \dcomp{dnode} 
+                    and execute it in the D machine of the \dcomp{dnode}; 
+                    make the \dcomp{dnode} build a Unix shell command from the 
+                    results, and submit it to the host of the \dcomp{dnode}, 
+                    observing the `ready/busy' rule \\\\\relax
+  ^       & dvt   & execute phrase as D code\\
+          & dnode & execute phrase as D code\\
+          & dpawn & execute phrase as D code on the \dcomp{dnode}, 
+                    disregarding which \dcomp{dpawn} owns the keyboard.\\\\
+  \%      & dvt   & execute phrase as D code\\
+          & dnode & execute phrase as D code on the \dcomp{dvt}, 
+                    disregarding which \dcomp{dnode} owns the keyboard\\
 \end{supertabular}
 
 The @ and \# tags have complex effects --- you will hardly use them when typing console phrases (they rather are used in `macros' produced by clicks into the ``DVT macros'' window maintained by the \dcomp{dvt} when it uses \emph{X Window}.
@@ -570,10 +574,10 @@ stringbuf index & faxRpage & stringbuf new\_index\\
    &          & [ ]\\\\
 \end{tabular}
 
-\index{operator!faxLpage}
-\index{operator!faxRpage}
-\index{operator!getLpage}
-\index{operator!getRpage}
+\index{Operators!faxLpage}
+\index{Operators!faxRpage}
+\index{Operators!getLpage}
+\index{Operators!getRpage}
 
 \emph{faxLpage} or \emph{faxRpage} append to a byte array the string representation of a directory selected in the left page or of directories/files selected in the right page and update the buffer index to the position folowing the insertion. The string format is suitable for presenting arguments to shell commands. If nothing is selected or other types of object are selected, nothing is appended.
 
@@ -590,11 +594,11 @@ stringbuf index & faxRpage & stringbuf new\_index\\
 
 The \dcomp{dnode} is the specialization of D machine that provides you with computational workhorses. A \dcomp{dnode} is brought up by a shell command addressed to its host. The command is `dnode \#' where `\#' is a numeral that defines a communication port at which this `dnode' will listen for connection requests made via the network. (The specified port number will be used as an offset into the range of user-reserved ports, with no absolute warranty that your chosen port is free -- in rare instances you may have to choose a different port). The D machine of the \dcomp{dnode} is assigned minimal memory resources at this time. More memory can be allocated when you take control of the \dcomp{dnode} via the network.
 
- A \dcomp{dnode} is alerted (from a state of dormancy that uses no CPU cycles, or amidst the execution of D code) whenever a connection request is made to it, when an established connection is the receiving end of the \emph{send} operator executed in another D machine, or when an established \emph{X Window} connection requires attention. The code that schedules reactions to such events is buried in the mill of the \dcomp{dnode} (whereas in the \dcomp{dvt} these events are attended to by code written in D).
+ A \dcomp{dnode} is alerted (from a state of dormancy that uses no CPU cycles, or amidst the execution of D code) whenever a connection request is made to it, when an established connection is the receiving end of the \op{send} operator executed in another D machine, or when an established \emph{X Window} connection requires attention. The code that schedules reactions to such events is buried in the mill of the \dcomp{dnode} (whereas in the \dcomp{dvt} these events are attended to by code written in D).
 
 The \dcomp{dnode} mill tests for external conditions at intervals no greater than the time needed to go round 100 turns, which typically is a very small amount of time on a human scale. When an event is detected it is attended to, interrupting and suspending ongoing execution of D code.  You can protect a D context against such interruption by executing it using the \emph{locked} operator. A \dcomp{dvt} normally will pace the execution of your console phrases so that the \dcomp[dnode]{dnodes} it supervises will not be interrupted. X window events do not pace their demands made to the \dcomp{dnode}, particularly when they arise from an impatient user. It is therefore a good idea to protect X window responses of a \dcomp{dnode} by \emph{lock}. The interruption of other D code by X window events is not a problem because X window response procedures leave behind the same D machine state that existed when the interrupt occured (please remember when you write your own).
 
-The \dcomp{dnode} mill schedules D code in response to X window events in the same way as the \dcomp{dvt} operator \emph{nextevent} (see \ref{ssec:dvtops}). Thus the same D code can be used in \dcomp{dvt} and \dcomp{dnode} machines to service X windows. When a message is received from another D machine (that uses \emph{send}), the received object is made active and pushed on the execution stack. If this (composite) object is not a string, a \emph{save} is executed before the object is unfolded into the VM space (see also \ref{ssec:network}).
+The \dcomp{dnode} mill schedules D code in response to X window events in the same way as the \dcomp{dvt} operator \emph{nextevent} (see \ref{ssec:dvtops}). Thus the same D code can be used in \dcomp{dvt} and \dcomp{dnode} machines to service X windows. When a message is received from another D machine (that uses \op{send}), the received object is made active and pushed on the execution stack. If this (composite) object is not a string, a \emph{save} is executed before the object is unfolded into the VM space (see also \ref{ssec:network}).
 
 A \dcomp{dnode} is terminated by killing its process from the Linux shell that was used to bring it up. A \dcomp{dnode}, however, will typically not be killed after a job: it rather is put into a dormant state (using \emph{vmresize}) from which it can be recruited by a \dcomp{dvt} for new work. Thus \dcomp[dnode]{dnodes} are used like servers.
 
@@ -603,60 +607,35 @@ Whenever the mill of the \dcomp{dnode} detects an error condition, it initiates 
 
 \subsection{Operators for administrating  a \dcomp{dnode}}\label{ssec:opsdnode} 
 
-
-
-\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
-long\_array/null  & vmresize & bool\\
--- & halt & --\\
--- & continue & --\\
--- & stop & --\\
--- & abort & --\\
-active\_obj & lock & --\\ 
--- & console & consolesocket/null\\
-consolesocket/null & setconsole & --\\
-string & toconsole & --\\
-string & tostderr & --\\
-hostname port\# sourcestr numerr & error & --\\
-hostname port\# sourcestr numerr strbuf & errormessage & messstr\\
--- & getmyport & port\#\\
--- & Xwindows\_ & bool\\
-(hostname:screen\#) & Xconnect & --\\
--- & Xdisconnect & -- \\
-num & makethreads & --\\ 
--- & threads & num\\ 
-active\_obj & serialize & --\\
--- & getlibdir & string\\
-(path) (filename) & loadlib & lib\_dict\\
--- & hi & (library description)\\
--- & libnum & num\\
-null/lib\_dict & nextlib & dict true\\
-               &         & false\\\\
-\end{tabular}
-
-\index{operator!halt}
-\index{operator!continue}
-\index{operator!stop}
-\index{operator!abort}
-\index{operator!lock}
-\index{operator!console}
-\index{operator!setconsole}
-\index{operator!toconsole}
-\index{operator!tostderr}
-\index{operator!error}
-\index{operator!errormessage}
-\index{operator!getmyport}
-\index{operator!Xwindows\_}
-\index{operator!Xconnect}
-\index{operator!Xdisconnect}
-\index{operator!makethreads}
-\index{operator!threads}
-\index{operator!serialize}
-\index{operator!getlibdir}
-\index{operator!loadlib}
-\index{operator!hi}
-\index{operator!libnum}
-\index{operator!nextlib}
-
+\begin{ops}
+long_array/null     & vmresize     & bool                  \\
+--                  & halt         & --                    \\
+--                  & continue     & --                    \\
+--                  & stop         & --                    \\
+--                  & abort        & --                    \\
+active_obj          & lock         & --                    \\ 
+--                  & console      & consolesocket/null    \\
+consolesocket/null  & setconsole   & --                    \\
+string              & toconsole    & --                    \\
+string              & tostderr     & --                    \\
+hostname port\# sourcestr!
+numerr              & error        & --                    \\
+hostname port\# sourcestr!
+numerr strbuf       & errormessage & messstr               \\
+--                  & getmyport    & port#                 \\
+--                  & Xwindows_    & bool                  \\
+(hostname:screen\#) & Xconnect     & --                    \\
+--                  & Xdisconnect  & --                    \\
+num                 & makethreads  & --                    \\ 
+--                  & threads      & num                   \\ 
+active_obj          & serialize    & --                    \\
+--                  & getlibdir    & string                \\
+(path) (filename)   & loadlib      & lib_dict              \\
+--                  & hi           & (library description) \\
+--                  & libnum       & num                   \\
+null/lib_dict       & nextlib      & dict true             \\
+                    &                & false                 \\\\
+\end{ops}
 
 The \dcomp{dnode} lets you resize the VM and stack dimensions (\emph{vmresize}). When given the \emph{null} object as operand, \emph{vmresize} establishes a tiny VM, renders the \dcomp{dnode} dormant, and returns \emph{true}. When given the array of type long as operand, \emph{vmresize} establishes stack, VM, and \emph{userdict} dimensions as specified by the elements of the array, in the order: operand stack size (in objects), dictionary stack size, execution stack size, VM capacity (in MB), and userdict capacity (in associations). \emph{vmresize} indicates sucess/failure of the attempted memory allocation in \emph{bool}. When used with the array operand, \emph{vmresize} also sets the startup and working file directories back to the original working directory (from which the \dcomp{dnode} has been started up); lastly, \emph{vmresize} makes the \dcomp{dnode} interpret the file \file{startup_dnode.d}. 
 
@@ -701,22 +680,22 @@ array dir & realFFT & array\\
 array dir & sineFFT & array\\\\
 \end{tabular}
 
-\index{operator!matmul}
-\index{operator!mattranspose}
-\index{operator!matvecmul}
-\index{operator!integrateOH}
-\index{operator!integrateRS}
-\index{operator!integrateOHv}
-\index{operator!solvetridiag}
-\index{operator!solv\_bandmat}
-\index{operator!decompLU}
-\index{operator!backsubLU}
-\index{operator!invertLU}
-\index{operator!bandLU}
-\index{operator!bandbs}
-\index{operator!complexFFT}
-\index{operator!realFFT}
-\index{operator!sineFFT}
+\index{Operators!matmul}
+\index{Operators!mattranspose}
+\index{Operators!matvecmul}
+\index{Operators!integrateOH}
+\index{Operators!integrateRS}
+\index{Operators!integrateOHv}
+\index{Operators!solvetridiag}
+\index{Operators!solv\_bandmat}
+\index{Operators!decompLU}
+\index{Operators!backsubLU}
+\index{Operators!invertLU}
+\index{Operators!bandLU}
+\index{Operators!bandbs}
+\index{Operators!complexFFT}
+\index{Operators!realFFT}
+\index{Operators!sineFFT}
 
 
 
@@ -765,145 +744,313 @@ The `subscript' operator has been given a short name, \emph{ss}. It returns the 
 A Amap 2 ss 9 ss 12 ss /amap name /a name\\\\
 \end{tabular}
 
-\noindent This example defines \emph{A} as a three-dimensional array and associates it with the map \emph{Amap}. Then performs three rounds of indexing to extract element $a_{2,9,12}$. This returns the map of a zero-dimensional array (as the D list [1]), and the zero-dimensional array containing the element (as a D array of length 1).
+\noindent This example defines \emph{A} as a three-dimensional array
+and associates it with the map \emph{Amap}. Then performs three rounds
+of indexing to extract element $a_{2,9,12}$. This returns the map of a
+zero-dimensional array (as the D list [1]), and the zero-dimensional
+array containing the element (as a D array of length 1).
 
-The `blas' and `lp' operators are executed using the cache facilities and processors in the host of the \dcomp{dnode}. They do not themselves distribute work among different hosts in a cluster.\\
+The `blas' and `lp' operators are executed using the cache facilities
+and processors in the host of the \dcomp{dnode}. They do not
+themselves distribute work among different hosts in a cluster.
 
-\begin{tabular}{>{\sffamily\bfseries}l>{\sffamily}l}
-matmul\_blas & $\alpha A^{t?} B^{t?} + \beta C \Rightarrow C $ \\
-matvecmul\_blas & $\alpha A^{t?} x + \beta y \Rightarrow y$ \\
-givens\_blas & compute Givens transformation \\
-rotate\_blas & rotate\\
-norm2\_blas & compute $\lVert x \rVert _2$\\
-solvetriang\_blas & $A^{t?,-1} x \Rightarrow x$\\
-decompLU\_blas & compute LU decomposition of $A$\\
-backsubLU\_blas & compute LU backsubstitution with RHS\\
-invertLU\_blas & compute inverse matrix following LU decomposition\\\\
-\end{tabular}
+\begin{formulas}
+matmul_blas      & C & \alpha A^{t?} B^{t?} + \beta C \\
+matvecmul_blas   & y & \alpha A^{t?} x + \beta y      \\
+solvetriang_blas & x & A^{t?,-1} x                    \\
+\end{formulas}
 
-\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
-C Cmap beta A Amap Atrans B Bmap Btrans alpha & matmul\_blas & C Cmap \\
-y beta A Amap Atrans x alpha & matvecmul\_blas & y \\
-x12 & givens\_blas & c s \\
-c s x y & rotate\_blas & x y \\
-x & norm2\_blas & num \\
-x A Amap Atrans upper unit & solvetriang\_blas & x \\
-A Amap pivot & decompLU\_lp & A Amap pivot true \\
-                 &              & false\\
-rhs A Amap pivot & backsubLU\_lp & rhs \\
-A Amap pivot & invertLU\_lp & A Amap \\\\
-\end{tabular}
+\begin{definitions}
+givens_blas      & compute Givens transformation \\
+rotate_blas      & rotate\\
+norm2_blas       & compute $\lVert x \rVert _2$\\
+decompLU_blas    & compute LU decomposition of $A$\\
+backsubLU_blas   & compute LU backsubstitution with RHS\\
+invertLU_blas    & compute inverse matrix following LU decomposition\\
+\end{definitions}
 
-\index{operator!matmul\_blas}
-\index{operator!matvecmul\_blas}
-\index{operator!givens\_blas}
-\index{operator!rotate\_blas}
-\index{operator!solvetriang\_blas}
-\index{operator!norm2\_blas}
-\index{operator!decompLU\_blas}
-\index{operator!backsubLU\_blas}
-\index{operator!invertLU\_blas}
+\begin{ops}
+C Cmap beta A Amap Atrans       !
+B Bmap Btrans alpha             & matmul_blas      & C Cmap \\
+y beta A Amap Atrans x alpha    & matvecmul_blas   & y \\
+x12                             & givens_blas      & c s \\
+c s x y                         & rotate_blas      & x y \\
+x                               & norm2_blas       & num \\
+x A Amap Atrans upper unit      & solvetriang_blas & x \\
+A Amap pivot                    & decompLU_lp      & A Amap pivot true \\
+                                &                    & false\\
+rhs A Amap pivot                & backsubLU_lp     & rhs \\
+A Amap pivot                    & invertLU_lp      & A Amap \\\\
+\end{ops}
 
+The operands specified as capitalized names (e.g., \emph{A}) are /D
+arrays holding matrix data, described by a map (\emph{Amap}). A
+boolean (\emph{Atrans}) when true designates use of the transposed
+matrix rather than the matrix itself. Names in greek letters stand for
+/D scalars, and lower-case names are vectors (/D arrays), a /L array
+(\emph{pivot}), or /D scalars (\emph{c}, \emph{s}).
 
-The operands specified as capitalized names (e.g., \emph{A}) are /D arrays holding matrix data, described by a map (\emph{Amap}). A boolean (\emph{Atrans}) when true designates use of the transposed matrix rather than the matrix itself. Names in greek letters stand for /D scalars, and lower-case names are vectors (/D arrays), a /L array (\emph{pivot}), or /D scalars (\emph{c}, \emph{s}).
+\op{matmul_blas} and \op{matvecmul_blas} perform generalized
+matrix-matrix or matrix-vector multiplications.
 
-\emph{matmul\_blas} and \emph{matvecmul\_blas} perform generalized matrix-matrix or matrix-vector multiplications.
+\op{givens_blas} computes the cosine (\emph{c}) and sine (\emph{s}) of
+a Givens transformation for a two-element vector \emph{h}, overwriting
+the vector. The plane Givens rotation on a pair of vectors \emph{x}
+and \emph{y} is effected in place by \op{rotate_blas}.
 
-\emph{givens\_blas} computes the cosine (\emph{c}) and sine (\emph{s}) of a Givens transformation for a two-element vector \emph{h}, overwriting the vector. The plane Givens rotation on a pair of vectors \emph{x} and \emph{y} is effected in place by \emph{rotate\_blas}. 
+\op{solvetriang_blas} solves the linear system with the triangular
+coefficient matrix \emph{A} where the boolean \emph{upper} indicates
+in which half of \emph{A} the triangular coefficients are located; the
+boolean \emph{unit} forces unit diagonal elements regardless of their
+values in \emph{A}. The vector \emph{x} contains the right hand side
+on input and the solution on output.
 
-\emph{solvetriang\_blas} solves the linear system with the triangular coefficient matrix \emph{A} where the boolean \emph{upper} indicates in which half of \emph{A} the triangular coefficients are located; the boolean \emph{unit} forces unit diagonal elements regardless of their values in \emph{A}. The vector \emph{x} contains the right hand side on input and the solution on output.
-
-\emph{decompLU\_lp}  performs the LU-decomposition of matrix \emph{A} in place and inserts pivoting information into the vector \emph{pivot}. The decomposed matrix and pivoting are used by \emph{backsubLU\_lp} and \emph{invertLU\_lp} to generate a solution given for a right-hand-side vector (returning it in the vector), or to compute the inverse of the decomposed matrix in place.
+\op{decompLU_lp} performs the LU-decomposition of matrix \emph{A} in
+place and inserts pivoting information into the vector
+\emph{pivot}. The decomposed matrix and pivoting are used by
+\op{backsubLU_lp} and \op{invertLU_lp} to generate a solution given
+for a right-hand-side vector (returning it in the vector), or to
+compute the inverse of the decomposed matrix in place.
  
  
-Some of these operators return a boolean indicating success/failure of the attempted operation. Others (e.g., \emph{solvetriang\_blas}) can also fail, but, for reasons due to error-reporting quirks of the BLAS/LAPACK libraries, report an operator error via the \emph{error} mechanism of the D \dcomp{dnode}. An additional message detailing the error reported by the library is written to `stderr' (which you may wish to redirect to a log file for having an ear at the horse's mouth).
+Some of these operators return a boolean indicating success/failure of
+the attempted operation. Others (e.g., \op{solvetriang_blas}) can
+also fail, but, for reasons due to error-reporting quirks of the
+BLAS/LAPACK libraries, report an operator error via the \op{error}
+mechanism of the D \dcomp{dnode}. An additional message detailing the
+error reported by the library is written to `stderr' (which you may
+wish to redirect to a log file for having an ear at the horse's
+mouth).
 
 \subsection{Communicating with a cluster of \dcomp[dpawn]{dpawns}}
 
-\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
-[ n1 dict1 n2 dict2 \ldots ] & makerthreads &  socket \\
-null & makerthreads & -- \\
--- & rthreads & n \\
-& checkrthreads & bool \\
-idx active\_obj / string & rsend & -- \\\\
-\end{tabular}
+\begin{ops}
+  [ n1 dict1 n2 dict2 \ldots ] & makerthreads  & socket \\
+  null                         & makerthreads  & --     \\
+--                             & rthreads      & n      \\
+--                             & checkrthreads & bool   \\
+  idx active_obj / string      & rsend         & --     \\
+  socket comp_obj              & send          & --     \\
+  sig                          & rsendsig      & --     \\\\
+\end{ops}
 
-\index{operator!makerthreads}
-\index{operator!rthreads}
-\index{operator!checkrthreads}
-\index{operator!rsends}
+A cluster of \dcomp[dpawn]{dpawns} is created on the network by
+\op{makerthreads} (make remote threads). The list argument of the
+operator generally has several to many paired entries. The first item
+of a pair gives the number of \dcomp[dpawn]{dpawns} to be brought up
+on the Linux box described by the second item, a dictionary. The
+dictionary is specific for the \emph{mpi} environment and provides,
+under \emph{mpi}-specific names a set of associated
+strings. \op{makethreads} starts a child process of the \dcomp{dnode}
+called the `rook'. The rook mediates communications between the
+\dcomp{dnode} and \dcomp[dpawn]{dpawns} via
+\emph{mpi}. \op{makerthreads} returns a socket (i.e. socket-type null
+object) for communication with the rook via the \dcomp{dnode} operator
+\op{send} (see below). Messages sent by \dcomp[dpawn]{dpawns} to the
+\dcomp{dnode} will be addressed (via \emph{mpi}) to the rook, who
+communicates them to the \dcomp{dnode} through the socket established
+by \op{makethreads}. A second usage of \op{makerthreads}, taking a
+\emph{null} argument, kills the rook and the current
+\dcomp[dpawn]{dpawns} (it returns nothing). The rook is used to couple
+\dcomp{dnode} and \dcomp[dpawn]{dpawns} in this way in order to
+facilitate cleanup of failed \dcomp{dpawn} activities without
+compromising the continuity of the \dcomp{dnode} itself.
 
-A cluster of \dcomp[dpawn]{dpawns} is created on the network by \emph{makerthreads} (make remote threads). The list argument of the operator generally has several to many paired entries. The first item of a pair gives the number of \dcomp[dpawn]{dpawns} to be brought up on the Linux box described by the second item, a dictionary. The dictionary is specific for the \emph{mpi} environment and provides, under \emph{mpi}-specific names a set of associated strings. \emph{makethreads} starts a child process of the \dcomp{dnode} called the `rook'. The rook mediates communications between the \dcomp{dnode} and \dcomp[dpawn]{dpawns} via \emph{mpi}. \emph{makerthreads} returns a socket (i.e. socket-type null object) for communication with the rook via the \dcomp{dnode} operator \emph{send} (see below). Messages sent by \dcomp[dpawn]{dpawns} to the \dcomp{dnode} will be addressed (via \emph{mpi}) to the rook, who communicates them to the \dcomp{dnode} through the socket established by \emph{makethreads}. A second usage of \emph{makerthreads}, taking a \emph{null} argument, kills the rook and the current \dcomp[dpawn]{dpawns} (it returns nothing). The rook is used to couple \dcomp{dnode} and \dcomp[dpawn]{dpawns} in this way in order to facilitate cleanup of failed \dcomp{dpawn} activities without compromising the continuity of the \dcomp{dnode} itself. 
+\op{rthreads} inquires the current number of \dcomp[dpawn]{dpawns},
+independent of their functional states. \op{checkrthreads} returns
+\emph{true} if the rook and all current \dcomp[dpawn]{dpawns} are
+responsive. If the rook is unresponsive, \op{checkrthreads} eliminates
+all remote threads from the \dcomp{dnode} and returns \emph{false}. If
+one or more \dcomp[dpawn]{dpawns} are unresponsive, \op{checkrthreads}
+simply returns \emph{false}.
 
-\emph{rthreads} inquires the current number of \dcomp[dpawn]{dpawns}, independent of their functional states. \emph{checkrthreads} returns \emph{true} if the rook and all current \dcomp[dpawn]{dpawns} are responsive. If the rook is unresponsive, \emph{checkrthreads} eliminates all remote threads from the \dcomp{dnode} and returns \emph{false}. If one or more \dcomp[dpawn]{dpawns} are unresponsive, \emph{checkrthreads} simply returns \emph{false}.
+You can send messages to the rook using \op{send} with the socket
+number obtained from \op{makerthreads}. The rook will broadcast such a
+message to all current \dcomp[dpawn]{dpawns}. The standard method for
+transmitting messages to \dcomp[dpawn]{dpawns}, however, is
+\op{rsend}. To identify a particular \dcomp{dpawn} as target, specify
+its index \emph{idx} (automatically assigned by \op{makerthreads} in
+the order of its argument list elements, starting from 0). To send to
+all current \dcomp[dpawn]{dpawns}, specify \emph{idx} as `undefined'
+(*). The active object or string will be submitted to the target
+\emph{dpawn(s)} for execution (see also \op{send}).
 
-You can send messages to the rook using \emph{send} with the socket number obtained from \emph{makerthreads}. The rook will broadcast such a message to all current \dcomp[dpawn]{dpawns}. The standard method for transmitting messages to \dcomp[dpawn]{dpawns}, however, is \emph{rsend}. To identify a particular \dcomp{dpawn} as target, specify its index \emph{idx} (automatically assigned by \emph{makerthreads} in the order of its argument list elements, starting from 0). To send to all current \dcomp[dpawn]{dpawns}, specify \emph{idx} as `undefined' (*). The active object or string will be submitted to the target \emph{dpawn(s)} for execution (see also \emph{send}).
+\op{rsendsig} sends a signal to all pawns, where the signal is an
+integer that is mapped in the source file \file{dm-signals.c} as
+\texttt{sigmap} to a signal number for the current platform. However,
+these mappings are identified by name in the dictionary
+\proc{SIGNALS}, which has such members as \textproc{QUIT} and
+\textproc{KILL}, which are the proper enumeration to send a
+\texttt{SIGQUIT} or \texttt{SIGKILL} to all pawns. See the
+\op{sendsig} operator which functions similarly for \dcomp{dvt} and
+\dcomp{dnode} machines.
 
+\pagebreak
 \subsection{The PETSc procedure library of the \dcomp{dnode}}
+\label{section:petsc-procs}
+\begin{procs}
+   /A \ldots /type rows columns & mat_create      & A \\
+                      /X length & vec_create      & X \\
+                           /Y X & vec_dup         & Y \\
+                        X ~data & vec_fill        & -- \\
+                   A ~row-maker & mat_fill        & -- \\
+                        X data  & get_vector      & data \\
+        Y beta A Atrans X alpha & pmatvecmul      & -- \\
+   data Y beta A Atrans X alpha & get_matvecmul   & data \\
+                         A data & get_matrix      & data \\
+                          /name & ksp_create      & K \\
+                              X & vec_destroy     & -- \\
+                              A & mat_destroy     & --\\
+                           /B A & mat_dup         & B\\
+                       \ldots A & mat_transpose   & --\\
+                              K & ksp_destroy     & --\\
+                        K A X Y & ksp_solve       & --\\
+                          K X Y & ksp_resolve     & --\\
+                   K A X Y data & get_ksp_solve   & data\\
+                     K X Y data & get_ksp_resolve & data\\
+                           bool & report          & --\\
+                 length ~active & execrange       & --\\
+\end{procs}
 
-\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
-/name $<$d data$>$ & vec\_create & vecdict \\
-/name $<$d data$>$ nrows ncols & dense\_mat\_create & matdict \\
-/name $<$d data$>$ ??? & band\_mat\_create & matdict \\
-/name $<$l irows$>$ $<$l icols$>$ $<$d data$>$ ncols & sparse\_mat\_create & matdict \\
-vecdict & get\_vector & vecdict\\
-matdict & get\_matrix & matdict\\
-matdict vecdict & get\_matvecmul & vecdict\\
-/name & ksp\_create & kspdict\\
-vecdict & vec\_destroy & --\\
-matdict & mat\_destroy & -- \\
-kspdict & ksp\_destroy & --\\
-kspdict Adict xdict bdict & ksp\_solve & --\\
-kspdict xdict bdict & ksp\_resolve & --\\
-kspdict Adict xdict bdict & get\_ksp\_solve & xdict\\
-kspdict xdict bdict & get\_ksp\_resolve & xdict\\
-\\\\
-\end{tabular}
+These procedures internally communicate with a cluster of
+\dcomp[dpawn]{dpawns} where they initiate operations involving PETSc
+operators (see section~\ref{section:petsc-ops}). The \dcomp{dnode}
+keeps records of the PETSc objects that are created in the form of
+dictionaries (referenced as $A$ or $B$ for matrices in the table, $X$
+or $Y$ for vectors, and $K$ for solvers). Currently three varieties of
+PETSc object are represented this way:
 
-\index{operator!vec\_create}
-\index{operator!mat\_create}
-\index{operator!get\_vector}
-\index{operator!get\_matrix}
-\index{operator!get\_matvecmul}
-\index{operator!ksp\_create}
-\index{operator!vec\_destroy}
-\index{operator!mat\_destroy}
-\index{operator!ksp\_destroy}
-\index{operator!ksp\_solve}
-\index{operator!ksp\_resolve}
-\index{operator!get\_ksp\_solve}
-\index{operator!get\_ksp\_resolve}
-
-These procedures internally communicate with a cluster of \dcomp[dpawn]{dpawns} where they initiate operations involving PETSc operators. The \dcomp{dnode} keeps records of the PETSc objects that are created in the form of dictionaries. Currently three varieties of PETSc object are represented this way:
-
-\begin{ctable}{PL}{Vector dictionary}{\label{table:vecdict}}
+\begin{dict}[vec]{Vector dictionary}
   id & name\\
-  data & /d\_array\\\\
-\end{ctable}
+  N  & length\\
+\end{dict}
 
-The \emph{id} is the name used when creating the PETSc object. The \emph{data} array is the array provided when defining the object. Its value will be overwritten by PETSc results when PETSc procedures with the prefix `get' in their name are executed. 
+The \textproc{id} is the name used when creating the PETSc
+object. \textproc{N} is the length of the vector.
 
-\begin{ctable}{PL}{Matrix dictionary}{\label{table:matdict}}
-  id & name\\
-  data & /d\_array\\
-  irows & /l\_array\\
-  icols & /l\_array\\
-  nmax & \# of rows for last dpawn\\\\
-\end{ctable}
+\begin{dict}[mat]{Matrix dictionary}
+  id     & name\\
+  m      & global rows\\
+  n      & global columns\\
+  mtype  & matrix type\\
+  params & dictionary of type-specific parameters\\
+  mmax   & the maximum number of local rows on any matrix\\
+\end{dict}
 
-The arrays \emph{irows} and \emph{icols} locate the non-zero elements of the matrix, and \emph{data} holds the non-zero element values in the order in which their locations are described by \emph{irows} and \emph{icols}.  
+\textproc{mtype} is a name defining the format of the matrix:
+\textproc{/sparse}, \textproc{/dense} or
+\textproc{blockdense}. \textproc{mmax} is the number of rows on the
+last pawn: if there are 9 rows and 4 pawns, \textproc{mmax} would be
+$3$. \textproc{params} is a dictionary whose format is associate with
+\textproc{mtype}.
 
-\begin{ctable}{PL}{Krylov Space Solver dictionary}{\label{table:krylov}}
-  id & name\\
-  rtol & relative tolerance (1e-12)\\
-  atol & absolute tolerance (*)\\
-  dtol & divergence tolerance (1/rtol)\\
-  maxits & maximal number of iterations\\
-  pctype & type of preconditioner (*, i.e. JACOBI)\\
-  ksptype & type of ksp solver (*, i.e. GMRES)\\
-  kspparam & parameters for the ksp type (null)\\
-  pcparam & parameters for preconditioner type (null)\\\\
-\end{ctable}
+\begin{dict}[sparse]{Sparse Matrix Parameter dictionary}
+  irows     & row offsets                                \\
+  icols     & column associated with each non-zero datum \\
+  icols_off & list of global row offsets                 \\
+\end{dict}
+
+\textproc{irows} and \textproc{icols} are active names defining the
+CSR format for the matrix. On each pawn, \textproc{irows} has a length
+equal to the number of rows on that pawn plus one; each element
+defines the offset into the data (and \textproc{icols}) of the start
+of a row, in order, and the last element gives the offset of the the
+last element of the data plus one. On each pawn, \textproc{icols} is
+the same size as the number of non-zero elements of the data, and
+holds the column number for the associated datum. \textproc{icols_off}
+is a list of the offsets of the first row on each pawn into the global
+matrix. The names pointed to by \textproc{irows} and \textproc{icols}
+are defined by the user on each pawn, but \textproc{icols_off} is
+transparently created by the \emph{petsc} \emph{D} procedures.
+
+For \textproc{/dense} and \textproc{/blockdense} types, the param dict
+is empty.
+
+\begin{dict}[krylov]{Krylov Space Solver dictionary}
+  id          & name\\
+  rtol        & relative tolerance (1e-12)\\
+  atol        & absolute tolerance (*)\\
+  dtol        & divergence tolerance (1/rtol)\\
+  maxits      & maximal number of iterations\\
+  pctype      & type of preconditioner (*, i.e. JACOBI)\\
+  ksptype     & type of ksp solver (*, i.e. GMRES)\\
+  kspparam    & parameters for the ksp type (null)\\
+  pcparam     & parameters for preconditioner type (null)\\
+  monitortype & type of the monitor for ksp solves (*, i.e. petsc default) \\
+\end{dict}
+
+\textproc{rtol} and \textproc{atol} are the tolerances for convergence
+tests.  Convergence is detected if $||r_k||_2 < max(rtol * ||b||2,
+atol)$, where $r_k = b - Ax_k$. On the other hand, \textproc{dtol} is
+the tolerance for detecting divergence: $||r_k||_2 > dtol *
+||b||_2$. \textproc{maxits} is the number of iterations before
+divergence is assumed. If any of these are set to $*$, the
+\emph{petsc} defaults are used. See \citet[Section~4.3.2]{balay:2004}
+for a discussion of these defaults.
+
+\textproc{ksptype}, \textproc{pctype}, and \textproc{monitortype} are
+integers that map to a solver, a preconditioner, and a monitoring
+output for the latter. The integers are defined in \file{dmpetsc.c} in
+the structures \texttt{ksptypes}, \texttt{pctypes}, and
+\texttt{monitors}. The names for use from \emph{D} are defined in the
+dictionaries \textproc{ksptypes}, \textproc{pctypes},
+\textproc{monitorytypes} defined by \file{petsc.d} in the
+\textproc{PETSC} module.
+
+Associated with \textproc{ksptype} is \textproc{kspparam}, and with
+\textproc{pctype} is \textproc{pcparam}. The `*param' names map to
+\emph{D} objects that are necessary for the solver (and its
+preconditioner). Currently, none of the defined types use them - both
+should be \textop{null}.
+
+\proc{mat_create} creates a matrix distributed over the
+\dcomp[dpawn]{dpawns}. The \textproc{rows} and \textproc{columns}
+operands are the global size of the matrix. The \textproc{/A} operand
+is the name of the matrix, from the point of view of the pawns;
+usually, this will also be what you call the output reference
+dictionary. The \textproc{/type} operand is a name:
+\textproc{/sparse}, \textproc{/dense} or \textproc{/blockdense}. That
+type determines the parameters representde by `\ldots'. This procedure
+returns a dictionary as in table~\ref{dict:mat}.
+
+For sparse, the parameters are: \textproc{~irows}
+\textproc{~icols}. \textproc{~irows} is a name that has been defined,
+on the pawns, to return the offsets into the local data for the
+beginning of each row, while \textproc{~icols} returns on the pawns
+the column number for location in the matrix. This a local CSR
+format. For dense and blockdense, there are no extra operands.
+
+\proc{vec_create} creates a vector distributed over the pawns. The
+\textproc{/X} parameter is the name of the vector on the pawns, which
+should usually be the same as the name of the dictionary referencing
+the vecotor, and \textproc{length} is the global length of the
+vector. This procedure return a dictionary referencing the vector, as
+defined in table~\ref{dict:vec}. \proc{vec_dup} replicates the vector
+\textproc{X} as \textproc{/Y} on the pawns, including data. It returns
+a new vector dictionary for the \dcomp{dnode}. 
+
+\proc{vec_fill} copies the d-array data, referenced by the name
+\textproc{~data} on each pawn for the local portion, into the vector
+replacing current values. \proc{mat_fill} does the same for matrices,
+but instead of referencing a d-array, the last parameter references a
+procedure, the \textproc{row_maker}: \\
+\begin{procs}
+  A row & row\_maker & data icols    \\
+\end{procs}                          \\
+where \textproc{A} is the matrix (see the pawn petsc operators,
+section~\ref{section:petsc-ops}), \textproc{row} is the local row
+number to be filled, \textproc{data} is the d-array to copy into that
+row, and \textproc{icols} are the column numbers of each of the
+elements of that row.
+
+\begin{formulas}
+  pmatvecmul      & y & \beta y + \alpha A^{t?} x \\
+  get_matvecmul   & y & \beta y + \alpha A^{t?} x \\
+  ksp_solve       & x & A^{-1} y                  \\
+  ksp_resolve     & x & A^{-1} y                  \\
+  get_ksp_solve   & x & A^{-1} y                  \\
+  get_ksp_resolve & x & A^{-1} y                  \\
+\end{formulas}
 
 \section{The D pawn (\dcomp{dpawn})}
 
@@ -914,19 +1061,18 @@ different set of communication operators based on the \emph{mpi}
 protocol, and taps the computational facilities of the PETSc library
 through D operators that map to PETSc library functions.
 
-The operator set of a \dcomp{dpawn} differs from that of a \dcomp{dnode} in the following ways:
-
+The operator set of a \dcomp{dpawn} differs from that of a
+\dcomp{dnode} in the following ways:
 \begin{itemize}
-\item The operators\\
+\item The operators \\
 \begin{tabular}{>{\sffamily\bfseries}l}
-console\\
-setconsole\\
-getmyport \\
-Xconnect\\
-Xdisconnect\\
+console             \\
+setconsole          \\
+getmyport           \\
+Xconnect            \\
+Xdisconnect         \\
 \end{tabular}
 \end{itemize}
-
 
 \subsection{Operators for administrating a \dcomp{dpawn}}
 
@@ -934,31 +1080,33 @@ Most of these operators are synomymous with \dcomp{dnode} operators but
 have slightly different behaviors.
 
 \begin{ops}
-                      |long_array/null|  & @vmresize@     & bool\\
-                                      -- & @halt@         & --\\
-                                      -- & @continue@     & --\\
-                                      -- & @stop@         & --\\
-                                      -- & @abort@        & --\\
-                            |active_obj| & @lock@         & --\\ 
-                                      -- & @console@      & consolesocket/null\\
-                      consolesocket/null & @setconsole@   & --\\
-                                  string & @toconsole@    & --\\
-                                  string & @tostderr@     & --\\
-       |hostname port# sourcestr numerr| & @error@        & --\\
-|hostname port# sourcestr numerr strbuf| & @errormessage@ & messstr\\
-                                      -- & @getmyport@    & |port#|\\
-                                      -- & @Xwindows_@    & bool\\
-                    |(hostname:screen#)| & @Xconnect@     & --\\
-                                      -- & @Xdisconnect@  & -- \\
-                                     num & @makethreads@  & --\\ 
-                                      -- & @threads@      & num\\ 
-                            |active_obj| & @serialize@    & --\\
-                                      -- & @getlibdir@    & string\\
-                       (path) (filename) & @loadlib@      & |lib_dict|\\
-                                      -- & @hi@           & (library description)\\
-                                      -- & @libnum@       & num\\
-                         |null/lib_dict| & @nextlib@      & dict true\\
-                                         &                & false\\\\
+                      long_array/null  & vmresize     & bool\\
+                                    -- & halt         & --\\
+                                    -- & continue     & --\\
+                                    -- & stop         & --\\
+                                    -- & abort        & --\\
+                              active_obj & lock         & --\\ 
+                                    -- & console      & consolesocket/null\\
+                      consolesocket/null & setconsole   & --\\
+                                  string & toconsole    & --\\
+                                  string & tostderr     & --\\
+       hostname port# !
+sourcestr numerr & error        & --\\
+hostname port# sourcestr!
+ numerr strbuf & errormessage & messstr\\
+                                    -- & getmyport    & port#\\
+                                    -- & Xwindows_    & bool\\
+                    (hostname:screen#) & Xconnect     & --\\
+                                    -- & Xdisconnect  & -- \\
+                                     num & makethreads  & --\\ 
+                                    -- & threads      & num\\ 
+                            active_obj & serialize    & --\\
+                                    -- & getlibdir    & string\\
+                       (path) (filename) & loadlib      & lib_dict\\
+                                    -- & hi           & (library description)\\
+                                    -- & libnum       & num\\
+                         null/lib_dict & nextlib      & dict true\\
+                                       &                & false\\\\
 \end{ops}
 
 \subsection{Operators for communicating via \emph{mpi}}
@@ -972,13 +1120,10 @@ source-destination.
 Individual operators are run on one pawn to produce global or local
 data about the network of mpi processes.
 
-\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
--- & mpirank & rank\\
--- & mpisize & size\\\\
-\end{tabular}
-
-\index{operator!mpirank}
-\index{operator!mpisize}
+\begin{ops}
+ -- & mpirank & rank\\
+ -- & mpisize & size\\\\
+\end{ops}
 
 These two operators define the relationship between the current
 process and all other \dcomp[dpawn]{dpawns}.
@@ -995,13 +1140,10 @@ Collective operators must be run on \emph{all} mpi
 processes. Processes will block until all other processes have at
 least entered the operator.
 
-\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+\begin{ops}
 -- & mpibarrier & --\\
 root object & mpibroadcast & object\\\\
-\end{tabular}
-
-\index{operator!mpibarrier}
-\index{operator!mipbroadcast}
+\end{ops}
 
 \op{mpibarrier} is a synchronization operator. All processes block
 until all other processes have entered the barrier. In other words, no
@@ -1020,16 +1162,14 @@ Source-destination operators work as pairs, where one process
 initiates the operation with an operator, and another process
 completes the operation with a different operator.
 
-%\test
-%\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
 \begin{ops}
-dest object & @mpisend@   & --\\
-src         & @mpirecv@   & object\\
-src         & @mpiprobe@  & src\\
+dest object & mpisend   & --\\
+src         & mpirecv   & object\\
+src         & mpiprobe  & src!
 *           &             & src\\
-src         & @mpiiprobe@ & src true\\
-src         &             & false\\
-*           &             & src true\\
+src         & mpiiprobe & src true!
+src         &             & false!
+*           &             & src true!
 *           &             & false\\\\
 \end{ops}
 
@@ -1054,4 +1194,57 @@ pending and true if a message is pending (in addition to the source
 id). Broadcast messages from \op{mpibroadcast} can not be probed
 for.
 
+\subsection{The PETSc operator library of the \dcomp{dpawn}}
+\label{section:petsc-ops}
+\begin{ops}
+                    size & petsc_vec_create            & X                 \\
+                       X & petsc_vec_dup               & Y                 \\
+                     X Y & petsc_vec_copy              & Y                 \\
+                       X & petsc_vec_syncto            & X                 \\
+           data offset X & petsc_vec_copyto            & X                 \\
+                       X & petsc_vec_syncfrom          & X                 \\
+           X offset data & petsc_vec_copyfrom          & data              \\
+                       X & petsc_vec_max               & max               \\
+                       X & petsc_vec_min               & min               \\
+                       X & petsc_vec_destroy           & --                \\
+                       X & petsc_vec_norm              & norm              \\
+            rows columns & petsc_mat_dense_create      & A                 \\
+<l irows> <l icols> columns 
+                         & petsc_mat_sparse_create     & A                 \\
+rows-per-process!
+columns-per-process!
+            rows columns & petsc_mat_blockdense_create & A                 \\
+                       A & petsc_mat_destroy           & --                \\
+                     A B & pesc_mat_copy               & B                 \\
+                       A & petsc_mat_dup               & B                 \\
+                       A & petsc_mat_syncto            & A                 \\
+                       A & petsc_mat_syncfill          & A                 \\
+                       A & petsc_mat_endfill           & A                 \\
+   data <l cols> row A   & petsc_mat_fill              & A                 \\
+ data row start-column A & petsc_mat_copyto            & A                 \\
+                       A & petsc_mat_syncfrom          & A                 \\
+ A row start-column data & petsc_mat_copyfrom          & data              \\
+ A                       & petsc_mat_transpose         & A|$^t$|            \\
+                       A & petsc_mat_getnz             & num-nonzeros      \\
+   <l rows> <l cols> A   & petsc_mat_getcsr            & <l rows> <l cols> \\
+ Y beta A transA X alpha & petsc_mat_vecmul            & Y                 \\
+ksptype kspparam pctype!
+pcparam monitortype      & petsc_ksp_create            & K                 \\
+                       K & petsc_ksp_destroy           & --                \\
+ K rtol atol dtol maxits & petsc_ksp_tol               & --                \\
+            K A/null X B & petsc_ksp_solve             & X                 \\
+                      -- & petsc_log_begin             & --                \\
+      (dir) (filename)   & petsc_log_summary           & --                \\
+\end{ops}
 
+These are the primitive operators called on a \dcomp{dpawn} to create
+and manipulate petsc objects. They are primarily collective in nature,
+in the \emph{mpi} sense: they must be called on each pawn
+independently but synchronistically. Therefore, these are primarily
+intended to be internal operators, called indirectly via procedures on
+the \dcomp{dnode} (see section~\ref{section:petsc-procs}).
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "newbook"
+%%% End: 

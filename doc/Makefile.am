@@ -1,6 +1,6 @@
 doc_DATA = dvt-3.0.pdf dvt-emacs.pdf newbook.pdf
 
-dist_noinst_DATA = chap1.tex chap2.tex chap3.tex \
+dist_noinst_DATA = chap1.tex chap2.tex chap3.tex appendix.tex \
 	dvt.bib \
 	redefs.sty pdf.sty options.sty newbook.sty \
 	dvt-3.0.tex dvt-emacs.tex newbook.tex \
@@ -17,15 +17,17 @@ EXTRA_DIST = 2ND_PRNT.PS \
 CLEANFILES = $(nodist_noinst_DATA)
 
 dvt-emacs.bbl: dvt-emacs.tex
-dvt-emacs.tex: config.sty
+dvt-emacs.tex: config.sty; test -e $@ && touch $@
 dvt-emacs.pdf: dvt-emacs.bbl
 
 dvt-3.0.bbl: dvt-3.0.tex
-dvt-3.0.tex: config.sty
+dvt-3.0.tex: config.sty; test -e $@ && touch $@
 dvt-3.0.pdf: dvt-3.0.bbl
 
-newbook.tex: chap1.tex chap2.tex chap3.tex config.sty newbook.sty
-newbook.pdf: newbook.ind
+newbook.pdf: newbook.ind newbook.bbl
+newbook.bbl: newbook.tex
+newbook.tex: chap1.tex chap2.tex chap3.tex appendix.tex config.sty newbook.sty
+	test -e $@ && touch $@
 
 edit = sed -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
 	$(SVNVERSION_EDIT) \
