@@ -4386,8 +4386,8 @@ CF_LATEX_PACKAGES_TMP=$ac_cv_latex_array_book; export CF_LATEX_PACKAGES_TMP;
 
 
     if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
-      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'" >&5
-echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
       { { echo "$as_me:$LINENO: error: array not found" >&5
 echo "$as_me: error: array not found" >&2;}
    { (exit 1); exit 1; }; }
@@ -4499,8 +4499,8 @@ CF_LATEX_PACKAGES_TMP=$ac_cv_latex_makeidx_book; export CF_LATEX_PACKAGES_TMP;
 
 
     if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
-      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'" >&5
-echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
       { { echo "$as_me:$LINENO: error: makeidx not found" >&5
 echo "$as_me: error: makeidx not found" >&2;}
    { (exit 1); exit 1; }; }
@@ -4612,8 +4612,8 @@ CF_LATEX_PACKAGES_TMP=$ac_cv_latex_supertabular_book; export CF_LATEX_PACKAGES_T
 
 
     if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
-      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'" >&5
-echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
       { { echo "$as_me:$LINENO: error: supertabular not found" >&5
 echo "$as_me: error: supertabular not found" >&2;}
    { (exit 1); exit 1; }; }
@@ -4725,8 +4725,8 @@ CF_LATEX_PACKAGES_TMP=$ac_cv_latex_pdf_book; export CF_LATEX_PACKAGES_TMP;
 
 
     if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
-      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'" >&5
-echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
       { { echo "$as_me:$LINENO: error: pdf not found" >&5
 echo "$as_me: error: pdf not found" >&2;}
    { (exit 1); exit 1; }; }
@@ -4838,8 +4838,8 @@ CF_LATEX_PACKAGES_TMP=$ac_cv_latex_options_book; export CF_LATEX_PACKAGES_TMP;
 
 
     if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
-      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'" >&5
-echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
       { { echo "$as_me:$LINENO: error: options not found" >&5
 echo "$as_me: error: options not found" >&2;}
    { (exit 1); exit 1; }; }
@@ -4951,8 +4951,8 @@ CF_LATEX_PACKAGES_TMP=$ac_cv_latex_hyperref_book; export CF_LATEX_PACKAGES_TMP;
 
 
     if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
-      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'" >&5
-echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
       { { echo "$as_me:$LINENO: error: hyperref not found" >&5
 echo "$as_me: error: hyperref not found" >&2;}
    { (exit 1); exit 1; }; }
@@ -5064,8 +5064,8 @@ CF_LATEX_PACKAGES_TMP=$ac_cv_latex_newbook_book; export CF_LATEX_PACKAGES_TMP;
 
 
     if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
-      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'" >&5
-echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
       { { echo "$as_me:$LINENO: error: newbook not found" >&5
 echo "$as_me: error: newbook not found" >&2;}
    { (exit 1); exit 1; }; }
@@ -5177,8 +5177,8 @@ CF_LATEX_PACKAGES_TMP=$ac_cv_latex_caption_book; export CF_LATEX_PACKAGES_TMP;
 
 
     if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
-      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'" >&5
-echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
       { { echo "$as_me:$LINENO: error: caption not found" >&5
 echo "$as_me: error: caption not found" >&2;}
    { (exit 1); exit 1; }; }
@@ -5290,8 +5290,8 @@ CF_LATEX_PACKAGES_TMP=$ac_cv_latex_calc_book; export CF_LATEX_PACKAGES_TMP;
 
 
     if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
-      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'" >&5
-echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
       { { echo "$as_me:$LINENO: error: calc not found" >&5
 echo "$as_me: error: calc not found" >&2;}
    { (exit 1); exit 1; }; }
@@ -5403,8 +5403,8 @@ CF_LATEX_PACKAGES_TMP=$ac_cv_latex_avant_book; export CF_LATEX_PACKAGES_TMP;
 
 
     if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
-      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'" >&5
-echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
       { { echo "$as_me:$LINENO: error: avant not found" >&5
 echo "$as_me: error: avant not found" >&2;}
    { (exit 1); exit 1; }; }
@@ -5516,14 +5516,127 @@ CF_LATEX_PACKAGES_TMP=$ac_cv_latex_mathpazo_book; export CF_LATEX_PACKAGES_TMP;
 
 
     if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
-      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'" >&5
-echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
       { { echo "$as_me:$LINENO: error: mathpazo not found" >&5
 echo "$as_me: error: mathpazo not found" >&2;}
    { (exit 1); exit 1; }; }
     fi
-    { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'" >&5
-echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+
+if test "$ac_cv_latex_class_book" = "" ;
+then
+
+{ echo "$as_me:$LINENO: checking for class book" >&5
+echo $ECHO_N "checking for class book... $ECHO_C" >&6; }
+if test "${ac_cv_latex_class_book+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+
+if test $latex = "no" ;
+then
+	{ { echo "$as_me:$LINENO: error: Unable to find a LaTeX application" >&5
+echo "$as_me: error: Unable to find a LaTeX application" >&2;}
+   { (exit 1); exit 1; }; };
+fi
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+echo "\\documentclass{book}" > testconf.tex
+cat >> testconf.tex << \EOF
+
+\begin{document}
+\end{document}
+
+EOF
+
+if cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_class_book=yes; then
+  cd ..
+  rm -rf .tmps_latex
+else
+  cd ..
+fi
+export ac_cv_latex_class_book
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_class_book" >&5
+echo "${ECHO_T}$ac_cv_latex_class_book" >&6; }
+boretti_classesansparametre=$ac_cv_latex_class_book ; export boretti_classesansparametre;
+
+
+
+
+	export boretti_classesansparametre;
+else
+	boretti_classesansparametre=$ac_cv_latex_class_book ;
+	export boretti_classesansparemetre;
+fi;
+if test $boretti_classesansparametre = "no" ;
+then
+    { { echo "$as_me:$LINENO: error: Unable to find book class" >&5
+echo "$as_me: error: Unable to find book class" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+{ echo "$as_me:$LINENO: checking for relsize in class book" >&5
+echo $ECHO_N "checking for relsize in class book... $ECHO_C" >&6; }
+if test "${ac_cv_latex_relsize_book+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+
+
+
+if test $latex = "no" ;
+then
+	{ { echo "$as_me:$LINENO: error: Unable to find a LaTeX application" >&5
+echo "$as_me: error: Unable to find a LaTeX application" >&2;}
+   { (exit 1); exit 1; }; };
+fi
+
+rm -rf .tmps_latex
+mkdir .tmps_latex
+cd .tmps_latex
+
+ac_cv_latex_relsize_book="no"; export ac_cv_latex_relsize_book;
+cat > testconf.tex << \EOF
+
+\documentclass{book}
+\usepackage{relsize}
+\begin{document}
+\end{document}
+
+EOF
+
+if cat testconf.tex | $latex 2>&1 1>/dev/null && ac_cv_latex_relsize_book=yes; then
+  cd ..
+  rm -rf .tmps_latex
+else
+  cd ..
+fi
+export ac_cv_latex_relsize_book
+
+
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_latex_relsize_book" >&5
+echo "${ECHO_T}$ac_cv_latex_relsize_book" >&6; }
+CF_LATEX_PACKAGES_TMP=$ac_cv_latex_relsize_book; export CF_LATEX_PACKAGES_TMP;
+
+
+
+    if test "$CF_LATEX_PACKAGES_TMP" = "no" ; then
+      { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
+      { { echo "$as_me:$LINENO: error: relsize not found" >&5
+echo "$as_me: error: relsize not found" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+    { echo "$as_me:$LINENO: checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'" >&5
+echo $ECHO_N "checking for packages array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize in class book with tex directories \`$TEXINPUTS'... $ECHO_C" >&6; }
   { echo "$as_me:$LINENO: result: found" >&5
 echo "${ECHO_T}found" >&6; }
     TEXINPUTS="$CF_LATEX_PACKAGES_TEXINPUTS"; export TEXINPUTS
@@ -15312,7 +15425,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 15315 "configure"' > conftest.$ac_ext
+  echo '#line 15428 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -17863,11 +17976,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17866: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17979: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17870: \$? = $ac_status" >&5
+   echo "$as_me:17983: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18131,11 +18244,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18134: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18247: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18138: \$? = $ac_status" >&5
+   echo "$as_me:18251: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18235,11 +18348,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18238: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18351: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:18242: \$? = $ac_status" >&5
+   echo "$as_me:18355: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -20543,7 +20656,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 20546 "configure"
+#line 20659 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -20643,7 +20756,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 20646 "configure"
+#line 20759 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -22983,11 +23096,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:22986: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:23099: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:22990: \$? = $ac_status" >&5
+   echo "$as_me:23103: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -23087,11 +23200,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:23090: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:23203: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:23094: \$? = $ac_status" >&5
+   echo "$as_me:23207: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -24657,11 +24770,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:24660: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:24773: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:24664: \$? = $ac_status" >&5
+   echo "$as_me:24777: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -24761,11 +24874,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:24764: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:24877: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:24768: \$? = $ac_status" >&5
+   echo "$as_me:24881: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -26963,11 +27076,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:26966: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:27079: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:26970: \$? = $ac_status" >&5
+   echo "$as_me:27083: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -27231,11 +27344,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:27234: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:27347: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:27238: \$? = $ac_status" >&5
+   echo "$as_me:27351: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -27335,11 +27448,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:27338: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:27451: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:27342: \$? = $ac_status" >&5
+   echo "$as_me:27455: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -37789,11 +37902,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:37792: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37905: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:37796: \$? = $ac_status" >&5
+    echo "$as_me:37909: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -37838,11 +37951,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:37841: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:37954: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:37845: \$? = $ac_status" >&5
+    echo "$as_me:37958: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38034,11 +38147,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38037: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:38150: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38041: \$? = $ac_status" >&5
+    echo "$as_me:38154: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38081,11 +38194,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38084: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:38197: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38088: \$? = $ac_status" >&5
+    echo "$as_me:38201: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38129,11 +38242,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38132: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:38245: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38136: \$? = $ac_status" >&5
+    echo "$as_me:38249: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38176,11 +38289,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38179: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:38292: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38183: \$? = $ac_status" >&5
+    echo "$as_me:38296: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38223,11 +38336,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38226: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:38339: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38230: \$? = $ac_status" >&5
+    echo "$as_me:38343: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38270,11 +38383,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38273: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:38386: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38277: \$? = $ac_status" >&5
+    echo "$as_me:38390: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38317,11 +38430,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38320: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:38433: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38324: \$? = $ac_status" >&5
+    echo "$as_me:38437: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38364,11 +38477,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38367: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:38480: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38371: \$? = $ac_status" >&5
+    echo "$as_me:38484: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38411,11 +38524,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38414: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:38527: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38418: \$? = $ac_status" >&5
+    echo "$as_me:38531: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38458,11 +38571,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38461: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:38574: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38465: \$? = $ac_status" >&5
+    echo "$as_me:38578: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38520,11 +38633,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38523: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:38636: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38527: \$? = $ac_status" >&5
+    echo "$as_me:38640: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38569,11 +38682,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38572: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:38685: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38576: \$? = $ac_status" >&5
+    echo "$as_me:38689: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38622,11 +38735,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38625: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:38738: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38629: \$? = $ac_status" >&5
+    echo "$as_me:38742: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38669,11 +38782,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38672: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:38785: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38676: \$? = $ac_status" >&5
+    echo "$as_me:38789: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38717,11 +38830,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38720: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:38833: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38724: \$? = $ac_status" >&5
+    echo "$as_me:38837: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38764,11 +38877,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38767: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:38880: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38771: \$? = $ac_status" >&5
+    echo "$as_me:38884: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38811,11 +38924,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38814: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:38927: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38818: \$? = $ac_status" >&5
+    echo "$as_me:38931: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38858,11 +38971,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38861: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:38974: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38865: \$? = $ac_status" >&5
+    echo "$as_me:38978: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38905,11 +39018,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38908: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:39021: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38912: \$? = $ac_status" >&5
+    echo "$as_me:39025: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38952,11 +39065,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:38955: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:39068: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:38959: \$? = $ac_status" >&5
+    echo "$as_me:39072: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.
@@ -38999,11 +39112,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
       -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
       -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
       -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:39002: $lt_compile\"" >&5)
+    (eval echo "\"\$as_me:39115: $lt_compile\"" >&5)
     (eval "$lt_compile" 2>conftest.err)
     ac_status=$?
     cat conftest.err >&5
-    echo "$as_me:39006: \$? = $ac_status" >&5
+    echo "$as_me:39119: \$? = $ac_status" >&5
     if (exit $ac_status) && test -s "$ac_outfile"; then
       # The compiler can only warn and ignore the option if not recognized
       # So say no if there are warnings other than the usual output.

@@ -42,11 +42,13 @@
 %  \opname    = Operators
 %  \dcompname = Components
 %  \filename  = Files
+%  \winname   = Windows
 %
 \newcommand\procname{Procedures}%
 \newcommand\opname{Operators}%
 \newcommand\dcompname{Components}%
 \newcommand\filename{Files}%
+\newcommand\winname{Windows}%
 %
 % \procfront
 % Font for procedure names.
@@ -68,6 +70,17 @@
 %
 \newcommand\filefont{\ttfamily}%
 %
+% \winfont
+% \Font for window names
+%
+\newcommand\winfont{}%
+%
+% \winbox{WindowName}
+% typeset WindowName, such as by quoting.
+%
+\newcommand\winbox[1]{``#1''}%
+%
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % All the \text* commands literalize their arguments.
@@ -79,43 +92,54 @@
 % \textproc{proc}
 % typesets proc with \procfont
 %
-\newcommand\textproc{\newbook@literal@typeset\procfont}%
+\newcommand\textproc{\newbook@literal@typeset\procfont{}}%
 %
 % \textop{op}
 % typesets op with \opfont
 %
-\newcommand\textop{\newbook@literal@typeset\opfont}%
+\newcommand\textop{\newbook@literal@typeset\opfont{}}%
 %
 % \textdcomp{dcomp}
 % typesets proc with \dcompfont
 %
-\newcommand\textdcomp{\newbook@literal@typeset\dcompfont}%
+\newcommand\textdcomp{\newbook@literal@typeset\dcompfont{}}%
 %
 % \textfile{file}
 % typesets file with \filefont
 %
-\newcommand\textfile{\newbook@literal@typeset\filefont}%
+\newcommand\textfile{\newbook@literal@typeset\filefont{}}%
+%
+% \textwin{win}
+% typesets win with \winfont and \winbox
+\newcommand\textwin{\newbook@literal@typeset\winfont\winbox}%
 %
 % \proc{proc} or \proc*{proc}
 % Inserts `proc', with underscores literal, 
 %  and inserts proc into index table procedures.
-% Without a star, calls \procfont{proc} to insert.
+% Without a star, calls {\procfont proc} to insert.
 %
 \newcommand\proc{\@ifnextchar*\newbook@procstar\newbook@procmain}%
 %
 % \op{op} or \op*{op}
 % Inserts `op', with underscores literal, 
 %  and inserts op into index table operands.
-% Without a star, calls \opfont{op} to insert.
+% Without a star, calls {\opfont op} to insert.
 %
 \newcommand\op{\@ifnextchar*\newbook@opstar\newbook@opmain}%
 %
 % \file{file} or \file*{file}
 % Inserts `file', with underscores literal, 
 %  and inserts file into index table files.
-% Without a star, calls \filefont{file} to insert.
+% Without a star, calls {\filefont file} to insert.
 %
 \newcommand\file{\@ifnextchar*\newbook@file@under@star\newbook@file@under}%
+%
+% \win{WindowName} or \win*{WindowName}
+% Inserts `file', with underscores literal, 
+%  and inserts win into index table windows.
+% Without a star, calls {\winfont\winbox{file}} to insert.
+\newcommand\win{\@ifnextchar*\newbook@winstar\newbook@winmain}%
+%
 %
 % \dcomp[dcomp]{dcomp-text}.
 % Inserts `dcomp', with underscores literal, 
@@ -129,15 +153,19 @@
 }%
 %
 % Column types for tabular:
-%   R: Right justified, san-serif.
-%   L: Left justified, san-serif.
-%   C: Centered, san-serif.
-%   O: Left-justified, operand font.
-%   P: Left-justified, procedure font.
+%   R: Right justified, san-serif, literal.
+%   L: Left justified, san-serif, literal.
+%   C: Centered, san-serif, literal.
+%   O: Left-justified, operand font, literal.
+%   P: Left-justified, procedure font, literal.
+%   M: Turn on literal-mode
+%   N: Turn off literal -mode
+%   F: Left justified, math mode
+%   A: Right justified, math mode followed by <=
+%   T: Left justified, san-serif
 %
 \newcolumntype{M}{>{\newbook@literal@on}}%
 \newcolumntype{N}{<{\newbook@literal@off}}%
-%
 \newcolumntype{R}{M>{\sffamily}rN}%
 \newcolumntype{C}{M>{\sffamily}cN}%
 \newcolumntype{O}{M>{\opfont}lN}%
@@ -146,6 +174,8 @@
 \newcolumntype{F}{>{\sffamily$}l<{$}}
 \newcolumntype{A}{>{\sffamily$}r<{$}@{\hspace{0.5em}$\Leftarrow$\hspace{0.5em}}}%
 \newcolumntype{T}{>{\sffamily}l}%
+%
+% Clear out supertabular definitions
 %
 \tablehead{}%
 \tablefirsthead{}%
@@ -308,6 +338,15 @@
 }%
 \endgroup%
 %
+% \begin{nopb}
+%   paragraph
+%   paragraph
+% \end{nopb}
+%
+% This environment just removes all page breaks.
+%
+\newenvironment{nopb}{\par\minipage\columnwidth}{\endminipage\par}%
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                      Internal                                 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -348,6 +387,15 @@
 \def\newbook@@opmain#1\newbook@@@under{%
   \newbook@textop{#1}%
   \index{\opname!#1}%
+}%
+\newcommand\newbook@winstar[1]{\newbook@winmain[]}%
+\newcommand\newbook@winmain[1][\textwin]{%
+  \def\newbook@textwin{#1}%
+  \newbook@win@under%
+}%
+\def\newbook@@winmain#1\newbook@@@under{%
+  \newbook@textwin{#1}%
+  \index{\winname!#1}%
 }%
 %
 \newcommand\newbook@under[1]{#1\newbook@@@under\endgroup}%
@@ -391,24 +439,34 @@
   \newbook@labelcol\newbook@@opmain\newbook@textop%
 }%
 %
-\newcommand\newbook@any@under[2]{%
+\RequirePackage{trace}%
+\newcommand\newbook@any@under[3]{%
   \begingroup%
+  \def\newbook@any@under@ii{#2}%
   \newbook@literalize%
   #1%
-  \expandafter#2\newbook@under%
+  \expandafter#3\newbook@under%
 }%
 %
 \newcommand\newbook@proc@under{%
-  \newbook@any@under\relax\newbook@@procmain%
+  \newbook@any@under{}{}\newbook@@procmain%
 }%
 %
 \newcommand\newbook@op@under{%
-  \newbook@any@under\relax\newbook@@opmain%
+  \newbook@any@under{}{}\newbook@@opmain%
 }%
 %
-\def\newbook@literal@typeset@under#1\newbook@@@under{#1}%
-\newcommand\newbook@literal@typeset[1]{%
-  \newbook@any@under#1%
+\newcommand\newbook@win@under{%
+  \newbook@any@under{}{}\newbook@@winmain%
+}%
+%
+\newtoks\tmp%
+\def\newbook@literal@typeset@under#1\newbook@@@under{%
+  \mbox{\newbook@any@under@ii{#1}}%
+}%
+%
+\newcommand\newbook@literal@typeset[2]{%
+  \newbook@any@under{#1}{#2}%
   \newbook@literal@typeset@under%
 }%
 %
@@ -424,7 +482,7 @@
   \let\ifnewbook@file@star=\iffalse%
   \newbook@file@under@%
 }%
-\newcommand\newbook@file@under@{\newbook@any@under\relax\newbook@file}%
+\newcommand\newbook@file@under@{\newbook@any@under{}{}\newbook@file}%
 %
 \def\newbook@literal@bar|{\newbook@literal}%
 %
@@ -472,7 +530,7 @@
   \let\newbook@ctable@abovecaptionskip=\belowcaptionskip%
   \let\belowcaptionskip=\abovecaptionskip%
   \let\abovecaptionskip=\newbook@ctable@abovecaptionskip%
-  \minipage{\textwidth}%
+  \minipage{\columnwidth}%
   \captionof{table}{#3}%
   #4%
   \newbook@ctable@star[#1]{#2}%
@@ -481,6 +539,9 @@
   \endnewbook@ctable@star%
   \endminipage%
 }%
+\RequirePackage{relsize}%
+\newcommand\newbook@tilde{\raisebox{-0.6\height}{\relsize{3}\textasciitilde}}%
+%
 %
 \begingroup%
   \catcode`\_=\active%
@@ -506,7 +567,7 @@
     \catcode`\|=\active+
     \let _=\_+
     \let ^=\textasciicircum+
-    \let ~=\textasciitilde+
+    \let ~=\newbook@tilde+
     \let $=\textdollar+$
     \let <=\textless+
     \let >=\textgreater+
