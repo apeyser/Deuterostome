@@ -217,16 +217,17 @@
 %
 % Builds a ctable for a dictionary, 
 %   with an optional label 'dict:label'.
-%
+%   and ! is active and defined as a small return and line skip
 \newenvironment{dict}[2][]{%
   \def\newbook@dict{%
+    \newbook@dict@setup%
     \edef\newbook@label{#1}%
     \ifx\newbook@label\empty\else\label{dict:#1}\fi%
   }%
   \ctable{PL}{#2}{\newbook@dict}%
-} {%
+}{%
   \endctable%
-}
+}%
 %
 % \begin{ctable}[pos]{tabular prologue}{caption}{settings}
 %   x & y & z\\
@@ -624,5 +625,10 @@
     \expandafter\ldotstoks\expandafter=\expandafter{\ldots}%
     \edef\ldots{\noexpand\hspace{0.5em}\the\ldotstoks\noexpand\hspace{0.5em}}%
   }%
+\endgroup%
+%
+\begingroup%
+  \catcode`\!=\active%
+  \gdef\newbook@dict@setup{\catcode`\!=\active\let !=\newrow}%
 \endgroup%
 %

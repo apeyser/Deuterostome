@@ -1122,17 +1122,17 @@ these mappings are identified by name in the dictionary
    /A \ldots /type rows columns & mat_create      & A \\
                       /X length & vec_create      & X \\
                            /Y X & vec_dup         & Y \\
-                        X ~data & vec_fill        & -- \\
+                         X data & vec_fill        & -- \\
                    A ~row-maker & mat_fill        & -- \\
                         X data  & get_vector      & data \\
+                         A data & get_matrix      & data \\
+                           /B A & mat_dup         & B\\
+                       \ldots A & mat_transpose   & --\\
         Y beta A Atrans X alpha & pmatvecmul      & -- \\
    data Y beta A Atrans X alpha & get_matvecmul   & data \\
-                         A data & get_matrix      & data \\
                           /name & ksp_create      & K \\
                               X & vec_destroy     & -- \\
                               A & mat_destroy     & --\\
-                           /B A & mat_dup         & B\\
-                       \ldots A & mat_transpose   & --\\
                               K & ksp_destroy     & --\\
                         K A X Y & ksp_solve       & --\\
                           K X Y & ksp_resolve     & --\\
@@ -1210,7 +1210,7 @@ is empty.
 \end{dict}
 
 \textproc{rtol} and \textproc{atol} are the tolerances for convergence
-tests.  Convergence is detected if $||r_k||_2 < max(rtol * ||b||2,
+tests.  Convergence is detected if $||r_k||_2 < max(rtol * ||b||_2,\;
 atol)$, where $r_k = b - Ax_k$. On the other hand, \textproc{dtol} is
 the tolerance for detecting divergence: $||r_k||_2 > dtol *
 ||b||_2$. \textproc{maxits} is the number of iterations before
@@ -1273,6 +1273,12 @@ number to be filled, \textproc{data} is the d-array to copy into that
 row, and \textproc{icols} are the column numbers of each of the
 elements of that row.
 
+\proc{get_vector} collects all the data for vector \textproc{X} into
+\textproc{data}, which is just a D array of doubles. The call returns
+the sub-array into which \textproc{X} fits. \proc{get_matrix} does the
+same for a matrix: the elements (non-zero for a sparse matrix) of the
+matrix are inserted into a D array of doubles.
+
 \begin{formulas}
   pmatvecmul      & y & \beta y + \alpha A^{t?} x \\
   get_matvecmul   & y & \beta y + \alpha A^{t?} x \\
@@ -1281,6 +1287,72 @@ elements of that row.
   get_ksp_solve   & x & A^{-1} y                  \\
   get_ksp_resolve & x & A^{-1} y                  \\
 \end{formulas}
+
+\proc{pmatvecmul} and \proc{get_matvecmul} multiply the (possibly
+transposed) matrix by a vector, and add it to a scale vector,
+returning the value in that latter vector. The `get' version returns
+the resultantant vector to the dnode.
+
+\proc{mat_dup} creates a new matrix $B$ from a matrix $A$, and then
+copies the non-zero elements from $A$ to $B$. \textproc{mat_transpose}
+transposes a matrix $A$, keeping the same identifier. The latter
+requires varying parameters according to type: For \textproc{/sparse},
+the parameters are \textproc{~irows} \textproc{~icols}, where
+\textproc{~irows} is the name to use on the \dcomp[dpawns]{dpawn} for
+the row data, and likewise for the \textproc{~icols}. See
+\textproc{mat_create} for further explanation: the only difference
+here is that they aren't predefined on the \dcomp[dpawns]{dpawn}, but
+are created by this procedure. For \textproc{/dense} type matrices,
+the optional parameters are empty.
+
+\proc{ksp_solve}, \proc{ksp_resolve}, \proc{get_ksp_solve} and
+\proc{get_ksp_resolve} all use an iterative solver to calculate
+$A^{-1}y$. The `re' versions solve for a new $x$ from $y$, given that
+the matrix $A$ is unchanged for the solver. The `get' versions return
+the resultant $x$ to the dnode. So, \proc{ksp_solve} must be called
+once with a matrix $A$ and solver $K$, and then $K$ may be used with
+\proc{ksp_resolve} to avoid pre-conditioning $A$ again.
+
+An important element of ksp reuse is that any new matrix $A_n$ must
+have an identical structure to the previous matrix $A_o$. This is
+guaranteed by testing that the $A_n$ was created by some sequence of
+calls to \proc{mat_dup} on $A_o$.
+
+The solver is created by calling \proc{ksp_create}, with a
+\dcomp{dnode} name. The currently defined \textproc{kspsettings}
+dictionary is used for the solver parameters, as defined in
+table~\ref{dict:krylov} (except for \textproc{id}, which is the
+parameter passed on the stack). It returns that a copy of that
+dictionary, with the \textproc{id} filled in. In \textproc{PETSC},
+dictionaries have predefined names for the numeric parameters:
+\textproc{ksptypes} for \textproc{ksptype}, \textproc{pctypes} for
+\textproc{pctype} and \textproc{monitortypes} for
+\textproc{monitortype}. As of this writing, none of the defined
+\textproc{ksptypes} or \textproc{pctypes} use \textproc{kspparam} or
+\textproc{pcparam}, respectively.
+
+The procedures \textproc{ksp_destroy}, \textproc{mat_destroy},
+\textproc{vec_destroy} all eliminate the parameter (of the matching
+type). They \op{restore} the box associated with the \dcomp{dnode} and
+\dcomp{dpawn} dictionaries, and un-allocate any external memory used
+by the PETSc libraries (and are therefore preferred to simply
+\op{restore}'ing a box that contains the dictionaries). PETSc external
+memory allocation only occurs on the \dcomp[dpawns]{dpawn}, and not on
+the \dcomp{dnode}.
+
+\proc{report} simply turns on or off verbose reporting
+(\textproc{true} to turn verbose reporting on).
+
+\proc{execrange} runs an active object on all \dcomp[dpawns]{dpawns},
+passing in the range for that pawn in particular. It should be used
+for initializing per-pawn data and parameters for vectors and
+matrices. The parameter \textproc{length} is chopped up into (offset,
+length) pairs for each node, which is passed to \textproc{~active} on
+the pawn. So, with 5 pawns and a length of 11, the first four pawns
+run \textproc{~active} with $0$ $2$, $2$ $2$, $4$ $2$, and $6$ $2$ on
+the stack, while the last pawn runs \textproc{~active} with $8$ $3$ on
+the stack.
+
 
 \section{The D pawn (\dcomp{dpawn})}
 
@@ -1450,11 +1522,14 @@ columns-per-process!
                        A & petsc_mat_syncto            & A                 \\
                        A & petsc_mat_syncfill          & A                 \\
                        A & petsc_mat_endfill           & A                 \\
-   data <l cols> row A   & petsc_mat_fill              & A                 \\
- data row start-column A & petsc_mat_copyto            & A                 \\
+              
+ <d data> <l cols> row A & petsc_mat_fill              & A                 \\
+ <d data> row
+          start-column A & petsc_mat_copyto            & A                 \\
                        A & petsc_mat_syncfrom          & A                 \\
- A row start-column data & petsc_mat_copyfrom          & data              \\
- A                       & petsc_mat_transpose         & A|$^t$|            \\
+ A row 
+   start-column <d data> & petsc_mat_copyfrom          & <d data>          \\
+ A                       & petsc_mat_transpose         & A|$^t$|           \\
                        A & petsc_mat_getnz             & num-nonzeros      \\
    <l rows> <l cols> A   & petsc_mat_getcsr            & <l rows> <l cols> \\
  Y beta A transA X alpha & petsc_mat_vecmul            & Y                 \\
@@ -1473,6 +1548,182 @@ in the \emph{mpi} sense: they must be called on each pawn
 independently but synchronistically. Therefore, these are primarily
 intended to be internal operators, called indirectly via procedures on
 the \dcomp{dnode} (see section~\ref{section:petsc-procs}).
+
+They work on three different objects produced by the \file{dmpetsc.c}
+plugin. Each is a D dictionary that encapsulates petsc data structures
+and memory allocations:
+
+\begin{dict}[petsc-vec]{dm\_petsc\_vector}
+    VECTOR_VECTOR & integerized pointer locating the petsc vector \\
+    VECTOR_N      & the local number of elements                  \\
+    VECTOR_GN     & the global number of elements                 \\
+    VECTOR_ASS    & boolean that signals whether the vector!
+                  & has been assembled by the petsc libraries     \\
+\end{dict}
+
+\begin{dict}[petsc-mat]{dm\_petsc\_matrix}
+    MATRIX_MATRIX & integerized pointer locating the petsc matrix \\
+    MATRIX_M      & local number of rows                          \\
+    MATRIX_N      & local number of columns                       \\
+    MATRIX_GM     & global number of rows                         \\
+    MATRIX_ASS    & boolean that signals whether the matrix!
+                  & has been assembled by the petsc libraries     \\
+    MATRIX_DUPID  & integer identifying the structure !
+                  & a duplicate has the same dupid,!
+                  & and can be used with the same ksp          \\
+    MATRIX_MTYPE  & an integer identifying the type of the matrix:!
+                  & sparse, or dense\\
+\end{dict}
+
+\begin{dict}[petsc-ksp]{dm\_petsc\_ksp}
+  KSP_KSP        & integerized pointer locating the petsc ksp \\
+  KSP_N          & The number of columns in the matrix and vectors!
+                 & associated with this ksp                   \\
+  KSP_KSPTYPE    & An integer identifying the solver type, !
+                 & as mapped to from \textproc{ksptypes} !
+                 & in \textproc{PETSC}\\
+  KSP_PCTYPE     & An integer identifyint the preconditioner type, !
+                 & as mapped to from \textproc{pctypes} !
+                 & in \textproc{PETSC}\\
+  KSP_DUPID      & An integer identifying the matrix `structure':!
+                 & once initialized, it will be identical to the !
+                 & \textproc{MATRIX_DUPID} of matrices that !
+                 & may be used with this ksp         \\
+  KSP_PCSETUPFD  & an integerized pointer to internal data !
+                 & for initializing the preconditions \\
+  KSP_KSPSETUPFD & an integerized pointer to internal data !
+                 & for initializing the solver\\
+\end{dict}
+
+\op{petsc_vec_create} creates a vector of a given \emph{local
+  length}. \op{petsc_vec_dup} duplicates a vector into a new vector of
+the same length, but without the elements being
+initialized. \op{petsc_vec_copy} copies the data from a vector $X$
+into a vector $Y$ of the same length.
+
+\op{petsc_vec_copyto} copies data elements from a D double array into
+a vector, starting at element $n$. Of course, the length of the array
++ $n$ must be less than or equal to the length of the
+vector. \op{petsc_vec_syncto} must be called on idling pawns when
+\op{petsc_vec_copyto} is called: in otherwords, the combination of the
+two operators is collective.
+
+\op{petsc_vec_copyfrom} is the inverse operation: it copies the
+elements of a vector, starting at $n$, into an a D array. The number
+of elements copied is the length of the array or the length of the
+vector - $n$ (which ever is smaller), and the sub-array of that length
+is returned. \op{petsc_vec_syncfrom} is used for idling pawns during
+this operation: the union of both operators is collective.
+
+\op{petsc_vec_max} and \op{petsc_vec_min} are collective operator that
+return on every pawn the \emph{global} max and min, respectively, of a
+vector. \op{petsc_vec_norm} returns on every pawn the \emph{global}
+length of the vector ($\scriptstyle||X||=\sqrt{\sum_i X_i^2}$).
+
+Finally, \op{petsc_vec_destroy} should be called to deallocate a
+vector: it destroys the dictionary and any internal petsc data
+structures associated with the vector. Use solely of
+\op{save}-\op{restore} pairs will leak through the PETSc libraries.
+
+\op{petsc_mat_dense_create} creates an empty matrix of a given numer
+of rows and columns. \op{petsc_mat_sparse_create} creates a sparse
+matrix whose structure is defined by a maximum number of columns and
+CSR pair of long D arrays: the offset into the column array for the
+beginning of each row, and the filled columns; of course, the last
+element of the row array is one past the last
+column. \op{petsc_mat_blockdense_create} creates a block-dense matrix,
+which has blocks defined by the number of columns per pawn, and rows
+per pawn.
+
+All these matrix types are cleaned-up by the single
+\op{petsc_mat_destroy} operator, which both eliminates the dictionary
+and cleans up any PETSc data structures associated with it.
+
+\op{petsc_mat_dup} duplicates a matrix, creating a new matrix with the
+same structure as the original, both type and
+layout. \op{petsc_mat_copy} copies the data from a matrix to a matrix
+with the same non-zero pattern (but it needs not be a duplicate).
+
+\op{petsc_mat_fill} copies data from a D double array into elements of
+a row of a matrix. The mapping is defined by a long array of the same
+length of the data array which identifies the column number for each
+data element. The row number $m$ is the \emph{local} row number. On
+idling pawns, \op{petsc_mat_syncfill} must be called: the combination
+of these two calls are collective. When done filling the rows of a
+matrix, \op{petsc_mat_endfill} must be called to assemble the matrix:
+this actually handles beginning the communications between different
+pawns about their updated elements. No other PETSc calls can be made
+on the matrix between the initial
+\op{petsc_mat_fill}/\op{petsc_mat_syncfill} and the final
+\op{petsc_mat_endfill} on all pawns.
+
+Similarly, \op{petsc_mat_copyto} copies the elements of a D array into
+a \emph{local} row of the matrix, starting at a given column
+number. It fills all the `non-zero' elements of the rows until the
+input array is exhausted. All idling pawns must call
+\op{petsc_syncto}. On the other hand, \op{petsc_mat_copyfrom} copies
+from a \emph{local} row of the matrix starting at a given column
+number into a D array, until it runs out of columns or exhausts the D
+array. \op{petsc_mat_syncfrom} must be called on idling pawns.
+
+\op{petsc_mat_transpose} transpose the data of a matrix. After this
+operation, the matrix $A$ will no longer be a duplicate of it's
+earlier state (i.e., can not be used with an ksp).
+
+\op{petsc_mat_getnz} returns the total number \emph{local} non-zero
+elements. This can be used to construct the arrays for
+\op{petsc_mat_getcsr}, which fills an array with the CSR structure of
+the matrix: an array of offsets for the beginning of each row, into an
+array of column numbers.
+
+\op{petsc_vec_matmul} evaluates $y \leftarrow \beta y + \alpha Ax$,
+where $y$ and $x$ are vectors and $A$ is a matrix. If $\beta$ is $0$
+(the integer), the shortcut $y \leftarrow \alpha Ax$ is applied, and
+if $\beta$ is $1$ (the integer), the shortcut $y \leftarrow y + \alpha
+Ax$ is applied.
+
+\op{petsc_ksp_create} creates a solver object (`ksp'). The parameter
+`ksptype' is an integer, as enumerated in \textproc{ksptypes} of
+\textproc{PETSC}, defining the solver type (GMRES, ...); if
+\textop{null}, then the PETSc default is used. The `kspparam' is a
+solver type specific parameter, currently \textop{null} for
+all. Likewise, `pctype' defines the precondition; the possible values
+are defined in \textproc{pctypes} of \textproc{PETSC}. As well,
+`pcparam' is a preconditioner specific parameter (currently
+\textop{null} for all). This operator is matched by
+\op{petsc_ksp_destroy}, which discards the `ksp' dictionary and any
+associated PETSc memory.
+
+\op{petsc_ksp_tol} sets the divergence/convergence tolerances for the
+solver. The parameters are:
+\begin{description}
+\vspace{-0.5\baselineskip}
+\parskip=-0.4\baselineskip
+\item[\textproc{K}] solver
+\item[\textproc{rtol}] relative tolerance for convergence. 
+\item[\textproc{atol}] absolute tolerance for convergence.
+\item[\textproc{dtol}] relative tolerance for divergence.
+\item[\textproc{maxits}] maximum iterations before divergence is assumed.
+\vspace{-0.75\baselineskip}
+\end{description}
+Convergence is detected if $||r_k||_2 < max(rtol * ||b||_2,\;atol)$,
+where $r_k = b - Ax_k$. Divergence is detected if $||r_k||_2 > dtol *
+||b||_2$, or if $maxits$ is reached. An error is signaled if
+divergence is detected (see \file{dmpetsc.c} for possible divergence
+errors, and their mappings from PETSc error codes).
+
+\op{petsc_ksp_solve} actually solves for $x$ in $Ax = b$. On the first
+use, $A$ must be given; for later solutions with the same left-hand
+side matrix, \textop{null} can be used instead (which will optimize
+the solver). If a new $A$ is used, it \emph{must} be a `duplicate' of
+the original matrix, as created by \op{petsc_mat_dup}. This guarantees
+that the `zero' elements in the same column/rows; the values, of
+course, of the non-zero elements need not be the same.
+
+\op{petsc_log_begin} activates PETSc internal logging (see
+`PetscLogBegin' in \citet{balay:2004}). To save the current log, use
+\op{petsc_log_summary} which takes a directory and a filename to save
+the entire log to.
 
 %%% Local Variables: 
 %%% mode: latex
