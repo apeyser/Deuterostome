@@ -48,6 +48,10 @@ CF_IF_ENABLED([threads], [
 ])
 
 CF_AC_ENABLE([rthreads], [Activate mpi], [yes])
+CF_IF_ENABLED([threads], [CF_ACX_PTHREAD_REQUIRE([no, please disable threads])])
+CF_IF_ENABLED([rthreads], [
+  CF_ACX_PTHREAD_REQUIRE([no, please disable rthreads])
+])
 
 CF_AC_ARG_DIR([dmbindir], [location for dm binary], [${bindir}/${PACKAGE}])
 CF_AC_ARG_DIR([pkgdatadir], [location for data files], 
@@ -182,12 +186,6 @@ AC_PROG_MAKE_SET
 AC_PROG_LN_S
 
 CF_SET_TOP_DIR
-
-CF_IF_ENABLED([threads], [CF_ACX_PTHREAD_REQUIRE([no, please disable threads])])
-CF_IF_ENABLED([rthreads], [
-  CF_ACX_PTHREAD_REQUIRE([no, please disable rthreads])
-  
-])
 
 AC_LIBTOOL_WIN32_DLL
 AC_LIBTOOL_DLOPEN
