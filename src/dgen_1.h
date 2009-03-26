@@ -101,11 +101,11 @@ P op_error(void)
   atmost -= nb;
  
   if (e < 0) { /*Clib error */
-    nb = dm_snprintf((char*)p,atmost,(char*)strerror(-e));
+    nb = dm_snprintf((char*)p,atmost,"%s",(char*)strerror(-e));
   }
   else { /* one of our error codes: decode */
     m = geterror(e);
-    nb = dm_snprintf((char*)p,atmost,(char*)m);
+    nb = dm_snprintf((char*)p,atmost,"%s",(char*)m);
   }
 
   p += nb; 
@@ -140,7 +140,7 @@ P op_errormessage(void)
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
   s = (B *)VALUE_BASE(o_1); tnb = ARRAY_SIZE(o_1);
   if (e < 0) { /*Clib error */
-    nb = dm_snprintf((char*)s,tnb,(char*)strerror(-e));
+    nb = dm_snprintf((char*)s,tnb,"%s",(char*)strerror(-e));
   } else { /* one of our error codes: decode */
     m = geterror(e);
     nb = strlen((char*)m);
