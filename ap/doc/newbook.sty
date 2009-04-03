@@ -1,0 +1,634 @@
+\ProvidesPackage{newbook}%
+%
+\RequirePackage{array}%
+\RequirePackage[osf]{mathpazo}%
+\RequirePackage{avant}%
+\RequirePackage{calc}%
+\RequirePackage[tableposition=top,labelfont=bf]{caption}%
+\RequirePackage{makeidx}%
+\RequirePackage{supertabular}%
+\RequirePackage{pdf}%
+\RequirePackage{hyperref}%
+\RequirePackage{natbib}%
+\bibliographystyle{plainnat}%
+\renewcommand{\bibsection}{%
+  \chapter*{\refname}%
+  \addcontentsline{toc}{chapter}{\refname}%
+}%
+%
+% newrow
+% insert a closely spaced for tabular-style environments,
+%  with a small skip.
+\newcommand\newrow{\vspace{-0.2\baselineskip}\\}%
+%
+%
+% sffamilysize
+% set to ratio to scale sans-serif fonts
+%
+\newcommand\sffamilysize{0.90}%
+%
+% \literal|...|
+% typesets ... literally. The characters:
+%  {}%_#^~$-<> are typeset literally
+%  and the sequences: \|, \&, \/ are typeset
+%  as the following literal (|, &, \)
+% Uses current type face, and other backslash sequences
+%  are not literalized.
+%
+\newcommand\literal{\newbook@literal@bar}%
+%
+% Names for index groups:
+%  \procname  = Procedures
+%  \opname    = Operators
+%  \dcompname = Components
+%  \filename  = Files
+%  \winname   = Windows
+%
+\newcommand\procname{Procedures}%
+\newcommand\opname{Operators}%
+\newcommand\dcompname{Components}%
+\newcommand\filename{Files}%
+\newcommand\winname{Windows}%
+%
+% \procfront
+% Font for procedure names.
+%
+\newcommand\procfont{\sffamily\bfseries\itshape}%
+%
+% \opfont
+% Font for operand names.
+%
+\newcommand\opfont{\sffamily\bfseries}%
+%
+% \dcompfont
+% Font for d-components
+%
+\newcommand\dcompfont{\itshape}%
+%
+% \filefont
+% Font for file names
+%
+\newcommand\filefont{\ttfamily}%
+%
+% \winfont
+% \Font for window names
+%
+\newcommand\winfont{}%
+%
+% \winbox{WindowName}
+% typeset WindowName, such as by quoting.
+%
+\newcommand\winbox[1]{``#1''}%
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% All the \text* commands literalize their arguments.
+% Unlike \literal|xxx|, | does not need to be escaped,
+%  and {,} are not literalized: for obvious reasons.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% \textproc{proc}
+% typesets proc with \procfont
+%
+\newcommand\textproc{\newbook@literal@typeset\procfont{}}%
+%
+% \textop{op}
+% typesets op with \opfont
+%
+\newcommand\textop{\newbook@literal@typeset\opfont{}}%
+%
+% \textdcomp{dcomp}
+% typesets proc with \dcompfont
+%
+\newcommand\textdcomp{\newbook@literal@typeset\dcompfont{}}%
+%
+% \textfile{file}
+% typesets file with \filefont
+%
+\newcommand\textfile{\newbook@literal@typeset\filefont{}}%
+%
+% \textwin{win}
+% typesets win with \winfont and \winbox
+\newcommand\textwin{\newbook@literal@typeset\winfont\winbox}%
+%
+% \proc{proc} or \proc*{proc}
+% Inserts `proc', with underscores literal, 
+%  and inserts proc into index table procedures.
+% Without a star, calls {\procfont proc} to insert.
+%
+\newcommand\proc{\@ifnextchar*\newbook@procstar\newbook@procmain}%
+%
+% \op{op} or \op*{op}
+% Inserts `op', with underscores literal, 
+%  and inserts op into index table operands.
+% Without a star, calls {\opfont op} to insert.
+%
+\newcommand\op{\@ifnextchar*\newbook@opstar\newbook@opmain}%
+%
+% \file{file} or \file*{file}
+% Inserts `file', with underscores literal, 
+%  and inserts file into index table files.
+% Without a star, calls {\filefont file} to insert.
+%
+\newcommand\file{\@ifnextchar*\newbook@file@under@star\newbook@file@under}%
+%
+% \win{WindowName} or \win*{WindowName}
+% Inserts `file', with underscores literal, 
+%  and inserts win into index table windows.
+% Without a star, calls {\winfont\winbox{file}} to insert.
+\newcommand\win{\@ifnextchar*\newbook@winstar\newbook@winmain}%
+%
+%
+% \dcomp[dcomp]{dcomp-text}.
+% Inserts `dcomp', with underscores literal, 
+%  and inserts dcomp into index table dcomps.
+% If [dcomp] is not passed, uses dcomp-text as
+%  the index for index components.
+%
+\DeclareRobustCommand\dcomp{%
+  \@ifnextchar[%]
+  \newbook@dcomp\newbook@dcomp@nobrace%
+}%
+%
+% Column types for tabular:
+%   R: Right justified, san-serif, literal.
+%   L: Left justified, san-serif, literal.
+%   C: Centered, san-serif, literal.
+%   O: Left-justified, operand font, literal.
+%   P: Left-justified, procedure font, literal.
+%   M: Turn on literal-mode
+%   N: Turn off literal -mode
+%   F: Left justified, math mode
+%   A: Right justified, math mode followed by <=
+%   T: Left justified, san-serif
+%
+\newcolumntype{M}{>{\newbook@literal@on}}%
+\newcolumntype{N}{<{\newbook@literal@off}}%
+\newcolumntype{R}{M>{\sffamily}rN}%
+\newcolumntype{C}{M>{\sffamily}cN}%
+\newcolumntype{O}{M>{\opfont}lN}%
+\newcolumntype{P}{M>{\procfont}lN}%
+\newcolumntype{L}{M>{\sffamily}lN}%
+\newcolumntype{F}{>{\sffamily$}l<{$}}
+\newcolumntype{A}{>{\sffamily$}r<{$}@{\hspace{0.5em}$\Leftarrow$\hspace{0.5em}}}%
+\newcolumntype{T}{>{\sffamily}l}%
+%
+% Clear out supertabular definitions
+%
+\tablehead{}%
+\tablefirsthead{}%
+\tabletail{}%
+\tablelasttail{}%
+%
+% \begin{supertable}[pos]{tabular prologue}{caption}{settings}
+%  x & y & z\\
+% \end{supertable}
+% Defines a supertabular environment, with pos defaulting to c,
+%  a caption above, and any settings such as \label or \lasttail.
+%  The prologue is exactly the embedded supertabular's prologue.
+\newenvironment{supertable}{%
+  \let\newbook@supertabular@star=\supertabular%
+  \let\endnewbook@supertabular@star=\endsupertabular%
+  \newbook@supertable%
+}{%
+  \endnewbook@supertable%
+}%
+%
+% \begin{supertable*}{width}[pos]{tabular prologue}{caption}{settings}
+%  x & y & z\\
+% \end{supertable*}
+% Defines a supertabular environment, with pos defaulting to c,
+%  a caption above, and any settings such as \label or \lasttail.
+%  The prologue is exactly the embedded supertabular's prologue.
+%  This starred version has a fixed width.
+\newenvironment{supertable*}[1]{%
+  \def\newbook@supertabular@star{\csname supertabular*\endcsname{#1}}%
+  \def\endnewbook@supertabular@star{\csname endsupertabular*\endcsname}%
+  \newbook@supertable%
+} {%
+  \endnewbook@supertable%
+}%
+%
+% \begin{dict}[label]{caption}
+%   x & y \\
+% \end{dict}
+%
+% Builds a ctable for a dictionary, 
+%   with an optional label 'dict:label'.
+%   and ! is active and defined as a small return and line skip
+\newenvironment{dict}[2][]{%
+  \def\newbook@dict{%
+    \newbook@dict@setup%
+    \edef\newbook@label{#1}%
+    \ifx\newbook@label\empty\else\label{dict:#1}\fi%
+  }%
+  \ctable{PL}{#2}{\newbook@dict}%
+}{%
+  \endctable%
+}%
+%
+% \begin{ctable}[pos]{tabular prologue}{caption}{settings}
+%   x & y & z\\
+% \end{ctable}
+% Defines a tabular environment, with pos defaulting to c,
+%  a caption above, and any settings such as \label.
+%  The prologue is exactly the embedded tabular's prologue.
+% 
+\newenvironment{ctable}{%
+  \def\newbook@ctable@star{\tabular}%
+  \def\endnewbook@ctable@star{\endtabular}%
+  \newbook@ctable%
+}{%
+  \endnewbook@ctable%
+}%
+%
+% \begin{ctable*}{width}[pos]{tabular prologue}{caption}{settings}
+%   x & y & z\\
+% \end{ctable*}
+% Defines a tabular environment, with pos defaulting to c,
+%  a caption above, and any settings such as \label.
+%  The prologue is exactly the embedded tabular's prologue.
+%  This starred version has a fixed width.
+% 
+\newenvironment{ctable*}[1]{%
+  \def\newbook@ctable@star{\csname tabular*\endcsname{#1}}%
+  \def\endnewbook@ctable@star{\csname endtabular*\endcsname}%
+  \newbook@ctable%
+}{%
+  \endnewbook@ctable@int%
+}
+%
+%
+\newcommand\newbook@supertabular[2]{%
+  \newbook@common%
+  #2%
+  \supertabular{#1}\relax%
+}
+\let\endnewbook@supertabular=\endsupertabular%
+%
+% \begin{ops}
+%   in-params & op & out-params
+% \end{ops}
+% Defines a supertabular environment 
+%   with prologue ROL (see column types above).
+% op is defined as \op*{op},
+%  and ! is active and defined as a small return and line skip
+%
+\begingroup%
+  \catcode`\&=\active%
+  \gdef\ops{%
+    \newbook@supertabular{ROL}{%
+      \let &=\newbook@op@at%
+    }%
+  }%
+  \global\let\endops=\endnewbook@supertabular%
+\endgroup%
+%
+% \begin{procs}
+%   in-params & proc & out-params
+% \end{procs}
+% Defines a supertabular environment 
+%   with prologue RPL (see column types above).
+%  proc is defined as \proc*{proc},
+%    and ! is active and defined as a small return and line skip.
+%
+\begingroup%
+  \catcode`\&=\active%
+  \gdef\procs{%
+    \newbook@supertabular{RPL}{
+      \let &=\newbook@proc@at%
+    }%
+  }%
+  \global\let\endprocs=\endnewbook@supertabular%
+\endgroup%
+%
+%
+% \begin{formulas}
+%   op & input-formula & output
+% \end{formulas}
+% Defines a supertabular environment 
+%   with prologue OAF (see column types above).
+% ! is active and defined as a small return and line skip.
+%
+\newcommand\formulas{\newbook@supertabular{OAF}{}}%
+\let\endformulas=\endnewbook@supertabular%
+%
+% \begin{definitions}
+%   op & some description
+% \end{definitions}
+% Defines a supertabular environment 
+%   with prologue OL (see column types above).
+% ! is active and defined as a small return and line skip.
+%
+\newcommand\definitions{\newbook@supertabular{OT}{}}%
+\let\enddefinitions=\endnewbook@supertabular%
+%
+% theindex
+%
+% Update the index to add a table of contents line.
+% Transparent.
+%
+\begingroup%
+\newtoks\thenewbook@indextoks%
+\expandafter\thenewbook@indextoks\expandafter=\expandafter{\theindex}%
+\xdef\theindex{%
+  \the\thenewbook@indextoks%
+  \noexpand\addcontentsline{toc}{chapter}{\noexpand\indexname}%
+}%
+\endgroup%
+%
+% \begin{nopb}
+%   paragraph
+%   paragraph
+% \end{nopb}
+%
+% This environment just removes all page breaks.
+%
+\newenvironment{nopb}{\par\minipage\columnwidth}{\endminipage\par}%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                      Internal                                 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\newcounter{newbook}%
+\newcommand\newbook@size{%
+  \setcounter{newbook}{\f@size*\real{\sffamilysize}}%
+  \edef\newbook@f@size{\number\c@newbook}%
+  \edef\newbook@f@baselineskip{\f@baselineskip}%
+  \set@fontsize\f@linespread\newbook@f@size\newbook@f@baselineskip%
+}
+\DeclareRobustCommand\newbook@sffamily{%
+  \newbook@size\newbook@sffamily@old%
+}%
+\let\newbook@sffamily@old=\sffamily%
+\let\sffamily=\newbook@sffamily%
+%
+\newcommand\newbook@dcomp@nobrace[1]{\newbook@dcomp[#1]{#1}}%
+\newcommand\newbook@dcomp[2][]{\textdcomp{#2}\index{\dcompname!#1}}%
+%
+\newcommand\newbook@procstar[1]{\newbook@procmain[]}%
+\newcommand\newbook@procmain[1][\textproc]{%
+  \def\newbook@textproc{#1}%
+  \newbook@proc@under%
+}%
+%
+\def\newbook@@procmain#1\newbook@@@under{%
+  \newbook@textproc{#1}%
+  \index{\procname!#1}%
+}%
+%
+\newcommand\newbook@opstar[1]{\newbook@opmain[]}%
+\newcommand\newbook@opmain[1][\textop]{%
+  \def\newbook@textop{#1}%
+  \newbook@op@under%
+}%
+%
+\def\newbook@@opmain#1\newbook@@@under{%
+  \newbook@textop{#1}%
+  \index{\opname!#1}%
+}%
+\newcommand\newbook@winstar[1]{\newbook@winmain[]}%
+\newcommand\newbook@winmain[1][\textwin]{%
+  \def\newbook@textwin{#1}%
+  \newbook@win@under%
+}%
+\def\newbook@@winmain#1\newbook@@@under{%
+  \newbook@textwin{#1}%
+  \index{\winname!#1}%
+}%
+%
+\newcommand\newbook@under[1]{#1\newbook@@@under\endgroup}%
+\newcommand\newbook@under@and{\endgroup\newbook@align}%
+\begingroup%
+  \catcode`\&=11%
+  \gdef\newbook@under@#1&{#1\newbook@@@under\newbook@under@and}%
+\endgroup%
+%
+\begingroup%
+  \catcode`\ =\active%
+  \gdef\newbook@spaceeater{\catcode`\ =\active\def {}}%
+\endgroup%
+%
+\def\newbook@spacechecker#1#2\newbook@@@under{%
+  \edef\newbook@temp{#2}%
+  \ifx\newbook@temp\empty\relax\else%
+    #1#2\newbook@@@under%
+  \fi%
+}%
+%
+\begingroup%
+  \catcode`\_=\active%
+  \gdef\newbook@labelcol#1#2{%
+    \newbook@align%
+    \begingroup%
+    \let#2=\relax%
+    \catcode`\_=\active%
+    \catcode`\&=11%
+    \let _=\_%
+    \newbook@spaceeater\expandafter\newbook@spacechecker%
+    \expandafter#1\newbook@under@%
+  }%
+\endgroup%
+%
+\newcommand\newbook@proc@at{%
+  \newbook@labelcol\newbook@@procmain\newbook@textproc%
+}%
+%
+\newcommand\newbook@op@at{%
+  \newbook@labelcol\newbook@@opmain\newbook@textop%
+}%
+%
+\RequirePackage{trace}%
+\newcommand\newbook@any@under[3]{%
+  \begingroup%
+  \def\newbook@any@under@ii{#2}%
+  \newbook@literalize%
+  #1%
+  \expandafter#3\newbook@under%
+}%
+%
+\newcommand\newbook@proc@under{%
+  \newbook@any@under{}{}\newbook@@procmain%
+}%
+%
+\newcommand\newbook@op@under{%
+  \newbook@any@under{}{}\newbook@@opmain%
+}%
+%
+\newcommand\newbook@win@under{%
+  \newbook@any@under{}{}\newbook@@winmain%
+}%
+%
+\newtoks\tmp%
+\def\newbook@literal@typeset@under#1\newbook@@@under{%
+  \mbox{\newbook@any@under@ii{#1}}%
+}%
+%
+\newcommand\newbook@literal@typeset[2]{%
+  \newbook@any@under{#1}{#2}%
+  \newbook@literal@typeset@under%
+}%
+%
+\def\newbook@file#1\newbook@@@under{%
+  \textfile{#1}%
+  \ifnewbook@file@star\else\index{\filename!#1}\fi%
+}%
+\def\newbook@file@under@star*{%
+  \let\ifnewbook@file@star=\iftrue%
+  \newbook@file@under@%
+}%
+\newcommand\newbook@file@under{%
+  \let\ifnewbook@file@star=\iffalse%
+  \newbook@file@under@%
+}%
+\newcommand\newbook@file@under@{\newbook@any@under{}{}\newbook@file}%
+%
+\def\newbook@literal@bar|{\newbook@literal}%
+%
+\begingroup%
+  \begingroup%
+    \catcode`\{=\active%
+    \catcode`\}=\active%
+    \catcode`\(=1%
+    \catcode`\)=2%
+    \gdef\newbook@literal@pre(%
+      \catcode`\{=\active%
+      \catcode`\}=\active%
+      \let {=\textbraceleft%
+      \let }=\textbraceright%
+    )%
+  \endgroup%
+  %
+  \gdef\newbook@literal{%
+    \begingroup%
+    \newbook@literal@pre%
+    \newbook@literalize%
+    \expandafter\newbook@@literal\newbook@under%
+  }%
+\endgroup%
+\def\newbook@@literal#1\newbook@@@under{#1}%
+%
+\newcommand\newbook@supertable[4][c]{%
+  \let\supertable@abovecaptionskip=\belowcaptionskip%
+  \let\belowcaptionskip=\abovecaptionskip%
+  \let\abovecaptionskip=\supertable@abovecaptionskip%
+  \tablecaption{#3}%
+  #4%
+  \newbook@supertabular@star[#1]{#2}%
+}%
+\def\endnewbook@supertable{%
+  \endnewbook@supertabular@star%
+  \tablehead{}%
+  \tablefirsthead{}%
+  \tabletail{}%
+  \tablelasttail{}%
+}%
+%
+%
+\newcommand\newbook@ctable[4][c]{%
+  \let\newbook@ctable@abovecaptionskip=\belowcaptionskip%
+  \let\belowcaptionskip=\abovecaptionskip%
+  \let\abovecaptionskip=\newbook@ctable@abovecaptionskip%
+  \minipage{\columnwidth}%
+  \captionof{table}{#3}%
+  #4%
+  \newbook@ctable@star[#1]{#2}%
+}%
+\def\endnewbook@ctable{%
+  \endnewbook@ctable@star%
+  \endminipage%
+}%
+\RequirePackage{relsize}%
+\newcommand\newbook@tilde{\raisebox{-0.6\height}{\relsize{3}\textasciitilde}}%
+%
+%
+\begingroup%
+  \catcode`\_=\active%
+  \catcode`\#=\active%
+  \catcode`\^=\active%
+  \catcode`\~=\active%
+  \catcode`\$=\active%
+  \catcode`\<=\active%
+  \catcode`\>=\active%
+  \catcode`\-=\active%
+  \catcode`\|=\active%
+  \catcode`\+=14%
+  \catcode`\%=\active+
+  \gdef\newbook@literalize{+
+    \catcode`\_=\active+
+    \catcode`\#=\active+
+    \catcode`\^=\active+
+    \catcode`\~=\active+
+    \catcode`\$=\active+
+    \catcode`\<=\active+
+    \catcode`\>=\active+
+    \catcode`\-=\active+
+    \catcode`\|=\active+
+    \let _=\_+
+    \let ^=\textasciicircum+
+    \let ~=\newbook@tilde+
+    \let $=\textdollar+$
+    \let <=\textless+
+    \let >=\textgreater+
+    \let -=\textendash+
+    \let |=\newbook@literal@off@temp+
+    \let\|=\textbar+
+    \let\/=\textbackslash+
+    \catcode`\#=\active+
+    \catcode`\%=\active+
+    \let %=\@percentchar+
+    \let #=\#+
+  }
+\endgroup%
+%
+\begingroup%
+  \catcode`\|=\active%
+  \gdef\newbook@literal@off@temp{%
+    \endgroup\begingroup%
+    \catcode`\|=\active%
+    \let |=\newbook@literal@on@temp%
+    \let\|=\textbar%
+  }%
+\endgroup%
+\newcommand\newbook@literal@on@temp{%
+  \endgroup%
+  \newbook@literal@on%
+}%
+%
+\newcommand\newbook@literal@on{%
+  \begingroup%
+  \let\ifnewbook@literal=\iftrue%
+  \newbook@literalize%
+}%
+\let\newbook@literal@off=\endgroup%
+%
+\newtoks\newbook@sstoks%
+\newcommand\newbook@redefss{%
+  \expandafter\newbook@sstoks\expandafter=\expandafter{\\\newbook@redefss}%
+  \edef\\{\the\newbook@sstoks}%
+}%
+\newcommand\newbook@align{&\newbook@redefss}%
+%
+\begingroup%
+%
+  \catcode`\!=\active%
+  \catcode`\&=\active%
+  % 
+  \gdef\newbook@common{%
+    \catcode`\!=\active%
+    \catcode`\&=\active%
+    \let !=\newrow%
+    \let &=\newbook@align%
+    \newtoks\ldotstoks%
+    \expandafter\ldotstoks\expandafter=\expandafter{\ldots}%
+    \edef\ldots{\noexpand\hspace{0.5em}\the\ldotstoks\noexpand\hspace{0.5em}}%
+  }%
+\endgroup%
+%
+\begingroup%
+  \catcode`\!=\active%
+  \gdef\newbook@dict@setup{\catcode`\!=\active\let !=\newrow}%
+\endgroup%
+%

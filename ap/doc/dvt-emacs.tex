@@ -1,0 +1,272 @@
+\documentclass[12pt]{article}
+
+\usepackage{pdf}
+\usepackage{hyperref}
+
+\usepackage{natbib}
+\bibliographystyle{plainnat}
+
+\usepackage{redefs}
+\renewcommand{\bibsection}{%
+  \section*{\refname}%
+  \addcontentsline{toc}{section}{\refname}%
+}
+
+\usepackage{verbdef}
+\verbdef\id$Id$
+\usepackage{config}
+
+\title{
+  Emacs \& D-machine: d source files and dvt\\
+  \titleversion
+}
+
+\author{Alex Peyser}
+
+\begin{document}
+\pagenumbering{roman}
+\maketitle
+\vspace{\stretch{1}}\tableofcontents\vspace{\stretch{1}}
+\newpage
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\pagenumbering{arabic}
+\section{Introduction \& Installation}
+
+The emacs interface to the dvt is composed of a set of lisp files:
+\begin{verbatim}
+dm-3.0/
+  site-start.el
+  ap/
+     d-comint-mode.el
+     d-mode.el
+\end{verbatim}
+\texttt{site-start.el} should be linked from
+\texttt{/usr/share/emacs/site-lisp/site-start.el} and \texttt{ap}
+should be linked from \texttt{/usr/share/emacs/site-lisp/ap} in order
+to be properly loaded by default. The file \texttt{site-start.el}
+defines the automatic loading of the other files and sets some
+sensible defaults.
+  
+Most emacs commands can either be called from a file in the form
+\emph{command param1 param2 \dots}, such as in your
+{\tt\verb$~/.$emacs} file for defaults executed on load, or by typing
+\verb$Alt-x$ \emph{command} (you will then be prompted for
+parameters).
+
+The functionality of the d-machine version 3.0, as opposed to the
+emacs specific interface, is specified in more detail in ``D-machine
+3.0 Extensions, and interface through DVT,'' \citep{dvt-3.0}.
+
+\section{D source files}
+  
+The lisp file \texttt{d-mode.el} defines the major mode for editing d
+code, which is by default defined to be any file of the form
+\verb$*.[dD]$.  Files will also be recognized as d files if they begin
+with the line:
+\begin{verbatim}
+| -*- mode: D; -*-
+\end{verbatim}
+Also, d-mode can be activated on an already loaded file with the interactive
+command \verb$Alt-x d-mode$.
+
+When a d file is loaded, the file is scanned for carriage returns and
+if any are found, the user will be queried ``Eliminate carriage
+returns?'' Answering `y' will remove the carriage returns and replace
+them with newlines if necessary. The user will then be asked whether
+the file should be immediately saved in its new unix standard format.
+On the other hand, if `n' is the response to the first query, the file
+will be edited as is and newlines will be inserted according to the
+convention of the file, that is, mac or dos formats.
+
+\subsection{Fontification}
+  
+D mode can fontify text according to emacs standards for programming
+languages. This is activated in the normal way for emacs, by either
+calling \verb$global-font-lock$ which takes \verb$t$(activates
+font-lock) or \verb$nil$ as a parameter or toggles when called
+interactively.  To change the font-lock-mode for a specific file, call
+\verb$font-lock-mode$ interactively which toggles the font-lock for
+the current buffer, or define a function for a mode in general as
+follows in your \texttt{.emacs}:
+\begin{verbatim}
+(defun my-d-mode-hook ()
+  (font-lock-mode t))
+(add-hook 'd-mode-hook my-d-mode-hook)
+\end{verbatim}
+Replacing \verb$t$ with \verb$nil$ will turn off font-lock-mode for
+d-mode.
+
+The categories for d-mode font-lock are as follows:
+\begin{description}
+  \item [font-lock-keyword-face] built in operators, such as
+  \verb$list$, \verb$array$\ldots
+  \item [font-lock-variable-name-face] any other legal d name which is
+  not preceded by \verb$/$ or \verb$~$
+  \item [d-mode-oref-face] \verb$~$\emph{name}
+  \item [font-lock-reference-face] \verb$/$\emph{name}
+  \item [font-lock-builtin-face] a constant such as a number, or
+  \verb$true$/\verb$false$
+  \item [font-lock-type-face] any of \verb$~[]{}$
+  \item [font-lock-comment-face] any comment from \verb$|$ to newline
+  \item [font-lock-string-face] anything between \verb$($ and
+  \verb$)$, or \verb$<b/w/l/s >$
+\end{description}
+  
+These can be customized by using the standard emacs font-lock
+customizer or by setting lines of the following kind in your
+\texttt{.emacs}:
+\begin{verbatim}
+(set-face-foreground 'font-lock-keyword-face "red")
+(make-face-bold 'font-lock-keyword-face)
+\end{verbatim}
+There is some interference between the comment face and the string
+face, so escaping unmatched parens in comments is suggested as
+follows:
+\begin{verbatim}
+| Here is an escaped paren \( and here is a pair ()
+| but the following paren may mess up your font lock (
+\end{verbatim} %\)
+\subsection{Minor modes}
+  
+D-mode has 4 associated minor modes, which are off by default. Each
+has letter associated with it (such as p) which appears on the mode
+line following \verb$D Machine-$ when activated.  That letter is also
+an element of the key sequence which toggles the mode.  For example,
+\verb$C-c C-p$ toggles d-mode-magic-parens, and a \verb$p$ appears on
+the mode line when it is active.  Modes are:
+\begin{description} 
+  \item [d-mode-magic-parens(p):] typing a mark (such as \verb${}[]$)
+  will re-indent the line to match the preceding line for openers or
+  the matching opener's line for closers.
+      
+  \item [d-mode-magic-newline(n):] hitting \verb$return$ will start
+  the cursor at the proper indent position for the next line. Lines
+  will indent the same as the previous line unless it has an unmatched
+  opening mark, in which case it will indent \verb$tab-width$
+  characters further.
+  
+  \item [d-mode-magic-comments(c):] hitting `\verb$|$' will place the
+  comment mark in the same column as the comment mark for the last
+  preceding comment.
+      
+  \item [d-mode-magic-delete(d):] hitting \verb$backspace$ (the big
+  delete key on mac keyboards) will delete at least one character, but
+  if the current cursor position is surrounded multiple spaces
+  including newlines \& tabs, all preceding spaces will be deleted
+  unless that would join two seperate words, in which case all but one
+  will be deleted. For example: (Cursor positon will be marked by
+  \verb$|$)
+
+\begin{verbatim*}
+one two three     |four five
+one two three |four five
+
+one two three  |  four five
+one two three|  four five   
+\end{verbatim*}
+\end{description}
+
+\subsection{Example \tt.emacs}
+  
+An example hook for d-mode in {\tt\verb$~/.$emacs} which will turn
+everything on and set an indent increment of 4 characters:
+\begin{verbatim}
+(defun my-d-mode-hook ()
+  (setq d-mode-magic-parens t)
+  (setq d-mode-magic-newline t)
+  (setq d-mode-magic-comment t)
+  (setq d-mode-magic-delete t)
+  (setq tab-width 2)
+  (font-lock-mode t))
+
+(add-hook 'd-mode-hook 'my-d-mode-hook)
+\end{verbatim}
+\subsection{Tabs}
+  
+Tabs will indent the current line, as defined previously.  To insert
+hard spaces regardless of the indent rules, press
+\verb$Shift-LeftTab$ or \verb$Alt-Tab$.  Indenting works as per emacs
+standard, controlled by the commands \verb$tab-always-indent$ and
+other parameters in the `indent' lisp package.
+
+\section{DVT interface}
+  
+The other emacs mode associated with the d-machine is d-comint-mode.
+This mode is started by calling the command \verb$Alt-x dvt$, which
+will start a dvt shell running a dvt from
+\texttt{/mnt/Lab1/dm-3.0-arch/dvt}, where arch is g4, g5 or osx
+depending on the current machine type. The location and name of the
+dvt to be started can be changed by setting
+\verb$explicit-dvt-file-name$ in your \texttt{.emacs} file, or the
+environmental variables \verb$EDVT$ or \verb$DVT$. The order of
+precedence is \verb$explicit-dvt-file-name$, \verb$EDVT$, \verb$DVT$,
+\texttt{/mnt/Lab1/dm-3.0/dvt}.
+
+Do it in your \texttt{.emacs} as follows:
+\begin{verbatim}
+(setq explicit-dvt-file-name "/home/juan/dvt-dir/dvt")
+\end{verbatim}
+By default the buffer will be named \texttt{*dvt*}, and if it is
+already running when dvt is called it will switch your current buffer
+to that buffer, rather than starting a new one. In order to start a
+dvt buffer with a different name, type \verb$C-u Alt-x dvt$ instead
+of \verb$Alt-x dvt$, and you will be prompted for the buffer name.
+
+\subsection{Fontification}
+
+DVT mode shares d-mode fontification on the command line typed by the
+user, but it will not fontify text send by the dvt process to emacs.
+Also, dvt mode turns on ansi-color-for-comint-mode, converting
+standard ansi color sequences sent by the dvt into actual color.
+Output from the dvt is by default black (has the face
+d-comint-mode-highlight-output), and the input is blue
+(comint-hightlight-input), though of course if font-lock-mode is on
+the command line is initially fontified by d-mode.  Errors are output
+as red.
+
+\subsection{Minor modes}
+  
+One minor mode for the dvt is d-comint-mode-scream.  It is toggled by
+\verb$control-!$ or \verb$control-1$, and places a \verb$!$ in the
+mode line. When it is activated, any lines typed by the user will have
+a \verb$!$ prepended to it if it does not already have one.  This is
+for sending commands to busy dnodes, particularly useful when
+debugging a dnode.
+  
+Another minor mode for the dvt is d-comint-mode-redirect-mode.  It is
+toggled by \verb$control->$, and places a \verb$>$ in the mode line.
+All output from the dvt is redirected from the screen and is appended
+to a file with the same name as the current buffer.
+
+\subsection{Key bindings}
+
+Key binding for dvt:
+\begin{description}   
+  \item [\large\tt f1] sends the preceding line to the currently
+  selected dmachine (useful for grabbing macros printed by the dvt
+  process to the buffer, and sending it back to the currently selected
+  node as a command)
+  \item [\large\tt f2] sends \verb$! continue$ to the currently
+  selected dmachine and turns off scream mode if active
+  \item [\large\tt f3] sends \verb$! stop$ to the currently selected
+  dmachine and turns off scream mode if active
+  \item [\large\tt f4] sends \verb$! abort$ to the currently selected
+  dmachine, and turns off scream mode if active
+  \item [\tt{\large C-!} {\rm or} {\large C-1}] toggles scream mode
+  \item [\large\tt C-c C-c] clears everything in the buffer from the
+  current cursor position to the beginning of the buffer
+  \item [\large\tt C-c C-a] behaves like \verb$f1$, except the command
+  is wrapped in \verb${} debug_abort$, for debugging dvt process d
+  code.  See \texttt{startup\_dvt.d} for \verb$debug_abort$'s
+  functionality.
+  \item [\large\tt C->] toggles redirect-mode 
+\end{description}
+
+For detail regarding selecting a keyboard-owning node or nodes, see
+\citet{dvt-3.0}.
+
+\bibliography{dvt}
+
+\end{document}
+

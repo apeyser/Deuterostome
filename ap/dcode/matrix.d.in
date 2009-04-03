@@ -1,0 +1,136 @@
+/MATRIX module 200 dict dup begin
+
+/userdef {
+  ~[currentdict ~begin 4 -1 roll ~stopped ~end {stop} ~if] bind
+  userdict 3 -1 roll put
+} bind def
+
+|======================= cuts
+|
+| Make a cut array in place:
+| <l dim_s ... dim_f> | <l dim_f*..*dim_s ... dim_f>
+|
+
+/cuts {
+  1 1 index length 1 sub -1 0 {/i name | <l> mul
+    1 index i get mul                  | <l> mul*<l>_i
+    dup 2 index i put                  | <l> mul*<l>_i
+  } for
+  pop dup dup length 1 sub get 1 ne {(Illegal cut\n) toconsole halt} if
+} bind userdef
+
+| dim_s ... dim_f n | <l dim_f*..*dim_s .. dim_f>
+/cutsn {
+  dup /x array 1
+  3 -1 roll 1 sub -1 0 {/i name | s .. f   <l> mul  
+    3 -1 roll mul               | s .. f-1 <l> mul*f
+    dup 2 index i put           | s .. f-1 <l> mul*f
+  } for
+  pop dup dup length 1 sub get 1 ne {(Illegal cut\n) toconsole halt} if
+} bind userdef
+
+|===================== cut
+|
+| Get a submatrix (row, plane...):
+| matrix cuts i | submatrix subcuts(cuts)
+
+/cut {
+  /i name                             | matrix cuts
+  1 1 index length 1 sub getinterval  | matrix subcuts
+  dup 0 get /sz name                  | matrix subcuts
+  exch sz i mul sz getinterval        | subcuts submatrix
+  exch                                | submatrix subcuts
+} bind userdef
+
+| matrix cuts i len | submatrix cuts
+/recut {
+  /len name /i name exch               | cuts matrix
+  1 index 1 get dup i mul exch len mul | cuts matrix start length
+  getinterval                          | cuts submatrix
+  exch dup 1 get len mul 1 index 0 put | submatrix subcuts
+} bind userdef
+
+| matrix cuts submatrix col_s cols | submatrix subcuts(cuts)
+/columnate {/cols name /col_s name
+  exch dup 1 get /sz name dup 2 get /csz name 3 1 roll | cuts matrix submatrix
+  0 2 index length sz div 1 sub | cuts matrix submatrix 0 rows-1
+  0 1 3 -1 roll {/i name        | cuts matrix submatrix 0
+    2 index i sz mul col_s csz mul add cols csz mul getinterval fax
+  } for
+  0 exch getinterval            | cuts matrix submatrix
+  exch pop                      | cuts submatrix
+  exch cols csz mul dup 2 index 1 put | submatrix subcuts row-size
+  i 1 add mul 1 index 0 put           | submatrix subcuts
+} bind userdef
+
+| matrix cuts submatrix col | submatrix subcuts(cuts)
+/columnate1 {
+  1 columnate 0 1 index length 1 sub getinterval
+} bind userdef
+
+| matrix cuts submatrix row_s rows col_s cols | submatrix subcuts(cuts)
+/compact {/cols name /col_s name /rows name /row_s name
+  exch dup 2 get /sz name
+  3 -1 roll | cuts matrix submatrix
+  0 row_s 1 row_s rows add {/row name | cuts matrix submatrix n
+    2 index 4 index row cut pop col_s sz mul cols sz mul getinterval fax
+  } for
+  0 exch getinterval | cuts matrix submatrix
+  exch pop exch      | submatrix cuts
+  cols sz mul dup 2 index 1 put
+  rows mul 1 index 0 put
+} bind userdef
+
+@ENABLE_ATLAS_START@
+
+|========================== matmul_blas
+|
+| Generic form:
+| C <cuts> beta A <cuts> trans B <cuts> trans alpha | C <cuts>
+| alpha*A^t?*B^t? + beta*C -> C
+| C may not be A or B, but A may be B.
+|
+| You should know the dimensionality of C:
+| C ~ m x n, where m is rows of A^t? and n is columns of B^t?
+|
+| The following are some simplified forms
+
+
+|--- matmul_simple
+|
+| C <cuts> A <cuts> B <cuts> | C <cuts>
+| A*B -> C
+
+/matmul_simple {
+  0 5 1 roll
+  false 3 1 roll
+  false 1
+  matmul_blas
+} bind userdef
+
+|---- matmul_trans
+|
+| C <cuts> A <cuts> transA B <cuts> transB | C <cuts>
+| A^t?*B^t? -> C
+
+/matmul_trans {
+  0 7 1 roll 1 matmul_blas
+} bind userdef
+
+|----- matmul_sum
+|
+| C <cuts> beta A <cuts> B <cuts> alpha | C <cuts>
+| alpha*A*B + beta*C -> C
+
+/matmul_sum {
+  false 4 1 roll false exch matmul_blas
+} bind userdef
+
+| y A A_cuts x | y=Ax
+/vecmatmul_simple {
+  0 4 -1 roll false exch 1 vecmatmul_blas
+} bind userdef
+
+@ENABLE_ATLAS_END@
+
+end _module

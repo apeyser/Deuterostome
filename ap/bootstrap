@@ -1,0 +1,16 @@
+#!/bin/sh -v
+
+LIBTOOL=false
+for i ; do
+	case "$i" in
+		--libtool) LIBTOOL=: 
+			;;
+		*) break
+			;;
+	esac
+	shift
+done
+
+$LIBTOOL && libtoolize "$@" -c --ltdl
+autoreconf "$@" -v --install
+

@@ -1,0 +1,230 @@
+
+/line 1652 string def
+
+% ------------------- circular text
+/outsidecircletext
+   { circtextdict begin
+     /radius exch def
+     /centerangle exch def
+     /ptsize exch def
+     /str exch def
+     /xradius radius ptsize 4 div add def
+     [0 0 0 0 0 0] currentmatrix
+     centerangle str findhalfangle add rotate
+     str
+     { /charcode exch def
+       ( ) dup 0 charcode put outsideplacechar
+     } forall
+     setmatrix
+     end
+   } def
+
+/insidecircletext {
+   circtextdict begin
+   /radius exch def  /centerangle exch def
+   /ptsize exch def  /str exch def
+   /xradius radius ptsize 3 div sub def
+   [0 0 0 0 0 0] currentmatrix
+    centerangle str findhalfangle sub rotate
+    str
+    { /charcode exch def
+      ( ) dup 0 charcode put insideplacechar
+    } forall
+   setmatrix
+   end
+} def
+
+/circtextdict 16 dict def
+circtextdict begin
+
+/findhalfangle {
+   stringwidth pop 2 div
+   2 xradius mul pi mul div 360 mul
+} def
+
+/outsideplacechar {
+   /char exch def
+   /halfangle char findhalfangle def
+   [0 0 0 0 0 0] currentmatrix
+    halfangle neg rotate
+    radius 0 translate
+    -90 rotate
+    char stringwidth pop 2 div neg 0 moveto
+    char present
+   setmatrix
+   halfangle 2 mul neg rotate
+} def
+
+/insideplacechar {
+   /char exch def
+   /halfangle char findhalfangle def
+   [0 0 0 0 0 0] currentmatrix
+    halfangle rotate
+    radius 0 translate
+    90 rotate
+    char stringwidth pop 2 div neg 0 moveto
+    char present
+   setmatrix
+   halfangle 2 mul rotate
+} def
+
+/pi 3.1415923 def
+end
+
+/centershow {
+   dup stringwidth pop 2 div neg 0 rmoveto show
+} def
+
+/Pcentershow {
+   dup /xw 0 def /yw 0 def
+   { exec stringwidth yw add /yw exch def xw add /xw exch def } forall
+   xw 2 div neg 0 rmoveto
+   { exec show } forall
+} def
+
+
+%---------------------- picture elements ----------------------------
+
+/seminar {
+bigfatfont setfont
+[0 0 0 0 0 0] currentmatrix
+310 406 translate
+/present { true charpath flattenpath } def
+(RESEARCH) 90 90 288 outsidecircletext
+(SEMINAR) 90 270 358 insidecircletext
+clip
+setmatrix
+} def
+
+/department {
+lessbigfatfont setfont
+[0 0 0 0 0 0] currentmatrix
+310 406 translate
+currentgray 0.1 setgray
+/present { show } def
+(UNIVERSITY OF MIAMI SCHOOL OF MEDICINE, MIAMI, FLORIDA)
+    27 270 273 insidecircletext
+(DEPARTMENT OF PHYSIOLOGY AND BIOPHYSICS)
+  27 90 258 outsidecircletext
+setgray
+setmatrix
+} def
+
+/background {                           % Cajal plate
+    systemdict /DVTPSPATH known {
+	/cajal DVTPSPATH length (/cajal2.img) length add string def
+	cajal 0 DVTPSPATH putinterval
+	cajal DVTPSPATH length (/cajal2.img) putinterval
+    } {
+	/cajal (@pkgpsdatadir@/cajal2.img) def
+    } ifelse
+
+   /img cajal (r) file def
+ %  /img (POSTSCRIPT/CAJAL2.IMG) (r) file def
+   -33 828 translate
+   -90 rotate
+   792 792 scale
+   512 480 8 [512 0 0 -480 0 480] 
+   { img line readstring pop }
+image
+img closefile
+} def
+
+/Speaker {
+mainfont setfont
+310 406 180 add translate
+fatfont setfont
+0 0 moveto (Dr. Feliksas Bukauskas) centershow
+mainfont setfont
+0 -30 moveto (Department of Neuroscience) centershow
+0 -53 moveto (Albert Einstein College of Medicine) centershow
+0 -76 moveto () centershow
+0 -99 moveto () centershow
+0 -122 moveto () centershow
+fatfont setfont
+%0 -76 moveto (Faculty Candidate) centershow
+} def
+
+/Title {
+fatfont setfont
+0 -170 translate
+0 0   moveto ("Gap Junction Channel Formation and Gating" ) centershow
+0 -25 moveto () centershow
+0 -50 moveto () centershow
+0 -75 moveto () centershow
+%0 -50 moveto [ 
+%  { fatsymbolfont setfont (a) }
+%  { fatfont setfont (-Calcitonin Gene-Related Peptide \() }
+%  { fatsymbolfont setfont (a) }
+%  { fatfont setfont (CGRP\)") }
+%] Pcentershow
+0 -75 moveto () centershow
+} def
+
+/When_and_Where {
+0 -135 translate
+fatfont setfont
+0 0 moveto (PLEASE NOTE DAY:) centershow
+%0 0 moveto (REVISED) centershow
+%0 23 12 add  moveto (Joint Seminar with the) centershow
+%0 0 12 add moveto (Miami Project to Cure Paralysis) centershow
+%0 -13 moveto () centershow
+mainfont setfont
+0 -23 moveto (Tuesday, June 21, 2005, 4 p.m.) centershow
+%fatfont setfont
+0 -46 moveto (Physiology Conference Room, RMSB 5122) centershow
+%0 -69 moveto (Lois Pope Life Center) centershow
+% fatfont setfont
+%0 -75 moveto (* Candidate for Training) centershow
+%0 -98 moveto (Grant Position) centershow
+} def 
+
+/Address {
+junkfont setfont
+310 14 translate 0 18 moveto
+0.65 1 scale
+(Department of Physiology & Biophysics, University of Miami, P.O. Box 016430, Miami FL 33101, (305) 243-6821)
+centershow
+} def
+
+
+% ------------------- fonts
+/bigfatfont /Helvetica-Bold findfont 110 scalefont def
+/lessbigfatfont /Helvetica-Bold findfont 30 scalefont def
+/mainfont /Times-Roman findfont 20 scalefont def
+/fatfont /Times-Bold findfont 22 scalefont def
+/junkfont /Helvetica findfont 17 scalefont def
+/fatsymbolfont /Symbol findfont 22 scalefont def
+/lessfatfont /Times-Bold findfont 15 scalefont def
+
+gsave
+14 36 translate
+0.95 0.95 scale
+% newpath 0 0 0 576 738 576 738 0 closepath clip
+gsave
+   { 0.4 sub 2 mul 0.8 add
+     dup 0.6 lt { pop 0.6 } if
+     dup 1 gt { pop 1 } if 
+   }  settransfer
+background
+grestore
+gsave
+seminar
+   { 0.4 sub 2 mul 0.2 add
+     dup 0 lt { pop 0 } if
+     dup 0.5 gt { pop 0.5 } if 
+   }  settransfer
+background
+grestore
+department
+Speaker
+Title
+When_and_Where
+grestore
+Address
+copypage
+1 { copypage } repeat
+
+
+
+

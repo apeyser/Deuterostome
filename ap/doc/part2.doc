@@ -1,0 +1,548 @@
+
+ÇhÄCHAPTER Å2Ç| mÄTHE MACHINEÇ| 1 ls
+
+ÇpÄThis chapter gives you a thorough tour of the D machine and informs you in Ädetail of the substrates of the machine, the D objects.Ç|
+
+ÇcÅ2.1 The objectsÇ| 1 ls
+
+Ç/tabs [ [144 1] [textwidth 144 sub 1] ] def
+
+ÇnÄSimple objectsÇ| tÅnullÇ|Ä    
+ÇnÄ              Ç| tÅnumeralÇ|Ä  
+ÇnÄ              Ç| tÅoperatorÇ|
+ÇnÄ              Ç| tÅnameÇ|
+ÇnÄ              Ç| tÅmarkÇ|
+ÇnÄ              Ç| tÅbooleanÇ| 1 ls
+
+ÇnÄComposite objectsÇ| tÅarrayÇ|
+ÇnÄ                 Ç| tÅlistÇ|
+ÇnÄ                 Ç| tÅdictionaryÇ|
+ÇnÄ                 Ç| tÅboxÇ|
+
+ÇpÄSimple  objects  are  unique,   self-contained  quanta  of  information. 
+ÄComposite objects may be or may not be unique,  and always consist of two 
+Äseparate  parts:  information that describes the object  and  information 
+Äthat represents the value of the object.  Simple objects are analogous to 
+Äsmall  pieces  of  merchandise  that can  be  traded  over  the  counter. 
+ÄComposite objects are analogous to real estate. When you pass a composite 
+Äobject  via the operand stack to an operator,  you pass  the  information 
+Äthat describes the object,  you do not pass the value. Likewise, when you 
+Ätrade your house,  you do not put it physically on the negotiation table: 
+Äyou bring the deed.Ç|
+
+ÇpÄThe ÅnullÄ object fills a space and serves as a void.Ç|
+
+ÇpÄThe  ÅnumeralÄ  object comes in several  types.  Since  all  manipulations 
+Äinvolving  numeral values are delegated to the equivalent of a  math  co-
+Äprocessor,  numeral types are not an intrinsic aspect of D and vary among 
+Äimplementations and hosts. Invariable, however, is their orthogonal treatment. ÄAlmost all operators take any kinds and combinations of numerals or numeral Äarrays and return meaningful results.Ç|
+
+ÇpÄThe  numeral types  available  in  the  Apple PowerPC and 68k implementations Äcomprise three ranges of integer (ÑbyteÄ, ÑwordÄ, andÑ longÄ), and 
+Ätwo precisions of IEEE real, ÑsingleÄ and ÑdoubleÄ (32-bit and 64-bit). Operators Äthat work on existing numeral  objects use the intrinsic type specification to  Ädetermine what arithmetics and type conversions are required.  Where numeral Ätypes need 
+Äto  be specified explicitly (e.g. when creating an array),  this is done by nameÄ objects whose  initial 
+Ächaracter is a type mnemonic, e.g. /w or /Word.Ç|
+
+ÇpÄThe  ÅoperatorÄ object represents an operation intrinsic to D or  provided 
+Äin user-created libraries of extrinsic operators.  Operators resolve into 
+Ähost machine code. They in principle are composite, because references to 
+Äan  operator imply a description that is separate from the  machine  code 
+Äthat  constitutes  the  value.  Operators de  facto  behave  like  simple 
+Äobjects, because (for reasons of sanity) you cannot perform operations on 
+Ätheir values.Ç|
+
+ÇpÄThe  ÅnameÄ  object  holds  a  name  to  serve  in   associations.   Since 
+Äassociations  in  D are dynamic,  reference to a name implies  an  actual 
+Äsearch for its current association.  A fast search  algorithm,  employing 
+Ähashing,  performs  this  critical task (most searches conclude  after  a 
+Äsingle name comparison regardless of the size of the searched vocabulary).Ç|
+
+ÇpÄTheÅ markÄ object is explained by its name.Ç|
+
+ÇpÄThe ÅbooleanÄ object's value is either 'true' or 'false'.Ç|
+
+ÇpÄAn ÅarrayÄ value is formed by a linearly ordered set of numeral values  of 
+Äidentical  types.  A  ÑstringÄ is an array of  byte-integers.  Elements  of 
+Äarrays  are referred to by index;  the index of the  first  array 
+Äelement is ÑzeroÄ.Ç|
+
+ÇpÄA  ÅlistÄ value is formed by a linearly ordered,  generally mixed  set  of 
+Ä(whole)  simple  objects  and/or  (descriptions  of)  composite  objects. 
+ÑProceduresÄ  are  Ñactive Älists (see below),  of objects  to  be  executed. 
+ÄBecause the list value,  again,  may contain lists or  dictionaries,  you 
+Äcan use lists to build nested high-order structures.  (Value) elements of 
+Älists  are  referred to by index;  the index of  the  first  list 
+Äelement is ÑzeroÄ.Ç|
+
+ÇpÄNote  the  difference  between arrays and  lists:  arrays  pack  numeral 
+Ävalues, not objects, whereas lists contain objects. Although you can make 
+Äa  list of exclusively numeral  objects,  an  array  will  be 
+Äpreferable for organizing numerals of identical types,  because the array 
+Ästores  the  numerical  values  in  a  more  compact  form  and   because 
+Ämathematical  operators deal more efficiently with array than  with  list 
+Ävalues.Ç|
+
+ÇpÄWhen you duplicate an array or list object,  or when you create a  child 
+Äobject that represents a subset of an array or list value, the respective 
+Äoperators create a new description, but they do not duplicate elements of 
+Äthe  value.  Hence the new objects share their values with the  original. 
+ÄChanges made to a shared value (by modifying the value of one of the sharing Äobjects) will affect all sharing objects.Ç|
+
+ÇpÄA ÅdictionaryÄ value is formed by a set of association pairs, of which one 
+Äpartner is a name,  and the other partner, any object. If the association 
+Äis with a composite object,  that object is represented by a  description 
+Ärather than the value.  Associations are constructed dynamically, through 
+Äoperators. Dictionary entries are always made or retrieved through a name 
+Äkey,  rather  than  a numerical index.  The information  contained  in  a 
+Ädictionary is transparently organized for quick retrieval by  name.  This 
+Äorganization precludes access via an index or subpartitioning into  child 
+Ädictionaries.Ç|
+
+ÇpÄA  ÅboxÄ value also is comprised of composite objects. A box in internal memory Äbrackets a set of composite objects that can be discarded selectively (e.g. Äarrays temporarily created and used during the execution of an algorithm). A boxÄ in external memory (see section 2.2) stores a folded tree of objects, which areÄ saved and retrieved en bloc.Ç|
+
+
+ÇpÄObjects  haveÅ attributesÄ.  In composite objects,  these  attributes  are 
+Äpart  of the description;  objects that share a value thus need not  have 
+Äidentical  attributes.  An  object  is either  ÑpassiveÄ  or  ÑactiveÄ.  This 
+Äattribute  is changeable and directs the use of the object,  as datum  or 
+Äinstruction. Once a composite object is given the ÑreadonlyÄ attribute, its
+Ävalue  can only be read,  but not modified (note that Ñreadonly  Ädoes  not 
+Äpreclude  changes  to the value made through  other  objects).  Composite 
+Äobjects are either ÑinternalÄ or ÑexternalÄ.  This distinction refers to  the 
+Älocation  of  the  object ÑvalueÄ.  For  external  objects  this  attribute 
+Äincludes the identifier of the medium where the object value resides (see 
+Äbelow).  If the creation of a composite object involves the creation of a 
+Ävalue,  this  object receives the ÑparentÄ attribute;  objects  created  to 
+Äshare  a subset of a parent object value receive the ÑchildÄ attribute.Ç|  2 
+Çls
+
+
+ÇcÅ2.2 Where D objects liveÇ|
+
+ÇpÄObjects can exist both in the ÑinternalÄ  memory of the host computer  and 
+Äin ÑexternalÄ mass storage. We first consider ÅinternalÄ sites of residence.Ç|
+
+ÇpÄInternal  objects  live  on  three stacks and in  a  large  memory  area 
+Äreferred to as the Virtual Memory (VM). Sizes of these storage facilities 
+Ämay  be chosen when the D machine is brought up.  The stacks  hold  whole 
+Äsimple  objects  or descriptions of composite objects.  The  VM  holds  a 
+Ämaster  description  and  the  value of  all  internal  parent  composite 
+Äobjects.Ç|
+
+ÇpÄThe Åoperand stackÄ holds objects to be consumed by operators or resulting 
+Äfrom operators. D uses the Ñreverse Polish notationÄ, and the operand stack 
+Äserves as the universal vehicle for passing operands from one operator to 
+Äanother.  Objects  accumulate on this stack until a subsequent  operation 
+Äconsumes them as operands.  While they remain on the stack,  they can  be 
+Äexplicitly manipulated by stack operators.Ç|
+
+ÇpÄThe  Åexecution  stackÄ  holds a file of objects  in  execution.  The  top 
+Äelement  is the next in line for execution,  whereas elements  below  are 
+Äsuspended.  An  object carrying the ÑactiveÄ attribute can be submitted  to 
+Äexecution by pushing it on the execution stack (by an operator or through 
+Äreference  to  an associated active name).  The execution stack  will  be 
+Äpopulated mostly by strings or procedures (active lists).  After a string 
+Ähas been moved to the execution stack,  the object tokens contained in it 
+Äare successively translated and submitted to execution,  until the string 
+Äis  exhausted  and  removed from the execution stack  (this  exposes  the 
+Älatest suspended object).  With a procedure, the objects constituting its 
+Ävalue  are successively submitted to execution.  Other objects pushed  on 
+Äthe execution stack are consumed at once.Ç|
+Ä  
+ÇpÄThe  execution  stack  is used also by the operators  that  control  the 
+Ärepeated  execution  of procedures (like loop operators).  In  this  way,  the 
+Äexecution  stack suffices to maintain the entire flow of control in  a  D 
+Ämachine.Ç|
+
+ÇpÄObjects  moved  to  the execution stack can  be  earmarked  as  dropback 
+Älevels.  If  an  object subsequently pushed on the  stack  for  execution 
+Äinvokes  a certain control operator,  this operator drops  the  execution 
+Ästack  down to the latest earmarked object.  This effects a return  to  a 
+Äformer  level  of execution,  skipping intermediate levels  of  procedure 
+Äcalls or nested loops if necessary.  Activities can be swiftly terminated 
+Äor  aborted in this way,  returning control to an  embracing  layer.  The 
+Ätechnique also serves to terminate loops from within.  D is a  structural 
+Äpurist's language:  there is no 'goto' statement. The dropback mechanism, 
+Ähowever,  provides  for all cases where a 'goto' might be desirable in  a 
+Ästructured program.Ç|
+
+ÇpÄThe Ådictionary stackÄ holds dictionary objects currently in use.  When  an 
+Äactive  name  object  is  executed,  the  name  is  looked  up  in  these 
+Ädictionaries,  beginning  with the dictionary on top of  the  stack.  The 
+Äfirst  object  found to be associated with the name substitutes  for  the 
+Äname  object.  The  dictionary  stack is  explicitly  maintained  through 
+Äoperators.Ç|
+
+ÇpÄThe ÅVMÄ occupies a large part of the host machine's internal memory.  It 
+Äis  called  'virtual'  because  you can  use  this  memory  only  through 
+Äoperators that establish a particular logical memory model.Ç|
+
+ÇpÄAs  internal composite objects become defined during a D  session,  they 
+Äconsume  storage space in VM and eventually exhaust all available  space.
+ÄThis is prevented by using three housekeeping operators, by which sets of VM Äobjects are earmarked and selectively discarded (references made to them in Äremaining objects are voided).Ç|
+
+ÇpÄD organizes also external media for the storage of objects. The external 
+Ämedium  is administrated and accessed as an Åexternal  VMÄ.  Each  physical 
+Äsubstrate  like  a  hard disk or optical cartridge  surface  becomes  a 
+Äseparate eVM,  which carries a unique identifier.  This identifier serves 
+Äto  specify  the  eVM to operators,  and it becomes part  of  all  object 
+Ädescriptions that refer to values located on the medium. The utility that 
+Äprimes  media  for  use as eVM automatically creates  a  dictionary  that 
+Äserves as the root object of the new eVM.  As you create more objects  in 
+Äthis  eVM,  you  can  define associations to these objects  in  the  root 
+Ädictionary  for  later retrieval.  Whereas this method might work  for  a 
+Äfloppy  disk  that contains only a few objects,  you  can  create  larger 
+Äaccess   schemes (trees)   of  unlimited  sophistication  by   just   using   Äthe possibilities inherent to composite objects.Ç|
+
+ÇpÄRecall  that  composite objects held by stacks or included in  lists  or 
+Ädictionaries are represented by their descriptions.  Hence references  to 
+Äexternal  objects  can be passed around in the D machine and  may  become 
+Äpart of values stored in internal or external VMs,  while the referred-to 
+Äobject  values  rest in their respective external storage media  (in  the 
+Äcase of removable media,  they may be even locked away).  This separation 
+Ägives you the freedom to organize as many reference systems to externally 
+Ästored values as you wish,  and it allows you to maintain these reference 
+Äsystems  wherever you wish.  For instance,  you may keep a  directory  of 
+Äexternal  information  that you are analyzing in internal  VM  (to  speed 
+Älookup),  or  you may store a specific access system to an external  data 
+Äbase on a separate medium (for reasons of security or redundancy).Ç|Ä  
+
+ÇpÄExternal  VM shares the property of internal VM,  that  objects  created 
+Äthere  accumulate and eventually fill up all space.  When you  create  an 
+Äobject in external VM,  you have two options:  you can create a permanent 
+Äor a temporary object.  The space of a permanent object can be  reclaimed 
+Äonly  by repriming the entire medium.  Temporary objects can  be  deleted 
+Älike internal VM objects by an operator. The values of both permanent and 
+Ätemporary  objects  are accessible for modification.  You can  wave  this 
+Äprivilege  by  giving objects to be safeguarded the  ÑreadonlyÄ  attribute. 
+ÄNote  that  permanent and temporary storage are no more than  options  at 
+Äyour disposal.  You can fill an entire medium with either temporary or permanentÄ 
+Äobjects exclusively, if that suits your needs or self-confidence.Ç|
+Ä 
+ÇpÄExternal VM serves as the main storage and backup facility of  permanent 
+Äinformation  in the D machine.  It is independent of and parallel to  the 
+Ämass  storage  organized  by the operating system of  the  host.  D  also 
+Äprovides  operators for access to and maintainance of the  domestic  file 
+Äsystem of the host.  File contents,  for instance, are exchanged with the 
+Ävalue of string objects. Text files holding executable D code or data are 
+Äreadily  imported  into the D machine in  this  fashion.  Operators  that 
+Äcommunicate  with  the console and other resources (such as  ports)  also 
+Äwork directly into and out of D objects.Ç| 2 ls
+
+
+ÇcÅ2.3 The text representation of objectsÇ|
+
+ÇpÄObjects are formulated in text using the printable subset of the USASCII Ächaracter set  plus  the 
+Äcontrol characters,  'space', 'newline', and 'carriage return'. 'Newline' 
+Äand 'carriage return' are equivalent in terminating a line.Ç|
+
+ÇpÄObject  tokens  are  separated  by Åwhite  spaceÄ,  a  single  or  several 
+Äsuccessive control characters. ÅCommentÄ, a '|' character and its followers 
+Äup  to the end of the line, also act as white space (they  are  otherwise 
+Äignored).  In  addition  to the separation by white  space,  objects  are 
+Ädelimited by any of the special characters,  ( ) [ ] { } < >, which serve 
+Äto segregate enumerated contents of composite objects.Ç| 1 ls
+
+Ç/tabs [ [48 1] [textwidth 48 sub 1 ]] def
+
+ÇpÄA   ÅnumeralÄ  starts  with  a  digit,   sign,   or  '*'   character.   An 
+ÅintegerÄ ÅnumeralÄ consists of (optional)  sign  and a sequence  of  digits, 
+Äoptionally  followed  by a type specifier.  The range of the  integer  is 
+Ädetermined by the specifier ('b/B' for byte,  'w/W' for word,  'l/L'  for 
+Älong (default integers are long). A Åreal numeralÄ is distinguished from an 
+Äinteger  by  the  presence  of at least one  of  a  fractional  part,  an 
+Äexponent,  or a 's/S' or 'd/D'  specifier.  The exponential part consists of oneÄ of 
+Äthe  characters  'e/E'  immediately followed by a  (signed)  sequence  of 
+Äexponent   digits.   Real  numbers are  stored  with  32-bit   (single) or 
+Ä64-bit (double) precision. Numerals that do not carry a type specifier will by Ädefault be of type /L (when lacking real-number features) or /D.Ç|
+
+ÇpÄNumeral  values  can  be  ÑundefinedÄ.  Mathematical  operators  using  an 
+ÑundefinedÄ value as an operand return ÑundefinedÄ results. Thus, arrays that 
+Äcontain invalid data in a few positions may be submitted to  computations 
+Äwithout special attention to such exceptions,  a little luxury that saves 
+Ätedious programming.  The text representation of an undefined numeral  is 
+Äan  '*',  which  may  be  followed by a decimal  point  (to  indicate  an 
+Äundefined real numeral), or by one of the type specifiers.Ç|
+Ä 
+ÇpÄA ÅnameÄ is a sequence of letters,  digits, or 'underline' characters (the 
+Äleading character cannot be a digit). Names are limited to 14 significant 
+Ächaracters (longer names are silently truncated).  Upper and lower case 
+Äare distinguished. A name preceded by '/' is given the ÑpassiveÄ attribute; 
+Äotherwise the attribute is ÑactiveÄ.  If you are familiar with  PostScript, 
+Äplease note the difference that D excludes you from using characters like 
+Ä'?!@#&%' in names.Ç|
+
+ÇpÄSimple  objects  other  than  numeral  or  name  have  no  direct   text 
+Ärepresentation.  Such  objects  are specified through  associated  names: 
+Ä'null' for the Ånull Äobject,  'true' or 'false' for a ÅbooleanÄ,  and  names 
+Äsuch as 'add' for Åoperator Äobjects.  The ÅmarkÄ object and a  complementary 
+Älist  operator  are accessed through the '[' and ']'  special  characters 
+Ä(making  list  construction  ÑformallyÄ  similar  to  array  or   procedure 
+Äenumerations).Ç|
+
+ÇpÄAll  classes of ÅcompositeÄ object can be created through  operators,  but 
+Äonly  ÅarraysÄ  and active lists (ÅproceduresÄ) can be  defined  directly  in 
+Ätext form by enumerating their elements.Ç|
+
+ÇpÅArraysÄ  are  composed of numeral values enclosed 
+Äbetween  '<'  and  '>';  the array type applies to all numerals in the array andÄ is specified by  a  letter that immediately 
+Äfollows  the  '<'  character.  Arrays  of  the byte type (ÅstringÄ) may be definedÄ  also  by 
+Äalphanumerical  enumeration enclosed between '()';  character codes  that 
+Äcannot  be designated directly in such an enumeration are represented  by 
+Äbackslash sequences:Ç|
+
+Ç/tabs [ [72 1] [textwidth 72 sub 1 ]] def
+
+ÇnÄ\nÇ| tÄnewline (line feed)Ç|
+ÇnÄ\rÇ| tÄcarriage returnÇ|
+ÇnÄ\(Ç| tÄleft parenthesisÇ|
+ÇnÄ\)Ç| tÄright parenthesisÇ|
+ÇnÄ\\Ç| tÄbackslashÇ|
+ÇnÄ\dddÇ| tÄcharacter code ddd (octal)Ç|
+ÇnÄ\newlineÇ| tÄno character - both are ignoredÇ|
+
+ÇpÄElements  of an enumerated ÅprocedureÄ are embraced by  '{}'.  Objects  so 
+Äembraced  are  not  executed:  they are translated  into  their  internal 
+Ärepresentation  and  simply stored as the value of the  procedure  object 
+Ä(compiled,  so  to  speak).  In particular,  no dictionary  searches  are 
+Äperformed  for active names at this time.  The objects contained  in  the 
+Äprocedure  value  will  be  executed  only  through  invokations  of  the 
+Äprocedure.Ç|
+
+ÇpÄArrays  and  procedures  defined by enumeration have  to  be  completely 
+Äcontained  within a single portion of text submitted to  the  translator. 
+ÄThe  translator  is used implicitly by the D executive  (mill)  described 
+Äbelow,  and  is made available for explicit use through an operator (a  D 
+Äprogram can study its own code).Ç|
+
+ÇpÄIn  summary:  the  text  form  of D  code  is  translated  with  minimal 
+Ägrammatical ado into a linear sequence of internal objects. Object tokens 
+Äbecome  either individual simple objects,  or become incorporated into  a 
+Äcomposite  object  when  they  are  enclosed  between  certain  types  of 
+Äbracket.Ç| 1 ls
+
+ÇcÅ2.4 The millÇ|
+
+ÇpÄThis  chapter specifies the executive of the D machine,  briefly  called 
+Äthe 'mill'.  The mill accepts the objects that are handed to the machine and 
+Äguides  them  to their targets,  where  they  are  stored,  consumed,  or 
+Ätransformed. Like with any machine that you operate, you want to know how 
+Äit is turned on or off, and what rules it follows while running.Ç|
+Ä 
+ÇpÄWhen  the  program  that  implements  the  D  machine  is  brought   up, 
+Äinitializations are performed. These effect that:Ç|
+
+ÇpÄ-- the  dictionary stack contains the system dictionary  (of  intrinsic 
+Äoperators) and a user dictionary.Ç|
+
+ÇpÄ-- the execution stack holds a single,  string object. The string value 
+Äis  derived  from a text file called 'startup.d' and retrieved  from  the 
+Ädirectory 'DM' (a folder in your startup volume).  This string holds the first 
+Äsequence  of  objects  to be executed and,  thus,  is  analogous  to  the 
+Ä'bootstrap'  code  of an ordinary computer. The D objects imported from the Ästartup file extend the operator set of the system by a library of procedures Äthat are needed very often and may be viewed as operators that happen to be Äwritten in D.Ç|
+
+ÇpÄ-- The internal VM is empty. No external VM's are in use.Ç|
+
+
+ÇpÄAfter this initialization,  the mill will cycle through a succession  of 
+Äthree  phases.  The ultimate goal of the mill's activity is to empty  the 
+Äexecution stack by fair play.Ç|
+
+ÇpÄEach  turn of the D mill  begins with the Åtest phaseÄ for  evaluating  Äconditions  that 
+Ärequire an interruption of the current context. This is followed by the Åfetch 
+ÅphaseÄ,  during  which  the next object in sequence  is  determined.  That 
+Äobject, then, is executed in the Åexecution phaseÄ.Ç|
+
+ÇpÄIn the Åfetch    phaseÄ,    the   execution   stack   is   inspected    to 
+Ädetermine the next object of execution. This stack will hold only objects 
+Äwith   the  ÑactiveÄ  attribute.   A  simple  object   will be popped   and 
+Äsubmitted directly to the  execution  phase.  Of a  procedure  or string, 
+Äinstead, the first (translated) object is extracted, and the remainder of 
+Äthe  procedure or string remains on the execution stack until the  entire 
+Äprocedure or string has been exhausted.Ç|
+
+ÇpÄA fine point to note is that a procedure object actually is popped  from 
+Äthe  execution stack ÑpriorÄ to the execution of its last value object  (to 
+Äsave stack space during end-to-end recursion).Ç|
+
+ÇpÄAny  ÑpassiveÄ  object  passed to the Åexecution  phaseÄ  is  'executed'  by 
+Ätransferring it to the operand stack.Ç|
+
+ÇpÄAn  ÑactiveÄ  object is given special attention if it is a  ÑnameÄ.  A  ÑnameÄ 
+Äobject is replaced by the currently associated object.  The search for an 
+Äassociated  object  involves  the  dictionaries  currently  held  on  the 
+Ädictionary  stack and proceeds from the top to the bottom of  the  stack. 
+ÄThe first association detected for the name is used. An active associated 
+Äobject  is pushed on the execution stack,  whereas a  passive  associated 
+Äobject is pushed on the operand stack. The mill starts a new turn.Ç|
+
+ÇpÄExecution  of other active objects also is directed by class:Ç|
+Ä 
+ÇpÄ-- A Ñnull Äobject is discarded.Ç|
+
+ÇpÄ--  An  ÑoperatorÄ  object  is  invoked, i.e.  the  host  program  module 
+Ärepresented  by the operator is executed.  A large set of system operators has Äbeen built into the D machine and is accessible through the system dictionary Ä(ÑsystemdictÄ), which is permanently present at the bottom of the dictionary Ästack.Ç|
+
+ÇpÄ-- Any other object is executed like a passive object,  by  transferring 
+Äit to the top of the operand stack.Ç|
+
+ÇpÄTwo points deserve a note here:  (1) AÑ Äpassive null object is pushed  on 
+Äthe  operand  stack,  but  an active null  object  effects  nothing.  (2) 
+ÄA procedure object  encountered on the execution stack always  serves  as 
+Ä'instruction' because of its ÑactiveÄ attribute;  reference to a  procedure 
+Äthrough  an  active name has the same effect.  If a procedure  is  to  be 
+Äworked  on  as 'data',  it needs to be transferred to the  operand  stack 
+Ä(operators see to that).Ç|
+
+ÇpÄMany functions that are essential for the D machine,  such as definition 
+Äof name-object associations,  are not of concern to the mill. The mill is 
+Äconcerned only with the orderly consumption of objects,  whereas specific 
+Ätasks   belong  to  the  operators.   This  strict  division   of   labor 
+Äkeeps  things simple and the D machine robust.  Operators will  be  dealt 
+Äwith in Chapter 3.Ç|
+
+ÇpÄThe  mill  consults a timer to ÅinterruptÄ the context being  executed  at 
+Äregular intervals (0.1 s).  The timer is examined in the Åtest phaseÄ  that 
+Äleads  each  turn.  When the end of the interval  is  recognized,  a  new 
+Äinterval is started, the active name ÑinterruptÄ is pushed on the execution 
+Ästack,  and  execution  resumes.  ÑinterruptÄ should be associated  with  a 
+Äprocedure that tests external conditions of interest (e.g.  a request for 
+Äoperator  intervention from the console),  or effects timed events  (e.g. 
+Äthe preventive dumping of a disk cache). By default, ÑinterruptÄ is associated Äwith a no-op operator; you can at any time substitute a procedure that suits 
+Äyour needs.Ç|
+
+ÇpÄOn each timer tick (and whenever it is idle), the mill consults  the virtual Äterminal (VT, described in the next section) for host events that require its Äattention. Most of the numerous events that the Apple operating system reports  Äto an application are attended to by the VT; only 'cooked' events that serve to Ädirect the execution of D objects are handed to the mill. These events are:Ç|
+
+ÇpÄ- a request to (re)draw the contents of a graphical VT screen. When such a Äscreen is created by an operator, a dictionary is associated with the screen. ÄWhen the (re)draw request is received, the mill pushes the screen dictionary on Äthe dictionary stack and the active name 'drawscreen' on the execution stack. Ä'drawscreen' should resolve to a procedure that uses the appropriate drawing Äoperators to build the contents of the screen.Ç|
+
+ÇpÄ- a request to respond to a mouse click over a graphical VT screen. The mill Äpushes the screen dictionary on the dictionary stack, the mouse coordinates and Ämodifier keys on the operand stack, and the active name 'mouseclick' on the Äexecution stack. 'mouseclick' should resolve to a procedure that attends to the Ämouse click.Ç|
+
+ÇpÄ- the user has pressed the command/escape keys on the keyboard. This directs 
+Äthe mill to submit the next phrase entered to the console screen to direct Äexecution by the mill (by pushing the phrase string on the execution stack).Ç|
+
+ÇpÄLast not least, in the act of consulting the VT, the mill offers the Apple Äoperating system an opportunity to take control and to allow other 
+Äapplications to be executed concurrently with the D machine. Thus, the D machineÄ can be moved between foreground and background operation in response to mouse Äclicks into the Apple menu bar or visible windows belonging the different Äapplications. The D machine, hence, is a good citizen in terms of the Apple Äcooperative multi-tasking concept. The principle of yielding adequate time to Äother applications is maintained also in the design of operators that could Äwaste considerable processor time by waiting for some external events (like a Ämessage from a communication line). Such operators are transparently subdivided Äinto smaller operators such that waiting intervals can be used otherwise.Ç|
+
+ÇpÅErrorsÄ  in  object usage recognized by the  mill,  text  translator,  or 
+Äoperators  lead  to a uniform response. A string object  indicating  the 
+Äinstance  of  discovery and a numeral object representing the  error  are 
+Äpushed onto the operand stack, and the active name 'error' is pushed on the Äexecution stack. 'error', unless reassigned by you, is associated with an  Äoperator that prints an error message on the console screen and pushes a 'halt' Äoperator on the execution stack. 'halt' directs console phrases to the mill for Ädirect execution, but once placed on the execution stack does not allow the Ästack to drop below the 'halt' operator (in effect, it loops endlessly). You canÄ remove the 'halt' operator from the execution stack by executing one of the Äoperators 'continue' (which makes the mill resume execution of the context in Äwhich the error occurred), 'stop' (which terminates the innermost context Äenclosed by 'stopped'),  or 'abort' (which reprimes all stacks and discards all Äactivities in progress).Ç|
+
+ÇpÄThe  mill  of the D machine halts when  the 'quit' operator is executed; this
+Äterminates the application that implements the D machine 
+Äand returns control to the operating system of the host computer.Ç|
+
+ÇpÄIn  summary,  the D mill can execute any object submitted to it via  the 
+Äexecution stack, with effects that depend on the active/passive attribute 
+Äand the class of the object.  Object associations by name are resolved in 
+Äthe act. Executed objects eventually precipitate in objects pushed on the 
+Äoperand  stack  (to  serve  as 'data' for  operators),  or  lead  to  the 
+Äexecution  of  host  program modules (which  perform  the  'instructions' 
+Äimplied by D operators). The mill can schedule responses to external events and Äthus provide a degree of pre-emptive multi-tasking in executing D objects. It Äprovides a uniform response to errors.Ç|
+
+ÇcÅ2.5 The Virtual TerminalÇ|
+
+ÇpÄThe D machine communicates with you using the video screen, keyboard, and mouseÄ of the Apple host computer. Since these facilities and others (like CPU time) 
+Äare shared among concurrent applications running in the Apple computer, they Äneed to be negotiated. In these negotiations, the D machine uses an Äintermediary, the virtual terminal (VT). From the perspective of a D program, Äthe VT appears as a combined text and graphics terminal subserved by a set of Äoperators. The Apple computer sees a normal application that conforms with the ÄApple cooperative multitasking. You see a neat and responsive console, from Äwhich you can steer the D machine. A multi-screen editor built into the VT Äassists you at all times, because it works concurrently with the D mill and Äother applications running on the host.Ç|Ä   
+
+ÇpÄThe VT organizes the physical screen of the Apple computer, 
+Äsuperimposing the windows of all other applications that are not in the Äforeground. The screen is divided into three horizontal zones spaning the full Äwidth:Ç|
+
+ÇpÄ- the standard Åmenu barÄ (containing the Apple and application menusÇ|Ä)Ç|
+
+ÇpÄ- Åtext and graph screensÄ. The VT maintains 1 to 10 virtual screens. Screen #0 Äis created automatically when the D machine is brought up; this is a text screenÄ and receives the console dialogue. Other screens are created/discarded by Äoperators and can be of text or graph types. A text screen is of fixed size and Äspans the entire text screen zone (thus only one text screen is visible at a Ätime). Graph screens are made to variable sizes and arrangements (thus several Ägraph screens may be visible on top of a text screen).Ç|
+
+ÇpÄ- ÅMenu screensÄ. A strip along the bottom of the physical screen is reserved forÄ graph screens usually dedicated to view and select menus created by D Äapplications. Each menu screen fills this entire strip, so one is visible at a Ätime.Ç|
+
+ÇpÄYou can randomly select screens for view, by pressing the corresponding
+Änumeral key of the numeral keypad together with 'control'. Screens can also
+Äbe switched by a VT operator.Ç|
+
+ÇpÄText screens have two possible behaviors: ÅeditÄ or ÅdialogueÄ. Each text screen isÄ associated with a private text memory (the console screen, for instance, has a Äcapacity of 500 rows of 80 columns). Edit screens use their memory linearly, so Äthey can fill up. Dialogue screens use their memory cyclically, overwriting the Äoldest rows as space for new rows runs out; they do not fill up. Edit screens Älet you modify their text via the keyboard, whereas dialogue text can only be Äviewed. The console screen blends these two behaviors. Text already passed to Äthe D mill (or written by D operators to the console screen) is treated like in Äa dialogue screen. Text being entered from the keyboard but not yet submitted toÄ the D machine is treated as if it were in an edit screen (text in this edit Äzone is shown in blue, whereas text in the dialogue zone is in black). A portionÄ of text is submitted to the D mill only after it has been closed by a Ä'return'.Ç|
+
+ÇpÄText screens are subdivided in a uniform way. The main, central area shows a Äportion of text. A strip along the top contains two fields in which you can Äenter strings to be used in searches or text replacements. A bar along the Äscreen bottom represents the unused (white), filled (gray), and displayed Ä(black) fractions of the text memory. One method for scrolling through the text Ämemory is by clicking the mouse over particular portions of the text screen:Ç|
+
+ÇpÄ- in the scroll bar below the screen: the top of the display moves in the text Äcorresponding to the chosen mouse location in the bar;Ç|
+
+ÇpÄ- in the background of the top border without or with pressing the control key:Ä scrolls down one or five rows; note that with the three-button mouse, you can Äuse the middle button instead of 'control/click'.Ç|
+
+ÇpÄ- in the background of the bottom border without or with pressing the control Äkey: scrolls up one or five rows;Ç|
+
+ÇpÄThe screen is scrolled also in response to the 'home', 'end', 'page up, and Ä'page down' keys, and it scrolls automatically as necessary to keep text being Äentered in the viewed range.Ç|
+
+ÇpÄClicking the mouse over the search or replacement fields lets you enter or Ämodify the search or replacement string (shown in blue while being entered; Äconclude with 'return'). Clicking the mouse over the main part of the screen Äplaces the text cursor at the mouse position. Clicking again while pressing the Äcontrol key marks a block of text, which extends between the old cursor positionÄ and the new mouse location (forward or backward).Ç|
+
+ÇpÄKeystrokes not dedicated to control functions enter text into the text memory 
+Äof the current console or edit text screen. This text is organized in a fixed Ägrid of rows of maximally 80 columns (a fixed-pitch font, Courier, is used for Äviewed text). When text being entered overflows the current row, the current Äword is carried over into a new row; no line separator is inserted unless you Äpress a 'return'; you can force insertion to continue in a new row by pressing Ä'control/return' (this does also not insert a line separator). When you are 
+Äentering/editing D code, line separators have no role beyond that of token Äseparator. For the console, however, 'return' is relevant because it makes a Äphrase ready for submission to the D mill (usually terminating your opportunity Äto correct it). Another use of multi-row phrases is to build paragraphs; when a Äparagrph is fragmented by insertions or deletions, can be swiftly reshaped by Äpressing 'escape'. The fixed pitch of the displayed text helps in arranging Ästructured D code; for word-processing text, the arrangements made on the screenÄ are useful for editing, but are overruled by imbedded typesetting instructions Äwhen a hardcopy is printed (see below).Ç|
+
+ÇpÄThe following control functions are available in both ÑeditÄ and ÑdialogueÄ Äscreens:Ç| 1 ls
+
+Ç/tabs [ [textwidth 1 ]] def
+ÇnÖcontrol/sÄ - start entering search stringÇ|
+ÇnÖcontrol/uparrowÄ or Öcontrol/leftarrowÄ - search backwardsÇ|
+ÇnÖcontrol/downarrowÄ or Öcontrol/rightarrowÄ - search forwardsÇ|
+ÇnÖcontrol/hÄ - mark current viewÇ|
+ÇnÖcontrol/tÄ - return to marked viewÇ|
+ÇnÖcontrol/xÄ - remove cursor and release blockÇ|
+
+ÇpÄIn ÑeditÄ screens the following additional control functions are available:Ç| 1 ls
+
+ÇnÖtabÄ - add spaces to fill the current triplet of columnsÇ|
+ÇnÖcontrol/dÄ or ÖdelÄ or ÖclearÄ - delete character under cursorÇ|
+ÇnÖcontrol/bÄ or ÖdeleteÄ - delete character to the left of cursorÇ|
+ÇnÖcontrol/returnÄ - continue insertion in a new rowÇ|
+ÇnÖreturnÄ - close phrase or paragraph and start new rowÇ|
+ÇnÖcontrol/lÄ - delete entire row that contains cursorÇ|
+ÇnÖcontrol/nÄ - enter replacement stringÇ|
+ÇnÖcontrol/rÄ - replace search string at current cursorÇ|
+ÇnÖcontrol/cÄ - insert copy of block starting at current cursorÇ|
+ÇnÖcontrol/kÄ - kill text in current blockÇ|
+ÇnÖcontrol/mÄ - move text in block to current cursorÇ|
+ÇnÖescapeÄ - reformat the current paragraph starting at the cursorÇ|
+
+ÇpÄDialogue screens can hold only plain ÅASCIIÄ text. Edit screens can be created inÄ two versions: plain ASCII and word processing (ÅWPÄ). The console screen is Äalways plain ASCII. Word processing screens allow you to direct typesettingÅ Äby aÄ ÅPostScriptÄ hardcopy device: PostScript instructions are embedded between Äprintable text, and, within printable text, you can switch within a set of Äenhancements (such as font characteristics, subscripting, etc). This method of Ätypesetting provides the maximal possible flexibility, because it deals with a ÄPostScript device directly, without being limited by what a word processor knowsÄ to do with PostScript (usually not much). This manual, by the way, was preparedÄ with the VT text editor in WP mode.Ç|
+
+ÇpÄThe WP-extended functions of edit screens include:Ç| 1 ls
+
+ÇnÖcontrol/escapeÄ: toggle between PostScript / printableÇ|
+ÇnÖcontrol/1Ä - use 'normal' fontÇ|
+ÇnÖcontrol/2Ä - use 'bold' fontÇ|
+ÇnÖcontrol/3Ä - use 'italic' fontÇ|
+ÇnÖcontrol/4Ä - use '4th' font (usually Symbol)Ç|
+ÇnÖcontrol/5Ä - terminate super/subscriptÇ|
+ÇnÖcontrol/6Ä - start superscriptÇ|
+ÇnÖcontrol/7Ä - start subscriptÇ|
+ÇnÖcontrol/8Ä - start superscript to be aligned above a subscriptÇ|
+ÇnÖcontrol/9Ä - start/terminate inline stretchÇ|
+ÇnÖcontrol/0Ä - insert a potential hyphenation site (underlined space)Ç|
+
+ÇpÄThese selections are doubled by the (unmodified) function keys F12, and F1 - ÄF10 respectively.Ç|
+
+ÇpÄThe 4th font is always displayed in ÅblueÄ and has two alternate representations:Ä Symbol or Courier. In the Symbol variety, for instance, letters are rendered inÄ ÑGreekÄ rather than Roman type (see code tables for these fonts).Ç| 1 ls
+
+ÇnÖcontrol/fÄ - toggle between Symbol/Courier representation of 4th fontÇ|
+
+ÇpÄText enhancements are shown on the screen in a rudimentary representation (likeÄ face, color, or size variations of the screen's fixed-spaced Courier font). TheÄ hardcopy can use all registers of the PostScript engine, because the text Äenhancements made with the editor are subject to interpretation by PostScript Äinstructions (embedded or supplied in 'include' files prepared for particular Äforms of document).Ç|
+
+ÇpÄNote that during typing text enhancements stay in effect until they are Äexplicitly turned off (cursor movement does not automatically do this).Ç|
+
+ÇpÄThe VT lets you enter ASCII codes that are not in the standard printable set Ä(but may be necessary to reach printable characters in other code tables or to Äexert control in communications). Control characters of the ASCII table (in the Ärange from 0x01 to 0x1F) are generated like on a teletype keyboard, by pressing Ä'command' (or in a few cases, 'command/option') plus a printable key (like Äcommand/T for code 0x18). Codes in the upper half of the ASCII table (>0x80) areÄ reached by pressing 'option' together with printable keys; these characters areÄ rendered in the viewed text (using the Courier font encoding table).Ç|
+ÇpÄThe D machine communicates with the VT through operators and through a direct Äexchange between the VT and the D mill (when console phrases are submitted to Äexecution or when events requiring attention to graph screens occur). Text Äscreen operators let you exchange text between text screen memory and string Äobjects (necessary conversions between plain ASCII and WP formats are done Äautomatically). Except for these simple exchanges, text screens operate Äautonomously, without requiring D instructions. Graph screens depend on D Äinstructions when they need to be drawn or when a mouse click needs attention. DÄ operators provide all basic graphic primitives. The D mill automatically Äschedules the execution of drawing or mouse-response procedures that you Äinstruct it to use when you create the screen (this frees you from polling the ÄVT).Ç|
+
+ÇpÄWP text exported from a text screen into a D string uses escape sequences to Ämark changes in text interpretation. Each escape sequence consists of 'escape' Äfollowed by a bitwise encoded byte:Ç| 1 ls
+
+ÇnÄbit 7 - always true (MSB)Ç|
+ÇnÄbit 6 - not usedÇ|
+ÇnÄbit 5 - subscriptÇ|
+ÇnÄbit 4 - superscriptÇ|
+ÇnÄbit 3 - underlineÇ|
+ÇnÄbit 2 - italicÇ|
+ÇnÄbit 1 - lightÇ|
+ÇnÄbit 0 - boldÇ|
+
+ÇpÄThese bit assignments are historical and in fact some bits are interpreted in Äother than the original ways: (1) text in light style is PostScript code; (2) Äunderlined text (except in super/subscript) is kept on the same hardcopy line; Ä(3) text following underlined text in superscript is backspaced to the beginningÄ of the superscript; (4) the bold and italic bits encode for one of four fonts. ÄLines in both ASCII in WP texts are terminated by '\n'. When a WP text is Äimported into an ASCII text screen, the escape sequences are simply discarded. ÄWhen an ASCII text is imported into a WP screen, it is copied as is.Ç|
+
+ÇpÄText screens other than the permanent console screen use (text) memory that is Ätaken away from the memory available to the VM (dynamically reducing the 'total'Ä VM space). This memory is given back when the screen is removed. Multiple text Äscreens can be created and removed in random order (freed space is transparentlyÄ compacted).Ç|
+
+ÇpÄIn summary, the VT text editor lets you compose and edit any text that you may Äwish to produce, although it is much simpler than any commercial utility. This Äsimplicity flows from a clear separation of the activities, editing and Ätypesetting. You benefit in several ways: (1) You deal with one problem at a Ätime. (2) You can render a document once created in as many different forms as Äyou wish. (3) Your editor is always at hand, is simple, and works fast.Ç|
+Ä  

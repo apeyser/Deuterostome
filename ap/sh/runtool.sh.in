@@ -1,0 +1,10 @@
+#! @ENABLE_BASH@
+
+go=$1 ; shift
+
+if [[ "$go" == "yes" ]] ; then 
+	exec "$@"
+else
+	echo "Tool missing: $1" 1>&2
+	exit 1
+fi
