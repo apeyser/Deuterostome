@@ -360,10 +360,10 @@ P op_error(void)
 
   p += nb; atmost -= nb;
   if ((P)e < 0) /*Clib error */
-    nb = dm_snprintf((char*)p,atmost,(char*)strerror((P)-e));
+    nb = dm_snprintf((char*)p,atmost,"%s",(char*)strerror((P)-e));
   else { /* one of our error codes: decode */
     m = geterror((P)e);
-    nb = dm_snprintf((char*)p,atmost,(char*)m);
+    nb = dm_snprintf((char*)p,atmost,"%s",(char*)m);
   }
   p += nb; atmost -= nb;
   nb = dm_snprintf((char*)p,atmost," in %s\033[0m\n", (char*)VALUE_BASE(o_2));
@@ -426,7 +426,7 @@ P op_errormessage(void)
   s += nb; tnb -= nb;
 
   if ((P)e < 0) /*Clib error */
-    nb = dm_snprintf((char*)s,tnb,(char*)strerror(-e));
+    nb = dm_snprintf((char*)s,tnb,"%s",(char*)strerror(-e));
   else { /* one of our error codes: decode */
     m = geterror((P)e);
     nb = strlen((char*)m);

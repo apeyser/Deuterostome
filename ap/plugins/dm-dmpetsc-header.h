@@ -317,6 +317,33 @@ P op_petsc_vec_copy(void);
 #define op_petsc_vec_dup EXPORTNAME(op_petsc_vec_dup)
 P op_petsc_vec_dup(void);
 
+#define op_petsc_vec_add EXPORTNAME(op_petsc_vec_add)
+P op_petsc_vec_add(void);
+
+#define op_petsc_vec_mul EXPORTNAME(op_petsc_vec_mul)
+P op_petsc_vec_mul(void);
+
+#define op_petsc_vec_pwr EXPORTNAME(op_petsc_vec_pwr)
+P op_petsc_vec_pwr(void);
+
+#define op_petsc_vec_sqrt EXPORTNAME(op_petsc_vec_sqrt)
+P op_petsc_vec_sqrt(void);
+
+#define op_petsc_vec_reciprocal EXPORTNAME(op_petsc_vec_reciprocal)
+P op_petsc_vec_reciprocal(void);
+
+#define op_petsc_vecvec_mul EXPORTNAME(op_petsc_vecvec_mul)
+P op_petsc_vecvec_mul(void);
+
+#define op_petsc_vecvec_add EXPORTNAME(op_petsc_vecvec_add)
+P op_petsc_vecvec_add(void);
+
+#define op_petsc_vecmat_copy EXPORTNAME(op_petsc_vecmat_copy)
+P op_petsc_vecmat_copy(void);
+
+#define op_petsc_vecmat_sync EXPORTNAME(op_petsc_vecmat_sync)
+P op_petsc_vecmat_sync(void);
+
 #define op_petsc_vec_copyto EXPORTNAME(op_petsc_vec_copyto)
 P op_petsc_vec_copyto(void);
 

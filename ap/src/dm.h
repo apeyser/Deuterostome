@@ -443,15 +443,24 @@ DLL_SCOPE B (*getc_func)(P* retc);
 DLL_SCOPE void (*ungetc_func)(P* retc);
 
 /*-- dm-conv.c */
-DLL_SCOPE void moveframe(B *socket, B *dest);
-DLL_SCOPE void moveframes(B *socket, B *dest, P n);
-DLL_SCOPE void moveB(B *socket, B *dest, P n);
-DLL_SCOPE void moveW(W *socket, W *dest, P n);
-DLL_SCOPE void moveL32(L32 *socket, L32 *dest, P n);
-DLL_SCOPE void moveL64(L64 *socket, L64 *dest, P n);
-DLL_SCOPE void moveLBIG(LBIG *socket, LBIG *dest, P n);
-DLL_SCOPE void moveS(S *socket, S *dest, P n);
-DLL_SCOPE void moveD(D *socket, D *dest, P n);
+DLL_SCOPE void moveframe(_dm_const B *_dm_restrict src, 
+			 B *_dm_restrict dest);
+DLL_SCOPE void moveframes(_dm_const B *_dm_restrict src, 
+			  B *_dm_restrict dest, P n);
+DLL_SCOPE void moveB(_dm_const B *_dm_restrict src, 
+		     B *_dm_restrict dest, P n);
+DLL_SCOPE void moveW(_dm_const W *_dm_restrict src, 
+		     W *_dm_restrict dest, P n);
+DLL_SCOPE void moveL32(_dm_const L32 *_dm_restrict src, 
+		       L32 *_dm_restrict dest, P n);
+DLL_SCOPE void moveL64(_dm_const L64 *_dm_restrict src, 
+		       L64 *_dm_restrict dest, P n);
+DLL_SCOPE void moveLBIG(_dm_const LBIG *_dm_restrict src, 
+			LBIG *_dm_restrict dest, P n);
+DLL_SCOPE void moveS(_dm_const S *_dm_restrict src, 
+		     S *_dm_restrict dest, P n);
+DLL_SCOPE void moveD(_dm_const D *_dm_restrict src, 
+		     D *_dm_restrict dest, P n);
 
 /*--- DMNUM */
 DLL_SCOPE void DECODE(B *frame, BOOLEAN fauto, W prec, B *buf);

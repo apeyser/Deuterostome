@@ -434,6 +434,56 @@
     {dup petsc_vec_dup petsc_vec_copy} in_petsc def
   } bind def
 
+  | x y | y_i = x_i
+  /vec_copy {
+    {petsc_vec_copy pop} in_petsc
+  } bind def
+
+  | x a | -- x_i += a
+  /vec_add {
+    {petsc_vec_add pop} in_petsc
+  } bind def
+
+  | x a | -- x_i*=a
+  /vec_mul {
+    {petsc_vec_mul pop} in_petsc
+  } bind def
+
+  | x a | -- x_i^=a
+  /vec_pwr {
+    {petsc_vec_pwr pop} in_petsc
+  } bind def
+
+  | x | -- x_i=sqrt(x_i)
+  /vec_sqrt {
+    {petsc_vec_sqrt pop} in_petsc
+  } bind def
+
+  | x | -- x_i=1/x_i
+  /vec_reciprocal {
+    {petsc_vec_reciprocal pop} in_petsc
+  } bind def
+
+  | x y | -- x_i*=y_i
+  /vecvec_mul {
+    {petsc_vecvec_mul pop} in_petsc
+  } bind def
+
+  | x a y b | -- x_i=a*x_i+b*y_i
+  /vecvec_add {
+    {petsc_vecvec_add pop} in_petsc
+  } bind def
+
+  | x offset len/* A m | -- A_m=x
+  /vecmat_copy {
+    {petsc_vecmat_copy pop} in_petsc
+  } bind def
+
+  | x A | -- 
+  /vecmat_sync {
+    {petsc_vecmat_sync pop} in_petsc
+  } bind def
+
   |---------------------------------------------- ksp_destroy
   | ksp | --
   |
@@ -598,6 +648,126 @@
         4 -1 roll getid
         ~vec_dup
       ] sexecpawns
+    } in_petsc
+  } bind def
+
+  | x y | y (y_i=x_i)
+  /vec_copy {
+    dup 3 1 roll
+    {
+      ~[
+        3 -1 roll getid
+        3 -1 roll getid
+        ~vec_copy
+      ] sexecpawns
+    } in_petsc
+  } bind def
+
+  | x a | x (x_i += a)
+  /vec_add {
+    {
+      1 index 3 1 roll
+      ~[
+        3 -1 roll getid
+        3 -1 roll
+        ~vec_add
+      ] sexecpawns
+    } in_petsc
+  } bind def
+
+  | x a | x (x_i -= a)
+  /vec_sub {
+    neg vec_add
+  } bind def
+  
+  | x a | x (x_i *= a)
+  /vec_mul {
+    {
+      1 index 3 1 roll
+      ~[
+        3 -1 roll getid
+        3 -1 roll
+        ~vec_mul
+      ] sexecpawns
+    } in_petsc
+  } bind def
+
+  | x a | x (x_i ^= a)
+  /vec_pwr {
+    {
+      1 index 3 1 roll
+      ~[
+        3 -1 roll getid
+        3 -1 roll
+        ~vec_pwr
+      ] sexecpawns
+    } in_petsc
+  } bind def
+
+  | x | x (x_i = sqrt(x_i))
+  /vec_sqrt {
+    ~[
+      1 index getid ~vec_sqrt
+    ] sexecpawns
+  } bind def
+    
+  | x | x (x_i = 1/x_i)
+  /vec_reciprocal {
+    ~[
+      1 index getid ~vec_reciprocal
+    ] sexecpawns
+  } bind def
+
+  | x y | x(x_i *= y_i)
+  /vecvec_mul {
+    {
+      1 index 3 1 roll
+      ~[
+        3 -1 roll getid
+        3 -1 roll getid
+        ~vecvec_mul
+      ] sexecpawns
+    } in_petsc
+  } bind def
+    
+  | x a y b | x (x_i = a*x_i + b*y_i)
+  /vecvec_add {
+    {
+      3 index 5 1 roll
+      ~[
+        5 -1 roll getid
+        5 -1 roll
+        5 -1 roll getid
+        5 -1 roll
+        ~vecvec_add
+      ] sexecpawns
+    } in_petsc
+  } bind def
+
+  | x y | x (x_i += y_i)
+  /vecvec_adds {
+    1 1 3 1 roll vecvec_add
+  } bind def
+    
+  | x offset length/* A m | A (A_m = x)
+  /vecmat_copy {
+    {
+      /row name /Aval name /len name /offset name /xval name
+      /syncer ~[xval getid Aval getid ~vecmat_sync] def
+      {
+        Aval /m get range
+        1 index add row le {pop /syncer find} {
+          dup row gt {pop /syncer find} {
+            ~[
+              xval getid offset len
+              Aval getid
+              row 7 -1 roll sub 
+              ~vecmat_copy
+            ]
+          } ifelse
+        } ifelse
+      } execpawns
+      Aval
     } in_petsc
   } bind def
 

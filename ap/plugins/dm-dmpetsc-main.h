@@ -57,7 +57,7 @@ P ll_errc[] = {
 };
 
 B* ll_errm[] = { 
-  (B*)"** dmpetsc: Woww!! 2^32 matrices created -- impressive!", 
+  (B*)"** dmpetsc: Wow!! 2^32 matrices created -- impressive!", 
   (B*)"** dmpetsc: Invalidated vector", 
   (B*)"** dmpetsc: Invalidated matrix", 
   (B*)"** dmpetsc: Invalidated ksp", 
@@ -118,6 +118,15 @@ B* ll_export[] = {
   PLUGIN_OP(petsc_vec_create),
   PLUGIN_OP(petsc_vec_copy),
   PLUGIN_OP(petsc_vec_dup),
+  PLUGIN_OP(petsc_vec_add),
+  PLUGIN_OP(petsc_vec_mul),
+  PLUGIN_OP(petsc_vec_pwr),
+  PLUGIN_OP(petsc_vec_sqrt),
+  PLUGIN_OP(petsc_vec_reciprocal),
+  PLUGIN_OP(petsc_vecvec_mul),
+  PLUGIN_OP(petsc_vecvec_add),
+  PLUGIN_OP(petsc_vecmat_copy),
+  PLUGIN_OP(petsc_vecmat_sync),
   PLUGIN_OP(petsc_vec_copyto),
   PLUGIN_OP(petsc_vec_copyfrom),
   PLUGIN_OP(petsc_vec_syncto),
@@ -188,6 +197,24 @@ P op_petsc_vec_create(void) {return petsc_vec_create();}
 P op_petsc_vec_copy(void) {return petsc_vec_copy();}
 
 P op_petsc_vec_dup(void) {return petsc_vec_dup();}
+
+P op_petsc_vec_add(void) {return petsc_vec_add();}
+
+P op_petsc_vec_mul(void) {return petsc_vec_mul();}
+
+P op_petsc_vec_pwr(void) {return petsc_vec_pwr();}
+
+P op_petsc_vec_sqrt(void) {return petsc_vec_sqrt();}
+
+P op_petsc_vec_reciprocal(void) {return petsc_vec_reciprocal();}
+
+P op_petsc_vecvec_mul(void) {return petsc_vecvec_mul();}
+
+P op_petsc_vecvec_add(void) {return petsc_vecvec_add();}
+
+P op_petsc_vecmat_copy(void) {return petsc_vecmat_copy();}
+
+P op_petsc_vecmat_sync(void) {return petsc_vecmat_sync();}
 
 P op_petsc_vec_copyto(void) {return petsc_vec_copyto();}
 

@@ -400,6 +400,259 @@ DM_INLINE_STATIC P petsc_vec_copyfrom(void) {
   return OK;
 }
 
+// x a | x (x_i += a)
+DM_INLINE_STATIC P petsc_vec_add(void) {
+  Vec x;
+  D a;
+  
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != NUM) return OPD_CLA;
+  if (!DVALUE(o_1, &a)) return UNDF_VAL;
+  INIT_VEC(o_2, x);
+
+  if (TYPE(o_1) < SINGLETYPE) {
+    P v;
+    PVALUE(o_1, &v);
+    if (v == 0) goto out;
+  }
+
+  DMPETSC_ERRCHECK(VecShift(x, a));
+
+ out:
+  FREEopds = o_1;
+  return OK;
+}
+
+// x a | x (x_i *= a)
+DM_INLINE_STATIC P petsc_vec_mul(void) {
+  Vec x;
+  D a;
+  
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != NUM) return OPD_CLA;
+  if (!DVALUE(o_1, &a)) return UNDF_VAL;
+  INIT_VEC(o_2, x);
+
+  if (TYPE(o_1) < SINGLETYPE) {
+    P v;
+    PVALUE(o_1, &v);
+    if (v == 1) goto out;
+    if (v == 0) {
+      VecSet(x, 0);
+      goto out;
+    }
+  }
+
+  DMPETSC_ERRCHECK(VecScale(x, a));
+
+ out:
+  FREEopds = o_1;
+  return OK;
+}
+
+// x | x (x_i = sqrt(x_i))
+DM_INLINE_STATIC P petsc_vec_sqrt(void) {
+  Vec x;
+  
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  INIT_VEC(o_1, x);
+
+  DMPETSC_ERRCHECK(VecSqrt(x));
+  return OK;
+}
+
+// x | x (x_i = 1/x_i)
+DM_INLINE_STATIC P petsc_vec_reciprocal(void) {
+  Vec x;
+  
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  INIT_VEC(o_1, x);
+
+  DMPETSC_ERRCHECK(VecReciprocal(x));
+  return OK;
+}
+
+// x a | x (x_i = x_i^a)
+DM_INLINE_STATIC P petsc_vec_pwr(void) {
+  Vec x;
+  D* arr;
+  P retc;
+  static const B af[FRAMEBYTES] = {ARRAY|DOUBLETYPE, 0, 0};
+  static B vf[FRAMEBYTES];
+  B* xf = o_2;
+      
+  if (xf < FLOORopds) return OPDS_UNF;
+
+  INIT_VEC(xf, x);  
+  DMPETSC_ERRCHECK(VecGetArray(x, &arr));
+
+  moveframe(xf, vf);
+  moveframe(af, xf);
+  VALUE_PTR(xf) = (B*) arr;
+  ARRAY_SIZE(xf) = DMPETSC_VECTOR_N(vf);
+
+  if ((retc = op_pwr()))
+    FREEopds = xf+FRAMEBYTES*2;
+    
+  moveframe(vf, xf);
+  DMPETSC_ERRCHECK(VecRestoreArray(x, PETSC_NULL));
+  return retc;
+}
+
+// y alpha x beta | y(y=a*y+b*x)
+DM_INLINE_STATIC P petsc_vecvec_add(void) {
+  Vec x, y;
+  D alpha, beta;
+  BOOLEAN alpha_1, alpha_0, beta_1, beta_0;
+
+  if (o_4 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != NUM || CLASS(o_3) != NUM)
+    return OPD_CLA;
+
+  if (!DVALUE(o_3, &alpha) || !DVALUE(o_1, &beta)) 
+    return UNDF_VAL;
+
+  if (TYPE(o_3) < SINGLETYPE) {
+    P v;
+    PVALUE(o_3, &v);
+    alpha_1 = (v == 1) ? TRUE : FALSE;
+    alpha_0 = (v == 0) ? TRUE : FALSE;
+  }
+
+  if (TYPE(o_1) < SINGLETYPE) {
+    P v;
+    PVALUE(o_1, &v);
+    beta_1 = (v == 1) ? TRUE : FALSE;
+    beta_0 = (v == 0) ? TRUE : FALSE;
+  }
+
+  INIT_VEC(o_2, x);
+  INIT_VEC(o_4, y);
+
+  if (alpha_0) {
+    if (beta_0) {
+      DMPETSC_ERRCHECK(VecSet(y, 0));
+    }
+    else {
+      DMPETSC_ERRCHECK(VecCopy(y, x));
+      if (! beta_1) {
+	VecScale(y, beta);
+      }
+    }
+  }
+  else if (alpha_1) {
+    if (!beta_0) {
+      if (beta_1) {
+	DMPETSC_ERRCHECK(VecAYPX(y, 1, x));
+      }
+      else {
+	DMPETSC_ERRCHECK(VecAXPY(y, beta, x));
+      }
+    }
+  }
+  else {
+    if (beta_0) {
+      DMPETSC_ERRCHECK(VecScale(y, alpha));
+    }
+    else if (beta_1) {
+      DMPETSC_ERRCHECK(VecAYPX(y, alpha, x));
+    }
+    else {
+      DMPETSC_ERRCHECK(VecAXPBY(y, beta, alpha, x));
+    }
+  }
+      
+  FREEopds = o_3;
+  return OK;
+}
+
+// y x | y(y_i *= x_i)
+DM_INLINE_STATIC P petsc_vecvec_mul(void) {
+  Vec x, y;
+
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  INIT_VEC(o_1, x);
+  INIT_VEC(o_2, y);
+
+  DMPETSC_ERRCHECK(VecPointwiseMult(y, y, x));
+
+  FREEopds = o_1;
+  return OK;
+}
+
+DM_INLINE_STATIC P petsc_vecmat_copy_mat(B* mf, D* arr, P row, P n) {
+  static const B af[FRAMEBYTES] = {ARRAY|DOUBLETYPE, 0, 0};
+  static const B rf[FRAMEBYTES] = {NUM|LONGBIGTYPE, 0, 0};
+  static const B nf[FRAMEBYTES] = {NUM|LONGBIGTYPE, 0, 0};
+  P retc;
+  B *sf = o1;
+
+  moveframe(af, o1);
+  VALUE_PTR(o1) = (B*) arr;
+  ARRAY_SIZE(o1) = n;
+
+  moveframe(rf, o2);
+  LONGBIG_VAL(o2) = row;
+
+  moveframe(nf, o3);
+  LONGBIG_VAL(o3) = n;
+
+  moveframe(mf, o4);  
+
+  FREEopds = o5;
+  if ((retc = op_petsc_mat_copyto()))
+    FREEopds = sf;
+
+  return retc;
+}
+
+// x offset length/* A m | A (A_m=x)
+DM_INLINE_STATIC P petsc_vecmat_copy(void) {
+  Vec x;
+  P off, n, row;
+  BOOLEAN nset;
+  D* arr;
+  P retc;
+
+  if (o_5 < FLOORopds) return OPDS_OVF;
+  if (o5 > CEILopds) return OPDS_OVF;
+  if (CLASS(o_1) != NUM 
+      || CLASS(o_3) != NUM
+      || CLASS(o_4) != NUM) 
+    return OPD_CLA;
+  if (TYPE(o_1) >= SINGLETYPE
+      || TYPE(o_3) >= SINGLETYPE
+      || TYPE(o_4) >= SINGLETYPE) 
+    return OPD_TYP;
+  if (!PVALUE(o_1, &row) || !PVALUE(o_4, &off)) return UNDF_VAL;
+  if (off < 0) return RNG_CHK;
+  if (PVALUE(o_3, &n) && n < 0) return RNG_CHK;
+
+  INIT_VEC(o_5, x);
+  if (n == PINF) n = DMPETSC_VECTOR_N(o_5) - off;
+  else if (n + off > DMPETSC_VECTOR_N(o_5)) RETURN_ERROR(DMPETSC_NOMATCH);
+  DMPETSC_ERRCHECK(VecGetArray(x, &arr));
+
+  if (! (retc = petsc_vecmat_copy_mat(o_2, arr + off, row, n))) {
+    moveframe(o_2, o_5);
+    FREEopds = o_4;
+  }
+  DMPETSC_ERRCHECK(VecRestoreArray(x, PETSC_NULL));
+  
+  return retc;
+}
+
+// x A | A
+DM_INLINE_STATIC P petsc_vecmat_sync(void) {
+  P retc;
+  if ((retc = op_petsc_mat_syncto()))
+    return retc;
+  
+  moveframe(o_1, o_2);
+  FREEopds = o_1;
+  return OK;
+}
+
 // vec-handle | max(v)
 DM_INLINE_STATIC P petsc_vec_max(void) {
   Vec x;
@@ -984,7 +1237,7 @@ DM_INLINE_STATIC P petsc_mat_syncfrom(void) {
 
 // A m n <d > | <d sub-array>
 DM_INLINE_STATIC P petsc_mat_copyfrom(void) {
-	P retc;
+  P retc;
   Mat A;
   P m, n, len_arr, gm;
   L32 ncols, ncols_;
