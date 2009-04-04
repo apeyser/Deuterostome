@@ -461,38 +461,6 @@ DLL_SCOPE void moveS(_dm_const S *_dm_restrict src,
 DLL_SCOPE void moveD(_dm_const D *_dm_restrict src, 
 		     D *_dm_restrict dest, P n);
 
-/*--- DM2 */
-L wrap_hi(B* hival);
-L wrap_libnum(UL libnum);
-B* nextlib(B* frame);
-B* geterror(L e);
-B *makedict(L n);
-void cleardict(B *dict);
-B *makeopdictbase(B *opdefs, L *errc, B **errm, L n1);
-B *makeopdict(B *opdefs, L *errc, B **errm);
-void d_reloc(B *dict, L oldd, L newd);
-void d_rreloc(B *dict, L oldd, L newd);
-void makename(B *namestring, B *nameframe);
-void pullname(B *nameframe, B *namestring);
-BOOLEAN matchname(B *nameframe1, B *nameframe2);
-void moveframe(B *source, B *dest);
-void moveframes(B *source, B *dest, L n);
-void moveB(B *source, B *dest, L n);
-void moveW(W *source, W *dest, L n);
-void moveL(L *source, L *dest, L n);
-void moveS(S *source, S *dest, L n);
-void moveD(D *source, D *dest, L n);
-B *lookup(B *nameframe, B *dict);
-BOOLEAN insert(B *nameframe, B *dict, B *framedef);
-BOOLEAN mergedict(B *source, B *sink);
-L exec(L turns);
-L foldobj(B *frame, L base, W *depth);
-L unfoldobj(B *frame, L base, BOOLEAN isnative);
-L deendian_frame(B *frame);
-L deendian_array(B* frame);
-L deendian_dict(B* dict);
-L deendian_entry(B* entry);
-
 /*--- DMNUM */
 DLL_SCOPE void DECODE(B *frame, BOOLEAN fauto, W prec, B *buf);
 DLL_SCOPE B ENCODE(W type, B *string, B *dnum);

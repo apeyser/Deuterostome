@@ -17,17 +17,22 @@ EXTRA_DIST = 2ND_PRNT.PS \
 CLEANFILES = $(nodist_noinst_DATA)
 
 dvt-emacs.bbl: dvt-emacs.tex
-dvt-emacs.tex: config.sty; test -e $@ && touch $@
+dvt-emacs.tex: config.sty
+	test -e $@ || cp $(srcdir)/$@ $@
+	touch $@
 dvt-emacs.pdf: dvt-emacs.bbl
 
 dvt-3.0.bbl: dvt-3.0.tex
-dvt-3.0.tex: config.sty; test -e $@ && touch $@
+dvt-3.0.tex: config.sty 
+	test -e $@ || cp $(srcdir)/$@ $@
+	touch $@
 dvt-3.0.pdf: dvt-3.0.bbl
 
 newbook.pdf: newbook.ind newbook.bbl
 newbook.bbl: newbook.tex
 newbook.tex: chap1.tex chap2.tex chap3.tex appendix.tex config.sty newbook.sty
-	test -e $@ && touch $@
+	test -e $@ || cp $(srcdir)/$@ $@
+	touch $@
 
 edit = sed -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
 	$(SVNVERSION_EDIT) \
@@ -43,3 +48,9 @@ include $(top_srcdir)/m4/cf_svnversion.make
 
 include $(top_srcdir)/m4/cf_bundle_sub.make
 
+distclean-local:
+	pwd1=`pwd`; \
+	pwd2=`cd "$(srcdir)"; pwd`; \
+	if test $$pwd1 != $$pwd2; then \
+	  rm dvt-3.0.tex newbook.tex dvt-emacs.tex || :; \
+	fi
