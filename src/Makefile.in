@@ -139,7 +139,7 @@ libdmglobals_la_OBJECTS = $(am_libdmglobals_la_OBJECTS)
 libdmnodal_la_DEPENDENCIES = $(builddir)/libdmglobals.la \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_1)
 am__libdmnodal_la_SOURCES_DIST = dm-vm.c dm-vm.h dm-dvt-vm.h plugin.h \
-	cppplugin.h pluginlib.h plugin.c
+	cppplugin.h $(top_srcdir)/libltdl/ltdl.h pluginlib.h plugin.c
 am__objects_5 =
 @ENABLE_PLUGINS_SUPPORT_TRUE@am__objects_6 = $(am__objects_5)
 am_libdmnodal_la_OBJECTS = dm-vm.lo $(am__objects_6) plugin.lo
@@ -246,9 +246,9 @@ nodist_pkgconfiglibDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(nodist_pkgconfiglib_DATA)
 nodist_pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 am__pkginclude_HEADERS_DIST = dm.h dm-errs.h dm3.h pluginlib.h \
-	plugin.h cppplugin.h dmx.h threads.h error-local.h \
-	dm-snprintf.h srandomdev-local.h dmnum.h basic-defs.h \
-	dm-types.h dm-nextevent.h dm2.h
+	plugin.h cppplugin.h $(top_srcdir)/libltdl/ltdl.h dmx.h \
+	threads.h error-local.h dm-snprintf.h srandomdev-local.h \
+	dmnum.h basic-defs.h dm-types.h dm-nextevent.h dm2.h
 pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(nodist_pkginclude_HEADERS) $(pkginclude_HEADERS)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
@@ -563,7 +563,7 @@ AM_LDFLAGS = -no-undefined
 AM_LIBS = $(PTHREAD_LIBS) $(X_LDFLAGS) 
 AM_LIBADD = $(AM_LIBS) @RELEASE_INFO@ @VERSION_INFO@
 AM_LDADD = $(AM_LIBS)
-INCLUDE = @INCLTDL@
+INCLUDES = 
 DIST_SUBDIRS = codegen
 dpawn = $(bindir)/dpawn
 drook = $(bindir)/drook
@@ -596,7 +596,7 @@ BUILT_SOURCES = dnode-nice.c    dnode-daemon.c    paths.h    \
 CLEANFILES = $(BUILT_SOURCES)
 DISTCLEANFILES = dm-config.h
 @ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@CPPPLUGIN_HDR = cppplugin.h
-@ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_HDR = plugin.h $(CPPPLUGIN_HDR)
+@ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_HDR = plugin.h $(CPPPLUGIN_HDR) $(top_srcdir)/libltdl/ltdl.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_LD = @LIBLTDL@
 pkginclude_HEADERS = dm.h dm-errs.h dm3.h pluginlib.h $(PLUGIN_HDR) \
 	dmx.h $(THREAD_HDR) \

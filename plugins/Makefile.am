@@ -1,8 +1,9 @@
 AM_CFLAGS =  $(GCC_CFLAGS) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
 AM_LDFLAGS = -module -no-undefined
 AM_LIBS = $(top_builddir)/src/libdmglobals.la $(X_LDFLAGS) 
-AM_CPPFLAGS = @INCLTDL@ -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
+AM_CPPFLAGS = $(INCLTDL) -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
 AM_LIBADD = $(AM_LIBS) $(LTLIBOBJS) @RELEASE_INFO@ @VERSION_INFO@
+INCLUDES = $(INCLTDL)
 
 if ENABLE_PLUGINS_SUPPORT
 
