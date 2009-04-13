@@ -39,6 +39,7 @@ target_triplet = @target@
 bin_PROGRAMS = dvt$(EXEEXT) dnode$(EXEEXT) dgen$(EXEEXT) \
 	$(am__EXEEXT_1) $(am__EXEEXT_2) dmprop$(EXEEXT)
 noinst_PROGRAMS = testwordorder$(EXEEXT) $(am__EXEEXT_3)
+@ENABLE_PLUGINS_SUPPORT_TRUE@am__append_1 = @INCLTDL@
 DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(dist_pkgdata_SCRIPTS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/dgen-build $(srcdir)/dgen.c $(srcdir)/dgen_1.h \
@@ -563,7 +564,7 @@ AM_LDFLAGS = -no-undefined
 AM_LIBS = $(PTHREAD_LIBS) $(X_LDFLAGS) 
 AM_LIBADD = $(AM_LIBS) @RELEASE_INFO@ @VERSION_INFO@
 AM_LDADD = $(AM_LIBS)
-INCLUDES = 
+INCLUDES = $(am__append_1)
 DIST_SUBDIRS = codegen
 dpawn = $(bindir)/dpawn
 drook = $(bindir)/drook

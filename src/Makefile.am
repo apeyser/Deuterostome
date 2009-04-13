@@ -65,8 +65,6 @@ dm-prop.c: Makefile $(srcdir)/dm-prop.c.in
 	$(edit) "$(srcdir)/dm-prop.c.in" > $@.tmp
 	mv $@.tmp $@
 
-
-
 if ENABLE_DAEMON
 
 nodist_dnode_daemon_SOURCES = dnode-daemon.c
@@ -116,6 +114,7 @@ CPPPLUGIN_HDR = cppplugin.h
 endif ENABLE_CPPPLUGIN
 PLUGIN_HDR = plugin.h $(CPPPLUGIN_HDR) $(top_srcdir)/libltdl/ltdl.h
 PLUGIN_LD = @LIBLTDL@
+INCLUDES += @INCLTDL@
 endif ENABLE_PLUGINS_SUPPORT
 
 pkginclude_HEADERS = dm.h dm-errs.h dm3.h pluginlib.h $(PLUGIN_HDR) \
