@@ -107,10 +107,10 @@ dist_noinst_DATA += cpptester.d
 
 if ENABLE_DMFLEX
 DMFLEX_LIB=dmflex.la
-endif ENABLE_DMFLEX
 BUILT_SOURCES += dmflex.c
 dmflex_la_SOURCES = dmflex.l dmflex.h
 dmflex_la_LIBADD = $(AM_LIBADD)
+endif ENABLE_DMFLEX
 
 else !ENABLE_PLUGINS
 if !ENABLE_PETSC
