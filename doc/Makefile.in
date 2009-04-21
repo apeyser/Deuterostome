@@ -684,7 +684,10 @@ distsvn-extra:
 distsvn: distsvn-extra distsvn-recursive
 	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
 
-distclean-local:
+distclean-local: distclean-local-tex
+
+.PHONY: distclean-local-tex
+distclean-local-tex:
 	if test "$(abs_builddir)" != "$(abs_srcdir)"; then \
 	  rm -f "$(builddir)"/dvt-3.0.tex \
 	        "$(builddir)"/newbook.tex \
