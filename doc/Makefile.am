@@ -49,8 +49,8 @@ include $(top_srcdir)/m4/cf_svnversion.make
 include $(top_srcdir)/m4/cf_bundle_sub.make
 
 distclean-local:
-	pwd1=`pwd`; \
-	pwd2=`cd "$(srcdir)"; pwd`; \
-	if test $$pwd1 != $$pwd2; then \
-	  rm dvt-3.0.tex newbook.tex dvt-emacs.tex || :; \
+	if test $(abs_builddir) != $(abs_srcdir); then \
+	  rm -f $(builddir)/dvt-3.0.tex \
+	        $(builddir)/newbook.tex \
+	        $(builddir)/dvt-emacs.tex || :; \
 	fi
