@@ -87,6 +87,7 @@
 | executes ~act in PETSC dictionary.
 |
 /in_petsc {PETSC indict} bind def
+/notin_petsc {end stopped PETSC begin ~stop if} bind def
 
 |================= dpawn definitions ===========================
 | Mapping from dnode functions to dpawn jobs associated with that
@@ -106,7 +107,7 @@
   | and names it /x.
   |
   /vec_create {
-    {petsc_vec_create} in_petsc def
+    petsc_vec_create def
   } bind def
 
   |------------------------------------ vec_fill
@@ -118,6 +119,16 @@
   |
   /vec_fill {
     0 3 -1 roll petsc_vec_copyto pop
+  } bind def
+
+  | <d > X i | -- 
+  /vec_copyto {
+    exch petsc_vec_copyto pop
+  } bind def
+
+  | X | --
+  /vec_syncto {
+    petsc_vec_syncto pop
   } bind def
 
   |------------------------------------- mat_creator
@@ -153,7 +164,7 @@
   | mat_creator in between.
   |
   /mat_create {
-    {mat_creators exch get exec} in_petsc def
+    mat_creators exch get exec def
   } bind def
 
   |------------------------------------ mat_transpose
@@ -178,10 +189,8 @@
       exch petsc_mat_getcsr
 
       | ~icolsnew ~irowsnew irows icols
-      end
       4 -1 roll name
       exch      name
-      PETSC begin
     }
   } bind makestruct def
       
@@ -298,7 +307,7 @@
   | y = beta*y + alpha*A*x
   |
   /pmatvecmul {
-    {petsc_mat_vecmul} in_petsc pop
+    petsc_mat_vecmul pop
   } bind def
   
   |----------------------- get_matvecmul ----------------------
@@ -308,7 +317,7 @@
   | return y to node
   |
   /get_matvecmul {
-    {petsc_mat_vecmul get_vector} in_petsc
+   petsc_mat_vecmul get_vector
   } bind def
   
   |--------------------------------------------------- get_vector 
@@ -408,7 +417,7 @@
   | Deallocate local portion of vector x, both in D and Petsc.
   |
   /vec_destroy {
-    {petsc_vec_destroy} in_petsc
+    petsc_vec_destroy
   } bind def
   
   |--------------------------------------------- mat_destroy
@@ -417,21 +426,76 @@
   | Deallocate local portion of matrix m, both in D and Petsc.
   |
   /mat_destroy {
-    {petsc_mat_destroy} in_petsc
+    petsc_mat_destroy
   } bind def
 
   |--------------------------------------------- mat_dup
   | /B A | --
   |
   /mat_dup {
-    {dup petsc_mat_dup petsc_mat_copy} in_petsc def
+    dup petsc_mat_dup petsc_mat_copy def
   } bind def
 
   |--------------------------------------------- vec_dup
   | /x x | --
   |
   /vec_dup {
-    {dup petsc_vec_dup petsc_vec_copy} in_petsc def
+    dup petsc_vec_dup petsc_vec_copy def
+  } bind def
+
+  | x y | y_i = x_i
+  /vec_copy {
+    petsc_vec_copy pop
+  } bind def
+
+  | x a | -- x_i += a
+  /vec_add {
+    petsc_vec_add pop
+  } bind def
+
+  | x a | -- x_i*=a
+  /vec_mul {
+    petsc_vec_mul pop
+  } bind def
+
+  | x a | -- x_i^=a
+  /vec_pwr {
+    petsc_vec_pwr pop
+  } bind def
+
+  | x | -- x_i=sqrt(x_i)
+  /vec_sqrt {
+    petsc_vec_sqrt pop
+  } bind def
+
+  | x | -- x_i=1/x_i
+  /vec_reciprocal {
+    petsc_vec_reciprocal pop
+  } bind def
+
+  | x d | -- x_i = d iff x_i == *
+  /vec_denan {
+    petsc_vec_denan pop
+  } bind def
+
+  | x y | -- x_i*=y_i
+  /vecvec_mul {
+    petsc_vecvec_mul pop
+  } bind def
+
+  | x a y b | -- x_i=a*x_i+b*y_i
+  /vecvec_add {
+    petsc_vecvec_add pop
+  } bind def
+
+  | x offset len/* A m | -- A_m=x
+  /vecmat_copy {
+    petsc_vecmat_copy pop
+  } bind def
+
+  | x A | -- 
+  /vecmat_sync {
+    petsc_vecmat_sync pop
   } bind def
 
   |---------------------------------------------- ksp_destroy
@@ -439,7 +503,7 @@
   |
   | Deallocate local portion of solver ksp, both in D and Petsc.
   /ksp_destroy {
-    {petsc_ksp_destroy} in_petsc
+    petsc_ksp_destroy
   } bind def
 
   |------------------------------------------------- ksp_solve
@@ -481,6 +545,33 @@
   |
   /get_ksp_solve {
     1 index 5 1 roll ksp_solve get_vector
+  } bind def
+
+  | offset elements A mmax ~active | --
+  | ~active:
+  |  row-local row-global | d n / *
+  /mat_forrows {
+    {/func name /mmax name 
+      /A name /len name /grow name
+      0 1 len 1 sub {/row name
+        dup grow add ~func notin_petsc
+        dup * eq {pop mat_syncfill} {
+          row A petsc_mat_fillone
+        } ifelse
+      } for
+      mmax len sub ~petsc_mat_syncfill repeat
+      petsc_mat_endfill
+    } in_petsc
+  } bind def
+
+  | offset elements A mmax ~active | --
+  /mat_forrows_get {
+    {
+      save 
+
+  | row column A | d
+  /mat_get {
+    petsc_mat_get
   } bind def
 } def
 
@@ -576,6 +667,25 @@
     } in_petsc
   } bind def
 
+  | /x <d > | xdict
+  /vec_createfrom {
+    dup length exch 3 1 roll vec_create
+    dup 3 1 roll vec_copyto
+  } bind def
+
+  | <d > x | --
+  /vec_copyto {
+    {/xval name /darr name
+      {
+        ~[
+          exch xval /N get range darr 3 1 roll getinterval
+          xval getid
+          0 ~vec_copyto
+        ]
+      } execpawns
+    } in_petsc
+  } bind def
+
   |------------------------------------- vec_dup
   | /x x | y
   |
@@ -598,6 +708,161 @@
         4 -1 roll getid
         ~vec_dup
       ] sexecpawns
+    } in_petsc
+  } bind def
+
+  | x y | y (y_i=x_i)
+  /vec_copy {
+    dup 3 1 roll
+    {
+      ~[
+        3 -1 roll getid
+        3 -1 roll getid
+        ~vec_copy
+      ] sexecpawns
+    } in_petsc
+  } bind def
+
+  | x a | x (x_i += a)
+  /vec_add {
+    {
+      1 index 3 1 roll
+      ~[
+        3 -1 roll getid
+        3 -1 roll
+        ~vec_add
+      ] sexecpawns
+    } in_petsc
+  } bind def
+
+  | x a | x (x_i -= a)
+  /vec_sub {
+    neg vec_add
+  } bind def
+  
+  | x a | x (x_i *= a)
+  /vec_mul {
+    {
+      1 index 3 1 roll
+      ~[
+        3 -1 roll getid
+        3 -1 roll
+        ~vec_mul
+      ] sexecpawns
+    } in_petsc
+  } bind def
+
+  | x | x (x_i *= -1)
+  /vec_neg {
+    -1 vec_mul
+  } bind def
+
+  | x a | x (x_i ^= a)
+  /vec_pwr {
+    {
+      1 index 3 1 roll
+      ~[
+        3 -1 roll getid
+        3 -1 roll
+        ~vec_pwr
+      ] sexecpawns
+    } in_petsc
+  } bind def
+
+  | x | x (x_i = sqrt(x_i))
+  /vec_sqrt {
+    ~[
+      1 index getid ~vec_sqrt
+    ] sexecpawns
+  } bind def
+    
+  | x | x (x_i = 1/x_i)
+  /vec_reciprocal {
+    ~[
+      1 index getid ~vec_reciprocal
+    ] sexecpawns
+  } bind def
+
+  | x d | x (x_i = d iff x_i == *)
+  /vec_denan {
+    1 index 3 1 roll
+    ~[
+      3 -1 roll getid
+      3 -1 roll
+      ~vec_denan
+    ] sexecpawns
+  } bind def
+
+  | x y | x(x_i *= y_i)
+  /vecvec_mul {
+    {
+      1 index 3 1 roll
+      ~[
+        3 -1 roll getid
+        3 -1 roll getid
+        ~vecvec_mul
+      ] sexecpawns
+    } in_petsc
+  } bind def
+    
+  | x a y b | x (x_i = a*x_i + b*y_i)
+  /vecvec_add {
+    {
+      3 index 5 1 roll
+      ~[
+        5 -1 roll getid
+        5 -1 roll
+        5 -1 roll getid
+        5 -1 roll
+        ~vecvec_add
+      ] sexecpawns
+    } in_petsc
+  } bind def
+
+  | x y | x (x_i += y_i)
+  /vecvec_adds {
+    1 exch 1 vecvec_add
+  } bind def
+    
+  | x offset length/* A m | A (A_m = x)
+  /vecmat_copy {
+    {
+      /row name /Aval name /len name /offset name /xval name
+      /syncer ~[xval getid Aval getid ~vecmat_sync] def
+      {
+        Aval /m get range
+        1 index add row le {pop /syncer find} {
+          dup row gt {pop /syncer find} {
+            ~[
+              xval getid offset len
+              Aval getid
+              row 7 -1 roll sub 
+              ~vecmat_copy
+            ]
+          } ifelse
+        } ifelse
+      } execpawns
+      Aval
+    } in_petsc
+  } bind def
+
+  | d X i | --
+  /vec_put {
+    {/i name /xval name /d name
+      /syncer ~[xval getid ~vec_syncto] def
+      {
+        xval /N get range 
+        1 index add i le {pop /syncer find} {
+          dup i gt {pop /syncer find} {
+            ~[
+              <d 0> d 1 index 0 put
+              xval getid 
+              i 5 -1 roll sub
+              ~vec_copyto
+            ]
+          } ifelse
+        } ifelse
+      } execpawns
     } in_petsc
   } bind def
 
@@ -1338,6 +1603,38 @@
       } execpawns
     } in_petsc
   } bind def  
+
+  | A ~active| --
+  /mat_forrows {
+    {/func name /Aval name
+      Aval /m get ~[
+        Aval getid
+        Aval /mmax get
+        /func destruct_execn
+        ~mat_forrows
+      ] execrange
+    } in_petsc
+  } bind def
+
+  | A ~active | --
+  /mat_forrows_get {
+    {
+      {
+        save kicknode dup capsave
+        ~kickdnode notin_petsc 
+        kickdnode restore
+      } in_petsc
+    } sexepawns
+    
+    {
+      save
+      /TMP_MATRIX dup 4 index mat_dup def
+      dup capsave 3 1 roll kickpawns 
+      ~mat_forrows not_inpetsc kickpawns
+      TMP_MATRIX mat_destroy
+      kickpawns restore
+    } in_petsc 
+  } bind def
 } def
 
 |============================================== dm_type

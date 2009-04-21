@@ -1,0 +1,1013 @@
+|============== D machine for PPC: DMNUMINC generator ==================
+|
+| This acts as an extended macro preprocessor to the C compiler, which
+| prepares nested, conditional, multi-line constructs in C.
+|
+
+1000 dict dup begin
+
+/ROLLBITS 3 def
+/BYTECORRECT 8 def
+/UNROLLS  2 ROLLBITS pwr def
+/ABORTCYCLES UNROLLS 1024 mul 1 sub def
+
+/__   { * exch text} def
+/st__ { st mkact __ } def
+/dt__ { dt mkact __ } def
+/n__  { * exch * number} def
+/op__ { op mkact __ } def
+/NL   { * (\n) text} def
+/_dt {dt mkact} def
+/_st {st mkact} def
+
+|----- macro argument stack routines
+
+/A_stack 20 list def
+/A_free 0 def
+
+/pushA { 
+  A_stack A_free put /A_free A_free 1 add def
+} bind def
+
+/popA {
+  /A_free A_free 1 sub def A_stack A_free get
+} bind def
+
+/peekA {
+    A_stack A_free 1 sub get
+} bind def
+
+/exchA {
+    popA popA exch pushA pushA
+} bind def
+
+/indexA {
+    1 add neg A_free add A_stack exch get
+} bind def
+
+|----------------------------- macros: make object value pointer
+| (frame) | --    
+
+/SCALAR { pushA (NUM_VAL\()__    popA __ (\))__ } def
+/ARRAY  { pushA (VALUE_BASE\()__ popA __ (\))__ } def
+
+|----------------------------- macro: get value via pointer (using cast),
+| convert it from type into into double type, and save it in temporary
+| variable; propagate an undefined value.
+
+| /type { pointer_constructor } (tempname) | --    
+
+/GETCV { dup pushA exch pushA pushA  GETCV_d exch get exec } def
+
+/GETCV_d 8 dict dup begin
+
+/B { NL (if \(\()__ popA __ ( = *\(\(B *\))__ popA exec (\)\) == BINF\) )__
+        popA __ ( = HUGE_VAL;)__ 
+   } def
+/W { NL (if \(\()__ popA __ ( = *\(\(W *\))__ popA exec (\)\) == WINF\) )__
+        popA __ ( = HUGE_VAL;)__  
+   } def
+/L64 { NL (if \(\()__ popA __ ( = *\(\(L64 *\))__ popA exec (\)\) == L64INF\) )__
+        popA __ ( = HUGE_VAL;)__  
+   } def
+/LBIG {
+    NL (if \(\()__ popA __ ( = *\(\(LBIG *\))__ popA exec (\)\) == LBIGINF\) )__
+        popA __ ( = HUGE_VAL;)__  
+   } def
+/L32 { NL (if \(\()__ popA __ ( = *\(\(L32 *\))__ popA exec (\)\) == L32INF\) )__
+        popA __ ( = HUGE_VAL;)__  
+   } def
+/S { NL popA __ ( = *\(\(S *\))__ popA exec (\);)__ popA pop
+   } def
+/D { NL popA __ ( = *\(\(D *\))__ popA exec (\);)__ popA pop
+   } def
+end def
+
+|----------------------------- macro: build C code to convert a
+| double value in a temporary variable into the destination type and
+| to store the result at the destination:
+
+|  /dest_type { dest_pointer_constructor } (tempname) | --    
+
+/CVPUT { pushA pushA CVPUT_d exch get exec } def
+
+/CVPUT_d 8 dict dup begin
+/B { NL (*\(\(B *\))__ popA exec (\) = \(\(\()__
+        popA dup pushA __ (\) > BMAX\) || \(\()__
+        popA dup pushA __ (\) < -BMAX\) || ISUNDEF\()__
+        popA dup pushA __ (\)\)? BINF : )__ popA __ (;)__
+   } def
+/W { NL (*\(\(W *\))__ popA exec (\) = \(\(\()__
+        popA dup pushA __ (\) > WMAX\) || \(\()__
+        popA dup pushA __ (\) < -WMAX\) || ISUNDEF\()__
+        popA dup pushA __ (\)\)? WINF : )__ popA __ (;)__
+   } def
+/L64 { NL (*\(\(L64 *\))__ popA exec (\) = \(\(\()__
+        popA dup pushA __ (\) > L64MAX\) || \(\()__
+        popA dup pushA __ (\) < -L64MAX\) || ISUNDEF\()__
+        popA dup pushA __ (\)\)? L64INF : )__ popA __ (;)__
+   } def
+/LBIG { NL (*\(\(LBIG *\))__ popA exec (\) = \(\(\()__
+        popA dup pushA __ (\) > LBIGMAX\) || \(\()__
+        popA dup pushA __ (\) < -LBIGMAX\) || ISUNDEF\()__
+        popA dup pushA __ (\)\)? LBIGINF : )__ popA __ (;)__
+   } def
+
+/L32 { NL (*\(\(L32 *\))__ popA exec (\) = \(\(\()__
+        popA dup pushA __ (\) > L32MAX\) || \(\()__
+        popA dup pushA __ (\) < -L32MAX\) || ISUNDEF\()__
+        popA dup pushA __ (\)\)? L32INF : )__ popA __ (;)__
+   } def
+/S { NL (*\(\(S *\))__ popA exec (\) = )__ popA __ (;)__ 
+   } def
+/D { NL (*\(\(D *\))__ popA exec (\) = )__ popA __ (;)__ 
+   } def
+end def
+
+|-------------------------------------------- construct C code of 'for'
+| statement, which executes body as many times as array frame has
+| elements (a long count variable, n, is assumed to exist);
+
+| (framename) { body_constructor }  | --
+
+/FOR { pushA pushA
+NL (for \(n = \(UP\)ARRAY_SIZE\()__ popA __ (\); n; n--\) {)__
+popA exec
+NL (})__
+} def
+
+| arraytype (framename) returnsL/bool {body_construct} | --
+/FOR_modn {pushA exch pushA exch pushA pushA
+    NL ({ UP n__ = VALUE_BASE\()__ 2 indexA __ (\) % )__ BYTECORRECT n__ (;
+        if \(n__\) {
+          n__ = )__ BYTECORRECT n__ ( - n__;
+          if \(DEBUG_DMNUM && \(n__ % sizeof\()__ 1 indexA __ (\)\)\) {
+            handleerr\(\);
+            return)__ popA {( BAD_ARR)__} if (;
+          }
+          n__ /= sizeof\()__  popA __ (\);
+          if \(n__ > \(UP\)ARRAY_SIZE\()__ peekA __(\)\)
+            n__ = \(UP\)ARRAY_SIZE\()__ peekA __(\);
+          for \(n = n__; n; n--\) {)__
+            1 indexA exec
+          NL (}
+    }
+    {
+      P abortcycle = 0;
+      for \(n = \(\(\(UP\)ARRAY_SIZE\()__ peekA __ (\)-n__\)>>)__
+      ROLLBITS n__  (\); 
+            n && \(\(++abortcycle, abortcycle &= )__ 
+                     ABORTCYCLES n__ (\) || ! abortflag\);
+            n--\) {)__
+      exchA UNROLLS {peekA exec} repeat exchA
+    NL (}
+    }
+    for \(n = \(\(\(UP\)ARRAY_SIZE\()__ popA __(\)-n__\)&)__
+                UNROLLS 1 sub n__ (\); n; n--\) {)__
+    popA exec
+    NL (}})__
+} def
+
+| returnsL/bool {body_construct} | --
+/FOR_modnp {pushA pushA
+    NL ({ UP n__ = \(UP\))__ fixsource __ ( % )__ BYTECORRECT n__ (;
+      if \(n__\) {
+      n__ = )__ BYTECORRECT n__ ( - n__;
+      if \(DEBUG_DMNUM && \(n__ % sizeof\(*)__ fixsource __ (\)\)\) {
+        handleerr\(\);
+        return)__ popA {( BAD_ARR)__} if (;
+      }
+      n__ /= sizeof\(*)__ fixsource __ (\);
+      if \(n__ > n_\) n__ = n_;
+      for \(n = n__; n; n--\) {)__
+        peekA exec
+      NL (}
+    }
+    {
+      P abortcycle = 0;
+      for \(n = \(\(n_-n__\) >> )__ ROLLBITS n__ (\); 
+            n && \(\(++abortcycle, abortcycle &= )__ 
+                     ABORTCYCLES n__ (\) || ! abortflag\);
+            n--\) {)__
+    UNROLLS {peekA exec} repeat
+    NL (}
+    }
+    for \(n = \(\(n_-n__\) & )__ UNROLLS 1 sub n__
+         (\); n; n--\) {)__
+    popA exec
+    NL (}})__ 
+} def
+
+
+/FOR_mod4 { pushA pushA
+NL (for \(n = \(\(UP\)ARRAY_SIZE\()__ popA __ (\)>>2\); n; n--\) {)__
+popA exec
+NL (})__
+} def
+
+/FOR_mod1 { pushA pushA
+NL (for \(n = \(\(UP\)ARRAY_SIZE\()__ popA __ (\)&3\); n; n--\) {)__
+popA exec
+NL (})__
+} def
+
+|--------------------------------------------- THREAD functions
+|
+| {serial-constructor} 
+| set-destination-array set-source-array
+| {parallel constructor} | --
+|
+/THREAD_SU {pushA pushA pushA pushA
+  /fixsource (r) def
+  1 indexA {(df) pushA} {(sf) pushA} ifelse (
+  if \(\(UP\)ARRAY_SIZE\()__ peekA __ (\) < THREADMUL*)__ UNROLLS n__ (\)
+    )__ exchA popA exec (;
+  else {
+    thread_array_data data;
+    UP nways = \(UP\)ARRAY_SIZE\()__ peekA __ (\)/\(THREADMUL*)__ UNROLLS n__ (\)
+               + \(\(UP\)ARRAY_SIZE\()__ peekA __ (\)%\(THREADMUL*)__ UNROLLS n__ (\) ?
+               1 : 0\);
+    if \(nways > thread_num\(\)\) nways = thread_num\(\);
+    data.perthread = \(UP\)ARRAY_SIZE\()__ peekA __ (\) / nways;
+    data.leftover = \(UP\)ARRAY_SIZE\()__ popA __ (\) % nways; )__
+    popA {(\n   data.df_start = VALUE_PTR\(df\);)__} if
+    popA {(\n   data.sf_start = VALUE_PTR\(sf\);)__} if (
+    {)__
+      popA exec (
+    }
+  })__
+} bind def
+
+| get-destination-array get-source-array {body-constructor} | --
+/THREAD {pushA pushA pushA
+(
+  const thread_array_data* data = \(const thread_array_data*\) indata;
+  UP n, n_ = data->perthread + \(thread_max\(\) == id ? data->leftover : 0\);)__
+  popA {(\n  )__ dt__ ( * d = \(\()__
+    dt__ ( *\) data->df_start\)+data->perthread*id;)__
+    /fixsource (d) def  
+  } if
+  popA {(\n  )__ st__ ( * s = \(\()__
+    st__ ( *\) data->sf_start\)+data->perthread*id;)__
+    /fixsource (s) def  
+  } if
+  popA exec (
+  return OK;)__
+} bind def
+  
+
+|-------------------------------------------- DYencode function:
+| constructs C code to convert a double value into destination type
+| type and to return the converted value.
+
+/DYencode {
+NL (static void D)__ dt__ (encode\(D t, B *dp\))__
+NL ({)__
+dt { (dp)__ } (t) CVPUT
+NL (})__
+} def
+
+|-------------------------------------------- XLvalue function:
+| constructs C code to convert a double value into any type
+| type and to return the converted value.
+
+/XLvalue {
+
+NL (static LBIG )__ st__ (Lvalue\(B *sp\))__
+NL ({)__
+NL (D t; LBIG tc;)__
+st { (sp)__ } (t) GETCV
+/LBIG { (&tc)__ } (t) CVPUT
+NL (return\(tc\);)__
+NL (})__
+} def
+
+|-------------------------------------------- XDtest function:
+| constructs C code to convert a source type value into double
+| type and to return the double value.
+
+/XDtest {
+
+NL (static D )__ st__ (Dtest\(B *sp\))__
+NL ({)__
+NL (D t;)__
+st { (sp)__ } (t) GETCV
+NL (return\(t\);)__
+NL (})__
+} def
+
+|-------------------------------------------- XYmoveSS function:
+| constructs C code to move a scalar from one frame to another, con-
+| verting the numeral type as necessary and preserving an old or, on
+| overflow, creating a new undefined value. 
+
+/XYmoveSS {
+
+NL (static void )__ st__ dt__ (moveSS\(B *sf, B *df\))__
+NL ({)__
+NL (D t;)__
+st { (sf) SCALAR } (t) GETCV
+dt { (df) SCALAR } (t) CVPUT
+NL (})__
+NL 
+} def
+
+|-------------------------------------------- XYmoveSA function:
+| constructs C code to spread a scalar into an array (see XYmoveSS)
+
+/XYmoveSA {
+(
+  static void )__ st__ dt__ (moveSAs\(B *sf, B *df\)
+  {
+    D t; P n; )__ dt__ ( * d;
+    d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
+    st { (sf) SCALAR } (t) GETCV
+    _dt (df) false { dt { (d++)__ } (t) CVPUT } FOR_modn (
+  }
+
+#if ENABLE_THREADS
+  static P )__ st__ dt__ (moveSAt\(UP id, const void* indata,
+                                   void* ignore
+                                   __attribute__ \(\(__unused__\)\)\)
+  {)__
+    true false {(
+      D t = data->in;)__ 
+      true {dt {(d++)__} (t) CVPUT} FOR_modnp
+    } THREAD (
+  }
+
+  static void )__ st__ dt__ (moveSAc\(B* sf, B* df\)
+  {)__
+    {st__ dt__ (moveSAs\(sf, df\))__} true false {
+      st {(sf) SCALAR} (data.in) GETCV (
+      threads_do\(nways, )__ st__ dt__ (moveSAt, &data\);)__
+    } THREAD_SU (
+  }
+#endif //ENABLE_THREADS
+
+  static void )__ st__ dt__ (moveSA\(B* sf, B* df\)
+  {
+    if \(thread_num\(\) == 1\)
+      )__ st__ dt__ (moveSAs\(sf, df\);
+#if ENABLE_THREADS
+    else )__ st__ dt__ (moveSAc\(sf,df\);
+#endif //ENABLE_THREADS
+  }
+)__
+} def
+
+|-------------------------------------------- XYmoveAS function:
+| constructs C code to move one array value cell into a scalar
+
+/XYmoveAS {
+
+NL (static void )__ st__ dt__ (moveAS\(B *sf, B *df\))__
+NL ({)__
+NL (D t; )__ st__ ( *s; )__
+NL (s = \()__ st__ ( *\))__ (sf) ARRAY (;)__
+NL st { (s)__ } (t) GETCV
+NL dt { (df) SCALAR } (t) CVPUT
+NL (})__
+NL
+} def
+
+|-------------------------------------------- XYmoveAA function:
+| constructs C code to copy an array into an array (see XYmoveSS)
+
+/XYmoveAA {
+(
+    static void )__ st__ dt__ (moveAAs\(B *sf, B *df\)
+    {
+       D t; P n; )__ st__ ( * s; )__ dt__ ( * d;
+       s = \()__ st__ ( *\))__ (sf) ARRAY (;
+       d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
+      _st (df) false { st { (s++)__ } (t) GETCV
+          dt { (d++)__ } (t) CVPUT
+      } FOR_modn (
+    }
+
+
+#if ENABLE_THREADS
+    static P )__ st__ dt__ (moveAAt\(UP id, const void* indata,
+                                     void* ignore
+                                     __attribute__ \(\(__unused__\)\)\)
+    {)__
+      true true {(
+       D t;)__ true { 
+         st {(s++)__} (t) GETCV
+         dt {(d++)__} (t) CVPUT
+       } FOR_modnp
+      } THREAD (
+    }
+
+    static void )__ st__ dt__ (moveAAc\(B *sf, B *df\)
+    {)__
+      {st__ dt__ (moveAAs\(sf, df\))__} true true {(
+        threads_do\(nways, )__ st__ dt__ (moveAAt, &data\);)__
+      } THREAD_SU (
+    }
+#endif //ENABLE_THREADS
+
+   static void )__ st__ dt__ (moveAA\(B *sf, B *df\)
+   {
+    if \(serialized || thread_num\(\) == 1\) )__ st__ dt__ (moveAAs\(sf,df\);
+#if ENABLE_THREADS
+    else )__ st__ dt__ (moveAAc\(sf, df\);
+#endif //ENABLE_THREADS
+   }
+)__
+} def
+
+|-------------------------------------------- XYdyOPSS function:
+| constructs C code to convert the values of two scalar frames (source
+| and destination) of any types into double type, to perform a dyadic
+| operation on them, to convert the result into the destination type
+| and to store the result.
+
+/XYdyOPSS {
+
+NL (static void )__ dt__ st__ (dy)__ op__ (SS\(B *df, B *sf\))__
+NL ({)__
+NL (D t, tt;)__
+dt { (df) SCALAR } (t) GETCV
+st { (sf) SCALAR } (tt) GETCV
+dyadic_d op get exec
+dt { (df) SCALAR } (t) CVPUT
+NL (})__
+NL 
+} def
+
+/dyadic_d 7 dict dup begin
+/ADD { NL (t += tt;)__ } def
+/SUB { NL (t -= tt;)__ } def
+/MUL { NL (t *= tt;)__ } def
+/DIV { NL (t /= tt;)__ } def
+/PWR { NL (t = pow\(t,tt\);)__ } def
+/MOD { NL (t = fmod\(t,tt\);)__ } def
+/THEARC {NL (t = thearc\(t,tt\);)__} def
+end def
+
+/dyadic_dp_unseed 5 dict dup begin
+/ADD {NL (t += tt;)__} def
+/SUB {NL (t -= tt;)__} def
+/MUL {NL (t *= tt;)__} def
+/DIV {NL (t /= tt;)__} def
+/PWR {NL (t = pow\(t,tt\);)__} def
+end def
+
+/dyadic_dp_op 5 dict dup begin
+/ADD {NL (t += tt;)__} def
+/SUB {NL (t += tt;)__} def
+/MUL {NL (t *= tt;)__} def
+/DIV {NL (t *= tt;)__} def
+/PWR {NL (t *= tt;)__} def
+end def
+
+/dyadic_dp_seed 5 dict dup begin
+/ADD {(0)__} def
+/SUB {(0)__} def
+/MUL {(1)__} def
+/DIV {(1)__} def
+/PWR {(1)__} def
+end def
+
+/dyadic_d_x 7 dict dup begin
+/ADD { pushA NL (t)__ popA dup pushA __ ( += tt)__ popA __ (;)__ } def
+/SUB { pushA NL (t)__ popA dup pushA __ ( -= tt)__ popA __ (;)__ } def
+/MUL { pushA NL (t)__ popA dup pushA __ ( *= tt)__ popA __ (;)__ } def
+/DIV { pushA NL (t)__ popA dup pushA __ ( /= tt)__ popA __ (;)__ } def
+/PWR { pushA NL (t)__ popA dup pushA __ ( = pow\(t)__ popA dup pushA __ 
+       (,tt)__ popA __ (\);)__ } def
+/MOD { pushA NL (t)__ popA dup pushA __ ( = fmod\(t)__ popA dup pushA __ 
+       (,tt)__ popA __ (\);)__ } def
+/THEARC { pushA NL (t)__ popA dup pushA __ ( = thearc\(t)__ popA dup pushA __
+       (,tt)__ popA __ (\);)__ } def
+end def
+
+|-------------------------------------------- XYdyOPAS function:
+| constructs C code to convert the value of a scalar source frame
+| and of all elements of the value of an array destination frame, which
+| can be of any types, into double type,  to perform a dyadic
+| operation on them, to convert the results into the destination type
+| and to store the results replacing the original elements of the
+| destination array.
+
+/XYdyOPAS {
+(
+  static void )__ dt__ st__ (dy)__ op__ (ASs\(B *df, B *sf\)
+  {
+    D t,tt; P n; )__ dt__ ( * d;
+    d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
+    st { (sf) SCALAR } (tt) GETCV
+    _dt (df) false { dt { (d)__ } (t) GETCV
+      dyadic_d op get exec
+      dt { (d++)__ } (t) CVPUT
+    } FOR_modn (
+  }
+
+#if ENABLE_THREADS
+  static P )__ dt__ st__ (dy)__ op__ (ASt\(UP id, const void* indata,
+                                           void* ignore
+                                           __attribute__ \(\(__unused__\)\)\)
+  {)__
+    true false {(
+      D t, tt = data->in;
+      )__ true {
+        dt {(d)__} (t) GETCV
+        dyadic_d op get exec
+        dt {(d++)__} (t) CVPUT
+      } FOR_modnp
+    } THREAD (
+  }
+
+  static void )__ dt__ st__ (dy)__ op__ (ASc\(B* df, B *sf\)
+  {)__
+    {dt__ st__ (dy)__ op__ (ASs\(df, sf\))__} true false {
+      st {(sf) SCALAR} (data.in) GETCV (
+      threads_do\(nways, )__ dt__ st__ (dy)__ op__ (ASt, &data\);)__
+    } THREAD_SU (
+  }
+#endif //ENABLE_THREADS
+
+  static void )__ dt__ st__ (dy)__ op__ (AS\(B *df, B *sf\)
+  {
+    if \(thread_num\(\) == 1\)
+    )__ dt__ st__ (dy)__ op__ (ASs\(df, sf\);
+#if ENABLE_THREADS
+    else )__ dt__ st__ (dy)__ op__ (ASc\(df, sf\);
+#endif //ENABLE_THREADS
+  }
+)__
+} def
+
+|-------------------------------------------- XYdyOPSA function:
+| constructs C code to convert the value of a destination scalar frame
+| and of all elements of the value of a array source frame, which
+| can be of any types, into double type,  to perform a dyadic
+| operation involving each source element and a running result (primed
+| to the destination value), to convert the accumulated result into the
+| destination type and to store it in the destination scalar.
+
+/XYdyOPSA {
+(
+  static void )__ dt__ st__ (dy)__ op__ (SAs\(B *df, B *sf\)
+  {
+    D t,tt; P n; )__ st__ ( * s;
+    s = \()__ st__ ( *\))__ (sf) ARRAY (;)__
+    dt { (df) SCALAR } (t) GETCV
+    _st (sf) false { st { (s++)__ } (tt) GETCV
+      dyadic_d op get exec
+    } FOR_modn
+    dt { (df) SCALAR } (t) CVPUT (
+   }
+)__
+dyadic_dp_seed op known {(
+#if ENABLE_THREADS
+ static P )__ dt__ st__ (dy)__ op__ (SAt\(UP id, const void* indata,
+                                          void* outdata\)
+ {)__
+   false true {(
+     D * ret = \(D*\) outdata;
+     D t = )__ dyadic_dp_seed op get exec (, tt;)__ 
+     true { 
+       st {(s++)__} (tt) GETCV
+       dyadic_dp_op op get exec
+     } FOR_modnp (
+     *ret = t;)__
+   } THREAD (
+  }
+    
+  static void )__ dt__ st__ (dy)__ op__ (SAc\(B* df, B* sf\)
+  {)__
+    {dt__ st__ (dy)__ op__ (SAs\(df, sf\))__} false true {(
+      UP n, n_ = nways;
+      D t,tt, ret[THREADNUM];
+      D* r = ret;
+      threads_do_local\(nways, )__ dt__ st__ (dy)__ op__ (SAt, &data, ret\);
+      )__  
+      dt {(df) SCALAR} (t) GETCV false {(
+        tt = *\(r++\);)__
+        dyadic_dp_unseed op get exec
+      } FOR_modnp
+      dt {(df) SCALAR} (t) CVPUT
+    } THREAD_SU (
+  }
+#endif //ENABLE_THREADS
+
+  static void )__ dt__ st__ (dy)__ op__ (SA\(B* df, B *sf\)
+  {
+    if \(thread_num\(\) == 1 || serialized\)
+      )__ dt__ st__ (dy)__ op__ (SAs\(df, sf\);
+#if ENABLE_THREADS
+    else )__ dt__ st__ (dy)__ op__ (SAc\(df, sf\);
+#endif //ENABLE_THREADS
+  }
+)__
+} {(
+  static void )__ dt__ st__ (dy)__ op__ (SA\(B* df, B *sf\)
+  {
+    )__ dt__ st__ (dy)__ op__ (SAs\(df, sf\);
+  }
+)__
+} ifelse
+} def
+
+|-------------------------------------------- XYdyOPAA function:
+| constructs C code to convert the values of two array frames (source
+| and destination), which can be of any types, into double type,  to
+| perform a dyadic operation on them, to convert the results into the
+| destination type and to store the results replacing the original
+| elements of the destination array.
+|
+| In this improved version, the loop is rolled out (modulo 4 for the time).
+|
+
+/XYdyOPAA {
+(
+    static void )__ dt__ st__ (dy)__ op__ (AAs\(B * df, B * sf\)
+    {
+       P n; )__  st__ ( * s; )__ dt__ ( * d;
+       D t, tt;
+       s = \()__ st__ ( *\))__ (sf) ARRAY (;
+       d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
+       _st (df) false {
+           st {(s++)__} (tt) GETCV
+           dt {(d)__} (t) GETCV
+           () dyadic_d_x op get exec
+           dt {(d++)__} (t) CVPUT
+       } FOR_modn
+(
+    }
+
+
+#if ENABLE_THREADS
+    static P )__ dt__ st__ (dy)__ op__ (AAt\(UP id, const void* indata,
+                                             void* ignore
+                                             __attribute__ \(\(__unused__\)\)\)
+    {)__
+      true true {(
+        D t, tt;)__
+        true {
+          st {(s++)__} (tt) GETCV
+          dt {(d)__} (t) GETCV
+          () dyadic_d_x op get exec
+          dt {(d++)__} (t) CVPUT
+        } FOR_modnp
+      } THREAD (
+    }
+
+    static void )__ dt__ st__ (dy)__ op__ (AAc\(B* df, B* sf\)
+    {)__
+      {dt__ st__ (dy)__ op__ (AAs\(df, sf\))__} true true {(
+         threads_do\(nways, )__ dt__ st__ (dy)__ op__ (AAt, &data\);)__
+      } THREAD_SU (
+    }
+#endif //ENABLE_THREADS
+
+    static void )__ dt__ st__ (dy)__ op__ (AA\(B * df, B * sf\)
+    {
+      if \(serialized || thread_num\(\) == 1\) )__ dt__ st__ (dy)__ op__ (AAs\(df,sf\);
+#if ENABLE_THREADS
+      else )__ dt__ st__ (dy)__ op__ (AAc\(df,sf\);
+#endif //ENABLE_THREADS
+    }
+)__
+} def
+
+|-------------------------------------------- YmoOPS function:
+| constructs C code to convert the value of a scalar frame of any type
+| into double type, to perform a monadic operation on it, to convert the
+| result into the destination type and to store the result.
+
+/YmoOPS {
+
+NL (static void )__ dt__ (mo)__ op__ (S\(B *df\))__
+NL ({)__
+NL (D t;)__
+dt { (df) SCALAR } (t) GETCV
+monadic_d op get exec
+dt { (df) SCALAR } (t) CVPUT
+NL (})__
+NL 
+} def
+
+/monadic_d 14 dict dup begin
+
+/NEG   { NL (t = -t;)__          } def
+/ABS   { NL (t = fabs\(t\);)__    } def
+/SQRT  { NL (t = sqrt\(t\);)__   } def
+/EXP   { NL (t = exp\(t\);)__    } def
+/LN    { NL (t = log\(t\);)__    } def
+/LG    { NL (t = log10\(t\);)__  } def
+/FLOOR { NL (t = floor\(t\);)__  } def
+/CEIL  { NL (t = ceil\(t\);)__   } def
+/SIN   { NL (t = sin\(t\);)__    } def
+/COS   { NL (t = cos\(t\);)__    } def
+/TAN   { NL (t = tan\(t\);)__    } def
+/ASIN  { NL (t = asin\(t\);)__   } def
+/ACOS  { NL (t = acos\(t\);)__   } def
+/ATAN  { NL (t = atan\(t\);)__   } def
+
+end def
+
+|-------------------------------------------- YmoOPA function:
+| constructs C code to convert the value of an array frame of any type
+| into double type, to perform a monadic operation on it, to convert the
+| result into the destination type and to store the result, overwriting
+| the original.
+
+/YmoOPA {
+(
+   static void )__ dt__ (mo)__ op__ (As\(B *df\)
+   {
+     D t; )__ dt__ ( *d; P n;
+     d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
+     _dt (df) false { dt { (d)__ } (t) GETCV
+       monadic_d op get exec
+       dt { (d++)__ } (t) CVPUT
+     } FOR_modn (
+   }
+
+#if ENABLE_THREADS
+  static P )__ dt__ (mo)__ op__ (At\(UP id, const void* indata,
+                                     void* ignore
+                                     __attribute__ \(\(__unused__\)\)\)
+  {)__
+    true false {(
+      D t;)__
+      true {
+        dt {(d)__} (t) GETCV
+        monadic_d op get exec
+        dt {(d++)__} (t) CVPUT
+      } FOR_modnp
+    } THREAD (
+  }
+    
+  static void )__ dt__ (mo)__ op__ (Ac\(B * df\)
+  {)__
+    {dt__ (mo)__ op__ (As\(df\))__} true false {(
+      threads_do\(nways, )__ dt__ (mo)__ op__ (At, &data\);)__
+    } THREAD_SU (
+  }
+#endif //ENABLE_THREADS
+
+  static void )__ dt__ (mo)__ op__ (A\(B *df\)
+  {
+    if \(thread_num\(\) == 1\) )__ dt__ (mo)__ op__ (As\(df\);
+#if ENABLE_THREADS
+    else )__ dt__ (mo)__ op__ (Ac\(df\);
+#endif //ENABLE_THREADS
+  }
+)__
+} def
+
+|-------------------------------------------- Ydecr function
+| constructs C code to convert the value of a scalar frame of any type
+| into double type, to subtract 1 from that value, to convert the
+| result into the frame type and to store the result.
+
+/Ydecr {
+
+NL (static void )__ dt__ (decr\(B *df\))__
+NL ({)__
+NL (D t;)__
+dt { (df) SCALAR } (t) GETCV
+NL (t -= 1.0;)__
+dt { (df) SCALAR } (t) CVPUT
+NL (})__
+NL 
+} def
+
+/alltypes [/B /W /L32 /L64 /S /D] def
+
+|-------------------- construct DMNUMINC.C -----------------------------
+| (dirname) (filename) | --
+
+/all {/filename name /dirname name
+  {
+(// Automatically generated by dmnuminc.d.in in src/codegen
+// DO NOT EDIT HERE!
+
+#include "threads.h"
+
+#if ENABLE_THREADS
+typedef struct {
+  B* df_start;
+  B* sf_start;
+  UP perthread;
+  UP leftover;
+  D in;
+} thread_array_data;
+#endif //ENABLE_THREADS
+
+#ifdef DEBUG_DMNUM
+#undef DEBUG_DMNUM
+#define DEBUG_DMNUM 1
+void handleerr\(void\) {
+  makename\("dmnumincerror", x1\); ATTR\(x1\) = ACTIVE;
+  FREEexecs = x2;
+}
+#else
+#define DEBUG_DMNUM 0
+#define handleerr\(\)
+#endif
+)__
+
+|----- generate ENCODE function definitions
+alltypes { /dt name DYencode } forall
+
+|----- generate definition of list of ENCODE functions
+
+NL (typedef void \(*ENCODEfct\)\(D,B*\);)__
+NL (static ENCODEfct ENCODElist[] = {)__
+alltypes {  /dt name 
+      NL (D)__ dt__ (encode, )__
+   } forall
+NL(};)__
+NL
+
+|----- generate VALUE function definitions
+alltypes { /st name XLvalue } forall
+
+|----- generate definition of list of VALUE functions
+
+NL (typedef LBIG \(*VALUEfct\)\(B*\);)__
+NL (static VALUEfct VALUElist[] = {)__
+alltypes {  /st name 
+      NL st__ (Lvalue, )__
+   } forall
+NL(};)__
+NL
+
+|----- generate TEST function definitions
+alltypes { /st name XDtest } forall
+
+|----- generate definition of list of TEST functions
+
+NL (typedef D \(*TESTfct\)\(B*\);)__
+NL (static TESTfct TESTlist[] = {)__
+alltypes {  /st name 
+      NL st__ (Dtest, )__
+   } forall
+NL(};)__
+NL
+
+|----- generate MOVE function definitions
+alltypes {  /st name 
+   alltypes {  /dt name 
+      [ /XYmoveSS /XYmoveSA /XYmoveAS /XYmoveAA ] { mkact exec } forall
+   } forall
+} forall
+
+|----- generate definition of list of MOVE functions
+
+NL (typedef void \(*MOVEfct\)\(B*,B*\);)__
+NL (static MOVEfct MOVElist[] = {)__
+NL
+alltypes {  /st name 
+   alltypes {  /dt name 
+      [ /SS /SA /AS /AA ]
+      { /cc name st__ dt__ (move)__ cc mkact __ (, )__ } forall
+      NL
+   } forall
+} forall
+NL(};)__
+NL
+
+|----- generate dyadic operator function definitions
+alltypes {  /dt name 
+   alltypes {  /st name
+      [ /ADD /SUB /MUL /DIV /PWR /MOD /THEARC ]
+      { /op name 
+        [ /XYdyOPSS /XYdyOPAS /XYdyOPSA /XYdyOPAA ] { mkact exec } forall
+      } forall
+   } forall
+} forall
+
+|----- generate definition of list of dyadic operator functions
+
+NL (typedef void \(*dyadic_fct\)\(B*,B*\);)__
+
+[ /ADD /SUB /MUL /DIV /PWR /MOD /THEARC ] { /op name
+NL (static dyadic_fct )__ op__ (list[] = {)__
+NL
+alltypes {  /dt name 
+   alltypes { /st name 
+     [ /SS /AS /SA /AA ] 
+     { /cc name
+       dt__ st__ (dy)__ op mkact __ cc mkact __ mkact exec (, )__
+     } forall
+        NL
+   } forall
+} forall
+NL(};)__
+} forall
+NL
+
+|----- generate monadic operator function definitions
+alltypes {  /dt name 
+  [ /NEG /ABS /SQRT /EXP /LN /LG /FLOOR /CEIL /SIN /COS /TAN
+    /ASIN /ACOS /ATAN
+  ]
+  { /op name 
+    [ /YmoOPS /YmoOPA ] { mkact exec } forall
+  } forall
+} forall
+
+|----- generate definitions of monadic operator lists
+
+NL (typedef void \(*monadic_fct\)\(B*\);)__
+
+[ /NEG /ABS /SQRT /EXP /LN /LG /FLOOR /CEIL /SIN /COS /TAN
+    /ASIN /ACOS /ATAN ]
+{ /op name
+NL (static monadic_fct )__ op__ (list[] = {)__
+NL
+alltypes { /dt name 
+  [ /S /A ] 
+  { /cc name
+    dt__ (mo)__ op mkact __ cc mkact __ mkact exec (, )__
+  } forall
+  NL
+} forall
+NL(};)__
+} forall
+
+|----- generate DECREMENT function definitions
+
+alltypes { /dt name Ydecr } forall
+
+|----- generate definitions of DECREMENT function lists
+
+NL (typedef void \(*DECR_fct\)\(B*\);)__
+
+NL (static DECR_fct DECRlist[] = {)__
+NL
+alltypes { /dt name dt__ (decr, )__ } forall
+NL(};)__
+NL
+    
+|------------ save the file
+}
+save /dmsave name /dmfile 5000000 /b array def dmsave capsave 
+dmfile 0 3 -1 roll exec
+0 exch getinterval dirname filename writefile
+dmsave restore 
+} def
+
+|------------------------ Testing constructors ------------------------
+
+/moveSS { /dt name /st name
+AMbase 0 XYmoveSS 0 exch getinterval /Rss name Rss toconsole
+} def
+
+/moveSA { /dt name /st name
+AMbase 0 XYmoveSA 0 exch getinterval /Rss name Rss toconsole
+} def
+
+/moveAS { /dt name /st name
+AMbase 0 XYmoveAS 0 exch getinterval /Rss name Rss toconsole
+} def
+
+/moveAA { /dt name /st name
+AMbase 0 XYmoveAA 0 exch getinterval /Rss name Rss toconsole
+} def
+
+/encode { /dt name
+AMbase 0 DYencode 0 exch getinterval /Rss name Rss toconsole 
+} def
+
+/value { /st name
+AMbase 0 XLvalue 0 exch getinterval /Rss name Rss toconsole 
+} def
+
+/test { /st name
+AMbase 0 XDtest 0 exch getinterval /Rss name Rss toconsole 
+} def
+
+/dySS { /op name /st name /dt name 
+AMbase 0 XYdyOPSS 0 exch getinterval /Rss name Rss toconsole
+} def
+
+/dyAS { /op name /st name /dt name 
+AMbase 0 XYdyOPAS 0 exch getinterval /Rss name Rss toconsole
+} def
+
+/dySA { /op name /st name /dt name 
+AMbase 0 XYdyOPSA 0 exch getinterval /Rss name Rss toconsole
+} def
+
+/dyAA { /op name /st name /dt name 
+AMbase 0 XYdyOPAA 0 exch getinterval /Rss name Rss toconsole
+} def
+
+/moS { /op name /dt name
+AMbase 0 YmoOPS 0 exch getinterval /Rss name Rss toconsole
+} def
+
+/moA { /op name /dt name
+AMbase 0 YmoOPA 0 exch getinterval /Rss name Rss toconsole
+} def
+
+end userdict /dmnuminc put
+

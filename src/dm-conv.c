@@ -5,24 +5,24 @@
   NOTA BENE: this implies FRAMEBYTES = n*8 for sake of speed!
 */
 
-void moveframe(B *source, B *dest)
+void moveframe(const B *restrict source, B *restrict dest)
 {
   unsigned int i;
-  int64_t *s,*d;
+  const LBIG *restrict s = (const LBIG*) source;
+  LBIG *restrict d = (LBIG*) dest;
 
-  s = (int64_t *)source; d = (int64_t *)dest;
-  for (i=0;i<FRAMEBYTES/sizeof(int64_t);++i)
+  for (i=0;i<FRAMEBYTES/sizeof(LBIG);++i)
     *(d++) = *(s++);
 }
 
-void moveframes(B *source, B *dest, P n)
+void moveframes(const B *restrict source, B *restrict dest, P n)
 {
   unsigned int i;
-  int64_t *s,*d;
+  const LBIG *restrict s = (const LBIG*) source;
+  LBIG *restrict d = (LBIG*) dest;
 
-  s = (int64_t*)source; d = (int64_t*)dest;
   for (; n>0; n--) 
-    for (i=0;i<FRAMEBYTES/sizeof(int64_t);++i) 
+    for (i=0;i<FRAMEBYTES/sizeof(LBIG);++i) 
       *(d++) = *(s++);
 }
 
@@ -30,37 +30,37 @@ void moveframes(B *source, B *dest, P n)
 
 These move blocks of different data sizes among aligned locations     */
 
-void moveB(B *source, B *dest, P n)
+void moveB(const B *restrict source, B *restrict dest, P n)
 {
   for (; n>0; n--) *(dest++) = *(source++);
 }
 
-void moveW(W *source, W *dest, P n)
+void moveW(const W *restrict source, W *restrict dest, P n)
 { 
   for (; n>0; n--) *(dest++) = *(source++);
 }
 
-void moveL32(L32 *source, L32 *dest, P n)
+void moveL32(const L32 *restrict source, L32 *restrict dest, P n)
 { 
   for (; n>0; n--) *(dest++) = *(source++);
 }
 
-void moveL64(L64 *source, L64 *dest, P n)
+void moveL64(const L64 *restrict source, L64 *restrict dest, P n)
 {
   for (; n>0; n--) *(dest++) = *(source++);
 }
 
-void moveLBIG(LBIG* source, LBIG* dest, P n)
+void moveLBIG(const LBIG*restrict  source, LBIG *restrict  dest, P n)
 {
   moveL64(source, dest, n);
 }
 
-void moveS(S *source, S *dest, P n)
+void moveS(const S *restrict source, S *restrict dest, P n)
 { 
   for (; n>0; n--) *(dest++) = *(source++);
 }
 
-void moveD(D *source, D *dest, P n)
+void moveD(const D *restrict source, D *restrict dest, P n)
 { 
   for (; n>0; n--) *(dest++) = *(source++);
 }

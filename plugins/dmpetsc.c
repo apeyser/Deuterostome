@@ -46,9 +46,9 @@ static P errmap[PETSC_ERR_MAX_VALUE + (-KSP_DIVERGED_INDEFINITE_MAT) + 1];
 DM_INLINE_STATIC P init_(void) {
   PetscErrorCode r;
 
-  if (setenv("PETSC_DIR", "@PETSC_DIR@", 1))
+  if (setenv("PETSC_DIR", "/opt/petsc/", 1))
     return -errno;
-  if (setenv("PETSC_ARCH", "@PETSC_ARCH@", 1))
+  if (setenv("PETSC_ARCH", "linux_deb_d", 1))
     return -errno;
 
   errmap[0] = OK;

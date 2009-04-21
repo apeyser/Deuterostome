@@ -106,8 +106,8 @@ cpptester_la_LIBADD = $(AM_LIBADD)
 dist_noinst_DATA += cpptester.d
 
 if ENABLE_DMFLEX
-DMFLEX_LIB=dmflex.la
 BUILT_SOURCES += dmflex.c
+DMFLEX_LIB=dmflex.la
 dmflex_la_SOURCES = dmflex.l dmflex.h
 dmflex_la_LIBADD = $(AM_LIBADD)
 endif ENABLE_DMFLEX
@@ -147,7 +147,7 @@ nodist_dmstart_DATA = $(IPETSC_D)
 EXTRA_DIST = petsc.d.in
 BUILT_SOURCES += $(IPETSC_D)
 
-CLEANFILES = $(BUILT_SOURCES) $(PETSC_D)
+CLEANFILES = $(BUILT_SOURCES) dmflex.c $(PETSC_D)
 
 endif ENABLE_PLUGINS_SUPPORT
 

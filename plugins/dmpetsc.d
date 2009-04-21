@@ -42,7 +42,7 @@
 end def
 
 /plugin_errs 100 dict dup begin |[
-  /MATOVF (Woww!! 2^32 matrices created -- impressive!) def
+  /MATOVF (Wow!! 2^32 matrices created -- impressive!) def
   /INVVEC (Invalidated vector) def
   /INVMAT (Invalidated matrix) def
   /INVKSP (Invalidated ksp) def
@@ -94,45 +94,57 @@ end def
   /DIVERGED_INDEFINITE_MAT (diverged due to indefinite matrix) def |]
 end def
 
-/plugin_ops 100 dict dup begin |[
-  /init_ null def
-  /fini_ null def
-  /petsc_log_begin null def
-  /petsc_log_summary null def
-  /petsc_vec_create null def
-  /petsc_vec_copy null def
-  /petsc_vec_dup null def
-  /petsc_vec_copyto null def
-  /petsc_vec_copyfrom null def
-  /petsc_vec_syncto null def
-  /petsc_vec_syncfrom null def
-  /petsc_vec_max null def
-  /petsc_vec_min null def
-  /petsc_vec_norm null def
-  /petsc_vec_destroy null def 
-  /petsc_mat_sparse_create null def 
-  /petsc_mat_dense_create null def 
-  /petsc_mat_blockdense_create null def
-  /petsc_mat_copy null def
-  /petsc_mat_copyto null def
-  /petsc_mat_copyfrom null def
-  /petsc_mat_syncto null def
-  /petsc_mat_syncfrom null def
-  /petsc_mat_endfill null def
-  /petsc_mat_fill null def
-  /petsc_mat_syncfill null def
-  /petsc_mat_destroy null def
-  /petsc_mat_dup null def
-  /petsc_mat_vecmul null def 
-  /petsc_mat_transpose null def
-  /petsc_mat_getcsr null def
-  /petsc_mat_getnzs null def
-  /petsc_ksp_create null def
-  /petsc_ksp_destroy null def
-  /petsc_ksp_tol null def
-  /petsc_ksp_iterations null def
-  /petsc_ksp_solve null def |]
-end def
+/plugin_ops 100 dict dup begin [
+  /init_ 
+  /fini_ 
+  /petsc_log_begin 
+  /petsc_log_summary 
+  /petsc_vec_create 
+  /petsc_vec_copy 
+  /petsc_vec_dup 
+  /petsc_vec_add 
+  /petsc_vec_mul
+  /petsc_vec_pwr
+  /petsc_vec_sqrt
+  /petsc_vec_reciprocal
+  /petsc_vec_denan
+  /petsc_vecvec_mul
+  /petsc_vecvec_add
+  /petsc_vecmat_copy
+  /petsc_vecmat_sync
+  /petsc_vec_copyto 
+  /petsc_vec_copyfrom 
+  /petsc_vec_syncto 
+  /petsc_vec_syncfrom 
+  /petsc_vec_max 
+  /petsc_vec_min 
+  /petsc_vec_norm 
+  /petsc_vec_destroy  
+  /petsc_mat_sparse_create  
+  /petsc_mat_dense_create  
+  /petsc_mat_blockdense_create 
+  /petsc_mat_copy 
+  /petsc_mat_copyto 
+  /petsc_mat_copyfrom 
+  /petsc_mat_syncto 
+  /petsc_mat_syncfrom 
+  /petsc_mat_endfill 
+  /petsc_mat_fill 
+  /petsc_mat_syncfill 
+  /petsc_mat_fillone
+  /petsc_mat_get
+  /petsc_mat_destroy 
+  /petsc_mat_dup 
+  /petsc_mat_vecmul  
+  /petsc_mat_transpose 
+  /petsc_mat_getcsr 
+  /petsc_mat_getnzs 
+  /petsc_ksp_create 
+  /petsc_ksp_destroy 
+  /petsc_ksp_tol 
+  /petsc_ksp_iterations 
+  /petsc_ksp_solve  
+] {null def} forall end def
 
 /all {
   getstartupdir (new-plugin.d) fromfiles
