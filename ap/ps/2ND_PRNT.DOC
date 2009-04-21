@@ -1,115 +1,0 @@
-0660103030573
-9[...........................................................]
-‚c€A2ndmethodofprinting‚|€
-
-‚p€Ourtexteditor,1st_Word,hasproveddependableandusefuloverthe
-years.Itstillisgoodformostjobs.Ontheotherhand,printershave
-beengreatlyimprovedandnowyieldprofessionalprintqualitywhen
-properlyinstructed.Detailedtypesettinginstructionsarebeyondthe
-meansof1st_Word,soonemightthinkofreplacingitwithanuptodate
-editor.Wewillnotdothat.Insteadwewilltransform1st_Wordintoa
-frontendofanopenprintshopwhoseequipmentcanbeupgradedovertime.
-Weturndirectlytothecurrentlymostpowerfultoolfordescribingpages
-toaprinter:PostScript.Apartfromoutstandinggraphicsandtypesetting,
-aPostScriptmachinemakesforanunusuallyintelligentgeneralpurpose
-computer.WesetupthenewprintshopinthePostScriptcomputerrather
-thanextending1st_WordbyAtariprograms.‚|
-
-p€ThePostScriptfacilityofourAtaricomputersconsistsofthe
-UltraScriptinterpreter,whichcombinestheAtaricomputerandadumb
-laserprinterengineintoavirtualPostScriptmachine.Documentstargeted
-forPostScriptaresubmittedtotheUltraScriptinterpreterintheformof
-diskfiles.‚|
-
-p€Wecan(butdonothaveto)createfilestobesubmittedtoPostScript
-via1st_Word.Therearetwopossibleformsforsuchfiles.Oneformis
-interpreteddirectlyintermsofthePostScriptsyntaxandispreparedin
-thenon-WP(plainASCII)modeof1st_Word.Thesecondformisinterpreted
-throughaPostScriptprogramandpreparedintheWPmodeof1st_Word.The
-PostScriptprogramsare'downloaded'intheformofanASCIIfileatthe
-beginningofaprintjob.‚|
-
-p€SincewewritethePostScriptsoftwareforinterpretingdocumentfiles
-ourselves,wecanchoosetherulesbywhichWPoptionsareinterpreted.
-Formaximalflexibility,weencodeprinterinstructionsattwolevels.(1)
-PostScriptcodeisembeddedbetweenprintabletext;suchcodeistypedin
-the'light'style.(2)Otherstyleoptionsusedinprintabletextare
-givennewrolesorareenhanced.‚|
-
-p€Aprintjobconsistsofacollectionofdiskfilesthatarechained
-together.TheheaderfileisalwaysanASCIIfilethatholdsPostScript
-instructions,whicheffectthedownloadingofPostScriptprograms,fonts,
-andofthesubsequentfilesthatconstitutethedocument.Suchheader
-filesarereadilymadefromtemplates.Thedocumentcanbedividedintoas
-manyfilesasarelogicallyuseful(like'Methods','Discussion',etc).
-Theseareindividuallyeditedanddraft-printedusing1st_Wordasbefore
-Ifyousubmitsuchdocumentfilestoprintingbytheoriginal1st_Prnt
-program,youwillseetheembeddedPostScriptinstructionsratherthan
-theireffects.‚|
-€
-‚c€ThePostScriptprogramneededtoprocessWPdocumentfilesiscontained
-inthe2nd_prnt.pstoolfile.Itcontains,amongothers,theprocedure
-PrintDocument.PrintDocumentacceptsaqueueofWPdocumentfiles.It
-dissectsthebodiesofthesefilesintoPostScriptinstructions(in
-'light'style),whicharesubmitteddirectlytothePostScriptmachine,
-andtheinterspersedportionsofprintabletext(inotherstyles),which
-aresubmittedtotheprocedureassociatedwiththename'TextProcessor'.
-Typically,theassociationof'TextProcessor'variesalongthedocument.
-Forinstance,thePostScriptcodeprecedingprintabletexttobecomea
-paragraphwillassociate'TextProcessor'withaprocedurethatcaststhe
-subsequentportionofprintabletextasawell-shapedparagraph.This
-technique,threadedcode,permitsyoutoformulateself-organizing
-documents.TheTextProcessorsneededforaparticularkindofdocument
-(likeaJournalofGeneralPhysiologypaper)typicallyareprovided
-byprefabricatedcollectionsofformtools(likethatcontainedin
-'GJP.ps').‚|
-
-p€TheUltraScriptinterpretercanmaintainaccesstonomorethantwofiles
-opensimultaneously(a'limitcheck'errorisproducedbyattemptstoopen
-furtherfiles).Inordertoavoidexceedingthemaximaldepthoffile
-accesses,chainfilesofaprintjobasfollows:‚|
-
-p€TheheaderPostScriptfilereadsinneededtoolfilesbysubmittingtheir
-pathnamestothePostScript'run'operator.Iftheprintjobconsists
-onlyofPostScriptfiles,theheaderdefinesamainprocedurethatcloses
-theheaderfile(by'currentfileclosefile')andthensubmitsall
-remainingPostScriptfilestothe'run'operator;thelaststatementof
-theheaderfileinvokesthisprocedure.Aslideshowmaybesetupinthis
-way.Intheotherextreme,abookwillincludeabackboneofWPdocument
-files.Thenthemainproceduresetupintheheadershouldclosethe
-headerfileandsubmitthebackbonefilelisttoPrintDocument.
-Alternatingpatternsofflowcanbeorganizedbyalternatingusesof'run'
-and'PrintDocument'inthemainprocedure.‚|
-
-p€Alargeprintjobmayrequirealsofigures,tables,footnotes,boxesof
-collateralinformationtobeplacedalongsidethebackbone.Thecontents
-ofsuchinsertstypicallyaresuppliedthroughseparatePostScriptorWP
-documentfiles;theirinvokationsarebracketedby'save'and'restore'
-operationsinordertolocalizetheireffectsonPostScriptmemoryand
-graphicalstate(insertfilesthemselvesalsomustnotinvokeotherfiles
-becauseofthelimiteddepthoffileaccesses).Theinsertsareplacedby
-PostScriptinstructionsthatallocateformspace;someofthesewillbe
-basedonformalrules,othersoncontextandaesthetics.Ifanythingcan
-helpyouautomatethisprocess,youcantrustPostScripttomakeit
-work.‚|
-€
-‚p€AprintjobinvolvesmanyPostScriptproceduresandvariablesandmay
-usesuchtoolsinalternatingcontexts(suchasbackboneandinsert).
-Thiscallsforadistinctionofcontexts,whichinPostScriptis
-convenientlydoneintheformofdictionaries.‚|
-
-p€Theheaderfileshouldprovideajob-widedictionarylargeenoughto
-accommodatethedefinitionsofprinttoolsmadebydownloadedPostScript
-filesandtoacceptdefinitionsmadeintheprocessofprinting.This
-dictionaryisheldpermanentlyonthedictionarystackandisthetop
-dictionaryduringtheprintingofbackbonecomponents.Foreachlevelof
-insert,aninsert-widedictionaryshouldbecreatedtoholdthe
-definitionsmadeduringtheprintingofaninsert;thisdictionaryis
-placedatthetopofthedictionarystackpriortotheprintingofthe
-insertandremovedfromtheretherafter.Allproceduresthatsupport
-printingmustdefineitemsofnon-temporaryscopeexclusivelyinthe
-dictionaryofthecurrent(backboneorinsert)context,ratherthanin
-theirprivatedictionaries.Theycanhidetemporarydefinitionsin
-privatedictionaries,inordertopreventconflictingusesofscratch
-variablenames(suchas'k').‚|€
-‚

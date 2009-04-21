@@ -1,5 +1,0 @@
-#define DMSOCKDIR "@dmsockdir@"
-#define STARTUP_DIR "@dmstartdir@"
-#define PLUGIN_DIR "@pkglibdir@"
-#define CONF_DIR "@dmconfdir@"
-
