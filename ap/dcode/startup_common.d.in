@@ -113,6 +113,16 @@ userdict /toconsole_ known not {/toconsole_ /toconsole find def} if
 |
 /indict {begin stopped end ~stop if} bind def
 
+|----------------- indict -----------------
+| ~exec | ...
+|
+| executes ~exec without the current top dict
+| wrapped with a stopped
+|
+/notindict {
+  ~[~stopped currentdict] end exec begin ~stop if
+} bind def
+
 |============================================ SIGNALS
 |
 | these must be in the same order as sigmap in dm-signals.c

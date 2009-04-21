@@ -332,6 +332,9 @@ P op_petsc_vec_sqrt(void);
 #define op_petsc_vec_reciprocal EXPORTNAME(op_petsc_vec_reciprocal)
 P op_petsc_vec_reciprocal(void);
 
+#define op_petsc_vec_denan EXPORTNAME(op_petsc_vec_denan)
+P op_petsc_vec_denan(void);
+
 #define op_petsc_vecvec_mul EXPORTNAME(op_petsc_vecvec_mul)
 P op_petsc_vecvec_mul(void);
 
@@ -400,6 +403,12 @@ P op_petsc_mat_fill(void);
 
 #define op_petsc_mat_syncfill EXPORTNAME(op_petsc_mat_syncfill)
 P op_petsc_mat_syncfill(void);
+
+#define op_petsc_mat_fillone EXPORTNAME(op_petsc_mat_fillone)
+P op_petsc_mat_fillone(void);
+
+#define op_petsc_mat_get EXPORTNAME(op_petsc_mat_get)
+P op_petsc_mat_get(void);
 
 #define op_petsc_mat_destroy EXPORTNAME(op_petsc_mat_destroy)
 P op_petsc_mat_destroy(void);

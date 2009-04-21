@@ -560,6 +560,14 @@ end def |========= end of mpi data ================
 
 /execpawns {false _execpawns} bind def
 
+/execall {
+  dup execpawns
+  save * 3 -1 roll exec dup null eq ~pop {
+    1 index capsave exec
+  } ifelse
+  restore
+} bind def
+
 /execkickpawns {false _execkickpawns} bind def
 
 /_execpawns {~wait_dnode execpawns_} bind def
@@ -605,6 +613,8 @@ end def |========= end of mpi data ================
 | a Simplified version of execpawns. It executes ~job on
 | all pawns, and waits for them to be done.
 /sexecpawns {~_execpawns sexecpawns_} bind def
+
+/sexecall {dup exec sexecpawns} bind def
 
 | ~job ~execpawns-version sexecpawns_ --
 /sexecpawns_ {

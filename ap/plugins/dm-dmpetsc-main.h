@@ -123,6 +123,7 @@ B* ll_export[] = {
   PLUGIN_OP(petsc_vec_pwr),
   PLUGIN_OP(petsc_vec_sqrt),
   PLUGIN_OP(petsc_vec_reciprocal),
+  PLUGIN_OP(petsc_vec_denan),
   PLUGIN_OP(petsc_vecvec_mul),
   PLUGIN_OP(petsc_vecvec_add),
   PLUGIN_OP(petsc_vecmat_copy),
@@ -146,6 +147,8 @@ B* ll_export[] = {
   PLUGIN_OP(petsc_mat_endfill),
   PLUGIN_OP(petsc_mat_fill),
   PLUGIN_OP(petsc_mat_syncfill),
+  PLUGIN_OP(petsc_mat_fillone),
+  PLUGIN_OP(petsc_mat_get),
   PLUGIN_OP(petsc_mat_destroy),
   PLUGIN_OP(petsc_mat_dup),
   PLUGIN_OP(petsc_mat_vecmul),
@@ -208,6 +211,8 @@ P op_petsc_vec_sqrt(void) {return petsc_vec_sqrt();}
 
 P op_petsc_vec_reciprocal(void) {return petsc_vec_reciprocal();}
 
+P op_petsc_vec_denan(void) {return petsc_vec_denan();}
+
 P op_petsc_vecvec_mul(void) {return petsc_vecvec_mul();}
 
 P op_petsc_vecvec_add(void) {return petsc_vecvec_add();}
@@ -253,6 +258,10 @@ P op_petsc_mat_endfill(void) {return petsc_mat_endfill();}
 P op_petsc_mat_fill(void) {return petsc_mat_fill();}
 
 P op_petsc_mat_syncfill(void) {return petsc_mat_syncfill();}
+
+P op_petsc_mat_fillone(void) {return petsc_mat_fillone();}
+
+P op_petsc_mat_get(void) {return petsc_mat_get();}
 
 P op_petsc_mat_destroy(void) {return petsc_mat_destroy();}
 

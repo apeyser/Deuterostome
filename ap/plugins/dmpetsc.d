@@ -107,6 +107,7 @@ end def
   /petsc_vec_pwr
   /petsc_vec_sqrt
   /petsc_vec_reciprocal
+  /petsc_vec_denan
   /petsc_vecvec_mul
   /petsc_vecvec_add
   /petsc_vecmat_copy
@@ -130,6 +131,8 @@ end def
   /petsc_mat_endfill 
   /petsc_mat_fill 
   /petsc_mat_syncfill 
+  /petsc_mat_fillone
+  /petsc_mat_get
   /petsc_mat_destroy 
   /petsc_mat_dup 
   /petsc_mat_vecmul  
