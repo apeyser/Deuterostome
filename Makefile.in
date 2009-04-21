@@ -903,13 +903,11 @@ distclean-local: distclean-local-svnversion
 
 .PHONY: distclean-local-svnversion
 distclean-local-svnversion:
-	if test `cd "$(top_srcdir)" && pwd -P` \
-	   	!= `cd "$(top_builddir)" && pwd -P` ; then \
-	  if cd "$(top_builddir)" ; then \
-	    rm svnversion.stamp || : ; \
+	if test "$(abs_top_builddir)" != "$(abs_top_srcdir)"; then \
+	  if cd "$(top_builddir)"; then \
+	    rm svnversion.stamp || :; \
 	  else false; \
-	  fi ; \
-	else : ; \
+	  fi; \
 	fi
 
 dist-hook: $(SVNVERSION_TARGET)
