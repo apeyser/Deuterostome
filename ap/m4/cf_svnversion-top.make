@@ -12,10 +12,7 @@ distclean-local: distclean-local-svnversion
 .PHONY: distclean-local-svnversion
 distclean-local-svnversion:
 	if test "$(abs_top_builddir)" != "$(abs_top_srcdir)"; then \
-	  if cd "$(top_builddir)"; then \
-	    rm svnversion.stamp || :; \
-	  else false; \
-	  fi; \
+	  rm -f "$(top_builddir)"/svnversion.stamp || :; \
 	fi
 
 dist-hook: $(SVNVERSION_TARGET)

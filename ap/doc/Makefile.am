@@ -48,7 +48,10 @@ include $(top_srcdir)/m4/cf_svnversion.make
 
 include $(top_srcdir)/m4/cf_bundle_sub.make
 
-distclean-local:
+distclean-local: distclean-local-tex
+
+.PHONY: distclean-local-tex
+distclean-local-tex:
 	if test "$(abs_builddir)" != "$(abs_srcdir)"; then \
 	  rm -f "$(builddir)"/dvt-3.0.tex \
 	        "$(builddir)"/newbook.tex \
