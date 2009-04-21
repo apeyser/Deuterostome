@@ -1,0 +1,16 @@
+#! /usr/bin/env sh
+
+dgen="$1" ; shift
+dirin="$1" ; shift
+basein="$1" ; shift
+baseout="`basename $1`" ; dirout="`dirname $1`"; shift
+dictin=`basename "$basein" .d | tr '-' '_'`
+
+${dgen} <<EOF
+(${dirin}/) (${basein}) fromfiles 
+/dictinname /${dictin} def
+${dictin} begin
+  (${dirout}) (${baseout}) $@ all 
+end 
+quit
+EOF

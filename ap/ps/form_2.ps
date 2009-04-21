@@ -1,0 +1,175 @@
+
+
+(%%[ Loading: Form_2 7/7/03 WN ]%%\n\015) print flush
+
+
+2000 dict begin          % the backbone dictionary
+    /codebuffer 20000 string def   % for backbone WP text
+
+%============== Formatter for notebook plots =========================
+
+% - uses landscape page format, placing two boxed pages on each sheet
+% - this is for notebook graphs (we do not support much text layout)
+% - includes support for placement of panels
+
+%------------------------------- NewDocument
+
+/NewDocument {
+
+   /sheetnumber 1 def
+   /nopage true def
+
+   /textfontlist [
+      /Helvetica findfont 9 scalefont
+      /Helvetica-Bold findfont 9 scalefont 
+      /Helvetica-Oblique findfont 9 scalefont 
+      /Symbol findfont 9 scalefont 
+      /Helvetica findfont 7 scalefont 
+      dup
+      dup
+      dup
+      ] def
+   /graffontlist [
+      /Helvetica findfont 9 scalefont
+      null                                 % bold: centered symbols
+      /Helvetica-Oblique findfont 9 scalefont 
+      /Symbol findfont 9 scalefont 
+      /Helvetica findfont 7 scalefont 
+      dup
+      dup
+      /Helvetica-Bold findfont 9 scalefont   % a bold to spare
+      ] def
+
+/textfonts {
+   /fontlist textfontlist def
+   /superscriptlevel 3 def
+   /subscriptlevel -2 def
+   /linespace 11 def
+   /paragraphspace 11 def
+   /paragraphindent 0 def
+   /paragraphahead 0 def
+   /paragraphadjust 1 def
+} bind def
+
+/graffonts {
+   /fontlist graffontlist def
+   /superscriptlevel 3 def
+   /subscriptlevel -2 def
+   /linespace 11 def
+} bind def
+
+textfonts
+
+1.0 setlinewidth  6 ScaleSymbolFont
+/ls { { LineSpacer } repeat } def
+
+} def  % of NewDocument
+
+%----------------------------- NewPage ---------------------------------
+
+/NewPage {
+   nopage
+     { /pagenumber 0 def /nopage false def }
+     { /pagenumber pagenumber 1 add def
+       pagenumber 2 ge 
+          { showpage
+            /sheetnumber sheetnumber 1 add def
+            /pagenumber 0 def
+          } if
+     }
+     ifelse
+   pagenumber 0 eq
+     { /leftmargin 28 def           % 1 cm from edge of sheet
+     }
+     { /leftmargin 400 def          % 1/6 inch between pages
+     }
+     ifelse
+   /bottomoftext 36 def         % 0.5 inch
+   /textwidth 360 def   
+   /topoftext 612 54 sub def    % 3/4 inch  
+   initgraphics
+   [ 0 -1 1 0 0 788 ] concat
+   textfontlist 0 get setfont
+   gsave
+   newpath
+     leftmargin bottomoftext moveto
+     leftmargin textwidth add bottomoftext lineto
+     leftmargin textwidth add topoftext lineto
+     leftmargin topoftext lineto
+   closepath stroke
+   pagenumber 0 eq {
+       leftmargin bottomoftext 15 sub moveto
+       sheetnumber (   ) cvs show
+       leftmargin 72 add bottomoftext 15 sub moveto
+       textfontlist 1 get setfont
+       comment show
+     } if
+   grestore
+   /topofnextpanel topoftext def
+   /lineordinate topoftext linespace sub def
+   /lineabscissa leftmargin def
+   /nopage false def
+} def
+
+%---------------------------- LineSpacer -------------------------------
+
+/LineSpacer {
+   lineordinate linespace sub 10 sub bottomoftext lt
+     { NewPage }
+     { /lineordinate lineordinate linespace sub def }
+     ifelse
+   /lineabscissa leftmargin def
+   /linewidth textwidth def
+} bind def
+
+%------------------------- ParagraphSpacer -----------------------------
+% provides optional positive or negative indent on line. A positive
+% indent starts the first line after the indent; other lines follow
+% on the normal leftmargin. A negative indent places the first line
+% on the normal leftmargin, whereas all subsequent lines are indented.
+
+/ParagraphSpacer {
+   lineordinate paragraphahead sub 10 sub bottomoftext lt nopage or
+      { NewPage }
+      { /lineordinate lineordinate paragraphspace sub def }
+      ifelse
+   paragraphindent 0 ge
+      { /lineabscissa leftmargin paragraphindent add def
+        /linewidth textwidth paragraphindent sub def
+      }
+      { /lineabscissa leftmargin def
+        /linewidth textwidth def
+        /leftmargin leftmargin paragraphindent sub def
+        /textwidth textwidth paragraphindent add def
+        /| { /leftmargin leftmargin paragraphindent add def
+             /textwidth textwidth paragraphindent sub def
+             /| { /TextProcessor /DefaultTextProcessor load def } def
+             |
+           } def
+      }
+      ifelse
+} bind def
+
+
+%-------------------------- paragraph chopper --------------------------
+%  paragraph | --     
+
+/ParagraphChopper {
+   ParagraphSpacer
+     /thetext exch def
+     TextFilter
+     /style 0 def
+     {
+        BreakText not { exit } if
+        paragraphadjust LineAdjust
+        ShowLine
+        LineSpacer
+     } loop
+     paragraphadjust dup 0 eq { pop 1 } if LineAdjust
+     ShowLine
+} def
+
+
+
+
+

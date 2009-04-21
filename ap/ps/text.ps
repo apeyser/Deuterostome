@@ -1,0 +1,574 @@
+(%%[ Loading: Text.ps 6/12/96 WN ]%%\n\015) print flush
+
+% Text maintains a private dictionary for its internal procedures
+% and variables:
+
+/Text 200 dict def
+
+%  Public variables:
+%
+%   thetext, theline
+%   linewidth, lineabscissa, lineordinate
+%   linelength, lineheight
+%   fontlist
+%   superscriptlevel, subscriptlevel
+%   style                          (NB: controls scope of style options)
+
+%  Public procedures:
+%
+%   PrintDocument
+%   TextProcessor
+%   TextFilter
+%   BreakText
+%   LineAdjust
+%   ShowLine
+%   MeasureLine
+%   Umlaute
+
+%------------------------- PrintDocument --------------------------------
+% divides the contents of WP document files into PostScript code (light
+% style) and printable text (the rest). PostScript code is submitted
+% directly to the PostScript interpreter. Printable text is submitted to
+% the procedure currently associated with 'TextProcessor'.
+%
+%   [ file .. ] | --
+%
+% TextProcessor receives printable text in a string via stack.
+
+
+/PrintDocument {
+   /TextProcessor { pop } def           % exterminates loose text
+   /DefaultTextProcessor { pop } def
+
+   Text begin
+   /filequeue exch def
+   /nofile true def  /endofqueue false def
+   /codetoscan () def
+
+   /LIGHT (\033\202) def
+   /STYLEZERO (\033\200) def
+   /STYLECHANGE (\033) def
+   {
+      {  % on this leg, split off a printable chunk
+         codetoscan LIGHT search 
+            { 3 -1 roll /codetoscan exch def exch pop
+              end TextProcessor Text begin exit } if
+         pop  ReadMoreCode
+         endofqueue
+            { codetoscan end TextProcessor Text begin exit } if
+      } loop
+      endofqueue { exit } if
+      {  % on this leg, split off a chunk for PostScript
+         codetoscan STYLECHANGE search
+            { 3 -2 roll pop pop dup /codetoscan codetoscan 3 -1 roll
+                 length dup neg codetoscan length add getinterval def
+              InsProcessor exit
+            } if
+         pop  ReadMoreCode 
+         endofqueue { codetoscan InsProcessor exit } if
+      } loop
+      endofqueue { exit } if 
+   } loop
+   end 
+} def        
+
+%------------------------------ read more code
+% This no longer accesses the local printer disk, but sends a request to the host to
+% have the required file transmitted via the standard input file, using a subfile filter
+
+Text /ReadMoreCode {
+   codetoscan codebuffer copy /codetoscan exch def  % the leftover
+   codebuffer codetoscan length dup neg codebuffer length add
+   dup 100 lt 
+     { (Text segment too large!\n) print flush pop pop pop 
+       /endofqueue true def }
+     {
+       getinterval 
+       nofile
+       {
+         filequeue length 0 eq 
+          { /endofqueue true def  } 
+          { filequeue 0 get dup (r) file /codefile exch def 
+            /nofile false def
+            (Printing: ) print print (\n\015) print flush
+            /filequeue filequeue dup length 1 exch 1 sub dup
+               0 gt { getinterval } { pop pop pop [] } ifelse def
+            STYLEZERO exch copy pop
+            codebuffer 0 codetoscan length 2 add getinterval
+               /codetoscan exch def
+            codebuffer codetoscan length dup neg 
+               codebuffer length add getinterval
+          }
+          ifelse 
+       } if
+       endofqueue not
+          {
+            codefile exch readstring
+            not { codefile closefile /nofile true def } if
+            length codetoscan length add
+            0 exch codebuffer 3 1 roll getinterval /codetoscan exch def
+          } 
+          { pop }
+          ifelse
+     }
+     ifelse 
+} bind put
+
+%--------------------------------------- Instruction processor
+%  (raw code) | --
+
+Text /InsProcessor {
+   dup /k 0 def          % non-Postscript characters -> space
+   {
+   /char exch def
+   char 127 ge char 32 lt or 
+      { char 10 ne char 13 ne and {  dup k 32 put } if } if
+   /k k 1 add def
+   } forall end
+   cvx exec Text begin            % execute Postscript instructions
+} bind put
+
+
+
+%---------------------- tools for printable text ------------------------
+
+% A library of procedures that dissect a stretch of printable text of WP
+% documents into individual printed lines. These procedures help
+% formatting procedures cast text into a given space.
+
+% The text tools interpret in-line instructions provided through WP
+% style changes:
+%
+% - Bold and Italic (in conjunction with super/subscript) select
+%   among 8 fonts (of normal or reduced size). The font set may be varied
+%   along the document, but not within an uninterrupted stretch of
+%   printable text (the font set is set up by PostScript instructions).
+% 
+% - Underline (except in light style) forces text to be placed on one and
+%   the same line. Underlining per se is not supported (but underlined
+%   fonts can be in the font set). Underlined spaces are printed in full,
+%   whereas successive spaces normally are contracted into one.
+%
+% - Spaces in light-underline style mark potential hyphenation sites.
+%
+% - Light underlining in conjunction with super/subscript forces subse-
+%   quent text to be placed starting at the same horizontal position
+%   at which the light underlined stretch started (for simultaneous
+%   super- and subscripting).
+%
+% - Super/subscript have their usual effects, of printing in a smaller
+%   font (selected by you) at a vertical offset (also settable).
+%
+% Lines formatted through 1st-Word generally are re-broken during
+% the typesetting. Thus, documents are typed in any format that is
+% convenient for editing; their final format is determined by the
+% typesetting instructions supplied to Postscript. The tools provided
+% can break text automatically into lines, such that the document can
+% be presented in different font sizes or in different page formats
+% without ado. This line-breaking considers the actual font metrics for
+% impeccable results.
+
+% The text procedures are directed by the following variables:
+%
+% superscriptlevel  in points (5)
+% subscriptlevel    in points (-3)
+% fontlist          array of 8 fonts, in the order
+%                    0 - normal
+%                    1 - bold
+%                    2 - italic
+%                    3 - bolditalic
+%                    4 - small normal  (super/subscript)
+%                    5 - small bold
+%                    6 - small italic
+%                    7 - small bolditalic
+%
+%                    (Note: names refer to WP style that selects the font;
+%                     actual characteristics of fonts are not
+%                     necessarily those implied by 1st_Word)
+%
+
+%----------------------------- TextFilter ------------------------------
+
+% to be applied to any printable text stretch prior to breaking:
+% - original and filtered text are contained in thetext
+% - discards 1st_Word format lines
+% - converts controls (<0x20) except restyle (0x1B) into spaces, 0x32
+% - underlined (hard or variable) space -> 0x31
+% - eliminates redundant, non-underlined spaces
+
+/TextFilter { Text begin
+   /nexttokeep 0 def  /styleflag false def  /spaceflag false def
+   /stripstyle 0 def
+   thetext
+   {
+   (\031) search              % for control line
+      { StripControls pop (\n) search  { pop pop } if }
+      { StripControls exit }
+      ifelse
+   } loop
+   /thetext thetext 0 nexttokeep getinterval end def 
+} bind def
+
+%--------------------------------------------- StripControls
+%  string_to_strip | --  (deposits result in thestring, incrementing
+%                         nexttokeep; controlled by spaceflag, styleflag)
+
+Text /StripControls {
+   {
+   dup 32 gt                                 % no control?
+      { styleflag 
+          { dup /stripstyle exch def /styleflag false def }
+          { /spaceflag false def }
+          ifelse
+      }
+      { dup 27 eq                           % restyle?
+         { /styleflag true def }
+         { stripstyle 8 and 8 eq            % in underline?
+            { dup 32 eq exch 30 eq or
+               { 31  /spaceflag true def }
+               { 0 }
+               ifelse
+            }
+            { pop spaceflag 
+               { 0 } 
+               { 32 /spaceflag true def }
+               ifelse
+            }
+            ifelse
+         }
+         ifelse
+      }
+      ifelse
+      dup 0 ne
+          { thetext nexttokeep 3 -1 roll put 
+            /nexttokeep nexttokeep 1 add def
+          }
+          { pop }
+          ifelse
+   } forall
+} bind put
+
+%---------------------------- BreakText --------------------------------
+
+% breaks one line from thetext and associates it with 'theline'. theline
+% is dimensioned to fit into the horizontal length set by 'linewidth'.
+
+%   -- | true     more text to break after this line
+%        false    no more text to break after this line
+
+% input:   thetext
+%          linewidth    (line width in points)
+% output:  thetext      (what remains to do)
+%          theline      (the resulting line)
+%          linewidth    (unused remainder of linewidth)
+%          charsinline  
+%          spacesinline
+
+/BreakText {
+   /spacesinline -1 def /charsinline -1 def
+   /style style                             % rescue initial style
+   Text begin
+   (\000) ScanStyleChange pop               % establish initial style
+   /toscan thetext def 
+   /spacewidthafterword 0 def
+   {
+      toscan ( ) search
+         { TryToFitWord
+            { pop  /toscan exch def }
+            { 3 -2 roll pop pop TryToSplit true exit }
+            ifelse
+         }
+         { TryToFitWord
+            { end /theline thetext def
+              /thetext () def false Text begin exit }
+            { TryToSplit true exit }
+            ifelse
+         }
+         ifelse
+   } loop
+   {                          % more text to go
+     charsinline 0 gt 
+      { { toskip }         % fallout of split mark
+        { 1 }              % skip terminating space
+        ifelse
+        end /theline thetext 0 charsinline getinterval def
+            /thetext thetext 3 -1 roll charsinline add dup neg
+                     thetext length add getinterval def
+        true
+      }
+      { pop end /theline (!! word > line !!) def false }
+      ifelse
+   }
+   { false end }                        % all text consumed
+   ifelse
+   3 1 roll def                         % back to initial style
+} bind def
+
+%----------------------------------------------- TryToSplit
+% wordstring | true                (updated: see TryToFitWord)
+%              false
+% NB: expects Text as current directory
+
+Text /TryToSplit {
+   /theword exch def
+   {
+      /splitlength 0 def
+      theword                                 % find rightmost splitmark
+      {  (\033\212\037) search                % space in light underline
+            { length /splitlength splitlength 3 -1 roll add def
+              pop pop theword 0 splitlength getinterval
+            }
+            { pop exit }
+            ifelse 
+      } loop
+      splitlength 0 ne
+         { theword splitlength 1 sub get 45 eq   % after hyphen?
+            { /theword theword 0 splitlength getinterval def
+              /toskip 3 def
+            }
+            { theword splitlength 45 put         % a tentative hyphen
+              /theword theword 0 splitlength 1 add getinterval def
+              /toskip 2 def 
+            } 
+            ifelse
+           theword TryToFitWord
+            { true exit }
+            { pop toskip 2 eq { theword dup length 1 sub 27 put } if }
+            ifelse
+         }
+         { false exit }
+         ifelse
+   } loop
+} bind put     
+
+%---------------------------------------------- TryToFitWord
+%  wordstring | true                 (linewidth, spacesinline, charsinline)
+%               wordstring false     (nothing else changed)
+% NB: expects Text as current directory
+
+Text /TryToFitWord {
+   style exch
+   dup length /wordlength exch def dup
+   /wordwidth spacewidthafterword def
+   {
+      (\033) search
+         { stringwidth pop /wordwidth exch wordwidth add def
+           pop ScanStyleChange
+         }
+         { stringwidth pop /wordwidth exch wordwidth add def
+           exit
+         }
+         ifelse
+   } loop
+   linewidth wordwidth ge
+      { /spacewidthbeforeword spacewidthafterword def
+        /spacewidthafterword ( ) stringwidth pop def
+        /linewidth linewidth wordwidth sub end def
+        /spacesinline spacesinline 1 add def
+        /charsinline charsinline 1 Text /wordlength get add add def
+        pop pop true Text begin
+      }
+      { exch end /style exch def Text begin false }
+      ifelse
+} bind put
+
+%----------------------------------------------- ScanStyleChange
+%  style_string | string           (side effects on style, current font)
+% NB: expects Text as current directory
+
+Text /ScanStyleChange {
+   {
+      dup 0 get currentdict exch end /style exch def begin
+      dup length 1 sub dup 0 gt { 1 exch getinterval }
+                                { pop pop () }
+                                ifelse
+      style 10 and 10 ne                        % not light & underline
+         { SetFontOfStyle exit }
+         { (\033) search { pop pop } { pop () exit } ifelse }
+         ifelse
+   } loop
+} bind put
+
+%----------------------------------------------- SetFontOfStyle
+
+Text /SetFontOfStyle {
+   0
+   style 1 and add
+   style 4 and 0 ne { 2 add } if
+   style 48 and 0 ne { 4 add } if
+   fontlist exch get dup null eq { pop fontlist 0 get } if setfont
+} bind put
+
+%---------------------------- LineAdjust ------------------------------
+% This prepares ShowLine to print adjusted lines:
+%
+%     adjustmode | --           (side effect on ShowText routine
+%                                used in ShowLine)
+%
+% Modes of line adjustments are:
+%
+%  0 - adjust to both left and right edges (both edges smooth)
+%  1 - adjust to left edge only (right edge ragged)
+%  2 - adjust to right edge only (left edge ragged)
+%  3 - adust to center (both edges ragged)
+
+/LineAdjust {
+  Text /Adjusts get exch get exec
+} bind def
+
+%------ 0: both left and right
+
+Text /Adjust0 {
+   spacesinline 0 gt 
+      { /ShowText { dup length 0 ne
+                     { linewidth spacesinline div 0 32 4 -1 roll widthshow }
+                     { pop }
+                     ifelse
+                  } def
+      }
+      { /ShowText /show load def }
+      ifelse
+} bind put
+
+%------ 1: left only
+
+Text /Adjust1 {
+    /ShowText /show load def
+} bind put
+
+%------ 2: right only
+
+Text /Adjust2 {
+    /lineabscissa linewidth lineabscissa add def
+    /ShowText /show load def
+} bind put
+
+%------ 3: center
+
+Text /Adjust3 {
+    /lineabscissa linewidth 2 div lineabscissa add def
+    /ShowText /show load def
+} bind put
+
+Text begin 
+/Adjusts  [ /Adjust0 load  /Adjust1 load /Adjust2 load /Adjust3 load ] def
+end
+
+%------------------------------------------------ ShowLine
+%  (theline) | --
+
+/ShowLine {
+   newpath lineabscissa lineordinate moveto
+   (\000) Text /ShowStyleChange get exec pop
+   theline
+   { (\033) search
+         { ActiveShowText pop Text /ShowStyleChange get exec }
+         { ActiveShowText exit }
+         ifelse
+   } loop
+} bind def
+
+
+%------------------------------------------------ MeasureLine
+%  measures theline, returning actual metrics in linelength, lineheight
+
+/MeasureLine {
+   /show load /show { false charpath } def
+   1 LineAdjust ShowLine
+   /show name
+   flattenpath pathbbox
+   2 index sub /lineheight exch def
+   2 index sub /linelength exch def
+   pop pop
+   1 LineAdjust
+} bind def
+
+%---------------------------------------------- ShowStyleChange
+%  string | substring      (side effects on position, showing)
+% 
+% consumes leading (style) byte and returns remainder of string in substring;
+% internally uses #64 bit of style to mark backspace stretch in progress
+% NB: expects context as current dictionary
+
+Text /ShowStyleChange {
+   {  dup 0 get /style exch style 64 and or def 
+      dup length 1 sub dup 0 gt { 1 exch getinterval }
+                                { pop pop () }
+                                ifelse
+      style 58 and 10 ne                   %  plain light & underline
+         { Text /SetFontOfStyle get exec
+           style 8 and 8 eq                %  underline
+              { /ActiveShowText /show load def }
+              { /ActiveShowText /ShowText load def }
+              ifelse
+           style 16 and 16 eq              % superscript
+              { currentpoint pop lineordinate superscriptlevel
+                add moveto }
+              { style 32 and 32 eq         % subscript
+                 { currentpoint pop lineordinate subscriptlevel
+                   add moveto }
+                 { currentpoint pop lineordinate moveto }
+                 ifelse
+              }
+              ifelse
+           style 10 and 10 eq             % super/sub and light underline
+              { style 64 and 64 ne
+                  { /style style 64 or def
+                    currentpoint pop /backupabscissa exch def
+                  } if
+              }
+              { style 64 and 64 eq        % end of backup stretch
+                  { currentpoint exch pop backupabscissa exch moveto
+                    /style style 64 xor def 
+                  } if
+              }
+              ifelse
+           exit
+         }
+         { (\033) search { pop pop } { pop () exit } ifelse }
+         ifelse
+   } loop
+} bind put
+
+%------------------------------- Umlaute --------------------------------
+%  /oldfont /newfont | --
+% produces a newfont that includes Umlaute from a normally encoded
+% (non-Symbol) oldfont
+
+/reencsmalldict 12 dict def
+/newcodesandnames [
+     8#216  /Adieresis
+     8#231  /Odieresis
+     8#232  /Udieresis
+     8#204  /adieresis
+     8#224  /odieresis
+     8#201  /udieresis
+     8#217  /Aring
+     8#236  /germandbls
+] def
+
+/Umlaute {
+   reencsmalldict begin
+   /newfontname exch def
+   /oldfontname exch def
+   /oldfontdict oldfontname findfont def
+   /newfont oldfontdict maxlength dict def
+   oldfontdict
+      { exch dup /FID ne
+         { dup /Encoding eq
+            { exch dup length array copy
+              newfont 3 1 roll put }
+            { exch newfont 3 1 roll put }
+            ifelse
+         }
+         { pop pop }
+         ifelse
+      } forall     
+   newfont /FontName newfontname put
+   newcodesandnames aload pop
+   newcodesandnames length 2 idiv
+      { newfont /Encoding get 3 1 roll put } repeat
+   newfontname newfont definefont pop
+   end     
+} bind def
+

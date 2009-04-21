@@ -1,0 +1,192 @@
+These macros for Autoconf test if latex and/or some others applications are installed
+
+To use this macro, just do the following :
+
+    add m4_include([latex.m4]) to the configure.in file
+
+    use autoconf -I<path to folder of latex.m4>
+
+or 
+    aclocal -I <path to folder that contains these macro>
+    autoconf
+    
+Then, you can use the following macro :
+
+AC_LATEX_CLASS_ARTICLE
+-> set $article to yes if class article exists
+
+AC_LATEX_CLASS_BOOK
+-> set $book to yes if class book exists
+
+AC_LATEX_CLASS_REPORT
+-> set $report to yes if class report exists
+
+AC_LATEX_CLASS(<class>,<var>)
+or
+AC_LATEX_CLASS(<class>,<var>,<action if yes>)
+or
+AC_LATEX_CLASS(<class>,<var>,<action if yes>,<action if no>)
+-> set $<var> to yes if <class> exists
+
+AC_LATEX_CLASSES ([<class1, class2, ...>],<var>)
+-> set $<var> to the first class that exists
+
+AC_LATEX_PACKAGE_AMSMATH
+-> set $amsmath to the right way to include amsmath
+
+AC_LATEX_PACKAGE_FONTENC
+-> set $fontenc to OT1 or T1
+
+AC_LATEX_PACKAGE_INPUT(<package>,<class>,<var>)
+-> set $<var> to yes if <package> can be \input within <class>
+
+AC_LATEX_PACKAGE_OPT(<package>,<class>,<var>,<opt>)
+-> set $<var> to yes if <package> with <opt> works within <class>
+
+AC_LATEX_PACKAGE(<package>,<class>,<var>)
+or
+AC_LATEX_PACKAGE(<package>,<class>,<var>,<action if yes>)
+or
+AC_LATEX_PACKAGE(<package>,<class>,<var>,<action if yes>,<action if no>)
+-> set $<var> to yes if <package> can be use within <class>
+
+AC_LATEX_PACKAGES([<package1>,<package2>,...],<class>,<var>)
+-> set $<var> to the first package that works with <class>
+
+AC_PROG_DVIPDF
+-> test if dvipdf exists and set $dvipdf
+
+AC_PROG_DVIPS
+-> test if dvips exists and set $dvips
+
+AC_PROG_FIG2DEV
+-> test if fig2dev exists and set $fig2dev
+
+AC_PROG_GNUPLOT
+-> test if gnuplot exists and set $gnuplot
+
+AC_PROG_GUNZIP
+-> test if gunzip exists and set $gunzip
+
+AC_PROG_GZIP
+-> test if gzip exists and set $gzip
+
+AC_PROG_LATEX
+-> test if latex exists and set $latex
+
+AC_PROG_MF
+-> test if mf exists and set $mf
+
+AC_PROG_PDFLATEX
+-> test if pdflatex exists and set $pdflatex
+
+AC_PROG_PS2PDF
+-> test if ps2pdf exists and set $ps2pdf
+
+AC_PROG_BIBTEX
+-> test if bibtex exists and set $bibtex
+
+AC_PROG_LATEX2HTML
+-> test if latex2html exists and set $latex2html
+
+AC_PROG_LATEX2MAN
+-> test if latex2man exists and set $latex2man
+
+AC_PROG_MAKEINDEX
+-> test if makeindex exists and set $makeindex
+
+AC_PROG_JPEG2PS
+-> test if jpeg2ps exists and set $jpeg2ps
+
+AC_LATEX_DVIPS_T (<paper>,<var>,[on|off])
+-> test if option -t <paper> in dvips works and set var to yes or no. if last parameter is on, use -t landscape and -t <paper>
+
+AC_LATEX_DVIPS_T_A4 
+-> test if option -t a4 in dvips works and set dvips_t_a4 to yes or no
+
+AC_LATEX_DVIPS_T_LETTER
+-> test if option -t letter in dvips works and set dvips_t_letter to yes or no
+
+AC_LATEX_DVIPS_T_A4_LANDSCAPE
+-> test if option -t a4 -t landscape in dvips works and set dvips_t_a4_landscape to yes or no
+
+AC_LATEX_DVIPS_T_LETTER_LANDSCAPE
+-> test if option -t letter -t landscape in dvips works and set dvips_t_letter_landscape to yes or no
+
+AC_LATEX_DVIPS_O_STDOUT
+-> test if option -t- in dvips works and set dvips_o_stdout to yes or no
+
+AC_PROG_MKTEXPK
+-> test if mktexpk exists and set $mktexpk
+
+AC_PROG_TEXHASH
+-> test if texhash exists and set $texhash
+
+AC_PROG_KPSEWHICH
+-> test if kpsewhich exists and set $kpsewhich
+
+AC_TEXMF_PATH
+-> test for a local texmf path where to install class and package
+
+AC_PROG_PNGTOPNM
+-> test if pngtopnm exists and set $pngtopnm
+
+AC_PROG_PNMTOPS
+-> test if pnmtops exists and set $pnmtops
+
+AC_PROG_JPEGTOPNM
+-> test if jpegtopnm exists and set $jpegtopnm
+
+AC_PROG_LATEX2PNG
+-> test if latex2png exists and set $latex2png
+
+AC_PROG_LATEX2RTF
+-> test if latex2rtf exists and set $latex2rtf
+
+AC_PROG_PSBOOK
+-> test if psbook exists and set $psbook
+
+AC_PROG_PSNUP
+-> test if psnup exists and set $psnup
+
+AC_PROG_PSSELECT
+-> test if psselect exists and set $psselect
+
+AC_PROG_PSRESIZE
+-> test if psresize exists and set $psresize
+
+AC_PROG_DVIBOOK
+-> test if dvibook exists and set $dvibook
+
+History :
+2004-08-14 : Version 1.3 of these macros
+2004-07-24 : Changing .dvips folder to be destroy at end
+2004-07-14 : Changing AC_LATEX_CLASS and AC_LATEX_PACKAGE to add feature
+             to support if and else operation
+             Adding AC_PROG_PNGTOPNM
+             Adding AC_PROG_PNMTOPS
+             Adding AC_PROG_JPEGTOPNM
+             Adding AC_PROG_LATEX2PNG
+             Adding AC_PROG_LATEX2RTF
+             Adding AC_PROG_PSBOOK
+             Adding AC_PROG_PSNUP
+             Adding AC_PROG_PSSELECT
+             Adding AC_PROG_PSRESIZE
+             Adding AC_PROG_DVIBOOK
+2004-06-18 : Adding AC_PROG_TEXHASH
+             Adding AC_PROG_KPSEWHICH
+             Adding AC_TEXMF_PATH
+2004-04-21 : Adding AC_LATEX_DVIPS_T_LETTER
+             Adding AC_LATEX_DVIPS_T_A4_LANDSCAPE
+             Adding AC_LATEX_DVIPS_T_LETTER_LANDSCAPE
+             Adding AC_LATEX_DVIPS_O_STDOUT
+             Adding AC_PROG_MKTEXPK
+             Bugs correction and adding some comments
+2004-04-20 : Adding AC_PROG_BIBTEX
+             Adding AC_PROG_LATEX2HTML
+             Adding AC_PROG_LATEX2MAN
+             Adding AC_PROG_MAKEINDEX
+             Adding AC_PROG_JPEG2PS
+             Adding AC_LATEX_DVIPS_T
+             Adding AC_LATEX_DVIPS_T_A4
+2004-04-19 : Version 1

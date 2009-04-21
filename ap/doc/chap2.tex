@@ -1,0 +1,1000 @@
+\chapter{THE  MACHINE}\label{chap:machine}
+
+We describe here the concepts and parts that define the generic D machine. Actual D machines have additional features by which they specialize for different tasks within a group of D machines that you set up for your work. The specializations of the D machine and their cooperation in a group will be described in Chapter \ref{chap:cluster}.
+
+
+\section{The Objects}\label{sec:objects}
+
+\begin{tabular}{>{\normalfont}l>{\bfseries}l}
+Simple objects & null\\    
+               & numeral\\ 
+               & operator\\
+               & name\\
+               & mark\\
+               & boolean\\\\
+
+Composite objects & array\\
+                  & list\\
+                  & dictionary\\
+                  & box\\\\
+\end{tabular}
+
+\noindent Simple  objects  are  unique,   self-contained  quanta  of  information. Composite objects may be or may not be unique,  and always consist of two separate  parts:  information that describes the object  and  information that represents the value of the object.  Simple objects are analogous to small  pieces  of  merchandise  that can  be  traded  over  the  counter. Composite objects are analogous to real estate. When you pass a composite object  via the operand stack to an operator,  you pass  the  information that describes the object,  you do not pass the value. Likewise, when you trade your house,  you do not put it physically on the negotiation table: you bring a copy of the deed.
+
+\begin{itemize}
+
+\item The \textbf{null} object fills a space and serves as a void. Some types of null object serve as the vehicle of a simple value that the D machine does not operate on but that it needs to opaquely pass around among operators (e.g., the handle of a network socket).
+
+\item The  \textbf{numeral} object comes in several types of number representation and range. The  numeral types comprise four ranges of signed integer (\emph{byte}, \emph{word}, \emph{long}, and \emph{extended} of 8, 16, 32, and 64 bit), and two precisions of IEEE real, \emph{single} and \emph{double} (32-bit and 64-bit). Operators that work on  numeral  objects use the intrinsic type specification to determine what arithmetics and conversions are required.  Where numeral types need to  be specified explicitly (e.g. when creating an array),  this is done by (passive) name objects whose  initial character is a type mnemonic, e.g., /w or /Word.
+
+\item The \textbf{operator} object represents an operation intrinsic to D or  provided in user-created libraries of extrinsic operators. An operator's value is an array of host machine code. For reasons of sanity, D does not \emph{provide} operators that let you operate on an operator's value. (For reasons of principle, D does not \emph{prevent} you from writing extrinsic operators that do just that.)
+
+\item The  \textbf{name} object's value is a compacted string. Currently name values are restricted to maximally 29 significant characters. Allowed characters are letters (upper and lower cases are distinguished), digits, and \emph{underline}. The first character of a name must not be a digit. When a name  object carrying the \emph{active} attribute is executed, the current vocabulary is searched  for an object associated with this name. The vocabulary is defined by the dictionaries currently held on the dictionary stack. A fast search  algorithm,  employing hashing,  performs  this  critical task (most searches in a dictionary conclude  after  a single name comparison regardless of the size of the dictionary). Name objects carrying the \emph{passive} attribute provide their value as a literal (for instance, for associating the name with some object).
+
+\item The \textbf{mark} object is explained by its name.
+
+\item The \textbf{boolean} object's value is either `true' or `false'.
+
+\item An \textbf{array} value is formed by a linearly ordered set of numeral values  of identical  types.  A \textbf{string} is an array of  byte-integers (note that character codes are \emph{signed} byte integers).  Elements  of arrays  are referred to by index;  the index of the  first  array element is zero. 
+
+\item A  \textbf{list} value is formed by a linearly ordered,  generally mixed  set  of (whole)  simple  objects  and/or  (descriptions  of)  composite  objects. \textbf{Procedures} are \emph{active} lists (see below),  of objects  to  be  executed. Because the list value,  again,  may contain lists or  dictionaries,  you can use lists to build nested high-order structures.  Value elements of lists  are  referred to by index;  the index of  the  first  list element is zero.
+
+Note  the  difference  between arrays and  lists:  arrays  pack  numeral values of the same type, not objects, whereas lists contain objects. Although you can make a  list of exclusively numeral  objects,  an  array  will  be preferable for organizing numerals of identical types,  because the array stores  the  numerical  values  in  a  more  compact  form  and   because mathematical  operators deal much more efficiently with array than  with  list values. In particular, many mathematical operators when working on arrays optimize cache memory use of the host machine and spread the work over multiple threads to use all processors in multi-processor Linux boxes; these services, which greatly speed numerical computations, are provided transparently.
+
+When you duplicate an array or list object under another name or when building a list,  or when you create a  child object that represents a subset of an array or list value, the respective operators create a new description, but they do not duplicate elements of the  value.  Hence the new objects share their values with the  original. Changes made to a shared value (by modifying the value of one of the sharing objects) will affect all sharing objects.
+
+\item A \textbf{dictionary} value is formed by a set of association pairs, of which one partner is a name,  and the other partner, any object. If the association is with a composite object,  that object is represented by a  description rather than the value.  Associations are constructed dynamically, through operators. Dictionary entries are always made or retrieved through a name key,  rather  than  a numerical index.  The information  contained  in  a dictionary is organized for quick retrieval by  name.  This organization precludes access via an index or subpartitioning into  child dictionaries.
+
+\item A \textbf{box} value is composite but its elements are not accessible for peaking and poking. A box can be marked by operators in VM space around successively created objects; the objects in this box can be selectively discarded to free their VM space. Specially typed boxes in VM \emph{can} be maintained for composite values that are privately created and used by extrinsic operators, but are inaccessible to intrinsic D operators (mind \emph{Pandora}). A single operator folds a tree of VM objects into a temporary box and saves the box in a binary file; another operator retrieves the tree and appends it to the objects in VM.
+\end{itemize}
+
+Objects  carry several \textbf{attributes}, some of which are changeable by operators. In composite objects,  these  attributes  are part  of the description;  objects that share a value thus need not  have identical  attributes.  An  object  is either  \emph{passive} or  \emph{active}.  This attribute  is changeable  and directs the use of the object,  as datum  or instruction. The \emph{tilde} attribute is converted to the \emph{active} attribute when tilded \emph{name}object is executed. The value of a composite object given the \emph{readonly} attribute can only be read,  but not modified (the \emph{readonly} attribute cannot be reversed, but you can have multiple descriptions of the composite object, some carrying \emph{readonly} and some not carrying the attribute). If the creation of a composite object involves the creation of a value,  this  object receives the \emph{parent} attribute;  objects  created  to share  a subset of a parent object value receive the \emph{child} attribute.
+
+\section{The Text Representation of Objects}\label{sec:textobjects}
+
+Objects are formulated in text using the printable subset of the USASCII character set  plus  the control characters,  `space', `newline', and `carriage return'. `Newline' and `carriage return' are equivalent in terminating a line. Object  tokens  are  separated  by \textbf{white  space},  a  single  or  several successive control characters. \textbf{Comment}, a `$|$' character and its followers up  to the end of the line, also act as white space (they  are  otherwise ignored by the machine).  In  addition  to the separation by white  space,  objects  are  delimited by any of the special characters,  ( ) [ ] \{ \} $<$ $>$, which serve to segregate enumerated or constructed contents of composite objects.
+
+A \textbf{numeral}  starts  with  a  digit,   sign,   or  `$\ast$'   character.   An \emph{integer} numeral consists of optional  sign and a sequence  of  digits, optionally concluded  by a type specifier.  The range of the  integer  is determined by the specifier ('b/B' for byte,  'w/W' for word,  'l/L'  for long, `x/X' for extended). These integers are signed and stored as 8, 16, 32, or 64 bit values, respectively. A \emph{real numeral} is distinguished from an integer  by  the  presence  of at least one  of:  a  fractional  part,  an exponent,  or a 's/S' or 'd/D'  specifier.  The exponential part consists of one  of the  characters  'e/E'  immediately followed by an optionally signed  sequence  of exponent   digits.   Real  numbers are  stored  with  32-bit   (single) or 64-bit (double) precision. Numerals that do not carry a type specifier will by default be of type /X (when lacking real-number features), or else will be of type /D.
+
+Numeral  values  can  be  \emph{undefined}.  Mathematical  operators  using  an \emph{undefined} value as an operand simply return \emph{undefined} results. Thus, arrays that contain invalid data in a few positions can be submitted to  computations without special attention to such exceptions,  a little luxury that saves tedious programming.  The text representation of an undefined numeral  is an  `$\ast$',  which  may  be  followed by a decimal  point  (to  indicate  an undefined real numeral), or by one of the type specifiers (if that helps make a point). 
+
+A \textbf{name} is a sequence of letters,  digits, or `underline' characters (the leading character must not be a digit). Names are limited to 29 significant characters (longer names are silently truncated).  Upper and lower case are distinguished. A name preceded by `/' is given the \emph{passive} attribute; otherwise the attribute is \emph{active}.  If you are familiar with  PostScript, please note the difference that D does not let you use characters like `?!@\#\&\$' in names.
+
+Simple  objects  other  than  numeral  or  name  have  no  direct   text representation.  Such  objects  are specified through  associated  names: `null' for the \textbf{null} object,  `true' or `false' for a \textbf{boolean},  and  names such as `add' for \textbf{operator} objects.  The \textbf{mark} object and a  complementary list  operator  are accessed through the `[' and `]'  special  characters, making  list  \emph{construction} formally  similar  to  array  or   procedure \emph{enumeration}. Note, however, that the objects that are enclosed between the `[' and `]' operators are executed at the time when this text is interpreted; their \emph{results} (which are accumulated on the operand stack) become the body of the list finally created by `]'. In this way passive-list contents are always computed rather than enumerated.
+
+All  classes of \textbf{composite} object can be created through  operators,  but only  \textbf{arrays}  and active lists (\textbf{procedures}) can be  defined  directly  in text form by enumerating their elements.
+
+Enumerated \textbf{arrays} are  composed of numeral values enclosed between  `$<$'  and  `$>$';  the array type is specified by  a  letter that immediately follows  the  `$<$'  character and applies to all numerals in the array.  Arrays  of  the byte type (\textbf{string}) may be defined  also  by alphanumerical  enumeration enclosed between `(' and `)';  character codes  that cannot  be designated directly in such an enumeration are represented  by backslash sequences:\\
+
+\begin{tabular}{>{\normalfont}l>{\normalfont}l}
+
+$\backslash$n &   newline (line feed)\\
+$\backslash$r &   carriage return\\
+$\backslash$( &   left parenthesis\\
+$\backslash$) &   right parenthesis\\
+$\backslash \backslash$ &    backslash\\
+$\backslash$ddd &  ASCII character code ddd (octal)\\
+$\backslash$ newline & no character - both are ignored\\\\
+\end{tabular}
+
+Elements  of an enumerated \textbf{procedure} are embraced by  `\{' and `\}'.  Objects  so embraced  are  not  executed:  they are translated  into  their  internal representations  and  simply stored as the value of the  procedure  object (compiled,  so  to  speak).  In particular,  no dictionary  searches  are performed  for active names at this time.  The objects contained  in  the procedure  value  will  be  executed  only  through  invocations  of  the procedure.
+
+Rather than enumerating the value of a procedure between `\{...\}' you can construct a list and assign the list the `active' attribute to make it a procedure. This is a method by which procedures are constructed on the fly by other D code. A shorthand is offered (with apologies) for such construction. It involves giving objects the attribute \emph{tilde} through the `$\sim$' prefix. The following long-hand and short-hand constructs have identical results:\\
+
+\begin{tabular}{>{\sffamily\bfseries}l}
+ [ x /y mkact /add mkact ] mkact \\
+ $\sim$[ x $\sim$y $\sim$add ] \\\\
+\end{tabular}
+
+They build a procedure that adds the value of \emph{x} at the time of building to the value of \emph{y} at the time of execution (note when the dictionary searches for \emph{x} and \emph{y} occur). When you refer to an active name during list construction, a dictionary search is done and the value of the matching object is placed into the list under construction. The \emph{tilde} attribute suppresses the dictionary search at this time; instead, the active name itself is inserted into the list (the future procedure). The \emph{tilde} attribute of the `[' operator tells the matching `]' operator to give the list the \emph{active} attribute when closing up the list construction (rendering the passive list a procedure). There are other uses of the \emph{tilde} attribute that will be described in \ref{ssec:controlops}.  
+
+\textbf{A constraint. }Arrays  and  procedures  defined by enumeration have  to  be  completely contained  within a single portion of text submitted to  the  translator (such as a console phrase or a string whose content has been derived from a file). The  translator  is used implicitly by the D executive  (mill)  described below.
+
+In  summary, the  text  form  of D  code  is  translated  with  minimal grammatical ado into a linear sequence of internal objects whose fate is to enter a mill of binaries described below. Object tokens become  either individual simple objects,  or become incorporated into  a composite  object  when  they  are  enclosed  between  certain  types  of bracket. 
+
+\section{Where Objects Live}\label{sec:whereobjects}
+
+Objects  live  on  three stacks and in  a  large  memory  area referred to as the Virtual Memory (VM). Sizes of these storage facilities are set to fixed values when the D machine is brought up (\emph{dvt}) or are created to a desired size by an operator (\emph{dnodes}).  The stacks  hold  whole simple  objects  or descriptions of composite objects.  The  VM  holds  a master  description  and  the  value of  all  parent composite objects (children objects are descriptions providing access to parts of parent object values, but there is no record of children objects per se in the VM).
+
+\begin{itemize}
+\item The \textbf{operand stack} holds objects to be consumed by operators or resulting from operators. D uses the \emph{reverse Polish notation}, and the operand stack serves as the universal vehicle for passing operands from one operator to another.  Objects  accumulate on this stack until an operation consumes them as operands.  While they remain on the stack,  they can  be explicitly manipulated there by stack operators.
+
+\item The  \textbf{execution  stack}  holds a file of objects  in  execution.  The  top element  is the next in line for execution,  whereas elements  below  are suspended until they become the top element.  An  object carrying the \emph{active} attribute can be submitted  to execution by pushing it on the execution stack (by an operator or through reference  to  an associated active name).  The execution stack  will  mostly be populated by active strings or procedures (active lists).  After a string has been moved to the execution stack,  the object tokens contained in it are successively translated and submitted to execution,  until the string is  exhausted  and  removed from the execution stack  (this  exposes  the latest suspended object).  With a procedure, the objects constituting its value  are successively submitted to execution.  Other objects pushed  on the execution stack are consumed at once.
+
+The  execution  stack  is transparently used by the operators  that  control  the repeated  execution  of procedures (loop operators). 
+
+Objects  moved  to  the execution stack can  be  earmarked  as  dropback levels.  If  an  object that is subsequently pushed on the  stack  for  execution invokes  a certain control operator,  this operator drops  the  execution stack  down to the topmost earmarked object. Execution resumes with that object, cutting short the execution of execution stack objects between the current top of the stack and the dropback object.  Activities can be swiftly terminated or  aborted in this way,  returning control to an  embracing  layer.  The technique also serves to terminate loops from within.  D is a  structural purist's language:  there is no `goto' statement. The dropback mechanism, however,  provides  for all cases where a `goto' might be desirable in  a structured program.
+
+\item The \textbf{dictionary stack} holds dictionary objects currently in use.  When  an active  name  object  is  executed,  the  name  is  looked  up  in  these dictionaries,  beginning  with the dictionary at the top and working toward the bottom.  The first  object  found to be associated with the name substitutes  for  the name  object.  The  dictionary  stack is  maintained  through operators.
+
+\item The \textbf{VM} occupies a substantial amount of the host machine's RAM space.  This memory is  called  `virtual'  because  you can  use it  only  through operators that establish a particular logical memory model.
+
+As composite objects are defined during D machine activity,  they consume space in VM and eventually exhaust all available space. This is prevented by a mechanism involving three housekeeping operators, by which sets of VM objects are earmarked and selectively discarded from the VM space (references made to them in remaining objects are voided). 
+\end{itemize} 
+
+
+
+\section{The Mill}\label{sec:mill}
+
+This  section describes the executive of the D machine, the \emph{mill} for short.  The mill accepts the objects that are handed to the machine and guides  them  to their targets,  where  they  are  stored,  consumed,  or transformed.
+
+Two varieties of D machine, the D virtual terminal (\emph{dvt}) and the D node (\emph{dnode}), have slightly different mills that make the machines deal differently with  external events and errors. These differences will be described in subsequent sections, which also tell you how to start up each variety of D machine, or terminate its operation. Here we consider the aspects of mill operation that that apply to both the \emph{dvt} and \emph{dnode} machines.
+
+When  the  program  that  implements  the  D  machine  is  brought   up, initializations are performed. These effect that:
+
+\begin{itemize}
+\item the  dictionary stack contains the \emph{system} dictionary  (of  intrinsic operators) and a \emph{user} dictionary (the `root' dictionary of the D machine).
+\item the execution stack holds a single object, a string. The string value is  derived  from a text file (called `startup\_dvt.d' or `startup\_dnode'; details are described in Chapter \ref{chap:cluster}). It holds the first sequence  of  objects  to be executed and,  thus,  is  analogous  to  the `bootstrap'  code  of an ordinary computer. The D objects imported from the startup file extend the operator set of the system by a library of procedures that are needed very often and may be viewed as operators that happen to be written in D.
+\item The VM is empty.
+\end{itemize}
+
+After this initialization,  the mill will cycle through a succession  of three  phases.  The ultimate goal of the mill's activity is to empty  the execution stack by fair play. When the execution stack has been exhausted, the D machine is idle, waiting for an external event that delivers new objects to the execution stack (e.g., a console phrase).
+
+Each  turn of the D mill  begins with the \textbf{test phase} evaluating conditions  that require special attention. This is followed by the \textbf{fetch phase},  during  which  the next object in sequence for execution is  determined.  That object, then, is executed in the \textbf{execution phase}.
+
+The \textbf{test phase} deals with external events that will typically push new objects onto the execution stack. The chief difference between the \emph{dvt} and \emph{dnode} is in their organizations of the test phase. The test phases of the two machine versions will be described separately in later sections. 
+
+In the \textbf{fetch    phase},    the   execution   stack   is   inspected    to derive the next object to be executed. This stack will only hold objects carrying the  \emph{active}  attribute.   A  simple  object   will be popped   and submitted directly to the  execution  phase.  Of a  procedure  or string, instead, the first object or translated token is extracted and submitted to the execution phase, whereas the remainder of the  procedure or string remains on the execution stack until the  entire procedure or string has been exhausted.
+
+A fine point is that a procedure object actually is popped  from the  execution stack \emph{prior} to the execution of its last value object  (to save stack space during end-to-end recursion).
+
+Any \emph{passive}  object  passed to the \textbf{execution  phase}  is  `executed'  by transfering it to the operand stack.
+
+An  \emph{active} object passed to the execution phase is given special attention if it is a  \emph{name}.  A  \emph{name} object is replaced by the currently associated object.  The search for an associated  object  involves  the  dictionaries  currently  held  on  the dictionary  stack and proceeds from the top of  that  stack to the bottom. The first association detected for the name is used. An active associated object  is pushed on the execution stack,  whereas a  passive  associated object is pushed on the operand stack. The mill starts a new turn.
+
+Execution  of other active objects also is directed by object class:
+\begin{itemize}
+\item A \emph{null} object is discarded.
+\item An \emph{operator}  object  is  invoked, i.e.  the  host  program  module represented  by the operator is executed.  A large set of system operators has been built into the D machine and is accessible through the system dictionary \emph{systemdict}, which is permanently present at the bottom of the dictionary stack. Libraries of additional operators (your personal extensions to the D operator set) can be loaded using certain operators and then become also incorporated into \emph{systemdict}.
+\item Any other object is executed like a passive object,  by  transferring it to the top of the operand stack (thus the active/passive sttribute is ignored).
+\end{itemize}
+
+Two small points require a note here:  (1)~ A passive null object is pushed  on the  operand  stack,  but  an active null  object  effects  nothing.  (2)~ A procedure object  encountered on the execution stack always  serves  as `instruction' because of its \emph{active} attribute;  reference to a  procedure through  an  active name has the same effect.  If a procedure  is  to  be worked  on  as `data',  it needs to be transferred to the  operand  stack. This automatically happens when a procedure object is encountered in a stream of objects being executed (rather than being referred to by an active name). You can also use \emph{get} to move a procedure associated with a name from a dictionary to the operand stack.
+
+Many functions that are essential for the D machine,  such as definition of name-object associations,  are not of concern to the mill. The mill is concerned only with the orderly consumption of objects,  whereas specific tasks   belong  to  the  operators.   This  strict  division   of   labor keeps  the plan simple and the D machine robust.  Operators will  be  dealt with in \ref{sec:operators}.
+
+\textbf{Errors} recognized by the  mill,  text  translator,  or operators  lead  to a consistent response in both types of D machine. The instance  of  discovery and a numeral representing the  error are reported on the \emph{dvt} that supervises the activity. Details of the reaction to errors will be described separately for each machine type.
+
+In  summary,  the D mill executes the objects submitted to it via  the execution stack, with effects that depend on the active/passive attribute and the class of the objects.  Object associations by name are resolved. Executed objects eventually precipitate in objects pushed on the operand  stack  (to  serve  as `data' for  operators),  or  lead  to  the execution  of  host  program modules (which  perform  the  `instructions' represented by D operators).
+
+
+\section{Working on a D Machine}\label{sec:works}
+
+When you are at the console of a D machine, the machine does not prompt you. It just sits there when it is not busy with executing D code. Simply type D code that you want to have interpreted. You can edit a phrase of D code as long as you have not concluded it with `return'. Hitting `return' submits your phrase to the D machine for interpretation.
+
+How can you tell the machine is ready for more? This depends on the kind of D machine that your console is connected to (see Chapter \ref{chap:cluster} for details). In short, if your target is a \emph{dvt}, you can simply keep typing because your code is buffered and successively executed in the order of entry. If your target is a \emph{dnode} or a group of \emph{dnodes}, you can observe the 'TheHorses' window: upon delivery of your code to the targets, the respective window row or rows turn green while a target is busy and turn back to white when a target becomes ready for new work. If you do not respect the 'busy' status of the target(s), the \emph{dvt} will reject your phrase of input with a `Wait!' message, unless you overrule that protection by tagging console phrases with '!' (shout, so to speak).
+
+If you have entered something like ``\{ \} loop'' the D machine will be running in a dead loop forever, unless you throw a wrench. Again, that wrench is different for the different kinds of D machine. For a \emph{dvt}, the wrench is typing `control-c` (twice when using an \emph{emacs} shell). For a \emph{dnode}, the wrench is entering (shouted) D code that will stop the loop activity, e.g. ``!abort'' if you want to make sure. 
+
+A D machine that has just started up has an initial vocabulary, of objects associated with names, residing in two dictionaries that permanently live as the bottommost two objects of the dictionary stack. The system dictionary (at the very bottom) references all intrinsic operators. If during a session you load a library of extrinsic operators, that set of operators will be merged with the operators already contained in the system dictionary (hence they are always accessible through their active names). The first entries in the user dictionary have been made by interpreting D code contained in the `startup' file for the kind of D machine you are using.  As you create new trees of D objects, reference their root objects in the user dictionary to maintain a permanent route of access (it is possible to `lose' D objects in the machine, and retrieving them can be entertaining).
+
+You should not redefine the objects handed to you in the user dictionary, unless you know exactly what you are doing. You will have to define additional objects in the user dictionary, but it is unwise to use the user dictionary as a working dictionary, littering it with random small objects. If you want to play around with the D machine as a desk calculator, define an empty dictionary for your new associations, reference it in userdict, and make it the current dictionary. The console phrase ``100 dict dup /junk name begin'' sees to that.
+
+
+\section{The Common Operators}\label{sec:operators}
+
+This section describes the operators or procedures commonly implemented in all varieties of D machine and accessible via the system and user dictionaries that are permanently present on the dictionary stack. We will simply refer to them as `operators' (those implemented as procedures are operators that happen to be written in D). The \emph{dvt} and \emph{dnode} varieties of D machine have additional machine-specific operators; these are described in Chapter \ref{chap:cluster}. The section groups the operators into functional tool boxes (some tools are multi-functional and hence appear in several toolboxes).
+
+In the operator tables that follow, items appearing on the left of  the operator  name (which is in \textbf{bold}) represent the operands and the order  in which these are expected on the stack (the last operand is the topmost  on the stack). The items on the right of the operator name  are the results deposited on the stack (again,  the last item is the topmost). These stack objects are designated by their class or type, or by names that reflect their usage;  alternate choices of an operand are separated by `/'.
+
+
+
+\subsection{Feeling around}
+
+Whatever you do with a D machine, you want to be able to know what is in there. The following operators tell you. They do not take operands or return results: they rather list information on the console:\\
+
+\begin{tabular}{>{\sffamily\bfseries}l>{\normalfont}l}
+\_   & `show top object of operand stack in brief form'\\
+v\_  & `show value of composite top object of operand stack'\\
+s\_  & `show value of string top object of operand stack as text'\\
+a\_  & `show all objects on operand stack in brief form'\\
+d\_  & `show top object of dictionary stack in brief form'\\
+da\_ & `show all objects on dictionary stack in brief form'\\
+xa\_ & `show all objects on execution stack in brief form'\\
+m\_  & `show current stack and VM usage'\\\\
+\end{tabular}
+
+\index{Operators!\_}
+\index{Operators!v\_}
+\index{Operators!s\_}
+\index{Operators!a\_}
+\index{Operators!d\_}
+\index{Operators!da\_}
+\index{Operators!xa\_}
+\index{Operators!m\_}
+\index{Operators!vm\_}
+
+To copy an object from the dictionary or execution stack to the operand stack (where you can further analyze it), use:\\
+
+\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+k & dg\_ & obj$_k$\\
+k & xg\_ & obj$_k$\\\\
+\end{tabular}
+
+\index{Operators!dg\_}
+\index{Operators!xg\_}
+
+\noindent where $k$ is the index of the targeted object, counting from the top down (the top element is $k=0$).
+
+The tool of choice for inspecting VM contents or file systems is a graphical browser called `TheEye'. This mouse-driven browser, which is written in D, is described in a Chapter \ref{chap:cluster}. 
+
+\subsection{Manipulating objects on the operand stack}
+
+Whenever you give the D machine a passive object to interpret, it puts that object on the operand stack. When your console input invokes an operator, the operator takes its operands from the operand stack and leaves its results on the operand stack.
+
+\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+obj & pop & --\\ 
+obj$_1$ obj$_2$ & exch & obj$_2$ obj$_1$\\ 
+obj & dup & obj obj\\ 
+obj$_1$ \ldots obj$_n$ n & copy & obj$_1$ \ldots obj$_n$ obj$_1$ \ldots obj$_n$\\
+obj$_n$ \ldots obj$_0$ n & index & obj$_n$ \ldots obj$_0$ obj$_n$\\
+a$_{n-1}$ \ldots a$_0$ n j & roll & a$_{j-1 \ mod \ n}$ \ldots a$_0$ a$_{n-1}$ \ldots a$_{j \ mod \ n}$\\
+$\|$ obj$_1$ obj$_n$ & clear & --\\
+$\|$ obj$_1$ obj$_n$ & count & obj$_1$ obj$_n$ n\\ 
+-- & [ & mark\\
+obj$_1$ \ldots obj$_n$ & ] & list\\
+obj$_1$ \ldots obj$_n$ & cleartomark & --\\
+obj$_1$ \ldots obj$_n$ & counttomark &  mark obj$_1$ \ldots obj$_n$ n\\
+-- & null & null\\
+-- & true & true\\
+-- & false & false\\\\
+\end{tabular}
+
+\index{Operators!pop}
+\index{Operators!exch}
+\index{Operators!dup}
+\index{Operators!copy}
+\index{Operators!index}
+\index{Operators!roll}
+\index{Operators!clear}
+\index{Operators!count}
+\index{Operators![}
+\index{Operators!mark}
+\index{Operators!]}
+\index{Operators!cleartomark}
+\index{Operators!counttomark}
+\index{Operators!null}
+\index{Operators!true}
+\index{Operators!false}
+ 
+
+Manipulation of objects on the operand stack becomes necessary,  for  instance, when  the  results  left on the stack by one operator  do  not  match  the 
+order of operands expected by a subsequent operator.  Simple  stack  operations remove (\emph{pop}),  exchange (\emph{exch}), or duplicate (\emph{dup}) the top element(s) of the stack.  Others  duplicate  portions  of the  stack  (\emph{copy}),  rotate  stack elements  in a chain (\emph{roll}),  or access the stack like an indexed  array (\emph{index}). The operand stack is cleared (\emph{clear}), or its elements are counted (\emph{count}).
+
+A word of caution: juggling objects on the stack can avoid making `variables' (and thus a wicked state machine). On the other hand, stack acrobatics quickly turn unintelligible to the acrobat. 
+
+There are facilities to mark a position on the stack ([) and to count  or delete the elements following the latest mark (\emph{counttomark}, The main use of `[' will be in list construction, as is described later.
+
+There  is no text representation of the null or  boolean  objects. Associations of these objects with names are provided in the system or user dictionaries (\emph{null}, \emph{true}, \emph{false}). 
+
+\subsection{Mathematical operations}\label{ssec:mathops}
+
+MONADIC operators are used in one of two possible ways:
+
+\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l} 
+num & operator & num (modified)\\
+array & operator & array (modified)\\\\
+\end{tabular}
+
+\noindent where the operator is one of:
+
+\begin{supertabular}{>{\sffamily\bfseries}l>{\normalfont}l}
+abs   & `take absolute value'\\
+neg   & `negate'\\
+sqrt  & `square root'\\
+cos   & `cosine'\\
+sin   & `sine'\\
+acos  & `arccosine'\\
+asin  & `arcsine'\\
+tan   & `tangent'\\
+atan  & `arctangent'\\
+exp   & `exponential, base $e$'\\
+ln    & `logarithm, base $e$'\\
+lg    & `logarithm, base $10$'\\
+floor & `round down to nearest integer'\\
+ceil  & `round up to nearest integer'\\\\
+\end{supertabular}
+
+\index{Operators!abs}
+\index{Operators!neg}
+\index{Operators!sqrt}
+\index{Operators!cos}
+\index{Operators!sin}
+\index{Operators!acos}
+\index{Operators!asin}
+\index{Operators!tan}
+\index{Operators!atan}
+\index{Operators!exp}
+\index{Operators!ln}
+\index{Operators!lg}
+\index{Operators!floor}
+\index{Operators!ceil}
+
+\noindent DYADIC operators are used in one of four possible ways:
+
+\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+num$_a$ num$_b$ & operator & num (result)\\
+array$_a$ num$_b$ & operator & array$_a$ (modified)\\
+num$_a$ array$_b$ & operator & num (result)\\
+array$_a$ array$_b$ & operator & array$_a$ (modified)\\\\
+\end{tabular}
+
+\noindent where the operator is one of:
+
+\begin{tabular}{>{\sffamily\bfseries}l>{\normalfont}l}
+add  & `sum, $a+b$'\\
+sub  & `difference, $a-b$`\\
+mul  & `product, $ab$'\\
+div  & `quotient, $a/b$'\\
+pwr  & `power, $a^b$'\\
+mod  & `modulus, $a \mod{b}$\\
+acos2  & `extended $\arccos(\frac{a}{\sqrt{a^2+b^2}})$'\\\\ 
+\end{tabular}
+
+\index{Operators!add}
+\index{Operators!sub}
+\index{Operators!mul}
+\index{Operators!div}
+\index{Operators!pwr}
+\index{Operators!mod}
+\index{Operators!acos2}
+
+
+The monadic operators take one operand. When given a numeral (scalar), they return a scalar. When given an array, they operate on all elements of the array, replace them with the results, and return the modified array. The dyadic operators take a pair of operands. With two scalar operands, they return a scalar result. With a pivotal scalar operand and a second array operand, they repeat the operation with each array element as the second operand and the scalar as the first operand; the scalar value is replaced by the running  result. In the converse operand configuration, a pivotal array and a second scalar operand, the operation is performed on each array element as the first operand always using the scalar as the second operand; the results overwrite the original array elements. With two arrays as operands, the operation is performed with the corresponding elements (array dimensions need to be matched) and the results overwrite the pivotal array.
+
+\emph{acos2 } computes the counterclockwise normalized arc (0 to 2$\pi$) corresponding to the Cartesian point $(a,b)$ on the circle around $(0,0)$. (It is a generalization of $\arccos$, which takes a single argument and thus cannot give a unique result for arcs extending over more than a half circle.)
+
+\paragraph{NOTA BENE: }All mathemetical operators first convert their operands into the double-precision floating point IEEE format, then perform the operation, and finally convert the result back into the type of the (first) operand. All operators work with all numeral types for first or second operands. The mantissa of the longest format of integer (63 bits) exceeds that of the highest precision of the floating-point format (53 bits). Thus operations involving integers of type '/X' return results with at most 53 bits of mantissa accuracy. A result of type '/X' and of value greater than or equal to $2^{53}$ is returned as \emph{undefined}.\\\\
+
+
+The   mathematical   operators  accept  \emph{undefined} operand values and automatically propagate \emph{undefined} into the result values. If the operation itself fails to yield a valid result,  it also returns \emph{undefined}. No error is indicated when mathematical operators receive or generate \emph{undefined} values, but other operators will generally reject \emph{undefined} operand values. The \emph{undefined} values of integers are expressed by the largest negative value of their ranges (e.g. -128 for /B). For real types \emph{undefined} values comprise all INF and NAN patterns of the IEEE floating point standard; the `$\ast$' notation for expressing undefined numeral values always generates +INF. You can test whether a /S or /D type numeral value is \emph{undefined} by comparing it through the \emph{eq} or \emph{ne} operator against `$\ast$'; both operators consider all possible INF and NAN patterns in this test as equal to `$\ast$' (+INF).
+
+The mathematical operators described here are executed in different ways by the \emph{dvt} and \emph{dnode} versions of D machine. In a \emph{dvt} a single thread of execution (processor) is used. The \emph{dnode} can use multiple threads, up to the number of processors in the hardware of the host. The number of threads used is controlled dynamically by operators. Except for the difference in execution time, the use of multiple threads is transparent to you.
+
+
+\subsection{Working with composite objects}
+
+Each class of composite object is created by a specific  operator, \emph{array},  \emph{list}, ], \emph{dict}, and \emph{save}. (Other operators can also create composite objects in VM; these include: \emph{readboxfile}, \emph{send} (in the target), \emph{token}, \emph{save}, \emph{regex}, \emph{regexi}, \emph{fromscreen}, \emph{Xauthgen}, \emph{loadlib}).
+
+Several  operators  perform  analogous  tasks  on  composite  objects  of several classes. They inquire the dimension of the object (\emph{length}), access or replace individual elements (\emph{get}, \emph{put}), physically copy the elements of the object value to another object (\emph{copy}),  or present the elements of  the value successively to a procedure, which is invoked once for every element (\emph{forall}).  Arrays  or  lists  (but  not  dictionaries)  may  be  logically subdivided into subarrays or sublists (\emph{getinterval}). Subarrays or sublists physically  share their elements with their parents and  siblings;  hence, changes  made  to  one  member of the object  family  affect  others  that represent  concerned elements of the value.\\
+
+\noindent The following operators work on ARRAYS:
+
+\begin{supertabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+n /type & array & array\\
+array & length & n\\
+array index & get & num\\
+num array index & put & --\\
+array index n & getinterval & subarray\\
+array$_1$/num array$_2$ & copy & (sub)array$_2$\\
+array$_1$ index array$_2$ & fax & array$_1$ index\\
+d-array idx count s-array & tile & d-array idx\\
+d-array idx count first step & ramp & d-array idx\\
+s-array idx iv d-array & extract & d-subarray\\
+s-array d-array idx iv & dilute & d-array\\
+s-array d-array idx iv &dilute\_add & d-array\\
+array n /type  & parcel & subarray$_2$ subarray$_1$\\
+oldmin oldmax array & extrema & newmin newmax\\
+array bool & ran1 & array\\
+array proc & forall & --\\
+string seek & anchorsearch & post match true\\
+            &              & or string false\\
+string seek & search & post match pre true\\
+            &        & or string false\\
+string & token & post obj true \\
+       &       & or string false \\
+string regexpr & regex & post match pre [submatches] true\\
+               &       & string false\\
+string regexpr & regexi & post match pre [submatches] true\\
+               &       & string false\\\\
+\end{supertabular}
+
+
+\index{Operators!array}
+\index{Operators!length}
+\index{Operators!get}
+\index{Operators!put}
+\index{Operators!getinterval}
+\index{Operators!copy}
+\index{Operators!fax}
+\index{Operators!tile}
+\index{Operators!ramp}
+\index{Operators!extract}
+\index{Operators!dilute}
+\index{Operators!dilute\_add}
+\index{Operators!forall}
+\index{Operators!parcel}
+\index{Operators!extrema}
+\index{Operators!ran1}
+\index{Operators!anchorsearch}
+\index{Operators!search}
+\index{Operators!token}
+\index{Operators!regex}
+\index{Operators!regexi}
+
+ Mathematical operators working with arrays have been described in \ref{ssec:mathops}. More mathematical operators for arrays are provided in a \emph{dnode} and are described in Chapter \ref{chap:cluster}.
+
+\emph{copy} moves  array elements from one array into another, performing automatic numeral  type conversion of the source array elements if the array types do not match. If the length of the destination array is greater than that of the source array, only the elements that receive source elements are changed. \emph{copy} returns the destination array, or the subarray representing only the changed elements in the destination array.
+
+To tile the contents of one array into successive subarrays of a larger array, use \emph{tile}. Insert numbers generated with uniform increments into an array using \emph{ramp}. \emph{extract} copies every \emph{iv}-th element of one array into successive elements of another, and \emph{dilute} copies successive elements of one array into every \emph{iv}-th element of another (\emph{dilute\_add} works like \emph{dilute} but algebraically adds, rather than copies, elements to the destination array). These operators take any numeral type, but their operand arrays must match in type.
+
+\emph{parcel} subdivides an array into subarrays of arbitrary  numeral  type  and thus facilitates multiple  uses  of  arrays (Cave: no type conversion is done to the contents).
+
+\emph{extrema} updates the two running extrema given to it as numerals to comprise the extrema of the given array value. It takes any numeral and array types, and it returns the new extrema in the types of the old extrema. All numeral types encountered in \emph{extrema} are converted to /D type prior to the operation.
+
+\emph{ran1} generates a sequence of random numbers in an array of type `/S'. If the boolean operand is \emph{true} the sequence starts from the seed (which is internally set and always the same to allow generation of pseudo-random sequences), else the sequence is continued. Random numbers  are between 0.0 and 1.0 excluding the exact boundaries. The period of the generator is $\approx 10^8$ cycles. This is the function \emph{ran1} described in Press et al. (page 280).
+
+\emph{forall} applies a procedure sequentially to all elements of an array, providing the current element to the procedure (as top element of the operand stack).
+
+Five array operators specialize in strings (byte arrays).  These dissect  a string after seeking for a pattern that defines the  breakpoint. \emph{search} looks for the seek pattern anywhere in the string, whereas \emph{anchorsearch} checks if the seek pattern leads the string. \emph{token} parses the string using the rules of the D grammar and, when successful, returns the remainder of the string and the (first) D object found, in translated form. \emph{regex}, and its case-insensitive kin \emph{regexi}, also search a string for a matching pattern. They differ from \emph{search} in that the match is defined not by a simple string literal, but is described by a \emph{regular expression} (see C library manual page `man:regex.7' for a definition). A regular expression can specify a great variety of patterns that are searched for in a single pass through the string. When a match is obtained, the returned list contains literal strings showing what was matched in second or later pieces of the search pattern; the string \emph{match} includes the entire substring of \emph{string} that generated the match, including characters that were not match criteria. The regular expression itself is an (interpreted) string (mind the composition rules for D string literals). \emph{regex} and \emph{regexi} allocate VM space for the list and strings of submatches.\\
+
+
+\noindent The following operators deal with LIST objects:
+
+\begin{supertabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+n & list & list\\
+-- & [ & mark\\
+mark obj$_0$ \ldots obj$_{n-1}$ & ] & list\\
+list index & get & obj\\
+obj list index & put & --\\
+list index n & getinterval & sublist\\
+list$_1$ list$_2$ & copy & (sub)list$_2$\\
+list$_1$ index list$_2$ & fax & list$_1$ index\\
+oldmin oldmax list & extrema & newmin newmax\\
+list proc & forall & --\\
+list & transcribe & list\\\\
+\end{supertabular}
+
+\index{Operators!list}
+\index{Operators![}
+\index{Operators!]}
+\index{Operators!get}
+\index{Operators!put}
+\index{Operators!getinterval}
+\index{Operators!copy}
+\index{Operators!fax}
+\index{Operators!extrema}
+\index{Operators!forall}
+\index{Operators!transcribe}
+
+The square bracket operators,  `[ ]', serve to construct a list, element for element,  on the operand stack.  First,  a mark object is laid down  by the `[' operator. Subsequent  activity  produces  objects  that  accumulate  on  the   stack following the mark.  Finally, the `]' operator counts the objects down to the nearest mark, creates a list of matched size, copies all objects following that mark into the list's value,  pops these stack objects including the mark, and pushes   the  list object.  Note  that the similarity with array or procedure enumeration  is superficial:  the objects enclosed between `[ ]' are \emph{executed} like any other objects (they are NOT included literally into the body of the list as would be the case for objects enclosed between `\{\}').
+
+\emph{extrema} updates the two running extrema given to it as numerals to comprise the extrema of a list containing only numeral objects (see also the array version of \emph{extrema}).
+
+A  list  can give origin to an object tree,  which comprises the value of the root list itself. If elements of the root value are composite objects themselves,  also their values are part  of the tree.  Of the elements of these values, lists or dictionaries continue the  tree (as new nodes). The operator \emph{toboxfile} (see file operators) assembles,  in a temporary VM buffer, a compact copy  of  the values of all composite objects that  constitute  a tree  and  saves the compact copy into one file.  The complementary operator \emph{fromboxfile} retrieves that tree into VM,  again in one operation. These operators  thus allow you to move large,  logically connected collections of objects in  a convenient and physically efficient manner.
+
+A list, or any other object, submitted to \emph{transcribe} will be replicated, and the replica will be returned. The replication is recursive and thus includes the entire tree of objects that originates from a composite original object.\\
+
+\noindent The following operators deal with DICTIONARIES:\\
+
+\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+n & dict & dict\\
+dict & length & num\\
+dict & used & num\\
+dict & begin & --\\
+-- & end & --\\
+/name obj & def & --\\
+obj /name & name & --\\
+dict /name & get & obj\\
+obj dict /name & put & --\\
+dict /name & known & bool\\
+/name & find & obj\\
+dict$_1$ dict$_2$ & merge & dict$_1$\\
+dict & cleardict & dict \\
+dict proc & forall & --\\
+-- & systemdict & dict\\
+-- & userdict & dict\\
+-- & currentdict & dict\\
+-- & countdictstack & num\\
+list & dictstack & sublist\\
+dict & transcribe & dict\\\\
+\end{tabular}
+
+\index{Operators!dict}
+\index{Operators!length}
+\index{Operators!used}
+\index{Operators!begin}
+\index{Operators!end}
+\index{Operators!def}
+\index{Operators!name}
+\index{Operators!get}
+\index{Operators!put}
+\index{Operators!known}
+\index{Operators!find}
+\index{Operators!merge}
+\index{Operators!cleardict}
+\index{Operators!forall}
+\index{Operators!systemdict}
+\index{Operators!userdict}
+\index{Operators!currentdict}
+\index{Operators!countdictstack}
+\index{Operators!dictstack}
+\index{Operators!transcribe}
+
+
+The  total capacity (\emph{length}) or used capacity (\emph{used}) of a dictionary  can be inquired (as the number of association pairs). Other operators move  a dictionary  to  and from the dictionary stack (\emph{begin}, \emph{end})  in  order  to control  the lexical scope of name searches. Name-object associations are formed in the current dictionary (\emph{def},  \emph{name}) or  in  any  dictionary  explicitly  specified  (\emph{put}). All entries of a dictionary are discarded by \emph{cleardict}, returning an empty dictionary. You  can determine  whether a name is defined  in  a  particular dictionary (\emph{known}) or retrieve the associated object (\emph{get}). All active dictionaries (i.e. those present on the dictionary stack) are searched for an  association  by \emph{find}.  The associations in one dictionary are merged into another dictionary (\emph{merge}, as  by repeated \emph{def} operations). 
+
+A dictionary, or any other composite object, submitted to \emph{transcribe} will be replicated, and the replica will be returned. The replication is recursive and thus includes the entire tree of objects that originates from the original object.
+
+Two  dictionaries  always  present  on  the  dictionary  stack  and   the dictionary   currently   on  top  of  the  stack  are   accessed   through associated  names  (\emph{systemdict}, \emph{userdict}, and the operator \emph{currentdict}.  The  number  of dictionaries present on the dictionary stack is inquired through \emph{countdictstack},  and the  current contents of the dictionary stack are copied into a  list  for diagnostic purposes by \emph{dictstack}.\\
+
+\noindent BOX  objects are involved in the following operators:\\
+
+\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+-- & save & box\\
+box & capsave & --\\
+box & restore & --\\
+box & length & num (\# of bytes)\\\\
+\end{tabular}
+
+\index{Operators!save}
+\index{Operators!capsave}
+\index{Operators!restore}
+\index{Operators!length}
+
+
+\emph{save}, \emph{capsave}, and \emph{restore} manage VM space. \emph{save} creates a box object that represents all composite objects created following the execution of \emph{save}. \emph{capsave} caps the box object (objects created in VM following \emph{capsave} are outside the box). \emph{restore} removes the VM objects contained in the box from the VM, nulling all references made to these objects in remaining objects (no reference to objects in the box must exist on stacks by the time \emph{restore} is applied). The VM is compacted, such that all remaining composite objects are stored contiguously. The size of the box object can be inquired by \emph{length}. (Boxes containing a tree of objects can be stored in a file or retrieved from a file by \emph{toboxfile}, \emph{fromboxfile}.)
+
+The VM management operators are used by a set of procedures (included in \emph{userdict} via the startup files) in order to help you manage your D programs and their memory usage. The models established by this library are the \emph{module} and the \emph{layer}. A module is a tree starting from a dictionary. A layer is a caooed `save' box of composite objects that modules work on. Both modules and layers can be created, deleted, and re-created without wasting VM space.\\
+
+\noindent MODULE and LAYER are implemented using the operators:\\
+
+\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+/module\_name & module & /module\_name savebox\\
+/module\_name savebox dict & \_module & --\\
+/module\_name & forgetmodule & --\\
+/module\_name /snapshot\_name & savemodule & --\\
+/snapshot\_name & restoremodule & --\\
+/layer\_name & layer & --\\
+boolean /layer\_name & \_layer & boolean\\\\
+\end{tabular}
+
+\index{Operators!module}
+\index{Operators!\_module}
+\index{Operators!forgetmodule}
+\index{Operators!savemodule}
+\index{Operators!restoremodule}
+\index{Operators!layer}
+\index{Operators!\_layer}
+
+
+To construct a module, put the name of the new module on the operand stack, execute \emph{module}, define your module tree with a dictionary as root, put the dictionary on the operand stack, and execute \emph{\_module}. The construct is analogous to defining a procedure, using the \emph{module} and \emph{\_module} operators in place of the delimitors '\{...\}'. \emph{module} deletes a previously existing object matching \emph{module\_name} from the VM, and executes \emph{save}. \emph{\_module} defines the dictionary under \emph{module\_name} in \emph{userdict}, executes \emph{capsave}, and saves the savebox and module\_name in the module dictionary. Each time you define a new module under an existing module name, the old version is deleted from the VM so that dead wood will not accumulate.
+
+A module may comprise the D code constituting your `project'. It may alternatively contain a collection of tools used by many projects. The advantage of the module organization is that you can replace tools or projects by newer versions as you develop them while maintaining their D environment that you do not want to change at this time and while conserving VM space. \emph{savemodule} preserves a replica ('snapshot') of a module in VM space. \emph{savemodule} needs to be used with \emph{userdict} as the current dictionary. \emph{restoremodule} re-establishes the module by making a saved snapshot the module and discarding from VM the previous version of the module. You can in this way save the state of an entire project (including results that require lengthy computations) while you test new parts of your project and retrieve the previously accumulated results as you debug the new parts of your project.
+
+Sets of objects created during the execution of a module can be organized as a 'layer' and as such be automatically discarded from VM when another work cycle starts that constructs a new layer under the same name. Use \emph{layer} and \emph{\_layer} to mark the beginning and ending points in your D code of the operations that define the objects of the layer (while using the module dictionary as the current dictionary). This stretch of code should also be wrapped as a \emph{stopped} context so that its sucessful or failed completion is indicated by a boolean left on the operand stack. \emph{\_layer} passes this boolean through to the code of your module so that you can react to a failed construction of the layer.
+
+
+\subsection{Tests and logics}
+
+\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+any$_1$ any$_2$ & eq & bool\\
+any$_1$ any$_2$ & ne & bool\\
+num$_1$ num$_2$ & gt & bool\\
+num$_1$ num$_2$ & ge & bool\\
+num$_1$ num$_2$ & lt & bool\\
+num$_1$ num$_2$ & le & bool\\
+bool$_1$/num$_1$ bool$_2$/num$_2$ & and & bool/num\\
+bool$_1$/num$_1$ bool$_2$/num$_2$ & or & bool/num\\
+bool$_1$/num$_1$ bool$_2$/num$_2$ & xor & bool/num\\
+bool/num & not & bool/num\\
+-- & true & true\\
+-- & false & false\\
+num shift & bitshift & num\\\\
+\end{tabular}
+
+\index{Operators!eq}
+\index{Operators!ne}
+\index{Operators!gt}
+\index{Operators!lt}
+\index{Operators!le}
+\index{Operators!and}
+\index{Operators!or}
+\index{Operators!xor}
+\index{Operators!not}
+\index{Operators!true}
+\index{Operators!false}
+\index{Operators!bitshift}
+
+The  relational  operators  compare two operands  and  return  a  boolean indicating whether or not the relation holds.  Any two objects of matching class are tested for equality (\emph{eq}, \emph{ne}) of their values (simple objects) or identity of their values (composite objects). Only numerals are tested for the other relations (\emph{ge},  \emph{gt}, \emph{le} \emph{lt}). \emph{eq} and \emph{ne} accept numerals of value \emph{undefined}, so they can test for the occurrence of this value.
+
+Logical operations (\emph{and}, \emph{or}, \emph{xor},  \emph{not}) use booleans (then returning  a boolean) or work in a bitwise fashion on numerals (then returning a numeral). The internal representation of numeral values normally remains transparent, but here it is important for understanding the bitwise logical operations. These operators are intended to be used on integers, which are 8-, 16-, or 32-bit two's complement numbers; the \emph{undefined} bit pattern is treated as a valid pattern (sign bit set, other bits reset). Real types are also accepted, but the interpretation of their results requires detailed knowledge of the IEEE floating-point formats. If two equal types are used in a binary logical operation, this operation is performed on all bits in parallel and the result is meaningful in all positions. If the second operand, however, is shorter than the first, the operands are aligned with respect to their least-significant bits and the shorter operand is expanded with zeroes. The operation is performed over the width of the first (longer) operand.
+
+\subsection{Controlling execution}\label{ssec:controlops}
+
+\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+obj & start & --\\
+obj & exec & --\\
+bool proc & if & --\\
+bool proc$_1$ proc$_2$ & ifelse & --\\
+init incr limit proc & for & --\\
+count proc & repeat & --\\
+proc & loop & --\\
+array/list/dict proc & forall & --\\
+-- & exit & --\\
+obj & stopped & bool\\
+-- & stop & --\\
+-- & abort & --\\
+-- & countexecstack & num\\
+list & execstack & sublist\\\\
+
+\end{tabular}
+
+\index{Operators!start}
+\index{Operators!exec}
+\index{Operators!if}
+\index{Operators!ifelse}
+\index{Operators!for}
+\index{Operators!repeat}
+\index{Operators!loop}
+\index{Operators!forall}
+\index{Operators!exit}
+\index{Operators!stopped}
+\index{Operators!stop}
+\index{Operators!abort}
+\index{Operators!countexecstack}
+\index{Operators!execstack}
+
+
+Control operators modify the usual linear execution of objects. Many work with a procedure operand that they execute conditionally or repeatedly. In addition to the control operators listed in this section, other events, like those originating from communication with connected D machines or X Windows can also schedule objects for execution.
+
+Any  object  carrying the \emph{active} attribute is pushed onto  the  execution stack for immediate execution by \emph{exec}. \emph{start} does so, too, \emph{after} popping the currently executing object from the execution stack. A procedure (or any active object provided in its place) is  executed conditionally,  dependent on the value of a boolean operand (\emph{if}), or one of two procedures is executed dependent on a boolean (\emph{ifelse}). Several  operators execute a procedure  repeatedly. \emph{for} takes three numeral operands defining a range and step to control an internal count and executes a procedure for each count of the range, providing the procedure with the current count as the top element of the operand stack. \emph{repeat} executes a procedure a prescribed number of times. \emph{loop} repeats the execution of the procedure indefinitely (unless terminated from within). \emph{forall} executes a procedure for each element of a composite object, providing the procedure with the current element as top element of the operand stack. Any loop operator can be terminated by executing one of the operators \emph{exit}, \emph{stop}, or \emph{abort} within the dynamic context of the loop body. \emph{exit} terminates the execution of the current loop and resumes execution of the object following the loop operator of the terminated loop.
+
+\emph{stopped} executes an object (usually a procedure) with a provision for two alternate kinds of termination, normal or stopped. Stopped termination  (effected  by  the \emph{stop} operator  executed from  within  the dynamic context of the object) returns \emph{false}, normal termination returns \emph{true}, and execution continues execution with the object immediately following \emph{stopped}. This construct helps  prepare  contexts that terminate on  exceptional events and turn control over to a supervisory context. The exceptional termination removes from the execution stack all objects that belong to the stopped context (such as pending procedures and loops in execution); it provides a clean exit from a domain of structured code. \emph{abort} drops the execution stack down to the most basic level (an \emph{aborted} capsule in the \emph{dvt} or the very bottom of the stack in the \emph{dnode} variety of machine). The loop termination operator, \emph{exit}, cannot move control outside the context of a stopped operator (the attempt produces an error), and \emph{stop} cannot move control outside an \emph{aborted} context in a \emph{dvt}.
+
+The operand described above as \emph{proc} typically is an active list (objects enclosed between `\{ \}'). You may supply instead any active object. A convenient method to supply an active name as operand to the control operator is to give the name with the \emph{tilde} attribute. When the tilded object is executed it is converted to an \emph{active} object and pushed on the operand stack, where the control operator will consume it.
+
+
+\subsection{Types, attributes, and their conversions}
+
+\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+obj & class & /class\\
+num/array & type & /type\\
+obj & readonly & bool\\
+obj & active & bool\\
+obj & parent & bool\\
+obj & tilde & bool\\
+obj & mkread & obj\\
+obj & mkact & obj\\
+obj & mkpass & obj\\
+num/array /type & ctype & num/array\\
+array n /type & parcel & rest-of-array subarray\\
+stringbuf index width obj & text & stringbuf index\\
+stringbuf index width num format & number & stringbuf index\\
+proc & bind & proc\\\\
+\end{tabular}
+
+\index{Operators!class}
+\index{Operators!readonly}
+\index{Operators!type}
+\index{Operators!active}
+\index{Operators!parent}
+\index{Operators!tilde}
+\index{Operators!mkread}
+\index{Operators!mkact}
+\index{Operators!mkpass}
+\index{Operators!ctype}
+\index{Operators!parcel}
+\index{Operators!text}
+\index{Operators!number}
+\index{Operators!bind}
+
+The  class,  numeral type,  and attributes of an object are  inquired by specific operators. \emph{class} or  \emph{type} return passive names such as  `/nameclass'  or  `/b'. The attributes of an object are inquired by \emph{readonly}, \emph{active}, \emph{parent}, or \emph{tilde}.  \emph{mkread}, \emph{mkact}, \emph{mkpass} change an attribute; the \emph{readonly} attribute cannot be reversed once established. An object carrying the \emph{tilde} attribute is treated as passive object when it is executed and the \emph{tilde} attribute is automatically removed (a tilded name object would turn active thereby). Uses of \emph{tilde} are described in \ref{sec:textobjects}.
+
+The  type  of  a  numeral or array is converted  into  a  different  type by \emph{ctype},  and an array of any type is parcelled into subarrays of the same or other type by \emph{parcel}.  Type conversion of a numeral object converts  the type  specification  of the object and translates the value into  the  new binary representation.  Type conversions involving arrays change only  the type  specification in the object description,  but do not  translate  the value from the old to the new binary representation  (hence,  pre-existing values of such arrays generally become uninterpretable).
+
+\emph{text} or \emph{number} translate an object into a text representation and insert the created text into a string buffer. Insertion into the buffer is controlled by the \emph{width} operand (a numeral). The absolute value of \emph{width} controls the number of characters (including padding spaces) that are inserted into the buffer. The sign of \emph{width} controls the adjustment (negative: left; positive: right). If \emph{width} is given with an \emph{undefined} value (`$\ast'$), the minimal number of characters needed to represent the object is inserted (without leading or trailing spaces). The text is inserted into a string buffer, starting at the element designated by \emph{index}; the index is updated to point to the next free element of the buffer. \emph{text} interprets the operand \emph{obj} as follows: numeral: the character coded by the numeral value is inserted; string: the string value is inserted; name: the text form of the name (with the passive attribute represented as a `/' prefix) is inserted; operator: the text form of the operator name is inserted. \emph{number} translates only numeral objects \emph{num} as specified by the numeral \emph{format}. A negative sign of \emph{format} selects fixed-point representation, a positive sign, floating-point representation. The value of \emph{format} specifies the number of fractional digits to include for a non-integer numeral (with automatic rounding). An \emph{undefined} value of \emph{format} specifies the maximal number of fractional digits needed to represent \emph{num}. 
+
+Subjecting  a procedure to the \emph{bind} operator replaces name  objects  that resolve to operators in the context of the current dictionary stack by the operator  objects  themselves. \emph{bind} applies itself to the  body  of  the operand procedure,  and recursively to the bodies of all procedure objects nested therein.  This has two consequences:  (1) re-definition of  current operator  names will not affect the behavior of the bound  procedure,  and (2) execution will be speeded as bound operators are referred to  directly rather than through an association.
+
+\subsection{Controlling VM resources}
+
+\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+-- & vmstatus & max used\\
+-- & save & box\\
+box & capsave & --\\
+box & restore & --\\
+null or parent & nextobject & obj true\\
+            &            & or false\\\\
+\end{tabular} 
+
+\index{Operators!vmstatus}
+\index{Operators!save}
+\index{Operators!capsave}
+\index{Operators!restore}
+\index{Operators!nextobject}
+
+The  values of internal objects that are created during a D  session  are accumulated  in  the  virtual memory (VM),  eventually  filling  all  available physical space. \emph{vmstatus} lets you examine the current capacity and usage of VM space (returned as number of bytes). \emph{save}, \emph{capsave}, and \emph{restore} let you mark and reclaim used VM space.
+
+\emph{save} creates a box object in VM that marks the current level of used VM space. When following some further activities \emph{restore} is applied to this box object, it discards all VM objects created after that instance of \emph{save}. This could leave object descriptions in the machine (on the stacks or in composite objects remaining in the VM) that refer to discarded VM objects. Therefore, \emph{restore} scans the stack for such references before it makes changes (it terminates with an error if it finds a reference). \emph{restore} then discards the VM objects and scans all remaining VM objects for references to discarded objects. It replaces discarded objects in lists by \emph{null} or purges associations with discarded objects from dictionaries.
+
+When \emph{capsave} is applied to a \emph{save} box object, the range of discardable VM objects is restricted to those created between the executions of \emph{save} and \emph{capsave}. When \emph{restore} is applied to a `capped' save box, it deletes the enclosed range of VM objects and in addition moves all objects created after those in the discarded range to compact the used VM space (references to moved objects will be automatically corrected in remaining objects).
+
+\emph{nextobject} retrieves a composite object from VM. If used with a null object as operand, the first object created in the VM is retrieved; with a VM object given as operand, the next object created after the operand object is retrieved. Applying \emph{nextobject} repeatedly to each retrieved object will scan the VM objects in their order of creation. Note that only parent objects are accessible to \emph{nextobject}, since no record of children objects is maintained in VM. In this way, you can locate a `lost' object, for which you have not saved a reference. \emph{nextobject} can also verify VM integrity as it will fail when running into a broken VM object.
+
+
+
+\subsection{File access}
+
+\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+string & getwdir & substring\\
+string & setwdir & --\\
+(path/) (filename) string & readfile & substring\\
+string (path/) (filename) & writefile & --\\
+(path/) (filename) & readboxfile & rootobj\\
+rootobj (path/) (filename) & writeboxfile & --\\
+(path/) & findfiles & filelist\\
+string & tosystem & --\\
+string$_1$ & fromsystem & string$_2$\\\\
+\end{tabular}
+
+\index{Operators!getwdir}
+\index{Operators!setwdir}
+\index{Operators!readfile}
+\index{Operators!writefile}
+\index{Operators!readboxfile}
+\index{Operators!writeboxfile}
+\index{Operators!findfiles}
+\index{Operators!tosystem}
+\index{Operators!fromsystem}
+
+
+The path operand of file operators is a directory tree following the Linux convention and concluded by `/'. \emph{readfile} reads the file contents into the buffer \emph{string} and returns the filled substring (if \emph{string} cannot hold the entire file, an error results). Box files contain a folded tree of objects that is described to \emph{writeboxfile} by the root object (a list or dictionary); \emph{readboxfile} copies the objects of the tree to the VM and returns the root object of the tree. Box files could be written and read by different generations of D machine and/or D machines running on different platforms. For interconversion issues see \ref{ssec:network}.
+
+\emph{getwdir} and \emph{setwdir} return the current directory or set a new current directory for subsequent file accesses.
+
+\emph{findfiles} scans the specified file directory and returns a sorted list of the entries; each entry is described by a list containing: filename (string), file size (numeral, in bytes), compact date/time of last modification, and the file attributes (a /W numeral whose bitwise interpretation is: \texttt {TTTT---uuugggooo}, where TTTT = 1100 - socket, 1010 - symbolic link, 1000 - regular file, 0110 - block device, 0100 - directory, 0010 - character device, 0001 - fifo, and where uuu, ggg, and ooo are bits defining the user (owner), group, and all (user, group,and all others) access privileges (read/write/execute)). The list of entries is sorted in the order directories, files, with each subgroup sorted alphabetically.
+
+\emph{tosystem} submits the string as a Linux command to the bash/emacs shell without waiting for completion. The operator is listed \emph{here} because many file manipulations (like moving or deleting) are not supported by D operators, but are instead left to existing Linux commands. \emph{tosystem} has unlimited other uses. \emph{fromsystem} is a generalization of \emph{tosystem}. It submits its operand string to the current Linux shell, blocks until the command has been completed, and returns a newly created string object holding the output of the invoked Linux command(s). (The returned string is created by \emph{fromsystem}; use \emph{save} and \emph{restore} to discard such strings to prevent their accumulation.)
+
+\subsection{Time and date}
+
+\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+-- & gettime & time\\
+time long-array-of-6 & localtime & array\\\\
+\end{tabular}
+
+\index{Operators!gettime}
+\index{Operators!localtime}
+
+
+\emph{gettime} returns compacted Linux time as an extended numeral
+(seconds since something). \emph{localtime} converts this long numeral
+into a local time and date and deposits the detailed result in the
+array; the entries are: year month day hour min sec. The time of day
+is the military version of the Babylonian, or whatever they call it.
+
+\subsection{Networking}\label{ssec:network}
+
+\begin{ops}
+(servername) port & connect    & socket \\
+socket            & disconnect & --     \\
+socket string     & send       & --     \\
+socket comp_obj   & send       & --     \\
+--                & getsocket  & socket \\
+socket sig        & sendsig    & --     \\
+\end{ops}
+
+A connection between two D machines is established when one of the
+machines establishes it (\op{connect}). The target of the connection
+is always a \dcomp{dnode} described by the network name of its host
+and by the number of the port where that \dcomp{dnode} is listening
+for connection requests (a \dcomp{dvt} does not listen for connection
+requests). The port number is an offset into the range of user
+reserved ports, starting with `0'; it is assigned to the \dcomp{dnode}
+when the \dcomp{dnode} process is started up by a shell command to the
+respective host. \op{connect} returns a socket number opaquely stored
+as the value of a typed \emph{null} object (you cannot play with it,
+but you can pass it around in the D machine). The connection is closed
+by \op{disconnect}.
+
+Two forms of message can be sent by connected machines to ane another
+(regardless of who established the connection). The first form submits
+a string; the receiving machine makes the string active and transfers
+it to the execution stack, so that the string is interpreted by the
+receiving machine. The second form of message folds the tree that
+originates from the composite operand object into a temporary box
+object and transmits the box object. The receiving machine executes
+\op{save}, unfolds the tree in the received box object into its VM,
+and transfers the root object with its active/passive attribute set to
+active onto the execution stack, thereby executing the root
+object. The composite object can be a list, dictionary, or array
+(except string). In other words, the difference between the two forms
+is that with a non-string composite operand object the receiving
+machine invokes \op{save} prior to executing the object, whereas with
+a string operand \op{save} is not invoked.
+
+The example\\
+
+\begin{tabular}{>{\sffamily\bfseries}l}
+  [ $\sim$dup $\sim$capsave somedict $\sim$begin $\sim$proc-name $\sim$end $\sim$restore ]\\\\
+\end{tabular}
+
+\noindent caps the save object that contains the downloaded tree
+(whose root is the list object), executes a procedure with a
+downloaded dictionary (a node of the tree) as the curent dictionary,
+and discards the tree from the VM of the receiving machine.
+
+The receiving machine also performs necessary conversions when it
+receives D objects from a machine that invokes \op{send}. This is done
+during the unfolding of the received tree (\op{readboxfile} proceeds
+similarly when it recovers a tree from a box file). Interconversion of
+little and big Endian formats are done automatically when two
+different platforms communicate. On the other hand, the communicating
+D machines must use the 64-bit binary format for their objects (note:
+these D machines can be implemented on 32 and 64 bit platforms; the
+point is that the D object formats must be the same). Older D machines
+using the 32-bit object format do not communicate with the current
+64-bit D machines (there exists, however, an undocumented operator to
+rescue box files that use the now obsolete 32-bit object format).
+  
+
+A \dcomp{dvt} receives a \op{send} message through the \op{nextevent}
+operator; in a \dcomp{dnode} it is the mill that receives and executes
+the message. A difference between the two machine types is that the
+\dcomp{dvt} will not process a message before it has completed an
+ongoing activity, whereas a \dcomp{dnode} will interrupt an ongoing
+activity (within a limited number of mill cycles) to attend to the
+message.
+
+\op{getsocket} returns the socket number of the socket through which
+the most recent message was received. There is a grace period of 100
+mill cycles before another message will be accepted. In this period
+the activity started by the message can execute \op{getsocket} with
+results that are guaranteed to be correct.
+
+The operators described in this group effect point-to-point network
+communication between two D machines using a bi-directional stream
+protocol. Another group of network operators effect
+point-to-many-points communication among D machines using the MPI
+(Message Protocol Interface). The second group of network operators is
+available only to \dcomp[dnode]{dnodes} and \dcomp[dpawn]{dpawns}, and
+is described in Chapter \ref{chap:cluster}.
+
+\op{sendsig} sends a `signal' to a \dcomp{dvt} or \dcomp{dnode}. The
+signal is a platform independent integer, that maps to a
+platform-dependent POSIX signal number on the receiving end; these are
+mapped in \file{dm-signals.c} in the \texttt{sigmap} array. That
+mapping is accessible directly in \emph{D} via the \proc{SIGNALS}
+dictionary, which maps the names of signals (such as \textproc{QUIT}
+for \texttt{SIGQUIT} or \texttt{KILL} for \texttt{SIGKILL}) to the
+platform neutral \emph{D} enumerations.
+
+\subsection{Configuration inquiries}\label{ssec:confops}
+
+\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+-- & getstartupdir & (path) `where startup file is'\\
+-- & getmyname & string `host name where we are'\\
+-- & getmyport & port\# `where we are listening (dnode)'\\
+-- & getmyfqdn & string `hostname.domainname'\\
+-- & getconfdir & string `typically /etc/dm'\\
+-- & gethomedir & string 'your home dir on this host'\\\\
+\end{tabular}
+
+\index{Operators!getstartupdir}
+\index{Operators!getmyname}
+\index{Operators!getmyport}
+\index{Operators!getmyfqdn}
+\index{Operators!getconfdir}
+\index{Operators!gethomedir}
+
+
+Most of these operators return a readonly string object that is
+created once when the D machine is started and has a fixed value
+(changing only when \emph{vmresize} is executed in a \emph{dnode}).
+
+\subsection{Windows and graphics}\label{ssec:windows}
+
+Before you run D machines that use the X Window system, make sure that the X server is not only running on the \emph{dvt} host (where windows will be displayed), but that this X server is configured so that it listens on its ports for requests from other machines (where your \emph{dnodes} might live).
+
+Hooking up X window services in a D machine cluster requires a ritual. We describe the ritual below without apologies (we did not invent it). This ritual is well hidden in `startup' code so that you need not normally immerse in it -- you may nevertheless read about it for an idea of what might go wrong. \\ 
+ 
+
+\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+-- & Xauth & bool\\
+(name) data bool-trusted & Xauthgen & (name) data id\\
+(name) data & Xauthset & --\\
+id & Xauthrev & --\\ 
+-- & Xwindows & bool\\
+-- & Xdisplayname & string\\
+-- & screensize & width height\\
+xy (name) (iconname) & makewindow & window\#\\
+window\# bool & mapwindow & --\\
+window\# width height & resizewindow & --\\
+window\# bool & topwindow & --\\
+window\# &deletewindow & --\\
+RGB-array & mapcolor & color-index\\
+window\# xy color-index & drawline & --\\
+window\# xy color-index symbol\# size & drawsymbols & --\\
+window\# xy color-index & fillrectangle & --\\
+window\# xy (text) [ \ldots ] & drawtext & window\# x y\\
+-- & Xsync & --\\\\
+\end{tabular}
+
+\index{Operators!Xwindows}
+\index{Operators!Xsync}
+\index{Operators!Xdisplayname}
+\index{Operators!makewindow}
+\index{Operators!deletewindow}
+\index{Operators!mapwindow}
+\index{Operators!resizewindow}
+\index{Operators!mapcolor}
+\index{Operators!drawline}
+\index{Operators!drawsymbols}
+\index{Operators!fillrectangle}
+\index{Operators!drawtext}
+\index{Operators!screensize}
+\index{Operators!topwindow}
+\index{Operators!Xauthrev}
+\index{Operators!Xauthset}
+\index{Operators!Xauthgen}
+\index{Operators!Xauth}
+
+Hooking up a \emph{dvt} and its \emph{dnodes} to an X window server is rather complicated because the X window system involves security issues because it allows transfer of information among hosts. When a \emph{dvt} process is started from a shell, it will connect automatically to the local X server (it is authorized by the shell). When the \emph{dvt} thereafter connects to a \emph{dnode} it checks whether the security extension is built into the local X windows server (\emph{Xauth}). If the extension does not exist the \emph{dnode} will not be given authorization info and will be instructed to simply attempt to connect to the X server. If the extension does exist the \emph{dvt} generates an authorization using \emph{Xauthgen} and instructs the \emph{dnode} to give its X library that authorization (\emph{Xauthset}). From then on, the \emph{dnode} can execute \emph{Xconnect} to connect to the X server and use X windows services (see also X window operators for \emph{dnodes} in \ref{ssec:opsdnode}).
+
+\emph{Xauthgen} takes three operands. The \emph{name} string gives the name of a security method to be used. We use `MIT-MAGIC-COOKIE-1', which requires no \emph{data} so that the second-operand string \emph{data} can be left empty (that is not generally the case with other methods). The third operand \emph{bool-trusted} should be set to \emph{true} unless your D machines are to run on a cluster of the DOD. A \emph{dnode} has 60 sec to connect to the X server before the authorization is automatically revoked (this can also be explicitly done by \emph{Xauthrev}). The byte array \emph{data} returned by \emph{Xauthgen} is the authorization key to be given to \emph{Xauthset}. The also returned integer \emph{id} is a handle for this authorization (needed by \emph{Xauthrev}).
+
+A \emph{dvt} setting up a \emph{dnode} also needs to inform the \emph{dnode} which display name to use when connecting to the X server (that name is of the form `hostname:number'). The \emph{dvt} executes \emph{Xdisplayname} to retrieve this information. In some instances, the hostname `localhost' is inserted into the display name. This is not a problem when both the \emph{dvt} and \emph{dnode} run on one and the same host. It is a problem when the hosts are different. In this case, the \emph{dvt} needs to edit the display name, replacing `localhost' by the string returned by \emph{getmyfqdn} (see \ref{ssec:network}). 
+
+\emph{Xwindows} informs a D machine whether it is currently connected to an X window server. \emph{screensize} returns the screen dimensions for the design of windows that you create with \emph{makewindow}. \emph{makewindow} takes three operands. The first operand \emph{xy} specifies the position and dimensions of the window. The notation \emph{xy} is shorthand for a number of options of how coordinate information can be presented to X window operators:\\
+
+\begin{tabular}{>{\sffamily}r} 
+$<$ x y \ldots $>$\\{}
+[ x y \ldots ]\\{}
+$<$ x \ldots $>$ $<$ y \ldots $>$ \\{}
+$<$ x \ldots $>$ [ y \ldots ]\\{}
+[ x \ldots ] $<$ y \ldots $>$\\{}
+[ x \ldots ] [ y \ldots ]\\{}
+\end{tabular}
+
+The other operands of \emph{makewindow} provide two strings for the header of the window (no more than 30 characters) and for the label of the iconized window (no more than 12 characters). A numeral \emph{window\#} is returned to serve as handle for specifying the window to other window operators.
+
+When you create a window with \emph{makewindow} you become also responsible for creating a dictionary that holds the procedures named \emph{windowsize}, \emph{drawwindow}, and \emph{mouseclick}, and is included in \emph{userdict} under the name formed by concatenating the letter `w' with the window\# returned by \emph{makewindow}. The three procedures are designed for the usage:\\
+
+\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
+width height & windowsize & -- `be notified of change in dimensions'\\
+-- & drawwindow & -- `(re)draw window'\\
+x y modifiers & mouseclick & -- `react to mouseclick'\\\\
+\end{tabular}
+
+\emph{windowsize} responds by executing \emph{resizewindow}. It uses the new dimensions found on the stack; or a modification thereof (e.g. maintaining a certain aspect ratio); or discards the new and re-uses the old dimensions (for a window that resists resizing). \emph{drawwindow}  draws the contents of the window. \emph{mouseclick} receives as operands the coordinates of the mouse pointer and modifier numeral (see \emph{nextevent} in \ref{ssec:dvtops} for details).
+
+\emph{topwindow} places a window on top of any others when used with a \emph{true} boolean. \emph{mapwindow} has more complex effects on the visibility of windows. If applied to a specified window, it raises the window to the top if the boolean operand is \emph{true} or else hides the window. If \emph{null} is specified in place of a window\# either all windows associated with the X connection are raised to the top or hidden, dependent on \emph{bool}. To delete a window use \emph{deletewindow}.
+
+\emph{mapcolor} translates a color specified in an array of the form $<$ red green blue $>$ (intensities are numbers from 0.0 to 1.0) into a color index, a simple numeral. Drawing operators use the color index to select colors.
+
+\emph{fillrectangle} fills a rectangular area of the window with uniform color. \emph{drawline} interconnects a set of coordinate points by a line, following the order of the points in \emph{xy}. Similarly, \emph{drawsymbols} marks each coordinate point with a symbol selected by \emph{symbol}, a numeral:\\
+
+ 
+\begin{tabular}{>{\sffamily}r>{\sffamily}l}
+           0 & dot\\
+           1 & stroked diamond\\
+           2 & filed square\\
+           3 & stroked square\\
+           4 & stroked square with horizontal bar\\
+           5 & cross\\
+           6 & x\\
+           7 & filled circle\\
+           8 & stroked circle\\
+           9 & stroked circle with horizontal bar\\
+          10 & asterisk\\
+          11 & filled up triangle\\
+          12 & filled down triangle\\
+          13 & filled right triangle\\
+          14 & filled left triangle\\
+          15 & vertical bar, centered\\
+          16 & verical bar, bottom adjusted\\
+          17 & vertical bar, top adjusted\\
+          18 & horizontal bar, centered\\
+          19 & horizontal bar, left adjusted\\
+          20 & horizontal bar, right adjusted\\\\
+\end{tabular}
+
+\emph{drawtext} draws text starting at the position given by \emph{x} and \emph{y} and returns the window\# and coordinates (only \emph{x} is modified) of the position following the last written character for a subsequent use of \emph{drawtext}. Details are specified in the list operand: the string \emph{font\_spec} selects a font name in the X windows convention; \emph{col\_idx} a color; \emph{h\_align} and \emph{v\_align} an alignment ($<$0 - left (bottom); 0 - center; $>0$ - right (top)). Note that X windows caches up to 10 fonts so that their alternating uses do not produce unreasonable delays.
+ 
+The X window library buffers X window commands prior to transmitting them to the X server. \emph{Xsync} transmits that buffer instantly.
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "newbook"
+%%% End: 

@@ -1,0 +1,502 @@
+#line 2 "@srcdir@/drook.c.in"
+
+/* #ifdef _XOPEN_SOURCE */
+/* #if _XOPEN_SOURCE < 500 */
+/* #undef _XOPEN_SOURCE */
+/* #endif */
+/* #ifndef _XOPEN_SOURCE */
+/* #define _XOPEN_SOURCE 500 */
+/* #endif */
+
+#include "dm.h"
+#include "error-local.h"
+#include "dm2.h"
+
+#include <stdio.h>
+#include <mpi.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h>
+
+static UL32 nodes;
+static MPI_Comm children;
+static MPI_Comm childrensig;
+static MPI_Request* requests;
+
+DM_INLINE_STATIC void usage_error(const char* name) 
+  __attribute__ ((__noreturn__));
+static void usage_error(const char* name) {
+  error(1, 0, 
+	"Usage: %s\n"
+	"Unix socket is available on fd 3\n"
+	"Unix dgram signal socket is available on fd 4\n"
+	"Number of jobs is 32 bit number available on socket", name);
+  exit(1);
+}
+
+DM_INLINE_STATIC void read_socket_int(void* where, size_t n) {
+  ssize_t r, off = 0;
+  do {
+    switch ((r = read(3, where+off, n))) {
+      case 0: 
+	error(1, 0, "EOF from dnode");
+
+      case -1:
+	error(1, errno, "Error in socket read");
+
+      default:
+	n -= r;
+	off += r;
+    }
+  } while (n > 0);
+}
+
+DM_INLINE_STATIC void write_socket_int(const void* where, size_t n) {
+  ssize_t r, off = 0;
+  do {
+    if ((r = write(3, where+off, n)) < 0)
+      error(1, errno, "Error in socket write");
+
+    n -= r;
+    off += r;
+  } while (n > 0);
+}
+
+struct InfoPair {
+  char key[MPI_MAX_INFO_KEY];
+  char* val;
+};
+
+struct InfoDict {
+  size_t n;
+  P nodes;
+  struct InfoPair* pair;
+};
+
+struct InfoDicts {
+  P n;
+  struct InfoDict* dicts;
+};
+
+DM_INLINE_STATIC void usage(int argc, char* argv[], 
+			    struct InfoDicts* infodicts) {
+  B* infovm;
+  B* infovm_;
+  B* list;
+  P dlist;
+  size_t i;
+  if (argc != 1) usage_error(argv[0]); 
+  
+  if (! (infovm = (B*) malloc(FRAMEBYTES*2)))
+    error(1, errno, "Unable to malloc %lli for infovm", 
+	  (long long) FRAMEBYTES*2);
+  read_socket_int(infovm, FRAMEBYTES*2);
+  if (! (infovm_ = (B*) realloc(infovm, FRAMEBYTES*2+BOX_NB(infovm))))
+    error(1, errno, "Unable to malloc %li for infovm", 
+	  BOX_NB(infovm));
+  infovm = infovm_;
+  read_socket_int(infovm+FRAMEBYTES*2, BOX_NB(infovm));
+
+  list = infovm+FRAMEBYTES;
+  nodes = 0;
+  infodicts->n = (LIST_CEIL(list) - VALUE_BASE(list))/FRAMEBYTES/2;
+  if (! (infodicts->dicts
+	 = (struct InfoDict*) malloc(infodicts->n*sizeof(struct InfoDict))))
+    error(1, errno, "Unable to malloc %li for infodicts", 
+	  infodicts->n*sizeof(struct InfoDict));
+
+  for (i = 0, dlist = VALUE_BASE(list); 
+       dlist < LIST_CEIL(list); 
+       i++, dlist += 2*FRAMEBYTES) {
+    P e;
+    B* dict = list+VALUE_BASE(list+dlist+FRAMEBYTES);
+    size_t j;
+
+    PVALUE(list+dlist, &infodicts->dicts[i].nodes);
+    nodes += infodicts->dicts[i].nodes;
+
+    infodicts->dicts[i].n = (DICT_FREE(dict)-DICT_ENTRIES(dict))/ENTRYBYTES;
+    if (! (infodicts->dicts[i].pair 
+	   = (struct InfoPair*) malloc(infodicts->dicts[i].n
+				       *sizeof(struct InfoPair)))
+	&& infodicts->dicts[i].n)
+      error(1, errno, "Unable to malloc %li for infopair", 
+	    infodicts->dicts[i].n*sizeof(struct InfoPair));
+    
+    for (j = 0, e = DICT_ENTRIES(dict); 
+	 e < DICT_FREE(dict); 
+	 j++, e += ENTRYBYTES) {
+      B* namef = ASSOC_NAME(list+e);
+      B* valf = ASSOC_FRAME(list+e);
+      size_t k = ARRAY_SIZE(valf);
+
+      pullname(namef, infodicts->dicts[i].pair[j].key);
+      if (! (infodicts->dicts[i].pair[j].val = (char*) malloc(k+1)))
+	error(1, errno, "Unable to malloc %li for valf", k);
+      strncpy(infodicts->dicts[i].pair[j].val, list + VALUE_BASE(valf), k);
+      infodicts->dicts[i].pair[j].val[k] = '\0';
+    }
+  }
+  
+  free(infovm);
+}
+
+DM_INLINE_STATIC void initmpi(void) {
+  int argc = 0;
+  char* argv[] = {NULL};
+  int threadtype;
+
+  MPI_Init_thread(&argc, (char***)&argv, MPI_THREAD_MULTIPLE, &threadtype);
+  if (threadtype < MPI_THREAD_MULTIPLE)
+    error(1, 0, "MPI_Init_thread: Requested %i, received %i\n", 
+	  MPI_THREAD_MULTIPLE, threadtype);
+}
+
+static void exithandler(void) {
+  static B boxf[2*FRAMEBYTES];
+  P i;
+
+  TAG(boxf) = BOX;
+  VALUE_PTR(boxf) = 0;
+  BOX_NB(boxf) = FRAMEBYTES;
+
+  makename("quit", boxf+FRAMEBYTES);
+  ATTR(boxf+FRAMEBYTES) = (ACTIVE|BIND);
+  close(3);
+
+  for (i = 0; i < nodes; i++)
+    MPI_Isend(boxf, 2*FRAMEBYTES, MPI_UNSIGNED_CHAR, 
+	      i, 1, children, &requests[i]);
+
+  MPI_Waitall(nodes, requests, MPI_STATUSES_IGNORE);
+  MPI_Abort(children, 1);
+}
+
+static void mpihandler(MPI_Comm* comm __attribute__ ((__unused__)), 
+		       int* err, ...) {
+  static char string[MPI_MAX_ERROR_STRING];
+  int len;
+  static BOOLEAN inhandler = FALSE;
+
+  if (inhandler) return;
+  inhandler = TRUE;
+
+  close(3);
+  if (MPI_Error_string(*err, string, &len))
+    error(1, 0, "Unable to produce error string (%i)", *err);
+  else
+    error(1, 0, "Error mpi: %s", string);
+
+  inhandler = FALSE;
+}
+
+DM_INLINE_STATIC void spawn(struct InfoDicts* infodicts) {
+  static char *argv[] = {@DPAWN_ARGS@ NULL};
+
+  int* errors;
+  size_t i, any = 0;
+  MPI_Errhandler mpierr;
+  char** comms;
+  int* maxprocs;
+  MPI_Info* info;
+  char*** argvs;
+
+  fprintf(stderr, "rook is spawning %i children as `%s'\n", 
+	  nodes, "@DPAWN_COMMAND@");
+  errors = (int*) malloc(sizeof(int)*nodes);
+
+  if (! (comms = (char**) malloc(sizeof(char*)*infodicts->n)))
+    error(1, errno, "Unable to malloc for comm %lli",
+	  (long long) sizeof(char**)*infodicts->n);
+
+  if (! (argvs = (char***) malloc(sizeof(char**)*infodicts->n)))
+    error(1, errno, "Unable to malloc for argvs %lli",
+	  (long long) sizeof(char**)*infodicts->n);
+  
+  if (! (maxprocs = (int*) malloc(sizeof(int)*infodicts->n)))
+    error(1, errno, "Unable to malloc for maxprocs %lli",
+	  (long long) sizeof(int)*infodicts->n);
+
+  if (! (info = (MPI_Info*) malloc(sizeof(MPI_Info)*infodicts->n)))
+    error(1, errno, "Unable to malloc for info %lli",
+	  (long long) sizeof(MPI_Info)*infodicts->n);
+
+  for (i = 0; i < (size_t) infodicts->n; i++) {
+    size_t j;
+    comms[i] = @DPAWN_EXEC@;
+    argvs[i] = argv;
+    maxprocs[i] = infodicts->dicts[i].nodes;
+    MPI_Info_create(info+i);
+    for (j = 0; j < infodicts->dicts[i].n; ++j) {
+      MPI_Info_set(info[i], 
+		   infodicts->dicts[i].pair[j].key,
+		   infodicts->dicts[i].pair[j].val);
+      free(infodicts->dicts[i].pair[j].val);
+    }
+    free(infodicts->dicts[i].pair);
+  }
+  free(infodicts->dicts);
+
+  MPI_Comm_spawn_multiple(infodicts->n, comms, argvs, maxprocs,
+			  info, 0, MPI_COMM_WORLD, &children, errors);
+			  
+  atexit(exithandler);
+  for (i = 0; i < nodes; i++) {
+    if (errors[i]) {
+      int len;
+      static char string[MPI_MAX_ERROR_STRING];
+      any = 1;
+      MPI_Error_string(errors[i], string, &len);
+      error(0, 0, "For node %lli, error %i, %s", 
+	    (long long) i, errors[i], string);
+    }
+  }
+  if (any) exit(1);
+
+  MPI_Comm_create_errhandler(mpihandler, &mpierr);
+  MPI_Comm_set_errhandler(children, mpierr);
+
+  free(errors);
+  free(comms);
+  free(argvs);
+  free(maxprocs);
+  for (i = 0; i < (size_t) infodicts->n; i++) MPI_Info_free(info+i);
+
+  fprintf(stderr, "Rook will wait for children\n");
+  MPI_Barrier(children);
+  fprintf(stderr, "Rook heard children\n");
+
+  MPI_Comm_dup(children, &childrensig);
+}
+
+DM_INLINE_STATIC void writesocketerror(char* type, char* info) {
+  static B errormsg[] = "rthread_";
+  static B frames[FRAMEBYTES*2+sizeof(errormsg)+1024];
+  static B *const boxf = frames;
+  static B *const stringf = frames+FRAMEBYTES;
+  static B *const string = frames+2*FRAMEBYTES;
+
+  int n = snprintf(string, sizeof(errormsg)+1024, 
+		   "(%s) %s%s", info, errormsg, type);
+  if (n < 0) error(1, errno, "Unable to snprintf error message");
+  if ((unsigned) n >= sizeof(errormsg)+1024) 
+    error(1, 0, "snprintf overflow: %i", n);
+
+  TAG(boxf) = BOX;
+  BOX_NB(boxf) = n;
+  SETNATIVE(boxf);
+  
+  TAG(stringf) = (ARRAY|BYTETYPE);
+  ATTR(stringf) = 0;
+  ARRAY_SIZE(stringf) = n;
+  VALUE_PTR(stringf) = 0;
+
+  write_socket_int(frames, FRAMEBYTES*2+n);
+}
+
+static B* from_dnode_data = NULL;
+static P from_dnode_data_n = 0;
+
+DM_INLINE_STATIC void readbody(void) {
+  B* data_ = (B*) realloc(from_dnode_data, from_dnode_data_n);
+  if (! data_) 
+    error(1, errno, "Unable to alloc %i", (int) from_dnode_data_n);
+  
+  from_dnode_data = data_;
+  read_socket_int(from_dnode_data + FRAMEBYTES*2, 
+		  from_dnode_data_n - FRAMEBYTES*2);
+}
+
+#define readsocketerr(string) do {					\
+    writesocketerror("readsocket", "Bad " string " from dnode");	\
+    error(1, 0, "Bad " string " from dnode");				\
+  } while (0)
+
+DM_INLINE_STATIC void readsocket(void) {
+  from_dnode_data_n = FRAMEBYTES*2;
+  if (! (from_dnode_data = (B*) malloc(from_dnode_data_n)))
+    readsocketerr("allocation of base frames");
+  read_socket_int(from_dnode_data, from_dnode_data_n);
+
+  if (! GETNATIVEFORMAT(from_dnode_data)
+      || ! GETNATIVEUNDEF(from_dnode_data))
+    readsocketerr("msg");
+  if (GETNONNATIVE(from_dnode_data)) 
+    readsocketerr("nativity");
+
+  from_dnode_data_n += BOX_NB(from_dnode_data);
+  readbody();
+}
+
+DM_INLINE_STATIC void writempi(void) {
+  P i, r;
+  P dest = VALUE_BASE(from_dnode_data);
+  unsigned char stype;
+  VALUE_PTR(from_dnode_data) = NULL;
+  
+  r = 0;
+  if (nodes >= dest && dest > 0) {
+    stype = 0;
+    MPI_Isend(&stype, sizeof(stype), MPI_UNSIGNED_CHAR, 
+	      dest-1, 1, children, &requests[r++]);
+
+    MPI_Isend(from_dnode_data, FRAMEBYTES*2, MPI_UNSIGNED_CHAR,
+	      dest-1, 2, children, &requests[r++]);
+    if (from_dnode_data_n > FRAMEBYTES*2) 
+      MPI_Isend(from_dnode_data+FRAMEBYTES*2, 
+		from_dnode_data_n-FRAMEBYTES*2,
+		MPI_UNSIGNED_CHAR,
+		dest-1, 3, children, &requests[r++]);
+  }
+  else {
+    stype = 1;
+    for (i = 0, r = 0; i < nodes; i++) 
+      MPI_Isend(&stype, sizeof(stype), MPI_UNSIGNED_CHAR, 
+		i, 1, children, &requests[r++]);
+
+    MPI_Bcast(from_dnode_data, FRAMEBYTES*2, MPI_UNSIGNED_CHAR,
+	      MPI_ROOT, children);
+    if (from_dnode_data_n > FRAMEBYTES*2)
+      MPI_Bcast(from_dnode_data+FRAMEBYTES*2,
+		from_dnode_data_n-FRAMEBYTES*2,
+		MPI_UNSIGNED_CHAR,
+		MPI_ROOT, children);
+  }
+  MPI_Waitall(r, requests, MPI_STATUSES_IGNORE);
+  
+  free(from_dnode_data);
+  from_dnode_data = NULL;
+}
+
+DM_INLINE_STATIC void* from_dnode(void* arg) __attribute__ ((__noreturn__));
+DM_INLINE_STATIC void* from_dnode(void* arg __attribute__ ((__unused__))) {
+  UL32 ok;
+  if (! (requests = (MPI_Request*) malloc(sizeof(MPI_Request)*nodes*3)))
+    error(1, errno, "Unable to malloc requests");
+  write_socket_int(&ok, sizeof(ok));
+
+  while (1) {readsocket(); writempi();};
+  exit(1);
+}
+
+
+DM_INLINE_STATIC void read_mpi_int(B* where, size_t n, int source, int tag) 
+{
+  MPI_Recv(where, n, MPI_UNSIGNED_CHAR,
+	   source, tag, children, MPI_STATUS_IGNORE);
+}
+
+DM_INLINE_STATIC void probe_mpi_int(P* count, P* src, P tag) {
+  MPI_Status status;
+  int count_;
+  MPI_Probe(*src, tag, children, &status);
+  MPI_Get_count(&status, MPI_UNSIGNED_CHAR, &count_);
+  *src = status.MPI_SOURCE;
+  *count = count_;
+}
+
+static B* from_mpi_data = NULL;
+static P from_mpi_data_n = 0;
+
+#define readmpierr(string) do {					\
+    writesocketerror("readmpi", "Bad " string " from mpi");	\
+    error(1, 0, "Bad " string " from mpi");	\
+  } while (0)
+
+DM_INLINE_STATIC void readmpi(void) {
+  P source= MPI_ANY_SOURCE;
+  P more_data_n;
+
+  probe_mpi_int(&from_mpi_data_n, &source, 1);
+  if (! (from_mpi_data = (B*) malloc(from_mpi_data_n)))
+    readmpierr("total size");
+  read_mpi_int(from_mpi_data, from_mpi_data_n, source, 1);
+
+  probe_mpi_int(&more_data_n, &source, 2);
+  if (! (from_mpi_data = (B*) realloc(from_mpi_data, 
+				      from_mpi_data_n + more_data_n)))
+    readmpierr("total size - latter frames");
+  if (more_data_n > 0)
+    read_mpi_int(from_mpi_data + from_mpi_data_n, more_data_n, source, 2);
+  from_mpi_data_n += more_data_n;
+}
+
+DM_INLINE_STATIC void writesocket(void) {
+  write_socket_int(from_mpi_data, from_mpi_data_n);
+  free(from_mpi_data);
+  from_mpi_data = NULL;
+}
+
+DM_INLINE_STATIC void* from_mpi(void* arg) __attribute__ ((__noreturn__));
+DM_INLINE_STATIC void* from_mpi(void* arg __attribute__ ((__unused__))) {
+  while (1) {readmpi(); writesocket();};
+  exit(1);
+}
+
+static void to_sig_exiter(void* unused __attribute__ ((__unused__))) {close(4);}
+
+DM_INLINE_STATIC void* to_sig(void* arg) __attribute__ ((__noreturn__));
+DM_INLINE_STATIC void* to_sig(void* arg __attribute__ ((__unused__))) {
+  pthread_cleanup_push(to_sig_exiter, NULL);  
+  while (1) {
+    B sig;
+    switch (recv(4, &sig, 1, 0)) {
+      case 0:
+	error(1, 0, "drook signal socket received close on recv");
+	close(4);
+	pthread_exit(NULL);
+
+      case -1:
+	error(1, errno, "drook signal socket");
+    };
+    MPI_Bcast(&sig, 1, MPI_UNSIGNED_CHAR, MPI_ROOT, childrensig);
+  }
+  pthread_cleanup_pop(1);
+}
+
+DM_INLINE_STATIC void makethread(char* name, void* (*func)(void*)) {
+  pthread_t thread;
+  int errno_;
+  if ((errno_ = pthread_create(&thread, NULL, func, NULL)))
+    error(1, errno_, "Unable to create %s thread", name);
+}
+
+DM_INLINE_STATIC void mainthread(void) __attribute__ ((__noreturn__));
+void mainthread(void) {
+  int sig;
+  sigset_t set;
+
+  if (sigemptyset(&set) 
+      || sigaddset(&set, SIGQUIT)
+      || sigaddset(&set, SIGTERM)
+      || sigaddset(&set, SIGPIPE))
+    error(1, errno, "sigset failure");
+      
+  if (! sigwait(&set, &sig)) exit(0);
+  error(1, errno, "Sigwait failure");
+  exit(1);
+}
+
+DM_INLINE_STATIC void blocksigs(void) {
+  sigset_t set;
+  if (sigfillset(&set)) error(1, errno, "Unable to empty sigset");
+  if (sigprocmask(SIG_BLOCK, &set, NULL)) 
+    error(1, errno, "Unable to block sigs");
+}
+
+int main(int argc, char* argv[]) {
+  struct InfoDicts infodicts;
+  usage(argc, argv, &infodicts);
+
+  blocksigs();
+  initmpi();
+  spawn(&infodicts);
+  
+  makethread("mpi sig", to_sig);
+  makethread("mpi receive", from_mpi);
+  makethread("dnode receive", from_dnode);
+  mainthread();
+}

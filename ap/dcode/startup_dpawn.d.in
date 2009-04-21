@@ -1,0 +1,103 @@
+
+|======================== startup_dnode.d ================================
+
+| Contains procedures for:
+|  - inspection of objects
+|  - object/text interconversion
+|  - transcription of objects
+|  - file <=> VM interchange
+|  - module support
+|  - emulators of dvt operators
+
+save /startup_common_save name 
+/startup_common_buf vmstatus sub 10 div /b array def
+startup_common_save capsave {
+  getstartupdir (startup_common.d) startup_common_buf readfile mkact exec
+  getstartupdir (startup_libs.d) startup_common_buf readfile mkact exec
+} stopped startup_common_save restore {
+  1024 /b array 0 
+  (Unable to load: ) fax
+  getstartupdir fax (startup_common.d\n) fax
+  0 exch getinterval toconsole
+  stop
+} if
+
+/dm_type /dpawn def
+
+|============================= userdict =================================
+
+|==================================================== dnode communications
+| save executable | ??
+/dnodereceive {
+  exch dup capsave userdict /dnodesave put
+  {unlock} stopped pop
+  userdict /dnodesave get restore 
+  dnoderespond
+} bind def
+
+/dnoderespond {
+  save
+  ~[~[mpirank ~mpidata ~begin ~makeready_dpawn] ~lock] rsend
+  restore
+} bind def
+
+| save {} | --
+/wait_dnode {
+  {
+    1 index capsave 
+    ~unlock stopped
+    save ~[mpirank ~notify] rsend restore
+    exch restore ~stop if
+  } lock
+} bind def
+
+| -- | stopped
+/kickdnode {
+  {
+    save ~[mpirank ~notify] rsend restore
+    ~halt stopped
+  } lock
+} bind def
+
+| save null | --
+/recv_kick_dnode {
+  {continue pop restore} lock
+} bind def
+
+/recv_module {
+  dup /myName get module 3 -1 roll transcribe _module
+} bind def
+
+|------------------------------------------------ whoami
+| prints name and port
+| for use with make_toconsole to identify who looks like who
+| -- | -- <<printout>>
+|
+/whoami ~[
+  1024 /b array 0 * mpirank * number (\n) fax 0 exch getinterval
+  ~toconsole
+] bind def
+
+(Using startup_dpawn.d $Id$ V@PACKAGE_VERSION@ svn-@SVNVERSION@\n) toconsole
+
+getstartupdir (errors.d) fromfiles
+getstartupdir (matrix.d) fromfiles
+
+save /tsave name 1024 /b array /tbuf name tsave capsave
+tbuf 0 (Trying ) fax getconfdir fax (dpawn.d...\n) fax 
+0 exch getinterval toconsole
+getconfdir (dpawn.d) fromxfiles {
+  tbuf 0 (Read ) fax getconfdir fax (dpawn.d\n) fax
+  0 exch getinterval toconsole
+} if
+(Trying ~/.dpawn ...\n) toconsole
+gethomedir (.dpawn) fromxfiles {(Read ~/.dnode\n) toconsole} if |]
+@ENABLE_PETSC_START@
+tbuf 0 (Trying ) fax getstartupdir fax (petsc.d...\n) fax
+0 exch getinterval toconsole
+getstartupdir (petsc.d) fromxfiles {
+  tbuf 0 (Read ) fax getstartupdir fax (petsc.d\n) fax
+  0 exch getinterval toconsole
+} if
+@ENABLE_PETSC_END@
+tsave restore

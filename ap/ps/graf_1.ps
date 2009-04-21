@@ -1,0 +1,1025 @@
+(%%[ Loading: Graf1.ps 11/26/01 ]%%\n\015) print flush
+
+% Private dictionary:
+
+/Graf 200 dict def
+
+% Front-end procedures:
+%
+%  DefXTransform
+%  DefYTransform
+%  X_to_x, Y_to_y, x_to_X, y_to_Y
+%  ScaleSymbolFont
+%  ExtremaXY, ExtremaX, ExtremaY
+%  Abscissa
+%  Ordinate
+%  Points, Points2
+%  Line, Line2
+%  DesignLinearAxis
+%  DesignLg10Axis
+%  UnitPrefix
+%  roundup, almost, name, text, numeral
+
+%========================= Plot area convention =============================
+%
+% The tools in Graf expect that the following coordinate system be set up
+% by the caller:
+%    origin: lower, left corner of allotted graph area
+%    dimensions: in 'xdimension', 'ydimension'
+%
+% It is good practice to lay out graphs with a point scale in mind (the actual
+% scale may vary for enlargement/reduction), as this helps maintain correct
+% proportions for symbols and labels. In fact, it is convenient to work from
+% a font size of 12 points and to choose other dimensions from this basis (the
+% long dimension of the graph should be no more than 360 to 600 points for
+% easy viewing of a slide or publication figure).
+
+%------------------- Font of centered symbols ---------------------------
+
+% These symbols serve to represent data points in graphs and are encoded by
+% capital letters. A text version to be used in labels or legends is
+% provided under the corresponding small letters.
+
+/Symbols 100 dict dup begin
+
+  /FontType 3 def
+  /FontMatrix [0.0005 0 0 0.0005 0 0] def
+  /FontBBox [-1000 -1000 1000 1000] def
+  /Encoding 256 array def
+  0 1 255 {Encoding exch /.notdef put} for
+  Encoding 65 /symbol_1 put        % A  dot
+  Encoding 66 /symbol_2 put        % B  diamond
+  Encoding 67 /symbol_3 put        % C  square, filled
+  Encoding 68 /symbol_4 put        % D  square, stroked
+  Encoding 69 /symbol_5 put        % E  square/horizontal
+  Encoding 70 /symbol_6 put        % F  +
+  Encoding 71 /symbol_7 put        % G  X
+  Encoding 72 /symbol_8 put        % H  circle, filled
+  Encoding 73 /symbol_9 put        % I  circle, stroked
+  Encoding 74 /symbol_10 put       % J  circle/horizontal
+  Encoding 75 /symbol_11 put       % K  *
+  Encoding 76 /symbol_12 put       % L  up triangle, filled
+  Encoding 77 /symbol_13 put       % M  down triangle, filled
+  Encoding 78 /symbol_14 put       % N  right triangle, filled
+  Encoding 79 /symbol_15 put       % O  left triangle, filled
+  Encoding 80 /symbol_16 put       % P  vertical bar, centered
+  Encoding 81 /symbol_17 put       % Q  vertical bar, bottom adjusted
+  Encoding 82 /symbol_18 put       % R  vertical bar, top adjusted
+  Encoding 83 /symbol_19 put       % S  horizontal bar, centered
+  Encoding 84 /symbol_20 put       % T  horizontal bar, left adjusted
+  Encoding 85 /symbol_21 put       % U  horizontal bar, right adjusted
+  Encoding 86 /symbol_22 put       % V  up triangle, stroked
+  Encoding 87 /symbol_23 put       % W  down triangle, stroked
+  Encoding 88 /symbol_24 put       % X  right triangle, stroked
+  Encoding 89 /symbol_25 put       % Y  left triangle, stroked
+
+  Encoding  97 /symbol_1c put        % a  dot
+  Encoding  98 /symbol_2c put        % b  diamond
+  Encoding  99 /symbol_3c put        % c  square, filled
+  Encoding 100 /symbol_4c put        % d  square, stroked
+  Encoding 101 /symbol_5c put        % e  square/horizontal
+  Encoding 102 /symbol_6c put        % f  +
+  Encoding 103 /symbol_7c put        % g  X
+  Encoding 104 /symbol_8c put        % h  circle, filled
+  Encoding 105 /symbol_9c put        % i  circle, stroked
+  Encoding 106 /symbol_10c put       % j  circle/horizontal
+  Encoding 107 /symbol_11c put       % k  *
+  Encoding 108 /symbol_12c put       % l  up triangle, filled
+  Encoding 109 /symbol_13c put       % m  down triangle, filled
+  Encoding 110 /symbol_14c put       % n  right triangle, filled
+  Encoding 111 /symbol_15c put       % o  left triangle, filled
+  Encoding 112 /symbol_16c put       % p  vertical bar, centered
+  Encoding 113 /symbol_17c put       % q  vertical bar, bottom adjusted
+  Encoding 114 /symbol_18c put       % r  vertical bar, top adjusted
+  Encoding 115 /symbol_19c put       % s  horizontal bar, centered
+  Encoding 116 /symbol_20c put       % t  horizontal bar, left adjusted
+  Encoding 117 /symbol_21c put       % u  horizontal bar, right adjusted
+  Encoding 118 /symbol_22c put       % v  up triangle, stroked
+  Encoding 119 /symbol_23c put       % w  down triangle, stroked
+  Encoding 120 /symbol_24c put       % x  right triangle, stroked
+  Encoding 121 /symbol_25c put       % y  left triangle, stroked
+
+  /CharProcs 60 dict def
+  CharProcs begin
+    /.notdef {} def
+    /symbol_1  { -150 -150 moveto 150 -150 lineto 150 150 lineto
+                 -150 150 lineto closepath fill } def
+    /symbol_2  { 0 -1000 moveto 1000 0 lineto 0 1000 lineto
+                 -1000 0 lineto closepath fill } def
+    /symbol_3  { -700 -700 moveto 700 -700 lineto 700 700 lineto
+                 -700 700 lineto closepath fill } def
+    /symbol_4  { symbolweight setlinewidth
+                 -700 -700 moveto 700 -700 lineto 700 700 lineto
+                 -700 700 lineto closepath stroke } def
+    /symbol_5  { -700 -700 moveto 700 -700 lineto 700 0 lineto
+                 -700 0 lineto closepath fill
+                 -700 -700 moveto -700 700 lineto 700 700 lineto
+                 700 -700 lineto closepath stroke } def
+    /symbol_6  { symbolweight setlinewidth
+                 -1000 0 moveto 1000 0 lineto stroke 
+                 0 -1000 moveto 0 1000 lineto stroke } def
+    /symbol_7  { symbolweight setlinewidth
+                 -707 -707 moveto 707 707 lineto stroke
+                 -707 707 moveto 707 -707 lineto stroke } def
+    /symbol_8  { 798 0 moveto 0 0 798 0 360 arc fill } def
+    /symbol_9  { symbolweight setlinewidth
+                 798 0 moveto 0 0 798 0 360 arc stroke } def
+    /symbol_10  { symbolweight setlinewidth
+                  798 0 moveto 0 0 798 180 360 arc fill
+                  798 0 moveto 0 0 798 0 360 arc stroke } def
+    /symbol_11  { symbolweight setlinewidth
+                  -1000 0 moveto 1000 0 lineto stroke 
+                  0 -1000 moveto 0 1000 lineto stroke 
+                  -707 -707 moveto 707 707 lineto stroke
+                  -707 707 moveto 707 -707 lineto stroke } def
+    /symbol_12  { 0 1000 moveto 866 -500 lineto -866 -500 lineto
+                  closepath fill } def
+    /symbol_13  { 0 -1000 moveto -866 500 lineto 866 500 lineto
+                  closepath fill } def
+    /symbol_14  { 1000 0 moveto -500 866 lineto -500 -866 lineto
+                  closepath fill } def
+    /symbol_15  { -1000 0 moveto 500 866 lineto 500 -866 lineto
+                  closepath fill } def
+    /symbol_16  { symbolweight setlinewidth
+                  0 -1000 moveto 0 1000 lineto stroke } def
+    /symbol_17  { symbolweight setlinewidth
+                  0 0 moveto 0 2000 lineto stroke } def
+    /symbol_18  { symbolweight setlinewidth
+                  0 0 moveto 0 -2000 lineto stroke } def
+    /symbol_19  { symbolweight setlinewidth
+                  -1000 0 moveto 1000 0 lineto stroke } def
+    /symbol_20  { symbolweight setlinewidth
+                  0 0 moveto 2000 0 lineto stroke } def
+    /symbol_21  { symbolweight setlinewidth
+                  -2000 0 moveto 0 0 lineto stroke } def
+    /symbol_22  { symbolweight setlinewidth
+                  0 1000 moveto 866 -500 lineto -866 -500 lineto
+                  closepath stroke } def
+    /symbol_23  { symbolweight setlinewidth
+                  0 -1000 moveto -866 500 lineto 866 500 lineto
+                  closepath stroke } def
+    /symbol_24  { symbolweight setlinewidth
+                  1000 0 moveto -500 866 lineto -500 -866 lineto
+                  closepath stroke } def
+    /symbol_25  { symbolweight setlinewidth
+                  -1000 0 moveto 500 866 lineto 500 -866 lineto
+                  closepath stroke } def
+
+    /fake { [ 1000 1000 /translate cvx 5 -1 roll load aload pop ] cvx } def
+
+    /symbol_1c /symbol_1 fake def
+    /symbol_2c /symbol_2 fake def
+    /symbol_3c /symbol_3 fake def
+    /symbol_4c /symbol_4 fake def
+    /symbol_5c /symbol_5 fake def
+    /symbol_6c /symbol_6 fake def
+    /symbol_7c /symbol_7 fake def
+    /symbol_8c /symbol_8 fake def
+    /symbol_9c /symbol_9 fake def
+    /symbol_10c /symbol_10 fake def
+    /symbol_11c /symbol_11 fake def
+    /symbol_12c /symbol_12 fake def
+    /symbol_13c /symbol_13 fake def
+    /symbol_14c /symbol_14 fake def
+    /symbol_15c /symbol_15 fake def
+    /symbol_16c /symbol_16 fake def
+    /symbol_17c /symbol_17 fake def
+    /symbol_18c /symbol_18 fake def
+    /symbol_19c /symbol_19 fake def
+    /symbol_20c /symbol_20 fake def
+    /symbol_21c /symbol_21 fake def
+    /symbol_22c /symbol_22 fake def
+    /symbol_23c /symbol_23 fake def
+    /symbol_24c /symbol_24 fake def
+    /symbol_25c /symbol_25 fake  def
+  end
+
+  /BuildChar  {
+    2000 0
+    -2000 -2000 2000 2000
+    setcachedevice
+    exch begin
+      Encoding exch get
+      CharProcs exch get
+      end
+    exec
+    } def
+end definefont pop   % Symbols font
+
+%----------------------- Logical coordinates ---------------------------
+
+% The graph tools use the same point-based coordinates as other tools;
+% in order to permit them to organize pictures within a space, the
+% origin of this ccordinate system is placed at the lower left corner
+% of the alotted area and the dimensions of the alotted area are given
+% in two variables, xdimension and ydimension.
+%
+% This graphical coordinate system (GCS) is complemented by a logical
+% coordinate system (LCS) used for placing data to be represented in
+% graphs. The LCS to GCS transforms can be non-linear and are defined
+% by reference to the procedures, DefXTransform and DefYTransform:
+%
+%   { LCS_to_linear } { linear_to_LCS } P1 P2 p1 p2  | --
+%
+% The procedures translate (non-linear) logical units into a linear unit
+% and vice versa. The transform from LCS units to GCS coordinates 
+% is defined by giving corresponding coordinates for two arbitrary
+% points (P1, P2: LCS coordinates; p1, p2: GCS coordinates). 
+
+%  { ln 2.301 div } { 10 exp }
+%     0.01 10 36 Xdimension 36 sub DefXTransform   
+%
+% maps a logarithmic logical abscissa ranging from 0.01 to 10 to the
+% horizontal form width minus 0.5" margins.
+%
+% Once defined, forward and reverse transforms are made by:
+%
+%          X     X_to_x     x      (logical to graphical)
+%          Y     Y_to_y     y
+%          x     x_to_X     X      (graphical to logical)
+%          y     y_to_Y     Y
+%
+% Tools for plotting annotated axes and curves implicitely transform
+% logical to graphical coordinates.
+%
+
+/DefXTransform { DefineTrans /x_to_X exch def /X_to_x exch def } def
+/DefYTransform { DefineTrans /y_to_Y exch def /Y_to_y exch def } def
+
+/DefineTrans { Graf begin
+   /p2 exch def /p1 exch def
+   /P2 exch def  /P1 exch def
+   /rtrans exch def /trans exch def
+   /pi2 P2 trans def  /pi1 P1 trans def
+   [ /trans load aload pop
+       /a p2 p1 sub pi2 pi1 sub div def
+       /b a pi1 mul neg p1 add def
+     a /mul cvx b /add cvx
+   ] cvx bind
+   [   /a pi2 pi1 sub p2 p1 sub div def
+       /b a p1 mul neg pi1 add def
+     a /mul cvx b /add cvx
+     /rtrans load aload pop
+   ] cvx bind
+   end
+} def
+
+%--------------------------- Axis systems -----------------------------
+
+%  [ X1 (L1) ... Xn (Ln) ] y (tick) ry_label Abscissa
+%  [ Y1 (L1) ... Yn (Ln) ] x (tick) rx_label Ordinate
+%
+% These procedures plot axis systems as references for plotted data
+% points. Axes are oriented parallel to the GCS. Locations of scale
+% marks are determined by Xn|y (abscissa) and x|Yn (ordinate), where
+% capitals denote LCS coordinates, and lower case, GCS coordinates.
+% Scale ticks are labelled by the strings Ln; these labels are offset
+% from the axis by ry_label or rx_label points.
+%
+% Note a small asymmetry in the placement of labels. In the abscissa,
+% ry_label specifies the distance between axis and lower edge of the
+% label. In the ordinate, rx_label specifies the distance between axis
+% and the nearest edge of the label.
+
+% The procedures use the current symbol font for ticks, the current
+% text fonts for labels (which can include WP style directives), and
+% the current line settings of PostScript.
+
+/Abscissa { Graf begin
+   /ry_label exch def  /tick exch def
+   /y_axis exch def    /x_axis exch def
+   graffontlist 1 get setfont                   % plot axis and ticks
+   gsave newpath 2 setlinecap
+   0 2 x_axis length 2 sub { /k exch def 
+      x_axis k get X_to_x y_axis moveto tick show } for
+   x_axis 0 get X_to_x y_axis moveto 
+   x_axis k get X_to_x y_axis lineto stroke
+   0 2 x_axis length 2 sub { /k exch def
+      x_axis k get X_to_x y_axis ry_label add
+      x_axis k 1 add get
+      end
+      /thetext exch def
+      /lineordinate exch def /lineabscissa exch def
+      /linewidth 720 def /style 0 def
+      TextFilter BreakText pop MeasureLine
+      /lineabscissa lineabscissa linelength 0.5 mul sub def
+      /style 0 def ShowLine
+      /lineabscissa lineabscissa linelength add def
+      Graf begin
+      } for   
+   grestore
+   end
+   /lineabscissa lineabscissa def /lineordinate lineordinate def
+} def
+
+
+/Ordinate { Graf begin
+   /rx_label exch def  /tick exch def
+   /x_axis exch def    /y_axis exch def
+   graffontlist 1 get setfont                   % plot axis and ticks
+   gsave newpath 2 setlinecap
+   0 2 y_axis length 2 sub { /k exch def 
+      x_axis y_axis k get Y_to_y moveto tick show } for
+   x_axis y_axis 0 get Y_to_y moveto
+   x_axis y_axis k get Y_to_y lineto stroke
+   0 2 y_axis length 2 sub { /k exch def  % plot labels
+      x_axis rx_label add y_axis k get Y_to_y 
+      y_axis k 1 add get
+      end
+      /thetext exch def
+      /lineordinate exch def /lineabscissa exch def
+      /linewidth 720 def  /style 0 def
+      TextFilter BreakText pop MeasureLine 
+      /lineabscissa lineabscissa 
+        Graf /rx_label get 0 lt { linelength sub } if def
+      /lineordinate lineordinate lineheight 2 div sub def
+      /style 0 def ShowLine
+      /lineabscissa lineabscissa linelength add def
+      Graf begin
+      } for   
+   grestore
+   end
+   /lineabscissa lineabscissa def /lineordinate lineordinate def
+} def
+
+%-------------------------- scale symbol font --------------------------
+%   fontsize | -- (graffontlist, #1)
+%
+% This creates a scaled symbol font with stroke weight matched to the
+% currentlinewidth.
+
+/ScaleSymbolFont { /symbolweight name
+   graffontlist 1 /Symbols findfont symbolweight scalefont put
+   /symbolweight currentlinewidth 2000 mul symbolweight div def
+} def
+
+%------------------- Data plots by by symbol or line --------------------
+
+% These represent x|y arrays using the current symbol font or current
+% line settings. To superimpose symbols on a line, plot the line first.
+%
+%  [ X Y ..] (symbol) Points
+%  [ X Y ..] Line
+%  [ X ] [ Y ] (symbol) Points2
+%  [ X ] [ Y ] Line2 
+
+/Points { Graf begin
+   /symbol exch def /XY exch def
+   graffontlist 1 get setfont gsave
+      0 2 XY length 2 sub { /k exch def
+      newpath
+      XY k get X_to_x XY k 1 add get Y_to_y moveto gsave
+      symbol false charpath 1 setgray fill grestore
+      symbol show } for
+   grestore
+   end
+} def
+
+/Points2 { Graf begin
+   /symbol exch def /Y exch def /X exch def
+   graffontlist 1 get setfont gsave
+      0 1 X length 1 sub { /k exch def
+      newpath
+      X k get X_to_x Y k get Y_to_y moveto gsave
+      symbol false charpath 1 setgray fill grestore
+      symbol show } for
+   grestore
+   end
+} def
+
+/Line { Graf begin
+   /XY exch def
+   gsave newpath
+   XY 0 get X_to_x XY 1 get Y_to_y moveto
+   2 2 XY length 2 sub { /k exch def
+      XY k get X_to_x XY k 1 add get Y_to_y lineto } for
+   1 setlinejoin stroke
+   grestore
+   end
+} def
+
+/Line2 { Graf begin
+   /Y name /X name
+   gsave newpath
+   X 0 get X_to_x Y 0 get Y_to_y moveto
+   1 1 X length 1 sub { /k exch def
+      X k get X_to_x Y k get Y_to_y lineto } for
+   1 setlinejoin stroke
+   grestore
+   end
+} def
+
+%--------------------- helpers for designing axes --------------------
+
+%----- To determine extrema of data arrays
+% ExtremaXY:  [ X Y ..] | --    (updates minX, maxX, minY, maxY)
+% ExtremaX:     [ X ..] | --    (updates minX, maxX)
+% ExtremaY:     [ Y ..] | --    (updates minY, maxY)
+
+/ExtremaXY {
+   { dup minY lt
+       { /minY name }
+       { dup maxY gt { /maxY name } { pop } ifelse }
+       ifelse
+   }
+   { dup minX lt
+       { /minX name }
+       { dup maxX gt { /maxX name } { pop } ifelse }
+       ifelse
+   }
+   3 -1 roll { 1 index exec exch } forall
+   pop pop
+} bind def
+
+/ExtremaY {
+   { dup minY lt
+     { /minY name }
+     { dup maxY gt { /maxY name } { pop } ifelse }
+     ifelse
+   } forall
+} bind def
+
+/ExtremaX {
+   { dup minX lt
+     { /minX name }
+     { dup maxX gt { /maxX name } { pop } ifelse }
+     ifelse
+   } forall
+} bind def
+
+
+
+%----- To design a linear axis
+% use: min max | [ min max step unit ]
+%      - chooses 5-10 partitions to embrace given min | max range
+%        (origin is included dependend on max/min ratio)
+%      - returns: rounded min, max
+%                 logical scale partition in step
+%                 unit is power of 10 that divided into the axis range
+%                 gives a number between 0.1 and 999.
+
+/DesignLinearAxis { Graf begin /max name /min name
+   max min eq {
+      max 0 eq
+       { -1e-6 1e-6 }
+       { max 0 gt { min 0.9 mul max 1.1 mul }
+                  { min 1.1 mul max 0.9 mul }
+                  ifelse
+       }
+       ifelse /max name /min name
+    } if
+   min 0 gt { max min div 5 gt { /min 0.0 def } if } if
+   max 0 lt { min max div 5 gt { /max 0.0 def } if } if
+   max min sub abs log dup floor dup /exp10 name sub /mant name
+   0.2 mant 0.1 ge { pop 0.5 } if mant 0.5 ge { pop 1.0 } if
+   10.0 exp10 exp mul /step name
+   /min min step div floor step mul def
+   /max max step div ceiling step mul def
+   /unit 10.0 min abs max abs 2 copy lt { exch } if pop
+      log 3 div floor 3 mul exp def
+   [ min max step unit ]
+   end
+} bind def
+
+%----- To design a log10 axis
+% use: min max | [ min max [ decades ] [ subdecades ] ]
+%
+% - a subdecade step (factor corresponding to scale subpartition) is
+%   chosen dependent on the # of decades in original min | max range and
+%   is either 1, 2, 5, or 10
+% - the full-decade partitions and decade subpartitions are returned in 
+%   separate arrays
+% - the returned min, max are adjusted to the actual spanned range and span
+%   at least one decade
+
+/DesignLg10Axis { Graf begin /max name /min name
+   max min div /range name
+   1.0 range 1e2 gt { pop 2.0 } if
+     range 1e5 gt { pop 5.0 } if /step name
+   /min min pwr_mant step div floor dup 0 eq
+      { pop 1.0 } { step mul } ifelse mul def
+   /max max pwr_mant step div ceiling step mul mul def
+   max min div 10.0 lt { /min 10.0 min log floor exp def } if
+   max min div 10.0 lt { /max 10.0 max log ceiling exp def } if
+   [ min max 
+     [ min almost log ceiling 1.0 max log floor { 10.0 exch exp } for ]
+     [ /lgstep 10.0 min log floor min a_decade { 1 sub } if exp step mul def
+       min { /part name part almost max gt { exit } if
+             part a_decade
+                { /lgstep lgstep 10.0 mul def
+                  step 1.0 eq { part lgstep add } { lgstep } ifelse 
+                }
+                { part dup lgstep add }
+                ifelse
+         } loop
+     ]
+   ]
+   end
+} bind def
+
+Graf begin
+
+/pwr_mant { % use: real | power_of_10_mantissa
+   dup log floor 10.0 exch exp dup 3 1 roll div
+} bind def
+
+/a_decade { % use: real | bool  (tests if 'real' is a power of ten)
+   log dup round sub abs 1e-3 le
+} bind def
+end
+
+%-------------------  To prefix a unit label ---------------------------------
+% use: textbuf textindex unit bool | textbuf textindex
+% 
+% - unit is a power of 1000
+% - true: tries to match a letter code (for units in range of femto to
+%         Giga), otherwise uses a power of 10
+% - false: always creates a power of 10
+
+/UnitPrefix { Graf begin exch /unit name
+   { { unit 1e-15 lt { power_prefix stop } if
+       unit 1e9 gt { power_prefix stop } if
+       letter_prefix stop
+     } if
+     power_prefix
+   } stopped pop
+   end
+} bind def
+Graf begin
+/power_prefix {
+   unit 1 ne { (10\033\220) text 
+               unit log roundup cvi numeral 
+               (\033\200) text
+             } if 
+} bind def
+
+/letter_prefix {
+   letterlist unit log 15 add 3 div 0.89999 add cvi get text
+} bind def
+
+/letterlist [ (f) (p) (n) (\033\205m\033\200) (m) () (K) (M) (G) ] def 
+end
+
+%---------------------- To deposit a power of 10 ------------------------------
+% use: textbuf textindex power | textbuf textindex
+%
+% appends to a running text a string formatted as a power of ten.
+
+/PowerOfTen { Graf begin /unit name
+   unit 1 ne { (10\033\220) text 
+               unit log roundup cvi numeral 
+               (\033\200) text
+             }
+             { (1) text }
+             ifelse  
+   end
+} bind def
+
+%------------------------ To do useful little things -------------------------
+
+/roundup { 10.0 mul dup 0 lt { 0.09999 sub } { 0.09999 add } ifelse cvi
+           10.0 div
+         } bind def
+
+/textdict 6 dict dup begin
+   /nametype { namebuf cvs stuffit } def
+   /stringtype { stuffit } def
+   /integertype { namebuf cvs stuffit } def
+   /realtype { namebuf cvs stuffit } def
+   /arraytype { { text ( ) text } forall } def
+   /booltype { (true) (false) ifelse stuffit } def
+end def
+
+/namebuf 40 string def
+
+/text { dup type textdict begin exec end } bind def
+/stuffit { 3 copy putinterval length add } bind def
+
+/numeral /text load def
+/name { exch def } bind def
+/almost { 1.0 1e-6 sub mul } bind def
+%========================= Pre-formatted graphs ==============================
+
+% These routines use data bases prepared for plotting in D and transcribed
+% into PostScript for plotting. Typically, individual figures are plotted
+% by executing their PS files, which load and use the procedures contained in
+% this package along with the figure's data bases.
+
+
+
+%---------------------- general purpose graph ---------------------------
+%
+% use:  graph_dict | --
+% interprets the following entries in graph_dict:
+%
+%  title        - (..) will appear at top of graph
+%  wildlabel    - [[ X Y ( .. ) ] ..] strings will be placed starting at x,y
+%  forabscissa  - [ scan min max type Y unit ] directs design of abscissa
+%  forordinate  - [ scan min max type X unit ] directs design of ordinate
+%  curves       - [ [ X.. ] [ [ [ Y.. ] { .. } ..] ] ]
+%  data         - [ [ [ X..] [Y..] { .. } ] .. ]  
+%
+% Parameters directing axis design:
+% 
+%  scan      - boolean, enables scan for axis limits 
+%  min, max  - extrema (if scan enabled, these prime the extrema unless
+%              'null' is given instead of a number) 
+%  type      - /lin (linear) or /log (logarithmic)
+%  X, Y      - logical abscissa/ordinate where ordinate/abscissa axis is
+%              wanted (state 'null' for automatic positioning)
+%  unit      - string, used in unit specification added to title
+%
+% Automatic axis placement, e.g., positions the axes in the origin of a
+% linear system, or else plots axes that contact each other at a corner. Scale
+% ticks and labels are chosen appropriately, in both size and position. The
+% unit (e.g., (A)) is incorporated into a specification of axis units that is
+% appended to the title as (abscissa_unit/ordinate_unit) with automatic
+% prefixes determined in the axis design.
+%
+% The procedure in curves/data contains the rendering instruction (Line2,
+% Points2, preceded by PS code to set up line pattern/color or symbol params).
+% All coordinates X, Y are logical. Curves are drawn prior to data (important
+% for symbol/line overlay).
+%
+% NOTE: you must specify title, forabscissa, forordinate, and at least one of
+%       curves/data. Wildlabels are optional.
+%
+
+%------- test if parameter value is specified (unspecied values are 'null')
+% parameter | bool
+
+/isnull { type cvlit /nulltype eq } bind def
+
+%------- axis designers
+
+/Xdesigners 2 dict dup begin
+  /log {
+     minX maxX DesignLg10Axis /Xaxis name
+     { log } { 10.0 exch exp } Xaxis 0 get Xaxis 1 get
+     lB rB DefXTransform
+     gdict /forabscissa get 4 get /Yabs name
+  } bind def
+ 
+  /lin {
+     minX maxX DesignLinearAxis /Xaxis name
+     { } { } Xaxis 0 get Xaxis 1 get
+     lB rB DefXTransform
+     gdict /forabscissa get 4 get /Yabs name
+  } bind def
+
+end def
+
+/Ydesigners 2 dict dup begin
+  /log {
+     minY maxY DesignLg10Axis /Yaxis name
+     { log } { 10.0 exch exp } Yaxis 0 get Yaxis 1 get
+     bB tB DefYTransform
+     gdict /forordinate get 4 get /Xord name
+  } bind def
+ 
+  /lin {
+     minY maxY DesignLinearAxis /Yaxis name
+     { } { } Yaxis 0 get Yaxis 1 get
+     bB tB DefYTransform
+     gdict /forordinate get 4 get /Xord name
+  } bind def
+
+end def
+
+%------- axis placement
+
+/placeXYaxes {
+    /abslabelxd false def
+    Yabs isnull {
+        Yaxis 0 get 0 lt 
+           { Yaxis 1 get 0 gt { 0.0 /abslabelxd true def
+                              } { Yaxis 1 get } ifelse
+           } { Yaxis 0 get } ifelse
+        /Yabs name
+      } if
+    /ordlabelxd false def
+    Xord isnull {
+        Xaxis 0 get 0 lt 
+           { Xaxis 1 get 0 gt { 0.0 /ordlabelxd true def
+                              } { Xaxis 1 get } ifelse
+           } { Xaxis 0 get } ifelse
+        /Xord name
+      } if  
+} bind def
+ 
+%------- axis plotters
+
+/Xplotters 2 dict dup begin
+  
+  /log {
+    (P) textsize symbolsize 0.5 mul add neg
+    Yabs Yaxis 0 get le { pop pop (Q) textsize neg } if
+    Yabs Yaxis 1 get ge { pop pop (R) symbolsize } if
+    /loffs name /tick name
+    symbolsize ScaleSymbolFont
+    [ Xaxis 2 get {
+          dup dup Xord sub abs 1e-5 lt abslabelxd and 
+            { pop () }
+            { 12 string 0 3 -1 roll PowerOfTen 0 exch getinterval } 
+            ifelse
+        } forall
+    ]  Yabs Y_to_y tick loffs Abscissa
+    symbolsize 0.5 mul ScaleSymbolFont 
+    [ Xaxis 3 get { () } forall ] Yabs Y_to_y tick loffs Abscissa
+    symbolsize ScaleSymbolFont
+  } bind def
+
+/lin {
+    (P) textsize symbolsize 0.5 mul add neg
+    Yabs Yaxis 0 get le { pop pop (Q) textsize neg } if
+    Yabs Yaxis 1 get ge { pop pop (R) symbolsize } if
+    /loffs name /tick name
+    symbolsize ScaleSymbolFont
+    [ Xaxis 0 get Xaxis 2 get almost Xaxis 1 get
+      { dup dup Xord sub abs Xaxis 2 get div 1e-5 lt abslabelxd and
+         { pop () }
+         { Xaxis 3 get div roundup 6 string cvs }
+         ifelse      } for
+    ] Yabs Y_to_y tick loffs Abscissa
+} bind def
+
+end def
+
+/Yplotters 2 dict dup begin
+  
+  /log {
+    (S) symbolsize neg
+    Xord Xaxis 0 get le { pop pop (T) symbolsize neg } if
+    Xord Xaxis 1 get ge { pop pop (U) symbolsize } if
+    /loffs name /tick name
+    symbolsize ScaleSymbolFont
+    [ Yaxis 2 get {
+          dup dup Yabs sub abs 1e-5 lt ordlabelxd and
+            { pop () }
+            { 12 string 0 3 -1 roll PowerOfTen 0 exch getinterval } 
+            ifelse
+        } forall
+    ]  Xord X_to_x tick loffs Ordinate
+    symbolsize 0.5 mul ScaleSymbolFont 
+    [ Yaxis 3 get { () } forall ] Xord X_to_x tick loffs Ordinate
+    symbolsize ScaleSymbolFont
+  } bind def
+
+/lin {
+    (S) symbolsize neg
+    Xord Xaxis 0 get le { pop pop (T) symbolsize neg } if
+    Xord Xaxis 1 get ge { pop pop (U) symbolsize } if
+    /loffs name /tick name
+    symbolsize ScaleSymbolFont
+    [ Yaxis 0 get Yaxis 2 get almost Yaxis 1 get
+      { dup dup Yabs sub abs Yaxis 2 get div 1e-5 lt ordlabelxd and
+         { pop () }
+         { Yaxis 3 get div roundup 6 string cvs }
+         ifelse 
+      } for
+    ] Xord X_to_x tick loffs Ordinate
+} bind def
+
+end def
+
+%----------------------------------- gpGraph
+
+/gpGraph {  /gdict name
+   gdict /forabscissa get dup 0 get /scanX name
+      dup 1 get /minX name dup 2 get /maxX name
+      4 1 getinterval /Yabs name
+   gdict /forordinate get dup 0 get /scanY name 
+      dup 1 get /minY name dup 2 get /maxY name
+      4 1 getinterval /Xord name
+   gdict /curves known
+      { gdict /curves get dup 0 get /X name 1 get /Ys name
+        scanX { minX isnull { /minX X 0 get def } if
+                maxX isnull { /maxX X 0 get def } if
+                X ExtremaX
+              } if
+        scanY { minY isnull { Ys 0 get 0 get 0 get /minY name } if
+                maxY isnull { Ys 0 get 0 get 0 get /maxY name } if
+                Ys { 0 get ExtremaY } forall
+              } if
+      } if
+   gdict /data known
+      { scanX { gdict /data get { 0 get /X name
+                    minX isnull { /minX X 0 get def } if
+                    maxX isnull { /maxX X 0 get def } if
+                    X ExtremaX
+                  } forall
+              } if
+        scanY { gdict /data get { 1 get /Y name
+                minY isnull { Y 0 get /minY name } if
+                maxY isnull { Y 0 get /maxY name } if
+                Y ExtremaY
+                  } forall
+              } if
+      } if
+   Yabs 0 get isnull not { Yabs ExtremaY } if
+   Xord 0 get isnull not { Xord ExtremaX } if
+
+   xdimension ydimension 2 copy gt { exch } if /dimension name pop
+   /textsize dimension 40 div 1.2 mul def
+   /symbolsize dimension 40 div 0.7 mul def
+   symbolsize /lB name xdimension symbolsize sub /rB name
+   symbolsize /bB name ydimension textsize 2 mul sub /tB name
+   /graffontlist [
+      /Helvetica findfont textsize scalefont
+      null
+      /Helvetica-Oblique findfont textsize scalefont
+      /Symbol findfont textsize scalefont
+      /Helvetica findfont textsize 0.72 mul scalefont
+      dup
+      dup
+      dup
+    ] def
+   dimension 400 div setlinewidth symbolsize ScaleSymbolFont 
+   /graffonts {
+     /fontlist graffontlist def
+     /superscriptlevel textsize 0.3 mul def
+     /subscriptlevel textsize -0.2 mul def
+     /linespace textsize def
+   } bind def
+   graffonts
+   0.0 setgray 
+
+   Xdesigners gdict /forabscissa get 3 get get exec 
+   Ydesigners gdict /forordinate get 3 get get exec
+   gdict /forabscissa get 4 get /Yabs name
+   gdict /forordinate get 4 get /Xord name 
+   placeXYaxes 
+   Xplotters gdict /forabscissa get 3 get get exec
+   Yplotters gdict /forordinate get 3 get get exec
+
+   100 string 0 gdict /title get text (\() text
+     gdict /forabscissa get 3 get /lin eq
+       { Xaxis 3 get true UnitPrefix } if
+     gdict /forabscissa get 5 get text
+     (; ) text
+     gdict /forordinate get 3 get /lin eq
+       { Yaxis 3 get true UnitPrefix } if
+     gdict /forordinate get 5 get text
+     (\)) text 0 exch getinterval /title name
+   [ lB x_to_X ydimension textsize sub y_to_Y title ] XYlabel
+
+   gdict /wildlabel known {
+       gdict /wildlabel get { XYlabel } forall
+     } if 
+
+   gdict /curves known {
+       gdict /curves get dup 0 get /X name 1 get
+         { X exch dup 0 get exch 1 get exec } forall
+     } if 
+   symbolsize ScaleSymbolFont
+   gdict /data known {
+       gdict /data get { /dataset name
+           dataset 0 get dataset 1 get dataset 2 get exec
+         } forall
+     } if
+   gdict /outline known {gdict /outline get exec} if
+
+} bind def
+
+%---------- place label at X, Y
+% [ X Y label ~coloring_setup] | --
+% coloring_setup is optional.
+
+/XYlabel { /thelabel exch def
+  /lineabscissa thelabel 0 get X_to_x def
+  /lineordinate thelabel 1 get Y_to_y def
+  /theline thelabel 2 get def
+  thelabel length 3 gt {thelabel 3 get exec} if
+  /style 0 def 1 LineAdjust ShowLine
+} bind def
+ 
+%--------------------------- Graph of pore profiles ---------------------------
+% plots axial profiles of bath/pore/bath system using a conventional ordinate
+% axis, with grayshading of the pore zone and a special abscissa representation
+%
+% use:  graph_dict | --
+%
+% interprets the following entries in graph_dict:
+%
+%  title        - (..)
+%  wildlabel    - [[ X Y ( .. ) ~color_setup], color_setup is optional
+%  poreproper   - [ X_left X_right ]
+%  compression  - [ length X1 length X2 length ]
+%  forordinate  - [ scan min max type -0.075 unit ]
+%  curves       - [ [ X.. ] [ [ [ Y.. ] { .. } ..] ] ]
+%  data         - [ [ [ X..] [Y..] { .. } ]  
+%
+% 'title', 'wildlabel', and 'forordinate' are described in 'gpGraph'. The
+% ordinate axis is on the left side of the graph, and the zone between the
+% limits given in 'poreproper' is shaded in light gray (0.9). To represent
+% 'compression' zones, ticks at abscissa positions 0, X1, X2, and 1 are
+% included along the bottom of the graph, and 'lengths' are included as labels
+% between the ticks. 'curves' and 'data' are like those in 'gpGraph'. Note
+% that all X coordinates are compressed and normalized to the axial length of
+% the system.
+
+/profileGraph { /gdict name
+   /minX 0.0 def /maxX 1.0 def 
+   gdict /forordinate get dup 0 get /scanY name 
+      dup 1 get /minY name dup 2 get /maxY name
+      4 1 getinterval /Xord name
+   gdict /curves known
+      { gdict /curves get 1 get /Ys name
+        scanY { minY isnull { Ys 0 get 0 get 0 get /minY name } if
+                maxY isnull { Ys 0 get 0 get 0 get /maxY name } if
+                Ys { 0 get ExtremaY } forall
+              } if
+      } if
+   gdict /data known
+      { scanY { gdict /data get { 1 get /Y name
+                    minY isnull { Y 0 get /minY name } if
+                    maxY isnull { Y 0 get /maxY name } if
+                    Y ExtremaY
+                  } forall
+              } if
+      } if
+
+   xdimension ydimension 2 copy gt { exch } if /dimension name pop
+   gdict /poreproper get /poreproper name
+   xdimension 5 div dup /lB name 5 mul /rB name
+   ydimension 10 div /bB name ydimension bB sub /tB name
+
+   /textsize dimension 40 div 1.2 mul def
+   /symbolsize dimension 40 div 0.7 mul def
+   /graffontlist [
+      /Helvetica findfont textsize scalefont
+      null
+      /Helvetica-Oblique findfont textsize scalefont
+      /Symbol findfont textsize scalefont
+      /Helvetica findfont textsize 0.72 mul scalefont
+      dup
+      dup
+      dup
+    ] def
+   dimension 400 div setlinewidth symbolsize ScaleSymbolFont 
+   /graffonts {
+     /fontlist graffontlist def
+     /superscriptlevel textsize 0.3 mul def
+     /subscriptlevel textsize -0.2 mul def
+     /linespace textsize def
+   } bind def
+   graffonts
+   
+   gdict begin /forabscissa [ false 0.0 1.0 /lin 0.0 (nm) ] def end
+   Xdesigners gdict /forabscissa get 3 get get exec
+   Ydesigners gdict /forordinate get 3 get get exec
+   placeXYaxes
+   
+   0.9 setgray  
+   newpath poreproper 0 get X_to_x tB moveto poreproper 1 get X_to_x tB lineto
+      poreproper 1 get X_to_x bB lineto poreproper 0 get X_to_x bB lineto
+      closepath fill
+   0 setgray
+   gdict /compression get /compression name
+   /Yabs 0.0 y_to_Y def   [ 0.0 Yabs compression 1 get Yabs compression 3 get Yabs 1.0 Yabs ]
+     (Q) Points
+   [ 0.0 compression 1 get Yabs compression 0 get ] xcenterlabel
+   [ compression 1 get compression 3 get Yabs
+      compression 2 get ] xcenterlabel
+   [ compression 3 get 1.0 Yabs compression 4 get ] xcenterlabel
+
+   Yplotters gdict /forordinate get 3 get get exec
+
+   100 string 0 gdict /title get text (\() text
+     (nm; ) text
+     gdict /forordinate get 3 get /lin eq
+       { Yaxis 3 get true UnitPrefix } if
+     gdict /forordinate get 5 get text
+     (\)) text 0 exch getinterval /title name
+   [ Xaxis 0 get ydimension textsize sub y_to_Y title ] XYlabel
+
+   gdict /wildlabel known {
+       gdict /wildlabel get { XYlabel } forall
+     } if 
+
+   gdict /curves known {
+       gdict /curves get dup 0 get /X name 1 get
+         { X exch dup 0 get exch 1 get exec } forall
+     } if 
+   symbolsize ScaleSymbolFont
+   gdict /data known {
+       gdict /data get { /dataset name
+           dataset 0 get dataset 1 get dataset 2 get exec
+         } forall
+     } if  
+
+} bind def
+
+%--------- center numeral label about x positions
+% [ X1 X2 Y numeral ] | --
+
+/xcenterlabel { /thelabel exch def
+   /thetext 10 string 0 thelabel 3 get text 0 exch getinterval def
+   /lineordinate thelabel 2 get Y_to_y def
+   /lineabscissa thelabel 1 get thelabel 0 get add 2 div X_to_x def
+   /linewidth 720 def /style 0 def
+   TextFilter BreakText pop MeasureLine
+   /lineabscissa lineabscissa linelength 0.5 mul sub def
+   /style 0 def ShowLine
+} bind def
+
