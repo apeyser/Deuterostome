@@ -126,7 +126,7 @@ CF_AC_SUBST_EVAL([NAMEBYTES_1], [`expr $NAMEBYTES - 1`])
 
 CF_IF_ENABLED([plugins], [
   CF_IF_ENABLED([dmflex], [
-    AM_PROG_LEX
+    CF_PROG_LEX
   ])
 ])
 

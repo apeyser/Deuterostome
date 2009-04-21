@@ -619,3 +619,15 @@ AC_DEFUN([CF_AC_CHECK_HEADER_WITH], [dnl
   ac_includes_default="${ac_includes_default}" dnl
 ])dnl
 dnl
+AC_DEFUN([CF_PROG_LEX], [dnl
+  AC_MSG_CHECKING([for lex or flex])
+  AC_REQUIRE([AC_PROG_LEX])
+  if test "$LEX" == ":"; then
+    AC_MSG_ERROR([No lex or flex found])
+  fi
+  AC_MSG_RESULT([yes, found $LEX])dnl
+])dnl
+dnl
+
+
+    
