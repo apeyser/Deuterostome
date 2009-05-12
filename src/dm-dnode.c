@@ -471,6 +471,7 @@ P op_setconsole(void)
 P op_console(void) {
   if (o1 > CEILopds) return (OPDS_OVF);
   TAG(o1) = NULLOBJ;
+  ATTR(o1) = 0;
   if (consolesocket != PINF) {
     TAG(o1) |= SOCKETTYPE;
     SOCKET_VAL(o1) = consolesocket;
