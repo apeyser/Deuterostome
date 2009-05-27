@@ -443,14 +443,14 @@ c_         list all connections
 | the node is assigned a group number (enter as NEGATIVE integer)
 | Also connects the eye.
 
-  Xwindows not {null} {  
-    /getdnodedisplay {
+  /getdnodedisplay Xwindows not ~null {  
+    {
       ~[
         getdvtdisplay_ 
         Xauthget /Xauthput find ~exec
       ]
-    } bind def
-  } ifelse
+    }
+  } ifelse bind def
 
   Xwindows {
     /_cx {
