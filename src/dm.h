@@ -339,7 +339,6 @@ extern "C" {
 #define STREAM_CHAR(fdbox)     (*(B*)       PF_PTR(fdbox,2))
 #define STREAM_RO(fdbox)       (*(BOOLEAN*) PF_PTR(fdbox,3))
 
-
 /*--------------------------------------------- Internal message codes */
 #include "dm-errs.h"
 
@@ -383,6 +382,7 @@ DLL_SCOPE BOOLEAN tinymemory;
 DLL_SCOPE P recsocket;
 DLL_SCOPE P maxsocket;
 DLL_SCOPE P consolesocket;
+DLL_SCOPE P consolesigsocket;
 DLL_SCOPE fd_set sock_fds;            /* active sockets                 */
 DLL_SCOPE _dm_const char* startup_dir; // setup by makefile,
                                    // defines which directory
@@ -435,31 +435,33 @@ DLL_SCOPE _dm_const UW ascii[];
 
 /*----------------------- function prototypes ------------------------*/
 
+#define DM_HOT __attribute__ ((__hot__))
+
 /*--- DM1 */
-DLL_SCOPE P tokenize_gen(void);
-DLL_SCOPE P tokenize(B *stringframe);
+DM_HOT DLL_SCOPE P tokenize_gen(void);
+DM_HOT DLL_SCOPE P tokenize(B *stringframe);
 DLL_SCOPE B (*getc_func)(P* retc);
 DLL_SCOPE void (*ungetc_func)(P* retc);
 
 /*-- dm-conv.c */
-DLL_SCOPE void moveframe(_dm_const B *_dm_restrict src, 
-			 B *_dm_restrict dest);
-DLL_SCOPE void moveframes(_dm_const B *_dm_restrict src, 
-			  B *_dm_restrict dest, P n);
-DLL_SCOPE void moveB(_dm_const B *_dm_restrict src, 
-		     B *_dm_restrict dest, P n);
-DLL_SCOPE void moveW(_dm_const W *_dm_restrict src, 
-		     W *_dm_restrict dest, P n);
-DLL_SCOPE void moveL32(_dm_const L32 *_dm_restrict src, 
-		       L32 *_dm_restrict dest, P n);
-DLL_SCOPE void moveL64(_dm_const L64 *_dm_restrict src, 
-		       L64 *_dm_restrict dest, P n);
-DLL_SCOPE void moveLBIG(_dm_const LBIG *_dm_restrict src, 
-			LBIG *_dm_restrict dest, P n);
-DLL_SCOPE void moveS(_dm_const S *_dm_restrict src, 
-		     S *_dm_restrict dest, P n);
-DLL_SCOPE void moveD(_dm_const D *_dm_restrict src, 
-		     D *_dm_restrict dest, P n);
+DM_HOT DLL_SCOPE void moveframe(_dm_const B *_dm_restrict src, 
+				B *_dm_restrict dest);
+DM_HOT DLL_SCOPE void moveframes(_dm_const B *_dm_restrict src, 
+				 B *_dm_restrict dest, P n);
+DM_HOT DLL_SCOPE void moveB(_dm_const B *_dm_restrict src, 
+			    B *_dm_restrict dest, P n);
+DM_HOT DLL_SCOPE void moveW(_dm_const W *_dm_restrict src, 
+			    W *_dm_restrict dest, P n);
+DM_HOT DLL_SCOPE void moveL32(_dm_const L32 *_dm_restrict src, 
+			      L32 *_dm_restrict dest, P n);
+DM_HOT DLL_SCOPE void moveL64(_dm_const L64 *_dm_restrict src, 
+			      L64 *_dm_restrict dest, P n);
+DM_HOT DLL_SCOPE void moveLBIG(_dm_const LBIG *_dm_restrict src, 
+			       LBIG *_dm_restrict dest, P n);
+DM_HOT DLL_SCOPE void moveS(_dm_const S *_dm_restrict src, 
+			    S *_dm_restrict dest, P n);
+DM_HOT DLL_SCOPE void moveD(_dm_const D *_dm_restrict src, 
+			    D *_dm_restrict dest, P n);
 
 /*--- DMNUM */
 DLL_SCOPE void DECODE(B *frame, BOOLEAN fauto, W prec, B *buf);
@@ -494,58 +496,58 @@ DLL_SCOPE void ATAN(B *frame);
 DLL_SCOPE void DECREMENT(B *frame);
 
 /*----------------------- system operators */
-DLL_SCOPE P op_pop(void);
-DLL_SCOPE P op_exch(void);
-DLL_SCOPE P op_dup(void);
-DLL_SCOPE P op_copy(void);
-DLL_SCOPE P op_index(void);
-DLL_SCOPE P op_roll(void);
-DLL_SCOPE P op_clear(void);
+DM_HOT DLL_SCOPE P op_pop(void);
+DM_HOT DLL_SCOPE P op_exch(void);
+DM_HOT DLL_SCOPE P op_dup(void);
+DM_HOT DLL_SCOPE P op_copy(void);
+DM_HOT DLL_SCOPE P op_index(void);
+DM_HOT DLL_SCOPE P op_roll(void);
+DM_HOT DLL_SCOPE P op_clear(void);
 DLL_SCOPE P op_count(void);
 DLL_SCOPE P op_cleartomark(void);
-DLL_SCOPE P op_counttomark(void);
+DM_HOT DLL_SCOPE P op_counttomark(void);
 /*-- dictionary, array, list */
-DLL_SCOPE P op_currentdict(void);
-DLL_SCOPE P op_closelist(void); 
-DLL_SCOPE P op_openlist(void);
-DLL_SCOPE P op_dict(void);
+DM_HOT DLL_SCOPE P op_currentdict(void);
+DM_HOT DLL_SCOPE P op_closelist(void); 
+DM_HOT DLL_SCOPE P op_openlist(void);
+DM_HOT DLL_SCOPE P op_dict(void);
 DLL_SCOPE P op_cleardict(void);
-DLL_SCOPE P op_array(void);
-DLL_SCOPE P op_list(void);
+DM_HOT DLL_SCOPE P op_array(void);
+DM_HOT DLL_SCOPE P op_list(void);
 DLL_SCOPE P (*usedfd_func)(void);
-DLL_SCOPE P op_used(void);
-DLL_SCOPE P op_length(void); 
-DLL_SCOPE P op_last(void);
-DLL_SCOPE P op_begin(void);
-DLL_SCOPE P op_end(void);
-DLL_SCOPE P op_def(void);
-DLL_SCOPE P op_name(void);
-DLL_SCOPE P op_find(void);
-DLL_SCOPE P op_get(void);
-DLL_SCOPE P op_put(void);
-DLL_SCOPE P op_known(void);
-DLL_SCOPE P op_getinterval(void);
+DM_HOT DLL_SCOPE P op_used(void);
+DM_HOT DLL_SCOPE P op_length(void); 
+DM_HOT DLL_SCOPE P op_last(void);
+DM_HOT DLL_SCOPE P op_begin(void);
+DM_HOT DLL_SCOPE P op_end(void);
+DM_HOT DLL_SCOPE P op_def(void);
+DM_HOT DLL_SCOPE P op_name(void);
+DM_HOT DLL_SCOPE P op_find(void);
+DM_HOT DLL_SCOPE P op_get(void);
+DM_HOT DLL_SCOPE P op_put(void);
+DM_HOT DLL_SCOPE P op_known(void);
+DM_HOT DLL_SCOPE P op_getinterval(void);
 DLL_SCOPE P op_countdictstack(void);
 DLL_SCOPE P op_dictstack(void);
 /*-- VM and miscellaneous */
-DLL_SCOPE P op_save(void);
-DLL_SCOPE P op_capsave(void);
-DLL_SCOPE P op_restore(void);
+DM_HOT DLL_SCOPE P op_save(void);
+DM_HOT DLL_SCOPE P op_capsave(void);
+DM_HOT DLL_SCOPE P op_restore(void);
 DLL_SCOPE P op_vmstatus(void);
-DLL_SCOPE P op_bind(void);
-DLL_SCOPE P op_null(void);
+DM_HOT DLL_SCOPE P op_bind(void);
+DM_HOT DLL_SCOPE P op_null(void);
 /*-- control */
 DLL_SCOPE P op_start(void);
-DLL_SCOPE P op_exec(void);
-DLL_SCOPE P op_if(void);
-DLL_SCOPE P op_ifelse(void);
-DLL_SCOPE P op_for(void);
-DLL_SCOPE P op_repeat(void);
-DLL_SCOPE P op_loop(void);
-DLL_SCOPE P op_forall(void);
-DLL_SCOPE P op_exit(void);
-DLL_SCOPE P op_stop(void);
-DLL_SCOPE P op_stopped(void);
+DM_HOT DLL_SCOPE P op_exec(void);
+DM_HOT DLL_SCOPE P op_if(void);
+DM_HOT DLL_SCOPE P op_ifelse(void);
+DM_HOT DLL_SCOPE P op_for(void);
+DM_HOT DLL_SCOPE P op_repeat(void);
+DM_HOT DLL_SCOPE P op_loop(void);
+DM_HOT DLL_SCOPE P op_forall(void);
+DM_HOT DLL_SCOPE P op_exit(void);
+DM_HOT DLL_SCOPE P op_stop(void);
+DM_HOT DLL_SCOPE P op_stopped(void);
 DLL_SCOPE P op_countexecstack(void);
 DLL_SCOPE P op_execstack(void);
 /*-- math */
@@ -572,14 +574,14 @@ DLL_SCOPE P op_ceil(void);
 DLL_SCOPE P op_asin(void);
 DLL_SCOPE P op_acos(void);
 /*-- relational, boolean, bitwise */ 
-DLL_SCOPE P op_eq(void);
-DLL_SCOPE P op_ne(void);
+DM_HOT DLL_SCOPE P op_eq(void);
+DM_HOT DLL_SCOPE P op_ne(void);
 DLL_SCOPE P op_ge(void);
 DLL_SCOPE P op_gt(void);
 DLL_SCOPE P op_le(void);
 DLL_SCOPE P op_lt(void);
 DLL_SCOPE P op_and(void);
-DLL_SCOPE P op_not(void);
+DM_HOT DLL_SCOPE P op_not(void);
 DLL_SCOPE P op_or(void);
 DLL_SCOPE P op_xor(void);
 DLL_SCOPE P op_bitshift(void);
@@ -595,15 +597,15 @@ DLL_SCOPE P op_mkpass(void);
 DLL_SCOPE P op_mktilde(void);
 DLL_SCOPE P op_ctype(void);
 DLL_SCOPE P op_parcel(void);
-DLL_SCOPE P op_text(void);
-DLL_SCOPE P op_number(void);
+DM_HOT DLL_SCOPE P op_text(void);
+DM_HOT DLL_SCOPE P op_number(void);
 DLL_SCOPE P (*tokenfd_func)(void);
 DLL_SCOPE P op_token(void);
 DLL_SCOPE P op_search(void);
 DLL_SCOPE P op_anchorsearch(void);
 
 /*-- more big operators.... */
-DLL_SCOPE P op_fax(void);
+DM_HOT DLL_SCOPE P op_fax(void);
 DLL_SCOPE P op_merge(void);
 DLL_SCOPE P op_nextobject(void);
 DLL_SCOPE P op_interpolate(void);
@@ -638,7 +640,7 @@ DLL_SCOPE P op_matvecmul(void);
 #include "dm-snprintf.h"
 
 #include "dm-types.h"
-DM_INLINE_STATIC BOOLEAN PVALUE(B* frame, P* var) {
+DM_HOT DM_INLINE_STATIC BOOLEAN PVALUE(B* frame, P* var) {
 #if DM_HOST_IS_32_BIT
   LBIG v;
   if (!VALUE(frame, &v) || v > PMAX || v < -PMAX)

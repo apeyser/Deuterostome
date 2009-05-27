@@ -32,7 +32,7 @@ static B *sframe;     /* ->socket string frame                       */
 
 /*--------------- GETC, UNGETC for feeding string object to scanner */
 
-DM_INLINE_STATIC B getc_string(P* retc)
+DM_HOT DM_INLINE_STATIC B getc_string(P* retc)
 {
   if (abortflag) {
     *retc = ABORT;
@@ -44,7 +44,7 @@ DM_INLINE_STATIC B getc_string(P* retc)
   return((*(B *)((VALUE_BASE(sframe))++)) & 0x7F);
 }
 
-DM_INLINE_STATIC void ungetc_string(P* retc)
+DM_HOT DM_INLINE_STATIC void ungetc_string(P* retc)
 {
   if (abortflag) {
     *retc = ABORT;
@@ -125,7 +125,7 @@ The lower nipple of a numeral type specifies one of:
     return 3;								\
   } while (0)
 
-DM_INLINE_STATIC W scan(P* retc)
+DM_HOT DM_INLINE_STATIC W scan(P* retc)
 {
   W kk,type,num;  UW k;
   B c;

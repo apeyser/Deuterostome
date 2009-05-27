@@ -201,3 +201,4 @@ distdir:
 
 include $(top_srcdir)/m4/cf_bundle_sub.make
 
+distdir: $(BUILT_SOURCES) dgen

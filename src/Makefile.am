@@ -123,34 +123,37 @@ pkginclude_HEADERS = dm.h dm-errs.h dm3.h pluginlib.h $(PLUGIN_HDR) \
 	basic-defs.h dm-types.h dm-nextevent.h dm2.h cppplugin.h
 nodist_pkginclude_HEADERS = dm-config.h paths.h
 
+# These source are only for the dvt and dnode, since they are
+#  dependent on sockets, file-descriptors and gnulib-tool
+#  libraries
 socksrcs = \
 	dm-nextevent.c dm-nextevent.h \
 	dm3.c dm3.h \
 	dm-proc.c dm-proc.h dm-glob.c dm-glob.h \
 	dm-prop.c dm-prop.h dm-dvt-vm.h 
+sockcpps = -I$(top_builddir)/lib -I$(top_srcdir)/lib
+socklds = $(top_builddir)/lib/libgnu.la
 
 dvt_SOURCES = dvt.c dvt_0.h dm-dvt.h dm-dvt.c \
 	$(socksrcs)
-
 dvt_LDADD = $(builddir)/libdmglobals.la \
-	$(top_builddir)/lib/libgnu.la \
+	$(socklds) \
 	$(AM_LDADD) $(ATLAS_LIBS)
 dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS) \
-	-I$(top_builddir)/lib -I$(top_srcdir)/lib
+	$(sockcpps)
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 
 dnode_SOURCES = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
 	$(socksrcs) \
 	$(DNODE_MPI_SRCS)
-
 dnode_LDADD = $(builddir)/libdmglobals.la \
 	$(builddir)/libdmnodal.la \
-	$(top_builddir)/lib/libgnu.la \
+	$(socklds) \
 	$(AM_LDADD) $(ATLAS_LIBS) $(MPI_LIBS)
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
 dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) \
 	$(ATLAS_FLAGS) $(MPI_FLAGS) \
-	-I$(top_builddir)/lib -I$(top_srcdir)/lib
+	$(sockcpps)
 
 dpawn_SOURCES = dpawn.c dpawn_0.h dm-dpawn.h dm-dpawn.c dm-mpi.h dm-mpi.c
 dpawn_LDADD = $(builddir)/libdmglobals.la \

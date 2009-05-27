@@ -1,16 +1,32 @@
 
 |======================== userdict ===================================
 
-2 list dictstack dup 0 get /systemdict name   | name the roots
-                     1 get /userdict name
+(Using startup_common.d $Id$ V@PACKAGE_VERSION@ svn-@SVNVERSION@\n) toconsole
 
-userdict /toconsole_ known not {/toconsole_ /toconsole find def} if
+2 list dictstack dup 0 get /systemdict name   | name the roots
+                     1 get /userdict   name
 
 /false 0 1 eq def                             | boolean prototypes
-/true 0 0 eq def
+/true  0 0 eq def
+
+/toconsole_ ~toconsole def
+/_toconsole ~toconsole bind def
 
 /makefont {
     ~[exch 3 -1 roll 1 ~index 0 ~put] bind
+} bind def
+
+/warning_buffer 1024 /b array def
+| ~active | --
+/warning {
+  /warning_func name
+  loadcolor
+  warning_buffer 0 {/red} {
+    (Warning: ) fax 
+    warning_func
+    (\n) fax
+  } color_text 
+  0 exch getinterval _toconsole
 } bind def
 
 |====================================== dictionary builders
@@ -108,10 +124,22 @@ userdict /toconsole_ known not {/toconsole_ /toconsole find def} if
 |----------------- indict -----------------
 | ~exec dict | ...
 |
-| executes ~exec in dictionary dict,
-| wrapped with a stopped
+| executes ~exec in dictionary dict
 |
 /indict {begin stopped end ~stop if} bind def
+
+|----------------- swapdict -----------------
+| ~exec dict | ...
+|
+| executes ~exec in current dictionary
+| with dict directly underneath
+|
+/swapdict {
+  currentdict end exch begin begin
+  stopped
+  currentdict end end begin
+  ~stop if
+} bind def
 
 |----------------- indict -----------------
 | ~exec | ...
@@ -152,16 +180,6 @@ userdict /toconsole_ known not {/toconsole_ /toconsole find def} if
 |
 /rsignal ~[SIGNALS ~exch ~get ~rsendsig] bind def
 
-/OPEN_MODES [
-  /r     | read-only
-  /w     | write-only
-  /wc    | write & create
-  /wcx   | write & create excluse
-  /wt    | write & truncate
-  /wct   | write & create & truncate
-  /wctx  | write & create & truncate excluse
-] makeenum def
-
 |------------------------ low-level information -------------------------
 | For debugging and quick information about objects, stacks, and system
 | resources use:
@@ -186,34 +204,47 @@ userdict /toconsole_ known not {/toconsole_ /toconsole find def} if
 /line @NAMEBYTES@ 2 mul 20 add /b array def
 
 /nulltypes 3 dict dup begin
-  /T (:socket) def
-  /P (:pid) def
-  /N () def
+  /T {(:socket) fax} def
+  /P {(:pid=) fax * object unpid * number} def
+  /N {} def
 end mkread def
 
 /oclasses 12 dict dup begin                      | object
-   /nullclass  { (null) fax nulltypes object type get fax} bind def
+   /nullclass  { (null) fax nulltypes object type get exec} bind def
    /numclass   { * object * number } bind def
    /opclass    { * (op: ) text * /object find text } bind def
-   /nameclass  { /object find active not { * (/) text } if
-                 * /object find text } bind def
-   /arrayclass { * (<) text  * /object find type text * ( .. > of ) text
-                 * /object find length * number } bind def
-   /listclass  { * /object find active
-                    { ({ .. } of ) } { ([ .. ] of ) } ifelse text
-                 * /object find length * number } bind def
-   /dictclass  { * (dict of ) text
-                 * object length * number * ( max and ) text
-                 * object used * number * ( used) text } bind def
+   /nameclass  { 
+     /object find active not { * (/) text } if
+     * /object find text 
+   } bind def
+   /arrayclass { 
+     * (<) text  * /object find type text * ( .. > of ) text
+     * /object find length * number 
+   } bind def
+   /listclass  { 
+     * /object find active
+     { ({ .. } of ) } { ([ .. ] of ) } ifelse text
+     * /object find length * number 
+   } bind def
+   /dictclass  { 
+     * (dict of ) text
+     * object length * number * ( max and ) text
+     * object used * number * ( used) text 
+   } bind def
    /markclass  { * ([) text } bind def
    /boolclass  { * object {(true)} {(false)} ifelse text } bind def
-   /boxclass   { * (box of ) text
-                 * object length * number * ( bytes) text } bind def
-   /streamclass { * (stream: ) text
-                      object closedfd {
-                        * (closed) text object used 1 eq {* (, buffd) text} if
-                      } {* (open) text} ifelse
-                } bind def
+   /boxclass   { 
+     * (box of ) text
+     * object length * number * ( bytes) text 
+   } bind def
+   /streamclass { 
+     * (stream: ) text
+     object closedfd {* (closed) text} {
+       * (open=) text * object unmakefd * number
+     } ifelse
+     * (, ro=) text * object readonlyfd {(t)} {(f)} ifelse text
+     object used 1 eq {* (, bf) text} if
+   } bind def
 end mkread def
 
 /vclasses 12 dict dup begin                  | value
@@ -497,6 +528,17 @@ end def  | of xtext_dict
 /DIRTYPE 16384L def
 /FUSERREAD 256 def
 
+| (dir) (file) | bool
+/fileisdir {
+  findfile not {/FILE_NOSUCH makeerror} if
+  3 1 roll pop pop FTYPEMASK and DIRTYPE eq
+} bind def
+
+| (dir) (file) | bool
+/fileexists {
+  findfile {pop pop pop true} ~false ifelse
+} bind def
+
 | dirname filename | 
 |   if file exists: objects.. true
 |   else:           false
@@ -608,6 +650,19 @@ end def  | of xtext_dict
   userdict 3 -1 roll put
 } bind def
 
+|-------------------------- moduledef
+|
+| /module_name size ~active | --
+|  size is the size of module_dict,
+|    which is created and begin'd
+|  active fills in module_dict
+
+/moduledef {
+  3 -1 roll module 4 2 roll 
+  exch dict dup begin exch exec end
+  _module
+} bind def
+
 |----------------------------- layer
 | /layer_name | --
 |
@@ -642,6 +697,20 @@ end def  | of xtext_dict
 /_layer {
   find exch {restore true} {capsave false} ifelse 
 } bind def 
+
+|-------------------------- inlayer
+| ~active /layer_name | ...
+|
+| encapsulates the common idiom of /x layer {...} stopped /x _layer ~stop if
+|  which then becomes {...} /x inlayer
+|  ... is whatever active leaves behind.
+|  propagates stops.
+|
+/inlayer {
+  dup layer ~[
+    3 -1 roll destruct_exec ~stopped 4 -1 roll
+  ] exec _layer ~stop if
+} bind def
 
 |------------------------------- savemodule
 |  /project_name /snapshot_name | --
@@ -709,11 +778,39 @@ end def  | of xtext_dict
     userdict /d_dictstack put
 } bind def
 
-(Using startup_common.d $Id$ V@PACKAGE_VERSION@ svn-@SVNVERSION@\n) toconsole
+| ... | --
+/showerror ~[
+  ~[ 
+    2 ~rollerror 1024 /b array ~errormessage ~fax 1 ~sub
+  ] ~warning
+] bind def
 
-save 1024 /b array
+| (buffer) (startup-name) | (buffer)
+/loadstartup {
+    1 index 0 (Loading: ) fax 2 index   fax (\n) fax 
+    0 exch getinterval toconsole
+
+    getstartupdir 1 index fromfiles
+
+    1 index 0 (Done )     fax 3 -1 roll fax (\n) fax
+    0 exch getinterval toconsole
+} bind def
+
+| (buffer) (dir) (name) | (buffer)
+/loadopt {
+  2 index 0 (Trying: ) fax 3 index fax 2 index fax (...\n) fax
+  0 exch getinterval toconsole
+
+  2 copy fromxfiles {
+    2 index 0 (Read: ) fax 3 index fax 2 index fax (\n) fax
+    0 exch getinterval toconsole
+  } if
+  pop pop
+} bind def
+
+save 1024 /b array 1 index capsave | [
   dup 0 (Home:  )   fax gethomedir    fax (\n) fax 0 exch getinterval toconsole
   dup 0 (Startup: ) fax getstartupdir fax (\n) fax 0 exch getinterval toconsole
+  (errors.d) loadstartup
 pop restore
 
-getstartupdir (errors.d) fromfiles

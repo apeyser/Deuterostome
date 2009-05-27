@@ -166,8 +166,7 @@ P killrthreads(void) {
   }
 
   if (socketfd != -1) {
-    if (close(socketfd)) r = -errno;
-    delsocket(socketfd);
+    r = delsocket_force(socketfd);
     socketfd = -1;
   }
 
@@ -223,6 +222,7 @@ P op_makerthreads(void) {
   int rookfd;
   int rooksigfd;
   P retc = OK;
+  union SocketInfo info = defaultsocketinfo;
 
   if (o_1 < FLOORopds) return OPDS_UNF;
   if ((retc = killrthreads())) return retc;
@@ -337,23 +337,28 @@ P op_makerthreads(void) {
 
   if (! pid) {
     int stdinfd;
+    if ((retc = closesockets_exec()))
+      error(1, retc < 0 ? -retc : 0, "Unable to close sockets for queen");
     if (dup2(rookfd, 3) == -1)
       error(1, errno, "Error duping %i to %i", (int) rookfd, 3);
     if ((retc = nocloseonexec(3)))
-      error(1, -retc, "Error setting no close on exec for fd 3");
+      error(1, retc < 0 ? -retc : 0, 
+	    "Error setting no close on exec for fd 3");
     if (dup2(rooksigfd, 4) == -1)
       error(1, errno, "Error duping %i to %i", (int) rooksigfd, 4);
     if ((retc = nocloseonexec(4)))
-      error(1, -retc, "Error setting no close on exec for fd 4");
+      error(1, retc < 0 ? -retc : 0, 
+	    "Error setting no close on exec for fd 4");
 
     if ((stdinfd = open("/dev/null", O_RDONLY)) == -1)
       error(1, errno, "Unable to open /dev/null for reading");
     if (dup2(stdinfd, 0) == -1)
       error(1, errno, "Error redirecting 0 from /dev/null");
-    if (stdinfd != 0 && close(stdinfd))
+    if (stdinfd > 2 && close(stdinfd))
       error(1, errno, "Unable to close fd %i", stdinfd);
     if ((retc = nocloseonexec(0)))
-      error(1, -retc, "Error setting no close on exec for fd 0");
+      error(1, retc < 0 ? -retc : 0, 
+	    "Error setting no close on exec for fd 0");
 
     execl("@drook@", "@drook@", NULL);
     error(1, errno, "Error starting `%s'", "@drook@");
@@ -382,7 +387,8 @@ P op_makerthreads(void) {
   }
   
   mpin = mpin_;
-  if ((retc = addsocket(socketfd, 0, FALSE, TRUE, sigfd))) {
+  info.listener.sigfd = sigfd;
+  if ((retc = addsocket(socketfd, &sockettype, &info))) {
     killrthreads();
     return retc;
   }

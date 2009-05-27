@@ -202,7 +202,7 @@ DM_INLINE_STATIC P INIT_MAT_WRITEEND_(Mat A, enum AssState* t) {
 
 #define INIT_MAT(frame, A) do {						\
     P _retc_;								\
-    enum AssState* t;							\
+    enum AssState* t = NULL;						\
     if ((_retc_ = INIT_MAT_(frame, &A, &t))				\
 	|| (_retc_ = INIT_MAT_ASS_(A, t)))				\
       return _retc_;							\
@@ -210,7 +210,7 @@ DM_INLINE_STATIC P INIT_MAT_WRITEEND_(Mat A, enum AssState* t) {
 
 #define INIT_MAT_WRITE(frame, A) do {					\
     P _retc_;								\
-    enum AssState* t;							\
+    enum AssState* t = NULL;						\
     if ((_retc_ = INIT_MAT_(frame, &A, &t))				\
 	|| (_retc_ = INIT_MAT_WRITE_(A, t)))				\
       return _retc_;							\
@@ -218,7 +218,7 @@ DM_INLINE_STATIC P INIT_MAT_WRITEEND_(Mat A, enum AssState* t) {
 
 #define INIT_MAT_WRITEEND(frame, A) do {				\
     P _retc_;								\
-    enum AssState* t;							\
+    enum AssState* t = NULL;						\
     if ((_retc_ = INIT_MAT_(frame, &A, &t))				\
 	|| (_retc_ = INIT_MAT_WRITEEND_(A, t)))				\
       return _retc_;							\
@@ -586,7 +586,7 @@ DM_INLINE_STATIC P petsc_vecvec_add_single(Vec y, B *restrict yf,
 DM_INLINE_STATIC P petsc_vecvec_add(void) {
   Vec x, y;
   D alpha, beta;
-  BOOLEAN alpha_1, alpha_0, beta_1, beta_0;
+  BOOLEAN alpha_1 = FALSE, alpha_0 = FALSE, beta_1 = FALSE, beta_0 = FALSE;
   L32 n;
 
   if (o_4 < FLOORopds) return OPDS_UNF;
@@ -687,7 +687,6 @@ DM_INLINE_STATIC P petsc_vecmat_copy_mat(B* mf, D* arr, P row, P n) {
 DM_INLINE_STATIC P petsc_vecmat_copy(void) {
   Vec x;
   P off, n, row;
-  BOOLEAN nset;
   D* arr;
   P retc;
 
@@ -1261,7 +1260,6 @@ DM_INLINE_STATIC P petsc_mat_endfill(void) {
 // d n m A | A
 DM_INLINE_STATIC P petsc_mat_fillone(void) {
   Mat A;
-  D* row;
   P m, n;
   L32 m32, n32;
   D v;

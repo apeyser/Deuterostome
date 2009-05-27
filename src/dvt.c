@@ -86,20 +86,20 @@ current directory.
 
 int main(void)
 {
+  P retc;
+
   sysop = _sysop;
   syserrm = _syserrm;
   syserrc = _syserrc;
   serialized = TRUE; // no serialize operator
 
-/*-------------------- prime the socket table -----------------------
-  We use a fd_set bit array to keep track of active sockets. Hence,
-  the number of active sockets is limited to the FD_SET_SIZE of
-  the host system.
-*/
-  FD_ZERO(&sock_fds);
-
  /*----------------- include stdin into socket table */ 
-  addsocket(0, 0, TRUE, TRUE, -1); /* we monitor console input */
+  initfds();
+  /* we monitor console input */
+  if ((consolesocket = dup(STDIN_FILENO)) == -1)
+    error(1, errno, "Unable to dup stdin");
+  if ((retc = addsocket(consolesocket, &sockettype, &defaultsocketinfo)))
+    error(1, retc < 0 ? -retc : 0, "Unable to add console socket");
 
  /*-------------- fire up Xwindows (if there is) -----------------------*/
 #if ! X_DISPLAY_MISSING
@@ -115,7 +115,8 @@ int main(void)
     ncachedfonts = 0;
     dvtgc = HXCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
     xsocket = ConnectionNumber(dvtdisplay);
-    addsocket(xsocket, 0, FALSE, TRUE, -1);
+    if ((retc = addsocket(xsocket, &sockettype, &defaultsocketinfo)))
+      error(1, retc < 0 ? -retc : 0, "Unable to add x socket");
   }
   else {
     dvtdisplay = NULL;

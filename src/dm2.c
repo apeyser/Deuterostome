@@ -9,6 +9,8 @@
      -  getstartupdir
 
 */
+#include "dm.h"
+
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -17,8 +19,8 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <signal.h>
+#include <sys/wait.h>
 
-#include "dm.h"
 #include "paths.h"
 #include "dm-swapbytes.h"
 #include "dm2.h"
@@ -440,7 +442,7 @@ void pullname(B *nameframe, B *namestring)
   namestring[NAMEBYTES] = 0;
 }
 
-P compname(B* nameframe1, B* nameframe2) 
+P compname(B* nameframe1, B* nameframe2)
 {
   UW i; W r; W* n1; W* n2;
   n1 = ((W*) nameframe1)+1; n2 = ((W*) nameframe2)+1;
@@ -480,9 +482,9 @@ B *lookup(B *nameframe, B *dict)
     return NULL;
 
   do { 
-    if (key == NAME_KEY(ASSOC_NAME(link)))
-      if (matchname(nameframe, ASSOC_NAME(link)))
-        return ASSOC_FRAME(link);
+    if (key == NAME_KEY(ASSOC_NAME(link))
+	&& matchname(nameframe, ASSOC_NAME(link)))
+      return ASSOC_FRAME(link);
   } while ((link = (B*) ASSOC_NEXT(link)) != (B*) -1L);
 
   return NULL;
@@ -593,7 +595,7 @@ P exec(L32 turns)
  x_t:
   if (FREEexecs <= FLOORexecs) return DONE;
   if (turns-- <= 0) return MORE;
-  if (abortflag) { 
+  if (abortflag) {
     abortflag = FALSE; 
     return ABORT;
   }
@@ -601,17 +603,16 @@ P exec(L32 turns)
 /* ---------------------------------------- fetch phase */
  
   switch (fclass = CLASS(x_1)) {
-    case LIST: goto f_list;
-    case ARRAY: goto f_arr;
+    case LIST:   goto f_list;
+    case ARRAY:  goto f_arr;
     case STREAM: if (execfd_func) goto f_str;
     // otherwise fall through
-    default:
-      if (fclass < BOX) {
-	f = x_1; 
-	FREEexecs = x_1; 
-	goto x_e; 
-      }
-  };
+  }
+  if (fclass < BOX) {
+    f = x_1; 
+    FREEexecs = x_1; 
+    goto x_e; 
+  }
   errsource = fetch_err; 
   return CORR_OBJ;
   
@@ -658,12 +659,14 @@ P exec(L32 turns)
 /* -----------------------------------------  execution phase */
  x_e:
   if (! (ATTR(f) & ACTIVE)) goto e_opd;
-  if ((fclass = CLASS(f)) == OP) goto e_op;
-  if (fclass == NAME) goto e_name;
-  if (fclass == NULLOBJ) goto x_t;
+  switch ((fclass = CLASS(f))) {
+    case OP:      goto e_op;
+    case NAME:    goto e_name;
+    case NULLOBJ: goto x_t;
+  }
   if (fclass > BOX) {
-    retc = CORR_OBJ; 
-    goto e_er_1; 
+    retc = CORR_OBJ;
+    goto e_er_1;
   }
 
  e_opd:                               /* push object on operand stack */
@@ -693,21 +696,21 @@ P exec(L32 turns)
  e_name:
   dict = FREEdicts;
   while ((dict -= FRAMEBYTES) >= FLOORdicts) { 
-    if ((af = lookup(f, (B *)(VALUE_BASE(dict)))) != 0L) { 
+    if ((af = lookup(f, VALUE_PTR(dict)))) { 
       f = af;
       if (ATTR(af) & ACTIVE) { 
 	if (FREEexecs >= CEILexecs) { 
 	  retc = EXECS_OVF; 
 	  goto e_er_1; 
 	}
-	moveframe(f,x1); 
+	moveframe(f, x1); 
 	FREEexecs = x2; 
 	goto x_t;
       }
       else goto e_opd;
     }
   }
-  pullname(f,undfn_buf);  
+  pullname(f, undfn_buf);  
   errsource = undfn_buf; 
   return UNDF;
 
@@ -961,13 +964,13 @@ BOOLEAN foldobj_mem(B** base, B** top)
 
 void foldobj_free(void) 
 {
-		if (vmalloc) {
-				free(vmalloc);
-				vmalloc = NULL;
-		}
+  if (vmalloc) {
+    free(vmalloc);
+    vmalloc = NULL;
+  }
 		
-		freemem = NULL;
-		ceilmem = NULL;
+  freemem = NULL;
+  ceilmem = NULL;
 }
 
 DM_INLINE_STATIC P foldobj_int(B *frame, P base, W *depth)
@@ -1402,13 +1405,12 @@ P fromsource(B* bufferf, SourceFunc r1, SourceFunc r2) {
       };
       // else fall through
     case LIST: case DICT: {
-      B* iboxf;
+      B* iboxf = FREEvm;
       
       if (bufferf) {
 	if (FREEvm + FRAMEBYTES + SBOXBYTES + BOX_NB(xboxf) >= CEILvm)
 	  return VM_OVF;
 
-	iboxf = FREEvm;
 	TAG(iboxf) = BOX;
 	ATTR(iboxf) = PARENT;
 	VALUE_PTR(iboxf) = FREEvm + FRAMEBYTES;
@@ -1509,49 +1511,104 @@ P op_aborted(void)
 
 /*--------- signal handler: SIGFPE */
 
-static void SIGFPEhandler(int sig __attribute__ ((__unused__)) )
+static void SIGFPEhandler(int sig __attribute__ ((__unused__)),
+			  siginfo_t* info __attribute__ ((__unused__)),
+			  void* ucon __attribute__ ((__unused__)))
 {
   numovf = TRUE;
 }
 
 /*---------- signal handler: SIGALRM */
 
-static void SIGALRMhandler(int sig __attribute__ ((__unused__)) )
+static void SIGALRMhandler(int sig __attribute__ ((__unused__)),
+			  siginfo_t* info __attribute__ ((__unused__)),
+			  void* ucon __attribute__ ((__unused__)))
 {
   timeout = TRUE;
 }
 
-/*---------- signal handler: SIGINT */
+/*---------- signal handler: SIGQUIT, TERM, HUP... */
 
-static void quithandler(int sig) __attribute__ ((__noreturn__));
-static void quithandler(int sig __attribute__ ((__unused__)) ) {
+static void quithandler(int sig, siginfo_t* info, void* ucon)
+  __attribute__ ((__noreturn__));
+
+static void quithandler(int sig, siginfo_t* info, 
+			void* ucon  __attribute__ ((__unused__))) 
+{
+  fprintf(stderr, "Exiting on signal %i from %li\n", 
+	  sig, info ? (long) info->si_pid : 0);
   exit(0);
 }
 
-static void aborthandler(int sig) {
-  fprintf(stderr, "Aborting on signal %i\n", sig);
+/* --------------- signal handler: job control... */
+
+static void shellhandler(int sig,
+			 siginfo_t* info,
+			 void* ucon __attribute__ ((__unused__)))
+{
+  sigset_t set;
+  if (info && info->si_pid == getpid()) return;
+  if (getpid() == getpgrp() && kill(0, sig))
+    error(0, errno, "Unable to propagate %i", sig);
+
+  sigfillset(&set);
+  sigdelset(&set, SIGCONT);
+  sigsuspend(&set);
+}
+
+static void conthandler(int sig,
+			siginfo_t* info,
+			void* ucon __attribute__ ((__unused__)))
+{
+  pid_t me = getpid();
+  if ((! info || info->si_pid != me) && me == getpgrp() && kill(0, SIGCONT))
+    error(0, 0, "Unable to propagate %i", sig);
+}
+
+/*---------- signal handler: SIGINT */
+
+static void aborthandler(int sig, 
+			 siginfo_t* info, 
+			 void* ucon __attribute__ ((__unused__))) 
+{
+  fprintf(stderr, "Aborting on signal %i from %li\n",
+	  sig, info ? (long) info->si_pid : 0);
   abortflag = TRUE;
 }
 
-static void makeaborthandler(void)
-{
-  int abortsigs[] = {SIGINT, 0};
+static void quit(void) {
+  int quitsigs[] = {SIGQUIT, SIGTERM, SIGHUP, 0};
   int* i;
-  for (i = abortsigs; *i; i++) sethandler(*i, aborthandler);
+  static struct sigaction sa = {
+    .sa_handler = SIG_DFL,
+    .sa_flags   = SA_NOCLDWAIT|SA_NOCLDSTOP
+  };
+  sigfillset(&sa.sa_mask);
+  if (sigaction(SIGCHLD, &sa, NULL))
+    error(0, errno, "Unable to dezombify");
+  for (i = quitsigs; *i; i++) clearhandler(*i);
+
+  if (getpid() == getpgrp() && kill(0, SIGQUIT))
+    error(0, errno, "Failed to send quit signal to process group");
+  while (wait(NULL) != -1 || errno == EINTR);
 }
 
-static void makequithandler(void) 
+static void makequithandler(void)
 {
   int quitsigs[] = {SIGQUIT, SIGTERM, SIGHUP, 0};
   int* i;
+  if (getpid() != getpgid(0) && setpgid(0, 0)) 
+    error(1, errno, "Failed to set process group");
+  if (atexit(quit)) error(1, 0, "Failed to set exit handler for quit");
   for (i = quitsigs; *i; i++) sethandler(*i, quithandler);
 }
 
-static void makeignorehandler(void)
+static void makeshellhandler(void)
 {
-  int quitsigs[] = {SIGHUP, 0};
+  int quitsigs[] = {SIGTSTP, SIGTTIN, SIGTTOU, 0};
   int* i;
-  for (i = quitsigs; *i; i++) sethandler(*i, SIG_IGN);
+  for (i = quitsigs; *i; i++) sethandler(*i, shellhandler);
+  sethandler(SIGCONT, conthandler);
 }
 
 void setuphandlers(void) {
@@ -1567,7 +1624,7 @@ void setuphandlers(void) {
    it will pop up in attempts to send on a broken connection
 */
 
-  sethandler(SIGPIPE, SIG_IGN);
+  clearhandler(SIGPIPE);
 
 /* We use alarms to limit read/write operations on sockets  */
 
@@ -1581,9 +1638,9 @@ void setuphandlers(void) {
    console keyboard, it triggers the execution of 'abort'
 */
   abortflag = FALSE;
+  sethandler(SIGINT, aborthandler);
 
   makequithandler();
-  makeaborthandler();
-  makeignorehandler();
+  makeshellhandler();
 }
 

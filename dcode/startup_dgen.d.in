@@ -13,15 +13,20 @@
 
 |============================= userdict =================================
 
+/dm_type /dgen def
+
 /false 0 1 eq def                             | boolean prototypes
 /true 0 0 eq def
-
-/dm_type /dgen def
 
 2 list dictstack dup 0 get /systemdict name   | name the roots
                      1 get /userdict name
 
-/lock {exec} bind def    | 
+/lock {exec} bind def    |
+
+| (source) /ERROR_NAME
+/makeerror ~[~ERRORS ~exch bind ~get bind ~error] def
+| (source) code ... n | .. (source) code
+/rollerror {2 1 index add exch roll} bind def
 
 |------------------------ low-level information -------------------------
 | For debugging and quick information about objects, stacks, and system

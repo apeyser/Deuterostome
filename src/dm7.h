@@ -16,8 +16,7 @@ DLL_SCOPE P op_findfiles(void);
 DLL_SCOPE P op_findfile(void);
 DLL_SCOPE P op_readboxfile(void);
 DLL_SCOPE P op_writeboxfile(void); 
-DLL_SCOPE P op_tosystem(void);
-DLL_SCOPE P op_fromsystem(void);
 DLL_SCOPE P op_transcribe(void);
+DLL_SCOPE P op_tostderr(void);
 
 #endif //DM7_H

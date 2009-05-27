@@ -70,7 +70,7 @@ DM_INLINE_STATIC P fromconsole(void)
   if (atmost <= 0) return RNG_CHK;
   //if (timeout) return BAD_MSG;
   if (abortflag) return ABORT;
-  if ((nb = read(0, p, atmost)) < 0) {
+  if ((nb = read(consolesocket, p, atmost)) < 0) {
     if ((errno == EAGAIN) || (errno == EINTR)) goto rc1;
     else return -errno;
   }
@@ -291,7 +291,7 @@ P clientinput(void) {
 
 
 BOOLEAN masterinput(P* retc, B* bufferf) {
-  if (recsocket != 0) return FALSE;
+  if (recsocket != consolesocket) return FALSE;
   if (o2 > CEILopds) {
     *retc = OPDS_OVF;
     return TRUE;
@@ -376,13 +376,17 @@ void makeerror(P retc, B* error_source) {
   FREEexecs = x2;
 }
 
-static void SIGINThandler(int sig __attribute__ ((__unused__)) )
+static void SIGINThandler(int sig __attribute__ ((__unused__)),
+			  siginfo_t* info __attribute__ ((__unused__)),
+			  void* ucon __attribute__ ((__unused__)))
 {
   abortflag = TRUE;
   fprintf(stderr, "\n"); // just skipped the current input line
 }
 
-static void SIGQUIThandler(int sig __attribute__ ((__unused__)) )
+static void SIGQUIThandler(int sig __attribute__ ((__unused__)),
+			  siginfo_t* info __attribute__ ((__unused__)),
+			  void* ucon __attribute__ ((__unused__)))
 {
   recvd_quit = TRUE;
   fprintf(stderr, "Received quit signal\n");

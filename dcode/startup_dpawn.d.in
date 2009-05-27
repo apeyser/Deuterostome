@@ -1,6 +1,8 @@
 
 |======================== startup_dnode.d ================================
 
+(Using startup_dpawn.d $Id$ V@PACKAGE_VERSION@ svn-@SVNVERSION@\n) toconsole
+
 | Contains procedures for:
 |  - inspection of objects
 |  - object/text interconversion
@@ -8,6 +10,8 @@
 |  - file <=> VM interchange
 |  - module support
 |  - emulators of dvt operators
+
+/dm_type /dpawn def
 
 save /startup_common_save name 
 /startup_common_buf vmstatus sub 10 div /b array def
@@ -22,7 +26,14 @@ startup_common_save capsave {
   stop
 } if
 
-/dm_type /dpawn def
+| (source) /ERROR_NAME
+/makeerror ~[
+  ~mpirank bind 3 1 ~roll bind ~ERRORS ~exch bind ~get bind
+  ~error
+] def
+
+| rank (source) code ... n | ... rank (source) string
+/rollerror {3 1 index add exch roll} bind def
 
 |============================= userdict =================================
 
@@ -78,26 +89,15 @@ startup_common_save capsave {
   ~toconsole
 ] bind def
 
-(Using startup_dpawn.d $Id$ V@PACKAGE_VERSION@ svn-@SVNVERSION@\n) toconsole
+(Starting...\n) toconsole
 
-getstartupdir (errors.d) fromfiles
-getstartupdir (matrix.d) fromfiles
-
-save /tsave name 1024 /b array /tbuf name tsave capsave
-tbuf 0 (Trying ) fax getconfdir fax (dpawn.d...\n) fax 
-0 exch getinterval toconsole
-getconfdir (dpawn.d) fromxfiles {
-  tbuf 0 (Read ) fax getconfdir fax (dpawn.d\n) fax
-  0 exch getinterval toconsole
-} if
-(Trying ~/.dpawn ...\n) toconsole
-gethomedir (.dpawn) fromxfiles {(Read ~/.dnode\n) toconsole} if |]
+save 1024 /b array 1 index capsave |[
+  (matrix.d) loadstartup
+  {
 @ENABLE_PETSC_START@
-tbuf 0 (Trying ) fax getstartupdir fax (petsc.d...\n) fax
-0 exch getinterval toconsole
-getstartupdir (petsc.d) fromxfiles {
-  tbuf 0 (Read ) fax getstartupdir fax (petsc.d\n) fax
-  0 exch getinterval toconsole
-} if
+    {getstartupdir (petsc.d)}
 @ENABLE_PETSC_END@
-tsave restore
+    {getconfdir (dpawn.d)}
+    {gethomedir (.dpawn)}
+  } {exec loadopt} forall |]
+pop restore

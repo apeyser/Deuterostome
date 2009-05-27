@@ -51,6 +51,8 @@
 #define UNDF_VAL    (P)0x00000409L /* using undefined number (NAN)          */
 #define ILL_RECAP   (P)0x0000040AL /* Double capsave                        */
 #define DIR_NOSUCH  (P)0x00000501L /* no such directory/volume              */
+#define SOCK_STATE  (P)0x00000502L /* illegal state change for fd           */
+
 
 #define BADBOX      (P)0x00000701L /* file does not hold a box              */
 #define BAD_MSG     (P)0x00000703L /* bad message received via network      */
@@ -126,4 +128,3 @@
 #define X_SEC_GEN   0x00000A06L /* X generate failure                    */
 #define X_SEC_REV   0x00000A07L /* X revoke failure                      */
 #define X_SEC_LIB   0x00000A08L /* X security lib missing                */
-

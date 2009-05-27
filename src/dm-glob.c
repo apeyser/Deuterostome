@@ -1,12 +1,4 @@
-
-/* #ifdef _POSIX_C_SOURCE */
-/* #undef _POSIX_C_SOURCE */
-/* #define undefd_POSIX_C_SOURCE */
-/* #endif //_POSIX_C_SOURCE */
-/* #ifdef _XOPEN_SOURCE */
-/* #undef _XOPEN_SOURCE */
-/* #define undefd_XOPEN_SOURCE */
-/* #endif //_XOPEN_SOURCE */
+#include "dm.h"
 
 #include <glob.h> // after, to get all glob features
 #include "dm-glob.h"

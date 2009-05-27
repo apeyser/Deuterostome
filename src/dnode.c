@@ -199,13 +199,7 @@ int main(int argc, char *argv[])
   if (! *(argv[1]) || *endptr) usage_error(errno);
 
   serverport += getportoffset();
-
-/*-------------------- prime the socket table -----------------------
-  We use a fd_set bit array to keep track of active sockets. Hence,
-  the number of active sockets is limited to the FD_SET_SIZE of
-  the host system. 
-*/
-  FD_ZERO(&sock_fds);
+  initfds();
 
 /*------------- make server socket and listen on it -----------------
 

@@ -346,29 +346,6 @@ P op_continue(void) {
   return OK; 
 }
 
-
-P op_tostderr(void)
-{
-  B *p;
-  P nb, atmost;
-
-  if (o_1 < FLOORopds) return OPDS_UNF;
-  if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
-
-  p = VALUE_PTR(o_1);
-  atmost = ARRAY_SIZE(o_1);
-  while (atmost > 0) {
-    while ((nb = write(2, p, atmost)) < 0
-           && ((errno == EINTR) || (errno == EAGAIN)));
-    if (nb < 0) return op_abort();
-    atmost -= nb;
-    p += nb;
-  }
-
-  FREEopds = o_1;
-  return OK;
-}  
-
 /*--------------------------------------- abort
    - clears the operand stack
    - clears the execution stack

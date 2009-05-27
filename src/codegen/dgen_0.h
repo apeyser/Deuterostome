@@ -189,7 +189,7 @@ P _syserrc[] = {
   NO_XWINDOWS, X_ERR, X_BADFONT, X_BADHOST, MEM_OVF, BAD_ARR,
   LIB_LOAD, LIB_EXPORT, LIB_LINK, LIB_ADD, LIB_LOADED, LIB_OVF, LIB_MERGE,
   LIB_INIT,
-  CLOCK_ERR, LONG_OVF,
+  CLOCK_ERR, LONG_OVF, SOCK_STATE,
   0L,
 };
 
@@ -250,6 +250,7 @@ B *_syserrm[] = {
   (B*)"** Unable to merge library into sysdict",
   (B*)"** Unable to initialize loaded library",
   (B*)"** Error accessing clock",
-  (B*)"** Error loading 64 bit integer into 32 bit machine"
+  (B*)"** Error loading 64 bit integer into 32 bit machine",
+  (B*)"** Attempt to change file descriptor state"
 };
 

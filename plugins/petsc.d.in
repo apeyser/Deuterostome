@@ -564,10 +564,10 @@
     } in_petsc
   } bind def
 
-  | offset elements A mmax ~active | --
-  /mat_forrows_get {
-    {
-      save 
+|  | offset elements A mmax ~active | --
+|  /mat_forrows_get {
+|    {
+|      save 
 
   | row column A | d
   /mat_get {

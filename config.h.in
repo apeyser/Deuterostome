@@ -1,7 +1,26 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Define if the compiler is building for multiple architectures of Apple
+   platforms at once. */
+#undef AA_APPLE_UNIVERSAL_BUILD
+
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
+
+/* Define to the number of bits in type 'ptrdiff_t'. */
+#undef BITSIZEOF_PTRDIFF_T
+
+/* Define to the number of bits in type 'sig_atomic_t'. */
+#undef BITSIZEOF_SIG_ATOMIC_T
+
+/* Define to the number of bits in type 'size_t'. */
+#undef BITSIZEOF_SIZE_T
+
+/* Define to the number of bits in type 'wchar_t'. */
+#undef BITSIZEOF_WCHAR_T
+
+/* Define to the number of bits in type 'wint_t'. */
+#undef BITSIZEOF_WINT_T
 
 /* align to this many bytes */
 #undef BYTECORRECT
@@ -109,6 +128,9 @@
 /* Header for endianness */
 #undef ENDIAN_HDR
 
+/* Define if gettimeofday clobbers the localtime buffer. */
+#undef GETTIMEOFDAY_CLOBBERS_LOCALTIME
+
 /* name of program to display pdf's, eg gnome-open or launch -i
    com.apple.Preview */
 #undef GUIPDF
@@ -127,6 +149,9 @@
 /* Define if you have ATLAS library. */
 #undef HAVE_ATLAS
 
+/* Define to 1 if you have the `btowc' function. */
+#undef HAVE_BTOWC
+
 /* Define to 1 if you have the <cblas.h> header file. */
 #undef HAVE_CBLAS_H
 
@@ -137,11 +162,33 @@
    */
 #undef HAVE_DECL_DIRFD
 
+/* Define to 1 if you have the declaration of `getc_unlocked', and to 0 if you
+   don't. */
+#undef HAVE_DECL_GETC_UNLOCKED
+
+/* Define to 1 if you have the declaration of `getlogin', and to 0 if you
+   don't. */
+#undef HAVE_DECL_GETLOGIN
+
+/* Define to 1 if you have the declaration of `getlogin_r', and to 0 if you
+   don't. */
+#undef HAVE_DECL_GETLOGIN_R
+
+/* Define to 1 if you have the declaration of `isblank', and to 0 if you
+   don't. */
+#undef HAVE_DECL_ISBLANK
+
+/* Define to 1 if you have the <dirent.h> header file. */
+#undef HAVE_DIRENT_H
+
 /* Define to 1 if you have the `dirfd' function. */
 #undef HAVE_DIRFD
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
+
+/* Define to 1 if you have the <errno.h> header file. */
+#undef HAVE_ERRNO_H
 
 /* Define to 1 if you have <error.h> */
 #undef HAVE_ERROR_H
@@ -158,20 +205,56 @@
 /* Define to 1 if you have the `getpwnam_r' function. */
 #undef HAVE_GETPWNAM_R
 
+/* Define to 1 if you have the `gettimeofday' function. */
+#undef HAVE_GETTIMEOFDAY
+
 /* Define to 1 if you have the <glob.h> header file. */
 #undef HAVE_GLOB_H
 
-/* Define if your compiler supports the #include_next directive. */
-#undef HAVE_INCLUDE_NEXT
-
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the `isblank' function. */
+#undef HAVE_ISBLANK
+
+/* Define to 1 if you have the `iswcntrl' function. */
+#undef HAVE_ISWCNTRL
+
+/* Define to 1 if you have the `iswctype' function. */
+#undef HAVE_ISWCTYPE
+
+/* Define if you have <langinfo.h> and nl_langinfo(CODESET). */
+#undef HAVE_LANGINFO_CODESET
+
+/* Define to 1 if the system has the type `long long int'. */
+#undef HAVE_LONG_LONG_INT
+
+/* Define to 1 if you have the `lstat' function. */
+#undef HAVE_LSTAT
+
+/* Define if the 'malloc' function is POSIX compliant. */
+#undef HAVE_MALLOC_POSIX
+
+/* Define to 1 if you have the `mbrtowc' function. */
+#undef HAVE_MBRTOWC
+
+/* Define to 1 if you have the `mbsinit' function. */
+#undef HAVE_MBSINIT
+
+/* Define to 1 if you have the `mbsrtowcs' function. */
+#undef HAVE_MBSRTOWCS
+
+/* Define to 1 if <wchar.h> declares mbstate_t. */
+#undef HAVE_MBSTATE_T
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
 /* Define to 1 if you have the `mempcpy' function. */
 #undef HAVE_MEMPCPY
+
+/* Define to 1 if you have the `mkdtemp' function. */
+#undef HAVE_MKDTEMP
 
 /* Define if you have MPI library. */
 #undef HAVE_MPI
@@ -191,11 +274,26 @@
 /* Define if you have POSIX threads libraries and header files. */
 #undef HAVE_PTHREAD
 
+/* Define to 1 if you have the <random.h> header file. */
+#undef HAVE_RANDOM_H
+
 /* Define to 1 if you have the `setsid' function. */
 #undef HAVE_SETSID
 
+/* Define to 1 if 'sig_atomic_t' is a signed integer type. */
+#undef HAVE_SIGNED_SIG_ATOMIC_T
+
+/* Define to 1 if 'wchar_t' is a signed integer type. */
+#undef HAVE_SIGNED_WCHAR_T
+
+/* Define to 1 if 'wint_t' is a signed integer type. */
+#undef HAVE_SIGNED_WINT_T
+
 /* Define to 1 if you have the `srandomdev' function. */
 #undef HAVE_SRANDOMDEV
+
+/* Define to 1 if stdbool.h conforms to C99. */
+#undef HAVE_STDBOOL_H
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -213,8 +311,17 @@
    headers. */
 #undef HAVE_STRUCT_DIRENT_D_TYPE
 
+/* Define to 1 if the system has the type `struct random_data'. */
+#undef HAVE_STRUCT_RANDOM_DATA
+
+/* Define to 1 if you have the <sys/bitypes.h> header file. */
+#undef HAVE_SYS_BITYPES_H
+
 /* Define to 1 if you have the <sys/cdefs.h> header file. */
 #undef HAVE_SYS_CDEFS_H
+
+/* Define to 1 if you have the <sys/inttypes.h> header file. */
+#undef HAVE_SYS_INTTYPES_H
 
 /* Define to 1 if you have the <sys/prctl.h> header file. */
 #undef HAVE_SYS_PRCTL_H
@@ -222,14 +329,51 @@
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
 
+/* Define to 1 if you have the <sys/timeb.h> header file. */
+#undef HAVE_SYS_TIMEB_H
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#undef HAVE_SYS_TIME_H
+
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Define to 1 if the system has the type `unsigned long long int'. */
+#undef HAVE_UNSIGNED_LONG_LONG_INT
+
+/* Define to 1 if you have the <wchar.h> header file. */
+#undef HAVE_WCHAR_H
+
+/* Define to 1 if you have the <wctype.h> header file. */
+#undef HAVE_WCTYPE_H
+
+/* Define if you have the 'wint_t' type. */
+#undef HAVE_WINT_T
+
+/* Define to 1 if you have the `wmemchr' function. */
+#undef HAVE_WMEMCHR
+
+/* Define to 1 if you have the `wmemcpy' function. */
+#undef HAVE_WMEMCPY
+
+/* Define to 1 if you have the `wmempcpy' function. */
+#undef HAVE_WMEMPCPY
+
 /* Define to 1 if you have <X11/extensions/security.h */
 #undef HAVE_X11_EXTENSIONS_SECURITY_H
+
+/* Define to 1 if the system has the type `_Bool'. */
+#undef HAVE__BOOL
+
+/* Define to 1 if you have the `_ftime' function. */
+#undef HAVE__FTIME
+
+/* Define to 1 if `lstat' dereferences a symlink specified with a trailing
+   slash. */
+#undef LSTAT_FOLLOWS_SLASHED_SYMLINK
 
 /* maximum vm allocation size in mb */
 #undef MAX_MEM_SIZE
@@ -245,6 +389,15 @@
 
 /* maximum user dict size */
 #undef MAX_USER_DICT_SIZE
+
+/* Define if the mbrtowc function has the NULL string argument bug. */
+#undef MBRTOWC_NULL_ARG_BUG
+
+/* Define if the mbrtowc function does not return 0 for a NUL character. */
+#undef MBRTOWC_NUL_RETVAL_BUG
+
+/* Define if the mbrtowc function returns a wrong return value. */
+#undef MBRTOWC_RETVAL_BUG
 
 /* "Header for endianness not found" */
 #undef NO_ENDIAN_HDR
@@ -280,8 +433,16 @@
    your system. */
 #undef PTHREAD_CREATE_JOINABLE
 
+/* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
+   'ptrdiff_t'. */
+#undef PTRDIFF_T_SUFFIX
+
 /* unroll math loops to 2^rollbits */
 #undef ROLLBITS
+
+/* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
+   'sig_atomic_t'. */
+#undef SIG_ATOMIC_T_SUFFIX
 
 /* The size of `int', as computed by sizeof. */
 #undef SIZEOF_INT
@@ -298,6 +459,10 @@
 /* The size of `void*', as computed by sizeof. */
 #undef SIZEOF_VOIDP
 
+/* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
+   'size_t'. */
+#undef SIZE_T_SUFFIX
+
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
    automatically deduced at runtime.
@@ -305,6 +470,9 @@
 	STACK_DIRECTION < 0 => grows toward lower addresses
 	STACK_DIRECTION = 0 => direction of growth unknown */
 #undef STACK_DIRECTION
+
+/* Define to 1 if the `S_IS*' macros in <sys/stat.h> do not work properly. */
+#undef STAT_MACROS_BROKEN
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
@@ -320,6 +488,14 @@
 
 /* Version number of package */
 #undef VERSION
+
+/* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
+   'wchar_t'. */
+#undef WCHAR_T_SUFFIX
+
+/* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
+   'wint_t'. */
+#undef WINT_T_SUFFIX
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
@@ -339,6 +515,12 @@
 /* Define to 1 if `lex' declares `yytext' as a `char *' by default, not a
    `char[]'. */
 #undef YYTEXT_POINTER
+
+/* Number of bits in a file offset, on hosts where this is settable. */
+#undef _FILE_OFFSET_BITS
+
+/* Define for large files, on AIX-style hosts. */
+#undef _LARGE_FILES
 
 /* Define to 1 if on MINIX. */
 #undef _MINIX
@@ -381,6 +563,12 @@
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
 
+/* Define to a replacement function name for fnmatch(). */
+#undef fnmatch
+
+/* Define to rpl_gmtime if the replacement function should be used. */
+#undef gmtime
+
 /* Define to `__inline__' or `__inline' if that's what the C compiler
    calls it, or to nothing if 'inline' is not supported under any name.  */
 #ifndef __cplusplus
@@ -397,6 +585,15 @@
 # define __GNUC_STDC_INLINE__ 1
 #endif
 
+/* Define to rpl_localtime if the replacement function should be used. */
+#undef localtime
+
+/* Define to a type if <wchar.h> does not define. */
+#undef mbstate_t
+
+/* Define to the type of st_nlink in struct stat, or a supertype. */
+#undef nlink_t
+
 /* Define to the equivalent of the C99 'restrict' keyword, or to
    nothing if this is not supported.  Do not define if restrict is
    supported directly.  */
@@ -409,3 +606,13 @@
 #if defined __SUNPRO_CC && !defined __RESTRICT
 # define _Restrict
 #endif
+
+/* Define as a marker that can be attached to function parameter declarations
+   for parameters that are not used.  This helps to reduce warnings, such as
+   from GCC -Wunused-parameter.  */
+#if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
+# define _UNUSED_PARAMETER_ __attribute__ ((__unused__))
+#else
+# define _UNUSED_PARAMETER_
+#endif
+
