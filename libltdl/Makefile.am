@@ -30,3 +30,5 @@ ltdl.lo: ltdl.h config.h
 $(libltdl_la_OBJECTS) $(libltdlc_la_OBJECTS): libtool
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
+
+include $(top_srcdir)/../m4/cf_bundle_sub.make
