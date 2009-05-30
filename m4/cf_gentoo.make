@@ -1,7 +1,7 @@
 # -*- mode: makefile; -*-
 
 gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild:
-	svn cp `echo gentoo/dev-lang/dm/dm-*.ebuild | sed -e 's/ /\n/' \
+	svn cp `echo gentoo/dev-lang/dm/dm-*.ebuild | sed -e 's/ /\n/g' \
 	        | sort | tail -n 1` $@
 
 .PHONY: update-version
