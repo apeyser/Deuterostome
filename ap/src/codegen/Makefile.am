@@ -48,7 +48,7 @@ libdmbootstrap_la_SOURCES = dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h \
 libdmbootstrap_la_LIBADD = $(AM_LIBADD)
 
 dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h \
-	dm3.c dm3.h dm-prop.c dm-prop.h paths.h
+	dm3.c dm3.h dm-prop.c dm-prop.h paths.h dgen-dm3.c dgen-dm3.h
 dm3.c: paths.h
 
 dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
@@ -201,3 +201,4 @@ distdir:
 
 include $(top_srcdir)/m4/cf_bundle_sub.make
 
+distdir: $(BUILT_SOURCES) dgen

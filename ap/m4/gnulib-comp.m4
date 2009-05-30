@@ -1,5 +1,5 @@
 # DO NOT EDIT! GENERATED AUTOMATICALLY!
-# Copyright (C) 2002-2008 Free Software Foundation, Inc.
+# Copyright (C) 2002-2009 Free Software Foundation, Inc.
 #
 # This file is free software, distributed under the terms of the GNU
 # General Public License.  As a special exception to the GNU General
@@ -47,12 +47,45 @@ changequote([, ])dnl
 AC_SUBST([LTALLOCA])
   gl_FUNC_ALLOCA
   gl_CHECK_TYPE_STRUCT_DIRENT_D_TYPE
+  gl_DIRENT_H
   gl_FUNC_DIRFD
-  # No macro. You should also use one of fnmatch-posix or fnmatch-gnu.
+  gl_DIRENT_MODULE_INDICATOR([dirfd])
+  gl_HEADER_ERRNO_H
+  gl_FUNC_FNMATCH_POSIX
+  gl_GETLOGIN_R
+  gl_UNISTD_MODULE_INDICATOR([getlogin_r])
+  gl_FUNC_GETTIMEOFDAY
   gl_GLOB
+  gl_LOCALCHARSET
+  LOCALCHARSET_TESTS_ENVIRONMENT="CHARSETALIASDIR=\"\$(top_builddir)/$gl_source_base\""
+  AC_SUBST([LOCALCHARSET_TESTS_ENVIRONMENT])
+  gl_FUNC_LSTAT
+  gl_SYS_STAT_MODULE_INDICATOR([lstat])
+  gl_FUNC_MALLOC_POSIX
+  gl_STDLIB_MODULE_INDICATOR([malloc-posix])
+  gl_FUNC_MBRTOWC
+  gl_WCHAR_MODULE_INDICATOR([mbrtowc])
+  gl_FUNC_MBSINIT
+  gl_WCHAR_MODULE_INDICATOR([mbsinit])
+  gl_FUNC_MBSRTOWCS
+  gl_WCHAR_MODULE_INDICATOR([mbsrtowcs])
   gl_FUNC_MEMPCPY
   gl_STRING_MODULE_INDICATOR([mempcpy])
+  gt_FUNC_MKDTEMP
+  gl_STDLIB_MODULE_INDICATOR([mkdtemp])
+  gl_MULTIARCH
+  AM_STDBOOL_H
+  gl_STDINT_H
+  gl_STDLIB_H
   gl_HEADER_STRING_H
+  gl_HEADER_SYS_STAT_H
+  AC_PROG_MKDIR_P
+  gl_HEADER_SYS_TIME_H
+  AC_PROG_MKDIR_P
+  gl_FUNC_GEN_TEMPNAME
+  gl_UNISTD_H
+  gl_WCHAR_H
+  gl_WCTYPE_H
   m4_ifval(gl_LIBSOURCES_LIST, [
     m4_syscmd([test ! -d ]m4_defn([gl_LIBSOURCES_DIR])[ ||
       for gl_file in ]gl_LIBSOURCES_LIST[ ; do
@@ -184,27 +217,84 @@ AC_DEFUN([gl_FILE_LIST], [
   build-aux/link-warning.h
   lib/alloca.c
   lib/alloca.in.h
+  lib/config.charset
+  lib/dirent.in.h
   lib/dirfd.c
-  lib/dirfd.h
-  lib/dummy.c
+  lib/errno.in.h
   lib/fnmatch.c
   lib/fnmatch.in.h
   lib/fnmatch_loop.c
+  lib/getlogin_r.c
+  lib/gettimeofday.c
   lib/glob-libc.h
   lib/glob.c
   lib/glob.in.h
+  lib/localcharset.c
+  lib/localcharset.h
+  lib/lstat.c
+  lib/malloc.c
+  lib/mbrtowc.c
+  lib/mbsinit.c
+  lib/mbsrtowcs-state.c
+  lib/mbsrtowcs.c
   lib/mempcpy.c
+  lib/mkdtemp.c
+  lib/ref-add.sin
+  lib/ref-del.sin
+  lib/stdbool.in.h
+  lib/stdint.in.h
+  lib/stdlib.in.h
+  lib/streq.h
   lib/string.in.h
+  lib/strnlen1.c
+  lib/strnlen1.h
+  lib/sys_stat.in.h
+  lib/sys_time.in.h
+  lib/tempname.c
+  lib/tempname.h
+  lib/unistd.in.h
+  lib/verify.h
+  lib/wchar.in.h
+  lib/wctype.in.h
+  m4/00gnulib.m4
   m4/alloca.m4
+  m4/codeset.m4
   m4/d-type.m4
+  m4/dirent_h.m4
   m4/dirfd.m4
+  m4/errno_h.m4
   m4/extensions.m4
   m4/fnmatch.m4
+  m4/getlogin_r.m4
+  m4/gettimeofday.m4
+  m4/glibc21.m4
   m4/glob.m4
   m4/gnulib-common.m4
   m4/include_next.m4
+  m4/localcharset.m4
+  m4/locale-fr.m4
+  m4/locale-ja.m4
+  m4/locale-zh.m4
+  m4/longlong.m4
+  m4/lstat.m4
+  m4/malloc.m4
+  m4/mbrtowc.m4
+  m4/mbsinit.m4
+  m4/mbsrtowcs.m4
   m4/mbstate_t.m4
   m4/mempcpy.m4
+  m4/mkdtemp.m4
+  m4/multiarch.m4
   m4/onceonly.m4
+  m4/stdbool.m4
+  m4/stdint.m4
+  m4/stdlib_h.m4
   m4/string_h.m4
+  m4/sys_stat_h.m4
+  m4/sys_time_h.m4
+  m4/tempname.m4
+  m4/unistd_h.m4
+  m4/wchar.m4
+  m4/wctype.m4
+  m4/wint_t.m4
 ])

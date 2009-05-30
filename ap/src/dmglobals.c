@@ -27,6 +27,7 @@ BOOLEAN tinymemory;
 P recsocket = -1;
 P maxsocket = 0;            // maxsocket = max(socketfd)+1
 P consolesocket = PINF;
+P consolesigsocket = PINF;
 fd_set sock_fds;            /* active sockets                 */
 BOOLEAN halt_flag;          /* execution block due to 'halt'     */
 

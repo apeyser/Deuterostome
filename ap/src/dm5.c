@@ -75,7 +75,8 @@ P op_if(void)
   if ((ATTR(o_1) & ACTIVE) == 0) return OPD_ATR;
   if (BOOL_VAL(o_2)) { 
     if (x1 >= CEILexecs) return EXECS_OVF;
-    moveframes(o_1, x1, 1L); FREEexecs = x2;
+    moveframe(o_1, x1); 
+    FREEexecs = x2;
   } 
   FREEopds = o_2;
   return OK;

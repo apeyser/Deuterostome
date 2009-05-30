@@ -10,11 +10,14 @@
 
 */
 
+#include "dm.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <netinet/in.h>
 #include <errno.h>
 #include <netdb.h>
@@ -58,128 +61,287 @@ P init_sockaddr(struct sockaddr_in *name,
   return OK;
 }
 
-//-------------------------------- set close-on-exec value for sockets
-
-P closeonexec(P socket) {
-  int oldflags = fcntl(socket, F_GETFD, 0);
-  if (oldflags < 0) return -errno;
-  if (fcntl(socket, F_SETFD, oldflags | FD_CLOEXEC) < 0) return -errno;
-
-  return OK;
-}
-
-P nocloseonexec(P socket) {
-  int oldflags = fcntl(socket, F_GETFD, 0);
-  if (oldflags < 0) return -errno;
-  if (fcntl(socket, F_SETFD, oldflags & ~FD_CLOEXEC) < 0) return -errno;
-
-  return OK;
-}
-
 static struct socketstore {
-  int sock;
-  P unixserverport;
-  P sigfd;
+  int fd;
+  union SocketInfo info;
+  struct SocketType type;
+  P pid;
+  P redirector;
   struct socketstore* next;
   struct socketstore* last;
-} *socketstore = NULL, *socketstore_ = NULL;
+} *socketstore_tail = NULL, *socketstore_head = NULL;
+
+//-------------------------------- set close-on-exec value for sockets
+
+P closeonexec(P fd) {
+  struct socketstore* next;
+
+  int oldflags = fcntl(fd, F_GETFD, 0);
+  if (oldflags < 0) return -errno;
+  if (fcntl(fd, F_SETFD, oldflags | FD_CLOEXEC) < 0) return -errno;
+
+  for (next = socketstore_head; next; next = next->next)
+    if (next->fd == fd) {
+      if (next->type.listener && next->info.listener.sigfd != -1) {
+	oldflags = fcntl(fd, F_GETFD, 0);
+	if (fcntl(next->info.listener.sigfd, F_SETFD, oldflags | FD_CLOEXEC) < 0)
+	  return -errno;
+      }
+      break;
+    }
+
+  return OK;
+}
+
+P nocloseonexec(P fd) {
+  struct socketstore* next;
+
+  int oldflags = fcntl(fd, F_GETFD, 0);
+  if (oldflags < 0) return -errno;
+  if (fcntl(fd, F_SETFD, oldflags & ~FD_CLOEXEC) < 0) return -errno;
+  
+  for (next = socketstore_head; next; next = next->next)
+    if (next->fd == fd) {
+      if (next->type.listener && next->info.listener.sigfd != -1) {
+	oldflags = fcntl(fd, F_GETFD, 0);
+	if (fcntl(next->info.listener.sigfd, F_SETFD, oldflags & ~FD_CLOEXEC) < 0)
+	  return -errno;
+      }
+      break;
+    }
+
+  return OK;
+}
+
+enum _DelMode {
+  _DelModeFork,
+  _DelModeExec,
+  _DelModeForce,
+  _DelModeResize,
+  _DelModeProc,
+};
+
+DM_INLINE_STATIC void sockprintdebug(const char* mode, struct socketstore* sock) {
+/*   fprintf(stderr, "%s: socket %li in %li of %li: f %s, " */
+/* 	  "e %s, l %s, r %s, r %li, p %li, rsig %li, esig %li, u %li\n", */
+/* 	  mode, */
+/* 	  (long) sock->fd, (long) getpid(), (long) getppid(), */
+/* 	  sock->type.fork ? "t" : "f", */
+/* 	  sock->type.exec ? "t" : "f", */
+/* 	  sock->type.listener ? "t" : "f", */
+/* 	  sock->type.resize ? "t" : "f", */
+/* 	  (long) sock->redirector, */
+/* 	  (long) sock->pid, */
+/* 	  sock->type.listener ? (long) sock->info.listener.recsigfd : -1, */
+/* 	  sock->type.listener ? (long) sock->info.listener.sigfd : -1, */
+/* 	  sock->type.listener ? (long) sock->info.listener.unixport : -1); */
+}
+
 
 // -------- delsocket ---------------------------
 // After a socket has been closed, call delsocket to cleanup maxsocket
 // and recsocket, and clear flag from sock_fds
-static BOOLEAN unix_owner = TRUE;
-void set_unixowner(BOOLEAN state) {unix_owner = state;}
-P delsocket(P socketfd) {
+
+DM_INLINE_STATIC P _delsocket(P fd, enum _DelMode delmode) {
   struct socketstore* next;
   P retc = OK;
+  pid_t mypid = getpid();
 
-  FD_CLR(socketfd, &sock_fds);
-  if (socketfd == maxsocket-1) {
-    P i, j = -1;
-    for (i = 0; i < socketfd; i++)
-      if (FD_ISSET(i, &sock_fds)) j = i;
-    maxsocket = j+1;
-  }
-
-  if (recsocket >= maxsocket) recsocket = maxsocket-1;
-  if (close(socketfd)) retc = -errno;
-
-  for (next = socketstore_; next; next = next->next) 
-    if (next->sock == socketfd) {
-      if (next->sigfd != -1) close(next->sigfd);
+  for (next = socketstore_head; next; next = next->next) 
+    if (next->fd == fd) {
+      switch (delmode) {
+	case _DelModeForce: 
+	  break;
+	case _DelModeFork:
+	  if (! next->type.fork) return OK;
+	  break;
+	case _DelModeExec:
+	  if (! next->type.exec) return OK;
+	  break;
+	case _DelModeResize:
+	  if (! next->type.resize) return OK;
+	  break;
+	case _DelModeProc:
+	  if (! next->type.proc) return OK;
+	  break;
+      };
+      sockprintdebug("close", next);
+      
+      if (close(fd))                 retc = -errno;
+      if (next->type.listener) {
+	if (next->info.listener.sigfd != -1)    close(next->info.listener.sigfd);
+	if (next->info.listener.recsigfd != -1) close(next->info.listener.recsigfd);
+	if (mypid == next->pid) {
+	  if (next->redirector != -1) {
+	    if (kill(next->redirector, SIGQUIT)) {
+	      error(0, errno, "Unable to kill redirector %li", 
+		    (long) next->redirector);
+	      if (! retc) retc = -errno;
+	    }
+	    else while (waitpid((pid_t) next->redirector, NULL, 0) == -1) {
+		if (errno == EINTR) {
+		  if (abortflag) break;
+		}
+		else {
+		  if (! retc) retc = -errno;
+		  break;
+		}
+	      }
+	  }
 #if ENABLE_UNIX_SOCKETS
-      if (unix_owner && next->unixserverport > 0) {
-	struct sockaddr_un name;
-	if (init_unix_sockaddr(&name, next->unixserverport, TRUE))
-	  if (unlink(name.sun_path) && ! retc) retc = -errno;
-      }
+	  if (next->info.listener.unixport > 0) {
+	    struct sockaddr_un name;
+	    if (init_unix_sockaddr(&name, next->info.listener.unixport, TRUE))
+	      if (unlink(name.sun_path) && ! retc) retc = -errno;
+	  }
 #endif //ENABLE_UNIX_SOCKETS
+	}
+
+	FD_CLR(fd, &sock_fds);
+	if (fd == maxsocket-1) {
+	  P i, j = -1;
+	  for (i = 0; i < fd; i++)
+	    if (FD_ISSET(i, &sock_fds)) j = i;
+	  maxsocket = j+1;
+	}
+
+	if (recsocket >= maxsocket) recsocket = maxsocket-1;
+
+#if ! DM_X_DISPLAY_MISSING
+	if (fd == xsocket) {
+	  xsocket = -1;
+	  dvtdisplay = NULL;
+	  retc = OK;
+	}
+#endif // ! DM_X_DISPLAY_MISSING
+      }
+
       if (! next->next)
-	socketstore = next->last;
+	socketstore_tail = next->last;
       else 
 	next->next->last = next->last;
       if (! next->last)
-	socketstore_ = next->next;
+	socketstore_head = next->next;
       else
 	next->last->next = next->next;
       free(next);
       break;
     }
-
+  
   return retc;
+}
+
+P delsocket_fork(P fd) {
+  return _delsocket(fd, _DelModeFork);
+}
+
+P delsocket_exec(P fd) {
+  return _delsocket(fd, _DelModeExec);
+}
+
+P delsocket_force(P fd) {
+  return _delsocket(fd, _DelModeForce);
+}
+
+P delsocket_proc(P fd) {
+  return _delsocket(fd, _DelModeProc);
 }
 
 // -------- addsocket -----------------------------
 // After opening a socket, call addsocket to increase maxsocket,
 // care for recsocket, and add socket to sock_fds.
-P addsocket(P socketfd, 
-	    P unixserverport, 
-	    BOOLEAN protected, 
-	    BOOLEAN listener,
-	    P sigfd) {
+P addsocket(P fd, const struct SocketType* type, const union SocketInfo* info) {
   P retc;
   struct socketstore* next;
 
-  if (! protected && (retc = closeonexec(socketfd))) {
-    close(socketfd);
+  for (next = socketstore_head; next; next = next->next)
+    if (next->fd == fd) {
+      if (type->listener || next->type.listener)
+	return SOCK_STATE;
+      return OK;
+    }
+
+  if (! (next
+	 = (struct socketstore*) malloc(sizeof(struct socketstore))))
+    error(1, errno, "Malloc failure creating socketstore");
+
+  next->fd = fd;
+  next->type = *type;
+  if (info) next->info = *info;
+  next->pid = getpid();
+  next->redirector = -1;
+  next->next = NULL;
+  next->last = socketstore_tail;
+  if (socketstore_tail) socketstore_tail->next = next;
+  else                  socketstore_head = next;
+  socketstore_tail = next;
+
+  if (! type->fork) {
+    if ((retc = nocloseonexec(fd))) {
+      delsocket_force(fd);
+      return retc;
+    }
+  }
+  else if ((retc = closeonexec(fd))) {
+    delsocket_force(fd);
     return retc;
   }
 
-  if (! protected && sigfd != -1 && (retc = closeonexec(sigfd))) {
-    close(socketfd);
-    close(sigfd);
-    return retc;
+  if (type->listener) {
+    FD_SET(fd, &sock_fds);
+    if (fd >= maxsocket) maxsocket = fd+1;
+    if (recsocket < 0) recsocket = fd;
+
+    if (info->listener.recsigfd != -1) {
+      if ((retc = forksighandler(info->listener.recsigfd, 
+				 info->listener.unixport, 
+				 &next->redirector))) {
+	delsocket_force(fd);
+	return retc;
+      }
+      next->info.listener.recsigfd = -1;
+    }
   }
 
-  if (listener) FD_SET(socketfd, &sock_fds);
-  if (socketfd >= maxsocket) maxsocket = socketfd+1;
-  if (recsocket < 0) recsocket = socketfd;
-  
-  if (! protected) {
-    if (! (next
-	   = (struct socketstore*) malloc(sizeof(struct socketstore))))
-      error(1, errno, "Malloc failure creating socketstore");
-
-    next->sock = socketfd;
-    next->sigfd = sigfd;
-    next->unixserverport = unixserverport;
-    next->next = NULL;
-    next->last = socketstore;
-    if (socketstore) socketstore->next = next;
-    else             socketstore_ = next;
-    socketstore = next;
-  }
-
+  sockprintdebug("open", next);
   return OK;
 }
 
-void closesockets(void) {
-  struct socketstore* next = socketstore_;
+DM_INLINE_STATIC P _closesockets(enum _DelMode delmode) {
+  int retc = OK, retc_;
+  struct socketstore* next = socketstore_head;
   while (next) {
     struct socketstore* last = next;
+    int fd = last->fd;
     next = next->next;
-    delsocket(last->sock);
+    if ((retc_ = _delsocket(fd, delmode))){
+      if (! retc) retc = retc_;
+      error(0, retc < 0 ? -retc : 0, 
+	    "Deleting socket %li, forking %s, execing %s, force %s, resize %s",
+	    (long) fd, 
+	    delmode == _DelModeFork ? "yes" : "no", 
+	    delmode == _DelModeExec ? "yes" : "no", 
+	    delmode == _DelModeForce ? "yes" : "no",
+	    delmode == _DelModeResize ? "yes" : "no");
+    }
   }
+  return retc;
+}
+
+P closesockets_force(void) {
+  return _closesockets(_DelModeForce);
+}
+
+P closesockets_exec(void) {
+  return _closesockets(_DelModeExec);
+}
+
+P closesockets_fork(void) {
+  return _closesockets(_DelModeFork);
+}
+
+P closesockets_resize(void) {
+  return _closesockets(_DelModeResize);
 }
 
 static void closedisplay(void) {
@@ -192,14 +354,16 @@ static void closedisplay(void) {
 #endif
 }
 
+static void _closesockets_force(void) {
+  closesockets_force();
+}
+
 void set_closesockets_atexit(void) {
-  if (atexit(closesockets))
+  if (atexit(_closesockets_force))
     error(1, -errno, "Setting atexit closesockets");
   if (atexit(closedisplay))
     error(1, -errno, "Setting atexit closedisplay");
 }
-
-
 
 #if X_DISPLAY_MISSING
 
@@ -553,14 +717,6 @@ P make_socket(UW port, BOOLEAN isseq, P* retc)
       close(sock);
       return -1;
     }
-    if((*retc = addsocket(sock, 0, FALSE, TRUE, -1))) {
-      close(sock);
-      return -1;
-    }
-  }
-  else if ((*retc = closeonexec(sock))) {
-    close(sock);
-    return -1;
   }
 
   return sock;
@@ -637,16 +793,6 @@ P make_unix_socket(UW port, BOOLEAN isseq, P* retc) {
       unlink(name.sun_path);
       return -1;
     }
-    if ((*retc = addsocket(sock, port, FALSE, TRUE, -1))) {
-      close(sock);
-      unlink(name.sun_path);
-      return -1;
-    }
-  }
-  else if ((*retc = closeonexec(sock))) {
-    close(sock);
-    unlink(name.sun_path);
-    return -1;
   }
 
   umask(mask);
@@ -735,6 +881,7 @@ P op_connect(void)
   LBIG port_;
   P sock, dgram, retc;
   struct sockaddr_in serveraddr;
+  union SocketInfo info;
 
   if (o_2 < FLOORopds) return(OPDS_UNF);
   if (TAG(o_2) != (ARRAY | BYTETYPE)) return(OPD_ERR);
@@ -810,7 +957,10 @@ P op_connect(void)
   };
   
  goodsocket:
-  if ((retc = addsocket(sock, 0, FALSE, TRUE, dgram)))
+  info.listener.unixport = 0;
+  info.listener.recsigfd = -1;
+  info.listener.sigfd = dgram;
+  if ((retc = addsocket(sock, &sockettype, &info)))
     return retc;
   TAG(o_2) = NULLOBJ | SOCKETTYPE; 
   ATTR(o_2) = 0;
@@ -829,7 +979,7 @@ P op_disconnect(void)
 {
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (NULLOBJ | SOCKETTYPE)) return OPD_ERR;
-  delsocket(SOCKET_VAL(o_1));
+  delsocket_force(SOCKET_VAL(o_1));
   FREEopds = o_1;
   return OK;
 }
@@ -845,7 +995,7 @@ P op_disconnect(void)
 P op_sendsig(void) {
   B sig;
   P sig_;
-  P socketfd;
+  P fd;
 
   if (o_2 < FLOORopds) return OPDS_UNF;
   if (TAG(o_2) != (NULLOBJ | SOCKETTYPE)) return OPD_ERR;
@@ -854,9 +1004,9 @@ P op_sendsig(void) {
   if (sig_ < 0 || sig_ >= 256) return RNG_CHK;
 
   sig = (B) sig_;
-  if ((socketfd = DGRAM_VAL(o_2)) == -1) return ILL_SOCK;
+  if ((fd = DGRAM_VAL(o_2)) == -1) return ILL_SOCK;
 
-  while (send(socketfd, &sig, 1, 0) == -1) {
+  while (send(fd, &sig, 1, 0) == -1) {
     if (errno != EINTR) return -errno;
     if (abortflag) return ABORT;
   };
@@ -871,18 +1021,18 @@ P op_sendsig(void) {
 
     op_send defined in dm-nextevent.c
     since op_send must handle calling makesocketdead.
-    In case of error, returns the active fd as *socketfd.
+    In case of error, returns the active fd as *fd.
 */
 
 P op_send(void)
 {
   P retc; 
   static B rootf[FRAMEBYTES];
-  P socketfd;
+  P fd;
 
   if (o_2 < FLOORopds) return OPDS_UNF;
   if (TAG(o_2) != (NULLOBJ | SOCKETTYPE)) return OPD_ERR;
-  socketfd = SOCKET_VAL(o_2);
+  fd = SOCKET_VAL(o_2);
 
   switch (CLASS(o_1)) {
     case ARRAY:
@@ -899,8 +1049,8 @@ P op_send(void)
 
   if (! (ATTR(rootf) & ACTIVE)) return OPD_ATR;
 	  
-  if ((retc = tosocket(socketfd, rootf)))
-    return makesocketdead(retc, socketfd, "send");
+  if ((retc = tosocket(fd, rootf)))
+    return makesocketdead(retc, fd, "send");
  
   FREEopds = o_2; 
   return OK;
@@ -953,6 +1103,51 @@ P op_getmyfqdn(void)
   return OK;
 }
 
-void forksighandler(P sigsocket, P serverport) {
-  spawnsighandler(sigsocket, serverport, set_unixowner, closesockets);
+// closes the signal socket passed in.
+P forksighandler(P sigsocket, P serverport, P* pid) {
+  return spawnsighandler(sigsocket, serverport, closesockets_exec, pid);
+}
+
+// nothing but STDIN, STDOUT, and STDERR will have been defined before this.
+// after this STDIN=0, STDOUT=1, STDERR=2, DEVNULLREAD=3, DEVNULLWRITE=4
+//   will be available.
+void initfds(void) {
+  P retc;
+  int fdr, fdw;
+
+/*-------------------- prime the socket table -----------------------
+  We use a fd_set bit array to keep track of active sockets. Hence,
+  the number of active sockets is limited to the FD_SET_SIZE of
+  the host system. 
+*/
+  FD_ZERO(&sock_fds);
+  if ((retc = addsocket(STDIN_FILENO, &stdtype, NULL)))
+    error(1, retc < 0 ? -retc : 0, "Failed to add STDIN");
+  if ((retc = addsocket(STDOUT_FILENO,  &stdtype, NULL)))
+    error(1, retc < 0 ? -retc : 0, "Failed to add STDOUT");
+  if ((retc = addsocket(STDERR_FILENO,  &stderrtype, NULL)))
+    error(1, retc < 0 ? -retc : 0, "Failed to add STDERR");
+
+  if ((fdr = open("/dev/null", O_RDONLY)) == -1)
+    error(1, errno, "Failed to open /dev/null for read");
+  if (fdr != 3) {
+    if (dup2(fdr, 3) == -1)
+      error(1, errno, "Failed to move %i to 3 for /dev/null", fdr);
+    if (close(fdr))
+      error(1, errno, "Failed to close %i for /dev/null", fdr);
+  }
+  
+  if ((fdw = open("/dev/null", O_WRONLY)) == -1)
+    error(1, errno, "Failed to open /dev/null for write");
+  if (fdw != 4) {
+    if (dup2(fdw, 4) == -1)
+      error(1, errno, "Failed to move %i to 4 for /dev/null", fdw);
+    if (close(fdw))
+      error(1, errno, "Failed to close %i for /dev/null", fdw);
+  }
+
+  if ((retc = addsocket(3, &stdtype, NULL)))
+    error(1, retc < 0 ? -retc : 0, "Failed to add NULL read");
+  if ((retc = addsocket(4, &stdtype, NULL)))
+    error(1, retc < 0 ? -retc : 0, "Failed to add NULL write");
 }

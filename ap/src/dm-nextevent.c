@@ -1,3 +1,4 @@
+#include "dm.h"
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -23,7 +24,10 @@
 P makesocketdead(P retc, P socketfd, B* error_source) {
   if (retc == QUIT) return QUIT;
 
-  if (socketfd == consolesocket) consolesocket = PINF;
+  if (socketfd == consolesocket) {
+    consolesocket = PINF;
+    consolesigsocket = PINF;
+  }
   switch (retc) {
     case OK: case LOST_CONN: break;
     default: 
@@ -32,7 +36,7 @@ P makesocketdead(P retc, P socketfd, B* error_source) {
       break;
   }
 
-  delsocket(socketfd);
+  delsocket_force(socketfd);
 
   if (o3 > CEILopds) return OPDS_OVF;
 
@@ -63,6 +67,54 @@ P makesocketdead(P retc, P socketfd, B* error_source) {
     
   return OK;
 }
+
+/*-------------------------------------- 'console'
+    -- | consolesocket or null (if stderr)
+
+  - returns a null object of type 'socket' that refers to
+    the current console socket (or 'stderr' for default)
+*/
+
+P op_console(void) {
+  if (o1 > CEILopds) return (OPDS_OVF);
+  TAG(o1) = NULLOBJ;
+  ATTR(o1) = 0;
+  if (consolesocket != PINF) {
+    TAG(o1) |= SOCKETTYPE;
+    SOCKET_VAL(o1) = consolesocket;
+    DGRAM_VAL(o1) = consolesigsocket;
+  }
+  FREEopds = o2;
+  return OK;
+}
+
+/*------------------------------------- 'setconsole'
+   consolesocket | -
+
+  - 'consolesocket' is a null object of type 'socket'
+    or a plain null object (to select the default, 'stderr')
+  - selects a socket to receive console output
+  - this socket is used until another socket is selected
+  - if the designated socket connection breaks, console output
+    is directed to the default, 'stderr'
+*/
+
+P op_setconsole(void)
+{
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != NULLOBJ) return OPD_CLA;
+  if (TYPE(o_1) == SOCKETTYPE) {
+    consolesocket = SOCKET_VAL(o_1);
+    consolesigsocket = DGRAM_VAL(o_1);
+  }
+  else  {
+    consolesocket = PINF;
+    consolesigsocket = PINF;
+  }
+  FREEopds = o_1;
+  return OK;
+}
+
 
 #if ! DISABLE_NEXTEVENT
 

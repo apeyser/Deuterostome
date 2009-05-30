@@ -4,10 +4,7 @@
 #include "dm.h"
 
 DLL_SCOPE P op_socketdead(void);
-DLL_SCOPE P op_setconsole(void);
-DLL_SCOPE P op_console(void);
 DLL_SCOPE P op_toconsole(void);
-DLL_SCOPE P op_tostderr(void);
 DLL_SCOPE BOOLEAN pending(void);
 DLL_SCOPE P clientinput(void);
 DLL_SCOPE P op_killsockets(void);

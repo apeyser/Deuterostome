@@ -227,7 +227,7 @@ P op_localtime(void)
 }
 
 /*---------------------------------------------------- gwdir
-   string | substring
+   --- | substring
 
   - returns in 'substring' of 'string' the absolute filename of
     the current working directory
@@ -235,19 +235,21 @@ P op_localtime(void)
 
 P op_getwdir(void)
 {
-  B *p; 
-  P nb;
+  B *curr;
+  size_t nb;
 
-  if (o_1 < FLOORopds) return (OPDS_UNF);
-  if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
-  if (ATTR(o_1) & READONLY) return OPD_ATR;
-  
-  if ((p = (B*)getcwd(0L,0L)) == 0L) return -errno;
-  nb = strlen((char*)p);
-  if (nb > ARRAY_SIZE(o_1)) return RNG_CHK;
-  moveB(p, (B *)VALUE_BASE(o_1),nb);
-  free(p);
-  ARRAY_SIZE(o_1) = nb;
+  if (o1 >= CEILopds) return OPDS_OVF;
+  if (FREEvm + FRAMEBYTES > CEILvm) return VM_OVF;
+  TAG(FREEvm) = (ARRAY|BYTETYPE);
+  ATTR(FREEvm) = PARENT;
+  curr = VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
+
+  if (! getcwd(curr, CEILvm - curr)) return -errno;
+ 
+  nb = ARRAY_SIZE(FREEvm) = strlen((char*) curr);
+  moveframe(FREEvm, o1);
+  FREEopds = o2;
+  FREEvm += FRAMEBYTES + DALIGN(nb);
   return OK;
 }
 
@@ -263,251 +265,14 @@ P op_setwdir(void)
 
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
-  nb = ARRAY_SIZE(o_1) + 1;
-  if (nb > (CEILvm - FREEvm)) return VM_OVF;
+  nb = ARRAY_SIZE(o_1);
+  if (FREEvm + nb >= CEILvm) return VM_OVF;
 
-  moveB((B *)VALUE_BASE(o_1),FREEvm, nb-1);
-  FREEvm[nb-1] = '\000';
-  if (chdir((char*)FREEvm)) return -errno;
+  moveB(VALUE_PTR(o_1), FREEvm, nb);
+  FREEvm[nb] = '\0';
+  if (chdir((char*) FREEvm)) return -errno;
   FREEopds = o_1;
   return OK;
-}
-
-/*---------------------------------------------------- tosystem
-     string | --
-
-  - executes 'string' as a bash shell command
-*/
-
-P op_tosystem(void)
-{
-  P nb;
-  pid_t f, r;
-  int status;
-	
-  if (o_1 < FLOORopds) return OPDS_UNF;
-  if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
-  nb = ARRAY_SIZE(o_1) + 1;
-  if (nb > (CEILvm - FREEvm)) return VM_OVF;
-  moveB((B *)VALUE_BASE(o_1),FREEvm, nb-1);
-  FREEvm[nb-1] = '\000';
-
-  if ((f = fork()) == -1) return -errno;
-  if (! f) {
-    int retc2;
-    while ((retc2 = open("/dev/null", O_RDWR, 0)) == -1 && errno == EINTR);
-    if (retc2 == -1) {
-      perror("Error opening /dev/null");
-      exit(-1);
-    }
-			
-    while ((status = dup2(retc2, STDIN_FILENO)) == -1 && errno == EINTR);
-    if (status == -1) {
-      perror("Error opening stdin into /dev/null");
-      exit(-1);
-    }
-			
-    while ((status = dup2(retc2, STDOUT_FILENO)) == -1 && errno == EINTR);
-    if (status == -1) {
-      perror("Error opening stdout into /dev/null");
-      exit(-1);
-    }
-
-    //fprintf(stderr, "tosystem: '%s' '%s' '%s'\n", ENABLE_BASH, "-c", FREEvm);
-    execl(ENABLE_BASH, ENABLE_BASH, "-c", FREEvm, (char*) NULL);
-    perror("Error exec'ing bash");
-    exit(-1);
-  }
-  
- wts:
-  if (abortflag) {
-    kill(f, SIGKILL);
-    return ABORT;
-  };
-  if ((r = waitpid(f, &status, 0)) == -1) {
-    int errno_;
-    if (errno == EINTR) goto wts;
-    errno_ = errno;
-    kill(f, SIGKILL);
-    return -errno_;
-  }
-  else if (r != f) goto wts;
-  if (status != 0) return NOSYSTEM;
-	
-  FREEopds = o_1;
-  return OK;
-}
-
-/*---------------------------------------------------- fromsystem
- * string | string
- *
- * - executes 'string' as a bash shell command, and returns the output
- * - the output is returned as a new string - remember to put it in a
- * - box.
- */
-
-P op_fromsystem(void) 
-{
-	P max, retc;
-	B* c;
-	pid_t f, r;
-	ssize_t rf;
-	int status;
-	int fd[2];
-	
-  if (o_1 < FLOORopds) return OPDS_UNF;
-  if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
-  max = ARRAY_SIZE(o_1) + 1;
-  if (max > (CEILvm - FREEvm)) return VM_OVF;
-  moveB((B *)VALUE_BASE(o_1),FREEvm, max-1);
-  FREEvm[max-1] = '\000';
-
-  if (pipe(fd)) return -errno;
-  
-  if ((f = fork()) == -1) {
-    retc = -errno;
-    close(fd[1]);
-    close(fd[0]);
-    return retc;
-  }
-	
-  if (! f) {
-    int retc2;
-    while ((retc2 = open("/dev/null", O_RDWR, 0)) == -1 && errno == EINTR);
-    if (retc2 == -1) {
-      perror("Error opening /dev/null");
-      exit(-1);
-    }
-		
-    while ((status = dup2(retc2, STDIN_FILENO)) == -1 && errno == EINTR);
-    if (status == -1) {
-      perror("Error opening stdin into /dev/null");
-      exit(-1);
-    }
-    
-    while ((status = close(fd[0]))  && errno == EINTR);
-    if (status) {
-      perror("Error closing pipe in");
-      exit(-1);
-    }
-		
-    while ((status = dup2(fd[1], STDOUT_FILENO) == -1) && errno == EINTR);
-    if (status == -1) perror("Error duping pipe out to stdout");
-		
-    while ((status = close(fd[1])) && errno == EINTR);
-    if (status) {
-      perror("Error closing pipe out");
-      exit(-1);
-    }
-		
-    execl(ENABLE_BASH, ENABLE_BASH, "-c", FREEvm, (char*) NULL);
-    perror("Error exec'ing bash");
-    exit(-1);
-  }
-
-  while ((status = close(fd[1])) == -1 && errno == EINTR) {
-    if (abortflag) {
-      retc = ABORT;
-      goto EXIT_FILE;
-    }
-  }
-	
-  if (status) {
-    retc = -errno;
-    goto EXIT_FILE;
-  }
-
-  if (FREEvm + FRAMEBYTES >= CEILvm) {
-    retc = VM_OVF;
-    goto EXIT_FILE;
-  }
-	
-  max = CEILvm - FREEvm - FRAMEBYTES;
-  TAG(FREEvm) = ARRAY | BYTETYPE;
-  ATTR(FREEvm) = PARENT;
-  c = VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
-
- READ:
-  while ((rf = read(fd[0], c, max)) > 0) {
-    c += rf;
-    if ((max -= rf) == 0) {
-      char c_;
-      while ((rf = read(fd[0], &c_, 1)) == -1 && errno == EINTR) {
-        if (abortflag) {
-          retc = ABORT;
-          goto EXIT_FILE;
-        }
-      }
-      if (rf == -1) {
-        retc = -errno;
-        goto EXIT_FILE;
-      } 
-      if (rf > 0) {
-        retc = VM_OVF;
-        goto EXIT_FILE;
-      }
-      break;
-    }
-  }
-	
-  if (rf == -1) {
-    if (abortflag) {
-      retc = ABORT;
-      goto EXIT_FILE;
-    }
-			
-    if (errno == EINTR) goto READ;
-    retc = -errno;
-    goto EXIT_FILE;
-  }
-	
-  if (close(fd[0])) {
-    retc = -errno;
-    goto EXIT_PID;
-  }
-  
- WAIT_PID:
-  if (abortflag) {
-    retc = ABORT;
-    goto EXIT_PID;
-  };
-	
-  while ((r = waitpid(f, &status, 0)) != f) {
-    if (r == -1) {
-      if (errno == EINTR) {
-        if (abortflag) {
-          retc = ABORT;
-          goto EXIT_PID;
-        }
-        goto WAIT_PID;
-      }
-      retc = -errno;
-      goto EXIT_PID;
-    }
-  }
-
-  if (status != 0) {
-    retc = NOSYSTEM;
-    goto EXIT_NOW;
-  }
-  
-  max = c - FREEvm - FRAMEBYTES;
-  if ((c = (B*) DALIGN(FREEvm + FRAMEBYTES + max)) > CEILvm) {
-    retc = VM_OVF;
-    goto EXIT_NOW;
-  }
-  ARRAY_SIZE(FREEvm) = c - FREEvm - FRAMEBYTES;
-  moveframe(FREEvm, o_1);
-  ARRAY_SIZE(o_1) = max;
-  FREEvm = c;
-  return OK;
-
- EXIT_FILE:
-	close(fd[0]);
- EXIT_PID:
-	kill(f, SIGKILL);
- EXIT_NOW:
-	return retc;
 }
 
 /*---------------------------------------------------- readfile
@@ -1089,10 +854,10 @@ P op_transcribe(void)
   B *p;
 
   if (o_1 < FLOORopds) return OPDS_UNF;
-  if (!((CLASS(o_1) == ARRAY) 
-        || (CLASS(o_1) == LIST) 
-        || (CLASS(o_1) == DICT)))
-    return OPD_ERR;
+  switch (CLASS(o_1)) {
+    case ARRAY: case LIST: case DICT: break;
+    default: return OPD_ERR;
+  };
 
   p = FREEvm;
   if ((retc = transcribe(o_1)) != OK) {FREEvm = p; return retc;}
@@ -1101,3 +866,29 @@ P op_transcribe(void)
   return OK;
 }
 
+/*------------------ tostderr -----------------------
+  (string) | --
+  prints string out to stderr
+*/
+
+P op_tostderr(void)
+{
+  B *p;
+  P nb, atmost;
+
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
+
+  p = VALUE_PTR(o_1);
+  atmost = ARRAY_SIZE(o_1);
+  while (atmost > 0) {
+    while ((nb = write(2, p, atmost)) < 0
+           && ((errno == EINTR) || (errno == EAGAIN)));
+    if (nb < 0) return ABORT;
+    atmost -= nb;
+    p += nb;
+  }
+
+  FREEopds = o_1;
+  return OK;
+}

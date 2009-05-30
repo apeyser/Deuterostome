@@ -131,6 +131,11 @@
     petsc_vec_syncto pop
   } bind def
 
+  | X <d > | --
+  /vec_interval {
+    1 index dup /gn get exch /n get getinterval vec_fill
+  } bind def
+
   |------------------------------------- mat_creator
 
   |--------- mat_creators --------------
@@ -564,10 +569,10 @@
     } in_petsc
   } bind def
 
-  | offset elements A mmax ~active | --
-  /mat_forrows_get {
-    {
-      save 
+|  | offset elements A mmax ~active | --
+|  /mat_forrows_get {
+|    {
+|      save 
 
   | row column A | d
   /mat_get {
@@ -877,6 +882,21 @@
   /vec_fill {
     {
       ~[3 -1 roll getid 3 -1 roll construct_exec ~vec_fill] sexecpawns
+    } in_petsc
+  } bind def
+
+  | xval <d > | xval
+  /vec_interval {
+    {
+      /arr name /xval name
+      {
+        ~[
+          xval getid
+          arr 4 -1 roll arr length range getinterval
+          ~vec_fill
+        ]
+      } execpawns
+      xval
     } in_petsc
   } bind def
 

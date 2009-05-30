@@ -1,16 +1,17 @@
 #!/bin/sh -v
 
 LIBTOOL=false
+GNULIBTOOL=false
 for i ; do
-	case "$i" in
-		--libtool) LIBTOOL=: 
-			;;
-		*) break
-			;;
-	esac
-	shift
+    case "$i" in
+	--libtool) LIBTOOL=: ;;
+	--gnulibtool) GNULIBTOOL=: ;;
+	*) break ;;
+    esac
+    shift
 done
 
+$GNULIBTOOL && gnulib-tool --import
 $LIBTOOL && libtoolize "$@" -c --ltdl
 autoreconf "$@" -v --install
 

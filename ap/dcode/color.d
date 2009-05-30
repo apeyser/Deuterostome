@@ -92,19 +92,19 @@ userdict /dvt known {/dvt} {/dnode} ifelse userdict /dnode_escape put
 
 /nocolors [] def
 /_color_fax {| (buffer) /l-index --> (buffer) /l-index
-  colors null eq {/colors nocolors def} if
+  /colors find null eq {/colors nocolors def} if
   {
     string (\n) search {
       /substring name pop /string name
       substring length 0 eq {(\n) fax} {
-        colors {mkact exec fax} forall
+        /colors find {mkact exec fax} forall
         substring    fax
         reset        fax
         (\n)         fax
       } ifelse
     } {
       length 0 ne {
-        colors {mkact exec fax} forall
+        /colors find {mkact exec fax} forall
         string       fax
         reset        fax
       } if
@@ -131,7 +131,7 @@ userdict /dvt known {/dvt} {/dnode} ifelse userdict /dnode_escape put
     /tbuffer buffer length i sub /b array def
     color_text_ capsave
 
-    /string tbuffer 0 proc 0 exch getinterval def
+    tbuffer 0 proc 0 exch getinterval /string name
     buffer i _color_fax
   } stopped {color_text_ restore end stop} if
   color_text_ restore end
@@ -149,7 +149,7 @@ userdict /dvt known {/dvt} {/dnode} ifelse userdict /dnode_escape put
     } loop
 
     10 dnode_escape mkact exec length
-      colors length 1 add mul
+      /colors find length 1 add mul
       i mul
       string length add
     /b array 0 _color_fax

@@ -119,9 +119,8 @@ P op_errormessage(void)
 
   s = (B *)VALUE_BASE(o_1); 
   tnb = ARRAY_SIZE(o_1);
-  nb = dm_snprintf((char*)s,
-		   tnb,"On %*s port %lld: ", (int) ARRAY_SIZE(o_5),
-                   (char*)VALUE_BASE(o_5), 
+  nb = dm_snprintf((char*)s, tnb,"On %*s port %lld: ", 
+		   (int) ARRAY_SIZE(o_5), (char*) VALUE_BASE(o_5), 
                    (long long) LONGBIG_VAL(o_4));
   s += nb; tnb -= nb;
 
@@ -134,7 +133,8 @@ P op_errormessage(void)
     moveB(m,s,nb);
   }
   s += nb; tnb -= nb;
-  nb = dm_snprintf((char*)s,tnb," in %s\n", (char*)VALUE_BASE(o_3));
+  nb = dm_snprintf((char*)s, tnb," in %*s\n", 
+		   (int) ARRAY_SIZE(o_3), (char*)VALUE_BASE(o_3));
   ARRAY_SIZE(o_1) = (P)(s + nb) - VALUE_BASE(o_1);
   moveframe(o_1,o_5);
   FREEopds = o_4;
@@ -158,11 +158,9 @@ static P int_Xdisconnect(BOOLEAN nocheck) {
 #else
   if (nocheck || dvtdisplay)  {
     if (dvtdisplay) HXCloseDisplay(dvtdisplay);
-    delsocket(xsocket);
-    xsocket = -1;
+    delsocket_force(xsocket);
     if (defaultdisplay) setenv("DISPLAY", defaultdisplay, 1);
     else unsetenv("DISPLAY");
-    dvtdisplay = NULL;
   }
   *displayname = '\0';
   return OK;
@@ -207,6 +205,8 @@ P op_Xconnect(void)
 #if X_DISPLAY_MISSING
   return NO_XWINDOWS;
 #else
+  P retc;
+
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
   if (ARRAY_SIZE(o_1) > (P) sizeof(displayname)-1) return RNG_CHK;
@@ -235,7 +235,10 @@ P op_Xconnect(void)
   ncachedfonts = 0;
   dvtgc = HXCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
   xsocket = ConnectionNumber(dvtdisplay);
-  addsocket(xsocket, 0, FALSE, TRUE, -1);
+  if ((retc = addsocket(xsocket, &sockettype, &defaultsocketinfo))) {
+    int_Xdisconnect(TRUE);
+    return retc;
+  }
   FREEopds = o_1; 
   XSetErrorHandler(xerrorhandler);
   XSetIOErrorHandler(xioerrorhandler);
@@ -310,16 +313,16 @@ DM_INLINE_STATIC P handleserverinput(void) {
 
   if ((newfd = accept(recsocket, &clientname, &size)) == -1) {
     P errno_ = -errno;
-    delsocket(recsocket);
+    delsocket_force(recsocket);
     return errno_;
   }
 
   if ((retc = dm_setsockopts(newfd, PACKET_SIZE))) {
-    delsocket(recsocket);
+    delsocket_force(recsocket);
     return retc;
   }
   
-  if ((retc = addsocket(newfd, 0, FALSE, TRUE, -1)))
+  if ((retc = addsocket(newfd, &sockettype, &defaultsocketinfo)))
     return retc;
     
   return OK;
@@ -440,46 +443,6 @@ void makeerror(P retc, B* error_source) {
   FREEexecs = x2;
 }
 
-/*------------------------------------- 'setconsole'
-   consolesocket | -
-
-  - 'consolesocket' is a null object of type 'socket'
-    or a plain null object (to select the default, 'stderr')
-  - selects a socket to receive console output
-  - this socket is used until another socket is selected
-  - if the designated socket connection breaks, console output
-    is directed to the default, 'stderr'
-*/
-
-P op_setconsole(void)
-{
-  if (o_1 < FLOORopds) return OPDS_UNF;
-  if (CLASS(o_1) != NULLOBJ) return OPD_CLA;
-  if (TYPE(o_1) == SOCKETTYPE) consolesocket = SOCKET_VAL(o_1);
-  else  consolesocket = PINF;
-  FREEopds = o_1;
-  return OK;
-}
-
-/*-------------------------------------- 'console'
-    -- | consolesocket or null (if stderr)
-
-  - returns a null object of type 'socket' that refers to
-    the current console socket (or 'stderr' for default)
-*/
-
-P op_console(void) {
-  if (o1 > CEILopds) return (OPDS_OVF);
-  TAG(o1) = NULLOBJ;
-  if (consolesocket != PINF) {
-    TAG(o1) |= SOCKETTYPE;
-    SOCKET_VAL(o1) = consolesocket;
-    DGRAM_VAL(o1) = -1;
-  }
-  FREEopds = o2;
-  return OK;
-}
-
 /*-------------------------------------- 'toconsole'
    (message) | -
 
@@ -585,17 +548,24 @@ P clientinput(void) {
   return OK;
 }
 
-/**********************************************vmreset
+/****************** killsockets ***********************
  * call right after vmresize, to reset sockets if
  * vmresize failed
  * --- | --- <<all non-server sockets closed>>
  */
 P op_killsockets(void) {
-  op_Xdisconnect();
-  closesockets();
-  return ABORT;
+  int retc = OK, retc_ = OK;
+  retc = op_Xdisconnect();
+  retc_ = closesockets_resize();
+  return retc ? retc : retc_ ? retc_ : ABORT;
 }
 
+/****************** socketdead ************************
+ * ... bool socket | --
+ * 
+ * Default socket dead. If bool is true, then ... is the
+ *  stack for an error. Overridden by startup files.
+ */
 P op_socketdead(void) {
   if (o_2 < FLOORopds) return DEAD_SOCKET;
   if (CLASS(o_2) != BOOL) return DEAD_SOCKET;
@@ -606,8 +576,9 @@ P op_socketdead(void) {
 }
 
 P op_vmresize(void) {
-  P retc = op_vmresize_();
-  if (retc) return retc;
+  P retc;
+  if ((retc = op_vmresize_())) return retc;
+  if ((retc = closesockets_resize())) return retc;
 #if DM_ENABLE_RTHREADS
   if ((retc = killrthreads())) return retc;
 #endif
@@ -619,12 +590,12 @@ P op_vmresize(void) {
 }
 
 DM_INLINE_STATIC void sock_error(BOOLEAN ex, P errno_, const char* msg) {
-  if (ex && serversocket != -1) delsocket(serversocket);
-  if (ex && sigsocket != -1) close(sigsocket);
+  if (ex && serversocket != -1) delsocket_force(serversocket);
+  serversocket = -1;
+  sigsocket = -1;
 
 #if ENABLE_UNIX_SOCKETS
-  if (unixserversocket != -1) delsocket(unixserversocket);
-  if (unixsigsocket != -1) close(unixsigsocket);
+  if (unixserversocket != -1) delsocket_force(unixserversocket);
   unixserversocket = -1;
   unixsigsocket = -1;
 #endif //ENABLE_UNIX_SOCKETS
@@ -635,6 +606,7 @@ DM_INLINE_STATIC void sock_error(BOOLEAN ex, P errno_, const char* msg) {
 void run_dnode_mill(void) {
   P retc;
   B abortframe[FRAMEBYTES];
+  union SocketInfo socketinfo = defaultsocketinfo;
 
 #if ! X_DISPLAY_MISSING
   defaultdisplay = getenv("DISPLAY");
@@ -649,21 +621,32 @@ void run_dnode_mill(void) {
   if ((sigsocket = make_socket(serverport, FALSE, &retc)) == -1)
     sock_error(TRUE, retc < 0 ? -retc : 0, "making internet signal socket");
 
+  socketinfo.listener.recsigfd = sigsocket;
+  if ((retc = addsocket(serversocket, &sockettype, &socketinfo)))
+    sock_error(TRUE, retc < 0 ? -retc : 0, "adding sockets");
+
 #if ENABLE_UNIX_SOCKETS
   if ((unixserversocket = make_unix_socket(serverport, TRUE, &retc)) < 0) {
     sock_error(FALSE, retc < 0 ? -retc : 0, "making unix server socket");
     goto socksdone;
   }
 
-  if ((unixsigsocket = make_unix_socket(serverport, FALSE, &retc)) < 0)
+  if ((unixsigsocket = make_unix_socket(serverport, FALSE, &retc)) < 0) {
     sock_error(FALSE, errno, "making unix signal socket");
+    delsocket_force(unixserversocket);
+    goto socksdone;
+  }
+
+  socketinfo.listener.unixport = serverport;
+  socketinfo.listener.recsigfd = unixsigsocket;
+  if ((retc = addsocket(unixserversocket, &sockettype, &socketinfo))) {
+    sock_error(FALSE, retc < 0 ? -retc : 0, "adding sockets");
+    goto socksdone;
+  }
+
 #endif //ENABLE_UNIX_SOCKETS
 
 socksdone:
-#if ENABLE_UNIX_SOCKETS
-  forksighandler(unixsigsocket, serverport);
-#endif //ENABLE_UNIX_SOCKETS
-  forksighandler(sigsocket, 0);
   maketinysetup();
 #if DM_ENABLE_RTHREADS
   rthreads_init();

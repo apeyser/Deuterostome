@@ -1111,7 +1111,7 @@ lt_estrdup (str)
 
 static lt_module
 sys_dl_open (loader_data, filename)
-     lt_user_data loader_data __attribute__ ((__unused__));
+     lt_user_data loader_data;
      const char *filename;
 {
   lt_module   module   = dlopen (filename, LT_GLOBAL | LT_LAZY_OR_NOW);
@@ -1126,7 +1126,7 @@ sys_dl_open (loader_data, filename)
 
 static int
 sys_dl_close (loader_data, module)
-     lt_user_data loader_data __attribute__ ((__unused__));
+     lt_user_data loader_data;
      lt_module module;
 {
   int errors = 0;
@@ -1142,7 +1142,7 @@ sys_dl_close (loader_data, module)
 
 static lt_ptr
 sys_dl_sym (loader_data, module, symbol)
-     lt_user_data loader_data __attribute__ ((__unused__));
+     lt_user_data loader_data;
      lt_module module;
      const char *symbol;
 {
@@ -1967,7 +1967,7 @@ static	lt_dlsymlists_t	       *preloaded_symbols		= 0;
 
 static int
 presym_init (loader_data)
-     lt_user_data loader_data __attribute__ ((__unused__));
+     lt_user_data loader_data;
 {
   int errors = 0;
 
@@ -2008,7 +2008,7 @@ presym_free_symlists ()
 
 static int
 presym_exit (loader_data)
-     lt_user_data loader_data __attribute__ ((__unused__));
+     lt_user_data loader_data;
 {
   presym_free_symlists ();
   return 0;
@@ -2054,7 +2054,7 @@ presym_add_symlist (preloaded)
 
 static lt_module
 presym_open (loader_data, filename)
-     lt_user_data loader_data __attribute__ ((__unused__));
+     lt_user_data loader_data;
      const char *filename;
 {
   lt_dlsymlists_t *lists;
@@ -2104,7 +2104,7 @@ presym_open (loader_data, filename)
 
 static int
 presym_close (loader_data, module)
-     lt_user_data loader_data __attribute__ ((__unused__));
+     lt_user_data loader_data;
      lt_module module;
 {
   /* Just to silence gcc -Wall */
@@ -2114,7 +2114,7 @@ presym_close (loader_data, module)
 
 static lt_ptr
 presym_sym (loader_data, module, symbol)
-     lt_user_data loader_data __attribute__ ((__unused__));
+     lt_user_data loader_data;
      lt_module module;
      const char *symbol;
 {
@@ -2150,6 +2150,8 @@ static struct lt_user_dlloader presym = {
 /* The type of a function used at each iteration of  foreach_dirinpath().  */
 typedef int	foreach_callback_func LT_PARAMS((char *filename, lt_ptr data1,
 						 lt_ptr data2));
+/* foreachfile_callback itself calls a function of this type: */
+typedef int	file_worker_func      LT_PARAMS((const char *filename, void *data));
 
 static	int	foreach_dirinpath     LT_PARAMS((const char *search_path,
 						 const char *base_name,
@@ -2715,7 +2717,7 @@ foreach_dirinpath (search_path, base_name, func, data1, data2)
       {
 	size_t lendir = LT_STRLEN (dir_name);
 
-	if (lendir +1 +lenbase >= (size_t) filenamesize)
+	if (lendir +1 +lenbase >= filenamesize)
 	{
 	  LT_DLFREE (filename);
 	  filenamesize	= lendir +1 +lenbase +1; /* "/d" + '/' + "f" + '\0' */
@@ -2724,7 +2726,7 @@ foreach_dirinpath (search_path, base_name, func, data1, data2)
 	    goto cleanup;
 	}
 
-	assert ((size_t) filenamesize > lendir);
+	assert (filenamesize > lendir);
 	strcpy (filename, dir_name);
 
 	if (base_name && *base_name)
@@ -2800,7 +2802,7 @@ static int
 find_handle_callback (filename, data, ignored)
      char *filename;
      lt_ptr data;
-     lt_ptr ignored __attribute__ ((__unused__));
+     lt_ptr ignored;
 {
   lt_dlhandle  *handle		= (lt_dlhandle *) data;
   int		notfound	= access (filename, R_OK);
@@ -2838,7 +2840,7 @@ find_handle (search_path, base_name, handle)
 static int
 load_deplibs (handle, deplibs)
      lt_dlhandle handle;
-     char *deplibs __attribute__ ((__unused__));
+     char *deplibs;
 {
 #if LTDL_DLOPEN_DEPLIBS
   char	*p, *save_search_path = 0;
@@ -3043,7 +3045,7 @@ trim (dest, str)
 	return 1;
 
       strncpy(tmp, &str[1], (end - str) - 1);
-      tmp[len-3] = LT_EOS_CHAR;
+      tmp[(end - str) - 1] = LT_EOS_CHAR;
       *dest = tmp;
     }
   else
@@ -3172,7 +3174,7 @@ try_dlopen (phandle, filename)
 
       /* canonicalize the module name */
       {
-        ssize_t i;
+        size_t i;
         for (i = 0; i < ext - base_name; ++i)
 	  {
 	    if (isalnum ((int)(base_name[i])))
@@ -3217,7 +3219,7 @@ try_dlopen (phandle, filename)
 	    }
 #endif
 #ifdef LTDL_SYSSEARCHPATH
-	  if (!file && sys_search_path != NULL)
+	  if (!file && *sys_search_path)
 	    {
 	      file = find_file (sys_search_path, base_name, &dir);
 	    }
@@ -3249,16 +3251,19 @@ try_dlopen (phandle, filename)
       /* read the .la file */
       while (!feof (file))
 	{
+	  line[line_len-2] = '\0';
 	  if (!fgets (line, (int) line_len, file))
 	    {
 	      break;
 	    }
 
 	  /* Handle the case where we occasionally need to read a line
-	     that is longer than the initial buffer size.  */
-	  while ((line[LT_STRLEN(line) -1] != '\n') && (!feof (file)))
+	     that is longer than the initial buffer size.
+	     Behave even if the file contains NUL bytes due to corruption. */
+	  while (line[line_len-2] != '\0' && line[line_len-2] != '\n' && !feof (file))
 	    {
 	      line = LT_DLREALLOC (char, line, line_len *2);
+	      line[line_len*2 - 2] = '\0';
 	      if (!fgets (&line[line_len -1], (int) line_len +1, file))
 		{
 		  break;
@@ -3731,8 +3736,7 @@ foreachfile_callback (dirname, data1, data2)
      lt_ptr data1;
      lt_ptr data2;
 {
-  int (*func) LT_PARAMS((const char *filename, lt_ptr data))
-	= (int (*) LT_PARAMS((const char *filename, lt_ptr data))) data1;
+  file_worker_func *func = *(file_worker_func **) data1;
 
   int	  is_done  = 0;
   char   *argz     = 0;
@@ -3770,37 +3774,38 @@ lt_dlforeachfile (search_path, func, data)
      lt_ptr data;
 {
   int is_done = 0;
+  file_worker_func **fpptr = &func;
 
   if (search_path)
     {
       /* If a specific path was passed, search only the directories
 	 listed in it.  */
       is_done = foreach_dirinpath (search_path, 0,
-				   foreachfile_callback, func, data);
+				   foreachfile_callback, fpptr, data);
     }
   else
     {
       /* Otherwise search the default paths.  */
       is_done = foreach_dirinpath (user_search_path, 0,
-				   foreachfile_callback, func, data);
+				   foreachfile_callback, fpptr, data);
       if (!is_done)
 	{
 	  is_done = foreach_dirinpath (getenv("LTDL_LIBRARY_PATH"), 0,
-				       foreachfile_callback, func, data);
+				       foreachfile_callback, fpptr, data);
 	}
 
 #ifdef LTDL_SHLIBPATH_VAR
       if (!is_done)
 	{
 	  is_done = foreach_dirinpath (getenv(LTDL_SHLIBPATH_VAR), 0,
-				       foreachfile_callback, func, data);
+				       foreachfile_callback, fpptr, data);
 	}
 #endif
 #ifdef LTDL_SYSSEARCHPATH
       if (!is_done)
 	{
 	  is_done = foreach_dirinpath (getenv(LTDL_SYSSEARCHPATH), 0,
-				       foreachfile_callback, func, data);
+				       foreachfile_callback, fpptr, data);
 	}
 #endif
     }
@@ -4032,7 +4037,7 @@ lt_dlpath_insertdir (ppath, before, dir)
   if (before)
     {
       assert (*ppath <= before);
-      assert ((size_t) (before - *ppath) <= strlen (*ppath));
+      assert (before - *ppath <= strlen (*ppath));
 
       before = before - *ppath + argz;
     }
@@ -4304,17 +4309,18 @@ lt_dlcaller_get_data  (key, handle)
   LT_DLMUTEX_LOCK ();
 
   /* Locate the index of the element with a matching KEY.  */
-  {
-    int i;
-    for (i = 0; handle->caller_data[i].key; ++i)
-      {
-	if (handle->caller_data[i].key == key)
-	  {
-	    result = handle->caller_data[i].data;
-	    break;
-	  }
-      }
-  }
+  if (handle->caller_data)
+    {
+      int i;
+      for (i = 0; handle->caller_data[i].key; ++i)
+        {
+          if (handle->caller_data[i].key == key)
+            {
+              result = handle->caller_data[i].data;
+              break;
+            }
+        }
+    }
 
   LT_DLMUTEX_UNLOCK ();
 

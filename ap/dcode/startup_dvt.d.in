@@ -10,6 +10,8 @@
 |  - file <=> VM interchange
 |  - module support
 
+/dm_type /dvt def
+
 save /startup_common_save name 
 /startup_common_buf vmstatus sub 10 div /b array def
 startup_common_save capsave {
@@ -20,7 +22,11 @@ startup_common_save capsave {
   stop
 } if
 
-/dm_type /dvt def
+| (source) /ERROR_NAME 
+/makeerror ~[~ERRORS ~exch bind ~get bind ~error] def
+| (source) code ... n | ... (source) code
+/rollerror {2 1 index add exch roll} bind def
+
 100 /b array debug_dict /line1 put
 
 |============================= userdict =================================
@@ -437,14 +443,14 @@ c_         list all connections
 | the node is assigned a group number (enter as NEGATIVE integer)
 | Also connects the eye.
 
-  Xwindows not {null} {  
-    /getdnodedisplay {
+  /getdnodedisplay Xwindows not ~null {  
+    {
       ~[
         getdvtdisplay_ 
         Xauthget /Xauthput find ~exec
       ]
-    } bind def
-  } ifelse
+    }
+  } ifelse bind def
 
   Xwindows {
     /_cx {
@@ -700,8 +706,7 @@ c_         list all connections
     end
   } bind userdict 3 -1 roll put
 
-| socket aborted | --
-  /socketmsg 1024 /b array def
+| ... error-pending socket | --
   /socketdead {
     dvt begin
     /deadsocket name
@@ -710,25 +715,22 @@ c_         list all connections
       node 2 get deadsocket eq {
         node 2 get disconnect
         loadcolor
-        socketmsg 0 {/red} mkpass {
+        {
           (** [) fax * knode * number (] Dead connection on ) fax
           node 0 get fax (:) fax * node 1 get * number
-          (\n) fax
-        } color_text 0 exch getinterval toconsole
+        } warning
         nodeclear
         check_kbdowner
         pop false exit
       } if
     } for {
-      (socketdead) ERRORS /DEAD_SOCKET get 
-      socketmsg errormessage toconsole
-    } if ~error ~abort ifelse
-    end
-  } bind def
+      (socketdead) ERRORS /DEAD_SOCKET get showerror
+    } if end ~error ~abort ifelse
+  } bind userdict 3 -1 roll put
 
   /loadcolor {
     userdict /color known not {getstartupdir (color.d) fromfiles} if
-  } bind def
+  } bind userdict 3 -1 roll put
 
   Xwindows {
     /_dx {
@@ -1971,19 +1973,13 @@ Xwindows {
 (dvt) userdict /myid put
 
 (Starting...\n) toconsole
-(Home: ) toconsole gethomedir toconsole (\n) toconsole
-(Startup: ) toconsole getstartupdir toconsole (\n) toconsole
-
-getstartupdir (errors.d) fromfiles
 
 | Read ~/.dvt, if it exists    
 {
-    (Trying ) toconsole getconfdir toconsole (dvt.d...\n) toconsole
-    getconfdir (dvt.d) fromxfiles {
-      (Read ) toconsole getconfdir toconsole (dvt.d\n) toconsole
-    } if
-    (Trying ~/.dvt ...\n) toconsole
-    gethomedir (.dvt) fromxfiles {(Read ~/.dvt\n) toconsole} if
+  save 1024 /b array 1 index capsave |[
+    {(processes.d) (eps.d)} ~loadstartup forall
+    {{getconfdir (dvt.d)} {gethomedir (.dvt)}} {exec loadopt} forall |]
+  pop restore
 } aborted {countdictstack 2 sub ~end repeat clear} if
 
 dvt begin

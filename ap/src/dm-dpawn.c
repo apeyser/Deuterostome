@@ -201,7 +201,7 @@ P op_mpiiprobe(void) {
   else if (src < 0 || src >= getworldsize()) return RNG_CHK;
   tag = MPI_ANY_TAG;
 
-  switch (mpiiprobe(getworldcomm(), &tag, &src, &count)) {
+  switch ((retc = mpiiprobe(getworldcomm(), &tag, &src, &count))) {
     case OK:
       TAG(o_1) = (NUM|LONGBIGTYPE);
       LONGBIG_VAL(o_1) = src;
@@ -210,6 +210,7 @@ P op_mpiiprobe(void) {
       BOOL_VAL(o1) = TRUE;
       FREEopds = o2;
       break;
+
     case MPI_NOMSG:
       TAG(o_1) = BOOL;
       BOOL_VAL(o_1) = FALSE;

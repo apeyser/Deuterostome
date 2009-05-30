@@ -7,6 +7,8 @@
 
 DLL_SCOPE P nextevent(B* buffer);
 DLL_SCOPE P makesocketdead(P retc, P socketfd, B* error_source);
+DLL_SCOPE P op_console(void);
+DLL_SCOPE P op_setconsole(void);
 DLL_SCOPE P op_send(void);
 
 // There are defined externally

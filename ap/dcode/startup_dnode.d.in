@@ -1,6 +1,8 @@
 
 |======================== startup_dnode.d ================================
 
+(Using startup_dnode.d $Id$ V@PACKAGE_VERSION@ svn-@SVNVERSION@\n) toconsole
+
 | Contains procedures for:
 |  - inspection of objects
 |  - object/text interconversion
@@ -9,7 +11,8 @@
 |  - module support
 |  - emulators of dvt operators
 
-/toconsole_ ~toconsole def
+/dm_type /dnode def
+
 save /startup_common_save name 
 /startup_common_buf vmstatus sub 10 div /b array def
 startup_common_save capsave {
@@ -23,7 +26,15 @@ startup_common_save capsave {
   stop
 } if
 
-/dm_type /dnode def
+| (source) /ERROR_NAME
+/makeerror ~[
+  ~myname ~getmyport bind 4 2 ~roll bind ~ERRORS ~exch bind ~get bind
+  ~error
+] def
+
+| (name) port (source) code ... n
+|               | ... (name) port (source) code
+/rollerror {4 1 index add exch roll} bind def
 
 |============================= userdict =================================
 
@@ -37,26 +48,23 @@ startup_common_save capsave {
 | default handler just throws away the socket and signals an error
 
 | error-pending socket | -- <<error thrown>>
-/socketmsg 1024 /b array def
 /socketdead {
   true exch
-  userdict /mpidata known not {pop} {
-    mpidata /socket known not {pop} {
+  userdict /mpidata known not ~pop {
+    mpidata /socket known not ~pop {
       mpidata begin {
         socket eq a_ (\n) toconsole {
-          loadcolor
-          socketmsg 0 {/red} mkpass {
+          {
             (On ) fax myname fax ( port ) fax * getmyport * number (: ) fax
-            (** rthreads socket dead\n) fax
-          } color_text 0 exch getinterval toconsole
+            (** rthreads socket dead) fax
+          } warning
           kill
           pop false
         } if
-      } stopped end {stop} if
+      } stopped end ~stop if
     } ifelse
   } ifelse {
-    myname getmyport (socketdead) ERRORS /DEAD_SOCKET get 
-    socketmsg errormessage toconsole
+    myname getmyport (socketdead) ERRORS /DEAD_SOCKET get showerror
   } if ~error ~abort ifelse
 } bind def
 
@@ -628,15 +636,50 @@ end def |========= end of mpi data ================
 } bind def
 
 | /modulename module_send --
-| sends a module to all pawns. Pawns shall recieve the modules
+| sends a module to all pawns. Pawns shall receive the modules
 | and reset the save box for the module to a local value.
 | I.e., it will active as if the module had been created locally
 | as if by a module _module pair.
+|
 /module_send {
   mpidata begin /module_send_ layer {
     ~[userdict 3 -1 roll get ~recv_module] /module_cmd name
     {pop /module_cmd find} execpawns
   } stopped /module_send_ _layer end ~stop if
+} bind def
+
+| [/x1 .. /xn] | --
+| defines /x1 x1 def ... /xn xn def
+| on the pawns in the current dictionary
+|
+/names_send {
+  save mpidata /names_send_ put {
+    ~[
+      exch dup {find destruct_exec exch} forall reverse ~recv_names
+    ] sexecpawns
+  } stopped 
+  mpidata /names_send_ get restore
+  ~stop if
+} bind def
+
+|-------------------------- inlayer
+| ~active /layer_name | ...
+|
+| Wraps up /layer_name layer ~active stopped /layer_name _layer ~stop if
+|  which is a common usage pattern for layers.
+| ... is whatever active leaves behind.
+|
+| This version also handles pawns -- it starts a layer on the pawns,
+|   halts the pawns, does an inlayer with the active object
+|   and then restarts the pawns to close the layer.
+|
+| {} /name | --
+/inlayerall {
+  dup layer ~[
+    ~[{kickdnode} 3 index ~inlayer] ~sexecpawns
+    5 -1 roll destruct_exec ~stopped 6 -1 roll
+  ] exec _layer {~stop sexecall} if
+  kickpawns
 } bind def
 
 |==================================== end of pawn functions
@@ -780,27 +823,15 @@ Xwindows_ {
   /delete_window {end} bind def | default delete action is nothing.
 } if
 
-(Using startup_dnode.d $Id$ V@PACKAGE_VERSION@ svn-@SVNVERSION@\n) toconsole
-  
-getstartupdir (matrix.d) fromfiles
+(Starting...\n) toconsole
 
-save /tsave name 1024 /b array /tbuf name tsave capsave
-tbuf 0 (Trying ) fax getconfdir fax (dnode.d...\n) fax 
-0 exch getinterval toconsole
-getconfdir (dnode.d) fromxfiles {
-  tbuf 0 (Read ) fax getconfdir fax (dnode.d\n) fax 
-  0 exch getinterval toconsole
-} if
-(Trying ~/.dnode ...\n) toconsole
-gethomedir (.dnode) fromxfiles {(Read ~/.dnode\n) toconsole_} if |]
+save 1024 /b array 1 index capsave |[
+  {(matrix.d) (processes.d) (eps.d)} ~loadstartup forall
+  {
 @ENABLE_PETSC_START@
-tbuf 0 (Trying ) fax getstartupdir fax (petsc.d...\n) fax
-0 exch getinterval toconsole
-getstartupdir (petsc.d) fromxfiles {
-  tbuf 0 (Read ) fax getstartupdir fax (petsc.d\n) fax
-  0 exch getinterval toconsole
-} if
+    {getstartupdir (petsc.d)}
 @ENABLE_PETSC_END@
-tsave restore
-
-
+    {getconfdir (dnode.d)} 
+    {gethomedir (.dnode)}
+  } {exec loadopt} forall |]
+pop restore

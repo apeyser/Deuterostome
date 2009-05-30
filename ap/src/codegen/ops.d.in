@@ -192,7 +192,7 @@
   /all 2 dict dup begin |[
     /commands [
       /error /errormessage /abort /aborted
-      /toconsole 
+      /toconsole /tostderr
       /pop /exch /dup /copy /index /roll /clear
       /count /cleartomark /counttomark
       /currentdict
@@ -218,7 +218,7 @@
       /token /search /anchorsearch 
       /gettime /gettimeofday /profiletime /localtime /getwdir /setwdir
       /readfile /writefile /findfiles /findfile /readboxfile /writeboxfile
-      /tosystem /fromsystem /transcribe
+      /transcribe
       /fax /merge /nextobject
       /interpolate /integrateOH /extrema 
       /solvetridiag /integrateOHv /tile /ramp
@@ -274,21 +274,34 @@
       /LONG_OVF (** 64 bit integer overflow on load into 32 bit machine) def
       /ILL_RECAP (** Double capsave) def 
       /READ_ERROR (** Internal Read error) def
+      /SOCK_STATE (** Attempt to change file descriptor state) def
       /UNKNOWN_ERR (** Internal Unknown error) def
       /BUF_OVF (** Internal buffer overflow) def |]
     end def |]
   end def |]
 end def
 
+/consolable 1 dict dup begin |[
+  /all 1 dict dup begin |[
+    /commands [/console /setconsole] def |]
+  end def |]
+end def |]
+
 /proc 1 dict dup begin |[
   /all 2 dict dup begin |[
     /commands [
-      /fork /makefd /dupfd /glob /spawn /setenv /getenv
-      /persistfd /pipefd /killpid /waitpid /checkpid
-      /openfd /readfd /suckfd /closedfd /ungetfd
+      /fork /killpid /waitpid /checkpid /getpid /getppid /unpid /spawn 
+      /copyfd /readonlyfd /makefd /unmakefd /dupfd /pipefd
+      /openfd /readfd /readtomarkfd /readtomarkfd_nb 
+      /tmpfile /tmpdir /rmpath /finddir
+      /suckfd /closedfd /getfd /ungetfd
       /writefd /closefd /lockfd /unlockfd /trylockfd
+      /glob /setenv /getenv
     ] def
-    /errors 4 dict dup begin |[
+    /errors 7 dict dup begin |[
+      /FILE_NOSUCH (** No such file or directory) def
+      /DIR_NOTEMPTY (** Directory not empty) def
+      /CHILD_FAILURE (*** Child process failed) def
       /STREAM_CLOSED (*** Operation on closed stream) def
       /STREAM_DIR (*** operation on wrong direction stream) def
       /STREAM_EPIPE (*** Stream closed while attempting to write) def
@@ -373,7 +386,6 @@ end def
   /all 2 dict dup begin |[
     /commands [
       /lock /unlock /serialize /threads /makethreads 
-      /tostderr 
       /halt /continue 
       /vmresize 
       /getplugindir
@@ -430,7 +442,7 @@ end def
 
 /master 3 dict dup begin |[
   /all 1 dict dup begin |[
-    /commands [/getmyport /setconsole /console /killsockets /socketdead] def 
+    /commands [/getmyport /killsockets /socketdead] def 
   end def
   /DM_ENABLE_RTHREADS 2 dict dup begin  |[
     /errors 10 dict dup begin |[
@@ -494,15 +506,15 @@ end def
 
 /dvtdict 1 dict dup begin |[
   /parents [
-    /common /net /socketevents /x /terminal /regex 
-    /quitable /proc
+    /common /net /socketevents /x /terminal /regex
+    /quitable /dies /proc /consolable
   ] def |]
 end def
 
 /dnodedict 1 dict dup begin |[
   /parents [
     /common /net /socketevents /node /x /xnode /master /regex /plugins
-    /dies /proc
+    /dies /proc /consolable
   ] def |]
 end def
 

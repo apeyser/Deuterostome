@@ -1,5 +1,7 @@
 #line 2 "@srcdir@/dm-prop.c.in"
 
+#include "dm.h"
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
@@ -19,7 +21,11 @@
 static P serverport = 0;
 
 __attribute__ ((__noreturn__))
-static void redirector_quit(int sig __attribute__ ((__unused__)) ) {
+static void redirector_quit(int sig, 
+			    siginfo_t* info, 
+			    void* ucon __attribute__ ((__unused__))) {
+  fprintf(stderr, "Redirector %li: quitting, signal %i from %li\n",
+	  (long) getpid(), sig, info ? (long) info->si_pid : 0);
   exit(0);
 }
 
@@ -28,9 +34,11 @@ static void redirector_quit(int sig __attribute__ ((__unused__)) ) {
 #endif
 
 #if DM_PROP_MAIN
+static pid_t myppid;
 static void redirect_sig(int sig) {
-  if (kill(getppid(), sig))
-    error(EXIT_FAILURE, errno, "redirector unable to signal parent");
+  if (kill(myppid, sig))
+    error(EXIT_FAILURE, errno, "redirector %li unable to signal parent %li",
+	  (long) getpid(), (long) getppid());
 }
 
 static void redirector_exit(void) {
@@ -51,54 +59,68 @@ static void handle_redirect(void) {
       error(EXIT_FAILURE, errno, "redirector recv");
   };
 
+/*   fprintf(stderr, "%li: received signal %i\n",  */
+/* 	  (long) getpid(), (int) sig); */
   propagate_sig(sig, redirect_sig);
 }
 
-static void redirector_alarm(int sig __attribute ((__unused__)) ) {
-  if (kill(getppid(), 0) && errno == ESRCH) exit(0);
+static void redirector_alarm(void) {
+/*   fprintf(stderr, "redirector timeout %li of %li\n", */
+/* 	  (long) getpid(), (long) getppid()); */
+  if (kill(myppid, 0))
+    error(1, errno, "%li: parent %li dead", 
+	  (long) getpid(), (long) getppid());
 }
 
 int main(void) {
-  fd_set rin, rout;
+  fd_set rin, rout, eout;
   int nfds = 1;
-  int quitsigs[] = {SIGQUIT, SIGTERM, SIGINT, SIGHUP, 0};
+  int quitsigs[] = {SIGQUIT, SIGTERM, SIGHUP, 0};
   int *i;
-  struct itimerval timer = {{KILL_TIME, 0}, {KILL_TIME, 0}};
+  const struct timeval timerin = {.tv_sec = KILL_TIME, .tv_usec = 0};
+  struct timeval timer;
+  myppid = getppid();
 
   if (atexit(redirector_exit))
     error(1, errno, "atexit for redirector");
 
   for (i = quitsigs; *i; i++) sethandler(*i, redirector_quit);
-  sethandler(SIGALRM, redirector_alarm);
-  if (setitimer(ITIMER_REAL, &timer, NULL))
-    error(1, errno, "setitimer for redirector");
+  clearhandler(SIGINT);
 
   FD_ZERO(&rin);
   FD_SET(0, &rin);
+  while (1) {
+    eout = rout = rin;
+    timer = timerin;
+    switch (select(nfds, &rout, NULL, &eout, &timer)) {
+      case -1:
+	if (errno == EINTR) break;
+	error(1, errno, "select failed in redirector");
+	break;
 
-  for (rout = rin; 
-       select(nfds, &rout, NULL, NULL, NULL) != -1
-	 || errno == EINTR;
-       rout = rin)
-    if (FD_ISSET(0, &rout)) handle_redirect();
-
-  error(EXIT_FAILURE, errno, "select failed in redirector");
+      case 0:  break;
+      default: handle_redirect(); break;
+    }
+    redirector_alarm();
+  }
   return 1;
 }
 #else
 
 __attribute__ ((__noreturn__))
-static void execsighandler(P sigsocket, P serverport_) {
+static void execsighandler(P sigsocket, P serverport_, 
+			   P (*closesockets_func)(void)) {
+  int sigsocket_;
+  P retc;
   serverport = serverport_;
-  if (dup2(sigsocket, 0) == -1) 
+  if ((sigsocket_ = dup(sigsocket)) == -1)
+    error(1, errno, "Unable to dup sigsocket %li", (long) sigsocket);
+  if ((retc = closesockets_func()))
+    error(1, retc < 0 ? -retc : 0, 
+	  "Unable to close sockets: %li", (long) getpid());
+  if (dup2(sigsocket_, 0) == -1) 
     error(1, errno, "Unable to dup sigsocket %li to stdin", 
 	  (long) sigsocket);
-  if (close(sigsocket))
-    error(1, errno, "Unable to close sigsocket %li", 
-	  (long) sigsocket);
-
-  if (close(1))
-    error(1, errno, "Unable to close stdout");
 
   execl("@dmprop@", "@dmprop@", NULL);
   error(1, errno, "Unable to exec: @dmprop@");
@@ -113,61 +135,33 @@ static void execsighandler(P sigsocket, P serverport_) {
 #define dmsigmask pthread_sigmask
 #endif //HAVE_PTHREAD
 
-DM_INLINE_STATIC void setalarm(int secs) {
-  sigset_t alm;
-  sigemptyset(&alm);
-  sigaddset(&alm, SIGALRM);
-  
-  dmsigmask(SIG_BLOCK, &alm, NULL);
-  timeout = FALSE;
-  alarm(secs);
-  dmsigmask(SIG_UNBLOCK, &alm, NULL);
-}
-
-static pid_t redirector = -1;
-
-static void redirector_killer(void) {
-  P pid;
-
-  if (kill(redirector, SIGTERM)) {
-    error(0, errno, "Killing redirector");
-    return;
-  }
-
-  setalarm(5);
-  while ((pid = waitpid(redirector, NULL, 0)) == -1 
-	 && errno == EINTR && ! timeout);
-  
-  if (pid == -1) {
-    kill(redirector, SIGKILL);
-    setalarm(5);
-    while ((pid = waitpid(redirector, NULL, 0)) == -1 
-	   && errno == EINTR && ! timeout);
-  }
-}
-
-void spawnsighandler(P sigsocket, P serverport,
-		     void (*set_unixowner_func)(BOOLEAN state),
-		     void (*closesockets_func)(void)) {
-  BOOLEAN subfork = (redirector != -1) ? TRUE : FALSE;
-  switch ((redirector = fork())) {
+P spawnsighandler(P sigsocket, P serverport,
+		  P (*closesockets_func)(void),
+		  P* pid) {
+  P retc = OK;
+  switch ((*pid = fork())) {
     case -1:
-      error(1, errno, "forking for signal redirector");
+     retc = -errno;
+     error(0, errno, "forking for signal redirector");
+     break;
 
     case 0:
-      set_unixowner_func(FALSE);
-      closesockets_func();
-      execsighandler(sigsocket, serverport);
+      *pid = -1;
+/*       fprintf(stderr, "spawning sig handler: %li of %li\n",  */
+/* 	      (long) getpid(), (long) getppid()); */
+      execsighandler(sigsocket, serverport, closesockets_func);
+      //never return from here
 
     default:
-      if (! subfork && atexit(redirector_killer))
-	error(TRUE, errno, "atexit for signal redirector");
-      close(sigsocket);
-      return;
+      if (close(sigsocket)) {
+	retc = -errno;
+	error(0, errno, "closing sigsocket");
+      }
+      break;
   }
+  return retc;
 }
 #endif //DM_PROP_MAIN
-
 
 #if ENABLE_UNIX_SOCKETS
 P init_unix_sockaddr(struct sockaddr_un *name, UW port, BOOLEAN isseq) {
