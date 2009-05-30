@@ -673,7 +673,7 @@ end def  | of xtext_dict
 
 /layer {
   dup currentdict exch known { 
-      dup find dup class /boxclass eq {restore} {pop} ifelse
+      dup find dup class /boxclass eq ~restore ~pop ifelse
   } if
   save def
 } bind def
@@ -710,6 +710,16 @@ end def  | of xtext_dict
   dup layer ~[
     3 -1 roll destruct_exec ~stopped 4 -1 roll
   ] exec _layer ~stop if
+} bind def
+
+| ~capped ~body /layer_name | ...
+/caplayer {
+  dup layer ~[
+    4 1 roll 
+    openlist 4 -1 roll construct_exec counttomark dup 3 add exch roll pop
+    exch destruct_exec exch ~find ~capsave ~exec
+    3 index
+  ] stopped {find restore stop} ~pop ifelse
 } bind def
 
 |------------------------------- savemodule

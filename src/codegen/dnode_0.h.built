@@ -157,8 +157,6 @@ B* _sysop[] =
   (B*) "sendsig", (B*) op_sendsig,
   (B*) "getmyname", (B*) op_getmyname,
   (B*) "getmyfqdn", (B*) op_getmyfqdn,
-  (B*) "tosystem", (B*) op_tosystem,
-  (B*) "fromsystem", (B*) op_fromsystem,
   (B*) "lock", (B*) op_lock,
   (B*) "unlock", (B*) op_unlock,
   (B*) "serialize", (B*) op_serialize,

@@ -50,8 +50,8 @@ startup_common_save capsave {
 | error-pending socket | -- <<error thrown>>
 /socketdead {
   true exch
-  userdict /mpidata known not {pop} {
-    mpidata /socket known not {pop} {
+  userdict /mpidata known not ~pop {
+    mpidata /socket known not ~pop {
       mpidata begin {
         socket eq a_ (\n) toconsole {
           {
@@ -61,11 +61,10 @@ startup_common_save capsave {
           kill
           pop false
         } if
-      } stopped end {stop} if
+      } stopped end ~stop if
     } ifelse
   } ifelse {
-    myname getmyport (socketdead) ERRORS /DEAD_SOCKET get 
-    showerror
+    myname getmyport (socketdead) ERRORS /DEAD_SOCKET get showerror
   } if ~error ~abort ifelse
 } bind def
 

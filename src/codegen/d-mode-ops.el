@@ -197,8 +197,6 @@
   "sendsig"
   "getmyname"
   "getmyfqdn"
-  "tosystem"
-  "fromsystem"
   "Xwindows"
   "Xdisplayname"
   "screensize"

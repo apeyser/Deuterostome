@@ -157,8 +157,6 @@ B* _sysop[] =
   (B*) "sendsig", (B*) op_sendsig,
   (B*) "getmyname", (B*) op_getmyname,
   (B*) "getmyfqdn", (B*) op_getmyfqdn,
-  (B*) "tosystem", (B*) op_tosystem,
-  (B*) "fromsystem", (B*) op_fromsystem,
   (B*) "Xwindows", (B*) op_Xwindows,
   (B*) "Xdisplayname", (B*) op_Xdisplayname,
   (B*) "screensize", (B*) op_screensize,

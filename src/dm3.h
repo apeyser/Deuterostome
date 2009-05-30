@@ -97,8 +97,6 @@ DLL_SCOPE P dm_setsockopts(P fd, P size);
 DLL_SCOPE P init_sockaddr(struct sockaddr_in *name, 
 			  const char *hostname, 
 			  UW port);
-DLL_SCOPE P op_tosystem(void);
-DLL_SCOPE P op_fromsystem(void);
 
 DLL_SCOPE P forksighandler(P sigsocket, P serverport, P* pid);
 DLL_SCOPE void initfds(void);

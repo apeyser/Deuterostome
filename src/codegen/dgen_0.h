@@ -9,6 +9,7 @@ P op_loadlib(void);
 P op_nextlib(void);
 #endif
 
+#include "dgen-dm3.h"
 
 B *_sysop[] =
    {

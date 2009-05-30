@@ -706,7 +706,7 @@ c_         list all connections
     end
   } bind userdict 3 -1 roll put
 
-| socket aborted | --
+| ... error-pending socket | --
   /socketdead {
     dvt begin
     /deadsocket name
@@ -724,10 +724,8 @@ c_         list all connections
         pop false exit
       } if
     } for {
-      (socketdead) ERRORS /DEAD_SOCKET get 
-      showerror
-    } if ~error ~abort ifelse
-    end
+      (socketdead) ERRORS /DEAD_SOCKET get showerror
+    } if end ~error ~abort ifelse
   } bind userdict 3 -1 roll put
 
   /loadcolor {

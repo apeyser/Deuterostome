@@ -158,6 +158,7 @@
     /socketdead destruct_execn {  | ... bool socket {}
       false pidsockets {          | ... bool socket {} false pidpair
         dup 0 get 4 index eq {    | ... bool socket {} false pidpair
+          dup 0 get disconnect    | ... bool socket {} false pidpair
           null exch 0 put         | ... bool socket {} false
           3 ~pop repeat true exit | ... bool true
         } if                      | ... bool socket {} false pidpair
@@ -367,4 +368,26 @@
     ~estreamclose PROCESSES indict 
     ~stop if
   } bind def
+
+  /tosystem {
+    {
+      openlist (@ENABLE_BASH@) (-c) 4 -1 roll 
+      NULLR NULLW STDERR sh fg not {
+        (tosystem) /NOSYSTEM makeerror
+      } if
+    } PROCESSES indict
+  } bind userdict 3 -1 roll put
+
+  /fromsystem {
+    ~pipefd {
+      /wt name /rd name {
+        openlist (@ENABLE_BASH@) (-c) 4 -1 roll NULLR wt STDERR sh fg not {
+          (fromsystem) /NOSYSTEM makeerror
+        } if
+
+        wt close
+        rd suckfd
+      } stopped {wt closeifopen rd closeifopen ~stop} if
+    } /fromsystem_ ~caplayer PROCESSES indict
+  } bind userdict 3 -1 roll put
 } moduledef

@@ -347,7 +347,7 @@ end def
   /all 2 dict dup begin |[
     /commands [
       /connect /disconnect /send /getsocket /sendsig
-      /getmyname /getmyfqdn /tosystem /fromsystem 
+      /getmyname /getmyfqdn
     ] def
     /errors 3 dict dup begin |[
       /LOST_CONN (** Lost connection) def 
@@ -506,7 +506,7 @@ end def
 
 /dvtdict 1 dict dup begin |[
   /parents [
-    /common /net /socketevents /x /terminal /regex 
+    /common /net /socketevents /x /terminal /regex
     /quitable /dies /proc /consolable
   ] def |]
 end def
