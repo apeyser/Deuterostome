@@ -132,27 +132,12 @@ P op_vmresize_(void)
 /*-------------------------- Dnode operators -------------------------*/
 
 static P x_op_lock(void) {
-  if (o_1 < FLOORopds) return OPDS_UNF;
   if (x_1 < FLOORexecs) return EXECS_UNF;
-  if (TAG(o_1) != BOOL) return OPD_CLA;
   if (TAG(x_1) != BOOL) return EXECS_COR;
 	
   locked = BOOL_VAL(x_1);
-  if (! BOOL_VAL(o_1)) FREEexecs = x_1;
-  else {
-    TAG(x_1) = OP;
-    ATTR(x_1) = ACTIVE;
-    if (ATTR(o_1) & STOPMARK) {
-      OP_NAME(x_1) = "stop"; 
-      OP_CODE(x_1) = op_stop;
-    }
-    else {
-      OP_NAME(x_1) = "abort"; 
-      OP_CODE(x_1) = op_abort;
-    }
-  }
-  FREEopds = o_1;
-  return OK;
+  FREEexecs = x_1;
+  return repush_stop();
 }
 
 /* ~active | -- */
@@ -211,27 +196,12 @@ P op_unlock(void) {
 
 
 static P x_op_serialize(void) {
-  if (o_1 < FLOORopds) return OPDS_UNF;
   if (x_1 < FLOORexecs) return EXECS_UNF;
-  if (TAG(o_1) != BOOL) return OPD_CLA;
   if (TAG(x_1) != BOOL) return EXECS_COR;
 	
   serialized = BOOL_VAL(x_1);
-  if (! BOOL_VAL(o_1)) FREEexecs = x_1;
-  else {
-    TAG(x_1) = OP; 
-    ATTR(x_1) = ACTIVE;
-    if (ATTR(o_1) & STOPMARK) {
-      OP_NAME(x_1) = "stop"; 
-      OP_CODE(x_1) = op_stop;
-    }
-    else {
-      OP_NAME(x_1) = "abort"; 
-      OP_CODE(x_1) = op_abort;
-    }
-  }
-  FREEopds = o_1;
-  return OK;
+  FREEexecs = x_1;
+  return repush_stop();
 }
 
 /* ~active | -- */
@@ -247,7 +217,8 @@ P op_serialize(void) {
   OP_NAME(x2) = "x_serialize"; 
   OP_CODE(x2) = x_op_serialize;
 
-  TAG(x3) = BOOL; ATTR(x3) = (STOPMARK | ABORTMARK | ACTIVE);
+  TAG(x3) = BOOL; 
+  ATTR(x3) = (STOPMARK | ABORTMARK | ACTIVE);
   BOOL_VAL(x3) = FALSE;
 
   moveframe(o_1, x4);
@@ -280,29 +251,14 @@ P x_op_halt(void)
 
 static P x_op_halt_stop(void) {
   if (x_2 < FLOORexecs) return EXECS_UNF;
-  if (o_1 < FLOORopds) return OPDS_UNF;
-  if (TAG(o_1) != BOOL) return OPD_CLA;
   if (TAG(x_1) != BOOL || TAG(x_2) != BOOL)
     return EXECS_COR;
 
   halt_flag = BOOL_VAL(x_1);
   locked = BOOL_VAL(x_2);
-  if (! BOOL_VAL(o_1)) FREEexecs = x_2;
-  else {
-    TAG(x_2) = OP;
-    ATTR(x_2) = ACTIVE;
-    if (ATTR(o_1) & STOPMARK) {
-      OP_NAME(x_2) = "stop";
-      OP_CODE(x_2) = op_stop;
-    }
-    else {
-      OP_NAME(x_2) = "abort"; 
-      OP_CODE(x_2) = op_abort;
-    }
-    FREEexecs = x_1;
-  }
-  FREEopds = o_1;
-  return OK;
+
+  FREEexecs = x_2;
+  return repush_stop();
 }
 
 P op_halt(void)
@@ -323,7 +279,7 @@ P op_halt(void)
   OP_CODE(x3) = x_op_halt_stop;
 
   TAG(x4) = BOOL;
-  ATTR(x4) = (STOPMARK|ABORTMARK|ACTIVE);
+  ATTR(x4) = (STOPMARK | ABORTMARK | ACTIVE);
   BOOL_VAL(x4) = FALSE;
 
   TAG(x5) = OP;
@@ -357,6 +313,7 @@ P op_abort(void)
 {
   B *frame;
   abortflag = FALSE;
+  isstopping = FALSE;
 
   frame = FREEexecs;
   while ((frame -= FRAMEBYTES) >= FLOORexecs) {

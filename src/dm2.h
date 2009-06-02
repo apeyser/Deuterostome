@@ -52,6 +52,7 @@ DLL_SCOPE P op_syslibnum(void);
 DLL_SCOPE P op_aborted(void);
 DLL_SCOPE void setuphandlers(void);
 
-
+DLL_SCOPE P int_repush_stop(P (*abortfunc)(void));
+#define repush_stop() int_repush_stop(op_abort)
 
 #endif //DM_2_H

@@ -185,6 +185,7 @@ P op_abort(void)
 {
   B *frame;
   abortflag = FALSE;
+  isstopping = FALSE;
 
   frame = FREEexecs;
   while ((frame -= FRAMEBYTES) >= FLOORexecs) {

@@ -251,7 +251,7 @@ P op_nextobject(void)
   B *next;
 
   if (o_1 < FLOORopds) return OPDS_UNF;
-  if (CLASS(o_1) == NULLOBJ) { 
+  if (TAG(o_1) == NULLOBJ) { 
     if (FLOORvm < FREEvm) {
       next = FLOORvm;
       goto n_pos; 

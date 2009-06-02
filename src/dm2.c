@@ -1644,3 +1644,30 @@ void setuphandlers(void) {
   makeshellhandler();
 }
 
+//----------------------- int_repush_stop -----------------
+//
+// stopped? | ---
+// if stopped, push stop/abort on execution stack.
+//
+P int_repush_stop(P (*abortfunc)(void)) {
+  if (x1 >= CEILexecs) return EXECS_OVF;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != BOOL) return OPD_CLA;
+
+  if (BOOL_VAL(o_1)) {
+    TAG(x1) = OP;
+    ATTR(x1) = ACTIVE;
+    if (isstopping) {
+      OP_NAME(x1) = "stop";
+      OP_CODE(x1) = op_stop;
+    }
+    else {
+      OP_NAME(x1) = "abort";
+      OP_CODE(x1) = abortfunc;
+    }
+    FREEexecs = x2;
+  }
+  FREEopds = o_1;
+
+  return OK;
+}

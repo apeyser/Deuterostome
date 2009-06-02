@@ -23,6 +23,7 @@ fd_set sock_fds;
 volatile BOOLEAN timeout;             /* for I/O operations          */
 volatile BOOLEAN abortflag;
 volatile BOOLEAN numovf;             /* FPU overflow status            */
+BOOLEAN isstopping; // propagate stops through other locks
 BOOLEAN tinymemory;
 P recsocket = -1;
 P maxsocket = 0;            // maxsocket = max(socketfd)+1

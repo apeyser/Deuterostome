@@ -504,7 +504,7 @@ DM_INLINE_STATIC void shift_stack(B* caplevel, P offset,
   - NOTE: we no longer support restoration of operand and dictionary
     stacks from uncapped 'save' objects
  */
-P op_restore(void) 
+P op_restore(void)
 {
   B *cframe, *frame, *dict, *tdict, *entry, *box, *savebox,
     *caplevel, *savefloor;

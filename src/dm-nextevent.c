@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/types.h>
 
 #include "dm-nextevent.h"
 #include "error-local.h"
@@ -22,6 +23,8 @@
 // and then, in all cases:
 //     pushes the socket on the opstack.
 P makesocketdead(P retc, P socketfd, B* error_source) {
+/*   fprintf(stderr, "makesocketdead %li: %li, %li, %s\n",  */
+/* 	  (long) getpid(), (long) retc, (long) socketfd, error_source); */
   if (retc == QUIT) return QUIT;
 
   if (socketfd == consolesocket) {

@@ -355,6 +355,7 @@ P op_forall(void)
 P op_exit(void)
 {
   B *frame; W m;
+  isstopping = FALSE;
 
   frame = FREEexecs;
   while ((frame -= FRAMEBYTES) >= FLOORexecs) {
@@ -379,6 +380,7 @@ P op_exit(void)
 P op_stop(void)
 {
   B *frame; W m; 
+  isstopping = FALSE;
 
   frame = FREEexecs;
   while ((frame -= FRAMEBYTES) >= FLOORexecs) {
@@ -387,6 +389,7 @@ P op_stop(void)
         BOOL_VAL(frame) = TRUE;
 	ATTR(frame) = (STOPMARK | ACTIVE);
         FREEexecs = frame + FRAMEBYTES; 
+	isstopping = TRUE;
         return OK; 
       }
       else if (m & ABORTMARK) return INV_STOP;
