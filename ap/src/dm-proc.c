@@ -562,7 +562,7 @@ P op_makefd(void) {
 
   TAG(FREEvm) = STREAM;
   ATTR(FREEvm) = PARENT;
-  VALUE_PTR(FREEvm) = streambox = FREEvm+FRAMEBYTES;
+  streambox = VALUE_PTR(FREEvm) = FREEvm+FRAMEBYTES;
   STREAM_FD(streambox) = (int) fd;
   STREAM_BUFFERED(streambox) = FALSE;
   STREAM_RO(streambox)  = BOOL_VAL(o_1);
@@ -718,7 +718,7 @@ P op_pipefd(void) {
 
   TAG(FREEvm) = STREAM;
   ATTR(FREEvm) = PARENT;
-  VALUE_PTR(FREEvm) = streambox = FREEvm + FRAMEBYTES;
+  streambox = VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
   STREAM_FD(streambox) = pipefd[0];
   STREAM_BUFFERED(streambox) = FALSE;
   STREAM_RO(streambox) = TRUE;
@@ -727,7 +727,7 @@ P op_pipefd(void) {
   FREEvm += FRAMEBYTES + STREAMBOXBYTES;
   TAG(FREEvm) = STREAM;
   ATTR(FREEvm) = PARENT;
-  VALUE_PTR(FREEvm) = streambox = FREEvm + FRAMEBYTES;
+  streambox = VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
   STREAM_FD(streambox) = pipefd[1];
   STREAM_BUFFERED(streambox) = FALSE;
   STREAM_RO(streambox) = FALSE;
@@ -969,7 +969,7 @@ P op_suckfd(void) {
   
   TAG(FREEvm) = (ARRAY|BYTETYPE);
   ATTR(FREEvm) = PARENT;
-  VALUE_PTR(FREEvm) = curr = FREEvm + FRAMEBYTES;
+  curr = VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
  
   if (STREAM_BUFFERED(streambox)) {
     (curr++)[0] = STREAM_CHAR(streambox);
@@ -977,7 +977,7 @@ P op_suckfd(void) {
     if (STREAM_FD(streambox) == -1) {
       ARRAY_SIZE(FREEvm) = 1;
       moveframe(FREEvm, o_1);
-      FREEvm = FREEvm + FRAMEBYTES + DALIGN(1);
+      FREEvm += FRAMEBYTES + DALIGN(1);
       return OK;
     }
   }
@@ -997,7 +997,7 @@ P op_suckfd(void) {
     
   STREAM_FD(streambox) = -1;
   if ((retc = delsocket_proc(fd))) return retc;
-  ARRAY_SIZE(FREEvm) = nb = curr - (FREEvm + FRAMEBYTES);
+  nb = ARRAY_SIZE(FREEvm) = curr - (FREEvm + FRAMEBYTES);
   moveframe(FREEvm, o_1);
   FREEvm += FRAMEBYTES + DALIGN(nb);
   return OK;
@@ -1157,7 +1157,7 @@ P op_readtomarkfd_nb(void) {
   if (! STREAM_RO(streambox)) return STREAM_DIR;
   c = BYTE_VAL(o_1);
 
-  if (FREEvm + FRAMEBYTES + 1 >= CEILvm) return VM_OVF;
+  if (FREEvm + FRAMEBYTES + DALIGN(1) >= CEILvm) return VM_OVF;
   TAG(FREEvm) = (ARRAY|BYTETYPE);
   ATTR(FREEvm) = PARENT;
   curr = VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
@@ -1274,9 +1274,7 @@ P op_closefd(void) {
 
 P x_op_lockfd(void) {
   B* streambox;
-  if (o_1 < FLOORopds) return OPDS_UNF;
   if (x_1 < FLOORexecs) return EXECS_UNF;
-  if (TAG(o_1) != BOOL) return OPD_CLA;
   if (CLASS(x_1) != STREAM) return EXECS_COR;
   
   streambox = VALUE_PTR(x_1);
@@ -1285,29 +1283,15 @@ P x_op_lockfd(void) {
       if (errno != EINTR) return -errno;
       if (abortflag) return ABORT;
     }
-  if (! BOOL_VAL(o_1)) FREEexecs = x_1;
-  else {
-    TAG(x_1) = OP;
-    ATTR(x_1) = ACTIVE;
-    if (ATTR(o_1) & STOPMARK) {
-      OP_NAME(x_1) = "stop";
-      OP_CODE(x_1) = op_stop;
-    }
-    else {
-      OP_NAME(x_1) = "abort"; 
-      OP_CODE(x_1) = op_abort;
-    }
-  }
-  
-  FREEopds = o_1;
+
+  FREEexecs = x_1;
+  repush_stop();
   return OK;
 }
 
 P x_op_unlockfd(void) {
   B* streambox;
-  if (o_1 < FLOORopds) return OPDS_UNF;
   if (x_1 < FLOORexecs) return EXECS_UNF;
-  if (TAG(o_1) != BOOL) return OPD_CLA;
   if (CLASS(x_1) != STREAM) return EXECS_COR;
   
   streambox = VALUE_PTR(x_1);
@@ -1317,61 +1301,11 @@ P x_op_unlockfd(void) {
       if (abortflag) return ABORT;
     }
 
-  if (! BOOL_VAL(o_1)) FREEexecs = x_1;
-  else {
-    TAG(x_1) = OP;
-    ATTR(x_1) = ACTIVE;
-    if (ATTR(o_1) & STOPMARK) {
-      OP_NAME(x_1) = "stop";
-      OP_CODE(x_1) = op_stop;
-    }
-    else {
-      OP_NAME(x_1) = "abort"; 
-      OP_CODE(x_1) = op_abort;
-    }
-  }
-  
-  FREEopds = o_1;
-  return OK;
+  FREEexecs = x_1;
+  return repush_stop();
 }
 
-P x_op_trylockfd(void) {
-  B* streambox;
-  if (o_1 < FLOORopds) return OPDS_UNF;
-  if (x_1 < FLOORexecs) return EXECS_UNF;
-  if (TAG(o_1) != BOOL) return OPD_CLA;
-  if (CLASS(x_1) != STREAM) return EXECS_COR;
-  
-  streambox = VALUE_PTR(x_1);
-  if (STREAM_FD(streambox) != -1)
-    while (lockf(STREAM_FD(streambox), 0, F_ULOCK)) {
-      if (errno != EINTR) return -errno;
-      if (abortflag) return ABORT;
-    }
-
-  if (! BOOL_VAL(o_1)) {
-    FREEexecs = x_1;
-    BOOL_VAL(o_1) = TRUE;
-    return OK;
-  }
-  else {
-    TAG(x_1) = OP;
-    ATTR(x_1) = ACTIVE;
-    if (ATTR(o_1) & STOPMARK) {
-      OP_NAME(x_1) = "stop";
-      OP_CODE(x_1) = op_stop;
-    }
-    else {
-      OP_NAME(x_1) = "abort"; 
-      OP_CODE(x_1) = op_abort;
-    }
-
-    FREEopds = o_1;
-    return OK;
-  }
-}
-
-// ~active fd | --
+// ~active fd | ...
 P op_lockfd(void) {
   B* streambox;
 
@@ -1439,12 +1373,12 @@ P op_unlockfd(void) {
   return OK;
 }
 
-// ~active fd | true-if-locked/false
+// ~active fd | ... true-if-success
 P op_trylockfd(void) {
   B* streambox;
 
   if (o_2 < FLOORopds) return OPDS_UNF;
-  if (CEILexecs < x5) return EXECS_OVF;
+  if (CEILexecs < x6) return EXECS_OVF;
   if (CLASS(o_1) != STREAM) return OPD_CLA;
   streambox = VALUE_PTR(o_1);
   if (STREAM_FD(streambox) == -1) return STREAM_CLOSED;
@@ -1466,20 +1400,24 @@ P op_trylockfd(void) {
 	return -errno;
     }
 
-  moveframe(o_1, x1);
+  TAG(x1) = BOOL;
+  ATTR(x1) = 0;
+  BOOL_VAL(x1) = TRUE;
   
-  TAG(x2) = OP;
-  ATTR(x2) = ACTIVE;
-  OP_NAME(x2) = "x_trylockfd";
-  OP_CODE(x2) = x_op_trylockfd;
+  moveframe(o_1, x2);
 
-  TAG(x3) = BOOL;
-  ATTR(x3) = (STOPMARK|ABORTMARK|ACTIVE);
-  BOOL_VAL(x3) = FALSE;
+  TAG(x3) = OP;
+  ATTR(x3) = ACTIVE;
+  OP_NAME(x3) = "x_lockfd";
+  OP_CODE(x3) = x_op_lockfd;
 
-  moveframe(o_2, x4);
-  FREEexecs = x5;
-  FREEopds = o_1;
+  TAG(x4) = BOOL;
+  ATTR(x4) = (STOPMARK|ABORTMARK|ACTIVE);
+  BOOL_VAL(x4) = FALSE;
+
+  moveframe(o_2, x5);
+  FREEexecs = x6;
+  FREEopds = o_2;
 
   return OK;
 }

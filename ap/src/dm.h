@@ -174,6 +174,12 @@ extern "C" {
 #define PARENT                     ((UB)0x04)
 #define TILDE                      ((UB)0x08)
 
+#define EXITMARK                   ((UB)0x10)   /* execstack marks */
+#define STOPMARK                   ((UB)0x20)
+#define ABORTMARK                  ((UB)0x40)
+#define XMARK                      ((UB)0x70)
+#define BIND                       ((UB)0x80)   /* box op housekeeping */
+
 /* Composite endianness */
 #define BIGENDIAN                  ((UB) 0x00)
 #define LITTLEENDIAN               ((UB) 0x01)
@@ -259,14 +265,8 @@ extern "C" {
 #define GETNONNATIVE(frame) \
   ((HOSTLAYOUTMASK & FORMAT(frame)) ^ HOSTLAYOUT_DEFAULT)
 #define HASNATIVEENDIAN(nomatchbits) (! ((nomatchbits) & ENDIANMASK))
-#define HASNATIVEBITS(nomatchbits) (! ((nomatchbits) & HOSTBITSMASK))
-  
+#define HASNATIVEBITS(nomatchbits) (! ((nomatchbits) & HOSTBITSMASK))  
 
-#define EXITMARK                   ((UB)0x10)   /* execstack marks */
-#define STOPMARK                   ((UB)0x20)
-#define ABORTMARK                  ((UB)0x40)
-#define XMARK                      ((UB)0x70)
-#define BIND                       ((UB)0x80)   /* box op housekeeping */
 
 #define PF_PTR(frame, offset) (((B*)(frame))+(offset)*PACK_FRAME)
 
@@ -378,6 +378,7 @@ DLL_SCOPE fd_set sock_fds;
 DLL_SCOPE volatile BOOLEAN timeout; /* for I/O operations          */
 DLL_SCOPE volatile BOOLEAN abortflag;
 DLL_SCOPE volatile BOOLEAN numovf; /* FPU overflow status            */
+DLL_SCOPE BOOLEAN isstopping; // propagate stops through other locks
 DLL_SCOPE BOOLEAN tinymemory;
 DLL_SCOPE P recsocket;
 DLL_SCOPE P maxsocket;
