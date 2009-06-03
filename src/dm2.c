@@ -866,10 +866,12 @@ DM_INLINE_STATIC BOOLEAN foldsubframe(B* lframe) {
       makename((B*) OP_NAME(lframe), lframe);
       ATTR(lframe) |= (BIND|oldattr);
       return FALSE;
+
     case BOX: case NULLOBJ: case STREAM:
       TAG(lframe) = NULLOBJ; 
       ATTR(lframe) = 0;
       return FALSE;
+
     case DICT:
       if (TYPE(lframe) == OPAQUETYPE) {
 	TAG(lframe) = NULLOBJ; 
@@ -877,6 +879,7 @@ DM_INLINE_STATIC BOOLEAN foldsubframe(B* lframe) {
 	return FALSE;
       }
       return TRUE;
+
     default:
       return COMPOSITE(lframe);
   }
@@ -981,7 +984,7 @@ DM_INLINE_STATIC P foldobj_int(B *frame, P base, W *depth)
   if ((++(*depth)) > MAXDEPTH) return(RNG_CHK);
 
   switch(CLASS(frame)) {
-    case ARRAY: 
+    case ARRAY:
       tframe = *freemem; 
       tvalue = tframe + FRAMEBYTES;
       nb = (P)(DALIGN(ARRAY_SIZE(frame) * VALUEBYTES(TYPE(frame))));
@@ -1051,7 +1054,7 @@ DM_INLINE_STATIC P foldobj_int(B *frame, P base, W *depth)
       break;
 
     default: 
-      return(CORR_OBJ);
+      return CORR_OBJ;
   }
 
   (*depth)--;
