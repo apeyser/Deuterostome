@@ -669,14 +669,21 @@ end def |========= end of mpi data ================
   restore
 } bind def
 
+| (line) | {line}
+/dvttokenize {
+  ~[{exch token not {pop exit} if} loop]
+} bind def
+
 | save (line) knode | ??
 /dvtreceive {
-  exch mkact 3 1 roll true dvtreceive_base
+  exch dvttokenize 3 1 roll true dvtreceive_base
+|  exch mkact 3 1 roll true dvtreceive_base
 } bind def
 
 | save (line) knode | ??
 /dvtreceive_np {
-  exch mkact 3 1 roll false dvtreceive_base
+  exch dvttokenize 3 1 roll false dvtreceive_base
+|  exch mkact 3 1 roll false dvtreceive_base
 } bind def
 
 | save (line) knode | ??
