@@ -5,13 +5,13 @@ use strict;
 use File::Temp qw(tempfile tempdir);
 use IO::Handle;
 use File::Basename;
-use POSIX qw(:sys_wait_h setsid);
+use POSIX qw(:sys_wait_h setsid pause);
 use File::Spec;
 
 END {
-    close(STDOUT);
-    close(STDERR);
-    while (wait() != -1) {};
+    #close(STDOUT);
+    #close(STDERR);
+    #while (wait() != -1) {};
 };
 
 my %tools = (
@@ -279,7 +279,6 @@ $funcs = {
 	if (! $fork) {
 	    foreground('@ENABLE_XTERM@', '-T', 'Printing....', 
 		       '-e', '@ENABLE_TAIL@', '-f', $outfile);
-	    kill HUP => -$pid;
 	    exit 0;
 	}
 	
@@ -287,7 +286,7 @@ $funcs = {
 	open(STDERR, ">&", $out) or die "$!";
 	STDOUT->autoflush(1);
 	STDERR->autoflush(1);
-}
+    }
 @ENABLE_XTERM_END@
 
 my $source = shift;
@@ -297,7 +296,14 @@ if (exists $funcs->{$source} && exists $funcs->{$source}{$dest}) {
     $funcs->{$source}{$dest}(@ARGV);
 } else {
     print STDERR "No transform from $source to $dest";
+    die 1;
 }
 
+$SIG{CHLD} = sub {wait};
 print "Done...\n";
-sleep if exists $ENV{DISPLAY};
+
+#@ENABLE_XTERM_START@
+#wait if exists $ENV{DISPLAY};
+#@ENABLE_XTERM_END@
+
+exit 0;

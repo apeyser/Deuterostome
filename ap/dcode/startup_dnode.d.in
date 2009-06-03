@@ -689,7 +689,7 @@ end def |========= end of mpi data ================
 
 | dvt... expect to be locked when called
 
-|  ~exec save knode true-if-send-to-active-pawn | ??
+|  ~exec save knode true-if-send-to-active-pawn | ...
 /dvtreceive_base {
   exch userdict /knode put
   exch dup capsave userdict /dvtsave put
@@ -709,30 +709,29 @@ end def |========= end of mpi data ================
   ~[{exch token not {pop exit} if} loop]
 } bind def
 
-| save (line) knode | ??
+| save (line) knode | ...
 /dvtreceive {
-  exch dvttokenize 3 1 roll true dvtreceive_base
-|  exch mkact 3 1 roll true dvtreceive_base
+  exch mkact 3 1 roll true dvtreceive_base
+|  exch dvttokenize 3 1 roll true dvtreceive_base
 } bind def
 
-| save (line) knode | ??
+| save (line) knode | ...
 /dvtreceive_np {
-  exch dvttokenize 3 1 roll false dvtreceive_base
-|  exch mkact 3 1 roll false dvtreceive_base
+  exch mkact 3 1 roll false dvtreceive_base
+|  exch dvttokenize 3 1 roll false dvtreceive_base
 } bind def
 
-| save (line) knode | ??
+| save (line) knode | ...
 /dvtsystem {
   ~tosystem 4 -1 roll 3 -1 roll true dvtreceive_base
 } bind def
 
+| save (line) knode | --
 /linebuf 8192 /b array def
 /dvtexecsystem {
-  {
-    {linebuf 0 3 -1 roll mkact exec 0 exch getinterval tosystem}
-    4 -1 roll 3 -1 roll 
-    true dvtreceive_base
-  } lock
+  exch dvttokenize 3 1 roll {
+    linebuf 0 3 -1 roll exec 0 exch getinterval tosystem
+  } 3 1 roll true dvtreceive_base
 } bind def
 
 |----------------------- color loader and setup
