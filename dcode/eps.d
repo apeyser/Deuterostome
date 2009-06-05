@@ -104,16 +104,16 @@
       } {exec writefd} forall close
 
       [(pdflatex) (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
-        NULLR ewr dup sh fg not ~stop if |]
+        NULLR ewr dup sh_ wait not ~stop if |]
 
       [(gs) (-q) RESOLUTION (-dLanguageLevel=3) 
         (-dNOPAUSE) (-dBATCH) (-dSAFER)
         (-sDEVICE=epswrite) (-sOutputFile=-)
         (eps.pdf)
-        NULLR wr ewr sh fg not ~stop if |]
+        NULLR wr ewr sh_ wait not ~stop if |]
 
       [(sed) (-e) (s/pt$//) (eps.comment) 
-        NULLR wr ewr sh fg not ~stop if |]
+        NULLR wr ewr sh_ wait not ~stop if |]
 
       wr (%%EOF) writefd close
     } stopped pwd setwdir ~stop if

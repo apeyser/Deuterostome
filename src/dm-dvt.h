@@ -12,6 +12,7 @@ DLL_SCOPE P op_errormessage(void);
 DLL_SCOPE P op_toconsole(void);
 DLL_SCOPE P op_nextevent(void);
 DLL_SCOPE BOOLEAN pending(void);
+DLL_SCOPE void setpending(void);
 DLL_SCOPE BOOLEAN masterinput(P* retc, B* bufferf);
 DLL_SCOPE void makeerror(P retc, B* error_socket);
 DLL_SCOPE void run_dvt_mill(void) __attribute__ ((__noreturn__));

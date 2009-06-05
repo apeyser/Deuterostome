@@ -3,6 +3,7 @@
 
 #include "pluginlib.h"
 #include "dm2.h"
+#include "dm6.h"
 
 #if ! ENABLE_PLUGINS_SUPPORT
 

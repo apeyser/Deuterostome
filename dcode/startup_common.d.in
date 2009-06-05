@@ -204,7 +204,7 @@
 /line @NAMEBYTES@ 2 mul 20 add /b array def
 
 /nulltypes 3 dict dup begin
-  /T {(:socket) fax} def
+  /T {(:socket=) fax * object socketval * number} def
   /P {(:pid=) fax * object unpid * number} def
   /N {} def
 end mkread def
@@ -816,6 +816,10 @@ end def  | of xtext_dict
     0 exch getinterval toconsole
   } if
   pop pop
+} bind def
+
+/loadcolor {
+  userdict /color known not {getstartupdir (color.d) fromfiles} if
 } bind def
 
 save 1024 /b array 1 index capsave | [

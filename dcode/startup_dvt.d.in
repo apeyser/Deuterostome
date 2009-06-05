@@ -31,7 +31,8 @@ startup_common_save capsave {
 
 |============================= userdict =================================
 
-/lock {exec} bind def    | just to make dnodes & dvts symmetric
+/lock   ~exec bind def    | just to make dnodes & dvts symmetric
+/unlock ~exec bind def
 
 |--------------------------- Supervisor of the dvt ---------------------------
 
@@ -701,35 +702,30 @@ c_         list all connections
     node 0 get class /nullclass ne { 
       node 2 get disconnect
       nodeclear
-      check_kbdowner
     } if
     end
   } bind userdict 3 -1 roll put
 
 | ... error-pending socket | --
   /socketdead {
-    dvt begin
-    /deadsocket name
-    true 1 1 nodelist length 1 sub {/knode name
-      nodelist knode get /node name
-      node 2 get deadsocket eq {
-        node 2 get disconnect
-        loadcolor
-        {
-          (** [) fax * knode * number (] Dead connection on ) fax
-          node 0 get fax (:) fax * node 1 get * number
-        } warning
-        nodeclear
-        check_kbdowner
-        pop false exit
-      } if
-    } for {
-      (socketdead) ERRORS /DEAD_SOCKET get showerror
-    } if end ~error ~abort ifelse
-  } bind userdict 3 -1 roll put
-
-  /loadcolor {
-    userdict /color known not {getstartupdir (color.d) fromfiles} if
+    {
+      /deadsocket name
+      true 
+      1 1 nodelist last {/knode name
+        nodelist knode get /node name
+        node 2 get deadsocket eq {
+          node 2 get disconnect
+          {
+            (** [) fax * knode * number (] Dead connection on ) fax
+            node 0 get fax (:) fax * node 1 get * number
+          } warning
+          nodeclear
+          pop false exit
+        } if
+      } for 
+      {(socketdead) ERRORS /DEAD_SOCKET get showerror} if 
+      ~error if
+    } dvt indict
   } bind userdict 3 -1 roll put
 
   Xwindows {
@@ -752,7 +748,6 @@ c_         list all connections
       nodelist knode get /node name
       node 2 get disconnect
       nodeclear
-      check_kbdowner
       end | dvt dict
     } bind def
   } if
@@ -763,7 +758,6 @@ c_         list all connections
     node 0 get class /nullclass ne {
       node 2 get dup (getsocket setconsole null vmresize) send disconnect
       nodeclear
-      check_kbdowner
     } if
     end    
   } bind userdict 3 -1 roll put
@@ -873,7 +867,7 @@ c_         list all connections
         printnode
       } for
 
-    } stopped { (Think!\n) toconsole } if
+    } stopped {(Think!\n) toconsole} if
     end
   } bind userdict 3 -1 roll put
 
@@ -930,16 +924,14 @@ c_         list all connections
     0     node 4 put
     {}    node 5 put
     null  node 6 put
-  } bind def
 
-  /check_kbdowner {
-    true {node 0 get null eq and} fornodes {0 _t} {printnode} ifelse
+    knode kbdowner eq {0 _t} if
   } bind def
 
   /pbuf 80 /b array def
   
   /printnode {
-    Xwindows {drawnode} {
+    Xwindows ~drawnode {
       node 6 get null ne {loadcolor} if
       node 0 get class /nullclass ne {
         pbuf 0 {

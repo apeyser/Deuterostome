@@ -21,6 +21,7 @@
 
 #include "dm.h"
 #include "dm-mpi.h"
+#include "dm6.h"
 
 enum AssState {
   ASSEMBLED,

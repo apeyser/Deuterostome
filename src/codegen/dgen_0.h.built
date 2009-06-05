@@ -150,6 +150,7 @@ B* _sysop[] =
   (B*) "getstartupdir", (B*) op_getstartupdir,
   (B*) "gethomedir", (B*) op_gethomedir,
   (B*) "getconfdir", (B*) op_getconfdir,
+  (B*) "socketval", (B*) op_socketval,
   (B*) "quit", (B*) op_quit,
   (B*) "fromconsole", (B*) op_fromconsole,
   (B*) "]", (B*) op_closelist,

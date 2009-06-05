@@ -120,7 +120,8 @@ endif ENABLE_PLUGINS_SUPPORT
 pkginclude_HEADERS = dm.h dm-errs.h dm3.h pluginlib.h $(PLUGIN_HDR) \
 	dmx.h $(THREAD_HDR) \
 	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h \
-	basic-defs.h dm-types.h dm-nextevent.h dm2.h cppplugin.h
+	basic-defs.h dm-types.h dm-nextevent.h dm2.h cppplugin.h \
+	dm6.h
 nodist_pkginclude_HEADERS = dm-config.h paths.h
 
 # These source are only for the dvt and dnode, since they are
@@ -167,7 +168,7 @@ testwordorder_SOURCES = test-word-order.c
 globsrcs = dmglobals.c \
 	dmnuminc.h dmnum.c dsp1f.h dsp1.c dsp2.c \
 	paths.h dm2.c dm2.h dm-conv.c dm-swapbytes.h\
-	dm4.c dm5.c dm6.c dm7.c dm7.h dm8.c dm9.c \
+	dm4.c dm5.c dm6.c dm6.h dm7.c dm7.h dm8.c dm9.c \
 	dm-types.c xhack.h \
 	dm1.c \
 	dm-signals.c dm-signals.h

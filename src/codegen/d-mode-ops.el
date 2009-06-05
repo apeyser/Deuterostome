@@ -151,6 +151,7 @@
   "getstartupdir"
   "gethomedir"
   "getconfdir"
+  "socketval"
   "regex"
   "regexi"
   "regexs"
@@ -260,5 +261,7 @@
   "mpisize"
   "groupconsole"
   "die"
+  "console"
+  "setconsole"
   )
 "Operator names for d-mode.")

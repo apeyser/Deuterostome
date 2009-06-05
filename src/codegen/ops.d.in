@@ -228,6 +228,7 @@
       /bandBS /invertLU /matmul /mattranspose
       /dilute_add /matvecmul
       /getstartupdir /gethomedir /getconfdir
+      /socketval
     ] def
     /errors 100 dict dup begin |[
       /ABORT (** Internal ABORT returned -- should never appear as error) def
@@ -497,7 +498,7 @@ end def end def
 /alltypes [
   /common /regex /quitable /proc /net /x /node 
   /xnode /master /plugins /socketevents
-  /terminal /pawn /dies
+  /terminal /pawn /dies /consolable
 ] def
 
 /dgendict 1 dict dup begin |[

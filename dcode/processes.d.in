@@ -42,7 +42,153 @@
     dup closedfd ~pop ~close ifelse
   } bind def
 
-  /pidsockets [100 {[null null]} repeat] def
+  /pidsockets 20 dict {
+    | n | --
+    /makelist {
+      {
+        /alloc null def
+        /free null 3 -1 roll {
+          4 dict {
+            1 index /next name
+            1 index null eq {exch pop} {dup 3 -1 roll /prev put} ifelse
+            /socket null def
+            /pid null def
+            /prev null def
+          } 1 index indict
+        } repeat def
+      } /makefree_ inlayer
+    } bind def
+
+    1000 makelist
+
+    | -- | dict
+    /allocate {
+      free 
+
+      dup /next get
+      dup null ne {null 1 index /prev put} if
+      /free name
+
+      alloc
+      dup null ne {2 copy /prev put} if
+      1 index /next put
+      /alloc name
+    } bind def
+
+    | pid socket | --
+    /prepend {
+      allocate
+      alloc /socket put
+      alloc /pid    put
+    } bind def
+    
+    | n | dict
+    /nth {
+      alloc 0 1 4 -1 roll 1 sub {pop /next get} for
+    } bind def
+
+    | dict | --
+    /del {
+      dup /socket get null ne ~pop {
+        dup /pid get null ne ~pop {
+          dup /next get null ne {
+            dup /prev get 1 index /next get /prev put
+          } if
+          dup /prev get null ne {
+            dup /next get 1 index /prev get /next put
+          } {
+            dup /next get /alloc name
+          } ifelse
+          free dup 2 index /next put
+          dup null ne {2 copy /prev put} if pop
+          /free name
+        } ifelse
+      } ifelse
+    } bind def
+
+    | socket | bool
+    /delsock {/s name
+      alloc {
+        dup null eq {false exit} if
+        dup /p name /next get
+
+        p /socket get dup s ne ~pop {
+          disconnect
+          null p /socket put
+          p del
+          true exit
+        } ifelse
+      } loop exch pop
+    } bind def
+
+    | pid | bool
+    /delpid {/s name
+      alloc {
+        dup null eq {false exit} if 
+        dup /p name /next get
+
+        p /pid get s eq {
+          null p /pid put
+          p del
+          true exit
+        } if
+      } loop exch pop
+    } bind def 
+
+    | -- | --
+    /clean {
+      null alloc {
+        dup null eq ~exit if exch pop
+        dup /p name dup /next get
+        p /socket get dup null eq ~pop {
+          disconnect
+          null p /socket put
+        } ifelse
+        null p /pid put
+      } loop pop
+
+      dup null eq ~pop {
+        free dup 2 index /next put
+        dup null eq {pop pop} {/prev put} ifelse
+      
+        /free alloc def
+        /alloc null def
+      } ifelse
+    } bind def
+
+    | pid# | --
+    /piddead {/s name
+      alloc {
+        dup null eq ~exit if
+        dup /p name /next get
+        
+        p /pid get dup null eq ~pop {
+          unpid s eq {
+            null p /pid put
+            p /socket get dup null eq ~pop {
+              disconnect
+              null p /socket put
+            } ifelse
+            p del
+            exit
+          } if
+        } ifelse
+      } loop pop
+    } bind def
+
+    | ~active | --
+    /iter {/ifunc name
+      end currentdict PROCESSES /pidsockets get begin /prevdict name
+      alloc {
+        dup null eq ~exit if
+        dup /next get /ip name
+        /ifunc find end ~exec stopped 
+        PROCESSES /pidsockets get begin ~stop if
+        ip
+      } loop pop
+    } bind def
+      
+  } 1 index indict def
 
   /debug 1024 /b array def
   | stream (string) | stream
@@ -72,47 +218,56 @@
 
   | ~active fd-in fd-out fd-err \[fd-chained... | pid
   /bg_ {
-    fork {setconsole
-      {
+    {
+      fork {
+        setconsole {
         |       debug 0 (forked: ) fax * getpid unpid * number (\n) fax
         |       0 exch getinterval toconsole
-        true PROCESSES /childproc put
-        {
-          /error {
-            userdict begin
-            /error ~error def
-            console ~[
-              2 rollerror getpid unpid {
-                (From child ) fax * 4 -1 roll * number (: ) fax
-                2 rollerror 1024 /b array errormessage fax 1 sub
-              } ~warning ~restore
-            ] send
-            -1 die
-          } bind def
-        } userdict indict
+          true PROCESSES /childproc put
+          {
+            /error {
+              userdict begin
+              /error ~error def
+              console ~[
+                2 rollerror getpid unpid {
+                  (From child ) fax * 4 -1 roll * number (: ) fax
+                  2 rollerror 1024 /b array errormessage fax 1 sub
+                } ~warning ~restore
+              ] send
+              -1 ~die ~quitting PROCESSES indict
+            } bind def
+          } userdict indict
 
-        {dup class /markclass eq ~exit if closeifopen} loop pop
-        {STDERR STDOUT STDIN} {exec
-          1 index exch dupfd 3 1 roll
-        } forall
-        3 ~closeifopen repeat
+          {dup class /markclass eq ~exit if closeifopen} loop pop
+          {STDERR STDOUT STDIN} {exec
+            1 index exch dupfd 3 1 roll
+          } forall
+          3 ~closeifopen repeat
 
-        exec 0 die
-      } aborted
-      console {(child) /CHILD_FAILURE makeerror} send
-      -1 die
-    } if | pid socket
+          ~exec unlock
+          {0} {1} ifelse ~die ~quitting PROCESSES indict
+        } aborted
+        console {(child) /CHILD_FAILURE makeerror} send
+        -1 ~die ~quitting PROCESSES indict
+      } if | pid socket
 
-    pidsockets {
-      dup 0 get null ne 1 index 1 get null ne or ~pop {| pid socket [null null]
-        exch    1 index 0 put | pid [socket null]
-        1 index exch    1 put | pid
-        exit
-      } ifelse
-    } forall
-    {exch dup class /markclass eq ~exit if pop} loop pop
+      1 index 3 1 roll ~prepend pidsockets indict
+      {exch dup class /markclass eq ~exit if pop} loop pop
 
-    5 1 roll 4 ~pop repeat
+      5 1 roll 4 ~pop repeat
+    } lock
+  } bind def
+
+  /quitting {
+    {
+      console ~[
+        ~[
+          getpid unpid {~piddead pidsockets indict} ~PROCESSES ~indict
+          ~restore
+        ] ~lock
+      ] send
+      exec
+    } lock
   } bind def
 
   | pid /SIGNAME | --
@@ -122,145 +277,129 @@
 
   | n | pid 
   /job {
-    pidsockets {
-      dup 1 get null eq ~pop {
-        1 index 0 ne {pop 1 sub} {1 get exch pop exit} ifelse
-      } ifelse
-    } forall
+    ~nth pidsockets indict /pid get
   } bind def
 
   /jobstr 256 /b array def
   | -- | --
   /jobs {
-    0 pidsockets {
-      dup 1 get null eq ~pop {
-        jobstr 0 * 4 index               * number (: ) fax
-        * 4 -1 roll 1 get unpid * number (\n) fax
+    0 {
+      /pid get dup null ne {
+        jobstr 0 * 4 index       * number (: ) fax
+                 * 3 index unpid * number (\n) fax
         0 exch getinterval toconsole
-        1 add
-      } ifelse
-    } forall pop
+      } if pop
+      1 add
+    } ~iter pidsockets indict pop
   } bind def
-
+  
   | pid | bool
   /wait {
-    dup waitpid {0 eq} {pop false} ifelse 
-    exch pidsockets {
-      dup 1 get 2 index ne ~pop {
-        null exch 1 put
-        pop exit
-      } ifelse
-    } forall
+    dup waitpid {0 eq} {pop false} ifelse
+    exch unpid ~piddead pidsockets indict
+  } bind def
+
+  | pid (source) | --
+  /wait_ {
+    dup class /arrayclass ne {(wait)} if
+    exch wait (Done\n) toconsole ~pop {/NOSYSTEM makeerror} ifelse
   } bind def
 
   | ... error-pending socket | -- <<error thrown>>
-  /socketdead ~[
-    /socketdead destruct_execn {  | ... bool socket {}
-      false pidsockets {          | ... bool socket {} false pidpair
-        dup 0 get 4 index eq {    | ... bool socket {} false pidpair
-          dup 0 get disconnect    | ... bool socket {} false pidpair
-          null exch 0 put         | ... bool socket {} false
-          3 ~pop repeat true exit | ... bool true
-        } if                      | ... bool socket {} false pidpair
-        pop                       | ... bool socket {} false
-      } forall                    | ... bool true / ... bool socket {} false
-      {~error if} ~exec ifelse    | --
+  /socketdead ~[~[
+    /socketdead destruct_execn {           | ... bool socket {}
+      1 index ~delsock pidsockets indict { | ... bool socket {}
+        pop pop ~error if
+      } ~exec ifelse                       | --
     } currentdict ~indict
-  ] bind userdict 3 -1 roll put
+  ] ~lock] bind userdict 3 -1 roll put
 
-  | ~active fd-in fd-out fd-err / pid | true/false
-  /fg {
-    dup class /nullclass ne ~bg if
-    wait
-  } bind def
-
-  | ~active fd-in fd-out fd-err \[ fd-close... | true/false
+  | ~active fd-in fd-out fd-err | true/false
   /fg_ {
-    bg_ wait
+    bg wait
   } bind def
 
-  | \[ (exec) .. fd-in fd-out fd-err \[ fd-close... | pid
-  /sh_ {
-    {countdictstack 2 sub ~end repeat closelist spawn} 
-    counttomark 5 add 1 roll bg_
-    counttomark 1 add 1 roll cleartomark
+  | ~active | --
+  /fg {
+    fds bg (fg) wait_
   } bind def
 
   | \[ (exec) ... fd-in fd-out fd-err | pid
-  /sh {
-    {countdictstack 2 sub ~end repeat closelist spawn} 4 1 roll bg
+  /sh_ {
+    {closelist spawn} 4 1 roll bg
     counttomark 1 add 1 roll cleartomark
   } bind def
-
-  | ~active fd-in fd-out fd-err | pid
-  |   active: -- | \[ (exec) ... 
-  /shex {
-    {exec closelist spawn} fds bg
-    counttomark 1 add 1 roll cleartomark
-  } bind def
-
 
   | \[ (exec) ... | --
-  /shfg {
-    fds sh fg not {(shfg) /NOSYSTEM makeerror} if
+  /sh {
+    fds sh_ (sh) wait_
+  } bind def
+
+  | \[ ~active ... fd-in fd-out fd-err | pid
+  /pipe {
+    {
+      |  (master: ) toconsole getpid _ pop
+      counttomark openlist exch 2 add 1 roll | \[ \[ ~active ...
+      STDOUT {                   | \[pid socket... \[~active... out
+        2 index class /markclass eq ~exit if
+
+        pipefd 3 copy 7 3 roll   | ... out inr inw ~active out inr inw
+        | must close inw in child to avoid file-descriptor loop
+        3 1 roll exch STDERR     | ... out inr inw ~active inw inr out STDERR
+        openlist 5 -1 roll bg_   | ... out inr inw pid
+        counttomark 1 add 1 roll | ... out inr inw
+        3 1 roll close close     | ... inw
+      } loop                     | \[pid... \[ ~active fd-out
+
+      exch STDIN 2 index STDERR bg   | \[pid ... \[fd-out pid
+      3 1 roll close pop             | \[pid ... 
+    
+      true {                         | \[pid... bool
+        exch wait and                | \[pid... bool
+        1 index class /markclass eq ~exit if
+      } loop                         | \[bool
+      exch pop                       | bool
+    } 4 1 roll bg                    | \[~active... fd-in fd-out fd-err pid
+    counttomark 1 add 1 roll cleartomark | pid
   } bind def
 
   | \[ ~active ... | --
   /pipefg {
-    pipe not {(pipefg) /NOSYSTEM makeerror} if
+    fds pipe (pipefg) wait_
   } bind def
 
-  | \[ ~active ... | bool
-  /pipe {
-    |  (master: ) toconsole getpid _ pop
-    counttomark openlist exch 2 add 1 roll | \[ \[ ~active ...
-    STDOUT {                   | \[pid socket... \[~active... out
-      2 index class /markclass eq ~exit if
-
-      pipefd 3 copy 7 3 roll   | ... out inr inw ~active out inr inw
-      | must close inw in child to avoid file-descriptor loop
-      3 1 roll exch STDERR     | ... out inr inw ~active inw inr out STDERR
-      openlist 5 -1 roll bg_   | ... out inr inw pid
-      counttomark 1 add 1 roll | ... out inr inw
-      3 1 roll close close     | ... inw
-    } loop                     | \[pid... \[ ~active fd-out
-
-    exch STDIN 2 index STDERR bg   | \[pid ... \[fd-out pid
-    3 1 roll close pop
-    
-    true {                         | \[pid... bool
-      exch wait and                | \[pid... bool
-      1 index class /markclass eq ~exit if
-    } loop
-    exch pop
-  } bind def
-
-  | \[ ~active ... | bool
+  | \[ ~active ... fd-in fd-out fd-err | bool
   /andp {
     {
-      counttomark dup 1 eq ~pop {-1 roll} ifelse
-      fds fg not {cleartomark false exit} if
-      dup class /markclass eq {pop true exit} if
-    } loop
+      {
+        counttomark dup 1 eq ~pop {-1 roll} ifelse
+        fds fg_ not {cleartomark false exit} if
+        dup class /markclass eq {pop true exit} if
+      } loop
+    } 4 1 roll bg
+    counttomark 1 add 1 roll cleartomark
   } bind def
 
   | \[ ~active ... | --
   /andfg {
-    andp not {(andfg) /NOSYSTEM makeerror} if
+    fds andp (andfg) wait_
   } bind def
 
-  | \[ ~active ... | bool
+  | \[ ~active ... fd-in fd-out fd-err | bool
   /orp {
     {
-      counttomark dup 1 eq ~pop {-1 roll} ifelse
-      fds fg {cleartomark true exit} if
-      dup class /markclass eq {pop false exit} if
-    } loop
+      {
+        counttomark dup 1 eq ~pop {-1 roll} ifelse
+        fds fg_ {cleartomark true exit} if
+        dup class /markclass eq {pop false exit} if
+      } loop
+    } 4 1 roll bg
+    counttomark 1 add 1 roll cleartomark
   } bind def
 
   | \[ ~active ... | --
   /orfg {
-    orp not {(orfg) /NOSYSTEM makeerror} if
+    fds orp (orfg) wait_
   } bind def
 
   | (buffer) offset fd char | (buffer) offset fd true / (buffer) offset false
@@ -284,9 +423,10 @@
   /readresult {
     {
       pipefd 2 copy counttomark 1 add 2 roll | pr pw \[.. pr pw 
-      exch pop STDIN exch STDERR sh fg not { | \[.. STDIN pw STDERR
-        close close (readresult)             |      --\> pr pw bool
-        /NOSYSTEM makeerror
+      exch pop STDIN exch STDERR             | \[.. STDIN pw STDERR
+      sh_ wait not {                         | pr pw
+        close close                          | --
+        (readresult) /NOSYSTEM makeerror     | --
       } if                                   | pr pw
       close (\n) readtomarkfd_nb             | (buffer) pr true / (buffer) false
       ~close if                              | (buffer)
@@ -371,23 +511,24 @@
 
   /tosystem {
     {
-      openlist (@ENABLE_BASH@) (-c) 4 -1 roll 
-      NULLR NULLW STDERR sh fg not {
-        (tosystem) /NOSYSTEM makeerror
-      } if
+      openlist (@ENABLE_BASH@) (-c) 4 -1 roll NULLR NULLW STDERR 
+      sh_ wait not {(tosystem) /NOSYSTEM makeerror} if
     } PROCESSES indict
   } bind userdict 3 -1 roll put
 
   /fromsystem {
     ~pipefd {
       /wt name /rd name {
-        openlist (@ENABLE_BASH@) (-c) 4 -1 roll NULLR wt STDERR sh fg not {
+        openlist (@ENABLE_BASH@) (-c) 4 -1 roll NULLR wt STDERR 
+        sh_ wait not {
+          wt close rd close
           (fromsystem) /NOSYSTEM makeerror
         } if
-
-        wt close
-        rd suckfd
-      } stopped {wt closeifopen rd closeifopen ~stop} if
+        wt close rd suckfd
+      } stopped {
+        wt closeifopen rd closeifopen
+        stop 
+      } if
     } /fromsystem_ ~caplayer PROCESSES indict
   } bind userdict 3 -1 roll put
 } moduledef

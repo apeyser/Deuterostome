@@ -50,8 +50,8 @@ P toconsole(B *p, P atmost)
 static volatile BOOLEAN recvd_quit = FALSE;
 DM_INLINE_STATIC P fromconsole(void)
 {
-  P nb, nsbuf, atmost;
-  B *p, *sbuf;
+  P nb, nsbuf;
+  B *p, *sbuf, *ebuf;
 
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
@@ -59,32 +59,28 @@ DM_INLINE_STATIC P fromconsole(void)
 
   nsbuf = ARRAY_SIZE(o_1);
   sbuf = (B *)VALUE_BASE(o_1);
+  ebuf = sbuf + nsbuf;
 
-/*----- we give ourselves 10 sec */
-  //alarm(10);
-  //timeout = FALSE;
 /* we read until we have a \n-terminated string */
   p = sbuf; 
-  atmost = nsbuf;
  rc1:
-  if (atmost <= 0) return RNG_CHK;
-  //if (timeout) return BAD_MSG;
   if (abortflag) return ABORT;
-  if ((nb = read(consolesocket, p, atmost)) < 0) {
-    if ((errno == EAGAIN) || (errno == EINTR)) goto rc1;
-    else return -errno;
-  }
-  if (nb == 0) {
+  do {
+    if (p >= ebuf) return RNG_CHK;
+    if ((nb = read(consolesocket, p, 1)) < 0) {
+      switch (errno) {
+	case EAGAIN: case EINTR: goto rc1;
+	default: return -errno;
+      }
+    }
+  } while (nb && (p++)[0] != '\n');
+
+  if (! nb) {
     fprintf(stderr, "Received end-of-stdin\n");
     recvd_quit = TRUE;
-    p++;
-    goto ec1;
+    if (p == sbuf || p[-1] != '\n') p++;
   }
-  p += nb; 
-  atmost -= nb;
-  if (*(p-1) != '\n') goto rc1;
- /* we trim the buffer string object on the operand stack */
- ec1:
+  /* we trim the buffer string object on the operand stack */
   ARRAY_SIZE(o_1) = p - sbuf - 1;
   return OK;
 }
@@ -279,6 +275,7 @@ P op_nextevent(void)
 }
 
 BOOLEAN pending(void) {return ispending || recvd_quit;}
+void setpending(void) {ispending = TRUE;}
 
 P clientinput(void) {
   if (x1 >= CEILexecs) return EXECS_OVF;

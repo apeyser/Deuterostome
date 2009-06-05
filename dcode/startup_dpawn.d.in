@@ -41,7 +41,7 @@ startup_common_save capsave {
 | save executable | ??
 /dnodereceive {
   exch dup capsave userdict /dnodesave put
-  {unlock} stopped pop
+  ~unlock stopped pop
   userdict /dnodesave get restore 
   dnoderespond
 } bind def

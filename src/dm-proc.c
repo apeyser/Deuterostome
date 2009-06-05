@@ -17,7 +17,7 @@
 #include "dm-prop.h"
 #include "dm-dvt-vm.h"
 #include "dm-signals.h"
-
+#include "dm6.h"
 
 // (dir)/null (prefix) | fdr fdw (dir) (prefix)
 P op_tmpfile(void) {

@@ -537,6 +537,8 @@ BOOLEAN pending(void) {
   return (FREEexecs != FLOORexecs);
 }
 
+void setpending(void) {}
+
 P clientinput(void) {
   if (x1 >= CEILexecs) return EXECS_OVF;
   if (o_1 < FLOORopds) return OPDS_UNF;

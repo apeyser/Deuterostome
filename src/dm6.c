@@ -60,6 +60,7 @@
 #include <math.h>
 
 #include "dm.h"
+#include "dm6.h"
 #include "dm2.h"
 
 /*---------------------------------------------------- checkFPU
@@ -1215,5 +1216,25 @@ P op_anchorsearch(void)
   TAG(o_1) = BOOL; 
   ATTR(o_1) = 0; 
   BOOL_VAL(o_1) = FALSE;
+  return OK;
+}
+
+/*-------------------- op_socketval -------------------
+  socket | int
+
+  convert to socket fd number for debuggin
+*/
+
+
+P op_socketval(void) {
+  P val;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != (NULLOBJ|SOCKETTYPE)) return OPD_ERR;
+
+  val = SOCKET_VAL(o_1);
+  TAG(o_1) = (NUM|LONGBIGTYPE);
+  ATTR(o_1) = 0;
+  LONGBIG_VAL(o_1) = val;
+
   return OK;
 }

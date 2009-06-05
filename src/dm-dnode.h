@@ -6,6 +6,7 @@
 DLL_SCOPE P op_socketdead(void);
 DLL_SCOPE P op_toconsole(void);
 DLL_SCOPE BOOLEAN pending(void);
+DLL_SCOPE void setpending(void);
 DLL_SCOPE P clientinput(void);
 DLL_SCOPE P op_killsockets(void);
 DLL_SCOPE P op_error(void);
@@ -33,7 +34,6 @@ DLL_SCOPE void run_dnode_mill(void);
 
 DLL_SCOPE P tosocket(P fd, B* buffer);
 DLL_SCOPE void makeerror(P retc, B* error_source);
-DLL_SCOPE BOOLEAN pending(void);
-DLL_SCOPE P clientinput(void);
+
 
 #endif //DM_NOTERM_H

@@ -500,7 +500,6 @@ DLL_SCOPE void DECREMENT(B *frame);
 DM_HOT DLL_SCOPE P op_pop(void);
 DM_HOT DLL_SCOPE P op_exch(void);
 DM_HOT DLL_SCOPE P op_dup(void);
-DM_HOT DLL_SCOPE P op_copy(void);
 DM_HOT DLL_SCOPE P op_index(void);
 DM_HOT DLL_SCOPE P op_roll(void);
 DM_HOT DLL_SCOPE P op_clear(void);
@@ -531,11 +530,6 @@ DM_HOT DLL_SCOPE P op_getinterval(void);
 DLL_SCOPE P op_countdictstack(void);
 DLL_SCOPE P op_dictstack(void);
 /*-- VM and miscellaneous */
-DM_HOT DLL_SCOPE P op_save(void);
-DM_HOT DLL_SCOPE P op_capsave(void);
-DM_HOT DLL_SCOPE P op_restore(void);
-DLL_SCOPE P op_vmstatus(void);
-DM_HOT DLL_SCOPE P op_bind(void);
 DM_HOT DLL_SCOPE P op_null(void);
 /*-- control */
 DLL_SCOPE P op_start(void);
@@ -551,29 +545,6 @@ DM_HOT DLL_SCOPE P op_stop(void);
 DM_HOT DLL_SCOPE P op_stopped(void);
 DLL_SCOPE P op_countexecstack(void);
 DLL_SCOPE P op_execstack(void);
-/*-- math */
-DLL_SCOPE P op_checkFPU(void);
-DLL_SCOPE P op_neg(void);
-DLL_SCOPE P op_abs(void);
-DLL_SCOPE P op_thearc(void);
-DLL_SCOPE P op_add(void);
-DLL_SCOPE P op_mod(void);
-DLL_SCOPE P op_sub(void);
-DLL_SCOPE P op_mul(void);
-DLL_SCOPE P op_div(void);
-DLL_SCOPE P op_sqrt(void);
-DLL_SCOPE P op_exp(void);
-DLL_SCOPE P op_ln(void);
-DLL_SCOPE P op_lg(void);
-DLL_SCOPE P op_pwr(void);
-DLL_SCOPE P op_cos(void);
-DLL_SCOPE P op_sin(void);
-DLL_SCOPE P op_tan(void);
-DLL_SCOPE P op_atan(void);
-DLL_SCOPE P op_floor(void);
-DLL_SCOPE P op_ceil(void);
-DLL_SCOPE P op_asin(void);
-DLL_SCOPE P op_acos(void);
 /*-- relational, boolean, bitwise */ 
 DM_HOT DLL_SCOPE P op_eq(void);
 DM_HOT DLL_SCOPE P op_ne(void);
@@ -587,23 +558,6 @@ DLL_SCOPE P op_or(void);
 DLL_SCOPE P op_xor(void);
 DLL_SCOPE P op_bitshift(void);
 /*-- conversion, string, attribute, class ,type */
-DLL_SCOPE P op_class(void);
-DLL_SCOPE P op_type(void);
-DLL_SCOPE P op_readonly(void);
-DLL_SCOPE P op_active(void);
-DLL_SCOPE P op_tilde(void);
-DLL_SCOPE P op_mkread(void);
-DLL_SCOPE P op_mkact(void);
-DLL_SCOPE P op_mkpass(void);
-DLL_SCOPE P op_mktilde(void);
-DLL_SCOPE P op_ctype(void);
-DLL_SCOPE P op_parcel(void);
-DM_HOT DLL_SCOPE P op_text(void);
-DM_HOT DLL_SCOPE P op_number(void);
-DLL_SCOPE P (*tokenfd_func)(void);
-DLL_SCOPE P op_token(void);
-DLL_SCOPE P op_search(void);
-DLL_SCOPE P op_anchorsearch(void);
 
 /*-- more big operators.... */
 DM_HOT DLL_SCOPE P op_fax(void);
