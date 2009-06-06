@@ -72,6 +72,14 @@
   pop
 } bind def
 
+|================ makelist =======================
+| max [/name...] | dict
+| 
+| See linkedlist.d for details
+/makelist {
+  ~make LINKEDLIST indict
+} bind def
+
 |===================================== executable wrappers
 |
 |------------- construct_exec ------------------
@@ -714,12 +722,12 @@ end def  | of xtext_dict
 
 | ~capped ~body /layer_name | ...
 /caplayer {
-  dup layer ~[
-    4 1 roll 
-    openlist 4 -1 roll construct_exec counttomark dup 3 add exch roll pop
-    exch destruct_exec exch ~find ~capsave ~exec
-    3 index
-  ] stopped {find restore stop} ~pop ifelse
+  dup layer find ~[
+    4 -1 roll destruct_exec ~stopped 
+    4 -1 roll {exch ~stop if capsave} ~exec
+    7 -1 roll destruct_exec ~stopped
+    4 index {exch ~stop if} ~exec
+  ] stopped {restore stop} ~pop ifelse
 } bind def
 
 |------------------------------- savemodule
@@ -825,6 +833,6 @@ end def  | of xtext_dict
 save 1024 /b array 1 index capsave | [
   dup 0 (Home:  )   fax gethomedir    fax (\n) fax 0 exch getinterval toconsole
   dup 0 (Startup: ) fax getstartupdir fax (\n) fax 0 exch getinterval toconsole
-  (errors.d) loadstartup
+  {(errors.d) (linkedlist.d)} ~loadstartup forall
 pop restore
 

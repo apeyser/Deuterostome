@@ -141,16 +141,20 @@
   |
   /eps {
     {
-      /ptsize name /input name {
-        openlist
-        pipefd /wr name /rd name 
-        {/ewr name _eps} estreamwith
-        rd suckfd exch pop
-      } stopped {
-        wr closeifopen rd closeifopen
-        cleartomark hamuti
-      } if
-    } EPS ~indict PROCESSES ~indict /eps_ inlayer
+      /ptsize name /input name
+      openlist {
+        {
+          pipefd /wr name /rd name
+          {/ewr name _eps} estreamwith
+          rd suckfd exch pop
+        } stopped {
+          wr closeifopen
+          rd closeifopen
+          cleartomark hamuti
+        } if
+      } /eps_ inlayer
+      dup length /b array copy
+    } EPS ~indict PROCESSES indict
   } bind def
 
   | Hamuti!

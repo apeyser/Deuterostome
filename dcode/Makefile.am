@@ -1,8 +1,12 @@
-dist_dmstart_DATA = color.d master.d sched.d plugin.d errors.d eps.d
+dist_dmstart_DATA = color.d master.d sched.d plugin.d errors.d eps.d \
+	linkedlist.d
+
 nodist_dmstart_DATA =  theeye.d startup_dnode.d startup_dpawn.d \
 	startup_dvt.d startup_dgen.d dvt_macros.d matrix.d new-plugin.d \
 	startup_common.d startup_libs.d processes.d
+
 dist_dmconf_DATA = dvt.d dpawn.d
+
 nodist_dmconf_DATA = dnode.d
 
 dist_noinst_DATA = theeye.d.in dnode.d.in dvt_macros.d.in \

@@ -41,154 +41,120 @@
   /closeifopen {
     dup closedfd ~pop ~close ifelse
   } bind def
+  
+  /pidsockets [
+    /ll 1000 {{/pid null /socket null} makestruct} makelist
+    {/s /p /pd} ~null forall
 
-  /pidsockets 20 dict {
-    | n | --
-    /makelist {
-      {
-        /alloc null def
-        /free null 3 -1 roll {
-          4 dict {
-            1 index /next name
-            1 index null eq {exch pop} {dup 3 -1 roll /prev put} ifelse
-            /socket null def
-            /pid null def
-            /prev null def
-          } 1 index indict
-        } repeat def
-      } /makefree_ inlayer
-    } bind def
-
-    1000 makelist
-
-    | -- | dict
-    /allocate {
-      free 
-
-      dup /next get
-      dup null ne {null 1 index /prev put} if
-      /free name
-
-      alloc
-      dup null ne {2 copy /prev put} if
-      1 index /next put
-      /alloc name
-    } bind def
+    /data {~data ll indict} bind
 
     | pid socket | --
     /prepend {
-      allocate
-      alloc /socket put
-      alloc /pid    put
-    } bind def
-    
-    | n | dict
-    /nth {
-      alloc 0 1 4 -1 roll 1 sub {pop /next get} for
-    } bind def
+      ~new ll indict dup /p name data /pd name
+      pd /socket put
+      pd /pid    put
+    } bind
 
-    | dict | --
-    /del {
-      dup /socket get null ne ~pop {
-        dup /pid get null ne ~pop {
-          dup /next get null ne {
-            dup /prev get 1 index /next get /prev put
-          } if
-          dup /prev get null ne {
-            dup /next get 1 index /prev get /next put
-          } {
-            dup /next get /alloc name
-          } ifelse
-          free dup 2 index /next put
-          dup null ne {2 copy /prev put} if pop
-          /free name
-        } ifelse
-      } ifelse
-    } bind def
+    | list | --
+    /del {~del ll indict} bind
 
-    | socket | bool
+    | socket | bool-was-found
     /delsock {/s name
-      alloc {
-        dup null eq {false exit} if
-        dup /p name /next get
-
-        p /socket get dup s ne ~pop {
+      {dup /p name data /pd name
+        pd /socket get dup s ne {pop false} {
           disconnect
-          null p /socket put
-          p del
-          true exit
+          null pd /socket put
+          pd /pid get null eq {p del} if
+          true
         } ifelse
-      } loop exch pop
-    } bind def
+      } iter gc
+    } bind
 
-    | pid | bool
+    | pid | bool-was-found
     /delpid {/s name
-      alloc {
-        dup null eq {false exit} if 
-        dup /p name /next get
-
-        p /pid get s eq {
-          null p /pid put
-          p del
-          true exit
-        } if
-      } loop exch pop
-    } bind def 
+      {dup /p name data /pd name
+        pd /pid get s ne ~false {
+          null pd /pid put
+          pd /socket get null eq {p del} if
+          true
+        } ifelse
+      } iter gc
+    } bind
 
     | -- | --
     /clean {
-      null alloc {
-        dup null eq ~exit if exch pop
-        dup /p name dup /next get
-        p /socket get dup null eq ~pop {
+      {dup /p name data /pd name
+        null pd /pid put
+        pd /socket get dup null eq ~pop {
           disconnect
-          null p /socket put
+          null pd /socket put
         } ifelse
-        null p /pid put
-      } loop pop
-
-      dup null eq ~pop {
-        free dup 2 index /next put
-        dup null eq {pop pop} {/prev put} ifelse
-      
-        /free alloc def
-        /alloc null def
-      } ifelse
-    } bind def
+        p del true
+      } iter pop gc
+    } bind
 
     | pid# | --
     /piddead {/s name
-      alloc {
-        dup null eq ~exit if
-        dup /p name /next get
-        
-        p /pid get dup null eq ~pop {
-          unpid s eq {
-            null p /pid put
-            p /socket get dup null eq ~pop {
+      {dup /p name data /pd name
+        pd /pid get dup null eq {pop false} {
+          unpid s ne ~false {
+            null pd /pid put
+            pd /socket get dup null eq ~pop {
               disconnect
-              null p /socket put
+              null pd /socket put
             } ifelse
-            p del
-            exit
-          } if
+            p del true
+          } ifelse
         } ifelse
-      } loop pop
-    } bind def
+      } iter pop gc
+    } bind
 
-    | ~active | --
-    /iter {/ifunc name
-      end currentdict PROCESSES /pidsockets get begin /prevdict name
-      alloc {
-        dup null eq ~exit if
-        dup /next get /ip name
-        /ifunc find end ~exec stopped 
-        PROCESSES /pidsockets get begin ~stop if
-        ip
-      } loop pop
-    } bind def
-      
-  } 1 index indict def
+    | pid# | --
+    /piddisconnect {/s name
+      {dup /p name data /pd name
+        pd /pid get dup null eq {pop false} {
+          unpid s ne ~false {
+            pd /socket get dup null eq ~pop {
+              disconnect
+              null pd /socket put
+            } ifelse
+            true
+          } ifelse
+        } ifelse
+      } iter pop gc
+    } bind
+
+    | n | pid
+    /job {nth data /pid get} bind
+
+    | ~active | bool
+    /iter {~iter ll indict} bind
+
+    | n | dict
+    /nth {~nth ll indict} bind
+
+    | -- | --
+    /jobs {
+      0 {
+        data /pid get dup null ne {
+          jobstr 0 * 4 index       * number (: ) fax
+                   * 3 index unpid * number (\n) fax
+          0 exch getinterval toconsole
+        } if pop
+        1 add false
+      } iter pop pop
+    } bind
+    /jobstr 256 /b array
+
+    /gc {
+      {dup /p name data /pd name
+        pd /pid get null eq {
+          pd /socket get null eq {p del} if
+        } if
+        false
+      } iter pop
+    } bind
+  ] makestruct def
 
   /debug 1024 /b array def
   | stream (string) | stream
@@ -276,27 +242,15 @@
   } bind def
 
   | n | pid 
-  /job {
-    ~nth pidsockets indict /pid get
-  } bind def
+  /job {~job pidsockets ~indict lock} bind def
 
-  /jobstr 256 /b array def
   | -- | --
-  /jobs {
-    0 {
-      /pid get dup null ne {
-        jobstr 0 * 4 index       * number (: ) fax
-                 * 3 index unpid * number (\n) fax
-        0 exch getinterval toconsole
-      } if pop
-      1 add
-    } ~iter pidsockets indict pop
-  } bind def
+  /jobs {~jobs pidsockets ~indict lock} bind def
   
   | pid | bool
   /wait {
     dup waitpid {0 eq} {pop false} ifelse
-    exch unpid ~piddead pidsockets indict
+    exch unpid ~piddead pidsockets ~indict lock
   } bind def
 
   | pid (source) | --
@@ -307,10 +261,10 @@
 
   | ... error-pending socket | -- <<error thrown>>
   /socketdead ~[~[
-    /socketdead destruct_execn {           | ... bool socket {}
-      1 index ~delsock pidsockets indict { | ... bool socket {}
+    /socketdead destruct_execn {                 | ... bool socket {}
+      1 index ~delsock pidsockets ~indict lock { | ... bool socket {}
         pop pop ~error if
-      } ~exec ifelse                       | --
+      } ~exec ifelse                             | --
     } currentdict ~indict
   ] ~lock] bind userdict 3 -1 roll put
 
@@ -324,9 +278,21 @@
     fds bg (fg) wait_
   } bind def
 
+  /spawnsh {
+    {
+      console ~[
+        ~[
+          getpid unpid {~piddisconnect pidsockets indict} ~PROCESSES ~indict
+          ~restore
+        ] ~lock
+      ] send
+      closelist spawn
+    } lock
+  } bind def
+
   | \[ (exec) ... fd-in fd-out fd-err | pid
   /sh_ {
-    {closelist spawn} 4 1 roll bg
+    ~spawnsh 4 1 roll bg
     counttomark 1 add 1 roll cleartomark
   } bind def
 
