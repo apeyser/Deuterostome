@@ -16,6 +16,7 @@
           - solve_bandmat
 
 */
+#include "dm.h"
 #include "dmnum.h"
 #include <math.h>
 

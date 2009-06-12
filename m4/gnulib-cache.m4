@@ -15,13 +15,14 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=. --lgpl --libtool --macro-prefix=gl glob mkdtemp
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=. --lgpl --libtool --macro-prefix=gl glob mkdtemp stdio
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
 gl_MODULES([
   glob
   mkdtemp
+  stdio
 ])
 gl_AVOID([])
 gl_SOURCE_BASE([lib])

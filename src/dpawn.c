@@ -4,6 +4,8 @@
 
 */
 
+#include "dm.h"
+
 #include <unistd.h>
 #include <time.h>
 #include <stdio.h>
@@ -34,6 +36,8 @@
 #include "dm-dpawn.h"
 #include "dregex.h"
 #include "dm6.h"
+#include "dm5.h"
+
 
 #include "dpawn_0.h"
 
@@ -128,5 +132,6 @@ int main(int argc __attribute__ ((__unused__)),
   syserrm = _syserrm;
   syserrc = _syserrc;
 
+  createfds();
   run_dpawn_mill();
 }

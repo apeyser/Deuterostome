@@ -1,21 +1,20 @@
-dist_dmstart_DATA = color.d master.d sched.d plugin.d errors.d eps.d \
-	linkedlist.d
+dist_dmstart_DATA = color.d master.d sched.d plugin.d
 
-nodist_dmstart_DATA =  theeye.d startup_dnode.d startup_dpawn.d \
+DISTEDITSRCS = theeye.d startup_dnode.d startup_dpawn.d \
 	startup_dvt.d startup_dgen.d dvt_macros.d matrix.d new-plugin.d \
-	startup_common.d startup_libs.d processes.d
+	startup_common.d startup_libs.d processes.d \
+	linkedlist.d eps.d 
+EDITSRCS = errors.d
+nodist_dmstart_DATA = $(DISTEDITSRCS) $(EDITSRCS)
 
 dist_dmconf_DATA = dvt.d dpawn.d
 
 nodist_dmconf_DATA = dnode.d
 
-dist_noinst_DATA = theeye.d.in dnode.d.in dvt_macros.d.in \
-	startup_dvt.d.in startup_dnode.d.in startup_dpawn.d.in \
-	matrix.d.in startup_dgen.d.in new-plugin.d.in \
-	dpawn.d startup_common.d.in startup_libs.d.in \
-	processes.d.in
-
-CLEANFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
+INFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
+EXTRA_DIST = $(DISTEDITSRCS:=in) $(nodist_dmconf_DATA:=in)
+CLEANFILES = $(INFILES)
+SUFFIXES =
 
 XPS_START = /^[[:space:]]*[@]ENABLE_XPS_START[@][[:space:]]*$$/
 XPS_ELSE = /^[[:space:]]*[@]ENABLE_XPS_ELSE[@][[:space:]]*$$/
@@ -136,66 +135,6 @@ edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 	$(REGEX_DELETE) \
 	$(PETSC_EDIT) 
 
-theeye.d: $(srcdir)/Makefile $(srcdir)/theeye.d.in @SVNVERSION_STAMP@
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/theeye.d.in >$@.tmp
-	mv $@.tmp $@
-
-dnode.d: $(srcdir)/Makefile $(srcdir)/dnode.d.in @SVNVERSION_STAMP@
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/dnode.d.in >$@.tmp
-	mv $@.tmp $@
-
-dvt_macros.d: $(srcdir)/Makefile $(srcdir)/dvt_macros.d.in  @SVNVERSION_STAMP@
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/dvt_macros.d.in >$@.tmp
-	mv $@.tmp $@
-
-startup_dvt.d: $(srcdir)/Makefile $(srcdir)/startup_dvt.d.in @SVNVERSION_STAMP@
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/startup_dvt.d.in >$@.tmp
-	mv $@.tmp $@
-
-startup_dnode.d: $(srcdir)/Makefile $(srcdir)/startup_dnode.d.in  @SVNVERSION_STAMP@
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/startup_dnode.d.in >$@.tmp
-	mv $@.tmp $@
-
-startup_dpawn.d: $(srcdir)/Makefile $(srcdir)/startup_dpawn.d.in @SVNVERSION_STAMP@
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/startup_dpawn.d.in >$@.tmp
-	mv $@.tmp $@
-
-startup_dgen.d: $(srcdir)/Makefile $(srcdir)/startup_dgen.d.in @SVNVERSION_STAMP@
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/startup_dgen.d.in >$@.tmp
-	mv $@.tmp $@
-
-startup_common.d: $(srcdir)/Makefile $(srcdir)/startup_common.d.in @SVNVERSION_STAMP@
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/startup_common.d.in >$@.tmp
-	mv $@.tmp $@
-
-startup_libs.d: $(srcdir)/Makefile $(srcdir)/startup_libs.d.in @SVNVERSION_STAMP@
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/startup_libs.d.in >$@.tmp
-	mv $@.tmp $@
-
-matrix.d: $(srcdir)/Makefile $(srcdir)/matrix.d.in @SVNVERSION_STAMP@
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/matrix.d.in >$@.tmp
-	mv $@.tmp $@
-
-new-plugin.d: $(srcdir)/Makefile $(srcdir)/new-plugin.d.in @SVNVERSION_STAMP@
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/new-plugin.d.in >$@.tmp
-	mv $@.tmp $@
-
-processes.d: $(srcdir)/Makefile $(srcdir)/processes.d.in @SVNVERSION_STAMP@
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/processes.d.in >$@.tmp
-	mv $@.tmp $@
-
+include $(top_srcdir)/m4/cf_in.make
 include $(top_srcdir)/m4/cf_svnversion.make
 include $(top_srcdir)/m4/cf_bundle_sub.make
-

@@ -18,6 +18,8 @@
 
 /*-------------------- operator support ------------------------------*/
 
+#include "dm.h"
+
 #include <string.h>
 
 #include "dm2.h"
@@ -28,7 +30,7 @@ P toconsole(B *p, P atmost)
   if (atmost == -1) atmost = strlen((char*)p);
   while (atmost > 0) {
   tc1:
-    if (abortflag) {abortflag = FALSE; return(ABORT);}
+    checkabort();
     if ((nb = write(1, p, atmost)) < 0) { 
       if ((errno == EINTR) || (errno == EAGAIN)) goto tc1;
       else return(-errno);

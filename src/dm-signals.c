@@ -1,3 +1,5 @@
+#include "dm.h"
+
 #include <signal.h>
 #include <errno.h>
 
@@ -18,7 +20,7 @@ int sigmap[] = {
 
 void propagate_sig(B sig, void (*redirect_sigf)(int sig)) {
   if (sig > (B) (sizeof(sigmap)/sizeof(sigmap[0])) || sig < 0) {
-    error(0, 0, "received illegal signal %i", sig);
+    error_local(0, 0, "received illegal signal %i", sig);
     return;
   }
 
@@ -32,7 +34,7 @@ void clearhandler(int sig)
   sigfillset(&sa.sa_mask);
   sa.sa_flags = 0;
   if (sigaction(sig, &sa, NULL))
-    error(1, errno, "Unable to set signal handler for %i", sig);
+    error_local(1, errno, "Unable to set signal handler for %i", sig);
 }
 
 void sethandler(int sig, void (*handler)(int sig, siginfo_t* info, void* ucon))
@@ -42,5 +44,5 @@ void sethandler(int sig, void (*handler)(int sig, siginfo_t* info, void* ucon))
   sigfillset(&sa.sa_mask);
   sa.sa_flags = SA_SIGINFO;
   if (sigaction(sig, &sa, NULL))
-    error(1, errno, "Unable to set signal handler for %i", sig);
+    error_local(1, errno, "Unable to set signal handler for %i", sig);
 }

@@ -169,8 +169,9 @@ userdict /dvt known {/dvt} {/dnode} ifelse userdict /dnode_escape put
 | (string) | -- <<output>>
     /node_toconsole ~[
       node_buffer 0 node_color 4 -1 ~roll
-      ~color_fax 0 ~exch ~getinterval systemdict /toconsole get
-    ] bind dup userdict /toconsole put def
+      ~color_fax 0 ~exch ~getinterval ~toconsole_base
+    ] bind def
+    ~node_toconsole userdict /toconsole put
   } stopped end ~stop if
 } bind def
 

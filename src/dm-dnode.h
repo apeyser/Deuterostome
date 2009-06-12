@@ -3,7 +3,6 @@
 
 #include "dm.h"
 
-DLL_SCOPE P op_socketdead(void);
 DLL_SCOPE P op_toconsole(void);
 DLL_SCOPE BOOLEAN pending(void);
 DLL_SCOPE void setpending(void);

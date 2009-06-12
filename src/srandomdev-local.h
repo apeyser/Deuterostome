@@ -1,7 +1,8 @@
 #ifndef SRANDOM_H
 #define SRANDOM_H
 
-#include "dm-config.h"
+#include "dm.h"
+
 #include <stdlib.h>
 #include <unistd.h>
 

@@ -3,6 +3,8 @@
 
 */
 
+#include "dm.h"
+
 #include <math.h>
 #include <stdio.h>
 #include <errno.h>
@@ -34,6 +36,11 @@ static B *sframe;     /* ->socket string frame                       */
 
 DM_HOT DM_INLINE_STATIC B getc_string(P* retc)
 {
+  if (recvd_quit) {
+    *retc = QUIT;
+    return 0;
+  }
+
   if (abortflag) {
     *retc = ABORT;
     return 0;
@@ -46,6 +53,11 @@ DM_HOT DM_INLINE_STATIC B getc_string(P* retc)
 
 DM_HOT DM_INLINE_STATIC void ungetc_string(P* retc)
 {
+  if (recvd_quit) {
+    *retc = QUIT;
+    return;
+  }
+
   if (abortflag) {
     *retc = ABORT;
     return;

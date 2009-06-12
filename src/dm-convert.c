@@ -541,21 +541,21 @@ DM_INLINE_STATIC void START_ALARM(void) {
 //100mbit/s*1/8mbyte/mbit*1024byte/mbyte*5s*1/2minrate*/
 
 DM_INLINE_STATIC L CHECK_ALARM(void) {
-		int timeout_;
-		alarm(0);
-
-		timeout_ = timeout;
-		timeout = FALSE;
-		if (clock() > endclock || timeout_) return TIMER;
-		if (abortflag) return ABORT;
-		
-		alarm(10);
-		return OK;
+  int timeout_;
+  alarm(0);
+  
+  timeout_ = timeout;
+  timeout = FALSE;
+  if (clock() > endclock || timeout_) return TIMER;
+  checkabort();
+  
+  alarm(10);
+  return OK;
 }
 
 DM_INLINE_STATIC void END_ALARM(void) {
-		alarm(0);
-		timeout = FALSE;
+  alarm(0);
+  timeout = FALSE;
 }
 
 /*---------------------------------------------------- readboxfile

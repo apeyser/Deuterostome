@@ -1,3 +1,5 @@
+#include "dm.h"
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
@@ -24,7 +26,7 @@ static void setupbase(B* sysdict, B* userdict) {
   TAG(msf) = (ARRAY | BYTETYPE); 
   ATTR(msf) = READONLY;
   if (FREEvm + MSF_SIZE + FRAMEBYTES > CEILvm)
-    error(EXIT_FAILURE, 0, "VM chosen too small");
+    error_local(EXIT_FAILURE, 0, "VM chosen too small");
   VALUE_BASE(msf) = (P)FREEvm + FRAMEBYTES; 
   ARRAY_SIZE(msf) = MSF_SIZE;
   moveframe(msf, FREEvm); 
@@ -42,16 +44,16 @@ void maketinysetup(void) {
   LBIG tinysetup[5] = { 100, 50, 10, 1 , 100 };
   
   if (makeDmemory(tinysetup))
-    error(1, errno, "Insufficient memory");
+    error_local(1, errno, "Insufficient memory");
   if ((sysdict = makeopdict((B*) sysop,syserrc,syserrm)) == (B*) -1L)
-    error(EXIT_FAILURE, 0, "Cannot make system dictionary");;
+    error_local(EXIT_FAILURE, 0, "Cannot make system dictionary");;
   if ((userdict = makedict(tinysetup[4])) == (B *)(-1L))
-    error(EXIT_FAILURE, 0, "Cannot make user dictionary");
+    error_local(EXIT_FAILURE, 0, "Cannot make user dictionary");
   tinymemory = TRUE;
   setupbase(sysdict, userdict);
 
   if (! (original_dir = getcwd(NULL, 0))) 
-    error(EXIT_FAILURE,errno,"getcwd");  
+    error_local(EXIT_FAILURE,errno,"getcwd");  
 
   setuphandlers();
 }
@@ -114,9 +116,9 @@ P op_vmresize_(void)
 
     if ((sysdict = makeopdictbase((B*) sysop,syserrc,syserrm,SYS_DICT_SIZE))
         == (B*) -1L)
-      error(EXIT_FAILURE, 0, "systemdict > vm");
+      error_local(EXIT_FAILURE, 0, "systemdict > vm");
     if ((userdict = makedict(setup[4])) == (B *)(-1L))
-      error(EXIT_FAILURE, 0, "userdict > vm");
+      error_local(EXIT_FAILURE, 0, "userdict > vm");
     tinymemory = FALSE;
 
     setupbase(sysdict, userdict);
@@ -124,7 +126,7 @@ P op_vmresize_(void)
     setupdirs();
   }
 
-  if (chdir(original_dir)) error(EXIT_FAILURE,errno,"chdir");
+  if (chdir(original_dir)) error_local(EXIT_FAILURE,errno,"chdir");
 
   return VMRESIZE_ERR(OK, TRUE);
 }

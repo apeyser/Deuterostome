@@ -1,3 +1,7 @@
+| -*- mode: d; -*-
+
+(Using eps.d $Id$ V@PACKAGE_VERSION@ @SVNVERSION@\n) toconsole
+
 /EPS 100 {
   |------------ RESOLUTION -------------------
   |
@@ -76,11 +80,11 @@
 
   /post (}\\immediate\\closeout\\epscomment) def
 
-  |----------------------- _eps -------------------
+  |----------------------- eps_ -------------------
   |
   | -- <</input, ptsize, wr, ewr defined>> | --
   |
-  | Here are the sinews. _eps does all the scripting work, 
+  | Here are the sinews. eps_ does all the scripting work, 
   |  constructing a latex document out of ptsize (10,11 or 12)
   |  and input, an arbitary latex string.
   | It creates a temporary directory, puts the document in there,
@@ -91,7 +95,7 @@
   | The output sits in a pipe, as well as an error messages from 
   |  the subprocesses.
   |
-  /_eps {
+  /eps_ {
     null (eps) tmpdir /tsdir name /tdir name
     ewr (Working in temporary directory: `) writefd
     tdir writefd tsdir writefd 
@@ -99,24 +103,27 @@
 
     /pwd getwdir def
     tdir tsdir setwdirp {
-      (.) (eps.tex) wropen {
-        predoc {(XX) 0 * ptsize * number pop} pre input post
-      } {exec writefd} forall close
+      {
+        (.) (eps.tex) wropen {
+          predoc {(XX) 0 * ptsize * number pop} pre input post
+        } {exec writefd} forall close
+        
+        [(pdflatex) (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
+          NULLR ewr dup sh_ wait not ~stop if |]
+        
+        [(gs) (-q) RESOLUTION (-dLanguageLevel=3) 
+          (-dNOPAUSE) (-dBATCH) (-dSAFER)
+          (-sDEVICE=epswrite) (-sOutputFile=-)
+          (eps.pdf)
+          NULLR wr ewr sh_ wait not ~stop if |]
 
-      [(pdflatex) (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
-        NULLR ewr dup sh_ wait not ~stop if |]
+        [(sed) (-e) (s/pt$//) (eps.comment)
+          NULLR wr ewr sh_ wait not ~stop if |]
 
-      [(gs) (-q) RESOLUTION (-dLanguageLevel=3) 
-        (-dNOPAUSE) (-dBATCH) (-dSAFER)
-        (-sDEVICE=epswrite) (-sOutputFile=-)
-        (eps.pdf)
-        NULLR wr ewr sh_ wait not ~stop if |]
-
-      [(sed) (-e) (s/pt$//) (eps.comment) 
-        NULLR wr ewr sh_ wait not ~stop if |]
-
-      wr (%%EOF) writefd close
-    } stopped pwd setwdir ~stop if
+        wr (%%EOF) writefd close
+      } stopped pwd setwdir 
+    } aborted {pwd setwdir abort} if
+    ~stop if
 
     tdir tsdir removedir
   } bind def
@@ -139,22 +146,19 @@
   |  that will dump the error stream to console if a stop or error
   |  happen internally.
   |
-  /eps {
+  /eps {/ptsize name /input name
     {
-      /ptsize name /input name
-      openlist {
-        {
-          pipefd /wr name /rd name
-          {/ewr name _eps} estreamwith
-          rd suckfd exch pop
-        } stopped {
-          wr closeifopen
-          rd closeifopen
-          cleartomark hamuti
-        } if
-      } /eps_ inlayer
-      dup length /b array copy
-    } EPS ~indict PROCESSES indict
+      pipefd /wr name /rd name
+      openlist {/ewr name eps_} ~estreamwith stopped
+    } {
+      {
+        wr closeifopen 
+        rd suckfd toconsole
+        cleartomark hamuti
+      } {
+        rd suckfd exch pop
+      } ifelse
+    } /_eps ~caplayer PROCESSES swapdict
   } bind def
 
   | Hamuti!

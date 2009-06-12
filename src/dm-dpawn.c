@@ -1,3 +1,5 @@
+#include "dm.h"
+
 #include <mpi.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -8,6 +10,8 @@
 #include "dm-vm.h"
 #include "dm2.h"
 #include "dm-mpi.h"
+#include "dm5.h"
+#include "error-local.h"
 
 static P rank;
 static MPI_Comm comm;
@@ -63,10 +67,10 @@ static P handle_error(P retc) {
   moveframe(buf, o4);
   FREEopds = o4;
   if (op_errormessage()) goto baderr;  
-  error(1, 0, "%.*s", (int) ARRAY_SIZE(o_1), VALUE_PTR(o_1));
+  error_local(1, 0, "%.*s", (int) ARRAY_SIZE(o_1), VALUE_PTR(o_1));
   
  baderr:
-  error(1, 0, "Unable to compose error for %lli\n", (long long) retc);
+  error_local(1, 0, "Unable to compose error for %lli\n", (long long) retc);
   return retc;
 }
 
@@ -259,7 +263,7 @@ static BOOLEAN pending(void) {
       return FALSE;
   }
 
-  return (FREEexecs != FLOORexecs);
+  return (recvd_quit || FREEexecs != FLOORexecs);
 }
 
 static P clientinput(B* bufferf) {
@@ -283,7 +287,7 @@ static P nextevent(B* bufferf) {
   MPI_Comm parent = getparentcomm();
 
   do {
-    if (abortflag) return ABORT;
+    checkabort();
     
     src = 0;
     tag = 1;
@@ -322,8 +326,10 @@ DM_INLINE_STATIC P clear_toconsole(void) {
   VALUE_PTR(stringf) = groupconsole_buf; 
   ARRAY_SIZE(stringf) = groupconsole_len;
   groupconsole_len = 0;
-  if ((retc = tompi(stringf, getparentcomm(), TRUE, 0)))
+  if ((retc = tompi(stringf, getparentcomm(), TRUE, 0))) {
+    error_local(0, 0, "Unable to propagate: %s", stringf);
     return retc;
+  }
 
   return OK;
 }
@@ -555,17 +561,20 @@ P op_groupconsole(void) {
 
 void run_dpawn_mill(void) {
   P retc;
-  B abortframe[FRAMEBYTES];
+  B abortframe[FRAMEBYTES], dieframe[FRAMEBYTES];
 
   initmpi();
   maketinysetup();
 
 /*----------------- construct frames for use in execution of D code */
-  makename((B*)"error", errorframe); 
+  makename((B*) "error", errorframe); 
   ATTR(errorframe) = ACTIVE;
 
-  makename((B*)"abort",abortframe); 
+  makename((B*) "abort", abortframe); 
   ATTR(abortframe) = ACTIVE;
+
+  makename((B*) "die", dieframe);
+  ATTR(dieframe) = ACTIVE;
 
 /*-------------- you are entering the scheduler -------------------*/\
 /* We start with no D code on the execution stack, so we doze
@@ -597,15 +606,15 @@ void run_dpawn_mill(void) {
 	retc = nextevent(cmsf);
 	break;
 
-      case QUIT:
-	fprintf(stderr, "Quitting...\n");
-	exit(EXIT_SUCCESS);
+      case TERM:
+	exit(exitval);
 	
       default:
 	break;
     }
     switch (retc) {
       case OK: continue;
+
       case ABORT:
 	abortflag = FALSE;
 	if (x1 < CEILexecs) {
@@ -615,7 +624,29 @@ void run_dpawn_mill(void) {
 	}
 
 	retc = EXECS_OVF; 
-	errsource = (B*)"supervisor"; 
+	errsource = (B*) "supervisor"; 
+	break;
+
+      case QUIT:
+	recvd_quit = FALSE;
+	if (o1 >= CEILopds) {
+	  retc = OPDS_OVF;
+	  errsource = (B*) "supervisor";
+	}
+	else if (x1 >= CEILexecs) {
+	  retc = EXECS_OVF;
+	  errsource = (B*) "supervisor";
+	}
+	else {
+	  TAG(o1) = (NUM|BYTETYPE);
+	  ATTR(o1) = 0;
+	  BYTE_VAL(o1) = 0;
+	  FREEopds = o2;
+	  
+	  moveframe(dieframe, x1);
+	  FREEexecs = x2;
+	  continue;
+	}
 	break;
 
       default: break;

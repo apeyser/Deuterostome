@@ -55,4 +55,6 @@ DLL_SCOPE void setuphandlers(void);
 DLL_SCOPE P int_repush_stop(P (*abortfunc)(void));
 #define repush_stop() int_repush_stop(op_abort)
 
+DLL_SCOPE void createfds(void);
+
 #endif //DM_2_H

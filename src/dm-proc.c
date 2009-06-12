@@ -1,3 +1,5 @@
+#include "dm.h"
+
 #include <limits.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -18,6 +20,11 @@
 #include "dm-dvt-vm.h"
 #include "dm-signals.h"
 #include "dm6.h"
+#include "error-local.h"
+
+//#define DEBUG(format, ...) error_local(0, 0, "%li: " format,		
+//				       (long) getpid(), __VA_ARGS__)
+#define DEBUG(...)
 
 // (dir)/null (prefix) | fdr fdw (dir) (prefix)
 P op_tmpfile(void) {
@@ -408,12 +415,12 @@ P op_fork(void) {
   switch ((child = fork())) {
     case -1: return -errno;
     case 0:
-      if (close(sockets[0])) error(1, errno, "close sockets[0]");
+      if (close(sockets[0])) error_local(1, errno, "close sockets[0]");
 
       closesockets_fork();
 
       if ((retc = addsocket(sockets[1], &sockettype, &defaultsocketinfo)))
-	error(1, retc < 0 ? -retc : 0, 
+	error_local(1, retc < 0 ? -retc : 0, 
 	      "on addsocket for child-server connection");
       
       TAG(o1) = (NULLOBJ|SOCKETTYPE);
@@ -429,6 +436,7 @@ P op_fork(void) {
       return OK;
   };
 
+  DEBUG("forked %li", (long) child);
   if (close(sockets[1])) {
     int errno_ = errno;
     kill(child, SIGKILL);
@@ -454,18 +462,6 @@ P op_fork(void) {
     
   FREEopds = o4;
   return OK;
-}
-
-// num | exited
-P op_die(void) {
-  P ex;
-  if (FLOORopds > o_1) return OPDS_UNF;
-  if (CLASS(o_1) != NUM) return OPD_CLA;
-  if (! PVALUE(o_1, &ex)) return UNDF_VAL;
-  if (sizeof(P) > sizeof(int) && ex > INT_MAX) 
-    return RNG_CHK;
-
-  exit((int) ex);
 }
 
 // -- | pid
@@ -625,8 +621,8 @@ P op_spawn(void) {
   }
   argv[i] = NULL;
 
-  //fprintf(stderr, "spawn %i: %s\n", getpid(), argv[0]);  
   closesockets_fork();
+  DEBUG("spawned %s", argv[0]);
   execvp(argv[0], argv);
   return -errno;
 }
@@ -775,16 +771,21 @@ DM_INLINE_STATIC P dmwait(BOOLEAN nb) {
   if (CEILopds < o3) return OPDS_OVF;
   if (TAG(o_1) != (NULLOBJ|PIDTYPE)) return OPD_ERR;
 
-  while ((pid = waitpid(PID_VAL(o_1), &status, nb ? (WNOHANG|WNOWAIT) : 0)) 
+  
+  DEBUG("waiting for %li", (long) PID_VAL(o_1));
+  while ((pid = waitpid((pid_t) PID_VAL(o_1), &status, 
+			nb ? (WNOHANG|WNOWAIT) : 0))
 	 == -1) {
     if (errno != EINTR) return -errno;
-    if (abortflag) return ABORT;
+    checkabort();
   }
+  DEBUG("received %i from %li", status, (long) PID_VAL(o_1));
 
   if (nb && ! pid) {
     TAG(o_1) = BOOL;
     ATTR(o_1) = 0;
     BOOL_VAL(o_1) = FALSE;
+    DEBUG("wait %i", 1);
     return OK;
   }
 
@@ -814,6 +815,7 @@ DM_INLINE_STATIC P dmwait(BOOLEAN nb) {
     FREEopds = o3;
   }
   else FREEopds = o2;
+  DEBUG("wait %i", 2);
   return OK;
 }
 
@@ -925,8 +927,9 @@ P op_readfd(void) {
       val = VALUE_PTR(o_2) + buffd;
       while ((nb = read(fd, val, nb_)) == -1) {
 	if (errno != EINTR) return -errno;
-	if (abortflag) return ABORT;
+	checkabort();
       }
+      if (nb < nb_) checkabort();
     }
   }
 
@@ -987,8 +990,9 @@ P op_suckfd(void) {
   do {
     while ((nb = read(fd, curr, CEILvm - curr)) == -1) {
       if (errno != EINTR) return -errno;
-      if (abortflag) return ABORT;
+      checkabort();
     }
+    if (nb < CEILvm - curr) checkabort();
     //fprintf(stderr, "suckfd: `%*s'\n", nb, curr);
     curr += nb;
   } while (nb && (DALIGN(curr) < (P) CEILvm));
@@ -1037,8 +1041,9 @@ P op_getfd(void) {
   else {
     while ((nb = read(fd, &byte, 1)) == -1) {
       if (errno != EINTR) return -errno;
-      if (abortflag) return ABORT;
+      checkabort();
     }
+    if (nb < 1) checkabort();
     if (! nb) {
       byte = BINF;
       STREAM_FD(streambox) = -1;
@@ -1115,8 +1120,9 @@ P op_readtomarkfd(void) {
   do {
     while ((nb = read(fd, curr, 1)) == -1) {
       if (errno != EINTR) return -errno;
-      if (abortflag) return ABORT;
+      checkabort();
     }
+    if (nb < 1) checkabort();
   } while (nb && *curr != c && ++curr < end);
   if (curr == end) return RNG_CHK;
 
@@ -1195,8 +1201,9 @@ P op_readtomarkfd_nb(void) {
   do {
     while ((nb = read(fd, curr, 1)) == -1) {
       if (errno != EINTR) return -errno;
-      if (abortflag) return ABORT;
+      checkabort();
     }
+    if (nb < 1) checkabort();
   } while (nb && *curr != c && ++curr < CEILvm);
   if ((B*) DALIGN(curr) >= CEILvm) return VM_OVF;
 
@@ -1237,12 +1244,12 @@ P op_writefd(void) {
 
   for (t = 0, nb_ = ARRAY_SIZE(o_1), f = VALUE_PTR(o_1); 
        t < nb_; 
-       t += nb)
+       t += nb) {
     while ((nb = write(fd, f + t, nb_ - t)) 
 	   == -1)
       switch (errno) {
 	case EINTR: 
-	  if (abortflag) return ABORT; 
+	  checkabort();
 	  continue;
 	case EPIPE: 
 	  delsocket_proc(fd);
@@ -1251,6 +1258,8 @@ P op_writefd(void) {
 	default:
 	  return -errno;
       }
+    if (nb < nb_ - t) checkabort();
+  }
 
   FREEopds = o_1;
   return OK;
@@ -1281,7 +1290,7 @@ P x_op_lockfd(void) {
   if (STREAM_FD(streambox) != -1)
     while (lockf(STREAM_FD(streambox), 0, F_ULOCK)) {
       if (errno != EINTR) return -errno;
-      if (abortflag) return ABORT;
+      checkabort();
     }
 
   FREEexecs = x_1;
@@ -1298,7 +1307,7 @@ P x_op_unlockfd(void) {
   if (STREAM_FD(streambox) != -1)
     while (lockf(STREAM_FD(streambox), 0, F_LOCK)) {
       if (errno != EINTR) return -errno;
-      if (abortflag) return ABORT;
+      checkabort();
     }
 
   FREEexecs = x_1;
@@ -1318,7 +1327,7 @@ P op_lockfd(void) {
 
   while (lockf(STREAM_FD(streambox), F_LOCK, 0)) {
     if (errno != EINTR) return -errno;
-    if (abortflag) return ABORT;
+    checkabort();
   }
 
   moveframe(o_1, x1);
@@ -1352,7 +1361,7 @@ P op_unlockfd(void) {
 
   while (lockf(STREAM_FD(streambox), F_ULOCK, 0)) {
     if (errno != EINTR) return -errno;
-    if (abortflag) return ABORT;
+    checkabort();
   }
 
   moveframe(o_1, x1);
@@ -1393,7 +1402,7 @@ P op_trylockfd(void) {
 	FREEopds = o_1;
 	return OK;
 	
-      case EINTR: if (abortflag) return ABORT;
+      case EINTR: checkabort();
 	break;
 
       default:
@@ -1430,6 +1439,10 @@ DM_INLINE_STATIC B getc_fd(P* retc) {
   ssize_t nb;
 
   if (*retc) return 0;
+  if (recvd_quit) {
+    *retc = QUIT;
+    return 0;
+  }
   if (abortflag) {
     *retc = ABORT;
     return 0;
@@ -1451,17 +1464,29 @@ DM_INLINE_STATIC B getc_fd(P* retc) {
       *retc = -errno;
       return 0;
     }
+    if (recvd_quit) {
+      *retc = QUIT;
+      return 0;
+    }
     if (abortflag) {
       *retc = ABORT;
       return 0;
     }
-  };
+  }
   
-  if (! nb) return 0;
+  if (! nb) {
+    if (recvd_quit) *retc = QUIT;
+    if (abortflag) *retc = ABORT;
+    return 0;
+  }
   return STREAM_CHAR(streambox) & 0x7F;
 }
 
 DM_INLINE_STATIC void ungetc_fd(P* retc) {
+  if (recvd_quit) {
+    *retc = QUIT;
+    return;
+  }
   if (abortflag) {
     *retc = ABORT;
     return;

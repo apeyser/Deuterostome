@@ -4,7 +4,6 @@
 #include "dm.h"
 
 DLL_SCOPE P op_fork(void);
-DLL_SCOPE P op_die(void);
 DLL_SCOPE P op_getpid(void);
 DLL_SCOPE P op_getppid(void);
 DLL_SCOPE P op_makefd(void);

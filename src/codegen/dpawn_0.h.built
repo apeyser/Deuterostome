@@ -194,7 +194,7 @@ B* _sysop[] =
   (B*) "loadlib", (B*) op_loadlib,
   (B*) "nextlib", (B*) op_nextlib,
 #endif //DM_ENABLE_PLUGINS_SUPPORT
-  (B*) "quit", (B*) op_quit,
+  (B*) "die", (B*) op_die,
   (B*) "]", (B*) op_closelist,
   (B*) "", (B*) NULL
 };
@@ -202,6 +202,7 @@ B* _sysop[] =
 P _syserrc[] = {
   ABORT,
   QUIT,
+  TERM,
   MORE,
   DONE,
   TIMER,
@@ -296,6 +297,7 @@ P _syserrc[] = {
 B* _syserrm[] = {
   (B*) "** Internal ABORT returned -- should never appear as error",
   (B*) "** Internal QUIT returned -- should never appear as error",
+  (B*) "** Internal TERM returned -- should never appear as error",
   (B*) "** Internal MORE returned -- should never appear as error",
   (B*) "** Internal DONE returned -- should never appear as error",
   (B*) "** Timeout",

@@ -1,6 +1,8 @@
 #ifndef DM_SNPRINTF
 #define DM_SNPRINTF
 
+#include "dm.h"
+
 #include <stdarg.h>
 #include <stdio.h>
 

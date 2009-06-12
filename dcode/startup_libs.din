@@ -1,3 +1,5 @@
+| -*- mode: d; -*-
+
 |-------------------------------------------- libs_
 | Print out shared libraries in order
 | that they were loaded
@@ -15,7 +17,7 @@
       * ( : ) text
       hi
       * (\n) text
-    0 exch getinterval toconsole_          | output used part
+    0 exch getinterval toconsole          | output used part
     
     end end                               | pop op lib, debug_dict
   } loop

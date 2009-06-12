@@ -14,6 +14,7 @@
           - countexecstack
           - execstack
           - quit
+	  - die
           - eq
           - ne
           - ge
@@ -27,10 +28,19 @@
           - bitshift
 */
 
-#include <stdio.h>
-
 #include "dm.h"
+
+#include <stdio.h>
+#include <limits.h>
+
 #include "dm2.h"
+#include "dm5.h"
+
+#include "error-local.h"
+//#define DEBUG(format, ...) error_local(0, 0, "%li: " format,		
+//				       (long) getpid(), __VA_ARGS__)
+#define DEBUG(...)
+
 
 /*----------------------------------------------- start
    any_active | --
@@ -473,7 +483,24 @@ P op_execstack(void)
 
 P op_quit(void)  
 {
-  return QUIT; 
+  DEBUG("%s", "quitting");
+  recvd_quit = FALSE;
+  exitval = 0;
+  return TERM;
+}
+
+// num | exited
+P op_die(void) {
+  DEBUG("%s", "dieing");
+  recvd_quit = FALSE;
+
+  if (FLOORopds > o_1) return OPDS_UNF;
+  if (CLASS(o_1) != NUM) return OPD_CLA;
+  if (! PVALUE(o_1, &exitval)) return UNDF_VAL;
+  if (sizeof(P) > sizeof(int) && exitval > INT_MAX) 
+    return RNG_CHK;
+
+  return TERM;
 }
 
 /*---------------------------------------------------- eq

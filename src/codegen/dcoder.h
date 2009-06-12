@@ -5,6 +5,7 @@ struct emap emap[] = {
   {"OK", OK},
   {"ABORT", ABORT},
   {"QUIT", QUIT},
+  {"TERM", TERM},
   {"MORE", MORE},
   {"DONE", DONE},
   {"TIMER", TIMER},

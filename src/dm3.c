@@ -39,6 +39,7 @@ extern int h_errno;
 #include "xhack.h"
 #include "dm-signals.h"
 #include "dm-prop.h"
+#include "error-local.h"
 
 #define SOCK_TIMEOUT (60)
 
@@ -113,6 +114,25 @@ P nocloseonexec(P fd) {
   return OK;
 }
 
+void clearsocket(P fd) {
+  FD_CLR((int) fd, &sock_fds);
+  if (fd == maxsocket-1) {
+    P i, j = -1;
+    for (i = 0; i < fd; i++)
+      if (FD_ISSET(i, &sock_fds)) j = i;
+    maxsocket = j+1;
+  }
+
+  if (recsocket >= maxsocket) recsocket = maxsocket-1;
+
+#if ! DM_X_DISPLAY_MISSING
+  if (fd == xsocket) {
+    xsocket = -1;
+    dvtdisplay = NULL;
+  }
+#endif // ! DM_X_DISPLAY_MISSING
+}
+
 enum _DelMode {
   _DelModeFork,
   _DelModeExec,
@@ -167,20 +187,22 @@ DM_INLINE_STATIC P _delsocket(P fd, enum _DelMode delmode) {
       };
       sockprintdebug("close", next);
       
-      if (close(fd))                 retc = -errno;
+      if (close(fd)) retc = -errno;
       if (next->type.listener) {
-	if (next->info.listener.sigfd != -1)    close(next->info.listener.sigfd);
-	if (next->info.listener.recsigfd != -1) close(next->info.listener.recsigfd);
+	if (next->info.listener.sigfd != -1) 
+	  close(next->info.listener.sigfd);
+	if (next->info.listener.recsigfd != -1) 
+	  close(next->info.listener.recsigfd);
 	if (mypid == next->pid) {
 	  if (next->redirector != -1) {
 	    if (kill(next->redirector, SIGQUIT)) {
-	      error(0, errno, "Unable to kill redirector %li", 
+	      error_local(0, errno, "Unable to kill redirector %li", 
 		    (long) next->redirector);
 	      if (! retc) retc = -errno;
 	    }
 	    else while (waitpid((pid_t) next->redirector, NULL, 0) == -1) {
 		if (errno == EINTR) {
-		  if (abortflag) break;
+		  if (abortflag || recvd_quit) break;
 		}
 		else {
 		  if (! retc) retc = -errno;
@@ -197,23 +219,7 @@ DM_INLINE_STATIC P _delsocket(P fd, enum _DelMode delmode) {
 #endif //ENABLE_UNIX_SOCKETS
 	}
 
-	FD_CLR(fd, &sock_fds);
-	if (fd == maxsocket-1) {
-	  P i, j = -1;
-	  for (i = 0; i < fd; i++)
-	    if (FD_ISSET(i, &sock_fds)) j = i;
-	  maxsocket = j+1;
-	}
-
-	if (recsocket >= maxsocket) recsocket = maxsocket-1;
-
-#if ! DM_X_DISPLAY_MISSING
-	if (fd == xsocket) {
-	  xsocket = -1;
-	  dvtdisplay = NULL;
-	  retc = OK;
-	}
-#endif // ! DM_X_DISPLAY_MISSING
+	clearsocket(fd);
       }
 
       if (! next->next)
@@ -247,6 +253,32 @@ P delsocket_proc(P fd) {
   return _delsocket(fd, _DelModeProc);
 }
 
+/****************** socketdead ************************
+ * ... bool socket | --
+ * 
+ * Default socket dead. If bool is true, then ... is the
+ *  stack for an error. Overridden by startup files.
+ */
+P op_socketdead(void) {
+  P retc;
+
+  if (o_2 < FLOORopds) return DEAD_SOCKET;
+  if (CLASS(o_2) != BOOL) return DEAD_SOCKET;
+
+  if ((retc = op_disconnect())) return retc;
+
+  FREEopds = o_1;
+  if (BOOL_VAL(o1)) {
+    if (x1 >= CEILexecs) return EXECS_OVF;
+    makename((B*) "error", x1);
+    ATTR(x1) |= ACTIVE;
+    FREEexecs = x2;
+    return OK;
+  }
+
+  return DEAD_SOCKET;
+}
+
 // -------- addsocket -----------------------------
 // After opening a socket, call addsocket to increase maxsocket,
 // care for recsocket, and add socket to sock_fds.
@@ -263,7 +295,7 @@ P addsocket(P fd, const struct SocketType* type, const union SocketInfo* info) {
 
   if (! (next
 	 = (struct socketstore*) malloc(sizeof(struct socketstore))))
-    error(1, errno, "Malloc failure creating socketstore");
+    error_local(1, errno, "Malloc failure creating socketstore");
 
   next->fd = fd;
   next->type = *type;
@@ -316,7 +348,7 @@ DM_INLINE_STATIC P _closesockets(enum _DelMode delmode) {
     next = next->next;
     if ((retc_ = _delsocket(fd, delmode))){
       if (! retc) retc = retc_;
-      error(0, retc < 0 ? -retc : 0, 
+      error_local(0, retc < 0 ? -retc : 0, 
 	    "Deleting socket %li, forking %s, execing %s, force %s, resize %s",
 	    (long) fd, 
 	    delmode == _DelModeFork ? "yes" : "no", 
@@ -360,9 +392,9 @@ static void _closesockets_force(void) {
 
 void set_closesockets_atexit(void) {
   if (atexit(_closesockets_force))
-    error(1, -errno, "Setting atexit closesockets");
+    error_local(1, -errno, "Setting atexit closesockets");
   if (atexit(closedisplay))
-    error(1, -errno, "Setting atexit closedisplay");
+    error_local(1, -errno, "Setting atexit closedisplay");
 }
 
 #if X_DISPLAY_MISSING
@@ -596,7 +628,7 @@ P waitsocket(BOOLEAN ispending, fd_set* out_fds) {
   if ((nact = select(maxsocket, &read_fds, NULL, &err_fds, 
 		     ispending ? &zerosec : NULL)) == -1) {
     if (errno == EINTR) return NEXTEVENT_NOEVENT;
-    error(EXIT_FAILURE, errno, "select");
+    error_local(EXIT_FAILURE, errno, "select");
   }
 
 #if ! X_DISPLAY_MISSING
@@ -642,15 +674,17 @@ DM_INLINE_STATIC P readfd_(P fd, B* where, P n,
     //if (timeout) return TIMER;
     switch ((r = read(fd, where+off, n))) {
       case 0: 
+	checkabort();
 	if (n) return LOST_CONN;
 	break;
 
       case -1:
 	if (errno != EINTR) return -errno;
-	if (abortflag) return ABORT;
+	checkabort();
 	continue;
 
       default:
+	if (r < n) checkabort();
 	n -= r;
 	off += r;
     }
@@ -671,11 +705,12 @@ DM_INLINE_STATIC P writefd_(P fd, B* where, P n,
   do {
     //if (timeout) return TIMER;
     if ((r = write(fd, where+off, n)) < 0) switch (errno) {
-      case EINTR: if (abortflag) return ABORT; continue;
+      case EINTR: checkabort(); continue;
       case EPIPE: return LOST_CONN;
       default: return -errno;
     }
 
+    if (r < n) checkabort();
     n -= r;
     off += r;
   } while (n > 0);
@@ -977,9 +1012,11 @@ P op_connect(void)
 
 P op_disconnect(void)
 {
+  P retc;
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (NULLOBJ | SOCKETTYPE)) return OPD_ERR;
-  delsocket_force(SOCKET_VAL(o_1));
+  
+  if ((retc = delsocket_force(SOCKET_VAL(o_1)))) return retc;
   FREEopds = o_1;
   return OK;
 }
@@ -1008,7 +1045,7 @@ P op_sendsig(void) {
 
   while (send(fd, &sig, 1, 0) == -1) {
     if (errno != EINTR) return -errno;
-    if (abortflag) return ABORT;
+    checkabort();
   };
 
   FREEopds = o_2;
@@ -1113,7 +1150,8 @@ P forksighandler(P sigsocket, P serverport, P* pid) {
 //   will be available.
 void initfds(void) {
   P retc;
-  int fdr, fdw;
+
+  createfds();
 
 /*-------------------- prime the socket table -----------------------
   We use a fd_set bit array to keep track of active sockets. Hence,
@@ -1122,32 +1160,21 @@ void initfds(void) {
 */
   FD_ZERO(&sock_fds);
   if ((retc = addsocket(STDIN_FILENO, &stdtype, NULL)))
-    error(1, retc < 0 ? -retc : 0, "Failed to add STDIN");
+    error_local(1, retc < 0 ? -retc : 0, "Failed to add STDIN");
   if ((retc = addsocket(STDOUT_FILENO,  &stdtype, NULL)))
-    error(1, retc < 0 ? -retc : 0, "Failed to add STDOUT");
+    error_local(1, retc < 0 ? -retc : 0, "Failed to add STDOUT");
   if ((retc = addsocket(STDERR_FILENO,  &stderrtype, NULL)))
-    error(1, retc < 0 ? -retc : 0, "Failed to add STDERR");
+    error_local(1, retc < 0 ? -retc : 0, "Failed to add STDERR");
 
-  if ((fdr = open("/dev/null", O_RDONLY)) == -1)
-    error(1, errno, "Failed to open /dev/null for read");
-  if (fdr != 3) {
-    if (dup2(fdr, 3) == -1)
-      error(1, errno, "Failed to move %i to 3 for /dev/null", fdr);
-    if (close(fdr))
-      error(1, errno, "Failed to close %i for /dev/null", fdr);
-  }
-  
-  if ((fdw = open("/dev/null", O_WRONLY)) == -1)
-    error(1, errno, "Failed to open /dev/null for write");
-  if (fdw != 4) {
-    if (dup2(fdw, 4) == -1)
-      error(1, errno, "Failed to move %i to 4 for /dev/null", fdw);
-    if (close(fdw))
-      error(1, errno, "Failed to close %i for /dev/null", fdw);
-  }
+  if ((retc = addsocket(DM_NULLR_FILENO, &stdtype, NULL)))
+    error_local(1, retc < 0 ? -retc : 0, "Failed to add NULL read");
+  if ((retc = addsocket(DM_NULLW_FILENO, &stdtype, NULL)))
+    error_local(1, retc < 0 ? -retc : 0, "Failed to add NULL write");
 
-  if ((retc = addsocket(3, &stdtype, NULL)))
-    error(1, retc < 0 ? -retc : 0, "Failed to add NULL read");
-  if ((retc = addsocket(4, &stdtype, NULL)))
-    error(1, retc < 0 ? -retc : 0, "Failed to add NULL write");
+  if ((retc = addsocket(DM_STDIN_FILENO, &stdtype, NULL)))
+    error_local(1, retc < 0 ? -retc : 0, "Failed to add DM_STDIN");
+  if ((retc = addsocket(DM_STDOUT_FILENO, &stdtype, NULL)))
+    error_local(1, retc < 0 ? -retc : 0, "Failed to add DM_STDOUT");
+  if ((retc = addsocket(DM_STDERR_FILENO, &stdtype, NULL)))
+    error_local(1, retc < 0 ? -retc : 0, "Failed to add DM_STDERR");
 }

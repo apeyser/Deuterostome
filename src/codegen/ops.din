@@ -1,17 +1,8 @@
+| -*- mode: d; -*-
+
 /ops module 1000 dict dup begin 
 
 /NAMEBYTES @NAMEBYTES@ def
-
-/mksmap {/errs name /cmds name /parents name
-  2 dict dup begin |[
-    /parents parents def
-    /all 2 dict dup begin |[
-      /errors errs def
-      /commands cmds def |]
-    end def |]
-  end
-} bind def
-
 
 /buffer 100 1024 mul /b array def
 /buffern 0 def
@@ -97,13 +88,16 @@
 } forall
 
 /dcoder_produce {
-  gdict {exch bifdef
-    dup /errors known not {pop} {
-      /errors get {pop
-        (  {")__ dup __ (", )__ __ (},)__ nl
-      } forall
+  gdict {
+    1 index /parents eq {pop pop} {
+      exch bifdef
+      dup /errors known not {pop} {
+        /errors get {pop
+          (  {")__ dup __ (", )__ __ (},)__ nl
+        } forall
+      } ifelse
+      eifdef
     } ifelse
-    eifdef
   } forall
 } bind def
 
@@ -124,16 +118,19 @@
 } bind def
 
 /derr_produce {
-  gdict {exch bifdef
-    dup /errors known not {pop} {
-      /errors get {
-        (// )__ __ nl
-        (#define )__ NAMEBYTES neg exch __w ( \(\(P\) )__ 
-        8 derr_num __w (L\))__ nl
-        /derr_num derr_num 1 add def
-      } forall
+  gdict {
+    1 index /parents eq {pop pop} {
+      exch bifdef
+      dup /errors known not {pop} {
+        /errors get {
+          (// )__ __ nl
+          (#define )__ NAMEBYTES neg exch __w ( \(\(P\) )__ 
+          8 derr_num __w (L\))__ nl
+          /derr_num derr_num 1 add def
+        } forall
+      } ifelse
+      eifdef
     } ifelse
-    eifdef
   } forall
 } bind def
 
@@ -158,11 +155,14 @@
 } bind def
 
 /demacs_produce {
-  gdict {exch pop
-    dup /commands known not {pop} {
-      /commands get {
-        (  ")__ __ (")__ nl
-      } forall
+  gdict {
+    1 index /parents eq {pop pop} {
+      exch pop
+      dup /commands known not {pop} {
+        /commands get {
+          (  ")__ __ (")__ nl
+        } forall
+      } ifelse
     } ifelse
   } forall
 } bind def
@@ -233,6 +233,7 @@
     /errors 100 dict dup begin |[
       /ABORT (** Internal ABORT returned -- should never appear as error) def
       /QUIT (** Internal QUIT returned -- should never appear as error) def
+      /TERM (** Internal TERM returned -- should never appear as error) def
       /MORE (** Internal MORE returned -- should never appear as error) def
       /DONE (** Internal DONE returned -- should never appear as error) def
       /TIMER (** Timeout) def
@@ -332,15 +333,16 @@ end def |]
   end def |]
 end def
 
-/quitable 1 dict dup begin |[
-  /all 1 dict dup begin |[
-    /commands [/quit] def |]
-  end def |]
-end def
-
 /dies 1 dict dup begin |[
   /all 1 dict dup begin |[
     /commands [/die] def |]
+  end def |]
+end def
+
+/quitable 2 dict dup begin |[
+  /parents [/dies] def
+  /all 1 dict dup begin |[
+    /commands [/quit] def |]
   end def |]
 end def
 
@@ -348,7 +350,7 @@ end def
   /all 2 dict dup begin |[
     /commands [
       /connect /disconnect /send /getsocket /sendsig
-      /getmyname /getmyfqdn
+      /getmyname /getmyfqdn /socketdead
     ] def
     /errors 3 dict dup begin |[
       /LOST_CONN (** Lost connection) def 
@@ -443,7 +445,7 @@ end def
 
 /master 3 dict dup begin |[
   /all 1 dict dup begin |[
-    /commands [/getmyport /killsockets /socketdead] def 
+    /commands [/getmyport /killsockets] def 
   end def
   /DM_ENABLE_RTHREADS 2 dict dup begin  |[
     /errors 10 dict dup begin |[
@@ -496,9 +498,9 @@ end def end def
 end def end def
 
 /alltypes [
-  /common /regex /quitable /proc /net /x /node 
+  /common /regex /dies /quitable /proc /net /x /node 
   /xnode /master /plugins /socketevents
-  /terminal /pawn /dies /consolable
+  /terminal /pawn /consolable
 ] def
 
 /dgendict 1 dict dup begin |[
@@ -508,7 +510,7 @@ end def
 /dvtdict 1 dict dup begin |[
   /parents [
     /common /net /socketevents /x /terminal /regex
-    /quitable /dies /proc /consolable
+    /quitable /proc /consolable
   ] def |]
 end def
 
@@ -520,7 +522,7 @@ end def
 end def
 
 /dpawndict 1 dict dup begin |[
-  /parents [/common /node /pawn /regex /plugins /quitable] def |]
+  /parents [/common /node /pawn /regex /plugins /dies] def |]
 end def
 
 end _module

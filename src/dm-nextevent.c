@@ -37,13 +37,13 @@ P makesocketdead(P retc, P socketfd, B* error_source) {
   }
   switch (retc) {
     case OK: case LOST_CONN: break;
-    default: 
+    default:
       makeerror(retc, error_source);
       if (FLOORexecs == FREEexecs) return EXECS_OVF;
       break;
   }
 
-  delsocket_force(socketfd);
+  clearsocket(socketfd);
 
   if (o3 > CEILopds) return OPDS_OVF;
 
@@ -172,7 +172,8 @@ P nextevent(B* buffer) {
   fd_set read_fds;
 
   do {
-    if (abortflag) return ABORT;
+    checkabort();
+      
     if ((retc = waitsocket(moreX() || pending(), &read_fds))) {
       if (retc == NEXTEVENT_NOEVENT && (retc = nextXevent()))
 	errsource = "X service";

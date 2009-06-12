@@ -1,6 +1,14 @@
 #ifndef BASIC_DEFS_H
 #define BASIC_DEFS_H
 
+#include "dm-config.h"
+#ifdef DM_HAVE_CONFIG_H
+#ifndef DM_INCLUDED_CONFIG_H
+#define DM_INCLUDED_CONFIG_H
+#include "config.h"
+#endif
+#endif
+
 #include <inttypes.h>
 
 #if __cplusplus

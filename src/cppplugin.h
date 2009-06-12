@@ -1,6 +1,8 @@
 #ifndef CPPPLUGIN_H
 #define CPPPLUGIN_H
 
+#include "dm.h"
+
 #if __cplusplus
 
 #include <memory>

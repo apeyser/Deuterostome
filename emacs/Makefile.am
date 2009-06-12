@@ -1,8 +1,10 @@
+INFILES = d-comint-mode.el init.el d-mode.el
+EXTRA_DIST = $(INFILES:=in)
+CLEANFILES = $(INFILES)
+SUFFIXES =
+
 dist_pkglisp_LISP = dm-server.el
-BUILT = d-comint-mode.el init.el d-mode.el 
-nodist_pkglisp_LISP = $(BUILT) d-mode-ops.el
-dist_noinst_DATA = d-comint-mode.el.in init.el.in d-mode.el.in
-CLEANFILES = $(BUILT)
+nodist_pkglisp_LISP = $(INFILES) d-mode-ops.el
 
 edit = sed \
 	-e 's,@bindir\@,$(bindir),g' \
@@ -11,21 +13,6 @@ edit = sed \
 	-e 's,[@]NAMEBYTES[@],@NAMEBYTES@,g' \
 	$(SVNVERSION_EDIT)
 
-d-mode.el: Makefile $(srcdir)/d-mode.el.in @SVNVERSION_STAMP@
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/$@.in >$@.tmp
-	mv $@.tmp $@
-
-d-comint-mode.el: Makefile $(srcdir)/d-comint-mode.el.in @SVNVERSION_STAMP@
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/$@.in >$@.tmp
-	mv $@.tmp $@
-
-init.el: Makefile $(srcdir)/init.el.in @SVNVERSION_STAMP@
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/$@.in >$@.tmp
-	mv $@.tmp $@
-
 include $(top_srcdir)/m4/cf_svnversion.make
 include $(top_srcdir)/m4/cf_bundle_sub.make
-
+include $(top_srcdir)/m4/cf_in.make

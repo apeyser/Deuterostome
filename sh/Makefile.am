@@ -1,3 +1,10 @@
+INFILES = dnode.sh print.pl runtool.sh emacsclient-run.sh
+EXTRA_DIST = $(INFILES:=in)
+CLEANFILES = $(INFILES)
+SUFFIXES =
+
+clean-local: ; -rm -f $(dmstart_SCRIPTS)
+
 nodist_dmstart_SCRIPTS = runtool.sh
 if ENABLE_BASH
 nodist_dmstart_SCRIPTS += dnode.sh
@@ -10,12 +17,6 @@ if ENABLE_EMACSCLIENT
 nodist_dmstart_SCRIPTS += emacsclient-run.sh
 endif ENABLE_EMACSCLIENT
 endif ENABLE_EMACS
-
-EXTRA_DIST = dnode.sh.in print.pl.in runtool.sh.in emacsclient-run.sh.in
-CLEANFILES = $(nodist_dmstart_SCRIPTS)
-
-clean-local:
-	-rm -f $(dmstart_SCRIPTS)
 
 XTERM_START = /^[[:space:]]*[@]ENABLE_XTERM_START[@][[:space:]]*$$/
 XTERM_END = /^[[:space:]]*[@]ENABLE_XTERM_END[@][[:space:]]*$$/
@@ -50,33 +51,6 @@ edit = sed \
 	-e 's,[@]ENABLE_EMACSCLIENT[@],$(ENABLE_EMACSCLIENT),g' \
 	$(XTERM_DELETE)
 
-if ENABLE_BASH
-dnode.sh: Makefile $(srcdir)/dnode.sh.in
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/dnode.sh.in >$@.tmp
-	mv $@.tmp $@
-endif ENABLE_BASH
-
-if ENABLE_PERL
-print.pl: Makefile $(srcdir)/print.pl.in
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/print.pl.in >$@.tmp
-	mv $@.tmp $@
-endif ENABLE_PERL
-
-runtool.sh: Makefile $(srcdir)/runtool.sh.in
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/runtool.sh.in >$@.tmp
-	mv $@.tmp $@
-
-if ENABLE_EMACS
-if ENABLE_EMACSCLIENT
-emacsclient-run.sh: Makefile $(srcdir)/emacsclient-run.sh.in
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/emacsclient-run.sh.in >$@.tmp
-	mv $@.tmp $@
-endif ENABLE_EMACSCLIENT
-endif ENABLE_EMACS
 
 include $(top_srcdir)/m4/cf_bundle_sub.make
-
+include $(top_srcdir)/m4/cf_in.make

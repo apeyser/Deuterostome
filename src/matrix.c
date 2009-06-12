@@ -1,3 +1,5 @@
+#include "dm.h"
+
 #include "matrix.h"
 
 #if BUILD_ATLAS

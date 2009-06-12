@@ -82,15 +82,20 @@ DLL_SCOPE P writefd(P fd, B* where, P n, P secs);
 DLL_SCOPE P closeonexec(P socketfd);
 DLL_SCOPE P nocloseonexec(P socketfd);
 
+DLL_SCOPE P op_socketdead(void);
+
 DLL_SCOPE P addsocket(P fd, const struct SocketType* type, const union SocketInfo* info);
 DLL_SCOPE P delsocket_force(P fd);
 DLL_SCOPE P delsocket_fork(P fd);
 DLL_SCOPE P delsocket_exec(P fd);
 DLL_SCOPE P delsocket_proc(P fd);
+DLL_SCOPE void clearsocket(P fd);
+
 DLL_SCOPE P closesockets_force(void);
 DLL_SCOPE P closesockets_fork(void);
 DLL_SCOPE P closesockets_exec(void);
 DLL_SCOPE P closesockets_resize(void);
+
 DLL_SCOPE void set_closesockets_atexit(void);
 DLL_SCOPE P dm_setsockopts(P fd, P size);
 

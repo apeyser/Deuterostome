@@ -1,5 +1,7 @@
 #line 2 "@srcdir@/dqueen.c.in"
 
+#include "dm.h"
+
 #include <signal.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
@@ -66,7 +68,7 @@ P op_rsendsig(void) {
   sig = (B) sig_;
   while (send(sigfd, &sig, 1, 0) == -1) {
     if (errno != EINTR) return -errno;
-    if (abortflag) return ABORT;
+    checkabort();
   };
 
   FREEopds = o_1;
@@ -203,7 +205,7 @@ static void killrthreads_exit(void) {
 
 void rthreads_init(void) {
   if (atexit(killrthreads_exit)) 
-    error(1, errno, "Unable to add rthread exit handler");
+    error_local(1, errno, "Unable to add rthread exit handler");
 }
 
 ///////////////////// makerthreads
@@ -338,30 +340,30 @@ P op_makerthreads(void) {
   if (! pid) {
     int stdinfd;
     if ((retc = closesockets_exec()))
-      error(1, retc < 0 ? -retc : 0, "Unable to close sockets for queen");
+      error_local(1, retc < 0 ? -retc : 0, "Unable to close sockets for queen");
     if (dup2(rookfd, 3) == -1)
-      error(1, errno, "Error duping %i to %i", (int) rookfd, 3);
+      error_local(1, errno, "Error duping %i to %i", (int) rookfd, 3);
     if ((retc = nocloseonexec(3)))
-      error(1, retc < 0 ? -retc : 0, 
+      error_local(1, retc < 0 ? -retc : 0, 
 	    "Error setting no close on exec for fd 3");
     if (dup2(rooksigfd, 4) == -1)
-      error(1, errno, "Error duping %i to %i", (int) rooksigfd, 4);
+      error_local(1, errno, "Error duping %i to %i", (int) rooksigfd, 4);
     if ((retc = nocloseonexec(4)))
-      error(1, retc < 0 ? -retc : 0, 
+      error_local(1, retc < 0 ? -retc : 0, 
 	    "Error setting no close on exec for fd 4");
 
     if ((stdinfd = open("/dev/null", O_RDONLY)) == -1)
-      error(1, errno, "Unable to open /dev/null for reading");
+      error_local(1, errno, "Unable to open /dev/null for reading");
     if (dup2(stdinfd, 0) == -1)
-      error(1, errno, "Error redirecting 0 from /dev/null");
+      error_local(1, errno, "Error redirecting 0 from /dev/null");
     if (stdinfd > 2 && close(stdinfd))
-      error(1, errno, "Unable to close fd %i", stdinfd);
+      error_local(1, errno, "Unable to close fd %i", stdinfd);
     if ((retc = nocloseonexec(0)))
-      error(1, retc < 0 ? -retc : 0, 
+      error_local(1, retc < 0 ? -retc : 0, 
 	    "Error setting no close on exec for fd 0");
 
     execl("@drook@", "@drook@", NULL);
-    error(1, errno, "Error starting `%s'", "@drook@");
+    error_local(1, errno, "Error starting `%s'", "@drook@");
   }
    
   if (close(rookfd)) {

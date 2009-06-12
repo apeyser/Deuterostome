@@ -4,6 +4,8 @@
    dvt-specific include modules that provide operators of the dvt.
 */
 
+#include "dm.h"
+
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -30,6 +32,8 @@
 #include "dm-glob.h"
 #include "dm7.h"
 #include "dm6.h"
+#include "dm5.h"
+#include "error-local.h"
 
 /*----------------- DM global variables -----------------------------*/
 
@@ -98,9 +102,9 @@ int main(void)
   initfds();
   /* we monitor console input */
   if ((consolesocket = dup(STDIN_FILENO)) == -1)
-    error(1, errno, "Unable to dup stdin");
+    error_local(1, errno, "Unable to dup stdin");
   if ((retc = addsocket(consolesocket, &sockettype, &defaultsocketinfo)))
-    error(1, retc < 0 ? -retc : 0, "Unable to add console socket");
+    error_local(1, retc < 0 ? -retc : 0, "Unable to add console socket");
 
  /*-------------- fire up Xwindows (if there is) -----------------------*/
 #if ! X_DISPLAY_MISSING
@@ -111,13 +115,13 @@ int main(void)
     dvtscreen = HXDefaultScreenOfDisplay(dvtdisplay);
     dvtrootwindow = HXDefaultRootWindow(dvtdisplay);
     if (HXGetWindowAttributes(dvtdisplay,dvtrootwindow,&rootwindowattr) == 0)
-      error(EXIT_FAILURE,0,"Xwindows: no root window attributes");
+      error_local(EXIT_FAILURE,0,"Xwindows: no root window attributes");
     ndvtwindows = 0; 
     ncachedfonts = 0;
     dvtgc = HXCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
     xsocket = ConnectionNumber(dvtdisplay);
     if ((retc = addsocket(xsocket, &sockettype, &defaultsocketinfo)))
-      error(1, retc < 0 ? -retc : 0, "Unable to add x socket");
+      error_local(1, retc < 0 ? -retc : 0, "Unable to add x socket");
   }
   else {
     dvtdisplay = NULL;

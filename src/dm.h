@@ -27,7 +27,10 @@
 
 #include "dm-config.h"
 #ifdef DM_HAVE_CONFIG_H
+#ifndef DM_INCLUDED_CONFIG_H
+#define DM_INCLUDED_CONFIG_H
 #include "config.h"
+#endif
 #endif
 
 #ifdef DM_HAVE_FEATURES_H
@@ -373,11 +376,15 @@ DLL_SCOPE B** sysop;
 DLL_SCOPE B locked;
 DLL_SCOPE B serialized;
 
+// signal handler flags
+DLL_SCOPE volatile BOOLEAN timeout;    /* for I/O operations          */
+DLL_SCOPE volatile BOOLEAN abortflag;
+DLL_SCOPE volatile BOOLEAN numovf;     /* FPU overflow status            */
+DLL_SCOPE volatile BOOLEAN recvd_quit; /* quit signal */
+
+DLL_SCOPE P exitval;
 DLL_SCOPE BOOLEAN halt_flag;          /* execution block due to 'halt'     */
 DLL_SCOPE fd_set sock_fds;
-DLL_SCOPE volatile BOOLEAN timeout; /* for I/O operations          */
-DLL_SCOPE volatile BOOLEAN abortflag;
-DLL_SCOPE volatile BOOLEAN numovf; /* FPU overflow status            */
 DLL_SCOPE BOOLEAN isstopping; // propagate stops through other locks
 DLL_SCOPE BOOLEAN tinymemory;
 DLL_SCOPE P recsocket;
@@ -531,32 +538,6 @@ DLL_SCOPE P op_countdictstack(void);
 DLL_SCOPE P op_dictstack(void);
 /*-- VM and miscellaneous */
 DM_HOT DLL_SCOPE P op_null(void);
-/*-- control */
-DLL_SCOPE P op_start(void);
-DM_HOT DLL_SCOPE P op_exec(void);
-DM_HOT DLL_SCOPE P op_if(void);
-DM_HOT DLL_SCOPE P op_ifelse(void);
-DM_HOT DLL_SCOPE P op_for(void);
-DM_HOT DLL_SCOPE P op_repeat(void);
-DM_HOT DLL_SCOPE P op_loop(void);
-DM_HOT DLL_SCOPE P op_forall(void);
-DM_HOT DLL_SCOPE P op_exit(void);
-DM_HOT DLL_SCOPE P op_stop(void);
-DM_HOT DLL_SCOPE P op_stopped(void);
-DLL_SCOPE P op_countexecstack(void);
-DLL_SCOPE P op_execstack(void);
-/*-- relational, boolean, bitwise */ 
-DM_HOT DLL_SCOPE P op_eq(void);
-DM_HOT DLL_SCOPE P op_ne(void);
-DLL_SCOPE P op_ge(void);
-DLL_SCOPE P op_gt(void);
-DLL_SCOPE P op_le(void);
-DLL_SCOPE P op_lt(void);
-DLL_SCOPE P op_and(void);
-DM_HOT DLL_SCOPE P op_not(void);
-DLL_SCOPE P op_or(void);
-DLL_SCOPE P op_xor(void);
-DLL_SCOPE P op_bitshift(void);
 /*-- conversion, string, attribute, class ,type */
 
 /*-- more big operators.... */
@@ -591,10 +572,22 @@ DLL_SCOPE P op_matvecmul(void);
 #define DVTSTRINGBUFSIZE 8192
 #define ERRLEN (1000)
 
-#include "error-local.h"
+#define checkabort() do {			\
+    if (recvd_quit) return QUIT;		\
+    if (abortflag) return ABORT;		\
+  } while (0)
+
+#define DM_NULLR_FILENO  (3)
+#define DM_NULLW_FILENO  (4)
+#define DM_STDIN_FILENO  (5)
+#define DM_STDOUT_FILENO (6)
+#define DM_STDERR_FILENO (7)
+
 #include "dm-snprintf.h"
 
 #include "dm-types.h"
+DM_INLINE_STATIC P checkabort_(void) {checkabort(); return OK;}
+
 DM_HOT DM_INLINE_STATIC BOOLEAN PVALUE(B* frame, P* var) {
 #if DM_HOST_IS_32_BIT
   LBIG v;

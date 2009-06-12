@@ -1,3 +1,5 @@
+#include "dm.h"
+
 #include <mpi.h>
 #include <pthread.h>
 #include <unistd.h>
@@ -56,11 +58,11 @@ static void mpihandler(MPI_Comm* comm, int* err, ...) {
   inhandler = 1;
 
   if (MPI_Error_string(*err, string, &len))
-    error(1, 0, "Unable to produce error string (%i)", *err);
+    error_local(1, 0, "Unable to produce error string (%i)", *err);
   else if (MPI_Comm_compare(*comm, world, &eq))
-    error(1, 0, "MPI Error: %s", string);
+    error_local(1, 0, "MPI Error: %s", string);
   else
-    error(1, 0, "Error %s mpi: %s", 
+    error_local(1, 0, "Error %s mpi: %s", 
 	  (eq == MPI_IDENT) ? "speaking with pawns" : "speaking with rook",
 	  string);
 
@@ -119,25 +121,25 @@ static P mpithread_barrier(void) {
 DM_INLINE_STATIC void mpithread_lock(void) {
   int errno_;
   if ((errno_ = pthread_mutex_lock(&mpithread_mutex)))
-    error(1, errno_, "Failed lock");
+    error_local(1, errno_, "Failed lock");
 }
 
 DM_INLINE_STATIC void mpithread_recv_signal(void) {
   int errno_;
   if ((errno_ = pthread_cond_wait(&mpithread_cond, &mpithread_mutex)))
-    error(1, errno_, "Failed cond");
+    error_local(1, errno_, "Failed cond");
 }
 
 DM_INLINE_STATIC void mpithread_send_signal(void) {
   int errno_;
   if ((errno_ = pthread_cond_signal(&mpithread_cond)))
-    error(1, errno_, "Failed signal");
+    error_local(1, errno_, "Failed signal");
 }
 
 DM_INLINE_STATIC void mpithread_unlock(void) {
   int errno_;
   if ((errno_ = pthread_mutex_unlock(&mpithread_mutex)))
-    error(1, errno_, "Failed unlock");
+    error_local(1, errno_, "Failed unlock");
 }
 
 DM_INLINE_STATIC P mpithread_exec(MpiThreadFunc func) {
@@ -145,17 +147,19 @@ DM_INLINE_STATIC P mpithread_exec(MpiThreadFunc func) {
   mpithread_func = func;
   mpithread_send_signal();
 
-  do {mpithread_recv_signal();} while (!abortflag && mpithread_func);
+  do {mpithread_recv_signal();} 
+  while (!recvd_quit && !abortflag && mpithread_func);
   retc = mpithread_retc;
 
   mpithread_unlock();  
-  return abortflag ? ABORT : retc;
+  checkabort();
+  return retc;
 }
 
 static void redirect_sig(int sig) {
   int errno_;
   if ((errno_ = pthread_kill(mainthread_id, sig)))
-    error(1, errno_, "pthread_kill %i", sig);
+    error_local(1, errno_, "pthread_kill %i", sig);
 }
 
 __attribute__ ((__noreturn__))
@@ -181,7 +185,7 @@ static void mpifunc(void) {
   MPI_Init_thread(&argc, (char***) &argv, MPI_THREAD_MULTIPLE, &threadtype);
   //  atexit(exithandler);
   if (threadtype < MPI_THREAD_MULTIPLE)
-    error(1, 0, "MPI_Init_thread: Requested %i, received %i",
+    error_local(1, 0, "MPI_Init_thread: Requested %i, received %i",
 	  MPI_THREAD_MULTIPLE, threadtype);
 
   MPI_Comm_create_errhandler(mpihandler, &mpierr);
@@ -292,15 +296,15 @@ DM_INLINE_STATIC void makethread(pthread_t* threadid,
   sigset_t set, oset;
   int errno_;
   if (sigfillset(&set))
-    error(1, errno, "Unable to empty sigset");
+    error_local(1, errno, "Unable to empty sigset");
   if ((errno_ = pthread_sigmask(SIG_BLOCK, &set, &oset)))
-    error(1, errno_, "Unable to block sigs");
+    error_local(1, errno_, "Unable to block sigs");
 
   if ((errno_ = pthread_create(threadid, NULL, startthread, threadfunc)))
-    error(1, errno_, "Failed thread create");
+    error_local(1, errno_, "Failed thread create");
 
   if ((errno_ = pthread_sigmask(SIG_SETMASK, &oset, NULL)))
-    error(1, errno_, "Unable to unblock sigs");
+    error_local(1, errno_, "Unable to unblock sigs");
 }
 
 void initmpi(void) {
@@ -308,7 +312,8 @@ void initmpi(void) {
   mpithread_lock();
 
   makethread(&mpithread_id, mpifunc);
-  do {mpithread_recv_signal();} while (!abortflag && mpithread_func);
+  do {mpithread_recv_signal();} 
+  while (! recvd_quit && !abortflag && mpithread_func);
   mpithread_unlock();
   makethread(&sigthread_id, sigfunc);
 }

@@ -76,6 +76,7 @@ AC_SUBST([LTALLOCA])
   gl_MULTIARCH
   AM_STDBOOL_H
   gl_STDINT_H
+  gl_STDIO_H
   gl_STDLIB_H
   gl_HEADER_STRING_H
   gl_HEADER_SYS_STAT_H
@@ -243,6 +244,8 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/ref-del.sin
   lib/stdbool.in.h
   lib/stdint.in.h
+  lib/stdio-write.c
+  lib/stdio.in.h
   lib/stdlib.in.h
   lib/streq.h
   lib/string.in.h
@@ -288,6 +291,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/onceonly.m4
   m4/stdbool.m4
   m4/stdint.m4
+  m4/stdio_h.m4
   m4/stdlib_h.m4
   m4/string_h.m4
   m4/sys_stat_h.m4

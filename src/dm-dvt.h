@@ -5,7 +5,6 @@
 
 #include "dm-dvt-vm.h"
 
-DLL_SCOPE P op_quit(void);
 DLL_SCOPE P toconsole(B *p, P atmost);
 DLL_SCOPE P op_error(void);
 DLL_SCOPE P op_errormessage(void);

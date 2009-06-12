@@ -1,6 +1,8 @@
 #ifndef XHACK_H
 #define XHACK_H
 
+#include "dm.h"
+
 #if ! DM_X_DISPLAY_MISSING
 
 #include <X11/Xlib.h>

@@ -16,6 +16,8 @@
 
 # -*- mode: makefile; -*-
 
+# -*- mode: makefile; -*-
+
 
 
 
@@ -44,18 +46,19 @@ DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(dist_pkgdata_SCRIPTS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/dgen-build $(srcdir)/dgen.c $(srcdir)/dgen_1.h \
 	$(srcdir)/dm-conv.c $(srcdir)/dm-nextevent.c \
-	$(srcdir)/dm-nextevent.h $(srcdir)/dm-prop.c.in \
+	$(srcdir)/dm-nextevent.h $(srcdir)/dm-prop.cin \
 	$(srcdir)/dm-prop.h $(srcdir)/dm-signals.c \
 	$(srcdir)/dm-signals.h $(srcdir)/dm-swapbytes.h \
 	$(srcdir)/dm-types.c $(srcdir)/dm-types.h $(srcdir)/dm-vm.c \
 	$(srcdir)/dm-vm.h $(srcdir)/dm.h $(srcdir)/dm.pc.in \
 	$(srcdir)/dm1.c $(srcdir)/dm2.c $(srcdir)/dm2.h \
 	$(srcdir)/dm3.c $(srcdir)/dm3.h $(srcdir)/dm4.c \
-	$(srcdir)/dm5.c $(srcdir)/dm6.c $(srcdir)/dm6.h \
-	$(srcdir)/dm7.c $(srcdir)/dm8.c $(srcdir)/dmglobals.c \
-	$(srcdir)/dmnum.c $(srcdir)/dmnum.h $(srcdir)/dsp1.c \
-	$(srcdir)/dsp2.c $(srcdir)/paths.h.in \
-	$(top_srcdir)/m4/cf_bundle_sub.make
+	$(srcdir)/dm5.c $(srcdir)/dm5.h $(srcdir)/dm6.c \
+	$(srcdir)/dm6.h $(srcdir)/dm7.c $(srcdir)/dm8.c \
+	$(srcdir)/dmglobals.c $(srcdir)/dmnum.c $(srcdir)/dmnum.h \
+	$(srcdir)/dsp1.c $(srcdir)/dsp2.c $(srcdir)/paths.hin \
+	$(top_srcdir)/m4/cf_bundle_sub.make \
+	$(top_srcdir)/m4/cf_in.make
 subdir = src
 SUBDIRS =
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -95,13 +98,13 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/mbstate_t.m4 $(top_srcdir)/m4/mempcpy.m4 \
 	$(top_srcdir)/m4/mkdtemp.m4 $(top_srcdir)/m4/multiarch.m4 \
 	$(top_srcdir)/m4/onceonly.m4 $(top_srcdir)/m4/stdbool.m4 \
-	$(top_srcdir)/m4/stdint.m4 $(top_srcdir)/m4/stdlib_h.m4 \
-	$(top_srcdir)/m4/string_h.m4 $(top_srcdir)/m4/sys_stat_h.m4 \
-	$(top_srcdir)/m4/sys_time_h.m4 $(top_srcdir)/m4/tempname.m4 \
-	$(top_srcdir)/m4/unistd_h.m4 $(top_srcdir)/m4/wchar.m4 \
-	$(top_srcdir)/m4/wctype.m4 $(top_srcdir)/m4/wint_t.m4 \
-	$(top_srcdir)/acinclude.m4 $(top_srcdir)/m4/basic-defs.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/stdint.m4 $(top_srcdir)/m4/stdio_h.m4 \
+	$(top_srcdir)/m4/stdlib_h.m4 $(top_srcdir)/m4/string_h.m4 \
+	$(top_srcdir)/m4/sys_stat_h.m4 $(top_srcdir)/m4/sys_time_h.m4 \
+	$(top_srcdir)/m4/tempname.m4 $(top_srcdir)/m4/unistd_h.m4 \
+	$(top_srcdir)/m4/wchar.m4 $(top_srcdir)/m4/wctype.m4 \
+	$(top_srcdir)/m4/wint_t.m4 $(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/m4/basic-defs.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -121,7 +124,8 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-am__DEPENDENCIES_3 = $(am__DEPENDENCIES_2)
+am__DEPENDENCIES_3 = $(am__DEPENDENCIES_2) \
+	$(top_builddir)/lib/libgnu.la
 libdmbootstrap_la_DEPENDENCIES = $(am__DEPENDENCIES_3)
 am__objects_1 = libdmbootstrap_la-dmglobals.lo \
 	libdmbootstrap_la-dmnum.lo libdmbootstrap_la-dsp1.lo \
@@ -132,15 +136,18 @@ am__objects_1 = libdmbootstrap_la-dmglobals.lo \
 	libdmbootstrap_la-dm9.lo libdmbootstrap_la-dm-types.lo \
 	libdmbootstrap_la-dm1.lo libdmbootstrap_la-dm-signals.lo
 am_libdmbootstrap_la_OBJECTS = $(am__objects_1)
-libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
+am__objects_2 =
+nodist_libdmbootstrap_la_OBJECTS = $(am__objects_2)
+libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS) \
+	$(nodist_libdmbootstrap_la_OBJECTS)
 libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_3)
 am__libdmglobals_la_SOURCES_DIST = dmglobals.c dmnuminc.h dmnum.c \
-	dsp1f.h dsp1.c dsp2.c paths.h dm2.c dm2.h dm-conv.c \
-	dm-swapbytes.h dm4.c dm5.c dm6.c dm6.h dm7.c dm7.h dm8.c dm9.c \
+	dsp1f.h dsp1.c dsp2.c dm2.c dm2.h dm-conv.c dm-swapbytes.h \
+	dm4.c dm5.c dm5.h dm6.c dm6.h dm7.c dm7.h dm8.c dm9.c \
 	dm-types.c xhack.h dm1.c dm-signals.c dm-signals.h matrix.c \
 	matrix.h threads.c dregex.c dregex.h dm-convert.h dm-convert.c
-am__objects_2 = libdmglobals_la-dmglobals.lo libdmglobals_la-dmnum.lo \
+am__objects_3 = libdmglobals_la-dmglobals.lo libdmglobals_la-dmnum.lo \
 	libdmglobals_la-dsp1.lo libdmglobals_la-dsp2.lo \
 	libdmglobals_la-dm2.lo libdmglobals_la-dm-conv.lo \
 	libdmglobals_la-dm4.lo libdmglobals_la-dm5.lo \
@@ -148,18 +155,19 @@ am__objects_2 = libdmglobals_la-dmglobals.lo libdmglobals_la-dmnum.lo \
 	libdmglobals_la-dm8.lo libdmglobals_la-dm9.lo \
 	libdmglobals_la-dm-types.lo libdmglobals_la-dm1.lo \
 	libdmglobals_la-dm-signals.lo
-@ENABLE_THREADS_TRUE@am__objects_3 = libdmglobals_la-threads.lo
-@ENABLE_REGEX_TRUE@am__objects_4 = libdmglobals_la-dregex.lo
-am_libdmglobals_la_OBJECTS = $(am__objects_2) \
-	libdmglobals_la-matrix.lo $(am__objects_3) $(am__objects_4) \
+@ENABLE_THREADS_TRUE@am__objects_4 = libdmglobals_la-threads.lo
+@ENABLE_REGEX_TRUE@am__objects_5 = libdmglobals_la-dregex.lo
+am_libdmglobals_la_OBJECTS = $(am__objects_3) \
+	libdmglobals_la-matrix.lo $(am__objects_4) $(am__objects_5) \
 	libdmglobals_la-dm-convert.lo
-libdmglobals_la_OBJECTS = $(am_libdmglobals_la_OBJECTS)
+nodist_libdmglobals_la_OBJECTS = $(am__objects_2)
+libdmglobals_la_OBJECTS = $(am_libdmglobals_la_OBJECTS) \
+	$(nodist_libdmglobals_la_OBJECTS)
 libdmnodal_la_DEPENDENCIES = $(builddir)/libdmglobals.la \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_1)
 am__libdmnodal_la_SOURCES_DIST = dm-vm.c dm-vm.h dm-dvt-vm.h plugin.h \
 	cppplugin.h $(top_srcdir)/libltdl/ltdl.h pluginlib.h plugin.c
-am__objects_5 =
-@ENABLE_PLUGINS_SUPPORT_TRUE@am__objects_6 = $(am__objects_5)
+@ENABLE_PLUGINS_SUPPORT_TRUE@am__objects_6 = $(am__objects_2)
 am_libdmnodal_la_OBJECTS = dm-vm.lo $(am__objects_6) plugin.lo
 libdmnodal_la_OBJECTS = $(am_libdmnodal_la_OBJECTS)
 @ENABLE_DAEMON_TRUE@am__EXEEXT_1 = dnode-daemon$(EXEEXT)
@@ -168,27 +176,28 @@ binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 @ENABLE_SETUID_TRUE@am__EXEEXT_3 = dnode-nice$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_dgen_OBJECTS = dgen-dgen.$(OBJEXT) dgen-dm-nextevent.$(OBJEXT) \
-	dgen-dm3.$(OBJEXT) dgen-dm-prop.$(OBJEXT)
-dgen_OBJECTS = $(am_dgen_OBJECTS)
+	dgen-dm3.$(OBJEXT)
+nodist_dgen_OBJECTS = dgen-dm-prop.$(OBJEXT)
+dgen_OBJECTS = $(am_dgen_OBJECTS) $(nodist_dgen_OBJECTS)
 dgen_DEPENDENCIES = $(builddir)/libdmbootstrap.la \
 	$(am__DEPENDENCIES_3)
-am_dmprop_OBJECTS = dmprop-dm-prop.$(OBJEXT) \
-	dmprop-dm-signals.$(OBJEXT)
-dmprop_OBJECTS = $(am_dmprop_OBJECTS)
-dmprop_LDADD = $(LDADD)
+am_dmprop_OBJECTS = dmprop-dm-signals.$(OBJEXT)
+nodist_dmprop_OBJECTS = dmprop-dm-prop.$(OBJEXT)
+dmprop_OBJECTS = $(am_dmprop_OBJECTS) $(nodist_dmprop_OBJECTS)
+dmprop_DEPENDENCIES = $(am__DEPENDENCIES_3)
 am__dnode_SOURCES_DIST = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
 	dm-nextevent.c dm-nextevent.h dm3.c dm3.h dm-proc.c dm-proc.h \
-	dm-glob.c dm-glob.h dm-prop.c dm-prop.h dm-dvt-vm.h dqueen.c \
-	dqueen.h
+	dm-glob.c dm-glob.h dm-prop.h dm-dvt-vm.h dqueen.h
 am__objects_7 = dnode-dm-nextevent.$(OBJEXT) dnode-dm3.$(OBJEXT) \
-	dnode-dm-proc.$(OBJEXT) dnode-dm-glob.$(OBJEXT) \
-	dnode-dm-prop.$(OBJEXT)
-@ENABLE_RTHREADS_TRUE@am__objects_8 = dnode-dqueen.$(OBJEXT)
+	dnode-dm-proc.$(OBJEXT) dnode-dm-glob.$(OBJEXT)
 am_dnode_OBJECTS = dnode-dnode.$(OBJEXT) dnode-dm-dnode.$(OBJEXT) \
-	$(am__objects_7) $(am__objects_8)
-dnode_OBJECTS = $(am_dnode_OBJECTS)
+	$(am__objects_7) $(am__objects_2)
+am__objects_8 = dnode-dm-prop.$(OBJEXT)
+@ENABLE_RTHREADS_TRUE@am__objects_9 = dnode-dqueen.$(OBJEXT)
+nodist_dnode_OBJECTS = $(am__objects_8) $(am__objects_9)
+dnode_OBJECTS = $(am_dnode_OBJECTS) $(nodist_dnode_OBJECTS)
 dnode_DEPENDENCIES = $(builddir)/libdmglobals.la \
-	$(builddir)/libdmnodal.la $(socklds) $(am__DEPENDENCIES_3) \
+	$(builddir)/libdmnodal.la $(am__DEPENDENCIES_3) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 dnode_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(dnode_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
@@ -209,18 +218,19 @@ dpawn_DEPENDENCIES = $(builddir)/libdmglobals.la \
 dpawn_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(dpawn_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am_drook_OBJECTS = drook-drook.$(OBJEXT)
-drook_OBJECTS = $(am_drook_OBJECTS)
+nodist_drook_OBJECTS = drook-drook.$(OBJEXT)
+drook_OBJECTS = $(nodist_drook_OBJECTS)
 drook_DEPENDENCIES = $(builddir)/libdmbootstrap.la \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_1)
-am__objects_9 = dvt-dm-nextevent.$(OBJEXT) dvt-dm3.$(OBJEXT) \
-	dvt-dm-proc.$(OBJEXT) dvt-dm-glob.$(OBJEXT) \
-	dvt-dm-prop.$(OBJEXT)
+am__objects_10 = dvt-dm-nextevent.$(OBJEXT) dvt-dm3.$(OBJEXT) \
+	dvt-dm-proc.$(OBJEXT) dvt-dm-glob.$(OBJEXT)
 am_dvt_OBJECTS = dvt-dvt.$(OBJEXT) dvt-dm-dvt.$(OBJEXT) \
-	$(am__objects_9)
-dvt_OBJECTS = $(am_dvt_OBJECTS)
-dvt_DEPENDENCIES = $(builddir)/libdmglobals.la $(socklds) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_1)
+	$(am__objects_10)
+am__objects_11 = dvt-dm-prop.$(OBJEXT)
+nodist_dvt_OBJECTS = $(am__objects_11)
+dvt_OBJECTS = $(am_dvt_OBJECTS) $(nodist_dvt_OBJECTS)
+dvt_DEPENDENCIES = $(builddir)/libdmglobals.la $(am__DEPENDENCIES_3) \
+	$(am__DEPENDENCIES_1)
 dvt_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(dvt_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
@@ -241,16 +251,20 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libdmbootstrap_la_SOURCES) $(libdmglobals_la_SOURCES) \
-	$(libdmnodal_la_SOURCES) $(dgen_SOURCES) $(dmprop_SOURCES) \
-	$(dnode_SOURCES) $(nodist_dnode_daemon_SOURCES) \
-	$(nodist_dnode_nice_SOURCES) $(dpawn_SOURCES) $(drook_SOURCES) \
-	$(dvt_SOURCES) $(testwordorder_SOURCES)
+SOURCES = $(libdmbootstrap_la_SOURCES) \
+	$(nodist_libdmbootstrap_la_SOURCES) $(libdmglobals_la_SOURCES) \
+	$(nodist_libdmglobals_la_SOURCES) $(libdmnodal_la_SOURCES) \
+	$(dgen_SOURCES) $(nodist_dgen_SOURCES) $(dmprop_SOURCES) \
+	$(nodist_dmprop_SOURCES) $(dnode_SOURCES) \
+	$(nodist_dnode_SOURCES) $(nodist_dnode_daemon_SOURCES) \
+	$(nodist_dnode_nice_SOURCES) $(dpawn_SOURCES) \
+	$(nodist_drook_SOURCES) $(dvt_SOURCES) $(nodist_dvt_SOURCES) \
+	$(testwordorder_SOURCES)
 DIST_SOURCES = $(libdmbootstrap_la_SOURCES) \
 	$(am__libdmglobals_la_SOURCES_DIST) \
 	$(am__libdmnodal_la_SOURCES_DIST) $(dgen_SOURCES) \
 	$(dmprop_SOURCES) $(am__dnode_SOURCES_DIST) $(dpawn_SOURCES) \
-	$(drook_SOURCES) $(dvt_SOURCES) $(testwordorder_SOURCES)
+	$(dvt_SOURCES) $(testwordorder_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -264,7 +278,8 @@ nodist_pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 am__pkginclude_HEADERS_DIST = dm.h dm-errs.h dm3.h pluginlib.h \
 	plugin.h cppplugin.h $(top_srcdir)/libltdl/ltdl.h dmx.h \
 	threads.h error-local.h dm-snprintf.h srandomdev-local.h \
-	dmnum.h basic-defs.h dm-types.h dm-nextevent.h dm2.h dm6.h
+	dmnum.h basic-defs.h dm-types.h dm-nextevent.h dm2.h dm6.h \
+	dm5.h
 pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(nodist_pkginclude_HEADERS) $(pkginclude_HEADERS)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
@@ -371,16 +386,32 @@ GNULIB_CALLOC_POSIX = @GNULIB_CALLOC_POSIX@
 GNULIB_CHOWN = @GNULIB_CHOWN@
 GNULIB_CLOSE = @GNULIB_CLOSE@
 GNULIB_DIRFD = @GNULIB_DIRFD@
+GNULIB_DPRINTF = @GNULIB_DPRINTF@
 GNULIB_DUP2 = @GNULIB_DUP2@
 GNULIB_ENVIRON = @GNULIB_ENVIRON@
 GNULIB_EUIDACCESS = @GNULIB_EUIDACCESS@
 GNULIB_FCHDIR = @GNULIB_FCHDIR@
+GNULIB_FCLOSE = @GNULIB_FCLOSE@
+GNULIB_FFLUSH = @GNULIB_FFLUSH@
+GNULIB_FOPEN = @GNULIB_FOPEN@
+GNULIB_FPRINTF = @GNULIB_FPRINTF@
+GNULIB_FPRINTF_POSIX = @GNULIB_FPRINTF_POSIX@
+GNULIB_FPUTC = @GNULIB_FPUTC@
+GNULIB_FPUTS = @GNULIB_FPUTS@
+GNULIB_FREOPEN = @GNULIB_FREOPEN@
+GNULIB_FSEEK = @GNULIB_FSEEK@
+GNULIB_FSEEKO = @GNULIB_FSEEKO@
 GNULIB_FSYNC = @GNULIB_FSYNC@
+GNULIB_FTELL = @GNULIB_FTELL@
+GNULIB_FTELLO = @GNULIB_FTELLO@
 GNULIB_FTRUNCATE = @GNULIB_FTRUNCATE@
+GNULIB_FWRITE = @GNULIB_FWRITE@
 GNULIB_GETCWD = @GNULIB_GETCWD@
+GNULIB_GETDELIM = @GNULIB_GETDELIM@
 GNULIB_GETDOMAINNAME = @GNULIB_GETDOMAINNAME@
 GNULIB_GETDTABLESIZE = @GNULIB_GETDTABLESIZE@
 GNULIB_GETHOSTNAME = @GNULIB_GETHOSTNAME@
+GNULIB_GETLINE = @GNULIB_GETLINE@
 GNULIB_GETLOADAVG = @GNULIB_GETLOADAVG@
 GNULIB_GETLOGIN_R = @GNULIB_GETLOGIN_R@
 GNULIB_GETPAGESIZE = @GNULIB_GETPAGESIZE@
@@ -416,7 +447,15 @@ GNULIB_MEMPCPY = @GNULIB_MEMPCPY@
 GNULIB_MEMRCHR = @GNULIB_MEMRCHR@
 GNULIB_MKDTEMP = @GNULIB_MKDTEMP@
 GNULIB_MKSTEMP = @GNULIB_MKSTEMP@
+GNULIB_OBSTACK_PRINTF = @GNULIB_OBSTACK_PRINTF@
+GNULIB_OBSTACK_PRINTF_POSIX = @GNULIB_OBSTACK_PRINTF_POSIX@
+GNULIB_PERROR = @GNULIB_PERROR@
+GNULIB_PRINTF = @GNULIB_PRINTF@
+GNULIB_PRINTF_POSIX = @GNULIB_PRINTF_POSIX@
+GNULIB_PUTC = @GNULIB_PUTC@
+GNULIB_PUTCHAR = @GNULIB_PUTCHAR@
 GNULIB_PUTENV = @GNULIB_PUTENV@
+GNULIB_PUTS = @GNULIB_PUTS@
 GNULIB_RANDOM_R = @GNULIB_RANDOM_R@
 GNULIB_RAWMEMCHR = @GNULIB_RAWMEMCHR@
 GNULIB_READLINK = @GNULIB_READLINK@
@@ -425,6 +464,9 @@ GNULIB_RPMATCH = @GNULIB_RPMATCH@
 GNULIB_SCANDIR = @GNULIB_SCANDIR@
 GNULIB_SETENV = @GNULIB_SETENV@
 GNULIB_SLEEP = @GNULIB_SLEEP@
+GNULIB_SNPRINTF = @GNULIB_SNPRINTF@
+GNULIB_SPRINTF_POSIX = @GNULIB_SPRINTF_POSIX@
+GNULIB_STDIO_H_SIGPIPE = @GNULIB_STDIO_H_SIGPIPE@
 GNULIB_STPCPY = @GNULIB_STPCPY@
 GNULIB_STPNCPY = @GNULIB_STPNCPY@
 GNULIB_STRCASESTR = @GNULIB_STRCASESTR@
@@ -444,6 +486,14 @@ GNULIB_STRTOULL = @GNULIB_STRTOULL@
 GNULIB_STRVERSCMP = @GNULIB_STRVERSCMP@
 GNULIB_UNISTD_H_SIGPIPE = @GNULIB_UNISTD_H_SIGPIPE@
 GNULIB_UNSETENV = @GNULIB_UNSETENV@
+GNULIB_VASPRINTF = @GNULIB_VASPRINTF@
+GNULIB_VDPRINTF = @GNULIB_VDPRINTF@
+GNULIB_VFPRINTF = @GNULIB_VFPRINTF@
+GNULIB_VFPRINTF_POSIX = @GNULIB_VFPRINTF_POSIX@
+GNULIB_VPRINTF = @GNULIB_VPRINTF@
+GNULIB_VPRINTF_POSIX = @GNULIB_VPRINTF_POSIX@
+GNULIB_VSNPRINTF = @GNULIB_VSNPRINTF@
+GNULIB_VSPRINTF_POSIX = @GNULIB_VSPRINTF_POSIX@
 GNULIB_WCRTOMB = @GNULIB_WCRTOMB@
 GNULIB_WCSNRTOMBS = @GNULIB_WCSNRTOMBS@
 GNULIB_WCSRTOMBS = @GNULIB_WCSRTOMBS@
@@ -458,21 +508,29 @@ HAVE_BTOWC = @HAVE_BTOWC@
 HAVE_CALLOC_POSIX = @HAVE_CALLOC_POSIX@
 HAVE_DECL_DIRFD = @HAVE_DECL_DIRFD@
 HAVE_DECL_ENVIRON = @HAVE_DECL_ENVIRON@
+HAVE_DECL_GETDELIM = @HAVE_DECL_GETDELIM@
+HAVE_DECL_GETLINE = @HAVE_DECL_GETLINE@
 HAVE_DECL_GETLOADAVG = @HAVE_DECL_GETLOADAVG@
 HAVE_DECL_GETLOGIN_R = @HAVE_DECL_GETLOGIN_R@
 HAVE_DECL_MEMMEM = @HAVE_DECL_MEMMEM@
 HAVE_DECL_MEMRCHR = @HAVE_DECL_MEMRCHR@
+HAVE_DECL_OBSTACK_PRINTF = @HAVE_DECL_OBSTACK_PRINTF@
+HAVE_DECL_SNPRINTF = @HAVE_DECL_SNPRINTF@
 HAVE_DECL_STRDUP = @HAVE_DECL_STRDUP@
 HAVE_DECL_STRERROR = @HAVE_DECL_STRERROR@
 HAVE_DECL_STRNDUP = @HAVE_DECL_STRNDUP@
 HAVE_DECL_STRNLEN = @HAVE_DECL_STRNLEN@
 HAVE_DECL_STRSIGNAL = @HAVE_DECL_STRSIGNAL@
 HAVE_DECL_STRTOK_R = @HAVE_DECL_STRTOK_R@
+HAVE_DECL_VSNPRINTF = @HAVE_DECL_VSNPRINTF@
 HAVE_DECL_WCTOB = @HAVE_DECL_WCTOB@
 HAVE_DECL_WCWIDTH = @HAVE_DECL_WCWIDTH@
+HAVE_DPRINTF = @HAVE_DPRINTF@
 HAVE_DUP2 = @HAVE_DUP2@
 HAVE_EUIDACCESS = @HAVE_EUIDACCESS@
+HAVE_FSEEKO = @HAVE_FSEEKO@
 HAVE_FSYNC = @HAVE_FSYNC@
+HAVE_FTELLO = @HAVE_FTELLO@
 HAVE_FTRUNCATE = @HAVE_FTRUNCATE@
 HAVE_GETDOMAINNAME = @HAVE_GETDOMAINNAME@
 HAVE_GETDTABLESIZE = @HAVE_GETDTABLESIZE@
@@ -531,6 +589,8 @@ HAVE_SYS_TYPES_H = @HAVE_SYS_TYPES_H@
 HAVE_UNISTD_H = @HAVE_UNISTD_H@
 HAVE_UNSETENV = @HAVE_UNSETENV@
 HAVE_UNSIGNED_LONG_LONG_INT = @HAVE_UNSIGNED_LONG_LONG_INT@
+HAVE_VASPRINTF = @HAVE_VASPRINTF@
+HAVE_VDPRINTF = @HAVE_VDPRINTF@
 HAVE_WCHAR_H = @HAVE_WCHAR_H@
 HAVE_WCRTOMB = @HAVE_WCRTOMB@
 HAVE_WCSNRTOMBS = @HAVE_WCSNRTOMBS@
@@ -580,6 +640,7 @@ NAMEBYTES_1 = @NAMEBYTES_1@
 NEXT_AS_FIRST_DIRECTIVE_DIRENT_H = @NEXT_AS_FIRST_DIRECTIVE_DIRENT_H@
 NEXT_AS_FIRST_DIRECTIVE_ERRNO_H = @NEXT_AS_FIRST_DIRECTIVE_ERRNO_H@
 NEXT_AS_FIRST_DIRECTIVE_STDINT_H = @NEXT_AS_FIRST_DIRECTIVE_STDINT_H@
+NEXT_AS_FIRST_DIRECTIVE_STDIO_H = @NEXT_AS_FIRST_DIRECTIVE_STDIO_H@
 NEXT_AS_FIRST_DIRECTIVE_STDLIB_H = @NEXT_AS_FIRST_DIRECTIVE_STDLIB_H@
 NEXT_AS_FIRST_DIRECTIVE_STRING_H = @NEXT_AS_FIRST_DIRECTIVE_STRING_H@
 NEXT_AS_FIRST_DIRECTIVE_SYS_STAT_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_STAT_H@
@@ -590,6 +651,7 @@ NEXT_AS_FIRST_DIRECTIVE_WCTYPE_H = @NEXT_AS_FIRST_DIRECTIVE_WCTYPE_H@
 NEXT_DIRENT_H = @NEXT_DIRENT_H@
 NEXT_ERRNO_H = @NEXT_ERRNO_H@
 NEXT_STDINT_H = @NEXT_STDINT_H@
+NEXT_STDIO_H = @NEXT_STDIO_H@
 NEXT_STDLIB_H = @NEXT_STDLIB_H@
 NEXT_STRING_H = @NEXT_STRING_H@
 NEXT_SYS_STAT_H = @NEXT_SYS_STAT_H@
@@ -634,8 +696,19 @@ RELEASE_INFO = @RELEASE_INFO@
 REPLACE_BTOWC = @REPLACE_BTOWC@
 REPLACE_CHOWN = @REPLACE_CHOWN@
 REPLACE_CLOSE = @REPLACE_CLOSE@
+REPLACE_DPRINTF = @REPLACE_DPRINTF@
 REPLACE_FCHDIR = @REPLACE_FCHDIR@
+REPLACE_FCLOSE = @REPLACE_FCLOSE@
+REPLACE_FFLUSH = @REPLACE_FFLUSH@
+REPLACE_FOPEN = @REPLACE_FOPEN@
+REPLACE_FPRINTF = @REPLACE_FPRINTF@
+REPLACE_FREOPEN = @REPLACE_FREOPEN@
+REPLACE_FSEEK = @REPLACE_FSEEK@
+REPLACE_FSEEKO = @REPLACE_FSEEKO@
+REPLACE_FTELL = @REPLACE_FTELL@
+REPLACE_FTELLO = @REPLACE_FTELLO@
 REPLACE_GETCWD = @REPLACE_GETCWD@
+REPLACE_GETLINE = @REPLACE_GETLINE@
 REPLACE_GETPAGESIZE = @REPLACE_GETPAGESIZE@
 REPLACE_GETTIMEOFDAY = @REPLACE_GETTIMEOFDAY@
 REPLACE_ISWCNTRL = @REPLACE_ISWCNTRL@
@@ -651,13 +724,25 @@ REPLACE_MBSTATE_T = @REPLACE_MBSTATE_T@
 REPLACE_MEMMEM = @REPLACE_MEMMEM@
 REPLACE_MKDIR = @REPLACE_MKDIR@
 REPLACE_MKSTEMP = @REPLACE_MKSTEMP@
+REPLACE_OBSTACK_PRINTF = @REPLACE_OBSTACK_PRINTF@
+REPLACE_PERROR = @REPLACE_PERROR@
+REPLACE_PRINTF = @REPLACE_PRINTF@
 REPLACE_PUTENV = @REPLACE_PUTENV@
+REPLACE_SNPRINTF = @REPLACE_SNPRINTF@
+REPLACE_SPRINTF = @REPLACE_SPRINTF@
+REPLACE_STDIO_WRITE_FUNCS = @REPLACE_STDIO_WRITE_FUNCS@
 REPLACE_STRCASESTR = @REPLACE_STRCASESTR@
 REPLACE_STRDUP = @REPLACE_STRDUP@
 REPLACE_STRERROR = @REPLACE_STRERROR@
 REPLACE_STRSIGNAL = @REPLACE_STRSIGNAL@
 REPLACE_STRSTR = @REPLACE_STRSTR@
 REPLACE_STRTOD = @REPLACE_STRTOD@
+REPLACE_VASPRINTF = @REPLACE_VASPRINTF@
+REPLACE_VDPRINTF = @REPLACE_VDPRINTF@
+REPLACE_VFPRINTF = @REPLACE_VFPRINTF@
+REPLACE_VPRINTF = @REPLACE_VPRINTF@
+REPLACE_VSNPRINTF = @REPLACE_VSNPRINTF@
+REPLACE_VSPRINTF = @REPLACE_VSPRINTF@
 REPLACE_WCRTOMB = @REPLACE_WCRTOMB@
 REPLACE_WCSNRTOMBS = @REPLACE_WCSNRTOMBS@
 REPLACE_WCSRTOMBS = @REPLACE_WCSRTOMBS@
@@ -780,15 +865,25 @@ tmp = @tmp@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CPPFLAGS = -DDM_HAVE_CONFIG_H
+AM_CPPFLAGS = -DDM_HAVE_CONFIG_H -I"$(top_builddir)/lib" -I"$(top_srcdir)/lib"
 AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
 AM_CXXFLAGS = $(GCC_CXXFLAGS)
 AM_LDFLAGS = -no-undefined 
 AM_LIBS = $(PTHREAD_LIBS) $(X_LDFLAGS) 
-AM_LIBADD = $(AM_LIBS) @RELEASE_INFO@ @VERSION_INFO@
-AM_LDADD = $(AM_LIBS)
+AM_LIBADD = $(AM_LIBS) @RELEASE_INFO@ @VERSION_INFO@ \
+	$(top_builddir)/lib/libgnu.la
+
+AM_LDADD = $(AM_LIBS) $(top_builddir)/lib/libgnu.la
 INCLUDES = $(am__append_1)
 DIST_SUBDIRS = codegen
+BUILT_SOURCES = dnode-nice.c dnode-daemon.c paths.h \
+		drook.c dqueen.c dm-prop.c
+
+INFILES = $(BUILT_SOURCES)
+EXTRA_DIST = $(INFILES:=in)
+CLEANFILES = $(INFILES)
+DISTCLEANFILES = dm-config.h
+SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
 dpawn = $(bindir)/dpawn
 drook = $(bindir)/drook
 dmprop = $(bindir)/dmprop
@@ -799,7 +894,11 @@ edit = sed \
 	-e "s,[@]DPAWN_EXEC[@],`for i in $(DPAWN_COMMAND) $(dpawn); do echo \\\"$$i\\\"; break; done | tr -d \"\n\"`,g" \
 	-e "s|[@]DPAWN_ARGS[@]|`first=:; for i in $(DPAWN_COMMAND) $(dpawn); do if $$first; then first=false; else echo \\\"$$i\\\",; fi ; done | tr -d \"\n\"`|g" \
 	-e 's,[@]DPAWN_COMMAND[@],$(DPAWN_COMMAND) $(dpawn),g' \
-	-e 's,[@]dmprop[@],$(dmprop),g'
+	-e 's,[@]dmprop[@],$(dmprop),g' \
+	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
+	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \
+	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
+	-e 's,[@]dmconfdir[@],$(dmconfdir),g'
 
 @ENABLE_SETUID_TRUE@nodist_dnode_nice_SOURCES = dnode-nice.c
 @ENABLE_SETUID_TRUE@DNODENICEBIN = dnode-nice
@@ -810,15 +909,8 @@ edit = sed \
 @ENABLE_THREADS_TRUE@THREADSRC = threads.c
 @ENABLE_REGEX_TRUE@REGEX_SRC = dregex.c dregex.h
 @ENABLE_RTHREADS_TRUE@MPI_PROGS = drook dpawn
-@ENABLE_RTHREADS_TRUE@DNODE_MPI_SRCS = dqueen.c dqueen.h
-EXTRA_DIST = dnode-nice.c.in dnode-daemon.c.in paths.h.in \
-	drook.c.in dqueen.c.in dm-prop.c.in
-
-BUILT_SOURCES = dnode-nice.c    dnode-daemon.c    paths.h    \
-	drook.c    dqueen.c    dm-prop.c
-
-CLEANFILES = $(BUILT_SOURCES)
-DISTCLEANFILES = dm-config.h
+@ENABLE_RTHREADS_TRUE@DNODE_MPI_SRCS = dqueen.h
+@ENABLE_RTHREADS_TRUE@NODIST_DNODE_MPI_SRCS = dqueen.c
 @ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@CPPPLUGIN_HDR = cppplugin.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_HDR = plugin.h $(CPPPLUGIN_HDR) $(top_srcdir)/libltdl/ltdl.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_LD = @LIBLTDL@
@@ -826,45 +918,39 @@ pkginclude_HEADERS = dm.h dm-errs.h dm3.h pluginlib.h $(PLUGIN_HDR) \
 	dmx.h $(THREAD_HDR) \
 	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h \
 	basic-defs.h dm-types.h dm-nextevent.h dm2.h cppplugin.h \
-	dm6.h
+	dm6.h dm5.h
 
 nodist_pkginclude_HEADERS = dm-config.h paths.h
 
 # These source are only for the dvt and dnode, since they are
 #  dependent on sockets, file-descriptors and gnulib-tool
 #  libraries
-socksrcs = \
+SOCKSRCS = \
 	dm-nextevent.c dm-nextevent.h \
 	dm3.c dm3.h \
 	dm-proc.c dm-proc.h dm-glob.c dm-glob.h \
-	dm-prop.c dm-prop.h dm-dvt-vm.h 
+	dm-prop.h dm-dvt-vm.h 
 
-sockcpps = -I$(top_builddir)/lib -I$(top_srcdir)/lib
-socklds = $(top_builddir)/lib/libgnu.la
-dvt_SOURCES = dvt.c dvt_0.h dm-dvt.h dm-dvt.c \
-	$(socksrcs)
-
+NODIST_SOCKSRCS = dm-prop.c
+dvt_SOURCES = dvt.c dvt_0.h dm-dvt.h dm-dvt.c $(SOCKSRCS)
+nodist_dvt_SOURCES = $(NODIST_SOCKSRCS)
 dvt_LDADD = $(builddir)/libdmglobals.la \
-	$(socklds) \
 	$(AM_LDADD) $(ATLAS_LIBS)
 
-dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS) \
-	$(sockcpps)
-
+dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS)
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dnode_SOURCES = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
-	$(socksrcs) \
+	$(SOCKSRCS) \
 	$(DNODE_MPI_SRCS)
 
+nodist_dnode_SOURCES = $(NODIST_SOCKSRCS) $(NODIST_DNODE_MPI_SRCS)
 dnode_LDADD = $(builddir)/libdmglobals.la \
 	$(builddir)/libdmnodal.la \
-	$(socklds) \
 	$(AM_LDADD) $(ATLAS_LIBS) $(MPI_LIBS)
 
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
 dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) \
-	$(ATLAS_FLAGS) $(MPI_FLAGS) \
-	$(sockcpps)
+	$(ATLAS_FLAGS) $(MPI_FLAGS)
 
 dpawn_SOURCES = dpawn.c dpawn_0.h dm-dpawn.h dm-dpawn.c dm-mpi.h dm-mpi.c
 dpawn_LDADD = $(builddir)/libdmglobals.la \
@@ -874,20 +960,22 @@ dpawn_LDADD = $(builddir)/libdmglobals.la \
 dpawn_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dpawn_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS) $(MPI_FLAGS)
 testwordorder_SOURCES = test-word-order.c
-globsrcs = dmglobals.c \
+GLOBSRCS = dmglobals.c \
 	dmnuminc.h dmnum.c dsp1f.h dsp1.c dsp2.c \
-	paths.h dm2.c dm2.h dm-conv.c dm-swapbytes.h\
-	dm4.c dm5.c dm6.c dm6.h dm7.c dm7.h dm8.c dm9.c \
+	dm2.c dm2.h dm-conv.c dm-swapbytes.h\
+	dm4.c dm5.c dm5.h dm6.c dm6.h dm7.c dm7.h dm8.c dm9.c \
 	dm-types.c xhack.h \
 	dm1.c \
 	dm-signals.c dm-signals.h
 
+NODIST_GLOBSRCS = paths.h
 lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la libdmnodal.la
 libdmglobals_la_LIBADD = $(ATLAS_LIBS) $(AM_LIBADD)
-libdmglobals_la_SOURCES = $(globsrcs) \
+libdmglobals_la_SOURCES = $(GLOBSRCS) \
 	matrix.c matrix.h \
 	$(THREADSRC) $(REGEX_SRC) dm-convert.h dm-convert.c
 
+nodist_libdmglobals_la_SOURCES = $(NODIST_GLOBSRCS)
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 libdmnodal_la_SOURCES = dm-vm.c dm-vm.h dm-dvt-vm.h \
 	$(PLUGIN_HDR) pluginlib.h plugin.c
@@ -895,45 +983,47 @@ libdmnodal_la_SOURCES = dm-vm.c dm-vm.h dm-dvt-vm.h \
 libdmnodal_la_LIBADD = $(builddir)/libdmglobals.la \
 	$(AM_LIBADD) $(PLUGIN_LD) 
 
-editpaths = sed \
-	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
-	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \
-	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
-	-e 's,[@]dmconfdir[@],$(dmconfdir),g'
-
 nodist_pkgconfiglib_DATA = dm.pc
 dist_pkgdata_SCRIPTS = dgen-build
 dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c \
-	dm-nextevent.h dm3.c dm3.h dm-prop.c dm-prop.h
+	dm-nextevent.h dm3.c dm3.h dm-prop.h
 
+nodist_dgen_SOURCES = dm-prop.c
 dgen_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DBOOTSTRAP_PLUGIN=1 -DDM_DISABLE_REGEX=1 \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 @LIBDM_DLL_IMPORT@ 
 
 dgen_LDADD = $(builddir)/libdmbootstrap.la $(AM_LDADD)
-drook_SOURCES = drook.c
+nodist_drook_SOURCES = drook.c
 drook_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_REGEX=1 -DDM_DISABLE_XDISPLAY \
 	$(MPI_FLAGS) @LIBDM_DLL_IMPORT@ 
 
 drook_LDADD = $(builddir)/libdmbootstrap.la $(AM_LDADD) $(MPI_LIBS)
-dmprop_SOURCES = \
-	dm-prop.c dm-prop.h \
-	dm-signals.c dm-signals.h 
-
+dmprop_SOURCES = dm-prop.h dm-signals.c dm-signals.h 
+nodist_dmprop_SOURCES = dm-prop.c
 dmprop_CPPFLAGS = $(AM_CPPFLAGS) -DDM_PROP_MAIN
+dmprop_LDADD = $(AM_LDADD)
 libdmbootstrap_la_LIBADD = $(AM_LIBADD)
-libdmbootstrap_la_SOURCES = $(globsrcs) 
+libdmbootstrap_la_SOURCES = $(GLOBSRCS)
+nodist_libdmbootstrap_la_SOURCES = $(NODIST_GLOBSRCS)
 libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_THREADS=1 -DDM_DISABLE_REGEX=1 \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1
+
+Makefile = Makefile
+SVNVERSION_STAMP_DEP = @SVNVERSION_STAMP@
+INFILES_RULE = \
+	! test -e $@.tmp || rm -f $@.tmp \
+	&& $(edit) $< >$@.tmp \
+	&& mv $@.tmp $@
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_bundle_sub.make $(am__configure_deps)
+.SUFFIXES: .cin .hin .elin .din .psin .shin .plin .styin .c .d .el .h .lo .o .obj .pl .ps .sh .sty
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_bundle_sub.make $(top_srcdir)/m4/cf_in.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -1465,20 +1555,6 @@ dgen-dm-prop.obj: dm-prop.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dgen_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dgen-dm-prop.obj `if test -f 'dm-prop.c'; then $(CYGPATH_W) 'dm-prop.c'; else $(CYGPATH_W) '$(srcdir)/dm-prop.c'; fi`
 
-dmprop-dm-prop.o: dm-prop.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmprop_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dmprop-dm-prop.o -MD -MP -MF $(DEPDIR)/dmprop-dm-prop.Tpo -c -o dmprop-dm-prop.o `test -f 'dm-prop.c' || echo '$(srcdir)/'`dm-prop.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dmprop-dm-prop.Tpo $(DEPDIR)/dmprop-dm-prop.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-prop.c' object='dmprop-dm-prop.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmprop_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dmprop-dm-prop.o `test -f 'dm-prop.c' || echo '$(srcdir)/'`dm-prop.c
-
-dmprop-dm-prop.obj: dm-prop.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmprop_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dmprop-dm-prop.obj -MD -MP -MF $(DEPDIR)/dmprop-dm-prop.Tpo -c -o dmprop-dm-prop.obj `if test -f 'dm-prop.c'; then $(CYGPATH_W) 'dm-prop.c'; else $(CYGPATH_W) '$(srcdir)/dm-prop.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dmprop-dm-prop.Tpo $(DEPDIR)/dmprop-dm-prop.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-prop.c' object='dmprop-dm-prop.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmprop_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dmprop-dm-prop.obj `if test -f 'dm-prop.c'; then $(CYGPATH_W) 'dm-prop.c'; else $(CYGPATH_W) '$(srcdir)/dm-prop.c'; fi`
-
 dmprop-dm-signals.o: dm-signals.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmprop_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dmprop-dm-signals.o -MD -MP -MF $(DEPDIR)/dmprop-dm-signals.Tpo -c -o dmprop-dm-signals.o `test -f 'dm-signals.c' || echo '$(srcdir)/'`dm-signals.c
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dmprop-dm-signals.Tpo $(DEPDIR)/dmprop-dm-signals.Po
@@ -1492,6 +1568,20 @@ dmprop-dm-signals.obj: dm-signals.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-signals.c' object='dmprop-dm-signals.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmprop_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dmprop-dm-signals.obj `if test -f 'dm-signals.c'; then $(CYGPATH_W) 'dm-signals.c'; else $(CYGPATH_W) '$(srcdir)/dm-signals.c'; fi`
+
+dmprop-dm-prop.o: dm-prop.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmprop_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dmprop-dm-prop.o -MD -MP -MF $(DEPDIR)/dmprop-dm-prop.Tpo -c -o dmprop-dm-prop.o `test -f 'dm-prop.c' || echo '$(srcdir)/'`dm-prop.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dmprop-dm-prop.Tpo $(DEPDIR)/dmprop-dm-prop.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-prop.c' object='dmprop-dm-prop.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmprop_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dmprop-dm-prop.o `test -f 'dm-prop.c' || echo '$(srcdir)/'`dm-prop.c
+
+dmprop-dm-prop.obj: dm-prop.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmprop_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dmprop-dm-prop.obj -MD -MP -MF $(DEPDIR)/dmprop-dm-prop.Tpo -c -o dmprop-dm-prop.obj `if test -f 'dm-prop.c'; then $(CYGPATH_W) 'dm-prop.c'; else $(CYGPATH_W) '$(srcdir)/dm-prop.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dmprop-dm-prop.Tpo $(DEPDIR)/dmprop-dm-prop.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-prop.c' object='dmprop-dm-prop.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmprop_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dmprop-dm-prop.obj `if test -f 'dm-prop.c'; then $(CYGPATH_W) 'dm-prop.c'; else $(CYGPATH_W) '$(srcdir)/dm-prop.c'; fi`
 
 dnode-dnode.o: dnode.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dnode.o -MD -MP -MF $(DEPDIR)/dnode-dnode.Tpo -c -o dnode-dnode.o `test -f 'dnode.c' || echo '$(srcdir)/'`dnode.c
@@ -2138,36 +2228,7 @@ clean-local:
 
 @ENABLE_SETUID_TRUE@uninstall-local:
 @ENABLE_SETUID_TRUE@	-rm -f "$(DESTDIR)$(bindir)/dnode-nice$(EXEEXT)"
-
-dnode-nice.c: Makefile $(srcdir)/dnode-nice.c.in
-	-rm -f $@ $@.tmp
-	$(edit) "$(srcdir)/dnode-nice.c.in" > $@.tmp
-	mv $@.tmp $@
-
-dqueen.c: Makefile $(srcdir)/dqueen.c.in
-	-rm -f $@ $@.tmp
-	$(edit) "$(srcdir)/dqueen.c.in" >$@.tmp
-	mv $@.tmp $@
-
-drook.c: Makefile $(srcdir)/drook.c.in
-	-rm -f $@ $@.tmp
-	$(edit) "$(srcdir)/drook.c.in" >$@.tmp
-	mv $@.tmp $@
-
-dm-prop.c: Makefile $(srcdir)/dm-prop.c.in
-	-rm -f $@ $@.tmp
-	$(edit) "$(srcdir)/dm-prop.c.in" > $@.tmp
-	mv $@.tmp $@
-
-dnode-daemon.c: Makefile $(srcdir)/dnode-daemon.c.in
-	rm -f $@ $@.tmp
-	$(edit) "$(srcdir)/dnode-daemon.c.in" > $@.tmp
-	mv $@.tmp $@
-
-paths.h: paths.h.in Makefile
-	-rm -f $@ $@.tmp
-	$(editpaths) "$(srcdir)/$@.in" >$@.tmp
-	mv $@.tmp $@
+dm2.c dm3.c: paths.h
 
 .PHONY: gencode-all gencode
 gencode-all: gencode all
@@ -2199,6 +2260,17 @@ distsvn-extra:
 .PHONY: distsvn
 distsvn: distsvn-extra distsvn-recursive
 	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
+
+.cin.c:     ; $(INFILES_RULE)
+.hin.h:     ; $(INFILES_RULE)
+.din.d:     ; $(INFILES_RULE)
+.psin.ps:   ; $(INFILES_RULE)
+.shin.sh:   ; $(INFILES_RULE)
+.plin.pl:   ; $(INFILES_RULE)
+.elin.el:   ; $(INFILES_RULE)
+.styin.sty: ; $(INFILES_RULE)
+
+$(INFILES): $(Makefile) $(SVNVERSION_STAMP_DEP)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

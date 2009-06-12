@@ -1,4 +1,4 @@
-#line 2 "./dcoder.c.in"
+#line 2 "@srcdir@/dcoder.c.in"
 
 #include "dm-config.h"
 #ifdef DM_HAVE_CONFIG_H
@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
   i++;
 
   for (cemap = emap; cemap->str; cemap++, i++)
-    if (fprintf(fd, "  /%-29s %8lldx def\n", 
+    if (fprintf(fd, "  /%-@NAMEBYTES@s %8lldx def\n", 
 		cemap->str, (long long) cemap->val) < 0)
       error_dcoder(1, errno, "Unable to write line# %i", i);
 

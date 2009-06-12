@@ -1,3 +1,5 @@
+.NOTPARALLEL:
+
 .tex.pdf:
 	TEXINPUTS="$(srcdir):$(builddir):$$TEXINPUTS" \
 		$(pdflatex) -interaction nonstopmode $<

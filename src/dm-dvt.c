@@ -1,3 +1,5 @@
+#include "dm.h"
+
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
@@ -19,6 +21,8 @@
 #include "dm2.h"
 #include "dm-proc.h"
 #include "dm-signals.h"
+#include "dm5.h"
+#include "error-local.h"
 
 static LBIG memsetup[5] = { 1000, 100, 20, 10, 200 };
 
@@ -28,13 +32,12 @@ P toconsole(B *p, P atmost)
   P nb;
   if (atmost == -1) atmost = strlen((char*)p);
   while (atmost > 0) {
-  tc1:
-    if (abortflag) {abortflag = FALSE; return ABORT;}
-    if ((nb = write(1, p, atmost)) < 0) {
-      if ((errno == EINTR) || (errno == EAGAIN)) goto tc1;
+    while ((nb = write(DM_STDOUT_FILENO, p, atmost)) < 0)
+      if (errno == EINTR) checkabort();
       else return -errno;
-    }
-    atmost -= nb; p += nb;
+    if (nb < atmost) checkabort();
+    atmost -= nb; 
+    p += nb;
   }
   return OK;
 }
@@ -47,7 +50,6 @@ P toconsole(B *p, P atmost)
     returns can occur.
  */
 
-static volatile BOOLEAN recvd_quit = FALSE;
 DM_INLINE_STATIC P fromconsole(void)
 {
   P nb, nsbuf;
@@ -63,25 +65,21 @@ DM_INLINE_STATIC P fromconsole(void)
 
 /* we read until we have a \n-terminated string */
   p = sbuf; 
- rc1:
-  if (abortflag) return ABORT;
   do {
     if (p >= ebuf) return RNG_CHK;
-    if ((nb = read(consolesocket, p, 1)) < 0) {
-      switch (errno) {
-	case EAGAIN: case EINTR: goto rc1;
-	default: return -errno;
-      }
-    }
+    while ((nb = read(consolesocket, p, 1)) < 0)
+      if (errno == EINTR) checkabort();
+      else return -errno;
+    if (nb < 1) checkabort();
   } while (nb && (p++)[0] != '\n');
-
-  if (! nb) {
-    fprintf(stderr, "Received end-of-stdin\n");
-    recvd_quit = TRUE;
-    if (p == sbuf || p[-1] != '\n') p++;
-  }
+  
   /* we trim the buffer string object on the operand stack */
   ARRAY_SIZE(o_1) = p - sbuf - 1;
+  if (! nb) {
+    error_local(0, 0, "Received end-of-stdin\n");
+    if (p == sbuf || p[-1] != '\n') ARRAY_SIZE(o_1) += 1;
+    return QUIT;
+  }
   return OK;
 }
 
@@ -179,6 +177,7 @@ P op_errormessage(void)
 
 P op_abort(void)
 {
+  static BOOLEAN exhaustion = FALSE;
   B *frame;
   abortflag = FALSE;
   isstopping = FALSE;
@@ -193,7 +192,23 @@ P op_abort(void)
     }
   }
 
-  toconsole((B*)"**Execution stack of dvt exhausted!\n", -1L);
+  if (! exhaustion) {
+    toconsole((B*)"**Execution stack of dvt exhausted!\n", -1L);
+    exhaustion = TRUE;
+
+    FREEexecs = FLOORexecs + FRAMEBYTES;
+    makename("die", x_1);
+    ATTR(x_1) |= ACTIVE;
+
+    FREEopds = FLOORopds + FRAMEBYTES;
+    TAG(o_1) = (NUM|BYTETYPE);
+    ATTR(o_1) = 0;
+    BYTE_VAL(o_1) = -1;
+    
+    return OK;
+  }
+
+  toconsole((B*) "** Emergency exit!\n", -1L);
   return QUIT;
 }
 
@@ -261,7 +276,6 @@ static BOOLEAN ispending;
 P op_nextevent(void)
 {
   static B bufferf[FRAMEBYTES];
-  if (recvd_quit) return QUIT;
 
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
@@ -382,17 +396,9 @@ static void SIGINThandler(int sig __attribute__ ((__unused__)),
   fprintf(stderr, "\n"); // just skipped the current input line
 }
 
-static void SIGQUIThandler(int sig __attribute__ ((__unused__)),
-			  siginfo_t* info __attribute__ ((__unused__)),
-			  void* ucon __attribute__ ((__unused__)))
-{
-  recvd_quit = TRUE;
-  fprintf(stderr, "Received quit signal\n");
-}
-
 void run_dvt_mill(void) {
   P retc;
-  B abortframe[FRAMEBYTES], *sf;
+  B abortframe[FRAMEBYTES], quitframe[FRAMEBYTES], *sf;
   B* startup_dvt;
   P nb, tnb;
   B* sysdict;
@@ -404,11 +410,10 @@ void run_dvt_mill(void) {
   setupfd();
 
   if (makeDmemory(memsetup))
-    error(EXIT_FAILURE, 0, "D memory");
+    error_local(EXIT_FAILURE, 0, "D memory");
 
   setuphandlers();
   sethandler(SIGINT, SIGINThandler); //override abort on int
-  sethandler(SIGQUIT, SIGQUIThandler); //override quit on quit
 
 /* The system dictionary is created in the workspace of the tiny D machine.
    If the operator 'makeVM' is used to create a large D machine, this larger
@@ -416,9 +421,9 @@ void run_dvt_mill(void) {
    the pointers of the tiny D memory so we can revert to the tiny setup.
 */
   if ((sysdict = makeopdict((B *)sysop, syserrc,  syserrm)) == (B *)(-1L))
-    error(EXIT_FAILURE,0,"Cannot make system dictionary");
+    error_local(EXIT_FAILURE,0,"Cannot make system dictionary");
   if ((userdict = makedict(memsetup[4])) == (B *)(-1L))
-    error(EXIT_FAILURE,0,"Cannot make user dictionary");
+    error_local(EXIT_FAILURE,0,"Cannot make user dictionary");
 
 /* The first two dictionaries on the dicts are systemdict and userdict;
    they are not removable
@@ -432,8 +437,10 @@ void run_dvt_mill(void) {
 /*----------------- construct frames for use in execution of D code */
   makename((B*)"error",errorframe); 
   ATTR(errorframe) = ACTIVE;
-  makename((B*)"abort",abortframe); 
+  makename((B*)"abort", abortframe); 
   ATTR(abortframe) = ACTIVE;
+  makename((B*)"quit", quitframe);
+  ATTR(quitframe) = ACTIVE;
 
 /*----------- read startup_dvt.d and push on execs ----------*/
   startup_dvt 
@@ -443,7 +450,7 @@ void run_dvt_mill(void) {
 		  "/startup_dvt.d");
  
   if ((sufd = open((char*)startup_dvt, O_RDONLY)) == -1)
-    error(EXIT_FAILURE,errno,"Opening startup_dvt.d");
+    error_local(EXIT_FAILURE,errno,"Opening startup_dvt.d");
   tnb = 0; 
   sf = FREEvm; 
   p = sf + FRAMEBYTES;
@@ -455,8 +462,8 @@ void run_dvt_mill(void) {
     tnb += nb; 
     p += nb; 
   }
-  if (nb == -1) error(EXIT_FAILURE,errno,"Reading startup_dvt.d");
-  if (p == CEILvm) error(EXIT_FAILURE, ENOMEM,"startup_dvt.d > VM");
+  if (nb == -1) error_local(EXIT_FAILURE,errno,"Reading startup_dvt.d");
+  if (p == CEILvm) error_local(EXIT_FAILURE, ENOMEM,"startup_dvt.d > VM");
   ARRAY_SIZE(sf) = tnb;
   FREEvm += DALIGN(FRAMEBYTES + tnb);
   moveframe(sf,x1);
@@ -466,11 +473,22 @@ void run_dvt_mill(void) {
     switch(retc = exec(1000)) {
       case MORE: case DONE: continue; 
 
-      case QUIT:     
-	fprintf(stderr, "Quitting...\n");
-	exit(EXIT_SUCCESS);
+      case TERM:
+	exit(exitval);
 
-      case ABORT:    
+      case QUIT: 
+	recvd_quit = FALSE;
+	if (x1 < CEILexecs) {
+	  moveframe(quitframe, x1);
+	  FREEexecs = x2;
+	  continue;
+	}
+	retc = EXECS_OVF;
+	errsource = (B*) "supervisor";
+	break;
+
+      case ABORT:
+	abortflag = FALSE;
 	if (x1 < CEILexecs) {
 	  moveframe(abortframe, x1); 
 	  FREEexecs = x2;

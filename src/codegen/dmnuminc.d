@@ -157,7 +157,7 @@ NL (})__
       for \(n = \(\(\(UP\)ARRAY_SIZE\()__ peekA __ (\)-n__\)>>)__
       ROLLBITS n__  (\); 
             n && \(\(++abortcycle, abortcycle &= )__ 
-                     ABORTCYCLES n__ (\) || ! abortflag\);
+                     ABORTCYCLES n__ (\) || ! checkabort_\(\)\);
             n--\) {)__
       exchA UNROLLS {peekA exec} repeat exchA
     NL (}
@@ -187,7 +187,7 @@ NL (})__
       P abortcycle = 0;
       for \(n = \(\(n_-n__\) >> )__ ROLLBITS n__ (\); 
             n && \(\(++abortcycle, abortcycle &= )__ 
-                     ABORTCYCLES n__ (\) || ! abortflag\);
+                     ABORTCYCLES n__ (\) || ! checkabort_\(\)\);
             n--\) {)__
     UNROLLS {peekA exec} repeat
     NL (}

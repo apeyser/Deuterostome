@@ -1,3 +1,4 @@
+| -*- mode: d; -*-
 
 |======================== userdict ===================================
 
@@ -9,15 +10,32 @@
 /false 0 1 eq def                             | boolean prototypes
 /true  0 0 eq def
 
-/toconsole_ ~toconsole def
-/_toconsole ~toconsole bind def
+|================================= block binding ======================
+| We want to make toconsole, error, quit and die late-binding 
+| even if a procedure is defined with bind, 
+| so that redefines always work.
+|
+{
+  {/toconsole /toconsole_base}
+  {/error /error_base}
+  {/die /die_base}
+  {/quit /quit_base}
+} {exec
+  systemdict 2 index known not {pop pop} {
+    2 copy ~[3 -1 roll mkact] bind def | /x_base ~[~x] bind def
+    mkact def                          | /x ~x_base def
+  } ifelse
+} forall
 
-/makefont {
-    ~[exch 3 -1 roll 1 ~index 0 ~put] bind
-} bind def
-
-/warning_buffer 1024 /b array def
+|========================== warning ===============================
 | ~active | --
+|
+| ~active: buffer index | buffer index+fill_length
+|
+| convert a string into a red warning string.
+| ~active just fills a buffer and updates the index to the end.
+| 
+/warning_buffer 1024 /b array def
 /warning {
   /warning_func name
   loadcolor
@@ -26,8 +44,29 @@
     warning_func
     (\n) fax
   } color_text 
-  0 exch getinterval _toconsole
+  0 exch getinterval toconsole_base
 } bind def
+
+|================================ makefont ===========================
+| ~font-spec-getter [null col_idx h_align v_align] | ~drawtextproc
+| 
+| drawtextproc: -- | [(font-spec) col_idx h_align v_align]
+|
+| creates a procedure that gives the top operand for drawtext.
+| ~font-spec-getter is a procedure that returns a font-spec string
+|   at the time that the ~drawtextproc is called,
+| col_idx is a color obtained from mapcolor,
+| h_align and v_align are integers that define the alignment of the
+|  text, as defined for drawtext in dm9.c
+|
+| This little function is used to late-bind a font to a font-spec,
+|  to allow redefining the font-spec for a font until after all
+|  the files (particularly .dvt) are loaded.
+|
+/makefont {
+    ~[exch 3 -1 roll 1 ~index 0 ~put] bind
+} bind def
+
 
 |====================================== dictionary builders
 |
@@ -73,11 +112,22 @@
 } bind def
 
 |================ makelist =======================
-| max [/name...] | dict
+| ~store | dict
 | 
 | See linkedlist.d for details
+| store can be ~dynamic, ~static or ~linked
+|  (with approprate arguments on stack)
+|
 /makelist {
-  ~make LINKEDLIST indict
+  {exec new} LINKEDLIST indict
+} bind def
+
+|================ inlist =========================
+| ~active linked-list | ...
+| execute ~active with linked-list and LINKEDLIST 
+|  on dictionary stack
+/inlist {
+  ~indict LINKEDLIST indict
 } bind def
 
 |===================================== executable wrappers
@@ -164,7 +214,7 @@
 | these must be in the same order as sigmap in dm-signals.c
 | for the use of sendsig, rsendsig.
 |
-/SIGNALS [
+/SIGNALS {
   /QUIT 
   /KILL
   /TERM
@@ -172,7 +222,7 @@
   /INT
   /ALRM
   /FPE
-] makeenum def
+} makeenum def
 
 |------------ signal ---------------
 | socket /SIGNAL | --
@@ -266,7 +316,7 @@ end mkread def
    /dictclass  { { exch
                    line 0
                    -@NAMEBYTES@ 4 add 4 -1 roll text 
-                   0 exch getinterval toconsole_ showobj pop
+                   0 exch getinterval toconsole showobj pop
                  } forall
                } bind def 
    /markclass  /_ mkact def
@@ -276,9 +326,9 @@ end mkread def
 end mkread def
 
 /showobj { dup /object name
-   /object find readonly { (r ) } { (  ) } ifelse toconsole_
+   /object find readonly { (r ) } { (  ) } ifelse toconsole
    line 0 /object find oclasses begin class mkact exec end
-   * (\n) text 0 exch getinterval toconsole_
+   * (\n) text 0 exch getinterval toconsole
 } bind def
 
 /tuples 6 dict dup begin
@@ -293,10 +343,10 @@ end def
 /intuples { /col 0 def
    { /value name tuples value type get /tuple name
      line 0 -80 tuple div value * number
-     0 exch getinterval toconsole_
-     /col col 1 add dup tuple ge { pop 0 (\n) toconsole_ } if def
+     0 exch getinterval toconsole
+     /col col 1 add dup tuple ge { pop 0 (\n) toconsole } if def
    } forall
-  col 0 ne { (\n) toconsole_ } if
+  col 0 ne { (\n) toconsole } if
 } bind def
 
 /topfirst {                        | show list value in reverse order
@@ -310,7 +360,7 @@ end def                            | of debug_dict
 
 /_ { debug_dict begin              | show top object on opd stack
    count 0 eq
-     { (OPDS is empty\n) toconsole_ }
+     { (OPDS is empty\n) toconsole }
      { showobj }
      ifelse
    end
@@ -328,8 +378,8 @@ end def                            | of debug_dict
 
 /s_ { dup                           | show text string at top of opd stack
 dup dup class /arrayclass eq exch type /B eq and
-  { { (\n) search { toconsole_ toconsole_ }
-                  { toconsole_ (\n) toconsole_ exit } ifelse
+  { { (\n) search { toconsole toconsole }
+                  { toconsole (\n) toconsole exit } ifelse
     } loop
   } { v_ } ifelse
 } bind def
@@ -341,18 +391,18 @@ dup dup class /arrayclass eq exch type /B eq and
            10 (EXECS) text
            10 (OPDS) text
            * (\n) text
-         0 exch getinterval toconsole_
+         0 exch getinterval toconsole
    line  0 -10 (max) text
             10 vmmax * number
             * (\n) text
-         0 exch getinterval toconsole_
+         0 exch getinterval toconsole
    line  0 -10 (used) text
             10 vmused * number
             10 countdictstack * number
             10 countexecstack * number
             10 count * number
             * (\n) text
-         0 exch getinterval toconsole_
+         0 exch getinterval toconsole
    end
 } bind def
 
@@ -720,7 +770,13 @@ end def  | of xtext_dict
   ] exec _layer ~stop if
 } bind def
 
+|-------------------------- caplayer
 | ~capped ~body /layer_name | ...
+|
+| executes ~capped with a layer /layer_name,
+|  caps the layer, and then executes body,
+|  restoring the layer if body is stopped
+|
 /caplayer {
   dup layer find ~[
     4 -1 roll destruct_exec ~stopped 
@@ -749,7 +805,7 @@ end def  | of xtext_dict
       def true
     } {pop pop false} ifelse
   } {pop pop pop false} ifelse
-  not { (Think!\n) toconsole_ } if
+  not { (Think!\n) toconsole } if
 } bind def
 
 |-------------------------------- restoremodule 
@@ -795,6 +851,9 @@ end def  | of xtext_dict
     reverse
     userdict /d_dictstack put
 } bind def
+
+| e1...ex ... n | ... e1..ex
+/rollerror {error_ops_length 1 index add exch roll} bind def
 
 | ... | --
 /showerror ~[

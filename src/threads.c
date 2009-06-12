@@ -1,3 +1,5 @@
+#include "dm.h"
+
 #include <pthread.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -5,6 +7,7 @@
 
 #include "dm.h"
 #include "threads.h"
+#include "error-local.h"
 
 #if DM_ENABLE_THREADS
 
@@ -35,7 +38,7 @@ BOOLEAN share_lock_i = FALSE;
 #define THREAD_ERROR_EXIT(func, msg, ...) do {                          \
     int err;                                                            \
     if ((err = func(__VA_ARGS__)))                                      \
-      error(EXIT_FAILURE, err,                                          \
+      error_local(EXIT_FAILURE, err,                                          \
             "%s in %s:%d with %s(%s)",                                  \
             msg, __FILE__, __LINE__, #func, #__VA_ARGS__);              \
   } while (0)
@@ -167,7 +170,7 @@ P threads_do_pool_int(UP nways, thread_func func,
 }
 
 #define PRINT_ERRNO(func, ...)                             \
-  error(0, _errno, "At %s:%d with %s(%s)",                 \
+  error_local(0, _errno, "At %s:%d with %s(%s)",                 \
         __FILE__, __LINE__, #func, #__VA_ARGS__)
 
 

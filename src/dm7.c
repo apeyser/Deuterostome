@@ -18,7 +18,7 @@
           - transcribe
 */
 
-//#define _GNU_SOURCE
+#include "dm.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -311,37 +311,25 @@ P op_readfile(void)
   FREEvm[ARRAY_SIZE(o_2)] = '\000';
   FREEvm = oldfreevm;
 
-  //  alarm(30);
-  //  timeout = FALSE;
- rf1:
-  //  if (timeout) return TIMER; 
-  if (abortflag) return ABORT;
-  fd = open((char*)FREEvm, O_RDONLY | O_NONBLOCK);
-  if (fd == -1) {
-    if ((errno == EINTR) || (errno == EAGAIN))
-      goto rf1; 
-    else return -errno;
+  if ((fd = open((char*)FREEvm, O_RDONLY)) == -1) {
+    checkabort();
+    return -errno;
   }
   p = (B *)VALUE_BASE(o_1); atmost = ARRAY_SIZE(o_1);
- rf2:
-  //if (timeout) return TIMER; 
-  if (abortflag) return ABORT;
-  nb = read(fd, p, atmost);
-  if (nb == -1) {
-    if ((errno == EAGAIN) || (errno == EINTR)) goto rf2;
+
+  do {
+    while ((nb = read(fd, p, atmost)) == -1)
+      if (errno == EINTR) checkabort();
+      else return -errno;
+    if (nb < atmost) checkabort();
+    p += nb;
+    atmost -= nb;
+    if (! atmost) return RNG_CHK;
+  } while (nb > 0);
+
+  while (close(fd) == -1)
+    if (errno == EINTR) checkabort();
     else return -errno;
-  }
-  if (nb == 0) goto rf3;
-  p += nb; atmost -= nb;
-  if (atmost == 0) return RNG_CHK;
-  goto rf2;
- rf3:
-  //if (timeout) return TIMER; 
-  if (abortflag) return ABORT;
-  if (close(fd) == -1) {
-    if (errno == EINTR) goto rf3; 
-    else return -errno;
-  }
  
   ARRAY_SIZE(o_1) = p - (B *)VALUE_BASE(o_1);
   moveframe(o_1, o_3);
@@ -382,73 +370,28 @@ P op_writefile(void)
   FREEvm[ARRAY_SIZE(o_1)] = '\000';
   FREEvm = oldfreevm;
   
-  //  alarm(30);
-  //timeout = FALSE;
- wf1:
-  //if (timeout) return TIMER; 
-  if (abortflag) return ABORT;
-  fd = open((char*)FREEvm, O_CREAT | O_RDWR | O_TRUNC | O_NONBLOCK,
-            S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
-  if (fd == -1) {
-    if ((errno == EINTR) || (errno == EAGAIN)) goto wf1; 
+  while ((fd = open((char*)FREEvm, O_CREAT | O_RDWR | O_TRUNC,
+		    S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH))
+	 == -1)
+    if (errno == EINTR) checkabort();
     else return -errno;
-  }
   p = (B *)VALUE_BASE(o_3); atmost = ARRAY_SIZE(o_3);
- wf2:
-  //if (timeout) return TIMER; 
-  if (abortflag) return ABORT;
-  nb = write(fd, p, atmost);
-  if (nb == -1) {
-    if ((errno == EAGAIN) || (errno == EINTR)) goto wf2;
-    else return -errno;
+
+  while (atmost) {
+    while ((nb = write(fd, p, atmost)) == -1)
+      if (errno == EINTR) checkabort();
+      else return -errno;
+    if (nb < atmost) checkabort();
+    atmost -= nb;
+    p += nb;
   }
-  p += nb; atmost -= nb;
-  if (atmost > 0) goto wf2;
- wf3:
-  //if (timeout) return TIMER; 
-  if (abortflag) return ABORT;
-  if (close(fd) == -1) {
-    if (errno == EINTR) goto wf3; 
+
+  while (close(fd) == -1)
+    if (errno == EINTR) checkabort();
     else return -errno;
-  }
+
   FREEopds = o_3;
   return OK;
-}
-
-/******************************************* some funcs for read/writeboxfile
- * double time loops: 10 seconds for single operations
- *                    and 3 minutes for the full thing.
- */
-
-#define TIMEOUT_SECS (3*60)
-
-//static clock_t endclock;
-static P chunk_size;
-
-DM_INLINE_STATIC void START_ALARM(void) {
-  //		endclock = clock() + TIMEOUT_SECS*CLOCKS_PER_SEC;
-  //		timeout = FALSE;
-}
-
-#define MAX_CHUNK (32000)
-//100mbit/s*1/8mbyte/mbit*1024byte/mbyte*5s*1/2minrate*/
-
-DM_INLINE_STATIC P CHECK_ALARM(void) {
-  //  int timeout_;
-  //alarm(0);
-  
-  //timeout_ = timeout;
-  //timeout = FALSE;
-  //if (clock() > endclock || timeout_) return TIMER;
-  if (abortflag) return ABORT;
-	
-  //alarm(10);
-  return OK;
-}
-
-DM_INLINE_STATIC void END_ALARM(void) {
-  //alarm(0);
-  //timeout = FALSE;
 }
 
 /*---------------------------------------------------- readboxfile
@@ -486,37 +429,26 @@ P op_readboxfile(void)
   FREEvm = oldfreevm;
 
   atmost = CEILvm - FREEvm;   
-  START_ALARM();
- rb1:
-  if ((retc = CHECK_ALARM()) != OK) return retc;
-  fd = open((char*)FREEvm, O_RDONLY | O_NONBLOCK);
-  if (fd == -1) {
-    if ((errno == EINTR) || (errno == EAGAIN)) goto rb1; 
-    else {retc = -errno; END_ALARM(); return retc;};
-  }
-  p = FREEvm; 
 
- rb2:
-  if ((retc = CHECK_ALARM()) != OK) return retc;
-  chunk_size = MAX_CHUNK < atmost ? MAX_CHUNK : atmost;
-  nb = read(fd, p, chunk_size);
-  if (nb == -1) {
-    if ((errno == EAGAIN) || (errno == EINTR)) goto rb2;
-    else {retc = -errno; END_ALARM(); return retc;};
-  }
-  if (nb == 0) goto rb3;
-  p += nb; atmost -= nb;
-  if (atmost == 0) {END_ALARM(); return VM_OVF;};
-  goto rb2;
- 
- rb3:
-  if ((retc = CHECK_ALARM()) != OK) return retc;
-  if (close(fd) == -1) {
-    if ((errno == EINTR) || (errno == EAGAIN)) goto rb3;
+  while ((fd = open((char*)FREEvm, O_RDONLY)) == -1)
+    if (errno == EINTR) checkabort();
     else return -errno;
-  }
-  END_ALARM();
+
+  p = FREEvm;
+  do {
+    while ((nb = read(fd, p, atmost)) == -1)
+      if (errno == EINTR) checkabort();
+      else return -errno;
+    if (nb < atmost) checkabort();
+    p += nb;
+    atmost -= nb;
+    if (! atmost) return VM_OVF;
+  } while (nb);
  
+  while (close(fd) == -1)
+    if (errno == EINTR) checkabort();
+    else return -errno;
+  
   nb = DALIGN(p - FREEvm);
   if (! GETNATIVEFORMAT(FREEvm) || ! GETNATIVEUNDEF(FREEvm)) return BAD_FMT;
   isnonnative = GETNONNATIVE(FREEvm);
@@ -584,36 +516,30 @@ P op_writeboxfile(void)
   freemem[ARRAY_SIZE(o_1)] = '\000';
   freemem = oldfreemem;
 
-  START_ALARM();
- wb1:
-  if ((retc = CHECK_ALARM()) != OK) {foldobj_free(); return retc;};
-  fd = open((char*)freemem, O_CREAT | O_NONBLOCK | O_RDWR | O_TRUNC,
-            S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
-  if (fd == -1) {
-    if ((errno == EINTR) || (errno == EAGAIN)) goto wb1;
-    else {retc = -errno; END_ALARM(); foldobj_free(); return retc;};
-  }
-  
- wb2:
-  if ((retc = CHECK_ALARM()) != OK) {foldobj_free(); return retc;};
-  chunk_size = MAX_CHUNK < atmost ? MAX_CHUNK : atmost;
-  nb = write(fd, base, chunk_size);
-  if (nb == -1) {
-    if ((errno == EAGAIN) || (errno == EINTR)) goto wb2;
-    else {retc = -errno; END_ALARM(); foldobj_free(); return retc;};
-  }
- 
-  base += nb; atmost -= nb;
-  if (atmost > 0) goto wb2;
+  while ((fd = open((char*)freemem, O_CREAT | O_RDWR | O_TRUNC,
+		    S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH))
+	 == -1)
+    if (errno == EINTR) {
+      if ((retc = checkabort_())) {foldobj_free(); return retc;}
+    } 
+    else {retc = -errno; foldobj_free(); return retc;}
+
+  do {
+    while ((nb = write(fd, base, atmost)) == -1)
+      if (errno == EINTR) {
+	if ((retc = checkabort_())) {foldobj_free(); return retc;}
+      }
+      else {retc = -errno; foldobj_free(); return retc;}
+    if (nb < atmost && (retc = checkabort_())) {foldobj_free(); return retc;}
+    base += nb;
+    atmost -= nb;
+  } while (atmost > 0);
 		
   foldobj_free();
- wb3:
-  if ((retc = CHECK_ALARM()) != OK) return retc;
-  if (close(fd) == -1) {
-    if (errno == EINTR) goto wb3;
+  while (close(fd) == -1) {
+    if (errno == EINTR) checkabort();
     else return -errno;
   }
-  END_ALARM();
  
   FREEopds = o_3;
   return OK;
@@ -871,8 +797,7 @@ P op_transcribe(void)
   prints string out to stderr
 */
 
-P op_tostderr(void)
-{
+P op_tostderr(void) {
   B *p;
   P nb, atmost;
 
@@ -882,9 +807,10 @@ P op_tostderr(void)
   p = VALUE_PTR(o_1);
   atmost = ARRAY_SIZE(o_1);
   while (atmost > 0) {
-    while ((nb = write(2, p, atmost)) < 0
-           && ((errno == EINTR) || (errno == EAGAIN)));
-    if (nb < 0) return ABORT;
+    while ((nb = write(DM_STDERR_FILENO, p, atmost)) < 0)
+      if (errno == EINTR) checkabort();
+      else return -errno;
+    if (nb < atmost) checkabort();
     atmost -= nb;
     p += nb;
   }

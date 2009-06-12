@@ -5,6 +5,7 @@
 #define MORE        (P)0x00000004L /*                                       */
 #define ABORT       (P)0x00000005L /* ABORT signal sent from console        */
 #define QUIT        (P)0x00000006L /*                                       */
+#define TERM        (P)0x00000007L /*                                       */
 
 #define CORR_OBJ    (P)0x00000101L /* corrupted object                      */
 #define LOST_CONN   (P)0x00000102L /* network connection lost               */

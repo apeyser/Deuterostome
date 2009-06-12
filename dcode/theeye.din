@@ -1,3 +1,5 @@
+| -*- mode: d; -*-
+
 |================================== TheEye =================================
 |   - graphically view/select contents of
 |       - the VM and its composite objects
@@ -5,7 +7,7 @@
 |   - viewed objects are made available to other D code
 
 200 dict dup begin  | of eyedict
-(Loading TheEye.d  $Id$ V@PACKAGE_VERSION@ @SVNVERSION@\n) toconsole
+(Using theeye.d  $Id$ V@PACKAGE_VERSION@ @SVNVERSION@\n) toconsole
 
 |=========================== window layout =================================
 |  - horizontal:
@@ -556,14 +558,14 @@ end mkread /infoclasses name
 | - stacks are cleaned up and 'stop' is executed
 
 /errordict 1 dict dup begin | {
-  /error {error} bind def   | }
+  /error ~error_base def   | }
 end mkread def
 
 /error {
   errordict begin {
     | avoid stop loop
-    dup ERRORS /INV_STOP get eq {error} {
-      dup ERRORS /EXECS_UNF get eq {error} {
+    dup ERRORS /INV_STOP get eq ~error_base {
+      dup ERRORS /EXECS_UNF get eq ~error_base {
         wid inforect BG fillrectangle
         infoline errormessage dup length 1 sub 0 exch getinterval
         dup toconsole (\n) toconsole

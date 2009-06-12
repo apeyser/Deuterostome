@@ -151,6 +151,7 @@ B* _sysop[] =
   (B*) "gethomedir", (B*) op_gethomedir,
   (B*) "getconfdir", (B*) op_getconfdir,
   (B*) "socketval", (B*) op_socketval,
+  (B*) "die", (B*) op_die,
   (B*) "quit", (B*) op_quit,
   (B*) "fromconsole", (B*) op_fromconsole,
   (B*) "]", (B*) op_closelist,
@@ -160,6 +161,7 @@ B* _sysop[] =
 P _syserrc[] = {
   ABORT,
   QUIT,
+  TERM,
   MORE,
   DONE,
   TIMER,
@@ -211,6 +213,7 @@ P _syserrc[] = {
 B* _syserrm[] = {
   (B*) "** Internal ABORT returned -- should never appear as error",
   (B*) "** Internal QUIT returned -- should never appear as error",
+  (B*) "** Internal TERM returned -- should never appear as error",
   (B*) "** Internal MORE returned -- should never appear as error",
   (B*) "** Internal DONE returned -- should never appear as error",
   (B*) "** Timeout",

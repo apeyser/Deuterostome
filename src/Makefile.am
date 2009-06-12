@@ -1,13 +1,21 @@
-AM_CPPFLAGS = -DDM_HAVE_CONFIG_H
+AM_CPPFLAGS = -DDM_HAVE_CONFIG_H -I"$(top_builddir)/lib" -I"$(top_srcdir)/lib"
 AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
 AM_CXXFLAGS = $(GCC_CXXFLAGS)
 AM_LDFLAGS = -no-undefined 
 AM_LIBS = $(PTHREAD_LIBS) $(X_LDFLAGS) 
-AM_LIBADD = $(AM_LIBS) @RELEASE_INFO@ @VERSION_INFO@
-AM_LDADD = $(AM_LIBS)
+AM_LIBADD = $(AM_LIBS) @RELEASE_INFO@ @VERSION_INFO@ \
+	$(top_builddir)/lib/libgnu.la
+AM_LDADD = $(AM_LIBS) $(top_builddir)/lib/libgnu.la
 INCLUDES =
 
 DIST_SUBDIRS = codegen
+BUILT_SOURCES = dnode-nice.c dnode-daemon.c paths.h \
+		drook.c dqueen.c dm-prop.c
+INFILES = $(BUILT_SOURCES)
+EXTRA_DIST = $(INFILES:=in)
+CLEANFILES = $(INFILES)
+DISTCLEANFILES = dm-config.h
+SUFFIXES =
 
 all-local:
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS) dgen
@@ -27,7 +35,12 @@ edit = sed \
 	-e "s,[@]DPAWN_EXEC[@],`for i in $(DPAWN_COMMAND) $(dpawn); do echo \\\"$$i\\\"; break; done | tr -d \"\n\"`,g" \
 	-e "s|[@]DPAWN_ARGS[@]|`first=:; for i in $(DPAWN_COMMAND) $(dpawn); do if $$first; then first=false; else echo \\\"$$i\\\",; fi ; done | tr -d \"\n\"`|g" \
 	-e 's,[@]DPAWN_COMMAND[@],$(DPAWN_COMMAND) $(dpawn),g' \
-	-e 's,[@]dmprop[@],$(dmprop),g'
+	-e 's,[@]dmprop[@],$(dmprop),g' \
+	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
+	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \
+	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
+	-e 's,[@]dmconfdir[@],$(dmconfdir),g'
+
 
 if ENABLE_SETUID
 
@@ -45,39 +58,12 @@ uninstall-local:
 
 endif ENABLE_SETUID
 
-dnode-nice.c: Makefile $(srcdir)/dnode-nice.c.in
-	-rm -f $@ $@.tmp
-	$(edit) "$(srcdir)/dnode-nice.c.in" > $@.tmp
-	mv $@.tmp $@
-
-dqueen.c: Makefile $(srcdir)/dqueen.c.in
-	-rm -f $@ $@.tmp
-	$(edit) "$(srcdir)/dqueen.c.in" >$@.tmp
-	mv $@.tmp $@
-
-drook.c: Makefile $(srcdir)/drook.c.in
-	-rm -f $@ $@.tmp
-	$(edit) "$(srcdir)/drook.c.in" >$@.tmp
-	mv $@.tmp $@
-
-dm-prop.c: Makefile $(srcdir)/dm-prop.c.in
-	-rm -f $@ $@.tmp
-	$(edit) "$(srcdir)/dm-prop.c.in" > $@.tmp
-	mv $@.tmp $@
-
 if ENABLE_DAEMON
 
 nodist_dnode_daemon_SOURCES = dnode-daemon.c
 DNODEDAEMONBIN = dnode-daemon
 
 endif ENABLE_DAEMON
-
-dnode-daemon.c: Makefile $(srcdir)/dnode-daemon.c.in
-	rm -f $@ $@.tmp
-	$(edit) "$(srcdir)/dnode-daemon.c.in" > $@.tmp
-	mv $@.tmp $@
-
-
 
 if ENABLE_ATLAS
 ATLAS_ACTIVATE = -DATLAS_LIB
@@ -94,16 +80,9 @@ endif ENABLE_REGEX
 
 if ENABLE_RTHREADS
 MPI_PROGS = drook dpawn
-DNODE_MPI_SRCS = dqueen.c dqueen.h
+DNODE_MPI_SRCS = dqueen.h
+NODIST_DNODE_MPI_SRCS = dqueen.c
 endif ENABLE_RTHREADS
-
-EXTRA_DIST =    dnode-nice.c.in dnode-daemon.c.in paths.h.in \
-	drook.c.in dqueen.c.in dm-prop.c.in
-BUILT_SOURCES = dnode-nice.c    dnode-daemon.c    paths.h    \
-	drook.c    dqueen.c    dm-prop.c
-CLEANFILES = $(BUILT_SOURCES)
-
-DISTCLEANFILES = dm-config.h
 
 bin_PROGRAMS = dvt dnode dgen $(DNODEDAEMONBIN) $(MPI_PROGS) dmprop
 noinst_PROGRAMS = testwordorder $(DNODENICEBIN)
@@ -121,40 +100,36 @@ pkginclude_HEADERS = dm.h dm-errs.h dm3.h pluginlib.h $(PLUGIN_HDR) \
 	dmx.h $(THREAD_HDR) \
 	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h \
 	basic-defs.h dm-types.h dm-nextevent.h dm2.h cppplugin.h \
-	dm6.h
+	dm6.h dm5.h
 nodist_pkginclude_HEADERS = dm-config.h paths.h
 
 # These source are only for the dvt and dnode, since they are
 #  dependent on sockets, file-descriptors and gnulib-tool
 #  libraries
-socksrcs = \
+SOCKSRCS = \
 	dm-nextevent.c dm-nextevent.h \
 	dm3.c dm3.h \
 	dm-proc.c dm-proc.h dm-glob.c dm-glob.h \
-	dm-prop.c dm-prop.h dm-dvt-vm.h 
-sockcpps = -I$(top_builddir)/lib -I$(top_srcdir)/lib
-socklds = $(top_builddir)/lib/libgnu.la
+	dm-prop.h dm-dvt-vm.h 
+NODIST_SOCKSRCS = dm-prop.c
 
-dvt_SOURCES = dvt.c dvt_0.h dm-dvt.h dm-dvt.c \
-	$(socksrcs)
+dvt_SOURCES = dvt.c dvt_0.h dm-dvt.h dm-dvt.c $(SOCKSRCS)
+nodist_dvt_SOURCES = $(NODIST_SOCKSRCS)
 dvt_LDADD = $(builddir)/libdmglobals.la \
-	$(socklds) \
 	$(AM_LDADD) $(ATLAS_LIBS)
-dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS) \
-	$(sockcpps)
+dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS)
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 
 dnode_SOURCES = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
-	$(socksrcs) \
+	$(SOCKSRCS) \
 	$(DNODE_MPI_SRCS)
+nodist_dnode_SOURCES = $(NODIST_SOCKSRCS) $(NODIST_DNODE_MPI_SRCS)
 dnode_LDADD = $(builddir)/libdmglobals.la \
 	$(builddir)/libdmnodal.la \
-	$(socklds) \
 	$(AM_LDADD) $(ATLAS_LIBS) $(MPI_LIBS)
 dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
 dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) \
-	$(ATLAS_FLAGS) $(MPI_FLAGS) \
-	$(sockcpps)
+	$(ATLAS_FLAGS) $(MPI_FLAGS)
 
 dpawn_SOURCES = dpawn.c dpawn_0.h dm-dpawn.h dm-dpawn.c dm-mpi.h dm-mpi.c
 dpawn_LDADD = $(builddir)/libdmglobals.la \
@@ -165,36 +140,28 @@ dpawn_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS) $(MPI_FLAGS)
 
 testwordorder_SOURCES = test-word-order.c
 
-globsrcs = dmglobals.c \
+GLOBSRCS = dmglobals.c \
 	dmnuminc.h dmnum.c dsp1f.h dsp1.c dsp2.c \
-	paths.h dm2.c dm2.h dm-conv.c dm-swapbytes.h\
-	dm4.c dm5.c dm6.c dm6.h dm7.c dm7.h dm8.c dm9.c \
+	dm2.c dm2.h dm-conv.c dm-swapbytes.h\
+	dm4.c dm5.c dm5.h dm6.c dm6.h dm7.c dm7.h dm8.c dm9.c \
 	dm-types.c xhack.h \
 	dm1.c \
 	dm-signals.c dm-signals.h
+NODIST_GLOBSRCS = paths.h
+dm2.c dm3.c: paths.h
 
 lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la libdmnodal.la
 libdmglobals_la_LIBADD = $(ATLAS_LIBS) $(AM_LIBADD)
-libdmglobals_la_SOURCES = $(globsrcs) \
+libdmglobals_la_SOURCES = $(GLOBSRCS) \
 	matrix.c matrix.h \
 	$(THREADSRC) $(REGEX_SRC) dm-convert.h dm-convert.c
+nodist_libdmglobals_la_SOURCES = $(NODIST_GLOBSRCS)
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 
 libdmnodal_la_SOURCES = dm-vm.c dm-vm.h dm-dvt-vm.h \
 	$(PLUGIN_HDR) pluginlib.h plugin.c
 libdmnodal_la_LIBADD = $(builddir)/libdmglobals.la \
 	$(AM_LIBADD) $(PLUGIN_LD) 
-
-editpaths = sed \
-	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
-	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \
-	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
-	-e 's,[@]dmconfdir[@],$(dmconfdir),g'
-
-paths.h: paths.h.in Makefile
-	-rm -f $@ $@.tmp
-	$(editpaths) "$(srcdir)/$@.in" >$@.tmp
-	mv $@.tmp $@
 
 .PHONY: gencode-all gencode
 gencode-all: gencode all
@@ -206,28 +173,30 @@ nodist_pkgconfiglib_DATA = dm.pc
 dist_pkgdata_SCRIPTS = dgen-build
 
 dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c \
-	dm-nextevent.h dm3.c dm3.h dm-prop.c dm-prop.h
+	dm-nextevent.h dm3.c dm3.h dm-prop.h
+nodist_dgen_SOURCES = dm-prop.c
 dgen_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DBOOTSTRAP_PLUGIN=1 -DDM_DISABLE_REGEX=1 \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 @LIBDM_DLL_IMPORT@ 
 dgen_LDADD = $(builddir)/libdmbootstrap.la $(AM_LDADD)
 
-drook_SOURCES = drook.c
+nodist_drook_SOURCES = drook.c
 drook_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_REGEX=1 -DDM_DISABLE_XDISPLAY \
 	$(MPI_FLAGS) @LIBDM_DLL_IMPORT@ 
 drook_LDADD = $(builddir)/libdmbootstrap.la $(AM_LDADD) $(MPI_LIBS)
 
-dmprop_SOURCES = \
-	dm-prop.c dm-prop.h \
-	dm-signals.c dm-signals.h 
+dmprop_SOURCES = dm-prop.h dm-signals.c dm-signals.h 
+nodist_dmprop_SOURCES = dm-prop.c
 dmprop_CPPFLAGS = $(AM_CPPFLAGS) -DDM_PROP_MAIN
+dmprop_LDADD = $(AM_LDADD)
 
 libdmbootstrap_la_LIBADD = $(AM_LIBADD)
-libdmbootstrap_la_SOURCES = $(globsrcs) 
+libdmbootstrap_la_SOURCES = $(GLOBSRCS)
+nodist_libdmbootstrap_la_SOURCES = $(NODIST_GLOBSRCS)
 libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_THREADS=1 -DDM_DISABLE_REGEX=1 \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1
 
 include $(top_srcdir)/m4/cf_bundle_sub.make
-
+include $(top_srcdir)/m4/cf_in.make

@@ -16,6 +16,8 @@
 
 # -*- mode: makefile; -*-
 
+# -*- mode: makefile; -*-
+
 
 
 
@@ -42,8 +44,9 @@ DIST_COMMON = $(dist_noinst_DATA) $(dist_noinst_SCRIPTS) \
 	$(srcdir)/dm-errs.h.built $(srcdir)/dmnuminc.h.built \
 	$(srcdir)/dnode_0.h.built $(srcdir)/dpawn_0.h.built \
 	$(srcdir)/dsp1f.h.built $(srcdir)/dsp2def.h.built \
-	$(srcdir)/dvt_0.h.built $(srcdir)/errors.d \
-	$(srcdir)/startup_dgen.d $(top_srcdir)/m4/cf_bundle_sub.make
+	$(srcdir)/dvt_0.h.built $(srcdir)/errors.din.built \
+	$(srcdir)/startup_dgen.d $(top_srcdir)/m4/cf_bundle_sub.make \
+	$(top_srcdir)/m4/cf_in.make
 subdir = src/codegen
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
@@ -82,39 +85,42 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/mbstate_t.m4 $(top_srcdir)/m4/mempcpy.m4 \
 	$(top_srcdir)/m4/mkdtemp.m4 $(top_srcdir)/m4/multiarch.m4 \
 	$(top_srcdir)/m4/onceonly.m4 $(top_srcdir)/m4/stdbool.m4 \
-	$(top_srcdir)/m4/stdint.m4 $(top_srcdir)/m4/stdlib_h.m4 \
-	$(top_srcdir)/m4/string_h.m4 $(top_srcdir)/m4/sys_stat_h.m4 \
-	$(top_srcdir)/m4/sys_time_h.m4 $(top_srcdir)/m4/tempname.m4 \
-	$(top_srcdir)/m4/unistd_h.m4 $(top_srcdir)/m4/wchar.m4 \
-	$(top_srcdir)/m4/wctype.m4 $(top_srcdir)/m4/wint_t.m4 \
-	$(top_srcdir)/acinclude.m4 $(top_srcdir)/m4/basic-defs.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/stdint.m4 $(top_srcdir)/m4/stdio_h.m4 \
+	$(top_srcdir)/m4/stdlib_h.m4 $(top_srcdir)/m4/string_h.m4 \
+	$(top_srcdir)/m4/sys_stat_h.m4 $(top_srcdir)/m4/sys_time_h.m4 \
+	$(top_srcdir)/m4/tempname.m4 $(top_srcdir)/m4/unistd_h.m4 \
+	$(top_srcdir)/m4/wchar.m4 $(top_srcdir)/m4/wctype.m4 \
+	$(top_srcdir)/m4/wint_t.m4 $(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/m4/basic-defs.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = dm.h dmglobals.c dsp1.c dm1.c dm2.c dm2.h dm3.h \
 	dm-prop.h dm-signals.h dm-vm.h dm-swapbytes.h dm-conv.c dm3.c \
-	dm-prop.c.in dm-signals.c dm-vm.c dm4.c dm5.c dm6.c dm6.h \
-	dm7.c dm8.c dmnum.c dsp2.c dm-types.h dm-types.c paths.h.in \
+	dm-prop.cin dm-signals.c dm-vm.c dm4.c dm5.c dm5.h dm6.c dm6.h \
+	dm7.c dm8.c dmnum.c dsp2.c dm-types.h dm-types.c paths.hin \
 	dgen.c dgen_1.h dgen-build dmnum.h dm-nextevent.c \
 	dm-nextevent.h
 LTLIBRARIES = $(noinst_LTLIBRARIES)
-am__DEPENDENCIES_1 =
+am__DEPENDENCIES_1 = $(top_builddir)/lib/libgnu.la
 libdmbootstrap_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libdmbootstrap_la_OBJECTS = dmnum.lo dsp1.lo dsp2.lo dmglobals.lo \
 	dm1.lo dm2.lo dm-conv.lo dm4.lo dm5.lo dm6.lo dm7.lo dm8.lo \
 	dm-types.lo dm-signals.lo
-libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS)
+nodist_libdmbootstrap_la_OBJECTS =
+libdmbootstrap_la_OBJECTS = $(am_libdmbootstrap_la_OBJECTS) \
+	$(nodist_libdmbootstrap_la_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
-am_dcoder_OBJECTS = dcoder-dcoder.$(OBJEXT)
-dcoder_OBJECTS = $(am_dcoder_OBJECTS)
-dcoder_LDADD = $(LDADD)
+am_dcoder_OBJECTS =
+nodist_dcoder_OBJECTS = dcoder-dcoder.$(OBJEXT)
+dcoder_OBJECTS = $(am_dcoder_OBJECTS) $(nodist_dcoder_OBJECTS)
+dcoder_DEPENDENCIES = $(AM_LDADD)
 am_dgen_OBJECTS = dgen-dgen.$(OBJEXT) dgen-dm-nextevent.$(OBJEXT) \
-	dgen-dm3.$(OBJEXT) dgen-dm-prop.$(OBJEXT) \
-	dgen-dgen-dm3.$(OBJEXT)
-dgen_OBJECTS = $(am_dgen_OBJECTS)
-dgen_DEPENDENCIES = $(builddir)/libdmbootstrap.la
+	dgen-dm3.$(OBJEXT) dgen-dgen-dm3.$(OBJEXT)
+nodist_dgen_OBJECTS = dgen-dm-prop.$(OBJEXT)
+dgen_OBJECTS = $(am_dgen_OBJECTS) $(nodist_dgen_OBJECTS)
+dgen_DEPENDENCIES = $(builddir)/libdmbootstrap.la $(AM_LDADD)
 dgen_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(dgen_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
@@ -131,14 +137,15 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libdmbootstrap_la_SOURCES) $(dcoder_SOURCES) \
-	$(dgen_SOURCES)
+SOURCES = $(libdmbootstrap_la_SOURCES) \
+	$(nodist_libdmbootstrap_la_SOURCES) $(dcoder_SOURCES) \
+	$(nodist_dcoder_SOURCES) $(dgen_SOURCES) \
+	$(nodist_dgen_SOURCES)
 DIST_SOURCES = $(libdmbootstrap_la_SOURCES) $(dcoder_SOURCES) \
 	$(dgen_SOURCES)
-DATA = $(dist_noinst_DATA)
+DATA = $(dist_noinst_DATA) $(nodist_noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
-DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 pkgdatadir = @pkgdatadir@
 pkglibdir = @pkglibdir@
 pkgincludedir = @pkgincludedir@
@@ -238,16 +245,32 @@ GNULIB_CALLOC_POSIX = @GNULIB_CALLOC_POSIX@
 GNULIB_CHOWN = @GNULIB_CHOWN@
 GNULIB_CLOSE = @GNULIB_CLOSE@
 GNULIB_DIRFD = @GNULIB_DIRFD@
+GNULIB_DPRINTF = @GNULIB_DPRINTF@
 GNULIB_DUP2 = @GNULIB_DUP2@
 GNULIB_ENVIRON = @GNULIB_ENVIRON@
 GNULIB_EUIDACCESS = @GNULIB_EUIDACCESS@
 GNULIB_FCHDIR = @GNULIB_FCHDIR@
+GNULIB_FCLOSE = @GNULIB_FCLOSE@
+GNULIB_FFLUSH = @GNULIB_FFLUSH@
+GNULIB_FOPEN = @GNULIB_FOPEN@
+GNULIB_FPRINTF = @GNULIB_FPRINTF@
+GNULIB_FPRINTF_POSIX = @GNULIB_FPRINTF_POSIX@
+GNULIB_FPUTC = @GNULIB_FPUTC@
+GNULIB_FPUTS = @GNULIB_FPUTS@
+GNULIB_FREOPEN = @GNULIB_FREOPEN@
+GNULIB_FSEEK = @GNULIB_FSEEK@
+GNULIB_FSEEKO = @GNULIB_FSEEKO@
 GNULIB_FSYNC = @GNULIB_FSYNC@
+GNULIB_FTELL = @GNULIB_FTELL@
+GNULIB_FTELLO = @GNULIB_FTELLO@
 GNULIB_FTRUNCATE = @GNULIB_FTRUNCATE@
+GNULIB_FWRITE = @GNULIB_FWRITE@
 GNULIB_GETCWD = @GNULIB_GETCWD@
+GNULIB_GETDELIM = @GNULIB_GETDELIM@
 GNULIB_GETDOMAINNAME = @GNULIB_GETDOMAINNAME@
 GNULIB_GETDTABLESIZE = @GNULIB_GETDTABLESIZE@
 GNULIB_GETHOSTNAME = @GNULIB_GETHOSTNAME@
+GNULIB_GETLINE = @GNULIB_GETLINE@
 GNULIB_GETLOADAVG = @GNULIB_GETLOADAVG@
 GNULIB_GETLOGIN_R = @GNULIB_GETLOGIN_R@
 GNULIB_GETPAGESIZE = @GNULIB_GETPAGESIZE@
@@ -283,7 +306,15 @@ GNULIB_MEMPCPY = @GNULIB_MEMPCPY@
 GNULIB_MEMRCHR = @GNULIB_MEMRCHR@
 GNULIB_MKDTEMP = @GNULIB_MKDTEMP@
 GNULIB_MKSTEMP = @GNULIB_MKSTEMP@
+GNULIB_OBSTACK_PRINTF = @GNULIB_OBSTACK_PRINTF@
+GNULIB_OBSTACK_PRINTF_POSIX = @GNULIB_OBSTACK_PRINTF_POSIX@
+GNULIB_PERROR = @GNULIB_PERROR@
+GNULIB_PRINTF = @GNULIB_PRINTF@
+GNULIB_PRINTF_POSIX = @GNULIB_PRINTF_POSIX@
+GNULIB_PUTC = @GNULIB_PUTC@
+GNULIB_PUTCHAR = @GNULIB_PUTCHAR@
 GNULIB_PUTENV = @GNULIB_PUTENV@
+GNULIB_PUTS = @GNULIB_PUTS@
 GNULIB_RANDOM_R = @GNULIB_RANDOM_R@
 GNULIB_RAWMEMCHR = @GNULIB_RAWMEMCHR@
 GNULIB_READLINK = @GNULIB_READLINK@
@@ -292,6 +323,9 @@ GNULIB_RPMATCH = @GNULIB_RPMATCH@
 GNULIB_SCANDIR = @GNULIB_SCANDIR@
 GNULIB_SETENV = @GNULIB_SETENV@
 GNULIB_SLEEP = @GNULIB_SLEEP@
+GNULIB_SNPRINTF = @GNULIB_SNPRINTF@
+GNULIB_SPRINTF_POSIX = @GNULIB_SPRINTF_POSIX@
+GNULIB_STDIO_H_SIGPIPE = @GNULIB_STDIO_H_SIGPIPE@
 GNULIB_STPCPY = @GNULIB_STPCPY@
 GNULIB_STPNCPY = @GNULIB_STPNCPY@
 GNULIB_STRCASESTR = @GNULIB_STRCASESTR@
@@ -311,6 +345,14 @@ GNULIB_STRTOULL = @GNULIB_STRTOULL@
 GNULIB_STRVERSCMP = @GNULIB_STRVERSCMP@
 GNULIB_UNISTD_H_SIGPIPE = @GNULIB_UNISTD_H_SIGPIPE@
 GNULIB_UNSETENV = @GNULIB_UNSETENV@
+GNULIB_VASPRINTF = @GNULIB_VASPRINTF@
+GNULIB_VDPRINTF = @GNULIB_VDPRINTF@
+GNULIB_VFPRINTF = @GNULIB_VFPRINTF@
+GNULIB_VFPRINTF_POSIX = @GNULIB_VFPRINTF_POSIX@
+GNULIB_VPRINTF = @GNULIB_VPRINTF@
+GNULIB_VPRINTF_POSIX = @GNULIB_VPRINTF_POSIX@
+GNULIB_VSNPRINTF = @GNULIB_VSNPRINTF@
+GNULIB_VSPRINTF_POSIX = @GNULIB_VSPRINTF_POSIX@
 GNULIB_WCRTOMB = @GNULIB_WCRTOMB@
 GNULIB_WCSNRTOMBS = @GNULIB_WCSNRTOMBS@
 GNULIB_WCSRTOMBS = @GNULIB_WCSRTOMBS@
@@ -325,21 +367,29 @@ HAVE_BTOWC = @HAVE_BTOWC@
 HAVE_CALLOC_POSIX = @HAVE_CALLOC_POSIX@
 HAVE_DECL_DIRFD = @HAVE_DECL_DIRFD@
 HAVE_DECL_ENVIRON = @HAVE_DECL_ENVIRON@
+HAVE_DECL_GETDELIM = @HAVE_DECL_GETDELIM@
+HAVE_DECL_GETLINE = @HAVE_DECL_GETLINE@
 HAVE_DECL_GETLOADAVG = @HAVE_DECL_GETLOADAVG@
 HAVE_DECL_GETLOGIN_R = @HAVE_DECL_GETLOGIN_R@
 HAVE_DECL_MEMMEM = @HAVE_DECL_MEMMEM@
 HAVE_DECL_MEMRCHR = @HAVE_DECL_MEMRCHR@
+HAVE_DECL_OBSTACK_PRINTF = @HAVE_DECL_OBSTACK_PRINTF@
+HAVE_DECL_SNPRINTF = @HAVE_DECL_SNPRINTF@
 HAVE_DECL_STRDUP = @HAVE_DECL_STRDUP@
 HAVE_DECL_STRERROR = @HAVE_DECL_STRERROR@
 HAVE_DECL_STRNDUP = @HAVE_DECL_STRNDUP@
 HAVE_DECL_STRNLEN = @HAVE_DECL_STRNLEN@
 HAVE_DECL_STRSIGNAL = @HAVE_DECL_STRSIGNAL@
 HAVE_DECL_STRTOK_R = @HAVE_DECL_STRTOK_R@
+HAVE_DECL_VSNPRINTF = @HAVE_DECL_VSNPRINTF@
 HAVE_DECL_WCTOB = @HAVE_DECL_WCTOB@
 HAVE_DECL_WCWIDTH = @HAVE_DECL_WCWIDTH@
+HAVE_DPRINTF = @HAVE_DPRINTF@
 HAVE_DUP2 = @HAVE_DUP2@
 HAVE_EUIDACCESS = @HAVE_EUIDACCESS@
+HAVE_FSEEKO = @HAVE_FSEEKO@
 HAVE_FSYNC = @HAVE_FSYNC@
+HAVE_FTELLO = @HAVE_FTELLO@
 HAVE_FTRUNCATE = @HAVE_FTRUNCATE@
 HAVE_GETDOMAINNAME = @HAVE_GETDOMAINNAME@
 HAVE_GETDTABLESIZE = @HAVE_GETDTABLESIZE@
@@ -398,6 +448,8 @@ HAVE_SYS_TYPES_H = @HAVE_SYS_TYPES_H@
 HAVE_UNISTD_H = @HAVE_UNISTD_H@
 HAVE_UNSETENV = @HAVE_UNSETENV@
 HAVE_UNSIGNED_LONG_LONG_INT = @HAVE_UNSIGNED_LONG_LONG_INT@
+HAVE_VASPRINTF = @HAVE_VASPRINTF@
+HAVE_VDPRINTF = @HAVE_VDPRINTF@
 HAVE_WCHAR_H = @HAVE_WCHAR_H@
 HAVE_WCRTOMB = @HAVE_WCRTOMB@
 HAVE_WCSNRTOMBS = @HAVE_WCSNRTOMBS@
@@ -447,6 +499,7 @@ NAMEBYTES_1 = @NAMEBYTES_1@
 NEXT_AS_FIRST_DIRECTIVE_DIRENT_H = @NEXT_AS_FIRST_DIRECTIVE_DIRENT_H@
 NEXT_AS_FIRST_DIRECTIVE_ERRNO_H = @NEXT_AS_FIRST_DIRECTIVE_ERRNO_H@
 NEXT_AS_FIRST_DIRECTIVE_STDINT_H = @NEXT_AS_FIRST_DIRECTIVE_STDINT_H@
+NEXT_AS_FIRST_DIRECTIVE_STDIO_H = @NEXT_AS_FIRST_DIRECTIVE_STDIO_H@
 NEXT_AS_FIRST_DIRECTIVE_STDLIB_H = @NEXT_AS_FIRST_DIRECTIVE_STDLIB_H@
 NEXT_AS_FIRST_DIRECTIVE_STRING_H = @NEXT_AS_FIRST_DIRECTIVE_STRING_H@
 NEXT_AS_FIRST_DIRECTIVE_SYS_STAT_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_STAT_H@
@@ -457,6 +510,7 @@ NEXT_AS_FIRST_DIRECTIVE_WCTYPE_H = @NEXT_AS_FIRST_DIRECTIVE_WCTYPE_H@
 NEXT_DIRENT_H = @NEXT_DIRENT_H@
 NEXT_ERRNO_H = @NEXT_ERRNO_H@
 NEXT_STDINT_H = @NEXT_STDINT_H@
+NEXT_STDIO_H = @NEXT_STDIO_H@
 NEXT_STDLIB_H = @NEXT_STDLIB_H@
 NEXT_STRING_H = @NEXT_STRING_H@
 NEXT_SYS_STAT_H = @NEXT_SYS_STAT_H@
@@ -501,8 +555,19 @@ RELEASE_INFO = @RELEASE_INFO@
 REPLACE_BTOWC = @REPLACE_BTOWC@
 REPLACE_CHOWN = @REPLACE_CHOWN@
 REPLACE_CLOSE = @REPLACE_CLOSE@
+REPLACE_DPRINTF = @REPLACE_DPRINTF@
 REPLACE_FCHDIR = @REPLACE_FCHDIR@
+REPLACE_FCLOSE = @REPLACE_FCLOSE@
+REPLACE_FFLUSH = @REPLACE_FFLUSH@
+REPLACE_FOPEN = @REPLACE_FOPEN@
+REPLACE_FPRINTF = @REPLACE_FPRINTF@
+REPLACE_FREOPEN = @REPLACE_FREOPEN@
+REPLACE_FSEEK = @REPLACE_FSEEK@
+REPLACE_FSEEKO = @REPLACE_FSEEKO@
+REPLACE_FTELL = @REPLACE_FTELL@
+REPLACE_FTELLO = @REPLACE_FTELLO@
 REPLACE_GETCWD = @REPLACE_GETCWD@
+REPLACE_GETLINE = @REPLACE_GETLINE@
 REPLACE_GETPAGESIZE = @REPLACE_GETPAGESIZE@
 REPLACE_GETTIMEOFDAY = @REPLACE_GETTIMEOFDAY@
 REPLACE_ISWCNTRL = @REPLACE_ISWCNTRL@
@@ -518,13 +583,25 @@ REPLACE_MBSTATE_T = @REPLACE_MBSTATE_T@
 REPLACE_MEMMEM = @REPLACE_MEMMEM@
 REPLACE_MKDIR = @REPLACE_MKDIR@
 REPLACE_MKSTEMP = @REPLACE_MKSTEMP@
+REPLACE_OBSTACK_PRINTF = @REPLACE_OBSTACK_PRINTF@
+REPLACE_PERROR = @REPLACE_PERROR@
+REPLACE_PRINTF = @REPLACE_PRINTF@
 REPLACE_PUTENV = @REPLACE_PUTENV@
+REPLACE_SNPRINTF = @REPLACE_SNPRINTF@
+REPLACE_SPRINTF = @REPLACE_SPRINTF@
+REPLACE_STDIO_WRITE_FUNCS = @REPLACE_STDIO_WRITE_FUNCS@
 REPLACE_STRCASESTR = @REPLACE_STRCASESTR@
 REPLACE_STRDUP = @REPLACE_STRDUP@
 REPLACE_STRERROR = @REPLACE_STRERROR@
 REPLACE_STRSIGNAL = @REPLACE_STRSIGNAL@
 REPLACE_STRSTR = @REPLACE_STRSTR@
 REPLACE_STRTOD = @REPLACE_STRTOD@
+REPLACE_VASPRINTF = @REPLACE_VASPRINTF@
+REPLACE_VDPRINTF = @REPLACE_VDPRINTF@
+REPLACE_VFPRINTF = @REPLACE_VFPRINTF@
+REPLACE_VPRINTF = @REPLACE_VPRINTF@
+REPLACE_VSNPRINTF = @REPLACE_VSNPRINTF@
+REPLACE_VSPRINTF = @REPLACE_VSPRINTF@
 REPLACE_WCRTOMB = @REPLACE_WCRTOMB@
 REPLACE_WCSNRTOMBS = @REPLACE_WCSNRTOMBS@
 REPLACE_WCSRTOMBS = @REPLACE_WCSRTOMBS@
@@ -655,52 +732,54 @@ PRODSRCS = \
 	dnode_0.h.built \
 	dvt_0.h.built \
 	dpawn_0.h.built \
-	errors.d \
+	errors.din.built \
 	d-mode-ops.el \
 	dm-errs.h.built
 
-MAINTAINERCLEANFILES = $(PRODSRCS) \
-	dcoder.h
-
-dist_noinst_DATA = \
-	dmnuminc.d \
-	ops.d \
-	dsp1f.d \
-	dsp2def.d \
-	startup_dgen.d \
-	dmnuminc.d.in ops.d.in paths.h.in dsp2def.d.in \
-	$(MAINTAINERCLEANFILES)
-
+MAINTAINERCLEANFILES = $(PRODSRCS)
+EDITSRCS = dm-prop.c paths.h
+DISTEDITSRCS = dcoder.c dmnuminc.d dsp2def.d ops.d
+BUILT_SOURCES = $(EDITSRCS) $(DISTEDITSRCS)
+DISTCLEANFILES = dm-config.h
+INFILES = $(DISTEDITSRCS) $(EDITSRCS) errors.d
+CLEANFILES = $(INFILES)
+EXTRA_DIST = $(DISTEDITSRCS:=in) $(PRODSRCS)
+SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
+dist_noinst_DATA = dsp1f.d startup_dgen.d
+nodist_noinst_DATA = $(MAINTAINERCLEANFILES)
 dist_noinst_SCRIPTS = dgen-build
 AM_CFLAGS = $(GCC_CFLAGS)
 AM_CPPFLAGS = \
 	-DDM_DISABLE_THREADS=1 -DDM_HAVE_CONFIG_H -DDM_DISABLE_REGEX=1 \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 \
 	-DDM_NO_PROP=1 \
-	-I"$(top_srcdir)/src" -I"$(top_builddir)/src"
+	-I"$(top_srcdir)/src" -I"$(top_builddir)/src" \
+	-I"$(top_builddir)/lib" -I"$(top_srcdir)/lib"
 
 AM_LDFLAGS = -no-undefined
-AM_LIBADD = @RELEASE_INFO@ @VERSION_INFO@
+AM_LIBADD = @RELEASE_INFO@ @VERSION_INFO@ $(top_builddir)/lib/libgnu.la
+AM_LDADD = $(top_builddir)/lib/libgnu.la
 INCLUDE = @INCLTDL@
-BUILT_SOURCES = paths.h dm-prop.c
-CLEANFILES = $(BUILT_SOURCES)
-DISTCLEANFILES = dm-config.h
 noinst_LTLIBRARIES = libdmbootstrap.la
-libdmbootstrap_la_SOURCES = dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h paths.h \
+libdmbootstrap_la_SOURCES = dmnum.c dsp1.c dsp2.c dmnuminc.h dsp1f.h \
 	dmglobals.c dm1.c dm2.c dm-conv.c dm-swapbytes.h \
 	dm4.c dm5.c dm6.c dm7.c dm8.c dm-types.c \
 	dm-signals.c dm-signals.h
 
+nodist_libdmbootstrap_la_SOURCES = paths.h
 libdmbootstrap_la_LIBADD = $(AM_LIBADD)
 dgen_SOURCES = dgen.c dgen_0.h dgen_1.h dm-nextevent.c dm-nextevent.h \
-	dm3.c dm3.h dm-prop.c dm-prop.h paths.h dgen-dm3.c dgen-dm3.h
+	dm3.c dm3.h dm-prop.h dgen-dm3.c dgen-dm3.h
 
+nodist_dgen_SOURCES = dm-prop.c paths.h
 dgen_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
-dgen_LDADD = $(builddir)/libdmbootstrap.la
-dcoder_SOURCES = dcoder.c dcoder.h dm-errs.h.built
+dgen_LDADD = $(builddir)/libdmbootstrap.la $(AM_LDADD)
+dcoder_SOURCES = dcoder.h
+nodist_dcoder_SOURCES = dcoder.c dm-errs.h.built
 dcoder_CPPFLAGS = -I"$(top_srcdir)/src" -I"$(top_builddir)/src" \
 	-DDM_HAVE_CONFIG_H
 
+dcoder_LDADD = $(AM_LDADD)
 edit = sed \
 	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
 	-e 's,[@]dmstartdir[@],.,g' \
@@ -711,12 +790,36 @@ edit = sed \
 	-e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
 	-e 's,[@]srcdir[@],$(srcdir),g'
 
+Makefile = Makefile
+SVNVERSION_STAMP_DEP = @SVNVERSION_STAMP@
+INFILES_RULE = \
+	! test -e $@.tmp || rm -f $@.tmp \
+	&& $(edit) $< >$@.tmp \
+	&& mv $@.tmp $@
+
+
+###############################################################
+# For getting around automake && make stupidity to distribute
+# this directory
+##############################################################
+
+# Files to only build when we're building
+dgen = dgen
+dmnumincd = dmnuminc.d
+opsd = ops.d
+dsp2defd = dsp2def.d
+dcoder = dcoder
+dgen_build = dgen-build
+distdir_global = distdir
+distdir_local = distdir-local
+SAVE_DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+DISTFILES = 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_bundle_sub.make $(am__configure_deps)
+.SUFFIXES: .cin .hin .elin .din .psin .shin .plin .styin .c .d .el .h .lo .o .obj .pl .ps .sh .sty
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_bundle_sub.make $(top_srcdir)/m4/cf_in.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -874,20 +977,6 @@ dgen-dm3.obj: dm3.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dm3.obj `if test -f 'dm3.c'; then $(CYGPATH_W) 'dm3.c'; else $(CYGPATH_W) '$(srcdir)/dm3.c'; fi`
 
-dgen-dm-prop.o: dm-prop.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -MT dgen-dm-prop.o -MD -MP -MF $(DEPDIR)/dgen-dm-prop.Tpo -c -o dgen-dm-prop.o `test -f 'dm-prop.c' || echo '$(srcdir)/'`dm-prop.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dgen-dm-prop.Tpo $(DEPDIR)/dgen-dm-prop.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-prop.c' object='dgen-dm-prop.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dm-prop.o `test -f 'dm-prop.c' || echo '$(srcdir)/'`dm-prop.c
-
-dgen-dm-prop.obj: dm-prop.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -MT dgen-dm-prop.obj -MD -MP -MF $(DEPDIR)/dgen-dm-prop.Tpo -c -o dgen-dm-prop.obj `if test -f 'dm-prop.c'; then $(CYGPATH_W) 'dm-prop.c'; else $(CYGPATH_W) '$(srcdir)/dm-prop.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dgen-dm-prop.Tpo $(DEPDIR)/dgen-dm-prop.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-prop.c' object='dgen-dm-prop.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dm-prop.obj `if test -f 'dm-prop.c'; then $(CYGPATH_W) 'dm-prop.c'; else $(CYGPATH_W) '$(srcdir)/dm-prop.c'; fi`
-
 dgen-dgen-dm3.o: dgen-dm3.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -MT dgen-dgen-dm3.o -MD -MP -MF $(DEPDIR)/dgen-dgen-dm3.Tpo -c -o dgen-dgen-dm3.o `test -f 'dgen-dm3.c' || echo '$(srcdir)/'`dgen-dm3.c
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dgen-dgen-dm3.Tpo $(DEPDIR)/dgen-dgen-dm3.Po
@@ -901,6 +990,20 @@ dgen-dgen-dm3.obj: dgen-dm3.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dgen-dm3.c' object='dgen-dgen-dm3.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dgen-dm3.obj `if test -f 'dgen-dm3.c'; then $(CYGPATH_W) 'dgen-dm3.c'; else $(CYGPATH_W) '$(srcdir)/dgen-dm3.c'; fi`
+
+dgen-dm-prop.o: dm-prop.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -MT dgen-dm-prop.o -MD -MP -MF $(DEPDIR)/dgen-dm-prop.Tpo -c -o dgen-dm-prop.o `test -f 'dm-prop.c' || echo '$(srcdir)/'`dm-prop.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dgen-dm-prop.Tpo $(DEPDIR)/dgen-dm-prop.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-prop.c' object='dgen-dm-prop.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dm-prop.o `test -f 'dm-prop.c' || echo '$(srcdir)/'`dm-prop.c
+
+dgen-dm-prop.obj: dm-prop.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -MT dgen-dm-prop.obj -MD -MP -MF $(DEPDIR)/dgen-dm-prop.Tpo -c -o dgen-dm-prop.obj `if test -f 'dm-prop.c'; then $(CYGPATH_W) 'dm-prop.c'; else $(CYGPATH_W) '$(srcdir)/dm-prop.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dgen-dm-prop.Tpo $(DEPDIR)/dgen-dm-prop.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-prop.c' object='dgen-dm-prop.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dgen_CFLAGS) $(CFLAGS) -c -o dgen-dm-prop.obj `if test -f 'dm-prop.c'; then $(CYGPATH_W) 'dm-prop.c'; else $(CYGPATH_W) '$(srcdir)/dm-prop.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -954,6 +1057,33 @@ GTAGS:
 
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
+
+distdir: $(DISTFILES)
+	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
+	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
+	list='$(DISTFILES)'; \
+	  dist_files=`for file in $$list; do echo $$file; done | \
+	  sed -e "s|^$$srcdirstrip/||;t" \
+	      -e "s|^$$topsrcdirstrip/|$(top_builddir)/|;t"`; \
+	case $$dist_files in \
+	  */*) $(MKDIR_P) `echo "$$dist_files" | \
+			   sed '/\//!d;s|^|$(distdir)/|;s,/[^/]*$$,,' | \
+			   sort -u` ;; \
+	esac; \
+	for file in $$dist_files; do \
+	  if test -f $$file || test -d $$file; then d=.; else d=$(srcdir); fi; \
+	  if test -d $$d/$$file; then \
+	    dir=`echo "/$$file" | sed -e 's,/[^/]*$$,,'`; \
+	    if test -d $(srcdir)/$$file && test $$d != $(srcdir); then \
+	      cp -pR $(srcdir)/$$file $(distdir)$$dir || exit 1; \
+	    fi; \
+	    cp -pR $$d/$$file $(distdir)$$dir || exit 1; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || cp -p $$d/$$file $(distdir)/$$file \
+	    || exit 1; \
+	  fi; \
+	done
 check-am: all-am
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
@@ -1063,55 +1193,31 @@ uninstall-am:
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am
 
-dm3.c: paths.h
+dgen-build: startup_dgen.d errors.d
+dm2.c dm3.c: paths.h
 
-$(srcdir)/dsp2def.h.built: dsp2def.d dgen dgen-build
+$(srcdir)/dsp2def.h.built: $(dsp2defd) $(dgen) $(dgen_build)
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dsp2def.d" "$@" 
 	(cd "$(srcdir)/.." ; \
 	 rm dsp2def.h ; \
 	 $(LN_S) codegen/dsp2def.h.built dsp2def.h)
 
-$(srcdir)/dmnuminc.h.built: dmnuminc.d dgen dgen-build
+$(srcdir)/dmnuminc.h.built: $(dmnuminc) $(dgen) $(dgen_build)
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dmnuminc.d" "$@" 
 	(cd "$(srcdir)/.." ; \
 	 rm dmnuminc.h ; \
 	 $(LN_S) codegen/dmnuminc.h.built dmnuminc.h)
 
-$(srcdir)/dsp1f.h.built: dsp1f.d dgen dgen-build
+$(srcdir)/dsp1f.h.built: dsp1f.d $(dgen) $(dgen_build)
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dsp1f.d" "$@"
 	(cd "$(srcdir)/.." ; \
 	 rm dsp1f.h ; \
 	 $(LN_S) codegen/dsp1f.h.built dsp1f.h)
 
-paths.h: paths.h.in Makefile
-	rm -f $@ $@.tmp
-	$(edit) $(builddir)/paths.h.in >$@.tmp
-	mv $@.tmp $@
-
-ops.d: ops.d.in Makefile
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/ops.d.in >$@.tmp
-	mv $@.tmp $@
-
-dcoder.c: dcoder.c.in Makefile
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/dcoder.c.in >$@.tmp
-	mv $@.tmp $@
-
-dmnuminc.d: dmnuminc.d.in Makefile
-	rm -f $@ $@.tmp
-	$(edit) $(srcdir)/dmnuminc.d.in >$@.tmp
-	mv $@.tmp $@
-
-dsp2def.d: dsp2def.d.in Makefile
-	rm -f $@ $@.tmp
-	$(edit) $(builddir)/dsp2def.d.in >$@.tmp
-	mv $@.tmp $@
-
-$(srcdir)/dgen_0.h.built: ops.d dgen dgen-build
+$(srcdir)/dgen_0.h.built: $(opsd) $(dgen) $(dgen_build)
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
 		"$@" "/dgen"
@@ -1119,7 +1225,7 @@ $(srcdir)/dgen_0.h.built: ops.d dgen dgen-build
 	rm dgen_0.h ; \
 	$(LN_S) codegen/dgen_0.h.built dgen_0.h)
 
-$(srcdir)/dvt_0.h.built: ops.d dgen dgen-build
+$(srcdir)/dvt_0.h.built: $(opsd) $(dgen) $(dgen_build)
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
 		"$@" "/dvt"
@@ -1127,7 +1233,7 @@ $(srcdir)/dvt_0.h.built: ops.d dgen dgen-build
 	rm dvt_0.h ; \
 	$(LN_S) codegen/dvt_0.h.built dvt_0.h)
 
-$(srcdir)/dnode_0.h.built: ops.d dgen dgen-build
+$(srcdir)/dnode_0.h.built: $(opsd) $(dgen) $(dgen_build)
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
 		"$@" "/dnode"
@@ -1135,7 +1241,7 @@ $(srcdir)/dnode_0.h.built: ops.d dgen dgen-build
 	rm dnode_0.h ; \
 	$(LN_S) codegen/dnode_0.h.built dnode_0.h)
 
-$(srcdir)/dpawn_0.h.built: ops.d dgen dgen-build
+$(srcdir)/dpawn_0.h.built: $(opsd) $(dgen) $(dgen_build)
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
 		"$@" "/dpawn"
@@ -1143,58 +1249,29 @@ $(srcdir)/dpawn_0.h.built: ops.d dgen dgen-build
 	rm dpawn_0.h ; \
 	$(LN_S) codegen/dpawn_0.h.built dpawn_0.h)
 
-$(srcdir)/dcoder.h: ops.d dgen dgen-build
+$(srcdir)/dcoder.h: $(opsd) $(dgen) $(dgen_build)
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
 		"$@" "/dcoder"
 
-$(srcdir)/dm-errs.h.built: ops.d dgen dgen-build
+$(srcdir)/dm-errs.h.built: $(opsd) $(dgen) $(dgen_build)
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
 		"$@" "/derr"
 
-$(srcdir)/d-mode-ops.el: ops.d dgen dgen-build
+$(srcdir)/d-mode-ops.el: $(opsd) $(dgen) $(dgen_build)
 	"$(srcdir)/dgen-build" \
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
 		"$@" "/demacs"
 
-$(srcdir)/errors.d: dcoder
-	"$(top_builddir)/src/codegen/dcoder" "$(srcdir)/errors.d"
-	(cd "$(srcdir)/../../dcode" ; \
-	rm errors.d ; \
-	$(LN_S) ../src/codegen/errors.d errors.d)
-
-dm-prop.c: Makefile $(top_builddir)/src/codegen/dm-prop.c.in
-	-rm -f $@ $@.tmp
-	$(edit) "$(top_builddir)/src/codegen/dm-prop.c.in" > $@.tmp
-	mv $@.tmp $@
-
-distdir:
-	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
-	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
-	list='$(DISTFILES)'; \
-	  dist_files=`for file in $$list; do echo $$file; done | \
-	  sed -e "s|^$$srcdirstrip/||;t" \
-	      -e "s|^$$topsrcdirstrip/|$(top_builddir)/|;t"`; \
-	case $$dist_files in \
-	  */*) $(MKDIR_P) `echo "$$dist_files" | \
-			   sed '/\//!d;s|^|$(distdir)/|;s,/[^/]*$$,,' | \
-			   sort -u` ;; \
-	esac; \
-	for file in $$dist_files; do \
-	  if test -f $$file || test -d $$file; then d=.; else d=$(srcdir); fi; \
-	  if test -d $$d/$$file; then \
-	    dir=`echo "/$$file" | sed -e 's,/[^/]*$$,,'`; \
-	    if test -d $(srcdir)/$$file && test $$d != $(srcdir); then \
-	      cp -pR $(srcdir)/$$file $(distdir)$$dir || exit 1; \
-	    fi; \
-	    cp -pR $$d/$$file $(distdir)$$dir || exit 1; \
-	  else \
-	    test -f $(distdir)/$$file \
-	    || cp -p $$d/$$file $(distdir)/$$file \
-	    || exit 1; \
-	  fi; \
-	done
+$(srcdir)/errors.din.built: $(dcoder)
+	"$(top_builddir)/src/codegen/dcoder" \
+		"$(srcdir)/errors.din.built"
+	( \
+	  cd "$(srcdir)/../../dcode" \
+	  && rm -f errors.d.in \
+	  && $(LN_S) ../src/codegen/errors.d.in errors.d.in \
+	)
 
 .PHONY: distsvn-recursive
 distsvn-recursive:
@@ -1222,7 +1299,30 @@ distsvn-extra:
 distsvn: distsvn-extra distsvn-recursive
 	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
 
-distdir: $(BUILT_SOURCES) dgen
+.cin.c:     ; $(INFILES_RULE)
+.hin.h:     ; $(INFILES_RULE)
+.din.d:     ; $(INFILES_RULE)
+.psin.ps:   ; $(INFILES_RULE)
+.shin.sh:   ; $(INFILES_RULE)
+.plin.pl:   ; $(INFILES_RULE)
+.elin.el:   ; $(INFILES_RULE)
+.styin.sty: ; $(INFILES_RULE)
+
+$(INFILES): $(Makefile) $(SVNVERSION_STAMP_DEP)
+
+# Redirect distdir, while resetting the files above ^^
+# to empty
+$(distdir_global): $(distdir_local)
+distdir-local:
+	$(MAKE) $(AM_MAKEFLAGS) \
+		top_distdir="$(top_distdir)" \
+		distdir="$(distdir)" \
+		am__remove_distdir=: \
+		am__skip_length_check=: \
+		dgen= dmnumincd= opsd= dsp2defd= dcoder= Makefile= \
+		dgen_build= \
+		distdir_local= DISTFILES="$(SAVE_DISTFILES)" \
+		distdir
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -15,6 +15,7 @@
 #include "dm-prop.h"
 #include "dm-signals.h"
 #include "paths.h"
+#include "error-local.h"
 
 /****************** signal redirector ********************/
 
@@ -37,7 +38,7 @@ static void redirector_quit(int sig,
 static pid_t myppid;
 static void redirect_sig(int sig) {
   if (kill(myppid, sig))
-    error(EXIT_FAILURE, errno, "redirector %li unable to signal parent %li",
+    error_local(EXIT_FAILURE, errno, "redirector %li unable to signal parent %li",
 	  (long) getpid(), (long) getppid());
 }
 
@@ -53,10 +54,10 @@ static void handle_redirect(void) {
  repeat:
   switch (recv(0, &sig, 1, 0)) {
     case 0:
-      error(1, 0, "redirector received close on recv");
+      error_local(1, 0, "redirector received close on recv");
     case -1:
       if (errno == EINTR) goto repeat;
-      error(EXIT_FAILURE, errno, "redirector recv");
+      error_local(EXIT_FAILURE, errno, "redirector recv");
   };
 
 /*   fprintf(stderr, "%li: received signal %i\n",  */
@@ -68,7 +69,7 @@ static void redirector_alarm(void) {
 /*   fprintf(stderr, "redirector timeout %li of %li\n", */
 /* 	  (long) getpid(), (long) getppid()); */
   if (kill(myppid, 0))
-    error(1, errno, "%li: parent %li dead", 
+    error_local(1, errno, "%li: parent %li dead", 
 	  (long) getpid(), (long) getppid());
 }
 
@@ -82,7 +83,7 @@ int main(void) {
   myppid = getppid();
 
   if (atexit(redirector_exit))
-    error(1, errno, "atexit for redirector");
+    error_local(1, errno, "atexit for redirector");
 
   for (i = quitsigs; *i; i++) sethandler(*i, redirector_quit);
   clearhandler(SIGINT);
@@ -95,7 +96,7 @@ int main(void) {
     switch (select(nfds, &rout, NULL, &eout, &timer)) {
       case -1:
 	if (errno == EINTR) break;
-	error(1, errno, "select failed in redirector");
+	error_local(1, errno, "select failed in redirector");
 	break;
 
       case 0:  break;
@@ -114,16 +115,16 @@ static void execsighandler(P sigsocket, P serverport_,
   P retc;
   serverport = serverport_;
   if ((sigsocket_ = dup(sigsocket)) == -1)
-    error(1, errno, "Unable to dup sigsocket %li", (long) sigsocket);
+    error_local(1, errno, "Unable to dup sigsocket %li", (long) sigsocket);
   if ((retc = closesockets_func()))
-    error(1, retc < 0 ? -retc : 0, 
+    error_local(1, retc < 0 ? -retc : 0, 
 	  "Unable to close sockets: %li", (long) getpid());
   if (dup2(sigsocket_, 0) == -1) 
-    error(1, errno, "Unable to dup sigsocket %li to stdin", 
+    error_local(1, errno, "Unable to dup sigsocket %li to stdin", 
 	  (long) sigsocket);
 
   execl("@dmprop@", "@dmprop@", NULL);
-  error(1, errno, "Unable to exec: @dmprop@");
+  error_local(1, errno, "Unable to exec: @dmprop@");
   exit(1);
 }
   
@@ -142,7 +143,7 @@ P spawnsighandler(P sigsocket, P serverport,
   switch ((*pid = fork())) {
     case -1:
      retc = -errno;
-     error(0, errno, "forking for signal redirector");
+     error_local(0, errno, "forking for signal redirector");
      break;
 
     case 0:
@@ -155,7 +156,7 @@ P spawnsighandler(P sigsocket, P serverport,
     default:
       if (close(sigsocket)) {
 	retc = -errno;
-	error(0, errno, "closing sigsocket");
+	error_local(0, errno, "closing sigsocket");
       }
       break;
   }

@@ -4,6 +4,8 @@
 
 */
 
+#include "dm.h"
+
 #include <unistd.h>
 #include <netdb.h>
 #include <stdlib.h>
@@ -29,6 +31,7 @@
 #include "dm-prop.h"
 #include "dm7.h"
 #include "dm6.h"
+#include "dm5.h"
 
 #include "dnode_0.h"
 
@@ -47,7 +50,7 @@
 
 DM_INLINE_STATIC void usage_error(int errno_) __attribute__ ((__noreturn__));
 DM_INLINE_STATIC void usage_error(int errno_) {
-  error(EXIT_FAILURE, errno_, "usage is: dnode portnumber [setsid=0/1]");
+  error_local(EXIT_FAILURE, errno_, "usage is: dnode portnumber [setsid=0/1]");
   exit(1);
 }
 
@@ -189,7 +192,7 @@ int main(int argc, char *argv[])
 /*------------------------ get host name */
 
   if (gethostname((char*)hostname,255) == -1) 
-    error(EXIT_FAILURE,errno,"gethostname");
+    error_local(EXIT_FAILURE,errno,"gethostname");
 
 /*------------------------ parse arguments */
   if (argc < 2) usage_error(0);

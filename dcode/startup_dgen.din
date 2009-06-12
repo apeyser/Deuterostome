@@ -1,3 +1,4 @@
+| -*- mode: d; -*-
 
 |============================ D Startup =================================
 
@@ -26,8 +27,9 @@
 
 | (source) /ERROR_NAME
 /makeerror ~[~ERRORS ~exch bind ~get bind ~error] def
-| (source) code ... n | .. (source) code
-/rollerror {2 1 index add exch roll} bind def
+
+| (source) code
+/error_ops_length 2 def
 
 |------------------------ low-level information -------------------------
 | For debugging and quick information about objects, stacks, and system

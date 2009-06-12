@@ -16,6 +16,8 @@
 
 # -*- mode: makefile; -*-
 
+# -*- mode: makefile; -*-
+
 
 VPATH = @srcdir@
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
@@ -41,15 +43,12 @@ target_triplet = @target@
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	dm-stats-header.h \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptester.c \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptester.h
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am__append_3 =  \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	process2.d \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	stats.d \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptester.d
-@ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am__append_4 = dmflex.c
-@ENABLE_PETSC_FALSE@@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@am__append_5 = .plugins
+@ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am__append_3 = dmflex.c
+@ENABLE_PETSC_FALSE@@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@am__append_4 = .plugins
 DIST_COMMON = $(am__dist_noinst_DATA_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/dmflex.l.in \
-	$(top_srcdir)/m4/cf_bundle_sub.make dmflex.c
+	$(top_srcdir)/m4/cf_bundle_sub.make \
+	$(top_srcdir)/m4/cf_in.make
 subdir = plugins
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
@@ -88,19 +87,18 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/mbstate_t.m4 $(top_srcdir)/m4/mempcpy.m4 \
 	$(top_srcdir)/m4/mkdtemp.m4 $(top_srcdir)/m4/multiarch.m4 \
 	$(top_srcdir)/m4/onceonly.m4 $(top_srcdir)/m4/stdbool.m4 \
-	$(top_srcdir)/m4/stdint.m4 $(top_srcdir)/m4/stdlib_h.m4 \
-	$(top_srcdir)/m4/string_h.m4 $(top_srcdir)/m4/sys_stat_h.m4 \
-	$(top_srcdir)/m4/sys_time_h.m4 $(top_srcdir)/m4/tempname.m4 \
-	$(top_srcdir)/m4/unistd_h.m4 $(top_srcdir)/m4/wchar.m4 \
-	$(top_srcdir)/m4/wctype.m4 $(top_srcdir)/m4/wint_t.m4 \
-	$(top_srcdir)/acinclude.m4 $(top_srcdir)/m4/basic-defs.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/stdint.m4 $(top_srcdir)/m4/stdio_h.m4 \
+	$(top_srcdir)/m4/stdlib_h.m4 $(top_srcdir)/m4/string_h.m4 \
+	$(top_srcdir)/m4/sys_stat_h.m4 $(top_srcdir)/m4/sys_time_h.m4 \
+	$(top_srcdir)/m4/tempname.m4 $(top_srcdir)/m4/unistd_h.m4 \
+	$(top_srcdir)/m4/wchar.m4 $(top_srcdir)/m4/wctype.m4 \
+	$(top_srcdir)/m4/wint_t.m4 $(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/m4/basic-defs.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = dmflex.l plugin.d startup_dgen.d errors.d \
-	new-plugin.d.in
+CONFIG_CLEAN_FILES = dmflex.l plugin.d startup_dgen.d new-plugin.din
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -114,28 +112,31 @@ LTLIBRARIES = $(pkglib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(top_builddir)/src/libdmglobals.la \
 	$(am__DEPENDENCIES_1)
-am__DEPENDENCIES_3 = $(am__DEPENDENCIES_2) $(LTLIBOBJS)
+am__DEPENDENCIES_3 = $(am__DEPENDENCIES_2) $(LTLIBOBJS) \
+	$(top_builddir)/lib/libgnu.la
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@cpptester_la_DEPENDENCIES = $(am__DEPENDENCIES_3)
-am__cpptester_la_SOURCES_DIST = cpptester.c cpptester.h \
-	cpptestercode.cpp cpptestercode.h
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_cpptester_la_OBJECTS = cpptester.lo \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptestercode.lo
-cpptester_la_OBJECTS = $(am_cpptester_la_OBJECTS)
+am__cpptester_la_SOURCES_DIST = cpptestercode.cpp cpptestercode.h
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_cpptester_la_OBJECTS = cpptestercode.lo
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@nodist_cpptester_la_OBJECTS = cpptester.lo
+cpptester_la_OBJECTS = $(am_cpptester_la_OBJECTS) \
+	$(nodist_cpptester_la_OBJECTS)
 @ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_cpptester_la_rpath = -rpath \
 @ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
 @ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dmflex_la_DEPENDENCIES = $(am__DEPENDENCIES_3)
-am__dmflex_la_SOURCES_DIST = dmflex.l dmflex.h
-@ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_dmflex_la_OBJECTS = dmflex.lo
-dmflex_la_OBJECTS = $(am_dmflex_la_OBJECTS)
+am__dmflex_la_SOURCES_DIST = dmflex.h
+am_dmflex_la_OBJECTS =
+@ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@nodist_dmflex_la_OBJECTS = dmflex.lo
+dmflex_la_OBJECTS = $(am_dmflex_la_OBJECTS) \
+	$(nodist_dmflex_la_OBJECTS)
 @ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_dmflex_la_rpath = -rpath \
 @ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@dmpetsc_la_DEPENDENCIES = $(am__DEPENDENCIES_3) \
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__DEPENDENCIES_1)
-am__dmpetsc_la_SOURCES_DIST = dm-dmpetsc-main.h dm-dmpetsc-header.h \
-	dmpetsc.c dmpetsc.h dmpetsc-bug.c
-@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@am_dmpetsc_la_OBJECTS = dmpetsc_la-dmpetsc.lo \
-@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@	dmpetsc_la-dmpetsc-bug.lo
-dmpetsc_la_OBJECTS = $(am_dmpetsc_la_OBJECTS)
+am__dmpetsc_la_SOURCES_DIST = dmpetsc.h dmpetsc-bug.c
+@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@am_dmpetsc_la_OBJECTS = dmpetsc_la-dmpetsc-bug.lo
+@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@nodist_dmpetsc_la_OBJECTS = dmpetsc_la-dmpetsc.lo
+dmpetsc_la_OBJECTS = $(am_dmpetsc_la_OBJECTS) \
+	$(nodist_dmpetsc_la_OBJECTS)
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@am_dmpetsc_la_rpath = -rpath \
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@	$(pkglibdir)
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_dmpetsc_la_rpath = -rpath \
@@ -148,17 +149,17 @@ process_la_OBJECTS = $(am_process_la_OBJECTS)
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@am_process_la_rpath = -rpath \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@	$(pkglibdir)
 process2_la_LIBADD =
-am__process2_la_SOURCES_DIST = process2.c process2.h
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_process2_la_OBJECTS =  \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@nodist_process2_la_OBJECTS =  \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	process2.lo
-process2_la_OBJECTS = $(am_process2_la_OBJECTS)
+process2_la_OBJECTS = $(nodist_process2_la_OBJECTS)
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@am_process2_la_rpath = -rpath \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@	$(pkglibdir)
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@stats_la_DEPENDENCIES = $(am__DEPENDENCIES_3)
-am__stats_la_SOURCES_DIST = dm-stats-main.h dm-stats-header.h stats.c
+am__stats_la_SOURCES_DIST = stats.c
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_stats_la_OBJECTS =  \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	stats.lo
-stats_la_OBJECTS = $(am_stats_la_OBJECTS)
+nodist_stats_la_OBJECTS =
+stats_la_OBJECTS = $(am_stats_la_OBJECTS) $(nodist_stats_la_OBJECTS)
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_stats_la_rpath =  \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	-rpath \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
@@ -207,25 +208,22 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-@MAINTAINER_MODE_FALSE@am__skiplex = test -f $@ ||
-LEXCOMPILE = $(LEX) $(LFLAGS) $(AM_LFLAGS)
-LTLEXCOMPILE = $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=compile $(LEX) $(LFLAGS) $(AM_LFLAGS)
-YLWRAP = $(top_srcdir)/ylwrap
-SOURCES = $(cpptester_la_SOURCES) $(dmflex_la_SOURCES) \
-	$(dmpetsc_la_SOURCES) $(process_la_SOURCES) \
-	$(process2_la_SOURCES) $(stats_la_SOURCES) $(test_la_SOURCES) \
-	$(test2_la_SOURCES) $(throw_la_SOURCES)
+SOURCES = $(cpptester_la_SOURCES) $(nodist_cpptester_la_SOURCES) \
+	$(dmflex_la_SOURCES) $(nodist_dmflex_la_SOURCES) \
+	$(dmpetsc_la_SOURCES) $(nodist_dmpetsc_la_SOURCES) \
+	$(process_la_SOURCES) $(nodist_process2_la_SOURCES) \
+	$(stats_la_SOURCES) $(nodist_stats_la_SOURCES) \
+	$(test_la_SOURCES) $(test2_la_SOURCES) $(throw_la_SOURCES)
 DIST_SOURCES = $(am__cpptester_la_SOURCES_DIST) \
 	$(am__dmflex_la_SOURCES_DIST) $(am__dmpetsc_la_SOURCES_DIST) \
-	$(am__process_la_SOURCES_DIST) $(am__process2_la_SOURCES_DIST) \
-	$(am__stats_la_SOURCES_DIST) $(am__test_la_SOURCES_DIST) \
-	$(am__test2_la_SOURCES_DIST) $(am__throw_la_SOURCES_DIST)
-am__dist_noinst_DATA_DIST = process2.d stats.d cpptester.d dmpetsc.d \
-	dmpetsc.c.in
+	$(am__process_la_SOURCES_DIST) $(am__stats_la_SOURCES_DIST) \
+	$(am__test_la_SOURCES_DIST) $(am__test2_la_SOURCES_DIST) \
+	$(am__throw_la_SOURCES_DIST)
+am__dist_noinst_DATA_DIST = dmpetsc.d process2.d stats.d cpptester.d
 nodist_dmstartDATA_INSTALL = $(INSTALL_DATA)
 pkglibDATA_INSTALL = $(INSTALL_DATA)
-DATA = $(dist_noinst_DATA) $(nodist_dmstart_DATA) $(pkglib_DATA)
+DATA = $(dist_noinst_DATA) $(nodist_dmstart_DATA) \
+	$(nodist_noinst_DATA) $(pkglib_DATA)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -328,16 +326,32 @@ GNULIB_CALLOC_POSIX = @GNULIB_CALLOC_POSIX@
 GNULIB_CHOWN = @GNULIB_CHOWN@
 GNULIB_CLOSE = @GNULIB_CLOSE@
 GNULIB_DIRFD = @GNULIB_DIRFD@
+GNULIB_DPRINTF = @GNULIB_DPRINTF@
 GNULIB_DUP2 = @GNULIB_DUP2@
 GNULIB_ENVIRON = @GNULIB_ENVIRON@
 GNULIB_EUIDACCESS = @GNULIB_EUIDACCESS@
 GNULIB_FCHDIR = @GNULIB_FCHDIR@
+GNULIB_FCLOSE = @GNULIB_FCLOSE@
+GNULIB_FFLUSH = @GNULIB_FFLUSH@
+GNULIB_FOPEN = @GNULIB_FOPEN@
+GNULIB_FPRINTF = @GNULIB_FPRINTF@
+GNULIB_FPRINTF_POSIX = @GNULIB_FPRINTF_POSIX@
+GNULIB_FPUTC = @GNULIB_FPUTC@
+GNULIB_FPUTS = @GNULIB_FPUTS@
+GNULIB_FREOPEN = @GNULIB_FREOPEN@
+GNULIB_FSEEK = @GNULIB_FSEEK@
+GNULIB_FSEEKO = @GNULIB_FSEEKO@
 GNULIB_FSYNC = @GNULIB_FSYNC@
+GNULIB_FTELL = @GNULIB_FTELL@
+GNULIB_FTELLO = @GNULIB_FTELLO@
 GNULIB_FTRUNCATE = @GNULIB_FTRUNCATE@
+GNULIB_FWRITE = @GNULIB_FWRITE@
 GNULIB_GETCWD = @GNULIB_GETCWD@
+GNULIB_GETDELIM = @GNULIB_GETDELIM@
 GNULIB_GETDOMAINNAME = @GNULIB_GETDOMAINNAME@
 GNULIB_GETDTABLESIZE = @GNULIB_GETDTABLESIZE@
 GNULIB_GETHOSTNAME = @GNULIB_GETHOSTNAME@
+GNULIB_GETLINE = @GNULIB_GETLINE@
 GNULIB_GETLOADAVG = @GNULIB_GETLOADAVG@
 GNULIB_GETLOGIN_R = @GNULIB_GETLOGIN_R@
 GNULIB_GETPAGESIZE = @GNULIB_GETPAGESIZE@
@@ -373,7 +387,15 @@ GNULIB_MEMPCPY = @GNULIB_MEMPCPY@
 GNULIB_MEMRCHR = @GNULIB_MEMRCHR@
 GNULIB_MKDTEMP = @GNULIB_MKDTEMP@
 GNULIB_MKSTEMP = @GNULIB_MKSTEMP@
+GNULIB_OBSTACK_PRINTF = @GNULIB_OBSTACK_PRINTF@
+GNULIB_OBSTACK_PRINTF_POSIX = @GNULIB_OBSTACK_PRINTF_POSIX@
+GNULIB_PERROR = @GNULIB_PERROR@
+GNULIB_PRINTF = @GNULIB_PRINTF@
+GNULIB_PRINTF_POSIX = @GNULIB_PRINTF_POSIX@
+GNULIB_PUTC = @GNULIB_PUTC@
+GNULIB_PUTCHAR = @GNULIB_PUTCHAR@
 GNULIB_PUTENV = @GNULIB_PUTENV@
+GNULIB_PUTS = @GNULIB_PUTS@
 GNULIB_RANDOM_R = @GNULIB_RANDOM_R@
 GNULIB_RAWMEMCHR = @GNULIB_RAWMEMCHR@
 GNULIB_READLINK = @GNULIB_READLINK@
@@ -382,6 +404,9 @@ GNULIB_RPMATCH = @GNULIB_RPMATCH@
 GNULIB_SCANDIR = @GNULIB_SCANDIR@
 GNULIB_SETENV = @GNULIB_SETENV@
 GNULIB_SLEEP = @GNULIB_SLEEP@
+GNULIB_SNPRINTF = @GNULIB_SNPRINTF@
+GNULIB_SPRINTF_POSIX = @GNULIB_SPRINTF_POSIX@
+GNULIB_STDIO_H_SIGPIPE = @GNULIB_STDIO_H_SIGPIPE@
 GNULIB_STPCPY = @GNULIB_STPCPY@
 GNULIB_STPNCPY = @GNULIB_STPNCPY@
 GNULIB_STRCASESTR = @GNULIB_STRCASESTR@
@@ -401,6 +426,14 @@ GNULIB_STRTOULL = @GNULIB_STRTOULL@
 GNULIB_STRVERSCMP = @GNULIB_STRVERSCMP@
 GNULIB_UNISTD_H_SIGPIPE = @GNULIB_UNISTD_H_SIGPIPE@
 GNULIB_UNSETENV = @GNULIB_UNSETENV@
+GNULIB_VASPRINTF = @GNULIB_VASPRINTF@
+GNULIB_VDPRINTF = @GNULIB_VDPRINTF@
+GNULIB_VFPRINTF = @GNULIB_VFPRINTF@
+GNULIB_VFPRINTF_POSIX = @GNULIB_VFPRINTF_POSIX@
+GNULIB_VPRINTF = @GNULIB_VPRINTF@
+GNULIB_VPRINTF_POSIX = @GNULIB_VPRINTF_POSIX@
+GNULIB_VSNPRINTF = @GNULIB_VSNPRINTF@
+GNULIB_VSPRINTF_POSIX = @GNULIB_VSPRINTF_POSIX@
 GNULIB_WCRTOMB = @GNULIB_WCRTOMB@
 GNULIB_WCSNRTOMBS = @GNULIB_WCSNRTOMBS@
 GNULIB_WCSRTOMBS = @GNULIB_WCSRTOMBS@
@@ -415,21 +448,29 @@ HAVE_BTOWC = @HAVE_BTOWC@
 HAVE_CALLOC_POSIX = @HAVE_CALLOC_POSIX@
 HAVE_DECL_DIRFD = @HAVE_DECL_DIRFD@
 HAVE_DECL_ENVIRON = @HAVE_DECL_ENVIRON@
+HAVE_DECL_GETDELIM = @HAVE_DECL_GETDELIM@
+HAVE_DECL_GETLINE = @HAVE_DECL_GETLINE@
 HAVE_DECL_GETLOADAVG = @HAVE_DECL_GETLOADAVG@
 HAVE_DECL_GETLOGIN_R = @HAVE_DECL_GETLOGIN_R@
 HAVE_DECL_MEMMEM = @HAVE_DECL_MEMMEM@
 HAVE_DECL_MEMRCHR = @HAVE_DECL_MEMRCHR@
+HAVE_DECL_OBSTACK_PRINTF = @HAVE_DECL_OBSTACK_PRINTF@
+HAVE_DECL_SNPRINTF = @HAVE_DECL_SNPRINTF@
 HAVE_DECL_STRDUP = @HAVE_DECL_STRDUP@
 HAVE_DECL_STRERROR = @HAVE_DECL_STRERROR@
 HAVE_DECL_STRNDUP = @HAVE_DECL_STRNDUP@
 HAVE_DECL_STRNLEN = @HAVE_DECL_STRNLEN@
 HAVE_DECL_STRSIGNAL = @HAVE_DECL_STRSIGNAL@
 HAVE_DECL_STRTOK_R = @HAVE_DECL_STRTOK_R@
+HAVE_DECL_VSNPRINTF = @HAVE_DECL_VSNPRINTF@
 HAVE_DECL_WCTOB = @HAVE_DECL_WCTOB@
 HAVE_DECL_WCWIDTH = @HAVE_DECL_WCWIDTH@
+HAVE_DPRINTF = @HAVE_DPRINTF@
 HAVE_DUP2 = @HAVE_DUP2@
 HAVE_EUIDACCESS = @HAVE_EUIDACCESS@
+HAVE_FSEEKO = @HAVE_FSEEKO@
 HAVE_FSYNC = @HAVE_FSYNC@
+HAVE_FTELLO = @HAVE_FTELLO@
 HAVE_FTRUNCATE = @HAVE_FTRUNCATE@
 HAVE_GETDOMAINNAME = @HAVE_GETDOMAINNAME@
 HAVE_GETDTABLESIZE = @HAVE_GETDTABLESIZE@
@@ -488,6 +529,8 @@ HAVE_SYS_TYPES_H = @HAVE_SYS_TYPES_H@
 HAVE_UNISTD_H = @HAVE_UNISTD_H@
 HAVE_UNSETENV = @HAVE_UNSETENV@
 HAVE_UNSIGNED_LONG_LONG_INT = @HAVE_UNSIGNED_LONG_LONG_INT@
+HAVE_VASPRINTF = @HAVE_VASPRINTF@
+HAVE_VDPRINTF = @HAVE_VDPRINTF@
 HAVE_WCHAR_H = @HAVE_WCHAR_H@
 HAVE_WCRTOMB = @HAVE_WCRTOMB@
 HAVE_WCSNRTOMBS = @HAVE_WCSNRTOMBS@
@@ -537,6 +580,7 @@ NAMEBYTES_1 = @NAMEBYTES_1@
 NEXT_AS_FIRST_DIRECTIVE_DIRENT_H = @NEXT_AS_FIRST_DIRECTIVE_DIRENT_H@
 NEXT_AS_FIRST_DIRECTIVE_ERRNO_H = @NEXT_AS_FIRST_DIRECTIVE_ERRNO_H@
 NEXT_AS_FIRST_DIRECTIVE_STDINT_H = @NEXT_AS_FIRST_DIRECTIVE_STDINT_H@
+NEXT_AS_FIRST_DIRECTIVE_STDIO_H = @NEXT_AS_FIRST_DIRECTIVE_STDIO_H@
 NEXT_AS_FIRST_DIRECTIVE_STDLIB_H = @NEXT_AS_FIRST_DIRECTIVE_STDLIB_H@
 NEXT_AS_FIRST_DIRECTIVE_STRING_H = @NEXT_AS_FIRST_DIRECTIVE_STRING_H@
 NEXT_AS_FIRST_DIRECTIVE_SYS_STAT_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_STAT_H@
@@ -547,6 +591,7 @@ NEXT_AS_FIRST_DIRECTIVE_WCTYPE_H = @NEXT_AS_FIRST_DIRECTIVE_WCTYPE_H@
 NEXT_DIRENT_H = @NEXT_DIRENT_H@
 NEXT_ERRNO_H = @NEXT_ERRNO_H@
 NEXT_STDINT_H = @NEXT_STDINT_H@
+NEXT_STDIO_H = @NEXT_STDIO_H@
 NEXT_STDLIB_H = @NEXT_STDLIB_H@
 NEXT_STRING_H = @NEXT_STRING_H@
 NEXT_SYS_STAT_H = @NEXT_SYS_STAT_H@
@@ -591,8 +636,19 @@ RELEASE_INFO = @RELEASE_INFO@
 REPLACE_BTOWC = @REPLACE_BTOWC@
 REPLACE_CHOWN = @REPLACE_CHOWN@
 REPLACE_CLOSE = @REPLACE_CLOSE@
+REPLACE_DPRINTF = @REPLACE_DPRINTF@
 REPLACE_FCHDIR = @REPLACE_FCHDIR@
+REPLACE_FCLOSE = @REPLACE_FCLOSE@
+REPLACE_FFLUSH = @REPLACE_FFLUSH@
+REPLACE_FOPEN = @REPLACE_FOPEN@
+REPLACE_FPRINTF = @REPLACE_FPRINTF@
+REPLACE_FREOPEN = @REPLACE_FREOPEN@
+REPLACE_FSEEK = @REPLACE_FSEEK@
+REPLACE_FSEEKO = @REPLACE_FSEEKO@
+REPLACE_FTELL = @REPLACE_FTELL@
+REPLACE_FTELLO = @REPLACE_FTELLO@
 REPLACE_GETCWD = @REPLACE_GETCWD@
+REPLACE_GETLINE = @REPLACE_GETLINE@
 REPLACE_GETPAGESIZE = @REPLACE_GETPAGESIZE@
 REPLACE_GETTIMEOFDAY = @REPLACE_GETTIMEOFDAY@
 REPLACE_ISWCNTRL = @REPLACE_ISWCNTRL@
@@ -608,13 +664,25 @@ REPLACE_MBSTATE_T = @REPLACE_MBSTATE_T@
 REPLACE_MEMMEM = @REPLACE_MEMMEM@
 REPLACE_MKDIR = @REPLACE_MKDIR@
 REPLACE_MKSTEMP = @REPLACE_MKSTEMP@
+REPLACE_OBSTACK_PRINTF = @REPLACE_OBSTACK_PRINTF@
+REPLACE_PERROR = @REPLACE_PERROR@
+REPLACE_PRINTF = @REPLACE_PRINTF@
 REPLACE_PUTENV = @REPLACE_PUTENV@
+REPLACE_SNPRINTF = @REPLACE_SNPRINTF@
+REPLACE_SPRINTF = @REPLACE_SPRINTF@
+REPLACE_STDIO_WRITE_FUNCS = @REPLACE_STDIO_WRITE_FUNCS@
 REPLACE_STRCASESTR = @REPLACE_STRCASESTR@
 REPLACE_STRDUP = @REPLACE_STRDUP@
 REPLACE_STRERROR = @REPLACE_STRERROR@
 REPLACE_STRSIGNAL = @REPLACE_STRSIGNAL@
 REPLACE_STRSTR = @REPLACE_STRSTR@
 REPLACE_STRTOD = @REPLACE_STRTOD@
+REPLACE_VASPRINTF = @REPLACE_VASPRINTF@
+REPLACE_VDPRINTF = @REPLACE_VDPRINTF@
+REPLACE_VFPRINTF = @REPLACE_VFPRINTF@
+REPLACE_VPRINTF = @REPLACE_VPRINTF@
+REPLACE_VSNPRINTF = @REPLACE_VSNPRINTF@
+REPLACE_VSPRINTF = @REPLACE_VSPRINTF@
 REPLACE_WCRTOMB = @REPLACE_WCRTOMB@
 REPLACE_WCSNRTOMBS = @REPLACE_WCSNRTOMBS@
 REPLACE_WCSRTOMBS = @REPLACE_WCSRTOMBS@
@@ -740,44 +808,51 @@ top_srcdir = @top_srcdir@
 AM_CFLAGS = $(GCC_CFLAGS) @LIBDM_DLL_IMPORT@ $(X_CFLAGS)
 AM_LDFLAGS = -module -no-undefined
 AM_LIBS = $(top_builddir)/src/libdmglobals.la $(X_LDFLAGS) 
-AM_CPPFLAGS = $(INCLTDL) -I"$(top_srcdir)/src" -I"$(top_builddir)/src"
-AM_LIBADD = $(AM_LIBS) $(LTLIBOBJS) @RELEASE_INFO@ @VERSION_INFO@
+AM_CPPFLAGS = $(INCLTDL) -I"$(top_srcdir)/src" -I"$(top_builddir)/src" \
+	-I"$(top_builddir)/lib" -I"$(top_srcdir)/lib"
+
+AM_LIBADD = $(AM_LIBS) $(LTLIBOBJS) @RELEASE_INFO@ @VERSION_INFO@ \
+	$(top_builddir)/lib/libgnu.la
+
 INCLUDES = $(INCLTDL)
+INFILES = dmpetsc.c petsc.d new-plugin.d
+EXTRA_DIST = dmpetsc.cin petsc.din
+SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
 @ENABLE_PLUGINS_SUPPORT_TRUE@edit = sed \
 @ENABLE_PLUGINS_SUPPORT_TRUE@	  -e 's,[@]PETSC_DIR[@],$(PETSC_DIR),g' \
 @ENABLE_PLUGINS_SUPPORT_TRUE@	  -e 's,[@]PETSC_ARCH[@],$(PETSC_ARCH),g' \
 @ENABLE_PLUGINS_SUPPORT_TRUE@	  -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g'
 
-@ENABLE_PLUGINS_SUPPORT_TRUE@BUILT_SOURCES = new-plugin.d \
+@ENABLE_PLUGINS_SUPPORT_TRUE@BUILT_SOURCES = errors.d new-plugin.d \
 @ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__append_1) $(am__append_2) \
-@ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__append_4) $(am__append_5) \
+@ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__append_3) $(am__append_4) \
 @ENABLE_PLUGINS_SUPPORT_TRUE@	$(IPETSC_D)
+@ENABLE_PLUGINS_SUPPORT_TRUE@nodist_noinst_DATA = errors.d
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@IPETSC_LIB = dmpetsc.la
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@IPETSC_D = petsc.d
-@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@dmpetsc_la_SOURCES = dm-dmpetsc-main.h dm-dmpetsc-header.h \
-@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@	dmpetsc.c dmpetsc.h dmpetsc-bug.c
-
+@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@dmpetsc_la_SOURCES = dmpetsc.h dmpetsc-bug.c
+@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@nodist_dmpetsc_la_SOURCES = dm-dmpetsc-main.h dm-dmpetsc-header.h dmpetsc.c
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@dmpetsc_la_LIBADD = $(AM_LIBADD) $(PETSC_LIB)
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@dmpetsc_la_CPPFLAGS = $(PETSC_CCPPFLAGS) $(AM_CPPFLAGS)
-@ENABLE_PETSC_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dist_noinst_DATA = process2.d \
-@ENABLE_PETSC_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(am__append_3)
-@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@dist_noinst_DATA =  \
-@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@	dmpetsc.d \
-@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@	dmpetsc.c.in \
-@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__append_3)
+@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@dist_noinst_DATA = dmpetsc.d
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dist_noinst_DATA =  \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	process2.d \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	stats.d \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptester.d
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@PROCESS_LIB = process.la process2.la
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process_la_SOURCES = process.c process.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process_la_LIBADD = $(AM_LIBADD)
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process2_la_SOURCES = process2.c process2.h
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@stats_la_SOURCES = dm-stats-main.h dm-stats-header.h stats.c
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@nodist_process2_la_SOURCES = process2.c process2.h
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@stats_la_SOURCES = stats.c
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@nodist_stats_la_SOURCES = dm-stats-main.h dm-stats-header.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@stats_la_LIBADD = $(AM_LIBADD)
 @ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@CPPPLUGIN_LIB = cpptester.la
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@cpptester_la_SOURCES = cpptester.c cpptester.h \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptestercode.cpp cpptestercode.h
-
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@cpptester_la_SOURCES = cpptestercode.cpp cpptestercode.h
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@nodist_cpptester_la_SOURCES = cpptester.c cpptester.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@cpptester_la_LIBADD = $(AM_LIBADD)
 @ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@DMFLEX_LIB = dmflex.la
-@ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dmflex_la_SOURCES = dmflex.l dmflex.h
+@ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dmflex_la_SOURCES = dmflex.h
+@ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@nodist_dmflex_la_SOURCES = dmflex.c
 @ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dmflex_la_LIBADD = $(AM_LIBADD)
 @ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@PLUGINS = $(IPETSC_LIB)
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@PLUGINS = test.la test2.la $(PROCESS_LIB) throw.la \
@@ -794,14 +869,20 @@ INCLUDES = $(INCLTDL)
 @ENABLE_PLUGINS_SUPPORT_TRUE@pkglib_LTLIBRARIES = $(PLUGINS)
 @ENABLE_PLUGINS_SUPPORT_TRUE@pkglib_DATA = $(PLACEHOLDER) 
 @ENABLE_PLUGINS_SUPPORT_TRUE@nodist_dmstart_DATA = $(IPETSC_D)
-@ENABLE_PLUGINS_SUPPORT_TRUE@EXTRA_DIST = petsc.d.in
-@ENABLE_PLUGINS_SUPPORT_TRUE@CLEANFILES = $(BUILT_SOURCES) dmflex.c $(PETSC_D)
+@ENABLE_PLUGINS_SUPPORT_TRUE@CLEANFILES = $(BUILT_SOURCES) $(PETSC_D)
+Makefile = Makefile
+SVNVERSION_STAMP_DEP = @SVNVERSION_STAMP@
+INFILES_RULE = \
+	! test -e $@.tmp || rm -f $@.tmp \
+	&& $(edit) $< >$@.tmp \
+	&& mv $@.tmp $@
+
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .cpp .l .lo .o .obj
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_bundle_sub.make $(am__configure_deps)
+.SUFFIXES: .cin .hin .elin .din .psin .shin .plin .styin .c .cpp .d .el .h .l .lo .o .obj .pl .ps .sh .sty
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_in.make $(top_srcdir)/m4/cf_bundle_sub.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -917,19 +998,19 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
-dmpetsc_la-dmpetsc.lo: dmpetsc.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmpetsc_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dmpetsc_la-dmpetsc.lo -MD -MP -MF $(DEPDIR)/dmpetsc_la-dmpetsc.Tpo -c -o dmpetsc_la-dmpetsc.lo `test -f 'dmpetsc.c' || echo '$(srcdir)/'`dmpetsc.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dmpetsc_la-dmpetsc.Tpo $(DEPDIR)/dmpetsc_la-dmpetsc.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dmpetsc.c' object='dmpetsc_la-dmpetsc.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmpetsc_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dmpetsc_la-dmpetsc.lo `test -f 'dmpetsc.c' || echo '$(srcdir)/'`dmpetsc.c
-
 dmpetsc_la-dmpetsc-bug.lo: dmpetsc-bug.c
 @am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmpetsc_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dmpetsc_la-dmpetsc-bug.lo -MD -MP -MF $(DEPDIR)/dmpetsc_la-dmpetsc-bug.Tpo -c -o dmpetsc_la-dmpetsc-bug.lo `test -f 'dmpetsc-bug.c' || echo '$(srcdir)/'`dmpetsc-bug.c
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dmpetsc_la-dmpetsc-bug.Tpo $(DEPDIR)/dmpetsc_la-dmpetsc-bug.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dmpetsc-bug.c' object='dmpetsc_la-dmpetsc-bug.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmpetsc_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dmpetsc_la-dmpetsc-bug.lo `test -f 'dmpetsc-bug.c' || echo '$(srcdir)/'`dmpetsc-bug.c
+
+dmpetsc_la-dmpetsc.lo: dmpetsc.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmpetsc_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dmpetsc_la-dmpetsc.lo -MD -MP -MF $(DEPDIR)/dmpetsc_la-dmpetsc.Tpo -c -o dmpetsc_la-dmpetsc.lo `test -f 'dmpetsc.c' || echo '$(srcdir)/'`dmpetsc.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dmpetsc_la-dmpetsc.Tpo $(DEPDIR)/dmpetsc_la-dmpetsc.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dmpetsc.c' object='dmpetsc_la-dmpetsc.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmpetsc_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dmpetsc_la-dmpetsc.lo `test -f 'dmpetsc.c' || echo '$(srcdir)/'`dmpetsc.c
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -951,9 +1032,6 @@ dmpetsc_la-dmpetsc-bug.lo: dmpetsc-bug.c
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
-
-.l.c:
-	$(am__skiplex) $(SHELL) $(YLWRAP) $< $(LEX_OUTPUT_ROOT).c $@ -- $(LEXCOMPILE)
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -1102,7 +1180,6 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-rm -f dmflex.c
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
@@ -1182,55 +1259,63 @@ uninstall-am: uninstall-nodist_dmstartDATA uninstall-pkglibDATA \
 	uninstall-am uninstall-nodist_dmstartDATA uninstall-pkglibDATA \
 	uninstall-pkglibLTLIBRARIES
 
-@ENABLE_PLUGINS_SUPPORT_TRUE@new-plugin.d: $(srcdir)/Makefile new-plugin.d.in
-@ENABLE_PLUGINS_SUPPORT_TRUE@	rm -f $@ $@.tmp
-@ENABLE_PLUGINS_SUPPORT_TRUE@	$(edit) new-plugin.d.in >$@.tmp
-@ENABLE_PLUGINS_SUPPORT_TRUE@	mv $@.tmp $@
 
-@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@petsc.d: Makefile $(srcdir)/petsc.d.in
-@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@	-rm -f $@ $@.tmp
-@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@	$(edit) "$(srcdir)/petsc.d.in" > $@.tmp
-@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@	mv $@.tmp $@
+@ENABLE_PLUGINS_SUPPORT_TRUE@errors.d: $(builddir)/../dcode/errors.d
+@ENABLE_PLUGINS_SUPPORT_TRUE@	rm -f $@
+@ENABLE_PLUGINS_SUPPORT_TRUE@	$(LN_S) $< $@
 
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@dm-dmpetsc-main.h: new-plugin.d dmpetsc.d
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@	"$(top_srcdir)/src/dgen-build" \
-@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dmpetsc.d" "$@" true true
+@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" \
+@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@		"dmpetsc.d" "$@" true true
 
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@dm-dmpetsc-header.h: new-plugin.d dmpetsc.d
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@	"$(top_srcdir)/src/dgen-build" \
-@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dmpetsc.d" "$@" false true
-
-@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@dmpetsc.c: Makefile $(srcdir)/dmpetsc.c.in
-@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@	-rm -f $@ $@.tmp
-@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@	$(edit) "$(srcdir)/dmpetsc.c.in" > $@.tmp
-@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@	mv $@.tmp $@
+@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" \
+@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@	"dmpetsc.d" "$@" false true
 
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process2.c: process2.d plugin.d
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "process2.d" "$@" true true
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"process2.d" "$@" true true
 
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process2.h: process2.d plugin.d
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "process2.d" "$@" false true
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"process2.d" "$@" false true
 
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dm-stats-main.h: stats.d new-plugin.d
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "stats.d" "$@" true true
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"stats.d" "$@" true true
 
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dm-stats-header.h: stats.d new-plugin.d
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "stats.d" "$@" false true
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"stats.d" "$@" false true
 
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@cpptester.c: cpptester.d plugin.d
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "cpptester.d" "$@" true true
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"cpptester.d" "$@" true true
 
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@cpptester.h: cpptester.d plugin.d
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "cpptester.d" "$@" false true
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"cpptester.d" "$@" false true
 
-@ENABLE_PETSC_FALSE@@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@.plugins:
-@ENABLE_PETSC_FALSE@@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@	touch "$@"
+@ENABLE_PETSC_FALSE@@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@.plugins: ; touch "$@"
+
+.cin.c:     ; $(INFILES_RULE)
+.hin.h:     ; $(INFILES_RULE)
+.din.d:     ; $(INFILES_RULE)
+.psin.ps:   ; $(INFILES_RULE)
+.shin.sh:   ; $(INFILES_RULE)
+.plin.pl:   ; $(INFILES_RULE)
+.elin.el:   ; $(INFILES_RULE)
+.styin.sty: ; $(INFILES_RULE)
+
+$(INFILES): $(Makefile) $(SVNVERSION_STAMP_DEP)
 
 .PHONY: distsvn-recursive
 distsvn-recursive:
@@ -1257,6 +1342,13 @@ distsvn-extra:
 .PHONY: distsvn
 distsvn: distsvn-extra distsvn-recursive
 	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
+
+#################################################
+# Keep automake from trying to save the .c file
+#
+.l.c:
+	$(am__skiplex) $(SHELL) $(YLWRAP) \
+		$< $(LEX_OUTPUT_ROOT).c $@ -- $(LEXCOMPILE)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

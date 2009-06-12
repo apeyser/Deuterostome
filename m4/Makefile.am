@@ -19,12 +19,20 @@ dist_noinst_DATA = \
 	petsc.make \
 	cf_latex.m4 cf_latex.make \
 	cf_svnversion.m4 cf_svnversion.make cf_svnversion-top.make \
-	cf_gentoo.make cf_debian.make
+	cf_gentoo.make cf_debian.make cf_in.make
 
-EXTRA_DIST = \
-	gnulib-cache.m4 dirfd.m4 d-type.m4 extensions.m4 \
+GNULIB = 00gnulib.m4 gnulib-cache.m4 dirfd.m4 d-type.m4 extensions.m4 \
 	fnmatch.m4 glob.m4 gnulib-common.m4 gnulib-comp.m4 \
-	gnulib-tool.m4 libtool.m4 onceonly.m4 \
+	gnulib-tool.m4 libtool.m4 onceonly.m4 stdio_h.m4 \
+	alloca.m4 codeset.m4 dirent_h.m4 errno_h.m4 getlogin_r.m4 \
+	gettimeofday.m4 glibc21.m4 include_next.m4 localcharset.m4 \
+	locale-fr.m4 locale-ja.m4 locale-zh.m4 longlong.m4 \
+	lstat.m4 malloc.m4 mbrtowc.m4 mbsinit.m4 mbsrtowcs.m4 \
+	mbstate_t.m4 mempcpy.m4 mkdtemp.m4 multiarch.m4 stdbool.m4 \
+	stdint.m4 stdlib_h.m4 string_h.m4 sys_stat_h.m4 sys_time_h.m4 \
+	tempname.m4 unistd_h.m4 wchar.m4 wctype.m4 wint_t.m4
+
+EXTRA_DIST = $(GNULIB) \
 	latex/ac_latex_class_article.m4 latex/ac_latex_class_book.m4 \
 	latex/ac_latex_classes.m4 latex/ac_latex_class.m4 \
 	latex/ac_latex_class_report.m4 latex/ac_latex_dvips_o_stdout.m4 \

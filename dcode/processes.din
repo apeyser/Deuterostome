@@ -1,0 +1,848 @@
+| -*- mode: d; -*-
+
+(Using processes.d $Id$ V@PACKAGE_VERSION@ @SVNVERSION@\n) toconsole
+
+/PROCESSES 100 {
+  | These need to be in the same order as
+  |  flags struct array in dm-proc.c.
+  /FFLAGS {
+    /READ_ONLY
+    /WRITE_TRUNCATE
+    /WRITE_APPEND
+  } makeenum def
+
+  /_STD_FDS {
+    /STDIN /STDOUT /STDERR /NULLR /NULLW /STDIN_ /STDOUT_ /STDERR_
+  } makeenum def
+  
+  /_STD_READ [
+    {/STDIN /NULLR /STDIN_} ~true forall
+    {/STDOUT /STDERR /NULLW /STDOUT_ /STDERR_} ~false forall
+  ] makestruct mkread def
+
+  _STD_FDS {_STD_READ 2 index get makefd def} forall
+
+  /fds ~[STDIN STDOUT STDERR] bind def
+  
+  /nfds ~[NULLR NULLW NULLW] bind def
+
+  /fds_ ~[STDIN_ STDOUT_ STDERR_] bind def
+
+  | (string) | --
+  /tosystemconsole {
+    PROCESSES /STDERR_ get exch writefd pop
+  } bind def
+
+  | (dir) (file) | fd
+  /wropen {
+    2 copy () 3 1 roll writefile
+    FFLAGS /WRITE_APPEND get openfd
+  } bind def
+
+  | fd | --
+  /close {
+    dup unmakefd 5 lt ~pop ~closefd ifelse
+  } bind def
+
+  /closeifopen {
+    dup closedfd ~pop ~close ifelse
+  } bind def
+  
+  /pidsockets [
+    /ll 20 {[null null false]} ~static makelist
+    {/s /p /pd /t} ~null forall
+
+    | [next data <<pid socket>>] | <<pid socket>>
+    /_data {~data ll inlist} bind
+
+    | list | --
+    /_remove {~remove ll inlist} bind
+
+    | ~active | bool
+    /_iter {~iter ll inlist} bind
+
+    | n | dict
+    /_nth {~nth ll inlist} bind
+
+    | [pid socket state] | pid
+    /_getpid {0 get} bind
+
+    | pid [null socket state] | --
+    /_setpid {0 put} bind
+
+    | [pid socket state] | --
+    /_getsocket {1 get} bind
+
+    | socket [pid null state] | --
+    /_setsocket {1 put} bind
+
+    | [pid socket state] | state
+    /_getstate {2 get} bind
+
+    | state [pid socket ?] | --
+    /_setstate {2 put} bind
+
+    |===================== add_process ==================
+    | pid socket | --
+    |
+    | Add a process, socket pair for tracking.
+    |
+    /add_process {
+      ~prepend ll inlist _data /pd name
+      pd _setsocket
+      pd _setpid
+      true pd _setstate
+    } bind
+
+    |====================== socketdead ===================
+    | socket | bool-was-found
+    |
+    | Handle a socket disconnect event.
+    | Pid may continue alive.
+    |
+    /socketdead {/s name
+      /t false def
+      {dup /p name _data /pd name
+        false
+        pd _getsocket dup s ne ~pop {
+          t ~pop ~disconnect ifelse
+          null pd _setsocket 
+          pd _getpid null eq {p _remove} {
+            pd _getstate not {p _remove} if
+          } ifelse
+          pop false /t true def
+        } ifelse
+      } _iter pop t
+    } bind
+
+    |======================= piddead ========================
+    | pid# | --
+    |
+    | Handle a process end event.
+    | Socket is disconnected if active.
+    |
+    /piddead {/s name
+      {dup /p name _data /pd name
+        false
+        pd _getpid dup null eq ~pop {
+          unpid s eq {
+            false pd _setstate
+            pop true
+          } if
+        } ifelse
+      } _iter pop
+    } bind
+
+    |======================= pidwaited ========================
+    | pid | --
+    |
+    | Handle a process wait.
+    | Socket is disconnected if active.
+    | Removed from processes being tracked.
+    |
+    /pidwaited {/s name
+      {dup /p name _data /pd name
+        false
+        pd _getpid dup null eq ~pop {
+          s eq {
+            false pd _setstate
+            null  pd _setpid
+            pd _getsocket null eq {p _remove} if
+            pop true
+          } if
+        } ifelse
+      } _iter pop
+    } bind
+
+    |==================== piddisconnect =====================
+    | pid# | --
+    |
+    | Handle a disconnect request from a process.
+    | Pid will continue alive.
+    |
+    /piddisconnect {/s name
+      {dup /p name _data /pd name
+        false
+        pd _getpid dup null eq ~pop {
+          unpid s eq {
+            pd _getsocket dup null eq ~pop {
+              disconnect
+              null pd _setsocket
+            } ifelse
+            pop true
+          } if
+        } ifelse
+      } _iter pop
+    } bind
+
+    | signal | --
+    /killall {/s name
+      {dup /p name _data /pd name
+        pd _getpid dup null eq ~pop {
+          pd _getstate {s killpid} ~pop ifelse
+        } ifelse
+        false
+      } _iter pop
+    } bind
+
+    | -- | --
+    /terminateall {
+      {dup /p name _data /pd name
+        pd _getpid dup null eq ~pop {
+          pd _getstate {SIGNALS /TERM get killpid} ~pop ifelse
+        } ifelse
+        false
+      } _iter pop
+
+      {_data _getpid dup null ne ~wait if pop false} _iter pop
+    } bind
+
+    | -- | --
+    /cleanall {
+      {_remove false} _iter pop
+    } bind
+
+    |======================== job ============================
+    | n | pid
+    |
+    | Get the pid for process #n (counting from 0), as listed
+    |  by jobs.
+    | Not stable after a wait.
+    |
+    /job {_nth _data _getpid} bind
+
+    |======================= jobconsole =======================
+    | n | socket
+    |
+    | Get the socket for process #n (counting from 0), as listed
+    |  by jobs.
+    | Not stable after a wait.
+    |
+    /jobconsole {_nth _data _getsocket} bind
+
+    |========================= jobs ============================
+    | -- | --
+    |
+    | List jobs: job#: pid: alive or dead
+    | Not stable after a wait.
+    |
+    /jobs {
+      0 {_data /pd name
+        pd _getpid null ne {
+          jobstr 0 * 3 index          * number                (: ) fax
+                   * pd _getpid unpid * number                (: ) fax
+                   pd _getstate {(alive)} {(dead)} ifelse fax (\n) fax
+          0 exch getinterval toconsole
+        } if
+        1 add false
+      } _iter pop 0 eq {(No jobs\n) toconsole} if
+    } bind
+    /jobstr 256 /b array
+
+    /jobconsoles {
+      0 {_data /pd name
+        pd _getsocket null ne {
+          jobstr 0 * 3 index                 * number         (: ) fax
+                   * pd _getsocket socketval * number         (: ) fax
+                   * pd _getpid dup null eq 
+                     {pop -1} ~unpid ifelse  * number         (: ) fax
+                   pd _getstate {(alive)} {(dead)} ifelse fax (\n) fax
+        } if
+        1 add false
+      } _iter pop 0 eq {(No sockets\n) toconsole} if
+    } bind
+    
+  ] makestruct def
+
+  {{/die /die_base} {/quit /quit_base}} {
+    exec /func_base name /func_name name
+    systemdict func_name known {
+      ~[
+        ~[
+          func_name {
+            countdictstack 2 sub ~end repeat
+            ~set_bgerror_ PROCESSES indict
+            systemdict 1 index get def
+            {terminateall _quitting} PROCESSES indict 
+          } ~exec func_base ~mkact ~exec
+        ] {~stopped aborted -1 die_base} ~lock
+      ] bind userdict func_name put
+    } if
+  } forall
+
+  /set_bgerror_ {
+    {/error /error_base} {/bgerror_ find userdict 3 -1 roll put} forall
+  } bind def
+
+  | This must be in a ~stopped ~aborted -1 ~die_base lock capsule.
+  /bgerror_ {
+    countdictstack 2 sub ~end repeat
+    /error_base ~abort bind def
+    /error ~abort bind def
+    /toconsole_base PROCESSES /tosystemconsole get def
+    error_ops_length copy showerror
+
+    console null ne {
+      console ~[
+        2 rollerror getpid unpid {
+          (From child ) fax * 4 -1 roll * number (: ) fax
+          2 rollerror 1024 /b array errormessage fax 1 sub
+        } ~warning ~restore
+      ] send
+    } if
+    abort
+  } bind def
+
+  /childproc false def
+
+  | -- | --
+  /_quitting {
+    childproc {
+      console dup null eq ~pop {
+        ~[
+          ~[
+            getpid unpid {~piddead pidsockets indict} ~PROCESSES ~indict
+            ~restore
+          ] ~lock
+        ] send
+      } ifelse
+    } if
+  } bind def
+
+  | ~active fd-in fd-out fd-err \[fd-chained... | --
+  | Never returns.
+  /_bg_ {
+    {
+      ~cleanall pidsockets indict
+      true PROCESSES /childproc put
+      set_bgerror_
+      
+      {dup class /markclass eq ~exit if closeifopen} loop pop
+      {STDERR STDOUT STDIN} {exec
+        1 index exch dupfd 3 1 roll
+      } forall
+      3 ~closeifopen repeat
+    
+      unlock {0} {1} ifelse die
+    }  ~stopped aborted -1 die_base
+  } bind def
+
+  |========================== bg ============================
+  | ~active fd-in fd-out fd-err \[fd-chained... | pid
+  |
+  | Background a job. ~active is executed with fd's redirected
+  |  to fd-in, fd-out, fd-err.
+  | Returns process id.
+  |
+  | fd-chained operands are closed before executing ~active
+  |  on child process. Useful for piping.
+  |
+  | ~active should return a boolean. If it returns false,
+  |  the child exits with an error code of 1.
+  | If the child throws an error, it returns -1.
+  | The child calls ~_quitting when exiting to disconnect console.
+  |
+  /bg_ {
+    {
+      fork {setconsole _bg_} if
+      | pid socket
+
+      1 index 3 1 roll ~add_process pidsockets indict
+      {exch dup class /markclass eq ~exit if pop} loop pop
+
+      5 1 roll 4 ~pop repeat
+    } lock
+  } def
+
+  |========================== bg ============================
+  | ~active fd-in fd-out fd-err | pid
+  |
+  | Background a job. ~active is executed with fd's redirected
+  |  to fd-in, fd-out, fd-err.
+  | Returns process id.
+  | See bg_.
+  |
+  /bg {openlist bg_} bind def
+
+  |=============================== kill ===========================
+  | pid /SIGNAME | --
+  |
+  | Sends signal SIGNAME to process pid.
+  | SIGNALS are defined in startup_common.d.in
+  |
+  /kill {
+    SIGNALS exch get killpid
+  } bind def
+
+  | /SIGNAME | --
+  /killall {
+    SIGNALS exch get ~killall pidsockets ~indict lock
+  } bind def
+
+  | -- | --
+  /terminateall {
+    ~terminateall pidsockets ~indict lock
+  } bind def
+
+  |=============================== job ============================
+  | n | pid 
+  |
+  | Get pid for the nth proces, as listed by jobs, starting from 0.
+  | Not stable after a ~wait.
+  |
+  /job {~job pidsockets ~indict lock} bind def
+
+  |=============================== jobconsole ============================
+  | n | pid 
+  |
+  | Get the socket for the nth proces, as listed by jobs, starting from 0.
+  | Not stable after a ~wait.
+  |
+  /jobconsole {~jobconsole pidsockets ~indict lock} bind def
+
+  |============================ jobs ==============================
+  | -- | --
+  | 
+  | List running jobs as:
+  | #: pid: alive or dead.
+  | Not stable after a ~wait.
+  |
+  /jobs {~jobs pidsockets ~indict lock} bind def
+
+  /jobconsoles {~jobconsoles pidsockets ~indict lock} bind def
+  
+  |============================ wait ==============================
+  | pid | bool
+  |
+  | Block until process pid ends.
+  | Returns true iff process returns status 0.
+  |
+  /wait {
+    dup waitpid {0 eq} {pop false} ifelse
+    exch ~pidwaited pidsockets ~indict lock
+  } bind def
+
+  |============================ wait_ =============================
+  | pid (source) | --
+  |
+  | Blocks untils process pid ends.
+  | If process does not return status 0, throws a NOSYSTEM error
+  |   coming from (source).
+  |
+  /wait_ {
+    dup class /arrayclass ne {(wait)} if
+    exch wait (Done\n) toconsole ~pop {/NOSYSTEM makeerror} ifelse
+  } bind def
+
+  |======================= socketdead ============================
+  | ... error-pending socket | -- <<error thrown>>
+  |
+  | Lives in userdict.
+  |
+  | Handler for console disconnect by child process.
+  | Uses pidsockets to handle disconnect.
+  | Throws a pending error if error-pending.
+  | If the socket is unknown here, call previous socketdead
+  |   handler in userdict.
+  |
+  /socketdead ~[
+    ~[
+      /socketdead destruct_execn {             | ... bool socket {}
+        1 index ~socketdead pidsockets indict {| ... bool socket {}
+          pop pop ~error if
+        } ~exec ifelse                         | --
+      } currentdict ~indict
+    ] ~lock
+  ] bind userdict 3 -1 roll put
+
+  |======================== fg ==================================
+  | ~active fd-in fd-out fd-err | true/false
+  |
+  | Creates a child executing ~active, and blocks until done.
+  | Returns true iff return status of process is 0
+  |   aka, active returns true without throwing an error.
+  |
+  /fg_ {
+    bg wait
+  } bind def
+
+  |======================== fg ==================================
+  | ~active | --
+  |
+  | Creates a child executing ~active, and blocks until done.
+  | Throws a NOSYSTEM error iff return status of process is not 0
+  |   aka, active returns false or throws an error.
+  |
+  /fg {
+    fds bg (fg) wait_
+  } bind def
+
+  | \[(exec) ... | --
+  | Process image replaced by exec with string operands,
+  |   after signalling parent to disconnect console.
+  | Used only in child process.
+  /_spawnsh {
+    {
+|      countdictstack 2 sub ~end repeat PROCESSES begin
+      console dup null eq ~pop {
+        ~[
+          ~[
+            getpid unpid {~piddisconnect pidsockets indict} ~PROCESSES ~indict
+            ~restore
+          ] ~lock
+        ] send
+      } ifelse
+
+      closelist spawn
+    } lock
+  } bind def
+
+  |======================== sh_ ================================
+  | \[ (exec) ... fd-in fd-out fd-err | pid
+  |
+  | Execute (exec) with following operands in child process,
+  |  using fd-in fd-out and fd-err as redirects.
+  | Returns pid of child process running in bg.
+  |
+  /sh_ {
+    {
+|      countdictstack 2 sub ~end repeat PROCESSES begin
+      ~_spawnsh fds bg wait
+    } 4 1 roll bg
+    counttomark 1 add 1 roll cleartomark
+  } bind def
+
+  |======================= sh ===================================
+  | \[ (exec) ... | --
+  | 
+  | Execute (exec) with following operands as child process in
+  |   the foreground (using the same in, out, and err fds as
+  |   parent).
+  | Blocks until child execution finished; if (exec) returns
+  |  non-zero exec status, throws NOSYSTEM error.
+  |
+  /sh {
+    ~_spawnsh fds bg
+    counttomark 1 add 1 roll cleartomark
+    (sh) wait_
+  } bind def
+
+  |====================== pipe ==================================
+  | \[ ~active ... fd-in fd-out fd-err | pid
+  |
+  | Runs a pipe of child processes, with ~active1's output feeding
+  |  into ~active2's input, and so forth.
+  | active1's input is fd-in, activen's output is fd-out,
+  |  and all active's error is fd-err.
+  | Returns pid of entire pipeline. Pipeline returns non-zero
+  |  status if any child returns non-zero status, which occurs
+  |  if ~active returns false or throws an error.
+  |
+  /pipe {
+    {
+      |  (master: ) toconsole getpid _ pop
+      counttomark openlist exch 2 add 1 roll | \[ \[ ~active ...
+      STDOUT {                   | \[pid socket... \[~active... out
+        2 index class /markclass eq ~exit if
+
+        pipefd 3 copy 7 3 roll   | ... out inr inw ~active out inr inw
+        | must close inw in child to avoid file-descriptor loop
+        3 1 roll exch STDERR     | ... out inr inw ~active inw inr out STDERR
+        openlist 5 -1 roll bg_   | ... out inr inw pid
+        counttomark 1 add 1 roll | ... out inr inw
+        3 1 roll close close     | ... inw
+      } loop                     | \[pid... \[ ~active fd-out
+
+      exch STDIN 2 index STDERR bg   | \[pid ... \[fd-out pid
+      3 1 roll close pop             | \[pid ... 
+    
+      true {                         | \[pid... bool
+        exch wait and                | \[pid... bool
+        1 index class /markclass eq ~exit if
+      } loop                         | \[bool
+      exch pop                       | bool
+    } 4 1 roll bg                    | \[~active... fd-in fd-out fd-err pid
+    counttomark 1 add 1 roll cleartomark | pid
+  } bind def
+
+  |============================= pipefg ============================
+  | \[ ~active ... | --
+  |
+  | Runs a pipe of child processes, with ~active1's output feeding
+  |  into ~active2's input, and so forth.
+  | active1's input is parent's STDIN, activen's output is parent's STDOUT,
+  |  and all active's error is parents STDERR.
+  | Throws NOSYSTEM error if any child process returns a non-zero status,
+  |  which occurs if ~active returns false or throws an error.
+  |
+  /pipefg {
+    fds pipe (pipefg) wait_
+  } bind def
+
+  |============================== andp =============================
+  | \[ ~active ... fd-in fd-out fd-err | pid
+  |
+  | Executes ~active1 to ~activen in sequence. Continues as
+  |  long as ~activeX returns a zero status (short-circuits).
+  | All children use fd-in as STDIN, fd-out as STDOUT and
+  |  fd-err as STDERR.
+  | The group returns a non-zero exit status if any child returns
+  |  a non-zero exit status -- aka, fails on first child failure.
+  |
+  /andp {
+    {
+      {
+        counttomark dup 1 eq ~pop {-1 roll} ifelse
+        fds fg_ not {cleartomark false exit} if
+        dup class /markclass eq {pop true exit} if
+      } loop
+    } 4 1 roll bg
+    counttomark 1 add 1 roll cleartomark
+  } bind def
+
+  |============================== andp =============================
+  | \[ ~active ... | --
+  |
+  | Executes ~active1 to ~activen in sequence. Continues as
+  |  long as ~activeX returns a zero status (short-circuits).
+  | All children use parent's STDIN, STDOUT and STDERR.
+  | Blocks until children are done; if any child fails with
+  |  non-zero exit status, processing stops and NOSYSTEM
+  |  is thrown.
+  |
+  /andfg {
+    fds andp (andfg) wait_
+  } bind def
+
+  |============================== andp =============================
+  | \[ ~active ... fd-in fd-out fd-err | pid
+  |
+  | Executes ~active1 to ~activen in sequence. Continues as
+  |  long as ~activeX returns a non-zero status (short-circuits).
+  | All children use fd-in as STDIN, fd-out as STDOUT and
+  |  fd-err as STDERR.
+  | The group returns a zero exit status if any child returns
+  |  a zero exit status -- aka, succeeds on first child success.
+  |
+  /orp {
+    {
+      {
+        counttomark dup 1 eq ~pop {-1 roll} ifelse
+        fds fg_ {cleartomark true exit} if
+        dup class /markclass eq {pop false exit} if
+      } loop
+    } 4 1 roll bg
+    counttomark 1 add 1 roll cleartomark
+  } bind def
+
+  |============================== andp =============================
+  | \[ ~active ... | --
+  |
+  | Executes ~active1 to ~activen in sequence. Continues as
+  |  long as ~activeX returns a non-zero status (short-circuits).
+  | All children use parent's STDIN, STDOUT and STDERR.
+  | Blocks until children are done; if all children fail
+  |  with non-zero exit status, processing stops and NOSYSTEM
+  |  is thrown. Returns with first successful child.
+  |
+  /orfg {
+    fds orp (orfg) wait_
+  } bind def
+
+  |=============================== readtomark ===============================
+  | (buffer) offset fd char | (buffer) offset fd true / (buffer) offset false
+  |
+  | Fills (buffer) from offset by reading fd until char is found.
+  | Blocks until either found char, or reached end-of-file
+  | Returns true if char is found; otherwise false if end-of-file found.
+  | char is not inserted into buffer.
+  | offset is updated to offset after characters inserted.
+  |
+  /readtomark {
+    4 copy pop pop  | (buffer) offset fd char (buffer) offset
+    1 index length exch sub getinterval 3 -1 roll
+    | (buffer) offset (subbuffer) fd char
+    readtomarkfd    | (buffer) offset (subbuffer) /fd true/false/
+    dup {4 -2 roll} {3 -1 roll} if
+    | (buffer) /fd true/false/ offset (subbuffer)
+    length add 1 index {3 -1 roll} ~exch ifelse
+    | (buffer) offset /fd true/false/
+  } bind def
+
+  |=============================== readline ===============================
+  | (buffer) offset fd | (buffer) offset fd true / (buffer) offset false
+  |
+  | same as readtomark, but char is set to newline.
+  |
+  /readline {
+    (\n) readtomark
+  } bind def
+
+  |============================== readresult ============================
+  | \[(exec) ... | (string)
+  |
+  | Executes (exec) with ... string parameters.
+  | If (exec) returns zero-exec status, returns the first line
+  |   of output (not including newline).
+  | Otherwise throws NOSYSTEM.
+  | Blocks until (exec) ends.
+  |
+  /readresult {
+    {
+      pipefd 2 copy counttomark 1 add 2 roll | pr pw \[.. pr pw 
+      exch pop STDIN exch STDERR             | \[.. STDIN pw STDERR
+      sh_ wait not {                         | pr pw
+        close close                          | --
+        (readresult) /NOSYSTEM makeerror     | --
+      } if                                   | pr pw
+      close (\n) readtomarkfd_nb             | (buffer) pr true / (buffer) false
+      ~close if                              | (buffer)
+    } /readresult_ inlayer
+    dup length /b array copy
+  } bind def
+
+|=============================== removepath functions =====================
+
+  | (dir) (file) norecur-bool | --
+  /_removepath {
+    /norecur exch {{/DIR_NOTEMPTY makeerror}} {null mkact} ifelse def
+    __removepath
+  } bind def
+
+  | (dir) (file) <</norecur defined>> | --
+  /__removepath {
+    2 copy fileisdir {
+      2 copy finddir {
+        norecur
+        {1 index exch __removepath} forall pop
+      } if
+    } if
+    rmpath
+  } bind def
+
+  |========================== removefile ========================
+  | (dir) (file) | --
+  |
+  | Removes file (dir/file), or dir (dir/file) if empty.
+  |
+  /removefile {
+    true ~_removepath /removepath_ ~inlayer PROCESSES indict
+  } bind def
+
+  |=========================== removedir ========================
+  | (dir) (file) | --
+  |
+  | Removes (dir/file) directory recursively, removing all children
+  |   first, then attempting to remove parent.
+  |
+  /removedir {
+    false ~_removepath /removepath_ ~inlayer PROCESSES indict
+  } bind def
+
+  |=========================== setwdirp ==========================
+  | (dir) (subdir) | --
+  |
+  | sets current working directory to (dir/subdir).
+  |
+  /setwdirp {
+    exch setwdir setwdir
+  } bind def
+
+|================================ process error handling ==========
+
+  /estreamrd null def
+  /estreamwt null def
+
+  | -- | writefd
+  /_estreamopen {
+    pipefd dup 3 1 roll
+    /estreamwt name
+    /estreamrd name
+  } def
+
+  | bool | bool
+  | if true, output contents of estreams
+  /_estreamclose {
+    estreamwt dup null eq ~pop {
+      close estreamrd 1 index {suckfd toconsole} ~close ifelse
+      /estreamwt null def /estreamrd null def
+    } ifelse
+  } bind def
+
+  | ... | --
+  /_estreamerror {
+    ~error_base PROCESSES /childproc get ~exec {
+      PROCESSES /estreamdict get /error put
+      showerror
+    } ifelse
+    stop
+  } bind def
+
+  /estreamdict 1 dict def
+
+  |====================== estreamwith ========================
+  | ~active | ...
+  |
+  | ~active: ... fd-err | ...
+  |
+  | Executes error in a context where errors become a stop,
+  |  and the output from an error stream is dumped before
+  |  propagating the stop.
+  |
+  | ~active receives the error stream to use for it's children
+  |  on the operand stack.
+  |
+  /estreamwith {
+    /_estreamerror find {
+      _estreamopen exch
+      /error ~name estreamdict indict
+    } PROCESSES indict
+
+    exch estreamdict ~swapdict stopped
+    ~_estreamclose PROCESSES indict 
+    ~stop if
+  } bind def
+
+  |======================== tosystem ===========================
+  | (exec ...) | --
+  |
+  | Executes (exec ...) via bash. Throws NOSYSTEM if
+  |  bash returns non-zero exit status.
+  | Blocks until bash returns.
+  | STDIN and STDOUT are redirected to /dev/null.
+  | Lives in userdict.
+  |
+  /tosystem {
+    {
+      openlist (@ENABLE_BASH@) (-c) 4 -1 roll NULLR NULLW STDERR 
+      sh_ wait not {(tosystem) /NOSYSTEM makeerror} if
+    } PROCESSES indict
+  } bind userdict 3 -1 roll put
+
+  |====================== fromsystem ===========================
+  | (exec ...) | (...)
+  |
+  | Executes (exec ...) via bash. Throws NOSYSTEM if
+  |  bash returns non-zero exit status.
+  | Blocks until bash returns.
+  | STDIN is redirected to /dev/null, and STDOUT is
+  |  read and the string returned.
+  | Lives in userdict.
+  |
+  /fromsystem {
+    ~pipefd {
+      /wt name /rd name {
+        openlist (@ENABLE_BASH@) (-c) 4 -1 roll NULLR wt STDERR 
+        sh_ wait not {
+          wt close rd close
+          (fromsystem) /NOSYSTEM makeerror
+        } if
+        wt close rd suckfd
+      } stopped {
+        wt closeifopen rd closeifopen
+        stop 
+      } if
+    } /fromsystem_ ~caplayer PROCESSES indict
+  } bind userdict 3 -1 roll put
+
+} moduledef

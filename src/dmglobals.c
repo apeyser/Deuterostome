@@ -19,10 +19,14 @@ B errorframe[FRAMEBYTES];
 B locked = FALSE;
 B serialized = FALSE;
 
+// signal handler flags
+volatile BOOLEAN timeout = FALSE;    /* for I/O operations          */
+volatile BOOLEAN abortflag = FALSE;
+volatile BOOLEAN numovf = FALSE;     /* FPU overflow status            */
+volatile BOOLEAN recvd_quit = FALSE; /* quit signal */
+
+P exitval;
 fd_set sock_fds;
-volatile BOOLEAN timeout;             /* for I/O operations          */
-volatile BOOLEAN abortflag;
-volatile BOOLEAN numovf;             /* FPU overflow status            */
 BOOLEAN isstopping; // propagate stops through other locks
 BOOLEAN tinymemory;
 P recsocket = -1;

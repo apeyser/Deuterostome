@@ -20,11 +20,16 @@
 #include <netdb.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include "paths.h"
 #include "dm-swapbytes.h"
 #include "dm2.h"
+#include "dm5.h"
 #include "dm-signals.h"
+#include "error-local.h"
 
 static char sys_hi[] = "System Operators V" PACKAGE_VERSION;
 P op_syshi(void)   {return wrap_hi((B*)sys_hi);}
@@ -595,10 +600,7 @@ P exec(L32 turns)
  x_t:
   if (FREEexecs <= FLOORexecs) return DONE;
   if (turns-- <= 0) return MORE;
-  if (abortflag) {
-    abortflag = FALSE; 
-    return ABORT;
-  }
+  checkabort();
 
 /* ---------------------------------------- fetch phase */
  
@@ -1231,7 +1233,7 @@ DM_INLINE_STATIC void setupname(B** frame, const char* string, BOOLEAN app) {
   if (app && (len == 0 || string[len-1] != '/')) lenapp++;
 
   if (FREEvm + FRAMEBYTES + DALIGN(len) > CEILvm)
-    error(EXIT_FAILURE,0,"VM overflow");
+    error_local(EXIT_FAILURE,0,"VM overflow");
 
   *frame = FREEvm;
   FREEvm += FRAMEBYTES + DALIGN(lenapp);
@@ -1270,10 +1272,10 @@ void setupdirs(void) {
   if (conf_env && *conf_env) conf_dir = conf_env;
 
   if (gethostname(myname, sizeof(myname)))
-    error(1, errno, "gethostname failure");
+    error_local(1, errno, "gethostname failure");
 
   if (! (h = gethostbyname(myname)))
-    error(1, h_errno, "gethostbyname failure: %s", myname);
+    error_local(1, h_errno, "gethostbyname failure: %s", myname);
   
   memset(myxname, '*', sizeof(myxname)-1);
 
@@ -1532,15 +1534,12 @@ static void SIGALRMhandler(int sig __attribute__ ((__unused__)),
 
 /*---------- signal handler: SIGQUIT, TERM, HUP... */
 
-static void quithandler(int sig, siginfo_t* info, void* ucon)
-  __attribute__ ((__noreturn__));
-
 static void quithandler(int sig, siginfo_t* info, 
 			void* ucon  __attribute__ ((__unused__))) 
 {
-  fprintf(stderr, "Exiting on signal %i from %li\n", 
-	  sig, info ? (long) info->si_pid : 0);
-  exit(0);
+  fprintf(stderr, "%li: Exiting on signal %i from %li\n", 
+	  (long) getpid(), sig, info ? (long) info->si_pid : 0);
+  recvd_quit = TRUE;
 }
 
 /* --------------- signal handler: job control... */
@@ -1552,7 +1551,7 @@ static void shellhandler(int sig,
   sigset_t set;
   if (info && info->si_pid == getpid()) return;
   if (getpid() == getpgrp() && kill(0, sig))
-    error(0, errno, "Unable to propagate %i", sig);
+    error_local(0, errno, "Unable to propagate %i", sig);
 
   sigfillset(&set);
   sigdelset(&set, SIGCONT);
@@ -1565,7 +1564,7 @@ static void conthandler(int sig,
 {
   pid_t me = getpid();
   if ((! info || info->si_pid != me) && me == getpgrp() && kill(0, SIGCONT))
-    error(0, 0, "Unable to propagate %i", sig);
+    error_local(0, 0, "Unable to propagate %i", sig);
 }
 
 /*---------- signal handler: SIGINT */
@@ -1588,12 +1587,12 @@ static void quit(void) {
   };
   sigfillset(&sa.sa_mask);
   if (sigaction(SIGCHLD, &sa, NULL))
-    error(0, errno, "Unable to dezombify");
+    error_local(0, errno, "Unable to dezombify");
   for (i = quitsigs; *i; i++) clearhandler(*i);
 
   if (getpid() == getpgrp() && kill(0, SIGQUIT))
-    error(0, errno, "Failed to send quit signal to process group");
-  while (wait(NULL) != -1 || errno == EINTR);
+    error_local(0, errno, "Failed to send quit signal to process group");
+  while (wait(NULL) != -1 || (errno == EINTR && ! checkabort_()));
 }
 
 static void makequithandler(void)
@@ -1601,8 +1600,8 @@ static void makequithandler(void)
   int quitsigs[] = {SIGQUIT, SIGTERM, SIGHUP, 0};
   int* i;
   if (getpid() != getpgid(0) && setpgid(0, 0)) 
-    error(1, errno, "Failed to set process group");
-  if (atexit(quit)) error(1, 0, "Failed to set exit handler for quit");
+    error_local(1, errno, "Failed to set process group");
+  if (atexit(quit)) error_local(1, 0, "Failed to set exit handler for quit");
   for (i = quitsigs; *i; i++) sethandler(*i, quithandler);
 }
 
@@ -1631,7 +1630,6 @@ void setuphandlers(void) {
 
 /* We use alarms to limit read/write operations on sockets  */
 
-  timeout = FALSE;
   sethandler(SIGALRM, SIGALRMhandler);
 
 // Switched the following to SIGABRT, produced by kill -ABRT
@@ -1640,7 +1638,6 @@ void setuphandlers(void) {
 /* The interrupt signal is produced by the control-c key of the
    console keyboard, it triggers the execution of 'abort'
 */
-  abortflag = FALSE;
   sethandler(SIGINT, aborthandler);
 
   makequithandler();
@@ -1673,4 +1670,35 @@ P int_repush_stop(P (*abortfunc)(void)) {
   FREEopds = o_1;
 
   return OK;
+}
+
+void createfds(void) {
+  int fdr, fdw;
+
+  if ((fdr = open("/dev/null", O_RDONLY)) == -1)
+    error_local(1, errno, "Failed to open /dev/null for read");
+  if (fdr != DM_NULLR_FILENO) {
+    if (dup2(fdr, DM_NULLR_FILENO) == -1)
+      error_local(1, errno, "Failed to move %i to %i for /dev/null", 
+	    fdr, DM_NULLR_FILENO);
+    if (close(fdr))
+      error_local(1, errno, "Failed to close %i for /dev/null", fdr);
+  }
+  
+  if ((fdw = open("/dev/null", O_WRONLY)) == -1)
+    error_local(1, errno, "Failed to open /dev/null for write");
+  if (fdw != DM_NULLW_FILENO) {
+    if (dup2(fdw, DM_NULLW_FILENO) == -1)
+      error_local(1, errno, "Failed to move %i to %i for /dev/null", 
+	    fdw, DM_NULLW_FILENO);
+    if (close(fdw))
+      error_local(1, errno, "Failed to close %i for /dev/null", fdw);
+  }
+
+  if (dup2(STDIN_FILENO, DM_STDIN_FILENO) == -1)
+    error_local(1, errno, "Failed to dup2 STDIN to %i", DM_STDIN_FILENO);
+  if (dup2(STDOUT_FILENO, DM_STDOUT_FILENO) == -1)
+    error_local(1, errno, "Failed to dup2 STDOUT to %i", DM_STDOUT_FILENO);
+  if (dup2(STDERR_FILENO, DM_STDERR_FILENO) == -1)
+    error_local(1, errno, "Failed to dup2 STDERR to %i", DM_STDERR_FILENO);
 }

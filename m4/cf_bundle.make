@@ -15,5 +15,5 @@ $(distdir).tar.bz2: distdir distsvn
 
 BUNDLE_CLEANFILES = $(distdir).tar.bz2
 
-include $(srcdir)/m4/cf_bundle_sub.make
+include $(top_srcdir)/m4/cf_bundle_sub.make
 

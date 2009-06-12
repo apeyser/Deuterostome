@@ -17,6 +17,8 @@
            for dnodes, or the 'nextevent' operator in a dvt.
 */
 
+#include "dm.h"
+
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -32,7 +34,6 @@
 #include <strings.h>
 #include <string.h>
 
-#include "dm.h"
 #include "dmx.h"
 #include "xhack.h"
 

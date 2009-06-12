@@ -4,6 +4,8 @@
    dvt-specific include modules that provide operators of the dvt.
 */
 
+#include "dm.h"
+
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -20,6 +22,8 @@
 #include "dmx.h"
 #include "dm3.h"
 #include "dm-proc.h"
+#include "dm5.h"
+#include "error-local.h"
 
 /*---------- include modules of dgen --------------*/
 
@@ -72,6 +76,8 @@ int main(void)
   syserrc = _syserrc;
   syserrm = _syserrm;
 
+  createfds();
+
   serialized = TRUE; // no serialize operator
 
 /*----------------- SIGNALS that we wish to handle -------------------*/
@@ -102,7 +108,7 @@ int main(void)
 */
 
   if (makeDmemory(memsetup))
-    error(EXIT_FAILURE, 0, "D memory");
+    error_local(EXIT_FAILURE, 0, "D memory");
   
 /*----------------- construct frames for use in execution of D code */
   makename((B*)"error",errorframe); ATTR(errorframe) = ACTIVE;
@@ -120,9 +126,9 @@ int main(void)
    the pointers of the tiny D memory so we can revert to the tiny setup.
 */
   if ((sysdict = makeopdict((B *)sysop, syserrc,  syserrm)) == (B *)(-1L))
-    error(EXIT_FAILURE,0,"Cannot make system dictionary");
+    error_local(EXIT_FAILURE,0,"Cannot make system dictionary");
   if ((userdict = makedict(memsetup[4])) == (B *)(-1L))
-    error(EXIT_FAILURE,0,"Cannot make user dictionary");
+    error_local(EXIT_FAILURE,0,"Cannot make user dictionary");
   
 /* The first two dictionaries on the dicts are systemdict and userdict;
    they are not removable
@@ -143,7 +149,7 @@ int main(void)
 		 "/startup_dgen.d");
 
   if ((sufd = open((char*)startup_dvt, O_RDONLY)) == -1)
-    error(EXIT_FAILURE, errno,"Opening %s", startup_dvt);
+    error_local(EXIT_FAILURE, errno,"Opening %s", startup_dvt);
   tnb = 0; sf = FREEvm; p = sf + FRAMEBYTES;
   TAG(sf) = ARRAY | BYTETYPE; ATTR(sf) = READONLY | ACTIVE | PARENT;
   VALUE_BASE(sf) = (P)p;
@@ -152,8 +158,8 @@ int main(void)
     tnb += nb; 
     p += nb; 
   }
-  if (nb == -1) error(EXIT_FAILURE,errno,"Reading %s", startup_dvt);
-  if (p == CEILvm) error(EXIT_FAILURE, ENOMEM,"%s > VM", startup_dvt);
+  if (nb == -1) error_local(EXIT_FAILURE,errno,"Reading %s", startup_dvt);
+  if (p == CEILvm) error_local(EXIT_FAILURE, ENOMEM,"%s > VM", startup_dvt);
   ARRAY_SIZE(sf) = tnb;
   FREEvm += DALIGN(FRAMEBYTES + tnb);
   moveframe(sf,x1);
@@ -167,10 +173,10 @@ int main(void)
 	moveframe(fromconsoleframe, x1); 
 	FREEexecs=x2; 
 	continue;
-      case QUIT: 
+      case QUIT: case TERM: 
 	printf("Success..\n"); 
-	exit(EXIT_SUCCESS);
-      case ABORT:    
+	exit((int) exitval);
+      case ABORT:
 	printf("Failure...\n"); 
 	exit(EXIT_FAILURE);
       default: break;

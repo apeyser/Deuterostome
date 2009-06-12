@@ -158,6 +158,7 @@ B* _sysop[] =
   (B*) "sendsig", (B*) op_sendsig,
   (B*) "getmyname", (B*) op_getmyname,
   (B*) "getmyfqdn", (B*) op_getmyfqdn,
+  (B*) "socketdead", (B*) op_socketdead,
   (B*) "lock", (B*) op_lock,
   (B*) "unlock", (B*) op_unlock,
   (B*) "serialize", (B*) op_serialize,
@@ -204,7 +205,6 @@ B* _sysop[] =
   (B*) "Xdisconnect", (B*) op_Xdisconnect,
   (B*) "getmyport", (B*) op_getmyport,
   (B*) "killsockets", (B*) op_killsockets,
-  (B*) "socketdead", (B*) op_socketdead,
 #ifdef DM_ENABLE_RTHREADS
   (B*) "rthreads", (B*) op_rthreads,
   (B*) "checkrthreads", (B*) op_checkrthreads,
@@ -269,6 +269,7 @@ B* _sysop[] =
 P _syserrc[] = {
   ABORT,
   QUIT,
+  TERM,
   MORE,
   DONE,
   TIMER,
@@ -395,6 +396,7 @@ P _syserrc[] = {
 B* _syserrm[] = {
   (B*) "** Internal ABORT returned -- should never appear as error",
   (B*) "** Internal QUIT returned -- should never appear as error",
+  (B*) "** Internal TERM returned -- should never appear as error",
   (B*) "** Internal MORE returned -- should never appear as error",
   (B*) "** Internal DONE returned -- should never appear as error",
   (B*) "** Timeout",

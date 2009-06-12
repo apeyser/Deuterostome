@@ -1,4 +1,4 @@
-AC_INIT([D-Machine], [4.5.3], [Alexander Peyser <a.peyser@umiami.edu>], [dm])
+AC_INIT([D-Machine], [4.5.4], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
 AC_CONFIG_MACRO_DIR(m4)
 AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE
@@ -237,9 +237,6 @@ CF_AC_CHECK_HEADER([strings.h])
 CF_AC_CHECK_HEADER([inttypes.h])
 CF_AC_CHECK_HEADER([sys/wait.h])
 CF_IF_ENABLED([plugins-support], [CF_AC_CHECK_HEADER([stdarg.h])])
-AC_CHECK_HEADER([error.h], [
-  AC_DEFINE([HAVE_ERROR_H], [1], [Define to 1 if you have <error.h>])
-])
 CF_IF_ENABLED([regex], [CF_AC_CHECK_HEADER([regex.h])])
 CF_IF_ENABLED([daemon], [
   AC_CHECK_HEADERS([sys/prctl.h])
@@ -336,11 +333,12 @@ AC_CONFIG_LINKS([
   src/codegen/dm-swapbytes.h:src/dm-swapbytes.h
   src/codegen/dm-conv.c:src/dm-conv.c
   src/codegen/dm3.c:src/dm3.c
-  src/codegen/dm-prop.c.in:src/dm-prop.c.in
+  src/codegen/dm-prop.cin:src/dm-prop.cin
   src/codegen/dm-signals.c:src/dm-signals.c
   src/codegen/dm-vm.c:src/dm-vm.c
   src/codegen/dm4.c:src/dm4.c
   src/codegen/dm5.c:src/dm5.c
+  src/codegen/dm5.h:src/dm5.h
   src/codegen/dm6.c:src/dm6.c
   src/codegen/dm6.h:src/dm6.h
   src/codegen/dm7.c:src/dm7.c
@@ -349,7 +347,7 @@ AC_CONFIG_LINKS([
   src/codegen/dsp2.c:src/dsp2.c
   src/codegen/dm-types.h:src/dm-types.h
   src/codegen/dm-types.c:src/dm-types.c
-  src/codegen/paths.h.in:src/paths.h.in
+  src/codegen/paths.hin:src/paths.hin
   src/codegen/dgen.c:src/dgen.c
   src/codegen/dgen_1.h:src/dgen_1.h
   src/codegen/dgen-build:src/dgen-build
@@ -357,11 +355,10 @@ AC_CONFIG_LINKS([
   src/codegen/dm-nextevent.c:src/dm-nextevent.c
   src/codegen/dm-nextevent.h:src/dm-nextevent.h
   plugins/plugin.d:dcode/plugin.d
-  dcode/errors.d:src/codegen/errors.d
+  dcode/errors.din:src/codegen/errors.din.built
   plugins/startup_dgen.d:src/codegen/startup_dgen.d
-  plugins/errors.d:src/codegen/errors.d
   emacs/d-mode-ops.el:src/codegen/d-mode-ops.el
-  plugins/new-plugin.d.in:dcode/new-plugin.d.in
+  plugins/new-plugin.din:dcode/new-plugin.din
   doc/dvt-3.0.bib:doc/dvt.bib
   doc/dvt-emacs.bib:doc/dvt.bib
   doc/newbook.bib:doc/dvt.bib

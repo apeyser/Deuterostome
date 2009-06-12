@@ -1,3 +1,5 @@
+#include "dm.h"
+
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -16,10 +18,17 @@
 #include "dqueen.h"
 #include "dm-proc.h"
 #include "dm-prop.h"
+#include "dm5.h"
+#include "error-local.h"
 
 #if ! X_DISPLAY_MISSING
 #include "xhack.h"
 #endif
+
+//#define DEBUG(format, ...) error_local(0, 0, "%li: " format,		
+//				       (long) getpid(), __VA_ARGS__)
+#define DEBUG(...)
+
 
 /*-- the X corner */
 char* defaultdisplay = NULL;
@@ -230,7 +239,7 @@ P op_Xconnect(void)
   dvtscreen = HXDefaultScreenOfDisplay(dvtdisplay);
   dvtrootwindow = HXDefaultRootWindow(dvtdisplay);
   if (HXGetWindowAttributes(dvtdisplay,dvtrootwindow,&rootwindowattr) == 0)
-    error(EXIT_FAILURE,0,"Xwindows: no root window attributes");
+    error_local(EXIT_FAILURE,0,"Xwindows: no root window attributes");
   ndvtwindows = 0; 
   ncachedfonts = 0;
   dvtgc = HXCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
@@ -506,6 +515,7 @@ P op_toconsole(void)
       FREEvm = (B*)DALIGN(p);
       if ((retc = tosocket(consolesocket, stringf))) {
         FREEvm = oldFREEvm;
+	error_local(0, 0, "Unable to propagate: %s", stringf);
         return makesocketdead(retc, consolesocket, "toconsole");
       }
       FREEvm = oldFREEvm;
@@ -534,7 +544,7 @@ BOOLEAN pending(void) {
       return FALSE;
   }
 
-  return (FREEexecs != FLOORexecs);
+  return (recvd_quit || FREEexecs != FLOORexecs);
 }
 
 void setpending(void) {}
@@ -562,21 +572,6 @@ P op_killsockets(void) {
   return retc ? retc : retc_ ? retc_ : ABORT;
 }
 
-/****************** socketdead ************************
- * ... bool socket | --
- * 
- * Default socket dead. If bool is true, then ... is the
- *  stack for an error. Overridden by startup files.
- */
-P op_socketdead(void) {
-  if (o_2 < FLOORopds) return DEAD_SOCKET;
-  if (CLASS(o_2) != BOOL) return DEAD_SOCKET;
-
-  FREEopds = o_2;
-  if (BOOL_VAL(o1)) return op_error();
-  return DEAD_SOCKET;
-}
-
 P op_vmresize(void) {
   P retc;
   if ((retc = op_vmresize_())) return retc;
@@ -602,12 +597,12 @@ DM_INLINE_STATIC void sock_error(BOOLEAN ex, P errno_, const char* msg) {
   unixsigsocket = -1;
 #endif //ENABLE_UNIX_SOCKETS
 
-  error(ex ? EXIT_FAILURE : 0, errno_, "%s", msg);
+  error_local(ex ? EXIT_FAILURE : 0, errno_, "%s", msg);
 }
 
 void run_dnode_mill(void) {
   P retc;
-  B abortframe[FRAMEBYTES];
+  B abortframe[FRAMEBYTES], dieframe[FRAMEBYTES];
   union SocketInfo socketinfo = defaultsocketinfo;
 
 #if ! X_DISPLAY_MISSING
@@ -655,11 +650,14 @@ socksdone:
 #endif //DM_ENABLE_RTHREADS
 
 /*----------------- construct frames for use in execution of D code */
-  makename((B*)"error", errorframe); 
+  makename((B*) "error", errorframe); 
   ATTR(errorframe) = ACTIVE;
 
-  makename((B*)"abort",abortframe); 
+  makename((B*) "abort", abortframe); 
   ATTR(abortframe) = ACTIVE;
+
+  makename((B*) "die", dieframe);
+  ATTR(dieframe) = ACTIVE;
 
 /*-------------- you are entering the scheduler -------------------*/\
 /* We start with no D code on the execution stack, so we doze
@@ -689,12 +687,17 @@ socksdone:
 	retc = nextevent(cmsf);
 	break;
 
+      case TERM:
+	DEBUG("Exiting: %i", (int) exitval);
+	exit(exitval);
+	
       default:
 	break;
     }
     switch (retc) {
       case OK: continue;
-      case ABORT: 
+
+      case ABORT:
 	abortflag = FALSE;
 	if (x1 < CEILexecs) {
 	  moveframe(abortframe, x1);
@@ -703,7 +706,29 @@ socksdone:
 	}
 	
 	retc = EXECS_OVF; 
-	errsource = (B*)"supervisor"; 
+	errsource = (B*) "supervisor"; 
+	break;
+
+      case QUIT:
+	recvd_quit = FALSE;
+	if (o1 >= CEILopds) {
+	  retc = OPDS_OVF;
+	  errsource = (B*) "supervisor";
+	}
+	else if (x1 >= CEILexecs) {
+	  retc = EXECS_OVF;
+	  errsource = (B*) "supervisor";
+	}
+	else {
+	  TAG(o1) = (NUM|BYTETYPE);
+	  ATTR(o1) = 0;
+	  BYTE_VAL(o1) = 0;
+	  FREEopds = o2;
+	  
+	  moveframe(dieframe, x1);
+	  FREEexecs = x2;
+	  continue;
+	}
 	break;
 
       default: break;
