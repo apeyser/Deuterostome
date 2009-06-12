@@ -1,4 +1,5 @@
 #! @ENABLE_PERL@ -w
+# -*- mode: perl; -*-
 
 use warnings;
 use strict;
@@ -58,7 +59,9 @@ sub background(@) {
 }
 
 sub foreground(@) {
-    waitpid(forker(@_), 0);
+    my $fork = forker @_;
+    while ($fork != waitpid($fork, 0)) {};
+    die "$?" if $?;
 }
 
 sub gs(@) {
@@ -299,11 +302,20 @@ if (exists $funcs->{$source} && exists $funcs->{$source}{$dest}) {
     die 1;
 }
 
-$SIG{CHLD} = sub {wait};
+#$SIG{CHLD} = sub {wait};
 print "Done...\n";
+@ENABLE_XTERM_START@
+print "Close this window to discard temp files\n"
+    if exists $ENV{DISPLAY};
+@ENABLE_XTERM_END@
 
-#@ENABLE_XTERM_START@
-#wait if exists $ENV{DISPLAY};
-#@ENABLE_XTERM_END@
+foreach my $sig ('INT', 'HUP', 'QUIT', 'TERM') {
+    $SIG{$sig} = sub {
+	$SIG{CHLD} = 'IGNORE';
+	exit 0;
+    }
+}
+
+while (wait != -1) {};
 
 exit 0;

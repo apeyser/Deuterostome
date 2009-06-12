@@ -133,6 +133,7 @@ CF_IF_ENABLED([plugins], [
 CF_ON_TARGET([*-*-darwin*], [
   AC_CHECK_PROG([guipdf], [launch], [launch -i com.apple.Preview])
 ])
+AC_CHECK_PROG([guipdf], [xdg-open], [xdg-open])
 AC_CHECK_PROG([guipdf], [kfmclient], [kfmclient exec])
 AC_CHECK_PROG([guipdf], [gnome-open], [gnome-open])
 AC_CHECK_PROG([guipdf], [kpdf], [kpdf])

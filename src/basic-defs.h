@@ -1,6 +1,7 @@
 #ifndef BASIC_DEFS_H
 #define BASIC_DEFS_H
 
+#ifndef DM_BASIC_DEFS_NO_INCLUDES
 #include "dm-config.h"
 #ifdef DM_HAVE_CONFIG_H
 #ifndef DM_INCLUDED_CONFIG_H
@@ -8,6 +9,7 @@
 #include "config.h"
 #endif
 #endif
+#endif //DM_BASIC_DEFS_NO_INCLUDES
 
 #include <inttypes.h>
 

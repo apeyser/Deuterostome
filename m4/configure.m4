@@ -520,6 +520,7 @@ AC_DEFUN([CF_BASIC_DEFS], [dnl
   else
     AC_LANG_PUSH([C])
     AC_COMPUTE_INT([NAMEBYTES_NEW], [NAMEBYTES], [[
+      #define DM_BASIC_DEFS_NO_INCLUDES 1
       #include "src/basic-defs.h"
     ]], [
       AC_MSG_ERROR([Unable to compute NAMEBYTES])
