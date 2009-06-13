@@ -1,7 +1,7 @@
 [submodule "debian-top"]
 	path = debian-top
-	url = git@disks:git/debian.git
+	url = git@disks.nonnerlab:git/debian.git
 [submodule "gentoo"]
 	path = gentoo
-	url = git@disks:git/portage-local.git
+	url = git@disks.nonnerlab:git/portage-local.git
 
