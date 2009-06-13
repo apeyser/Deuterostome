@@ -1,9 +1,3 @@
-[submodule "gentoo"]
-	path = gentoo
-	url = /home/ap/dm.git/gentoo
 [submodule "debian-top"]
 	path = debian-top
 	url = /home/ap/dm.git/debian
-[submodule "portage-local"]
-	path = portage-local
-	url = /home/ap/dm.git/portage-local
