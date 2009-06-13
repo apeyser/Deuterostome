@@ -1,7 +1,7 @@
 [submodule "debian-top"]
 	path = debian-top
-	url = git@disks:/mnt/Cheetah/Cheetah1/git/debian.git
+	url = git@disks:git/debian.git
 [submodule "gentoo"]
 	path = gentoo
-	url = git@disks:/mnt/Cheetah/Cheetah1/git/portage-local.git
+	url = git@disks:git/portage-local.git
 
