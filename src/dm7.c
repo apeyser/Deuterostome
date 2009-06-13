@@ -780,10 +780,10 @@ P op_transcribe(void)
   B *p;
 
   if (o_1 < FLOORopds) return OPDS_UNF;
-  if (!((CLASS(o_1) == ARRAY) 
-        || (CLASS(o_1) == LIST) 
-        || (CLASS(o_1) == DICT)))
-    return OPD_ERR;
+  switch (CLASS(o_1)) {
+    case ARRAY: case LIST: case DICT: break;
+    default: return OPD_ERR;
+  };
 
   p = FREEvm;
   if ((retc = transcribe(o_1)) != OK) {FREEvm = p; return retc;}
