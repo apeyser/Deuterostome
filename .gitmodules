@@ -1,0 +1,6 @@
+[submodule "gentoo"]
+	path = gentoo
+	url = /home/ap/dm.git/gentoo
+[submodule "debian-top"]
+	path = debian-top
+	url = /home/ap/dm.git/debian
