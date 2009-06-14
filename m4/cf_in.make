@@ -9,7 +9,7 @@ SUFFIXES += .cin .hin .elin .din .psin .shin .plin .styin
 
 INFILES_RULE = \
 	! test -e $@.tmp || rm -f $@.tmp \
-	&& $(edit) -e 's|[@]SVNVERSION[@]|$(SVNVERSION)|g' $< >$@.tmp \
+	&& $(edit) $(SVNVERSION_EDIT) $< >$@.tmp \
 	&& mv $@.tmp $@
 
 .cin.c:     ; $(INFILES_RULE)

@@ -1,14 +1,18 @@
 # -*- mode: makefile; -*-
 
 if MAINTAINER_MODE
-$(top_srcdir)/svnversion.stamp:
-	cd $(top_srcdir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+SVNVERSION_DIR = $(top_srcdir)
 else !MAINTAINER_MODE
-$(top_builddir)/svnversion.stamp:
-	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+SVNVERSION_DIR = $(top_builddir)
 endif !MAINTAINER_MODE
 
-SVNVERSION_EDIT = \
-	-e "s,[@]SVNVERSION[@],`cat $(top_builddir)/svnversion.stamp`,g"
+$(SVNVERSION_DIR)/svnversion.stamp:
+	cd $(SVNVERSION_DIR) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+
+SVNVERSION_STAMP = `cat $(SVNVERSION_DIR)/svnversion.stamp`
+SVNVERSION_EDIT = -e "s,[@]SVNVERSION[@],$(SVNVERSION_STAMP),g"
+
+SVNID_STAMP = `git log -n 1 --pretty='format:%cn %cd %H' $<`
+SVNID_EDIT = -e "s,[@]SVNID[@],$(SVNID_STAMP),g"
 
 SVNVERSION_TARGET = svnversion

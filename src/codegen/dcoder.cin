@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
   if (! (fd = fopen(argv[1], "w")))
     error_dcoder(1, errno, "Unable to open for writing: %s", argv[1]);
 
-  if (fprintf(fd, "(Using errors.d  $" "Id$ V@" "PACKAGE_VERSION@ @"
+  if (fprintf(fd, "(Using errors.d  @" "SVNID@ V@" "PACKAGE_VERSION@ @"
 	      "SVNVERSION@\\n) toconsole\n") < 0)
     error_dcoder(1, errno, "Unable to write line# %i", i);
   i++;
