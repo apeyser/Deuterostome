@@ -10,6 +10,5 @@ nodist_pkgpsdata_DATA = thursday.ps tuesday.ps
 
 edit = sed -e 's,[@]pkgpsdatadir[@],$(pkgpsdatadir),g'
 
-include $(top_srcdir)/m4/cf_bundle_sub.make
 include $(top_srcdir)/m4/cf_in.make
 

@@ -14,8 +14,6 @@
 
 @SET_MAKE@
 
-# -*- mode: makefile; -*-
-
 
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
@@ -35,13 +33,12 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+subdir = .
 DIST_COMMON = README $(am__configure_deps) $(am__include_HEADERS_DIST) \
 	$(am__noinst_HEADERS_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config-h.in \
-	$(top_srcdir)/../m4/cf_bundle_sub.make $(top_srcdir)/configure \
-	COPYING.LIB config.guess config.sub install-sh ltmain.sh \
-	missing
-subdir = .
+	$(top_srcdir)/configure COPYING.LIB config.guess config.sub \
+	install-sh ltmain.sh missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/configure.ac
@@ -236,7 +233,7 @@ all: config.h
 .SUFFIXES: .c .lo .o .obj
 am--refresh:
 	@:
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(top_srcdir)/../m4/cf_bundle_sub.make $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -662,32 +659,6 @@ ltdl.lo: ltdl.h config.h
 $(libltdl_la_OBJECTS) $(libltdlc_la_OBJECTS): libtool
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
-
-.PHONY: distsvn-recursive
-distsvn-recursive:
-	list='$(DIST_SUBDIRS)'; for subdir in $$list ; do \
-	  if test "$$subdir" = .; then :; else \
-	    distdir=`$(am__cd) $(distdir) && pwd`; \
-	    top_distdir=`$(am__cd) $(top_distdir) && pwd`; \
-	    (cd $$subdir && \
-	      $(MAKE) $(AM_MAKEFLAGS) \
-	        top_distdir="$$top_distdir" \
-	        distdir="$$distdir/$$subdir" \
-		distsvn) \
-	    || exit 1; \
-	  fi; \
-	done
-
-.PHONY: distsvn-extra
-distsvn-extra:
-	list='$(EXTRA_DIST_SVN)'; for subdir in $$list ; do \
-	  ! test -d $$subdir/.svn \
-	  || cp -pRH $$subdir/.svn "$(distdir)/$$subdir/.svn"; \
-	done
-
-.PHONY: distsvn
-distsvn: distsvn-extra distsvn-recursive
-	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

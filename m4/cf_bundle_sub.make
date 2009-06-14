@@ -1,7 +1,7 @@
 # -*- mode: makefile; -*-
 
 .PHONY: distsvn-recursive
-distsvn-recursive:
+distbundle-recursive:
 	list='$(DIST_SUBDIRS)'; for subdir in $$list ; do \
 	  if test "$$subdir" = .; then :; else \
 	    distdir=`$(am__cd) $(distdir) && pwd`; \
@@ -17,7 +17,7 @@ distsvn-recursive:
 
 .PHONY: distsvn-extra
 distsvn-extra:
-	list='$(EXTRA_DIST_SVN)'; for subdir in $$list ; do \
+	list='$(EXTRA_DIST_BUNDLE)'; for subdir in $$list ; do \
 	  ! test -d $$subdir/.svn \
 	  || cp -pRH $$subdir/.svn "$(distdir)/$$subdir/.svn"; \
 	done

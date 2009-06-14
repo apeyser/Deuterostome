@@ -4,8 +4,6 @@ else !ENABLE_PLUGINS_SUPPORT
 PLUGINNODISTR = plugin-config.m4
 endif !ENABLE_PLUGINS_SUPPORT
 
-EXTRA_DIST_SVN = latex
-
 dist_m4data_DATA = $(PLUGINDISTR)
 dist_noinst_DATA = \
 	acx_pthread.m4 ax_cflags_strict_prototypes.m4 \
@@ -59,6 +57,4 @@ EXTRA_DIST = $(GNULIB) \
 	latex/ac_prog_texhash.m4 latex/ac_texmf_path.m4 latex/latex.m4 \
 	latex/LICENSE latex/README
 
-include $(top_srcdir)/m4/cf_bundle_sub.make
 include $(top_srcdir)/m4/cf_svnversion.make
-

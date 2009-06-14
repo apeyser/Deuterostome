@@ -51,6 +51,4 @@ edit = sed \
 	-e 's,[@]ENABLE_EMACSCLIENT[@],$(ENABLE_EMACSCLIENT),g' \
 	$(XTERM_DELETE)
 
-
-include $(top_srcdir)/m4/cf_bundle_sub.make
 include $(top_srcdir)/m4/cf_in.make

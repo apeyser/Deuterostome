@@ -123,7 +123,6 @@ edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 	-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
 	-e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
 	-e 's,[@]ENABLE_BASH[@],$(ENABLE_BASH),g' \
-	$(SVNVERSION_EDIT) \
 	$(PLUGINS_DELETE) \
 	$(PLUGINS_SUPPORT_DELETE) \
 	$(THREADS_EDIT) \
@@ -136,5 +135,3 @@ edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 	$(PETSC_EDIT) 
 
 include $(top_srcdir)/m4/cf_in.make
-include $(top_srcdir)/m4/cf_svnversion.make
-include $(top_srcdir)/m4/cf_bundle_sub.make

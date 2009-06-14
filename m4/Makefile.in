@@ -16,8 +16,6 @@
 
 # -*- mode: makefile; -*-
 
-# -*- mode: makefile; -*-
-
 VPATH = @srcdir@
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
@@ -36,8 +34,7 @@ host_triplet = @host@
 target_triplet = @target@
 DIST_COMMON = $(am__dist_m4data_DATA_DIST) \
 	$(am__dist_noinst_DATA_DIST) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(top_srcdir)/m4/cf_bundle_sub.make \
-	$(top_srcdir)/m4/cf_svnversion.make
+	$(srcdir)/Makefile.in $(top_srcdir)/m4/cf_svnversion.make
 subdir = m4
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
@@ -688,7 +685,6 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGINDISTR = plugin-config.m4
 @ENABLE_PLUGINS_SUPPORT_FALSE@PLUGINNODISTR = plugin-config.m4
-EXTRA_DIST_SVN = latex
 dist_m4data_DATA = $(PLUGINDISTR)
 dist_noinst_DATA = \
 	acx_pthread.m4 ax_cflags_strict_prototypes.m4 \
@@ -749,7 +745,7 @@ SVNVERSION_TARGET = svnversion
 all: all-am
 
 .SUFFIXES:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_bundle_sub.make $(top_srcdir)/m4/cf_svnversion.make $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_svnversion.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -933,32 +929,6 @@ uninstall-am: uninstall-dist_m4dataDATA
 	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
 	ps ps-am uninstall uninstall-am uninstall-dist_m4dataDATA
 
-
-.PHONY: distsvn-recursive
-distsvn-recursive:
-	list='$(DIST_SUBDIRS)'; for subdir in $$list ; do \
-	  if test "$$subdir" = .; then :; else \
-	    distdir=`$(am__cd) $(distdir) && pwd`; \
-	    top_distdir=`$(am__cd) $(top_distdir) && pwd`; \
-	    (cd $$subdir && \
-	      $(MAKE) $(AM_MAKEFLAGS) \
-	        top_distdir="$$top_distdir" \
-	        distdir="$$distdir/$$subdir" \
-		distsvn) \
-	    || exit 1; \
-	  fi; \
-	done
-
-.PHONY: distsvn-extra
-distsvn-extra:
-	list='$(EXTRA_DIST_SVN)'; for subdir in $$list ; do \
-	  ! test -d $$subdir/.svn \
-	  || cp -pRH $$subdir/.svn "$(distdir)/$$subdir/.svn"; \
-	done
-
-.PHONY: distsvn
-distsvn: distsvn-extra distsvn-recursive
-	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
 
 @MAINTAINER_MODE_TRUE@$(top_srcdir)/svnversion.stamp:
 @MAINTAINER_MODE_TRUE@	cd $(top_srcdir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp

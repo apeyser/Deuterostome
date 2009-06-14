@@ -1,5 +1,7 @@
 # -*- mode: makefile; -*-
 
+include $(top_srcdir)/m4/cf_svnversion.make
+
 Makefile = Makefile
 SVNVERSION_STAMP_DEP = @SVNVERSION_STAMP@
 

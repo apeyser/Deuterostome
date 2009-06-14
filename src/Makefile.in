@@ -18,8 +18,6 @@
 
 # -*- mode: makefile; -*-
 
-# -*- mode: makefile; -*-
-
 
 
 
@@ -59,7 +57,6 @@ DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(dist_pkgdata_SCRIPTS) \
 	$(srcdir)/dm6.h $(srcdir)/dm7.c $(srcdir)/dm8.c \
 	$(srcdir)/dmglobals.c $(srcdir)/dmnum.c $(srcdir)/dmnum.h \
 	$(srcdir)/dsp1.c $(srcdir)/dsp2.c $(srcdir)/paths.hin \
-	$(top_srcdir)/m4/cf_bundle_sub.make \
 	$(top_srcdir)/m4/cf_in.make \
 	$(top_srcdir)/m4/cf_svnversion.make
 subdir = src
@@ -1014,6 +1011,10 @@ libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_THREADS=1 -DDM_DISABLE_REGEX=1 \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1
 
+SVNVERSION_EDIT = \
+	-e "s,[@]SVNVERSION[@],`cat $(top_builddir)/svnversion.stamp`,g"
+
+SVNVERSION_TARGET = svnversion
 Makefile = Makefile
 SVNVERSION_STAMP_DEP = @SVNVERSION_STAMP@
 INFILES_RULE = \
@@ -1021,16 +1022,12 @@ INFILES_RULE = \
 	&& $(edit) -e 's|[@]SVNVERSION[@]|$(SVNVERSION)|g' $< >$@.tmp \
 	&& mv $@.tmp $@
 
-SVNVERSION_EDIT = \
-	-e "s,[@]SVNVERSION[@],`cat $(top_builddir)/svnversion.stamp`,g"
-
-SVNVERSION_TARGET = svnversion
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 .SUFFIXES:
 .SUFFIXES: .cin .hin .elin .din .psin .shin .plin .styin .c .d .el .h .lo .o .obj .pl .ps .sh .sty
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_bundle_sub.make $(top_srcdir)/m4/cf_in.make $(top_srcdir)/m4/cf_svnversion.make $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_in.make $(top_srcdir)/m4/cf_svnversion.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -2242,31 +2239,10 @@ gencode-all: gencode all
 gencode:
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS)
 
-.PHONY: distsvn-recursive
-distsvn-recursive:
-	list='$(DIST_SUBDIRS)'; for subdir in $$list ; do \
-	  if test "$$subdir" = .; then :; else \
-	    distdir=`$(am__cd) $(distdir) && pwd`; \
-	    top_distdir=`$(am__cd) $(top_distdir) && pwd`; \
-	    (cd $$subdir && \
-	      $(MAKE) $(AM_MAKEFLAGS) \
-	        top_distdir="$$top_distdir" \
-	        distdir="$$distdir/$$subdir" \
-		distsvn) \
-	    || exit 1; \
-	  fi; \
-	done
-
-.PHONY: distsvn-extra
-distsvn-extra:
-	list='$(EXTRA_DIST_SVN)'; for subdir in $$list ; do \
-	  ! test -d $$subdir/.svn \
-	  || cp -pRH $$subdir/.svn "$(distdir)/$$subdir/.svn"; \
-	done
-
-.PHONY: distsvn
-distsvn: distsvn-extra distsvn-recursive
-	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
+@MAINTAINER_MODE_TRUE@$(top_srcdir)/svnversion.stamp:
+@MAINTAINER_MODE_TRUE@	cd $(top_srcdir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+@MAINTAINER_MODE_FALSE@$(top_builddir)/svnversion.stamp:
+@MAINTAINER_MODE_FALSE@	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
 
 .cin.c:     ; $(INFILES_RULE)
 .hin.h:     ; $(INFILES_RULE)
@@ -2278,11 +2254,6 @@ distsvn: distsvn-extra distsvn-recursive
 .styin.sty: ; $(INFILES_RULE)
 
 $(INFILES): $(Makefile) $(SVNVERSION_STAMP_DEP)
-
-@MAINTAINER_MODE_TRUE@$(top_srcdir)/svnversion.stamp:
-@MAINTAINER_MODE_TRUE@	cd $(top_srcdir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
-@MAINTAINER_MODE_FALSE@$(top_builddir)/svnversion.stamp:
-@MAINTAINER_MODE_FALSE@	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -47,8 +47,8 @@ target_triplet = @target@
 @ENABLE_PETSC_FALSE@@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@am__append_4 = .plugins
 DIST_COMMON = $(am__dist_noinst_DATA_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/dmflex.l.in \
-	$(top_srcdir)/m4/cf_bundle_sub.make \
-	$(top_srcdir)/m4/cf_in.make
+	$(top_srcdir)/m4/cf_in.make \
+	$(top_srcdir)/m4/cf_svnversion.make
 subdir = plugins
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
@@ -870,6 +870,10 @@ SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
 @ENABLE_PLUGINS_SUPPORT_TRUE@pkglib_DATA = $(PLACEHOLDER) 
 @ENABLE_PLUGINS_SUPPORT_TRUE@nodist_dmstart_DATA = $(IPETSC_D)
 @ENABLE_PLUGINS_SUPPORT_TRUE@CLEANFILES = $(BUILT_SOURCES) $(PETSC_D)
+SVNVERSION_EDIT = \
+	-e "s,[@]SVNVERSION[@],`cat $(top_builddir)/svnversion.stamp`,g"
+
+SVNVERSION_TARGET = svnversion
 Makefile = Makefile
 SVNVERSION_STAMP_DEP = @SVNVERSION_STAMP@
 INFILES_RULE = \
@@ -882,7 +886,7 @@ all: $(BUILT_SOURCES)
 
 .SUFFIXES:
 .SUFFIXES: .cin .hin .elin .din .psin .shin .plin .styin .c .cpp .d .el .h .l .lo .o .obj .pl .ps .sh .sty
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_in.make $(top_srcdir)/m4/cf_bundle_sub.make $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_in.make $(top_srcdir)/m4/cf_svnversion.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -1306,6 +1310,11 @@ uninstall-am: uninstall-nodist_dmstartDATA uninstall-pkglibDATA \
 
 @ENABLE_PETSC_FALSE@@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@.plugins: ; touch "$@"
 
+@MAINTAINER_MODE_TRUE@$(top_srcdir)/svnversion.stamp:
+@MAINTAINER_MODE_TRUE@	cd $(top_srcdir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+@MAINTAINER_MODE_FALSE@$(top_builddir)/svnversion.stamp:
+@MAINTAINER_MODE_FALSE@	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+
 .cin.c:     ; $(INFILES_RULE)
 .hin.h:     ; $(INFILES_RULE)
 .din.d:     ; $(INFILES_RULE)
@@ -1316,32 +1325,6 @@ uninstall-am: uninstall-nodist_dmstartDATA uninstall-pkglibDATA \
 .styin.sty: ; $(INFILES_RULE)
 
 $(INFILES): $(Makefile) $(SVNVERSION_STAMP_DEP)
-
-.PHONY: distsvn-recursive
-distsvn-recursive:
-	list='$(DIST_SUBDIRS)'; for subdir in $$list ; do \
-	  if test "$$subdir" = .; then :; else \
-	    distdir=`$(am__cd) $(distdir) && pwd`; \
-	    top_distdir=`$(am__cd) $(top_distdir) && pwd`; \
-	    (cd $$subdir && \
-	      $(MAKE) $(AM_MAKEFLAGS) \
-	        top_distdir="$$top_distdir" \
-	        distdir="$$distdir/$$subdir" \
-		distsvn) \
-	    || exit 1; \
-	  fi; \
-	done
-
-.PHONY: distsvn-extra
-distsvn-extra:
-	list='$(EXTRA_DIST_SVN)'; for subdir in $$list ; do \
-	  ! test -d $$subdir/.svn \
-	  || cp -pRH $$subdir/.svn "$(distdir)/$$subdir/.svn"; \
-	done
-
-.PHONY: distsvn
-distsvn: distsvn-extra distsvn-recursive
-	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
 
 #################################################
 # Keep automake from trying to save the .c file

@@ -157,7 +157,6 @@ CLEANFILES = $(BUILT_SOURCES) $(PETSC_D)
 endif ENABLE_PLUGINS_SUPPORT
 
 include $(top_srcdir)/m4/cf_in.make
-include $(top_srcdir)/m4/cf_bundle_sub.make
 
 #################################################
 # Keep automake from trying to save the .c file
