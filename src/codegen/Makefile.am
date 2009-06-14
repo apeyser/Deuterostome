@@ -150,7 +150,6 @@ $(srcdir)/errors.din.built: $(dcoder)
 	  && $(LN_S) ../src/codegen/errors.d.in errors.d.in \
 	)
 
-include $(top_srcdir)/m4/cf_bundle_sub.make
 include $(top_srcdir)/m4/cf_in.make
 
 ###############################################################

@@ -1,10 +1,7 @@
 EXTRA_DIST = bootstrap autom4te.cfg \
 	link-warning.h \
 	fink/dm.el fink/dm.info \
-	testboxes/dict.box testboxes/list.box testboxes/longarray.box \
-	$(SVNVERSION_EXTRA_DIST)
-
-EXTRA_DIST_SVN = testboxes fink
+	testboxes/dict.box testboxes/list.box testboxes/longarray.box
 
 CLEANFILES = $(BUNDLE_CLEANFILES)
 

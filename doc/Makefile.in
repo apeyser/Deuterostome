@@ -18,8 +18,6 @@
 
 # -*- mode: makefile; -*-
 
-# -*- mode: makefile; -*-
-
 VPATH = @srcdir@
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
@@ -37,8 +35,8 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/dvt.bib $(top_srcdir)/m4/cf_bundle_sub.make \
-	$(top_srcdir)/m4/cf_in.make $(top_srcdir)/m4/cf_latex.make \
+	$(srcdir)/dvt.bib $(top_srcdir)/m4/cf_in.make \
+	$(top_srcdir)/m4/cf_latex.make \
 	$(top_srcdir)/m4/cf_svnversion.make
 subdir = doc
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -696,7 +694,6 @@ CLEANFILES = $(INFILES)
 SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
 doc_DATA = dvt-3.0.pdf dvt-emacs.pdf newbook.pdf
 edit = sed -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
-	$(SVNVERSION_EDIT) \
 	-e 's|[@]amsmath[@]|\$(amsmath)|g'
 
 SVNVERSION_EDIT = \
@@ -714,7 +711,7 @@ all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .cin .hin .elin .din .psin .shin .plin .styin .bbl .bib .c .d .el .h .idx .ind .pdf .pl .ps .sh .sty .tex
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_latex.make $(top_srcdir)/m4/cf_svnversion.make $(top_srcdir)/m4/cf_bundle_sub.make $(top_srcdir)/m4/cf_in.make $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_latex.make $(top_srcdir)/m4/cf_in.make $(top_srcdir)/m4/cf_svnversion.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -953,32 +950,6 @@ clean-local: clean-local-latex
 @MAINTAINER_MODE_TRUE@	cd $(top_srcdir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
 @MAINTAINER_MODE_FALSE@$(top_builddir)/svnversion.stamp:
 @MAINTAINER_MODE_FALSE@	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
-
-.PHONY: distsvn-recursive
-distsvn-recursive:
-	list='$(DIST_SUBDIRS)'; for subdir in $$list ; do \
-	  if test "$$subdir" = .; then :; else \
-	    distdir=`$(am__cd) $(distdir) && pwd`; \
-	    top_distdir=`$(am__cd) $(top_distdir) && pwd`; \
-	    (cd $$subdir && \
-	      $(MAKE) $(AM_MAKEFLAGS) \
-	        top_distdir="$$top_distdir" \
-	        distdir="$$distdir/$$subdir" \
-		distsvn) \
-	    || exit 1; \
-	  fi; \
-	done
-
-.PHONY: distsvn-extra
-distsvn-extra:
-	list='$(EXTRA_DIST_SVN)'; for subdir in $$list ; do \
-	  ! test -d $$subdir/.svn \
-	  || cp -pRH $$subdir/.svn "$(distdir)/$$subdir/.svn"; \
-	done
-
-.PHONY: distsvn
-distsvn: distsvn-extra distsvn-recursive
-	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
 
 .cin.c:     ; $(INFILES_RULE)
 .hin.h:     ; $(INFILES_RULE)

@@ -18,8 +18,6 @@
 
 # -*- mode: makefile; -*-
 
-# -*- mode: makefile; -*-
-
 VPATH = @srcdir@
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
@@ -39,7 +37,6 @@ target_triplet = @target@
 DIST_COMMON = $(dist_dmconf_DATA) $(dist_dmstart_DATA) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/new-plugin.din $(srcdir)/plugin.d \
-	$(top_srcdir)/m4/cf_bundle_sub.make \
 	$(top_srcdir)/m4/cf_in.make \
 	$(top_srcdir)/m4/cf_svnversion.make
 subdir = dcode
@@ -754,7 +751,6 @@ edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 	-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
 	-e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
 	-e 's,[@]ENABLE_BASH[@],$(ENABLE_BASH),g' \
-	$(SVNVERSION_EDIT) \
 	$(PLUGINS_DELETE) \
 	$(PLUGINS_SUPPORT_DELETE) \
 	$(THREADS_EDIT) \
@@ -766,6 +762,10 @@ edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 	$(REGEX_DELETE) \
 	$(PETSC_EDIT) 
 
+SVNVERSION_EDIT = \
+	-e "s,[@]SVNVERSION[@],`cat $(top_builddir)/svnversion.stamp`,g"
+
+SVNVERSION_TARGET = svnversion
 Makefile = Makefile
 SVNVERSION_STAMP_DEP = @SVNVERSION_STAMP@
 INFILES_RULE = \
@@ -773,15 +773,11 @@ INFILES_RULE = \
 	&& $(edit) -e 's|[@]SVNVERSION[@]|$(SVNVERSION)|g' $< >$@.tmp \
 	&& mv $@.tmp $@
 
-SVNVERSION_EDIT = \
-	-e "s,[@]SVNVERSION[@],`cat $(top_builddir)/svnversion.stamp`,g"
-
-SVNVERSION_TARGET = svnversion
 all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .cin .hin .elin .din .psin .shin .plin .styin .c .d .el .h .pl .ps .sh .sty
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_in.make $(top_srcdir)/m4/cf_svnversion.make $(top_srcdir)/m4/cf_bundle_sub.make $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_in.make $(top_srcdir)/m4/cf_svnversion.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -1024,6 +1020,11 @@ uninstall-am: uninstall-dist_dmconfDATA uninstall-dist_dmstartDATA \
 	uninstall-nodist_dmstartDATA
 
 
+@MAINTAINER_MODE_TRUE@$(top_srcdir)/svnversion.stamp:
+@MAINTAINER_MODE_TRUE@	cd $(top_srcdir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+@MAINTAINER_MODE_FALSE@$(top_builddir)/svnversion.stamp:
+@MAINTAINER_MODE_FALSE@	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+
 .cin.c:     ; $(INFILES_RULE)
 .hin.h:     ; $(INFILES_RULE)
 .din.d:     ; $(INFILES_RULE)
@@ -1034,37 +1035,6 @@ uninstall-am: uninstall-dist_dmconfDATA uninstall-dist_dmstartDATA \
 .styin.sty: ; $(INFILES_RULE)
 
 $(INFILES): $(Makefile) $(SVNVERSION_STAMP_DEP)
-
-@MAINTAINER_MODE_TRUE@$(top_srcdir)/svnversion.stamp:
-@MAINTAINER_MODE_TRUE@	cd $(top_srcdir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
-@MAINTAINER_MODE_FALSE@$(top_builddir)/svnversion.stamp:
-@MAINTAINER_MODE_FALSE@	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
-
-.PHONY: distsvn-recursive
-distsvn-recursive:
-	list='$(DIST_SUBDIRS)'; for subdir in $$list ; do \
-	  if test "$$subdir" = .; then :; else \
-	    distdir=`$(am__cd) $(distdir) && pwd`; \
-	    top_distdir=`$(am__cd) $(top_distdir) && pwd`; \
-	    (cd $$subdir && \
-	      $(MAKE) $(AM_MAKEFLAGS) \
-	        top_distdir="$$top_distdir" \
-	        distdir="$$distdir/$$subdir" \
-		distsvn) \
-	    || exit 1; \
-	  fi; \
-	done
-
-.PHONY: distsvn-extra
-distsvn-extra:
-	list='$(EXTRA_DIST_SVN)'; for subdir in $$list ; do \
-	  ! test -d $$subdir/.svn \
-	  || cp -pRH $$subdir/.svn "$(distdir)/$$subdir/.svn"; \
-	done
-
-.PHONY: distsvn
-distsvn: distsvn-extra distsvn-recursive
-	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

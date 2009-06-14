@@ -14,8 +14,6 @@
 
 @SET_MAKE@
 
-# -*- mode: makefile; -*-
-
 VPATH = @srcdir@
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
@@ -32,10 +30,9 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/arr.d.in \
-	$(top_srcdir)/m4/cf_bundle_sub.make
 subdir = test
+DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in $(srcdir)/arr.d.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/latex/ac_prog_bibtex.m4 \
@@ -672,7 +669,7 @@ noinst_DATA = arr.d
 all: all-am
 
 .SUFFIXES:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_bundle_sub.make $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -837,32 +834,6 @@ uninstall-am:
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am
 
-
-.PHONY: distsvn-recursive
-distsvn-recursive:
-	list='$(DIST_SUBDIRS)'; for subdir in $$list ; do \
-	  if test "$$subdir" = .; then :; else \
-	    distdir=`$(am__cd) $(distdir) && pwd`; \
-	    top_distdir=`$(am__cd) $(top_distdir) && pwd`; \
-	    (cd $$subdir && \
-	      $(MAKE) $(AM_MAKEFLAGS) \
-	        top_distdir="$$top_distdir" \
-	        distdir="$$distdir/$$subdir" \
-		distsvn) \
-	    || exit 1; \
-	  fi; \
-	done
-
-.PHONY: distsvn-extra
-distsvn-extra:
-	list='$(EXTRA_DIST_SVN)'; for subdir in $$list ; do \
-	  ! test -d $$subdir/.svn \
-	  || cp -pRH $$subdir/.svn "$(distdir)/$$subdir/.svn"; \
-	done
-
-.PHONY: distsvn
-distsvn: distsvn-extra distsvn-recursive
-	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

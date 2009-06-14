@@ -21,8 +21,6 @@
 # -*- mode: makefile; -*-
 
 # -*- mode: makefile; -*-
-
-# -*- mode: makefile; -*-
 VPATH = @srcdir@
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
@@ -41,10 +39,10 @@ host_triplet = @host@
 target_triplet = @target@
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
-	$(srcdir)/m4/cf_bundle.make $(srcdir)/m4/cf_debian.make \
-	$(srcdir)/m4/cf_gentoo.make \
+	$(srcdir)/m4/cf_bundle.make \
 	$(srcdir)/m4/cf_svnversion-top.make $(top_srcdir)/configure \
-	$(top_srcdir)/m4/cf_bundle_sub.make AUTHORS COPYING ChangeLog \
+	$(top_srcdir)/m4/cf_debian.make \
+	$(top_srcdir)/m4/cf_gentoo.make AUTHORS COPYING ChangeLog \
 	INSTALL NEWS compile config.guess config.sub depcomp \
 	elisp-comp install-sh ltmain.sh missing ylwrap
 subdir = .
@@ -705,10 +703,8 @@ top_srcdir = @top_srcdir@
 EXTRA_DIST = bootstrap autom4te.cfg \
 	link-warning.h \
 	fink/dm.el fink/dm.info \
-	testboxes/dict.box testboxes/list.box testboxes/longarray.box \
-	$(SVNVERSION_EXTRA_DIST)
+	testboxes/dict.box testboxes/list.box testboxes/longarray.box
 
-EXTRA_DIST_SVN = testboxes fink
 CLEANFILES = $(BUNDLE_CLEANFILES)
 @ENABLE_EMACS_TRUE@EMACS_DIR = emacs
 @ENABLE_BASH_TRUE@@ENABLE_ENV_TRUE@BASH_DIR = sh
@@ -731,7 +727,7 @@ all: config.h
 .SUFFIXES:
 am--refresh:
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/m4/cf_svnversion-top.make $(srcdir)/m4/cf_bundle.make $(srcdir)/m4/cf_gentoo.make $(srcdir)/m4/cf_debian.make $(top_srcdir)/m4/cf_bundle_sub.make $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/m4/cf_svnversion-top.make $(srcdir)/m4/cf_bundle.make $(top_srcdir)/m4/cf_gentoo.make $(top_srcdir)/m4/cf_debian.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -1203,8 +1199,9 @@ dist-hook: $(SVNVERSION_TARGET)
 	cp -p $(builddir)/svnversion.stamp $(distdir)/svnversion.stamp
 
 gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild:
-	svn cp `echo gentoo/dev-lang/dm/dm-*.ebuild | sed -e 's/ /\n/g' \
+	cp `echo gentoo/dev-lang/dm/dm-*.ebuild | sed -e 's/ /\n/g' \
 	        | sort | tail -n 1` $@
+	cd gentoo && git add $@
 
 .PHONY: update-version
 update-version: gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild
@@ -1233,7 +1230,7 @@ rsync: dist
 
 .PHONY: gentoo-ci
 gentoo-ci: gentoo-setup
-	svn ci -m 'Update ebuilds' gentoo
+	cd gentoo && git commit -a -m 'Update ebuilds'
 
 .PHONY: ebuild
 ebuild: rsync gentoo-ci
@@ -1248,34 +1245,11 @@ bundle: $(SVNVERSION_TARGET) $(distdir).tar.bz2
 
 $(distdir).tar.bz2: distdir distsvn
 	cp -pRH $(BUNDLE) $(distdir)
+	list='$(BUNDLE)'; for subdir in $$list ; do ( \
+	  cd $(distdir)/$$list && if test -e .git ; then rm -rf .git ; fi; \
+	); done
 	tardir=$(distdir) && $(am__tar) | bzip2 -9 -c >$(distdir).tar.bz2
 	$(am__remove_distdir)
-
-.PHONY: distsvn-recursive
-distsvn-recursive:
-	list='$(DIST_SUBDIRS)'; for subdir in $$list ; do \
-	  if test "$$subdir" = .; then :; else \
-	    distdir=`$(am__cd) $(distdir) && pwd`; \
-	    top_distdir=`$(am__cd) $(top_distdir) && pwd`; \
-	    (cd $$subdir && \
-	      $(MAKE) $(AM_MAKEFLAGS) \
-	        top_distdir="$$top_distdir" \
-	        distdir="$$distdir/$$subdir" \
-		distsvn) \
-	    || exit 1; \
-	  fi; \
-	done
-
-.PHONY: distsvn-extra
-distsvn-extra:
-	list='$(EXTRA_DIST_SVN)'; for subdir in $$list ; do \
-	  ! test -d $$subdir/.svn \
-	  || cp -pRH $$subdir/.svn "$(distdir)/$$subdir/.svn"; \
-	done
-
-.PHONY: distsvn
-distsvn: distsvn-extra distsvn-recursive
-	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

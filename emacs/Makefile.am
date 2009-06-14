@@ -10,9 +10,6 @@ edit = sed \
 	-e 's,@bindir\@,$(bindir),g' \
 	-e 's,@pkglispdir\@,$(pkglispdir),g' \
 	-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
-	-e 's,[@]NAMEBYTES[@],@NAMEBYTES@,g' \
-	$(SVNVERSION_EDIT)
+	-e 's,[@]NAMEBYTES[@],@NAMEBYTES@,g'
 
-include $(top_srcdir)/m4/cf_svnversion.make
-include $(top_srcdir)/m4/cf_bundle_sub.make
 include $(top_srcdir)/m4/cf_in.make

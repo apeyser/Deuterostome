@@ -33,12 +33,9 @@ newbook.tex: chap1.tex chap2.tex chap3.tex appendix.tex config.sty newbook.sty
 	touch $@
 
 edit = sed -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
-	$(SVNVERSION_EDIT) \
 	-e 's|[@]amsmath[@]|\$(amsmath)|g'
 
 include $(top_srcdir)/m4/cf_latex.make
-include $(top_srcdir)/m4/cf_svnversion.make
-include $(top_srcdir)/m4/cf_bundle_sub.make
 include $(top_srcdir)/m4/cf_in.make
 
 distclean-local: distclean-local-tex
