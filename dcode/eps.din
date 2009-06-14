@@ -1,6 +1,6 @@
 | -*- mode: d; -*-
 
-(Using eps.d $Id$ V@PACKAGE_VERSION@ @SVNVERSION@\n) toconsole
+(Using eps.d ID: @SVN_ID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole
 
 /EPS 100 {
   |------------ RESOLUTION -------------------

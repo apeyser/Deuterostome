@@ -1,4 +1,6 @@
-(Using linkedlist.d $Id$ V@PACKAGE_VERSION@ @SVNVERSION@\n) toconsole
+| -*- mode: d; -*-
+
+(Using linkedlist.d ID: @SVN_ID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole
 
 /LINKEDLIST 100 {
 

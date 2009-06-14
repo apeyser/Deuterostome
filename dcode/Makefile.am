@@ -12,7 +12,7 @@ dist_dmconf_DATA = dvt.d dpawn.d
 nodist_dmconf_DATA = dnode.d
 
 INFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
-EXTRA_DIST = $(DISTEDITSRCS:=in) $(nodist_dmconf_DATA:=in)
+EXTRA_DIST = $(DISTEDITSRCS:=in) $(nodist_dmconf_DATA:=in) $(IDFILES)
 CLEANFILES = $(INFILES)
 SUFFIXES =
 
@@ -119,19 +119,18 @@ endif ENABLE_PETSC
 endif ENABLE_PLUGINS
 endif ENABLE_PLUGINS_SUPPORT
 
-edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
-	-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
-	-e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
-	-e 's,[@]ENABLE_BASH[@],$(ENABLE_BASH),g' \
-	$(PLUGINS_DELETE) \
-	$(PLUGINS_SUPPORT_DELETE) \
-	$(THREADS_EDIT) \
-	$(XPS_DELETE) \
-	$(PERL_DELETE) \
-	$(EMACSCLIENT_EDIT) \
-	$(ATLAS_EDIT) \
-	$(RTHREADS_EDIT) \
-	$(REGEX_DELETE) \
-	$(PETSC_EDIT) 
+edit = -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
+       -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
+       -e 's,[@]ENABLE_BASH[@],$(ENABLE_BASH),g' \
+       $(PLUGINS_DELETE) \
+       $(PLUGINS_SUPPORT_DELETE) \
+       $(THREADS_EDIT) \
+       $(XPS_DELETE) \
+       $(PERL_DELETE) \
+       $(EMACSCLIENT_EDIT) \
+       $(ATLAS_EDIT) \
+       $(RTHREADS_EDIT) \
+       $(REGEX_DELETE) \
+       $(PETSC_EDIT) 
 
 include $(top_srcdir)/m4/cf_in.make

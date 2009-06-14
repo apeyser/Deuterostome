@@ -24,7 +24,7 @@
   end                                     | pop debug_dict
 } def
 
-(Using startup_libs.d $Id$ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole
+(Using startup_libs.d ID: @SVN_ID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole
 
 save 1024 /b array 
  dup 0 (Plugins: ) fax getplugindir fax (\n) fax 0 exch getinterval toconsole

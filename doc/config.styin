@@ -5,7 +5,7 @@
 %
 \ProvidesPackage{config}%
 %
-% \id must be defined before use (preferably as \verbdef\id$Id$)
+% \id must be defined before use (preferably as \verbdef\id$ID: @SVN_ID@$)
 %   \verbdef is defined in verbdef!
 % You should put a \\ before \titleversion
 %  in \title

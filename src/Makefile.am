@@ -12,7 +12,7 @@ DIST_SUBDIRS = codegen
 BUILT_SOURCES = dnode-nice.c dnode-daemon.c paths.h \
 		drook.c dqueen.c dm-prop.c
 INFILES = $(BUILT_SOURCES)
-EXTRA_DIST = $(INFILES:=in)
+EXTRA_DIST = $(INFILES:=in) $(IDFILES)
 CLEANFILES = $(INFILES)
 DISTCLEANFILES = dm-config.h
 SUFFIXES =

@@ -1,6 +1,6 @@
 ; -*- mode: lisp; -*-
 
-(defconst d-mode-version "$Id$ V@PACKAGE_VERSION@ git-@SVNVERSION@"
+(defconst d-mode-version "ID: @SVN_ID@ V@PACKAGE_VERSION@ git-@SVNVERSION@"
   "Revision number of d-mode.")
 
 (require 'font-lock)

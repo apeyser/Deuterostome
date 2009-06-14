@@ -1,5 +1,5 @@
 INFILES = dnode.sh print.pl runtool.sh emacsclient-run.sh
-EXTRA_DIST = $(INFILES:=in)
+EXTRA_DIST = $(INFILES:=in) $(IDFILES)
 CLEANFILES = $(INFILES)
 SUFFIXES =
 

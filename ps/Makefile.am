@@ -1,5 +1,5 @@
 INFILES = $(nodist_pkgpsdata_DATA)
-EXTRA_DIST = $(INFILES:=in)
+EXTRA_DIST = $(INFILES:=in) $(IDFILES)
 CLEANFILES = $(INFILES)
 SUFFIXES =
 

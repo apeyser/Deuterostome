@@ -8,7 +8,7 @@ AM_LIBADD = $(AM_LIBS) $(LTLIBOBJS) @RELEASE_INFO@ @VERSION_INFO@ \
 INCLUDES = $(INCLTDL)
 
 INFILES = dmpetsc.c petsc.d new-plugin.d
-EXTRA_DIST = dmpetsc.cin petsc.din
+EXTRA_DIST = dmpetsc.cin petsc.din $(IDFILES)
 SUFFIXES =
 
 if ENABLE_PLUGINS_SUPPORT

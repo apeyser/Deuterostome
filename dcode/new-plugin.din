@@ -1,3 +1,5 @@
+| -*- mode: d; -*-
+| ID: @SVN_ID@ V@ V@PACKAGE_VERSION@ git-@SVNVERSION@
 /NEW_PLUGINS module 1000 dict dup begin
 
 | lower | LOWER

@@ -1,5 +1,5 @@
 INFILES = config.sty
-EXTRA_DIST = $(INFILES:=in) \
+EXTRA_DIST = $(INFILES:=in) $(IDFILES) \
 	2ND_PRNT.PS \
 	chap1.tex chap2.tex chap3.tex appendix.tex \
 	dvt.bib \
@@ -32,8 +32,7 @@ newbook.tex: chap1.tex chap2.tex chap3.tex appendix.tex config.sty newbook.sty
 	test -e $@ || cp $(srcdir)/$@ $@
 	touch $@
 
-edit = sed -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
-	-e 's|[@]amsmath[@]|\$(amsmath)|g'
+edit = -e 's|[@]amsmath[@]|\$(amsmath)|g'
 
 include $(top_srcdir)/m4/cf_latex.make
 include $(top_srcdir)/m4/cf_in.make

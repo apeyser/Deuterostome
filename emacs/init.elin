@@ -1,3 +1,5 @@
+;; ID: @SVN_ID@ V@ V@PACKAGE_VERSION@ git-@SVNVERSION@
+
 (defvar explicit-dmlispdir nil)
 
 (let* ((dmlispdir (or explicit-dmlispdir
