@@ -16,6 +16,8 @@
 
 # -*- mode: makefile; -*-
 
+# -*- mode: makefile; -*-
+
 VPATH = @srcdir@
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
@@ -34,7 +36,8 @@ host_triplet = @host@
 target_triplet = @target@
 DIST_COMMON = $(am__dist_m4data_DATA_DIST) \
 	$(am__dist_noinst_DATA_DIST) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(top_srcdir)/m4/cf_bundle_sub.make
+	$(srcdir)/Makefile.in $(top_srcdir)/m4/cf_bundle_sub.make \
+	$(top_srcdir)/m4/cf_svnversion.make
 subdir = m4
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
@@ -739,10 +742,14 @@ EXTRA_DIST = $(GNULIB) \
 	latex/ac_prog_texhash.m4 latex/ac_texmf_path.m4 latex/latex.m4 \
 	latex/LICENSE latex/README
 
+SVNVERSION_EDIT = \
+	-e "s,[@]SVNVERSION[@],`cat $(top_builddir)/svnversion.stamp`,g"
+
+SVNVERSION_TARGET = svnversion
 all: all-am
 
 .SUFFIXES:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_bundle_sub.make $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_bundle_sub.make $(top_srcdir)/m4/cf_svnversion.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -952,6 +959,11 @@ distsvn-extra:
 .PHONY: distsvn
 distsvn: distsvn-extra distsvn-recursive
 	! test -d .svn || cp -pRH .svn "$(distdir)/.svn"
+
+@MAINTAINER_MODE_TRUE@$(top_srcdir)/svnversion.stamp:
+@MAINTAINER_MODE_TRUE@	cd $(top_srcdir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+@MAINTAINER_MODE_FALSE@$(top_builddir)/svnversion.stamp:
+@MAINTAINER_MODE_FALSE@	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

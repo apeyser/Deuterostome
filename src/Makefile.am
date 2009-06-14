@@ -200,3 +200,4 @@ libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) \
 
 include $(top_srcdir)/m4/cf_bundle_sub.make
 include $(top_srcdir)/m4/cf_in.make
+include $(top_srcdir)/m4/cf_svnversion.make

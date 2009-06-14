@@ -18,6 +18,8 @@
 
 # -*- mode: makefile; -*-
 
+# -*- mode: makefile; -*-
+
 
 
 
@@ -58,7 +60,8 @@ DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(dist_pkgdata_SCRIPTS) \
 	$(srcdir)/dmglobals.c $(srcdir)/dmnum.c $(srcdir)/dmnum.h \
 	$(srcdir)/dsp1.c $(srcdir)/dsp2.c $(srcdir)/paths.hin \
 	$(top_srcdir)/m4/cf_bundle_sub.make \
-	$(top_srcdir)/m4/cf_in.make
+	$(top_srcdir)/m4/cf_in.make \
+	$(top_srcdir)/m4/cf_svnversion.make
 subdir = src
 SUBDIRS =
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -1018,12 +1021,16 @@ INFILES_RULE = \
 	&& $(edit) -e 's|[@]SVNVERSION[@]|$(SVNVERSION)|g' $< >$@.tmp \
 	&& mv $@.tmp $@
 
+SVNVERSION_EDIT = \
+	-e "s,[@]SVNVERSION[@],`cat $(top_builddir)/svnversion.stamp`,g"
+
+SVNVERSION_TARGET = svnversion
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 .SUFFIXES:
 .SUFFIXES: .cin .hin .elin .din .psin .shin .plin .styin .c .d .el .h .lo .o .obj .pl .ps .sh .sty
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_bundle_sub.make $(top_srcdir)/m4/cf_in.make $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_bundle_sub.make $(top_srcdir)/m4/cf_in.make $(top_srcdir)/m4/cf_svnversion.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -2271,6 +2278,11 @@ distsvn: distsvn-extra distsvn-recursive
 .styin.sty: ; $(INFILES_RULE)
 
 $(INFILES): $(Makefile) $(SVNVERSION_STAMP_DEP)
+
+@MAINTAINER_MODE_TRUE@$(top_srcdir)/svnversion.stamp:
+@MAINTAINER_MODE_TRUE@	cd $(top_srcdir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+@MAINTAINER_MODE_FALSE@$(top_builddir)/svnversion.stamp:
+@MAINTAINER_MODE_FALSE@	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

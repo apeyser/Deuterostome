@@ -60,4 +60,5 @@ EXTRA_DIST = $(GNULIB) \
 	latex/LICENSE latex/README
 
 include $(top_srcdir)/m4/cf_bundle_sub.make
+include $(top_srcdir)/m4/cf_svnversion.make
 
