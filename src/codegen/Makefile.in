@@ -794,7 +794,7 @@ Makefile = Makefile
 SVNVERSION_STAMP_DEP = @SVNVERSION_STAMP@
 INFILES_RULE = \
 	! test -e $@.tmp || rm -f $@.tmp \
-	&& $(edit) $< >$@.tmp \
+	&& $(edit) -e 's|[@]SVNVERSION[@]|$(SVNVERSION)|g' $< >$@.tmp \
 	&& mv $@.tmp $@
 
 
