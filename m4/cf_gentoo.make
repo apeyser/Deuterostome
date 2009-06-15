@@ -3,7 +3,7 @@
 gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild:
 	cp `echo gentoo/dev-lang/dm/dm-*.ebuild | sed -e 's/ /\n/g' \
 	        | sort | tail -n 1` $@
-	cd gentoo && git add $@
+	git add $@
 
 .PHONY: update-version
 update-version: gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild

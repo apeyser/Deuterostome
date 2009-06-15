@@ -1,11 +1,17 @@
-PRODSRCS = \
-	dmnuminc.h.built \
-	dsp1f.h.built \
+DGEN_H_BUILT = \
 	dsp2def.h.built \
+	dmnuminc.h.built \
+	dsp1f.h.built
+
+DGEN_OPS_BUILT= \
 	dgen_0.h.built \
-	dnode_0.h.built \
 	dvt_0.h.built \
-	dpawn_0.h.built \
+	dnode_0.h.built \
+	dpawn_0.h.built
+
+PRODSRCS = \
+	$(DGEN_H_BUILT) \
+	$(DGEN_OPS_BUILT) \
 	errors.din.built \
 	d-mode-ops.el \
 	dm-errs.h.built
@@ -63,26 +69,53 @@ dcoder_CPPFLAGS = -I"$(top_srcdir)/src" -I"$(top_builddir)/src" \
 	-DDM_HAVE_CONFIG_H
 dcoder_LDADD = $(AM_LDADD)
 
-$(srcdir)/dsp2def.h.built: $(dsp2defd) $(dgen) $(dgen_build)
+$(DGEN_H_BUILT): $(dgen) $(dgen_build)
+	f=`echo $@ | sed -e 's,.*/,,g' -e 's,\..*,.d,g'`; \
 	"$(srcdir)/dgen-build" \
-		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dsp2def.d" "$@" 
-	(cd "$(srcdir)/.." ; \
-	 rm dsp2def.h ; \
-	 $(LN_S) codegen/dsp2def.h.built dsp2def.h)
+	  "$(top_builddir)/src/codegen/dgen" "$(srcdir)" \
+	  "$$f" "$@"
+	(f=`echo $@ | sed -e 's,.*/,,g' -e 's,\.built,,g'`; \
+	cd "$(srcdir)/.."; \
+	rm $$f; \
+	$(LN_S) codegen/$$f.built $$f)
 
-$(srcdir)/dmnuminc.h.built: $(dmnuminc) $(dgen) $(dgen_build)
-	"$(srcdir)/dgen-build" \
-		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dmnuminc.d" "$@" 
-	(cd "$(srcdir)/.." ; \
-	 rm dmnuminc.h ; \
-	 $(LN_S) codegen/dmnuminc.h.built dmnuminc.h)
+dsp2def.h.built: $(dsp2defd)
+dmnuminc.h.built: $(dmnuminc)
+dsp1f.h.built: dsp1f.d
 
-$(srcdir)/dsp1f.h.built: dsp1f.d $(dgen) $(dgen_build)
+$(DGEN_OPS_BUILT): $(opsd) $(dgen) $(dgen_build)
+	dict=`echo $@ | sed -e 's,.*/,,g' -e 's,_.*,,g'`; \
 	"$(srcdir)/dgen-build" \
-		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "dsp1f.d" "$@"
-	(cd "$(srcdir)/.." ; \
-	 rm dsp1f.h ; \
-	 $(LN_S) codegen/dsp1f.h.built dsp1f.h)
+	  "$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
+	  "$@" "/$$dict"
+	(f=`echo $@ | sed -e 's,.*/,,g' -e 's,\.built,,g'`; \
+	cd "$(srcdir)/.." ; \
+	rm $$f ; \
+	$(LN_S) codegen/$$f.built $$f)
+
+dcoder.h: $(opsd) $(dgen) $(dgen_build)
+	"$(srcdir)/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
+		"$@" "/dcoder"
+
+dm-errs.h.built: $(opsd) $(dgen) $(dgen_build)
+	"$(srcdir)/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
+		"$@" "/derr"
+
+d-mode-ops.el: $(opsd) $(dgen) $(dgen_build)
+	"$(srcdir)/dgen-build" \
+		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
+		"$@" "/demacs"
+
+errors.din.built: $(dcoder)
+	"$(top_builddir)/src/codegen/dcoder" \
+		"$(srcdir)/errors.din.built"
+	( \
+	  cd "$(srcdir)/../../dcode" \
+	  && rm -f errors.din \
+	  && $(LN_S) ../src/codegen/errors.din.built errors.din \
+	)
 
 edit = -e 's,[@]dmsockdir[@],$(dmsockdir),g' \
        -e 's,[@]dmstartdir[@],.,g' \
@@ -92,62 +125,6 @@ edit = -e 's,[@]dmsockdir[@],$(dmsockdir),g' \
        -e 's,[@]BYTECORRECT[@],$(BYTECORRECT),g' \
        -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
        -e 's,[@]srcdir[@],$(srcdir),g'
-
-$(srcdir)/dgen_0.h.built: $(opsd) $(dgen) $(dgen_build)
-	"$(srcdir)/dgen-build" \
-		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
-		"$@" "/dgen"
-	(cd "$(srcdir)/.." ; \
-	rm dgen_0.h ; \
-	$(LN_S) codegen/dgen_0.h.built dgen_0.h)
-
-$(srcdir)/dvt_0.h.built: $(opsd) $(dgen) $(dgen_build)
-	"$(srcdir)/dgen-build" \
-		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
-		"$@" "/dvt"
-	(cd "$(srcdir)/.." ; \
-	rm dvt_0.h ; \
-	$(LN_S) codegen/dvt_0.h.built dvt_0.h)
-
-$(srcdir)/dnode_0.h.built: $(opsd) $(dgen) $(dgen_build)
-	"$(srcdir)/dgen-build" \
-		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
-		"$@" "/dnode"
-	(cd "$(srcdir)/.." ; \
-	rm dnode_0.h ; \
-	$(LN_S) codegen/dnode_0.h.built dnode_0.h)
-
-$(srcdir)/dpawn_0.h.built: $(opsd) $(dgen) $(dgen_build)
-	"$(srcdir)/dgen-build" \
-		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
-		"$@" "/dpawn"
-	(cd "$(srcdir)/.." ; \
-	rm dpawn_0.h ; \
-	$(LN_S) codegen/dpawn_0.h.built dpawn_0.h)
-
-$(srcdir)/dcoder.h: $(opsd) $(dgen) $(dgen_build)
-	"$(srcdir)/dgen-build" \
-		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
-		"$@" "/dcoder"
-
-$(srcdir)/dm-errs.h.built: $(opsd) $(dgen) $(dgen_build)
-	"$(srcdir)/dgen-build" \
-		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
-		"$@" "/derr"
-
-$(srcdir)/d-mode-ops.el: $(opsd) $(dgen) $(dgen_build)
-	"$(srcdir)/dgen-build" \
-		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
-		"$@" "/demacs"
-
-$(srcdir)/errors.din.built: $(dcoder)
-	"$(top_builddir)/src/codegen/dcoder" \
-		"$(srcdir)/errors.din.built"
-	( \
-	  cd "$(srcdir)/../../dcode" \
-	  && rm -f errors.d.in \
-	  && $(LN_S) ../src/codegen/errors.d.in errors.d.in \
-	)
 
 include $(top_srcdir)/m4/cf_in.make
 
