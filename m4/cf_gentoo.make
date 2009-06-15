@@ -1,9 +1,11 @@
 # -*- mode: makefile; -*-
 
 gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild:
-	cp `echo gentoo/dev-lang/dm/dm-*.ebuild | sed -e 's/ /\n/g' \
-	        | sort | tail -n 1` $@
-	git add $@
+	cd gentoo \
+	&& git checkout master \
+	&& cp `echo dev-lang/dm/dm-*.ebuild | sed -e 's/[ \t]+/\n/g' \
+	        | sort | tail -n 1` dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild \
+	&& git add dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild
 
 .PHONY: update-version
 update-version: gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild
@@ -33,7 +35,9 @@ rsync: dist
 
 .PHONY: gentoo-ci
 gentoo-ci: gentoo-setup
-	cd gentoo && git commit -a -m 'Update ebuilds' && git push
+	cd gentoo \
+	&& git checkout master \
+	&& git commit -a -m 'Update ebuilds' && git push
 
 .PHONY: ebuild
 ebuild: rsync gentoo-ci
