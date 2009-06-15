@@ -1230,7 +1230,7 @@ rsync: dist
 
 .PHONY: gentoo-ci
 gentoo-ci: gentoo-setup
-	cd gentoo && git commit -a -m 'Update ebuilds'
+	cd gentoo && git commit -a -m 'Update ebuilds' && git push
 
 .PHONY: ebuild
 ebuild: rsync gentoo-ci
