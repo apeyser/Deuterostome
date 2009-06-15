@@ -1,3 +1,5 @@
+// ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
+
 #define DMSOCKDIR "@dmsockdir@"
 #define STARTUP_DIR "@dmstartdir@"
 #define PLUGIN_DIR "@pkglibdir@"

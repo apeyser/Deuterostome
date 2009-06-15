@@ -1,5 +1,7 @@
 #line 2 "@srcdir@/dqueen.c.in"
 
+// ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
+
 #include "dm.h"
 
 #include <signal.h>

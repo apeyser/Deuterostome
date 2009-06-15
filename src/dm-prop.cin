@@ -1,5 +1,7 @@
 #line 2 "@srcdir@/dm-prop.c.in"
 
+// ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
+
 #include "dm.h"
 
 #include <stdlib.h>

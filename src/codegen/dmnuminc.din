@@ -1,4 +1,7 @@
-|============== D machine for PPC: DMNUMINC generator ==================
+| -*- mode: d; -*-
+| ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
+
+|============== D machine: DMNUMINC generator ==================
 |
 | This acts as an extended macro preprocessor to the C compiler, which
 | prepares nested, conditional, multi-line constructs in C.

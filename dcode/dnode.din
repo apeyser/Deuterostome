@@ -1,5 +1,6 @@
 | -*-d-*-
 | Site configuration for dnode
+| ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
 
 @ENABLE_THREADS_START@
 (Starting up threads: @ENABLE_THREADS@\n) toconsole  

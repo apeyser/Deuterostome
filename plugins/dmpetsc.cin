@@ -1,4 +1,9 @@
 #line 2 "./dmpetsc.c.in"
+
+// ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
+
+#include "dm.h"
+
 #include <petscksp.h>
 
 #ifdef PETSC_USE_SINGLE
@@ -19,7 +24,6 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "dm.h"
 #include "dm-mpi.h"
 #include "dm6.h"
 
@@ -1998,3 +2002,7 @@ DM_INLINE_STATIC P petsc_mat_vecmul(void) {
 }
 
 #include "dm-dmpetsc-main.h"
+
+// Local Variables:
+// mode: c
+// End:

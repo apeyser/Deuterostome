@@ -1,12 +1,6 @@
 #line 2 "@srcdir@/drook.c.in"
 
-/* #ifdef _XOPEN_SOURCE */
-/* #if _XOPEN_SOURCE < 500 */
-/* #undef _XOPEN_SOURCE */
-/* #endif */
-/* #ifndef _XOPEN_SOURCE */
-/* #define _XOPEN_SOURCE 500 */
-/* #endif */
+// ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
 
 #include "dm.h"
 #include "error-local.h"

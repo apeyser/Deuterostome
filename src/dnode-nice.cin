@@ -1,5 +1,7 @@
 #line 2 "@srcdir@/dnode-nice.c.in"
 
+// ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>

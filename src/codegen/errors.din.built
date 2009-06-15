@@ -1,3 +1,4 @@
+| -*- mode: d; -*-
 (Using errors.d  ID: @SVNID@ V@PACKAGE_VERSION@ @SVNVERSION@\n) toconsole
 /ERRORS module 1000 dict dup begin
   /OK                                   0x def

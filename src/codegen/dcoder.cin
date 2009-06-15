@@ -1,5 +1,7 @@
 #line 2 "@srcdir@/dcoder.c.in"
 
+// ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
+
 #include "dm-config.h"
 #ifdef DM_HAVE_CONFIG_H
 #ifndef DM_INCLUDED_CONFIG_H
@@ -64,6 +66,10 @@ int main(int argc, char* argv[]) {
   if (! (fd = fopen(argv[1], "w")))
     error_dcoder(1, errno, "Unable to open for writing: %s", argv[1]);
 
+  if (fprintf(fd, "| -*- mode: d; -*-\n") < 0)
+    error_dcoder(1, errno, "Unable to write line# %i", i);
+  i++;
+
   if (fprintf(fd, "(Using errors.d  ID: @" "SVNID@ V@" "PACKAGE_VERSION@ @"
 	      "SVNVERSION@\\n) toconsole\n") < 0)
     error_dcoder(1, errno, "Unable to write line# %i", i);
@@ -83,3 +89,7 @@ int main(int argc, char* argv[]) {
 
   return 0;
 }
+
+// Local Variables:
+// mode: c
+// End:
