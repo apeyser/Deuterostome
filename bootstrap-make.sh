@@ -18,7 +18,7 @@ done
 ! $CONFIG || ./configure --enable-plugins --enable-plugins-support \
     --enable-maintainer-mode --enable-petsc --enable-rthreads \
     --with-petsc=/opt/petsc/ --with-petsc-arch=linux_deb_d \
-    CPPFLAGS="-Wall -g -O2"
+    CPPFLAGS="-Wall -g -O2" $CONFIGURE
 
 for i in clean gencode clean -j9 clean distcheck clean -j9; do
     make $i || exit $?
