@@ -572,7 +572,7 @@ STDBOOL_H = @STDBOOL_H@
 STDINT_H = @STDINT_H@
 STRINGBUF = @STRINGBUF@
 STRIP = @STRIP@
-SVNVERSION_STAMP = @SVNVERSION_STAMP@
+SVNVERSION_STAMP = `cat $(SVNVERSION_DIR)/svnversion.stamp`
 SYS_DICT_SIZE = @SYS_DICT_SIZE@
 SYS_STAT_H = @SYS_STAT_H@
 SYS_TIME_H = @SYS_TIME_H@
@@ -679,7 +679,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 INFILES = config.sty
-EXTRA_DIST = $(INFILES:=in) \
+EXTRA_DIST = $(INFILES:=in) $(IDFILES) \
 	2ND_PRNT.PS \
 	chap1.tex chap2.tex chap3.tex appendix.tex \
 	dvt.bib \
@@ -693,18 +693,40 @@ EXTRA_DIST = $(INFILES:=in) \
 CLEANFILES = $(INFILES)
 SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
 doc_DATA = dvt-3.0.pdf dvt-emacs.pdf newbook.pdf
-edit = sed -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
-	-e 's|[@]amsmath[@]|\$(amsmath)|g'
+edit = -e 's|[@]amsmath[@]|\$(amsmath)|g'
+@MAINTAINER_MODE_FALSE@SVNVERSION_DIR = $(top_builddir)
+@MAINTAINER_MODE_TRUE@SVNVERSION_DIR = $(top_srcdir)
+SVNVERSION_EDIT = -e "s,[@]SVNVERSION[@],$(SVNVERSION_STAMP),g"
+SVNID_STAMP = `cat $(srcdir)/$@in.idstamp || echo unknown`
+SVNID_EDIT = -e "s,[@]SVNID[@],$(SVNID_STAMP),g"
+IDFILES_RULE = \
+	@echo "Building idstamp: $@"; \
+	f=`echo $@ | sed 's,.idstamp,,g'` \
+	&& if git log -n 1 --pretty='format:%cn %cd %H' \
+	      `readlink $$f || echo $$f` \
+		>$@.tmp 2>/dev/null ; then \
+	  if test "`cat $@`" = "`cat $@.tmp`"; then \
+	    rm $@.tmp || exit 1; \
+	  else \
+	    mv $@.tmp $@ || exit 1; \
+	    touch $$f || exit 1; \
+	  fi; \
+	else rm $@.tmp; \
+	fi;
 
-SVNVERSION_EDIT = \
-	-e "s,[@]SVNVERSION[@],`cat $(top_builddir)/svnversion.stamp`,g"
-
+IDFILES = $(INFILES:=in.idstamp)
+@MAINTAINER_MODE_TRUE@idfiles = idfiles
 SVNVERSION_TARGET = svnversion
 Makefile = Makefile
 SVNVERSION_STAMP_DEP = @SVNVERSION_STAMP@
+PACKAGE_EDIT = -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g'
 INFILES_RULE = \
 	! test -e $@.tmp || rm -f $@.tmp \
-	&& $(edit) -e 's|[@]SVNVERSION[@]|$(SVNVERSION)|g' $< >$@.tmp \
+	&& sed $(edit) \
+	       $(SVNVERSION_EDIT) \
+	       $(SVNID_EDIT) \
+	       $(PACKAGE_EDIT) \
+	       $< >$@.tmp \
 	&& mv $@.tmp $@
 
 all: all-am
@@ -798,7 +820,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(DATA)
+all-am: Makefile $(DATA) all-local
 installdirs:
 	for dir in "$(DESTDIR)$(docdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
@@ -884,15 +906,15 @@ uninstall-am: uninstall-docDATA
 
 .MAKE: install-am install-strip
 
-.PHONY: all all-am check check-am clean clean-generic clean-libtool \
-	clean-local distclean distclean-generic distclean-libtool \
-	distclean-local distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am \
-	install-docDATA install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+.PHONY: all all-am all-local check check-am clean clean-generic \
+	clean-libtool clean-local distclean distclean-generic \
+	distclean-libtool distclean-local distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-docDATA install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
 	uninstall-docDATA
@@ -946,10 +968,12 @@ clean-local-latex:
 
 clean-local: clean-local-latex
 
-@MAINTAINER_MODE_TRUE@$(top_srcdir)/svnversion.stamp:
-@MAINTAINER_MODE_TRUE@	cd $(top_srcdir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
-@MAINTAINER_MODE_FALSE@$(top_builddir)/svnversion.stamp:
-@MAINTAINER_MODE_FALSE@	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+$(SVNVERSION_DIR)/svnversion.stamp:
+	cd $(SVNVERSION_DIR) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+all-local: $(idfiles)
+
+@MAINTAINER_MODE_TRUE@$(IDFILES): ; $(IDFILES_RULE)
+@MAINTAINER_MODE_TRUE@idfiles: $(IDFILES)
 
 .cin.c:     ; $(INFILES_RULE)
 .hin.h:     ; $(INFILES_RULE)
@@ -960,7 +984,7 @@ clean-local: clean-local-latex
 .elin.el:   ; $(INFILES_RULE)
 .styin.sty: ; $(INFILES_RULE)
 
-$(INFILES): $(Makefile) $(SVNVERSION_STAMP_DEP)
+$(INFILES): $(IDFILES) $(Makefile) $(SVNVERSION_STAMP_DEP)
 
 distclean-local: distclean-local-tex
 

@@ -15,31 +15,28 @@ SVNVERSION_EDIT = -e "s,[@]SVNVERSION[@],$(SVNVERSION_STAMP),g"
 SVNID_STAMP = `cat $(srcdir)/$@in.idstamp || echo unknown`
 SVNID_EDIT = -e "s,[@]SVNID[@],$(SVNID_STAMP),g"
 
-IDFILES_RULE = 	\
-	list='$(INFILES:=in)'; (for f in $$list ; do \
-	  if test -e $$f.idstamp ; then \
-	    if git log -n 1 --pretty='format:%cn %cd %H' \
-	      `readlink $$f || echo $$f` >$$f.idstamp.tmp 2>/dev/null ; then\
-	      if test "`cat $$f.idstamp`" = "`cat $$f.idstamp.tmp`"; then \
-		rm $$f.idstamp.tmp || exit 1; \
-	      else \
-		mv $$f.idstamp.tmp $$f.idstamp || exit 1; \
-		touch $$f || exit 1; \
-	      fi; \
-	    else rm $$f.idstamp.tmp; \
-	    fi; \
+IDFILES_RULE = \
+	@echo "Building idstamp: $@"; \
+	f=`echo $@ | sed 's,.idstamp,,g'` \
+	&& if git log -n 1 --pretty='format:%cn %cd %H' \
+	      `readlink $$f || echo $$f` \
+		>$@.tmp 2>/dev/null ; then \
+	  if test "`cat $@`" = "`cat $@.tmp`"; then \
+	    rm $@.tmp || exit 1; \
+	  else \
+	    mv $@.tmp $@ || exit 1; \
+	    touch $$f || exit 1; \
 	  fi; \
-	done)
+	else rm $@.tmp; \
+	fi;
 
 IDFILES = $(INFILES:=in.idstamp)
-
-.PHONY: idfiles
-idfiles: ; $(IDFILES_RULE)
+all-local: $(idfiles)
 
 if MAINTAINER_MODE
-IDFILES_TARGET = idfiles
-else !MAINTAINER_MODE
-IDFILES_TARGET = 
-endif !MAINTAINER_MODE
+$(IDFILES): ; $(IDFILES_RULE)
+idfiles: $(IDFILES)
+idfiles = idfiles
+endif MAINTAINER_MODE
 
 SVNVERSION_TARGET = svnversion

@@ -2,7 +2,7 @@
 
 |============================ D Startup =================================
 
-(Using startup_dvt ID: @SVN_ID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole        | hi!
+(Using startup_dvt ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole        | hi!
 
 | Contains procedures for:
 |  - inspection of objects

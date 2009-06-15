@@ -699,7 +699,7 @@ STDBOOL_H = @STDBOOL_H@
 STDINT_H = @STDINT_H@
 STRINGBUF = @STRINGBUF@
 STRIP = @STRIP@
-SVNVERSION_STAMP = @SVNVERSION_STAMP@
+SVNVERSION_STAMP = `cat $(SVNVERSION_DIR)/svnversion.stamp`
 SYS_DICT_SIZE = @SYS_DICT_SIZE@
 SYS_STAT_H = @SYS_STAT_H@
 SYS_TIME_H = @SYS_TIME_H@
@@ -816,12 +816,11 @@ AM_LIBADD = $(AM_LIBS) $(LTLIBOBJS) @RELEASE_INFO@ @VERSION_INFO@ \
 
 INCLUDES = $(INCLTDL)
 INFILES = dmpetsc.c petsc.d new-plugin.d
-EXTRA_DIST = dmpetsc.cin petsc.din
+EXTRA_DIST = dmpetsc.cin petsc.din $(IDFILES)
 SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
-@ENABLE_PLUGINS_SUPPORT_TRUE@edit = sed \
-@ENABLE_PLUGINS_SUPPORT_TRUE@	  -e 's,[@]PETSC_DIR[@],$(PETSC_DIR),g' \
-@ENABLE_PLUGINS_SUPPORT_TRUE@	  -e 's,[@]PETSC_ARCH[@],$(PETSC_ARCH),g' \
-@ENABLE_PLUGINS_SUPPORT_TRUE@	  -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g'
+@ENABLE_PLUGINS_SUPPORT_TRUE@edit = -e 's,[@]PETSC_DIR[@],$(PETSC_DIR),g' \
+@ENABLE_PLUGINS_SUPPORT_TRUE@        -e 's,[@]PETSC_ARCH[@],$(PETSC_ARCH),g' \
+@ENABLE_PLUGINS_SUPPORT_TRUE@        -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g'
 
 @ENABLE_PLUGINS_SUPPORT_TRUE@BUILT_SOURCES = errors.d new-plugin.d \
 @ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__append_1) $(am__append_2) \
@@ -870,15 +869,39 @@ SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
 @ENABLE_PLUGINS_SUPPORT_TRUE@pkglib_DATA = $(PLACEHOLDER) 
 @ENABLE_PLUGINS_SUPPORT_TRUE@nodist_dmstart_DATA = $(IPETSC_D)
 @ENABLE_PLUGINS_SUPPORT_TRUE@CLEANFILES = $(BUILT_SOURCES) $(PETSC_D)
-SVNVERSION_EDIT = \
-	-e "s,[@]SVNVERSION[@],`cat $(top_builddir)/svnversion.stamp`,g"
+@MAINTAINER_MODE_FALSE@SVNVERSION_DIR = $(top_builddir)
+@MAINTAINER_MODE_TRUE@SVNVERSION_DIR = $(top_srcdir)
+SVNVERSION_EDIT = -e "s,[@]SVNVERSION[@],$(SVNVERSION_STAMP),g"
+SVNID_STAMP = `cat $(srcdir)/$@in.idstamp || echo unknown`
+SVNID_EDIT = -e "s,[@]SVNID[@],$(SVNID_STAMP),g"
+IDFILES_RULE = \
+	@echo "Building idstamp: $@"; \
+	f=`echo $@ | sed 's,.idstamp,,g'` \
+	&& if git log -n 1 --pretty='format:%cn %cd %H' \
+	      `readlink $$f || echo $$f` \
+		>$@.tmp 2>/dev/null ; then \
+	  if test "`cat $@`" = "`cat $@.tmp`"; then \
+	    rm $@.tmp || exit 1; \
+	  else \
+	    mv $@.tmp $@ || exit 1; \
+	    touch $$f || exit 1; \
+	  fi; \
+	else rm $@.tmp; \
+	fi;
 
+IDFILES = $(INFILES:=in.idstamp)
+@MAINTAINER_MODE_TRUE@idfiles = idfiles
 SVNVERSION_TARGET = svnversion
 Makefile = Makefile
 SVNVERSION_STAMP_DEP = @SVNVERSION_STAMP@
+PACKAGE_EDIT = -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g'
 INFILES_RULE = \
 	! test -e $@.tmp || rm -f $@.tmp \
-	&& $(edit) -e 's|[@]SVNVERSION[@]|$(SVNVERSION)|g' $< >$@.tmp \
+	&& sed $(edit) \
+	       $(SVNVERSION_EDIT) \
+	       $(SVNID_EDIT) \
+	       $(PACKAGE_EDIT) \
+	       $< >$@.tmp \
 	&& mv $@.tmp $@
 
 all: $(BUILT_SOURCES)
@@ -1153,7 +1176,7 @@ distdir: $(DISTFILES)
 check-am: all-am
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
-all-am: Makefile $(LTLIBRARIES) $(DATA)
+all-am: Makefile $(LTLIBRARIES) $(DATA) all-local
 installdirs:
 	for dir in "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(dmstartdir)" "$(DESTDIR)$(pkglibdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
@@ -1247,20 +1270,21 @@ uninstall-am: uninstall-nodist_dmstartDATA uninstall-pkglibDATA \
 
 .MAKE: install-am install-strip
 
-.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libtool clean-pkglibLTLIBRARIES ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-nodist_dmstartDATA install-pdf install-pdf-am \
-	install-pkglibDATA install-pkglibLTLIBRARIES install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-nodist_dmstartDATA uninstall-pkglibDATA \
+.PHONY: CTAGS GTAGS all all-am all-local check check-am clean \
+	clean-generic clean-libtool clean-pkglibLTLIBRARIES ctags \
+	distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-nodist_dmstartDATA \
+	install-pdf install-pdf-am install-pkglibDATA \
+	install-pkglibLTLIBRARIES install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags uninstall uninstall-am \
+	uninstall-nodist_dmstartDATA uninstall-pkglibDATA \
 	uninstall-pkglibLTLIBRARIES
 
 
@@ -1310,10 +1334,12 @@ uninstall-am: uninstall-nodist_dmstartDATA uninstall-pkglibDATA \
 
 @ENABLE_PETSC_FALSE@@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@.plugins: ; touch "$@"
 
-@MAINTAINER_MODE_TRUE@$(top_srcdir)/svnversion.stamp:
-@MAINTAINER_MODE_TRUE@	cd $(top_srcdir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
-@MAINTAINER_MODE_FALSE@$(top_builddir)/svnversion.stamp:
-@MAINTAINER_MODE_FALSE@	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+$(SVNVERSION_DIR)/svnversion.stamp:
+	cd $(SVNVERSION_DIR) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+all-local: $(idfiles)
+
+@MAINTAINER_MODE_TRUE@$(IDFILES): ; $(IDFILES_RULE)
+@MAINTAINER_MODE_TRUE@idfiles: $(IDFILES)
 
 .cin.c:     ; $(INFILES_RULE)
 .hin.h:     ; $(INFILES_RULE)
@@ -1324,7 +1350,7 @@ uninstall-am: uninstall-nodist_dmstartDATA uninstall-pkglibDATA \
 .elin.el:   ; $(INFILES_RULE)
 .styin.sty: ; $(INFILES_RULE)
 
-$(INFILES): $(Makefile) $(SVNVERSION_STAMP_DEP)
+$(INFILES): $(IDFILES) $(Makefile) $(SVNVERSION_STAMP_DEP)
 
 #################################################
 # Keep automake from trying to save the .c file

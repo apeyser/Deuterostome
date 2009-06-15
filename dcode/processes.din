@@ -1,6 +1,6 @@
 | -*- mode: d; -*-
 
-(Using processes.d ID: @SVN_ID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole
+(Using processes.d ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole
 
 /PROCESSES 100 {
   | These need to be in the same order as

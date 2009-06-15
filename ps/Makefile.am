@@ -8,7 +8,7 @@ dist_pkgpsdata_DATA = cajal2.img form_1.ps form_2.ps graf_1.ps gray.ps \
 
 nodist_pkgpsdata_DATA = thursday.ps tuesday.ps
 
-edit = sed -e 's,[@]pkgpsdatadir[@],$(pkgpsdatadir),g'
+edit = -e 's,[@]pkgpsdatadir[@],$(pkgpsdatadir),g'
 
 include $(top_srcdir)/m4/cf_in.make
 

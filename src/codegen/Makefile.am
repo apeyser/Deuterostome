@@ -84,15 +84,14 @@ $(srcdir)/dsp1f.h.built: dsp1f.d $(dgen) $(dgen_build)
 	 rm dsp1f.h ; \
 	 $(LN_S) codegen/dsp1f.h.built dsp1f.h)
 
-edit = sed \
-	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
-	-e 's,[@]dmstartdir[@],.,g' \
-	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
-	-e 's,[@]dmconfdir[@],$(dmconfdir),g' \
-	-e 's,[@]ROLLBITS[@],$(ROLLBITS),g' \
-	-e 's,[@]BYTECORRECT[@],$(BYTECORRECT),g' \
-	-e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
-	-e 's,[@]srcdir[@],$(srcdir),g'
+edit = -e 's,[@]dmsockdir[@],$(dmsockdir),g' \
+       -e 's,[@]dmstartdir[@],.,g' \
+       -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
+       -e 's,[@]dmconfdir[@],$(dmconfdir),g' \
+       -e 's,[@]ROLLBITS[@],$(ROLLBITS),g' \
+       -e 's,[@]BYTECORRECT[@],$(BYTECORRECT),g' \
+       -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
+       -e 's,[@]srcdir[@],$(srcdir),g'
 
 $(srcdir)/dgen_0.h.built: $(opsd) $(dgen) $(dgen_build)
 	"$(srcdir)/dgen-build" \

@@ -759,7 +759,7 @@ STDBOOL_H = @STDBOOL_H@
 STDINT_H = @STDINT_H@
 STRINGBUF = @STRINGBUF@
 STRIP = @STRIP@
-SVNVERSION_STAMP = @SVNVERSION_STAMP@
+SVNVERSION_STAMP = `cat $(SVNVERSION_DIR)/svnversion.stamp`
 SYS_DICT_SIZE = @SYS_DICT_SIZE@
 SYS_STAT_H = @SYS_STAT_H@
 SYS_TIME_H = @SYS_TIME_H@
@@ -880,25 +880,24 @@ BUILT_SOURCES = dnode-nice.c dnode-daemon.c paths.h \
 		drook.c dqueen.c dm-prop.c
 
 INFILES = $(BUILT_SOURCES)
-EXTRA_DIST = $(INFILES:=in)
+EXTRA_DIST = $(INFILES:=in) $(IDFILES)
 CLEANFILES = $(INFILES)
 DISTCLEANFILES = dm-config.h
 SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
 dpawn = $(bindir)/dpawn
 drook = $(bindir)/drook
 dmprop = $(bindir)/dmprop
-edit = sed \
-	-e 's,[@]bindir[@],$(bindir),g' \
-	-e 's,[@]srcdir[@],$(srcdir),g' \
-	-e 's,[@]drook[@],$(drook),g' \
-	-e "s,[@]DPAWN_EXEC[@],`for i in $(DPAWN_COMMAND) $(dpawn); do echo \\\"$$i\\\"; break; done | tr -d \"\n\"`,g" \
-	-e "s|[@]DPAWN_ARGS[@]|`first=:; for i in $(DPAWN_COMMAND) $(dpawn); do if $$first; then first=false; else echo \\\"$$i\\\",; fi ; done | tr -d \"\n\"`|g" \
-	-e 's,[@]DPAWN_COMMAND[@],$(DPAWN_COMMAND) $(dpawn),g' \
-	-e 's,[@]dmprop[@],$(dmprop),g' \
-	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
-	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \
-	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
-	-e 's,[@]dmconfdir[@],$(dmconfdir),g'
+edit = -e 's,[@]bindir[@],$(bindir),g' \
+       -e 's,[@]srcdir[@],$(srcdir),g' \
+       -e 's,[@]drook[@],$(drook),g' \
+       -e "s,[@]DPAWN_EXEC[@],`for i in $(DPAWN_COMMAND) $(dpawn); do echo \\\"$$i\\\"; break; done | tr -d \"\n\"`,g" \
+       -e "s|[@]DPAWN_ARGS[@]|`first=:; for i in $(DPAWN_COMMAND) $(dpawn); do if $$first; then first=false; else echo \\\"$$i\\\",; fi ; done | tr -d \"\n\"`|g" \
+       -e 's,[@]DPAWN_COMMAND[@],$(DPAWN_COMMAND) $(dpawn),g' \
+       -e 's,[@]dmprop[@],$(dmprop),g' \
+       -e 's,[@]dmsockdir[@],$(dmsockdir),g' \
+       -e 's,[@]dmstartdir[@],$(dmstartdir),g' \
+       -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
+       -e 's,[@]dmconfdir[@],$(dmconfdir),g'
 
 @ENABLE_SETUID_TRUE@nodist_dnode_nice_SOURCES = dnode-nice.c
 @ENABLE_SETUID_TRUE@DNODENICEBIN = dnode-nice
@@ -1011,15 +1010,39 @@ libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_THREADS=1 -DDM_DISABLE_REGEX=1 \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1
 
-SVNVERSION_EDIT = \
-	-e "s,[@]SVNVERSION[@],`cat $(top_builddir)/svnversion.stamp`,g"
+@MAINTAINER_MODE_FALSE@SVNVERSION_DIR = $(top_builddir)
+@MAINTAINER_MODE_TRUE@SVNVERSION_DIR = $(top_srcdir)
+SVNVERSION_EDIT = -e "s,[@]SVNVERSION[@],$(SVNVERSION_STAMP),g"
+SVNID_STAMP = `cat $(srcdir)/$@in.idstamp || echo unknown`
+SVNID_EDIT = -e "s,[@]SVNID[@],$(SVNID_STAMP),g"
+IDFILES_RULE = \
+	@echo "Building idstamp: $@"; \
+	f=`echo $@ | sed 's,.idstamp,,g'` \
+	&& if git log -n 1 --pretty='format:%cn %cd %H' \
+	      `readlink $$f || echo $$f` \
+		>$@.tmp 2>/dev/null ; then \
+	  if test "`cat $@`" = "`cat $@.tmp`"; then \
+	    rm $@.tmp || exit 1; \
+	  else \
+	    mv $@.tmp $@ || exit 1; \
+	    touch $$f || exit 1; \
+	  fi; \
+	else rm $@.tmp; \
+	fi;
 
+IDFILES = $(INFILES:=in.idstamp)
+@MAINTAINER_MODE_TRUE@idfiles = idfiles
 SVNVERSION_TARGET = svnversion
 Makefile = Makefile
 SVNVERSION_STAMP_DEP = @SVNVERSION_STAMP@
+PACKAGE_EDIT = -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g'
 INFILES_RULE = \
 	! test -e $@.tmp || rm -f $@.tmp \
-	&& $(edit) -e 's|[@]SVNVERSION[@]|$(SVNVERSION)|g' $< >$@.tmp \
+	&& sed $(edit) \
+	       $(SVNVERSION_EDIT) \
+	       $(SVNID_EDIT) \
+	       $(PACKAGE_EDIT) \
+	       $< >$@.tmp \
 	&& mv $@.tmp $@
 
 all: $(BUILT_SOURCES)
@@ -2239,10 +2262,12 @@ gencode-all: gencode all
 gencode:
 	cd codegen && $(MAKE) $(AM_MAKEFLAGS)
 
-@MAINTAINER_MODE_TRUE@$(top_srcdir)/svnversion.stamp:
-@MAINTAINER_MODE_TRUE@	cd $(top_srcdir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
-@MAINTAINER_MODE_FALSE@$(top_builddir)/svnversion.stamp:
-@MAINTAINER_MODE_FALSE@	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+$(SVNVERSION_DIR)/svnversion.stamp:
+	cd $(SVNVERSION_DIR) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+all-local: $(idfiles)
+
+@MAINTAINER_MODE_TRUE@$(IDFILES): ; $(IDFILES_RULE)
+@MAINTAINER_MODE_TRUE@idfiles: $(IDFILES)
 
 .cin.c:     ; $(INFILES_RULE)
 .hin.h:     ; $(INFILES_RULE)
@@ -2253,7 +2278,7 @@ gencode:
 .elin.el:   ; $(INFILES_RULE)
 .styin.sty: ; $(INFILES_RULE)
 
-$(INFILES): $(Makefile) $(SVNVERSION_STAMP_DEP)
+$(INFILES): $(IDFILES) $(Makefile) $(SVNVERSION_STAMP_DEP)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

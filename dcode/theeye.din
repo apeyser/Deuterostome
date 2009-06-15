@@ -7,7 +7,7 @@
 |   - viewed objects are made available to other D code
 
 200 dict dup begin  | of eyedict
-(Using theeye.d  ID: @SVN_ID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole
+(Using theeye.d  ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole
 
 |=========================== window layout =================================
 |  - horizontal:

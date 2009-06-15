@@ -2,7 +2,7 @@
 
 |======================== startup_dnode.d ================================
 
-(Using startup_dnode.d ID: @SVN_ID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole
+(Using startup_dnode.d ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole
 
 | Contains procedures for:
 |  - inspection of objects

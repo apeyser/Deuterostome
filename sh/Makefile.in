@@ -568,7 +568,7 @@ STDBOOL_H = @STDBOOL_H@
 STDINT_H = @STDINT_H@
 STRINGBUF = @STRINGBUF@
 STRIP = @STRIP@
-SVNVERSION_STAMP = @SVNVERSION_STAMP@
+SVNVERSION_STAMP = `cat $(SVNVERSION_DIR)/svnversion.stamp`
 SYS_DICT_SIZE = @SYS_DICT_SIZE@
 SYS_STAT_H = @SYS_STAT_H@
 SYS_TIME_H = @SYS_TIME_H@
@@ -675,7 +675,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 INFILES = dnode.sh print.pl runtool.sh emacsclient-run.sh
-EXTRA_DIST = $(INFILES:=in)
+EXTRA_DIST = $(INFILES:=in) $(IDFILES)
 CLEANFILES = $(INFILES)
 SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
 nodist_dmstart_SCRIPTS = runtool.sh $(am__append_1) $(am__append_2) \
@@ -685,36 +685,59 @@ XTERM_END = /^[[:space:]]*[@]ENABLE_XTERM_END[@][[:space:]]*$$/
 @ENABLE_TAIL_FALSE@XTERM_DELETE = -e '$(XTERM_START),$(XTERM_END) d'
 @ENABLE_TAIL_TRUE@@ENABLE_XTERM_FALSE@XTERM_DELETE = -e '$(XTERM_START),$(XTERM_END) d'
 @ENABLE_TAIL_TRUE@@ENABLE_XTERM_TRUE@XTERM_DELETE = -e '$(XTERM_START) d' -e '$(XTERM_END) d'
-edit = sed \
-	-e 's,[@]pkgpsdatadir[@],$(pkgpsdatadir),g' \
-	-e 's,[@]bindir[@],$(bindir),g' \
-	-e 's,[@]guipdf[@],$(guipdf),g' \
-	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \
-	-e 's,[@]ENABLE_BASH[@],$(ENABLE_BASH),g' \
-	-e 's,[@]ENABLE_PERL[@],$(ENABLE_PERL),g' \
-	-e 's,[@]ENABLE_XTERM[@],$(ENABLE_XTERM),g' \
-	-e 's,[@]ENABLE_TAIL[@],$(ENABLE_TAIL),g' \
-	-e 's,[@]ENABLE_ATPS[@],$(ENABLE_ATPS),g' \
-	-e 's,[@]ENABLE_LP[@],$(ENABLE_LP),g' \
-	-e 's,[@]ENABLE_PSTPDF[@],$(ENABLE_PSTPDF),g' \
-	-e 's,[@]ENABLE_PDFTPS[@],$(ENABLE_PDFTPS),g' \
-	-e 's,[@]ENABLE_DVIPDF[@],$(ENABLE_DVIPDF),g' \
-	-e 's,[@]ENABLE_XDVI[@],$(ENABLE_XDVI),g' \
-	-e 's,[@]ENABLE_GS[@],$(ENABLE_GS),g' \
-	-e 's,[@]ENABLE_PDFLATEX[@],$(ENABLE_PDFLATEX),g' \
-	-e 's,[@]ENABLE_LATEX[@],$(ENABLE_LATEX),g' \
-	-e 's,[@]ENABLE_EMACSCLIENT[@],$(ENABLE_EMACSCLIENT),g' \
-	$(XTERM_DELETE)
+edit = -e 's,[@]pkgpsdatadir[@],$(pkgpsdatadir),g' \
+       -e 's,[@]bindir[@],$(bindir),g' \
+       -e 's,[@]guipdf[@],$(guipdf),g' \
+       -e 's,[@]dmstartdir[@],$(dmstartdir),g' \
+       -e 's,[@]ENABLE_BASH[@],$(ENABLE_BASH),g' \
+       -e 's,[@]ENABLE_PERL[@],$(ENABLE_PERL),g' \
+       -e 's,[@]ENABLE_XTERM[@],$(ENABLE_XTERM),g' \
+       -e 's,[@]ENABLE_TAIL[@],$(ENABLE_TAIL),g' \
+       -e 's,[@]ENABLE_ATPS[@],$(ENABLE_ATPS),g' \
+       -e 's,[@]ENABLE_LP[@],$(ENABLE_LP),g' \
+       -e 's,[@]ENABLE_PSTPDF[@],$(ENABLE_PSTPDF),g' \
+       -e 's,[@]ENABLE_PDFTPS[@],$(ENABLE_PDFTPS),g' \
+       -e 's,[@]ENABLE_DVIPDF[@],$(ENABLE_DVIPDF),g' \
+       -e 's,[@]ENABLE_XDVI[@],$(ENABLE_XDVI),g' \
+       -e 's,[@]ENABLE_GS[@],$(ENABLE_GS),g' \
+       -e 's,[@]ENABLE_PDFLATEX[@],$(ENABLE_PDFLATEX),g' \
+       -e 's,[@]ENABLE_LATEX[@],$(ENABLE_LATEX),g' \
+       -e 's,[@]ENABLE_EMACSCLIENT[@],$(ENABLE_EMACSCLIENT),g' \
+       $(XTERM_DELETE)
 
-SVNVERSION_EDIT = \
-	-e "s,[@]SVNVERSION[@],`cat $(top_builddir)/svnversion.stamp`,g"
+@MAINTAINER_MODE_FALSE@SVNVERSION_DIR = $(top_builddir)
+@MAINTAINER_MODE_TRUE@SVNVERSION_DIR = $(top_srcdir)
+SVNVERSION_EDIT = -e "s,[@]SVNVERSION[@],$(SVNVERSION_STAMP),g"
+SVNID_STAMP = `cat $(srcdir)/$@in.idstamp || echo unknown`
+SVNID_EDIT = -e "s,[@]SVNID[@],$(SVNID_STAMP),g"
+IDFILES_RULE = \
+	@echo "Building idstamp: $@"; \
+	f=`echo $@ | sed 's,.idstamp,,g'` \
+	&& if git log -n 1 --pretty='format:%cn %cd %H' \
+	      `readlink $$f || echo $$f` \
+		>$@.tmp 2>/dev/null ; then \
+	  if test "`cat $@`" = "`cat $@.tmp`"; then \
+	    rm $@.tmp || exit 1; \
+	  else \
+	    mv $@.tmp $@ || exit 1; \
+	    touch $$f || exit 1; \
+	  fi; \
+	else rm $@.tmp; \
+	fi;
 
+IDFILES = $(INFILES:=in.idstamp)
+@MAINTAINER_MODE_TRUE@idfiles = idfiles
 SVNVERSION_TARGET = svnversion
 Makefile = Makefile
 SVNVERSION_STAMP_DEP = @SVNVERSION_STAMP@
+PACKAGE_EDIT = -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g'
 INFILES_RULE = \
 	! test -e $@.tmp || rm -f $@.tmp \
-	&& $(edit) -e 's|[@]SVNVERSION[@]|$(SVNVERSION)|g' $< >$@.tmp \
+	&& sed $(edit) \
+	       $(SVNVERSION_EDIT) \
+	       $(SVNID_EDIT) \
+	       $(PACKAGE_EDIT) \
+	       $< >$@.tmp \
 	&& mv $@.tmp $@
 
 all: all-am
@@ -810,7 +833,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(SCRIPTS)
+all-am: Makefile $(SCRIPTS) all-local
 installdirs:
 	for dir in "$(DESTDIR)$(dmstartdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
@@ -896,10 +919,10 @@ uninstall-am: uninstall-nodist_dmstartSCRIPTS
 
 .MAKE: install-am install-strip
 
-.PHONY: all all-am check check-am clean clean-generic clean-libtool \
-	clean-local distclean distclean-generic distclean-libtool \
-	distdir dvi dvi-am html html-am info info-am install \
-	install-am install-data install-data-am install-dvi \
+.PHONY: all all-am all-local check check-am clean clean-generic \
+	clean-libtool clean-local distclean distclean-generic \
+	distclean-libtool distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-dvi \
 	install-dvi-am install-exec install-exec-am install-html \
 	install-html-am install-info install-info-am install-man \
 	install-nodist_dmstartSCRIPTS install-pdf install-pdf-am \
@@ -912,10 +935,12 @@ uninstall-am: uninstall-nodist_dmstartSCRIPTS
 
 clean-local: ; -rm -f $(dmstart_SCRIPTS)
 
-@MAINTAINER_MODE_TRUE@$(top_srcdir)/svnversion.stamp:
-@MAINTAINER_MODE_TRUE@	cd $(top_srcdir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
-@MAINTAINER_MODE_FALSE@$(top_builddir)/svnversion.stamp:
-@MAINTAINER_MODE_FALSE@	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+$(SVNVERSION_DIR)/svnversion.stamp:
+	cd $(SVNVERSION_DIR) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+all-local: $(idfiles)
+
+@MAINTAINER_MODE_TRUE@$(IDFILES): ; $(IDFILES_RULE)
+@MAINTAINER_MODE_TRUE@idfiles: $(IDFILES)
 
 .cin.c:     ; $(INFILES_RULE)
 .hin.h:     ; $(INFILES_RULE)
@@ -926,7 +951,7 @@ clean-local: ; -rm -f $(dmstart_SCRIPTS)
 .elin.el:   ; $(INFILES_RULE)
 .styin.sty: ; $(INFILES_RULE)
 
-$(INFILES): $(Makefile) $(SVNVERSION_STAMP_DEP)
+$(INFILES): $(IDFILES) $(Makefile) $(SVNVERSION_STAMP_DEP)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

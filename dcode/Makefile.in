@@ -578,7 +578,7 @@ STDBOOL_H = @STDBOOL_H@
 STDINT_H = @STDINT_H@
 STRINGBUF = @STRINGBUF@
 STRIP = @STRIP@
-SVNVERSION_STAMP = @SVNVERSION_STAMP@
+SVNVERSION_STAMP = `cat $(SVNVERSION_DIR)/svnversion.stamp`
 SYS_DICT_SIZE = @SYS_DICT_SIZE@
 SYS_STAT_H = @SYS_STAT_H@
 SYS_TIME_H = @SYS_TIME_H@
@@ -695,7 +695,7 @@ nodist_dmstart_DATA = $(DISTEDITSRCS) $(EDITSRCS)
 dist_dmconf_DATA = dvt.d dpawn.d
 nodist_dmconf_DATA = dnode.d
 INFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
-EXTRA_DIST = $(DISTEDITSRCS:=in) $(nodist_dmconf_DATA:=in)
+EXTRA_DIST = $(DISTEDITSRCS:=in) $(nodist_dmconf_DATA:=in) $(IDFILES)
 CLEANFILES = $(INFILES)
 SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
 XPS_START = /^[[:space:]]*[@]ENABLE_XPS_START[@][[:space:]]*$$/
@@ -747,30 +747,53 @@ PETSC_EDIT_OFF = -e '$(PETSC_START),$(PETSC_END) d'
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@PETSC_EDIT = $(PETSC_EDIT_ON)
 @ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@PETSC_EDIT = $(PETSC_EDIT_OFF)
 @ENABLE_PLUGINS_SUPPORT_FALSE@PETSC_EDIT = $(PETSC_EDIT_OFF)
-edit = sed  -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
-	-e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g' \
-	-e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
-	-e 's,[@]ENABLE_BASH[@],$(ENABLE_BASH),g' \
-	$(PLUGINS_DELETE) \
-	$(PLUGINS_SUPPORT_DELETE) \
-	$(THREADS_EDIT) \
-	$(XPS_DELETE) \
-	$(PERL_DELETE) \
-	$(EMACSCLIENT_EDIT) \
-	$(ATLAS_EDIT) \
-	$(RTHREADS_EDIT) \
-	$(REGEX_DELETE) \
-	$(PETSC_EDIT) 
+edit = -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
+       -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
+       -e 's,[@]ENABLE_BASH[@],$(ENABLE_BASH),g' \
+       $(PLUGINS_DELETE) \
+       $(PLUGINS_SUPPORT_DELETE) \
+       $(THREADS_EDIT) \
+       $(XPS_DELETE) \
+       $(PERL_DELETE) \
+       $(EMACSCLIENT_EDIT) \
+       $(ATLAS_EDIT) \
+       $(RTHREADS_EDIT) \
+       $(REGEX_DELETE) \
+       $(PETSC_EDIT) 
 
-SVNVERSION_EDIT = \
-	-e "s,[@]SVNVERSION[@],`cat $(top_builddir)/svnversion.stamp`,g"
+@MAINTAINER_MODE_FALSE@SVNVERSION_DIR = $(top_builddir)
+@MAINTAINER_MODE_TRUE@SVNVERSION_DIR = $(top_srcdir)
+SVNVERSION_EDIT = -e "s,[@]SVNVERSION[@],$(SVNVERSION_STAMP),g"
+SVNID_STAMP = `cat $(srcdir)/$@in.idstamp || echo unknown`
+SVNID_EDIT = -e "s,[@]SVNID[@],$(SVNID_STAMP),g"
+IDFILES_RULE = \
+	@echo "Building idstamp: $@"; \
+	f=`echo $@ | sed 's,.idstamp,,g'` \
+	&& if git log -n 1 --pretty='format:%cn %cd %H' \
+	      `readlink $$f || echo $$f` \
+		>$@.tmp 2>/dev/null ; then \
+	  if test "`cat $@`" = "`cat $@.tmp`"; then \
+	    rm $@.tmp || exit 1; \
+	  else \
+	    mv $@.tmp $@ || exit 1; \
+	    touch $$f || exit 1; \
+	  fi; \
+	else rm $@.tmp; \
+	fi;
 
+IDFILES = $(INFILES:=in.idstamp)
+@MAINTAINER_MODE_TRUE@idfiles = idfiles
 SVNVERSION_TARGET = svnversion
 Makefile = Makefile
 SVNVERSION_STAMP_DEP = @SVNVERSION_STAMP@
+PACKAGE_EDIT = -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g'
 INFILES_RULE = \
 	! test -e $@.tmp || rm -f $@.tmp \
-	&& $(edit) -e 's|[@]SVNVERSION[@]|$(SVNVERSION)|g' $< >$@.tmp \
+	&& sed $(edit) \
+	       $(SVNVERSION_EDIT) \
+	       $(SVNID_EDIT) \
+	       $(PACKAGE_EDIT) \
+	       $< >$@.tmp \
 	&& mv $@.tmp $@
 
 all: all-am
@@ -915,7 +938,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(DATA)
+all-am: Makefile $(DATA) all-local
 installdirs:
 	for dir in "$(DESTDIR)$(dmconfdir)" "$(DESTDIR)$(dmstartdir)" "$(DESTDIR)$(dmconfdir)" "$(DESTDIR)$(dmstartdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
@@ -1003,13 +1026,13 @@ uninstall-am: uninstall-dist_dmconfDATA uninstall-dist_dmstartDATA \
 
 .MAKE: install-am install-strip
 
-.PHONY: all all-am check check-am clean clean-generic clean-libtool \
-	distclean distclean-generic distclean-libtool distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dist_dmconfDATA \
-	install-dist_dmstartDATA install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man \
+.PHONY: all all-am all-local check check-am clean clean-generic \
+	clean-libtool distclean distclean-generic distclean-libtool \
+	distdir dvi dvi-am html html-am info info-am install \
+	install-am install-data install-data-am \
+	install-dist_dmconfDATA install-dist_dmstartDATA install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
 	install-nodist_dmconfDATA install-nodist_dmstartDATA \
 	install-pdf install-pdf-am install-ps install-ps-am \
 	install-strip installcheck installcheck-am installdirs \
@@ -1020,10 +1043,12 @@ uninstall-am: uninstall-dist_dmconfDATA uninstall-dist_dmstartDATA \
 	uninstall-nodist_dmstartDATA
 
 
-@MAINTAINER_MODE_TRUE@$(top_srcdir)/svnversion.stamp:
-@MAINTAINER_MODE_TRUE@	cd $(top_srcdir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
-@MAINTAINER_MODE_FALSE@$(top_builddir)/svnversion.stamp:
-@MAINTAINER_MODE_FALSE@	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+$(SVNVERSION_DIR)/svnversion.stamp:
+	cd $(SVNVERSION_DIR) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
+all-local: $(idfiles)
+
+@MAINTAINER_MODE_TRUE@$(IDFILES): ; $(IDFILES_RULE)
+@MAINTAINER_MODE_TRUE@idfiles: $(IDFILES)
 
 .cin.c:     ; $(INFILES_RULE)
 .hin.h:     ; $(INFILES_RULE)
@@ -1034,7 +1059,7 @@ uninstall-am: uninstall-dist_dmconfDATA uninstall-dist_dmstartDATA \
 .elin.el:   ; $(INFILES_RULE)
 .styin.sty: ; $(INFILES_RULE)
 
-$(INFILES): $(Makefile) $(SVNVERSION_STAMP_DEP)
+$(INFILES): $(IDFILES) $(Makefile) $(SVNVERSION_STAMP_DEP)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -13,10 +13,9 @@ SUFFIXES =
 
 if ENABLE_PLUGINS_SUPPORT
 
-edit = 	sed \
-	  -e 's,[@]PETSC_DIR[@],$(PETSC_DIR),g' \
-	  -e 's,[@]PETSC_ARCH[@],$(PETSC_ARCH),g' \
-	  -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g'
+edit = 	-e 's,[@]PETSC_DIR[@],$(PETSC_DIR),g' \
+        -e 's,[@]PETSC_ARCH[@],$(PETSC_ARCH),g' \
+        -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g'
 
 BUILT_SOURCES = errors.d
 nodist_noinst_DATA = errors.d

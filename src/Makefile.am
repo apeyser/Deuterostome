@@ -28,18 +28,17 @@ dpawn = $(bindir)/dpawn
 drook = $(bindir)/drook
 dmprop = $(bindir)/dmprop
 
-edit = sed \
-	-e 's,[@]bindir[@],$(bindir),g' \
-	-e 's,[@]srcdir[@],$(srcdir),g' \
-	-e 's,[@]drook[@],$(drook),g' \
-	-e "s,[@]DPAWN_EXEC[@],`for i in $(DPAWN_COMMAND) $(dpawn); do echo \\\"$$i\\\"; break; done | tr -d \"\n\"`,g" \
-	-e "s|[@]DPAWN_ARGS[@]|`first=:; for i in $(DPAWN_COMMAND) $(dpawn); do if $$first; then first=false; else echo \\\"$$i\\\",; fi ; done | tr -d \"\n\"`|g" \
-	-e 's,[@]DPAWN_COMMAND[@],$(DPAWN_COMMAND) $(dpawn),g' \
-	-e 's,[@]dmprop[@],$(dmprop),g' \
-	-e 's,[@]dmsockdir[@],$(dmsockdir),g' \
-	-e 's,[@]dmstartdir[@],$(dmstartdir),g' \
-	-e 's,[@]pkglibdir[@],$(pkglibdir),g' \
-	-e 's,[@]dmconfdir[@],$(dmconfdir),g'
+edit = -e 's,[@]bindir[@],$(bindir),g' \
+       -e 's,[@]srcdir[@],$(srcdir),g' \
+       -e 's,[@]drook[@],$(drook),g' \
+       -e "s,[@]DPAWN_EXEC[@],`for i in $(DPAWN_COMMAND) $(dpawn); do echo \\\"$$i\\\"; break; done | tr -d \"\n\"`,g" \
+       -e "s|[@]DPAWN_ARGS[@]|`first=:; for i in $(DPAWN_COMMAND) $(dpawn); do if $$first; then first=false; else echo \\\"$$i\\\",; fi ; done | tr -d \"\n\"`|g" \
+       -e 's,[@]DPAWN_COMMAND[@],$(DPAWN_COMMAND) $(dpawn),g' \
+       -e 's,[@]dmprop[@],$(dmprop),g' \
+       -e 's,[@]dmsockdir[@],$(dmsockdir),g' \
+       -e 's,[@]dmstartdir[@],$(dmstartdir),g' \
+       -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
+       -e 's,[@]dmconfdir[@],$(dmconfdir),g'
 
 
 if ENABLE_SETUID

@@ -1,4 +1,4 @@
-;; ID: @SVN_ID@ V@ V@PACKAGE_VERSION@ git-@SVNVERSION@
+;; ID: @SVNID@ V@ V@PACKAGE_VERSION@ git-@SVNVERSION@
 
 (require 'd-mode)
 (require 'dm-server)

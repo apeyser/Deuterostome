@@ -2,7 +2,7 @@
 
 |======================== userdict ===================================
 
-(Using startup_common.d ID: @SVN_ID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole
+(Using startup_common.d ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole
 
 2 list dictstack dup 0 get /systemdict name   | name the roots
                      1 get /userdict   name
