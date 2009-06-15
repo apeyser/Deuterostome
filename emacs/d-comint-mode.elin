@@ -1,3 +1,4 @@
+;; -*- mode: lisp; -*-
 ;; ID: @SVNID@ V@ V@PACKAGE_VERSION@ git-@SVNVERSION@
 
 (require 'd-mode)
@@ -270,8 +271,18 @@ Derived from `comint-mode' with font-lock from `d-mode'.
       (insert "! ")))
   (comint-send-input))
 
-(define-minor-mode d-comint-mode-scream "" nil " !"
-  '(("" . d-comint-mode-scream-and-send)))
+(defvar d-comint-mode-modeline-background nil)
+(make-variable-buffer-local 'd-comint-mode-modeline-background)
+(define-minor-mode d-comint-mode-scream "Scream Mode" nil " !"
+  '(("" . d-comint-mode-scream-and-send))
+  (if d-comint-mode-scream
+      (progn
+	(setq d-comint-mode-modeline-background (face-background 'modeline))
+	(set-face-background 'modeline "red" (current-buffer)))
+    (set-face-background 'modeline d-comint-mode-modeline-background 
+			 (current-buffer))
+  )
+) 
 
 (defun d-comint-mode-redirect-kill-process ()
   (process-send-string d-comint-mode-redirect-process "\n")

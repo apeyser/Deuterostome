@@ -766,20 +766,24 @@ edit = -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
 SVNVERSION_EDIT = -e "s,[@]SVNVERSION[@],$(SVNVERSION_STAMP),g"
 SVNID_STAMP = `cat $(srcdir)/$@in.idstamp || echo unknown`
 SVNID_EDIT = -e "s,[@]SVNID[@],$(SVNID_STAMP),g"
-IDFILES_RULE = \
-	@echo "Building idstamp: $@"; \
-	f=`echo $@ | sed 's,.idstamp,,g'` \
+IDFILES_RULE_BASE = \
+	echo "Building idstamp: $$id"; \
+	f=`echo $$id | sed 's,.idstamp,,g'` \
 	&& if git log -n 1 --pretty='format:%cn %cd %H' \
 	      `readlink $$f || echo $$f` \
-		>$@.tmp 2>/dev/null ; then \
-	  if test "`cat $@`" = "`cat $@.tmp`"; then \
-	    rm $@.tmp || exit 1; \
+		>$$id.tmp 2>/dev/null ; then \
+	  if test "`cat $$id`" = "`cat $$id.tmp`"; then \
+	    rm $$id.tmp || exit 1; \
 	  else \
-	    mv $@.tmp $@ || exit 1; \
+	    mv $$id.tmp $$id || exit 1; \
 	    touch $$f || exit 1; \
 	  fi; \
-	else rm $@.tmp; \
-	fi;
+	else rm $$id.tmp; \
+	fi
+
+IDFILES_RULE = @id=$@; $(IDFILES_RULE_BASE)
+IDFILES_REFRESH = \
+	@list="$(IDFILES)"; for id in $$list; do $(IDFILES_RULE_BASE); done
 
 IDFILES = $(INFILES:=in.idstamp)
 @MAINTAINER_MODE_TRUE@idfiles = idfiles
@@ -1047,8 +1051,10 @@ $(SVNVERSION_DIR)/svnversion.stamp:
 	cd $(SVNVERSION_DIR) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
 all-local: $(idfiles)
 
+.PHONY: idfiles
+
 @MAINTAINER_MODE_TRUE@$(IDFILES): ; $(IDFILES_RULE)
-@MAINTAINER_MODE_TRUE@idfiles: $(IDFILES)
+@MAINTAINER_MODE_TRUE@idfiles: ; $(IDFILES_REFRESH)
 
 .cin.c:     ; $(INFILES_RULE)
 .hin.h:     ; $(INFILES_RULE)
