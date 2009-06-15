@@ -1,0 +1,12 @@
+/alloca.h
+/charset.alias
+/configmake.h
+/dirent.h
+/glob.h
+/ref-add.sed
+/ref-del.sed
+/stdio.h
+/stdlib.h
+/string.h
+/sys
+/unistd.h

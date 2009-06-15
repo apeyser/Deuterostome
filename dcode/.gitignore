@@ -1,0 +1,16 @@
+/dnode.d
+/dvt_macros.d
+/eps.d
+/errors.d
+/errors.din
+/linkedlist.d
+/matrix.d
+/new-plugin.d
+/processes.d
+/startup_common.d
+/startup_dgen.d
+/startup_dnode.d
+/startup_dpawn.d
+/startup_dvt.d
+/startup_libs.d
+/theeye.d
