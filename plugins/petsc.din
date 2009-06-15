@@ -1,7 +1,8 @@
 | -*- mode: d; -*-
-| ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
 
 /PETSC module 200 dict dup begin
+
+/version (ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@) def
 
 |============== Global definitions ==========================
 
