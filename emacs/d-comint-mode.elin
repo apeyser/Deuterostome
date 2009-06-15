@@ -273,16 +273,15 @@ Derived from `comint-mode' with font-lock from `d-mode'.
 
 (defvar d-comint-mode-modeline-background nil)
 (make-variable-buffer-local 'd-comint-mode-modeline-background)
-(define-minor-mode d-comint-mode-scream "Scream Mode" nil " !"
-  '(("" . d-comint-mode-scream-and-send))
-  (if d-comint-mode-scream
-      (progn
-	(setq d-comint-mode-modeline-background (face-background 'modeline))
-	(set-face-background 'modeline "red" (current-buffer)))
-    (set-face-background 'modeline d-comint-mode-modeline-background 
-			 (current-buffer))
-  )
-) 
+(defconst d-comint-mode-scream-lighter 
+  (propertize " ! " 'face 
+ 	      '(:foreground "#ff0000"
+		:background "#00ffff"
+		:weight ultra-bold
+ 		:inverse-video t)))
+(define-minor-mode d-comint-mode-scream "Scream Mode" nil 
+  d-comint-mode-scream-lighter
+  '(("" . d-comint-mode-scream-and-send)))
 
 (defun d-comint-mode-redirect-kill-process ()
   (process-send-string d-comint-mode-redirect-process "\n")
@@ -295,12 +294,12 @@ Derived from `comint-mode' with font-lock from `d-mode'.
 		    (concat (buffer-name) ".log"))))
     (let ((d-comint-mode-redirect-ignore t)
 	  (string1 (concat "[31m" 
-			   (if d-comint-mode-redirect-mode 
-			       (concat "*** Emacs: Redirecting output from dvt terminal to file "
-				       log-name " ***")
-			     (concat "*** Emacs: Redirecting output from file " log-name
-				     " to dvt terminal ***"))
-			   "[0m\n")))
+		    (if d-comint-mode-redirect-mode 
+			(concat "*** Emacs: Redirecting output from dvt terminal to file "
+				log-name " ***")
+		      (concat "*** Emacs: Redirecting output from file " log-name
+			      " to dvt terminal ***"))
+		    "[0m\n")))
       (comint-output-filter (get-buffer-process (current-buffer)) string1))
 
     (when (and d-comint-mode-redirect-mode (not d-comint-mode-redirect-process))
@@ -321,7 +320,7 @@ Derived from `comint-mode' with font-lock from `d-mode'.
 			  "--- Stop: %Y-%m-%d %T%z ---\n")))
   )
 
-(define-minor-mode d-comint-mode-redirect-mode "" nil " >"
+(define-minor-mode d-comint-mode-redirect-mode "" nil " > "
   '() (d-comint-mode-redirect-process-open))
 
 (defun d-comint-mode-invert ()
@@ -336,7 +335,7 @@ Derived from `comint-mode' with font-lock from `d-mode'.
   (interactive)
   (delete-region 1 (point)))
 
-(add-minor-mode 'd-comint-mode-narrowed " Narrow")
+(add-minor-mode 'd-comint-mode-narrowed "")
 
 (defvar d-comint-mode-narrowed nil "Toggle for Narrow mode")
 
