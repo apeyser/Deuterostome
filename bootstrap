@@ -1,17 +1,47 @@
-#!/bin/sh -v
+#!/bin/bash
 
-LIBTOOL=false
-GNULIBTOOL=false
+usage() {
+    cat <<EOF 1>&2
+Usage: $0 $@
+Parameters:
+        --help: This!
+	--libtool: run libtoolize (with parameters \$LIBTOOL).
+        --gnulibtool: run gnulib-tool (with parameters \$GNULIBTOOL).
+      
+Rebuilds the entire configure infrastructure.
+Autoreconf is run with parameters \$AUTORECONF.
+EOF
+
+    exit -1
+}
+
+runif() {
+    local test=$1
+    shift
+    if $test; then 
+	echo "Running: $@"
+	"$@"
+	local r=$?
+	[[ $r != 0 ]] && exit $r
+    fi
+    return 0
+}
+
+libtool=false
+gnulibtool=false
 for i ; do
     case "$i" in
-	--libtool) LIBTOOL=: ;;
-	--gnulibtool) GNULIBTOOL=: ;;
+	--libtool)    libtool=: ;;
+	--gnulibtool) gnulibtool=: ;;
+	--help)       usage ;;
 	*) break ;;
     esac
     shift
 done
 
-$GNULIBTOOL && gnulib-tool --import
-$LIBTOOL && libtoolize "$@" -c --ltdl
-autoreconf "$@" -v --install
+[[ $# != 0 ]] && usage
+
+runif gnulibtool gnulib-tool --import $GNULIBTOOL
+runif libtool    libtoolize -c --ltdl $LIBTOOL
+runif :          autoreconf -v --install $AUTORECONF
 

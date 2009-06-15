@@ -1,0 +1,60 @@
+#!/bin/bash
+
+usage() {
+    cat <<EOF 1>&2
+Usage: $0 $@
+Parameters:
+        --help: This!
+        --install: run make install after final build.
+        --bootstrap: run ./bootstrap (with parameters \$BOOTSTRAP).
+        --config: run configure after bootstrap, before makes
+                  (with parameters \$CONFIG).
+
+Rebuilds the system from the ground up, building codegen
+  and running a distcheck.
+EOF
+
+    exit -1
+}
+
+runif() {
+    local test=$1
+    shift
+    if $test; then 
+	echo "Running: $@"
+	"$@"
+	local r=$?
+	[[ $r != 0 ]] && exit $r
+    fi
+    return 0
+}
+
+install=false
+bootstrap=false
+config=false
+for i ; do
+    case "$i" in
+	--install)   install=:   ;;
+	--bootstrap) bootstrap=: ;;
+	--config)    config=:    ;;
+	--help)      usage       ;;
+	*) break ;;
+    esac
+    shift
+done
+
+[[ $# != 0 ]] && usage
+
+runif $bootstrap ./bootstrap $BOOTSTRAP
+
+runif $config    ./configure --enable-plugins --enable-plugins-support \
+    --enable-maintainer-mode --enable-petsc --enable-rthreads \
+    --with-petsc=/opt/petsc/ --with-petsc-arch=linux_deb_d \
+    CPPFLAGS="-Wall -g -O2" $CONFIG
+
+for i in clean gencode clean -j9 clean distcheck clean -j9; do
+    runif : make $i
+done
+
+runif $install make install
+
