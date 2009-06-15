@@ -1199,11 +1199,14 @@ dist-hook: $(SVNVERSION_TARGET)
 	cp -p $(builddir)/svnversion.stamp $(distdir)/svnversion.stamp
 
 gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild:
+	dmver=dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild ; \
 	cd gentoo \
 	&& git checkout master \
-	&& cp `echo dev-lang/dm/dm-*.ebuild | sed -e 's/[ \t]+/\n/g' \
-	        | sort | tail -n 1` dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild \
-	&& git add dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild
+	&& if ! test -e $$dmver ; then \
+	  cp `echo dev-lang/dm/dm-*.ebuild | sed -e 's/[ \t]+/\n/g' \
+	      | sort | tail -n 1` $$dmver \
+	  && git add dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild; \
+	fi
 
 .PHONY: update-version
 update-version: gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild
