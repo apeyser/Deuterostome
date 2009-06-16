@@ -54834,7 +54834,7 @@ done
       && cf_svnversion_src=`cat "$srcdir/svnversion.stamp" 2>/dev/null`
           test -e "svnversion.stamp" \
       && cf_svnversion_build=`cat "svnversion.stamp" 2>/dev/null`
-          cf_svnversion=`( git describe --all || echo unknown ) 2>/dev/null`
+          cf_svnversion=`( git describe || echo unknown ) 2>/dev/null`
       test -n "$cf_svnversion_src" \
     && test "$cf_svnversion_src" != "unknown" \
     && test "$cf_svnversion_src" != "exported" \

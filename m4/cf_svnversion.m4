@@ -60,7 +60,7 @@ dnl
 dnl
     CF_SVNVERSION_READ([_src], [$srcdir/])
     CF_SVNVERSION_READ([_build], [])
-    CF_SVNVERSION_READ([], [], [( git describe --all || echo unknown )])
+    CF_SVNVERSION_READ([], [], [( git describe || echo unknown )])
 dnl
     CF_SVNVERSION_CHECK([_src])
     CF_SVNVERSION_CHECK([_build])
