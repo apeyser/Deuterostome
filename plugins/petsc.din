@@ -561,7 +561,7 @@
       {/func name /mmax name 
         /A name /len name /grow name
         0 1 len 1 sub {/row name
-          dup grow add ~func notin_petsc
+          dup grow add /func find notin_petsc
           dup * eq {pop mat_syncfill} {
             row A petsc_mat_fillone
           } ifelse
@@ -570,11 +570,6 @@
         petsc_mat_endfill
       } in_petsc
     } bind def
-
-    |  | offset elements A mmax ~active | --
-    |  /mat_forrows_get \{
-    |    \{
-    |      save 
 
     | row column A | d
     /mat_get {
