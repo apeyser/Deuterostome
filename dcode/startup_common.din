@@ -11,10 +11,15 @@ end def
   3 dict dup mkread version_dict 7 index put begin {
     {/GIT /PACKAGE /ID} ~name forall
   } stopped end ~stop if
-  version_dict begin dup find begin {
+
+  currentdict /dirname known currentdict filename known and {
+    {pop dirname fax (/) fax filename fax}
+  } ~fax ifelse
+
+  version_dict begin 2 index find begin {
     _version_string 0 
-    (Using ) fax 3 -1 roll fax
-    ( ID: ) fax ID fax
+    (Using ) fax 4 2 roll exec
+    ( ID: ) fax SVNVERSION fax
     ( V) fax PACKAGE fax
     (\n) fax 0 exch getinterval
     toconsole
