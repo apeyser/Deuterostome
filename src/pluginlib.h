@@ -16,7 +16,6 @@ DLL_SCOPE void closealllibs(void);
 // for LL
 DLL_SCOPE P op_loadlib(void);
 DLL_SCOPE P op_nextlib(void);
-DLL_SCOPE P op_getplugindir(void);
 
 #if DM_ENABLE_PLUGINS_SUPPORT
 

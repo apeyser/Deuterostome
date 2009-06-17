@@ -42,6 +42,7 @@ B* _sysop[] =
   (B*) "capsave", (B*) op_capsave,
   (B*) "restore", (B*) op_restore,
   (B*) "vmstatus", (B*) op_vmstatus,
+  (B*) "getplugindir", (B*) op_getplugindir,
   (B*) "bind", (B*) op_bind,
   (B*) "null", (B*) op_null,
   (B*) "not", (B*) op_not,

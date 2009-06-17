@@ -42,6 +42,7 @@ B* _sysop[] =
   (B*) "capsave", (B*) op_capsave,
   (B*) "restore", (B*) op_restore,
   (B*) "vmstatus", (B*) op_vmstatus,
+  (B*) "getplugindir", (B*) op_getplugindir,
   (B*) "bind", (B*) op_bind,
   (B*) "null", (B*) op_null,
   (B*) "not", (B*) op_not,
@@ -167,7 +168,6 @@ B* _sysop[] =
   (B*) "halt", (B*) op_halt,
   (B*) "continue", (B*) op_continue,
   (B*) "vmresize", (B*) op_vmresize,
-  (B*) "getplugindir", (B*) op_getplugindir,
 #ifdef BUILD_ATLAS
   (B*) "matmul_blas", (B*) op_matmul_blas,
   (B*) "decompLU_lp", (B*) op_decompLU_lp,
