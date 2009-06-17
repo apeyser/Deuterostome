@@ -12,14 +12,14 @@ end def
     {/GIT /PACKAGE /ID} ~name forall
   } stopped end ~stop if
 
-  currentdict /dirname known currentdict filename known and {
+  currentdict /fileid_dict known {
     {pop dirname fax (/) fax filename fax}
-  } ~fax ifelse
+  } {~fax} ifelse
 
   version_dict begin 2 index find begin {
-    _version_string 0 
+    _version_string 0
     (Using ) fax 4 2 roll exec
-    ( ID: ) fax SVNVERSION fax
+    ( ID: ) fax GIT fax
     ( V) fax PACKAGE fax
     (\n) fax 0 exch getinterval
     toconsole
@@ -595,9 +595,10 @@ end def  | of xtext_dict
 | use: dirname filename | objects..  (and/or side effects)
 
 /fromfiles {
-  save /fromfilessave name 2 dict {
-    2 copy          /filename put
-    2 index 1 index /dirname  put
+  save /fromfilessave name 3 dict {
+    true    1 index /fileid_dict put
+    2 copy          /filename    put
+    2 index 1 index /dirname     put
     {
       vmstatus sub 3 div /b array fromfilessave capsave
       readfile mkact exec
