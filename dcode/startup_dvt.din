@@ -2,8 +2,6 @@
 
 |============================ D Startup =================================
 
-(Using startup_dvt ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole        | hi!
-
 | Contains procedures for:
 |  - inspection of objects
 |  - object/text interconversion
@@ -22,6 +20,8 @@ startup_common_save capsave {
   getstartupdir toconsole (startup_common.d\n) toconsole
   stop
 } if
+
+/startup (startup_dvt.d) @version_add@ pop
 
 | (source) /ERROR_NAME 
 /makeerror ~[~ERRORS ~exch bind ~get bind ~error] def

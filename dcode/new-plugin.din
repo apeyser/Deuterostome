@@ -1,6 +1,5 @@
 | -*- mode: d; -*-
-| ID: @SVNID@ V@ V@PACKAGE_VERSION@ git-@SVNVERSION@
-/NEW_PLUGINS module 1000 dict dup begin
+/NEW_PLUGINS (new-plugin.d) @version_add@ module 1000 dict dup begin
 
 | lower | LOWER
 /toupper_ {

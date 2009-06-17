@@ -1,8 +1,6 @@
 | -*- mode: d; -*-
 
-(Using processes.d ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole
-
-/PROCESSES 100 {
+/PROCESSES (processes.d) @version_add@ 100 {
   | These need to be in the same order as
   |  flags struct array in dm-proc.c.
   /FFLAGS {

@@ -2,6 +2,8 @@
 | Site configuration for dnode
 | ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
 
+/dnode (dnode.d) @version_add@ pop
+
 @ENABLE_THREADS_START@
 (Starting up threads: @ENABLE_THREADS@\n) toconsole  
 @ENABLE_THREADS@ makethreads

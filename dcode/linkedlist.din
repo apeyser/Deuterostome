@@ -1,8 +1,6 @@
 | -*- mode: d; -*-
 
-(Using linkedlist.d ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole
-
-/LINKEDLIST 100 {
+/LINKEDLIST (linkedlist.d) @version_add@ 100 {
 
 |==================== allocators ========================
 

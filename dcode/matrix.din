@@ -1,6 +1,5 @@
 | -*- mode: d; -*-
-| ID: @SVNID@ V@ V@PACKAGE_VERSION@ git-@SVNVERSION@
-/MATRIX module 200 dict dup begin
+/MATRIX (matrix.d) @version_add@ module 200 dict dup begin
 
 /userdef {
   ~[currentdict ~begin 4 -1 roll ~stopped ~end {stop} ~if] bind

@@ -2,7 +2,26 @@
 
 |======================== userdict ===================================
 
-(Using startup_common.d ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole
+/version_dict 100 dict dup begin
+  /_version_string 240 /b array def
+end def
+
+| /name  (file) ([@]SVNID[@]) ([@]PACKAGE_VERSION[@]) ([@]SVNVERSION[@]) | /name
+/version_add {
+  3 dict dup mkread version_dict 7 index put begin {
+    {/GIT /PACKAGE /ID} ~name forall
+  } stopped end ~stop if
+  version_dict begin dup find begin {
+    _version_string 0 
+    (Using ) fax 3 -1 roll fax
+    ( ID: ) fax ID fax
+    ( V) fax PACKAGE fax
+    (\n) fax 0 exch getinterval
+    toconsole
+  } stopped end end ~stop if
+} bind def
+
+/common (startup_common.d) @version_add@ pop
 
 2 list dictstack dup 0 get /systemdict name   | name the roots
                      1 get /userdict   name
@@ -559,24 +578,26 @@ end def  | of xtext_dict
 | use:  dirname filename { object_generator } | --
 
 /tofiles {
-   save /tofilessave name
- { 
-   vmstatus sub 5 div 4 mul /b array tofilessave capsave
-   0 3 -1 roll exec
-   0 exch getinterval 3 1 roll writefile
- } stopped pop tofilessave restore
+  save /tofilessave name { 
+    vmstatus sub 5 div 4 mul /b array tofilessave capsave
+    0 3 -1 roll exec
+    0 exch getinterval 3 1 roll writefile
+  } stopped tofilessave restore ~stop if
 } bind def
 
 | 'fromfiles' performs the converse of 'tofiles', by reading a text file
 | into a transient string object and executing that string.
 | use: dirname filename | objects..  (and/or side effects)
 
-/fromfiles { 
-   save /fromfilessave name
- {
-   vmstatus sub 3 div /b array fromfilessave capsave
-   readfile mkact exec
- } stopped pop fromfilessave restore
+/fromfiles {
+  save /fromfilessave name 2 dict {
+    2 copy          /filename put
+    2 index 1 index /dirname  put
+    {
+      vmstatus sub 3 div /b array fromfilessave capsave
+      readfile mkact exec
+    } exch mkread indict
+  } stopped fromfilessave restore ~stop if
 } bind def
 
 | fromxfiles does the same as fromfiles, but first checks that the file
@@ -601,12 +622,12 @@ end def  | of xtext_dict
 |   if file exists: objects.. true
 |   else:           false
 /fromxfiles {
-    2 copy findfile not {pop pop false} {
-        3 1 roll pop pop
-        dup FTYPEMASK and DIRTYPE eq {pop pop pop false} {
-            FUSERREAD and 0 eq {pop pop false} {fromfiles true} ifelse
-        } ifelse
+  2 copy findfile not {pop pop false} {
+    3 1 roll pop pop
+    dup FTYPEMASK and DIRTYPE eq {pop pop pop false} {
+      FUSERREAD and 0 eq {pop pop false} {fromfiles true} ifelse
     } ifelse
+  } ifelse
 } bind def
 
 |====================== Support for toolboxes and projects =====================

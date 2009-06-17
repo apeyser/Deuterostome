@@ -1,8 +1,6 @@
 | -*- mode: d; -*-
 
-(Using eps.d ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole
-
-/EPS 100 {
+/EPS (eps.d) @version_add@ 100 {
   |------------ RESOLUTION -------------------
   |
   | The resolution argument to ghostscript.

@@ -9,12 +9,15 @@ SUFFIXES += .cin .hin .elin .din .psin .shin .plin .styin
 
 PACKAGE_EDIT = -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g'
 
+D_VERSION_EDIT = -e 's,[@]version_add[@],($(SVNID)) ($(PACKAGE_VERSION)) ($(SVNVERSION)) version_add,g'
+
 INFILES_RULE = \
 	! test -e $@.tmp || rm -f $@.tmp \
 	&& sed $(edit) \
 	       $(SVNVERSION_EDIT) \
 	       $(SVNID_EDIT) \
 	       $(PACKAGE_EDIT) \
+	       $(D_VERSION_EDIT) \
 	       $< >$@.tmp \
 	&& mv $@.tmp $@
 

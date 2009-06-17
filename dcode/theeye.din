@@ -6,8 +6,7 @@
 |       - file systems
 |   - viewed objects are made available to other D code
 
-200 dict dup begin  | of eyedict
-(Using theeye.d  ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole
+/TheEye (theeye.d) @version_add@ 200 dict dup begin  | of eyedict
 
 |=========================== window layout =================================
 |  - horizontal:
@@ -1273,7 +1272,7 @@ end def
 
 end def
 
-end userdict /TheEye put
+end userdict 3 -1 roll put
 
 |------------------------- fire it up --------------------------------
 
