@@ -28,11 +28,8 @@ startup_common_save capsave {
 /error_ops_length 2 def
 
 |============================= userdict =================================
-
 /lock   ~exec bind def    | just to make dnodes & dvts symmetric
 /unlock ~exec bind def
-
-
 (dgen) userdict /myid put
 
 (End of startup\n) toconsole
