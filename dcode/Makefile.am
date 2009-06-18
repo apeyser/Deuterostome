@@ -4,8 +4,7 @@ dist_dmstart_DATA = color.d master.d sched.d plugin.d \
 
 DISTEDITSRCS = theeye.d startup_dnode.d startup_dpawn.d \
 	startup_dvt.d dvt_macros.d matrix.d new-plugin.d \
-	startup_common.d processes.d
-
+	startup_common.d processes.d compose.d
 nodist_dmstart_DATA = $(DISTEDITSRCS) errors.d
 
 dist_dmconf_DATA = dvt.d dpawn.d
