@@ -301,6 +301,9 @@ P clientinput(void) {
   return OK;
 }
 
+void clearsocket_special(P fd) {
+  if (fd == consolesocket) consolesocket = PINF;
+}
 
 BOOLEAN masterinput(P* retc, B* bufferf) {
   if (recsocket != consolesocket) return FALSE;

@@ -10,6 +10,7 @@
 
 */
 
+#define DEBUG_ACTIVE 0
 #include "dm.h"
 
 #include <stdio.h>
@@ -115,6 +116,8 @@ P nocloseonexec(P fd) {
 }
 
 void clearsocket(P fd) {
+  DEBUG("clearsocket %li", (long) fd);
+  clearsocket_special(fd);
   FD_CLR((int) fd, &sock_fds);
   if (fd == maxsocket-1) {
     P i, j = -1;
@@ -141,20 +144,22 @@ enum _DelMode {
   _DelModeProc,
 };
 
-DM_INLINE_STATIC void sockprintdebug(const char* mode, struct socketstore* sock) {
-/*   fprintf(stderr, "%s: socket %li in %li of %li: f %s, " */
-/* 	  "e %s, l %s, r %s, r %li, p %li, rsig %li, esig %li, u %li\n", */
-/* 	  mode, */
-/* 	  (long) sock->fd, (long) getpid(), (long) getppid(), */
-/* 	  sock->type.fork ? "t" : "f", */
-/* 	  sock->type.exec ? "t" : "f", */
-/* 	  sock->type.listener ? "t" : "f", */
-/* 	  sock->type.resize ? "t" : "f", */
-/* 	  (long) sock->redirector, */
-/* 	  (long) sock->pid, */
-/* 	  sock->type.listener ? (long) sock->info.listener.recsigfd : -1, */
-/* 	  sock->type.listener ? (long) sock->info.listener.sigfd : -1, */
-/* 	  sock->type.listener ? (long) sock->info.listener.unixport : -1); */
+DM_INLINE_STATIC void sockprintdebug(const char* mode, 
+				     struct socketstore* sock) 
+{
+  DEBUG("%s: socket %li: f %s, "
+	"e %s, l %s, r %s, r %li, p %li, rsig %li, esig %li, u %li\n",
+	mode,
+	(long) sock->fd,
+	sock->type.fork ? "t" : "f",
+	sock->type.exec ? "t" : "f",
+	sock->type.listener ? "t" : "f",
+	sock->type.resize ? "t" : "f",
+	(long) sock->redirector,
+	(long) sock->pid,
+	sock->type.listener ? (long) sock->info.listener.recsigfd : -1,
+	sock->type.listener ? (long) sock->info.listener.sigfd : -1,
+	sock->type.listener ? (long) sock->info.listener.unixport : -1);
 }
 
 
@@ -189,6 +194,7 @@ DM_INLINE_STATIC P _delsocket(P fd, enum _DelMode delmode) {
       
       if (close(fd)) retc = -errno;
       if (next->type.listener) {
+	clearsocket(fd);
 	if (next->info.listener.sigfd != -1) 
 	  close(next->info.listener.sigfd);
 	if (next->info.listener.recsigfd != -1) 
@@ -218,8 +224,6 @@ DM_INLINE_STATIC P _delsocket(P fd, enum _DelMode delmode) {
 	  }
 #endif //ENABLE_UNIX_SOCKETS
 	}
-
-	clearsocket(fd);
       }
 
       if (! next->next)
@@ -625,6 +629,7 @@ P waitsocket(BOOLEAN ispending, fd_set* out_fds) {
   read_fds = sock_fds;
   err_fds = sock_fds;
   
+  DEBUG("select%s", "");
   if ((nact = select(maxsocket, &read_fds, NULL, &err_fds, 
 		     ispending ? &zerosec : NULL)) == -1) {
     if (errno == EINTR) return NEXTEVENT_NOEVENT;
@@ -1016,6 +1021,7 @@ P op_disconnect(void)
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (NULLOBJ | SOCKETTYPE)) return OPD_ERR;
   
+  DEBUG("disconnecting: %li", (long) SOCKET_VAL(o_1));
   if ((retc = delsocket_force(SOCKET_VAL(o_1)))) return retc;
   FREEopds = o_1;
   return OK;

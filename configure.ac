@@ -1,4 +1,4 @@
-AC_INIT([D-Machine], [4.5.6], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
+AC_INIT([D-Machine], [4.5.7], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
 AC_CONFIG_MACRO_DIR(m4)
 AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE

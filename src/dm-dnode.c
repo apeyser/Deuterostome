@@ -1,3 +1,4 @@
+#define DEBUG_ACTIVE 0
 #include "dm.h"
 
 #include <errno.h>
@@ -24,11 +25,6 @@
 #if ! X_DISPLAY_MISSING
 #include "xhack.h"
 #endif
-
-//#define DEBUG(format, ...) error_local(0, 0, "%li: " format,		
-//				       (long) getpid(), __VA_ARGS__)
-#define DEBUG(...)
-
 
 /*-- the X corner */
 char* defaultdisplay = NULL;
@@ -335,6 +331,14 @@ DM_INLINE_STATIC P handleserverinput(void) {
     return retc;
     
   return OK;
+}
+
+void clearsocket_special(P fd) {
+#if ENABLE_UNIX_SOCKETS
+  if (fd == unixserversocket) unixserversocket = -1;
+  else
+#endif //ENABLE_UNIX_SOCKETS
+    if (fd == serversocket) serversocket = -1;
 }
 
 BOOLEAN masterinput(P* retc, B* bufferf __attribute__ ((__unused__)) ) {

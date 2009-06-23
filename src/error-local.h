@@ -36,4 +36,14 @@ static void error_local(int __status,
 
 #define error MAKEITANERROR
 
+#ifndef DEBUG_ACTIVE
+#define DEBUG_ACTIVE 0
+#endif //DEBUG_ACTIVE
+#define DEBUG(format, ...) do {						\
+    if (DEBUG_ACTIVE) {							\
+      error_local(0, 0, "%li: " format,					\
+		  (long) getpid(), __VA_ARGS__);			\
+    };									\
+  } while (0)
+
 #endif //ERROR_H

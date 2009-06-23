@@ -17,6 +17,7 @@ DLL_SCOPE P op_Xwindows_(void);
 DLL_SCOPE P op_vmresize(void);
 
 DLL_SCOPE BOOLEAN masterinput(P* retc, B* bufferf);
+DLL_SCOPE void clearsocket_special(P fd);
 
 #if ! X_DISPLAY_MISSING
 DLL_SCOPE P wm_delete_window(XEvent* event, B* userdict);
