@@ -10,7 +10,7 @@
 
 */
 
-#define DEBUG_ACTIVE 0
+#define DEBUG_ACTIVE 1
 #include "dm.h"
 
 #include <stdio.h>
