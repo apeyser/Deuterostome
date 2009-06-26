@@ -1,7 +1,8 @@
-#line 2 "@srcdir@/dm-prop.c.in"
+#line 2 "@srcdir@/dm-prop.cin"
 
 // ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
 
+#define DEBUG_ACTIVE 1
 #include "dm.h"
 
 #include <stdlib.h>
@@ -21,7 +22,7 @@
 
 /****************** signal redirector ********************/
 
-static P serverport = 0;
+__attribute__ ((__unused__)) static P serverport = 0;
 
 __attribute__ ((__noreturn__))
 static void redirector_quit(int sig, 
@@ -40,48 +41,69 @@ static void redirector_quit(int sig,
 static pid_t myppid;
 static void redirect_sig(int sig) {
   if (kill(myppid, sig))
-    error_local(EXIT_FAILURE, errno, "redirector %li unable to signal parent %li",
-	  (long) getpid(), (long) getppid());
+    error_local(EXIT_FAILURE, errno, 
+		"redirector %li unable to "
+		"signal parent %li",
+		(long) getpid(), (long) getppid());
 }
 
 static void redirector_exit(void) {
   struct sockaddr_un name;
-  if (serverport && init_unix_sockaddr(&name, serverport, FALSE))
+  if (serverport >= 0 && init_unix_sockaddr(&name, serverport, FALSE))
     unlink(name.sun_path);
 }
 
-static void handle_redirect(void) {
+static fd_set rin;
+static int nfds;
+
+static void handle_connect(void) {
+  int fd;
+  if ((fd = accept(0, NULL, NULL)) == -1)
+    error_local(1, errno, "redirector accept error");
+
+  if (fd >= nfds) nfds = fd+1;
+  FD_SET(fd, &rin);
+}
+
+static void handle_redirect(P fd) {
   B sig;
 
  repeat:
-  switch (recv(0, &sig, 1, 0)) {
+  switch (recv(fd, &sig, 1, 0)) {
     case 0:
-      error_local(1, 0, "redirector received close on recv");
+      if (fd == 1) error_local(1, 0, "redirector received close on recv");
+
+      close(fd);
+      FD_CLR(fd, &rin);
+      if (fd == nfds-1) for (nfds--; ! FD_ISSET(nfds-1, &rin); nfds--);
+      return;
+
     case -1:
       if (errno == EINTR) goto repeat;
-      error_local(EXIT_FAILURE, errno, "redirector recv");
+      error_local(1, errno, "redirector recv");
   };
 
-/*   fprintf(stderr, "%li: received signal %i\n",  */
-/* 	  (long) getpid(), (int) sig); */
+  DEBUG("Received sig %i", (int) sig);
   propagate_sig(sig, redirect_sig);
 }
 
 static void redirector_alarm(void) {
-/*   fprintf(stderr, "redirector timeout %li of %li\n", */
-/* 	  (long) getpid(), (long) getppid()); */
   if (kill(myppid, 0))
     error_local(1, errno, "%li: parent %li dead", 
-	  (long) getpid(), (long) getppid());
+		(long) getpid(), (long) getppid());
 }
 
-int main(void) {
-  fd_set rin, rout, eout;
-  int nfds = 1;
+int main(int argc, char* argv[]) {
+  fd_set rout, eout;
   int quitsigs[] = {SIGQUIT, SIGTERM, SIGHUP, 0};
-  int *i;
+  int *i, fd;
   const struct timeval timerin = {.tv_sec = KILL_TIME, .tv_usec = 0};
   struct timeval timer;
+  int zero, one;
+
+  serverport = (P) atoll(argv[1]);
+  zero = atoi(argv[2]);
+  one = atoi(argv[3]);
   myppid = getppid();
 
   if (atexit(redirector_exit))
@@ -91,7 +113,27 @@ int main(void) {
   clearhandler(SIGINT);
 
   FD_ZERO(&rin);
-  FD_SET(0, &rin);
+  nfds = 0;
+  if (zero) {FD_SET(0, &rin); nfds = 1;}
+  if (one)  {FD_SET(1, &rin); nfds = 2;}
+
+  if (DEBUG_ACTIVE) {
+    struct sockaddr_in s;
+    socklen_t sl = sizeof(s);
+    getsockname(1, (struct sockaddr*) &s, &sl);
+    if (one) {
+      DEBUG("%i, %i, (%i, %i), (%li, %li)", 
+	    1, (int) s.sin_family, s.sin_port, ntohs(s.sin_port),
+	    (long) s.sin_addr.s_addr,(long)  ntohl(s.sin_addr.s_addr));
+    }
+    if (zero) {
+      getsockname(0, (struct sockaddr*) &s, &sl);
+      DEBUG("%i, %i, (%i, %i), (%li, %li)", 
+	    0, (int) s.sin_family, s.sin_port, ntohs(s.sin_port),
+	    (long) s.sin_addr.s_addr, (long) ntohl(s.sin_addr.s_addr));
+    }
+  }
+
   while (1) {
     eout = rout = rin;
     timer = timerin;
@@ -101,32 +143,70 @@ int main(void) {
 	error_local(1, errno, "select failed in redirector");
 	break;
 
-      case 0:  break;
-      default: handle_redirect(); break;
+      case 0:  
+	redirector_alarm();
+	break;
+
+      default: 
+	if (zero && (FD_ISSET(0, &rout) || FD_ISSET(0, &eout))) {
+	  handle_connect();
+	  break;
+	}
+	
+	for (fd = zero ? 1 : 0; fd < nfds; fd++)
+	  if (FD_ISSET(fd, &rout) || FD_ISSET(fd, &eout)) {
+	    handle_redirect(fd);
+	    break;
+	  }
+	break;
     }
-    redirector_alarm();
   }
   return 1;
 }
 #else
 
 __attribute__ ((__noreturn__))
-static void execsighandler(P sigsocket, P serverport_, 
+static void execsighandler(P sigsocket, P tcp_sigsocket, P serverport, 
 			   P (*closesockets_func)(void)) {
-  int sigsocket_;
+  int sigsocket_ = -1, tcp_sigsocket_ = -1;
   P retc;
-  serverport = serverport_;
-  if ((sigsocket_ = dup(sigsocket)) == -1)
+  char* _serverport;
+
+  if (sigsocket != -1 && (sigsocket_ = dup(sigsocket)) == -1)
     error_local(1, errno, "Unable to dup sigsocket %li", (long) sigsocket);
+  if (tcp_sigsocket != -1 && (tcp_sigsocket_ = dup(tcp_sigsocket)) == -1)
+    error_local(1, errno, "Unable to dup tcp_sigsocket %li", 
+		(long) tcp_sigsocket);
+
   if ((retc = closesockets_func()))
     error_local(1, retc < 0 ? -retc : 0, 
 	  "Unable to close sockets: %li", (long) getpid());
-  if (dup2(sigsocket_, 0) == -1) 
-    error_local(1, errno, "Unable to dup sigsocket %li to stdin", 
+
+  if (sigsocket_ != -1 
+      && (dup2(sigsocket_, 1) == -1 || close(sigsocket_))) 
+    error_local(1, errno, "Unable to dup sigsocket %li to stdout", 
 	  (long) sigsocket);
 
-  execl("@dmprop@", "@dmprop@", NULL);
-  error_local(1, errno, "Unable to exec: @dmprop@");
+  if (tcp_sigsocket_ != -1 
+      && (dup2(tcp_sigsocket_, 0) == -1 || close(tcp_sigsocket_)))
+    error_local(1, errno, "Unable to dup tcp_sigsocket %li to stdin", 
+	  (long) tcp_sigsocket);
+
+  if (asprintf(&_serverport, "%li", serverport) == -1)
+    error_local(1, 0, "Unable to asprintf serverport");
+  
+  DEBUG("exec: @dmprop@ %s %i %i", _serverport, 
+	tcp_sigsocket != -1 ? 1 : 0, sigsocket != -1 ? 1 : 0);
+
+  execl("@dmprop@", "@dmprop@",
+	_serverport, 
+	tcp_sigsocket != -1 ? "1" : "0",
+	sigsocket != -1 ? "1" : "0",
+	NULL);
+
+  error_local(1, errno, 
+	      "Unable to exec: @dmprop@ %s %i", _serverport,
+	      tcp_sigsocket != -1 ? 1 : 0);
   exit(1);
 }
   
@@ -138,7 +218,7 @@ static void execsighandler(P sigsocket, P serverport_,
 #define dmsigmask pthread_sigmask
 #endif //HAVE_PTHREAD
 
-P spawnsighandler(P sigsocket, P serverport,
+P spawnsighandler(P sigsocket, P tcp_sigsocket, P serverport,
 		  P (*closesockets_func)(void),
 		  P* pid) {
   P retc = OK;
@@ -150,15 +230,18 @@ P spawnsighandler(P sigsocket, P serverport,
 
     case 0:
       *pid = -1;
-/*       fprintf(stderr, "spawning sig handler: %li of %li\n",  */
-/* 	      (long) getpid(), (long) getppid()); */
-      execsighandler(sigsocket, serverport, closesockets_func);
+      execsighandler(sigsocket, tcp_sigsocket, serverport, closesockets_func);
       //never return from here
 
     default:
-      if (close(sigsocket)) {
+      if (sigsocket != -1 && close(sigsocket)) {
 	retc = -errno;
-	error_local(0, errno, "closing sigsocket");
+	if (tcp_sigsocket != -1) close(tcp_sigsocket);
+	error_local(0, -retc, "closing sigsocket");
+      }
+      if (tcp_sigsocket != -1 && close(tcp_sigsocket)) {
+	retc = -errno;
+	error_local(0, -retc, "closing tcp_sigsocket");
       }
       break;
   }
@@ -200,3 +283,8 @@ UW getportoffset(void) {
     };
     return portoffset;
 }
+
+  
+// Local Variables:
+// mode: c
+// End:

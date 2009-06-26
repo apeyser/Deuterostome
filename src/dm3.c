@@ -10,7 +10,7 @@
 
 */
 
-#define DEBUG_ACTIVE 0
+#define DEBUG_ACTIVE 1
 #include "dm.h"
 
 #include <stdio.h>
@@ -148,7 +148,8 @@ DM_INLINE_STATIC void sockprintdebug(const char* mode,
 				     struct socketstore* sock) 
 {
   DEBUG("%s: socket %li: f %s, "
-	"e %s, l %s, r %s, r %li, p %li, rsig %li, esig %li, u %li\n",
+	"e %s, l %s, r %s, r %li, p %li, rsig %li, trsig %li, esig %li, "
+	"u %li\n",
 	mode,
 	(long) sock->fd,
 	sock->type.fork ? "t" : "f",
@@ -158,6 +159,7 @@ DM_INLINE_STATIC void sockprintdebug(const char* mode,
 	(long) sock->redirector,
 	(long) sock->pid,
 	sock->type.listener ? (long) sock->info.listener.recsigfd : -1,
+	sock->type.listener ? (long) sock->info.listener.trecsigfd : -1,
 	sock->type.listener ? (long) sock->info.listener.sigfd : -1,
 	sock->type.listener ? (long) sock->info.listener.unixport : -1);
 }
@@ -199,6 +201,8 @@ DM_INLINE_STATIC P _delsocket(P fd, enum _DelMode delmode) {
 	  close(next->info.listener.sigfd);
 	if (next->info.listener.recsigfd != -1) 
 	  close(next->info.listener.recsigfd);
+	if (next->info.listener.trecsigfd != -1) 
+	  close(next->info.listener.trecsigfd);
 	if (mypid == next->pid) {
 	  if (next->redirector != -1) {
 	    if (kill(next->redirector, SIGQUIT)) {
@@ -217,7 +221,7 @@ DM_INLINE_STATIC P _delsocket(P fd, enum _DelMode delmode) {
 	      }
 	  }
 #if ENABLE_UNIX_SOCKETS
-	  if (next->info.listener.unixport > 0) {
+	  if (next->info.listener.unixport >= 0) {
 	    struct sockaddr_un name;
 	    if (init_unix_sockaddr(&name, next->info.listener.unixport, TRUE))
 	      if (unlink(name.sun_path) && ! retc) retc = -errno;
@@ -328,14 +332,16 @@ P addsocket(P fd, const struct SocketType* type, const union SocketInfo* info) {
     if (fd >= maxsocket) maxsocket = fd+1;
     if (recsocket < 0) recsocket = fd;
 
-    if (info->listener.recsigfd != -1) {
-      if ((retc = forksighandler(info->listener.recsigfd, 
+    if (info->listener.recsigfd != -1 || info->listener.trecsigfd != -1) {
+      if ((retc = forksighandler(info->listener.recsigfd,
+				 info->listener.trecsigfd,
 				 info->listener.unixport, 
 				 &next->redirector))) {
 	delsocket_force(fd);
 	return retc;
       }
       next->info.listener.recsigfd = -1;
+      next->info.listener.trecsigfd = -1;
     }
   }
 
@@ -729,36 +735,44 @@ P writefd(P fd, B* where, P n, P secs) {
 
 /*--------------------------- make a server socket */
 
-P make_socket(UW port, BOOLEAN isseq, P* retc)
+P make_socket(UW* port, BOOLEAN tcp, P packet_size, P* retc)
 {
   P sock;
   struct sockaddr_in name;
+  socklen_t s = sizeof(name);;
   memset(&name, 0, sizeof(struct sockaddr_in));
 
-  if ((sock = socket(PF_INET, isseq ? SOCK_STREAM : SOCK_DGRAM, 0)) < 0) {
+  if ((sock = socket(PF_INET, tcp ? SOCK_STREAM : SOCK_DGRAM, 0)) < 0) {
     *retc = -errno;
     return -1;
   }
 
-  if ((*retc = dm_setsockopts(sock, isseq ? PACKET_SIZE : 1)))
+  if ((*retc = dm_setsockopts(sock, packet_size)))
     return -1;
 
   name.sin_family = AF_INET;
-  name.sin_port = htons(port);
+  name.sin_port = htons(*port);
   name.sin_addr.s_addr = htonl(INADDR_ANY);
-  if (bind(sock, (struct sockaddr *) &name, sizeof(name)) < 0) {
+  if (bind(sock, (struct sockaddr *) &name, s) < 0) {
     *retc = -errno;
     return -1;
   }
 
-  if (isseq) {
-    if (listen(sock, 5) < 0) {
-      *retc = -errno;
-      close(sock);
-      return -1;
-    }
+  if (tcp && listen(sock, 5) < 0) {
+    *retc = -errno;
+    close(sock);
+    return -1;
   }
 
+  if (getsockname(sock, (struct sockaddr*) &name, &s) < 0) {
+    *retc = -errno;
+    return -1;
+  }
+
+  *port = name.sin_port;
+  DEBUG("made %i: (%i, %i), %s, %li", 
+	(int) sock, (int) *port, ntohs(*port),
+	tcp ? "tcp" : "udp", packet_size);
   return sock;
 }
 
@@ -792,7 +806,7 @@ P make_unix_socket(UW port, BOOLEAN isseq, P* retc) {
     if (stat(sock_dir, &buf)) {
       if ((errno != ENOTDIR && errno != ENOENT)
           || mkdir(sock_dir, ~(mode_t) 0)) {
-	fprintf(stderr, "Unable to mkdir: %s\n", sock_dir);
+	error_local(0, errno, "Unable to mkdir: %s", sock_dir);
         free(sock_dir);
         umask(mask);
 	close(sock);
@@ -811,19 +825,19 @@ P make_unix_socket(UW port, BOOLEAN isseq, P* retc) {
   free(sock_dir);
 
   if (! stat(name.sun_path, &buf) && unlink(name.sun_path)) {
-      fprintf(stderr, "Unable to unlink: %s\n", name.sun_path);
-      umask(mask);
-      close(sock);
-      return -1;
+    error_local(0, errno, "Unable to unlink: %s", name.sun_path);
+    umask(mask);
+    close(sock);
+    return -1;
   }
     
   if (bind(sock, (struct sockaddr *) &name, 
            sizeof(name.sun_family)+strlen(name.sun_path)+1)
       < 0) {
-      fprintf(stderr, "Unable to bind: %s\n", name.sun_path);
-      umask(mask);
-      close(sock);
-      return -1;
+    error_local(0, errno, "Unable to bind: %s", name.sun_path);
+    umask(mask);
+    close(sock);
+    return -1;
   }
   
   if (isseq) {
@@ -836,6 +850,9 @@ P make_unix_socket(UW port, BOOLEAN isseq, P* retc) {
   }
 
   umask(mask);
+  DEBUG("made unix %i: %i, %s", 
+	(int) sock, (int) port, 
+	isseq ? "tcp" : "udp");
   return sock;
 }
 #endif
@@ -907,6 +924,21 @@ P dm_setsockopts(P sock, P size) {
   return OK;
 }
 
+DM_INLINE_STATIC P read_port(P sock, UW eport[1]) {
+  ssize_t n = 0, n_;
+
+  do {
+    while ((n_ = read(sock, ((B*) eport)+n, sizeof(eport)-n)) == -1)
+      if (errno == EINTR) checkabort();
+      else return -errno;
+  } while ((n += n_) < sizeof(eport));
+
+  DEBUG("ports: (%i, %i)", 
+	eport[0], ntohs(eport[0]));
+
+  return OK;
+}
+
 /*----------------------------------------------- connect
     servername port | socket
 
@@ -922,6 +954,7 @@ P op_connect(void)
   P sock, dgram, retc;
   struct sockaddr_in serveraddr;
   union SocketInfo info;
+  UW eport[1];
 
   if (o_2 < FLOORopds) return(OPDS_UNF);
   if (TAG(o_2) != (ARRAY | BYTETYPE)) return(OPD_ERR);
@@ -956,23 +989,28 @@ P op_connect(void)
       close(sock);
       goto ipsocket;
     }
-    
+
     if (connect(dgram, (struct sockaddr *) &unixserveraddr,
 		sizeof(unixserveraddr.sun_family)
 		+ strlen(unixserveraddr.sun_path))) {
+      error_local(0, errno, "unix dgram");
       close(sock);
       close(dgram);
       goto ipsocket;
     }
 
+    if ((retc = read_port(sock, eport))) {
+      close(sock);
+      return retc;
+    }    
     goto goodsocket;
   };
  ipsocket:
 #endif //ENABLE_UNIX_SOCKETS
 
-  if ((retc = init_sockaddr(&serveraddr, (char*)FREEvm, port))) 
+  if ((retc = init_sockaddr(&serveraddr, (char*)FREEvm, port)))
     return retc;
-  if ((sock = socket(PF_INET, SOCK_STREAM, 0)) == -1) 
+  if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1) 
     return -errno;
   if ((retc = dm_setsockopts(sock, PACKET_SIZE)))
     return retc;
@@ -983,22 +1021,37 @@ P op_connect(void)
     return -errno_;
   };
 
-  if ((dgram = socket(PF_INET, SOCK_DGRAM, 0)) == -1) return -errno;
-  if ((retc = dm_setsockopts(dgram, 1))) {
+  if ((retc = read_port(sock, eport))) {
     close(sock);
     return retc;
   }
-  if (connect(dgram, (struct sockaddr *)&serveraddr,
-	      sizeof(serveraddr)) == -1) {
-    int errno_ = errno;
+
+  if ((dgram = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+    retc = -errno;
     close(sock);
+    return retc;
+  }
+
+  if ((retc = dm_setsockopts(dgram, 1))) {
     close(dgram);
-    return -errno_;
-  };
+    close(sock);
+    return retc;
+  }
+    
+  serveraddr.sin_port = eport[0];
+  if (! connect(dgram, (struct sockaddr *)&serveraddr,
+		sizeof(serveraddr)))
+    goto goodsocket;
+
+  retc = -errno;
+  close(dgram);
+  close(sock);
+  return -retc;
   
  goodsocket:
-  info.listener.unixport = 0;
+  info.listener.unixport = -1;
   info.listener.recsigfd = -1;
+  info.listener.trecsigfd = -1;
   info.listener.sigfd = dgram;
   if ((retc = addsocket(sock, &sockettype, &info)))
     return retc;
@@ -1147,8 +1200,9 @@ P op_getmyfqdn(void)
 }
 
 // closes the signal socket passed in.
-P forksighandler(P sigsocket, P serverport, P* pid) {
-  return spawnsighandler(sigsocket, serverport, closesockets_exec, pid);
+P forksighandler(P sigsocket, P tcp_sigsocket, P serverport, P* pid) {
+  return spawnsighandler(sigsocket, tcp_sigsocket, 
+			 serverport, closesockets_exec, pid);
 }
 
 // nothing but STDIN, STDOUT, and STDERR will have been defined before this.
@@ -1181,6 +1235,6 @@ void initfds(void) {
     error_local(1, retc < 0 ? -retc : 0, "Failed to add DM_STDIN");
   if ((retc = addsocket(DM_STDOUT_FILENO, &stdtype, NULL)))
     error_local(1, retc < 0 ? -retc : 0, "Failed to add DM_STDOUT");
-  if ((retc = addsocket(DM_STDERR_FILENO, &stdtype, NULL)))
+  if ((retc = addsocket(DM_STDERR_FILENO, &stderrtype, NULL)))
     error_local(1, retc < 0 ? -retc : 0, "Failed to add DM_STDERR");
 }

@@ -1,5 +1,6 @@
-#define DEBUG_ACTIVE 0
+#define DEBUG_ACTIVE 1
 #include "dm.h"
+
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>

@@ -1,4 +1,4 @@
-#line 2 "@srcdir@/dqueen.c.in"
+#line 2 "@srcdir@/dqueen.cin"
 
 // ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
 
@@ -404,3 +404,7 @@ P op_makerthreads(void) {
 
   return OK;
 }
+
+// Local Variables:
+// mode: c
+// End:

@@ -1,4 +1,4 @@
-#line 2 "@srcdir@/dcoder.c.in"
+#line 2 "@srcdir@/dcoder.cin"
 
 // ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
 
