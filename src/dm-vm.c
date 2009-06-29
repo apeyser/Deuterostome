@@ -114,7 +114,7 @@ P op_vmresize_(void)
     if (makeDmemory(setup)) 
       return VMRESIZE_ERR(VMR_ERR, FALSE);
 
-    if ((sysdict = makeopdictbase((B*) sysop,syserrc,syserrm,SYS_DICT_SIZE))
+    if ((sysdict = makeopdictbase((B*) sysop, syserrc, syserrm, SYS_DICT_SIZE))
         == (B*) -1L)
       error_local(EXIT_FAILURE, 0, "systemdict > vm");
     if ((userdict = makedict(setup[4])) == (B *)(-1L))
