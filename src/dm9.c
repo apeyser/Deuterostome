@@ -704,7 +704,7 @@ P op_drawline(void)
    color   array or list of 3 elements: red green blue (range: 0-255)
    symbol# 0 - dot
            1 - stroked diamond
-           2 - filed square
+           2 - filled square
            3 - stroked square
            4 - stroked square with horizontal bar
            5 - cross
@@ -946,6 +946,9 @@ P op_drawsymbols(void)
   - v_align  <0 bottom), 0 (center), >0 (top) alignment
   - the returned y is unchanged; the returned x always is adjusted
     to the position following the last written character
+    -- left   -> after string
+    -- center -> after string
+    -- right  -> before string
 */
 
 P op_drawtext(void)
@@ -1014,13 +1017,13 @@ P op_drawtext(void)
 
   dx = XTextWidth(font, (char*)VALUE_BASE(o1),ARRAY_SIZE(o1));
   if (haln == 0) x -= dx / 2; 
-  else if (haln > 0) x += dx;
+  else if (haln > 0) x -= dx;
   if (valn == 0) y += font->max_bounds.ascent / 2;
   else if (valn > 0) y += font->max_bounds.ascent;
 
   TAG(o_2) = (NUM | LONGBIGTYPE); 
   ATTR(o_2) = 0;
-  LONGBIG_VAL(o_2) = x + dx;
+  LONGBIG_VAL(o_2) = (haln > 0) ? x : (x + dx);
   
   HXDrawString(dvtdisplay,wid, dvtgc, x,  y,
 	       (char*)VALUE_BASE(o1), ARRAY_SIZE(o1));

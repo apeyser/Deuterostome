@@ -68,6 +68,9 @@
   /leftpagerect [ 1 15 wW 3 sub 2 div wH 30 sub ] def
   /ritepagerect [ wW 3 sub 2 div 2 add 15 wW 3 sub 2 div wH 30 sub ] def
   /dx wW 12 div def /y wH 8 sub def
+  /nodot_size 8 def
+  /nodot_dim [wW 3 sub nodot_size 2 div sub 1 13 add 2 div 1 add] def
+  /nodot_dimo [wW 4 sub nodot_size 2 div sub 1 13 add 2 div] def
 
   /barsymbleft [
     /x dx 2 div def
@@ -163,6 +166,11 @@
        [ x y 7 sub ] mkact
        } for
   ] def
+
+  /inforect_draw {
+    wid inforect BG fillrectangle
+    nodot_draw
+  } bind def
 
 |-------------------- interface to viewed objects ----------------------
 | The composite objects currently held in the left page are accessible
@@ -306,7 +314,7 @@ userdict /dnode_setup known not {
   rebuildLpage pop
   /leftchecked -1 def
   showLpage
-  wid inforect BG fillrectangle
+  inforect_draw
   wid ritepagerect BG fillrectangle
   showRpage
 } stopped cleartomark | ]
@@ -358,7 +366,10 @@ end def
 /mouseclick {
    [ 4 1 roll { | stopped and reentry lock
      /mS name /mY name /mX name 
-     mY 14 le {wid inforect BG fillrectangle stop} if
+     mY 14 le {
+       mX wW 3 sub nodot_size sub ge {/nodot nodot not def} if
+       inforect_draw stop
+     } if
      mY wH 15 sub ge {mS /theeye scroll_actions mouseaction pop stop} if
      /mL mY 15 sub 13 div def
      mX wW 3 sub 2 div 1 add le {hitL} {hitR} ifelse
@@ -388,17 +399,24 @@ end def
 
 |------------------- presenting info on (simple-) clicked object
 
-/INFOTEXT ~NORMALFONT [null BLACK -1 -1] makefont def
-|/INFOTEXT [ NORMALFONT BLACK -1 -1 ] def
+/INFOTEXT   ~NORMALFONT [null BLACK -1 -1] makefont def
 
 /toinfo { 
-  wid inforect BG fillrectangle
+  inforect_draw
   theobj 1 get class /nullclass ne {
     wid 2 12 infoline 0 infoclasses theobj 0 get get mkact exec
       0 exch getinterval
     INFOTEXT drawtext pop pop pop
   } if
 } def
+
+/nodot_draw {
+  wid nodot_dimo BLACK 3 nodot_size 1 add drawsymbols
+  nodot {
+    wid nodot_dim ARROWBG 2 nodot_size drawsymbols
+    wid nodot_dim BLACK   6 nodot_size drawsymbols
+  } if
+} bind def
 
 /Kb { * exch 999 add 1000 div * number } def
 
@@ -469,13 +487,28 @@ end mkread /infoclasses name
    /nullclass theopen 0 put
 } def
 
+/nodot true def
+/findfiles_nd {
+  findfiles nodot {[
+    exch {
+      dup 0 get 0 get 46 eq {
+        dup 0 get length 2 lt ~pop {
+          dup 0 get length 2 gt ~pop {
+            dup 0 get 1 get 46 ne ~pop if
+          } ifelse
+        } ifelse
+      } if
+    } forall
+  ]} if
+} bind def
+
 |-------- opening file directory
 /open_dir {
   pathbuf 0 theobj 1 get fax
   theobj 2 get dup length 0 eq { pop } { fax (/) fax } ifelse
   0 exch getinterval
   save /tempcbs name { 
-    findfiles dup length /b array
+    findfiles_nd dup length /b array
     theobj 1 get dup length /b array copy 
     theobj 2 get dup length /b array copy
   } stopped tempcbs capsave {tempcbs restore stop} if 
@@ -495,7 +528,7 @@ end mkread /infoclasses name
 /open_fs {
   pathbuf 0 theobj 1 get fax 0 exch getinterval
   save /tempcbs name {
-    findfiles dup length /b array
+    findfiles_nd dup length /b array
     theobj 1 get dup length /b array copy
     [
       theobj 2 get 0 get dup length /b array copy
@@ -565,7 +598,7 @@ end mkread def
     | avoid stop loop
     dup ERRORS /INV_STOP get eq ~error_base {
       dup ERRORS /EXECS_UNF get eq ~error_base {
-        wid inforect BG fillrectangle
+        inforect_draw
         infoline errormessage dup length 1 sub 0 exch getinterval
         dup toconsole (\n) toconsole
         wid 2 12 4 -1 roll INFOTEXT drawtext   | put err -newline in eye
