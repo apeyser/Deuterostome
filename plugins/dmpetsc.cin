@@ -1238,7 +1238,7 @@ DM_INLINE_STATIC P petsc_mat_syncto(void) {
   Mat A;
 
   if (o_1 < FLOORopds) return OPDS_UNF;
-  INIT_MAT(o_1, A);
+  INIT_MAT_WRITE(o_1, A);
 
   return OK;
 }
@@ -1338,7 +1338,7 @@ DM_INLINE_STATIC P petsc_mat_copyto(void) {
   MatGetrowFunc getrow;
 
   if (o_4 < FLOORopds) return OPDS_UNF;
-  INIT_MAT(o_1, A);
+  INIT_MAT_WRITE(o_1, A);
   if (CLASS(o_2) != NUM || CLASS(o_3) != NUM) return OPD_CLA;
   if (! PVALUE(o_2, &n) || ! PVALUE(o_3, &m)) return UNDF_VAL;
   if (n < 0) return RNG_CHK;

@@ -500,6 +500,11 @@
       petsc_vecmat_copy pop
     } bind def
 
+    | A | --
+    /vecmat_copy_end {
+      petsc_mat_endfill pop
+    } bind def
+
     | x A | -- 
     /vecmat_sync {
       petsc_vecmat_sync pop
@@ -552,23 +557,6 @@
     |
     /get_ksp_solve {
       1 index 5 1 roll ksp_solve get_vector
-    } bind def
-
-    | offset elements A mmax ~active | --
-    | ~active:
-    |  row-local row-global | d n / *
-    /mat_forrows {
-      {/func name /mmax name 
-        /A name /len name /grow name
-        0 1 len 1 sub {/row name
-          dup grow add /func find notin_petsc
-          dup * eq {pop mat_syncfill} {
-            row A petsc_mat_fillone
-          } ifelse
-        } for
-        mmax len sub ~petsc_mat_syncfill repeat
-        petsc_mat_endfill
-      } in_petsc
     } bind def
 
     | row column A | d
@@ -675,12 +663,15 @@
       dup 3 1 roll vec_copyto
     } bind def
 
-    | <d > x | --
+    | <d >/~active x | --
     /vec_copyto {
       {/xval name /darr name
         {
           ~[
-            exch xval /N get range darr 3 1 roll getinterval
+            exch 
+            /darr find dup active ~construct_exec {
+              xval /N get range getinterval
+            } ifelse
             xval getid
             0 ~vec_copyto
           ]
@@ -845,6 +836,13 @@
           } ifelse
         } execpawns
         Aval
+      } in_petsc
+    } bind def
+
+    | A | A
+    /vecmat_copy_end {
+      {
+        ~[1 index getid ~vecmat_copy_end] sexecpawns
       } in_petsc
     } bind def
 
@@ -1620,38 +1618,6 @@
         } execpawns
       } in_petsc
     } bind def  
-
-    | A ~active| --
-    /mat_forrows {
-      {/func name /Aval name
-        Aval /m get ~[
-          Aval getid
-          Aval /mmax get
-          /func destruct_execn
-          ~mat_forrows
-        ] execrange
-      } in_petsc
-    } bind def
-
-    | A ~active | --
-    /mat_forrows_get {
-      {
-        {
-          save kicknode dup capsave
-          ~kickdnode notin_petsc 
-          kickdnode restore
-        } in_petsc
-      } sexepawns
-      
-      {
-        save
-        /TMP_MATRIX dup 4 index mat_dup def
-        dup capsave 3 1 roll kickpawns 
-        ~mat_forrows not_inpetsc kickpawns
-        TMP_MATRIX mat_destroy
-        kickpawns restore
-      } in_petsc 
-    } bind def
   } def
 
   |============================================== dm_type
