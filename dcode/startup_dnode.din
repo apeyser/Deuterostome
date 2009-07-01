@@ -650,6 +650,19 @@ end def |========= end of mpi data ================
   } stopped /module_send_ _layer end ~stop if
 } bind def
 
+
+|=================== names_send =====================
+| [/name... ] | --
+|
+| copies each name to the pawns, transcribing composite objects
+|  at the receiving end.
+|
+/names_send {
+  save [ 3 -1 roll {
+    {~[exch dup find {recv_transcribe def} ~exec] sexecpawns} forall
+  } stopped cleartomark restore ~stop if
+} bind def
+
 |==================================== end of pawn functions
 @ENABLE_RTHREADS_END@
 

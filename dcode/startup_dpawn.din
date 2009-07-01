@@ -80,6 +80,23 @@ startup_common_save capsave {
   dup /myName get module 3 -1 roll transcribe _module
 } bind def
 
+|================== recv_transcribe ====================
+| anything | anything-transcribed
+|
+| copies anything by transcribing if anything is composite.
+| otherwise, leaves it alone
+|
+/transcribedict [
+  {/arrayclass /listclass /dictclass} {~transcribe bind} forall
+  {/nullclass /numclass /opclass /nameclass /boolclass /markclass} {
+    null mkact
+  } forall
+] makestruct def
+
+/recv_transcribe {
+  transcribedict 1 index class get exec
+} bind def
+
 |------------------------------------------------ whoami
 | prints name and port
 | for use with make_toconsole to identify who looks like who
