@@ -90,7 +90,7 @@
 
 
 /matmul_test {/beta name /alpha name settrans 
-  C1 C_cuts beta A1_ A_cuts_ transA B1_ B_cuts_ transB alpha
+  C1 C_map beta A1_ A_map_ transA B1_ B_map_ transB alpha
   matmul_blas pop pop
 } bind def
 
@@ -104,7 +104,7 @@
 } bind def
 
 /gmres_test {
-  y1 A1 A_cuts x1 m GMRES begin gmres end pop
+  y1 A1 A_map x1 m GMRES begin gmres end pop
 } bind def
 
 /gmres_cmp {
@@ -112,10 +112,10 @@
 } bind def
 
 /lu_test {
-  A1 A_cuts piv1 decompLU_lp {3 {pop} repeat} {
+  A1 A_map piv1 decompLU_lp {3 {pop} repeat} {
     (Singular!\n) toconsole halt
   } ifelse
-  y1 x1 copy A1 A_cuts piv1 backsubLU_lp pop
+  y1 x1 copy A1 A_map piv1 backsubLU_lp pop
 } bind def
 
 /luold_test {
@@ -126,10 +126,10 @@
 } bind def
 
 /luinv_test {
-  A1 A_cuts piv1 decompLU_lp {3 {pop} repeat} {
+  A1 A_map piv1 decompLU_lp {3 {pop} repeat} {
     (Singular!\n) toconsole halt
   } ifelse
-  A1 A_cuts piv1 invertLU_lp pop pop
+  A1 A_map piv1 invertLU_lp pop pop
 } bind def
 
 /luinvold_test {
@@ -155,27 +155,27 @@
     /A1_ A1 def
     /A2_ A2 def
     /A3_ A3 def
-    /A_cuts_ A_cuts def
+    /A_map_ A_map def
   } {
     /A1_ A1t def
     /A2_ A2t def
     /A3_ A3t def
-    /A_cuts_ At_cuts def
+    /A_map_ At_map def
   } ifelse
   
   transB not {
     /B1_ B1 def
     /B2_ B2 def
-    /B_cuts_ B_cuts def
+    /B_map_ B_map def
   } {
     /B1_ B1t def
     /B2_ B2t def
-    /B_cuts_ Bt_cuts def
+    /B_map_ Bt_map def
   } ifelse
 } bind def
 
 /matvecmul_test {/beta name /alpha name false settrans 
-  y1 beta A1_ A_cuts_ transA x1 alpha matvecmul_blas pop
+  y1 beta A1_ A_map_ transA x1 alpha matvecmul_blas pop
 } bind def
 
 /matvecmulold_test {/beta name /alpha name false settrans 
@@ -193,18 +193,18 @@
 } bind def
 
 /trisolve_test {false settrans
-  x1 x_temp copy A1_ A_cuts_ transA true triagonal_u triangular_solve
+  x1 x_temp copy A1_ A_map_ transA true triagonal_u triangular_solve
   y1 copy pop
 } bind def
 
 /trisolveold_test {false settrans
   n 1 sub -1 0 {/i name
     x2 i get
-    A2 A_cuts i cut pop x_temp copy
+    A2 A_map i ss pop x_temp copy
     i 1 add 1 index length 1 index sub getinterval
     y2 i 1 add 1 index length 1 index sub getinterval mul
     sub
-    A2 A_cuts i cut pop i get
+    A2 A_map i ss pop i get
     div y2 i put
   } for
 } bind def
@@ -343,7 +343,7 @@
 
   0 B1 copy pop
   0 1 n 1 sub {/i name
-    B1 B_cuts i cut pop
+    B1 B_map i ss pop
     0 1 k 1 sub {/j name
       j i k mul add 1 index j put
     } for
@@ -364,7 +364,7 @@
 
     0 A1 copy pop
     0 1 m 1 sub {/i name
-      1 A1 A_cuts i cut pop i n mod put
+      1 A1 A_map i ss pop i n mod put
     } for
 
     m ~[m n {/n name /m name /nl name /n0 name
@@ -410,9 +410,9 @@
 
   0 A1 copy pop
   m 1 sub -1 0 {/i name
-    A1 A_cuts i cut pop 0 exch copy
+    A1 A_map i ss pop 0 exch copy
     i m 1 sub eq not {
-      A1 A_cuts i 1 add cut pop exch copy 0.5 mul |i 1 add mul
+      A1 A_map i 1 add ss pop exch copy 0.5 mul |i 1 add mul
       y1 i 1 add get 0.5 mul |i 1 add mul
       y1 i put
     } if
@@ -490,7 +490,7 @@
       GAT /MODEL get /Matrix get
       0 1 m 1 sub {/i name
         dup i get 0 n getinterval
-        A1 A_cuts i cut pop copy pop
+        A1 A_map i ss pop copy pop
       } for
       /gatData name
       
@@ -655,30 +655,30 @@
         } ~exec] sexecpawns
 
         /A1 m n mul /d array def
-        /A_cuts m n 1 3 cutsn def
+        /A_map m n 1 3 mapn def
         /A1_old [A1 m {n /d parcel exch} repeat pop] def
         
         /A1t n m mul /d array def
-        /At_cuts n m 1 3 cutsn def
+        /At_map n m 1 3 mapn def
         /A1t_old [A1t n {m /d parcel exch} repeat pop] def
         
         /B1 n k mul /d array def
-        /B_cuts n k 1 3 cutsn def
+        /B_map n k 1 3 mapn def
         /B1_old [B1 n {k /d parcel exch} repeat pop] def
         
         /B1t k n mul /d array def
-        /Bt_cuts k n 1 3 cutsn def
+        /Bt_map k n 1 3 mapn def
         /B1t_old [B1t k {n /d parcel exch} repeat pop] def
         
         /C_temp m k mul /d array def
         /Cold_temp [C_temp m {k /d parcel exch} repeat pop] def
         
         /C1 m k mul /d array def
-        /C_cuts m k 1 3 cutsn def
+        /C_map m k 1 3 mapn def
         /C1_old [C1 m {k /d parcel exch} repeat pop] def
         
         /C1t k m mul /d array def
-        /Ct_cuts k m 1 3 cutsn def
+        /Ct_map k m 1 3 mapn def
         /C1t_old [C1t k {m /d parcel exch} repeat pop] def
 
         /piv1 n /l array def
