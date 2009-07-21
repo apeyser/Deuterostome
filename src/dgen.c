@@ -39,6 +39,8 @@ P op_fromconsole(void);
 
 /*----------------- DM global variables -----------------------------*/
 
+DLL_SCOPE void clearsocket_special(P fd) {}
+
 /*--------- signal handler: SIGFPE */
 
 static void SIGFPEhandler(int sig)

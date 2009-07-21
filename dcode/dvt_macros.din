@@ -2,6 +2,8 @@
 | ID: @SVNID@ V@ V@PACKAGE_VERSION@ git-@SVNVERSION@
 |------------------------------ DVT macros ---------------------------
 
+/dvt_macros (dvt_macros.d) @version_add@ pop
+
 50 dict dup begin |[
   /myname (DVT macros) def
   /myshortname myname def

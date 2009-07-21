@@ -53,6 +53,21 @@
 /* sizeof(void*) */
 #undef DM_SIZEOF_VOIDP_
 
+/* dvt vm allocation size in mb */
+#undef DVT_MEM_SIZE
+
+/* dvt dict stack size in frames */
+#undef DVT_NUM_DICTS
+
+/* dvt exec stack size in frame */
+#undef DVT_NUM_EXECS
+
+/* dvt operand stack size in frames */
+#undef DVT_NUM_OPDS
+
+/* dvt user dict size */
+#undef DVT_USER_DICT_SIZE
+
 /* Path to ATPS */
 #undef ENABLE_ATPS
 

@@ -1,4 +1,4 @@
-#line 2 "@srcdir@/dcoder.c.in"
+#line 2 "@srcdir@/dcoder.cin"
 
 // ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
 
@@ -53,6 +53,11 @@ struct emap {
 
 #include "dcoder.h"
 
+#define WRITE(line) \
+  if (fprintf(fd, line "\n") < 0) \
+    error_dcoder(1, errno, "Unable to write line# %i", i); \
+  i++;
+
 int main(int argc, char* argv[]) {
   FILE* fd;
   struct emap* cemap;
@@ -63,29 +68,19 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
+  fprintf(stdout,
+	  "Running dcoder, ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n");
+
   if (! (fd = fopen(argv[1], "w")))
     error_dcoder(1, errno, "Unable to open for writing: %s", argv[1]);
 
-  if (fprintf(fd, "| -*- mode: d; -*-\n") < 0)
-    error_dcoder(1, errno, "Unable to write line# %i", i);
-  i++;
-
-  if (fprintf(fd, "(Using errors.d  ID: @" "SVNID@ V@" "PACKAGE_VERSION@ @"
-	      "SVNVERSION@\\n) toconsole\n") < 0)
-    error_dcoder(1, errno, "Unable to write line# %i", i);
-  i++;
-
-  if (fprintf(fd, "/ERRORS module 1000 dict dup begin\n") < 0)
-    error_dcoder(1, errno, "Unable to write line# %i", i);
-  i++;
-
+  WRITE("| -*- mode: d; -*-");
+  WRITE("/ERRORS (errors.d) @""version_add@ module 1000 dict dup begin");
   for (cemap = emap; cemap->str; cemap++, i++)
     if (fprintf(fd, "  /%-@NAMEBYTES@s %8lldx def\n", 
 		cemap->str, (long long) cemap->val) < 0)
       error_dcoder(1, errno, "Unable to write line# %i", i);
-
-  if (fprintf(fd, "end _module\n") < 0)
-    error_dcoder(1, errno, "Unable to write line# %i", i);
+  WRITE("end _module");
 
   return 0;
 }

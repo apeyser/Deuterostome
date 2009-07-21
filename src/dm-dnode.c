@@ -1,3 +1,4 @@
+#define DEBUG_ACTIVE 0
 #include "dm.h"
 
 #include <errno.h>
@@ -24,11 +25,6 @@
 #if ! X_DISPLAY_MISSING
 #include "xhack.h"
 #endif
-
-//#define DEBUG(format, ...) error_local(0, 0, "%li: " format,		
-//				       (long) getpid(), __VA_ARGS__)
-#define DEBUG(...)
-
 
 /*-- the X corner */
 char* defaultdisplay = NULL;
@@ -313,6 +309,21 @@ static P unixsigsocket = -1;
 #endif
 static P serversocket = -1;
 static P sigsocket = -1;
+static P tcp_sigsocket = -1;
+static UW eport[1] = {0};
+
+DM_INLINE_STATIC P write_port(P sock, UW eport[1]) {
+  ssize_t n = 0, n_;
+
+  do {
+    while ((n_ = write(sock, ((B*) eport)+n, sizeof(eport)-n)) == -1)
+      if (errno == EINTR) checkabort();
+      else return -errno;
+  } while ((n += n_) < sizeof(eport));
+
+  return OK;
+}
+
 
 DM_INLINE_STATIC P handleserverinput(void) {
   struct sockaddr clientname;
@@ -321,9 +332,9 @@ DM_INLINE_STATIC P handleserverinput(void) {
   P retc;
 
   if ((newfd = accept(recsocket, &clientname, &size)) == -1) {
-    P errno_ = -errno;
+    retc = -errno;
     delsocket_force(recsocket);
-    return errno_;
+    return retc;
   }
 
   if ((retc = dm_setsockopts(newfd, PACKET_SIZE))) {
@@ -331,10 +342,24 @@ DM_INLINE_STATIC P handleserverinput(void) {
     return retc;
   }
   
+  DEBUG("Adding %li", (long) newfd);
+  if ((retc = write_port(newfd, eport))) {
+    close(newfd);
+    return retc;
+  }
+
   if ((retc = addsocket(newfd, &sockettype, &defaultsocketinfo)))
     return retc;
-    
+  
   return OK;
+}
+
+void clearsocket_special(P fd) {
+#if ENABLE_UNIX_SOCKETS
+  if (fd == unixserversocket) unixserversocket = -1;
+  else
+#endif //ENABLE_UNIX_SOCKETS
+    if (fd == serversocket) serversocket = -1;
 }
 
 BOOLEAN masterinput(P* retc, B* bufferf __attribute__ ((__unused__)) ) {
@@ -588,8 +613,10 @@ P op_vmresize(void) {
 
 DM_INLINE_STATIC void sock_error(BOOLEAN ex, P errno_, const char* msg) {
   if (ex && serversocket != -1) delsocket_force(serversocket);
+
   serversocket = -1;
   sigsocket = -1;
+  tcp_sigsocket = -1;
 
 #if ENABLE_UNIX_SOCKETS
   if (unixserversocket != -1) delsocket_force(unixserversocket);
@@ -604,6 +631,7 @@ void run_dnode_mill(void) {
   P retc;
   B abortframe[FRAMEBYTES], dieframe[FRAMEBYTES];
   union SocketInfo socketinfo = defaultsocketinfo;
+  UW port = (UW) serverport;
 
 #if ! X_DISPLAY_MISSING
   defaultdisplay = getenv("DISPLAY");
@@ -612,13 +640,14 @@ void run_dnode_mill(void) {
   set_closesockets_atexit();
   setupfd();
 
-  if ((serversocket = make_socket(serverport, TRUE, &retc)) == -1)
+  if ((serversocket = make_socket(&port, TRUE, PACKET_SIZE, &retc)) == -1)
     sock_error(TRUE, retc < 0 ? -retc : 0, "making internet server socket");
 
-  if ((sigsocket = make_socket(serverport, FALSE, &retc)) == -1)
+  if ((sigsocket = make_socket(eport, TRUE, 1, &retc)) == -1)
     sock_error(TRUE, retc < 0 ? -retc : 0, "making internet signal socket");
+  socketinfo.listener.recsigfd = -1;
+  socketinfo.listener.trecsigfd = sigsocket;
 
-  socketinfo.listener.recsigfd = sigsocket;
   if ((retc = addsocket(serversocket, &sockettype, &socketinfo)))
     sock_error(TRUE, retc < 0 ? -retc : 0, "adding sockets");
 
@@ -636,6 +665,7 @@ void run_dnode_mill(void) {
 
   socketinfo.listener.unixport = serverport;
   socketinfo.listener.recsigfd = unixsigsocket;
+  socketinfo.listener.trecsigfd = -1;
   if ((retc = addsocket(unixserversocket, &sockettype, &socketinfo))) {
     sock_error(FALSE, retc < 0 ? -retc : 0, "adding sockets");
     goto socksdone;

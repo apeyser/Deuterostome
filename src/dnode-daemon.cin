@@ -1,4 +1,4 @@
-#line 2 "@srcdir@/dnode-daemon.c.in"
+#line 2 "@srcdir@/dnode-daemon.cin"
 
 // ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
 
@@ -536,3 +536,6 @@ int main(const int argc, const char* argv[]) {
   return 0;
 }
   
+// Local Variables:
+// mode: c
+// End:

@@ -28,6 +28,7 @@
           - bitshift
 */
 
+#define DEBUG_ACTIVE 0
 #include "dm.h"
 
 #include <stdio.h>
@@ -37,10 +38,6 @@
 #include "dm5.h"
 
 #include "error-local.h"
-//#define DEBUG(format, ...) error_local(0, 0, "%li: " format,		
-//				       (long) getpid(), __VA_ARGS__)
-#define DEBUG(...)
-
 
 /*----------------------------------------------- start
    any_active | --

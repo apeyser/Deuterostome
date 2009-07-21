@@ -1,7 +1,7 @@
 
 |============================ D Startup =================================
 
-(Using startup_dgen $Id: startup_dgen.d.in 1089 2007-11-29 04:48:15Z ap $ V4.2.0\n) toconsole        | hi!
+(Using startup_dgen from codegen\n) toconsole
 
 | Contains procedures for:
 |  - inspection of objects
@@ -14,14 +14,18 @@
 |============================= userdict =================================
 
 /false 0 1 eq def                             | boolean prototypes
-/true 0 0 eq def
+/true  0 0 eq def
 
 /dm_type /dgen def
 
 2 list dictstack dup 0 get /systemdict name   | name the roots
                      1 get /userdict name
 
-/lock {exec} bind def    | 
+/lock   ~exec bind def    |
+/unlock ~exec bind def
+
+| For plugin files.
+/version_add {4 ~pop repeat} bind def
 
 |------------------------ low-level information -------------------------
 | For debugging and quick information about objects, stacks, and system

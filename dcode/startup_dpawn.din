@@ -2,8 +2,6 @@
 
 |======================== startup_dnode.d ================================
 
-(Using startup_dpawn.d ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n) toconsole
-
 | Contains procedures for:
 |  - inspection of objects
 |  - object/text interconversion
@@ -26,6 +24,8 @@ startup_common_save capsave {
   0 exch getinterval toconsole
   stop
 } if
+
+/startup (startup_dpawn.d) @version_add@ pop
 
 | (source) /ERROR_NAME
 /makeerror ~[

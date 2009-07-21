@@ -4,7 +4,7 @@
 #include "dm.h"
 #include <sys/un.h>
 
-DLL_SCOPE P spawnsighandler(P sigsocket, P serverport,
+DLL_SCOPE P spawnsighandler(P sigsocket, P tcp_sigsocket, P serverport,
 			    P (*closesockets_func)(void),
 			    P* pid);
 DLL_SCOPE UW getportoffset(void);

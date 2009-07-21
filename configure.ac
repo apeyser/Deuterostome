@@ -1,4 +1,4 @@
-AC_INIT([D-Machine], [4.5.6], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
+AC_INIT([D-Machine], [4.5.7], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
 AC_CONFIG_MACRO_DIR(m4)
 AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE
@@ -21,6 +21,14 @@ CF_AC_ARG_VAR([MAX_NUM_DICTS], [maximum dict stack size in frames], [10000])
 CF_AC_ARG_VAR([MAX_NUM_EXECS], [maximum exec stack size in frame], [5000])
 CF_AC_ARG_VAR([MAX_MEM_SIZE], [maximum vm allocation size in mb], [4000])
 CF_AC_ARG_VAR([MAX_USER_DICT_SIZE], [maximum user dict size], [5000])
+
+CF_AC_ARG_VAR([DVT_NUM_OPDS], 
+              [dvt operand stack size in frames], [1000])
+CF_AC_ARG_VAR([DVT_NUM_DICTS], 
+              [dvt dict stack size in frames], [20])
+CF_AC_ARG_VAR([DVT_NUM_EXECS], [dvt exec stack size in frame], [100])
+CF_AC_ARG_VAR([DVT_MEM_SIZE], [dvt vm allocation size in mb], [10])
+CF_AC_ARG_VAR([DVT_USER_DICT_SIZE], [dvt user dict size], [300])
 
 CF_AC_ARG_VAR([DM_IPPORT_USERRESERVED],
               [Symbol or integer value to use for default port base if dnode not in services], 

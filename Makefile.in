@@ -169,6 +169,11 @@ DM_IPPORT_USERRESERVED = @DM_IPPORT_USERRESERVED@
 DM_IPPORT_USERRESERVED_STANDARD = @DM_IPPORT_USERRESERVED_STANDARD@
 DPAWN_COMMAND = @DPAWN_COMMAND@
 DSYMUTIL = @DSYMUTIL@
+DVT_MEM_SIZE = @DVT_MEM_SIZE@
+DVT_NUM_DICTS = @DVT_NUM_DICTS@
+DVT_NUM_EXECS = @DVT_NUM_EXECS@
+DVT_NUM_OPDS = @DVT_NUM_OPDS@
+DVT_USER_DICT_SIZE = @DVT_USER_DICT_SIZE@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -1203,7 +1208,7 @@ gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild:
 	cd gentoo \
 	&& git checkout master \
 	&& if ! test -e $$dmver ; then \
-	  cp `echo dev-lang/dm/dm-*.ebuild | sed -e 's/[ \t]+/\n/g' \
+	  cp `echo dev-lang/dm/dm-*.ebuild | sed -e 's/[ \t]\+/\n/g' \
 	      | sort | tail -n 1` $$dmver \
 	  && git add dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild; \
 	fi

@@ -1,4 +1,6 @@
+#define DEBUG_ACTIVE 0
 #include "dm.h"
+
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -27,8 +29,10 @@ void setpending(void) {}
 // and then, in all cases:
 //     pushes the socket on the opstack.
 P makesocketdead(P retc, P socketfd, B* error_source) {
-/*   fprintf(stderr, "makesocketdead %li: %li, %li, %s\n",  */
-/* 	  (long) getpid(), (long) retc, (long) socketfd, error_source); */
+  DEBUG("makesocketdead %li, %li, %s",
+	(long) retc, (long) socketfd, error_source);
+
+  clearsocket(socketfd);
   if (retc == QUIT) return QUIT;
 
   if (socketfd == consolesocket) {
@@ -42,8 +46,6 @@ P makesocketdead(P retc, P socketfd, B* error_source) {
       if (FLOORexecs == FREEexecs) return EXECS_OVF;
       break;
   }
-
-  clearsocket(socketfd);
 
   if (o3 > CEILopds) return OPDS_OVF;
 
@@ -138,6 +140,7 @@ DM_INLINE_STATIC BOOLEAN nextsocket(fd_set* read_fds) {
     if (++recsocket >= maxsocket) recsocket = 0;
 
     if (FD_ISSET(recsocket, read_fds)) {
+      DEBUG("nextsocket: %li", (long) recsocket);
       FD_CLR(recsocket, read_fds);
       return TRUE;
     }

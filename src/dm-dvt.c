@@ -24,7 +24,13 @@
 #include "dm5.h"
 #include "error-local.h"
 
-static LBIG memsetup[5] = { 1000, 100, 20, 10, 200 };
+static LBIG memsetup[] = {
+  DVT_NUM_OPDS, 
+  DVT_NUM_EXECS, 
+  DVT_NUM_DICTS, 
+  DVT_MEM_SIZE, 
+  DVT_USER_DICT_SIZE
+};
 
 
 P toconsole(B *p, P atmost)
@@ -301,6 +307,9 @@ P clientinput(void) {
   return OK;
 }
 
+void clearsocket_special(P fd) {
+  if (fd == consolesocket) consolesocket = PINF;
+}
 
 BOOLEAN masterinput(P* retc, B* bufferf) {
   if (recsocket != consolesocket) return FALSE;

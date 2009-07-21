@@ -1,4 +1,4 @@
-#line 2 "@srcdir@/drook.c.in"
+#line 2 "@srcdir@/drook.cin"
 
 // ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
 
@@ -494,3 +494,7 @@ int main(int argc, char* argv[]) {
   makethread("dnode receive", from_dnode);
   mainthread();
 }
+
+// Local Variables:
+// mode: c
+// End:

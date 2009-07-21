@@ -20,6 +20,7 @@ union SocketInfo {
     P unixport;       // port number to construct unix file string (or 0)
     P sigfd;
     P recsigfd;
+    P trecsigfd;
   } listener;
 };
 
@@ -56,13 +57,14 @@ static const struct SocketType sockettype = {
 };
 
 static const union SocketInfo defaultsocketinfo = {
-  .listener.unixport = 0,
-  .listener.sigfd    = -1,
-  .listener.recsigfd = -1
+  .listener.unixport  = -1,
+  .listener.sigfd     = -1,
+  .listener.recsigfd  = -1,
+  .listener.trecsigfd = -1,
 };
 
 
-DLL_SCOPE P make_socket(UW port, BOOLEAN isseq, P* retc);
+DLL_SCOPE P make_socket(UW* port, BOOLEAN tcp, P packet_size, P* retc);
 DLL_SCOPE P make_unix_socket(UW port, BOOLEAN isseq, P* retc);
 DLL_SCOPE P toconsole(B *string, P stringlength);
 DLL_SCOPE P fromsocket(P socket, B* buffer);
@@ -89,7 +91,9 @@ DLL_SCOPE P delsocket_force(P fd);
 DLL_SCOPE P delsocket_fork(P fd);
 DLL_SCOPE P delsocket_exec(P fd);
 DLL_SCOPE P delsocket_proc(P fd);
+
 DLL_SCOPE void clearsocket(P fd);
+DLL_SCOPE void clearsocket_special(P fd); //defined by dvt or dnode
 
 DLL_SCOPE P closesockets_force(void);
 DLL_SCOPE P closesockets_fork(void);
@@ -103,7 +107,7 @@ DLL_SCOPE P init_sockaddr(struct sockaddr_in *name,
 			  const char *hostname, 
 			  UW port);
 
-DLL_SCOPE P forksighandler(P sigsocket, P serverport, P* pid);
+DLL_SCOPE P forksighandler(P sigsocket, P tcp_sigsocket, P serverport, P* pid);
 DLL_SCOPE void initfds(void);
 
 #if ! DM_X_DISPLAY_MISSING
