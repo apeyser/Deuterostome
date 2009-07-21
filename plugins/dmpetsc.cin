@@ -1,4 +1,4 @@
-#line 2 "./dmpetsc.c.in"
+#line 2 "./dmpetsc.cin"
 
 // ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
 
@@ -246,6 +246,11 @@ DM_INLINE_STATIC P INIT_KSP_(B* frame, KSP* ksp) {
     if ((_r_ = func)) RETURN_ERROR(errmap[_r_]);			\
   } while (0)
 
+#define DMPETSC_ERRCHECK_(v, func) do {			\
+    PetscErrorCode _r_;					\
+    if ((_r_ = func)) v = (ll_type | errmap[_r_]);	\
+    else v = OK;					\
+  } while (0);						\
 
 //------------------------ petsc_vec_create
 // n | vec-handle
@@ -688,11 +693,137 @@ DM_INLINE_STATIC P petsc_vecmat_copy_mat(B* mf, D* arr, P row, P n) {
   return retc;
 }
 
+// leaves all the values of Vec s in FREEvm (no frame, just the data)
+DM_INLINE_STATIC P petsc_scatter_to(Vec s, P off, P len) {
+  P retc;
+  VecScatter scat;
+  IS s_is;
+  Vec d;
+  PetscScalar* a;
+
+  DMPETSC_ERRCHECK(VecCreateSeq(PETSC_COMM_WORLD, len, &d));
+  DMPETSC_ERRCHECK_(retc, ISCreateStride(PETSC_COMM_SELF, len, off, 1, &s_is));
+  if (retc) {
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, VecScatterCreate(s, s_is, d, PETSC_NULL, &scat));
+  if (retc) {
+    ISDestroy(s_is);
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, VecScatterBegin(scat, s, d, 
+			  INSERT_VALUES, SCATTER_FORWARD));
+  if (retc) {
+    VecScatterDestroy(scat);
+    ISDestroy(s_is);
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, VecScatterEnd(scat, s, d, 
+			  INSERT_VALUES, SCATTER_FORWARD));
+  if (retc) {
+    VecScatterDestroy(scat);
+    ISDestroy(s_is);
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, VecScatterDestroy(scat));
+  if (retc) {
+    ISDestroy(s_is);
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, ISDestroy(s_is));
+  if (retc) {
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, VecGetArray(d, &a));
+  if (retc) {
+    VecDestroy(d);
+    return retc;
+  }
+  moveD(a, (D*) FREEvm, len);
+  DMPETSC_ERRCHECK_(retc, VecRestoreArray(d, PETSC_NULL));
+  if (retc) {
+    VecDestroy(d);
+    return retc;
+  }
+  DMPETSC_ERRCHECK(VecDestroy(d));
+
+  return OK;
+}
+
+DM_INLINE_STATIC P petsc_scatter_from(Vec s) {
+  P retc;
+  VecScatter scat;
+  IS s_is;
+  Vec d;
+
+  DMPETSC_ERRCHECK(VecCreateSeq(PETSC_COMM_WORLD, 0, &d));
+  DMPETSC_ERRCHECK_(retc, 
+		    ISCreateGeneral(PETSC_COMM_SELF, 0, PETSC_NULL, &s_is));
+  if (retc) {
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, VecScatterCreate(s, s_is, d, PETSC_NULL, &scat));
+  if (retc) {
+    ISDestroy(s_is);
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, VecScatterBegin(scat, s, d, 
+					  INSERT_VALUES, SCATTER_FORWARD));
+  if (retc) {
+    VecScatterDestroy(scat);
+    ISDestroy(s_is);
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, VecScatterEnd(scat, s, d, 
+					INSERT_VALUES, SCATTER_FORWARD));
+  if (retc) {
+    VecScatterDestroy(scat);
+    ISDestroy(s_is);
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, VecScatterDestroy(scat));
+  if (retc) {
+    ISDestroy(s_is);
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, ISDestroy(s_is));
+  if (retc) {
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK(VecDestroy(d));
+  return OK;
+}
+
 // x offset length/* A m | A (A_m=x)
 DM_INLINE_STATIC P petsc_vecmat_copy(void) {
   Vec x;
   P off, n, row;
-  D* arr;
+  PetscInt len;
+  D* arr = (D*) FREEvm;
   P retc;
 
   if (o_5 < FLOORopds) return OPDS_OVF;
@@ -710,27 +841,37 @@ DM_INLINE_STATIC P petsc_vecmat_copy(void) {
   if (PVALUE(o_3, &n) && n < 0) return RNG_CHK;
 
   INIT_VEC(o_5, x);
-  if (n == PINF) n = DMPETSC_VECTOR_N(o_5) - off;
-  else if (n + off > DMPETSC_VECTOR_N(o_5)) RETURN_ERROR(DMPETSC_NOMATCH);
+  DMPETSC_ERRCHECK(VecGetSize(x, &len));
+  if (n == PINF) n = len - off;
+  else if (off + n > len) RETURN_ERROR(DMPETSC_NOMATCH);
 
-  DMPETSC_ERRCHECK(VecGetArray(x, &arr));
-  if (! (retc = petsc_vecmat_copy_mat(o_2, arr + off, row, n))) {
-    moveframe(o_2, o_5);
-    FREEopds = o_4;
+  if ((retc = petsc_scatter_to(x, off, n))) return retc;
+  FREEvm += n*sizeof(D);
+
+  if ((retc = petsc_vecmat_copy_mat(o_2, arr, row, n))) {
+    FREEvm = (B*) arr;
+    return retc;
   }
-  DMPETSC_ERRCHECK(VecRestoreArray(x, PETSC_NULL));
+  FREEvm = (B*) arr;
   
-  return retc;
+  moveframe(o_2, o_5);
+  FREEopds = o_4;
+
+  return OK;
 }
 
 // x A | A
 DM_INLINE_STATIC P petsc_vecmat_sync(void) {
   P retc;
-  if ((retc = op_petsc_mat_syncto()))
-    return retc;
+  Vec x;
+
+  INIT_VEC(o_2, x);
+  if ((retc = petsc_scatter_from(x))) return retc;
+  if ((retc = op_petsc_mat_syncto())) return retc;
   
   moveframe(o_1, o_2);
   FREEopds = o_1;
+
   return OK;
 }
 
@@ -1351,8 +1492,11 @@ DM_INLINE_STATIC P petsc_mat_copyto(void) {
   if ((retc = getrow(A, &ncols, gm+m))) return retc;
   if (n + len_arr > ncols) return RNG_CHK;
   a = (D*) VALUE_PTR(o_4);
-  row = (D*) FREEvm;
-  moveD(a, row+n, len_arr);
+  if (len_arr == ncols) row = a;
+  else {
+    row = (D*) FREEvm;
+    moveD(a, row+n, len_arr);
+  }
 
   copyto = matType[DMPETSC_MATRIX_MTYPE(o_1)].copyto;
   if ((retc = copyto(A, gm+m, row, ncols))) return retc;
