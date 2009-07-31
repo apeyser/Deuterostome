@@ -126,7 +126,8 @@ B* ll_export[] = {
   PLUGIN_OP(petsc_vec_denan),
   PLUGIN_OP(petsc_vecvec_mul),
   PLUGIN_OP(petsc_vecvec_add),
-  PLUGIN_OP(petsc_vecmat_copy),
+  PLUGIN_OP(petsc_vecmat_copyrow),
+  PLUGIN_OP(petsc_vecmat_copycol),
   PLUGIN_OP(petsc_vecmat_sync),
   PLUGIN_OP(petsc_vec_copyto),
   PLUGIN_OP(petsc_vec_copyfrom),
@@ -217,7 +218,9 @@ P op_petsc_vecvec_mul(void) {return petsc_vecvec_mul();}
 
 P op_petsc_vecvec_add(void) {return petsc_vecvec_add();}
 
-P op_petsc_vecmat_copy(void) {return petsc_vecmat_copy();}
+P op_petsc_vecmat_copyrow(void) {return petsc_vecmat_copyrow();}
+
+P op_petsc_vecmat_copycol(void) {return petsc_vecmat_copycol();}
 
 P op_petsc_vecmat_sync(void) {return petsc_vecmat_sync();}
 

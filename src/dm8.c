@@ -18,6 +18,7 @@
 #include <math.h>
 
 #include "dm2.h"
+#include "dm8.h"
 
 /*------------------------------------ used
   dict/stream | int

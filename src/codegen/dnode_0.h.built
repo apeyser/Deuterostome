@@ -331,6 +331,7 @@ P _syserrc[] = {
   VMR_STATE,
   ILL_OPAQUE,
   FOLD_OPAQUE,
+  ACTIVE_OPAQUE,
   NO_PLUGINS,
 #ifdef BUILD_ATLAS
 #endif //BUILD_ATLAS
@@ -458,6 +459,7 @@ B* _syserrm[] = {
   (B*) "** Memory alread minimized",
   (B*) "** Opaque dict type mismatch",
   (B*) "** Illegal attempt to fold opaque object",
+  (B*) "** Unable to restore active opaque object",
   (B*) "** Compiled without plugin support",
 #ifdef BUILD_ATLAS
 #endif //BUILD_ATLAS

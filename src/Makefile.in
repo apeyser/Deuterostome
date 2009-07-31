@@ -55,9 +55,9 @@ DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(dist_pkgdata_SCRIPTS) \
 	$(srcdir)/dm3.c $(srcdir)/dm3.h $(srcdir)/dm4.c \
 	$(srcdir)/dm5.c $(srcdir)/dm5.h $(srcdir)/dm6.c \
 	$(srcdir)/dm6.h $(srcdir)/dm7.c $(srcdir)/dm8.c \
-	$(srcdir)/dmglobals.c $(srcdir)/dmnum.c $(srcdir)/dmnum.h \
-	$(srcdir)/dsp1.c $(srcdir)/dsp2.c $(srcdir)/paths.hin \
-	$(top_srcdir)/m4/cf_in.make \
+	$(srcdir)/dm8.h $(srcdir)/dmglobals.c $(srcdir)/dmnum.c \
+	$(srcdir)/dmnum.h $(srcdir)/dsp1.c $(srcdir)/dsp2.c \
+	$(srcdir)/paths.hin $(top_srcdir)/m4/cf_in.make \
 	$(top_srcdir)/m4/cf_svnversion.make
 subdir = src
 SUBDIRS =

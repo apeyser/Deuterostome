@@ -6,6 +6,7 @@
 #include "pluginlib.h"
 #include "dm2.h"
 #include "dm6.h"
+#include "dm8.h"
 #include "error-local.h"
 
 #if ! ENABLE_PLUGINS_SUPPORT
@@ -14,6 +15,7 @@ P op_nextlib(void) {return NO_PLUGINS;}
 P op_loadlib(void) {return NO_PLUGINS;}
 void closealllibs(void) {}
 void initialize_plugins(void) {}
+P _check_plugins(B* floor, B* top) {return OK;}
 
 #else //ENABLE_PLUGINS_SUPPORT
 
@@ -26,7 +28,9 @@ B saveboxname[FRAMEBYTES];
 B buffernameframe[FRAMEBYTES];
 B fininame[FRAMEBYTES];
 B initname[FRAMEBYTES];
+B activename[FRAMEBYTES];
 static B nullframe[FRAMEBYTES];
+static B activeframe[FRAMEBYTES];
 
 void initialize_plugins(void) {
   if (lt_dlinit()) {
@@ -40,8 +44,12 @@ void initialize_plugins(void) {
   makename((B*)"BUFFER", buffernameframe);
   makename((B*)"INIT_", initname);
   makename((B*)"FINI_", fininame);
+  makename((B*)"ACTIVE", activename);
   TAG(nullframe) = NULLOBJ; 
   ATTR(nullframe) = READONLY;
+  TAG(activeframe) = BOOL;
+  ATTR(activeframe) = READONLY;
+  BOOL_VAL(activeframe) = FALSE;
 }
 
 /*------------------------------------------------closealllibs
@@ -260,7 +268,7 @@ B* make_opaque_frame(P n, B* pluginnameframe, ...) {
   
   if (op_save() != OK) return NULL;
 
-  if ((dict = makedict(len + 2 + (n ? 1 : 0))) == (B*) -1L) {
+  if ((dict = makedict(len + 3 + (n ? 1 : 0))) == (B*) -1L) {
     FREEvm = oldFREEvm;
     FREEopds = o_1;
     return NULL;
@@ -286,6 +294,7 @@ B* make_opaque_frame(P n, B* pluginnameframe, ...) {
   insert(saveboxname, dict, o_1);
   ATTR(pluginnameframe) |= READONLY;
   insert(opaquename, dict, pluginnameframe);
+  insert(activename, dict, activeframe);
   if (buffer) insert(buffernameframe, dict, buffer);
 
   va_start(nameframes, pluginnameframe);
@@ -320,5 +329,27 @@ P wrap_readcode(const char* file) {
   FREEexecs = o2;
   return OK;
 }
+
+P _check_plugins(B* floor, B* top) {
+  P retc;
+
+  if (o2 > CEILopds) return OPDS_OVF;
+  moveframe(floor, o1);
+  FREEopds = o2;
+
+ again:
+  if (TAG(o_1) == (DICT|OPAQUETYPE)
+      && BOOL_VAL(lookup(activename, VALUE_PTR(o_1))))
+      return ACTIVE_OPAQUE;
+
+  if ((retc = op_nextobject())) return retc;
+  FREEopds = o_1;
+  if (BOOL_VAL(o1)) {
+    if (VALUE_PTR(o_1) - FRAMEBYTES < top) goto again;
+    FREEopds = o_1;
+  }
+
+  return OK;
+}      
 
 #endif //ENABLE_PLUGINS_SUPPORT

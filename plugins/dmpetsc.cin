@@ -11,7 +11,7 @@
 #endif
 
 #ifdef PETSC_USE_LONG_DOUBLE
-#error "PetscReal is double"
+#error "PetscReal is long double"
 #endif
 
 #ifdef PETSC_USE_INT
@@ -279,6 +279,7 @@ DM_INLINE_STATIC P petsc_vec_create(void) {
   DMPETSC_VECTOR_GN(pframe) = gn;
   if ((r = VecAssemblyBegin(*x))) goto err;
 
+  OPAQUE_ACTIVE(pframe) = TRUE;
   moveframe(pframe, o_1);
   return OK;
 
@@ -667,12 +668,16 @@ DM_INLINE_STATIC P petsc_vecvec_mul(void) {
   return OK;
 }
 
-DM_INLINE_STATIC P petsc_vecmat_copy_mat(B* mf, D* arr, P row, P n) {
+// ((D*) FREEvm)[n] is the array of values to be copied
+DM_INLINE_STATIC P petsc_vecmat_copy_mat(B* mf, P row, P off, P n) {
   static const B af[FRAMEBYTES] = {ARRAY|DOUBLETYPE, 0, 0};
   static const B rf[FRAMEBYTES] = {NUM|LONGBIGTYPE, 0, 0};
   static const B nf[FRAMEBYTES] = {NUM|LONGBIGTYPE, 0, 0};
   P retc;
   B *sf = o1;
+
+  D* arr = (D*) FREEvm;
+  FREEvm += DALIGN(n*sizeof(D));
 
   moveframe(af, o1);
   VALUE_PTR(o1) = (B*) arr;
@@ -682,7 +687,7 @@ DM_INLINE_STATIC P petsc_vecmat_copy_mat(B* mf, D* arr, P row, P n) {
   LONGBIG_VAL(o2) = row;
 
   moveframe(nf, o3);
-  LONGBIG_VAL(o3) = n;
+  LONGBIG_VAL(o3) = off;
 
   moveframe(mf, o4);  
 
@@ -690,6 +695,8 @@ DM_INLINE_STATIC P petsc_vecmat_copy_mat(B* mf, D* arr, P row, P n) {
   if ((retc = op_petsc_mat_copyto()))
     FREEopds = sf;
 
+  FREEopds = o_1;
+  FREEvm = (B*) arr;
   return retc;
 }
 
@@ -818,44 +825,102 @@ DM_INLINE_STATIC P petsc_scatter_from(Vec s) {
   return OK;
 }
 
-// x offset length/* A m | A (A_m=x)
-DM_INLINE_STATIC P petsc_vecmat_copy(void) {
+// x local-offsetX <L cols> A local-offsetA | A (A_mc = x_m)
+DM_INLINE_STATIC P petsc_vecmat_copycol(void) {
   Vec x;
-  P off, n, row;
+  P offX, offA, n;
   PetscInt len;
-  D* arr = (D*) FREEvm;
+  D* arr;
   P retc;
+  Mat A;
+  PetscInt *cols, *rows, *i;
+  P gm, m;
 
   if (o_5 < FLOORopds) return OPDS_OVF;
-  if (o5 > CEILopds) return OPDS_OVF;
   if (CLASS(o_1) != NUM 
-      || CLASS(o_3) != NUM
+      || CLASS(o_3) != ARRAY
       || CLASS(o_4) != NUM) 
     return OPD_CLA;
   if (TYPE(o_1) >= SINGLETYPE
-      || TYPE(o_3) >= SINGLETYPE
-      || TYPE(o_4) >= SINGLETYPE) 
+      || TYPE(o_3) != LONG32TYPE
+      || TYPE(o_4) >= SINGLETYPE)
     return OPD_TYP;
-  if (!PVALUE(o_1, &row) || !PVALUE(o_4, &off)) return UNDF_VAL;
-  if (off < 0) return RNG_CHK;
-  if (PVALUE(o_3, &n) && n < 0) return RNG_CHK;
+
+  if (!PVALUE(o_1, &offA) 
+      || !PVALUE(o_4, &offX))
+    return UNDF_VAL;
+  if (offX < 0 || offA < 0) return RNG_CHK;
+  n = ARRAY_SIZE(o_3);
+  if (((UL64) offA) + n > INT32_MAX) return RNG_CHK;
 
   INIT_VEC(o_5, x);
   DMPETSC_ERRCHECK(VecGetSize(x, &len));
-  if (n == PINF) n = len - off;
-  else if (off + n > len) RETURN_ERROR(DMPETSC_NOMATCH);
+  if (offX + n > len) RETURN_ERROR(DMPETSC_NOMATCH);
 
-  if ((retc = petsc_scatter_to(x, off, n))) return retc;
-  FREEvm += n*sizeof(D);
+  if ((retc = petsc_scatter_to(x, offX, n))) return retc;
+  arr = (D*) FREEvm;
+  rows = (PetscInt*) (arr + n);
+  if (rows + n >= (PetscInt*) CEILvm) return VM_OVF;
+  cols = (PetscInt*) VALUE_PTR(o_3);
 
-  if ((retc = petsc_vecmat_copy_mat(o_2, arr, row, n))) {
-    FREEvm = (B*) arr;
-    return retc;
-  }
-  FREEvm = (B*) arr;
+  INIT_MAT_WRITE(o_2, A);
+  gm = DMPETSC_MATRIX_GM(o_2);
+  m = DMPETSC_MATRIX_M(o_2);
+  if (offA + n > m) return RNG_CHK;
+  for (i = rows; i < rows + n; i++) *i = gm + offA++;
   
+  DMPETSC_ERRCHECK(MatSetValues(A, n, rows,
+				1, cols, 
+				arr, INSERT_VALUES));
+
   moveframe(o_2, o_5);
   FREEopds = o_4;
+  return OK;
+}
+  
+
+// x offsetX length/* A m offsetA | A (A_mc=x_c)
+DM_INLINE_STATIC P petsc_vecmat_copyrow(void) {
+  Vec x;
+  P offX, offA, n, row;
+  PetscInt len;
+  P retc;
+
+  if (o_6 < FLOORopds) return OPDS_OVF;
+  if (o5 > CEILopds) return OPDS_OVF;
+  if (CLASS(o_1) != NUM 
+      || CLASS(o_2) != NUM
+      || CLASS(o_4) != NUM
+      || CLASS(o_5) != NUM) 
+    return OPD_CLA;
+  if (TYPE(o_1) >= SINGLETYPE
+      || TYPE(o_2) >= SINGLETYPE
+      || TYPE(o_4) >= SINGLETYPE
+      || TYPE(o_5) >= SINGLETYPE) 
+    return OPD_TYP;
+
+  if (!PVALUE(o_1, &offA) 
+      || !PVALUE(o_2, &row) 
+      || !PVALUE(o_5, &offX)) 
+    return UNDF_VAL;
+  if (offX < 0 || offA < 0 || row < 0) return RNG_CHK;
+  if (PVALUE(o_4, &n) && n < 0) return RNG_CHK;
+
+  INIT_VEC(o_6, x);
+  DMPETSC_ERRCHECK(VecGetSize(x, &len));
+  if (n == PINF) {
+    n = len - offX;
+    if (n < 0) return RNG_CHK;
+  }
+  else if (offX + n > len) RETURN_ERROR(DMPETSC_NOMATCH);
+
+  // the scattered array is passed at FREEvm
+  if ((retc = petsc_scatter_to(x, offX, n))) return retc;
+  if ((retc = petsc_vecmat_copy_mat(o_3, row, offA, n)))
+    return retc;
+  
+  moveframe(o_3, o_6);
+  FREEopds = o_5;
 
   return OK;
 }
@@ -1157,6 +1222,7 @@ DM_INLINE_STATIC P mat_create(
   if ((r = MatAssemblyBegin(*A, MAT_FINAL_ASSEMBLY)))
     goto err;
 
+  OPAQUE_ACTIVE(pframe) = TRUE;
   moveframe(pframe, rpframe);
   return OK;
 
@@ -1782,6 +1848,7 @@ DM_INLINE_STATIC P petsc_ksp_create(void) {
   }
   else if (TAG(pcparam) != NULLOBJ) kspretc(OPD_ERR);
 
+  OPAQUE_ACTIVE(pframe) = TRUE;
   moveframe(pframe, o_5);
   FREEopds = o_4;
   return OK;

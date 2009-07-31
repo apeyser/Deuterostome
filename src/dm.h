@@ -372,6 +372,7 @@ DLL_SCOPE B errorframe[FRAMEBYTES];
 DLL_SCOPE B** syserrm;
 DLL_SCOPE P* syserrc;
 DLL_SCOPE B** sysop;
+DLL_SCOPE P (*check_plugins)(B* floor, B* top);
 
 DLL_SCOPE B locked;
 DLL_SCOPE B serialized;
@@ -521,10 +522,6 @@ DM_HOT DLL_SCOPE P op_dict(void);
 DLL_SCOPE P op_cleardict(void);
 DM_HOT DLL_SCOPE P op_array(void);
 DM_HOT DLL_SCOPE P op_list(void);
-DLL_SCOPE P (*usedfd_func)(void);
-DM_HOT DLL_SCOPE P op_used(void);
-DM_HOT DLL_SCOPE P op_length(void); 
-DM_HOT DLL_SCOPE P op_last(void);
 DM_HOT DLL_SCOPE P op_begin(void);
 DM_HOT DLL_SCOPE P op_end(void);
 DM_HOT DLL_SCOPE P op_def(void);
@@ -541,9 +538,6 @@ DM_HOT DLL_SCOPE P op_null(void);
 /*-- conversion, string, attribute, class ,type */
 
 /*-- more big operators.... */
-DM_HOT DLL_SCOPE P op_fax(void);
-DLL_SCOPE P op_merge(void);
-DLL_SCOPE P op_nextobject(void);
 DLL_SCOPE P op_interpolate(void);
 DLL_SCOPE P op_integrateOH(void);
 DLL_SCOPE P op_extrema(void);

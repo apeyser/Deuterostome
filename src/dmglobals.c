@@ -51,6 +51,7 @@ B* myxname_frame; //points to the frame buffering the DISPLAY name
 B** syserrm;
 P* syserrc;
 B** sysop;
+P (*check_plugins)(B* floor, B* top) = NULL;
 
 /*---------------------------- ASCII character classification table
 

@@ -102,6 +102,7 @@ int bigtester\(P size, Tester* t\) {
       INNERP_VAL\() handle (\) = \(P\) t;
      ) /TESTER make_handle (;
 )} 0 /killtester (o1) build_handle (
+      OPAQUE_ACTIVE\(o1\) = TRUE;
       FREEopds = o2;
       return OK;
 )}

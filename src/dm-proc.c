@@ -21,6 +21,7 @@
 #include "dm-dvt-vm.h"
 #include "dm-signals.h"
 #include "dm6.h"
+#include "dm8.h"
 #include "error-local.h"
 
 // (dir)/null (prefix) | fdr fdw (dir) (prefix)

@@ -86,12 +86,15 @@ extern B buffernameframe[FRAMEBYTES];
 #define OPAQUE_BUFFER_SIZE(frame) (ARRAY_SIZE(OPAQUE_BUFFER_GET(frame)))
 #define OPAQUE_BUFFER_PTR(frame)  (VALUE_PTR(OPAQUE_BUFFER_GET(frame)))
 
+#define OPAQUE_ACTIVE(frame) (BOOL_VAL(OPAQUE_MEM(frame, activename)))
+
 #define MAKE_OPAQUE_DICT(n, ...)					\
   (make_opaque_frame(n, opaquename, __VA_ARGS__, NULL))
 
 // dict should be o_1
 #define KILL_OPAQUE() do {						\
     P ret;								\
+    OPAQUE_ACTIVE(o_1) = FALSE;						\
     moveframe(OPAQUE_MEM(o_1, saveboxname), o_1);			\
     if ((ret = op_restore()) != OK) return ret;				\
   } while (0)

@@ -96,6 +96,7 @@ struct emap emap[] = {
   {"VMR_STATE", VMR_STATE},
   {"ILL_OPAQUE", ILL_OPAQUE},
   {"FOLD_OPAQUE", FOLD_OPAQUE},
+  {"ACTIVE_OPAQUE", ACTIVE_OPAQUE},
   {"NO_PLUGINS", NO_PLUGINS},
 #ifdef BUILD_ATLAS
 #endif //BUILD_ATLAS

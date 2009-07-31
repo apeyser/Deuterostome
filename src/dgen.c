@@ -23,6 +23,7 @@
 #include "dm3.h"
 #include "dm-proc.h"
 #include "dm5.h"
+#include "dm8.h"
 #include "error-local.h"
 
 /*---------- include modules of dgen --------------*/

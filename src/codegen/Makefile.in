@@ -99,8 +99,8 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = dm.h dmglobals.c dsp1.c dm1.c dm2.c dm2.h dm3.h \
 	dm-prop.h dm-signals.h dm-vm.h dm-swapbytes.h dm-conv.c dm3.c \
 	dm-prop.cin dm-signals.c dm-vm.c dm4.c dm5.c dm5.h dm6.c dm6.h \
-	dm7.c dm8.c dmnum.c dsp2.c dm-types.h dm-types.c paths.hin \
-	dgen.c dgen_1.h dgen-build dmnum.h dm-nextevent.c \
+	dm7.c dm8.c dm8.h dmnum.c dsp2.c dm-types.h dm-types.c \
+	paths.hin dgen.c dgen_1.h dgen-build dmnum.h dm-nextevent.c \
 	dm-nextevent.h
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 am__DEPENDENCIES_1 = $(top_builddir)/lib/libgnu.la

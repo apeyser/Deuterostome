@@ -341,8 +341,11 @@ P op_petsc_vecvec_mul(void);
 #define op_petsc_vecvec_add EXPORTNAME(op_petsc_vecvec_add)
 P op_petsc_vecvec_add(void);
 
-#define op_petsc_vecmat_copy EXPORTNAME(op_petsc_vecmat_copy)
-P op_petsc_vecmat_copy(void);
+#define op_petsc_vecmat_copyrow EXPORTNAME(op_petsc_vecmat_copyrow)
+P op_petsc_vecmat_copyrow(void);
+
+#define op_petsc_vecmat_copycol EXPORTNAME(op_petsc_vecmat_copycol)
+P op_petsc_vecmat_copycol(void);
 
 #define op_petsc_vecmat_sync EXPORTNAME(op_petsc_vecmat_sync)
 P op_petsc_vecmat_sync(void);

@@ -110,7 +110,8 @@ end def
   /petsc_vec_denan
   /petsc_vecvec_mul
   /petsc_vecvec_add
-  /petsc_vecmat_copy
+  /petsc_vecmat_copyrow
+  /petsc_vecmat_copycol
   /petsc_vecmat_sync
   /petsc_vec_copyto 
   /petsc_vec_copyfrom 

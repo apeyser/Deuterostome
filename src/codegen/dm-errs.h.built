@@ -191,57 +191,59 @@
 #define ILL_OPAQUE                    ((P)       90L)
 // ** Illegal attempt to fold opaque object
 #define FOLD_OPAQUE                   ((P)       91L)
+// ** Unable to restore active opaque object
+#define ACTIVE_OPAQUE                 ((P)       92L)
 // ** Compiled without plugin support
-#define NO_PLUGINS                    ((P)       92L)
+#define NO_PLUGINS                    ((P)       93L)
 #ifdef BUILD_ATLAS
 #endif //BUILD_ATLAS
 #ifdef HAVE_ATLAS
 // Matrix Error: undefined value in cut
-#define MATRIX_UNDEF_CUT              ((P)       93L)
+#define MATRIX_UNDEF_CUT              ((P)       94L)
 // Matrix Error: cut dimension less than 1
-#define MATRIX_ILLEGAL_CUT            ((P)       94L)
+#define MATRIX_ILLEGAL_CUT            ((P)       95L)
 // Matrix Error: number of cut dimensions too small
-#define MATRIX_UNDER_CUT              ((P)       95L)
+#define MATRIX_UNDER_CUT              ((P)       96L)
 // Matrix Error: array too small for cut
-#define MATRIX_NONMATCH_CUT           ((P)       96L)
+#define MATRIX_NONMATCH_CUT           ((P)       97L)
 // Matrix Error: matrix dimensions don't match
-#define MATRIX_NONMATCH_SHAPE         ((P)       97L)
+#define MATRIX_NONMATCH_SHAPE         ((P)       98L)
 // Matrix Error: parameters to clapack illegal
-#define MATRIX_PARAM_ERROR            ((P)       98L)
+#define MATRIX_PARAM_ERROR            ((P)       99L)
 // Matrix Error: Internal Error - message on stack
-#define MATRIX_INT_ERR                ((P)       99L)
+#define MATRIX_INT_ERR                ((P)      100L)
 // Matrix Error: lu matrix is singular
-#define MATRIX_SINGULAR               ((P)      100L)
+#define MATRIX_SINGULAR               ((P)      101L)
 #endif //HAVE_ATLAS
 #ifdef DM_ENABLE_RTHREADS
 // ** Rthreads are inactive
-#define RTHREADS_UNSET                ((P)      101L)
+#define RTHREADS_UNSET                ((P)      102L)
 // ** Rthreads: nodes for dictionay not a numeral
-#define RTHREADS_NUMTYPE              ((P)      102L)
+#define RTHREADS_NUMTYPE              ((P)      103L)
 // ** Rthreads: nodes for dictionary undefined
-#define RTHREADS_NUMUNDF              ((P)      103L)
+#define RTHREADS_NUMUNDF              ((P)      104L)
 // ** Rthreads: nodes for dictionary out of range
-#define RTHREADS_NUMRNG               ((P)      104L)
+#define RTHREADS_NUMRNG               ((P)      105L)
 // ** Rthreads: illegal class for info dictionary
-#define RTHREADS_DICTTYPE             ((P)      105L)
+#define RTHREADS_DICTTYPE             ((P)      106L)
 // ** Rthreads: key/val pair: val not a string
-#define RTHREADS_VALTYPE              ((P)      106L)
+#define RTHREADS_VALTYPE              ((P)      107L)
 // ** Rthreads: key/val pair: val too long
-#define RTHREADS_VALSIZE              ((P)      107L)
+#define RTHREADS_VALSIZE              ((P)      108L)
 // ** Rthreads: key/val pair: val empty
-#define RTHREADS_VALEMPTY             ((P)      108L)
+#define RTHREADS_VALEMPTY             ((P)      109L)
 // ** Rthreads: key/val pair: key too long
-#define RTHREADS_KEYSIZE              ((P)      109L)
+#define RTHREADS_KEYSIZE              ((P)      110L)
 // ** Rthreads: key/val pair: val is active
-#define RTHREADS_VALATR               ((P)      110L)
+#define RTHREADS_VALATR               ((P)      111L)
 #endif //DM_ENABLE_RTHREADS
 #ifdef DM_HOST_IS_32_BIT
 #endif //DM_HOST_IS_32_BIT
 #ifdef DM_ENABLE_PLUGINS_SUPPORT
 #endif //DM_ENABLE_PLUGINS_SUPPORT
 // ** no socket events -- internal
-#define NEXTEVENT_NOEVENT             ((P)      111L)
+#define NEXTEVENT_NOEVENT             ((P)      112L)
 // ** No mpi message msg received -- internal
-#define MPI_NOMSG                     ((P)      112L)
+#define MPI_NOMSG                     ((P)      113L)
 
 #endif //DM_ERRS_H

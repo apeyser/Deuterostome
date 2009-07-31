@@ -17,6 +17,8 @@ DLL_SCOPE void closealllibs(void);
 DLL_SCOPE P op_loadlib(void);
 DLL_SCOPE P op_nextlib(void);
 
+DLL_SCOPE P _check_plugins(B* floor, B* top);
+
 #if DM_ENABLE_PLUGINS_SUPPORT
 
 DLL_SCOPE BOOLEAN check_opaque_name(B* nameframe, B* dict);
@@ -26,6 +28,7 @@ DLL_SCOPE B* make_opaque_frame(P n, B* pluginnameframe, ...);
 
 //globals -- used only in plugins and dnode_1.h
 DLL_SCOPE B opaquename[FRAMEBYTES];
+DLL_SCOPE B activename[FRAMEBYTES];
 DLL_SCOPE B saveboxname[FRAMEBYTES];
 DLL_SCOPE B fininame[FRAMEBYTES];
 DLL_SCOPE B initname[FRAMEBYTES];

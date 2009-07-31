@@ -32,6 +32,7 @@
 #include "dm7.h"
 #include "dm6.h"
 #include "dm5.h"
+#include "dm8.h"
 
 #include "dnode_0.h"
 

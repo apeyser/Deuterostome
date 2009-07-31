@@ -496,9 +496,36 @@
     } bind def
 
     |================ Need to gather from all processors
-    | x offset len/* A m | -- A_m=x
-    /vecmat_copy {
-      petsc_vecmat_copy pop
+    | x offsetX len/* A m offsetA | -- A_mc=x_c
+    /vecmat_copyrow {
+      petsc_vecmat_copyrow pop
+    } bind def
+
+    | ... | <L col...>
+    /vecmat_copycolers [
+      | <L col...> | <L col...>
+      /dense null mkact
+      | <L col...> | <L col...>
+      /blockdense null mkact
+
+      | col first-row <L col...> irows icols | <L col...>
+      /sparse {
+        {
+          /icols name exch /cols name 3 -1 roll /col name
+          exch cols length getinterval | subirows
+          0 exch {
+            col add icols exch get cols 2 index put
+            1 add
+          } forall pop
+          cols
+        } in_petsc
+      } bind
+    ] makestruct def
+
+    | x local-offsetX A local-offsetA ... /type | -- A_mc = x_m
+    /vecmat_copycol {
+      vecmat_copycolers exch get exec 3 1 roll
+      petsc_vecmat_copycol pop
     } bind def
 
     | A | --
@@ -818,20 +845,72 @@
       1 exch 1 vecvec_add
     } bind def
     
-    | x offset length/* A m | A (A_m = x)
-    /vecmat_copy {
+    | x offsetX length/* A m offsetA | A (A_mc = x_c)
+    /vecmat_copyrow {
       {
-        /row name /Aval name /len name /offset name /xval name
+        /offA name /row name /Aval name /len name /offX name /xval name
         /syncer ~[xval getid Aval getid ~vecmat_sync] def
         {
           Aval /m get range
           1 index add row le {pop /syncer find} {
             dup row gt {pop /syncer find} {
               ~[
-                xval getid offset len
+                xval getid offX len
                 Aval getid
-                row 7 -1 roll sub 
+                row 9 -1 roll sub offA
                 ~vecmat_copy
+              ]
+            } ifelse
+          } ifelse
+        } execpawns
+        Aval
+      } in_petsc
+    } bind def
+
+    | A col first-row n-rows | ...
+    /vecmat_copycolers {
+      | A col first-row n-rows | <L col...>
+      /dense {
+        /l array exch pop copy exch pop
+      }
+      | A col first-row n-rows | <L col...>
+      /blockdense {
+        /l array exch pop copy exch pop
+      } 
+
+      | A col first-row n-rows |  col first-row <l 0...n-rows> ~irows ~icols
+      /sparse {
+        /l array
+        {
+          /irows construct_execn /icols construct_execn
+        } 5 -1 roll /params get indict
+      }
+    } bind makestruct def
+
+    | x offsetX length/* A c offsetA | A (A_mc =  x_m)
+    /vecmat_copycol {
+      {
+        /offA name /col name /Aval name /len name /offX name /xval name
+        len * eq {/len xval /n get offX sub def} if
+
+        /syncer ~[xval getid Aval getid ~vecmat_sync] def
+        {
+          Aval /m get range /lrows name /lstart name
+          offA len add lstart le {/syncer find} {
+            offA lstart lrows add ge {/syncer find} {
+              /loffA offA lstart sub dup 0 lt {pop 0} if def
+              /loffX offX lstart loffA add offA sub add def
+              /llen  len loffX offX sub sub 
+                     lrows loffA sub 
+                     2 copy gt ~exch if pop
+              def
+              ~[
+                xval getid loffX
+                Aval getid loffA
+
+                Aval col loffA llen vecmat_copycolers Aval exectype
+                Aval gettype
+                ~vecmat_copycol
               ]
             } ifelse
           } ifelse
@@ -1088,7 +1167,7 @@
       | -- | ~irows ~icols
       | ~irows: executable (appended with ~exec if procedure) on the
       |   pawn that returns the local offsets for each row in icols.
-      | ~icols: executbale (appended with ~exec if procedure) on the pawn
+      | ~icols: executable (appended with ~exec if procedure) on the pawn
       |   that returns the column number for the local non-zero data of the
       |   current matrix.
       /sparse {

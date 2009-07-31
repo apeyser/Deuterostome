@@ -19,6 +19,7 @@
 #include "dm-mpi.h"
 #include "dm-vm.h"
 #include "dm7.h"
+#include "dm8.h"
 
 /*----------------- DM global variables -----------------------------*/
 
@@ -131,6 +132,7 @@ int main(int argc __attribute__ ((__unused__)),
   sysop = _sysop;
   syserrm = _syserrm;
   syserrc = _syserrc;
+  check_plugins = _check_plugins;
 
   createfds();
   run_dpawn_mill();

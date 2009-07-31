@@ -523,6 +523,10 @@ P op_restore(void)
     capped = FALSE; 
     caplevel = FREEvm; 
   }
+  if (check_plugins 
+      && (retc = check_plugins(savefloor, caplevel)))
+    return retc;
+
   offset = caplevel - savefloor;
   FREEopds = o_1;
 
