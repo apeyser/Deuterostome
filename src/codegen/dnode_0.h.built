@@ -332,6 +332,7 @@ P _syserrc[] = {
   ILL_OPAQUE,
   FOLD_OPAQUE,
   ACTIVE_OPAQUE,
+  ACTIVE_STREAM,
   NO_PLUGINS,
 #ifdef BUILD_ATLAS
 #endif //BUILD_ATLAS
@@ -460,6 +461,7 @@ B* _syserrm[] = {
   (B*) "** Opaque dict type mismatch",
   (B*) "** Illegal attempt to fold opaque object",
   (B*) "** Unable to restore active opaque object",
+  (B*) "** Unable to restore open stream object",
   (B*) "** Compiled without plugin support",
 #ifdef BUILD_ATLAS
 #endif //BUILD_ATLAS

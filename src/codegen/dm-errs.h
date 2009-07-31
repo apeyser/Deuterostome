@@ -107,7 +107,7 @@
 #define MPI_ERRS       (P)0x00001000L /* 1000L:1100-1 for errors in dm-mpi.h */
 #define MPI_NOMSG (MPI_ERRS+0) /* no event available */
 
-#define RTHREADS_ERRS  (P)0x00001100L /* 1100L:1100-1 for errror in dqueen.h */
+#define RTHREADS_ERRS  (P)0x00001100L /* 1100L:1100-1 for errors in dqueen.h */
 #define RTHREADS_UNSET    (RTHREADS_ERRS+0)
 #define RTHREADS_NUMTYPE  (RTHREADS_ERRS+1)
 #define RTHREADS_NUMUNDF  (RTHREADS_ERRS+2)
@@ -129,3 +129,5 @@
 #define X_SEC_GEN   0x00000A06L /* X generate failure                    */
 #define X_SEC_REV   0x00000A07L /* X revoke failure                      */
 #define X_SEC_LIB   0x00000A08L /* X security lib missing                */
+
+#define ACTIVE_STREAM 0x00000B00L /* Can't restore open stream */

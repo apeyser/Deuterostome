@@ -279,7 +279,7 @@ DM_INLINE_STATIC P petsc_vec_create(void) {
   DMPETSC_VECTOR_GN(pframe) = gn;
   if ((r = VecAssemblyBegin(*x))) goto err;
 
-  OPAQUE_ACTIVE(pframe) = TRUE;
+  OPAQUE_WIRED(pframe) = TRUE;
   moveframe(pframe, o_1);
   return OK;
 
@@ -1222,7 +1222,7 @@ DM_INLINE_STATIC P mat_create(
   if ((r = MatAssemblyBegin(*A, MAT_FINAL_ASSEMBLY)))
     goto err;
 
-  OPAQUE_ACTIVE(pframe) = TRUE;
+  OPAQUE_WIRED(pframe) = TRUE;
   moveframe(pframe, rpframe);
   return OK;
 
@@ -1848,7 +1848,7 @@ DM_INLINE_STATIC P petsc_ksp_create(void) {
   }
   else if (TAG(pcparam) != NULLOBJ) kspretc(OPD_ERR);
 
-  OPAQUE_ACTIVE(pframe) = TRUE;
+  OPAQUE_WIRED(pframe) = TRUE;
   moveframe(pframe, o_5);
   FREEopds = o_4;
   return OK;

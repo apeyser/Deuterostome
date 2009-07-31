@@ -178,6 +178,7 @@ int main(int argc, char *argv[])
   sysop = _sysop;
   syserrm = _syserrm;
   syserrc = _syserrc;
+  check_plugin = _check_plugin;
 
 #if HAVE_SETSID
   // separate from current session - don't die if term closed.

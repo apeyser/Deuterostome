@@ -177,7 +177,7 @@ def
   ) /STATE make_handle (;
   ) /BUFFC make_handle (;
 )} 0 null (o_1) build_handle (
-    OPAQUE_ACTIVE\(o_1\) = 1;
+    OPAQUE_WIRED\(o_1\) = 1;
     return OK;
 )
       }

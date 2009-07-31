@@ -372,7 +372,7 @@ DLL_SCOPE B errorframe[FRAMEBYTES];
 DLL_SCOPE B** syserrm;
 DLL_SCOPE P* syserrc;
 DLL_SCOPE B** sysop;
-DLL_SCOPE P (*check_plugins)(B* floor, B* top);
+DLL_SCOPE P (*check_plugin)(void);
 
 DLL_SCOPE B locked;
 DLL_SCOPE B serialized;

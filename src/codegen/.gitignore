@@ -38,3 +38,8 @@
 /paths.h
 /paths.hin
 /dm8.h
+/dcoder
+/dcoder.c
+/dmnuminc.d
+/dsp2def.d
+/ops.d

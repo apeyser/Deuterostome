@@ -407,6 +407,7 @@ end def
       /ILL_OPAQUE (** Opaque dict type mismatch) def
       /FOLD_OPAQUE (** Illegal attempt to fold opaque object) def
       /ACTIVE_OPAQUE (** Unable to restore active opaque object) def
+      /ACTIVE_STREAM (** Unable to restore open stream object) def
       /NO_PLUGINS (** Compiled without plugin support) def |]
     end def |]
   end def

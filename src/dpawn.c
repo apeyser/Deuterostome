@@ -132,7 +132,7 @@ int main(int argc __attribute__ ((__unused__)),
   sysop = _sysop;
   syserrm = _syserrm;
   syserrc = _syserrc;
-  check_plugins = _check_plugins;
+  check_plugin = _check_plugin;
 
   createfds();
   run_dpawn_mill();

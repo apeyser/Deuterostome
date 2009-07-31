@@ -474,7 +474,7 @@ P op_makestream(void) {
   OPAQUE_MEM_SET(streamframe, DMFLEX_FD_N, initframe);
   LONGBIG_VAL(initframe) = DMFLEX_OPEN;
   OPAQUE_MEM_SET(streamframe, DMFLEX_STATE_N, initframe);
-  OPAQUE_ACTIVE(streamframe) = TRUE;
+  OPAQUE_WIRED(streamframe) = TRUE;
   
   moveframe(streamframe, o_3);
   FREEopds = o_2;
@@ -658,7 +658,7 @@ P op_execstream(void) {
 
   lasthandle = NULL;
   setbufstate(streamstate);
-  OPAQUE_ACTIVE(streamstate) = 1;
+  OPAQUE_WIRED(streamstate) = TRUE;
 
   TAG(o_1) = BOOL; 
   ATTR(o_1) = 0;
