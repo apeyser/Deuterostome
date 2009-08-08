@@ -1105,6 +1105,31 @@
       } in_petsc
     } bind def
 
+    | xval <d > off | xval
+    /vec_subinterval {
+      {
+        /off name /arr name /xval name
+        /arrm off arr length add def
+        /syncer ~[xval getid ~vec_syncto] def
+        {
+          arrm range /lenp name /offp name
+          offp lenp add offp lt {/syncer find} {
+            offp arrm gt {/syncer find} {
+              /st offp off sub dup 0 lt {pop 0} if def
+              /len lenp st offp sub dup 0 gt ~sub ~pop ifelse def
+              st lenp add arrm gt {/lenp arrm st sub def} if
+              ~[
+                xval getid
+                arr st lenp getinterval
+                st offp sub
+                ~vec_copyto
+              ]
+            } ifelse
+          } ifelse
+        } execpawns
+      } in_petsc
+    } bind def
+
     |------------------------------------------------- mat_create
     |
     |----------------- condense_sparse ---------------------
