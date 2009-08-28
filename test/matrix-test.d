@@ -185,7 +185,7 @@
 } bind def
 
 /matvecmulp_test {/beta name /alpha name false settrans
-  y3 beta A3_ transA x3 alpha pmatvecmul
+  y3 beta A3_ transA x3 alpha pmatvecmul pop
 } bind def
 
 /matvecmul_cmp {

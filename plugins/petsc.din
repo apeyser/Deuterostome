@@ -773,6 +773,11 @@
       } in_petsc
     } bind def
 
+    | x a | x (x_i /= a)
+    /vec_div {
+      1d exch div vec_mul
+    } bind def
+
     | x | x (x_i *= -1)
     /vec_neg {
       -1 vec_mul
@@ -1257,7 +1262,7 @@
     } bind def
 
     |------------------------------------------------------ pmatvecmul
-    | y beta A trans x alpha | --
+    | y beta A trans x alpha | y
     |
     | Call pmatvecmul on pawns.
     | A: dictionary describing matrix from mat_create
@@ -1269,6 +1274,7 @@
     |
     /pmatvecmul {
       {
+        5 index 7 1 roll
         exch getid exch
         4 -1 roll getid 4 1 roll
         6 -1 roll getid 6 1 roll
