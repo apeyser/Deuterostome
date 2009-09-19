@@ -24,18 +24,18 @@ dnl
   dnl First, check ATLAS_LIBS environment variable
   if test $cf_atlas_ok = no; then
     if test "x$ATLAS_LIBS" != x; then
-	    LIBS="$ATLAS_LIBS $LIBS"
+      LIBS="$ATLAS_LIBS $LIBS"
       CPPFLAGS="$CPPFLAGS $ATLAS_FLAGS"
-	    AC_MSG_CHECKING([for cblas_sgemm in $ATLAS_LIBS])
-	    AC_TRY_LINK_FUNC([cblas_sgemm], [cf_atlas_ok=yes], [ATLAS_LIBS=""])
-	    AC_MSG_RESULT([$cf_atlas_ok])
+      AC_MSG_CHECKING([for cblas_sgemm in $ATLAS_LIBS])
+      AC_TRY_LINK_FUNC([cblas_sgemm], [cf_atlas_ok=yes], [ATLAS_LIBS=""])
+      AC_MSG_RESULT([$cf_atlas_ok])
       if test $cf_atlas_ok = yes ; then
         AC_MSG_CHECKING([for clapack_dgesv in $ATLAS_LIBS])
         AC_TRY_LINK_FUNC([clapack_dgesv], [cf_atlas_ok=yes], 
                          [ATLAS_LIBS="" ; cf_atlas_ok=no])
         AC_MSG_RESULT([$cf_atlas_ok])
       fi
-	    LIBS="$cf_atlas_save_LIBS"
+      LIBS="$cf_atlas_save_LIBS"
       CPPFLAGS="$cf_atlas_save_CPPFLAGS"
     fi
   fi
@@ -44,7 +44,7 @@ dnl
   if test $cf_atlas_ok = no; then
      ATLAS_LIBS="-latlas"
      CPPFLAGS="$CPPFLAGS $ATLAS_FLAGS"
-	   AC_SEARCH_LIBS([cblas_sgemm], [ptcblas cblas],
+     AC_SEARCH_LIBS([cblas_sgemm], [ptcblas cblas],
                     [AC_MSG_CHECKING([for cblas_sgemm in $ac_res])
                      if test -n "$ac_lib" ; then 
                        ATLAS_LIBS="$ac_res $ATLAS_LIBS"

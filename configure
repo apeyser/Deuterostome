@@ -13056,11 +13056,11 @@ fi
   cf_atlas_save_CPPFLAGS="$CPPFLAGS"
     if test $cf_atlas_ok = no; then
     if test "x$ATLAS_LIBS" != x; then
-	    LIBS="$ATLAS_LIBS $LIBS"
+      LIBS="$ATLAS_LIBS $LIBS"
       CPPFLAGS="$CPPFLAGS $ATLAS_FLAGS"
-	    { $as_echo "$as_me:$LINENO: checking for cblas_sgemm in $ATLAS_LIBS" >&5
+      { $as_echo "$as_me:$LINENO: checking for cblas_sgemm in $ATLAS_LIBS" >&5
 $as_echo_n "checking for cblas_sgemm in $ATLAS_LIBS... " >&6; }
-	    cat >conftest.$ac_ext <<_ACEOF
+      cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
@@ -13114,7 +13114,7 @@ fi
 rm -rf conftest.dSYM
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
-	    { $as_echo "$as_me:$LINENO: result: $cf_atlas_ok" >&5
+      { $as_echo "$as_me:$LINENO: result: $cf_atlas_ok" >&5
 $as_echo "$cf_atlas_ok" >&6; }
       if test $cf_atlas_ok = yes ; then
         { $as_echo "$as_me:$LINENO: checking for clapack_dgesv in $ATLAS_LIBS" >&5
@@ -13176,14 +13176,14 @@ rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
         { $as_echo "$as_me:$LINENO: result: $cf_atlas_ok" >&5
 $as_echo "$cf_atlas_ok" >&6; }
       fi
-	    LIBS="$cf_atlas_save_LIBS"
+      LIBS="$cf_atlas_save_LIBS"
       CPPFLAGS="$cf_atlas_save_CPPFLAGS"
     fi
   fi
     if test $cf_atlas_ok = no; then
      ATLAS_LIBS="-latlas"
      CPPFLAGS="$CPPFLAGS $ATLAS_FLAGS"
-	   { $as_echo "$as_me:$LINENO: checking for library containing cblas_sgemm" >&5
+     { $as_echo "$as_me:$LINENO: checking for library containing cblas_sgemm" >&5
 $as_echo_n "checking for library containing cblas_sgemm... " >&6; }
 if test "${ac_cv_search_cblas_sgemm+set}" = set; then
   $as_echo_n "(cached) " >&6
