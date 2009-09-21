@@ -18,13 +18,13 @@ PDEBUILD=': $${TMP=/tmp} \
 
 .PHONY: debian
 debian: 
-	@ATLAS_VERSION=''; \
+	ATLAS_VERSION=''; \
 	$(PDEBUILD)
 
 
 .PHONY: ubuntu
 ubuntu:
-	@ATLAS_VERSION='(>= 3.6.0-22ubuntu2)'; \
+	ATLAS_VERSION='(>= 3.6.0-22ubuntu2)'; \
 	$(PDEBUILD)
 
 DEBIAN_BUNDLE = debian
