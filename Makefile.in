@@ -725,7 +725,7 @@ SVNVERSION_EXTRA_DIST = svnversion.stamp
 BUNDLE = $(GENTOO_BUNDLE) $(DEBIAN_BUNDLE)
 BUNDLE_CLEANFILES = $(distdir).tar.bz2
 GENTOO_BUNDLE = gentoo
-PDEBUILD = ': $${TMP=/tmp} \
+PDEBUILD = : $${TMP=/tmp} \
 	&& DESTTOP="$$TMP/dm-$$$$" \
 	&& DEST="$$DESTTOP/dm-$(PACKAGE_VERSION)" \
 	&& echo "Building in $$DEST" \
@@ -739,7 +739,7 @@ PDEBUILD = ': $${TMP=/tmp} \
 	          debian/control.in >debian/control \
 	&& pdebuild --buildresult "$(abs_builddir)/.." \
 	&& cd "$(abs_builddir)" \
-	&& rm -rf "$$DEST"'
+	&& rm -rf "$$DEST"
 
 DEBIAN_BUNDLE = debian
 all: config.h
