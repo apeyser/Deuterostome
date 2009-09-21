@@ -21,7 +21,9 @@ debian:
 	@ATLAS_VERSION=''; \
 	$(PDEBUILD)
 
+
 .PHONY: ubuntu
+ubuntu:
 	@ATLAS_VERSION='(>= 3.6.0-22ubuntu2)'; \
 	$(PDEBUILD)
 
