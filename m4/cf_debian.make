@@ -10,7 +10,7 @@ PDEBUILD=: $${TMP=/tmp} \
 	&& $(SED) -e 's/[@]VERSION[@]/@VERSION@/g' \
 	          -e "s/[@]DATE[@]/`date -R`/g" \
 	          debian/changelog.in >debian/changelog \
-	&& $(SED) -e 's/[@]ATLAS_VERSION[@]/$$ATLAS_VERSION/g' \
+	&& $(SED) -e "s/[@]ATLAS_VERSION[@]/$$ATLAS_VERSION/g" \
 	          debian/control.in >debian/control \
 	&& pdebuild --buildresult "$(abs_builddir)/.." \
 	&& cd "$(abs_builddir)" \
