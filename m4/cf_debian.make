@@ -1,6 +1,6 @@
 # -*- mode: makefile; -*-
 
-PDEBUILD=': $${TMP=/tmp} \
+PDEBUILD=: $${TMP=/tmp} \
 	&& DESTTOP="$$TMP/dm-$$$$" \
 	&& DEST="$$DESTTOP/dm-$(PACKAGE_VERSION)" \
 	&& echo "Building in $$DEST" \
@@ -14,7 +14,7 @@ PDEBUILD=': $${TMP=/tmp} \
 	          debian/control.in >debian/control \
 	&& pdebuild --buildresult "$(abs_builddir)/.." \
 	&& cd "$(abs_builddir)" \
-	&& rm -rf "$$DEST"'
+	&& rm -rf "$$DEST"
 
 .PHONY: debian
 debian: 
