@@ -725,6 +725,22 @@ SVNVERSION_EXTRA_DIST = svnversion.stamp
 BUNDLE = $(GENTOO_BUNDLE) $(DEBIAN_BUNDLE)
 BUNDLE_CLEANFILES = $(distdir).tar.bz2
 GENTOO_BUNDLE = gentoo
+PDEBUILD = ': $${TMP=/tmp} \
+	&& DESTTOP="$$TMP/dm-$$$$" \
+	&& DEST="$$DESTTOP/dm-$(PACKAGE_VERSION)" \
+	&& echo "Building in $$DEST" \
+	&& $(MKDIR_P) "$$DESTTOP" \
+	&& cp -prf "$(srcdir)" "$$DEST" \
+	&& cd "$$DEST" \
+	&& $(SED) -e \'s/[@]VERSION[@]/@VERSION@/g\' \
+	          -e "s/[@]DATE[@]/`date -R`/g" \
+	          debian/changelog.in >debian/changelog \
+	&& $(SED) -e \'s/[@]ATLAS_VERSION[@]/$$ATLAS_VERSION/g\' \
+	          debian/control.in >debian/control \
+	&& pdebuild --buildresult "$(abs_builddir)/.." \
+	&& cd "$(abs_builddir)" \
+	&& rm -rf "$$DEST"'
+
 DEBIAN_BUNDLE = debian
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -1250,19 +1266,12 @@ ebuild: rsync gentoo-ci
 
 .PHONY: debian
 debian: 
-	@: $${TMP=/tmp} \
-	&& DESTTOP="$$TMP/dm-$$$$" \
-	&& DEST="$$DESTTOP/dm-$(PACKAGE_VERSION)" \
-	&& echo "Building in $$DEST" \
-	&& $(MKDIR_P) "$$DESTTOP" \
-	&& cp -prf "$(srcdir)" "$$DEST" \
-	&& cd "$$DEST" \
-	&& $(SED) -e 's/[@]VERSION[@]/@VERSION@/g' \
-	          -e "s/[@]DATE[@]/`date -R`/g" \
-	          debian/changelog.in >debian/changelog \
-	&& pdebuild --buildresult "$(abs_builddir)/.." \
-	&& cd "$(abs_builddir)" \
-	&& rm -rf "$$DEST"
+	@ATLAS_VERSION=''; \
+	$(PDEBUILD)
+
+.PHONY: ubuntu
+	@ATLAS_VERSION='(>= 3.6.0-22ubuntu2)'; \
+	$(PDEBUILD)
 
 .PHONY: bundle
 bundle: $(SVNVERSION_TARGET) $(distdir).tar.bz2
