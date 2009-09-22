@@ -1285,26 +1285,26 @@ ebuild: rsync gentoo-ci
 
 .PHONY: debian-setup
 debian-setup:
-	$(PDEBUILD_SETUP)
+	@$(PDEBUILD_SETUP)
 
 .PHONY: debian-sed
 debian-sed:
-	: $${ATLAS_VERSION=''}; \
+	@: $${ATLAS_VERSION=''}; \
 	$(PDEBUILD_SED)
 
 .PHONY: debian-action
 debian-action:
-	$(PDEBUILD_ACTION)
+	@$(PDEBUILD_ACTION)
 
 .PHONY: debian-cleanup
 debian-cleanup:
-	$(PDEBUILD_CLEANUP)
+	@$(PDEBUILD_CLEANUP)
 
 .PHONY: debian-init
 debian-init: debian-setup debian-sed
 
 .PHONY: debian-fin
-debian-fin: debian-action debian-clean
+debian-fin: debian-action debian-cleanup
 
 .PHONY: debian-int
 debian-int: debian-init debian-fin
@@ -1315,7 +1315,7 @@ debian:
 
 .PHONY: ubuntu-sed
 ubuntu-sed:
-	: $${ATLAS_VERSION='(>= 3.6.0-22ubuntu2)'}; \
+	@: $${ATLAS_VERSION='(>= 3.6.0-22ubuntu2)'}; \
 	$(PDEBUILD_SED)
 
 .PHONY: ubuntu-init

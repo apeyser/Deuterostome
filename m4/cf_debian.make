@@ -57,7 +57,7 @@ debian-cleanup:
 debian-init: debian-setup debian-sed
 
 .PHONY: debian-fin
-debian-fin: debian-action debian-clean
+debian-fin: debian-action debian-cleanup
 
 .PHONY: debian-int
 debian-int: debian-init debian-fin
