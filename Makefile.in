@@ -725,21 +725,40 @@ SVNVERSION_EXTRA_DIST = svnversion.stamp
 BUNDLE = $(GENTOO_BUNDLE) $(DEBIAN_BUNDLE)
 BUNDLE_CLEANFILES = $(distdir).tar.bz2
 GENTOO_BUNDLE = gentoo
-PDEBUILD = : $${TMP=/tmp} \
-	&& DESTTOP="$$TMP/dm-$$$$" \
-	&& DEST="$$DESTTOP/dm-$(PACKAGE_VERSION)" \
-	&& echo "Building in $$DEST" \
-	&& $(MKDIR_P) "$$DESTTOP" \
-	&& cp -prf "$(srcdir)" "$$DEST" \
-	&& cd "$$DEST" \
-	&& $(SED) -e 's/[@]VERSION[@]/@VERSION@/g' \
+PDEBUILD_NAME = "build"
+PDEBUILD_VARS = \
+	: $${TMP=/tmp}; \
+	PDEBBUILD_DESTTOP="$$TMP/dm-$(PDEBUILD_NAME)"; \
+	PDEBBUILD_DEST="$$PDEBBUILD_DESTTOP/dm-$(PACKAGE_VERSION)"
+
+PDEBUILD_SETUP = \
+	$(PDEBUILD_VARS); \
+	echo "Initializing in $$PDEBBUILD_DEST"; \
+	rm -rf "$$PDEBUILD_DESTTOP"; \
+	$(MKDIR_P) "$$PDEBBUILD_DESTTOP" \
+	&& cp -prf "$(srcdir)" "$$PDEBBUILD_DEST" \
+	&& cd "$$PDEBBUILD_DEST"
+
+PDEBUILD_SED = \
+	$(PDEBUILD_VARS); \
+	echo "Updating files in $$PDEBBUILD_DEST"; \
+	cd "$$PDEBBUILD_DEST" \
+	&& $(SED) -e 's/[@]VERSION[@]/@VERSION@/g'\
 	          -e "s/[@]DATE[@]/`date -R`/g" \
 	          debian/changelog.in >debian/changelog \
 	&& $(SED) -e "s/[@]ATLAS_VERSION[@]/$$ATLAS_VERSION/g" \
-	          debian/control.in >debian/control \
-	&& pdebuild --buildresult "$(abs_builddir)/.." \
-	&& cd "$(abs_builddir)" \
-	&& rm -rf "$$DEST"
+	          debian/control.in >debian/control 
+
+PDEBUILD_ACTION = \
+	$(PDEBUILD_VARS); \
+	echo "Building in $$PDEBBUILD_DEST"; \
+	cd "$$PDEBBUILD_DEST" \
+	&& pdebuild --buildresult "$(abs_builddir)/.."
+
+PDEBUILD_CLEANUP = \
+	$(PDEBUILD_VARS); \
+	echo "Cleanup up $$PDEBBUILD_DEST"; \
+	rm -rf "$$PDEBBUILD_DEST"
 
 DEBIAN_BUNDLE = debian
 all: config.h
@@ -1264,15 +1283,50 @@ gentoo-ci: gentoo-setup
 ebuild: rsync gentoo-ci
 	sudo layman -s gentoo-local
 
+.PHONY: debian-setup
+debian-setup:
+	$(PDEBUILD_SETUP)
+
+.PHONY: debian-sed
+debian-sed:
+	: $${ATLAS_VERSION=''}; \
+	$(PDEBUILD_SED)
+
+.PHONY: debian-action
+debian-action:
+	$(PDEBUILD_ACTION)
+
+.PHONY: debian-cleanup
+debian-cleanup:
+	$(PDEBUILD_CLEANUP)
+
+.PHONY: debian-init
+debian-init: debian-setup debian-sed
+
+.PHONY: debian-fin
+debian-fin: debian-action debian-clean
+
+.PHONY: debian-int
+debian-int: debian-init debian-fin
+
 .PHONY: debian
-debian: 
-	ATLAS_VERSION=''; \
-	$(PDEBUILD)
+debian:
+	$(MAKE) $(AM_MAKEFLAGS) PDEBUILD_NAME="$$$$" debian-int
+
+.PHONY: ubuntu-sed
+ubuntu-sed:
+	: $${ATLAS_VERSION='(>= 3.6.0-22ubuntu2)'}; \
+	$(PDEBUILD_SED)
+
+.PHONY: ubuntu-init
+ubuntu-init: debian-setup ubuntu-sed
+
+.PHONY: ubuntu-int
+ubuntu-int: ubuntu-init debian-fin
 
 .PHONY: ubuntu
 ubuntu:
-	ATLAS_VERSION='(>= 3.6.0-22ubuntu2)'; \
-	$(PDEBUILD)
+	$(MAKE) $(AM_MAKEFLAGS) PDEBUILD_NAME="$$$$" ubuntu-int
 
 .PHONY: bundle
 bundle: $(SVNVERSION_TARGET) $(distdir).tar.bz2
