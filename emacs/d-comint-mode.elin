@@ -522,7 +522,7 @@ This quotes per `shell-quote-argument', then requotes per `d-comint-mode-quote'"
 	    (t (dvt-special-frame dvt-buffer-name))))))
     (window-frame window)))
 
-(defun d-comint-mode-process-mark 
+(defun d-comint-mode-process-mark ()
   "Move point to process mark"
   (interactive)
   (comint-goto-process-mark)

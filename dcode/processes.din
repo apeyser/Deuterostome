@@ -421,7 +421,7 @@
   } bind def
 
   |============================ wait_ =============================
-  | pid (source) | --
+  | pid / pid (source) | --
   |
   | Blocks untils process pid ends.
   | If process does not return status 0, throws a NOSYSTEM error
@@ -453,7 +453,7 @@
     ] ~lock
   ] bind userdict 3 -1 roll put
 
-  |======================== fg ==================================
+  |======================== fg_ ==================================
   | ~active fd-in fd-out fd-err | true/false
   |
   | Creates a child executing ~active, and blocks until done.
@@ -495,6 +495,18 @@
     } lock
   } bind def
 
+  |======================== _sh_ ================================
+  | \[ (exec) ... fd-in fd-out fd-err | \{ (exec) ... pid
+  |
+  | Execute (exec) with following operands in child process,
+  |  using fd-in fd-out and fd-err as redirects.
+  | Returns pid of child process running in bg.
+  | -- without clear to mark
+  |
+  /_sh_ {
+    {~_spawnsh fds bg wait} 4 1 roll bg
+  } bind def
+
   |======================== sh_ ================================
   | \[ (exec) ... fd-in fd-out fd-err | pid
   |
@@ -503,11 +515,7 @@
   | Returns pid of child process running in bg.
   |
   /sh_ {
-    {
-|      countdictstack 2 sub ~end repeat PROCESSES begin
-      ~_spawnsh fds bg wait
-    } 4 1 roll bg
-    counttomark 1 add 1 roll cleartomark
+    _sh_ counttomark 1 add 1 roll cleartomark
   } bind def
 
   |======================= sh ===================================
