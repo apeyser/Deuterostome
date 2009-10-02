@@ -35356,23 +35356,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-<<<<<<< variant A
-   (eval echo "\"\$as_me:35590: $lt_compile\"" >&5)
->>>>>>> variant B
-   (eval echo "\"\$as_me:35077: $lt_compile\"" >&5)
-####### Ancestor
-   (eval echo "\"\$as_me:35308: $lt_compile\"" >&5)
-======= end
+   (eval echo "\"\$as_me:35359: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-<<<<<<< variant A
-   echo "$as_me:35594: \$? = $ac_status" >&5
->>>>>>> variant B
-   echo "$as_me:35081: \$? = $ac_status" >&5
-####### Ancestor
-   echo "$as_me:35312: \$? = $ac_status" >&5
-======= end
+   echo "$as_me:35363: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -35467,23 +35455,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-<<<<<<< variant A
-   (eval echo "\"\$as_me:35689: $lt_compile\"" >&5)
->>>>>>> variant B
-   (eval echo "\"\$as_me:35176: $lt_compile\"" >&5)
-####### Ancestor
-   (eval echo "\"\$as_me:35407: $lt_compile\"" >&5)
-======= end
+   (eval echo "\"\$as_me:35458: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-<<<<<<< variant A
-   echo "$as_me:35693: \$? = $ac_status" >&5
->>>>>>> variant B
-   echo "$as_me:35180: \$? = $ac_status" >&5
-####### Ancestor
-   echo "$as_me:35411: \$? = $ac_status" >&5
-======= end
+   echo "$as_me:35462: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -35531,23 +35507,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-<<<<<<< variant A
-   (eval echo "\"\$as_me:35741: $lt_compile\"" >&5)
->>>>>>> variant B
-   (eval echo "\"\$as_me:35228: $lt_compile\"" >&5)
-####### Ancestor
-   (eval echo "\"\$as_me:35459: $lt_compile\"" >&5)
-======= end
+   (eval echo "\"\$as_me:35510: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-<<<<<<< variant A
-   echo "$as_me:35745: \$? = $ac_status" >&5
->>>>>>> variant B
-   echo "$as_me:35232: \$? = $ac_status" >&5
-####### Ancestor
-   echo "$as_me:35463: \$? = $ac_status" >&5
-======= end
+   echo "$as_me:35514: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized

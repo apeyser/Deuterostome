@@ -182,10 +182,6 @@ B* _sysop[] =
   (B*) "fillrectangle", (B*) op_fillrectangle,
   (B*) "drawtext", (B*) op_drawtext,
   (B*) "makewindowtop", (B*) op_makewindowtop,
-  (B*) "Xauth", (B*) op_Xauth,
-  (B*) "Xauthrev", (B*) op_Xauthrev,
-  (B*) "Xauthgen", (B*) op_Xauthgen,
-  (B*) "Xauthset", (B*) op_Xauthset,
   (B*) "nextevent", (B*) op_nextevent,
 #ifdef DM_ENABLE_REGEX
   (B*) "regex", (B*) op_regex,
@@ -293,10 +289,6 @@ P _syserrc[] = {
   X_ERR,
   X_BADFONT,
   X_BADHOST,
-  X_SEC_MISS,
-  X_SEC_GEN,
-  X_SEC_REV,
-  X_SEC_LIB,
 #ifdef DM_ENABLE_REGEX
   REGEX_BADPAT,
   REGEX_ECOLLATE,
@@ -380,10 +372,6 @@ B* _syserrm[] = {
   (B*) "** Error in X windows",
   (B*) "** Bad X windows font",
   (B*) "** Cannot connect to X server",
-  (B*) "** X Security Extension missing",
-  (B*) "** X Security Extension unable to generate",
-  (B*) "** X Security Extension unable to revoke",
-  (B*) "** X Security library missing",
 #ifdef DM_ENABLE_REGEX
   (B*) "Regex Error: Invalid regular expression",
   (B*) "Regex Error: Invalid collating element",

@@ -453,7 +453,7 @@ c_         list all connections
 
     | (display) | pid
     /command {
-      openlist (ssh) ssh_flags ~null forall 
+      openlist (ssh) ssh_flags {} forall 
       counttomark 1 add -1 roll 
       (dvtgetdisplay) sh
     } bind
@@ -474,7 +474,7 @@ c_         list all connections
       getdisplayhost dup null eq {pop node 0 get} if
       dup (^localhost$) regexs {4 ~pop repeat} {
         ssh dup ~isdead PROCESSES indict {
-          null node 7 put /NOSYSTEM makeerror
+          null node 7 put (display) /NOSYSTEM makeerror
         } if
         node 7 put
       } ifelse
@@ -482,7 +482,7 @@ c_         list all connections
   ] makestruct def
 
   /getdnodedisplay
-    Xwindows not {null} {~[~display ssh_display indict]} ifelse
+    Xwindows not ~null {~[~display ssh_display indict]} ifelse
   bind def
 
   Xwindows {
