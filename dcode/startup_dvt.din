@@ -1385,6 +1385,7 @@ Xwindows {
       /click {} bind def | }
     end def
 
+    
     /mouseclick { 
       { [ 4 1 roll | ]
         /mS name /mY name /mX name
@@ -1396,6 +1397,7 @@ Xwindows {
           mX box 0 get ge mX box 1 get le and
           { pop true exit } { /kbox kbox 1 add def } ifelse
         } forall
+        goto_point_emacs
         { rowlist krow get kbox get dup active {exec} {toconsole} ifelse} if
       } stopped cleartomark
       end 
@@ -1535,12 +1537,17 @@ Xwindows {
 Xwindows {
   /take_input_focus {end} bind def
   /raise_emacs {end} def
+  /goto_point_emacs ~null bind def
 
   /take_input_setup {pop pop} bind def
 @ENABLE_EMACSCLIENT_START@ 
   /take_input_setup {
     userdict begin
     /emacs_buffer_name name /emacs_server_name name
+    /emacs_client_cmd
+      getstartupdir length (emacsclient-run.sh) length add /b array 0
+      getstartupdir fax (emacsclient-run.sh) fax pop
+    def
 
     {
       {/take_input_focus (focus)}
@@ -1548,19 +1555,16 @@ Xwindows {
     } {
       exec
       ~[
-        1024 /b array 0
-        (exec ) fax
-        getstartupdir fax
-        (emacsclient-run.sh ) fax
-        emacs_server_name fax
-        ( "\(d-comint-mode-) fax
-        4 -1 roll fax
-        ( \") fax
-        emacs_buffer_name fax
-        (\"\)") fax
-        0 exch getinterval
-        {[exch tosystem} ~stopped ~cleartomark | ]
-        ~end
+        ~openlist
+        emacs_client_cmd
+        emacs_server_name
+        1024 /b array 0 
+          (\(d-comint-mode-) fax 6 -1 roll fax 
+          ( \") fax emacs_buffer_name fax (\") fax
+          (\)) fax
+          0 exch getinterval
+        {{fds sh_ fg} PROCESSES ~indict stopped pop end}
+        ~exec
       ] bind def
     } forall
     
@@ -1570,19 +1574,18 @@ Xwindows {
       {/F3_KEY (stop)}
       {/F4_KEY (abort)}
       {/CTRL_1_KEY (scream)}
+      {/goto_point_emacs (process-mark)}
     } {
       exec
-      ~[1024 /b array 0
-        (exec ) fax
-        getstartupdir fax
-        (emacsclient-run.sh ) fax
-        emacs_server_name fax
-        ( "\(d-comint-mode-) fax
-        4 -1 roll fax
-        (\)") fax
-        0 exch getinterval
-        {[exch tosystem} ~stopped ~cleartomark |]
-        ~end
+      ~[
+        ~openlist
+        emacs_client_cmd
+        emacs_server_name
+        1024 /b array 0
+          (\(d-comint-mode-) fax 6 -1 roll fax (\)) fax
+          0 exch getinterval
+        {{fds sh_ fg} PROCESSES ~indict stopped pop end}
+        ~exec
       ] bind def
     } forall
     
