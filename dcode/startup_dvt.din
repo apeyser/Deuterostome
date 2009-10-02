@@ -292,7 +292,7 @@ startup_common_save capsave {
 | The node list stores information on the whereabouts, state, and grouping
 | of the nodes. Node list entries are lists themselves:
 | 
-| [ (hostname) port# socket status group color_list color_name]
+| [ (hostname) port# socket status group color_list color_name ssh-pid]
 |
 | The status is busy (true) or ready (false). Busy nodes are not given
 | dvt phrases unless this is forced by the '!' tag. The group is a negative
@@ -306,8 +306,8 @@ startup_common_save capsave {
 | machinery of the nodes window.
 
   /nodelist [
-    [ (dvt) null null false 0 {} null ]
-    9 { [ null null null false 0 {} null] } repeat
+    [ (dvt) null null false 0 {} null null]
+    9 { [ null null null false 0 {} null null] } repeat
   ] def
 
 |------------------------------- front-end ------------------------------
@@ -441,20 +441,33 @@ c_         list all connections
   } bind userdict 3 -1 roll put
 
 |---------------------------------------------------- connect to node
-| hostname port# group# | -- 
+| hostname port# group# sshname | -- 
 |
 | connects to the node and makes itself the current dvt of the node;
 | the node is assigned a group number (enter as NEGATIVE integer)
 | Also connects the eye.
 
-  /getdnodedisplay Xwindows not ~null {  
+  /getdnodedisplay Xwindows not ~null ~ssh_display ifelse
+
+  | (display) | pid
+  /ssh_command {
+    openlist (ssh) 3 -1 roll (dvtgetdisplay) sh
+  } bind def
+
+  | check (added) & kill (updated) for time lapse
+  | between create, check & kill -- need to look in pidsockets
+  | <<node set>> | (display:0.0)
+  /ssh_result 1024 /b array def
+  /ssh_display {
     {
-      ~[
-        getdvtdisplay_ 
-        Xauthget /Xauthput find ~exec
-      ]
-    }
-  } ifelse bind def
+      node 7 get dup null eq {pop} {/QUIT kill} ifelse
+      getdisplayhost dup null eq {pop node 0 get} if
+      pipefd 3 -1 roll ~ssh_command NULLR 4 -1 roll STDERR bg
+      ssh_result 3 -1 roll readfd ~closefd if
+      exch dup check {pop pop /NOSYSTEM makeerror} if
+      node 7 put
+    } PROCESSES indict
+  } bind def
 
   Xwindows {
     /_cx {
@@ -496,7 +509,7 @@ c_         list all connections
   } if
 
 |---------------------------------------------------- connect to node
-| [/color...] hostname port# group# | -- 
+| [/color...] hostname port# group# sshname | -- 
 |
 | connects to the node and makes itself the current dvt of the node;
 | the node is assigned a group number (enter as NEGATIVE integer)
@@ -543,7 +556,7 @@ c_         list all connections
   } if
   
 |---------------------------------------------------- set up node
-| hostname port# group# <l opds dicts execs vm/M userdict > | -- 
+| hostname port# group# sshname <l opds dicts execs vm/M userdict > | -- 
 |
 | connects to the node like '-c', primes its memory setup, reads
 | startup_dnode.d, and makes itself the dvt of the node;
@@ -594,25 +607,7 @@ c_         list all connections
   } bind userdict 3 -1 roll put
 
   Xwindows {
-    Xdisplayname {
-      (localhost:) anchorsearch not {
-        (:) anchorsearch not {dup exit} if
-      } if pop
-      dup length 1 add /b array 0 (:) fax 3 -1 roll fax pop
-      getmyfqdn dup length 2 index length add /b array 0
-      3 -1 roll fax 2 index fax pop
-      exit
-    } loop 
-    userdict /getforeigndisplay put
-    userdict /getlocaldisplay put
-
-    /getdvtdisplay {
-      node 0 get (localhost) anchorsearch not {pop getforeigndisplay} {
-        pop length 0 eq ~getlocaldisplay ~getforeigndisplay ifelse
-      } ifelse
-    } bind def
-
-    /getdvtdisplay_ ~getdvtdisplay def
+    /getdisplayhost null def
   } if
 
   /_csu1x {
@@ -799,7 +794,7 @@ c_         list all connections
     end userdict 3 -1 roll put
 
     /dnode_resize {
-      /getdvtdisplay_ dnode_setup /display get def
+      /getdisplayhost dup find exch dnode_setup /display get def
       dnode_setup begin
       color dup null eq {pop ~_csu} {
         dup class /listclass ne {[exch]} if
@@ -812,22 +807,22 @@ c_         list all connections
       mb    1 index 3 put
       user  1 index 4 put
       end 5 -1 roll exec
-      /getdvtdisplay_ ~getdvtdisplay def
+      /getdisplayhost name
     } bind def
 
   | ~_c ~_cc | --
     /dnode_up {
-      /getdvtdisplay_ dnode_setup /display get def
+      /getdisplayhost dup find dnode_setup /display get def
       dnode_setup begin
       color dup null eq {pop pop} {
         3 -1 roll pop
         dup class /listclass ne {[exch]} if
         exch
       } ifelse
-      host port group
+      host port group ssh
       end
       4 -1 roll exec
-      /getdvtdisplay_ ~getdvtdisplay def
+      /getdisplayhost name
     } bind def
 
     /dnode_display {dnode_setup /display put} bind userdict 3 -1 roll put
@@ -978,6 +973,10 @@ c_         list all connections
     0     node 4 put
     {}    node 5 put
     null  node 6 put
+    node 7 get dup null eq ~pop {
+      {check not /QUIT kill} PROCESSES indict
+    } if
+    null  node 7 put
 
     knode kbdowner eq {0 _t} if
   } bind def
@@ -1651,75 +1650,6 @@ Xwindows {
   } bind def
 } if
 
-| ========================================= set up Xauth data for dnodes
-| Xauthmake - set up a dictionary of Xauth data:
-|  /trusted - true if the connection will be trusted
-|  /datain  - data for creating cookie
-|  /sec_name - protocol string (such as MIT-MAGIC-COOKIE-1)
-|  /lasttime - time that data was generated (-1 if none generated yet)
-| Xauthcreate - generate dataout and id
-|  /dataout - Xauth certificate generated
-|  /id - id for certificate (used to revoke, numeral)
-|  /lasttime - set to current time
-| Xauthget - if certificate has timed, generate one; 
-|            return protocol name and dataout
-| Xauthput - if Xauth available, call Xauthset with (protocol) <b dataout>
-| 
-| If no Xauth, Xauthget and Xauthput are defined to empty,
-|  the rest are undefined.
-|
-Xwindows {
-  Xauth not {/Xauthget {} def /Xauthput {} def} {
-    | (name) <b indata>/{} bool-trusted | xauthdict
-    /Xauthmake {
-      7 dict dup begin
-        exch /trusted name
-        exch /datain  name
-        exch /sec_name name
-        -1 /lasttime name
-      end 
-    } bind def
-
-    | -- xauthdict <<Xauthmake called, /xauthdict set>> 
-    |    | -- <<dataout,id>>
-    /Xauthcreate {
-      dup              /xsave    known {dup /xsave get restore} if
-      save 1 index     /xsave    put
-      dup gettime exch /lasttime put
-
-      dup              /sec_name get exch
-      dup              /datain   get exch
-      dup              /trusted  get exch
-      5 1 roll Xauthgen
-
-      4 -1 roll 
-      exch 1 index /id      put
-      exch 1 index /dataout put
-      exch pop     /xsave get capsave
-    } bind def
-
-    | -- <<Xauthmake called, /xauthdict save>> | (protocol) <b dataout>
-    /Xauthget {
-      xauthdict dup /lasttime get dup -1 eq {pop dup Xauthcreate} {
-        gettime exch sub 30 gt {dup Xauthcreate} if
-      } ifelse
-
-      dup  /sec_name get
-      exch /dataout  get
-    } bind def
-
-    | (protocol) <b dataout> | -- <<Xauth certificate set for Xconnect>>
-    /Xauthput {
-      Xauth {Xauthset} {
-        pop pop (!!! Xauth extension missing !!!\n) toconsole
-      } ifelse
-    } bind def
-          
-    | default is MIT-MAGIC-COOKIE trusted for 60 seconds
-    /xauthdict_def (MIT-MAGIC-COOKIE-1) () true Xauthmake def
-    /xauthdict xauthdict_def def
-  } ifelse
-} if
         
 |----------------------------- start the dvt ------------------------------
 | A 'save' representing a clean dvt is associated with the name cleanDVT in

@@ -97,6 +97,7 @@ endif ENABLE_X11
 
 bin_PROGRAMS = dvt dnode dgen \
 	$(DNODEDAEMONBIN) $(MPI_PROGS) dmprop \
+	dvtgetdisplay \
 	$(DVTXSETINPUTFOCUSBIN)
 noinst_PROGRAMS = testwordorder $(DNODENICEBIN)
 

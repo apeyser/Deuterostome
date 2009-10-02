@@ -39,7 +39,7 @@ host_triplet = @host@
 target_triplet = @target@
 bin_PROGRAMS = dvt$(EXEEXT) dnode$(EXEEXT) dgen$(EXEEXT) \
 	$(am__EXEEXT_1) $(am__EXEEXT_2) dmprop$(EXEEXT) \
-	$(am__EXEEXT_3)
+	dvtgetdisplay$(EXEEXT) $(am__EXEEXT_3)
 noinst_PROGRAMS = testwordorder$(EXEEXT) $(am__EXEEXT_4)
 @ENABLE_PLUGINS_SUPPORT_TRUE@am__append_1 = @INCLTDL@
 DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(dist_pkgdata_SCRIPTS) \
@@ -246,6 +246,9 @@ am__dvt_x_set_input_focus_SOURCES_DIST = x-set-input-focus.c
 dvt_x_set_input_focus_OBJECTS = $(am_dvt_x_set_input_focus_OBJECTS)
 @ENABLE_X11_TRUE@dvt_x_set_input_focus_DEPENDENCIES =  \
 @ENABLE_X11_TRUE@	$(am__DEPENDENCIES_1)
+dvtgetdisplay_SOURCES = dvtgetdisplay.c
+dvtgetdisplay_OBJECTS = dvtgetdisplay.$(OBJEXT)
+dvtgetdisplay_LDADD = $(LDADD)
 am_testwordorder_OBJECTS = test-word-order.$(OBJEXT)
 testwordorder_OBJECTS = $(am_testwordorder_OBJECTS)
 testwordorder_LDADD = $(LDADD)
@@ -271,13 +274,14 @@ SOURCES = $(libdmbootstrap_la_SOURCES) \
 	$(nodist_dnode_SOURCES) $(nodist_dnode_daemon_SOURCES) \
 	$(nodist_dnode_nice_SOURCES) $(dpawn_SOURCES) \
 	$(nodist_drook_SOURCES) $(dvt_SOURCES) $(nodist_dvt_SOURCES) \
-	$(dvt_x_set_input_focus_SOURCES) $(testwordorder_SOURCES)
+	$(dvt_x_set_input_focus_SOURCES) dvtgetdisplay.c \
+	$(testwordorder_SOURCES)
 DIST_SOURCES = $(libdmbootstrap_la_SOURCES) \
 	$(am__libdmglobals_la_SOURCES_DIST) \
 	$(am__libdmnodal_la_SOURCES_DIST) $(dgen_SOURCES) \
 	$(dmprop_SOURCES) $(am__dnode_SOURCES_DIST) $(dpawn_SOURCES) \
 	$(dvt_SOURCES) $(am__dvt_x_set_input_focus_SOURCES_DIST) \
-	$(testwordorder_SOURCES)
+	dvtgetdisplay.c $(testwordorder_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -1184,6 +1188,9 @@ dvt$(EXEEXT): $(dvt_OBJECTS) $(dvt_DEPENDENCIES)
 dvt-x-set-input-focus$(EXEEXT): $(dvt_x_set_input_focus_OBJECTS) $(dvt_x_set_input_focus_DEPENDENCIES) 
 	@rm -f dvt-x-set-input-focus$(EXEEXT)
 	$(LINK) $(dvt_x_set_input_focus_OBJECTS) $(dvt_x_set_input_focus_LDADD) $(LIBS)
+dvtgetdisplay$(EXEEXT): $(dvtgetdisplay_OBJECTS) $(dvtgetdisplay_DEPENDENCIES) 
+	@rm -f dvtgetdisplay$(EXEEXT)
+	$(LINK) $(dvtgetdisplay_OBJECTS) $(dvtgetdisplay_LDADD) $(LIBS)
 testwordorder$(EXEEXT): $(testwordorder_OBJECTS) $(testwordorder_DEPENDENCIES) 
 	@rm -f testwordorder$(EXEEXT)
 	$(LINK) $(testwordorder_OBJECTS) $(testwordorder_LDADD) $(LIBS)
@@ -1242,6 +1249,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvt-dm-prop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvt-dm3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvt-dvt.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvtgetdisplay.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm-conv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm-signals.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm-types.Plo@am__quote@

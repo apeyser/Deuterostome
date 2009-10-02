@@ -392,9 +392,6 @@
 /* Define to 1 if you have the `wmempcpy' function. */
 #undef HAVE_WMEMPCPY
 
-/* Define to 1 if you have <X11/extensions/security.h */
-#undef HAVE_X11_EXTENSIONS_SECURITY_H
-
 /* Define to 1 if the system has the type `_Bool'. */
 #undef HAVE__BOOL
 

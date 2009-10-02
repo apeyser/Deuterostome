@@ -253,7 +253,6 @@ CF_AC_CHECK_HEADER([sys/resource.h])
 CF_X11_ENABLED([
   CF_AC_CHECK_HEADER([X11/Xlib.h])
   CF_AC_CHECK_HEADER([X11/Xutil.h])
-  CF_AC_CHECK_XSEC()
 ])
 CF_AC_CHECK_HEADER([strings.h])
 CF_AC_CHECK_HEADER([inttypes.h])
