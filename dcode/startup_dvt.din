@@ -447,27 +447,43 @@ c_         list all connections
 | the node is assigned a group number (enter as NEGATIVE integer)
 | Also connects the eye.
 
-  /getdnodedisplay Xwindows not ~null ~ssh_display ifelse
+  /ssh_display [
+    /result 1024 /b array def
+    /flags []
 
-  | (display) | pid
-  /ssh_command {
-    openlist (ssh) 3 -1 roll (dvtgetdisplay) sh
-  } bind def
+    | (display) | pid
+    /command {
+      openlist (ssh) ssh_flags ~null forall 
+      counttomark 1 add -1 roll 
+      (dvtgetdisplay) sh
+    } bind
 
-  | check (added) & kill (updated) for time lapse
-  | between create, check & kill -- need to look in pidsockets
-  | <<node set>> | (display:0.0)
-  /ssh_result 1024 /b array def
-  /ssh_display {
-    {
-      node 7 get dup null eq {pop} {/QUIT kill} ifelse
+    | (display-host) | (display) pid
+    /ssh {
+      pipefd 
+      3 -1 roll ~command {NULLR 4 -1 roll STDERR bg} PROCESSES indict
+      result 3 -1 roll readfd ~closefd if        
+    } bind
+
+    | (display-host) | (display)
+    /display {
+      node 7 get dup null ne {
+        dup /QUIT {kill wait} PROCESSES indict
+      } if pop
+
       getdisplayhost dup null eq {pop node 0 get} if
-      pipefd 3 -1 roll ~ssh_command NULLR 4 -1 roll STDERR bg
-      ssh_result 3 -1 roll readfd ~closefd if
-      exch dup check {pop pop /NOSYSTEM makeerror} if
-      node 7 put
-    } PROCESSES indict
-  } bind def
+      dup (^localhost$) regexs {4 ~pop repeat} {
+        ssh dup ~isdead PROCESSES indict {
+          null node 7 put /NOSYSTEM makeerror
+        } if
+        node 7 put
+      } ifelse
+    } bind
+  ] makestruct def
+
+  /getdnodedisplay
+    Xwindows not {null} {~[~display ssh_display indict]} ifelse
+  bind def
 
   Xwindows {
     /_cx {
@@ -973,9 +989,9 @@ c_         list all connections
     0     node 4 put
     {}    node 5 put
     null  node 6 put
-    node 7 get dup null eq ~pop {
-      {check not /QUIT kill} PROCESSES indict
-    } if
+    node 7 get dup null eq {
+      {dup isdead not {dup /QUIT kill wait} if} PROCESSES indict
+    } if pop
     null  node 7 put
 
     knode kbdowner eq {0 _t} if
