@@ -309,7 +309,7 @@
     |----------------------------------------------mat vec mul
     |
     |---------------------- pmatvecmul ----------------------
-    | y beta A trans x alpha | y
+    | y beta A trans x alpha | --
     | 
     | y = beta*y + alpha*A*x
     |
@@ -318,7 +318,7 @@
     } bind def
     
     |----------------------- get_matvecmul ----------------------
-    | y beta A trans x alpha | y
+    | y beta A trans x alpha | --
     | 
     | y = beta*y + alpha*A*x
     | return y to node
