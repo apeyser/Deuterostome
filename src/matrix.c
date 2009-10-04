@@ -302,7 +302,7 @@ P op_matmul_blas(void)
 		return(OK);
 }
 
-// matrix <cuts> <l pivot> | lumatrix(matrix) <cuts> <l pivot> true
+// matrix <x cuts> <l pivot> | lumatrix(matrix) <cuts> <l pivot> true
 //                         | false
 P op_decompLU_lp(void) {
   P N;
