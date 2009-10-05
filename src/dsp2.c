@@ -581,7 +581,7 @@ P thread_matmul(UL32 id, const void* global,
   UL32 i, j;
 
   for (i = i_; i < i_ + n; i++)
-    for (j = 0; j < (UP) m->Ncolc; j++)
+    for (j = 0; j < (UL32) m->Ncolc; j++)
       MATMUL_INNER(m->Ncola, m->ap, m->bp, m->cp);
   
   return OK;

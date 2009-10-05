@@ -363,7 +363,7 @@ P op_tile(void)
   if ((idx + count * ARRAY_SIZE(o_1)) > ARRAY_SIZE(o_4)) return RNG_CHK;
   (*(tile_list[TYPE(o_4)]))(o_1,o_4,idx,count);
 
-  TAG(o_3) = NUM | LBIGTYPE;
+  TAG(o_3) = NUM | LONGBIGTYPE;
   ATTR(o_3) = 0;
   LONGBIG_VAL(o_3) += count * ARRAY_SIZE(o_1);
   FREEopds = o_2;

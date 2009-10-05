@@ -47,31 +47,31 @@ BOOLEAN share_lock_i = FALSE;
 #define MAINERR(func, ...) THREAD_ERROR_EXIT(func, "main", __VA_ARGS__)
 
 void thread_unlock_lock(void* arg) {
-  UL32 thread_id = (UL32) arg;
+  UL32 thread_id = (UL32) (P) arg;
   THREADERR(pthread_mutex_unlock, thread_lock+thread_id);
 }
 
 void thread_destroy_lock(void* arg) {
-  UL32 thread_id = (UL32) arg;
+  UL32 thread_id = (UL32) (P) arg;
   THREADERR(pthread_mutex_destroy, thread_lock+thread_id);
 }
 
 void thread_destroy_wait(void* arg) {
-  UL32 thread_id = (UL32) arg;
+  UL32 thread_id = (UL32) (P) arg;
   THREADERR(pthread_cond_destroy, thread_wait+thread_id);
 }
 
 void* thread_routine(void* arg) {
-  UL32 thread_id = (UL32) arg;
+  UL32 thread_id = (UL32) (P) arg;
 
   THREADERR(pthread_cond_init, thread_wait+thread_id, NULL);
-  pthread_cleanup_push(thread_destroy_wait, (void*) thread_id);
+  pthread_cleanup_push(thread_destroy_wait, (void*) (P) thread_id);
 
   THREADERR(pthread_mutex_init, thread_lock+thread_id, NULL);
-  pthread_cleanup_push(thread_destroy_lock, (void*) thread_id);
+  pthread_cleanup_push(thread_destroy_lock, (void*) (P) thread_id);
 
   THREADERR(pthread_mutex_lock, thread_lock+thread_id);
-  pthread_cleanup_push(thread_unlock_lock, (void*) thread_id);
+  pthread_cleanup_push(thread_unlock_lock, (void*) (P) thread_id);
 
   THREADERR(pthread_sigmask, SIG_BLOCK, &sigmask, NULL);
 
@@ -245,7 +245,7 @@ P threads_init(L32 num) {
                  threads + thread_num_,
                  NULL, //&attr,
                  thread_routine,
-                 (void*) thread_num_);
+                 (void*) (P) thread_num_);
   THREADS_INITD();
   
   return OK;
