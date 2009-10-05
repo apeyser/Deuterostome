@@ -1169,36 +1169,6 @@ P op_getsocket(void)
   return(OK);
 }
 
-/*------------------------------------------- getmyname
-  -- | string
-
-  returns the host's name
-*/
-
-P op_getmyname(void)
-{
-  if (o1 >= CEILopds) return OPDS_OVF;
-  if (! myname_frame) return CORR_OBJ;
-  moveframe(myname_frame, o1);
-  FREEopds = o2;
-  return OK;
-}
-
-/*------------------------------------------- getmyfqdn
-    -- | string
-
-    returns the host's name
-*/
-
-P op_getmyfqdn(void)
-{
-  if (o1 >= CEILopds) return OPDS_OVF;
-  if (! myfqdn_frame) return CORR_OBJ;
-  moveframe(myfqdn_frame, o1);
-  FREEopds = o2;
-  return OK;
-}
-
 // closes the signal socket passed in.
 P forksighandler(P sigsocket, P tcp_sigsocket, P serverport, P* pid) {
   return spawnsighandler(sigsocket, tcp_sigsocket, 

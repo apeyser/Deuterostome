@@ -410,9 +410,7 @@ startup_common_save capsave {
             exch not {abort} if
             /fbuf vmstatus sub 10 div /b array def
             ~[~[
-              mpirank 
-              (hostname) fromsystem dup length 1 sub 0 exch getinterval
-              ~mpidata ~begin ~sethostname
+              mpirank getmyfqdn ~mpidata ~begin ~sethostname
             ] ~lock]
             1 index capsave
             getstartupdir (startup_dpawn.d) fbuf readfile mkact exec

@@ -57,4 +57,7 @@ DLL_SCOPE P int_repush_stop(P (*abortfunc)(void));
 
 DLL_SCOPE void createfds(void);
 
+DLL_SCOPE P op_getmyname(void);
+DLL_SCOPE P op_getmyfqdn(void);
+
 #endif //DM_2_H

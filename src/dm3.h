@@ -75,8 +75,6 @@ DLL_SCOPE P op_disconnect(void);
 DLL_SCOPE P op_send(void);
 DLL_SCOPE P op_sendsig(void);
 DLL_SCOPE P op_getsocket(void);
-DLL_SCOPE P op_getmyname(void);
-DLL_SCOPE P op_getmyfqdn(void);
 
 DLL_SCOPE P readfd(P fd, B* where, P n, P secs);
 DLL_SCOPE P writefd(P fd, B* where, P n, P secs);
