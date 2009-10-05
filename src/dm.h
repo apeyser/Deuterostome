@@ -600,6 +600,14 @@ DM_HOT DM_INLINE_STATIC BOOLEAN PVALUE(B* frame, P* var) {
 #endif // DM_HOST_IS_32_BIT
 }
 
+DM_HOT DM_INLINE_STATIC BOOLEAN L32VALUE(B* frame, L32* var) {
+  LBIG v;
+  if (!VALUE(frame, &v) || v > L32MAX || v < -L32MAX)
+    return FALSE;
+  *var = (L32) v;
+  return TRUE;
+}
+
 #if __cplusplus
 }
 #endif		

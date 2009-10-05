@@ -363,8 +363,8 @@ P op_tile(void)
   if ((idx + count * ARRAY_SIZE(o_1)) > ARRAY_SIZE(o_4)) return RNG_CHK;
   (*(tile_list[TYPE(o_4)]))(o_1,o_4,idx,count);
 
-  TAG(o_3) = NUM | LONGBIGTYPE; 
-  ATTR(o_3) = 0;   
+  TAG(o_3) = NUM | LBIGTYPE;
+  ATTR(o_3) = 0;
   LONGBIG_VAL(o_3) += count * ARRAY_SIZE(o_1);
   FREEopds = o_2;
   return OK;
@@ -832,9 +832,9 @@ P op_ran1(void)
 
 P op_solve_bandmat(void)
 {
-  P nband, na, k, nb, m2, i, j, l, w;
-  P m1;
-  LBIG *iarr;
+  L32 nband, na, k, nb, m2, i, j, l, w;
+  L32 m1;
+  L32 *iarr;
   D **a, *b, **m, x, *free;
   B *fa;
   BOOLEAN good; 
@@ -843,7 +843,7 @@ P op_solve_bandmat(void)
   if (CLASS(o_3) != LIST) return OPD_CLA;
   if (TAG(o_2) != (ARRAY | DOUBLETYPE)) return OPD_TYP;
   if (CLASS(o_1) != NUM) return OPD_CLA;
-  if (!PVALUE(o_1,&m1)) return UNDF_VAL;
+  if (!L32VALUE(o_1, &m1)) return UNDF_VAL;
   if (m1 < 0) return RNG_CHK;
   if (ATTR(o_2) & READONLY) return OPD_ATR;
   na = ARRAY_SIZE(o_2);
@@ -859,7 +859,7 @@ P op_solve_bandmat(void)
   /* reserve work memory in VM */   
   if (nband <= m1) return RNG_CHK;
   nb = DALIGN((nband + m1) * sizeof(D *)) 
-    + m1 * na * sizeof(D) + na * sizeof(P);
+    + m1 * na * sizeof(D) + na * sizeof(L32);
   if ((FREEvm + nb) > CEILvm) return VM_OVF;
   a = (D **)FREEvm; fa = (B *)VALUE_BASE(o_3);
   for (k=0; k<nband; k++) { 
@@ -871,7 +871,7 @@ P op_solve_bandmat(void)
     m[k] = free - 1; 
     free += na; 
   }
-  iarr = ((LBIG *)free) - 1;
+  iarr = ((L32 *)free) - 1;
   a += m1; m--; m2 = nband - m1 - 1;
   
   /* banddet1 */
@@ -961,9 +961,9 @@ P op_solve_bandmat(void)
 
 P op_bandLU(void)
 {
-  P nband, na, k, nb, m2, i, j, l;
-  P m1;
-  LBIG *iarr;
+  L32 nband, na, k, nb, m2, i, j, l;
+  L32 m1;
+  L32 *iarr;
   D **a, **m, x, *free;
   B *fa;
   BOOLEAN good; 
@@ -973,14 +973,14 @@ P op_bandLU(void)
   if (CLASS(o_4) != LIST) return OPD_CLA;
   if (CLASS(o_3) != LIST) return OPD_CLA;
   if (CLASS(o_2) != NUM) return OPD_CLA;
-  if (TAG(o_1) != (ARRAY | LONGBIGTYPE)) return OPD_TYP;
+  if (TAG(o_1) != (ARRAY | LONG32TYPE)) return OPD_TYP;
 
   if ((ATTR(o_4) & READONLY) 
       || (ATTR(o_3) & READONLY) 
       || (ATTR(o_1) & READONLY))
     return OPD_ATR;
 
-  if (!PVALUE(o_2,&m1)) return UNDF_VAL;
+  if (!L32VALUE(o_2,&m1)) return UNDF_VAL;
   if (m1 < 0) return RNG_CHK;
 
   na = 0;
@@ -1021,7 +1021,7 @@ P op_bandLU(void)
     m[k] = ((D *)(VALUE_BASE(fa))) - 1; 
     fa += FRAMEBYTES;
   }
-  iarr = (LBIG*)VALUE_BASE(o_1) - 1;
+  iarr = (L32*)VALUE_BASE(o_1) - 1;
   
   a += m1; m--; m2 = nband - m1 - 1;
 
@@ -1079,8 +1079,8 @@ This is the procedure bandsol1.
 
 P op_bandBS(void)
 {
-  P nband, na, k, nb, m1, m2, i, l, w;
-  LBIG *iarr;
+  L32 nband, na, k, nb, m1, m2, i, l, w;
+  L32 *iarr;
   D **a, *b, **m, x, *free;
   B *fa;
 
@@ -1088,7 +1088,7 @@ P op_bandBS(void)
   if (CLASS(o_5) != LIST) return OPD_CLA;
   if (CLASS(o_4) != LIST) return OPD_CLA;
   if (CLASS(o_3) != NUM) return OPD_CLA;
-  if (TAG(o_2) != (ARRAY | LONGBIGTYPE)) return OPD_TYP;
+  if (TAG(o_2) != (ARRAY | LONG32TYPE)) return OPD_TYP;
   if (TAG(o_1) != (ARRAY | DOUBLETYPE)) return OPD_TYP;
 
   if ((ATTR(o_1) & READONLY) 
@@ -1096,7 +1096,7 @@ P op_bandBS(void)
       || (ATTR(o_2) & READONLY))
     return OPD_ATR;
 
-  if (!PVALUE(o_3,&m1)) return UNDF_VAL;
+  if (!L32VALUE(o_3,&m1)) return UNDF_VAL;
   if (m1 < 0) return RNG_CHK;
 
   na = 0;
@@ -1143,7 +1143,7 @@ P op_bandBS(void)
     m[k] = ((D *)(VALUE_BASE(fa))) - 1; 
     fa += FRAMEBYTES;
   }
-  iarr = (LBIG *)VALUE_BASE(o_2) - 1;
+  iarr = (L32 *)VALUE_BASE(o_2) - 1;
   b = (D *)VALUE_BASE(o_1) - 1;
 
   a += m1; m--; m2 = nband - m1 - 1;
@@ -1152,7 +1152,7 @@ P op_bandBS(void)
   
   l = m1;
   for (k=1; k<=na; k++) { 
-    i = (P) iarr[k];
+    i = iarr[k];
     if (i != k) { 
       x = b[k]; b[k] = b[i]; b[i] = x; 
     }

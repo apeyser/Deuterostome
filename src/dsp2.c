@@ -44,9 +44,9 @@
 #define TwoPi 6.28318530717959
 #define Pi 3.141592653589793
 
-DM_INLINE_STATIC void four1( D *data, P nn, P dir)
+DM_INLINE_STATIC void four1(D *data, L32 nn, LBIG dir)
 {
-  P n, mmax, m, j, istep, i;
+  L32 n, mmax, m, j, istep, i;
   D wtemp, wr, wpr, wpi, wi, theta, tempr, tempi;
    
   n = nn << 1;
@@ -99,9 +99,9 @@ DM_INLINE_STATIC void four1( D *data, P nn, P dir)
   NOTE: call with 'data' pointing one below the first element
 */
 
-DM_INLINE_STATIC void realft(D *data, P n, P dir)
+DM_INLINE_STATIC void realft(D *data, L32 n, LBIG dir)
 {
-  P i, i1, i2, i3, i4, np3;
+  L32 i, i1, i2, i3, i4, np3;
   D c1, c2, h1r, h1i, h2r, h2i, wr, wi, wpr, wpi, wtemp, theta;
    
   c1 = 0.5;
@@ -156,9 +156,9 @@ DM_INLINE_STATIC void realft(D *data, P n, P dir)
 */  
 
 
-DM_INLINE_STATIC void sinft( D *y, P n)
+DM_INLINE_STATIC void sinft(D *y, L32 n)
 {
-  P j, n2;
+  L32 j, n2;
   D sum, y1, y2, theta, wi, wr, wpi, wpr, wtemp;
    
   n2 = n + 2;
@@ -191,9 +191,9 @@ DM_INLINE_STATIC void sinft( D *y, P n)
   (Press et al., page 46
 */
 
-DM_INLINE_STATIC BOOLEAN ludcmp(D **a, P n, LBIG *indx, D *d, D *vv)
+DM_INLINE_STATIC BOOLEAN ludcmp(D **a, L32 n, L32 *indx, D *d, D *vv)
 {
-  P i, imax = 0, j, k;
+  L32 i, imax = 0, j, k;
   D big, dum, sum, temp, TINY;
   TINY = 1e-20;
    
@@ -247,15 +247,15 @@ DM_INLINE_STATIC BOOLEAN ludcmp(D **a, P n, LBIG *indx, D *d, D *vv)
   (Press et al., page 47)
 */
 
-DM_INLINE_STATIC void lubksb(D **a, P n, LBIG *indx, D *b)
+DM_INLINE_STATIC void lubksb(D **a, L32 n, L32 *indx, D *b)
 {
-   P i, ii, ip, j;
+   L32 i, ii, ip, j;
    D sum;
 
    ii = 0;
    
    for (i=1; i<=n; i++) { 
-     ip = (P) indx[i];
+     ip = indx[i];
      sum = b[ip];
      b[ip] = b[i];
      if (ii) for (j=ii; j<=i-1; j++) sum -= a[i][j] * b[j];
@@ -285,7 +285,7 @@ DM_INLINE_STATIC void lubksb(D **a, P n, LBIG *indx, D *b)
 
 P op_complexFFT(void)
 {
-  P N2, logN2, j;
+  L32 N2, logN2, j;
   LBIG dir;
   D f, *data;
 
@@ -327,7 +327,7 @@ P op_complexFFT(void)
 
 P op_realFFT(void)
 {
-  P N, logN, j;
+  L32 N, logN, j;
   LBIG dir;
   D f, *data;
 
@@ -365,7 +365,7 @@ P op_realFFT(void)
 
 P op_sineFFT(void)
 {
-  P N, logN, j;
+  L32 N, logN, j;
   LBIG dir;
   D f, *data;
 
@@ -404,8 +404,8 @@ P op_sineFFT(void)
 
 P op_decompLU(void)
 {
-  P N, k;
-  LBIG *idxp;
+  L32 N, k;
+  L32 *idxp;
   B *fp;
   D **ap, *vec, d;
 
@@ -425,9 +425,9 @@ P op_decompLU(void)
     fp += FRAMEBYTES;
   }
   vec = (D *)DALIGN(ap);
-  if (TAG(o_1) != (ARRAY | LONGBIGTYPE)) return OPD_ERR;
+  if (TAG(o_1) != (ARRAY | LONG32TYPE)) return OPD_ERR;
   if (ARRAY_SIZE(o_1) != N) return RNG_CHK;
-  idxp = (LBIG *)VALUE_BASE(o_1);
+  idxp = (L32 *)VALUE_BASE(o_1);
 
   if (ludcmp(((D **)FREEvm)-1, N, idxp-1, &d, vec-1)) { 
     TAG(o_2) = NUM | DOUBLETYPE;
@@ -454,8 +454,8 @@ P op_decompLU(void)
 
 P op_backsubLU(void)
 {
-  P N, k;
-  LBIG *idxp;
+  L32 N, k;
+  L32 *idxp;
   B *fp;
   D **ap, *bp;
 
@@ -472,9 +472,9 @@ P op_backsubLU(void)
     *(ap++) = ((D *)VALUE_BASE(fp)) - 1;
     fp += FRAMEBYTES;
   }
-  if (TAG(o_2) != (ARRAY | LONGBIGTYPE)) return OPD_ERR;
+  if (TAG(o_2) != (ARRAY | LONG32TYPE)) return OPD_ERR;
   if (ARRAY_SIZE(o_2) != N) return RNG_CHK;
-  idxp = (LBIG *)VALUE_BASE(o_2);
+  idxp = (L32 *)VALUE_BASE(o_2);
   if (TAG(o_1) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
   if (ARRAY_SIZE(o_1) != N) return RNG_CHK;
   bp = (D *)VALUE_BASE(o_1);
@@ -499,8 +499,8 @@ P op_backsubLU(void)
 
 P op_invertLU(void)
 {
-  P N, k, i, j;
-  LBIG *idxp;
+  L32 N, k, i, j;
+  L32 *idxp;
   B *fp;
   D **ap, **a1p, *vec, d;
 
@@ -531,9 +531,9 @@ P op_invertLU(void)
   }
 
   vec = (D *)DALIGN(ap)-1;
-  if (TAG(o_2) != (ARRAY | LONGBIGTYPE)) return OPD_ERR;
+  if (TAG(o_2) != (ARRAY | LONG32TYPE)) return OPD_ERR;
   if (ARRAY_SIZE(o_2) != N) return RNG_CHK;
-  idxp = (LBIG *)VALUE_BASE(o_2)-1;
+  idxp = (L32 *)VALUE_BASE(o_2)-1;
   
   if (ludcmp(((D **)FREEvm)-1, N, idxp, &d, vec)) {
     for (j=1; j<=N; j++) {
@@ -565,23 +565,23 @@ P op_invertLU(void)
 
 #if ENABLE_THREADS
 typedef struct {
-  P Ncolc, Ncola;
+  L32 Ncolc, Ncola;
   D *restrict *restrict ap, 
 	*restrict *restrict bp, 
 	*restrict *restrict cp;
-  UP perthread;
-  UP leftover;
+  UL32 perthread;
+  UL32 leftover;
 } matmult;
 
-P thread_matmul(UP id, const void* global, 
+P thread_matmul(UL32 id, const void* global, 
                 void* local __attribute__ ((__unused__))) {
   const matmult* restrict m = (const matmult*) global;
-  UP n = m->perthread + (thread_max() == id ? m->leftover : 0);
-  UP i_ = m->perthread*id;
-  UP i, j;
+  UL32 n = m->perthread + (thread_max() == id ? m->leftover : 0);
+  UL32 i_ = m->perthread*id;
+  UL32 i, j;
 
   for (i = i_; i < i_ + n; i++)
-    for (j = 0; j < (UP)m->Ncolc; j++)
+    for (j = 0; j < (UP) m->Ncolc; j++)
       MATMUL_INNER(m->Ncola, m->ap, m->bp, m->cp);
   
   return OK;
@@ -590,11 +590,11 @@ P thread_matmul(UP id, const void* global,
 
 P op_matmul(void)
 {
-  UP Nrowa, Nrowb, Nrowc, Ncola , Ncolb, Ncolc, i, j, k;
+  UL32 Nrowa, Nrowb, Nrowc, Ncola , Ncolb, Ncolc, i, j, k;
   B *fp;
   D **p, **ap, **bp, **cp;
 #if ENABLE_THREADS
-  UP nways;
+  UL32 nways;
 #endif
 
   if (o_3 < FLOORopds) return OPDS_UNF;
@@ -614,7 +614,7 @@ P op_matmul(void)
   for (k=0; k<Nrowc; k++) {
     if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
     if (Ncolc == 0) Ncolc = ARRAY_SIZE(fp);
-    else if ((UP)ARRAY_SIZE(fp) != Ncolc) return RNG_CHK;
+    else if ((UL32) ARRAY_SIZE(fp) != Ncolc) return RNG_CHK;
     *(p++) = ((D *)VALUE_BASE(fp));
     fp += FRAMEBYTES;
   }
@@ -625,8 +625,8 @@ P op_matmul(void)
   for (k=0; k<Nrowa; k++) { 
     if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
     if (Ncola == 0) Ncola = ARRAY_SIZE(fp);
-    else if ((UP)ARRAY_SIZE(fp) != Ncola) return RNG_CHK;
-    *(p++) = ((D *)VALUE_BASE(fp));
+    else if ((UL32) ARRAY_SIZE(fp) != Ncola) return RNG_CHK;
+    *(p++) = ((D *) VALUE_BASE(fp));
     fp += FRAMEBYTES;
   }
 
@@ -636,8 +636,8 @@ P op_matmul(void)
   for (k=0; k<Nrowb; k++) { 
     if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
     if (Ncolb == 0) Ncolb = ARRAY_SIZE(fp);
-    else if ((UP)ARRAY_SIZE(fp) != Ncolb) return RNG_CHK;
-    *(p++) = ((D *)VALUE_BASE(fp));
+    else if ((UL32) ARRAY_SIZE(fp) != Ncolb) return RNG_CHK;
+    *(p++) = ((D*) VALUE_BASE(fp));
     fp += FRAMEBYTES;
   }
   
@@ -686,19 +686,19 @@ P op_matmul(void)
 
 #if ENABLE_THREADS
 typedef struct {
-  P Ncola;
-  UP perthread;
-  UP leftover;
+  L32 Ncola;
+  UL32 perthread;
+  UL32 leftover;
   D *restrict *restrict ap, *restrict *restrict bp;
 } mattransposet;
 
-P thread_mattranspose(UP id,
+P thread_mattranspose(UL32 id,
                       const void* global,
                       void* local __attribute__ ((__unused__))) {
   const mattransposet* restrict m = (const mattransposet*) global;
-  UP n = m->perthread + (thread_max() == id ? m->leftover : 0);
-  const UP i_ = m->perthread*id;
-  UP i;
+  UL32 n = m->perthread + (thread_max() == id ? m->leftover : 0);
+  const UL32 i_ = m->perthread*id;
+  UL32 i;
   
   for (i = i_; i < i_ + n; ++i) 
     MATTRANSPOSE_INNER(m->Ncola, m->ap, m->bp);
@@ -709,11 +709,11 @@ P thread_mattranspose(UP id,
 
 P op_mattranspose(void)
 {
-  UP Nrowa, Nrowb, Ncola , Ncolb, i, k;
+  UL32 Nrowa, Nrowb, Ncola , Ncolb, i, k;
   B *fp;
   D **p, **ap, **bp;
 #if ENABLE_THREADS
-  UP nways;
+  UL32 nways;
 #endif //ENABLE_THREADS
 
   if (o_2 < FLOORopds) return OPDS_UNF;
@@ -730,8 +730,8 @@ P op_mattranspose(void)
   for (k=0; k<Nrowb; k++) {
     if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
     if (Ncolb == 0) Ncolb = ARRAY_SIZE(fp);
-    else if ((UP)ARRAY_SIZE(fp) != Ncolb) return RNG_CHK;
-    *(p++) = ((D *)VALUE_BASE(fp));
+    else if ((UL32) ARRAY_SIZE(fp) != Ncolb) return RNG_CHK;
+    *(p++) = ((D*) VALUE_BASE(fp));
     fp += FRAMEBYTES;
   }
 
@@ -741,8 +741,8 @@ P op_mattranspose(void)
   for (k=0; k<Nrowa; k++) { 
     if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
     if (Ncola == 0)  Ncola = ARRAY_SIZE(fp);
-    else if ((UP)ARRAY_SIZE(fp) != Ncola) return RNG_CHK;
-    *(p++) = ((D *)VALUE_BASE(fp));
+    else if ((UL32) ARRAY_SIZE(fp) != Ncola) return RNG_CHK;
+    *(p++) = ((D*) VALUE_BASE(fp));
     fp += FRAMEBYTES;
   }
   
@@ -791,18 +791,18 @@ typedef struct {
   D *restrict *restrict ap,
     *restrict bp,
     *restrict cp;
-  UP perthread;
-  UP leftover;
-  P Ncola;
+  UL32 perthread;
+  UL32 leftover;
+  L32 Ncola;
 } matvecmult;
 
-P thread_matvecmul(UP id,
+P thread_matvecmul(UL32 id,
                    const void* global,
                    void* local __attribute__ ((__unused__))) {
   const matvecmult *restrict m = (const matvecmult*) global;
-  const UP n = m->perthread + (thread_max() == id ? m->leftover : 0);
-  const UP i_ = m->perthread * id;
-  UP i;
+  const UL32 n = m->perthread + (thread_max() == id ? m->leftover : 0);
+  const UL32 i_ = m->perthread * id;
+  UL32 i;
   
   for (i = i_;  i < i_ + n; ++i)
     MATVECMUL_INNER(m->Ncola, m->ap, m->bp, m->cp);
@@ -813,11 +813,11 @@ P thread_matvecmul(UP id,
 
 P op_matvecmul(void)
 {
-  UP Nrowa, Nrowb, Nrowc, Ncola, i, k;
+  UL32 Nrowa, Nrowb, Nrowc, Ncola, i, k;
   B *fp;
   D **p, **ap, *bp, *cp;
 #if ENABLE_THREADS
-  UP nways;
+  UL32 nways;
 #endif //ENABLE_THREADS
 
   if (o_3 < FLOORopds) return OPDS_UNF;
@@ -837,8 +837,8 @@ P op_matvecmul(void)
   for (k=0; k<Nrowa; k++)  {
     if (TAG(fp) != (ARRAY | DOUBLETYPE)) return OPD_ERR;
     if (Ncola == 0) Ncola = ARRAY_SIZE(fp);
-    else if ((UP)ARRAY_SIZE(fp) != Ncola) return RNG_CHK;
-    *(p++) = ((D *)VALUE_BASE(fp));
+    else if ((UL32) ARRAY_SIZE(fp) != Ncola) return RNG_CHK;
+    *(p++) = ((D*) VALUE_BASE(fp));
     fp += FRAMEBYTES;
   }
   

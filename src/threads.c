@@ -15,9 +15,9 @@
 // Therefore, elements 0 is empty.
 pthread_t threads[THREADNUM] = {};
 BOOLEAN thread_start[THREADNUM] = {};
-UP thread_end = 0;
-UP thread_num_ = 1;
-UP thread_max_ = 0;
+UL32 thread_end = 0;
+UL32 thread_num_ = 1;
+UL32 thread_max_ = 0;
 pthread_cond_t thread_wait[THREADNUM] = {};
 pthread_mutex_t thread_lock[THREADNUM] = {};
 thread_func thread_function = NULL;
@@ -47,22 +47,22 @@ BOOLEAN share_lock_i = FALSE;
 #define MAINERR(func, ...) THREAD_ERROR_EXIT(func, "main", __VA_ARGS__)
 
 void thread_unlock_lock(void* arg) {
-  UP thread_id = (UP) arg;
+  UL32 thread_id = (UL32) arg;
   THREADERR(pthread_mutex_unlock, thread_lock+thread_id);
 }
 
 void thread_destroy_lock(void* arg) {
-  UP thread_id = (UP) arg;
+  UL32 thread_id = (UL32) arg;
   THREADERR(pthread_mutex_destroy, thread_lock+thread_id);
 }
 
 void thread_destroy_wait(void* arg) {
-  UP thread_id = (UP) arg;
+  UL32 thread_id = (UL32) arg;
   THREADERR(pthread_cond_destroy, thread_wait+thread_id);
 }
 
 void* thread_routine(void* arg) {
-  UP thread_id = (UP) arg;
+  UL32 thread_id = (UL32) arg;
 
   THREADERR(pthread_cond_init, thread_wait+thread_id, NULL);
   pthread_cleanup_push(thread_destroy_wait, (void*) thread_id);
@@ -106,10 +106,10 @@ void* thread_routine(void* arg) {
   return NULL;
 }
 
-P threads_do_int(UP nways, thread_func func,
+P threads_do_int(UL32 nways, thread_func func,
                  const void* global,
                  void* local, size_t s) {
-  UP i;
+  UL32 i;
   if (nways > thread_num()) return RNG_CHK;
   
   thread_max_ = nways-1;
@@ -140,13 +140,13 @@ P threads_do_int(UP nways, thread_func func,
   return OK;
 }
 
-DM_INLINE_STATIC P threads_do_pool_int_(UP nways, thread_func func, 
+DM_INLINE_STATIC P threads_do_pool_int_(UL32 nways, thread_func func, 
                               const void* global, 
                               void* local, size_t s) {
-  UP i; P r;
-  if ((P) nways < 0) return RNG_CHK;
+  UL32 i; P r;
+  if ((L32) nways < 0) return RNG_CHK;
     
-  for (i = (P) nways; i > 0; i -= thread_num()) {
+  for (i = (L32) nways; i > 0; i -= thread_num()) {
     if ((r = threads_do_int((i < thread_num()) ? i : thread_num(), 
                             func, global, local, s)) != OK)
       return r;
@@ -155,14 +155,14 @@ DM_INLINE_STATIC P threads_do_pool_int_(UP nways, thread_func func,
   return OK;
 }
 
-P threads_do_pool_int(UP nways, thread_func func, 
+P threads_do_pool_int(UL32 nways, thread_func func, 
                       const void* global, 
                       void* local, size_t s) {
-  UP i; P r; void* alloc = NULL;
+  UL32 i; P r; void* alloc = NULL;
   if (! local) {
-    if (! (local = alloc = malloc(sizeof(UP)*nways))) return MEM_OVF;
-    for (i = nways; i--;) ((UP*) local)[i] = i;
-    s = sizeof(UP);
+    if (! (local = alloc = malloc(sizeof(UL32)*nways))) return MEM_OVF;
+    for (i = nways; i--;) ((UL32*) local)[i] = i;
+    s = sizeof(UL32);
   }
   r = threads_do_pool_int_(nways, func, global, local, s);
   free(alloc);
@@ -230,7 +230,7 @@ P threads_destroy(P errno_) {
 
 
 
-P threads_init(P num) {
+P threads_init(L32 num) {
   if (num < 1 || num > THREADNUM) return RNG_CHK;
   if (num == 1) return OK;
 
@@ -240,7 +240,7 @@ P threads_init(P num) {
   THREADS_INIT_TEST(main_wait, pthread_cond_init, NULL);
 
   MAINERR(pthread_mutex_lock, &main_lock);
-  for (; thread_num_ < (UP)num; thread_num_++)
+  for (; thread_num_ < (UL32)num; thread_num_++)
     THREADS_INIT(pthread_create,
                  threads + thread_num_,
                  NULL, //&attr,
@@ -282,15 +282,16 @@ P op_threads(void) {
  *
  */
 P op_makethreads(void) {
-  LBIG n; 
+  L32 n; 
   P ret;
 
   if (FLOORopds > o_1) return OPDS_UNF;
   if (CLASS(o_1) != NUM) return OPD_CLA;
-  if (! VALUE(o_1, &n)) return UNDF_VAL;
+  if (! L32VALUE(o_1, &n)) return UNDF_VAL;
+  if (n < 1) return RNG_CHK;
 
   if ((ret = threads_destroy(0)) == OK 
-      && (ret = threads_init((P)n)) == OK)
+      && (ret = threads_init((UL32)n)) == OK)
     FREEopds = o_1;
   return ret;
 }
