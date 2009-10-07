@@ -409,7 +409,7 @@ startup_common_save capsave {
             /fbuf vmstatus sub 10 div /b array def
             ~[~[
               mpirank 
-              (hostname) fromsystem dup length 1 sub 0 exch getinterval
+              (xxx)
               ~mpidata ~begin ~sethostname
             ] ~lock]
             1 index capsave

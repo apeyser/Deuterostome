@@ -193,7 +193,7 @@
 } bind def
 
 /trisolve_test {false settrans
-  x1 x_temp copy A1_ A_cuts_ transA true triagonal_u triangular_solve
+  x1 x_temp copy A1_ A_cuts_ transA true triagonal_u solvetriang_blas
   y1 copy pop
 } bind def
 
