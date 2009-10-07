@@ -94,6 +94,7 @@ DLL_SCOPE void clearsocket(P fd);
 DLL_SCOPE void clearsocket_special(P fd); //defined by dvt or dnode
 
 DLL_SCOPE P closesockets_force(void);
+DLL_SCOPE P closesockets_proc(void);
 DLL_SCOPE P closesockets_fork(void);
 DLL_SCOPE P closesockets_exec(void);
 DLL_SCOPE P closesockets_resize(void);

@@ -374,6 +374,10 @@ P closesockets_force(void) {
   return _closesockets(_DelModeForce);
 }
 
+P closesockets_proc(void) {
+  return _closesockets(_DelModeProc);
+}
+
 P closesockets_exec(void) {
   return _closesockets(_DelModeExec);
 }
