@@ -565,9 +565,9 @@
   } bind def
 
   | offset elements A mmax ~active | --
-  /mat_forrows_get {
-    {
-      save 
+|   /mat_forrows_get {
+|     {
+|       save 
 
   | row column A | d
   /mat_get {
