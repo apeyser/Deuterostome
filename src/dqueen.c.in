@@ -337,8 +337,11 @@ P op_makerthreads(void) {
 
   if (! pid) {
     int stdinfd;
-    if ((retc = closesockets_exec()))
-      error(1, retc < 0 ? -retc : 0, "Unable to close sockets for queen");
+    if ((retc = closesockets_fork()))
+      error(1, retc < 0 ? -retc : 0, "Unable to close fork sockets for queen");
+    if ((retc = closesockets_proc()))
+      error(1, retc < 0 ? -retc : 0, "Unable to close proc sockets for queen");
+
     if (dup2(rookfd, 3) == -1)
       error(1, errno, "Error duping %i to %i", (int) rookfd, 3);
     if ((retc = nocloseonexec(3)))

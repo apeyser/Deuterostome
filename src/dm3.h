@@ -88,6 +88,7 @@ DLL_SCOPE P delsocket_fork(P fd);
 DLL_SCOPE P delsocket_exec(P fd);
 DLL_SCOPE P delsocket_proc(P fd);
 DLL_SCOPE P closesockets_force(void);
+DLL_SCOPE P closesockets_proc(void);
 DLL_SCOPE P closesockets_fork(void);
 DLL_SCOPE P closesockets_exec(void);
 DLL_SCOPE P closesockets_resize(void);
