@@ -171,16 +171,13 @@ static void sigfunc(void) {
   }
 }
 
-__attribute__ ((__noreturn__))
-static void mpifunc(void) {
+static void initmpi_(void) {
   int argc = 0;
   const char* argv[] = {NULL};
   int threadtype;
   MPI_Errhandler mpierr;
   int universe_;
   int rank_;
-
-  mpithread_lock();
 
   MPI_Init_thread(&argc, (char***) &argv, MPI_THREAD_MULTIPLE, &threadtype);
   //  atexit(exithandler);
@@ -207,6 +204,11 @@ static void mpifunc(void) {
   //  fprintf(stderr, "Child %i waiting for rooksig\n", (int) rank);
   //MPI_Barrier(rooksig);
   //fprintf(stderr, "Child %i heard from rooksig\n", (int) rank);
+}
+
+__attribute__ ((__noreturn__))
+static void mpifunc(void) {
+  mpithread_lock();
 
   while (1) {
     mpithread_func = NULL;
@@ -309,8 +311,9 @@ DM_INLINE_STATIC void makethread(pthread_t* threadid,
 
 void initmpi(void) {
   mainthread_id = pthread_self();
-  mpithread_lock();
+  initmpi_();
 
+  mpithread_lock();
   makethread(&mpithread_id, mpifunc);
   do {mpithread_recv_signal();} 
   while (! recvd_quit && !abortflag && mpithread_func);
