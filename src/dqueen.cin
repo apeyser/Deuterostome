@@ -341,12 +341,9 @@ P op_makerthreads(void) {
 
   if (! pid) {
     int stdinfd;
-    if ((retc = closesockets_fork()))
+    if ((retc = closesockets_exec()))
       error_local(1, retc < 0 ? -retc : 0, 
-		  "Unable to close fork sockets for queen");
-    if ((retc = closesockets_proc()))
-      error_local(1, retc < 0 ? -retc : 0, 
-		  "Unable to close proc sockets for queen");
+		  "Unable to close sockets for queen");
 
     if (dup2(rookfd, 3) == -1)
       error_local(1, errno, "Error duping %i to %i", (int) rookfd, 3);
@@ -359,14 +356,10 @@ P op_makerthreads(void) {
       error_local(1, retc < 0 ? -retc : 0, 
 	    "Error setting no close on exec for fd 4");
 
-    if ((stdinfd = open("/dev/null", O_RDONLY)) == -1)
-      error_local(1, errno, "Unable to open /dev/null for reading");
-    if (dup2(stdinfd, 0) == -1)
+    if (dup2(STDERR_FILENO, STDOUT_FILENO) == -1)
       error_local(1, errno, "Error redirecting 0 from /dev/null");
-    if (stdinfd > 2 && close(stdinfd))
-      error_local(1, errno, "Unable to close fd %i", stdinfd);
-    if ((retc = nocloseonexec(0)))
-      error_local(1, retc < 0 ? -retc : 0, 
+    if ((retc = nocloseonexec_simple(STDOUT_FILENO)))
+      error_local(1, retc < 0 ? -retc : 0,
 	    "Error setting no close on exec for fd 0");
 
     execl("@drook@", "@drook@", NULL);

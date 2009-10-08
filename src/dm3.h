@@ -13,6 +13,7 @@ struct SocketType {
   BOOLEAN exec;     // close on exec
   BOOLEAN proc;     // close in proc
   BOOLEAN listener; // used as a D-command socket
+  char stdin;       // 1 if stdin, 0 if stderr/stdout, -1 else.
 };
 
 union SocketInfo {
@@ -29,7 +30,26 @@ static const struct SocketType stdtype = {
   .resize   = FALSE,
   .fork     = FALSE,
   .exec     = TRUE,
-  .proc     = FALSE
+  .proc     = FALSE,
+  .stdin    = -1
+};
+
+static const struct SocketType stdintype = {
+  .listener = FALSE,
+  .resize   = FALSE,
+  .fork     = FALSE,
+  .exec     = TRUE,
+  .proc     = FALSE,
+  .stdin    = 1
+};
+
+static const struct SocketType stdouttype = {
+  .listener = FALSE,
+  .resize   = FALSE,
+  .fork     = FALSE,
+  .exec     = TRUE,
+  .proc     = FALSE,
+  .stdin    = 0
 };
 
 static const struct SocketType stderrtype = {
@@ -37,7 +57,8 @@ static const struct SocketType stderrtype = {
   .resize   = FALSE,
   .fork     = FALSE,
   .exec     = FALSE,
-  .proc     = FALSE
+  .proc     = FALSE,
+  .stdin    = 0
 };
 
 static const struct SocketType pipetype = {
@@ -45,7 +66,9 @@ static const struct SocketType pipetype = {
   .resize   = TRUE,
   .fork     = FALSE,
   .exec     = TRUE,
-  .proc     = TRUE
+  .proc     = TRUE,
+  .stdin    = -1
+
 };
 
 static const struct SocketType sockettype = {
@@ -53,7 +76,8 @@ static const struct SocketType sockettype = {
   .resize   = FALSE, // sockets closes are self-handling
   .fork     = TRUE,
   .exec     = TRUE,
-  .proc     = FALSE
+  .proc     = FALSE,
+  .stdin    = -1
 };
 
 static const union SocketInfo defaultsocketinfo = {
@@ -79,12 +103,15 @@ DLL_SCOPE P op_getsocket(void);
 DLL_SCOPE P readfd(P fd, B* where, P n, P secs);
 DLL_SCOPE P writefd(P fd, B* where, P n, P secs);
 
-DLL_SCOPE P closeonexec(P socketfd);
-DLL_SCOPE P nocloseonexec(P socketfd);
+DLL_SCOPE P nocloseonexec_simple(P fd);
+DLL_SCOPE P closeonexec_simple(P fd);
+DLL_SCOPE P closeonexec(P fd);
+DLL_SCOPE P nocloseonexec(P fd);
 
 DLL_SCOPE P op_socketdead(void);
 
-DLL_SCOPE P addsocket(P fd, const struct SocketType* type, const union SocketInfo* info);
+DLL_SCOPE P addsocket(P fd, const struct SocketType* type, 
+		      const union SocketInfo* info);
 DLL_SCOPE P delsocket_force(P fd);
 DLL_SCOPE P delsocket_fork(P fd);
 DLL_SCOPE P delsocket_exec(P fd);
