@@ -933,21 +933,23 @@ c_         list all connections
   /pbuf 80 /b array def
   
   /printnode {
-    Xwindows ~drawnode {
-      node 6 get null ne {loadcolor} if
-      node 0 get class /nullclass ne {
-        pbuf 0 {
-          -4 knode * number node 0 get fax
-          knode 0 ne {
-            (:) fax * node 1 get * number
-            node 3 get { ( - busy  ) } { ( - ready ) } ifelse fax
-            * node 4 get * number
-          } if
-          (\n) fax
-        } node 6 get dup null ne {exch color_text} {pop exec} ifelse
-        0 exch getinterval toconsole
-      } if
-    } ifelse
+    {
+      Xwindows ~drawnode {
+        node 6 get null ne {loadcolor} if
+        node 0 get class /nullclass ne {
+          pbuf 0 {
+            -4 knode * number node 0 get fax
+            knode 0 ne {
+              (:) fax * node 1 get * number
+              node 3 get { ( - busy  ) } { ( - ready ) } ifelse fax
+              * node 4 get * number
+            } if
+            (\n) fax
+          } node 6 get dup null ne {exch color_text} {pop exec} ifelse
+          0 exch getinterval toconsole
+        } if
+      } ifelse
+    } dvt indict
   } bind def
 
 |-------------------------------------- setready or setbusy
