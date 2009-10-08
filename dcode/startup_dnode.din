@@ -429,12 +429,11 @@ startup_common_save capsave {
   | to it. nwait should be set to the total number of jobs.
   | sets the pawn ready for more jobs.
   /notify {
-    {
-      makeready
-      /nwait nwait 1 sub def
-      continue
-      restore
-    } lock
+    makeready
+    /nwait nwait 1 sub def
+    continue
+    end
+    restore
   } bind def |]
 end def |========= end of mpi data ================
 
