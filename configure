@@ -31145,7 +31145,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -g"
+    CFLAGS="$CFLAGS -Werror -g"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -31203,7 +31203,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -O2"
+    CFLAGS="$CFLAGS -Werror -O2"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -31410,7 +31410,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -ftree-vectorize"
+    CFLAGS="$CFLAGS -Werror -ftree-vectorize"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -31466,7 +31466,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -fno-strict-aliasing"
+    CFLAGS="$CFLAGS -Werror -fno-strict-aliasing"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -31523,7 +31523,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -pipe"
+    CFLAGS="$CFLAGS -Werror -pipe"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -31579,7 +31579,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -fno-unsigned-char"
+    CFLAGS="$CFLAGS -Werror -fno-unsigned-char"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -31635,7 +31635,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -ffast-math"
+    CFLAGS="$CFLAGS -Werror -ffast-math"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -31691,7 +31691,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -fno-finite-math-only"
+    CFLAGS="$CFLAGS -Werror -fno-finite-math-only"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -31747,7 +31747,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -fno-unsafe-math-optimizations"
+    CFLAGS="$CFLAGS -Werror -fno-unsafe-math-optimizations"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -31803,7 +31803,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -Wno-pointer-sign"
+    CFLAGS="$CFLAGS -Werror -Wno-pointer-sign"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -31859,7 +31859,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -fprefetch-loop-arrays"
+    CFLAGS="$CFLAGS -Werror -fprefetch-loop-arrays"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -31915,7 +31915,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -std=gnu99"
+    CFLAGS="$CFLAGS -Werror -std=gnu99"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -36126,7 +36126,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -g"
+    CFLAGS="$CFLAGS -Werror -g"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -36184,7 +36184,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -O2"
+    CFLAGS="$CFLAGS -Werror -O2"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -36246,7 +36246,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -ftree-vectorize"
+    CFLAGS="$CFLAGS -Werror -ftree-vectorize"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -36302,7 +36302,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -fno-strict-aliasing"
+    CFLAGS="$CFLAGS -Werror -fno-strict-aliasing"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -36359,7 +36359,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -pipe"
+    CFLAGS="$CFLAGS -Werror -pipe"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -36415,7 +36415,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -fno-unsigned-char"
+    CFLAGS="$CFLAGS -Werror -fno-unsigned-char"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -36471,7 +36471,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -ffast-math"
+    CFLAGS="$CFLAGS -Werror -ffast-math"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -36527,7 +36527,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -fno-finite-math-only"
+    CFLAGS="$CFLAGS -Werror -fno-finite-math-only"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -36583,7 +36583,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -fno-unsafe-math-optimizations"
+    CFLAGS="$CFLAGS -Werror -fno-unsafe-math-optimizations"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -36639,7 +36639,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -Wno-pointer-sign"
+    CFLAGS="$CFLAGS -Werror -Wno-pointer-sign"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF
@@ -36695,7 +36695,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -fprefetch-loop-arrays"
+    CFLAGS="$CFLAGS -Werror -fprefetch-loop-arrays"
     cat >conftest.$ac_ext <<_ACEOF
 int some_variable = 0;
 _ACEOF

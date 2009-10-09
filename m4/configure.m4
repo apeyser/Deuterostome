@@ -122,7 +122,7 @@ AC_DEFUN([CF_GCC_COMPILER_OPTION_INT], [dnl
     AC_MSG_CHECKING([for $3 compiler options $1])
     AC_LANG_PUSH($3)
     CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS $1"
+    CFLAGS="$CFLAGS -Werror $1"
     AC_COMPILE_IFELSE([int some_variable = 0;], [
       AC_MSG_RESULT([Adding])
       $4="$$4 $1"
