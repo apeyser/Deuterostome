@@ -20,7 +20,7 @@ EOF
 runif() {
     local test=$1
     shift
-    if $test; then 
+    if ${!test}; then 
 	echo "Running: $@"
 	"$@"
 	local r=$?
@@ -32,6 +32,7 @@ runif() {
 install=false
 bootstrap=false
 config=false
+true=:
 for i ; do
     case "$i" in
 	--install)   install=:   ;;
@@ -45,16 +46,16 @@ done
 
 [[ $# != 0 ]] && usage
 
-runif $bootstrap ./bootstrap $BOOTSTRAP
+runif bootstrap ./bootstrap $BOOTSTRAP
 
-runif $config    ./configure --enable-plugins --enable-plugins-support \
+runif config    ./configure --enable-plugins --enable-plugins-support \
     --enable-maintainer-mode --enable-petsc --enable-rthreads \
     --with-petsc=/opt/petsc/ --with-petsc-arch=linux_deb_d \
     CPPFLAGS="-Wall -g -O2" $CONFIG
 
 for i in clean gencode clean -j9 clean distcheck clean -j9; do
-    runif : make $i
+    runif true make $i
 done
 
-runif $install make install
+runif install make install
 
