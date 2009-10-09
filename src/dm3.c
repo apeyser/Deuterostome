@@ -172,7 +172,7 @@ DM_INLINE_STATIC void sockprintdebug(const char* mode,
 }
 
 DM_INLINE_STATIC P _opendevnull(int fd, int flags) {
-  int nfd, oldflags;
+  int nfd;
   if ((nfd  = open("/dev/null", flags)) < 0) return -errno;
   if (dup2(nfd, fd) < 0) return -errno;
   if (close(nfd)) return -errno;
@@ -210,8 +210,8 @@ DM_INLINE_STATIC P _delsocket(P fd, enum _DelMode delmode) {
       sockprintdebug("close", next);
       
       switch (next->type.stdin) {
-	case  0: if (retc = _opendevnull(fd, O_WRONLY)) return retc; break;
-	case  1: if (retc = _opendevnull(fd, O_RDONLY)) return retc; break;
+	case  0: if ((retc = _opendevnull(fd, O_WRONLY))) return retc; break;
+	case  1: if ((retc = _opendevnull(fd, O_RDONLY))) return retc; break;
 	case -1: if (close(fd)) retc = -errno; break;
       }
 

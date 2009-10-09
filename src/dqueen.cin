@@ -340,7 +340,6 @@ P op_makerthreads(void) {
   }
 
   if (! pid) {
-    int stdinfd;
     if ((retc = closesockets_exec()))
       error_local(1, retc < 0 ? -retc : 0, 
 		  "Unable to close sockets for queen");
