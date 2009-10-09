@@ -52,7 +52,10 @@ DM_INLINE_STATIC void four1(D *data, L32 nn, LBIG dir)
   n = nn << 1;
   j = 1;
   for (i=1; i<n; i+=2) {
-    if (j>i) SWAP(data[j],data[i]); SWAP(data[j+1],data[i+1]); 
+    if (j>i) {
+      SWAP(data[j],data[i]); 
+      SWAP(data[j+1],data[i+1]);
+    }
     m = n>>1;
     while (m>=2 && j>m) { 
       j -= m; 
@@ -300,7 +303,7 @@ P op_complexFFT(void)
   if (!VALUE(o_1,&dir)) return UNDF_VAL;
   if (imaxabs(dir) != 1) return RNG_CHK;
 
-  four1((data = ((D *)VALUE_BASE(o_2)))-1,N2>>1,dir);
+  four1((data = ((D*) VALUE_PTR(o_2))) - 1, N2>>1, dir);
   if (dir == -1) {
     f = 2.0 / N2;
     for (j=0; j<N2; j++) data[j] *= f;
@@ -338,10 +341,10 @@ P op_realFFT(void)
   logN = 0; 
   while ((N >>= 1) > 0) logN += 1;
   if ((N = ARRAY_SIZE(o_2)) != (1 << logN)) return RNG_CHK;
-  if (!VALUE(o_1,&dir)) return UNDF_VAL;
+  if (! VALUE(o_1,&dir)) return UNDF_VAL;
   if (imaxabs(dir) != 1) return RNG_CHK;
 
-  realft((data = ((D *)VALUE_BASE(o_2)))-1,N,dir);
+  realft((data = ((D*) VALUE_PTR(o_2))) - 1, N, dir);
   if (dir == -1) {
     f = 2.0 / N;
     for (j=0; j<N; j++) data[j] *= f;
@@ -376,10 +379,10 @@ P op_sineFFT(void)
   logN = 0; 
   while ((N >>= 1) > 0) logN += 1;
   if ((N = ARRAY_SIZE(o_2)) != (1 << logN)) return RNG_CHK;
-  if (!VALUE(o_1,&dir)) return UNDF_VAL;
+  if (!VALUE(o_1, &dir)) return UNDF_VAL;
   if (imaxabs(dir) != 1) return RNG_CHK;
 
-  sinft((data = ((D *)VALUE_BASE(o_2)))-1,N);
+  sinft((data = ((D*) VALUE_PTR(o_2))) - 1, N);
   if (dir == -1) {
     f = 2.0 / N;
     for (j=0; j<N; j++) data[j] *= f;
