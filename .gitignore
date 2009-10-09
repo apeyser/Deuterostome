@@ -27,3 +27,5 @@
 Makefile
 \#*
 .deps
+/plugins/dm-stats-main.h
+/plugins/dm-stats-header.h
