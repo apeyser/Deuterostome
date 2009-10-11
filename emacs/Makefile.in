@@ -106,7 +106,7 @@ am__ELFILES = d-comint-mode.el d-mode-ops.el d-mode.el dm-server.el \
 	init.el
 am__ELCFILES = $(am__ELFILES:.el=.elc)
 ELCFILES = $(LISP:.el=.elc)
-elisp_comp = $(top_srcdir)/elisp-comp
+elisp_comp = $(top_srcdir)/libltdl/config/elisp-comp
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 pkgdatadir = @pkgdatadir@
 pkglibdir = @pkglibdir@

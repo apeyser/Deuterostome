@@ -44,7 +44,11 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(top_srcdir)/m4/cf_debian.make \
 	$(top_srcdir)/m4/cf_gentoo.make AUTHORS COPYING ChangeLog \
 	INSTALL NEWS compile config.guess config.sub depcomp \
-	elisp-comp install-sh ltmain.sh missing ylwrap
+	elisp-comp install-sh libltdl/config/compile \
+	libltdl/config/config.guess libltdl/config/config.sub \
+	libltdl/config/depcomp libltdl/config/elisp-comp \
+	libltdl/config/install-sh libltdl/config/ltmain.sh \
+	libltdl/config/missing ltmain.sh missing ylwrap
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
