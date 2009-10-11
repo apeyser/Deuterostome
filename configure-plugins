@@ -1,0 +1,7 @@
+#!/bin/sh
+
+exec ./configure --disable-xps --disable-regex --disable-setuid \
+     --enable-threads --disable-rthreads --enable-unix-sockets \
+     --disable-doc --enable-plugins-support --enable-plugins \
+     --enable-shared --without-atlas --without-mpi --without-petsc \
+     --with-x
