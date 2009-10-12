@@ -19,21 +19,22 @@ DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 CFLAGS = -Wall -g
 
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
-	CFLAGS += -O0
+	CFLAGS += -O2
 else
-	CFLAGS += -O3
+	CFLAGS += -O2
 endif
 
+#--host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)
 config.status: configure
 	dh_testdir
-	# Add here commands to configure the package.
-ifneq "$(wildcard /usr/share/misc/config.sub)" ""
-	cp -f /usr/share/misc/config.sub config.sub
-endif
-ifneq "$(wildcard /usr/share/misc/config.guess)" ""
-	cp -f /usr/share/misc/config.guess config.guess
-endif
-	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info --sysconfdir=/etc CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs" --with-mpi="-lmpich -lrt -lpthread" --enable-rthreads --enable-mpi --without-petsc --with-emacs --enable-setuid --enable-daemon --enable-threads --enable-plugins --enable-plugins-support --enable-doc --with-x
+#	# Add here commands to configure the package.
+#ifneq "$(wildcard /usr/share/misc/config.sub)" ""
+#	cp -f /usr/share/misc/config.sub config.sub
+#endif
+#ifneq "$(wildcard /usr/share/misc/config.guess)" ""
+#	cp -f /usr/share/misc/config.guess config.guess
+#endif
+	./configure --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info --sysconfdir=/etc CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs" --with-mpi="-lmpich -lrt -lpthread" --enable-rthreads --enable-mpi --without-petsc --with-emacs --enable-setuid --enable-daemon --enable-threads --enable-plugins --enable-plugins-support --enable-doc --with-x
 
 
 build: build-stamp
@@ -41,9 +42,9 @@ build: build-stamp
 build-stamp:  config.status
 	dh_testdir
 
-	# Add here commands to compile the package.
+#	# Add here commands to compile the package.
 	$(MAKE)
-	#docbook-to-man debian/dm.sgml > dm.1
+#	#docbook-to-man debian/dm.sgml > dm.1
 
 	touch $@
 
@@ -54,12 +55,12 @@ clean:
 
 	# Add here commands to clean up after the build process.
 	-$(MAKE) distclean
-	rm -f config.sub config.guess config.status
+#	rm -f config.sub config.guess config.status
 
 	dh_clean 
 
 install: build
-	dh_testdir
+dh_testdir
 	dh_testroot
 	dh_clean -k 
 	dh_installdirs
