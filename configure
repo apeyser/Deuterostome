@@ -31207,7 +31207,7 @@ $as_echo "$ac_try_echo") >&5
 
       { $as_echo "$as_me:$LINENO: result: Adding" >&5
 $as_echo "Adding" >&6; }
-      CFLAGS="$CFLAGS -g"
+      GCC_CFLAGS="$GCC_CFLAGS -g"
 
 else
   $as_echo "$as_me: failed program was:" >&5
@@ -31265,7 +31265,7 @@ $as_echo "$ac_try_echo") >&5
 
       { $as_echo "$as_me:$LINENO: result: Adding" >&5
 $as_echo "Adding" >&6; }
-      CFLAGS="$CFLAGS -O2"
+      GCC_CFLAGS="$GCC_CFLAGS -O2"
 
 else
   $as_echo "$as_me: failed program was:" >&5
@@ -31472,7 +31472,7 @@ $as_echo "$ac_try_echo") >&5
 
       { $as_echo "$as_me:$LINENO: result: Adding" >&5
 $as_echo "Adding" >&6; }
-      CFLAGS="$CFLAGS -ftree-vectorize"
+      GCC_CFLAGS="$GCC_CFLAGS -ftree-vectorize"
 
 else
   $as_echo "$as_me: failed program was:" >&5
@@ -31528,7 +31528,7 @@ $as_echo "$ac_try_echo") >&5
 
       { $as_echo "$as_me:$LINENO: result: Adding" >&5
 $as_echo "Adding" >&6; }
-      CFLAGS="$CFLAGS -fno-strict-aliasing"
+      GCC_CFLAGS="$GCC_CFLAGS -fno-strict-aliasing"
 
 else
   $as_echo "$as_me: failed program was:" >&5
@@ -31977,7 +31977,7 @@ $as_echo "$ac_try_echo") >&5
 
       { $as_echo "$as_me:$LINENO: result: Adding" >&5
 $as_echo "Adding" >&6; }
-      CFLAGS="$CFLAGS -std=gnu99"
+      GCC_CFLAGS="$GCC_CFLAGS -std=gnu99"
 
 else
   $as_echo "$as_me: failed program was:" >&5
@@ -36188,7 +36188,7 @@ $as_echo "$ac_try_echo") >&5
 
       { $as_echo "$as_me:$LINENO: result: Adding" >&5
 $as_echo "Adding" >&6; }
-      CXXFLAGS="$CXXFLAGS -g"
+      GCC_CXXFLAGS="$GCC_CXXFLAGS -g"
 
 else
   $as_echo "$as_me: failed program was:" >&5
@@ -36246,7 +36246,7 @@ $as_echo "$ac_try_echo") >&5
 
       { $as_echo "$as_me:$LINENO: result: Adding" >&5
 $as_echo "Adding" >&6; }
-      CXXFLAGS="$CXXFLAGS -O2"
+      GCC_CXXFLAGS="$GCC_CXXFLAGS -O2"
 
 else
   $as_echo "$as_me: failed program was:" >&5
@@ -36308,7 +36308,7 @@ $as_echo "$ac_try_echo") >&5
 
       { $as_echo "$as_me:$LINENO: result: Adding" >&5
 $as_echo "Adding" >&6; }
-      CXXFLAGS="$CXXFLAGS -ftree-vectorize"
+      GCC_CXXFLAGS="$GCC_CXXFLAGS -ftree-vectorize"
 
 else
   $as_echo "$as_me: failed program was:" >&5
@@ -36364,7 +36364,7 @@ $as_echo "$ac_try_echo") >&5
 
       { $as_echo "$as_me:$LINENO: result: Adding" >&5
 $as_echo "Adding" >&6; }
-      CXXFLAGS="$CXXFLAGS -fno-strict-aliasing"
+      GCC_CXXFLAGS="$GCC_CXXFLAGS -fno-strict-aliasing"
 
 else
   $as_echo "$as_me: failed program was:" >&5

@@ -107,13 +107,13 @@ dnl
 AC_DEFUN([CF_GCC_COMPILER_OPTION], [dnl
   AC_REQUIRE([AC_PROG_CC])dnl
   AC_REQUIRE([AC_PROG_LIBTOOL])dnl
-  CF_GCC_COMPILER_OPTION_INT([$1], [GCC], [C], ifelse([$2],[],[CFLAGS],[$2]))dnl
+  CF_GCC_COMPILER_OPTION_INT([$1], [GCC], [C], ifelse([$2],[],[GCC_CFLAGS],[$2]))dnl
 ])dnl
 dnl
 AC_DEFUN([CF_GXX_COMPILER_OPTION], [dnl
   AC_REQUIRE([AC_PROG_CXX])dnl
   AC_REQUIRE([AC_PROG_LIBTOOL])dnl
-  CF_GCC_COMPILER_OPTION_INT([$1], [GXX], [C++], ifelse([$2],[],[CXXFLAGS],[$2]))dnl
+  CF_GCC_COMPILER_OPTION_INT([$1], [GXX], [C++], ifelse([$2],[],[GCC_CXXFLAGS],[$2]))dnl
 ])dnl
 dnl
 AC_DEFUN([CF_GCC_COMPILER_OPTION_INT], [dnl
