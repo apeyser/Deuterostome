@@ -74,41 +74,48 @@ static struct socketstore {
 } *socketstore_tail = NULL, *socketstore_head = NULL;
 
 //-------------------------------- set close-on-exec value for sockets
+P closeonexec_simple(P fd) {
+  int oldflags;
+  if ((oldflags = fcntl(fd, F_GETFD, 0)) < 0) return -errno;
+  if (fcntl(fd, F_SETFD, oldflags | FD_CLOEXEC) < 0) return -errno;
+  return OK;
+}
 
 P closeonexec(P fd) {
+  P retc;
   struct socketstore* next;
 
-  int oldflags = fcntl(fd, F_GETFD, 0);
-  if (oldflags < 0) return -errno;
-  if (fcntl(fd, F_SETFD, oldflags | FD_CLOEXEC) < 0) return -errno;
+  if ((retc = closeonexec_simple(fd))) return retc;
 
   for (next = socketstore_head; next; next = next->next)
     if (next->fd == fd) {
-      if (next->type.listener && next->info.listener.sigfd != -1) {
-	oldflags = fcntl(fd, F_GETFD, 0);
-	if (fcntl(next->info.listener.sigfd, F_SETFD, oldflags | FD_CLOEXEC) < 0)
-	  return -errno;
-      }
+      if (next->type.listener && next->info.listener.sigfd != -1
+	  && (retc = closeonexec_simple(next->info.listener.sigfd)))
+	return retc;
       break;
     }
 
   return OK;
 }
 
+P nocloseonexec_simple(P fd) {
+  int oldflags;
+  if ((oldflags = fcntl(fd, F_GETFD, 0)) < 0) return -errno;
+  if (fcntl(fd, F_SETFD, oldflags & ~FD_CLOEXEC) < 0) return -errno;
+  return OK;
+}
+
 P nocloseonexec(P fd) {
+  P retc;
   struct socketstore* next;
 
-  int oldflags = fcntl(fd, F_GETFD, 0);
-  if (oldflags < 0) return -errno;
-  if (fcntl(fd, F_SETFD, oldflags & ~FD_CLOEXEC) < 0) return -errno;
+  if ((retc = nocloseonexec_simple(fd))) return retc;
   
   for (next = socketstore_head; next; next = next->next)
     if (next->fd == fd) {
-      if (next->type.listener && next->info.listener.sigfd != -1) {
-	oldflags = fcntl(fd, F_GETFD, 0);
-	if (fcntl(next->info.listener.sigfd, F_SETFD, oldflags & ~FD_CLOEXEC) < 0)
-	  return -errno;
-      }
+      if (next->type.listener && next->info.listener.sigfd != -1
+	  && (retc = nocloseonexec_simple(next->info.listener.sigfd)))
+	return retc;
       break;
     }
 
@@ -164,6 +171,14 @@ DM_INLINE_STATIC void sockprintdebug(const char* mode,
 	sock->type.listener ? (long) sock->info.listener.unixport : -1);
 }
 
+DM_INLINE_STATIC P _opendevnull(int fd, int flags) {
+  int nfd;
+  if ((nfd  = open("/dev/null", flags)) < 0) return -errno;
+  if (dup2(nfd, fd) < 0) return -errno;
+  if (close(nfd)) return -errno;
+
+  return nocloseonexec_simple(fd);
+}
 
 // -------- delsocket ---------------------------
 // After a socket has been closed, call delsocket to cleanup maxsocket
@@ -194,7 +209,12 @@ DM_INLINE_STATIC P _delsocket(P fd, enum _DelMode delmode) {
       };
       sockprintdebug("close", next);
       
-      if (close(fd)) retc = -errno;
+      switch (next->type.stdin) {
+	case  0: if ((retc = _opendevnull(fd, O_WRONLY))) return retc; break;
+	case  1: if ((retc = _opendevnull(fd, O_RDONLY))) return retc; break;
+	case -1: if (close(fd)) retc = -errno; break;
+      }
+
       if (next->type.listener) {
 	clearsocket(fd);
 	if (next->info.listener.sigfd != -1) 
@@ -372,6 +392,10 @@ DM_INLINE_STATIC P _closesockets(enum _DelMode delmode) {
 
 P closesockets_force(void) {
   return _closesockets(_DelModeForce);
+}
+
+P closesockets_proc(void) {
+  return _closesockets(_DelModeProc);
 }
 
 P closesockets_exec(void) {
@@ -771,8 +795,8 @@ P make_socket(UW* port, BOOLEAN tcp, P packet_size, P* retc)
 
   *port = name.sin_port;
   DEBUG("made %i: (%i, %i), %s, %li", 
-	(int) sock, (int) *port, ntohs(*port),
-	tcp ? "tcp" : "udp", packet_size);
+	(int) sock, (int) *port, (int) ntohs(*port),
+	tcp ? "tcp" : "udp", (long) packet_size);
   return sock;
 }
 
@@ -1169,36 +1193,6 @@ P op_getsocket(void)
   return(OK);
 }
 
-/*------------------------------------------- getmyname
-  -- | string
-
-  returns the host's name
-*/
-
-P op_getmyname(void)
-{
-  if (o1 >= CEILopds) return OPDS_OVF;
-  if (! myname_frame) return CORR_OBJ;
-  moveframe(myname_frame, o1);
-  FREEopds = o2;
-  return OK;
-}
-
-/*------------------------------------------- getmyfqdn
-    -- | string
-
-    returns the host's name
-*/
-
-P op_getmyfqdn(void)
-{
-  if (o1 >= CEILopds) return OPDS_OVF;
-  if (! myfqdn_frame) return CORR_OBJ;
-  moveframe(myfqdn_frame, o1);
-  FREEopds = o2;
-  return OK;
-}
-
 // closes the signal socket passed in.
 P forksighandler(P sigsocket, P tcp_sigsocket, P serverport, P* pid) {
   return spawnsighandler(sigsocket, tcp_sigsocket, 
@@ -1219,9 +1213,9 @@ void initfds(void) {
   the host system. 
 */
   FD_ZERO(&sock_fds);
-  if ((retc = addsocket(STDIN_FILENO, &stdtype, NULL)))
+  if ((retc = addsocket(STDIN_FILENO, &stdintype, NULL)))
     error_local(1, retc < 0 ? -retc : 0, "Failed to add STDIN");
-  if ((retc = addsocket(STDOUT_FILENO,  &stdtype, NULL)))
+  if ((retc = addsocket(STDOUT_FILENO,  &stdouttype, NULL)))
     error_local(1, retc < 0 ? -retc : 0, "Failed to add STDOUT");
   if ((retc = addsocket(STDERR_FILENO,  &stderrtype, NULL)))
     error_local(1, retc < 0 ? -retc : 0, "Failed to add STDERR");

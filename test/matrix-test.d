@@ -193,7 +193,7 @@
 } bind def
 
 /trisolve_test {false settrans
-  x1 x_temp copy A1_ A_map_ transA true triagonal_u triangular_solve
+  x1 x_temp copy A1_ A_map_ transA true triagonal_u solvetriang_blas
   y1 copy pop
 } bind def
 
@@ -705,7 +705,7 @@
         /C2t k m mul /d array def
         /C2t_old [C2t k {m /d parcel exch} repeat pop] def
         
-        /piv2 n /x array def
+        /piv2 n /l array def
         /x2 n /d array def
         /y2 m /d array def
         

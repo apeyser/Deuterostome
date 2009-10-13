@@ -141,7 +141,7 @@ NL (})__
 
 | arraytype (framename) returnsL/bool {body_construct} | --
 /FOR_modn {pushA exch pushA exch pushA pushA
-    NL ({ UP n__ = VALUE_BASE\()__ 2 indexA __ (\) % )__ BYTECORRECT n__ (;
+    NL ({ ULBIG n__ = VALUE_BASE\()__ 2 indexA __ (\) % )__ BYTECORRECT n__ (;
         if \(n__\) {
           n__ = )__ BYTECORRECT n__ ( - n__;
           if \(DEBUG_DMNUM && \(n__ % sizeof\()__ 1 indexA __ (\)\)\) {
@@ -173,7 +173,7 @@ NL (})__
 
 | returnsL/bool {body_construct} | --
 /FOR_modnp {pushA pushA
-    NL ({ UP n__ = \(UP\))__ fixsource __ ( % )__ BYTECORRECT n__ (;
+    NL ({ ULBIG n__ = \(UP\))__ fixsource __ ( % )__ BYTECORRECT n__ (;
       if \(n__\) {
       n__ = )__ BYTECORRECT n__ ( - n__;
       if \(DEBUG_DMNUM && \(n__ % sizeof\(*)__ fixsource __ (\)\)\) {
@@ -227,12 +227,12 @@ NL (})__
     )__ exchA popA exec (;
   else {
     thread_array_data data;
-    UP nways = \(UP\)ARRAY_SIZE\()__ peekA __ (\)/\(THREADMUL*)__ UNROLLS n__ (\)
-               + \(\(UP\)ARRAY_SIZE\()__ peekA __ (\)%\(THREADMUL*)__ UNROLLS n__ (\) ?
-               1 : 0\);
+    LBIG nways = ARRAY_SIZE\()__ peekA __ (\)/\(THREADMUL*)__ UNROLLS n__ (\)
+          + \(\(ARRAY_SIZE\()__ peekA __ (\)%\(THREADMUL*)__ UNROLLS n__ (\)\)
+              ? 1 : 0\);
     if \(nways > thread_num\(\)\) nways = thread_num\(\);
-    data.perthread = \(UP\)ARRAY_SIZE\()__ peekA __ (\) / nways;
-    data.leftover = \(UP\)ARRAY_SIZE\()__ popA __ (\) % nways; )__
+    data.perthread = ARRAY_SIZE\()__ peekA __ (\) / nways;
+    data.leftover = ARRAY_SIZE\()__ popA __ (\) % nways; )__
     popA {(\n   data.df_start = VALUE_PTR\(df\);)__} if
     popA {(\n   data.sf_start = VALUE_PTR\(sf\);)__} if (
     {)__
@@ -245,7 +245,7 @@ NL (})__
 /THREAD {pushA pushA pushA
 (
   const thread_array_data* data = \(const thread_array_data*\) indata;
-  UP n, n_ = data->perthread + \(thread_max\(\) == id ? data->leftover : 0\);)__
+  LBIG n, n_ = data->perthread + \(thread_max\(\) == id ? data->leftover : 0\);)__
   popA {(\n  )__ dt__ ( * d = \(\()__
     dt__ ( *\) data->df_start\)+data->perthread*id;)__
     /fixsource (d) def  
@@ -322,14 +322,14 @@ NL
 (
   static void )__ st__ dt__ (moveSAs\(B *sf, B *df\)
   {
-    D t; P n; )__ dt__ ( * d;
+    D t; LBIG n; )__ dt__ ( * d;
     d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
     st { (sf) SCALAR } (t) GETCV
     _dt (df) false { dt { (d++)__ } (t) CVPUT } FOR_modn (
   }
 
 #if ENABLE_THREADS
-  static P )__ st__ dt__ (moveSAt\(UP id, const void* indata,
+  static P )__ st__ dt__ (moveSAt\(UL32 id, const void* indata,
                                    void* ignore
                                    __attribute__ \(\(__unused__\)\)\)
   {)__
@@ -343,7 +343,7 @@ NL
   {)__
     {st__ dt__ (moveSAs\(sf, df\))__} true false {
       st {(sf) SCALAR} (data.in) GETCV (
-      threads_do\(nways, )__ st__ dt__ (moveSAt, &data\);)__
+      threads_do\(\(UL32\) nways, )__ st__ dt__ (moveSAt, &data\);)__
     } THREAD_SU (
   }
 #endif //ENABLE_THREADS
@@ -381,7 +381,7 @@ NL
 (
     static void )__ st__ dt__ (moveAAs\(B *sf, B *df\)
     {
-       D t; P n; )__ st__ ( * s; )__ dt__ ( * d;
+       D t; LBIG n; )__ st__ ( * s; )__ dt__ ( * d;
        s = \()__ st__ ( *\))__ (sf) ARRAY (;
        d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
       _st (df) false { st { (s++)__ } (t) GETCV
@@ -391,7 +391,7 @@ NL
 
 
 #if ENABLE_THREADS
-    static P )__ st__ dt__ (moveAAt\(UP id, const void* indata,
+    static P )__ st__ dt__ (moveAAt\(UL32 id, const void* indata,
                                      void* ignore
                                      __attribute__ \(\(__unused__\)\)\)
     {)__
@@ -406,7 +406,7 @@ NL
     static void )__ st__ dt__ (moveAAc\(B *sf, B *df\)
     {)__
       {st__ dt__ (moveAAs\(sf, df\))__} true true {(
-        threads_do\(nways, )__ st__ dt__ (moveAAt, &data\);)__
+        threads_do\(\(UL32\) nways, )__ st__ dt__ (moveAAt, &data\);)__
       } THREAD_SU (
     }
 #endif //ENABLE_THREADS
@@ -499,7 +499,7 @@ end def
 (
   static void )__ dt__ st__ (dy)__ op__ (ASs\(B *df, B *sf\)
   {
-    D t,tt; P n; )__ dt__ ( * d;
+    D t,tt; LBIG n; )__ dt__ ( * d;
     d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
     st { (sf) SCALAR } (tt) GETCV
     _dt (df) false { dt { (d)__ } (t) GETCV
@@ -509,7 +509,7 @@ end def
   }
 
 #if ENABLE_THREADS
-  static P )__ dt__ st__ (dy)__ op__ (ASt\(UP id, const void* indata,
+  static P )__ dt__ st__ (dy)__ op__ (ASt\(UL32 id, const void* indata,
                                            void* ignore
                                            __attribute__ \(\(__unused__\)\)\)
   {)__
@@ -527,7 +527,7 @@ end def
   {)__
     {dt__ st__ (dy)__ op__ (ASs\(df, sf\))__} true false {
       st {(sf) SCALAR} (data.in) GETCV (
-      threads_do\(nways, )__ dt__ st__ (dy)__ op__ (ASt, &data\);)__
+      threads_do\(\(UL32\) nways, )__ dt__ st__ (dy)__ op__ (ASt, &data\);)__
     } THREAD_SU (
   }
 #endif //ENABLE_THREADS
@@ -555,7 +555,7 @@ end def
 (
   static void )__ dt__ st__ (dy)__ op__ (SAs\(B *df, B *sf\)
   {
-    D t,tt; P n; )__ st__ ( * s;
+    D t,tt; LBIG n; )__ st__ ( * s;
     s = \()__ st__ ( *\))__ (sf) ARRAY (;)__
     dt { (df) SCALAR } (t) GETCV
     _st (sf) false { st { (s++)__ } (tt) GETCV
@@ -566,7 +566,7 @@ end def
 )__
 dyadic_dp_seed op known {(
 #if ENABLE_THREADS
- static P )__ dt__ st__ (dy)__ op__ (SAt\(UP id, const void* indata,
+ static P )__ dt__ st__ (dy)__ op__ (SAt\(UL32 id, const void* indata,
                                           void* outdata\)
  {)__
    false true {(
@@ -583,10 +583,10 @@ dyadic_dp_seed op known {(
   static void )__ dt__ st__ (dy)__ op__ (SAc\(B* df, B* sf\)
   {)__
     {dt__ st__ (dy)__ op__ (SAs\(df, sf\))__} false true {(
-      UP n, n_ = nways;
-      D t,tt, ret[THREADNUM];
+      ULBIG n, n_ = nways;
+      D t, tt, ret[THREADNUM];
       D* r = ret;
-      threads_do_local\(nways, )__ dt__ st__ (dy)__ op__ (SAt, &data, ret\);
+      threads_do_local\(\(UL32\) nways, )__ dt__ st__ (dy)__ op__ (SAt, &data, ret\);
       )__  
       dt {(df) SCALAR} (t) GETCV false {(
         tt = *\(r++\);)__
@@ -629,7 +629,7 @@ dyadic_dp_seed op known {(
 (
     static void )__ dt__ st__ (dy)__ op__ (AAs\(B * df, B * sf\)
     {
-       P n; )__  st__ ( * s; )__ dt__ ( * d;
+       LBIG n; )__  st__ ( * s; )__ dt__ ( * d;
        D t, tt;
        s = \()__ st__ ( *\))__ (sf) ARRAY (;
        d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
@@ -644,7 +644,7 @@ dyadic_dp_seed op known {(
 
 
 #if ENABLE_THREADS
-    static P )__ dt__ st__ (dy)__ op__ (AAt\(UP id, const void* indata,
+    static P )__ dt__ st__ (dy)__ op__ (AAt\(UL32 id, const void* indata,
                                              void* ignore
                                              __attribute__ \(\(__unused__\)\)\)
     {)__
@@ -662,7 +662,7 @@ dyadic_dp_seed op known {(
     static void )__ dt__ st__ (dy)__ op__ (AAc\(B* df, B* sf\)
     {)__
       {dt__ st__ (dy)__ op__ (AAs\(df, sf\))__} true true {(
-         threads_do\(nways, )__ dt__ st__ (dy)__ op__ (AAt, &data\);)__
+         threads_do\(\(UL32\) nways, )__ dt__ st__ (dy)__ op__ (AAt, &data\);)__
       } THREAD_SU (
     }
 #endif //ENABLE_THREADS
@@ -723,7 +723,7 @@ end def
 (
    static void )__ dt__ (mo)__ op__ (As\(B *df\)
    {
-     D t; )__ dt__ ( *d; P n;
+     D t; )__ dt__ ( *d; LBIG n;
      d = \()__ dt__ ( *\))__ (df) ARRAY (;)__
      _dt (df) false { dt { (d)__ } (t) GETCV
        monadic_d op get exec
@@ -732,7 +732,7 @@ end def
    }
 
 #if ENABLE_THREADS
-  static P )__ dt__ (mo)__ op__ (At\(UP id, const void* indata,
+  static P )__ dt__ (mo)__ op__ (At\(UL32 id, const void* indata,
                                      void* ignore
                                      __attribute__ \(\(__unused__\)\)\)
   {)__
@@ -749,7 +749,7 @@ end def
   static void )__ dt__ (mo)__ op__ (Ac\(B * df\)
   {)__
     {dt__ (mo)__ op__ (As\(df\))__} true false {(
-      threads_do\(nways, )__ dt__ (mo)__ op__ (At, &data\);)__
+      threads_do\(\(UL32\) nways, )__ dt__ (mo)__ op__ (At, &data\);)__
     } THREAD_SU (
   }
 #endif //ENABLE_THREADS
@@ -788,7 +788,7 @@ NL
 
 /all {/filename name /dirname name
   {
-(// Automatically generated by dmnuminc.d.in in src/codegen
+(// Automatically generated by dmnuminc.din in src/codegen
 // DO NOT EDIT HERE!
 
 #include "threads.h"
@@ -797,8 +797,8 @@ NL
 typedef struct {
   B* df_start;
   B* sf_start;
-  UP perthread;
-  UP leftover;
+  LBIG perthread;
+  LBIG leftover;
   D in;
 } thread_array_data;
 #endif //ENABLE_THREADS

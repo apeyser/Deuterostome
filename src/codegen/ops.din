@@ -229,7 +229,7 @@
       /bandBS /invertLU /matmul /mattranspose
       /dilute_add /matvecmul
       /getstartupdir /gethomedir /getconfdir
-      /socketval
+      /socketval /getmyname /getmyfqdn
     ] def
     /errors 100 dict dup begin |[
       /ABORT (** Internal ABORT returned -- should never appear as error) def
@@ -351,7 +351,7 @@ end def
   /all 2 dict dup begin |[
     /commands [
       /connect /disconnect /send /getsocket /sendsig
-      /getmyname /getmyfqdn /socketdead
+      /socketdead
     ] def
     /errors 3 dict dup begin |[
       /LOST_CONN (** Lost connection) def 

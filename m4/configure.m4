@@ -107,52 +107,30 @@ dnl
 AC_DEFUN([CF_GCC_COMPILER_OPTION], [dnl
   AC_REQUIRE([AC_PROG_CC])dnl
   AC_REQUIRE([AC_PROG_LIBTOOL])dnl
-  CF_GCC_COMPILER_OPTION_INT([$1], [GCC], [C], ifelse([$2],[],[CFLAGS],[$2]))dnl
+  CF_GCC_COMPILER_OPTION_INT([$1], [GCC], [C], ifelse([$2],[],[GCC_CFLAGS],[$2]))dnl
 ])dnl
 dnl
 AC_DEFUN([CF_GXX_COMPILER_OPTION], [dnl
   AC_REQUIRE([AC_PROG_CXX])dnl
   AC_REQUIRE([AC_PROG_LIBTOOL])dnl
-  CF_GCC_COMPILER_OPTION_INT([$1], [GXX], [C++], ifelse([$2],[],[CXXFLAGS],[$2]))dnl
+  CF_GCC_COMPILER_OPTION_INT([$1], [GXX], [C++], ifelse([$2],[],[GCC_CXXFLAGS],[$2]))dnl
 ])dnl
 dnl
 AC_DEFUN([CF_GCC_COMPILER_OPTION_INT], [dnl
   AC_SUBST([$4])dnl
   if test "x$$2" == "xyes" ; then
-    AC_REQUIRE([LT_AC_PROG_SED])dnl
-    AC_MSG_CHECKING([for compiler options $1])
+    AC_MSG_CHECKING([for $3 compiler options $1])
     AC_LANG_PUSH($3)
-    CF_GCO_S=
-    lt_simple_compile_test_code="int some_variable = 0;\n"
-    printf "$lt_simple_compile_test_code" > conftest.$ac_ext
-    lt_compiler_flag="$1"
-    lt_compile=`echo "$ac_compile" | $SED \
-      -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
-      -e 's: [[^ ]]*conftest\.: $lt_compiler_flag&:; t' \
-      -e 's:$: $lt_compiler_flag:'`
-    (eval echo "\"\$as_me:__oline__: $lt_compile\"" >&AS_MESSAGE_LOG_FD)
-    (eval "$lt_compile" 2>conftest.err)
-    ac_status=$?
-    cat conftest.err >&AS_MESSAGE_LOG_FD
-    echo "$as_me:__oline__: \$? = $ac_status" >&AS_MESSAGE_LOG_FD
-    if (exit $ac_status) && test -s "$ac_outfile"; then
-      # The compiler can only warn and ignore the option if not recognized
-      # So say no if there are warnings other than the usual output.
-      $echo "X$_lt_compiler_boilerplate" | $Xsed >conftest.exp
-      $SED '/^$/d' conftest.err >conftest.er2
-      if test ! -s conftest.err || diff conftest.exp conftest.er2 >/dev/null; then
-        CF_GCO_S=yes
-      fi
-    fi
-    $rm conftest*
- dnl
-    if test x"$CF_GCO_S" = xyes ; then
-        AC_MSG_RESULT([Adding])
-        $4="$$4 $1"
-    else
-        AC_MSG_RESULT([Failed, not adding])
-    fi
+    CF_CFLAGS="$CFLAGS"
+    CFLAGS="$CFLAGS -Werror $1"
+    AC_COMPILE_IFELSE([int some_variable = 0;], [
+      AC_MSG_RESULT([Adding])
+      $4="$$4 $1"
+    ], [
+      AC_MSG_RESULT([Failed, not adding])
+    ])
     AC_LANG_POP($3)
+    CFLAGS="$CF_CFLAGS"
   fi dnl
 ])dnl
 dnl

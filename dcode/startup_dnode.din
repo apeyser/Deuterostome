@@ -108,7 +108,7 @@ startup_common_save capsave {
   /updatet {
     winmade {{currentdict begin drawwindow} stopped pop} {
       pbuf 0 (pawn ) fax * cpawn * number (:\n) fax 0 exch getinterval
-      toconsole_
+      toconsole_base
     } ifelse
   } bind def
 
@@ -118,9 +118,9 @@ startup_common_save capsave {
   /checkbusy {
     dup * eq {
       pop
-      false pawnbusy {or} forall {(Pawn is busy!\n) toconsole_ stop} if
+      false pawnbusy {or} forall {(Pawn is busy!\n) toconsole_base stop} if
     } {
-      pawnbusy exch get {(Pawn is busy!\n) toconsole_ stop} if
+      pawnbusy exch get {(Pawn is busy!\n) toconsole_base stop} if
     } ifelse
   } bind def
 
@@ -394,7 +394,7 @@ startup_common_save capsave {
   | All of this is put in a save to be restored by kill
   /rthreads_start {
     {
-      pawns 0 gt {(** Rthreads already exist!\n) toconsole_ halt} if
+      pawns 0 gt {(** Rthreads already exist!\n) toconsole_base halt} if
       save /save_ name {
         exec
         0 0 2 mpiinfo length 1 sub {mpiinfo exch get add} for /pawns name
@@ -410,9 +410,7 @@ startup_common_save capsave {
             exch not {abort} if
             /fbuf vmstatus sub 10 div /b array def
             ~[~[
-              mpirank 
-              (hostname) fromsystem dup length 1 sub 0 exch getinterval
-              ~mpidata ~begin ~sethostname
+              mpirank getmyfqdn ~mpidata ~begin ~sethostname
             ] ~lock]
             1 index capsave
             getstartupdir (startup_dpawn.d) fbuf readfile mkact exec
@@ -431,12 +429,11 @@ startup_common_save capsave {
   | to it. nwait should be set to the total number of jobs.
   | sets the pawn ready for more jobs.
   /notify {
-    {
-      makeready
-      /nwait nwait 1 sub def
-      continue
-      restore
-    } lock
+    makeready
+    /nwait nwait 1 sub def
+    continue
+    end
+    restore
   } bind def |]
 end def |========= end of mpi data ================
 
@@ -531,8 +528,8 @@ end def |========= end of mpi data ================
 | memory
 /rthreads_stop {
   mpidata begin {
-    checkrthreads not {(** Rthreads not running!\n) toconsole_} if
-    pawns 0 eq {(** No rthreads to stop! Halting\n) toconsole_ halt} if
+    checkrthreads not {(** Rthreads not running!\n) toconsole_base} if
+    pawns 0 eq {(** No rthreads to stop! Halting\n) toconsole_base halt} if
     * checkbusy
     kill
   } stopped end {stop} if
@@ -793,7 +790,7 @@ end def |========= end of mpi data ================
     (:) fax
     * getmyport * number
     (\n) fax
-    0 exch getinterval toconsole_
+    0 exch getinterval toconsole_base
   } ~exec
 ] bind def
 

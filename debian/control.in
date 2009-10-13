@@ -1,0 +1,13 @@
+Source: dm
+Section: unknown
+Priority: extra
+Maintainer: Alex Peyser <a.peyser@umiami.edu>
+Build-Depends: debhelper (>= 5), autotools-dev, emacs22, a2ps, ghostscript, perl, xterm, texlive, texlive-latex-extra, cups | cupsys, xorg, evince, libatlas3gf-base, libatlas-base-dev @ATLAS_VERSION@, libatlas-headers, pkg-config, mpich2, libx11-dev,
+Standards-Version: 3.7.2
+
+Package: dm
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, emacs22, a2ps, ghostscript, perl, xterm, cups | cupsys, xorg, evince, libatlas3gf-base | libatlas.so.3gf, libatlas3gf-base | libblas.so.3gf, libatlas3gf-base | liblapack.so.3gf, libatlas3gf-base-dev | liblapack-3gf.so , libatlas-base-dev  | libblas-3gf.so , libatlas-base-dev  | libatlas-3gf.so, pkg-config, mpich2, xorg
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+

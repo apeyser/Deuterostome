@@ -93,18 +93,21 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/localcharset.m4 $(top_srcdir)/m4/locale-fr.m4 \
 	$(top_srcdir)/m4/locale-ja.m4 $(top_srcdir)/m4/locale-zh.m4 \
 	$(top_srcdir)/m4/longlong.m4 $(top_srcdir)/m4/lstat.m4 \
-	$(top_srcdir)/m4/malloc.m4 $(top_srcdir)/m4/mbrtowc.m4 \
-	$(top_srcdir)/m4/mbsinit.m4 $(top_srcdir)/m4/mbsrtowcs.m4 \
-	$(top_srcdir)/m4/mbstate_t.m4 $(top_srcdir)/m4/mempcpy.m4 \
-	$(top_srcdir)/m4/mkdtemp.m4 $(top_srcdir)/m4/multiarch.m4 \
-	$(top_srcdir)/m4/onceonly.m4 $(top_srcdir)/m4/stdbool.m4 \
-	$(top_srcdir)/m4/stdint.m4 $(top_srcdir)/m4/stdio_h.m4 \
-	$(top_srcdir)/m4/stdlib_h.m4 $(top_srcdir)/m4/string_h.m4 \
-	$(top_srcdir)/m4/sys_stat_h.m4 $(top_srcdir)/m4/sys_time_h.m4 \
-	$(top_srcdir)/m4/tempname.m4 $(top_srcdir)/m4/unistd_h.m4 \
-	$(top_srcdir)/m4/wchar.m4 $(top_srcdir)/m4/wctype.m4 \
-	$(top_srcdir)/m4/wint_t.m4 $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/m4/basic-defs.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/ltdl.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
+	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/m4/malloc.m4 \
+	$(top_srcdir)/m4/mbrtowc.m4 $(top_srcdir)/m4/mbsinit.m4 \
+	$(top_srcdir)/m4/mbsrtowcs.m4 $(top_srcdir)/m4/mbstate_t.m4 \
+	$(top_srcdir)/m4/mempcpy.m4 $(top_srcdir)/m4/mkdtemp.m4 \
+	$(top_srcdir)/m4/multiarch.m4 $(top_srcdir)/m4/onceonly.m4 \
+	$(top_srcdir)/m4/stdbool.m4 $(top_srcdir)/m4/stdint.m4 \
+	$(top_srcdir)/m4/stdio_h.m4 $(top_srcdir)/m4/stdlib_h.m4 \
+	$(top_srcdir)/m4/string_h.m4 $(top_srcdir)/m4/sys_stat_h.m4 \
+	$(top_srcdir)/m4/sys_time_h.m4 $(top_srcdir)/m4/tempname.m4 \
+	$(top_srcdir)/m4/unistd_h.m4 $(top_srcdir)/m4/wchar.m4 \
+	$(top_srcdir)/m4/wctype.m4 $(top_srcdir)/m4/wint_t.m4 \
+	$(top_srcdir)/acinclude.m4 $(top_srcdir)/m4/basic-defs.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -240,7 +243,7 @@ testwordorder_LDADD = $(LDADD)
 dist_pkgdataSCRIPT_INSTALL = $(INSTALL_SCRIPT)
 SCRIPTS = $(dist_pkgdata_SCRIPTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
-depcomp = $(SHELL) $(top_srcdir)/depcomp
+depcomp = $(SHELL) $(top_srcdir)/libltdl/config/depcomp
 am__depfiles_maybe = depfiles
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -334,12 +337,12 @@ DM_IPPORT_USERRESERVED = @DM_IPPORT_USERRESERVED@
 DM_IPPORT_USERRESERVED_STANDARD = @DM_IPPORT_USERRESERVED_STANDARD@
 DPAWN_COMMAND = @DPAWN_COMMAND@
 DSYMUTIL = @DSYMUTIL@
+DUMPBIN = @DUMPBIN@
 DVT_MEM_SIZE = @DVT_MEM_SIZE@
 DVT_NUM_DICTS = @DVT_NUM_DICTS@
 DVT_NUM_EXECS = @DVT_NUM_EXECS@
 DVT_NUM_OPDS = @DVT_NUM_OPDS@
 DVT_USER_DICT_SIZE = @DVT_USER_DICT_SIZE@
-ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
@@ -377,8 +380,7 @@ EOVERFLOW_HIDDEN = @EOVERFLOW_HIDDEN@
 EOVERFLOW_VALUE = @EOVERFLOW_VALUE@
 ERRNO_H = @ERRNO_H@
 EXEEXT = @EXEEXT@
-F77 = @F77@
-FFLAGS = @FFLAGS@
+FGREP = @FGREP@
 FNMATCH_H = @FNMATCH_H@
 GCC_CFLAGS = @GCC_CFLAGS@
 GCC_CXXFLAGS = @GCC_CXXFLAGS@
@@ -611,23 +613,28 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LD = @LD@
 LDFLAGS = @LDFLAGS@
 LEX = @LEX@
 LEXLIB = @LEXLIB@
 LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
 LIBDM_DLL_IMPORT = @LIBDM_DLL_IMPORT@
 LIBLTDL = @LIBLTDL@
+LIBM = @LIBM@
 LIBOBJS = @LIBOBJS@
 LIBPLUGIN_DLL_IMPORT = @LIBPLUGIN_DLL_IMPORT@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIBTOOL_DEP = @LIBTOOL_DEP@
+LIPO = @LIPO@
 LN_S = @LN_S@
 LOCALCHARSET_TESTS_ENVIRONMENT = @LOCALCHARSET_TESTS_ENVIRONMENT@
 LOCALE_FR_UTF8 = @LOCALE_FR_UTF8@
 LOCALE_JA = @LOCALE_JA@
 LOCALE_ZH_CN = @LOCALE_ZH_CN@
 LTALLOCA = @LTALLOCA@
+LTDLDEPS = @LTDLDEPS@
+LTDLINCL = @LTDLINCL@
 LTLIBOBJS = @LTLIBOBJS@
 M4DATADIR = @M4DATADIR@
 MAINT = @MAINT@
@@ -664,12 +671,15 @@ NEXT_SYS_TIME_H = @NEXT_SYS_TIME_H@
 NEXT_UNISTD_H = @NEXT_UNISTD_H@
 NEXT_WCHAR_H = @NEXT_WCHAR_H@
 NEXT_WCTYPE_H = @NEXT_WCTYPE_H@
+NM = @NM@
 NMEDIT = @NMEDIT@
 NO_PTHREAD_CC = @NO_PTHREAD_CC@
 NO_PTHREAD_CFLAGS = @NO_PTHREAD_CFLAGS@
 NO_PTHREAD_LIBS = @NO_PTHREAD_LIBS@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
+OTOOL = @OTOOL@
+OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
@@ -792,7 +802,7 @@ abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
-ac_ct_F77 = @ac_ct_F77@
+ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
 acx_pthread_config = @acx_pthread_config@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
@@ -841,6 +851,7 @@ libexecdir = @libexecdir@
 lispdir = @lispdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
+lt_ECHO = @lt_ECHO@
 m4datadir = @m4datadir@
 makeindex = @makeindex@
 mandir = @mandir@

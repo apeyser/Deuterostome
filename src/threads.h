@@ -27,7 +27,7 @@ P op_makethreads(void);
  * As long as global is read-only, no locking should be necessary
  *
  * */
-typedef P (*thread_func)(UP id, const void * global, void* local);
+typedef P (*thread_func)(UL32 id, const void * global, void* local);
 
 /************************************************** threads_do_int
  *
@@ -44,7 +44,7 @@ typedef P (*thread_func)(UP id, const void * global, void* local);
  *          thread to return error != OK.
  * 
  */
-P threads_do_int(UP nways, thread_func func, const void* global,
+P threads_do_int(UL32 nways, thread_func func, const void* global,
                  void* local, size_t size_per_local);
 
 /**************************************************** threads_do_pool_int
@@ -55,7 +55,7 @@ P threads_do_int(UP nways, thread_func func, const void* global,
  *   starting with the passed local.
  *
  */
-P threads_do_pool_int(UP nways, thread_func func, const void* global,
+P threads_do_pool_int(UL32 nways, thread_func func, const void* global,
                       void* local, size_t size_per_local);
 
 /**************************************************** threads_do_local
@@ -107,8 +107,8 @@ void thread_share_unlock_f(void);
  * 1 <= thread_num <= THREADMAX
  * 
  * */
-extern UP thread_num_;
-DM_INLINE_STATIC UP thread_num(void) {return thread_num_;};
+extern UL32 thread_num_;
+DM_INLINE_STATIC UL32 thread_num(void) {return thread_num_;};
 
 /*********************************************************** thread_max
  *
@@ -118,9 +118,9 @@ DM_INLINE_STATIC UP thread_num(void) {return thread_num_;};
  * 0 <= thread_max < thread_num.
  * Equal to nways passed in threads_do_int
  */
-extern UP thread_max_;
+extern UL32 thread_max_;
 __attribute__ ((__unused__)) 
-DM_INLINE_STATIC UP thread_max(void)  {return thread_max_;};
+DM_INLINE_STATIC UL32 thread_max(void)  {return thread_max_;};
 
 #else //!DM_ENABLE_THREADS
 

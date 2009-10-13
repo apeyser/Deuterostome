@@ -7,7 +7,7 @@
 #include "error-local.h"
 
 // these must be kept in the same order as SIGMAP_* in dm-signals.h
-// and SIGNALS in startup_common.d.in
+// and SIGNALS in startup_common.din
 int sigmap[] = {
   SIGQUIT,
   SIGKILL,

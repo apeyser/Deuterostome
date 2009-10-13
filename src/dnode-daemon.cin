@@ -219,8 +219,8 @@ static void startlog(void) {
     fataly("Unable to dup /dev/null to standard fd's");
 
 
-  if (stdin > STDERR_FILENO && close(stdin) 
-      || stdout > STDERR_FILENO && close(stdout))
+  if ((stdin > STDERR_FILENO && close(stdin))
+      || (stdout > STDERR_FILENO && close(stdout)))
     fataly("Unable to close /dev/null");
 
   if (getpgrp() != getpid() && setsid() == -1) 

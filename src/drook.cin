@@ -90,7 +90,7 @@ DM_INLINE_STATIC void usage(int argc, char* argv[],
   read_socket_int(infovm, FRAMEBYTES*2);
   if (! (infovm_ = (B*) realloc(infovm, FRAMEBYTES*2+BOX_NB(infovm))))
     error_local(1, errno, "Unable to malloc %li for infovm", 
-	  BOX_NB(infovm));
+		(long) BOX_NB(infovm));
   infovm = infovm_;
   read_socket_int(infovm+FRAMEBYTES*2, BOX_NB(infovm));
 
@@ -100,7 +100,7 @@ DM_INLINE_STATIC void usage(int argc, char* argv[],
   if (! (infodicts->dicts
 	 = (struct InfoDict*) malloc(infodicts->n*sizeof(struct InfoDict))))
     error_local(1, errno, "Unable to malloc %li for infodicts", 
-	  infodicts->n*sizeof(struct InfoDict));
+		(long) infodicts->n*sizeof(struct InfoDict));
 
   for (i = 0, dlist = VALUE_BASE(list); 
        dlist < LIST_CEIL(list); 
@@ -118,7 +118,7 @@ DM_INLINE_STATIC void usage(int argc, char* argv[],
 				       *sizeof(struct InfoPair)))
 	&& infodicts->dicts[i].n)
       error_local(1, errno, "Unable to malloc %li for infopair", 
-	    infodicts->dicts[i].n*sizeof(struct InfoPair));
+		  (long) infodicts->dicts[i].n*sizeof(struct InfoPair));
     
     for (j = 0, e = DICT_ENTRIES(dict); 
 	 e < DICT_FREE(dict); 
@@ -129,7 +129,7 @@ DM_INLINE_STATIC void usage(int argc, char* argv[],
 
       pullname(namef, infodicts->dicts[i].pair[j].key);
       if (! (infodicts->dicts[i].pair[j].val = (char*) malloc(k+1)))
-	error_local(1, errno, "Unable to malloc %li for valf", k);
+	error_local(1, errno, "Unable to malloc %li for valf", (long) k);
       strncpy(infodicts->dicts[i].pair[j].val, list + VALUE_BASE(valf), k);
       infodicts->dicts[i].pair[j].val[k] = '\0';
     }

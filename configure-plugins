@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# exec ./configure --disable-xps --disable-regex --disable-setuid \
+#      --enable-threads --enable-rthreads --enable-unix-sockets \
+#      --disable-doc --enable-plugins-support --enable-plugins \
+#      --enable-shared --with-atlas --with-mpi="-lmpich -lrt -lpthread" \
+#      --with-x
+
+	./configure CFLAGS="-Wall -g" LDFLAGS="-Wl,-z,defs" --with-mpi="-lmpich -lrt -lpthread" --enable-rthreads --enable-mpi --without-petsc --with-emacs --enable-setuid --enable-daemon --enable-threads --enable-plugins --enable-plugins-support --enable-doc --with-x
