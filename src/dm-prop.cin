@@ -192,7 +192,7 @@ static void execsighandler(P sigsocket, P tcp_sigsocket, P serverport,
     error_local(1, errno, "Unable to dup tcp_sigsocket %li to stdin", 
 	  (long) tcp_sigsocket);
 
-  if (asprintf(&_serverport, "%li", serverport) == -1)
+  if (asprintf(&_serverport, "%li", (long) serverport) == -1)
     error_local(1, 0, "Unable to asprintf serverport");
   
   DEBUG("exec: @dmprop@ %s %i %i", _serverport, 

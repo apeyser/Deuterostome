@@ -795,8 +795,8 @@ P make_socket(UW* port, BOOLEAN tcp, P packet_size, P* retc)
 
   *port = name.sin_port;
   DEBUG("made %i: (%i, %i), %s, %li", 
-	(int) sock, (int) *port, ntohs(*port),
-	tcp ? "tcp" : "udp", packet_size);
+	(int) sock, (int) *port, (int) ntohs(*port),
+	tcp ? "tcp" : "udp", (long) packet_size);
   return sock;
 }
 

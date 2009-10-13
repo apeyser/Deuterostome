@@ -1263,8 +1263,9 @@ try_dlopen (lt_dlhandle *phandle, const char *filename, const char *ext,
 
       if (vtable)
 	{
+	  const char* libext_ = libext;
 	  /* name + "." + libext + NULL */
-	  archive_name = MALLOC (char, LT_STRLEN (name) + LT_STRLEN (libext) + 2);
+	  archive_name = MALLOC (char, LT_STRLEN (name) + LT_STRLEN (libext_) + 2);
 	  *phandle = (lt_dlhandle) lt__zalloc (sizeof (struct lt__handle));
 
 	  if ((*phandle == NULL) || (archive_name == NULL))
