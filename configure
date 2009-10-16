@@ -31173,8 +31173,8 @@ $as_echo "no" >&6; }
     *-pc-cygwin) ;;
     *)
               if test "x$GCC" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C compiler options -g" >&5
-$as_echo_n "checking for C compiler options -g... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GCC compiler options -g" >&5
+$as_echo_n "checking for GCC compiler options -g... " >&6; }
     ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -31227,12 +31227,15 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GCC compiler options -g" >&5
+$as_echo "$as_me: Skipping check for GCC compiler options -g" >&6;}
   fi
   ;;
   esac
             if test "x$GCC" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C compiler options -O2" >&5
-$as_echo_n "checking for C compiler options -O2... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GCC compiler options -O2" >&5
+$as_echo_n "checking for GCC compiler options -O2... " >&6; }
     ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -31285,6 +31288,9 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GCC compiler options -O2" >&5
+$as_echo "$as_me: Skipping check for GCC compiler options -O2" >&6;}
   fi
 
   else
@@ -31438,8 +31444,8 @@ esac
 
 
           if test "x$GCC" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C compiler options -ftree-vectorize" >&5
-$as_echo_n "checking for C compiler options -ftree-vectorize... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GCC compiler options -ftree-vectorize" >&5
+$as_echo_n "checking for GCC compiler options -ftree-vectorize... " >&6; }
     ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -31492,10 +31498,13 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GCC compiler options -ftree-vectorize" >&5
+$as_echo "$as_me: Skipping check for GCC compiler options -ftree-vectorize" >&6;}
   fi
           if test "x$GCC" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C compiler options -fno-strict-aliasing" >&5
-$as_echo_n "checking for C compiler options -fno-strict-aliasing... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GCC compiler options -fno-strict-aliasing" >&5
+$as_echo_n "checking for GCC compiler options -fno-strict-aliasing... " >&6; }
     ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -31548,11 +31557,14 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GCC compiler options -fno-strict-aliasing" >&5
+$as_echo "$as_me: Skipping check for GCC compiler options -fno-strict-aliasing" >&6;}
   fi
 
           if test "x$GCC" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C compiler options -pipe" >&5
-$as_echo_n "checking for C compiler options -pipe... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GCC compiler options -pipe" >&5
+$as_echo_n "checking for GCC compiler options -pipe... " >&6; }
     ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -31605,10 +31617,13 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GCC compiler options -pipe" >&5
+$as_echo "$as_me: Skipping check for GCC compiler options -pipe" >&6;}
   fi
           if test "x$GCC" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C compiler options -fno-unsigned-char" >&5
-$as_echo_n "checking for C compiler options -fno-unsigned-char... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GCC compiler options -fno-unsigned-char" >&5
+$as_echo_n "checking for GCC compiler options -fno-unsigned-char... " >&6; }
     ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -31661,10 +31676,13 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GCC compiler options -fno-unsigned-char" >&5
+$as_echo "$as_me: Skipping check for GCC compiler options -fno-unsigned-char" >&6;}
   fi
           if test "x$GCC" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C compiler options -ffast-math" >&5
-$as_echo_n "checking for C compiler options -ffast-math... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GCC compiler options -ffast-math" >&5
+$as_echo_n "checking for GCC compiler options -ffast-math... " >&6; }
     ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -31717,10 +31735,13 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GCC compiler options -ffast-math" >&5
+$as_echo "$as_me: Skipping check for GCC compiler options -ffast-math" >&6;}
   fi
           if test "x$GCC" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C compiler options -fno-finite-math-only" >&5
-$as_echo_n "checking for C compiler options -fno-finite-math-only... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GCC compiler options -fno-finite-math-only" >&5
+$as_echo_n "checking for GCC compiler options -fno-finite-math-only... " >&6; }
     ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -31773,10 +31794,13 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GCC compiler options -fno-finite-math-only" >&5
+$as_echo "$as_me: Skipping check for GCC compiler options -fno-finite-math-only" >&6;}
   fi
           if test "x$GCC" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C compiler options -fno-unsafe-math-optimizations" >&5
-$as_echo_n "checking for C compiler options -fno-unsafe-math-optimizations... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GCC compiler options -fno-unsafe-math-optimizations" >&5
+$as_echo_n "checking for GCC compiler options -fno-unsafe-math-optimizations... " >&6; }
     ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -31829,10 +31853,13 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GCC compiler options -fno-unsafe-math-optimizations" >&5
+$as_echo "$as_me: Skipping check for GCC compiler options -fno-unsafe-math-optimizations" >&6;}
   fi
           if test "x$GCC" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C compiler options -Wno-pointer-sign" >&5
-$as_echo_n "checking for C compiler options -Wno-pointer-sign... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GCC compiler options -Wno-pointer-sign" >&5
+$as_echo_n "checking for GCC compiler options -Wno-pointer-sign... " >&6; }
     ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -31885,10 +31912,13 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GCC compiler options -Wno-pointer-sign" >&5
+$as_echo "$as_me: Skipping check for GCC compiler options -Wno-pointer-sign" >&6;}
   fi
           if test "x$GCC" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C compiler options -fprefetch-loop-arrays" >&5
-$as_echo_n "checking for C compiler options -fprefetch-loop-arrays... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GCC compiler options -fprefetch-loop-arrays" >&5
+$as_echo_n "checking for GCC compiler options -fprefetch-loop-arrays... " >&6; }
     ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -31941,10 +31971,13 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GCC compiler options -fprefetch-loop-arrays" >&5
+$as_echo "$as_me: Skipping check for GCC compiler options -fprefetch-loop-arrays" >&6;}
   fi
           if test "x$GCC" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C compiler options -std=gnu99" >&5
-$as_echo_n "checking for C compiler options -std=gnu99... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GCC compiler options -std=gnu99" >&5
+$as_echo_n "checking for GCC compiler options -std=gnu99... " >&6; }
     ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -31997,6 +32030,9 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GCC compiler options -std=gnu99" >&5
+$as_echo "$as_me: Skipping check for GCC compiler options -std=gnu99" >&6;}
   fi
 
 
@@ -35010,11 +35046,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:35013: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:35049: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:35017: \$? = $ac_status" >&5
+   echo "$as_me:35053: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -35109,11 +35145,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:35112: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:35148: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:35116: \$? = $ac_status" >&5
+   echo "$as_me:35152: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -35161,11 +35197,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:35164: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:35200: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:35168: \$? = $ac_status" >&5
+   echo "$as_me:35204: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -36154,8 +36190,8 @@ $as_echo "no" >&6; }
     *-pc-cygwin) ;;
     *)
                 if test "x$GXX" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C++ compiler options -g" >&5
-$as_echo_n "checking for C++ compiler options -g... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GXX compiler options -g" >&5
+$as_echo_n "checking for GXX compiler options -g... " >&6; }
     ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -36208,12 +36244,15 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GXX compiler options -g" >&5
+$as_echo "$as_me: Skipping check for GXX compiler options -g" >&6;}
   fi
     ;;
   esac
               if test "x$GXX" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C++ compiler options -O2" >&5
-$as_echo_n "checking for C++ compiler options -O2... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GXX compiler options -O2" >&5
+$as_echo_n "checking for GXX compiler options -O2... " >&6; }
     ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -36266,6 +36305,9 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GXX compiler options -O2" >&5
+$as_echo "$as_me: Skipping check for GXX compiler options -O2" >&6;}
   fi
 
   else
@@ -36274,8 +36316,8 @@ $as_echo "yes, \`${CXXFLAGS}'" >&6; }
   fi
 
             if test "x$GXX" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C++ compiler options -ftree-vectorize" >&5
-$as_echo_n "checking for C++ compiler options -ftree-vectorize... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GXX compiler options -ftree-vectorize" >&5
+$as_echo_n "checking for GXX compiler options -ftree-vectorize... " >&6; }
     ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -36328,10 +36370,13 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GXX compiler options -ftree-vectorize" >&5
+$as_echo "$as_me: Skipping check for GXX compiler options -ftree-vectorize" >&6;}
   fi
             if test "x$GXX" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C++ compiler options -fno-strict-aliasing" >&5
-$as_echo_n "checking for C++ compiler options -fno-strict-aliasing... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GXX compiler options -fno-strict-aliasing" >&5
+$as_echo_n "checking for GXX compiler options -fno-strict-aliasing... " >&6; }
     ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -36384,11 +36429,14 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GXX compiler options -fno-strict-aliasing" >&5
+$as_echo "$as_me: Skipping check for GXX compiler options -fno-strict-aliasing" >&6;}
   fi
 
             if test "x$GXX" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C++ compiler options -pipe" >&5
-$as_echo_n "checking for C++ compiler options -pipe... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GXX compiler options -pipe" >&5
+$as_echo_n "checking for GXX compiler options -pipe... " >&6; }
     ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -36441,10 +36489,13 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GXX compiler options -pipe" >&5
+$as_echo "$as_me: Skipping check for GXX compiler options -pipe" >&6;}
   fi
             if test "x$GXX" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C++ compiler options -fno-unsigned-char" >&5
-$as_echo_n "checking for C++ compiler options -fno-unsigned-char... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GXX compiler options -fno-unsigned-char" >&5
+$as_echo_n "checking for GXX compiler options -fno-unsigned-char... " >&6; }
     ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -36497,10 +36548,13 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GXX compiler options -fno-unsigned-char" >&5
+$as_echo "$as_me: Skipping check for GXX compiler options -fno-unsigned-char" >&6;}
   fi
             if test "x$GXX" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C++ compiler options -ffast-math" >&5
-$as_echo_n "checking for C++ compiler options -ffast-math... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GXX compiler options -ffast-math" >&5
+$as_echo_n "checking for GXX compiler options -ffast-math... " >&6; }
     ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -36553,10 +36607,13 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GXX compiler options -ffast-math" >&5
+$as_echo "$as_me: Skipping check for GXX compiler options -ffast-math" >&6;}
   fi
             if test "x$GXX" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C++ compiler options -fno-finite-math-only" >&5
-$as_echo_n "checking for C++ compiler options -fno-finite-math-only... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GXX compiler options -fno-finite-math-only" >&5
+$as_echo_n "checking for GXX compiler options -fno-finite-math-only... " >&6; }
     ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -36609,10 +36666,13 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GXX compiler options -fno-finite-math-only" >&5
+$as_echo "$as_me: Skipping check for GXX compiler options -fno-finite-math-only" >&6;}
   fi
             if test "x$GXX" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C++ compiler options -fno-unsafe-math-optimizations" >&5
-$as_echo_n "checking for C++ compiler options -fno-unsafe-math-optimizations... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GXX compiler options -fno-unsafe-math-optimizations" >&5
+$as_echo_n "checking for GXX compiler options -fno-unsafe-math-optimizations... " >&6; }
     ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -36665,10 +36725,13 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GXX compiler options -fno-unsafe-math-optimizations" >&5
+$as_echo "$as_me: Skipping check for GXX compiler options -fno-unsafe-math-optimizations" >&6;}
   fi
             if test "x$GXX" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C++ compiler options -Wno-pointer-sign" >&5
-$as_echo_n "checking for C++ compiler options -Wno-pointer-sign... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GXX compiler options -Wno-pointer-sign" >&5
+$as_echo_n "checking for GXX compiler options -Wno-pointer-sign... " >&6; }
     ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -36721,10 +36784,13 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GXX compiler options -Wno-pointer-sign" >&5
+$as_echo "$as_me: Skipping check for GXX compiler options -Wno-pointer-sign" >&6;}
   fi
             if test "x$GXX" == "xyes" ; then
-    { $as_echo "$as_me:$LINENO: checking for C++ compiler options -fprefetch-loop-arrays" >&5
-$as_echo_n "checking for C++ compiler options -fprefetch-loop-arrays... " >&6; }
+    { $as_echo "$as_me:$LINENO: checking for GXX compiler options -fprefetch-loop-arrays" >&5
+$as_echo_n "checking for GXX compiler options -fprefetch-loop-arrays... " >&6; }
     ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -36777,15 +36843,18 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     CPPFLAGS="$CF_CPPFLAGS"
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for GXX compiler options -fprefetch-loop-arrays" >&5
+$as_echo "$as_me: Skipping check for GXX compiler options -fprefetch-loop-arrays" >&6;}
   fi
 
     fi
 
 
 
-      if test "x$GCC" == "xyes"; then
-    { $as_echo "$as_me:$LINENO: checking for value of HAVE_HOT" >&5
-$as_echo_n "checking for value of HAVE_HOT... " >&6; }
+    if test "x$GCC" == "xyes"; then
+    { $as_echo "$as_me:$LINENO: checking for value of HAVE_HOT for GCC" >&5
+$as_echo_n "checking for value of HAVE_HOT for GCC... " >&6; }
     ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -36795,10 +36864,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
     CF_CPPFLAGS="$CPPFLAGS"
     CPPFLAGS="$CPPFLAGS -Werror"
     cat >conftest.$ac_ext <<_ACEOF
-
-  __attribute__ ((__hot__)) void x(void) {}
-  int main(int argc, char** argv) {x();}
-
+__attribute__ ((__hot__)) void x(void) {}
 _ACEOF
 rm -f conftest.$ac_objext
 if { (ac_try="$ac_compile"
@@ -36825,12 +36891,14 @@ _ACEOF
 
       { $as_echo "$as_me:$LINENO: result: HAVE_HOT defined" >&5
 $as_echo "HAVE_HOT defined" >&6; }
+
 else
   $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
 	      { $as_echo "$as_me:$LINENO: result: HAVE_HOT not defined" >&5
 $as_echo "HAVE_HOT not defined" >&6; }
+
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
@@ -36841,6 +36909,9 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+  else
+    { $as_echo "$as_me:$LINENO: Skipping check for value of HAVE_HOT for GCC" >&5
+$as_echo "$as_me: Skipping check for value of HAVE_HOT for GCC" >&6;}
   fi
 
 

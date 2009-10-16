@@ -298,10 +298,7 @@ CF_IF_ENABLED([cppplugin], [
   CF_GXX_COMPILER_OPTION([-fprefetch-loop-arrays], [GCC_CXXFLAGS])
 ])
 
-CF_DEFINE_IF_CODE([HOT], [
-  __attribute__ ((__hot__)) void x(void) {}
-  int main(int argc, char** argv) {x();}
-])
+CF_DEFINE_IF_CODE_GCC([HOT], [__attribute__ ((__hot__)) void x(void) {}])
 
 AC_SUBST([INCLTDL])
 AC_SUBST([LIBLTDL])

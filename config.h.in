@@ -223,7 +223,7 @@
 /* Define to 1 if you have the <glob.h> header file. */
 #undef HAVE_GLOB_H
 
-/* Define if you have "HAVE_HOT" */
+/* Define if you have "HOT" */
 #undef HAVE_HOT
 
 /* Define to 1 if you have the <inttypes.h> header file. */
