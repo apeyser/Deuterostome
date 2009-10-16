@@ -10,3 +10,4 @@
 /string.h
 /sys
 /unistd.h
+/wchar.h

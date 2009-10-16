@@ -443,7 +443,11 @@ DLL_SCOPE _dm_const UW ascii[];
 
 /*----------------------- function prototypes ------------------------*/
 
+#if DM_HAVE_HOT
 #define DM_HOT __attribute__ ((__hot__))
+#else
+#define DM_HOT 
+#endif
 
 /*--- DM1 */
 DM_HOT DLL_SCOPE P tokenize_gen(void);

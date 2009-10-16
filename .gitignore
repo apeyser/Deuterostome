@@ -31,3 +31,4 @@ Makefile
 .libs
 /plugins/dm-stats-main.h
 /plugins/dm-stats-header.h
+.\#*
