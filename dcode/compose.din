@@ -54,7 +54,7 @@
 |-- phase 1 (logical design)
 
   phase1 begin COMPOSE begin 
-    (\n1) toconsole
+     (\n1) toconsole
     ~[ generator ] bind /root name 
   end end
 
@@ -535,7 +535,7 @@
 /letterprefix true def | lineaar axis label: use letter prefix
                        |   (else power of 10)
 
-/verboxe true def      | switch: outline bounding boxes
+/verboxe false def      | switch: outline bounding boxes
 
  
 
@@ -1015,8 +1015,8 @@
              { [ exch ] } if /Ys name
           selitem 2 get /pres name
         }
-        { report selitem 0 get get /X name
-          report selitem 1 get get [ exch ] /Ys name
+        { report selitem 0 get get 0 get /X name
+          report selitem 0 get get 1 get [ exch ] /Ys name
           selitem 1 get /pres name
         }
         ifelse
@@ -1091,7 +1091,7 @@ end def
     Xaxis 0 get Xaxis 2 get almost Xaxis 1 get { /xtick name
         10 /b array 0 ($) fax
         |-- scale by unit and round to integer
-        * xtick Xaxis 3 get div roundup /l ctype * number
+        * xtick Xaxis 3 get div round /l ctype * number
         ($)fax 0 exch getinterval
         |-- center on xtick, top adjust half a line below axis
         ~[ xtick ~X_to_x textsize -0.5 mul ~translate
@@ -1132,7 +1132,7 @@ end def
     Yaxis 0 get Yaxis 2 get almost Yaxis 1 get { /ytick name
         10 /b array 0 ($) fax
         |-- scale by unit and round to integer
-        * ytick Yaxis 3 get div roundup /l ctype * number
+        * ytick Yaxis 3 get div round /l ctype * number
           ($)fax 0 exch getinterval
         ~[ textsize -0.5 mul ytick ~Y_to_y ~translate
            ~alignRC
@@ -1638,7 +1638,7 @@ end definefont pop   % Symbols font
 |  - DesignLinearAxis
 |  - DesignLg10Axis
 |  - LinAxisLabel
-|  - UnitPrefix
+|  - AxisUnit
 |  - roundup, almost, name, text, numeral
 |
 |----------------------- Logical coordinates ---------------------------
@@ -1724,7 +1724,7 @@ end definefont pop   % Symbols font
 
 |-------------------------- make label of linear axis ----------------------
 
-/LinAxisLabel { s_ /unit name s_ /axdesc name _ /poweroften name
+/LinAxisLabel { /unit name /axdesc name /poweroften name
   
   100 /b array 0 axdesc fax
   poweroften 1 eq unit length 0 eq and not
@@ -1791,7 +1791,7 @@ end definefont pop   % Symbols font
      { poweroften 1e-15 lt { power_prefix stop } if
        poweroften 1e9 gt { power_prefix stop } if
        unit length 0 eq { power_prefix stop } if
-       (@) toconsole letter_prefix stop
+       letter_prefix stop
      } if
      unit length 0 ne { (\() fax power_prefix (\)) fax }
                       { power_prefix }
@@ -1800,16 +1800,16 @@ end definefont pop   % Symbols font
 } bind def
 
 /power_prefix {
-   poweroften 1 ne { ($10^{) fax 
+  poweroften 1 ne { ($10^{) fax 
                      * poweroften lg roundup /l ctype -1 number 
-                     (}$ ) fax unit fax 
-                   } 
-                   { unit fax }
-                   ifelse 
+                    (}$ ) fax unit fax 
+                  } if
+  unit fax 
 } bind def
 
 /letter_prefix {
-   letterlist poweroften lg 15 add 3 div 0.8999999999999999 add get s_ fax
+  letterlist poweroften lg 15 add 3 div 0.8999999999999999 add get fax
+  unit fax
 } bind def
 
 /letterlist [ (f) (p) (n) ($\mu$) (m) () (K) (M) (G) ] def 

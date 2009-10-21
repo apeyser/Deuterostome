@@ -1,4 +1,4 @@
-/COMPOSE (compose.d) () (4.5.6) (merge-fromfile-id-to-master) version_add module
+/COMPOSE (compose.d) (Alex Peyser Wed Oct 21 16:39:11 2009 -0400 a1c0adb94376ff47f6475cdb70acef8e63e54b6d) (4.5.10) (jaunty64-4.5.10-7-gf722df5) version_add module
 200 dict dup begin
 
 |=============================== Prologue ====================================
@@ -54,7 +54,7 @@
 |-- phase 1 (logical design)
 
   phase1 begin COMPOSE begin 
-    (\n1) toconsole
+     (\n1) toconsole
     ~[ generator ] bind /root name 
   end end
 
@@ -284,9 +284,9 @@
   t1 m2 copy
 } bind def
 
-|-------- map:  x' y' matrix | x y
-|         where x',y' are the coordinates in the child space, `matrix' is
-|         the transform matrix from the child to the parent space, and x,'
+|-------- map:  x' y' map | x y
+|         where x',y' are the coordinates in the child space, `map' is
+|         the transform map from the child to the parent space, and x,'
 |         are the coordinates in the parent space.
 
 /map { /m name /y name /x name
@@ -339,7 +339,7 @@
 | If the primitive is the root primitive of the figure tree, the placement
 | is in device space.  
 
-|------- make the inverse matrix
+|------- make the inverse map (child to parent)
 
 /makeinverse {
   <d 1 0 0 1 0 0 > 6 /d array copy placement /inverse name
@@ -527,13 +527,15 @@
 |---------------------------- default parameters -----------------------------
 |
 | If you wish to use different defaults globally, redefine these parameters
- | in the COMPOSE dictionary:
+| in the COMPOSE dictionary:
 
-/linewidth 0.7 def   | general, points
-/symbolsize 7 def    | for graphs, points
-/textsize 10 def     | for LaTEX (and graphs), points
+/linewidth 0.7 def     | general, points
+/symbolsize 7 def      | for graphs, points
+/textsize 10 def       | for LaTEX (and graphs), points
+/letterprefix true def | lineaar axis label: use letter prefix
+                       |   (else power of 10)
 
-/verboxe true def    | switch: draw all bounding boxes
+/verboxe false def      | switch: outline bounding boxes
 
  
 
@@ -845,7 +847,9 @@
   setlinewidth
   symbolsize setsymbolsize
   ( symbolfont setfont ) faxPS
-  [ /postscript find ~exec ~restore ] ~toPS forall
+  [ /postscript find ~exec ] ~toPS forall
+  verboxe { bbox toPS ~drawbbox toPS } if
+  ~restore toPS
   DSCon faxPS
   end
 } bind phase3 /PS put
@@ -1011,8 +1015,8 @@
              { [ exch ] } if /Ys name
           selitem 2 get /pres name
         }
-        { report selitem 0 get get /X name
-          report selitem 1 get get [ exch ] /Ys name
+        { report selitem 0 get get 0 get /X name
+          report selitem 0 get get 1 get [ exch ] /Ys name
           selitem 1 get /pres name
         }
         ifelse
@@ -1087,22 +1091,15 @@ end def
     Xaxis 0 get Xaxis 2 get almost Xaxis 1 get { /xtick name
         10 /b array 0 ($) fax
         |-- scale by unit and round to integer
-        * xtick Xaxis 3 get div roundup /l ctype * number
+        * xtick Xaxis 3 get div round /l ctype * number
         ($)fax 0 exch getinterval
         |-- center on xtick, top adjust half a line below axis
         ~[ xtick ~X_to_x textsize -0.5 mul ~translate
            ~alignCT
          ] latex
-      } for
-    100 /b array 0 abscissa 5 get fax ( / ) fax
-        Xaxis 3 get 1 eq { abscissa 4 get fax
-                         }
-                         { (\() fax
-                           Xaxis 3 get PowerOfTen ( ) fax
-                           abscissa 4 get fax (\)) fax
-                         }
-                         ifelse 0 exch getinterval
+      } for  
     |-- place descr /unit axis label
+    Xaxis 3 get abscissa 5 get abscissa 4 get LinAxisLabel
     ~[ xdim 0.5 mul
        ~parent /bbox ~get 1 ~get textsize 0.5 mul ~sub ~translate
        ~alignCT
@@ -1128,28 +1125,21 @@ end def
   } bind def
 
 end def
-
+ 
 /gpYlabels 2 dict dup begin
-
+ 
   /lin {
     Yaxis 0 get Yaxis 2 get almost Yaxis 1 get { /ytick name
         10 /b array 0 ($) fax
         |-- scale by unit and round to integer
-        * ytick Yaxis 3 get div roundup /l ctype * number
+        * ytick Yaxis 3 get div round /l ctype * number
           ($)fax 0 exch getinterval
         ~[ textsize -0.5 mul ytick ~Y_to_y ~translate
            ~alignRC
          ] latex
       } for
     |-- place descr/power unit axis label
-    100 /b array 0 ordinate 5 get fax ( / ) fax
-        Yaxis 3 get 1 eq { ordinate 4 get fax
-                         }
-                         { (\() fax
-                           Yaxis 3 get PowerOfTen ( ) fax
-                           ordinate 4 get fax (\)) fax
-                         }
-                         ifelse 0 exch getinterval
+    Yaxis 3 get ordinate 5 get ordinate 4 get LinAxisLabel
     ~[ ~parent /bbox ~get 0 ~get textsize 0.5 mul ~sub 
        ydim 0.5 mul ~translate
        90.0 ~rotate
@@ -1647,7 +1637,8 @@ end definefont pop   % Symbols font
 |  - X_to_x, Y_to_y, x_to_X, y_to_Y 
 |  - DesignLinearAxis
 |  - DesignLg10Axis
-|  - UnitPrefix
+|  - LinAxisLabel
+|  - AxisUnit
 |  - roundup, almost, name, text, numeral
 |
 |----------------------- Logical coordinates ---------------------------
@@ -1731,6 +1722,16 @@ end definefont pop   % Symbols font
    [ min max step unit ]
 } bind def 
 
+|-------------------------- make label of linear axis ----------------------
+
+/LinAxisLabel { /unit name /axdesc name /poweroften name
+  
+  100 /b array 0 axdesc fax
+  poweroften 1 eq unit length 0 eq and not
+    { ( / ) fax AxisUnit
+    } if 0 exch getinterval
+} bind def
+
 |------------------------ designing a log10 axis ---------------------------
 | use: min max | [ min max [ decades ] [ subdecades ] ]
 |
@@ -1776,31 +1777,39 @@ end definefont pop   % Symbols font
 
 
 |------------------- prefix a unit label
-| use: textbuf textindex unit bool | textbuf textindex
+| use: textbuf textindex | textbuf textindex
+|
+| expects three input values in:
+|  unit          - string, describing physical unit
+|  poweroften    - power of 10^3 (axis range stripped of mantissa)
+|  letterprefix  - boolean: express poweroften by letter code else
+|                  write power of ten as number
 | 
-| - unit is a power of 1000
-| - true: tries to match a letter code (for units in range of femto to
-|         Giga), otherwise uses a power of 10
-| - false: always creates a power of 10
 
-/UnitPrefix { exch /unit name
-   { { unit 1e-15 lt { power_prefix stop } if
-       unit 1e9 gt { power_prefix stop } if
+/AxisUnit { 
+   { letterprefix
+     { poweroften 1e-15 lt { power_prefix stop } if
+       poweroften 1e9 gt { power_prefix stop } if
+       unit length 0 eq { power_prefix stop } if
        letter_prefix stop
      } if
-     power_prefix
+     unit length 0 ne { (\() fax power_prefix (\)) fax }
+                      { power_prefix }
+                      ifelse
    } stopped pop
 } bind def
 
 /power_prefix {
-   unit 1 ne { * (10^{) text 
-               * unit lg roundup /l ctype -1 number 
-               * (}) text
-             } if 
+  poweroften 1 ne { ($10^{) fax 
+                     * poweroften lg roundup /l ctype -1 number 
+                    (}$ ) fax unit fax 
+                  } if
+  unit fax 
 } bind def
 
 /letter_prefix {
-   * letterlist unit lg 15 add 3 div 0.89999 add get text
+  letterlist poweroften lg 15 add 3 div 0.8999999999999999 add get fax
+  unit fax
 } bind def
 
 /letterlist [ (f) (p) (n) ($\mu$) (m) () (K) (M) (G) ] def 
