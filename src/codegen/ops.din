@@ -194,7 +194,7 @@
     /commands [
       /error /errormessage /abort /aborted
       /toconsole /tostderr
-      /pop /exch /dup /copy /index /roll /clear
+      /pop /push /exch /dup /copy /index /roll /clear
       /count /cleartomark /counttomark
       /currentdict
       /dict /cleardict /array /list

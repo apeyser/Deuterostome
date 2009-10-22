@@ -655,9 +655,39 @@ end def |========= end of mpi data ================
 |  at the receiving end.
 |
 /names_send {
-  save [ 3 -1 roll {
+  save openlist 3 -1 roll {
     {~[exch dup find {recv_transcribe def} ~exec] sexecpawns} forall
   } stopped cleartomark restore ~stop if
+} bind def
+
+|-------------------------- inlayerall
+| ~active /layer_name | ...
+|
+| Wraps up /layer_name layer ~active stopped /layer_name _layer ~stop if
+|  which is a common usage pattern for layers.
+| ... is whatever active leaves behind.
+|
+| This version also handles pawns -- it starts a layer on the pawns,
+|   halts the pawns, does an inlayer with the active object
+|   and then restarts the pawns to close the layer.
+|
+| {} /name | --
+/inlayerall {
+  dup layer ~[
+    ~[{kickdnode} 3 index ~inlayer] ~sexecpawns
+    5 -1 roll destruct_exec ~stopped 6 -1 roll
+  ] exec _layer {~stop sexecall} if
+  kickpawns
+} bind def
+
+|-------------------------- restoreall
+| /save_name | ...
+|
+| restores the /savename on dnode & pawns
+|
+/restoreall {
+  save ~[2 index mkact ~restore] sexecpawns restore
+  find restore
 } bind def
 
 |==================================== end of pawn functions

@@ -15,6 +15,7 @@
 #include "dm.h"
 #include "dm2.h"
 #include "dm3.h"
+#include "dm4.h"
 
 /* NOTE: the '~' enjoys some fortuitous encoding */
 

@@ -123,6 +123,7 @@ end def
 |
 | Creates a dictionary with exactly the size to fit every name
 | in the list, with the values from the list
+|
 | So: {/a 1 /b {doit} /c 1e-9} makestruct
 |  returns a dictionary 3 long, with a=1, b={doit}, c=1e-9
 |
@@ -133,6 +134,40 @@ end def
     } for
   } stopped end {stop} if
   pop
+} bind def
+
+|---------------- makestruct_stack ----------------
+| n1 ... nn \[ /n1 .. /nn | dict == /n1 n1 .. /nn nn
+|
+| Creates a dictionary with exactly the size to fit every name
+| on the stack after the mark, with the values from the stack
+| before the mark.
+|
+| So: 1 {doit} 1e-9 \[ /a /b /c makestruct_stack
+|  returns a dictionary 3 long, with a=1, b={doit}, c=1e-9
+|
+/makestruct_stack {
+  counttomark dup dict {
+    3 add {dup 3 eq ~exit if
+      exch 1 index -1 roll def
+      1 sub
+    } loop pop pop
+    currentdict
+  } exch indict
+} bind def
+
+|---------------- makestruct_name ----------------
+| \[ /n1 .. /nn | dict == /n1 null .. /nn null
+|
+| Creates a dictionary with exactly the size to fit every name
+| on the stack after the mark, with null values
+|
+| So: \[ /a /b /c makestruct_stack
+|  returns a dictionary 3 long, with a=null, b=null, c=null
+|
+/makestruct_name {
+  counttomark dup dict
+  exch {{null def} repeat pop} 2 index indict
 } bind def
 
 |================ makelist =======================
@@ -224,13 +259,19 @@ end def
 } bind def
 
 |----------------- indict -----------------
-| ~exec | ...
+| ~exec dict | ...
 |
-| executes ~exec without the current top dict
-| wrapped with a stopped
+| executes ~exec without the sequence
+| of top dicts equal to dict temporarily removed.
 |
 /notindict {
-  ~[~stopped currentdict] end exec begin ~stop if
+  0 {
+    1 index currentdict ne ~exit if
+    end 1 add
+  } loop
+  openlist 3 1 roll exch ~stopped push
+  {dup begin} repeat pop
+  ~stop if
 } bind def
 
 |============================================ SIGNALS

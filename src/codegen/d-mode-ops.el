@@ -11,6 +11,7 @@
   "toconsole"
   "tostderr"
   "pop"
+  "push"
   "exch"
   "dup"
   "copy"

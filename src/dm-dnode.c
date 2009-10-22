@@ -11,15 +11,16 @@
 #include "dm-dnode.h"
 #include "dm-nextevent.h"
 #include "pluginlib.h"
-#include "dm3.h"
 #include "dm-dnode.h"
 #include "dm-vm.h"
 #include "dmx.h"
 #include "dm2.h"
+#include "dm3.h"
+#include "dm4.h"
+#include "dm5.h"
 #include "dqueen.h"
 #include "dm-proc.h"
 #include "dm-prop.h"
-#include "dm5.h"
 #include "error-local.h"
 
 #if ! X_DISPLAY_MISSING

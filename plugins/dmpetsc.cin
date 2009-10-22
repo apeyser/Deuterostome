@@ -1127,7 +1127,7 @@ DM_INLINE_STATIC P petsc_mat_dense_transpose(Mat A, Mat *At) {
 }
 
 DM_INLINE_STATIC P petsc_mat_other_transpose(Mat A, Mat *At) {
-  extern PetscErrorCode dm_MatTranspose_MPIAIJ(Mat A,Mat *matout);
+  extern PetscErrorCode dm_MatTranspose_MPIAIJ(Mat A, Mat *matout);
 
   DMPETSC_ERRCHECK(dm_MatTranspose_MPIAIJ(A, At));
   return OK;
@@ -1137,11 +1137,19 @@ DM_INLINE_STATIC P petsc_mat_other_transpose(Mat A, Mat *At) {
 enum DMMatrixType {
   DENSETYPE = 0,
   SPARSETYPE = 1,
-  BLOCKDENSETYPE = 2
+  BLOCKDENSETYPE = 2,
+  DMMatrixTypeMax
+};
+
+static MatType petscMatrixType[] = {
+  MATMPIDENSE,
+  MATMPIAIJ,
+  MATMPIBAIJ,
+  NULL
 };
 
 static const struct {
-  char *restrict type;
+  MatType type;
   PreassFunc preass;
   MatCopytoFunc copyto;
   MatGetrowFunc getrow;
@@ -1187,7 +1195,7 @@ DM_INLINE_STATIC P mat_create(
   P retc = OK;
   B* oldfreevm = FREEvm;
   Mat* A = NULL;
-  char* type = matType[mtype].type;
+  MatType type = matType[mtype].type;
   PreassFunc preass = matType[mtype].preass;
 
   if (! dupid) RETURN_ERROR(DMPETSC_MATOVF);
@@ -1231,6 +1239,48 @@ DM_INLINE_STATIC P mat_create(
   FREEvm = oldfreevm;
   if (retc) return retc;
   RETURN_ERROR(errmap[r]);
+}
+
+DM_INLINE_STATIC P mat_create_from(Mat A, B* restrict rpframe)
+{
+  enum DMMatrixType mtype;
+  MatType type;
+  B* pframe;
+  P retc = OK;
+  B* oldfreevm = FREEvm;
+
+  if (! dupid) RETURN_ERROR(DMPETSC_MATOVF);
+
+  MAKE_DMPETSC_MATRIX(pframe);
+  DMPETSC_MATRIX_MATRIX(pframe) = A;
+
+  DMPETSC_ERRCHECK_(retc, MatGetType(A, &type));
+  if (retc) goto ret;
+  for (mtype = (enum DMMatrixType) 0; mtype < DMMatrixTypeMax; mtype++)
+    if (! strcmp(petscMatrixType[mtype], type)) break;
+  if (mtype == DMMatrixTypeMax)  {
+    retc = ll_type | DMPETSC_UNKNOWN_MATRIX_TYPE;
+    goto ret;
+  }
+  DMPETSC_MATRIX_MTYPE(pframe) = mtype;
+  
+  DMPETSC_ERRCHECK_(retc, MatGetLocalSize(A, &DMPETSC_MATRIX_M(pframe), 
+					  &DMPETSC_MATRIX_N(pframe)));
+  if (retc) goto ret;
+
+  DMPETSC_ERRCHECK_(retc, MatGetOwnershipRange(A, &DMPETSC_MATRIX_GM(pframe), 
+					       PETSC_NULL));
+  if (retc) goto ret;
+
+  DMPETSC_MATRIX_DUPID(pframe) = dupid++;
+  DMPETSC_MATRIX_ASS(pframe) = ASSEMBLED;
+
+  OPAQUE_WIRED(pframe) = TRUE;
+  moveframe(pframe, rpframe);
+
+ ret:
+  if (retc) FREEvm = oldfreevm;
+  return retc;
 }
 
 // m n | mat
@@ -1438,6 +1488,31 @@ DM_INLINE_STATIC P petsc_mat_dup(void) {
   if (Bm && *Bm) MatDestroy(*Bm);
   FREEvm = oldfreevm;
   RETURN_ERROR(retc ? retc : errmap[r]);
+}
+
+// A a | A (A*=a)
+DM_INLINE_STATIC P petsc_mat_mul(void) {
+  Mat A;
+  D a;
+  
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != NUM) return OPD_CLA;
+  INIT_MAT(o_2, A);
+  if (TYPE(o_1) < SINGLETYPE) {
+    P v;
+    if (! PVALUE(o_1, &v)) return UNDF_VAL;
+    if (v == 0) DMPETSC_ERRCHECK(MatZeroEntries(A));
+    if (v == 0 || v == 1) {
+      FREEopds = o_1;
+      return OK;
+    }
+  }
+
+  if (! DVALUE(o_1, &a)) return UNDF_VAL;
+  DMPETSC_ERRCHECK(MatScale(A, a));
+  
+  FREEopds = o_1;
+  return OK;
 }
 
 // A | A
@@ -2028,19 +2103,9 @@ DM_INLINE_STATIC P petsc_vec_norm(void) {
 }
 
 
-/*   { */
-/*     PetscInt m1, n1, m2, n2, m3, n3; */
-/*     P r = getworldrank(); */
-/*     MatGetOwnershipRange(A, &m1, &n1); */
-/*     MatGetLocalSize(A, &m2, &n2); */
-/*     MatGetSize(A, &m3, &n3); */
-/*     fprintf(stderr, "Post: Rank: %i, Range: (%i,%i), LSize: (%i,%i), Size(%i,%i)\n", */
-/* 	    (int) r, (int) m1, (int) n1, (int) m2, (int) n2,  */
-/* 	    (int) m3, (int) n3); */
-/*   } */
-
 // MatA | MatA(transposed)
-DM_INLINE_STATIC P petsc_mat_transpose(void) {
+DM_INLINE_STATIC P petsc_mat_transpose(void) 
+{
   Mat A, At;
   L32 m, n, gm;
   P retc;
@@ -2079,6 +2144,125 @@ DM_INLINE_STATIC P petsc_mat_transpose(void) {
   return OK;
 }
 
+// MatA & MatB -- just structure
+// MatC -- to be used in petsc_mat_matmul
+// MatA transA MatB transB fill | MatC
+DM_INLINE_STATIC P petsc_mat_matmulsu(void)
+{
+  Mat mA, mB, mC;
+  MatTransposeFunc trans;
+  D fill;
+  P retc = OK, retc_ = OK;
+  BOOLEAN transA, transB;
+  static B pframe[FRAMEBYTES];
+  
+  if (o_5 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != NUM) return OPD_CLA;
+  if (! DVALUE(o_1, &fill)) fill = 0.5;
+  if (TAG(o_2) != BOOL || TAG(o_4) != BOOL) return OPD_CLA;
+  INIT_MAT(o_3, mB);
+  INIT_MAT(o_5, mA);
+
+  transB = BOOL_VAL(o_2);
+  transA = BOOL_VAL(o_4);
+  if (transA) {
+    Mat At;
+    trans = matType[DMPETSC_MATRIX_MTYPE(o_5)].trans;
+    retc = trans(mA, &At);
+    mA = At;
+    if (retc) goto A;
+  };
+  if (transB) {
+    Mat Bt;
+    trans = matType[DMPETSC_MATRIX_MTYPE(o_3)].trans;
+    retc = trans(mB, &Bt);
+    mB = Bt;
+    if (retc) goto B;
+  };
+
+  DMPETSC_ERRCHECK_(retc, MatMatMultSymbolic(mA, mB, fill, &mC));
+  if (retc) goto B;
+  
+  if ((retc = mat_create_from(mC, pframe))) goto C;
+  moveframe(pframe, o_5);
+  FREEopds = o_4;
+
+  C: if (retc)   DMPETSC_ERRCHECK_(retc_, MatDestroy(mC));
+  B: if (transB) DMPETSC_ERRCHECK_(retc_, MatDestroy(mB));
+  A: if (transA) DMPETSC_ERRCHECK_(retc_, MatDestroy(mA));
+  return retc ? retc : retc_;
+}  
+
+// MatC MatA transA MatB transB | MatC(=MatAt?*MatBt?)
+DM_INLINE_STATIC P petsc_mat_matmul(void) {
+  Mat mA, mB, mC;
+  BOOLEAN transA, transB;
+  MatTransposeFunc trans;
+  P retc = OK, retc_ = OK;
+  
+  if (o_5 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != BOOL || TAG(o_3) != BOOL) return OPD_CLA;
+  INIT_MAT(o_2, mB);
+  INIT_MAT(o_4, mA);
+  INIT_MAT(o_5, mC);
+
+  transB = BOOL_VAL(o_1);
+  transA = BOOL_VAL(o_3);
+  if (transA) {
+    Mat At;
+    trans = matType[DMPETSC_MATRIX_MTYPE(o_4)].trans;
+    retc = trans(mA, &At);
+    mA = At;
+    if (retc) goto A;
+  }
+  if (transB) {
+    Mat Bt;
+    trans = matType[DMPETSC_MATRIX_MTYPE(o_2)].trans;
+    retc = trans(mB, &Bt);
+    mB = Bt;
+    if (retc) goto B;
+  }
+
+  DMPETSC_ERRCHECK_(retc, MatMatMultNumeric(mA, mB, mC));
+  if (retc) goto B;
+
+  FREEopds = o_4;
+
+  B: if (transB) DMPETSC_ERRCHECK_(retc_, MatDestroy(mB));
+  A: if (transA) DMPETSC_ERRCHECK_(retc_, MatDestroy(mA));
+  return retc ? retc : retc_;
+}
+
+// MatA | MatA = 0
+DM_INLINE_STATIC P petsc_mat_zero(void) {
+  Mat A;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  INIT_MAT(o_1, A);
+  DMPETSC_ERRCHECK(MatZeroEntries(A));
+  return OK;
+}
+
+// MatA MatB | MatA += MatB
+DM_INLINE_STATIC P petsc_mat_matadd(void) {
+  Mat A, B, C;
+  Mat mats[2];
+  P retc = OK;
+
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  INIT_MAT(o_1, B);
+  INIT_MAT(o_1, A);
+  mats[0] = A;
+  mats[1] = B;
+  
+  DMPETSC_ERRCHECK(MatCreateComposite(PETSC_COMM_WORLD, 2, mats, &C));
+  DMPETSC_ERRCHECK_(retc, MatCopy(C, A, SAME_NONZERO_PATTERN));
+  DMPETSC_ERRCHECK(MatDestroy(C));
+  if (retc) return retc;
+  
+  FREEopds = o_1;
+  return OK;
+}
+
 // MatA | number-of-local-nonzeros
 DM_INLINE_STATIC P petsc_mat_getnzs(void) {
   Mat A;
@@ -2105,7 +2289,6 @@ DM_INLINE_STATIC P petsc_mat_getnzs(void) {
 }
 
 // <l irows> <l icols> MatA | <l irows> <l icols>
-// icols is allocated by getcsr
 DM_INLINE_STATIC P petsc_mat_getcsr(void) {
   Mat A;
   L32 m, gm;

@@ -91,7 +91,8 @@ end def
   /DIVERGED_NONSYMMETRIC (diverged due to nonsymmetric) def
   /DIVERGED_INDEFINITE_PC (diverged due to indefinite preconditioner) def
   /DIVERGED_NAN (diverged due to Not-A-Number) def
-  /DIVERGED_INDEFINITE_MAT (diverged due to indefinite matrix) def |]
+  /DIVERGED_INDEFINITE_MAT (diverged due to indefinite matrix) def 
+  /UNKNOWN_MATRIX_TYPE (unknown matrix type from petsc) def |]
 end def
 
 /plugin_ops 100 dict dup begin [
@@ -135,9 +136,14 @@ end def
   /petsc_mat_fillone
   /petsc_mat_get
   /petsc_mat_destroy 
-  /petsc_mat_dup 
+  /petsc_mat_dup
+  /petsc_mat_mul
   /petsc_mat_vecmul  
   /petsc_mat_transpose 
+  /petsc_mat_matadd
+  /petsc_mat_matmulsu
+  /petsc_mat_matmul
+  /petsc_mat_zero
   /petsc_mat_getcsr 
   /petsc_mat_getnzs 
   /petsc_ksp_create 

@@ -24,6 +24,7 @@
 #include "dm-convert.h"
 #include "pluginlib.h"
 #include "dm3.h"
+#include "dm4.h"
 #include "dqueen.h"
 #include "dm-nextevent.h"
 #include "dm-proc.h"

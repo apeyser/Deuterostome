@@ -16,12 +16,13 @@
 
 #include "dm-dvt.h"
 #include "dm-nextevent.h"
-#include "dm3.h"
-#include "dm-vm.h"
 #include "dm2.h"
+#include "dm3.h"
+#include "dm4.h"
+#include "dm5.h"
+#include "dm-vm.h"
 #include "dm-proc.h"
 #include "dm-signals.h"
-#include "dm5.h"
 #include "error-local.h"
 
 static LBIG memsetup[] = {

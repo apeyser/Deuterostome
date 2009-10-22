@@ -10,6 +10,7 @@ B* _sysop[] =
   (B*) "toconsole", (B*) op_toconsole,
   (B*) "tostderr", (B*) op_tostderr,
   (B*) "pop", (B*) op_pop,
+  (B*) "push", (B*) op_push,
   (B*) "exch", (B*) op_exch,
   (B*) "dup", (B*) op_dup,
   (B*) "copy", (B*) op_copy,

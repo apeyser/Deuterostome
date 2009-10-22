@@ -223,7 +223,8 @@ The tool of choice for inspecting VM contents or file systems is a graphical bro
 Whenever you give the D machine a passive object to interpret, it puts that object on the operand stack. When your console input invokes an operator, the operator takes its operands from the operand stack and leaves its results on the operand stack.
 
 \begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
-obj & pop & --\\ 
+obj & pop & --\\
+\relax[ obj$_1$ .. obj$_n$ & push & -- \\ % ]
 obj$_1$ obj$_2$ & exch & obj$_2$ obj$_1$\\ 
 obj & dup & obj obj\\ 
 obj$_1$ \ldots obj$_n$ n & copy & obj$_1$ \ldots obj$_n$ obj$_1$ \ldots obj$_n$\\
@@ -241,6 +242,7 @@ obj$_1$ \ldots obj$_n$ & counttomark &  mark obj$_1$ \ldots obj$_n$ n\\
 \end{tabular}
 
 \index{Operators!pop}
+\index{Operators!push}
 \index{Operators!exch}
 \index{Operators!dup}
 \index{Operators!copy}
@@ -259,7 +261,7 @@ obj$_1$ \ldots obj$_n$ & counttomark &  mark obj$_1$ \ldots obj$_n$ n\\
  
 
 Manipulation of objects on the operand stack becomes necessary,  for  instance, when  the  results  left on the stack by one operator  do  not  match  the 
-order of operands expected by a subsequent operator.  Simple  stack  operations remove (\emph{pop}),  exchange (\emph{exch}), or duplicate (\emph{dup}) the top element(s) of the stack.  Others  duplicate  portions  of the  stack  (\emph{copy}),  rotate  stack elements  in a chain (\emph{roll}),  or access the stack like an indexed  array (\emph{index}). The operand stack is cleared (\emph{clear}), or its elements are counted (\emph{count}).
+order of operands expected by a subsequent operator.  Simple  stack  operations remove (\emph{pop}),  exchange (\emph{exch}), or duplicate (\emph{dup}) the top element(s) of the stack.  Others  duplicate  portions  of the  stack  (\emph{copy}),  rotate  stack elements  in a chain (\emph{roll}),  or access the stack like an indexed  array (\emph{index}). The operand stack is cleared (\emph{clear}), or its elements are counted (\emph{count}). Operands are moved from the operand stack to the execution stack by the \emph{push} operator; this is not intended for casual use, but as part of utilities for complicated and recursive D operators.
 
 A word of caution: juggling objects on the stack can avoid making `variables' (and thus a wicked state machine). On the other hand, stack acrobatics quickly turn unintelligible to the acrobat. 
 

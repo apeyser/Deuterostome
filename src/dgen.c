@@ -20,23 +20,24 @@
 #include <string.h>
 #include "dm.h"
 #include "dmx.h"
+#include "dm-dvt.h"
+#include "dm2.h"
 #include "dm3.h"
-#include "dm-proc.h"
+#include "dm4.h"
 #include "dm5.h"
+#include "dm6.h"
 #include "dm8.h"
-#include "error-local.h"
+#include "dm7.h"
 
 /*---------- include modules of dgen --------------*/
 
 B inputframe[FRAMEBYTES];
 P op_fromconsole(void);
-#include "dm-dvt.h"
-#include "dm2.h"
-#include "dm7.h"
-#include "dm6.h"
 
 #include "dgen_0.h"
 #include "dgen_1.h"
+#include "dm-proc.h"
+#include "error-local.h"
 
 /*----------------- DM global variables -----------------------------*/
 

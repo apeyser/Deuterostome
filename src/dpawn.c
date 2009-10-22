@@ -36,8 +36,9 @@
 #include "threads.h"
 #include "dm-dpawn.h"
 #include "dregex.h"
-#include "dm6.h"
+#include "dm4.h"
 #include "dm5.h"
+#include "dm6.h"
 
 
 #include "dpawn_0.h"

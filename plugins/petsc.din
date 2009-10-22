@@ -84,12 +84,19 @@
   } makeenum def
 
   |------------------------- in_petsc -----------------
-  | ~act in_petsc --
+  | ~act in_petsc | ...
   |
   | executes ~act in PETSC dictionary.
   |
   /in_petsc {PETSC indict} bind def
-  /notin_petsc {end stopped PETSC begin ~stop if} bind def
+
+  |----------------------- notin_petsc -----------------
+  | ~act notin_petsc | ...
+  |
+  | Removes the top PETSC dict(s) from the dictionary stack
+  |   executes act, and then replaces them.
+  |
+  /notin_petsc {PETSC notindict} bind def
 
   |================= dpawn definitions ===========================
   | Mapping from dnode functions to dpawn jobs associated with that
@@ -146,58 +153,94 @@
     | Calls the mat_creator for a specific matrix type,
     | eating the associated parameters.
     /mat_creators {
-      | <l irows> <l icols> n | A
+      | mmax N <l irows> <l icols> n save | A
       | Yale compressed format sparse matrix. 
       | n is the local number of columns (the diagonal matrix)
       | irow is the offsets in to icol to start each row (local offset)
       | and is one longer than the number of rows \(last is one past the
       |   the last row\).
-      /sparse petsc_mat_sparse_create
+      /sparse {
+        6 1 roll
+        3 1 roll 2 copy 5 -1 roll         | sv mmax N irows icols irows icol n
+        petsc_mat_sparse_create           | sv mmax N irows icols A_
+        5 1 roll dup length /l array copy | sv A_ mmax N irows icols_
+        exch     dup length /l array copy | sv A_ mmax icols_ irows_
+        /sparse
+        openlist /sv /matrix /mmax /N /icols /irows /mtype
+        makestruct_stack
+      }
 
-      | m n | A
+      | mmax N m n save | A
       | Dense column oriented matrix. m is the number of rows,
       | n is the number of columns.
-      /dense petsc_mat_dense_create
+      /dense {
+        5 1 roll
+        petsc_mat_dense_create | sv mmax N A_
+        /dense 5 -1 roll dup capsave
+        openlist /sv /mmax /N /matrix /mtype makestruct_stack
+      }
 
-      | m n M N | A
-      /blockdense petsc_mat_blockdense_create
+      | mmax N m n M save | A
+      /blockdense {
+        6 1 roll
+        4 -1 roll 2 copy 6 2 roll   | sv mmax M N m n M N
+        petsc_mat_blockdense_create | sv mmax M N A_
+        /blockdense openlist /sv /mmax /M /N /matrix /mtype makestruct_stack
+      }
     } bind makestruct def
 
+    |----------------------- _getmatrix -----------------------
+    | Adict | A
+    /_getmatrix {/matrix get} bind def
+
+    |---------------------- _gettype --------------------------
+    | Adict | /mtype
+    /_gettype {/mtype get} bind def
+
+    |--------------------- _exectype --------------------------
+    | execdict Adict | ...
+    /_exectype {_gettype get exec} bind def
+
     |-------------- mat_create -------------------
-    | /A .... /type | --
+    | /A mmax .... /type | --
     |
     | The generic creator. Creates a matrix of /type (dense, sparse, etc)
     | that will be named /A, with the parameters for it's matching
     | mat_creator in between.
     |
     /mat_create {
-      mat_creators exch get exec def
+      save mat_creators exch get exec
+      dup /sv get capsave def
     } bind def
 
     |------------------------------------ mat_transpose
     |
-    | .. /type A | -- (A=At)
-    |
+    | A | -- (A=At)
+    |    
     /mat_transpose {
-      {
-        petsc_mat_transpose
-        mat_transposers 3 -1 roll get exec
-      } in_petsc
+      _getmatrix petsc_mat_transpose
     } bind def
 
-    | ... | --
-    /mat_transposers {
-      | -- | --
-      /dense pop
-      | /icolsnew /irowsnew At | --
-      /sparse {
-        dup /MATRIX_M get 1 add /l array
-        exch dup petsc_mat_getnzs /l array 
-        exch petsc_mat_getcsr
+    | A mmax N | --
+    /mat_transpose_update {
+      2 index /N    put
+      1 index /mmax put
+      mat_transposers 1 index _exectype
+    } bind def
 
-        | ~icolsnew ~irowsnew irows icols
-        4 -1 roll name
-        exch      name
+    | A | --
+    /mat_transposers {
+      | Atdict | --
+      /dense pop
+      /blockdense pop
+      | Atdict | --
+      /sparse {
+        dup _getmatrix                     | Atdict At
+        dup /MATRIX_M get 1 add /l array   | Atdict At <l irows>
+        1 index petsc_mat_getnzs /l array  | Atdict At <l irows> <l icols>
+        3 -1 roll petsc_mat_getcsr         | Atdict <l irows> <l icols>
+        2 index /icols put                 | Atdict <l irows>
+        exch    /irows put                 | --
       }
     } bind makestruct def
     
@@ -206,7 +249,7 @@
 
 
     |---------------- mat_fill ---------------
-    | A mmax ~row-maker | --
+    | A ~row-maker | --
     | row-maker: A row | <d data> <l icols>
     |
     | Fills a matrix of any type row by row.
@@ -219,102 +262,90 @@
     |   be an l array of 0...N-1.
     |
     /mat_fill {
-      currentdict {/lastdict name
-        /filler name /mmax name 
-        dup /A name                      | A
+      {
+        /filler name                      | A
+        dup /mmax get exch                | mmax A
+        _getmatrix                        | mmax A_
 
-        0 1 A /MATRIX_M get 1 sub {      | A row
-          2 copy ~filler lastdict indict | A row <d> <l>
-          4 -2 roll exch petsc_mat_fill  | A
+        0 1 2 index /MATRIX_M get 1 sub { | mmax A_ row
+          2 copy /filler find notin_petsc | mmax A_ row <d> <l>
+          4 -2 roll exch petsc_mat_fill   | mmax A_
         } for
-        mmax A /MATRIX_M get sub ~petsc_mat_syncfill repeat | A
-        petsc_mat_endfill                                   | A
-
+        
+        exch 1 index /MATRIX_M get sub ~petsc_mat_syncfill repeat | A_
+        petsc_mat_endfill                                         | A_
         pop
       } in_petsc
     } bind def
 
-    |------------- mat_fillers_set --------------------
-    | ... | --
-    |
-    | The type specific data initializaton function for use in
-    |  mat_fill_data.
-    | Gets type specific params in mat_fill_data, and store away
-    |  for use by the ~row-maker procedure.
-    |
-    /mat_fillers_set {
-      | irows icols | --
-      | irows is the l-array of local offsets of each row in icol.
-      | icols is the l-array of column numbers in the amtrix
-      /sparse {/icols name /irows name}
-      | N | --
-      | N is the global number of columns in the matrix
-      | creates an icol of 0...N-1 l-array.
-      /dense {/N name
-        /icols N /l array 0 1 index length 0 1 ramp pop def
-      }
-      | N | --
-      /blockdense {/N name
-        /icols N /l array 0 1 index length 0 1 ramp pop def
-      }
-    } bind makestruct def
-
-    |-------------- mat_fillers_get ----------------------
-    | <d data> | <d row> <l icols>
+    |-------------- mat_fillers_map ----------------------
+    | A | ~row-maker
+    | row-maker: <d data> | <d row> <l icols>
     |
     | the base of the ~row-maker procedure for each matrix type.
     | Takes the data (compressed) for the entire matrix, and chops
     | off the current row, and the current associated column numbers
     | Expects /row to be defined.
     |
-    /mat_fillers_get {
+    /mat_fillers_map {
       /sparse {
-        irows row get irows row 1 add get 1 index sub getinterval
-        icols irows row get irows row 1 add get 1 index sub getinterval
+        dup /icols get /icols name
+            /irows get /irows name
+        {
+          irows row get irows row 1 add get 1 index sub getinterval
+          icols irows row get irows row 1 add get 1 index sub getinterval
+        }
       }
 
       /dense {
-        row N mul N getinterval 
-        icols
+        /N get /N name
+        {
+          /icols N /l array 0 1 index length 0 1 ramp pop def
+        } /mat_fillers_layer inlayer
+        {
+          row N mul N getinterval 
+          icols
+        }
       }
 
       /blockdense {
-        row N mul N getinterval 
-        icols
+        /N get /N name
+        {
+          /icols N /l array 0 1 index length 0 1 ramp pop def
+        } /mat_fillers_layer inlayer
+        {
+          row N mul N getinterval 
+          icols
+        }
       }
     } bind makestruct def
 
     |-------------------- mat_fill_data ----------------------
-    | A mmax data ... /type | --
+    | A data | --
     |
     | Fills matrix A with the data (compressed). 
     | A is the matrix.
-    | mmax is the largest number of local rows on any
-    |  pawn.
     | data is a <d > array, with the compressed data.
     | ... are the type specific parameters.
-    | type is the matrix type: /dense, /sparse, ...
     |
     /mat_fill_data {
       {
-        /mtype name
-        mat_fillers_set mtype get exec
         /data name
-        mat_fillers_get mtype get /data_filler name
-
+        dup mat_fillers_map 1 index _exectype /data_filler name
         {/row name pop data data_filler} mat_fill
+        /mat_fillers_layer known {mat_fillers_layer restore} if
       } in_petsc
     } bind def
 
     |----------------------------------------------mat vec mul
     |
-    |---------------------- pmatvecmul ----------------------
+    |---------------------- matvecmul_petsc ----------------------
     | y beta A trans x alpha | --
     | 
     | y = beta*y + alpha*A*x
     |
-    /pmatvecmul {
-      petsc_mat_vecmul pop
+    /matvecmul_petsc {
+      _getmatrix petsc_mat_vecmul pop
     } bind def
     
     |----------------------- get_matvecmul ----------------------
@@ -324,7 +355,71 @@
     | return y to node
     |
     /get_matvecmul {
-      petsc_mat_vecmul get_vector
+      _getmatrix petsc_mat_vecmul get_vector
+    } bind def
+
+    | mmax N save A_ | A
+    /mat_matmulsu_create {
+      /dense {
+        /dense openlist /mmax /N /sv /matrix /mtype makestruct_stack
+      }
+
+      /sparse {
+        dup /MATRIX_M get 1 add /l array
+        1 index petsc_mat_getnzs /l array
+        2 index petsc_mat_getcsr
+        /sparse openlist /mmax /N /sv /matrix /irows /icols /mtype 
+        makestruct_stack
+      }
+    } bind makestruct def
+
+    |-------------------------- mat_matmulsu -------------------------
+    | /C mmax N /type A transA B transB fill/* | --
+    | fill = nz(C)/(nz(A)+nz(B))
+    /mat_matmulsu {
+      save 6 1 roll                 | /C mmax N sv /type A transA B transB f
+      3 -1 roll _getmatrix 3 1 roll | /C mmax N sv /type A transA B_ transB f
+      5 -1 roll _getmatrix 5 1 roll | /C mmax N sv /type A_ transA B_ transB f
+      petsc_mat_matmulsu            | /C mmax N sv /type C_
+      mat_matmulsu_create 3 -1 roll get exec | /C C
+      dup /sv get capsave           | /C C
+      def
+    } bind def
+
+    |------------------------- mat_matmul ----------------------------
+    | C A transA B transB | --
+    |
+    | C = At?*Bt
+    |
+    /mat_matmul {
+      exch _getmatrix exch
+      4 -1 roll _getmatrix 4 1 roll
+      5 -1 roll _getmatrix 5 -1 roll
+      petsc_mat_matmul pop
+    } bind def
+
+    |-------------------------- matzero -------------------------------
+    | A | --
+    | 
+    | A = 0
+    /mat_zero {
+      _getmatrix petsc_mat_zero pop
+    } bind def
+
+    |-------------------------- matmul_petsc --------------------------
+    | A a | -- 
+    | A *= a
+    |
+    /mat_mul {
+      _getmatrix petsc_mat_mul pop
+    } bind def
+
+    |-------------------------- matadd --------------------------------
+    | A B | --
+    | A += B
+    | A & B must have the same shape.
+    /mat_matadd {
+      _getmatrix exch _getmatrix exch petsc_mat_matadd pop
     } bind def
     
     |--------------------------------------------------- get_vector 
@@ -341,20 +436,6 @@
 
     |----------------------------------------------------- get_matrix
     |
-    |--------------------- matrixers_set --------------------------
-    | ... | --
-    |
-    | store the matrix type-specific parameters for matrix_get
-    |
-    /matrixers_set {
-      | irows | --
-      | irows: the array of local offsets for icols.
-      /sparse {/irows name}
-      | -- | --
-      /dense  {}
-      | -- | --
-      /blockdense {}
-    } bind makestruct def
 
     |---------------------- matrixers_get ---------------------------
     | A | local_interval_start
@@ -364,41 +445,94 @@
     | /row is defined before calling.
     /matrixers_get {
       /sparse {
-        pop irows row get
+        /irows get row get
       }
       /dense {
-        row N mul
+        row exch /N get mul
       }
       /blockdense {
-        row N mul
+        row exch /N get mul
       }
     } bind makestruct def
+
+    | A | --
+    /matrix_result {
+      {
+        {/N get /d array /t name} /matrix_result_layer inlayer
+      } in_petsc
+    } bind def
     
     |------------------------ get_matrix ------------------------------
-    | A N mmax ... /type | --
+    | A | --
     |
     | Returns the local data, row by row, to the node.
     | A is the matrix
-    | N is the global number of columns.
-    | mmax is the largest local number of rows on any pawn.
-    | ... is the parameters specific to the type of A.
     | type is the the type of A: /dense, /sparse, ...
     /get_matrix {
       {
-        /mtype name
-        matrixers_set mtype get exec
-        /mmax name /N name
-        dup /A name 
-        N /d array /t name
-        0 1 A /MATRIX_M get {/row name
-          A row 0 t petsc_mat_copyfrom
+        dup _getmatrix                        | A A_
+
+        0 1 2 index /MATRIX_M get {/row name  | A A_ 
+          dup row 0 t petsc_mat_copyfrom      | A A_ t
           ~[
             exch 
-            A matrixers_get mtype get exec 
+            mpirank
+            4 index matrixers_get 1 index _exectype
             ~recv_matrix_result
-          ] rsend
+          ] rsend                             | A A_
         } for
-        mmax 1 index /MATRIX_M get sub {petsc_mat_syncfrom} repeat pop
+        exch /mmax get 1 index /MATRIX_M get sub ~petsc_mat_syncfrom repeat 
+        pop
+      } in_petsc
+    } bind def
+
+    /matrix_result_end {
+      {
+        /matrix_result_layer known {matrix_result_layer restore} if
+      } in_petsc
+    } bind def
+
+    |----------------------------------------------------- get_matrix
+    |
+    |---------------------- densematrixers_get ---------------------------
+    | A | column-info...
+    |
+    | return the type specific start of the local interval for the
+    |  current row.
+    | /row is defined before calling.
+    /densematrixers_get {
+      | A | icols
+      /sparse {
+        dup /icols get 1 index /irows get row get dup | A icols rowi rowi
+        4 -1 roll /irows get row 1 add get exch sub   | icols rowi rowlen
+        getinterval                                   | icols-interval
+      }
+      | A | --
+      /dense pop
+      | A | --
+      /blockdense pop
+    } bind makestruct def
+
+
+    |------------------------ get_densematrix ------------------------------
+    | A | --
+    |
+    | Returns the local data, row by row, to the node.
+    | A is the matrix
+    /get_densematrix {
+      {
+        dup _getmatrix                        | A A_
+        0 1 2 index /MATRIX_M get {/row name  | A A_
+          dup row 0 t petsc_mat_copyfrom      | A A_ t
+          ~[
+            exch 
+            2 index /MATRIX_GM get row add
+            4 index densematrixers_get 1 index _exectype
+            ~recv_densematrix_result
+          ] rsend
+        } for                                 | A A_
+        exch /mmax get 1 index /MATRIX_M get sub ~petsc_mat_syncfrom repeat 
+        pop
       } in_petsc
     } bind def
 
@@ -433,14 +567,40 @@
     | Deallocate local portion of matrix m, both in D and Petsc.
     |
     /mat_destroy {
-      petsc_mat_destroy
+      dup _getmatrix petsc_mat_destroy
+      /sv get restore
     } bind def
 
     |--------------------------------------------- mat_dup
     | /B A | --
     |
     /mat_dup {
-      dup petsc_mat_dup petsc_mat_copy def
+      save 3 1 roll                                    | sv /B A
+      dup transcribe                                   | sv /B A B
+      exch _getmatrix dup petsc_mat_dup petsc_mat_copy | sv /B B B_
+      1 index /matrix put                              | sv /B B
+      dup 3 index /sv put                              | sv /B B
+      3 -1 roll capsave                                | /B B
+      def                                              | --
+    } bind def
+
+    |-------------------------------------------- mat_copy
+    | B A | --
+    | A=B
+    /mat_copy {
+      _getmatrix exch _getmatrix exch petsc_mat_copy pop
+    } bind def
+
+    |---------------------------------------------mat_dup_shape
+    | /B A | --
+    /mat_dup_shape {
+      save 3 1 roll                     | sv /B A
+      dup transcribe                    | sv /B A B
+      exch _getmatrix dup petsc_mat_dup | sv /B B B_
+      1 index /matrix put               | sv /B B
+      dup 3 index /sv put               | sv /B B
+      3 -1 roll capsave                 | /B B
+      def                               | --
     } bind def
 
     |--------------------------------------------- vec_dup
@@ -498,44 +658,48 @@
     |================ Need to gather from all processors
     | x offsetX len/* A m offsetA | -- A_mc=x_c
     /vecmat_copyrow {
+      3 -1 roll _getmatrix 3 1 roll
       petsc_vecmat_copyrow pop
     } bind def
 
-    | ... | <L col...>
-    /vecmat_copycolers [
-      | <L col...> | <L col...>
+    | ... A | <L col...> A
+    /vecmat_copycolers ~[
+      | <L col...> A | <L col...> A
       /dense null mkact
-      | <L col...> | <L col...>
+      | <L col...> A | <L col...> A
       /blockdense null mkact
 
-      | col first-row <L col...> irows icols | <L col...>
+      | col first-row n A | <L col...>
       /sparse {
         {
-          /icols name exch /cols name 3 -1 roll /col name
-          exch cols length getinterval | subirows
+          4 1 roll
+          /l array /cols name /frow name /col name
+          dup /icols get /icols name
+          dup /irows get /irows name
+          irows frow cols length getinterval | subirows
           0 exch {
             col add icols exch get cols 2 index put
             1 add
           } forall pop
           cols
         } in_petsc
-      } bind
-    ] makestruct def
+      }
+    ] bind makestruct def
 
-    | x local-offsetX A local-offsetA ... /type | -- A_mc = x_m
+    | x local-offsetX local-offsetA ... A | -- A_mc = x_m
     /vecmat_copycol {
-      vecmat_copycolers exch get exec 3 1 roll
-      petsc_vecmat_copycol pop
+      vecmat_copycolers exch get exec
+      3 -1 roll _getmatrix 3 1 roll petsc_vecmat_copycol pop
     } bind def
 
     | A | --
     /vecmat_copy_end {
-      petsc_mat_endfill pop
+      _getmatrix petsc_mat_endfill pop
     } bind def
 
     | x A | -- 
     /vecmat_sync {
-      petsc_vecmat_sync pop
+      _getmatrix petsc_vecmat_sync pop
     } bind def
 
     |---------------------------------------------- ksp_destroy
@@ -565,6 +729,7 @@
     |
     /ksp_solve {
       {3 index /ksp_ name
+        3 -1 roll dup null ne ~_getmatrix if 3 1 roll
         petsc_ksp_solve pop
         mpirank 0 eq {
           report {
@@ -584,12 +749,13 @@
     | of x to the node.
     |
     /get_ksp_solve {
+      3 -1 roll dup null ne ~_getmatrix if 3 1 roll
       1 index 5 1 roll ksp_solve get_vector
     } bind def
 
     | row column A | d
     /mat_get {
-      petsc_mat_get
+      _getmatrix petsc_mat_get
     } bind def
   } def
 
@@ -672,10 +838,7 @@
     |
     /vec_create {
       {
-        2 dict {
-          exch /N name 
-          exch /id name
-        } 1 index indict
+        openlist /id /N makestruct_stack
         dup /xval name 
         {~[
           xval /id get
@@ -719,10 +882,7 @@
     |
     /vec_dup {
       {
-        2 dict {
-          1 index /N get /N name
-          3 -1 roll /id name
-        } 1 index indict
+        openlist /id /N makestruct_stack
         dup /xval name
         ~[
           xval /id get
@@ -872,25 +1032,20 @@
       } in_petsc
     } bind def
 
-    | A col first-row n-rows | ...
-    /vecmat_copycolers {
-      | A col first-row n-rows | <L col...>
+    | col first-row n-rows | ...
+    /vecmat_copycolers ~[
+      | col first-row n-rows | <L col...>
       /dense {
-        /l array exch pop copy exch pop
+        exch pop 0 exch getinterval
       }
-      | A col first-row n-rows | <L col...>
+      | col first-row n-rows | <L col...>
       /blockdense {
-        /l array exch pop copy exch pop
+        exch pop 0 exch getinterval
       } 
 
-      | A col first-row n-rows |  col first-row <l 0...n-rows> ~irows ~icols
-      /sparse {
-        /l array
-        {
-          /irows construct_execn /icols construct_execn
-        } 5 -1 roll /params get indict
-      }
-    } bind makestruct def
+      | col first-row n-rows |  col first-row n-rows
+      /sparse null mkact
+    ] bind makestruct def
 
     | x offsetX length/* A c offsetA | A (A_mc =  x_m)
     /vecmat_copycol {
@@ -910,11 +1065,9 @@
                      2 copy gt ~exch if pop
               def
               ~[
-                xval getid loffX
-                Aval getid loffA
-
-                Aval col loffA llen vecmat_copycolers Aval exectype
-                Aval gettype
+                xval getid loffX loffA
+                col loffA llen vecmat_copycolers Aval exectype
+                Aval getid
                 ~vecmat_copycol
               ]
             } ifelse
@@ -1133,15 +1286,11 @@
     |------------------------------------------------- mat_create
     |
     |----------------- condense_sparse ---------------------
-    | ~irows ~icols | icols_off
+    | A | icols_off
     |
     | Calculates the global offsets of the first row for each
     |  pawn for a sparse matrix.
     |
-    | ~irows: executable for the pawns that returns the local offsets
-    |   of each row (in icols).
-    | ~icols: executable for the pawns that returns the column number
-    |   of each data element in the matrix.
     | icols_off: a list of the global offsets for the first row on
     |  each pawn. The last element is the offset of the row past the 
     |  last row of the matrix.
@@ -1152,11 +1301,10 @@
     |
     /condense_sparse {
       {
-        /icols name /irows name
         /icols_len mpidata /pawns get 1 add list def
         ~[
-          /icols construct_execn
-          {~[exch length mpirank ~condense_recv] rsend} ~in_petsc
+          exch getid 
+          {~[exch /icols get length mpirank ~condense_recv] rsend} ~in_petsc
         ] sexecpawns
 
         1 1 icols_len last 1 sub {
@@ -1212,8 +1360,8 @@
       |   for the pawn.
       /sparse {
         Aval /n get rangesize openlist
-        Aval /params get /irows get construct_exec
-        Aval /params get /icols get construct_exec
+        /irows find construct_exec
+        /icols find construct_exec
         counttomark 2 add -2 roll pop
       }
 
@@ -1227,26 +1375,24 @@
         exch Aval /n get rangesize
       }
 
-      | pawn | m n M N
+      | pawn | m n M
       /blockdense {
         dup Aval /m get rangesize
         exch Aval /n get rangesize
         Aval /m get
-        Aval /n get 
       }
     } bind makestruct def
     
     |------------------- mat_creators_set -------------------------
-    | ... | param-dict
+    | .. | param-dict
     |
     | Swallow up the matrix type-specific parameters for mat_create
     |    on the node.
-    | ...: type-specific parameters.
     | param-dict: a dictionary storing the parameters for this type
     |   matrix.
     |
     /mat_creators_set {
-      | ~irows ~icols | param-dict
+      | A ~irows ~icols | param-dict
       | ~irows: an executable for the pawns that returns the local offsets
       |   of the rows in icols.
       | ~icols_off: an executable for the pawns that returns the column number
@@ -1255,19 +1401,24 @@
       | Calls condense_sparse and requests from each pawn the size of ~icols
       |  in order to calculate the global offsets for each pawn.
       /sparse {
-        2 copy condense_sparse
-        3 dict {
-          exch /icols_off name
-          exch /icols name
-          exch /irows name
-        } 1 index indict
+        /icols name /irows name
+        openlist /icols_off makestruct_name
       }
 
       | -- | param-dict
-      /dense {0 dict}
+      /dense {openlist makestruct_name}
 
       | -- | param-dict
-      /blockdense {0 dict}
+      /blockdense {openlist makestruct_name}
+    } bind makestruct def
+
+    | A | --
+    /mat_creators_update {
+      /dense pop
+      /blockdense pop
+      /sparse {
+        dup condense_sparse exch /params get /icols_off put
+      }
     } bind makestruct def
 
     |-------------------------- mat_create --------------------
@@ -1292,20 +1443,24 @@
     |
     /mat_create {
       {
-        /Aval 6 dict def
-        Aval /n       put
-        Aval /m       put
-        Aval /mtype   put mat_creators_set Aval exectype
-        Aval /params  put mpidata /pawns get 1 sub Aval /m get rangesize 
-        Aval /mmax    put 
-        Aval /id      put
+        null null null save openlist 
+        /mtype /m /n /params /mmax /id /sv makestruct_stack /Aval name
+
+        mat_creators_set Aval exectype Aval /params put 
+        mpidata /pawns get 1 sub Aval /m get rangesize Aval /mmax put 
+        Aval /id put
+
         {~[
           Aval /id get
-          3 -1 roll mat_creators_get Aval exectype
-          Aval gettype 
+          Aval /mmax get
+          Aval /n get
+          4 -1 roll mat_creators_get Aval exectype
+          Aval gettype
           ~mat_create
         ]} execpawns
-        Aval
+
+        Aval dup mat_creators_update 1 index exectype
+        dup /sv get capsave
       } in_petsc
     } bind def
 
@@ -1350,15 +1505,7 @@
     |
     /mat_fill_data {
       {
-        /data name /Aval name
-        ~[
-          Aval getid
-          Aval /mmax get
-          /data construct_execn
-          mat_fillers Aval exectype
-          Aval gettype 
-          ~mat_fill_data
-        ] sexecpawns
+        ~[3 -1 roll getid 3 -1 roll construct_execn ~mat_fill_data] sexecpawns
       } in_petsc
     } bind def
 
@@ -1376,20 +1523,14 @@
     |
     /mat_fill {
       {
-        /filler name /Aval name
-        ~[
-          Aval getid
-          Aval /mmax get
-          /filler destruct_execn
-          ~mat_fill
-        ] sexecpawns
+        ~[3 -1 roll getid 3 -1 roll destruct_execn ~mat_fill] sexecpawns
       } in_petsc
     } bind def
 
-    |------------------------------------------------------ pmatvecmul
+    |------------------------------------------------------ matvecmul_petsc
     | y beta A trans x alpha | y
     |
-    | Call pmatvecmul on pawns.
+    | Call matvecmul_petsc on pawns.
     | A: dictionary describing matrix from mat_create
     | x: dictionary describing vector from vec_create
     | y: dictionary describing vector from vec_create
@@ -1397,13 +1538,13 @@
     | beta, alpha: scaling constants
     | y = beta*y + alpha*A'*x
     |
-    /pmatvecmul {
+    /matvecmul_petsc {
       {
         5 index 7 1 roll
         exch getid exch
         4 -1 roll getid 4 1 roll
         6 -1 roll getid 6 1 roll
-        ~[7 1 roll ~pmatvecmul] sexecpawns
+        ~[7 1 roll ~matvecmul_petsc] sexecpawns
       } in_petsc
     } bind def  
 
@@ -1479,7 +1620,154 @@
         ~[7 1 roll ~get_matvecmul] sexecpawns
       } in_petsc
     } bind def
-    
+
+    |---------------------------- mat_matmul ---------------------------
+    | /C A transA B transB fill/* | C
+    |
+
+    | -- | /type
+    /mat_matmulsu_mtype [
+      /sparse [
+        /sparse /sparse
+        /dense  /dense
+      ] makestruct
+      /dense [
+        /dense /dense
+        /sparse /dense
+      ] makestruct
+    ] makestruct def
+
+    | -- | params
+    /mat_matmulsu_create {
+      /dense {openlist makestruct_name}
+      /sparse {
+        openlist /icols_off makestruct_name
+      } 
+    } bind makestruct def
+
+    /mat_matmulsu {
+      {
+        /fill name /transB name /Bval name /transA name /Aval name
+        mat_matmulsu_mtype Aval gettype get Bval gettype get
+        Aval transA {/m} {/n} ifelse get
+        Bval transB {/n} {/m} ifelse get
+        mat_matmulsu_create 3 index get exec
+        mpidata /pawns get 1 sub 3 index rangesize
+        6 -1 roll
+        save
+        openlist /mtype /m /n /params /mmax /id /sv makestruct_name
+        /Cval name
+
+        ~[
+          Cval getid mkpass
+          Cval /mmax get 
+          Cval /n get
+          Cval gettype
+          Aval getid transA
+          Bval getid transB
+          fill
+          ~mat_matmulsu
+        ] sexecpawns
+
+        Cval 
+        dup mat_creators_update 1 index exectype
+        dup /sv get capsave
+      } in_petsc
+    } bind def
+
+    |---------------------------- mat_matmul ----------------------------
+    | C beta A transA B transB alpha | C
+    |
+    | C must have the correct non-zero pattern for At?*Bt?
+    | C = C*beta + At?*Bt?*alpha
+    |
+    /mat_matmul {
+      {
+        /alpha name /transB name /Bval name /transA name /Aval name 
+        /beta name dup /Cval name
+        alpha 0 eq {
+          beta dup 0 eq {pop mat_zero} {
+            dup 1 eq ~pop ~mat_mul ifelse
+          } ifelse
+        } {
+          beta 0 ne {
+            {~kickdnode in_petsc} sexecpawns
+            /Cval_ dup Cval mat_dup def
+            kickpawns
+          } if
+
+          ~[
+            Cval getid 
+            Aval getid transA 
+            Bval getid transB 
+            ~mat_matmul
+          ] sexecpawns
+
+          Cval alpha dup 1 eq ~pop ~mat_mul ifelse
+          beta dup 0 eq ~pop {
+            {~kickdnode in_petsc} sexecpawns
+            Cval_ exch dup 1 eq ~pop ~mat_mul ifelse
+            mat_matadd
+            Cval_ mat_destroy
+            kickpawns
+          } ifelse
+        } ifelse
+      } in_petsc
+    } bind def
+
+    |---------------------- mat_zero --------------------------------------
+    | A | A
+    |
+    | A = 0
+    |
+    /mat_zero {
+      ~[1 index getid ~mat_zero] sexecpawns
+    } bind def
+
+    |---------------------- mat_mul ------------------------------
+    | A a | A
+    | 
+    | A *= a
+    /mat_mul {
+      {
+        /a name
+        a 0 eq ~matzero {
+          a 1 ne {
+            ~[1 index getid a ~mat_mul] sexecpawns
+          } ifelse
+        } ifelse
+      } in_petsc
+    } bind def
+
+    |---------------------- mat_matadd ----------------------------------
+    | A B | A
+    |
+    | A += B
+    | A & B must have the same shape.
+    /mat_matadd {
+      1 index 3 1 roll
+      ~[exch getid 3 -1 roll getid ~mat_matadd] sexecpawns
+    } bind def
+
+    |------------------------- getnzs ----------------------
+    | A | nzs
+    | nzs are the number of nonzeros in A
+    |
+    /getnzs {
+      getnzs_nzs 1 index exectype
+    } bind def
+
+    /getnzs_nzs {
+      /dense {
+        dup /m get exch /n get mul
+      }
+      /blockdense {
+        dup /m get exch /n get mul
+      }
+      /sparse {
+        /params get /icols get length
+      }
+    } bind makestruct def
 
     |-------------------------------------------------- get_matrix
     |
@@ -1504,18 +1792,49 @@
         exch Aval /m get rangestart Aval /n get mul add
       }
     } bind makestruct def
+
+    |---------------- densematrix_result_splitters --------------------
+    | <d data> global-row ... | --
+    | 
+    | Called by matrix_result to calculate global offset for matrix
+    |   data reported by a pawn.
+    /densematrix_result_splitters {
+      | <d data> global-row icols | --
+      /sparse {
+        /icols name
+        data exch 2 index length mul 2 index length getinterval /rdata name
+        0 1 icols length {/i name
+          dup i get rdata icols i get put
+        } for
+        pop
+      }
+      | <d data> global-row | --
+      /dense {
+        data exch 2 index length mul 2 index length getinterval copy pop
+      }
+      | <d data> global-row | --
+      /blockdense {
+        data exch 2 index length mul 2 index length getinterval copy pop
+      }
+    } bind makestruct def
     
     |------------------------ matrix_result -----------------------
-    | A <d data> | --
+    | splitters A <d data> | --
     |
     | Store the info for recv_matrix_result. Called from get_matrix.
     | A: dictionary from mat_create for the matrix.
     | data: d-array into which the (non-zero for sparse) data for matrix
     |   will be stored.
     /matrix_result {
-      {/data name /Aval name
-        matrix_result_splitters Aval gettype get /splitter name
+      {
+        /data name /Aval name 
+        Aval gettype get /splitter name
+        ~[Aval getid ~matrix_result] sexecpawns
       } in_petsc
+    } bind def
+
+    /matrix_result_end {
+      ~matrix_result_end sexecpawns
     } bind def
 
     |----------------------- recv_matrix_result ----------------------
@@ -1537,26 +1856,19 @@
       } lock
     } bind def  
 
-    |----------------------- matrixers ------------------------------
-    | A | ...
+    |----------------------- recv_densematrix_result ----------------------
+    | save <d data> global-row ... | --
     |
-    | Returns matrix type-specific parameters for get_matrix on the pawn.
-    | A: dictionary for matrix from mat_create
-    | ...| parameters for get_matrix on pawn.
-    /matrixers {
-      | A | ~irows
-      | ~irows: executable (appended with ~exec if procedure) on pawn
-      |   that returns the local offsets of rows into icols column number
-      |   array
-      /sparse {
-        /params get /irows get construct_exec
-      }
-      | A | --
-      /dense  pop
-      | A | --
-      /blockdense pop
-    } bind makestruct def
-    
+    | Called by pawn to report a sub-set of its local data for the matrix.
+    | Called indirectly from pawn from get_matrix.
+    |
+    | save: save-box from send.
+    | data: the data reported by the pawn
+    |  
+    /recv_densematrix_result {
+      {splitter restore} lock
+    } bind def
+
     |----------------------- get_matrix ------------------------------
     | A <d data> | <d data>
     |
@@ -1567,15 +1879,25 @@
     |
     /get_matrix {
       {
+        matrix_result_splitters 3 1 roll matrix_result
+        ~[Aval getid ~get_matrix] sexecpawns
+        matrix_result_end
+
+        data
+      } in_petsc
+    } bind def
+
+    |----------------------- get_densematrix ---------------------------
+    | A | <d data>
+    |
+    /get_densematrix {
+      {
+        densematrix_result_splitters
+        exch dup /m get 1 index /n get mul /d array 0 exch copy
         matrix_result
-        ~[
-          Aval getid 
-          Aval /n get 
-          Aval /mmax get 
-          Aval matrixers Aval exectype
-          Aval gettype
-          ~get_matrix
-        ] sexecpawns
+        ~[Aval getid ~get_densematrix] sexecpawns
+        matrix_result_end
+
         data
       } in_petsc
     } bind def
@@ -1650,94 +1972,79 @@
     |
     /mat_destroy {
       {
-        ~[exch getid ~mat_destroy] sexecpawns
+        ~[1 index getid ~mat_destroy] sexecpawns
+        /sv get restore
       } in_petsc
     } bind def
 
     |------------------------------------------------ mat_dup 
     |
-    | /B A | B
+    | /B A | B(=A)
     |
     /mat_dup {
       {
-        2 copy                                       | /B A /B A
-        ~[3 1 roll getid ~mat_dup] sexecpawns        | /B A
-        dup used dict exch merge                     | /B B
-        dup /params get mat_dupers 2 index exectype  | /B B params
-        1 index /params put                          | /B B
-        dup 3 1 roll /id put                         | B
+        2 copy                                | /B A /B A
+        ~[3 1 roll getid ~mat_dup] sexecpawns | /B A
+        transcribe                            | /B B
+        dup 3 1 roll /id put                  | B
       } in_petsc
     } bind def
     
-    | oldparamsdict | newparamsdict
-    /mat_dupers {
-      /dense {pop 0 dict}
-      /sparse {
-        3 dict {
-          1 index /icols_off get dup length list copy 
-          /icols_off name
-          1 index /icols get /icols name
-          exch    /irows get /irows name
-        } 1 index indict
-      }
-    } bind makestruct def
+    |------------------------------------------------ mat_dup_shape
+    |
+    | /B A | B (uninitialized, but same shape)
+    |
+    /mat_dup_shape {
+      {
+        2 copy                                      | /B A /B A
+        ~[3 1 roll getid ~mat_dup_shape] sexecpawns | /B A
+        transcribe                                  | /B B
+        dup 3 1 roll /id put                        | B
+      } in_petsc
+    } bind def
+
+    |----------------------------------------------- mat_copy
+    | A B | B (=A)
+    | B must already have the same shape as A
+    |
+    /mat_copy {
+      dup 3 1 roll
+      ~[3 1 roll getid exch getid exch ~mat_copy] sexecpawns
+    } bind def
 
     |--------------------------------------------- mat_transpose
     |
-    | ... A | --
+    | A | --
     |
     /mat_transpose {
       {
         /Aval name
-        mat_transposers_set Aval exectype
-        ~[
-          mat_transposers_get Aval exectype
-          Aval gettype Aval getid ~mat_transpose
-        ] sexecpawns
+        ~[Aval getid ~mat_transpose] sexecpawns
 
-        Aval /n get 
-        Aval /m get Aval /n put 
+        Aval /n get
+        Aval /m get Aval /n put
         Aval /m put
 
         mpidata /pawns get 1 sub Aval /m get rangesize Aval /mmax put
+        ~[
+          Aval getid 
+          Aval /mmax get 
+          Aval /n get 
+          ~mat_transpose_update
+        ] sexecpawns
         mat_transposers_condense Aval exectype
       } in_petsc
     } bind def
 
-    /mat_transposers_buf @NAMEBYTES@ 1 add /b array def
-    /mat_transposers_num 0 def
     | -- | --
-    /mat_transposers_set {
-      | -- | --
-      /dense {}
-      | ~irows ~icols | --
+    /mat_transposers_condense ~[
+      /dense null mkact
+      /blockdense null mkact
       /sparse {
-        /icolsn name
-        /irowsn name
+        Aval dup condense_sparse
+        exch /params get /icols_off put
       }
-    } bind makestruct def
-
-    | -- | ...
-    /mat_transposers_get {
-      | -- | --
-      /dense {}
-      | -- | /icolsn /irowsn
-      /sparse {
-        /icolsn find mkpass
-        /irowsn find mkpass
-      }
-    } bind makestruct def
-
-    | -- | --
-    /mat_transposers_condense {
-      /dense {}
-      /sparse {
-        /icolsn find Aval /params get /icols put
-        /irowsn find Aval /params get /irows put
-        /icolsn find /irowsn find condense_sparse
-        Aval /params get /icols_off put
-      }
-    } bind makestruct def
+    ] bind makestruct def
     
     |----------------------------------------------- ksp_destroy
     | ksp | --

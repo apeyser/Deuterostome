@@ -4,6 +4,7 @@
           _ null
           - ]
           - pop
+	  - push
           - exch
           - dup
           - index
@@ -100,6 +101,24 @@ P op_pop(void)
 {
   if (FREEopds <= FLOORopds) return OPDS_UNF;
   FREEopds -= FRAMEBYTES;
+  return OK;
+}
+
+/*-------------------------------------- push
+  [ any... | --
+  any.. are moved to the execution stack
+*/
+
+P op_push(void) {
+  B* i;
+
+  for (i = o_1; i >= FLOORopds && TAG(i) != MARK; i -= FRAMEBYTES);
+  if (TAG(i) != MARK) return OPDS_UNF;
+
+  if (x1 + (FREEopds-i-FRAMEBYTES) > CEILexecs) return EXECS_OVF;
+  moveframes(i+FRAMEBYTES, x1, (FREEopds-i)/FRAMEBYTES - 1);
+  FREEopds = i;
+
   return OK;
 }
 
