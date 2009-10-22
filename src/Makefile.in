@@ -147,7 +147,7 @@ libdmglobals_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_3)
 am__libdmglobals_la_SOURCES_DIST = dmglobals.c dmnuminc.h dmnum.c \
 	dsp1f.h dsp1.c dsp2.c dm2.c dm2.h dm-conv.c dm-swapbytes.h \
-	dm4.c dm5.c dm5.h dm6.c dm6.h dm7.c dm7.h dm8.c dm9.c \
+	dm4.c dm4.h dm5.c dm5.h dm6.c dm6.h dm7.c dm7.h dm8.c dm9.c \
 	dm-types.c xhack.h dm1.c dm-signals.c dm-signals.h matrix.c \
 	matrix.h threads.c dregex.c dregex.h dm-convert.h dm-convert.c
 am__objects_3 = libdmglobals_la-dmglobals.lo libdmglobals_la-dmnum.lo \
@@ -278,11 +278,11 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 nodist_pkgconfiglibDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(nodist_pkgconfiglib_DATA)
 nodist_pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
-am__pkginclude_HEADERS_DIST = dm.h dm-errs.h dm3.h pluginlib.h \
-	plugin.h cppplugin.h $(top_srcdir)/libltdl/ltdl.h dmx.h \
-	threads.h error-local.h dm-snprintf.h srandomdev-local.h \
-	dmnum.h basic-defs.h dm-types.h dm-nextevent.h dm2.h dm6.h \
-	dm5.h
+am__pkginclude_HEADERS_DIST = dm.h dm-errs.h pluginlib.h plugin.h \
+	cppplugin.h $(top_srcdir)/libltdl/ltdl.h dmx.h threads.h \
+	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h \
+	basic-defs.h dm-types.h dm-nextevent.h dm2.h dm3.h dm4.h dm5.h \
+	dm6.h
 pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(nodist_pkginclude_HEADERS) $(pkginclude_HEADERS)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
@@ -929,11 +929,12 @@ edit = -e 's,[@]bindir[@],$(bindir),g' \
 @ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@CPPPLUGIN_HDR = cppplugin.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_HDR = plugin.h $(CPPPLUGIN_HDR) $(top_srcdir)/libltdl/ltdl.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_LD = @LIBLTDL@
-pkginclude_HEADERS = dm.h dm-errs.h dm3.h pluginlib.h $(PLUGIN_HDR) \
+pkginclude_HEADERS = dm.h dm-errs.h pluginlib.h $(PLUGIN_HDR) \
 	dmx.h $(THREAD_HDR) \
 	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h \
-	basic-defs.h dm-types.h dm-nextevent.h dm2.h cppplugin.h \
-	dm6.h dm5.h
+	basic-defs.h dm-types.h dm-nextevent.h \
+	dm2.h dm3.h dm4.h dm5.h dm6.h \
+	cppplugin.h
 
 nodist_pkginclude_HEADERS = dm-config.h paths.h
 
@@ -978,7 +979,7 @@ testwordorder_SOURCES = test-word-order.c
 GLOBSRCS = dmglobals.c \
 	dmnuminc.h dmnum.c dsp1f.h dsp1.c dsp2.c \
 	dm2.c dm2.h dm-conv.c dm-swapbytes.h\
-	dm4.c dm5.c dm5.h dm6.c dm6.h dm7.c dm7.h dm8.c dm9.c \
+	dm4.c dm4.h dm5.c dm5.h dm6.c dm6.h dm7.c dm7.h dm8.c dm9.c \
 	dm-types.c xhack.h \
 	dm1.c \
 	dm-signals.c dm-signals.h
