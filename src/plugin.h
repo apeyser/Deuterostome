@@ -31,6 +31,7 @@ char libPLUGIN_is_dll(void) {return 1;}
 #endif
 
 #include "dm.h"
+#include "dm6.h"
 
 #if __cplusplus
 extern "C" {
