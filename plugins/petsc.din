@@ -935,7 +935,7 @@
     } bind def
 
     |------------------------------------- vec_dup
-    | /x x | y
+    | /y x | y
     |
     | Call vec_dup on pawns.
     | Takes the name for the destination vector on the pawns,

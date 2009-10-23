@@ -27,17 +27,27 @@
   sub 3 1 roll sub 1e-6 exch mul exch add
 } bind def
 
-/petsc_test {
-  /PETSC_TESTER_ layer PETSC begin PETSC_TESTER begin {
-    ~[
-      {
-        /PETSC_TESTER_ layer 
-        PETSC begin
-        100 dict dup /PETSC_TESTER name begin
-      } ~exec
-      /dim dim ~def
-    ] sexecpawns
+/loaded false def
 
+/loadpawns {
+  {
+    /PETSC_TESTER 200 {} moduledef
+    ~kickdnode PETSC_TESTER indict
+  } sexecpawns
+  /loadpawns null mkact def
+} bind def
+
+/test {
+  loadpawns
+
+  ~[
+    dim ~PETSC {
+      /dim name
+      kickdnode
+    } ~exch ~swapdict
+  ] sexecpawns
+
+  /PETSC_TESTER_ ~inlayerall PETSC {
     (\n) toconsole
     (matD create) {/matD dup /dense dim dup mat_create def} timer
     (matD data) {
@@ -57,9 +67,9 @@
     /vecxSD dup dim vec_create def
     {
       5 vecxS /VECTOR_N get /d array copy /vecxdata name
-    } sexecpawns
-    
+    } sexecpawns    
     (\n) toconsole
+
     (matS init) {
       dim {/nl name /n0 name
         /matSrows 0 nl 1 add /l array copy def
@@ -87,8 +97,8 @@
       } sexecpawns
     } timer
     (matS fill) {matS ~matSdata mat_fill_data} timer
-      
     (\n) toconsole
+
     (matSD init) {
       dim {/nl name /n0 name
         /matSDrows nl 1 add /l array 
@@ -132,12 +142,8 @@
     } sexecpawns
     vecb ~vecbdata vec_fill
     
-    /vecb2 dup dim vec_create def
-    {
-      /vecb2data vecbdata dup length /d array copy 2 mul def
-    } sexecpawns
-    vecb2 ~vecb2data vec_fill
-      
+    /vecb2 dup vecb vec_dup 2 vec_mul def
+    
     /res dim /d array def
     {
       {(sparse)       kS  matS  vecxS  activeS}
@@ -145,18 +151,22 @@
       {(dense)        kD  matD  vecxD  activeD}
     } {
       (\n==============================\n) toconsole
-      exec not {3 ~pop repeat
+      exec not {
+        3 ~pop repeat
+
         (Skipping: ) toconsole toconsole (\n) toconsole
-      } {/vecx name /mat name /k name /mt name
+      } {
+        /vecx name /mat name /k name /mt name
+        
         vecx ~vecxdata vec_fill
         (Testing: ) toconsole mt toconsole (\n\n) toconsole
         (Solution: \n) toconsole
         gettimeofday k mat vecx vecb res get_ksp_solve gettimeofday
         3 -1 roll show {v_} if 
         1 sub dup mul 0d exch add sqrt (Distance: ) toconsole _ pop
-        timediff neg (Time: ) toconsole _ pop
-        
+        timediff neg (Time: ) toconsole _ pop        
         (\n) toconsole
+
         (Resolve: \n) toconsole
         gettimeofday k vecx vecb res get_ksp_resolve gettimeofday
         3 -1 roll show {v_} if 
@@ -165,6 +175,7 @@
 
         vecx ~vecxdata vec_fill
         (\n) toconsole
+
         (Solution x2: \n) toconsole
         gettimeofday k vecx vecb2 res get_ksp_resolve gettimeofday
         3 -1 roll show {v_} if
@@ -179,13 +190,9 @@
       vecxSD matSD kSD
       vecb vecb2
     } {exec destroy} forall
-      
-    {
-      end
-      end
-      false /PETSC_TESTER_ _layer pop
-    } sexecpawns
-  } stopped end end /PETSC_TESTER_ _layer {stop} if
+  } 4 1 roll swapdict
+
+  kickpawns
 } bind def
 
 end _module
