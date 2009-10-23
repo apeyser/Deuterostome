@@ -307,7 +307,7 @@
           4 -2 roll exch petsc_mat_fill   | mmax A_
         } for
         
-        exch 1 index /mrMATRIX_M get sub ~petsc_mat_syncfill repeat | A_
+        exch 1 index /MATRIX_M get sub ~petsc_mat_syncfill repeat | A_
         petsc_mat_endfill                                         | A_
         pop
       } in_petsc
