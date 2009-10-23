@@ -1,4 +1,6 @@
-/MATRIX_TEST module 200 dict dup begin
+| -*- mode: d; -*-
+
+/MATRIX_TEST (matrix-test.d) @version_add@ 200 {
 
 /m 1000 def
 
@@ -757,4 +759,4 @@
   } forall
 } bind def
 
-end _module
+} moduledef

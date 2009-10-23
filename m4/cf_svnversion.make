@@ -12,22 +12,24 @@ $(SVNVERSION_DIR)/svnversion.stamp:
 SVNVERSION_STAMP = `cat $(SVNVERSION_DIR)/svnversion.stamp`
 SVNVERSION_EDIT = -e "s,[@]SVNVERSION[@],$(SVNVERSION_STAMP),g"
 
-SVNID_STAMP = `cat $(srcdir)/$@in.idstamp || echo unknown`
+SVNID_STAMP = `cat $(srcdir)/$@in.idstamp 2>/dev/null || echo unknown`
 SVNID_EDIT = -e "s,[@]SVNID[@],$(SVNID_STAMP),g"
 
 IDFILES_RULE_BASE = \
 	echo "Building idstamp: $$id"; \
 	f=`echo $$id | sed 's,.idstamp,,g'` \
+	&& t=`echo $$$$.$$id` \
 	&& if git log -n 1 --pretty='format:%cn %cd %H' \
 	      `readlink $$f || echo $$f` \
-		>$$id.tmp 2>/dev/null ; then \
-	  if test "`cat $$id`" = "`cat $$id.tmp`"; then \
-	    rm $$id.tmp || exit 1; \
+		>$$t 2>/dev/null ; then \
+	  if test "`cat $$id 2>/dev/null`" = "`cat $$t 2>/dev/null`"; \
+	  then \
+	    rm $$t || exit 1; \
 	  else \
-	    mv $$id.tmp $$id || exit 1; \
+	    mv $$t $$id || exit 1; \
 	    touch $$f || exit 1; \
 	  fi; \
-	else rm $$id.tmp; \
+	else rm $$t; \
 	fi
 
 
