@@ -299,6 +299,11 @@ CF_IF_ENABLED([cppplugin], [
 ])
 
 CF_DEFINE_IF_CODE_GCC([HOT], [__attribute__ ((__hot__)) void x(void) {}])
+CF_DEFINE_IF_CODE_GCC([UNUSED], [__attribute__ ((__unused__)) void x(void) {}])
+CF_DEFINE_IF_CODE_GCC([NORETURN], [
+  #include <stdlib.h>
+  __attribute__ ((__noreturn__)) void x(void) {exit(0);}
+])
 
 AC_SUBST([INCLTDL])
 AC_SUBST([LIBLTDL])

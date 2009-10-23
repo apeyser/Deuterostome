@@ -277,6 +277,9 @@
 /* Define to 1 if you have the <mpi.h> header file. */
 #undef HAVE_MPI_H
 
+/* Define if you have "NORETURN" */
+#undef HAVE_NORETURN
+
 /* Define if you have PETSC library. */
 #undef HAVE_PETSC
 
@@ -361,6 +364,9 @@
 
 /* Define to 1 if the system has the type `unsigned long long int'. */
 #undef HAVE_UNSIGNED_LONG_LONG_INT
+
+/* Define if you have "UNUSED" */
+#undef HAVE_UNUSED
 
 /* Define to 1 if you have the <wchar.h> header file. */
 #undef HAVE_WCHAR_H

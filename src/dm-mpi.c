@@ -162,7 +162,7 @@ static void redirect_sig(int sig) {
     error_local(1, errno_, "pthread_kill %i", sig);
 }
 
-__attribute__ ((__noreturn__))
+DM_NORETURN
 static void sigfunc(void) {
   while (1) {
     B sig;
@@ -206,7 +206,7 @@ static void initmpi_(void) {
   //fprintf(stderr, "Child %i heard from rooksig\n", (int) rank);
 }
 
-__attribute__ ((__noreturn__))
+DM_NORETURN
 static void mpifunc(void) {
   mpithread_lock();
 

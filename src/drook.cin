@@ -21,7 +21,7 @@ static MPI_Comm childrensig;
 static MPI_Request* requests;
 
 DM_INLINE_STATIC void usage_error(const char* name) 
-  __attribute__ ((__noreturn__));
+  DM_NORETURN;
 static void usage_error(const char* name) {
   error_local(1, 0, 
 	"Usage: %s\n"
@@ -169,7 +169,7 @@ static void exithandler(void) {
   MPI_Abort(children, 1);
 }
 
-static void mpihandler(MPI_Comm* comm __attribute__ ((__unused__)), 
+static void mpihandler(MPI_Comm* comm DM_UNUSED, 
 		       int* err, ...) {
   static char string[MPI_MAX_ERROR_STRING];
   int len;
@@ -365,8 +365,8 @@ DM_INLINE_STATIC void writempi(void) {
   from_dnode_data = NULL;
 }
 
-DM_INLINE_STATIC void* from_dnode(void* arg) __attribute__ ((__noreturn__));
-DM_INLINE_STATIC void* from_dnode(void* arg __attribute__ ((__unused__))) {
+DM_INLINE_STATIC void* from_dnode(void* arg) DM_NORETURN;
+DM_INLINE_STATIC void* from_dnode(void* arg DM_UNUSED) {
   UL32 ok;
   if (! (requests = (MPI_Request*) malloc(sizeof(MPI_Request)*nodes*3)))
     error_local(1, errno, "Unable to malloc requests");
@@ -424,16 +424,16 @@ DM_INLINE_STATIC void writesocket(void) {
   from_mpi_data = NULL;
 }
 
-DM_INLINE_STATIC void* from_mpi(void* arg) __attribute__ ((__noreturn__));
-DM_INLINE_STATIC void* from_mpi(void* arg __attribute__ ((__unused__))) {
+DM_INLINE_STATIC void* from_mpi(void* arg) DM_NORETURN;
+DM_INLINE_STATIC void* from_mpi(void* arg DM_UNUSED) {
   while (1) {readmpi(); writesocket();};
   exit(1);
 }
 
-static void to_sig_exiter(void* unused __attribute__ ((__unused__))) {close(4);}
+static void to_sig_exiter(void* unused DM_UNUSED) {close(4);}
 
-DM_INLINE_STATIC void* to_sig(void* arg) __attribute__ ((__noreturn__));
-DM_INLINE_STATIC void* to_sig(void* arg __attribute__ ((__unused__))) {
+DM_INLINE_STATIC void* to_sig(void* arg) DM_NORETURN;
+DM_INLINE_STATIC void* to_sig(void* arg DM_UNUSED) {
   pthread_cleanup_push(to_sig_exiter, NULL);  
   while (1) {
     B sig;
@@ -458,7 +458,7 @@ DM_INLINE_STATIC void makethread(char* name, void* (*func)(void*)) {
     error_local(1, errno_, "Unable to create %s thread", name);
 }
 
-DM_INLINE_STATIC void mainthread(void) __attribute__ ((__noreturn__));
+DM_INLINE_STATIC void mainthread(void) DM_NORETURN;
 void mainthread(void) {
   int sig;
   sigset_t set;

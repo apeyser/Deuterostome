@@ -362,7 +362,7 @@ void clearsocket_special(P fd) {
     if (fd == serversocket) serversocket = -1;
 }
 
-BOOLEAN masterinput(P* retc, B* bufferf __attribute__ ((__unused__)) ) {
+BOOLEAN masterinput(P* retc, B* bufferf DM_UNUSED) {
 #if ENABLE_UNIX_SOCKETS
   if (unixserversocket == recsocket) {
     *retc = handleserverinput();

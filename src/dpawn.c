@@ -125,8 +125,8 @@ previous message whose execution has been interrupted.
 
 */
 
-int main(int argc __attribute__ ((__unused__)), 
-	 char *argv[] __attribute((__unused__)) )
+int main(int argc DM_UNUSED, 
+	 char *argv[] DM_UNUSED)
 {
   sysop = _sysop;
   syserrm = _syserrm;
