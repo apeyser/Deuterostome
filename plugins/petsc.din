@@ -98,6 +98,16 @@
   |
   /notin_petsc {PETSC notindict} bind def
 
+  | object | object
+  /_cap {
+    dup /sv get capsave
+  } bind def
+
+  | object | --
+  /_destroy {
+    /sv get restore
+  } bind def
+
   |================= dpawn definitions ===========================
   | Mapping from dnode functions to dpawn jobs associated with that
   | function. In general, the mapping has the same name on both
@@ -116,8 +126,11 @@
     | and names it /x.
     |
     /vec_create {
-      petsc_vec_create def
+      save exch petsc_vec_create openlist /sv /vector makestruct_stack
+      _cap def
     } bind def
+    
+    /_getvector {/vector get} bind def
 
     |------------------------------------ vec_fill
     | x <d > | --
@@ -127,21 +140,22 @@
     | of elements as the vector has locally.
     |
     /vec_fill {
-      0 3 -1 roll petsc_vec_copyto pop
+      0 3 -1 roll _getvector petsc_vec_copyto pop
     } bind def
 
     | <d > X i | -- 
     /vec_copyto {
-      exch petsc_vec_copyto pop
+      exch _getvector petsc_vec_copyto pop
     } bind def
 
     | X | --
     /vec_syncto {
-      petsc_vec_syncto pop
+      _getvector petsc_vec_syncto pop
     } bind def
 
     | X <d > | --
     /vec_interval {
+      exch _getvector exch
       1 index dup /gn get exch /n get getinterval vec_fill
     } bind def
 
@@ -210,7 +224,7 @@
     |
     /mat_create {
       save mat_creators exch get exec
-      dup /sv get capsave def
+      _cap def
     } bind def
 
     |------------------------------------ mat_transpose
@@ -345,7 +359,10 @@
     | y = beta*y + alpha*A*x
     |
     /matvecmul_petsc {
-      _getmatrix petsc_mat_vecmul pop
+      6 -1 roll _getvector 5 1 roll
+      4 -1 roll _getmatrix 4 -1 roll
+      exch _getvector exch
+      petsc_mat_vecmul pop
     } bind def
     
     |----------------------- get_matvecmul ----------------------
@@ -355,7 +372,10 @@
     | return y to node
     |
     /get_matvecmul {
-      _getmatrix petsc_mat_vecmul get_vector
+      5 index _getvector 5 1 roll
+      4 -1 roll _getmatrix 4 1 roll
+      exch _getvector exch
+      petsc_mat_vecmul pop get_vector
     } bind def
 
     | mmax N save A_ | A
@@ -382,8 +402,7 @@
       5 -1 roll _getmatrix 5 1 roll | /C mmax N sv /type A_ transA B_ transB f
       petsc_mat_matmulsu            | /C mmax N sv /type C_
       mat_matmulsu_create 3 -1 roll get exec | /C C
-      dup /sv get capsave           | /C C
-      def
+      _cap def                      | --
     } bind def
 
     |------------------------- mat_matmul ----------------------------
@@ -411,7 +430,7 @@
     | A *= a
     |
     /mat_mul {
-      _getmatrix petsc_mat_mul pop
+      exch _getmatrix exch petsc_mat_mul pop
     } bind def
 
     |-------------------------- matadd --------------------------------
@@ -429,6 +448,7 @@
     |
     /get_vector {
       {
+        _getvector
         dup 0 1 index /VECTOR_N get /d array petsc_vec_copyfrom
         ~[3 1 roll exch /VECTOR_GN get ~recv_vector_result] rsend
       } in_petsc
@@ -544,13 +564,17 @@
     |
     /ksp_create {
       {
-        dup /kspsettings name
+        save
         {
           ksptype kspparam pctype pcparam monitortype petsc_ksp_create
           dup rtol atol dtol maxits petsc_ksp_tol
-        } exch indict
-      } in_petsc def
+        } 3 -1 roll indict
+        openlist /sv /ksp makestruct_stack
+      } in_petsc 
+      _cap def
     } bind def
+
+    /_getksp {/ksp get} bind def
 
     |--------------------------------------------- vec_destroy
     | x | --
@@ -558,7 +582,8 @@
     | Deallocate local portion of vector x, both in D and Petsc.
     |
     /vec_destroy {
-      petsc_vec_destroy
+      dup _getvector petsc_vec_destroy
+      _destroy
     } bind def
     
     |--------------------------------------------- mat_destroy
@@ -568,20 +593,19 @@
     |
     /mat_destroy {
       dup _getmatrix petsc_mat_destroy
-      /sv get restore
+      _destroy
     } bind def
 
     |--------------------------------------------- mat_dup
     | /B A | --
     |
     /mat_dup {
-      save 3 1 roll                                    | sv /B A
-      dup transcribe                                   | sv /B A B
-      exch _getmatrix dup petsc_mat_dup petsc_mat_copy | sv /B B B_
-      1 index /matrix put                              | sv /B B
-      dup 3 index /sv put                              | sv /B B
-      3 -1 roll capsave                                | /B B
-      def                                              | --
+      save exch                                        | /B sv A
+      dup transcribe                                   | /B sv A B
+      exch _getmatrix dup petsc_mat_dup petsc_mat_copy | /B sv B B_
+      1 index /matrix put                              | /B sv B
+      exch 1 index /sv put                             | /B B
+      _cap def                                         | --
     } bind def
 
     |-------------------------------------------- mat_copy
@@ -594,70 +618,72 @@
     |---------------------------------------------mat_dup_shape
     | /B A | --
     /mat_dup_shape {
-      save 3 1 roll                     | sv /B A
-      dup transcribe                    | sv /B A B
-      exch _getmatrix dup petsc_mat_dup | sv /B B B_
-      1 index /matrix put               | sv /B B
-      dup 3 index /sv put               | sv /B B
-      3 -1 roll capsave                 | /B B
-      def                               | --
+      save exch                      | /B sv A
+      dup transcribe                 | /B sv A B
+      exch _getmatrix petsc_mat_dup  | /B sv B B_
+      1 index /matrix put            | /B sv B
+      exch 1 index /sv put           | /B B
+      _cap def                       | --
     } bind def
 
     |--------------------------------------------- vec_dup
     | /x x | --
     |
     /vec_dup {
-      dup petsc_vec_dup petsc_vec_copy def
+      _getvector dup petsc_vec_dup petsc_vec_copy def
     } bind def
 
     | x y | y_i = x_i
     /vec_copy {
-      petsc_vec_copy pop
+      _getvector exch _getvector exch petsc_vec_copy pop
     } bind def
 
     | x a | -- x_i += a
     /vec_add {
-      petsc_vec_add pop
+      exch _getvector exch petsc_vec_add pop
     } bind def
 
     | x a | -- x_i*=a
     /vec_mul {
-      petsc_vec_mul pop
+      exch _getvector exch petsc_vec_mul pop
     } bind def
 
     | x a | -- x_i^=a
     /vec_pwr {
-      petsc_vec_pwr pop
+      exch _getvector exch petsc_vec_pwr pop
     } bind def
 
     | x | -- x_i=sqrt(x_i)
     /vec_sqrt {
-      petsc_vec_sqrt pop
+      _getvector petsc_vec_sqrt pop
     } bind def
 
     | x | -- x_i=1/x_i
     /vec_reciprocal {
-      petsc_vec_reciprocal pop
+      _getvector petsc_vec_reciprocal pop
     } bind def
 
     | x d | -- x_i = d iff x_i == *
     /vec_denan {
-      petsc_vec_denan pop
+      exch _getvector exch petsc_vec_denan pop
     } bind def
 
     | x y | -- x_i*=y_i
     /vecvec_mul {
-      petsc_vecvec_mul pop
+       _getvector exch _getvector exch petsc_vecvec_mul pop
     } bind def
 
     | x a y b | -- x_i=a*x_i+b*y_i
     /vecvec_add {
+      exch _getvector exch
+      4 -1 roll _getvector 4 1 roll
       petsc_vecvec_add pop
     } bind def
 
     |================ Need to gather from all processors
     | x offsetX len/* A m offsetA | -- A_mc=x_c
     /vecmat_copyrow {
+      6 -1 roll _getvector 6 1 roll
       3 -1 roll _getmatrix 3 1 roll
       petsc_vecmat_copyrow pop
     } bind def
@@ -669,7 +695,7 @@
       | <L col...> A | <L col...> A
       /blockdense null mkact
 
-      | col first-row n A | <L col...>
+      | col first-row n A | <L col...> A
       /sparse {
         {
           4 1 roll
@@ -681,15 +707,17 @@
             col add icols exch get cols 2 index put
             1 add
           } forall pop
-          cols
+          cols exch
         } in_petsc
       }
     ] bind makestruct def
 
     | x local-offsetX local-offsetA ... A | -- A_mc = x_m
     /vecmat_copycol {
-      vecmat_copycolers exch get exec
-      3 -1 roll _getmatrix 3 1 roll petsc_vecmat_copycol pop
+      vecmat_copycolers 1 index _exectype
+      _getmatrix
+      5 -1 roll _getvector 5 1 roll
+      petsc_vecmat_copycol pop
     } bind def
 
     | A | --
@@ -699,7 +727,9 @@
 
     | x A | -- 
     /vecmat_sync {
-      _getmatrix petsc_vecmat_sync pop
+      _getmatrix 
+      exch _getvector exch
+      petsc_vecmat_sync pop
     } bind def
 
     |---------------------------------------------- ksp_destroy
@@ -707,7 +737,8 @@
     |
     | Deallocate local portion of solver ksp, both in D and Petsc.
     /ksp_destroy {
-      petsc_ksp_destroy
+      dup _getksp petsc_ksp_destroy
+      _destroy
     } bind def
 
     |------------------------------------------------- ksp_solve
@@ -728,9 +759,14 @@
     | solver ksp. Should be more efficient in that case.
     |
     /ksp_solve {
-      {3 index /ksp_ name
+      {
+        3 index _getksp /ksp_ name
+
+        _getvector
+        exch _getvector exch
         3 -1 roll dup null ne ~_getmatrix if 3 1 roll
         petsc_ksp_solve pop
+
         mpirank 0 eq {
           report {
             repbuf 0 (Convergence iterations: ) fax 
@@ -742,14 +778,13 @@
       } in_petsc
     } bind def
 
-    |--------------- get_gsp_solve --------------------
+    |--------------- get_ksp_solve --------------------
     | ksp A/null x b | --
     |
     | Calls ksp_solve, and then returns the local portion
     | of x to the node.
     |
     /get_ksp_solve {
-      3 -1 roll dup null ne ~_getmatrix if 3 1 roll
       1 index 5 1 roll ksp_solve get_vector
     } bind def
 
@@ -838,13 +873,14 @@
     |
     /vec_create {
       {
-        openlist /id /N makestruct_stack
+        save openlist /id /N /sv makestruct_stack
         dup /xval name 
         {~[
           xval /id get
           3 -1 roll xval /N get rangesize 
           ~vec_create
         ]} execpawns
+        _cap
       } in_petsc
     } bind def
 
@@ -1301,7 +1337,12 @@
     |
     /condense_sparse {
       {
-        /icols_len mpidata /pawns get 1 add list def
+        /icols_len 1 index dup /params known not {pop true} {
+          /params get dup /icols_off known not {pop true} {
+            /icols_off get false
+          } ifelse
+        } ifelse {mpidata /pawns get 1 add list} if def
+
         ~[
           exch getid 
           {~[exch /icols get length mpirank ~condense_recv] rsend} ~in_petsc
@@ -1460,7 +1501,7 @@
         ]} execpawns
 
         Aval dup mat_creators_update 1 index exectype
-        dup /sv get capsave
+        _cap
       } in_petsc
     } bind def
 
@@ -1671,7 +1712,7 @@
 
         Cval 
         dup mat_creators_update 1 index exectype
-        dup /sv get capsave
+        _cap
       } in_petsc
     } bind def
 
@@ -1935,6 +1976,8 @@
       /kspparam null
       /pcparam  null
       /monitortype *
+      /id null
+      /sv null
     } bind makestruct def
     
     |------------------------ kspcreate ----------------
@@ -1946,9 +1989,12 @@
     |   augmented with /id=/ksp.
     |
     /ksp_create {
-      kspsettings dup used 1 add dict exch {merge
+      save
+      exch transcribe exch {
+        1 index /sv put
         2 copy /id put
         ~[3 -1 roll 2 index ~ksp_create] sexecpawns
+        _cap
       } in_petsc
     } bind def
     
@@ -1960,7 +2006,8 @@
     |
     /vec_destroy {
       {
-        ~[exch getid ~vec_destroy] sexecpawns
+        ~[1 index getid ~vec_destroy] sexecpawns
+        _destroy
       } in_petsc
     } bind def
     
@@ -1973,7 +2020,7 @@
     /mat_destroy {
       {
         ~[1 index getid ~mat_destroy] sexecpawns
-        /sv get restore
+        _destroy
       } in_petsc
     } bind def
 
@@ -1983,10 +2030,12 @@
     |
     /mat_dup {
       {
-        2 copy                                | /B A /B A
-        ~[3 1 roll getid ~mat_dup] sexecpawns | /B A
-        transcribe                            | /B B
-        dup 3 1 roll /id put                  | B
+        save 3 1 roll                         | sv /B A
+        transcribe 2 copy                     | sv /B B /B B
+        ~[3 1 roll getid ~mat_dup] sexecpawns | sv /B B
+        exch 1 index /id put                  | sv B
+        exch 1 index /sv put                  | B
+        _cap                                  | B
       } in_petsc
     } bind def
     
@@ -1996,10 +2045,12 @@
     |
     /mat_dup_shape {
       {
-        2 copy                                      | /B A /B A
-        ~[3 1 roll getid ~mat_dup_shape] sexecpawns | /B A
-        transcribe                                  | /B B
-        dup 3 1 roll /id put                        | B
+        save 3 1 roll                               | sv /B A
+        transcribe 2 copy                           | sv /B B /B B
+        ~[3 1 roll getid ~mat_dup_shape] sexecpawns | sv /B B
+        exch 1 index /id put                        | sv B
+        exch 1 index /sv put                        | B
+        _cap                                        | B
       } in_petsc
     } bind def
 
@@ -2014,7 +2065,7 @@
 
     |--------------------------------------------- mat_transpose
     |
-    | A | --
+    | A | At
     |
     /mat_transpose {
       {
@@ -2054,7 +2105,8 @@
     |
     /ksp_destroy {
       {
-        ~[exch getid ~ksp_destroy] sexecpawns
+        ~[1 index getid ~ksp_destroy] sexecpawns
+        _destroy
       } in_petsc
     } bind def
 
