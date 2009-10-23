@@ -401,8 +401,7 @@
 
     /A3 dup ~matArows ~matAcols /sparse m n mat_create def
     A3 ~matAdata mat_fill_data
-    /A3t dup A3 mat_dup def
-    ~matAtrows ~matAtcols A3t mat_transpose
+    /A3t dup A3 mat_dup mat_transpose def
 
     {}
  } run_tests
@@ -481,10 +480,8 @@
   |(A3 fill\n) toconsole
   A3 ~matAdata mat_fill_data
   |(A3 dup\n) toconsole
-  /A3t dup A3 mat_dup def
+  /A3t dup A3 mat_dup mat_transpose def
   |(A3t transpose\n) toconsole
-  ~matAtrows ~matAtcols A3t mat_transpose
-  |(A3t transpose end\n) toconsole
 
   {}
 } bind def
@@ -525,8 +522,7 @@
       } ~exec
     ]} execpawns
     A3 ~matAdata mat_fill_data
-    /A3t dup A3 mat_dup def
-    A3t mat_transpose
+    /A3t dup A3 mat_dup mat_transpose def
 
     {}
   } run_tests
@@ -541,8 +537,7 @@
   B1 B2 copy pop
   B1t B2t copy pop
 
-  /B3t dup B3 mat_dup def
-  B3t mat_transpose
+  /B3t dup B3 mat_dup mat_transpose def
 
   C1t_old C1_old mattranspose pop
   C1 C2 copy pop

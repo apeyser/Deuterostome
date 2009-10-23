@@ -174,12 +174,11 @@
     } forall
     
     {
-      {vecxS  matS  kS}
-      {vecxD  matD  kD}
-      {vecxSD matSD kSD}
-    } {exec ksp_destroy mat_destroy vec_destroy} forall
-      
-    {vecb vecb2} {exec vec_destroy} forall
+      vecxS  matS  kS
+      vecxD  matD  kD
+      vecxSD matSD kSD
+      vecb vecb2
+    } {exec destroy} forall
       
     {
       end

@@ -108,6 +108,23 @@
     /sv get restore
   } bind def
 
+  /destroyers {
+    /matrix mat_destroy
+    /vector vec_destroy
+    /ksp    ksp_destroy
+  } makestruct def
+
+  | object | /ptype
+  /getptype {/ptype get} bind def
+
+  | funcmap object | ...
+  /execptype {getptype exec} bind def
+
+  | object | --
+  /destroy {
+    destroyers 1 index execptype
+  } bind def
+
   |================= dpawn definitions ===========================
   | Mapping from dnode functions to dpawn jobs associated with that
   | function. In general, the mapping has the same name on both
@@ -126,8 +143,9 @@
     | and names it /x.
     |
     /vec_create {
-      save exch petsc_vec_create openlist /sv /vector makestruct_stack
-      _cap def
+      save exch petsc_vec_create 
+      /vector openlist /sv /vector /ptype
+      makestruct_stack _cap def
     } bind def
     
     /_getvector {/vector get} bind def
@@ -179,8 +197,8 @@
         petsc_mat_sparse_create           | sv mmax N irows icols A_
         5 1 roll dup length /l array copy | sv A_ mmax N irows icols_
         exch     dup length /l array copy | sv A_ mmax icols_ irows_
-        /sparse
-        openlist /sv /matrix /mmax /N /icols /irows /mtype
+        /sparse /matrix
+        openlist /sv /matrix /mmax /N /icols /irows /mtype /ptype
         makestruct_stack
       }
 
@@ -190,8 +208,9 @@
       /dense {
         5 1 roll
         petsc_mat_dense_create | sv mmax N A_
-        /dense 5 -1 roll dup capsave
-        openlist /sv /mmax /N /matrix /mtype makestruct_stack
+        /dense /matrix
+        openlist /sv /mmax /N /matrix /mtype /ptype 
+        makestruct_stack
       }
 
       | mmax N m n M save | A
@@ -199,7 +218,9 @@
         6 1 roll
         4 -1 roll 2 copy 6 2 roll   | sv mmax M N m n M N
         petsc_mat_blockdense_create | sv mmax M N A_
-        /blockdense openlist /sv /mmax /M /N /matrix /mtype makestruct_stack
+        /blockdense /matrix
+        openlist /sv /mmax /M /N /matrix /mtype /ptype 
+        makestruct_stack
       }
     } bind makestruct def
 
@@ -381,14 +402,17 @@
     | mmax N save A_ | A
     /mat_matmulsu_create {
       /dense {
-        /dense openlist /mmax /N /sv /matrix /mtype makestruct_stack
+        /dense /matrix 
+        openlist /mmax /N /sv /matrix /mtype /ptype 
+        makestruct_stack
       }
 
       /sparse {
         dup /MATRIX_M get 1 add /l array
         1 index petsc_mat_getnzs /l array
         2 index petsc_mat_getcsr
-        /sparse openlist /mmax /N /sv /matrix /irows /icols /mtype 
+        /sparse /matrix 
+        openlist /mmax /N /sv /matrix /irows /icols /mtype /ptype
         makestruct_stack
       }
     } bind makestruct def
@@ -569,7 +593,9 @@
           ksptype kspparam pctype pcparam monitortype petsc_ksp_create
           dup rtol atol dtol maxits petsc_ksp_tol
         } 3 -1 roll indict
-        openlist /sv /ksp makestruct_stack
+        /ksp
+        openlist /sv /ksp /ptype 
+        makestruct_stack
       } in_petsc 
       _cap def
     } bind def
@@ -873,7 +899,9 @@
     |
     /vec_create {
       {
-        save openlist /id /N /sv makestruct_stack
+        save /vector 
+        openlist /id /N /sv /ptype
+        makestruct_stack
         dup /xval name 
         {~[
           xval /id get
@@ -1484,8 +1512,9 @@
     |
     /mat_create {
       {
-        null null null save openlist 
-        /mtype /m /n /params /mmax /id /sv makestruct_stack /Aval name
+        null null null save /matrix openlist 
+        /mtype /m /n /params /mmax /id /sv /ptype
+        makestruct_stack /Aval name
 
         mat_creators_set Aval exectype Aval /params put 
         mpidata /pawns get 1 sub Aval /m get rangesize Aval /mmax put 
@@ -1696,7 +1725,8 @@
         mpidata /pawns get 1 sub 3 index rangesize
         6 -1 roll
         save
-        openlist /mtype /m /n /params /mmax /id /sv makestruct_name
+        /matrix
+        openlist /mtype /m /n /params /mmax /id /sv /ptype makestruct_name
         /Cval name
 
         ~[
@@ -1978,6 +2008,7 @@
       /monitortype *
       /id null
       /sv null
+      /ptype /ksp
     } bind makestruct def
     
     |------------------------ kspcreate ----------------
