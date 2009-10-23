@@ -307,7 +307,7 @@
           4 -2 roll exch petsc_mat_fill   | mmax A_
         } for
         
-        exch 1 index /MATRIX_M get sub ~petsc_mat_syncfill repeat | A_
+        exch 1 index /mrMATRIX_M get sub ~petsc_mat_syncfill repeat | A_
         petsc_mat_endfill                                         | A_
         pop
       } in_petsc
@@ -334,9 +334,9 @@
 
       /dense {
         /N get /N name
-        {
+        /mat_fillers_layer {
           /icols N /l array 0 1 index length 0 1 ramp pop def
-        } /mat_fillers_layer inlayer
+        } exch inlayer
         {
           row N mul N getinterval 
           icols
@@ -345,9 +345,9 @@
 
       /blockdense {
         /N get /N name
-        {
+        /mat_fillers_layer {
           /icols N /l array 0 1 index length 0 1 ramp pop def
-        } /mat_fillers_layer inlayer
+        } exch inlayer
         {
           row N mul N getinterval 
           icols
@@ -368,7 +368,7 @@
         /data name
         dup mat_fillers_map 1 index _exectype /data_filler name
         {/row name pop data data_filler} mat_fill
-        /mat_fillers_layer known {mat_fillers_layer restore} if
+        /mat_fillers_layer {} exch inlayer
       } in_petsc
     } bind def
 
