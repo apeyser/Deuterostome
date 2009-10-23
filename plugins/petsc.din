@@ -1524,7 +1524,7 @@
           Aval /id get
           Aval /mmax get
           Aval /n get
-          4 -1 roll mat_creators_get Aval exectype
+          5 -1 roll mat_creators_get Aval exectype
           Aval gettype
           ~mat_create
         ]} execpawns
