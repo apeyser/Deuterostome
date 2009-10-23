@@ -54,10 +54,10 @@
       (matD create) {/matD dup /dense dim dup mat_create def} timer
       (matD data) {
         {
-          /matDdata 0 matD /MATRIX_M get dim mul /d array copy def
-          0 1 matD /MATRIX_M get 1 sub {/row name
+          /matDdata 0 matD _getmatrix /MATRIX_M get dim mul /d array copy def
+          0 1 matD _getmatrix /MATRIX_M get 1 sub {/row name
             matDdata row dim mul dim getinterval 
-            matD /MATRIX_GM get row add dim 1 index sub getinterval
+            matD _getmatrix /MATRIX_GM get row add dim 1 index sub getinterval
             1 exch copy pop
           } for
         } sexecpawns
@@ -68,7 +68,7 @@
       /vecxD  dup dim vec_create def
       /vecxSD dup dim vec_create def
       {
-        5 vecxS /VECTOR_N get /d array copy /vecxdata name
+        5 vecxS _getvector /VECTOR_N get /d array copy /vecxdata name
       } sexecpawns    
       (\n) toconsole
 
@@ -117,9 +117,9 @@
       (matSD data) {
         {
           /matSDdata 0 matSDcols length /d array copy def
-          0 1 matSD /MATRIX_M get 1 sub {/row name
+          0 1 matSD _getmatrix /MATRIX_M get 1 sub {/row name
             matSDdata row dim mul dim getinterval
-            matSD /MATRIX_GM get row add dim 1 index sub getinterval
+            matSD _getmatrix /MATRIX_GM get row add dim 1 index sub getinterval
             1 exch copy pop
           } for
         } sexecpawns
@@ -138,8 +138,9 @@
       
       /vecb dup dim vec_create def
       {
-        /vecbdata vecb /VECTOR_N get /d array
-        0 vecb /VECTOR_N get dim vecb /VECTOR_GN get sub -1 ramp pop
+        /vecbdata vecb _getvector /VECTOR_N get /d array
+        0 vecb _getvector /VECTOR_N get 
+        dim vecb _getvector /VECTOR_GN get sub -1 ramp pop
         def
       } sexecpawns
       vecb ~vecbdata vec_fill
