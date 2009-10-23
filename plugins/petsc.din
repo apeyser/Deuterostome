@@ -244,7 +244,7 @@
     | mat_creator in between.
     |
     /mat_create {
-      save mat_creators exch get exec
+      save mat_creators 3 -1 roll get exec
       _cap def
     } bind def
 
