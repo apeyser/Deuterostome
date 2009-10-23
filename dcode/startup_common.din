@@ -166,8 +166,10 @@ end def
 |  returns a dictionary 3 long, with a=null, b=null, c=null
 |
 /makestruct_name {
-  counttomark dup dict
-  exch {{null def} repeat pop} 2 index indict
+  counttomark dup dict {
+    {null def} repeat pop
+    currentdict
+  } exch indict
 } bind def
 
 |================ makelist =======================
