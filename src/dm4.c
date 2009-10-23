@@ -111,12 +111,15 @@ P op_pop(void)
 
 P op_push(void) {
   B* i;
+  P framebytes;
 
   for (i = o_1; i >= FLOORopds && TAG(i) != MARK; i -= FRAMEBYTES);
   if (TAG(i) != MARK) return OPDS_UNF;
+  framebytes = FREEopds - i - FRAMEBYTES;
 
-  if (x1 + (FREEopds-i-FRAMEBYTES) > CEILexecs) return EXECS_OVF;
-  moveframes(i+FRAMEBYTES, x1, (FREEopds-i)/FRAMEBYTES - 1);
+  if (x1 + framebytes > CEILexecs) return EXECS_OVF;
+  moveframes(i+FRAMEBYTES, x1, framebytes/FRAMEBYTES);
+  FREEexecs = x1 + framebytes;
   FREEopds = i;
 
   return OK;
