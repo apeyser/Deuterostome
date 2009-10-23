@@ -1575,7 +1575,7 @@
     |
     /mat_fill_data {
       {
-        ~[3 -1 roll getid 3 -1 roll construct_execn ~mat_fill_data] sexecpawns
+        ~[3 -1 roll getid 3 -1 roll construct_exec ~mat_fill_data] sexecpawns
       } in_petsc
     } bind def
 
