@@ -795,11 +795,10 @@
     |
     /ksp_solve {
       {
-        3 index _getksp /ksp_ name
-
         _getvector
         exch _getvector exch
         3 -1 roll dup null ne ~_getmatrix if 3 1 roll
+        4 -1 roll _getksp dup /ksp_ name 4 1 roll
         petsc_ksp_solve pop
 
         mpirank 0 eq {
