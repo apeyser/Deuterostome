@@ -124,7 +124,7 @@
   /getptype {/ptype get} bind def
 
   | funcmap object | ...
-  /execptype {getptype exec} bind def
+  /execptype {getptype get exec} bind def
 
   | object | --
   /destroy {
