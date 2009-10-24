@@ -1763,7 +1763,7 @@
           } ifelse
         } {
           beta 0 ne {
-            {~kickdnode in_petsc} sexecpawns
+            {~kickdnode in_petsc ~stop if} sexecpawns
             /Cval_ dup Cval mat_dup def
             kickpawns
           } if
@@ -1777,7 +1777,7 @@
 
           Cval alpha dup 1 eq ~pop ~mat_mul ifelse
           beta dup 0 eq ~pop {
-            {~kickdnode in_petsc} sexecpawns
+            {~kickdnode in_petsc ~stop if} sexecpawns
             Cval_ exch dup 1 eq ~pop ~mat_mul ifelse
             mat_matadd
             Cval_ mat_destroy

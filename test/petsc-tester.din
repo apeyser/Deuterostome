@@ -18,6 +18,7 @@
   /activeD true def
 
   /dp {~[exch {_ pop a_ (\n) toconsole} ~exec] sexecpawns} bind def
+  /dp ~pop bind def
 
   | (name) ~active:--|-- | --
   /timer {
@@ -37,12 +38,12 @@
     0 dp
     {
       /PETSC_TESTER 200 {} moduledef
-      ~kickdnode PETSC_TESTER indict
+      ~kickdnode PETSC_TESTER indict ~stop if
     } sexecpawns
     1 dp
     /loadpawns {
       2 dp
-      {~kickdnode PETSC_TESTER indict} sexecpawns
+      {~kickdnode PETSC_TESTER indict ~stop if} sexecpawns
       3 dp
     } def
   } bind def
@@ -53,7 +54,7 @@
     loadpawns
     
     ~[
-      dim {PETSC {/dim name kickdnode} exch swapdict} ~exec
+      dim {PETSC {/dim name kickdnode ~stop if} exch swapdict} ~exec
     ] sexecpawns 4 dp
 
     /PETSC_TESTER_ ~inlayerall PETSC {
