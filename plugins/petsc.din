@@ -945,15 +945,11 @@
     | Returns a new dictionary referring to the duplicate vector.
     |
     /vec_dup {
-      {
-        openlist /id /N makestruct_stack
-        dup /xval name
-        ~[
-          xval /id get
-          4 -1 roll getid
-          ~vec_dup
-        ] sexecpawns
-      } in_petsc
+      save exch transcribe | /y sv y
+      exch 1 index /sv put | /y y
+      2 copy ~[3 1 roll getid ~vec_dup] sexecpawns  | /y y
+      exch 1 index /id put | y
+      _cap                 | y
     } bind def
 
     | x y | y (y_i=x_i)
