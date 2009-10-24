@@ -103,6 +103,12 @@
     dup /sv get capsave
   } bind def
 
+  | object1 | object2
+  /_transcribe {
+    save exch transcribe | sv o2
+    exch 1 index /sv put | o2
+  } bind def
+
   | object | --
   /_destroy {
     /sv get restore
@@ -626,12 +632,12 @@
     | /B A | --
     |
     /mat_dup {
-      save exch                                        | /B sv A
-      dup transcribe                                   | /B sv A B
-      exch _getmatrix dup petsc_mat_dup petsc_mat_copy | /B sv B B_
-      1 index /matrix put                              | /B sv B
-      exch 1 index /sv put                             | /B B
-      _cap def                                         | --
+      dup _transcribe     | /B A B
+      exch _getmatrix     | /B B A_
+      dup petsc_mat_dup   | /B B A_ B_
+      petsc_mat_copy      | /B B B_
+      1 index /matrix put | /B B
+      _cap def            | --
     } bind def
 
     |-------------------------------------------- mat_copy
@@ -644,19 +650,22 @@
     |---------------------------------------------mat_dup_shape
     | /B A | --
     /mat_dup_shape {
-      save exch                      | /B sv A
-      dup transcribe                 | /B sv A B
-      exch _getmatrix petsc_mat_dup  | /B sv B B_
-      1 index /matrix put            | /B sv B
-      exch 1 index /sv put           | /B B
+      dup _transcribe                | /B A B
+      exch _getmatrix petsc_mat_dup  | /B B B_
+      1 index /matrix put            | /B B
       _cap def                       | --
     } bind def
 
     |--------------------------------------------- vec_dup
-    | /x x | --
+    | /y x | --
     |
     /vec_dup {
-      _getvector dup petsc_vec_dup petsc_vec_copy def
+      dup _transcribe      | /y x y
+      exch _getvector      | /y y x_
+      dup petsc_vec_dup    | /y y x_ y_
+      petsc_vec_copy       | /y y y_
+      1 index /vector put  | /y y
+      _cap def             | --
     } bind def
 
     | x y | y_i = x_i
@@ -945,8 +954,7 @@
     | Returns a new dictionary referring to the duplicate vector.
     |
     /vec_dup {
-      save exch transcribe | /y sv y
-      exch 1 index /sv put | /y y
+      _transcribe          | /y y
       2 copy ~[3 1 roll getid ~vec_dup] sexecpawns  | /y y
       exch 1 index /id put | y
       _cap                 | y
@@ -983,14 +991,12 @@
     
     | x a | x (x_i *= a)
     /vec_mul {
-      {
-        1 index 3 1 roll
-        ~[
-          3 -1 roll getid
-          3 -1 roll
-          ~vec_mul
-        ] sexecpawns
-      } in_petsc
+      1 index 3 1 roll
+      ~[
+        3 -1 roll getid
+        3 -1 roll
+        ~vec_mul
+      ] sexecpawns
     } bind def
 
     | x a | x (x_i /= a)
@@ -2016,13 +2022,10 @@
     |   augmented with /id=/ksp.
     |
     /ksp_create {
-      save
-      kspsettings transcribe exch {
-        1 index /sv put
-        2 copy /id put
-        ~[3 -1 roll 2 index ~ksp_create] sexecpawns
-        _cap
-      } in_petsc
+      kspsettings _transcribe  | /ksp ksp
+      2 copy /id put
+      ~[3 -1 roll 2 index ~ksp_create] sexecpawns | ksp
+      _cap                   | ksp
     } bind def
     
     |---------------------------------------------- vec_destroy
@@ -2057,11 +2060,11 @@
     |
     /mat_dup {
       {
-        save 3 1 roll                         | sv /B A
-        transcribe 2 copy                     | sv /B B /B B
-        ~[3 1 roll getid ~mat_dup] sexecpawns | sv /B B
-        exch 1 index /id put                  | sv B
-        exch 1 index /sv put                  | B
+        _transcribe                           | /B B
+        2 copy ~[
+          3 1 roll getid ~mat_dup
+        ] sexecpawns                          | /B B
+        exch 1 index /id put                  | B
         _cap                                  | B
       } in_petsc
     } bind def
@@ -2071,14 +2074,12 @@
     | /B A | B (uninitialized, but same shape)
     |
     /mat_dup_shape {
-      {
-        save 3 1 roll                               | sv /B A
-        transcribe 2 copy                           | sv /B B /B B
-        ~[3 1 roll getid ~mat_dup_shape] sexecpawns | sv /B B
-        exch 1 index /id put                        | sv B
-        exch 1 index /sv put                        | B
-        _cap                                        | B
-      } in_petsc
+      _transcribe           | /B B
+      2 copy ~[
+        3 1 roll getid ~mat_dup_shape
+      ] sexecpawns          | /B B
+      exch 1 index /id put  | B
+      _cap                  | B
     } bind def
 
     |----------------------------------------------- mat_copy
