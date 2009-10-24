@@ -835,9 +835,8 @@ end def  | of xtext_dict
 |  propagates stops.
 |
 /inlayer {
-  dup layer ~[
-    3 -1 roll destruct_exec ~stopped 4 -1 roll
-  ] exec _layer ~stop if
+  dup layer openlist exch ~stopped push
+  _layer ~stop if
 } bind def
 
 |-------------------------- caplayer

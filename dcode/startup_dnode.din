@@ -673,11 +673,10 @@ end def |========= end of mpi data ================
 |
 | {} /name | --
 /inlayerall {
-  dup layer ~[
-    ~[{kickdnode} 3 index ~inlayer] ~sexecpawns
-    5 -1 roll destruct_exec ~stopped 6 -1 roll
-  ] exec _layer {~stop sexecall stop} if
-  kickpawns
+  {
+    ~[{kickdnode} 3 -1 roll ~inlayer] sexecpawns
+    exec kickpawns
+  } 1 index inlayer {~stop sexecall stop} if
 } bind def
 
 |-------------------------- restoreall
