@@ -1999,7 +1999,7 @@
     /kspsettings {
       /rtol     1e-12
       /atol     *
-      /dtol     {1d kspsettings /rtol get div}
+      /dtol     {1d rtol div}
       /maxits   *
       /pctype   *
       /ksptype  *
