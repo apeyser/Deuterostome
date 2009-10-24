@@ -600,10 +600,10 @@ end def |========= end of mpi data ================
       pop
 
       {
-        nwait 0 eq {exit} if
+        nwait 0 eq ~exit if
         halt
       } loop
-    } stopped end {stop} if
+    } stopped end ~stop if
   } lock
 } bind def
 

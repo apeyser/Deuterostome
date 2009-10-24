@@ -1367,7 +1367,7 @@
       {
         /icols_len 1 index dup /params known not {pop true} {
           /params get dup /icols_off known not {pop true} {
-            /icols_off get false
+            /icols_off get dup null ne ~false {pop true} ifelse
           } ifelse
         } ifelse {mpidata /pawns get 1 add list} if def
 
