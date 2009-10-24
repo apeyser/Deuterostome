@@ -676,7 +676,7 @@ end def |========= end of mpi data ================
   dup layer ~[
     ~[{kickdnode} 3 index ~inlayer] ~sexecpawns
     5 -1 roll destruct_exec ~stopped 6 -1 roll
-  ] exec _layer {~stop sexecall} if
+  ] exec _layer {~stop sexecall stop} if
   kickpawns
 } bind def
 
