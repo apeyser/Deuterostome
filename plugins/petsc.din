@@ -2021,7 +2021,7 @@
     |
     /ksp_create {
       save
-      exch transcribe exch {
+      kspsettings transcribe exch {
         1 index /sv put
         2 copy /id put
         ~[3 -1 roll 2 index ~ksp_create] sexecpawns
