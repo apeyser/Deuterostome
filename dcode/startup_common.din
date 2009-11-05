@@ -146,6 +146,17 @@
   } exch indict
 } bind def
 
+|----------------- userdef --------------------------
+| /name ~active | --
+|
+| defines /name in userdict with a procedure
+| that calls executes active in the current dict
+|
+/userdef {
+  ~[exch destruct_exec currentdict ~indict]
+  userdict 3 -1 roll put
+}
+
 |================ makelist =======================
 | ~store | dict
 | 

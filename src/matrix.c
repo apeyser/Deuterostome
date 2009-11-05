@@ -105,20 +105,20 @@ int cblas_errprn(int ierr, int info, char *form, ...)
 
 DM_INLINE_STATIC P matrix_dims(B* cuts, B* array, P* m, P* n, P* lda) 
 {
-  LBIG t;
+  L32 t;
 
   if (CLASS(cuts) != ARRAY 
       || CLASS(array) != ARRAY) return OPD_CLA;
   
-  if (TYPE(cuts) != LONGBIGTYPE 
+  if (TYPE(cuts) != LONG32TYPE 
       || TYPE(array) != DOUBLETYPE) return OPD_TYP;
 
   if (ARRAY_SIZE(cuts) < 2) return MATRIX_UNDER_CUT;
-  if ((t = ((LBIG*) VALUE_PTR(cuts))[1]) > PMAX || t < -PMAX)
+  if ((t = ((L32*) VALUE_PTR(cuts))[1]) > PMAX || t < -PMAX)
     return UNDF_VAL;
   *n = t;
   *lda = *n ? *n : 1;
-  if ((t = ((LBIG*) VALUE_PTR(cuts))[0]) > PMAX || t < -PMAX)
+  if ((t = ((L32*) VALUE_PTR(cuts))[0]) > PMAX || t < -PMAX)
     return UNDF_VAL;
   *m = t/(*lda);
 
@@ -302,8 +302,8 @@ P op_matmul_blas(void)
 		return(OK);
 }
 
-// matrix <x cuts> <l pivot> | lumatrix(matrix) <cuts> <l pivot> true
-//                         | false
+// matrix <l cuts> <l pivot> | lumatrix(matrix) <cuts> <l pivot> true
+//                           | false
 P op_decompLU_lp(void) {
   P N;
   P info;

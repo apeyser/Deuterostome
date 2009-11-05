@@ -1,11 +1,6 @@
 | -*- mode: d; -*-
 /MATRIX module 200 dict dup begin
 
-/userdef {
-  ~[currentdict ~begin 4 -1 roll ~stopped ~end {stop} ~if] bind
-  userdict 3 -1 roll put
-} bind def
-
 |======================= map
 |
 | Make a map array in place:
@@ -22,7 +17,7 @@
 
 | dim_s ... dim_f n | <l dim_f*..*dim_s .. dim_f>
 /mapn {
-  dup /x array 1
+  dup /l array 1
   3 -1 roll 1 sub -1 0 {/i name | s .. f   <l> mul  
     3 -1 roll mul               | s .. f-1 <l> mul*f
     dup 2 index i put           | s .. f-1 <l> mul*f
@@ -30,7 +25,26 @@
   pop dup dup length 1 sub get 1 ne {(Illegal cut\n) toconsole halt} if
 } bind userdef
 
-|===================== cut
+|==================== mat_dict
+| dim_s .. dim_f n |  dict
+|
+| Create a matrix of s. .. .f size
+| where /map <d dim_f*...*dim_s> 
+|       /matrix <l dim_f*...*dim_s ... dim_f>
+|
+/mat_dict {
+  mapn dup 0 get /d array
+  openlist /matrix /map makestruct_stack
+} bind userdef
+
+|================= mat_dict_get
+| matdict | matrix map
+|
+/mat_dict_get {
+  dup /matrix get exch /map get
+} bind userdef
+
+|===================== ss
 |
 | Get a submatrix (row, plane...):
 | matrix map i | submatrix submap(map)
@@ -43,12 +57,30 @@
   exch                                | submatrix submap
 } bind userdef
 
+| matdict i | submatrix
+/ss_dict {
+  exch dup /matrix get exch /map get 3 -1 roll
+  ss pop
+} bind userdef
+
+|===================== ress =================
 | matrix map i len | submatrix map
+|
+| cuts out len 'rows' starting from 'row' i
+| out of matrix, and updates map to describe the new
+| matrix
+|
 /ress {
   /len name /i name exch               | map matrix
   1 index 1 get dup i mul exch len mul | map matrix start length
   getinterval                          | map submatrix
   exch dup 1 get len mul 1 index 0 put | submatrix submap
+} bind userdef
+
+| matdict i len | matdict
+/ress_dict {
+  2 index dup /matrix get exch /map get 4 2 roll
+  ress 2 index /map put 1 index /matrix put
 } bind userdef
 
 | matrix map submatrix col_s cols | submatrix submap(map)
