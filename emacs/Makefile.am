@@ -3,7 +3,7 @@ EXTRA_DIST = $(INFILES:=in) $(IDFILES)
 CLEANFILES = $(INFILES)
 SUFFIXES =
 
-dist_pkglisp_LISP = dm-server.el
+dist_pkglisp_LISP = dm-server-22.el dm-server-23.el
 nodist_pkglisp_LISP = $(INFILES) d-mode-ops.el
 
 edit = -e 's,@bindir\@,$(bindir),g' \
