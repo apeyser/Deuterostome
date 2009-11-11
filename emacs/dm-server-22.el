@@ -1,7 +1,7 @@
-;;; dm-server.el --- Lisp code for GNU Emacs running as server process
+;;; dm-server.el --- Lisp code for GNU Emacs running as dm-server process
 
-;; Copyright (C) 1986,87,92,94,95,96,97,98,99,2000,01,02,03,2004
-;;	 Free Software Foundation, Inc.
+;; Copyright (C) 1986, 1987, 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+;;   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
 ;; Author: William Sommerfeld <wesommer@athena.mit.edu>
 ;; Maintainer: FSF
@@ -13,7 +13,7 @@
 
 ;; GNU Emacs is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
+;; the Free Software Foundation; either version 3, or (at your option)
 ;; any later version.
 
 ;; GNU Emacs is distributed in the hope that it will be useful,
@@ -29,28 +29,28 @@
 ;;; Commentary:
 
 ;; This Lisp code is run in Emacs when it is to operate as
-;; a server for other processes.
+;; a dm-server for other processes.
 
-;; Load this library and do M-x server-edit to enable Emacs as a server.
+;; Load this library and do M-x dm-server-edit to enable Emacs as a dm-server.
 ;; Emacs opens up a socket for communication with clients.  If there are no
-;; client buffers to edit, server-edit acts like (switch-to-buffer
+;; client buffers to edit, dm-server-edit acts like (switch-to-buffer
 ;; (other-buffer))
 
 ;; When some other program runs "the editor" to edit a file,
 ;; "the editor" can be the Emacs client program ../lib-src/emacsclient.
 ;; This program transmits the file names to Emacs through
-;; the server subprocess, and Emacs visits them and lets you edit them.
+;; the dm-server subprocess, and Emacs visits them and lets you edit them.
 
 ;; Note that any number of clients may dispatch files to emacs to be edited.
 
-;; When you finish editing a Server buffer, again call server-edit
+;; When you finish editing a Dm-Server buffer, again call dm-server-edit
 ;; to mark that buffer as done for the client and switch to the next
-;; Server buffer.  When all the buffers for a client have been edited
-;; and exited with server-edit, the client "editor" will return
+;; Dm-Server buffer.  When all the buffers for a client have been edited
+;; and exited with dm-server-edit, the client "editor" will return
 ;; to the program that invoked it.
 
 ;; Your editing commands and Emacs's display output go to and from
-;; the terminal in the usual way.  Thus, server operation is possible
+;; the terminal in the usual way.  Thus, dm-server operation is possible
 ;; only when Emacs can talk to the terminal at the time you invoke
 ;; the client.  This is possible in four cases:
 
@@ -69,9 +69,9 @@
 ;; brought into the foreground for editing.  When done editing, Emacs is
 ;; suspended again, and the client program is brought into the foreground.
 
-;; The buffer local variable "server-buffer-clients" lists
+;; The buffer local variable "dm-server-buffer-clients" lists
 ;; the clients who are waiting for this buffer to be edited.
-;; The global variable "server-clients" lists all the waiting clients,
+;; The global variable "dm-server-clients" lists all the waiting clients,
 ;; and which files are yet to be edited for each.
 
 ;;; Code:
@@ -82,18 +82,54 @@
   "Emacs running as a dm-server process."
   :group 'external)
 
+(defcustom dm-server-use-tcp nil
+  "If non-nil, use TCP sockets instead of local sockets."
+  :set #'(lambda (sym val)
+           (unless (featurep 'make-network-process '(:family local))
+             (setq val t)
+             (unless load-in-progress
+               (message "Local sockets unsupported, using TCP sockets")))
+           (when val (random t))
+           (set-default sym val))
+  :group 'dm-server
+  :type 'boolean
+  :version "22.1")
+
+(defcustom dm-server-host nil
+  "The name or IP address to use as host address of the dm-server process.
+If set, the dm-server accepts remote connections; otherwise it is local."
+  :group 'dm-server
+  :type '(choice
+          (string :tag "Name or IP address")
+          (const :tag "Local" nil))
+  :version "22.1")
+(put 'dm-server-host 'risky-local-variable t)
+
+(defcustom dm-server-auth-dir "~/.emacs.d/dm-server/"
+  "Directory for dm-server authentication files."
+  :group 'dm-server
+  :type 'directory
+  :version "22.1")
+(put 'dm-server-auth-dir 'risky-local-variable t)
+
+(defcustom dm-server-raise-frame t
+  "If non-nil, raise frame when switching to a buffer."
+  :group 'dm-server
+  :type 'boolean
+  :version "22.1")
+
 (defcustom dm-server-visit-hook nil
-  "*Hook run when visiting a file for the Emacs dm-server."
+  "Hook run when visiting a file for the Emacs dm-server."
   :group 'dm-server
   :type 'hook)
 
 (defcustom dm-server-switch-hook nil
-  "*Hook run when switching to a buffer for the Emacs dm-server."
+  "Hook run when switching to a buffer for the Emacs dm-server."
   :group 'dm-server
   :type 'hook)
 
 (defcustom dm-server-done-hook nil
-  "*Hook run when done editing a buffer for the Emacs dm-server."
+  "Hook run when done editing a buffer for the Emacs dm-server."
   :group 'dm-server
   :type 'hook)
 
@@ -113,7 +149,7 @@ When a buffer is marked as \"done\", it is removed from this list.")
 (put 'dm-server-buffer-clients 'permanent-local t)
 
 (defcustom dm-server-window nil
-  "*Specification of the window to use for selecting Emacs dm-server buffers.
+  "Specification of the window to use for selecting Emacs dm-server buffers.
 If nil, use the selected window.
 If it is a function, it should take one argument (a buffer) and
 display and select it.  A common value is `pop-to-buffer'.
@@ -128,30 +164,31 @@ Only programs can do so."
 			:match (lambda (widget value)
 				 (not (functionp value)))
 			nil)
+		 (function-item :tag "Display in new frame" switch-to-buffer-other-frame)
 		 (function-item :tag "Use pop-to-buffer" pop-to-buffer)
 		 (function :tag "Other function")))
 
 (defcustom dm-server-temp-file-regexp "^/tmp/Re\\|/draft$"
-  "*Regexp matching names of temporary files.
+  "Regexp matching names of temporary files.
 These are deleted and reused after each edit by the programs that
 invoke the Emacs dm-server."
   :group 'dm-server
   :type 'regexp)
 
 (defcustom dm-server-kill-new-buffers t
-  "*Whether to kill buffers when done with them.
+  "Whether to kill buffers when done with them.
 If non-nil, kill a buffer unless it already existed before editing
-it with Emacs dm-server.  If nil, kill only buffers as specified by
+it with the Emacs dm-server.  If nil, kill only buffers as specified by
 `dm-server-temp-file-regexp'.
-Please note that only buffers are killed that still have a client,
-i.e. buffers visited which \"emacsclient --no-wait\" are never killed in
+Please note that only buffers that still have a client are killed,
+i.e. buffers visited with \"emacsclient --no-wait\" are never killed in
 this way."
   :group 'dm-server
   :type 'boolean
   :version "21.1")
 
 (or (assq 'dm-server-buffer-clients minor-mode-alist)
-    (setq minor-mode-alist (cons '(dm-server-buffer-clients " Dm-Server") minor-mode-alist)))
+    (push '(dm-server-buffer-clients " Dm-Server") minor-mode-alist))
 
 (defvar dm-server-existing-buffer nil
   "Non-nil means the buffer existed before the dm-server was asked to visit it.
@@ -166,13 +203,13 @@ are done with it in the dm-server.")
 
 (defun dm-server-log (string &optional client)
   "If a *dm-server* buffer exists, write STRING to it for logging purposes."
-  (if (get-buffer "*dm-server*")
-      (with-current-buffer "*dm-server*"
-	(goto-char (point-max))
-	(insert (current-time-string)
-		(if client (format " %s:" client) " ")
-		string)
-	(or (bolp) (newline)))))
+  (when (get-buffer "*dm-server*")
+    (with-current-buffer "*dm-server*"
+      (goto-char (point-max))
+      (insert (current-time-string)
+	      (if client (format " %s:" client) " ")
+	      string)
+      (or (bolp) (newline)))))
 
 (defun dm-server-sentinel (proc msg)
   (let ((client (assq proc dm-server-clients)))
@@ -189,6 +226,17 @@ are done with it in the dm-server.")
 			      (not dm-server-existing-buffer))
 			 (dm-server-temp-file-p)))
 	    (kill-buffer (current-buffer)))))))
+  ;; If this is a new client process, set the query-on-exit flag to nil
+  ;; for this process (it isn't inherited from the dm-server process).
+  (when (and (eq (process-status proc) 'open)
+	     (process-query-on-exit-flag proc))
+    (set-process-query-on-exit-flag proc nil))
+  ;; Delete the associated connection file, if applicable.
+  ;; This is actually problematic: the file may have been overwritten by
+  ;; another Emacs dm-server in the mean time, so it's not ours any more.
+  ;; (and (process-contact proc :server)
+  ;;      (eq (process-status proc) 'closed)
+  ;;      (ignore-errors (delete-file (process-get proc :dm-server-file))))
   (dm-server-log (format "Status changed to %s" (process-status proc)) proc))
 
 (defun dm-server-select-display (display)
@@ -198,18 +246,36 @@ are done with it in the dm-server.")
     (dolist (frame (frame-list))
       (when (equal (frame-parameter frame 'display) display)
 	(select-frame frame)))
-    ;; If there's no frame on that display yet, create a dummy one
-    ;; and select it.
+    ;; If there's no frame on that display yet, create and select one.
     (unless (equal (frame-parameter (selected-frame) 'display) display)
-      (select-frame
-       (make-frame-on-display
-	display
-	;; This frame is only there in place of an actual "current display"
-	;; setting, so we want it to be as unobtrusive as possible.  That's
-	;; what the invisibility is for.  The minibuffer setting is so that
-	;; we don't end up displaying a buffer in it (which noone would
-	;; notice).
-	'((visibility . nil) (minibuffer . only)))))))
+      (let* ((buffer (generate-new-buffer " *dm-server-dummy*"))
+             (frame (make-frame-on-display
+                     display
+                     ;; Make it display (and remember) some dummy buffer, so
+                     ;; we can detect later if the frame is in use or not.
+                     `((dm-server-dummmy-buffer . ,buffer)
+                       ;; This frame may be deleted later (see
+                       ;; dm-server-unselect-display) so we want it to be as
+                       ;; unobtrusive as possible.
+                       (visibility . nil)))))
+        (select-frame frame)
+        (set-window-buffer (selected-window) buffer)))))
+
+(defun dm-server-unselect-display (frame)
+  ;; If the temporary frame is in use (displays something real), make it
+  ;; visible.  If not (which can happen if the user's customizations call
+  ;; pop-to-buffer etc.), delete it to avoid preserving the connection after
+  ;; the last real frame is deleted.
+  (if (and (eq (frame-first-window frame)
+               (next-window (frame-first-window frame) 'nomini))
+           (eq (window-buffer (frame-first-window frame))
+               (frame-parameter frame 'dm-server-dummy-buffer)))
+      ;; The temp frame still only shows one buffer, and that is the
+      ;; internal temp buffer.
+      (delete-frame frame)
+    (set-frame-parameter frame 'visibility t))
+  (kill-buffer (frame-parameter frame 'dm-server-dummy-buffer))
+  (set-frame-parameter frame 'dm-server-dummy-buffer nil))
 
 (defun dm-server-unquote-arg (arg)
   (replace-regexp-in-string
@@ -230,11 +296,12 @@ Creates the directory if necessary and makes sure:
   (setq dir (directory-file-name dir))
   (let ((attrs (file-attributes dir)))
     (unless attrs
-      (letf (((default-file-modes) ?\700)) (make-directory dir))
+      (letf (((default-file-modes) ?\700)) (make-directory dir t))
       (setq attrs (file-attributes dir)))
     ;; Check that it's safe for use.
-    (unless (and (eq t (car attrs)) (eq (nth 2 attrs) (user-uid))
-		 (zerop (logand ?\077 (file-modes dir))))
+    (unless (and (eq t (car attrs)) (eql (nth 2 attrs) (user-uid))
+                 (or (eq system-type 'windows-nt)
+                     (zerop (logand ?\077 (file-modes dir)))))
       (error "The directory %s is unsafe" dir))))
 
 ;;;###autoload
@@ -245,34 +312,64 @@ client \"editors\" can send your editing commands to this Emacs job.
 To use the dm-server, set up the program `emacsclient' in the
 Emacs distribution as your standard \"editor\".
 
-Prefix arg means just kill any existing dm-server communications subprocess."
+Optional argument LEAVE-DEAD (interactively, a prefix arg) means just
+kill any existing dm-server communications subprocess."
   (interactive "P")
-  ;; Make sure there is a safe directory in which to place the socket.
-  (dm-server-ensure-safe-dir dm-server-socket-dir)
-  ;; kill it dead!
-  (if dm-server-process
-      (condition-case () (delete-process dm-server-process) (error nil)))
-  ;; Delete the socket files made by previous dm-server invocations.
-  (condition-case ()
-      (delete-file (expand-file-name dm-server-name dm-server-socket-dir))
-    (error nil))
+  (when dm-server-process
+    ;; kill it dead!
+    (ignore-errors (delete-process dm-server-process)))
   ;; If this Emacs already had a dm-server, clear out associated status.
   (while dm-server-clients
     (let ((buffer (nth 1 (car dm-server-clients))))
       (dm-server-buffer-done buffer)))
+  ;; Now any previous dm-server is properly stopped.
   (unless leave-dead
-    (if dm-server-process
-	(dm-server-log (message "Restarting dm-server")))
-    (letf (((default-file-modes) ?\700))
-      (setq dm-server-process
-	    (make-network-process
-	     :name "dm-server" :family 'local :server t :noquery t
-	     :service (expand-file-name dm-server-name dm-server-socket-dir)
-	     :sentinel 'dm-server-sentinel :filter 'dm-server-process-filter
-	     ;; We must receive file names without being decoded.
-	     ;; Those are decoded by dm-server-process-filter according
-	     ;; to file-name-coding-system.
-	     :coding 'raw-text)))))
+    (let* ((dm-server-dir (if dm-server-use-tcp dm-server-auth-dir dm-server-socket-dir))
+           (dm-server-file (expand-file-name dm-server-name dm-server-dir)))
+      ;; Make sure there is a safe directory in which to place the socket.
+      (dm-server-ensure-safe-dir dm-server-dir)
+      ;; Remove any leftover socket or authentication file.
+      (ignore-errors (delete-file dm-server-file))
+      (when dm-server-process
+        (dm-server-log (message "Restarting dm-server")))
+      (letf (((default-file-modes) ?\700))
+        (setq dm-server-process
+              (apply #'make-network-process
+                     :name dm-server-name
+                     :server t
+                     :noquery t
+                     :sentinel 'dm-server-sentinel
+                     :filter 'dm-server-process-filter
+                     ;; We must receive file names without being decoded.
+                     ;; Those are decoded by dm-server-process-filter according
+                     ;; to file-name-coding-system.
+                     :coding 'raw-text
+                     ;; The rest of the args depends on the kind of socket used.
+                     (if dm-server-use-tcp
+                         (list :family nil
+                               :service t
+                               :host (or dm-server-host 'local)
+                               :plist '(:authenticated nil))
+                       (list :family 'local
+                             :service dm-server-file
+                             :plist '(:authenticated t)))))
+        (unless dm-server-process (error "Could not start dm-server process"))
+        (when dm-server-use-tcp
+          (let ((auth-key
+                 (loop
+                    ;; The auth key is a 64-byte string of random chars in the
+                    ;; range `!'..`~'.
+                    for i below 64
+                    collect (+ 33 (random 94)) into auth
+                    finally return (concat auth))))
+            (process-put dm-server-process :auth-key auth-key)
+            (with-temp-file dm-server-file
+              (set-buffer-multibyte nil)
+              (setq buffer-file-coding-system 'no-conversion)
+              (insert (format-network-address
+                       (process-contact dm-server-process :local))
+                      " " (int-to-string (emacs-pid))
+                      "\n" auth-key))))))))
 
 ;;;###autoload
 (define-minor-mode dm-server-mode
@@ -287,14 +384,47 @@ Dm-Server mode runs a process that accepts commands from the
   ;; nothing if there is one (for multiple Emacs sessions)?
   (dm-server-start (not dm-server-mode)))
 
-(defun dm-server-process-filter (proc string)
+(defun* dm-server-process-filter (proc string)
   "Process a request from the dm-server to edit some files.
 PROC is the dm-server process.  Format of STRING is \"PATH PATH PATH... \\n\"."
+  ;; First things first: let's check the authentication
+  (unless (process-get proc :authenticated)
+    (if (and (string-match "-auth \\(.*?\\)\n" string)
+             (equal (match-string 1 string) (process-get proc :auth-key)))
+        (progn
+          (setq string (substring string (match-end 0)))
+          (process-put proc :authenticated t)
+          (dm-server-log "Authentication successful" proc))
+      (dm-server-log "Authentication failed" proc)
+      (process-send-string proc "Authentication failed")
+      (delete-process proc)
+      ;; We return immediately
+      (return-from dm-server-process-filter)))
   (dm-server-log string proc)
-  (let ((prev (process-get proc 'previous-string)))
+  (let ((prev (process-get proc :previous-string)))
     (when prev
       (setq string (concat prev string))
-      (process-put proc 'previous-string nil)))
+      (process-put proc :previous-string nil)))
+  (when (> (recursion-depth) 0)
+    ;; We're inside a minibuffer already, so if the emacs-client is trying
+    ;; to open a frame on a new display, we might end up with an unusable
+    ;; frame because input from that display will be blocked (until exiting
+    ;; the minibuffer).  Better exit this minibuffer right away.
+    ;; Similarly with recursive-edits such as the splash screen.
+    (process-put proc :previous-string string)
+    (run-with-timer 0 nil (lexical-let ((proc proc))
+                            (lambda () (dm-server-process-filter proc ""))))
+    (top-level))
+  (condition-case nil
+      ;; If we're running isearch, we must abort it to allow Emacs to
+      ;; display the buffer and switch to it.
+      (mapc #'(lambda (buffer)
+		(with-current-buffer buffer
+		  (when (bound-and-true-p isearch-mode)
+		    (isearch-cancel))))
+	    (buffer-list))
+    ;; Signaled by isearch-cancel
+    (quit (message nil)))
   ;; If the input is multiple lines,
   ;; process each line individually.
   (while (string-match "\n" string)
@@ -305,7 +435,7 @@ PROC is the dm-server process.  Format of STRING is \"PATH PATH PATH... \\n\"."
 	  client nowait eval
 	  (files nil)
 	  (lineno 1)
-	  (tmp-frame nil) ; Sometimes used to embody the selected display.
+	  (tmp-frame nil) ;; Sometimes used to embody the selected display.
 	  (columnno 0))
       ;; Remove this line from STRING.
       (setq string (substring string (match-end 0)))
@@ -314,47 +444,48 @@ PROC is the dm-server process.  Format of STRING is \"PATH PATH PATH... \\n\"."
 	(let ((arg (substring request (match-beginning 0) (1- (match-end 0)))))
 	  (setq request (substring request (match-end 0)))
 	  (cond
-	   ((equal "-nowait" arg) (setq nowait t))
-	   ((equal "-eval" arg) (setq eval t))
-	   ((and (equal "-display" arg) (string-match "\\([^ ]*\\) " request))
-	    (let ((display (dm-server-unquote-arg (match-string 1 request))))
-	      (setq request (substring request (match-end 0)))
-	      (condition-case err
-		  (setq tmp-frame (dm-server-select-display display))
-		(error (process-send-string proc (nth 1 err))
-		       (setq request "")))))
-	   ;; ARG is a line number option.
-	   ((string-match "\\`\\+[0-9]+\\'" arg)
-	    (setq lineno (string-to-number (substring arg 1))))
-	   ;; ARG is line number:column option.
-	   ((string-match "\\`+\\([0-9]+\\):\\([0-9]+\\)\\'" arg)
-	    (setq lineno (string-to-number (match-string 1 arg))
-		  columnno (string-to-number (match-string 2 arg))))
-	   (t
-	    ;; Undo the quoting that emacsclient does
-	    ;; for certain special characters.
-	    (setq arg (dm-server-unquote-arg arg))
-	    ;; Now decode the file name if necessary.
-	    (if coding-system
-		(setq arg (decode-coding-string arg coding-system)))
-	    (if eval
-		(let ((v (eval (car (read-from-string arg)))))
-		  (when v
-		    (with-temp-buffer
-		      (let ((standard-output (current-buffer)))
-			(pp v)
-			;; Suppress the error rose when the pipe to PROC is closed.
-			(condition-case err
-			    (process-send-region proc (point-min) (point-max))
-			  (file-error nil)
-			  (error nil))
-			))))
-	      ;; ARG is a file name.
-	      ;; Collapse multiple slashes to single slashes.
-	      (setq arg (command-line-normalize-file-name arg))
-	      (push (list arg lineno columnno) files))
-	    (setq lineno 1)
-	    (setq columnno 0)))))
+            ((equal "-nowait" arg) (setq nowait t))
+            ((equal "-eval" arg) (setq eval t))
+            ((and (equal "-display" arg) (string-match "\\([^ ]*\\) " request))
+             (let ((display (dm-server-unquote-arg (match-string 1 request))))
+               (setq request (substring request (match-end 0)))
+               (condition-case err
+                   (setq tmp-frame (dm-server-select-display display))
+                 (error (process-send-string proc (nth 1 err))
+                        (setq request "")))))
+            ;; ARG is a line number option.
+            ((string-match "\\`\\+[0-9]+\\'" arg)
+             (setq lineno (string-to-number (substring arg 1))))
+            ;; ARG is line number:column option.
+            ((string-match "\\`+\\([0-9]+\\):\\([0-9]+\\)\\'" arg)
+             (setq lineno (string-to-number (match-string 1 arg))
+                   columnno (string-to-number (match-string 2 arg))))
+            (t
+             ;; Undo the quoting that emacsclient does
+             ;; for certain special characters.
+             (setq arg (dm-server-unquote-arg arg))
+             ;; Now decode the file name if necessary.
+             (when coding-system
+               (setq arg (decode-coding-string arg coding-system)))
+             (if eval
+                 (let* (errorp
+                        (v (condition-case errobj
+                               (eval (car (read-from-string arg)))
+                             (error (setq errorp t) errobj))))
+                   (when v
+                     (with-temp-buffer
+                       (let ((standard-output (current-buffer)))
+                         (when errorp (princ "error: "))
+                         (pp v)
+                         (ignore-errors
+                           (process-send-region proc (point-min) (point-max)))
+                         ))))
+               ;; ARG is a file name.
+               ;; Collapse multiple slashes to single slashes.
+               (setq arg (command-line-normalize-file-name arg))
+               (push (list arg lineno columnno) files))
+             (setq lineno 1)
+             (setq columnno 0)))))
       (when files
 	(run-hooks 'pre-command-hook)
 	(dm-server-visit-files files client nowait)
@@ -371,19 +502,21 @@ PROC is the dm-server process.  Format of STRING is \"PATH PATH PATH... \\n\"."
 	  (dm-server-switch-buffer (nth 1 client))
 	  (run-hooks 'dm-server-switch-hook)
 	  (unless nowait
-	    (message (substitute-command-keys
-		      "When done with a buffer, type \\[dm-server-edit]")))))
-      ;; Avoid preserving the connection after the last real frame is deleted.
-      (if tmp-frame (delete-frame tmp-frame))))
+	    (message "%s" (substitute-command-keys
+                           "When done with a buffer, type \\[dm-server-edit]")))))
+      (when (frame-live-p tmp-frame)
+        ;; Delete tmp-frame or make it visible depending on whether it's
+        ;; been used or not.
+        (dm-server-unselect-display tmp-frame))))
   ;; Save for later any partial line that remains.
   (when (> (length string) 0)
-    (process-put proc 'previous-string string)))
+    (process-put proc :previous-string string)))
 
 (defun dm-server-goto-line-column (file-line-col)
   (goto-line (nth 1 file-line-col))
   (let ((column-number (nth 2 file-line-col)))
-    (if (> column-number 0)
-	(move-to-column (1- column-number)))))
+    (when (> column-number 0)
+      (move-to-column (1- column-number)))))
 
 (defun dm-server-visit-files (files client &optional nowait)
   "Find FILES and return the list CLIENT with the buffers nconc'd.
@@ -400,20 +533,22 @@ so don't mark these buffers specially, just visit them normally."
 	;; If there is an existing buffer modified or the file is
 	;; modified, revert it.  If there is an existing buffer with
 	;; deleted file, offer to write it.
-	(let* ((filen (car file))
+	(let* ((minibuffer-auto-raise (or dm-server-raise-frame
+                                          minibuffer-auto-raise))
+	       (filen (car file))
 	       (obuf (get-file-buffer filen)))
-	  (push filen file-name-history)
+	  (add-to-history 'file-name-history filen)
 	  (if (and obuf (set-buffer obuf))
 	      (progn
 		(cond ((file-exists-p filen)
-		       (if (not (verify-visited-file-modtime obuf))
-			   (revert-buffer t nil)))
+		       (when (not (verify-visited-file-modtime obuf))
+                         (revert-buffer t nil)))
 		      (t
-		       (if (y-or-n-p
-			    (concat "File no longer exists: "
-				    filen
-				    ", write buffer to file? "))
-			   (write-file filen))))
+		       (when (y-or-n-p
+                              (concat "File no longer exists: "
+                                      filen
+                                      ", write buffer to file? "))
+                         (write-file filen))))
 		(setq dm-server-existing-buffer t)
 		(dm-server-goto-line-column file))
 	    (set-buffer (find-file-noselect filen))
@@ -455,33 +590,33 @@ FOR-KILLING if non-nil indicates that we are called from `kill-buffer'."
 	  (dm-server-log "Close" (car client))
 	  (setq dm-server-clients (delq client dm-server-clients))))
       (setq old-clients (cdr old-clients)))
-    (if (and (bufferp buffer) (buffer-name buffer))
-	;; We may or may not kill this buffer;
-	;; if we do, do not call dm-server-buffer-done recursively
-	;; from kill-buffer-hook.
-	(let ((dm-server-kill-buffer-running t))
-	  (with-current-buffer buffer
-	    (setq dm-server-buffer-clients nil)
-	    (run-hooks 'dm-server-done-hook))
-	  ;; Notice whether dm-server-done-hook killed the buffer.
-	  (if (null (buffer-name buffer))
+    (when (and (bufferp buffer) (buffer-name buffer))
+      ;; We may or may not kill this buffer;
+      ;; if we do, do not call dm-server-buffer-done recursively
+      ;; from kill-buffer-hook.
+      (let ((dm-server-kill-buffer-running t))
+	(with-current-buffer buffer
+	  (setq dm-server-buffer-clients nil)
+	  (run-hooks 'dm-server-done-hook))
+	;; Notice whether dm-server-done-hook killed the buffer.
+	(if (null (buffer-name buffer))
+	    (setq killed t)
+	  ;; Don't bother killing or burying the buffer
+	  ;; when we are called from kill-buffer.
+	  (unless for-killing
+	    (when (and (not killed)
+		       dm-server-kill-new-buffers
+		       (with-current-buffer buffer
+			 (not dm-server-existing-buffer)))
 	      (setq killed t)
-	    ;; Don't bother killing or burying the buffer
-	    ;; when we are called from kill-buffer.
-	    (unless for-killing
-	      (when (and (not killed)
-			 dm-server-kill-new-buffers
-			 (with-current-buffer buffer
-			   (not dm-server-existing-buffer)))
-		(setq killed t)
-		(bury-buffer buffer)
-		(kill-buffer buffer))
-	      (unless killed
-		(if (dm-server-temp-file-p buffer)
-		    (progn
-		      (kill-buffer buffer)
-		      (setq killed t))
-		  (bury-buffer buffer)))))))
+	      (bury-buffer buffer)
+	      (kill-buffer buffer))
+	    (unless killed
+	      (if (dm-server-temp-file-p buffer)
+		  (progn
+		    (kill-buffer buffer)
+		    (setq killed t))
+		(bury-buffer buffer)))))))
     (list next-buffer killed)))
 
 (defun dm-server-temp-file-p (&optional buffer)
@@ -508,10 +643,10 @@ specifically for the clients and did not exist before their request for it."
 	(let ((version-control nil)
 	      (buffer-backed-up nil))
 	  (save-buffer))
-      (if (and (buffer-modified-p)
-	       buffer-file-name
-	       (y-or-n-p (concat "Save file " buffer-file-name "? ")))
-	  (save-buffer)))
+      (when (and (buffer-modified-p)
+		 buffer-file-name
+		 (y-or-n-p (concat "Save file " buffer-file-name "? ")))
+	(save-buffer)))
     (dm-server-buffer-done (current-buffer))))
 
 ;; Ask before killing a dm-server buffer.
@@ -531,8 +666,8 @@ specifically for the clients and did not exist before their request for it."
 	(tail dm-server-clients))
     ;; See if any clients have any buffers that are still alive.
     (while tail
-      (if (memq t (mapcar 'stringp (mapcar 'buffer-name (cdr (car tail)))))
-	  (setq live-client t))
+      (when (memq t (mapcar 'stringp (mapcar 'buffer-name (cdr (car tail)))))
+	(setq live-client t))
       (setq tail (cdr tail)))
     (or (not live-client)
 	(yes-or-no-p "Dm-Server buffers still have clients; exit anyway? "))))
@@ -566,11 +701,13 @@ which filenames are considered temporary.
 If invoked with a prefix argument, or if there is no dm-server process running,
 starts dm-server process and that is all.  Invoked by \\[dm-server-edit]."
   (interactive "P")
-  (if (or arg
-	  (not dm-server-process)
-	  (memq (process-status dm-server-process) '(signal exit)))
-      (dm-server-start nil)
-    (apply 'dm-server-switch-buffer (dm-server-done))))
+  (cond
+    ((or arg
+         (not dm-server-process)
+         (memq (process-status dm-server-process) '(signal exit)))
+     (dm-server-mode 1))
+    (dm-server-clients (apply 'dm-server-switch-buffer (dm-server-done)))
+    (t (message "No dm-server editing buffers exist"))))
 
 (defun dm-server-switch-buffer (&optional next-buffer killed-one)
   "Switch to another buffer, preferably one that has a client.
@@ -595,21 +732,19 @@ Arg NEXT-BUFFER is a suggestion; if it is a live buffer, use it."
 	(let ((win (get-buffer-window next-buffer 0)))
 	  (if (and win (not dm-server-window))
 	      ;; The buffer is already displayed: just reuse the window.
-	      (let ((frame (window-frame win)))
-		(if (eq (frame-visible-p frame) 'icon)
-		    (raise-frame frame))
-		(select-window win)
-		(set-buffer next-buffer))
+              (progn
+                (select-window win)
+                (set-buffer next-buffer))
 	    ;; Otherwise, let's find an appropriate window.
 	    (cond ((and (windowp dm-server-window)
 			(window-live-p dm-server-window))
 		   (select-window dm-server-window))
 		  ((framep dm-server-window)
-		   (if (not (frame-live-p dm-server-window))
-		       (setq dm-server-window (make-frame)))
+		   (unless (frame-live-p dm-server-window)
+		     (setq dm-server-window (make-frame)))
 		   (select-window (frame-selected-window dm-server-window))))
-	    (if (window-minibuffer-p (selected-window))
-		(select-window (next-window nil 'nomini 0)))
+	    (when (window-minibuffer-p (selected-window))
+	      (select-window (next-window nil 'nomini 0)))
 	    ;; Move to a non-dedicated window, if we have one.
 	    (when (window-dedicated-p (selected-window))
 	      (select-window
@@ -623,19 +758,26 @@ Arg NEXT-BUFFER is a suggestion; if it is a live buffer, use it."
 		(switch-to-buffer next-buffer)
 	      ;; After all the above, we might still have ended up with
 	      ;; a minibuffer/dedicated-window (if there's no other).
-	      (error (pop-to-buffer next-buffer)))))))))
+	      (error (pop-to-buffer next-buffer)))))))
+    (when dm-server-raise-frame
+      (select-frame-set-input-focus (window-frame (selected-window))))))
 
 (define-key ctl-x-map "#" 'dm-server-edit)
 
-(defun dm-server-unload-hook ()
-  (dm-server-start t)
-  (remove-hook 'kill-buffer-query-functions 'dm-server-kill-buffer-query-function)
-  (remove-hook 'kill-emacs-query-functions 'dm-server-kill-emacs-query-function)
-  (remove-hook 'kill-buffer-hook 'dm-server-kill-buffer))
+(defun dm-server-unload-function ()
+  "Unload the dm-server library."
+  (dm-server-mode -1)
+  (substitute-key-definition 'dm-server-edit nil ctl-x-map)
+  (save-current-buffer
+   (dolist (buffer (buffer-list))
+     (set-buffer buffer)
+     (remove-hook 'kill-buffer-hook 'dm-server-kill-buffer t)))
+  ;; continue standard unloading
+  nil)
 
-(add-hook 'dm-server-unload-hook 'dm-server-unload-hook)
+(add-hook 'kill-emacs-hook (lambda () (dm-server-mode -1))) ;Cleanup upon exit.
 
 (provide 'dm-server)
 
-;;; arch-tag: 1f7ecb42-f00a-49f8-906d-61995d84c8d6
+;; arch-tag: 1f7ecb42-f00a-49f8-906d-61995d84c8d6
 ;;; dm-server.el ends here
