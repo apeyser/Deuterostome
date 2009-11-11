@@ -2,7 +2,7 @@
 ;; ID: @SVNID@ V@ V@PACKAGE_VERSION@ git-@SVNVERSION@
 
 (require 'd-mode)
-(require 'dm-server (format "dm-server-%d" emacs-major-version))
+(require 'dm-server)
 (require 'comint)
 
 (defgroup d-comint-mode nil 
@@ -401,9 +401,8 @@ Derived from `comint-mode' with font-lock from `d-mode'.
 
 (defun d-comint-mode-server ()
   "Start d-comint-mode-server"
-  (when (and d-comint-mode-server (not dm-server-process))
-    (setq dm-server-name (format "dm-server-%d" (emacs-pid)))
-    (dm-server-start)))
+  (when d-comint-mode-server 
+    (dm-server-start (format "dm-server-%d" (emacs-pid)))))
 
 (defun dvt-scroll-special (dvt-buffer-name)
   (let ((selected-window (selected-window)))
