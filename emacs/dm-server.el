@@ -48,6 +48,16 @@
    
   (when (not dm-server-process)
     (setq dm-server-name nm)
-    (server-start)))
+    (server-start)
+    (process-put dm-server-process :dm-server-buffer (current-buffer))))
+
+(defadvice server-sentinel (around 
+			    dm-server-sentinel 
+			    activate 
+			    compile 
+			    preactivate)
+  (let ((buffer (process-get proc :dm-server-buffer)))
+    (if buffer (save-excursion (set-buffer buffer) ad-do-it)
+      ad-do-it)))
 
 (provide 'dm-server)
