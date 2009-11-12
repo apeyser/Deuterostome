@@ -7,6 +7,11 @@
     (dm-server-start)
     (add-hook 'kill-buffer-hook (lambda () (dm-server-start t)) t t)))
 ")
+
+(defun dm-server-header (path)
+  (format ";; Automatically built on %s\n;;   from %s\n\n"
+	  (format-time-string "%Y-%m-%d %H:%M:%S %z") path))
+
 (defun build ()
   (catch 'ret
     (mapc 
@@ -22,6 +27,8 @@
 	   (while (search-forward "server" nil t)
 	     (when (not (looking-back ":server"))
 	       (replace-match "dm-server" nil t)))
+	   (goto-char (point-min))
+	   (insert (dm-server-header path))
 	   (goto-char (point-max))
 	   (insert dm-server)
 	   (write-file output-file-name)
