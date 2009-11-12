@@ -40,6 +40,7 @@ rsync: dist
 gentoo-ci: gentoo-setup
 	cd gentoo \
 	&& git checkout master \
+	&& git pull \
 	&& git commit -a -m 'Update ebuilds' && git push
 
 .PHONY: ebuild
