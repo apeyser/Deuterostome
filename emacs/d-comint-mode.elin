@@ -402,7 +402,7 @@ Derived from `comint-mode' with font-lock from `d-mode'.
 (defun d-comint-mode-server ()
   "Start d-comint-mode-server"
   (when d-comint-mode-server 
-    (dm-server-start (format "dm-server-%d" (emacs-pid)))))
+    (dm-server (format "dm-server-%d" (emacs-pid)))))
 
 (defun dvt-scroll-special (dvt-buffer-name)
   (let ((selected-window (selected-window)))
@@ -475,12 +475,7 @@ Otherwise, one argument `-i' is passed to the shell.
 	  (d-comint-mode)
 	  (d-comint-mode-server)
 	  (when dm-server-process
-	    (process-send-string 
-	     (get-buffer-process dvt-buffer)
-	     (concat 
-	      "Xwindows {(" (d-comint-mode-shell-quote dm-server-name) ") ("
-	      (d-comint-mode-shell-quote (buffer-name dvt-buffer)) 
-	      ") take_input_setup} if\n"))))
+	    (run-at-time 1 nil 'd-comint-mode-take-input dvt-buffer)))
 	
 	(when (or d-comint-mode-keep-focus override)
 	  (dvt-special-frame buffer)
@@ -489,6 +484,18 @@ Otherwise, one argument `-i' is passed to the shell.
 	(switch-to-buffer dvt-buffer)
 	(goto-char (point-max)))
     (switch-to-buffer buffer)))
+
+(defun d-comint-mode-take-input (dvt-buffer)
+  (save-excursion 
+    (set-buffer dvt-buffer)
+    (process-send-string 
+     (get-buffer-process dvt-buffer)
+     (concat 
+      "Xwindows {(" 
+      (d-comint-mode-shell-quote dm-server-name) 
+      ") ("
+      (d-comint-mode-shell-quote (buffer-name dvt-buffer)) 
+      ") take_input_setup} if\n"))))
 
 (defun d-comint-mode-quote (string)
   "Quote a string to be sent to and interpreted by the dvt.

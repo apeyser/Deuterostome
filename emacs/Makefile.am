@@ -1,10 +1,17 @@
 INFILES = d-comint-mode.el init.el d-mode.el
-EXTRA_DIST = $(INFILES:=in) $(IDFILES)
-CLEANFILES = $(INFILES)
+BUILT_SOURCES = dm-server.el $(INFILES)
+EXTRA_DIST = $(INFILES:=in) $(IDFILES) dm-server-source.el
+CLEANFILES = $(BUILT_SOURCES) script
 SUFFIXES =
 
-dist_pkglisp_LISP = dm-server.el
-nodist_pkglisp_LISP = $(INFILES) d-mode-ops.el
+dm-server.el: dm-server-source.el
+	echo "(setq output-file-name \"$@\") \
+	      (setq load-path (cons nil load-path)) \
+	      (setq load-path (cons \"$(srcdir)\" load-path)) \
+	      (load \"$<\" nil nil t)" > script
+	$(EMACS) -batch -q -l script -f build
+
+nodist_pkglisp_LISP = $(INFILES) d-mode-ops.el dm-server.el
 
 edit = -e 's,@bindir\@,$(bindir),g' \
        -e 's,@pkglispdir\@,$(pkglispdir),g' \
