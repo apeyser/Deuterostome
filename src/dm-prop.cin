@@ -22,12 +22,12 @@
 
 /****************** signal redirector ********************/
 
-__attribute__ ((__unused__)) static P serverport = 0;
+DM_UNUSED static P serverport = 0;
 
-__attribute__ ((__noreturn__))
+DM_NORETURN
 static void redirector_quit(int sig, 
 			    siginfo_t* info, 
-			    void* ucon __attribute__ ((__unused__))) {
+			    void* ucon DM_UNUSED) {
   fprintf(stderr, "Redirector %li: quitting, signal %i from %li\n",
 	  (long) getpid(), sig, info ? (long) info->si_pid : 0);
   exit(0);
@@ -165,7 +165,7 @@ int main(int argc, char* argv[]) {
 }
 #else
 
-__attribute__ ((__noreturn__))
+DM_NORETURN
 static void execsighandler(P sigsocket, P tcp_sigsocket, P serverport, 
 			   P (*closesockets_func)(void)) {
   int sigsocket_ = -1, tcp_sigsocket_ = -1;

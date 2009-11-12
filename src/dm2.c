@@ -1516,18 +1516,18 @@ P op_aborted(void)
 
 /*--------- signal handler: SIGFPE */
 
-static void SIGFPEhandler(int sig __attribute__ ((__unused__)),
-			  siginfo_t* info __attribute__ ((__unused__)),
-			  void* ucon __attribute__ ((__unused__)))
+static void SIGFPEhandler(int sig DM_UNUSED,
+			  siginfo_t* info DM_UNUSED,
+			  void* ucon DM_UNUSED)
 {
   numovf = TRUE;
 }
 
 /*---------- signal handler: SIGALRM */
 
-static void SIGALRMhandler(int sig __attribute__ ((__unused__)),
-			  siginfo_t* info __attribute__ ((__unused__)),
-			  void* ucon __attribute__ ((__unused__)))
+static void SIGALRMhandler(int sig DM_UNUSED,
+			  siginfo_t* info DM_UNUSED,
+			  void* ucon DM_UNUSED)
 {
   timeout = TRUE;
 }
@@ -1535,7 +1535,7 @@ static void SIGALRMhandler(int sig __attribute__ ((__unused__)),
 /*---------- signal handler: SIGQUIT, TERM, HUP... */
 
 static void quithandler(int sig, siginfo_t* info, 
-			void* ucon  __attribute__ ((__unused__))) 
+			void* ucon  DM_UNUSED) 
 {
   fprintf(stderr, "%li: Exiting on signal %i from %li\n", 
 	  (long) getpid(), sig, info ? (long) info->si_pid : 0);
@@ -1546,7 +1546,7 @@ static void quithandler(int sig, siginfo_t* info,
 
 static void shellhandler(int sig,
 			 siginfo_t* info,
-			 void* ucon __attribute__ ((__unused__)))
+			 void* ucon DM_UNUSED)
 {
   sigset_t set;
   if (info && info->si_pid == getpid()) return;
@@ -1560,7 +1560,7 @@ static void shellhandler(int sig,
 
 static void conthandler(int sig,
 			siginfo_t* info,
-			void* ucon __attribute__ ((__unused__)))
+			void* ucon DM_UNUSED)
 {
   pid_t me = getpid();
   if ((! info || info->si_pid != me) && me == getpgrp() && kill(0, SIGCONT))
@@ -1571,7 +1571,7 @@ static void conthandler(int sig,
 
 static void aborthandler(int sig, 
 			 siginfo_t* info, 
-			 void* ucon __attribute__ ((__unused__))) 
+			 void* ucon DM_UNUSED) 
 {
   fprintf(stderr, "Aborting on signal %i from %li\n",
 	  sig, info ? (long) info->si_pid : 0);

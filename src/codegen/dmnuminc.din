@@ -331,7 +331,7 @@ NL
 #if ENABLE_THREADS
   static P )__ st__ dt__ (moveSAt\(UL32 id, const void* indata,
                                    void* ignore
-                                   __attribute__ \(\(__unused__\)\)\)
+                                   DM_UNUSED\)
   {)__
     true false {(
       D t = data->in;)__ 
@@ -393,7 +393,7 @@ NL
 #if ENABLE_THREADS
     static P )__ st__ dt__ (moveAAt\(UL32 id, const void* indata,
                                      void* ignore
-                                     __attribute__ \(\(__unused__\)\)\)
+                                     DM_UNUSED\)
     {)__
       true true {(
        D t;)__ true { 
@@ -511,7 +511,7 @@ end def
 #if ENABLE_THREADS
   static P )__ dt__ st__ (dy)__ op__ (ASt\(UL32 id, const void* indata,
                                            void* ignore
-                                           __attribute__ \(\(__unused__\)\)\)
+                                           DM_UNUSED\)
   {)__
     true false {(
       D t, tt = data->in;
@@ -646,7 +646,7 @@ dyadic_dp_seed op known {(
 #if ENABLE_THREADS
     static P )__ dt__ st__ (dy)__ op__ (AAt\(UL32 id, const void* indata,
                                              void* ignore
-                                             __attribute__ \(\(__unused__\)\)\)
+                                             DM_UNUSED\)
     {)__
       true true {(
         D t, tt;)__
@@ -734,7 +734,7 @@ end def
 #if ENABLE_THREADS
   static P )__ dt__ (mo)__ op__ (At\(UL32 id, const void* indata,
                                      void* ignore
-                                     __attribute__ \(\(__unused__\)\)\)
+                                     DM_UNUSED\)
   {)__
     true false {(
       D t;)__

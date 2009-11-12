@@ -119,10 +119,10 @@ dnl
 AC_DEFUN([CF_GCC_COMPILER_OPTION_INT], [dnl
   AC_SUBST([$4])dnl
   if test "x$$2" == "xyes" ; then
-    AC_MSG_CHECKING([for $3 compiler options $1])
+    AC_MSG_CHECKING([for $2 compiler options $1])
     AC_LANG_PUSH($3)
-    CF_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -Werror $1"
+    CF_CPPFLAGS="$CPPFLAGS"
+    CPPFLAGS="$CPPFLAGS -Werror $1"
     AC_COMPILE_IFELSE([int some_variable = 0;], [
       AC_MSG_RESULT([Adding])
       $4="$$4 $1"
@@ -130,7 +130,38 @@ AC_DEFUN([CF_GCC_COMPILER_OPTION_INT], [dnl
       AC_MSG_RESULT([Failed, not adding])
     ])
     AC_LANG_POP($3)
-    CFLAGS="$CF_CFLAGS"
+    CPPFLAGS="$CF_CPPFLAGS"
+  else
+    AC_MSG_NOTICE([Skipping check for $2 compiler options $1])
+  fi dnl
+])dnl
+dnl
+dnl $1=var, $2=code
+AC_DEFUN([CF_DEFINE_IF_CODE_GCC], [dnl
+  CF_DEFINE_IF_CODE_G([$1], [$2], [C], [GCC])dnl
+])dnl
+dnl
+dnl $1=var, $2=code
+AC_DEFUN([CF_DEFINE_IF_CODE_GXX], [dnl
+  CF_DEFINE_IF_CODE_G([$1], [$2], [C++], [GXX])dnl
+])dnl
+dnl internal ^^
+AC_DEFUN([CF_DEFINE_IF_CODE_G], [dnl
+  if test "x$$4" == "xyes"; then
+    AC_MSG_CHECKING([for value of HAVE_$1 for $4])
+    AC_LANG_PUSH($3)
+    CF_CPPFLAGS="$CPPFLAGS"
+    CPPFLAGS="$CPPFLAGS -Werror"
+    AC_COMPILE_IFELSE([$2], [dnl
+      AC_DEFINE([HAVE_$1], [1], [Define if you have "$1"])
+      AC_MSG_RESULT([HAVE_$1 defined])
+    ],[dnl
+      AC_MSG_RESULT([HAVE_$1 not defined])
+    ])
+    CPPFLAGS="$CF_CPPFLAGS"
+    AC_LANG_POP($3)
+  else
+    AC_MSG_NOTICE([Skipping check for value of HAVE_$1 for $4])
   fi dnl
 ])dnl
 dnl

@@ -34,8 +34,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-DIST_COMMON = $(dist_pkglisp_LISP) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(top_srcdir)/m4/cf_in.make \
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(top_srcdir)/m4/cf_in.make \
 	$(top_srcdir)/m4/cf_svnversion.make
 subdir = emacs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -98,12 +98,11 @@ am__vpath_adj = case $$p in \
     *) f=$$p;; \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-am__installdirs = "$(DESTDIR)$(pkglispdir)" "$(DESTDIR)$(pkglispdir)"
-dist_pkglispLISP_INSTALL = $(INSTALL_DATA)
+am__installdirs = "$(DESTDIR)$(pkglispdir)"
 nodist_pkglispLISP_INSTALL = $(INSTALL_DATA)
-LISP = $(dist_pkglisp_LISP) $(nodist_pkglisp_LISP)
-am__ELFILES = d-comint-mode.el d-mode-ops.el d-mode.el dm-server-22.el \
-	dm-server-23.el init.el
+LISP = $(nodist_pkglisp_LISP)
+am__ELFILES = d-comint-mode.el d-mode-ops.el d-mode.el dm-server.el \
+	init.el
 am__ELCFILES = $(am__ELFILES:.el=.elc)
 ELCFILES = $(LISP:.el=.elc)
 elisp_comp = $(top_srcdir)/libltdl/config/elisp-comp
@@ -700,11 +699,11 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 INFILES = d-comint-mode.el init.el d-mode.el
-EXTRA_DIST = $(INFILES:=in) $(IDFILES)
-CLEANFILES = $(INFILES)
+BUILT_SOURCES = dm-server.el $(INFILES)
+EXTRA_DIST = $(INFILES:=in) $(IDFILES) dm-server-source.el
+CLEANFILES = $(BUILT_SOURCES) dm-server-script
 SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
-dist_pkglisp_LISP = dm-server-22.el dm-server-23.el
-nodist_pkglisp_LISP = $(INFILES) d-mode-ops.el
+nodist_pkglisp_LISP = $(INFILES) d-mode-ops.el dm-server.el
 edit = -e 's,@bindir\@,$(bindir),g' \
        -e 's,@pkglispdir\@,$(pkglispdir),g' \
        -e 's,[@]NAMEBYTES[@],@NAMEBYTES@,g'
@@ -751,7 +750,8 @@ INFILES_RULE = \
 	       $< >$@.tmp \
 	&& mv $@.tmp $@
 
-all: all-am
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .cin .hin .elin .din .psin .shin .plin .styin .c .d .el .h .pl .ps .sh .sty
@@ -816,34 +816,6 @@ $(am__ELCFILES): elc-stamp
 	    test -f elc-stamp; exit $$?; \
 	  fi; \
 	else : ; fi
-install-dist_pkglispLISP: $(dist_pkglisp_LISP) $(ELCFILES)
-	@$(NORMAL_INSTALL)
-	@if test "$(EMACS)" != no; then \
-	  test -z "$(pkglispdir)" || $(MKDIR_P) "$(DESTDIR)$(pkglispdir)"; \
-	  list='$(dist_pkglisp_LISP)'; for p in $$list; do \
-	    if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	    f=$(am__strip_dir) \
-	    echo " $(dist_pkglispLISP_INSTALL) '$$d$$p' '$(DESTDIR)$(pkglispdir)/$$f'"; \
-	    $(dist_pkglispLISP_INSTALL) "$$d$$p" "$(DESTDIR)$(pkglispdir)/$$f"; \
-	    if test -f $${p}c; then \
-	      echo " $(dist_pkglispLISP_INSTALL) '$${p}c' '$(DESTDIR)$(pkglispdir)/$${f}c'"; \
-	      $(dist_pkglispLISP_INSTALL) "$${p}c" "$(DESTDIR)$(pkglispdir)/$${f}c"; \
-	    else : ; fi; \
-	  done; \
-	else : ; fi
-
-uninstall-dist_pkglispLISP:
-	@$(NORMAL_UNINSTALL)
-	@if test "$(EMACS)" != no; then \
-	  list='$(dist_pkglisp_LISP)'; for p in $$list; do \
-	    f=$(am__strip_dir) \
-	    echo " rm -f '$(DESTDIR)$(pkglispdir)/$$f' '$(DESTDIR)$(pkglispdir)/$${f}c'"; \
-	    rm -f "$(DESTDIR)$(pkglispdir)/$$f" "$(DESTDIR)$(pkglispdir)/$${f}c"; \
-	  done; \
-	else : ; fi
-
-clean-lisp:
-	-rm -f elc-stamp $(ELCFILES)
 install-nodist_pkglispLISP: $(nodist_pkglisp_LISP) $(ELCFILES)
 	@$(NORMAL_INSTALL)
 	@if test "$(EMACS)" != no; then \
@@ -869,6 +841,9 @@ uninstall-nodist_pkglispLISP:
 	    rm -f "$(DESTDIR)$(pkglispdir)/$$f" "$(DESTDIR)$(pkglispdir)/$${f}c"; \
 	  done; \
 	else : ; fi
+
+clean-lisp:
+	-rm -f elc-stamp $(ELCFILES)
 tags: TAGS
 TAGS:
 
@@ -903,13 +878,15 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: check-am
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(LISP) $(ELCFILES) all-local
 installdirs:
-	for dir in "$(DESTDIR)$(pkglispdir)" "$(DESTDIR)$(pkglispdir)"; do \
+	for dir in "$(DESTDIR)$(pkglispdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -934,6 +911,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-generic clean-libtool clean-lisp mostlyclean-am
@@ -952,7 +930,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dist_pkglispLISP install-nodist_pkglispLISP
+install-data-am: install-nodist_pkglispLISP
 
 install-dvi: install-dvi-am
 
@@ -986,24 +964,30 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-dist_pkglispLISP uninstall-nodist_pkglispLISP
+uninstall-am: uninstall-nodist_pkglispLISP
 
 .MAKE: install-am install-strip
 
 .PHONY: all all-am all-local check check-am clean clean-generic \
 	clean-libtool clean-lisp distclean distclean-generic \
 	distclean-libtool distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am \
-	install-dist_pkglispLISP install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
 	install-nodist_pkglispLISP install-pdf install-pdf-am \
 	install-ps install-ps-am install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
-	uninstall-dist_pkglispLISP uninstall-nodist_pkglispLISP
+	uninstall-nodist_pkglispLISP
 
+
+dm-server.el: dm-server-source.el
+	echo "(setq output-file-name \"$@\") \
+	      (setq load-path (cons nil load-path)) \
+	      (setq load-path (cons \"$(srcdir)\" load-path)) \
+	      (load \"$<\" nil nil t)" > dm-server-script
+	$(EMACS) -batch -q -l dm-server-script -f dm-server-build
 
 $(SVNVERSION_DIR)/svnversion.stamp:
 	cd $(SVNVERSION_DIR) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
