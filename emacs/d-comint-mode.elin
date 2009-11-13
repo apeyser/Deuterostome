@@ -279,20 +279,35 @@ Derived from `comint-mode' with font-lock from `d-mode'.
       (line-end-position 0)))
    " } debug_aborted"))
 
-(defun d-comint-mode-stop ()
-  (interactive)
-  (d-comint-mode-send-line "! stop")
-  (d-comint-mode-scream 0))
+(defun d-comint-mode-stop (&optional dvt-buffer-name)
+  (interactive
+   (list (or (and current-prefix-arg (read-buffer "DVT buffer: " "*dvt*"))
+	     (buffer-name))))
+  (when (null dvt-buffer-name) (setq dvt-buffer-name "*dvt*"))
+  (save-excursion
+    (set-buffer dvt-buffer-name)
+    (d-comint-mode-send-line "! stop")
+    (d-comint-mode-scream 0)))
 
-(defun d-comint-mode-continue ()
-  (interactive)
-  (d-comint-mode-send-line "! continue")
-  (d-comint-mode-scream 0))
+(defun d-comint-mode-continue (&optional dvt-buffer-name)
+  (interactive
+   (list (or (and current-prefix-arg (read-buffer "DVT buffer: " "*dvt*"))
+	     (buffer-name))))
+  (when (null dvt-buffer-name) (setq dvt-buffer-name "*dvt*"))
+  (save-excursion
+    (set-buffer dvt-buffer-name)
+    (d-comint-mode-send-line "! continue")
+    (d-comint-mode-scream 0)))
 
-(defun d-comint-mode-abort ()
-  (interactive)
-  (d-comint-mode-send-line "! abort")
-  (d-comint-mode-scream 0))
+(defun d-comint-mode-abort (&optional dvt-buffer-name)
+  (interactive
+   (list (or (and current-prefix-arg (read-buffer "DVT buffer: " "*dvt*"))
+	     (buffer-name))))
+  (when (null dvt-buffer-name) (setq dvt-buffer-name "*dvt*"))
+  (save-excursion
+    (set-buffer dvt-buffer-name)
+    (d-comint-mode-send-line "! abort")
+    (d-comint-mode-scream 0)))
 
 (defun d-comint-mode-next-talk ()
   (interactive)
@@ -337,6 +352,15 @@ Derived from `comint-mode' with font-lock from `d-mode'.
   d-comint-mode-scream-lighter
   '(("" . d-comint-mode-scream-and-send)))
 
+(defun d-comint-mode-toggle-scream (&optional dvt-buffer-name)
+  (interactive
+   (list (or (and current-prefix-arg (read-buffer "DVT buffer: " "*dvt*"))
+	     (buffer-name))))
+  (when (null dvt-buffer-name) (setq dvt-buffer-name "*dvt*"))
+  (save-excursion
+    (set-buffer dvt-buffer-name)
+    (d-comint-mode-scream)))
+
 (defun d-comint-mode-redirect-kill-process ()
   (process-send-string d-comint-mode-redirect-process "\n")
   (process-send-eof d-comint-mode-redirect-process)
@@ -377,13 +401,20 @@ Derived from `comint-mode' with font-lock from `d-mode'.
 (define-minor-mode d-comint-mode-redirect-mode "" nil " > "
   '() (d-comint-mode-redirect-process-open))
 
-(defun d-comint-mode-invert ()
-  (interactive)
-  (d-comint-mode-send
-   (save-excursion
-     (buffer-substring-no-properties
-      (line-beginning-position 0)
-      (line-end-position 0)))))
+(defun d-comint-mode-invert (&optional dvt-buffer-name)
+  (interactive
+   (list (or (and current-prefix-arg (read-buffer "DVT buffer: " "*dvt*"))
+	     (buffer-name))))
+  (when (null dvt-buffer-name) (setq dvt-buffer-name "*dvt*"))
+  (save-excursion
+    (set-buffer dvt-buffer-name)
+    (d-comint-mode-send
+     (save-excursion
+       (let* ((beg (line-beginning-position 0))
+	      (end (line-end-position 0))
+	      (str (buffer-substring-no-properties beg end)))
+	 (message "invert %s %d, %d: %s" (current-buffer) beg end str)
+	 str)))))
 
 (defun d-comint-mode-clear ()
   (interactive)
@@ -579,11 +610,16 @@ This quotes per `shell-quote-argument', then requotes per `d-comint-mode-quote'"
 	    (t (dvt-special-frame dvt-buffer-name))))))
     (window-frame window)))
 
-(defun d-comint-mode-process-mark ()
+(defun d-comint-mode-process-mark (&optional dvt-buffer-name)
   "Move point to process mark"
-  (interactive)
-  (comint-goto-process-mark)
-  (delete-region (point) (point-max)))
+  (interactive
+   (list (or (and current-prefix-arg (read-buffer "DVT buffer: " "*dvt*"))
+	     (buffer-name))))
+  (when (null dvt-buffer-name) (setq dvt-buffer-name "*dvt*"))
+  (save-excursion
+    (set-buffer dvt-buffer-name)
+    (comint-goto-process-mark)
+    (delete-region (point) (point-max))))
 
 (defun d-comint-mode-focus (dvt-buffer-name &optional override)
   "Set input focus to dvt buffer. 

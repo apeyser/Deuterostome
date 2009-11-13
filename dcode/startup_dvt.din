@@ -1554,11 +1554,11 @@ Xwindows {
     {
       {/take_input_focus ~end true null mkact (focus)}
       {/raise_emacs ~end true null mkact (focus-raise)}
-      {/F1_KEY ~end false ~goto_point_emacs (invert)}
-      {/F2_KEY ~end false ~goto_point_emacs (continue)}
-      {/F3_KEY ~end false ~goto_point_emacs (stop)}
-      {/F4_KEY ~end false ~goto_point_emacs  (abort)}
-      {/CTRL_1_KEY ~end false ~goto_point_emacs (scream)}
+      {/F1_KEY ~end true ~goto_point_emacs (invert)}
+      {/F2_KEY ~end true ~goto_point_emacs (continue)}
+      {/F3_KEY ~end true ~goto_point_emacs (stop)}
+      {/F4_KEY ~end true ~goto_point_emacs  (abort)}
+      {/CTRL_1_KEY ~end true ~goto_point_emacs (toggle-scream)}
       {/goto_point_emacs null mkact false null mkact (process-mark)}
     } {
       exec
@@ -1573,7 +1573,7 @@ Xwindows {
           (\)) fax
           0 exch getinterval
         {
-          {
+          s_ {
             NULLR NULLW STDERR _sh_ 
             wait not {(emacs-client) /NOSYSTEM makeerror} if
           } PROCESSES ~indict stopped pop cleartomark
