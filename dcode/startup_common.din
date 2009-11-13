@@ -155,7 +155,7 @@
 /userdef {
   ~[exch destruct_exec currentdict ~indict]
   userdict 3 -1 roll put
-}
+} bind def
 
 |================ makelist =======================
 | ~store | dict
