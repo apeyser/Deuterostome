@@ -33,13 +33,67 @@
 (defcustom explicit-dvt-file-name nil 
   "*dvt program name"
   :group 'd-comint-mode
-  :type '(choice (const nil) file))
-;;(defvar comint-last-output-start)
+  :type '(choice (const nil) (file :must-match t)))
 
-(defcustom d-comint-mode-focus-raise-global nil 
-  "*Global sequence to pop *dvt*"
+(defcustom d-comint-mode-global-override nil
+  "*Use custom global keybindings even if those keys are already defined
+
+Only becomes active when global keybindings are defined, 
+either in defcustom at load-up time, by changing the defaults
+or by calling the associated setter"
   :group 'd-comint-mode
-  :type '(repeat character))
+  :type 'boolean)
+
+(defun d-comint-mode-global-set-key (key command &optional force)
+  (if (and (null force) (key-binding key))
+      (message "%s not rebound from `%s' to `%s'."
+	       key (key-binding key) command)
+    (global-set-key key command)))
+
+(defun d-comint-mode-global-unset-key (key command &optional force)
+  (if (or force (eq (key-binding key) command))
+      (global-unset-key key)
+    (message "%s not unbound" key)))
+
+(defun d-comint-mode-global-key (sym val command)
+  (set-default sym val)
+  (if (equal 0 (length val)) (d-comint-mode-global-unset-key val command nil)
+    (d-comint-mode-global-set-key (vconcat val) command
+				  d-comint-mode-global-override)))
+
+(defun d-comint-mode-focus-raise-global-set (sym val)
+  (d-comint-mode-global-key 'd-comint-mode-focus-raise-global
+			    val
+			    'd-comint-mode-focus-raise-switch))
+
+(defun d-comint-mode-switch-to-dvt-global-set (sym val)
+  (d-comint-mode-global-key 'd-comint-mode-switch-to-dvt-global
+			    val
+			    'dvt))
+
+(defcustom d-comint-mode-focus-raise-global '(f12)
+  "*Global keybinding to pop *dvt*:
+
+Calls (d-comint-mode-focus-raise-global-set ignored-symbol key-vector)
+"
+  :group 'd-comint-mode
+  :type '(vector (repeat :inline t
+			 (choice (symbol    :tag "special key") 
+				 (character :tag "character"))))
+  :set 'd-comint-mode-focus-raise-global-set
+  :initialize 'custom-initialize-set)
+
+(defcustom d-comint-mode-switch-to-dvt-global '(f11)
+  "*Global sequence to run dvt:
+
+Calls (d-comint-mode-switch-to-dvt-global-set ignored-symbol key-vector)
+"
+  :group 'd-comint-mode
+  :type '(vector (repeat :inline t
+			 (choice (symbol    :tag "special key") 
+				 (character :tag "character"))))
+  :set 'd-comint-mode-switch-to-dvt-global-set
+  :initialize 'custom-initialize-set)
 
 (require 'comint)
 
@@ -373,9 +427,6 @@ Derived from `comint-mode' with font-lock from `d-mode'.
   (define-key d-comint-mode-map [f6] 'd-comint-mode-raise-all)
   (define-key d-comint-mode-map [(shift f6)] 'd-comint-mode-hide-all)
   (define-key d-comint-mode-map [f7] 'd-comint-mode-focus-raise)
-  (if d-comint-mode-focus-raise-global
-      (global-set-key (vconcat d-comint-mode-focus-raise-global) 
-                      'd-comint-mode-focus-raise-switch))
   (define-key d-comint-mode-map [f8] 'dnode)
   (define-key d-comint-mode-map [(control ?h) ?d] 'd-comint-mode-help)
   (define-key d-comint-mode-map [(control !)] 'd-comint-mode-scream)
