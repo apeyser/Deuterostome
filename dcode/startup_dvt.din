@@ -1573,7 +1573,7 @@ Xwindows {
           (\)) fax
           0 exch getinterval
         {
-          s_ {
+          {
             NULLR NULLW STDERR _sh_ 
             wait not {(emacs-client) /NOSYSTEM makeerror} if
           } PROCESSES ~indict stopped pop cleartomark

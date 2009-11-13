@@ -410,11 +410,8 @@ Derived from `comint-mode' with font-lock from `d-mode'.
     (set-buffer dvt-buffer-name)
     (d-comint-mode-send
      (save-excursion
-       (let* ((beg (line-beginning-position 0))
-	      (end (line-end-position 0))
-	      (str (buffer-substring-no-properties beg end)))
-	 (message "invert %s %d, %d: %s" (current-buffer) beg end str)
-	 str)))))
+       (buffer-substring-no-properties(line-beginning-position 0)
+				      (line-end-position 0))))))
 
 (defun d-comint-mode-clear ()
   (interactive)
