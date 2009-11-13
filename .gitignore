@@ -16,6 +16,7 @@
 *.tar.gz
 *.toc
 *.idx
+*.orig
 *~
 .*/
 /config.h

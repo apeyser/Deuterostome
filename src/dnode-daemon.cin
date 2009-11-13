@@ -24,6 +24,12 @@
 #define __attribute__(attr)
 #endif // ! defined __GNUC__ && ! defined __attribute__
 
+#if HAVE_UNUSED
+#define UNUSED __attribute__ ((__unused__))
+#else
+#define UNUSED
+#endif
+
 //#define SIGINT SIGHUP
 
 struct node {
@@ -67,11 +73,11 @@ static void setprocessname(const char* name) {
 #endif
 
 static volatile char int_ = 0;
-static void sigint(int sig __attribute__((__unused__))) {int_ = 1;}
+static void sigint(int sig UNUSED) {int_ = 1;}
 static volatile char term_ = 0;
-static void sigterm(int sig __attribute__((__unused__))) {term_ = 1;}
+static void sigterm(int sig UNUSED) {term_ = 1;}
 static volatile char alarm_ = 0;
-static void sigalarm(int sig __attribute__((__unused__))) {alarm_ = 1;}
+static void sigalarm(int sig UNUSED) {alarm_ = 1;}
 
 static void sethandler(void (*handler)(int), int sig, int flag) {
   struct sigaction sa = {};

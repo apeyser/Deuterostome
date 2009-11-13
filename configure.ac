@@ -1,4 +1,4 @@
-AC_INIT([D-Machine], [4.5.10], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
+AC_INIT([D-Machine], [4.5.11], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
 AC_CONFIG_MACRO_DIR([m4 libltdl/m4])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_AUX_DIR([libltdl/config])
@@ -296,6 +296,13 @@ CF_IF_ENABLED([cppplugin], [
   CF_GXX_COMPILER_OPTION([-fno-unsafe-math-optimizations], [GCC_CXXFLAGS])
   CF_GXX_COMPILER_OPTION([-Wno-pointer-sign], [GCC_CXXFLAGS])
   CF_GXX_COMPILER_OPTION([-fprefetch-loop-arrays], [GCC_CXXFLAGS])
+])
+
+CF_DEFINE_IF_CODE_GCC([HOT], [__attribute__ ((__hot__)) void x(void) {}])
+CF_DEFINE_IF_CODE_GCC([UNUSED], [__attribute__ ((__unused__)) void x(void) {}])
+CF_DEFINE_IF_CODE_GCC([NORETURN], [
+  #include <stdlib.h>
+  __attribute__ ((__noreturn__)) void x(void) {exit(0);}
 ])
 
 AC_SUBST([INCLTDL])

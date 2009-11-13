@@ -9,7 +9,7 @@
 #include <math.h>
 #include <ctype.h>
 
-  static void yyunput (int c,char *buf_ptr  ) __attribute__ ((unused)) ;
+  static void yyunput (int c,char *buf_ptr  ) DM_UNUSED;
 
   UP ll_type = 0;
   P op_hi(void) {return wrap_hi((B*)"dmflex V1");}

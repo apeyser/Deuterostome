@@ -444,7 +444,23 @@ DLL_SCOPE _dm_const UW ascii[];
 
 /*----------------------- function prototypes ------------------------*/
 
+#if DM_HAVE_HOT
 #define DM_HOT __attribute__ ((__hot__))
+#else
+#define DM_HOT 
+#endif
+
+#if DM_HAVE_UNUSED
+#define DM_UNUSED __attribute__ ((__unused__))
+#else
+#define DM_UNUSED
+#endif
+
+#if DM_HAVE_NORETURN
+#define DM_NORETURN __attribute__ ((__noreturn__))
+#else
+#define DM_NORETURN
+#endif
 
 /*--- DM1 */
 DM_HOT DLL_SCOPE P tokenize_gen(void);

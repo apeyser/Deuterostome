@@ -41,8 +41,8 @@ enum AssState {
 				   
 #include "dm-dmpetsc-header.h"
 
-static PetscErrorCode petscsig(int sig __attribute__ ((__unused__)), 
-			       void* ptr __attribute__ ((__unused__)) ) {
+static PetscErrorCode petscsig(int sig DM_UNUSED, 
+			       void* ptr DM_UNUSED) {
   return PETSC_ERR_SIG;
 }
 
@@ -1013,7 +1013,7 @@ DM_INLINE_STATIC P petsc_mat_dense_copyto(
 
 DM_INLINE_STATIC P petsc_mat_sparse_copyto(
   Mat A, P grow, D* restrict row, 
-  L32 ncols __attribute__ ((__unused__)) ) 
+  L32 ncols DM_UNUSED) 
 {
   DMPETSC_ERRCHECK(MatSetValuesRow(A, grow, row));
   return OK;
@@ -1062,7 +1062,7 @@ DM_INLINE_STATIC P petsc_mat_getvalues(Mat A, L32 *restrict ncols, L32 gm)
 }
 
 DM_INLINE_STATIC P petsc_mat_dense_getnzs(Mat A, L32 *restrict nzs,
-					  L32 gm __attribute__((__unused__)),
+					  L32 gm DM_UNUSED,
 					  L32 m)
 {
   DMPETSC_ERRCHECK(MatGetSize(A, PETSC_NULL, nzs));
@@ -1077,7 +1077,7 @@ struct SparsePreass {
   
 DM_INLINE_STATIC P petsc_mat_sparse_preass(
   Mat A,
-  B* restrict pframe __attribute__ ((__unused__)), 
+  B* restrict pframe DM_UNUSED, 
   void* restrict arg)
 {
   struct SparsePreass *const params = (struct SparsePreass*) arg;
@@ -1098,7 +1098,7 @@ struct BlockDensePreass {
 
 DM_INLINE_STATIC P petsc_mat_blockdense_preass(
   Mat A,
-  B* restrict pframe __attribute__ ((__unused__)), 
+  B* restrict pframe DM_UNUSED, 
   void* restrict arg) 
 {
   struct BlockDensePreass *params = (struct BlockDensePreass*) arg;
@@ -1110,8 +1110,8 @@ DM_INLINE_STATIC P petsc_mat_blockdense_preass(
 
 DM_INLINE_STATIC P petsc_mat_dense_preass(
   Mat A,
-  B* restrict pframe __attribute__ ((__unused__)), 
-  void* restrict arg __attribute__ ((__unused__)) )
+  B* restrict pframe DM_UNUSED, 
+  void* restrict arg DM_UNUSED)
 {
   DMPETSC_ERRCHECK(MatSetOption(A, MAT_ROW_ORIENTED));
   return OK;
@@ -1724,7 +1724,7 @@ static const struct {
 
 DM_INLINE_STATIC P finalize_BJACOBI_ILU(
   KSP ksp, 
-  B *restrict kspframe __attribute__ ((__unused__)) ) 
+  B *restrict kspframe DM_UNUSED) 
 {
   PetscInt n_local;
   PC pc;
@@ -1747,7 +1747,7 @@ DM_INLINE_STATIC P finalize_BJACOBI_ILU(
 
 DM_INLINE_STATIC P finalize_BJACOBI_LU(
   KSP ksp, 
-  B *restrict kspframe __attribute__ ((__unused__)) ) 
+  B *restrict kspframe DM_UNUSED) 
 {
   PetscInt n_local;
   PC pc;
@@ -1767,9 +1767,9 @@ DM_INLINE_STATIC P finalize_BJACOBI_LU(
 }
 
 DM_INLINE_STATIC P setup_LU(
-  PC pc __attribute__ ((__unused__)),
+  PC pc DM_UNUSED,
   B* restrict param,
-  B* restrict kspframe __attribute__ ((__unused__)) ) 
+  B* restrict kspframe DM_UNUSED) 
 {
   if (TAG(param) != NULLOBJ) return OPD_ERR;
   //DMPETSC_ERRCHECK(PCFactorSetUseInPlace(pc));
@@ -1777,9 +1777,9 @@ DM_INLINE_STATIC P setup_LU(
 }
 
 DM_INLINE_STATIC P setup_ILU(
-  PC pc __attribute__ ((__unused__)),
+  PC pc DM_UNUSED,
   B* restrict param,
-  B* restrict kspframe __attribute__ ((__unused__)) ) 
+  B* restrict kspframe DM_UNUSED) 
 {
   if (TAG(param) != NULLOBJ) return OPD_ERR;
   //DMPETSC_ERRCHECK(PCFactorSetUseInPlace(pc));
@@ -1789,9 +1789,9 @@ DM_INLINE_STATIC P setup_ILU(
 }
 
 DM_INLINE_STATIC P setup_ICC(
-  PC pc __attribute__ ((__unused__)),
+  PC pc DM_UNUSED,
   B* restrict param,
-  B* restrict kspframe __attribute__ ((__unused__)) )
+  B* restrict kspframe DM_UNUSED)
 {
   if (TAG(param) != NULLOBJ) return OPD_ERR;
   //DMPETSC_ERRCHECK(PCFactorSetUseInPlace(pc));
