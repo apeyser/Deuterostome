@@ -24,29 +24,40 @@
 	  (format-time-string "%Y-%m-%d %H:%M:%S %z")
 	  path))
 
+(setq dm-server-fin "")
+(defun dm-server-dir (dir)
+  (setq path (concat (file-name-as-directory 
+		      (expand-file-name 
+		       (if dir dir default-directory)))
+		     "server.el"
+		     dm-server-fin))
+  (when (file-readable-p path)
+    (if (not (string= dm-server-fin ".gz"))
+	(insert-file-contents path nil nil nil t)
+      (unless (call-process gunzip path t)
+	(error "Unable to ungzip %s" path)))
+    (throw 'dm-server-build nil)))
+
+(defun dm-server-build-do ()
+  (set-buffer (get-buffer-create "*server*"))
+  (catch 'dm-server-build
+    (mapc 'dm-server-dir load-path)
+    (setq dm-server-fin ".gz")
+    (mapc 'dm-server-dir load-path)
+    (error "Source file not found: %s (load-path: %s)" 
+	   "server.el" load-path))
+  (goto-char (point-min))
+  (while (search-forward "server" nil t)
+    (when (not (looking-back ":server"))
+      (replace-match "dm-server" nil t)))
+  (goto-char (point-min))
+  (insert (dm-server-header path))
+  (goto-char (point-max))
+  (insert dm-server-tail)
+  (write-file output-file-name))
+
 (defun dm-server-build ()
-  (let ((path 
-	 (catch 'dm-server-build
-	   (mapc 
-	    (lambda (dir)
-	      (let ((path 
-		     (concat (file-name-as-directory 
-			      (expand-file-name 
-			       (if dir dir ".")))
-			     "server.el")))
-		(when (file-readable-p path)
-		  (throw 'dm-server-build path))))
-	    load-path)
-	   (error "Source file not found: %s (load-path: %s)" 
-		  "server.el" load-path))))
-    (set-buffer (get-buffer-create "*server*"))
-    (insert-file-contents path nil nil nil t)
-    (goto-char (point-min))
-    (while (search-forward "server" nil t)
-      (when (not (looking-back ":server"))
-	(replace-match "dm-server" nil t)))
-    (goto-char (point-min))
-    (insert (dm-server-header path))
-    (goto-char (point-max))
-    (insert dm-server-tail)
-    (write-file output-file-name)))
+  (condition-case err (dm-server-build-do)
+    (error
+     (message "%s" (error-message-string err))
+     (kill-emacs 1))))

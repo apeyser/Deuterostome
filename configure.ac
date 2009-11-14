@@ -188,7 +188,9 @@ CF_AC_ARG_VAR_QUOTE([guipdf],
  [name of program to display pdf's, eg gnome-open or launch -i com.apple.Preview],
  [xpdf])
 
-CF_EMACS_ENABLED
+CF_EMACS_ENABLED([
+  CF_EMACS_SOURCE([server])
+])
 
 AC_CHECK_HEADERS([unistd.h])
 AC_PROG_INSTALL
