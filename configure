@@ -16004,10 +16004,10 @@ $as_echo "$as_me: error: emacs not enabled" >&2;}
        (kill-emacs 1))))
 
 EOF
-    if $EMACS -batch -q -l emacs-test -f emacs-test >emacs-test-result; then
+    if $EMACS -batch -q -l emacs-test -f emacs-test \
+        >emacs-test-result 2>/dev/null; then
       fin=`cat emacs-test-result`
       rm emacs-test emacs-test-result
-      echo "What is fin? $fin"
       { $as_echo "$as_me:$LINENO: result: found" >&5
 $as_echo "found" >&6; }
       if test "$fin" == "el.gz"; then

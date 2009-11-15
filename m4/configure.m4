@@ -463,10 +463,10 @@ AC_DEFUN([CF_EMACS_SOURCE], [dnl
        (kill-emacs 1))))
 
 EOF
-    if $EMACS -batch -q -l emacs-test -f emacs-test >emacs-test-result; then
+    if $EMACS -batch -q -l emacs-test -f emacs-test \
+        >emacs-test-result 2>/dev/null; then
       fin=`cat emacs-test-result`
       rm emacs-test emacs-test-result
-      echo "What is fin? $fin"
       AC_MSG_RESULT([found])
       if test "$fin" == "el.gz"; then
         AC_CHECK_PROG([gunzip], [gunzip], [gunzip])
