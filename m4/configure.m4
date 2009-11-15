@@ -435,13 +435,13 @@ AC_DEFUN([CF_EMACS_SOURCE], [dnl
   AC_MSG_CHECKING([for emacs source file $1])
   CF_IF_EMACS_ENABLED([dnl
     cat >emacs-test <<EOF
-(setq emacs-test-fin "")
+(setq emacs-test-fin "el")
 (defun emacs-test-dir (dir)
   (setq path (concat 
 	      (file-name-as-directory 
 	       (expand-file-name 
 		(if dir dir default-directory)))
-	      "$1.el"
+	      "$1."
 	      emacs-test-fin))
   (when (file-readable-p path)
     (throw 'emacs-test nil)))
@@ -449,12 +449,12 @@ AC_DEFUN([CF_EMACS_SOURCE], [dnl
 (defun emacs-test-do ()
   (catch 'emacs-test
     (mapc 'emacs-test-dir load-path)
-    (setq emacs-test-fin ".gz")
+    (setq emacs-test-fin "el.gz")
     (mapc 'emacs-test-dir load-path)
     (error "Source file not found: %s (load-path: %s)" 
 	   "$1.el"
 	   load-path))
-  (print emacs-test-fin))
+  (princ emacs-test-fin))
 
 (defun emacs-test ()
   (condition-case err (emacs-test-do)
@@ -463,18 +463,19 @@ AC_DEFUN([CF_EMACS_SOURCE], [dnl
        (kill-emacs 1))))
 
 EOF
-    if $EMACS -batch -q -l emacs-test -f emacs-test | read fin; then
-      rm emacs-test
+    if $EMACS -batch -q -l emacs-test -f emacs-test >emacs-test-result; then
+      fin=`cat emacs-test-result`
+      rm emacs-test emacs-test-result
       echo "What is fin? $fin"
       AC_MSG_RESULT([found])
-      if test -n "$fin"; then
+      if test "$fin" == "el.gz"; then
         AC_CHECK_PROG([gunzip], [gunzip], [gunzip])
 	if test -z "$gunzip"; then
 	  AC_MSG_ERROR([gunzip not found -- needed for $1])
 	fi
       fi
     else
-      rm emacs-test
+      rm emacs-test emacs-test-result
       AC_MSG_ERROR([not found])
     fi dnl
   ], [dnl
