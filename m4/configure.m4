@@ -452,7 +452,7 @@ AC_DEFUN([CF_EMACS_SOURCE], [dnl
     (setq emacs-test-fin ".gz")
     (mapc 'emacs-test-dir load-path)
     (error "Source file not found: %s (load-path: %s)" 
-	   "$1.el" 
+	   "$1.el"
 	   load-path))
   (print emacs-test-fin))
 
@@ -465,6 +465,7 @@ AC_DEFUN([CF_EMACS_SOURCE], [dnl
 EOF
     if $EMACS -batch -q -l emacs-test -f emacs-test | read fin; then
       rm emacs-test
+      echo "What is fin? $fin"
       AC_MSG_RESULT([found])
       if test -n "$fin"; then
         AC_CHECK_PROG([gunzip], [gunzip], [gunzip])
