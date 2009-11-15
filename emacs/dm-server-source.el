@@ -3,7 +3,7 @@
   (when (eq dm-server-process nil)
     (setq dm-server-name name)
     (when (fboundp 'dm-server-force-delete) 
-      (apply 'dm-server-force-delete)
+      (funcall 'dm-server-force-delete)
       (message nil))
     (dm-server-start)
     (add-hook 'kill-buffer-hook (lambda () (dm-server-start t)) t t)))
