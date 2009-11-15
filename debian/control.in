@@ -3,7 +3,7 @@ Section: unknown
 Priority: extra
 Maintainer: Alex Peyser <peyser.alex@gmail.com>
 Build-Depends: debhelper (>= 5), autotools-dev,
-  emacs22 | emacs23, emacs22-el | emacs23-el,
+  emacs22 | emacs23, emacs22-el | emacs23-el, gunzip,
   a2ps, ghostscript, perl, xterm, texlive, texlive-latex-extra, 
   cups | cupsys, xorg, evince, 
   libatlas3gf-base, libatlas-base-dev @ATLAS_VERSION@, libatlas-headers, 
