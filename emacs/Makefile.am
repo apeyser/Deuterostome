@@ -8,6 +8,7 @@ dm-server.el: dm-server-source.el
 	echo "(setq output-file-name \"$@\") \
 	      (setq load-path (cons nil load-path)) \
 	      (setq load-path (cons \"$(srcdir)\" load-path)) \
+	      (setq gunzip \"$(gunzip)\") \
 	      (load \"$<\" nil nil t)" > dm-server-script
 	$(EMACS) -batch -q -l dm-server-script -f dm-server-build
 

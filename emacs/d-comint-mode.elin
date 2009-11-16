@@ -279,12 +279,19 @@ Derived from `comint-mode' with font-lock from `d-mode'.
       (line-end-position 0)))
    " } debug_aborted"))
 
+(defmacro d-comint-save-buffer (&rest body)
+  `(let ((d-comint-save-buffer (current-buffer))
+	 (d-comint-save-buffer-ret (progn ,@body)))
+     (if (not (eq (current-buffer) d-comint-save-buffer)) 
+	 (set-buffer d-comint-save-buffer))
+     d-comint-save-buffer-ret))
+
 (defun d-comint-mode-stop (&optional dvt-buffer-name)
   (interactive
    (list (or (and current-prefix-arg (read-buffer "DVT buffer: " "*dvt*"))
 	     (buffer-name))))
   (when (null dvt-buffer-name) (setq dvt-buffer-name "*dvt*"))
-  (save-excursion
+  (d-comint-save-buffer
     (set-buffer dvt-buffer-name)
     (d-comint-mode-send-line "! stop")
     (d-comint-mode-scream 0)))
@@ -294,7 +301,7 @@ Derived from `comint-mode' with font-lock from `d-mode'.
    (list (or (and current-prefix-arg (read-buffer "DVT buffer: " "*dvt*"))
 	     (buffer-name))))
   (when (null dvt-buffer-name) (setq dvt-buffer-name "*dvt*"))
-  (save-excursion
+  (d-comint-save-buffer
     (set-buffer dvt-buffer-name)
     (d-comint-mode-send-line "! continue")
     (d-comint-mode-scream 0)))
@@ -304,7 +311,7 @@ Derived from `comint-mode' with font-lock from `d-mode'.
    (list (or (and current-prefix-arg (read-buffer "DVT buffer: " "*dvt*"))
 	     (buffer-name))))
   (when (null dvt-buffer-name) (setq dvt-buffer-name "*dvt*"))
-  (save-excursion
+  (d-comint-save-buffer
     (set-buffer dvt-buffer-name)
     (d-comint-mode-send-line "! abort")
     (d-comint-mode-scream 0)))
@@ -357,7 +364,7 @@ Derived from `comint-mode' with font-lock from `d-mode'.
    (list (or (and current-prefix-arg (read-buffer "DVT buffer: " "*dvt*"))
 	     (buffer-name))))
   (when (null dvt-buffer-name) (setq dvt-buffer-name "*dvt*"))
-  (save-excursion
+  (d-comint-save-buffer
     (set-buffer dvt-buffer-name)
     (d-comint-mode-scream)))
 
@@ -406,7 +413,7 @@ Derived from `comint-mode' with font-lock from `d-mode'.
    (list (or (and current-prefix-arg (read-buffer "DVT buffer: " "*dvt*"))
 	     (buffer-name))))
   (when (null dvt-buffer-name) (setq dvt-buffer-name "*dvt*"))
-  (save-excursion
+  (d-comint-save-buffer
     (set-buffer dvt-buffer-name)
     (d-comint-mode-send
      (save-excursion
@@ -613,7 +620,7 @@ This quotes per `shell-quote-argument', then requotes per `d-comint-mode-quote'"
    (list (or (and current-prefix-arg (read-buffer "DVT buffer: " "*dvt*"))
 	     (buffer-name))))
   (when (null dvt-buffer-name) (setq dvt-buffer-name "*dvt*"))
-  (save-excursion
+  (d-comint-save-buffer
     (set-buffer dvt-buffer-name)
     (comint-goto-process-mark)
     (delete-region (point) (point-max))))
