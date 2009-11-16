@@ -635,6 +635,7 @@ gl_LTLIBOBJS = @gl_LTLIBOBJS@
 gltests_LIBOBJS = @gltests_LIBOBJS@
 gltests_LTLIBOBJS = @gltests_LTLIBOBJS@
 guipdf = @guipdf@
+gunzip = @gunzip@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@

@@ -404,16 +404,83 @@ AC_DEFUN([CF_AM_PROG], [dnl
   AM_CONDITIONAL([ENABLE_$1], [test "${ENABLE_$1+set}" = set])dnl
 ])dnl
 dnl
+dnl $1 = do if emacs enabled
+dnl $2 = do if emacs not enabled (optional)
+AC_DEFUN([CF_IF_EMACS_ENABLED], [dnl
+  if test x"$EMACS" = xno ; then
+    ifelse([$2],[],:,[$2])
+  else
+    $1
+  fi dnl
+])dnl
+dnl
+dnl $1 = do if emacs enabled (optional)
+dnl $2 = do if emacs disabled (optional)
 AC_DEFUN([CF_EMACS_ENABLED], [dnl
   AC_REQUIRE([AM_PATH_LISPDIR])
   AC_MSG_CHECKING([if emacs is enabled (\$EMACS != no)])
-  if test x"$EMACS" = xno ; then 
-    CF_AM_CONDITIONAL([EMACS], [false])
-    AC_MSG_RESULT([emacs NOT enabled])
-  else
+  CF_IF_EMACS_ENABLED([dnl
     CF_AM_CONDITIONAL([EMACS], [:])
     AC_MSG_RESULT([emacs enabled])
-  fi dnl
+    ifelse($1,[],:,$1)dnl
+  ], [dnl
+    CF_AM_CONDITIONAL([EMACS], [false])
+    AC_MSG_RESULT([emacs NOT enabled])
+    ifelse($2,[],:,$2)dnl
+  ])dnl
+])dnl
+dnl
+dnl $1 = elisp file name (without el extension)
+AC_DEFUN([CF_EMACS_SOURCE], [dnl
+  AC_MSG_CHECKING([for emacs source file $1])
+  CF_IF_EMACS_ENABLED([dnl
+    cat >emacs-test <<EOF
+(setq emacs-test-fin "el")
+(defun emacs-test-dir (dir)
+  (setq path (concat 
+	      (file-name-as-directory 
+	       (expand-file-name 
+		(if dir dir default-directory)))
+	      "$1."
+	      emacs-test-fin))
+  (when (file-readable-p path)
+    (throw 'emacs-test nil)))
+
+(defun emacs-test-do ()
+  (catch 'emacs-test
+    (mapc 'emacs-test-dir load-path)
+    (setq emacs-test-fin "el.gz")
+    (mapc 'emacs-test-dir load-path)
+    (error "Source file not found: %s (load-path: %s)" 
+	   "$1.el"
+	   load-path))
+  (princ emacs-test-fin))
+
+(defun emacs-test ()
+  (condition-case err (emacs-test-do)
+      (error
+       (message "%s" (error-message-string err))
+       (kill-emacs 1))))
+
+EOF
+    if $EMACS -batch -q -l emacs-test -f emacs-test \
+        >emacs-test-result 2>/dev/null; then
+      fin=`cat emacs-test-result`
+      rm emacs-test emacs-test-result
+      AC_MSG_RESULT([found])
+      if test "$fin" == "el.gz"; then
+        AC_CHECK_PROG([gunzip], [gunzip], [gunzip])
+	if test -z "$gunzip"; then
+	  AC_MSG_ERROR([gunzip not found -- needed for $1])
+	fi
+      fi
+    else
+      rm emacs-test emacs-test-result
+      AC_MSG_ERROR([not found])
+    fi dnl
+  ], [dnl
+    AC_MSG_ERROR([emacs not enabled])dnl
+  ])dnl
 ])dnl
 dnl
 AC_DEFUN([CF_SET_EXPR], [dnl
