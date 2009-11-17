@@ -1,7 +1,5 @@
 #line 2 "./dmpetsc.cin"
 
-// ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
-
 #include "dm.h"
 
 #include <petscksp.h>

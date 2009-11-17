@@ -1,4 +1,4 @@
-/ERRORS (errors.d) @version_add@ module 1000 dict dup begin
+/ERRORS module 1000 dict dup begin
   /OK                                   0x def
   /ABORT                                1x def
   /QUIT                                 2x def

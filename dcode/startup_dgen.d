@@ -19,8 +19,6 @@ startup_common_save capsave {
   stop
 } if
 
-/startup (startup_dgen.d) @version_add@ pop
-
 | (source) /ERROR_NAME
 /makeerror ~[~ERRORS ~exch bind ~get bind ~error] def
 

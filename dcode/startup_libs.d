@@ -1,7 +1,5 @@
 | -*- mode: d; -*-
 
-/startup_libs (startup_libs.d) @version_add@ pop
-
 |-------------------------------------------- libs_
 | Print out shared libraries in order
 | that they were loaded

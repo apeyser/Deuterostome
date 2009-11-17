@@ -16,7 +16,6 @@ dist_noinst_DATA = \
 	ax_set_version_info.m4 \
 	petsc.make \
 	cf_latex.m4 cf_latex.make \
-	cf_svnversion.m4 cf_svnversion.make cf_svnversion-top.make \
 	cf_gentoo.make cf_debian.make cf_in.make
 
 GNULIB = 00gnulib.m4 gnulib-cache.m4 dirfd.m4 d-type.m4 extensions.m4 \
@@ -56,5 +55,3 @@ EXTRA_DIST = $(GNULIB) \
 	latex/ac_prog_psresize.m4 latex/ac_prog_psselect.m4 \
 	latex/ac_prog_texhash.m4 latex/ac_texmf_path.m4 latex/latex.m4 \
 	latex/LICENSE latex/README
-
-include $(top_srcdir)/m4/cf_svnversion.make
