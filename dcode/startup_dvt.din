@@ -1159,9 +1159,7 @@ c_         list all connections
     /HBG <d 166 219 160 > 255 div mapcolor def
     
     /NORMALTEXT ~NORMALFONT [null BLACK -1 0] makefont def
-    |/NORMALTEXT   [NORMALFONT BLACK -1 0] bind def
     /HIGHTEXT ~BOLDFONT [null BLUE -1 0] makefont def
-    |/HIGHTEXT     [BOLDFONT   BLUE  -1 0] bind def
 
 |--------------------------------------------- resist resizing
 
@@ -1285,13 +1283,14 @@ end userdict 3 -1 roll put
 |  - each 'command' string should be terminated by '\n'
 |
 
-/makemacros {begin
+/makemacros {
   { 
     Xwindows not ~stop if
+    macros ~def forall
+
     screensize /scrH name /scrW name
-    macros /rowH get /rowH name
     /nkeys 0 def /nrows 1 def
-    [ [ macros /pass0 get begin keywords end ] ] /rowlist name
+    [ [~keywords pass0 indict] ] /rowlist name
     commands length nkeys ne
       { (Macros: keys do not match commands!\n) toconsole stop } if
     /wW 1 def /wH nrows rowH mul 6 add def
@@ -1307,21 +1306,12 @@ end userdict 3 -1 roll put
       } ~exec] bind def
     |/wpane [ 1 1 wW 2 sub wH 2 sub ] def
     /line 4 /x array def
-    macros /windowsize get /windowsize name
-    macros /drawwindow get /drawwindow name
-    macros /mouseclick get /mouseclick name
-    macros /checkcolor get /checkcolor name
-    macros /outcolor   get /outcolor   name      
-    macros /BLACK get /BLACK name
-    macros /GRAY get /GRAY name
-    macros /BG get /BG name
-    macros /TEXT get /TEXT name
     /newmacros true def
     currentdict userdict debug_dict /line get 0 (/w) fax * wid * number
       0 exch getinterval mkact exec put
     wid true mapwindow
-  } stopped pop end
-} userdict 3 -1 roll put 
+  } exch ~indict stopped pop
+} userdict 3 -1 roll put
 
    
 |---------------------------- macros ----------------------------------
@@ -1337,7 +1327,6 @@ Xwindows {
     /RED   <d 1 0 0 > mapcolor def
     /BG <d 235 243 248 > 255 div mapcolor def
     /TEXT ~BOLDFONT [null BLACK -1 -1] makefont def
-    |/TEXT [BOLDFONT BLACK -1 -1] bind def
     /rowH 20 def
 
   |------------------ resist resizing of a macro window
@@ -1360,7 +1349,7 @@ Xwindows {
         newmacros { [ [ } if | ] ]
         rowH 1 sub dup line 1 put line 3 put
         /x_ 0 def /x 5 def /y rowH 2 sub def
-        macros /pass1 get begin keywords end
+        ~keywords pass1 indict
         /wW x_ 5 add def
         wid wW wH resizewindow | [ [
           newmacros { ] ] /boxlist name} if
@@ -1386,15 +1375,14 @@ Xwindows {
       } if
     } def
   
-    /macros_actions 1 dict dup begin | {
-      /click {} bind def | }
-    end def
-
+    /macros_actions {
+      /click {}
+    } bind makestruct def
     
     /mouseclick { 
       { [ 4 1 roll | ]
         /mS name /mY name /mX name
-        mS /macros macros /macros_actions get mouseaction not ~stop if
+        mS /macros macros_actions mouseaction not ~stop if
         /krow mY 1 sub rowH div def
         /kbox 0 def
         checkcolor
@@ -1410,51 +1398,50 @@ Xwindows {
     } bind def
 
   |------------------ pass0: count keywords, rows for window layout
-  
-    4 dict dup begin
-    /NL  { ] [ /nrows nrows 1 add def } bind def
-    /PRE { pop } bind def
-    /KEY { pop commands nkeys get /nkeys nkeys 1 add def } bind def
-    /GAP { pop } bind def
-    end mkread /pass0 name
+
+    /pass0 {
+      /NL  { ][ /nrows nrows 1 add def}
+      /PRE ~pop
+      /KEY {pop commands nkeys get /nkeys nkeys 1 add def}
+      /GAP ~pop
+    } bind makestruct mkread def
 
   |------------------ pass1: render (and measure) text and underlines;
   |                          a box gives the left and right x of the
   |                          keyword text
-    5 dict dup begin
-    /xname {dup /x name dup x_ le ~pop {/x_ name} ifelse} bind def
+    /pass1 {
+      /xname {dup /x name dup x_ le ~pop {/x_ name} ifelse}
     
-    /NL  {
-      ul { /ul false def x line 2 put
-        wid line GRAY drawline
-      } if
-      line 1 get rowH add dup line 1 put line 3 put
-      5 xname /y y rowH add def
-      newmacros { ] [ } if
-    } bind def
+      /NL  {
+        ul { /ul false def x line 2 put
+          wid line GRAY drawline
+        } if
+        line 1 get rowH add dup line 1 put line 3 put
+        5 xname /y y rowH add def
+        newmacros { ] [ } if
+      }
 
-    /PRE { /s name x line 0 put /ul true def
-      wid x y s TEXT drawtext pop xname pop
-    } bind def
+      /PRE { /s name x line 0 put /ul true def
+        wid x y s TEXT drawtext pop xname pop
+      }
     
-    /KEY { /s name
-      /xl x def
-      wid x y s TEXT drawtext pop xname pop
-      newmacros { /box 2 /x array def
-        xl box 0 put x box 1 put
-        box
-      } if
-    } bind def
+      /KEY { /s name
+        /xl x def
+        wid x y s TEXT drawtext pop xname pop
+        newmacros { /box 2 /x array def
+          xl box 0 put x box 1 put
+          box
+        } if
+      }
   
-    /GAP {
-      ul { /ul false def x line 2 put
-        wid line GRAY drawline
-      } if
-      { wid x y ( ) TEXT drawtext pop xname pop } repeat
-    } bind def
+      /GAP {
+        ul { /ul false def x line 2 put
+          wid line GRAY drawline
+        } if
+        {wid x y ( ) TEXT drawtext pop xname pop} repeat
+      }
+    } bind makestruct mkread def
   
-    end mkread /pass1 name
-
     | }
   end userdict 3 -1 roll put
 } if
