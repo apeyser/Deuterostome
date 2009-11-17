@@ -1,4 +1,4 @@
-/COMPOSE (compose.d) (Alex Peyser Wed Oct 21 16:39:11 2009 -0400 a1c0adb94376ff47f6475cdb70acef8e63e54b6d) (4.5.10) (jaunty64-4.5.10-7-gf722df5) version_add module
+/COMPOSE module
 200 dict dup begin
 
 |=============================== Prologue ====================================

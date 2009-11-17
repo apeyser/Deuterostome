@@ -699,7 +699,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 dist_dmstart_DATA = color.d master.d sched.d plugin.d \
 	startup_libs.d startup_dgen.d \
-	compose.d
+	linkedlist.d eps.d compose.d
 
 DISTEDITSRCS = theeye.d startup_dnode.d startup_dpawn.d \
 	startup_dvt.d dvt_macros.d matrix.d new-plugin.d \
