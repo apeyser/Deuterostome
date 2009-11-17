@@ -5,8 +5,6 @@
 %
 \ProvidesPackage{config}%
 %
-% \id must be defined before use (preferably as \verbdef\id$ID: @SVNID@$)
-%   \verbdef is defined in verbdef!
 % You should put a \\ before \titleversion
 %  in \title
 %
@@ -16,8 +14,6 @@
     \vspace{0.5\baselineskip}%
     {%
       \titleversionfont%
-      Version: @PACKAGE_VERSION@, SVN: @SVNVERSION@\\[-\baselineskip]
-      \id%
     }%
   \endgroup%
 }%

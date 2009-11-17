@@ -24,9 +24,6 @@
 /lock   ~exec bind def    |
 /unlock ~exec bind def
 
-| For plugin files.
-/version_add {4 ~pop repeat} bind def
-
 |------------------------ low-level information -------------------------
 | For debugging and quick information about objects, stacks, and system
 | resources use:

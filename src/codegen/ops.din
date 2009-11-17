@@ -1,5 +1,4 @@
 | -*- mode: d; -*-
-| ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
 
 /ops module 1000 dict dup begin 
 

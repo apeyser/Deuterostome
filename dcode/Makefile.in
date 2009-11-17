@@ -16,8 +16,6 @@
 
 # -*- mode: makefile; -*-
 
-# -*- mode: makefile; -*-
-
 VPATH = @srcdir@
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
@@ -37,8 +35,7 @@ target_triplet = @target@
 DIST_COMMON = $(dist_dmconf_DATA) $(dist_dmstart_DATA) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/new-plugin.din $(srcdir)/plugin.d \
-	$(top_srcdir)/m4/cf_in.make \
-	$(top_srcdir)/m4/cf_svnversion.make
+	$(top_srcdir)/m4/cf_in.make
 subdir = dcode
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
@@ -59,11 +56,11 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/ax_set_version_info.m4 \
 	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/cf_latex.m4 \
 	$(top_srcdir)/m4/cf_mpi.m4 $(top_srcdir)/m4/cf_petsc.m4 \
-	$(top_srcdir)/m4/cf_svnversion.m4 $(top_srcdir)/m4/codeset.m4 \
-	$(top_srcdir)/m4/configure.m4 $(top_srcdir)/m4/d-type.m4 \
-	$(top_srcdir)/m4/dirent_h.m4 $(top_srcdir)/m4/dirfd.m4 \
-	$(top_srcdir)/m4/errno_h.m4 $(top_srcdir)/m4/extensions.m4 \
-	$(top_srcdir)/m4/fnmatch.m4 $(top_srcdir)/m4/getlogin_r.m4 \
+	$(top_srcdir)/m4/codeset.m4 $(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/d-type.m4 $(top_srcdir)/m4/dirent_h.m4 \
+	$(top_srcdir)/m4/dirfd.m4 $(top_srcdir)/m4/errno_h.m4 \
+	$(top_srcdir)/m4/extensions.m4 $(top_srcdir)/m4/fnmatch.m4 \
+	$(top_srcdir)/m4/getlogin_r.m4 \
 	$(top_srcdir)/m4/gettimeofday.m4 $(top_srcdir)/m4/glibc21.m4 \
 	$(top_srcdir)/m4/glob.m4 $(top_srcdir)/m4/gnulib-common.m4 \
 	$(top_srcdir)/m4/gnulib-comp.m4 \
@@ -91,7 +88,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = errors.din
+CONFIG_CLEAN_FILES = errors.d
 SOURCES =
 DIST_SOURCES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -593,7 +590,6 @@ STDBOOL_H = @STDBOOL_H@
 STDINT_H = @STDINT_H@
 STRINGBUF = @STRINGBUF@
 STRIP = @STRIP@
-SVNVERSION_STAMP = `cat $(SVNVERSION_DIR)/svnversion.stamp`
 SYS_DICT_SIZE = @SYS_DICT_SIZE@
 SYS_STAT_H = @SYS_STAT_H@
 SYS_TIME_H = @SYS_TIME_H@
@@ -701,17 +697,18 @@ tmp = @tmp@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-dist_dmstart_DATA = color.d master.d sched.d plugin.d
-DISTEDITSRCS = theeye.d startup_dnode.d startup_dpawn.d \
-	startup_dvt.d startup_dgen.d dvt_macros.d matrix.d new-plugin.d \
-	startup_common.d startup_libs.d processes.d \
-	linkedlist.d eps.d 
+dist_dmstart_DATA = color.d master.d sched.d plugin.d \
+	startup_libs.d startup_dgen.d \
+	linkedlist.d eps.d
 
-EDITSRCS = errors.d
-nodist_dmstart_DATA = $(DISTEDITSRCS) $(EDITSRCS)
+DISTEDITSRCS = theeye.d startup_dnode.d startup_dpawn.d \
+	startup_dvt.d dvt_macros.d matrix.d new-plugin.d \
+	startup_common.d processes.d
+
+nodist_dmstart_DATA = $(DISTEDITSRCS) errors.d
 dist_dmconf_DATA = dvt.d dpawn.d
 nodist_dmconf_DATA = dnode.d
-INFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
+INFILES = $(DISTEDITSRCS) $(nodist_dmconf_DATA)
 EXTRA_DIST = $(DISTEDITSRCS:=in) $(nodist_dmconf_DATA:=in) $(IDFILES)
 CLEANFILES = $(INFILES)
 SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
@@ -778,53 +775,17 @@ edit = -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
        $(REGEX_DELETE) \
        $(PETSC_EDIT) 
 
-@MAINTAINER_MODE_FALSE@SVNVERSION_DIR = $(top_builddir)
-@MAINTAINER_MODE_TRUE@SVNVERSION_DIR = $(top_srcdir)
-SVNVERSION_EDIT = -e "s,[@]SVNVERSION[@],$(SVNVERSION_STAMP),g"
-SVNID_STAMP = `cat $(srcdir)/$@in.idstamp || echo unknown`
-SVNID_EDIT = -e "s,[@]SVNID[@],$(SVNID_STAMP),g"
-IDFILES_RULE_BASE = \
-	echo "Building idstamp: $$id"; \
-	f=`echo $$id | sed 's,.idstamp,,g'` \
-	&& if git log -n 1 --pretty='format:%cn %cd %H' \
-	      `readlink $$f || echo $$f` \
-		>$$id.tmp 2>/dev/null ; then \
-	  if test "`cat $$id`" = "`cat $$id.tmp`"; then \
-	    rm $$id.tmp || exit 1; \
-	  else \
-	    mv $$id.tmp $$id || exit 1; \
-	    touch $$f || exit 1; \
-	  fi; \
-	else rm $$id.tmp; \
-	fi
-
-IDFILES_RULE = @id=$@; $(IDFILES_RULE_BASE)
-IDFILES_REFRESH = \
-	@list="$(IDFILES)"; for id in $$list; do $(IDFILES_RULE_BASE); done
-
-IDFILES = $(INFILES:=in.idstamp)
-@MAINTAINER_MODE_TRUE@idfiles = idfiles
-SVNVERSION_TARGET = svnversion
 Makefile = Makefile
-SVNVERSION_STAMP_DEP = @SVNVERSION_STAMP@
-PACKAGE_EDIT = -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g'
-D_VERSION = ($(SVNID_STAMP)) ($(PACKAGE_VERSION)) ($(SVNVERSION_STAMP))
-D_VERSION_EDIT = -e "s,[@]version_add[@],$(D_VERSION) version_add,g"
 INFILES_RULE = \
 	! test -e $@.tmp || rm -f $@.tmp \
-	&& sed $(edit) \
-	       $(SVNVERSION_EDIT) \
-	       $(SVNID_EDIT) \
-	       $(PACKAGE_EDIT) \
-	       $(D_VERSION_EDIT) \
-	       $< >$@.tmp \
+	&& sed $(edit) $< >$@.tmp \
 	&& mv $@.tmp $@
 
 all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .cin .hin .elin .din .psin .shin .plin .styin .c .d .el .h .pl .ps .sh .sty
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_in.make $(top_srcdir)/m4/cf_svnversion.make $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_in.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -962,7 +923,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(DATA) all-local
+all-am: Makefile $(DATA)
 installdirs:
 	for dir in "$(DESTDIR)$(dmconfdir)" "$(DESTDIR)$(dmstartdir)" "$(DESTDIR)$(dmconfdir)" "$(DESTDIR)$(dmstartdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
@@ -1050,13 +1011,13 @@ uninstall-am: uninstall-dist_dmconfDATA uninstall-dist_dmstartDATA \
 
 .MAKE: install-am install-strip
 
-.PHONY: all all-am all-local check check-am clean clean-generic \
-	clean-libtool distclean distclean-generic distclean-libtool \
-	distdir dvi dvi-am html html-am info info-am install \
-	install-am install-data install-data-am \
-	install-dist_dmconfDATA install-dist_dmstartDATA install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
+.PHONY: all all-am check check-am clean clean-generic clean-libtool \
+	distclean distclean-generic distclean-libtool distdir dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-dist_dmconfDATA \
+	install-dist_dmstartDATA install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man \
 	install-nodist_dmconfDATA install-nodist_dmstartDATA \
 	install-pdf install-pdf-am install-ps install-ps-am \
 	install-strip installcheck installcheck-am installdirs \
@@ -1067,15 +1028,6 @@ uninstall-am: uninstall-dist_dmconfDATA uninstall-dist_dmstartDATA \
 	uninstall-nodist_dmstartDATA
 
 
-$(SVNVERSION_DIR)/svnversion.stamp:
-	cd $(SVNVERSION_DIR) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
-all-local: $(idfiles)
-
-.PHONY: idfiles
-
-@MAINTAINER_MODE_TRUE@$(IDFILES): ; $(IDFILES_RULE)
-@MAINTAINER_MODE_TRUE@idfiles: ; $(IDFILES_REFRESH)
-
 .cin.c:     ; $(INFILES_RULE)
 .hin.h:     ; $(INFILES_RULE)
 .din.d:     ; $(INFILES_RULE)
@@ -1085,7 +1037,7 @@ all-local: $(idfiles)
 .elin.el:   ; $(INFILES_RULE)
 .styin.sty: ; $(INFILES_RULE)
 
-$(INFILES): $(IDFILES) $(Makefile) $(SVNVERSION_STAMP_DEP)
+$(INFILES): $(Makefile)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

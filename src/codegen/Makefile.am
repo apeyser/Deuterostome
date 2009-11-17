@@ -12,7 +12,7 @@ DGEN_OPS_BUILT= \
 PRODSRCS = \
 	$(DGEN_H_BUILT) \
 	$(DGEN_OPS_BUILT) \
-	errors.din.built \
+	errors.d.built \
 	d-mode-ops.el \
 	dm-errs.h.built
 
@@ -22,12 +22,12 @@ EDITSRCS = dm-prop.c paths.h
 DISTEDITSRCS = dcoder.c dmnuminc.d dsp2def.d ops.d
 BUILT_SOURCES = $(EDITSRCS) $(DISTEDITSRCS)
 DISTCLEANFILES = dm-config.h
-INFILES = $(DISTEDITSRCS) $(EDITSRCS) errors.d
+INFILES = $(DISTEDITSRCS) $(EDITSRCS)
 CLEANFILES = $(INFILES)
 EXTRA_DIST = $(DISTEDITSRCS:=in) $(PRODSRCS) $(IDFILES)
 SUFFIXES =
 
-dist_noinst_DATA = dsp1f.d startup_dgen.d
+dist_noinst_DATA = dsp1f.d startup_dgen.d errors.d
 nodist_noinst_DATA = $(MAINTAINERCLEANFILES)
 dist_noinst_SCRIPTS = dgen-build
 dgen-build: startup_dgen.d errors.d
@@ -108,13 +108,13 @@ d-mode-ops.el: $(opsd) $(dgen) $(dgen_build)
 		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" "ops.d" \
 		"$@" "/demacs"
 
-errors.din.built: $(dcoder)
+errors.d.built: $(dcoder)
 	"$(top_builddir)/src/codegen/dcoder" \
-		"$(srcdir)/errors.din.built"
+		"$(srcdir)/errors.d.built"
 	( \
 	  cd "$(srcdir)/../../dcode" \
-	  && rm -f errors.din \
-	  && $(LN_S) ../src/codegen/errors.din.built errors.din \
+	  && rm -f errors.d \
+	  && $(LN_S) ../src/codegen/errors.d.built errors.d \
 	)
 
 edit = -e 's,[@]dmsockdir[@],$(dmsockdir),g' \

@@ -19,8 +19,6 @@
 # -*- mode: makefile; -*-
 
 # -*- mode: makefile; -*-
-
-# -*- mode: makefile; -*-
 VPATH = @srcdir@
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
@@ -39,8 +37,7 @@ host_triplet = @host@
 target_triplet = @target@
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
-	$(srcdir)/m4/cf_bundle.make \
-	$(srcdir)/m4/cf_svnversion-top.make $(top_srcdir)/configure \
+	$(srcdir)/m4/cf_bundle.make $(top_srcdir)/configure \
 	$(top_srcdir)/m4/cf_debian.make \
 	$(top_srcdir)/m4/cf_gentoo.make AUTHORS COPYING ChangeLog \
 	INSTALL NEWS compile config.guess config.sub depcomp \
@@ -69,11 +66,11 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/ax_set_version_info.m4 \
 	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/cf_latex.m4 \
 	$(top_srcdir)/m4/cf_mpi.m4 $(top_srcdir)/m4/cf_petsc.m4 \
-	$(top_srcdir)/m4/cf_svnversion.m4 $(top_srcdir)/m4/codeset.m4 \
-	$(top_srcdir)/m4/configure.m4 $(top_srcdir)/m4/d-type.m4 \
-	$(top_srcdir)/m4/dirent_h.m4 $(top_srcdir)/m4/dirfd.m4 \
-	$(top_srcdir)/m4/errno_h.m4 $(top_srcdir)/m4/extensions.m4 \
-	$(top_srcdir)/m4/fnmatch.m4 $(top_srcdir)/m4/getlogin_r.m4 \
+	$(top_srcdir)/m4/codeset.m4 $(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/d-type.m4 $(top_srcdir)/m4/dirent_h.m4 \
+	$(top_srcdir)/m4/dirfd.m4 $(top_srcdir)/m4/errno_h.m4 \
+	$(top_srcdir)/m4/extensions.m4 $(top_srcdir)/m4/fnmatch.m4 \
+	$(top_srcdir)/m4/getlogin_r.m4 \
 	$(top_srcdir)/m4/gettimeofday.m4 $(top_srcdir)/m4/glibc21.m4 \
 	$(top_srcdir)/m4/glob.m4 $(top_srcdir)/m4/gnulib-common.m4 \
 	$(top_srcdir)/m4/gnulib-comp.m4 \
@@ -613,7 +610,6 @@ STDBOOL_H = @STDBOOL_H@
 STDINT_H = @STDINT_H@
 STRINGBUF = @STRINGBUF@
 STRIP = @STRIP@
-SVNVERSION_STAMP = @SVNVERSION_STAMP@
 SYS_DICT_SIZE = @SYS_DICT_SIZE@
 SYS_STAT_H = @SYS_STAT_H@
 SYS_TIME_H = @SYS_TIME_H@
@@ -736,8 +732,6 @@ SUBDIRS = libltdl lib src dcode plugins $(BASH_DIR) ps \
 
 ACLOCAL_AMFLAGS = -I m4 -I m4/latex
 DISTCHECK_CONFIGURE_FLAGS = --enable-plugins --enable-daemon
-SVNVERSION_TARGET = svnversion
-SVNVERSION_EXTRA_DIST = svnversion.stamp
 BUNDLE = $(GENTOO_BUNDLE) $(DEBIAN_BUNDLE)
 BUNDLE_CLEANFILES = $(distdir).tar.bz2
 GENTOO_BUNDLE = gentoo
@@ -783,7 +777,7 @@ all: config.h
 .SUFFIXES:
 am--refresh:
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/m4/cf_svnversion-top.make $(srcdir)/m4/cf_bundle.make $(top_srcdir)/m4/cf_gentoo.make $(top_srcdir)/m4/cf_debian.make $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/m4/cf_bundle.make $(top_srcdir)/m4/cf_gentoo.make $(top_srcdir)/m4/cf_debian.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -1016,9 +1010,6 @@ distdir: $(DISTFILES)
 	      || exit 1; \
 	  fi; \
 	done
-	$(MAKE) $(AM_MAKEFLAGS) \
-	  top_distdir="$(top_distdir)" distdir="$(distdir)" \
-	  dist-hook
 	-find $(distdir) -type d ! -perm -777 -exec chmod a+rwx {} \; -o \
 	  ! -type d ! -perm -444 -links 1 -exec chmod a+r {} \; -o \
 	  ! -type d ! -perm -400 -exec chmod a+r {} \; -o \
@@ -1160,7 +1151,7 @@ distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -f Makefile
 distclean-am: clean-am distclean-generic distclean-hdr \
-	distclean-libtool distclean-local distclean-tags
+	distclean-libtool distclean-tags
 
 dvi: dvi-recursive
 
@@ -1216,19 +1207,18 @@ uninstall-am:
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am am--refresh check check-am clean clean-generic \
 	clean-libtool ctags ctags-recursive dist dist-all dist-bzip2 \
-	dist-gzip dist-hook dist-lzma dist-shar dist-tarZ dist-zip \
-	distcheck distclean distclean-generic distclean-hdr \
-	distclean-libtool distclean-local distclean-tags \
-	distcleancheck distdir distuninstallcheck dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
-	uninstall uninstall-am
+	dist-gzip dist-lzma dist-shar dist-tarZ dist-zip distcheck \
+	distclean distclean-generic distclean-hdr distclean-libtool \
+	distclean-tags distcleancheck distdir distuninstallcheck dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags tags-recursive uninstall uninstall-am
 
 #--disable-process
 
@@ -1239,20 +1229,6 @@ gencode:
 	cd libltdl && $(MAKE) $(AM_MAKEFLAGS) all
 	cd lib && $(MAKE) $(AM_MAKEFLAGS) all
 	cd src && $(MAKE) $(AM_MAKEFLAGS) gencode
-.PHONY: $(SVNVERSION_TARGET)
-svnversion.stamp $(SVNVERSION_TARGET): $(top_srcdir)/configure
-	$(SHELL) ./config.status svnversion.stamp
-
-distclean-local: distclean-local-svnversion
-
-.PHONY: distclean-local-svnversion
-distclean-local-svnversion:
-	if test "$(abs_top_builddir)" != "$(abs_top_srcdir)"; then \
-	  rm -f "$(top_builddir)"/svnversion.stamp || :; \
-	fi
-
-dist-hook: $(SVNVERSION_TARGET)
-	cp -p $(builddir)/svnversion.stamp $(distdir)/svnversion.stamp
 
 gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild:
 	dmver=dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild ; \
@@ -1346,7 +1322,7 @@ ubuntu:
 	$(MAKE) $(AM_MAKEFLAGS) PDEBUILD_NAME="$$$$" ubuntu-int
 
 .PHONY: bundle
-bundle: $(SVNVERSION_TARGET) $(distdir).tar.bz2
+bundle: $(distdir).tar.bz2
 
 $(distdir).tar.bz2: distdir
 	cp -pRH $(BUNDLE) $(distdir)

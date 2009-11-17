@@ -52,11 +52,11 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/ax_set_version_info.m4 \
 	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/cf_latex.m4 \
 	$(top_srcdir)/m4/cf_mpi.m4 $(top_srcdir)/m4/cf_petsc.m4 \
-	$(top_srcdir)/m4/cf_svnversion.m4 $(top_srcdir)/m4/codeset.m4 \
-	$(top_srcdir)/m4/configure.m4 $(top_srcdir)/m4/d-type.m4 \
-	$(top_srcdir)/m4/dirent_h.m4 $(top_srcdir)/m4/dirfd.m4 \
-	$(top_srcdir)/m4/errno_h.m4 $(top_srcdir)/m4/extensions.m4 \
-	$(top_srcdir)/m4/fnmatch.m4 $(top_srcdir)/m4/getlogin_r.m4 \
+	$(top_srcdir)/m4/codeset.m4 $(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/d-type.m4 $(top_srcdir)/m4/dirent_h.m4 \
+	$(top_srcdir)/m4/dirfd.m4 $(top_srcdir)/m4/errno_h.m4 \
+	$(top_srcdir)/m4/extensions.m4 $(top_srcdir)/m4/fnmatch.m4 \
+	$(top_srcdir)/m4/getlogin_r.m4 \
 	$(top_srcdir)/m4/gettimeofday.m4 $(top_srcdir)/m4/glibc21.m4 \
 	$(top_srcdir)/m4/glob.m4 $(top_srcdir)/m4/gnulib-common.m4 \
 	$(top_srcdir)/m4/gnulib-comp.m4 \
@@ -573,7 +573,6 @@ STDBOOL_H = @STDBOOL_H@
 STDINT_H = @STDINT_H@
 STRINGBUF = @STRINGBUF@
 STRIP = @STRIP@
-SVNVERSION_STAMP = @SVNVERSION_STAMP@
 SYS_DICT_SIZE = @SYS_DICT_SIZE@
 SYS_STAT_H = @SYS_STAT_H@
 SYS_TIME_H = @SYS_TIME_H@

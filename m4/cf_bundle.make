@@ -8,7 +8,7 @@ include $(top_srcdir)/m4/cf_gentoo.make
 include $(top_srcdir)/m4/cf_debian.make
 
 .PHONY: bundle
-bundle: $(SVNVERSION_TARGET) $(distdir).tar.bz2
+bundle: $(distdir).tar.bz2
 
 $(distdir).tar.bz2: distdir
 	cp -pRH $(BUNDLE) $(distdir)

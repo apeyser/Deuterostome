@@ -1,7 +1,5 @@
 #line 2 "@srcdir@/dcoder.cin"
 
-// ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
-
 #include "dm-config.h"
 #ifdef DM_HAVE_CONFIG_H
 #ifndef DM_INCLUDED_CONFIG_H
@@ -68,14 +66,13 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  fprintf(stdout,
-	  "Running dcoder, ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@\n");
+  fprintf(stdout, "Running dcoder\n");
 
   if (! (fd = fopen(argv[1], "w")))
     error_dcoder(1, errno, "Unable to open for writing: %s", argv[1]);
 
   WRITE("| -*- mode: d; -*-");
-  WRITE("/ERRORS (errors.d) @""version_add@ module 1000 dict dup begin");
+  WRITE("/ERRORS module 1000 dict dup begin");
   for (cemap = emap; cemap->str; cemap++, i++)
     if (fprintf(fd, "  /%-@NAMEBYTES@s %8lldx def\n", 
 		cemap->str, (long long) cemap->val) < 0)

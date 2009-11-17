@@ -21,10 +21,9 @@
 .*/
 /config.h
 /config.status
-/dm-4.5.5
+/dm-*/
 /libtool
 /stamp-h1
-/svnversion.stamp
 Makefile
 \#*
 .deps

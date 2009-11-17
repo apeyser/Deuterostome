@@ -1,7 +1,5 @@
 #line 2 "@srcdir@/dm-prop.cin"
 
-// ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
-
 #define DEBUG_ACTIVE 0
 #include "dm.h"
 

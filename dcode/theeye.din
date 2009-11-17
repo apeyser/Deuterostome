@@ -6,7 +6,7 @@
 |       - file systems
 |   - viewed objects are made available to other D code
 
-/TheEye (theeye.d) @version_add@ 200 dict dup begin  | of eyedict
+/TheEye 200 dict dup begin  | of eyedict
 
 |=========================== window layout =================================
 |  - horizontal:

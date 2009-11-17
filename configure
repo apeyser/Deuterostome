@@ -1267,7 +1267,6 @@ ENABLE_PLUGINS_TRUE
 ENABLE_PLUGINS_SUPPORT
 ENABLE_PLUGINS_SUPPORT_FALSE
 ENABLE_PLUGINS_SUPPORT_TRUE
-SVNVERSION_STAMP
 NAMEBYTES
 CONFIG_STATUS_DEPENDENCIES
 EGREP
@@ -12360,14 +12359,6 @@ $as_echo "$as_me: error: failed" >&2;}
     fi
   fi
 
-  { $as_echo "$as_me:$LINENO: checking adding SVNVERSION to config.status" >&5
-$as_echo_n "checking adding SVNVERSION to config.status... " >&6; }
-  ac_config_commands="$ac_config_commands svnversion.stamp"
-
-    SVNVERSION_STAMP="\$(top_srcdir)/svnversion.stamp \$(top_builddir)/svnversion.stamp"
-
-  { $as_echo "$as_me:$LINENO: result: instantiated" >&5
-$as_echo "instantiated" >&6; }
 
     { $as_echo "$as_me:$LINENO: checking if plugins-support is enabled" >&5
 $as_echo_n "checking if plugins-support is enabled... " >&6; }
@@ -17172,13 +17163,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:17175: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:17166: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:17178: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:17169: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:17181: output\"" >&5)
+  (eval echo "\"\$as_me:17172: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -18369,7 +18360,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 18372 "configure"' > conftest.$ac_ext
+  echo '#line 18363 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -19734,11 +19725,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19737: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19728: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:19741: \$? = $ac_status" >&5
+   echo "$as_me:19732: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -20073,11 +20064,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:20076: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:20067: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:20080: \$? = $ac_status" >&5
+   echo "$as_me:20071: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -20178,11 +20169,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:20181: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:20172: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:20185: \$? = $ac_status" >&5
+   echo "$as_me:20176: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -20233,11 +20224,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:20236: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:20227: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:20240: \$? = $ac_status" >&5
+   echo "$as_me:20231: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -23046,7 +23037,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 23049 "configure"
+#line 23040 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -23142,7 +23133,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 23145 "configure"
+#line 23136 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -35142,11 +35133,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:35145: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:35136: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:35149: \$? = $ac_status" >&5
+   echo "$as_me:35140: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -35241,11 +35232,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:35244: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:35235: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:35248: \$? = $ac_status" >&5
+   echo "$as_me:35239: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -35293,11 +35284,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:35296: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:35287: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:35300: \$? = $ac_status" >&5
+   echo "$as_me:35291: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -48592,7 +48583,7 @@ $as_echo "$gl_cv_next_wctype_h" >&6; }
 
 
 
-ac_config_links="$ac_config_links src/dsp1f.h:src/codegen/dsp1f.h.built src/dmnuminc.h:src/codegen/dmnuminc.h.built src/dsp2def.h:src/codegen/dsp2def.h.built src/dgen_0.h:src/codegen/dgen_0.h.built src/dnode_0.h:src/codegen/dnode_0.h.built src/dpawn_0.h:src/codegen/dpawn_0.h.built src/dm-errs.h:src/codegen/dm-errs.h.built src/dvt_0.h:src/codegen/dvt_0.h.built src/codegen/dm.h:src/dm.h src/codegen/dmglobals.c:src/dmglobals.c src/codegen/dsp1.c:src/dsp1.c src/codegen/dm1.c:src/dm1.c src/codegen/dm2.c:src/dm2.c src/codegen/dm2.h:src/dm2.h src/codegen/dm3.h:src/dm3.h src/codegen/dm-prop.h:src/dm-prop.h src/codegen/dm-signals.h:src/dm-signals.h src/codegen/dm-vm.h:src/dm-vm.h src/codegen/dm-swapbytes.h:src/dm-swapbytes.h src/codegen/dm-conv.c:src/dm-conv.c src/codegen/dm3.c:src/dm3.c src/codegen/dm-prop.cin:src/dm-prop.cin src/codegen/dm-signals.c:src/dm-signals.c src/codegen/dm-vm.c:src/dm-vm.c src/codegen/dm4.c:src/dm4.c src/codegen/dm5.c:src/dm5.c src/codegen/dm5.h:src/dm5.h src/codegen/dm6.c:src/dm6.c src/codegen/dm6.h:src/dm6.h src/codegen/dm7.c:src/dm7.c src/codegen/dm8.c:src/dm8.c src/codegen/dmnum.c:src/dmnum.c src/codegen/dsp2.c:src/dsp2.c src/codegen/dm-types.h:src/dm-types.h src/codegen/dm-types.c:src/dm-types.c src/codegen/paths.hin:src/paths.hin src/codegen/dgen.c:src/dgen.c src/codegen/dgen_1.h:src/dgen_1.h src/codegen/dgen-build:src/dgen-build src/codegen/dmnum.h:src/dmnum.h src/codegen/dm-nextevent.c:src/dm-nextevent.c src/codegen/dm-nextevent.h:src/dm-nextevent.h plugins/plugin.d:dcode/plugin.d dcode/errors.din:src/codegen/errors.din.built plugins/startup_dgen.d:src/codegen/startup_dgen.d emacs/d-mode-ops.el:src/codegen/d-mode-ops.el plugins/new-plugin.din:dcode/new-plugin.din doc/dvt-3.0.bib:doc/dvt.bib doc/dvt-emacs.bib:doc/dvt.bib doc/newbook.bib:doc/dvt.bib"
+ac_config_links="$ac_config_links src/dsp1f.h:src/codegen/dsp1f.h.built src/dmnuminc.h:src/codegen/dmnuminc.h.built src/dsp2def.h:src/codegen/dsp2def.h.built src/dgen_0.h:src/codegen/dgen_0.h.built src/dnode_0.h:src/codegen/dnode_0.h.built src/dpawn_0.h:src/codegen/dpawn_0.h.built src/dm-errs.h:src/codegen/dm-errs.h.built src/dvt_0.h:src/codegen/dvt_0.h.built src/codegen/dm.h:src/dm.h src/codegen/dmglobals.c:src/dmglobals.c src/codegen/dsp1.c:src/dsp1.c src/codegen/dm1.c:src/dm1.c src/codegen/dm2.c:src/dm2.c src/codegen/dm2.h:src/dm2.h src/codegen/dm3.h:src/dm3.h src/codegen/dm-prop.h:src/dm-prop.h src/codegen/dm-signals.h:src/dm-signals.h src/codegen/dm-vm.h:src/dm-vm.h src/codegen/dm-swapbytes.h:src/dm-swapbytes.h src/codegen/dm-conv.c:src/dm-conv.c src/codegen/dm3.c:src/dm3.c src/codegen/dm-prop.cin:src/dm-prop.cin src/codegen/dm-signals.c:src/dm-signals.c src/codegen/dm-vm.c:src/dm-vm.c src/codegen/dm4.c:src/dm4.c src/codegen/dm5.c:src/dm5.c src/codegen/dm5.h:src/dm5.h src/codegen/dm6.c:src/dm6.c src/codegen/dm6.h:src/dm6.h src/codegen/dm7.c:src/dm7.c src/codegen/dm8.c:src/dm8.c src/codegen/dmnum.c:src/dmnum.c src/codegen/dsp2.c:src/dsp2.c src/codegen/dm-types.h:src/dm-types.h src/codegen/dm-types.c:src/dm-types.c src/codegen/paths.hin:src/paths.hin src/codegen/dgen.c:src/dgen.c src/codegen/dgen_1.h:src/dgen_1.h src/codegen/dgen-build:src/dgen-build src/codegen/dmnum.h:src/dmnum.h src/codegen/dm-nextevent.c:src/dm-nextevent.c src/codegen/dm-nextevent.h:src/dm-nextevent.h plugins/plugin.d:dcode/plugin.d dcode/errors.d:src/codegen/errors.d.built plugins/startup_dgen.d:src/codegen/startup_dgen.d emacs/d-mode-ops.el:src/codegen/d-mode-ops.el plugins/new-plugin.din:dcode/new-plugin.din doc/dvt-3.0.bib:doc/dvt.bib doc/dvt-emacs.bib:doc/dvt.bib doc/newbook.bib:doc/dvt.bib"
 
 
 ac_config_files="$ac_config_files Makefile src/Makefile src/codegen/Makefile src/dm.pc plugins/Makefile plugins/dmflex.l ps/Makefile sh/Makefile emacs/Makefile dcode/Makefile test/Makefile m4/Makefile test/arr.d lib/Makefile doc/Makefile"
@@ -49542,9 +49533,6 @@ PACKAGE="$PACKAGE"
 PACKAGE="$PACKAGE"
 AMDEP_TRUE="$AMDEP_TRUE" ac_aux_dir="$ac_aux_dir"
 
-    USE_MAINTAINER_MODE=$USE_MAINTAINER_MODE
-
-
 
 # The HP-UX ksh and POSIX shell print the target directory to stdout
 # if CDPATH is set.
@@ -49909,7 +49897,6 @@ do
     "src/dm-config.h") CONFIG_COMMANDS="$CONFIG_COMMANDS src/dm-config.h" ;;
     "src/codegen/dm-config.h") CONFIG_COMMANDS="$CONFIG_COMMANDS src/codegen/dm-config.h" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
-    "svnversion.stamp") CONFIG_COMMANDS="$CONFIG_COMMANDS svnversion.stamp" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "src/dsp1f.h") CONFIG_LINKS="$CONFIG_LINKS src/dsp1f.h:src/codegen/dsp1f.h.built" ;;
     "src/dmnuminc.h") CONFIG_LINKS="$CONFIG_LINKS src/dmnuminc.h:src/codegen/dmnuminc.h.built" ;;
@@ -49954,7 +49941,7 @@ do
     "src/codegen/dm-nextevent.c") CONFIG_LINKS="$CONFIG_LINKS src/codegen/dm-nextevent.c:src/dm-nextevent.c" ;;
     "src/codegen/dm-nextevent.h") CONFIG_LINKS="$CONFIG_LINKS src/codegen/dm-nextevent.h:src/dm-nextevent.h" ;;
     "plugins/plugin.d") CONFIG_LINKS="$CONFIG_LINKS plugins/plugin.d:dcode/plugin.d" ;;
-    "dcode/errors.din") CONFIG_LINKS="$CONFIG_LINKS dcode/errors.din:src/codegen/errors.din.built" ;;
+    "dcode/errors.d") CONFIG_LINKS="$CONFIG_LINKS dcode/errors.d:src/codegen/errors.d.built" ;;
     "plugins/startup_dgen.d") CONFIG_LINKS="$CONFIG_LINKS plugins/startup_dgen.d:src/codegen/startup_dgen.d" ;;
     "emacs/d-mode-ops.el") CONFIG_LINKS="$CONFIG_LINKS emacs/d-mode-ops.el:src/codegen/d-mode-ops.el" ;;
     "plugins/new-plugin.din") CONFIG_LINKS="$CONFIG_LINKS plugins/new-plugin.din:dcode/new-plugin.din" ;;
@@ -51068,40 +51055,6 @@ $as_echo "$as_me: error: cannot create directory $as_dir" >&2;}
     echo '# dummy' > "$dirpart/$file"
   done
 done
- ;;
-    "svnversion.stamp":C)
-    SVNVERSION="unknown"
-          test -e "$srcdir/svnversion.stamp" \
-      && cf_svnversion_src=`cat "$srcdir/svnversion.stamp" 2>/dev/null`
-          test -e "svnversion.stamp" \
-      && cf_svnversion_build=`cat "svnversion.stamp" 2>/dev/null`
-          cf_svnversion=`( git describe || echo unknown ) 2>/dev/null`
-      test -n "$cf_svnversion_src" \
-    && test "$cf_svnversion_src" != "unknown" \
-    && test "$cf_svnversion_src" != "exported" \
-    && SVNVERSION="$cf_svnversion_src"
-      test -n "$cf_svnversion_build" \
-    && test "$cf_svnversion_build" != "unknown" \
-    && test "$cf_svnversion_build" != "exported" \
-    && SVNVERSION="$cf_svnversion_build"
-      test -n "$cf_svnversion" \
-    && test "$cf_svnversion" != "unknown" \
-    && test "$cf_svnversion" != "exported" \
-    && SVNVERSION="$cf_svnversion"
-    if test $USE_MAINTAINER_MODE = yes; then
-         test "$SVNVERSION" != "$cf_svnversion_src" \
-    && echo "$SVNVERSION" >"$srcdir/svnversion.stamp"
-    fi
-      test "$SVNVERSION" != "$cf_svnversion_build" \
-    && echo "$SVNVERSION" >"svnversion.stamp"
-    { $as_echo "$as_me:$LINENO: src stamp = $cf_svnversion_src" >&5
-$as_echo "$as_me: src stamp = $cf_svnversion_src" >&6;}
-    { $as_echo "$as_me:$LINENO: build stamp = $cf_svnversion_build" >&5
-$as_echo "$as_me: build stamp = $cf_svnversion_build" >&6;}
-    { $as_echo "$as_me:$LINENO: svnversion = $cf_svnversion" >&5
-$as_echo "$as_me: svnversion = $cf_svnversion" >&6;}
-    { $as_echo "$as_me:$LINENO: SVNVERSION = $SVNVERSION" >&5
-$as_echo "$as_me: SVNVERSION = $SVNVERSION" >&6;}
  ;;
     "libtool":C)
 

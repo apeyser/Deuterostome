@@ -16,8 +16,6 @@
 
 # -*- mode: makefile; -*-
 
-# -*- mode: makefile; -*-
-
 VPATH = @srcdir@
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
@@ -35,8 +33,7 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 DIST_COMMON = $(dist_pkgpsdata_DATA) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(top_srcdir)/m4/cf_in.make \
-	$(top_srcdir)/m4/cf_svnversion.make
+	$(srcdir)/Makefile.in $(top_srcdir)/m4/cf_in.make
 subdir = ps
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
@@ -57,11 +54,11 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/ax_set_version_info.m4 \
 	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/cf_latex.m4 \
 	$(top_srcdir)/m4/cf_mpi.m4 $(top_srcdir)/m4/cf_petsc.m4 \
-	$(top_srcdir)/m4/cf_svnversion.m4 $(top_srcdir)/m4/codeset.m4 \
-	$(top_srcdir)/m4/configure.m4 $(top_srcdir)/m4/d-type.m4 \
-	$(top_srcdir)/m4/dirent_h.m4 $(top_srcdir)/m4/dirfd.m4 \
-	$(top_srcdir)/m4/errno_h.m4 $(top_srcdir)/m4/extensions.m4 \
-	$(top_srcdir)/m4/fnmatch.m4 $(top_srcdir)/m4/getlogin_r.m4 \
+	$(top_srcdir)/m4/codeset.m4 $(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/d-type.m4 $(top_srcdir)/m4/dirent_h.m4 \
+	$(top_srcdir)/m4/dirfd.m4 $(top_srcdir)/m4/errno_h.m4 \
+	$(top_srcdir)/m4/extensions.m4 $(top_srcdir)/m4/fnmatch.m4 \
+	$(top_srcdir)/m4/getlogin_r.m4 \
 	$(top_srcdir)/m4/gettimeofday.m4 $(top_srcdir)/m4/glibc21.m4 \
 	$(top_srcdir)/m4/glob.m4 $(top_srcdir)/m4/gnulib-common.m4 \
 	$(top_srcdir)/m4/gnulib-comp.m4 \
@@ -588,7 +585,6 @@ STDBOOL_H = @STDBOOL_H@
 STDINT_H = @STDINT_H@
 STRINGBUF = @STRINGBUF@
 STRIP = @STRIP@
-SVNVERSION_STAMP = `cat $(SVNVERSION_DIR)/svnversion.stamp`
 SYS_DICT_SIZE = @SYS_DICT_SIZE@
 SYS_STAT_H = @SYS_STAT_H@
 SYS_TIME_H = @SYS_TIME_H@
@@ -705,53 +701,17 @@ dist_pkgpsdata_DATA = cajal2.img form_1.ps form_2.ps graf_1.ps gray.ps \
 
 nodist_pkgpsdata_DATA = thursday.ps tuesday.ps
 edit = -e 's,[@]pkgpsdatadir[@],$(pkgpsdatadir),g'
-@MAINTAINER_MODE_FALSE@SVNVERSION_DIR = $(top_builddir)
-@MAINTAINER_MODE_TRUE@SVNVERSION_DIR = $(top_srcdir)
-SVNVERSION_EDIT = -e "s,[@]SVNVERSION[@],$(SVNVERSION_STAMP),g"
-SVNID_STAMP = `cat $(srcdir)/$@in.idstamp || echo unknown`
-SVNID_EDIT = -e "s,[@]SVNID[@],$(SVNID_STAMP),g"
-IDFILES_RULE_BASE = \
-	echo "Building idstamp: $$id"; \
-	f=`echo $$id | sed 's,.idstamp,,g'` \
-	&& if git log -n 1 --pretty='format:%cn %cd %H' \
-	      `readlink $$f || echo $$f` \
-		>$$id.tmp 2>/dev/null ; then \
-	  if test "`cat $$id`" = "`cat $$id.tmp`"; then \
-	    rm $$id.tmp || exit 1; \
-	  else \
-	    mv $$id.tmp $$id || exit 1; \
-	    touch $$f || exit 1; \
-	  fi; \
-	else rm $$id.tmp; \
-	fi
-
-IDFILES_RULE = @id=$@; $(IDFILES_RULE_BASE)
-IDFILES_REFRESH = \
-	@list="$(IDFILES)"; for id in $$list; do $(IDFILES_RULE_BASE); done
-
-IDFILES = $(INFILES:=in.idstamp)
-@MAINTAINER_MODE_TRUE@idfiles = idfiles
-SVNVERSION_TARGET = svnversion
 Makefile = Makefile
-SVNVERSION_STAMP_DEP = @SVNVERSION_STAMP@
-PACKAGE_EDIT = -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g'
-D_VERSION = ($(SVNID_STAMP)) ($(PACKAGE_VERSION)) ($(SVNVERSION_STAMP))
-D_VERSION_EDIT = -e "s,[@]version_add[@],$(D_VERSION) version_add,g"
 INFILES_RULE = \
 	! test -e $@.tmp || rm -f $@.tmp \
-	&& sed $(edit) \
-	       $(SVNVERSION_EDIT) \
-	       $(SVNID_EDIT) \
-	       $(PACKAGE_EDIT) \
-	       $(D_VERSION_EDIT) \
-	       $< >$@.tmp \
+	&& sed $(edit) $< >$@.tmp \
 	&& mv $@.tmp $@
 
 all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .cin .hin .elin .din .psin .shin .plin .styin .c .d .el .h .pl .ps .sh .sty
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_in.make $(top_srcdir)/m4/cf_svnversion.make $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_in.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -855,7 +815,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(DATA) all-local
+all-am: Makefile $(DATA)
 installdirs:
 	for dir in "$(DESTDIR)$(pkgpsdatadir)" "$(DESTDIR)$(pkgpsdatadir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
@@ -943,29 +903,19 @@ uninstall-am: uninstall-dist_pkgpsdataDATA \
 
 .MAKE: install-am install-strip
 
-.PHONY: all all-am all-local check check-am clean clean-generic \
-	clean-libtool distclean distclean-generic distclean-libtool \
-	distdir dvi dvi-am html html-am info info-am install \
-	install-am install-data install-data-am \
-	install-dist_pkgpsdataDATA install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man \
-	install-nodist_pkgpsdataDATA install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+.PHONY: all all-am check check-am clean clean-generic clean-libtool \
+	distclean distclean-generic distclean-libtool distdir dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-dist_pkgpsdataDATA \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-html install-html-am install-info install-info-am \
+	install-man install-nodist_pkgpsdataDATA install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
 	uninstall-dist_pkgpsdataDATA uninstall-nodist_pkgpsdataDATA
 
-
-$(SVNVERSION_DIR)/svnversion.stamp:
-	cd $(SVNVERSION_DIR) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
-all-local: $(idfiles)
-
-.PHONY: idfiles
-
-@MAINTAINER_MODE_TRUE@$(IDFILES): ; $(IDFILES_RULE)
-@MAINTAINER_MODE_TRUE@idfiles: ; $(IDFILES_REFRESH)
 
 .cin.c:     ; $(INFILES_RULE)
 .hin.h:     ; $(INFILES_RULE)
@@ -976,7 +926,7 @@ all-local: $(idfiles)
 .elin.el:   ; $(INFILES_RULE)
 .styin.sty: ; $(INFILES_RULE)
 
-$(INFILES): $(IDFILES) $(Makefile) $(SVNVERSION_STAMP_DEP)
+$(INFILES): $(Makefile)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
