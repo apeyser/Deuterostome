@@ -8,14 +8,14 @@
 |
 
 /map {
-  1 1 index length 1 sub -1 0 {/i name | <l> mul
+  1 1 index last -1 0 {/i name | <l> mul
     1 index i get mul                  | <l> mul*<l>_i
     dup 2 index i put                  | <l> mul*<l>_i
   } for
   pop dup dup last get 1 ne {(Illegal cut\n) toconsole halt} if
 } bind userdef
 
-| dim_s ... dim_f n | <l dim_f*..*dim_s .. dim_f>
+| dim_s ... dim_f n | <l dim_f*..*dim_s .. dim_f 1>
 /mapn {
   1 exch dup 1 add /l array 1 | s .. f 1 <l> 1
   3 -1 roll -1 0 {/i name     | s .. f   <l> mul  
@@ -30,7 +30,7 @@
 |
 | Create a matrix of s. .. .f size
 | where /map <d dim_f*...*dim_s> 
-|       /matrix <l dim_f*...*dim_s ... dim_f>
+|       /matrix <l dim_f*...*dim_s ... dim_f 1>
 |
 /mat_dict {
   mapn dup 0 get /d array
@@ -98,7 +98,7 @@
 
 | matrix map submatrix col | submatrix submap(map)
 /columnate1 {
-  1 columnate 0 1 index length 1 sub getinterval
+  1 columnate 0 1 index last getinterval
 } bind userdef
 
 | matrix map submatrix row_s rows col_s cols | submatrix submap(map)
