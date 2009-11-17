@@ -150,11 +150,22 @@
 | /name ~active | --
 |
 | defines /name in userdict with a procedure
-| that calls executes active in the current dict
+| that calls executes active in currentdict
 |
 /userdef {
   ~[exch destruct_exec currentdict ~indict]
   userdict 3 -1 roll put
+} bind def
+
+|---------------- dictdef ---------------------------
+| /name ~active | --
+|
+| defines /name in currentdict with a procedure
+| that calls executes active in currentdict
+|
+/dictdef {
+  ~[exch destruct_exec currentdict ~indict]
+  def
 } bind def
 
 |================ makelist =======================

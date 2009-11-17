@@ -4,7 +4,7 @@
 |======================= map
 |
 | Make a map array in place:
-| <l dim_s ... dim_f> | <l dim_f*..*dim_s ... dim_f>
+| <l dim_s ... dim_f 1> | <l dim_f*..*dim_s ... dim_f 1>
 |
 
 /map {
@@ -12,17 +12,17 @@
     1 index i get mul                  | <l> mul*<l>_i
     dup 2 index i put                  | <l> mul*<l>_i
   } for
-  pop dup dup length 1 sub get 1 ne {(Illegal cut\n) toconsole halt} if
+  pop dup dup last get 1 ne {(Illegal cut\n) toconsole halt} if
 } bind userdef
 
 | dim_s ... dim_f n | <l dim_f*..*dim_s .. dim_f>
 /mapn {
-  dup /l array 1
-  3 -1 roll 1 sub -1 0 {/i name | s .. f   <l> mul  
-    3 -1 roll mul               | s .. f-1 <l> mul*f
-    dup 2 index i put           | s .. f-1 <l> mul*f
+  1 exch dup 1 add /l array 1 | s .. f 1 <l> 1
+  3 -1 roll -1 0 {/i name     | s .. f   <l> mul  
+    3 -1 roll mul             | s .. f-1 <l> mul*f
+    dup 2 index i put         | s .. f-1 <l> mul*f
   } for
-  pop dup dup length 1 sub get 1 ne {(Illegal cut\n) toconsole halt} if
+  pop dup dup last get 1 ne {(Illegal cut\n) toconsole halt} if
 } bind userdef
 
 |==================== mat_dict
