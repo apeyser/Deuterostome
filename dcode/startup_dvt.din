@@ -1401,9 +1401,9 @@ Xwindows {
 
     /pass0 {
       /NL  { ][ /nrows nrows 1 add def}
-      /PRE ~pop
+      /PRE pop
       /KEY {pop commands nkeys get /nkeys nkeys 1 add def}
-      /GAP ~pop
+      /GAP pop
     } bind makestruct mkread def
 
   |------------------ pass1: render (and measure) text and underlines;
