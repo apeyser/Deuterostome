@@ -50,11 +50,11 @@
 | matrix map i | submatrix submap(map)
 
 /ss {
-  /i name                             | matrix map
-  1 1 index length 1 sub getinterval  | matrix submap
-  dup 0 get /sz name                  | matrix submap
-  exch sz i mul sz getinterval        | submap submatrix
-  exch                                | submatrix submap
+  /i name                      | matrix map
+  1 1 index last getinterval   | matrix submap
+  dup 0 get /sz name           | matrix submap
+  exch sz i mul sz getinterval | submap submatrix
+  exch                         | submatrix submap
 } bind userdef
 
 | matdict i | submatrix
