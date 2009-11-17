@@ -12,7 +12,7 @@ dist_dmconf_DATA = dvt.d dpawn.d
 
 nodist_dmconf_DATA = dnode.d
 
-INFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
+INFILES = $(DISTEDITSRCS) $(nodist_dmconf_DATA)
 EXTRA_DIST = $(DISTEDITSRCS:=in) $(nodist_dmconf_DATA:=in) $(IDFILES)
 CLEANFILES = $(INFILES)
 SUFFIXES =

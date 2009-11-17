@@ -14,3 +14,5 @@
 /test.la
 /test2.la
 /throw.la
+/dm-*-header.h
+/dm-*-main.h
