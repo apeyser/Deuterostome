@@ -34,7 +34,7 @@
 |
 /mat_dict {
   mapn dup 0 get /d array
-  openlist /matrix /map makestruct_stack
+  openlist /map /matrix makestruct_stack
 } bind userdef
 
 |================= mat_dict_get
