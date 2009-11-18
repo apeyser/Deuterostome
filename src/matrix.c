@@ -188,7 +188,7 @@ DM_INLINE_STATIC P pivot_check(B* pivot, INDEX_SIZE rows)
 
     p = ((L32*) VALUE_PTR(pivot));
     p_ = p + rows;
-    while (p < p_ && *p > 1 && *p > rows) p++;
+    while (p < p_ && *p >= 0 && *p < rows) p++;
     if (p != p_) return MATRIX_PIVOT_CORR;
 
     return OK;
