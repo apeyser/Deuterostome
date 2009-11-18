@@ -705,7 +705,9 @@ end def |========= end of mpi data ================
 
 /dvtrespond {
   save
-  console ~[userdict /knode get {dvt begin setready_dnode} ~exec] send 
+  console ~[userdict /knode get {
+    userdict /dvt get begin setready_dnode
+  } ~exec] send 
   restore
 } bind def
 
