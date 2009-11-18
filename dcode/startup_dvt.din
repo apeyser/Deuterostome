@@ -147,6 +147,10 @@ startup_common_save capsave {
     } if 
   } bind def
 
+  /dvt_exec {
+    line mkact [ currentdict end ~stopped push begin ~stop if |]
+  } bind def
+
   /tags [
 
   |-- no tag
@@ -155,7 +159,7 @@ startup_common_save capsave {
   |         busy: discard phrase and print 'Wait!'
 
     { 
-      kbdowner 0 eq {line end mkact exec dvt begin} { { 
+      kbdowner 0 eq ~dvt_exec { {
         node 3 get {(Wait!\n) toconsole} { 
           knode setbusy 
           save
@@ -168,18 +172,14 @@ startup_common_save capsave {
     |-- %
     | dvt - execute phrase
     | dnode - execute phrase on dvt
-    {
-      line end mkact exec dvt begin
-    } bind
+    ~dvt_exec
 
     |-- !
     | dvt   - ignore tag and execute rest of phrase
     | dnode - send phrase regardless of dnode state
     
     { 
-      kbdowner 0 eq { 
-        line end mkact exec dvt begin
-      } { 
+      kbdowner 0 eq ~dvt_exec {
         { node 2 get line send } fornodes
       } ifelse
     } bind
@@ -211,14 +211,14 @@ startup_common_save capsave {
     
     { 
       kbdowner 0 eq { 
-        combuf 0 line mkact end exec dvt begin
+        combuf 0 dvt_exec
         ( &) fax 0 exch getinterval tosystem
       } { 
         { 
           node 3 get {(Wait!\n) toconsole} { 
             knode setbusy
             save
-            node 2 get ~[~[line mkact exec knode ~dvtsystem] ~lock] send
+            node 2 get ~[~[dvt_exec knode ~dvtsystem] ~lock] send
             restore
           } ifelse
         } fornodes
@@ -234,7 +234,7 @@ startup_common_save capsave {
     
     { 
       kbdowner 0 eq { 
-        combuf 0 line mkact end exec dvt begin
+        combuf 0 dvt_exec
         ( &) fax 0 exch getinterval tosystem
       } { 
         { 
@@ -253,7 +253,7 @@ startup_common_save capsave {
     | dnode - execute on dnode, not pawns
 
     { 
-      kbdowner 0 eq {line end mkact exec dvt begin} { { 
+      kbdowner 0 eq ~dvt_exec { { 
         node 3 get {node 2 get line send} { 
           knode setbusy 
           save
