@@ -1,6 +1,6 @@
 | -*- mode: d; -*-
 
-/PETSC_TESTER (petsc-tester.d) @version_add@ 200 {
+/PETSC_TESTER 200 {
 
   /dim 5 def
   /show true def 

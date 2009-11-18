@@ -1,6 +1,6 @@
 | -*- mode: d; -*-
 
-/MATRIX_TEST (matrix-test.d) @version_add@ 200 {
+/MATRIX_TEST 200 {
 
 /m 1000 def
 

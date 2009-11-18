@@ -16,8 +16,6 @@
 
 # -*- mode: makefile; -*-
 
-# -*- mode: makefile; -*-
-
 
 VPATH = @srcdir@
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
@@ -47,8 +45,7 @@ target_triplet = @target@
 @ENABLE_PETSC_FALSE@@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@am__append_4 = .plugins
 DIST_COMMON = $(am__dist_noinst_DATA_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/dmflex.l.in \
-	$(top_srcdir)/m4/cf_in.make \
-	$(top_srcdir)/m4/cf_svnversion.make
+	$(top_srcdir)/m4/cf_in.make
 subdir = plugins
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
@@ -69,11 +66,11 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/ax_set_version_info.m4 \
 	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/cf_latex.m4 \
 	$(top_srcdir)/m4/cf_mpi.m4 $(top_srcdir)/m4/cf_petsc.m4 \
-	$(top_srcdir)/m4/cf_svnversion.m4 $(top_srcdir)/m4/codeset.m4 \
-	$(top_srcdir)/m4/configure.m4 $(top_srcdir)/m4/d-type.m4 \
-	$(top_srcdir)/m4/dirent_h.m4 $(top_srcdir)/m4/dirfd.m4 \
-	$(top_srcdir)/m4/errno_h.m4 $(top_srcdir)/m4/extensions.m4 \
-	$(top_srcdir)/m4/fnmatch.m4 $(top_srcdir)/m4/getlogin_r.m4 \
+	$(top_srcdir)/m4/codeset.m4 $(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/d-type.m4 $(top_srcdir)/m4/dirent_h.m4 \
+	$(top_srcdir)/m4/dirfd.m4 $(top_srcdir)/m4/errno_h.m4 \
+	$(top_srcdir)/m4/extensions.m4 $(top_srcdir)/m4/fnmatch.m4 \
+	$(top_srcdir)/m4/getlogin_r.m4 \
 	$(top_srcdir)/m4/gettimeofday.m4 $(top_srcdir)/m4/glibc21.m4 \
 	$(top_srcdir)/m4/glob.m4 $(top_srcdir)/m4/gnulib-common.m4 \
 	$(top_srcdir)/m4/gnulib-comp.m4 \
@@ -714,7 +711,6 @@ STDBOOL_H = @STDBOOL_H@
 STDINT_H = @STDINT_H@
 STRINGBUF = @STRINGBUF@
 STRIP = @STRIP@
-SVNVERSION_STAMP = `cat $(SVNVERSION_DIR)/svnversion.stamp`
 SYS_DICT_SIZE = @SYS_DICT_SIZE@
 SYS_STAT_H = @SYS_STAT_H@
 SYS_TIME_H = @SYS_TIME_H@
@@ -886,48 +882,10 @@ SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
 @ENABLE_PLUGINS_SUPPORT_TRUE@pkglib_DATA = $(PLACEHOLDER) 
 @ENABLE_PLUGINS_SUPPORT_TRUE@nodist_dmstart_DATA = $(IPETSC_D)
 @ENABLE_PLUGINS_SUPPORT_TRUE@CLEANFILES = $(BUILT_SOURCES) $(PETSC_D)
-@MAINTAINER_MODE_FALSE@SVNVERSION_DIR = $(top_builddir)
-@MAINTAINER_MODE_TRUE@SVNVERSION_DIR = $(top_srcdir)
-SVNVERSION_EDIT = -e "s,[@]SVNVERSION[@],$(SVNVERSION_STAMP),g"
-SVNID_STAMP = `cat $(srcdir)/$@in.idstamp 2>/dev/null || echo unknown`
-SVNID_EDIT = -e "s,[@]SVNID[@],$(SVNID_STAMP),g"
-IDFILES_RULE_BASE = \
-	echo "Building idstamp: $$id"; \
-	f=`echo $$id | sed 's,.idstamp,,g'` \
-	&& t=`echo $$$$.$$id` \
-	&& if git log -n 1 --pretty='format:%cn %cd %H' \
-	      `readlink $$f || echo $$f` \
-		>$$t 2>/dev/null ; then \
-	  if test "`cat $$id 2>/dev/null`" = "`cat $$t 2>/dev/null`"; \
-	  then \
-	    rm $$t || exit 1; \
-	  else \
-	    mv $$t $$id || exit 1; \
-	    touch $$f || exit 1; \
-	  fi; \
-	else rm $$t; \
-	fi
-
-IDFILES_RULE = @id=$@; $(IDFILES_RULE_BASE)
-IDFILES_REFRESH = \
-	@list="$(IDFILES)"; for id in $$list; do $(IDFILES_RULE_BASE); done
-
-IDFILES = $(INFILES:=in.idstamp)
-@MAINTAINER_MODE_TRUE@idfiles = idfiles
-SVNVERSION_TARGET = svnversion
 Makefile = Makefile
-SVNVERSION_STAMP_DEP = @SVNVERSION_STAMP@
-PACKAGE_EDIT = -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g'
-D_VERSION = ($(SVNID_STAMP)) ($(PACKAGE_VERSION)) ($(SVNVERSION_STAMP))
-D_VERSION_EDIT = -e "s,[@]version_add[@],$(D_VERSION) version_add,g"
 INFILES_RULE = \
 	! test -e $@.tmp || rm -f $@.tmp \
-	&& sed $(edit) \
-	       $(SVNVERSION_EDIT) \
-	       $(SVNID_EDIT) \
-	       $(PACKAGE_EDIT) \
-	       $(D_VERSION_EDIT) \
-	       $< >$@.tmp \
+	&& sed $(edit) $< >$@.tmp \
 	&& mv $@.tmp $@
 
 all: $(BUILT_SOURCES)
@@ -935,7 +893,7 @@ all: $(BUILT_SOURCES)
 
 .SUFFIXES:
 .SUFFIXES: .cin .hin .elin .din .psin .shin .plin .styin .c .cpp .d .el .h .l .lo .o .obj .pl .ps .sh .sty
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_in.make $(top_srcdir)/m4/cf_svnversion.make $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/m4/cf_in.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -1202,7 +1160,7 @@ distdir: $(DISTFILES)
 check-am: all-am
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
-all-am: Makefile $(LTLIBRARIES) $(DATA) all-local
+all-am: Makefile $(LTLIBRARIES) $(DATA)
 installdirs:
 	for dir in "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(dmstartdir)" "$(DESTDIR)$(pkglibdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
@@ -1296,21 +1254,20 @@ uninstall-am: uninstall-nodist_dmstartDATA uninstall-pkglibDATA \
 
 .MAKE: install-am install-strip
 
-.PHONY: CTAGS GTAGS all all-am all-local check check-am clean \
-	clean-generic clean-libtool clean-pkglibLTLIBRARIES ctags \
-	distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-nodist_dmstartDATA \
-	install-pdf install-pdf-am install-pkglibDATA \
-	install-pkglibLTLIBRARIES install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags uninstall uninstall-am \
-	uninstall-nodist_dmstartDATA uninstall-pkglibDATA \
+.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
+	clean-libtool clean-pkglibLTLIBRARIES ctags distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-nodist_dmstartDATA install-pdf install-pdf-am \
+	install-pkglibDATA install-pkglibLTLIBRARIES install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-nodist_dmstartDATA uninstall-pkglibDATA \
 	uninstall-pkglibLTLIBRARIES
 
 
@@ -1360,15 +1317,6 @@ uninstall-am: uninstall-nodist_dmstartDATA uninstall-pkglibDATA \
 
 @ENABLE_PETSC_FALSE@@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@.plugins: ; touch "$@"
 
-$(SVNVERSION_DIR)/svnversion.stamp:
-	cd $(SVNVERSION_DIR) && $(MAKE) $(AM_MAKEFLAGS) svnversion.stamp
-all-local: $(idfiles)
-
-.PHONY: idfiles
-
-@MAINTAINER_MODE_TRUE@$(IDFILES): ; $(IDFILES_RULE)
-@MAINTAINER_MODE_TRUE@idfiles: ; $(IDFILES_REFRESH)
-
 .cin.c:     ; $(INFILES_RULE)
 .hin.h:     ; $(INFILES_RULE)
 .din.d:     ; $(INFILES_RULE)
@@ -1378,7 +1326,7 @@ all-local: $(idfiles)
 .elin.el:   ; $(INFILES_RULE)
 .styin.sty: ; $(INFILES_RULE)
 
-$(INFILES): $(IDFILES) $(Makefile) $(SVNVERSION_STAMP_DEP)
+$(INFILES): $(Makefile)
 
 #################################################
 # Keep automake from trying to save the .c file

@@ -1,5 +1,5 @@
 | -*- mode: d; -*-
-/MATRIX (matrix.d) @version_add@ module 200 dict dup begin
+/MATRIX module 200 dict dup begin
 
 /userdef {
   ~[currentdict ~begin 4 -1 roll ~stopped ~end {stop} ~if] bind

@@ -114,7 +114,6 @@ AC_C_CONST
 AC_C_RESTRICT
 CF_C_INLINE
 CF_BASIC_DEFS
-CF_SVNVERSION
 
 CF_AC_ENABLE([plugins-support], [compile or install plugin support], [yes])
 CF_AM_ENABLE([plugins], [compile or install plugins], [yes])
@@ -376,7 +375,7 @@ AC_CONFIG_LINKS([
   src/codegen/dm-nextevent.c:src/dm-nextevent.c
   src/codegen/dm-nextevent.h:src/dm-nextevent.h
   plugins/plugin.d:dcode/plugin.d
-  dcode/errors.din:src/codegen/errors.din.built
+  dcode/errors.d:src/codegen/errors.d.built
   plugins/startup_dgen.d:src/codegen/startup_dgen.d
   emacs/d-mode-ops.el:src/codegen/d-mode-ops.el
   plugins/new-plugin.din:dcode/new-plugin.din

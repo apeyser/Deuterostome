@@ -1,6 +1,6 @@
 | -*- mode: d; -*-
 
-/PROCESSES (processes.d) @version_add@ 100 {
+/PROCESSES 100 {
   | These need to be in the same order as
   |  flags struct array in dm-proc.c.
   /FFLAGS {

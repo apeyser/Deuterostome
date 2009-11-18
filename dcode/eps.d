@@ -1,6 +1,6 @@
 | -*- mode: d; -*-
 
-/EPS (eps.d) @version_add@ 100 {
+/EPS 100 {
   |------------ RESOLUTION -------------------
   |
   | The resolution argument to ghostscript.

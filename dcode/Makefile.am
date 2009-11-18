@@ -1,17 +1,18 @@
-dist_dmstart_DATA = color.d master.d sched.d plugin.d
+dist_dmstart_DATA = color.d master.d sched.d plugin.d \
+	startup_libs.d startup_dgen.d \
+	linkedlist.d eps.d
 
 DISTEDITSRCS = theeye.d startup_dnode.d startup_dpawn.d \
-	startup_dvt.d startup_dgen.d dvt_macros.d matrix.d new-plugin.d \
-	startup_common.d startup_libs.d processes.d \
-	linkedlist.d eps.d 
-EDITSRCS = errors.d
-nodist_dmstart_DATA = $(DISTEDITSRCS) $(EDITSRCS)
+	startup_dvt.d dvt_macros.d matrix.d new-plugin.d \
+	startup_common.d processes.d
+
+nodist_dmstart_DATA = $(DISTEDITSRCS) errors.d
 
 dist_dmconf_DATA = dvt.d dpawn.d
 
 nodist_dmconf_DATA = dnode.d
 
-INFILES = $(nodist_dmstart_DATA) $(nodist_dmconf_DATA)
+INFILES = $(DISTEDITSRCS) $(nodist_dmconf_DATA)
 EXTRA_DIST = $(DISTEDITSRCS:=in) $(nodist_dmconf_DATA:=in) $(IDFILES)
 CLEANFILES = $(INFILES)
 SUFFIXES =

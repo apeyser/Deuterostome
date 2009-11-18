@@ -1,6 +1,6 @@
 | -*- mode: d; -*-
 
-/PETSC (petsc.d) @version_add@ 200 {
+/PETSC 200 {
 
   |============== Global definitions ==========================
 

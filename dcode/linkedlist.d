@@ -1,6 +1,6 @@
 | -*- mode: d; -*-
 
-/LINKEDLIST (linkedlist.d) @version_add@ 100 {
+/LINKEDLIST 100 {
 
 |==================== allocators ========================
 

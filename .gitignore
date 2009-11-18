@@ -24,7 +24,6 @@
 /dm-*.*.*/
 /libtool
 /stamp-h1
-/svnversion.stamp
 Makefile
 \#*
 .\#*

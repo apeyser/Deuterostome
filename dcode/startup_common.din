@@ -2,32 +2,6 @@
 
 |======================== userdict ===================================
 
-/version_dict 100 dict dup begin
-  /_version_string 240 /b array def
-end def
-
-| /name  (file) ([@]SVNID[@]) ([@]PACKAGE_VERSION[@]) ([@]SVNVERSION[@]) | /name
-/version_add {
-  3 dict dup mkread version_dict 7 index put begin {
-    {/GIT /PACKAGE /ID} ~name forall
-  } stopped end ~stop if
-
-  currentdict /fileid_dict known {
-    {pop dirname fax (/) fax filename fax}
-  } {~fax} ifelse
-
-  version_dict begin 2 index find begin {
-    _version_string 0
-    (Using ) fax 4 2 roll exec
-    ( ID: ) fax GIT fax
-    ( V) fax PACKAGE fax
-    (\n) fax 0 exch getinterval
-    toconsole
-  } stopped end end ~stop if
-} bind def
-
-/common (startup_common.d) @version_add@ pop
-
 2 list dictstack dup 0 get /systemdict name   | name the roots
                      1 get /userdict   name
 

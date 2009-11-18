@@ -1,7 +1,5 @@
 #line 2 "@srcdir@/drook.cin"
 
-// ID: @SVNID@ V@PACKAGE_VERSION@ git-@SVNVERSION@
-
 #include "dm.h"
 #include "error-local.h"
 #include "dm2.h"
