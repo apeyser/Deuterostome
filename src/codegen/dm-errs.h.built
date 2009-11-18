@@ -200,52 +200,56 @@
 #ifdef BUILD_ATLAS
 #endif //BUILD_ATLAS
 #ifdef HAVE_ATLAS
+// Matrix Error: illegal vector size
+#define MATRIX_VECTOR_SIZE            ((P)       95L)
+// Matrix Error: pivot array corrupted
+#define MATRIX_PIVOT_CORR             ((P)       96L)
 // Matrix Error: undefined value in cut
-#define MATRIX_UNDEF_CUT              ((P)       95L)
+#define MATRIX_UNDEF_CUT              ((P)       97L)
 // Matrix Error: cut dimension less than 1
-#define MATRIX_ILLEGAL_CUT            ((P)       96L)
+#define MATRIX_ILLEGAL_CUT            ((P)       98L)
 // Matrix Error: number of cut dimensions too small
-#define MATRIX_UNDER_CUT              ((P)       97L)
+#define MATRIX_UNDER_CUT              ((P)       99L)
 // Matrix Error: array too small for cut
-#define MATRIX_NONMATCH_CUT           ((P)       98L)
+#define MATRIX_NONMATCH_CUT           ((P)      100L)
 // Matrix Error: matrix dimensions don't match
-#define MATRIX_NONMATCH_SHAPE         ((P)       99L)
+#define MATRIX_NONMATCH_SHAPE         ((P)      101L)
 // Matrix Error: parameters to clapack illegal
-#define MATRIX_PARAM_ERROR            ((P)      100L)
+#define MATRIX_PARAM_ERROR            ((P)      102L)
 // Matrix Error: Internal Error - message on stack
-#define MATRIX_INT_ERR                ((P)      101L)
+#define MATRIX_INT_ERR                ((P)      103L)
 // Matrix Error: lu matrix is singular
-#define MATRIX_SINGULAR               ((P)      102L)
+#define MATRIX_SINGULAR               ((P)      104L)
 #endif //HAVE_ATLAS
 #ifdef DM_ENABLE_RTHREADS
 // ** Rthreads are inactive
-#define RTHREADS_UNSET                ((P)      103L)
+#define RTHREADS_UNSET                ((P)      105L)
 // ** Rthreads: nodes for dictionay not a numeral
-#define RTHREADS_NUMTYPE              ((P)      104L)
+#define RTHREADS_NUMTYPE              ((P)      106L)
 // ** Rthreads: nodes for dictionary undefined
-#define RTHREADS_NUMUNDF              ((P)      105L)
+#define RTHREADS_NUMUNDF              ((P)      107L)
 // ** Rthreads: nodes for dictionary out of range
-#define RTHREADS_NUMRNG               ((P)      106L)
+#define RTHREADS_NUMRNG               ((P)      108L)
 // ** Rthreads: illegal class for info dictionary
-#define RTHREADS_DICTTYPE             ((P)      107L)
+#define RTHREADS_DICTTYPE             ((P)      109L)
 // ** Rthreads: key/val pair: val not a string
-#define RTHREADS_VALTYPE              ((P)      108L)
+#define RTHREADS_VALTYPE              ((P)      110L)
 // ** Rthreads: key/val pair: val too long
-#define RTHREADS_VALSIZE              ((P)      109L)
+#define RTHREADS_VALSIZE              ((P)      111L)
 // ** Rthreads: key/val pair: val empty
-#define RTHREADS_VALEMPTY             ((P)      110L)
+#define RTHREADS_VALEMPTY             ((P)      112L)
 // ** Rthreads: key/val pair: key too long
-#define RTHREADS_KEYSIZE              ((P)      111L)
+#define RTHREADS_KEYSIZE              ((P)      113L)
 // ** Rthreads: key/val pair: val is active
-#define RTHREADS_VALATR               ((P)      112L)
+#define RTHREADS_VALATR               ((P)      114L)
 #endif //DM_ENABLE_RTHREADS
 #ifdef DM_HOST_IS_32_BIT
 #endif //DM_HOST_IS_32_BIT
 #ifdef DM_ENABLE_PLUGINS_SUPPORT
 #endif //DM_ENABLE_PLUGINS_SUPPORT
 // ** no socket events -- internal
-#define NEXTEVENT_NOEVENT             ((P)      113L)
+#define NEXTEVENT_NOEVENT             ((P)      115L)
 // ** No mpi message msg received -- internal
-#define MPI_NOMSG                     ((P)      114L)
+#define MPI_NOMSG                     ((P)      116L)
 
 #endif //DM_ERRS_H

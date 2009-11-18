@@ -426,6 +426,8 @@ end def
   end def
   /HAVE_ATLAS 1 dict dup begin |[
     /errors 100 dict dup begin |[
+      /MATRIX_VECTOR_SIZE (Matrix Error: illegal vector size) def
+      /MATRIX_PIVOT_CORR  (Matrix Error: pivot array corrupted) def
       /MATRIX_UNDEF_CUT (Matrix Error: undefined value in cut) def
       /MATRIX_ILLEGAL_CUT (Matrix Error: cut dimension less than 1) def
       /MATRIX_UNDER_CUT (Matrix Error: number of cut dimensions too small) def

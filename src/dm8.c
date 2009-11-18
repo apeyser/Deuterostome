@@ -15,8 +15,6 @@
 /*------------------------------ externals -----------------------------*/
 #include "dm.h"
 
-#include <math.h>
-
 #include "dm2.h"
 #include "dm8.h"
 

@@ -109,6 +109,7 @@ extern "C" {
 #include DM_ENDIAN_HDR
 #endif //DM_NO_ENDIAN_HDR
 
+#include <math.h>
 #define ISUNDEF(n) (isinf(n) || isnan(n))
 
 /*-------------------------- network packet size ----------------------*/

@@ -95,24 +95,26 @@
   /ACTIVE_OPAQUE                       92x def
   /ACTIVE_STREAM                       93x def
   /NO_PLUGINS                          94x def
-  /MATRIX_UNDEF_CUT                    95x def
-  /MATRIX_ILLEGAL_CUT                  96x def
-  /MATRIX_UNDER_CUT                    97x def
-  /MATRIX_NONMATCH_CUT                 98x def
-  /MATRIX_NONMATCH_SHAPE               99x def
-  /MATRIX_PARAM_ERROR                 100x def
-  /MATRIX_INT_ERR                     101x def
-  /MATRIX_SINGULAR                    102x def
-  /RTHREADS_UNSET                     103x def
-  /RTHREADS_NUMTYPE                   104x def
-  /RTHREADS_NUMUNDF                   105x def
-  /RTHREADS_NUMRNG                    106x def
-  /RTHREADS_DICTTYPE                  107x def
-  /RTHREADS_VALTYPE                   108x def
-  /RTHREADS_VALSIZE                   109x def
-  /RTHREADS_VALEMPTY                  110x def
-  /RTHREADS_KEYSIZE                   111x def
-  /RTHREADS_VALATR                    112x def
-  /NEXTEVENT_NOEVENT                  113x def
-  /MPI_NOMSG                          114x def
+  /MATRIX_VECTOR_SIZE                  95x def
+  /MATRIX_PIVOT_CORR                   96x def
+  /MATRIX_UNDEF_CUT                    97x def
+  /MATRIX_ILLEGAL_CUT                  98x def
+  /MATRIX_UNDER_CUT                    99x def
+  /MATRIX_NONMATCH_CUT                100x def
+  /MATRIX_NONMATCH_SHAPE              101x def
+  /MATRIX_PARAM_ERROR                 102x def
+  /MATRIX_INT_ERR                     103x def
+  /MATRIX_SINGULAR                    104x def
+  /RTHREADS_UNSET                     105x def
+  /RTHREADS_NUMTYPE                   106x def
+  /RTHREADS_NUMUNDF                   107x def
+  /RTHREADS_NUMRNG                    108x def
+  /RTHREADS_DICTTYPE                  109x def
+  /RTHREADS_VALTYPE                   110x def
+  /RTHREADS_VALSIZE                   111x def
+  /RTHREADS_VALEMPTY                  112x def
+  /RTHREADS_KEYSIZE                   113x def
+  /RTHREADS_VALATR                    114x def
+  /NEXTEVENT_NOEVENT                  115x def
+  /MPI_NOMSG                          116x def
 end _module

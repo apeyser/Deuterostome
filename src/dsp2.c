@@ -21,7 +21,6 @@
 #include "threads.h"
 #include "dmnum.h"
 
-#include <math.h>
 #include <inttypes.h>
 #include <stdio.h>
 
