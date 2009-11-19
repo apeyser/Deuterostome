@@ -414,19 +414,34 @@ P op_stop(void)
 // inside, a /name goto will return control to the
 // next operation after label.
 //
+static P x_op_exitlabel(void) {
+  if (FREEexecs == FLOORexecs
+      || TAG(x_1) != NAME
+      || (ATTR(x_1) & ACTIVE))
+    return EXECS_COR;
+
+  FREEexecs = x_1;
+  return OK;
+}
+  
 P op_exitlabel(void) {
   if (o_2 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != NAME) return OPD_CLA;
   if (ATTR(o_1) & ACTIVE) return OPD_ATR;
   if (! (ATTR(o_2) & ACTIVE)) return OPD_ATR;
-  if (x3 > CEILexecs) return EXECS_OVF;
+  if (x4 > CEILexecs) return EXECS_OVF;
 
   moveframe(o_1, x1);
   ATTR(x1) = EXITMARK;
+  
+  TAG(x2) = OP;
+  ATTR(x2) = ACTIVE;
+  OP_NAME(x2) = "x_exitlabel";
+  OP_CODE(x2) = x_op_exitlabel;
 
-  moveframe(o_2, x2);
+  moveframe(o_2, x3);
 
-  FREEexecs = x3;
+  FREEexecs = x4;
   FREEopds = o_2;
   return OK;
 }
