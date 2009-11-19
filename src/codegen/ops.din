@@ -205,7 +205,7 @@
       /bind /null /not
       /start /exec
       /if /ifelse /for /repeat /loop /forall /exit
-      /stop /stopped
+      /stop /stopped /exitto /exitlabel
       /countexecstack /execstack
       /checkFPU /neg /abs /thearc /add /mod
       /sub /mul /div /sqrt /exp /ln /lg /pwr /cos
@@ -247,6 +247,7 @@
       /DICTS_UNF (** Dictionary stack underflow) def
       /INV_EXT (** Invalid exit) def
       /INV_STOP (** Invalid stop) def
+      /INV_EXITTO (** Invalid goto) def
       /EXECS_COR (** Excution stack corrupted) def
       /INV_REST (** Stack holds discardable object) def
       /BAD_TOK (** Bad token) def

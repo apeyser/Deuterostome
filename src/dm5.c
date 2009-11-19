@@ -50,7 +50,8 @@ P op_start(void)
 {
   if (o_1 < FLOORopds) return OPDS_UNF;
   if ((ATTR(o_1) & ACTIVE) == 0) return OPD_ATR;
-  moveframe(o_1,FREEexecs-FRAMEBYTES);
+  if (x_1 < FLOORexecs) return EXECS_UNF;
+  moveframe(o_1, x_1);
   FREEopds = o_1;
   return OK;
 }
@@ -405,6 +406,58 @@ P op_stop(void)
 
   return EXECS_UNF;
 }
+
+//------------------------ label -----------------
+// ~active /name | ...
+//
+// label an active for a goto.
+// inside, a /name goto will return control to the
+// next operation after label.
+//
+P op_exitlabel(void) {
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != NAME) return OPD_CLA;
+  if (ATTR(o_1) & ACTIVE) return OPD_ATR;
+  if (! (ATTR(o_2) & ACTIVE)) return OPD_ATR;
+  if (x3 > CEILexecs) return EXECS_OVF;
+
+  moveframe(o_1, x1);
+  ATTR(x1) = EXITMARK;
+
+  moveframe(o_2, x2);
+
+  FREEexecs = x3;
+  FREEopds = o_2;
+  return OK;
+}
+
+//-------------------------
+// -- | --
+P op_exitto(void) {
+  B *frame; W m;
+  isstopping = FALSE;
+  
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != NAME) return OPD_CLA;
+  if (ATTR(o_1) & ACTIVE) return OPD_ATR;
+
+  for (frame = FREEexecs; (frame -= FRAMEBYTES) >= FLOORexecs; )
+    if ((m = ATTR(frame) & XMARK)) {
+      if (m & EXITMARK) {
+	if (TAG(frame) == NAME 
+	    && ! (ATTR(frame) & ACTIVE)
+	    && ! compname(frame, o_1)) {
+	  FREEexecs = frame;
+	  FREEopds = o_1;
+	  return OK;
+	}
+      }
+      else return INV_EXITTO;
+    }
+
+  return EXECS_UNF;
+}
+  
 
 /*----------------------------------------------- stopped
    any_active | bool

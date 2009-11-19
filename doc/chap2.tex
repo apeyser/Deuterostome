@@ -605,7 +605,8 @@ Logical operations (\emph{and}, \emph{or}, \emph{xor},  \emph{not}) use booleans
 \subsection{Controlling execution}\label{ssec:controlops}
 
 \begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
-obj & start & --\\
+obj & start & --\\\relax
+[ obj ... & push & --\\
 obj & exec & --\\
 bool proc & if & --\\
 bool proc$_1$ proc$_2$ & ifelse & --\\
@@ -614,6 +615,8 @@ count proc & repeat & --\\
 proc & loop & --\\
 array/list/dict proc & forall & --\\
 -- & exit & --\\
+/name & exitto & -- \\
+proc /name & exitlabel & -- \\
 obj & stopped & bool\\
 -- & stop & --\\
 -- & abort & --\\
@@ -623,6 +626,7 @@ list & execstack & sublist\\\\
 \end{tabular}
 
 \index{Operators!start}
+\index{Operators!push}
 \index{Operators!exec}
 \index{Operators!if}
 \index{Operators!ifelse}
@@ -631,6 +635,8 @@ list & execstack & sublist\\\\
 \index{Operators!loop}
 \index{Operators!forall}
 \index{Operators!exit}
+\index{Operators!exitto}
+\index{Operators!exitlabel}
 \index{Operators!stopped}
 \index{Operators!stop}
 \index{Operators!abort}
@@ -640,7 +646,33 @@ list & execstack & sublist\\\\
 
 Control operators modify the usual linear execution of objects. Many work with a procedure operand that they execute conditionally or repeatedly. In addition to the control operators listed in this section, other events, like those originating from communication with connected D machines or X Windows can also schedule objects for execution.
 
-Any  object  carrying the \emph{active} attribute is pushed onto  the  execution stack for immediate execution by \emph{exec}. \emph{start} does so, too, \emph{after} popping the currently executing object from the execution stack. A procedure (or any active object provided in its place) is  executed conditionally,  dependent on the value of a boolean operand (\emph{if}), or one of two procedures is executed dependent on a boolean (\emph{ifelse}). Several  operators execute a procedure  repeatedly. \emph{for} takes three numeral operands defining a range and step to control an internal count and executes a procedure for each count of the range, providing the procedure with the current count as the top element of the operand stack. \emph{repeat} executes a procedure a prescribed number of times. \emph{loop} repeats the execution of the procedure indefinitely (unless terminated from within). \emph{forall} executes a procedure for each element of a composite object, providing the procedure with the current element as top element of the operand stack. Any loop operator can be terminated by executing one of the operators \emph{exit}, \emph{stop}, or \emph{abort} within the dynamic context of the loop body. \emph{exit} terminates the execution of the current loop and resumes execution of the object following the loop operator of the terminated loop.
+Any object carrying the \emph{active} attribute is pushed onto the
+execution stack for immediate execution by \emph{exec}. \emph{start}
+does so, too, \emph{after} popping the currently executing object from
+the execution stack. \emph{push} transfers the objects follow the last
+mark onto the execution stack, in effect executing them in reverse
+order; this allows temporary hiding of a portion of the operand stack
+during execution of a given procedure and its automatic replacement on
+top afterwards. A procedure (or any active object provided in its
+place) is executed conditionally, dependent on the value of a boolean
+operand (\emph{if}), or one of two procedures is executed dependent on
+a boolean (\emph{ifelse}). Several operators execute a procedure
+repeatedly. \emph{for} takes three numeral operands defining a range
+and step to control an internal count and executes a procedure for
+each count of the range, providing the procedure with the current
+count as the top element of the operand stack. \emph{repeat} executes
+a procedure a prescribed number of times. \emph{loop} repeats the
+execution of the procedure indefinitely (unless terminated from
+within). \emph{forall} executes a procedure for each element of a
+composite object, providing the procedure with the current element as
+top element of the operand stack. Any loop operator can be terminated
+by executing one of the operators \emph{exit}, \emph{stop}, or
+\emph{abort} within the dynamic context of the loop body. \emph{exit}
+terminates the execution of the current loop and resumes execution of
+the object following the loop operator of the terminated
+loop. \emph{exitto} is a generalized \emph{exit} -- it transfers
+control from the current point to the object following the enclosing
+\emph{exitlabel} operator. Matching means that the /name matches.
 
 \emph{stopped} executes an object (usually a procedure) with a provision for two alternate kinds of termination, normal or stopped. Stopped termination  (effected  by  the \emph{stop} operator  executed from  within  the dynamic context of the object) returns \emph{false}, normal termination returns \emph{true}, and execution continues execution with the object immediately following \emph{stopped}. This construct helps  prepare  contexts that terminate on  exceptional events and turn control over to a supervisory context. The exceptional termination removes from the execution stack all objects that belong to the stopped context (such as pending procedures and loops in execution); it provides a clean exit from a domain of structured code. \emph{abort} drops the execution stack down to the most basic level (an \emph{aborted} capsule in the \emph{dvt} or the very bottom of the stack in the \emph{dnode} variety of machine). The loop termination operator, \emph{exit}, cannot move control outside the context of a stopped operator (the attempt produces an error), and \emph{stop} cannot move control outside an \emph{aborted} context in a \emph{dvt}.
 

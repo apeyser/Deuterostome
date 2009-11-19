@@ -831,9 +831,14 @@ end def  | of xtext_dict
 |  propagates stops.
 |
 /inlayer {
-  dup layer openlist exch ~stopped push
+  dup layer [ exch ~stopped push |]
   _layer ~stop if
 } bind def
+
+|-------------------------- layerdef
+| /layer_name ~active | ...
+| Just reverse inlayer.
+/layerdef {exch inlayer} bind def
 
 |-------------------------- caplayer
 | ~capped ~body /layer_name | ...
@@ -843,13 +848,23 @@ end def  | of xtext_dict
 |  restoring the layer if body is stopped
 |
 /caplayer {
-  dup layer find ~[
-    4 -1 roll destruct_exec ~stopped 
-    4 -1 roll {exch ~stop if capsave} ~exec
-    7 -1 roll destruct_exec ~stopped
-    4 index {exch ~stop if} ~exec
-  ] stopped {restore stop} ~pop ifelse
+  dup layer ~[
+    4 -1 roll construct_exec
+    counttomark 1 add index ~find ~capsave
+    counttomark 3 add -1 roll construct_exec
+  ] [3 -1 roll ~stopped push |]
+  exch {find restore stop} ~pop ifelse
 } bind def
+
+|-------------------------- caplayerdef
+| /layer_name ~capped ~body | ...
+| Just calls caplayer with layer name rolled
+/caplayerdef {3 -1 roll caplayer} bind def
+
+|-------------------------- exitdef
+| /label ~active | ...
+| Just calls label with /name exch'd
+/exitdef {exch exitlabel} bind def
 
 |------------------------------- savemodule
 |  /project_name /snapshot_name | --

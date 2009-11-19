@@ -19,6 +19,7 @@ struct emap emap[] = {
   {"DICTS_UNF", DICTS_UNF},
   {"INV_EXT", INV_EXT},
   {"INV_STOP", INV_STOP},
+  {"INV_EXITTO", INV_EXITTO},
   {"EXECS_COR", EXECS_COR},
   {"INV_REST", INV_REST},
   {"BAD_TOK", BAD_TOK},

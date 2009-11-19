@@ -59,6 +59,8 @@
   "exit"
   "stop"
   "stopped"
+  "exitto"
+  "exitlabel"
   "countexecstack"
   "execstack"
   "checkFPU"
