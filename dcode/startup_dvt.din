@@ -270,11 +270,11 @@ startup_common_save capsave {
   /fornodes { /procfornodes name
     kbdowner 0 gt { 
       /knode kbdowner def /node nodelist knode get def
-      /procfornodes find exec
+      procfornodes
     } { 
       1 1 nodelist length 1 sub { /knode name
         nodelist knode get /node name
-        node 4 get kbdowner eq { /procfornodes find exec } if
+        node 4 get kbdowner eq ~procfornodes if
       } for
     } ifelse
   } bind def

@@ -5,7 +5,6 @@
 
 #include "dm.h"
 
-#include <math.h>
 #include <stdio.h>
 #include <errno.h>
 #include <unistd.h>

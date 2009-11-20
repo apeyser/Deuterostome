@@ -21,7 +21,6 @@
 #include "threads.h"
 #include "dmnum.h"
 
-#include <math.h>
 #include <inttypes.h>
 #include <stdio.h>
 
@@ -448,10 +447,12 @@ P op_decompLU(void)
 
    a_list idx_array b_array | b_array
 
-- a_list is a list of double row arrays containing a previously LU-decomposed matrix
-- idx_array is long and provides the permutation info of the previous decomposition
-- b inputs the right-hand side for which the eqn system is to be solved and returns
-  the solution
+- a_list is a list of double row arrays containing a previously 
+   LU-decomposed matrix
+- idx_array is long and provides the permutation info of the previous 
+   decomposition
+- b inputs the right-hand side for which the eqn system is to be solved 
+   and returns the solution
 
 */
 

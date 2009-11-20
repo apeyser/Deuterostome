@@ -58,6 +58,8 @@ B* _sysop[] =
   (B*) "exit", (B*) op_exit,
   (B*) "stop", (B*) op_stop,
   (B*) "stopped", (B*) op_stopped,
+  (B*) "exitto", (B*) op_exitto,
+  (B*) "exitlabel", (B*) op_exitlabel,
   (B*) "countexecstack", (B*) op_countexecstack,
   (B*) "execstack", (B*) op_execstack,
   (B*) "checkFPU", (B*) op_checkFPU,
@@ -219,6 +221,7 @@ P _syserrc[] = {
   DICTS_UNF,
   INV_EXT,
   INV_STOP,
+  INV_EXITTO,
   EXECS_COR,
   INV_REST,
   BAD_TOK,
@@ -269,6 +272,8 @@ P _syserrc[] = {
 #ifdef BUILD_ATLAS
 #endif //BUILD_ATLAS
 #ifdef HAVE_ATLAS
+  MATRIX_VECTOR_SIZE,
+  MATRIX_PIVOT_CORR,
   MATRIX_UNDEF_CUT,
   MATRIX_ILLEGAL_CUT,
   MATRIX_UNDER_CUT,
@@ -316,6 +321,7 @@ B* _syserrm[] = {
   (B*) "** Dictionary stack underflow",
   (B*) "** Invalid exit",
   (B*) "** Invalid stop",
+  (B*) "** Invalid goto",
   (B*) "** Excution stack corrupted",
   (B*) "** Stack holds discardable object",
   (B*) "** Bad token",
@@ -366,6 +372,8 @@ B* _syserrm[] = {
 #ifdef BUILD_ATLAS
 #endif //BUILD_ATLAS
 #ifdef HAVE_ATLAS
+  (B*) "Matrix Error: illegal vector size",
+  (B*) "Matrix Error: pivot array corrupted",
   (B*) "Matrix Error: undefined value in cut",
   (B*) "Matrix Error: cut dimension less than 1",
   (B*) "Matrix Error: number of cut dimensions too small",

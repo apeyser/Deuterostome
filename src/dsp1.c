@@ -18,8 +18,6 @@
 */
 #include "dm.h"
 #include "dmnum.h"
-#include <math.h>
-
 #include "dsp1f.h"
 
 #include <stdio.h>

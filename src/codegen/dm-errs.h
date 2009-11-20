@@ -22,6 +22,7 @@
 #define INV_EXT     (P)0x00000207L /* invalid exit                          */
 #define INV_STOP    (P)0x00000208L /* invalid stop                          */
 #define EXECS_COR   (P)0x00000209L /* execution stack corrupted             */
+#define INV_EXITTO  (P)0x0000020AL /* invalid exitto                        */
 #define INV_REST    (P)0x0000020BL /* invalid restore                       */
 #define ILL_OPAQUE  (P)0x0000020EL /* Opaque dict type mismatch             */
 #define FOLD_OPAQUE (P)0x0000020FL /* Illegal attempt to box opaque object  */

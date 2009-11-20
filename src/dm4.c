@@ -32,9 +32,6 @@
 */
 
 #include "dm.h"
-
-#include <math.h>
-
 #include "dm2.h"
 
 /*------------------------------------- null

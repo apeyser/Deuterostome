@@ -32,6 +32,8 @@ DM_HOT DLL_SCOPE P op_forall(void);
 DM_HOT DLL_SCOPE P op_exit(void);
 DM_HOT DLL_SCOPE P op_stop(void);
 DM_HOT DLL_SCOPE P op_stopped(void);
+DM_HOT DLL_SCOPE P op_exitto(void);
+DM_HOT DLL_SCOPE P op_exitlabel(void);
 DLL_SCOPE P op_countexecstack(void);
 DLL_SCOPE P op_execstack(void);
 

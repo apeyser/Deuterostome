@@ -7,6 +7,9 @@
 #include <clapack.h>
 #include <stdarg.h>
 
+typedef L32 INDEX_SIZE;
+#define INDEX_MAX (L32MAX)
+
 static BOOLEAN xerbla_background = FALSE;
 static BOOLEAN xerbla_err = FALSE;
 void cblas_xerbla(int p, const char *rout, const char *form, ...) 
@@ -103,36 +106,39 @@ int cblas_errprn(int ierr, int info, char *form, ...)
     }                                      \
   } while (0)
 
-DM_INLINE_STATIC P matrix_dims(B* cuts, B* array, P* m, P* n, P* lda) 
+DM_INLINE_STATIC P matrix_dims(B* cuts, B* array, 
+			       INDEX_SIZE* m, INDEX_SIZE* n, INDEX_SIZE* lda)
 {
-  LBIG t;
+  INDEX_SIZE t;
 
   if (CLASS(cuts) != ARRAY 
       || CLASS(array) != ARRAY) return OPD_CLA;
   
-  if (TYPE(cuts) != LONGBIGTYPE 
+  if (TYPE(cuts) != LONG32TYPE
       || TYPE(array) != DOUBLETYPE) return OPD_TYP;
 
   if (ARRAY_SIZE(cuts) < 2) return MATRIX_UNDER_CUT;
-  if ((t = ((LBIG*) VALUE_PTR(cuts))[1]) > PMAX || t < -PMAX)
-    return UNDF_VAL;
+  if ((t = ((L32*) VALUE_PTR(cuts))[1]) > INDEX_MAX
+      || t < 1) 
+    return MATRIX_UNDEF_CUT;
   *n = t;
-  *lda = *n ? *n : 1;
-  if ((t = ((LBIG*) VALUE_PTR(cuts))[0]) > PMAX || t < -PMAX)
-    return UNDF_VAL;
-  *m = t/(*lda);
+  *lda = *n = t;
 
-  if (*n == PINF || *m == PINF) return MATRIX_UNDEF_CUT;
-  if (*n < 0 || *m < 0) return MATRIX_ILLEGAL_CUT;
+  if ((t = ((L32*) VALUE_PTR(cuts))[0]) > INDEX_MAX
+      || t < 1) 
+    return MATRIX_UNDEF_CUT;
+
+  *m = t/(*lda);
+  if (ISUNDEF(*m)) return MATRIX_UNDEF_CUT;  
   if ((*n)*(*m) > ARRAY_SIZE(array)) return MATRIX_NONMATCH_CUT;
 
   return OK;
 }
 
-DM_INLINE_STATIC P matrix_square(B* cuts, B* array, P* n) {
-  P m, lda;
-  P r = matrix_dims(cuts, array, &m, n,  &lda);
-  if (r != OK) return r;
+DM_INLINE_STATIC P matrix_square(B* cuts, B* array, INDEX_SIZE* n) {
+  INDEX_SIZE m, lda;
+  P r;
+  if ((r = matrix_dims(cuts, array, &m, n,  &lda))) return r;
   if (m != *n) return MATRIX_NONMATCH_SHAPE;
   return OK;
 }
@@ -144,26 +150,26 @@ DM_INLINE_STATIC P get_trans(B* t, enum CBLAS_TRANSPOSE* trans_, BOOLEAN* trans)
   return OK;
 }
 
-DM_INLINE_STATIC P matrix_square_trans(B* cuts, B* array, P* n, 
+DM_INLINE_STATIC P matrix_square_trans(B* cuts, B* array, INDEX_SIZE* n, 
                              B* t, enum CBLAS_TRANSPOSE* trans_,
                              BOOLEAN* trans) {
-  P m, lda;
-  P r = matrix_dims(cuts, array, &m, n, &lda);
-  if (r != OK) return r;
+  INDEX_SIZE m, lda;
+  P r;
+  if ((r = matrix_dims(cuts, array, &m, n, &lda))) return r;
   if (m != *n) return MATRIX_NONMATCH_SHAPE;
   return get_trans(t, trans_, trans);
 }
 
-DM_INLINE_STATIC P matrix_dims_trans(B* cuts, B* array, P* m, P* n, 
-                           B* t, enum CBLAS_TRANSPOSE* trans_, 
-                           BOOLEAN* trans, P* lda) {
-  P r = matrix_dims(cuts, array, m, n, lda);
-  if (r != OK) return r;
+DM_INLINE_STATIC P matrix_dims_trans(B* cuts, B* array, INDEX_SIZE* m, INDEX_SIZE* n, 
+				     B* t, enum CBLAS_TRANSPOSE* trans_, 
+				     BOOLEAN* trans, INDEX_SIZE* lda) {
+  P r;
+  if ((r = matrix_dims(cuts, array, m, n, lda))) return r;
   if ((r = get_trans(t, trans_, trans)) != OK) return r;
   return OK;
 }
 
-DM_INLINE_STATIC P pivot_dims(B* pivot, P rows) 
+DM_INLINE_STATIC P pivot_dims(B* pivot, INDEX_SIZE rows)
 {
   if (CLASS(pivot) != ARRAY) return OPD_CLA;
   if (TYPE(pivot) != LONG32TYPE) return OPD_TYP;
@@ -172,7 +178,23 @@ DM_INLINE_STATIC P pivot_dims(B* pivot, P rows)
   return OK;
 }
 
-DM_INLINE_STATIC P vector_dim(B* vec, P rows) {
+DM_INLINE_STATIC P pivot_check(B* pivot, INDEX_SIZE rows)
+{
+    P r;
+    L32* p;
+    L32* p_;
+
+    if ((r = pivot_dims(pivot, rows))) return r;
+
+    p = ((L32*) VALUE_PTR(pivot));
+    p_ = p + rows;
+    while (p < p_ && *p >= 0 && *p < rows) p++;
+    if (p != p_) return MATRIX_PIVOT_CORR;
+
+    return OK;
+}
+
+DM_INLINE_STATIC P vector_dim(B* vec, INDEX_SIZE rows) {
   if (CLASS(vec) != ARRAY) return OPD_CLA;
   if (TYPE(vec) != DOUBLETYPE) return OPD_TYP;
   if (rows != ARRAY_SIZE(vec)) return MATRIX_NONMATCH_CUT;
@@ -180,15 +202,20 @@ DM_INLINE_STATIC P vector_dim(B* vec, P rows) {
   return OK;
 }
 
-DM_INLINE_STATIC P vector_get_dim(B* vec, P* rows) {
+DM_INLINE_STATIC P vector_get_dim(B* vec, INDEX_SIZE* rows) {
+  P rows_;
   if (CLASS(vec) != ARRAY) return OPD_CLA;
   if (TYPE(vec) != DOUBLETYPE) return OPD_TYP;
-  *rows = ARRAY_SIZE(vec);
-  
+
+  if ((rows_ = ARRAY_SIZE(vec)) > INDEX_MAX || rows_ < 0)
+    return MATRIX_VECTOR_SIZE;
+  *rows = (INDEX_SIZE) rows_;
   return OK;
 }
 
-DM_INLINE_STATIC void matrix_trans(P rows, P cols, BOOLEAN istrans, P* rowst, P* colst)
+DM_INLINE_STATIC void matrix_trans(INDEX_SIZE rows, INDEX_SIZE cols, 
+				   BOOLEAN istrans, 
+				   INDEX_SIZE* rowst, INDEX_SIZE* colst)
 {
   if (istrans) {
     *rowst = cols;
@@ -200,62 +227,51 @@ DM_INLINE_STATIC void matrix_trans(P rows, P cols, BOOLEAN istrans, P* rowst, P*
   }
 }
 
-#define MATRIX_TRANS(rows, cols, istrans, rowst, colst) do {    \
-    matrix_trans((rows), (cols), (istrans), &(rowst), &(colst)); \
-  } while (0)
-
-#define VECTOR_GET_DIM(vec, rows) do {          \
-    P r = vector_get_dim(vec, &rows);           \
-    if (r != OK) return r;                      \
-  } while (0)
-
-#define GET_TRANS(t, trans, trans_) do {                \
-     P r = get_trans((t), &(trans), &(trans_));   \
-    if (r != OK) return r;                       \
-  } while (0)
-
-#define VECTOR_DIM(v, rows) do {      \
-    P r = vector_dim((v), (rows));    \
-    if (r != OK) return r;         \
-  } while (0)
-
-#define PIVOT_DIMS(pivot, rows) do { \
-    P r = pivot_dims((pivot), (rows));          \
-    if (r != OK) return r;           \
-  } while (0)
-
-#define MATRIX_DIMS_TRANS(cuts, a, m, n, t, trans, transb, lda) do {     \
-        P r = matrix_dims_trans((cuts), (a), &(m), &(n),                \
-                                (t), &(trans), &(transb), &(lda));      \
-    if (r != OK) return r;                                     \
-  } while (0)
-
-#define MATRIX_SQUARE_TRANS(cuts, a, n, t, trans, transb) do { \
-        P r = matrix_square_trans((cuts), (a), &(n),           \
-                                  (t), &(trans), &(transb));   \
-    if (r != OK) return r;                             \
-  } while (0)
-
-#define MATRIX_SQUARE(cuts, a, n) do {          \
-    P r = matrix_square((cuts), (a), &(n));     \
-    if (r != OK) return r;                      \
-  } while (0)
-
-#define MATRIX_DIMS(cuts, a, m, n, lda) do {        \
-    P r = matrix_dims((cuts), (a), &(m), &(n), &(lda)); \
-    if (r != OK) return r;                          \
-  } while (0)
-
 DM_INLINE_STATIC P mult(B* num, D* val) {
   if (CLASS(num) != NUM) return OPD_CLA;
   if (! DVALUE((num), (val))) return UNDF_VAL;
   return OK;
 }
 
-#define MULT(num, val) do { \
-    P r = mult((num), &(val));                  \
-    if (r != OK) return r;                      \
+#define MATRIX_RETCHECK(func) do { \
+    P r;			   \
+    if ((r = func)) return r;	   \
   } while (0)
+
+#define MATRIX_TRANS(rows, cols, istrans, rowst, colst) \
+  matrix_trans((rows), (cols), (istrans), &(rowst), &(colst))
+
+#define VECTOR_GET_DIM(vec, rows)		\
+  MATRIX_RETCHECK(vector_get_dim(vec, &(rows)))
+
+#define GET_TRANS(t, trans, trans_)			\
+  MATRIX_RETCHECK(get_trans((t), &(trans), &(trans_)))
+
+#define VECTOR_DIM(v, rows)			\
+  MATRIX_RETCHECK(vector_dim((v), (rows)))
+
+#define PIVOT_DIMS(pivot, rows)			\
+  MATRIX_RETCHECK(pivot_dims((pivot), (rows)))
+
+#define PIVOT_CHECK(pivot, rows)		\
+  MATRIX_RETCHECK(pivot_check((pivot), (rows)))
+
+#define MATRIX_DIMS_TRANS(cuts, a, m, n, t, trans, transb, lda)		\
+  MATRIX_RETCHECK(matrix_dims_trans((cuts), (a), &(m), &(n),		\
+				    (t), &(trans), &(transb), &(lda)))
+
+#define MATRIX_SQUARE_TRANS(cuts, a, n, t, trans, transb)		\
+  MATRIX_RETCHECK(matrix_square_trans((cuts), (a), &(n),		\
+				      (t), &(trans), &(transb)))
+
+#define MATRIX_SQUARE(cuts, a, n) \
+  MATRIX_RETCHECK(matrix_square((cuts), (a), &(n)))
+
+#define MATRIX_DIMS(cuts, a, m, n, lda) \
+  MATRIX_RETCHECK(matrix_dims((cuts), (a), &(m), &(n), &(lda)))
+
+#define MULT(num, val) \
+  MATRIX_RETCHECK(mult((num), &(val)))
 
 /*--------------------------------------------- matmul_blas
  * C <cuts> beta A <cuts> transA B <cuts> transB alpha | C <cuts>
@@ -264,15 +280,15 @@ DM_INLINE_STATIC P mult(B* num, D* val) {
 
 P op_matmul_blas(void)
 {
-    P Nrowa,  Nrowb,  Ncola,  Ncolb, Ncolc, Nrowc, lda, ldb, ldc;
-    P Ncola_, Nrowa_, Ncolb_, Nrowb_;
-		D *ap, *bp, *cp;
-		D alpha, beta;
-		enum CBLAS_TRANSPOSE transA, transB;
+    INDEX_SIZE Nrowa,  Nrowb,  Ncola,  Ncolb, Ncolc, Nrowc, lda, ldb, ldc;
+    INDEX_SIZE Ncola_, Nrowa_, Ncolb_, Nrowb_;
+    D *ap, *bp, *cp;
+    D alpha, beta;
+    enum CBLAS_TRANSPOSE transA, transB;
     BOOLEAN transA_, transB_;
 
-		if (o_10 < FLOORopds) return OPDS_UNF;
-		if (ATTR(o_10) & READONLY) return OPD_ATR;
+    if (o_10 < FLOORopds) return OPDS_UNF;
+    if (ATTR(o_10) & READONLY) return OPD_ATR;
 
     MATRIX_DIMS_TRANS(o_3, o_4, Nrowb, Ncolb, o_2, transB, transB_,ldb);
     MATRIX_DIMS_TRANS(o_6, o_7, Nrowa, Ncola, o_5, transA, transA_, lda);
@@ -289,23 +305,23 @@ P op_matmul_blas(void)
     if (Ncola_ != Nrowb_ || Nrowc != Nrowa_ || Ncolc != Ncolb_) 
       return MATRIX_NONMATCH_SHAPE;
 
-		cblas_dgemm(CblasRowMajor,
-								transA,
-								transB,
+    cblas_dgemm(CblasRowMajor,
+		transA,
+		transB,
                 Nrowc,  Ncolc,  Ncola_,
-								alpha, ap, lda, 
+		alpha, ap, lda, 
                 bp,  ldb,
-								beta, cp,  ldc);
+		beta, cp,  ldc);
     CHECK_ERR;
         
-		FREEopds = o_8;
-		return(OK);
+    FREEopds = o_8;
+    return(OK);
 }
 
-// matrix <x cuts> <l pivot> | lumatrix(matrix) <cuts> <l pivot> true
-//                         | false
+// matrix <l cuts> <l pivot> | lumatrix(matrix) <cuts> <l pivot> true
+//                           | false
 P op_decompLU_lp(void) {
-  P N;
+  INDEX_SIZE N;
   P info;
   BOOLEAN nsing = TRUE;
   
@@ -328,17 +344,17 @@ P op_decompLU_lp(void) {
   ATTR(o_1) = 0;
   BOOL_VAL(o_1) = nsing;    
   return OK;
-} 
+}
 
 // rhs lumatrix <cut> <pivot> | solution(rhs)
 P op_backsubLU_lp(void) {
-  P N;
+  INDEX_SIZE N;
 
   if (o_4 < FLOORopds) return OPDS_UNF;
   if (ATTR(o_4) & READONLY) return OPD_ATR;
   
   MATRIX_SQUARE(o_2, o_3, N);
-  PIVOT_DIMS(o_1, N);
+  PIVOT_CHECK(o_1, N);
   VECTOR_DIM(o_4, N);
 
   if (clapack_dgetrs(CblasRowMajor, CblasNoTrans,
@@ -355,13 +371,13 @@ P op_backsubLU_lp(void) {
 
 // lumatrix <cuts> pivot | invmatrix(lumatrix) <cuts>
 P op_invertLU_lp(void) {
-  P N;
+  INDEX_SIZE N;
   
   if (o_3 < FLOORopds) return OPDS_UNF;
   if (ATTR(o_3) & READONLY) return OPD_ATR;
 
   MATRIX_SQUARE(o_2, o_3, N);
-  PIVOT_DIMS(o_1, N);
+  PIVOT_CHECK(o_1, N);
 
   if (clapack_dgetri(CblasRowMajor, N, 
                      (D*) VALUE_PTR(o_3), N,
@@ -380,7 +396,9 @@ P op_norm2_blas(void) {
   if (TYPE(o_1) != DOUBLETYPE) return OPD_TYP;
   r = cblas_dnrm2(ARRAY_SIZE(o_1), (D*) VALUE_PTR(o_1), 1);
   CHECK_ERR;
-  TAG(o_1) = NUM | DOUBLETYPE; ATTR(o_1) = 0;
+
+  TAG(o_1) = NUM | DOUBLETYPE; 
+  ATTR(o_1) = 0;
   *(D*) NUM_VAL(o_1) = r;
   return OK;
 }
@@ -388,7 +406,7 @@ P op_norm2_blas(void) {
 // y beta A <cuts> transpose x alpha | y=alpha*A*x+beta*y
 P op_matvecmul_blas(void) {
   D alpha, beta;
-  P Nrowa, Ncola, Nrowa_, Ncola_, lda;
+  INDEX_SIZE Nrowa, Ncola, Nrowa_, Ncola_, lda;
   enum CBLAS_TRANSPOSE trans;
   BOOLEAN trans_;
 
@@ -418,7 +436,7 @@ P op_matvecmul_blas(void) {
 P op_solvetriang_blas(void) {
   enum CBLAS_TRANSPOSE trans;
   BOOLEAN uplo, unit, trans_;
-  P N;
+  INDEX_SIZE N;
   
   if (FLOORopds > o_6) return OPDS_UNF;
   if (CLASS(o_1) != BOOL || CLASS(o_2) != BOOL)
@@ -467,7 +485,7 @@ P op_givens_blas(void) {
 // c s <d x...> <d y...> | <xr...> <yr...>
 P op_rotate_blas(void) {
   D c, s;
-  P rows;
+  INDEX_SIZE rows;
 
   if (FLOORopds > o_4) return OPDS_UNF;
   if ((ATTR(o_1) & READONLY) || (ATTR(o_2) & READONLY)) return OPD_ATR;

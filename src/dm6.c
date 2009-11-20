@@ -59,7 +59,6 @@
 
 #include <string.h>
 #include <stdio.h>
-#include <math.h>
 
 #include "dm6.h"
 #include "dm2.h"
