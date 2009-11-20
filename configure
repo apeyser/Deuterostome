@@ -2243,7 +2243,7 @@ Some influential environment variables:
   DVT_MEM_SIZE
               dvt vm allocation size in mb, default=10
   DVT_USER_DICT_SIZE
-              dvt user dict size, default=300
+              dvt user dict size, default=500
   DM_IPPORT_USERRESERVED
               Symbol or integer value to use for default port base if dnode
               not in services, default=IPPORT_USERRESERVED
@@ -3791,7 +3791,7 @@ $as_echo "setting to ${DVT_MEM_SIZE}" >&6; }
   { $as_echo "$as_me:$LINENO: checking if ${cf_ac_cv_arg_val} is set" >&5
 $as_echo_n "checking if ${cf_ac_cv_arg_val} is set... " >&6; }
 
-  if test "${DVT_USER_DICT_SIZE-set}" == set ; then DVT_USER_DICT_SIZE="300"; fi
+  if test "${DVT_USER_DICT_SIZE-set}" == set ; then DVT_USER_DICT_SIZE="500"; fi
 
 cat >>confdefs.h <<_ACEOF
 #define DVT_USER_DICT_SIZE ${DVT_USER_DICT_SIZE}
