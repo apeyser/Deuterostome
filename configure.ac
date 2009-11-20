@@ -362,6 +362,7 @@ AC_CONFIG_LINKS([
   src/codegen/dm6.h:src/dm6.h
   src/codegen/dm7.c:src/dm7.c
   src/codegen/dm8.c:src/dm8.c
+  src/codegen/dm8.h:src/dm8.h
   src/codegen/dmnum.c:src/dmnum.c
   src/codegen/dsp2.c:src/dsp2.c
   src/codegen/dm-types.h:src/dm-types.h

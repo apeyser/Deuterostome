@@ -109,6 +109,7 @@ extern "C" {
 #include DM_ENDIAN_HDR
 #endif //DM_NO_ENDIAN_HDR
 
+#include <math.h>
 #define ISUNDEF(n) (isinf(n) || isnan(n))
 
 /*-------------------------- network packet size ----------------------*/
@@ -372,6 +373,7 @@ DLL_SCOPE B errorframe[FRAMEBYTES];
 DLL_SCOPE B** syserrm;
 DLL_SCOPE P* syserrc;
 DLL_SCOPE B** sysop;
+DLL_SCOPE P (*check_plugin)(void);
 
 DLL_SCOPE B locked;
 DLL_SCOPE B serialized;
@@ -520,46 +522,9 @@ DLL_SCOPE void ATAN(B *frame);
 DLL_SCOPE void DECREMENT(B *frame);
 
 /*----------------------- system operators */
-DM_HOT DLL_SCOPE P op_pop(void);
-DM_HOT DLL_SCOPE P op_exch(void);
-DM_HOT DLL_SCOPE P op_dup(void);
-DM_HOT DLL_SCOPE P op_index(void);
-DM_HOT DLL_SCOPE P op_roll(void);
-DM_HOT DLL_SCOPE P op_clear(void);
-DLL_SCOPE P op_count(void);
-DLL_SCOPE P op_cleartomark(void);
-DM_HOT DLL_SCOPE P op_counttomark(void);
-/*-- dictionary, array, list */
-DM_HOT DLL_SCOPE P op_currentdict(void);
-DM_HOT DLL_SCOPE P op_closelist(void); 
-DM_HOT DLL_SCOPE P op_openlist(void);
-DM_HOT DLL_SCOPE P op_dict(void);
-DLL_SCOPE P op_cleardict(void);
-DM_HOT DLL_SCOPE P op_array(void);
-DM_HOT DLL_SCOPE P op_list(void);
-DLL_SCOPE P (*usedfd_func)(void);
-DM_HOT DLL_SCOPE P op_used(void);
-DM_HOT DLL_SCOPE P op_length(void); 
-DM_HOT DLL_SCOPE P op_last(void);
-DM_HOT DLL_SCOPE P op_begin(void);
-DM_HOT DLL_SCOPE P op_end(void);
-DM_HOT DLL_SCOPE P op_def(void);
-DM_HOT DLL_SCOPE P op_name(void);
-DM_HOT DLL_SCOPE P op_find(void);
-DM_HOT DLL_SCOPE P op_get(void);
-DM_HOT DLL_SCOPE P op_put(void);
-DM_HOT DLL_SCOPE P op_known(void);
-DM_HOT DLL_SCOPE P op_getinterval(void);
-DLL_SCOPE P op_countdictstack(void);
-DLL_SCOPE P op_dictstack(void);
-/*-- VM and miscellaneous */
-DM_HOT DLL_SCOPE P op_null(void);
 /*-- conversion, string, attribute, class ,type */
 
 /*-- more big operators.... */
-DM_HOT DLL_SCOPE P op_fax(void);
-DLL_SCOPE P op_merge(void);
-DLL_SCOPE P op_nextobject(void);
 DLL_SCOPE P op_interpolate(void);
 DLL_SCOPE P op_integrateOH(void);
 DLL_SCOPE P op_extrema(void);

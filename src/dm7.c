@@ -30,7 +30,6 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <fnmatch.h>
-#include <math.h>
 #include <sys/wait.h>
 #include <signal.h>
 #include <sys/time.h>

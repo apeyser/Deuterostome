@@ -193,7 +193,7 @@
     /commands [
       /error /errormessage /abort /aborted
       /toconsole /tostderr
-      /pop /exch /dup /copy /index /roll /clear
+      /pop /push /exch /dup /copy /index /roll /clear
       /count /cleartomark /counttomark
       /currentdict
       /dict /cleardict /array /list
@@ -201,11 +201,11 @@
       /begin /end /def /name 
       /find /get /put /known
       /getinterval /countdictstack /dictstack
-      /save /capsave /restore /vmstatus
+      /save /capsave /restore /vmstatus /getplugindir
       /bind /null /not
       /start /exec
       /if /ifelse /for /repeat /loop /forall /exit
-      /stop /stopped
+      /stop /stopped /exitto /exitlabel
       /countexecstack /execstack
       /checkFPU /neg /abs /thearc /add /mod
       /sub /mul /div /sqrt /exp /ln /lg /pwr /cos
@@ -247,6 +247,7 @@
       /DICTS_UNF (** Dictionary stack underflow) def
       /INV_EXT (** Invalid exit) def
       /INV_STOP (** Invalid stop) def
+      /INV_EXITTO (** Invalid goto) def
       /EXECS_COR (** Excution stack corrupted) def
       /INV_REST (** Stack holds discardable object) def
       /BAD_TOK (** Bad token) def
@@ -391,7 +392,6 @@ end def
       /lock /unlock /serialize /threads /makethreads 
       /halt /continue 
       /vmresize 
-      /getplugindir
     ] def
     /errors 100 dict dup begin |[
       /LIB_LOAD (** Unable to load dynamically linked library) def
@@ -406,6 +406,8 @@ end def
       /VMR_STATE (** Memory alread minimized) def
       /ILL_OPAQUE (** Opaque dict type mismatch) def
       /FOLD_OPAQUE (** Illegal attempt to fold opaque object) def
+      /ACTIVE_OPAQUE (** Unable to restore active opaque object) def
+      /ACTIVE_STREAM (** Unable to restore open stream object) def
       /NO_PLUGINS (** Compiled without plugin support) def |]
     end def |]
   end def
@@ -425,6 +427,8 @@ end def
   end def
   /HAVE_ATLAS 1 dict dup begin |[
     /errors 100 dict dup begin |[
+      /MATRIX_VECTOR_SIZE (Matrix Error: illegal vector size) def
+      /MATRIX_PIVOT_CORR  (Matrix Error: pivot array corrupted) def
       /MATRIX_UNDEF_CUT (Matrix Error: undefined value in cut) def
       /MATRIX_ILLEGAL_CUT (Matrix Error: cut dimension less than 1) def
       /MATRIX_UNDER_CUT (Matrix Error: number of cut dimensions too small) def

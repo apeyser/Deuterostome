@@ -1,4 +1,6 @@
-/MATRIX_TEST module 200 dict dup begin
+| -*- mode: d; -*-
+
+/MATRIX_TEST 200 {
 
 /m 1000 def
 
@@ -99,8 +101,12 @@
   C2 beta mul C_temp add pop
 } bind def
 
+/matmulp_test {/beta name /alpha name settrans
+  C3 beta A3_ transA B3_ transB alpha mat_matmul pop
+} bind def
+
 /matmul_cmp {
-  C1 C2 C_temp compare
+  C3_ get_densematrix C1 C2 C_temp compare3
 } bind def
 
 /gmres_test {
@@ -166,10 +172,12 @@
   transB not {
     /B1_ B1 def
     /B2_ B2 def
+    /B3_ B3 def
     /B_map_ B_map def
   } {
     /B1_ B1t def
     /B2_ B2t def
+    /B3_ B3t def
     /B_map_ Bt_map def
   } ifelse
 } bind def
@@ -185,7 +193,7 @@
 } bind def
 
 /matvecmulp_test {/beta name /alpha name false settrans
-  y3 beta A3_ transA x3 alpha pmatvecmul
+  y3 beta A3_ transA x3 alpha matvecmul_petsc pop
 } bind def
 
 /matvecmul_cmp {
@@ -225,7 +233,7 @@
 | [ [[test1 test2 comparator] [(name) params...]]... ]
 /base_tests [
   /matmul
-  [[~matmul_test ~matmulold_test ] ~matmul_cmp ~do_full [
+  [[~matmul_test ~matmulold_test ~matmulp_test] ~matmul_cmp ~do_full [
     [(01nn) false false 0 1]
     [(10nn) false false 1 0]
     [(02nn) false false 0 2]
@@ -350,6 +358,20 @@
     pop
   } for
 
+  /B3 dup /dense n k mat_create def
+  B3 ~[
+    k /d array k /l array 0 k 0 1 ramp pop k {
+      /k name
+      /icol name
+      3 1 roll
+      exch /MATRIX_GM get add /i name
+      0 1 data last {/j name
+        j i k mul add 1 index j put
+      } for
+      icol
+    } ~exec
+  ] mat_fill
+
   0 1 n 1 sub {x1 1 index put} for
   0 1 m 1 sub {y1 1 index put} for
 
@@ -381,8 +403,7 @@
 
     /A3 dup ~matArows ~matAcols /sparse m n mat_create def
     A3 ~matAdata mat_fill_data
-    /A3t dup A3 mat_dup def
-    ~matAtrows ~matAtcols A3t mat_transpose
+    /A3t dup A3 mat_dup mat_transpose def
 
     {}
  } run_tests
@@ -461,10 +482,8 @@
   |(A3 fill\n) toconsole
   A3 ~matAdata mat_fill_data
   |(A3 dup\n) toconsole
-  /A3t dup A3 mat_dup def
+  /A3t dup A3 mat_dup mat_transpose def
   |(A3t transpose\n) toconsole
-  ~matAtrows ~matAtcols A3t mat_transpose
-  |(A3t transpose end\n) toconsole
 
   {}
 } bind def
@@ -505,8 +524,7 @@
       } ~exec
     ]} execpawns
     A3 ~matAdata mat_fill_data
-    /A3t dup A3 mat_dup def
-    A3t mat_transpose
+    /A3t dup A3 mat_dup mat_transpose def
 
     {}
   } run_tests
@@ -520,6 +538,8 @@
   B1t_old B1_old mattranspose pop
   B1 B2 copy pop
   B1t B2t copy pop
+
+  /B3t dup B3 mat_dup mat_transpose def
 
   C1t_old C1_old mattranspose pop
   C1 C2 copy pop
@@ -539,6 +559,9 @@
   /y4 dup y3 vec_dup def
   /A4 dup A3 mat_dup def
   /A4t dup A3t mat_dup def
+
+|  /C3 dup A3 mat_dup_shape def
+|  /C3t dup C3 mat_transpose def
 
   exec
 } bind def
@@ -704,6 +727,8 @@
         
         /C2t k m mul /d array def
         /C2t_old [C2t k {m /d parcel exch} repeat pop] def
+
+        /C3 dup /dense m k mat_create def
         
         /piv2 n /l array def
         /x2 n /d array def
@@ -734,4 +759,4 @@
   } forall
 } bind def
 
-end _module
+} moduledef

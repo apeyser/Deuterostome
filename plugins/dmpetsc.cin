@@ -9,7 +9,7 @@
 #endif
 
 #ifdef PETSC_USE_LONG_DOUBLE
-#error "PetscReal is double"
+#error "PetscReal is long double"
 #endif
 
 #ifdef PETSC_USE_INT
@@ -244,6 +244,11 @@ DM_INLINE_STATIC P INIT_KSP_(B* frame, KSP* ksp) {
     if ((_r_ = func)) RETURN_ERROR(errmap[_r_]);			\
   } while (0)
 
+#define DMPETSC_ERRCHECK_(v, func) do {			\
+    PetscErrorCode _r_;					\
+    if ((_r_ = func)) v = (ll_type | errmap[_r_]);	\
+    else v = OK;					\
+  } while (0);						\
 
 //------------------------ petsc_vec_create
 // n | vec-handle
@@ -272,6 +277,7 @@ DM_INLINE_STATIC P petsc_vec_create(void) {
   DMPETSC_VECTOR_GN(pframe) = gn;
   if ((r = VecAssemblyBegin(*x))) goto err;
 
+  OPAQUE_WIRED(pframe) = TRUE;
   moveframe(pframe, o_1);
   return OK;
 
@@ -660,12 +666,16 @@ DM_INLINE_STATIC P petsc_vecvec_mul(void) {
   return OK;
 }
 
-DM_INLINE_STATIC P petsc_vecmat_copy_mat(B* mf, D* arr, P row, P n) {
+// ((D*) FREEvm)[n] is the array of values to be copied
+DM_INLINE_STATIC P petsc_vecmat_copy_mat(B* mf, P row, P off, P n) {
   static const B af[FRAMEBYTES] = {ARRAY|DOUBLETYPE, 0, 0};
   static const B rf[FRAMEBYTES] = {NUM|LONGBIGTYPE, 0, 0};
   static const B nf[FRAMEBYTES] = {NUM|LONGBIGTYPE, 0, 0};
   P retc;
   B *sf = o1;
+
+  D* arr = (D*) FREEvm;
+  FREEvm += DALIGN(n*sizeof(D));
 
   moveframe(af, o1);
   VALUE_PTR(o1) = (B*) arr;
@@ -675,7 +685,7 @@ DM_INLINE_STATIC P petsc_vecmat_copy_mat(B* mf, D* arr, P row, P n) {
   LONGBIG_VAL(o2) = row;
 
   moveframe(nf, o3);
-  LONGBIG_VAL(o3) = n;
+  LONGBIG_VAL(o3) = off;
 
   moveframe(mf, o4);  
 
@@ -683,52 +693,248 @@ DM_INLINE_STATIC P petsc_vecmat_copy_mat(B* mf, D* arr, P row, P n) {
   if ((retc = op_petsc_mat_copyto()))
     FREEopds = sf;
 
+  FREEopds = o_1;
+  FREEvm = (B*) arr;
   return retc;
 }
 
-// x offset length/* A m | A (A_m=x)
-DM_INLINE_STATIC P petsc_vecmat_copy(void) {
+// leaves all the values of Vec s in FREEvm (no frame, just the data)
+DM_INLINE_STATIC P petsc_scatter_to(Vec s, P off, P len) {
+  P retc;
+  VecScatter scat;
+  IS s_is;
+  Vec d;
+  PetscScalar* a;
+
+  DMPETSC_ERRCHECK(VecCreateSeq(PETSC_COMM_WORLD, len, &d));
+  DMPETSC_ERRCHECK_(retc, ISCreateStride(PETSC_COMM_SELF, len, off, 1, &s_is));
+  if (retc) {
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, VecScatterCreate(s, s_is, d, PETSC_NULL, &scat));
+  if (retc) {
+    ISDestroy(s_is);
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, VecScatterBegin(scat, s, d, 
+			  INSERT_VALUES, SCATTER_FORWARD));
+  if (retc) {
+    VecScatterDestroy(scat);
+    ISDestroy(s_is);
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, VecScatterEnd(scat, s, d, 
+			  INSERT_VALUES, SCATTER_FORWARD));
+  if (retc) {
+    VecScatterDestroy(scat);
+    ISDestroy(s_is);
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, VecScatterDestroy(scat));
+  if (retc) {
+    ISDestroy(s_is);
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, ISDestroy(s_is));
+  if (retc) {
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, VecGetArray(d, &a));
+  if (retc) {
+    VecDestroy(d);
+    return retc;
+  }
+  moveD(a, (D*) FREEvm, len);
+  DMPETSC_ERRCHECK_(retc, VecRestoreArray(d, PETSC_NULL));
+  if (retc) {
+    VecDestroy(d);
+    return retc;
+  }
+  DMPETSC_ERRCHECK(VecDestroy(d));
+
+  return OK;
+}
+
+DM_INLINE_STATIC P petsc_scatter_from(Vec s) {
+  P retc;
+  VecScatter scat;
+  IS s_is;
+  Vec d;
+
+  DMPETSC_ERRCHECK(VecCreateSeq(PETSC_COMM_WORLD, 0, &d));
+  DMPETSC_ERRCHECK_(retc, 
+		    ISCreateGeneral(PETSC_COMM_SELF, 0, PETSC_NULL, &s_is));
+  if (retc) {
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, VecScatterCreate(s, s_is, d, PETSC_NULL, &scat));
+  if (retc) {
+    ISDestroy(s_is);
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, VecScatterBegin(scat, s, d, 
+					  INSERT_VALUES, SCATTER_FORWARD));
+  if (retc) {
+    VecScatterDestroy(scat);
+    ISDestroy(s_is);
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, VecScatterEnd(scat, s, d, 
+					INSERT_VALUES, SCATTER_FORWARD));
+  if (retc) {
+    VecScatterDestroy(scat);
+    ISDestroy(s_is);
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, VecScatterDestroy(scat));
+  if (retc) {
+    ISDestroy(s_is);
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK_(retc, ISDestroy(s_is));
+  if (retc) {
+    VecDestroy(d);
+    return retc;
+  }
+
+  DMPETSC_ERRCHECK(VecDestroy(d));
+  return OK;
+}
+
+// x local-offsetX <L cols> A local-offsetA | A (A_mc = x_m)
+DM_INLINE_STATIC P petsc_vecmat_copycol(void) {
   Vec x;
-  P off, n, row;
+  P offX, offA, n;
+  PetscInt len;
   D* arr;
   P retc;
+  Mat A;
+  PetscInt *cols, *rows, *i;
+  P gm, m;
 
   if (o_5 < FLOORopds) return OPDS_OVF;
-  if (o5 > CEILopds) return OPDS_OVF;
   if (CLASS(o_1) != NUM 
-      || CLASS(o_3) != NUM
+      || CLASS(o_3) != ARRAY
       || CLASS(o_4) != NUM) 
     return OPD_CLA;
   if (TYPE(o_1) >= SINGLETYPE
-      || TYPE(o_3) >= SINGLETYPE
-      || TYPE(o_4) >= SINGLETYPE) 
+      || TYPE(o_3) != LONG32TYPE
+      || TYPE(o_4) >= SINGLETYPE)
     return OPD_TYP;
-  if (!PVALUE(o_1, &row) || !PVALUE(o_4, &off)) return UNDF_VAL;
-  if (off < 0) return RNG_CHK;
-  if (PVALUE(o_3, &n) && n < 0) return RNG_CHK;
+
+  if (!PVALUE(o_1, &offA) 
+      || !PVALUE(o_4, &offX))
+    return UNDF_VAL;
+  if (offX < 0 || offA < 0) return RNG_CHK;
+  n = ARRAY_SIZE(o_3);
+  if (((UL64) offA) + n > INT32_MAX) return RNG_CHK;
 
   INIT_VEC(o_5, x);
-  if (n == PINF) n = DMPETSC_VECTOR_N(o_5) - off;
-  else if (n + off > DMPETSC_VECTOR_N(o_5)) RETURN_ERROR(DMPETSC_NOMATCH);
+  DMPETSC_ERRCHECK(VecGetSize(x, &len));
+  if (offX + n > len) RETURN_ERROR(DMPETSC_NOMATCH);
 
-  DMPETSC_ERRCHECK(VecGetArray(x, &arr));
-  if (! (retc = petsc_vecmat_copy_mat(o_2, arr + off, row, n))) {
-    moveframe(o_2, o_5);
-    FREEopds = o_4;
-  }
-  DMPETSC_ERRCHECK(VecRestoreArray(x, PETSC_NULL));
+  if ((retc = petsc_scatter_to(x, offX, n))) return retc;
+  arr = (D*) FREEvm;
+  rows = (PetscInt*) (arr + n);
+  if (rows + n >= (PetscInt*) CEILvm) return VM_OVF;
+  cols = (PetscInt*) VALUE_PTR(o_3);
+
+  INIT_MAT_WRITE(o_2, A);
+  gm = DMPETSC_MATRIX_GM(o_2);
+  m = DMPETSC_MATRIX_M(o_2);
+  if (offA + n > m) return RNG_CHK;
+  for (i = rows; i < rows + n; i++) *i = gm + offA++;
   
-  return retc;
+  DMPETSC_ERRCHECK(MatSetValues(A, n, rows,
+				1, cols, 
+				arr, INSERT_VALUES));
+
+  moveframe(o_2, o_5);
+  FREEopds = o_4;
+  return OK;
+}
+  
+
+// x offsetX length/* A m offsetA | A (A_mc=x_c)
+DM_INLINE_STATIC P petsc_vecmat_copyrow(void) {
+  Vec x;
+  P offX, offA, n, row;
+  PetscInt len;
+  P retc;
+
+  if (o_6 < FLOORopds) return OPDS_OVF;
+  if (o5 > CEILopds) return OPDS_OVF;
+  if (CLASS(o_1) != NUM 
+      || CLASS(o_2) != NUM
+      || CLASS(o_4) != NUM
+      || CLASS(o_5) != NUM) 
+    return OPD_CLA;
+  if (TYPE(o_1) >= SINGLETYPE
+      || TYPE(o_2) >= SINGLETYPE
+      || TYPE(o_4) >= SINGLETYPE
+      || TYPE(o_5) >= SINGLETYPE) 
+    return OPD_TYP;
+
+  if (!PVALUE(o_1, &offA) 
+      || !PVALUE(o_2, &row) 
+      || !PVALUE(o_5, &offX)) 
+    return UNDF_VAL;
+  if (offX < 0 || offA < 0 || row < 0) return RNG_CHK;
+  if (PVALUE(o_4, &n) && n < 0) return RNG_CHK;
+
+  INIT_VEC(o_6, x);
+  DMPETSC_ERRCHECK(VecGetSize(x, &len));
+  if (n == PINF) {
+    n = len - offX;
+    if (n < 0) return RNG_CHK;
+  }
+  else if (offX + n > len) RETURN_ERROR(DMPETSC_NOMATCH);
+
+  // the scattered array is passed at FREEvm
+  if ((retc = petsc_scatter_to(x, offX, n))) return retc;
+  if ((retc = petsc_vecmat_copy_mat(o_3, row, offA, n)))
+    return retc;
+  
+  moveframe(o_3, o_6);
+  FREEopds = o_5;
+
+  return OK;
 }
 
 // x A | A
 DM_INLINE_STATIC P petsc_vecmat_sync(void) {
   P retc;
-  if ((retc = op_petsc_mat_syncto()))
-    return retc;
+  Vec x;
+
+  INIT_VEC(o_2, x);
+  if ((retc = petsc_scatter_from(x))) return retc;
+  if ((retc = op_petsc_mat_syncto())) return retc;
   
   moveframe(o_1, o_2);
   FREEopds = o_1;
+
   return OK;
 }
 
@@ -919,7 +1125,7 @@ DM_INLINE_STATIC P petsc_mat_dense_transpose(Mat A, Mat *At) {
 }
 
 DM_INLINE_STATIC P petsc_mat_other_transpose(Mat A, Mat *At) {
-  extern PetscErrorCode dm_MatTranspose_MPIAIJ(Mat A,Mat *matout);
+  extern PetscErrorCode dm_MatTranspose_MPIAIJ(Mat A, Mat *matout);
 
   DMPETSC_ERRCHECK(dm_MatTranspose_MPIAIJ(A, At));
   return OK;
@@ -929,11 +1135,19 @@ DM_INLINE_STATIC P petsc_mat_other_transpose(Mat A, Mat *At) {
 enum DMMatrixType {
   DENSETYPE = 0,
   SPARSETYPE = 1,
-  BLOCKDENSETYPE = 2
+  BLOCKDENSETYPE = 2,
+  DMMatrixTypeMax
+};
+
+static MatType petscMatrixType[] = {
+  MATMPIDENSE,
+  MATMPIAIJ,
+  MATMPIBAIJ,
+  NULL
 };
 
 static const struct {
-  char *restrict type;
+  MatType type;
   PreassFunc preass;
   MatCopytoFunc copyto;
   MatGetrowFunc getrow;
@@ -979,7 +1193,7 @@ DM_INLINE_STATIC P mat_create(
   P retc = OK;
   B* oldfreevm = FREEvm;
   Mat* A = NULL;
-  char* type = matType[mtype].type;
+  MatType type = matType[mtype].type;
   PreassFunc preass = matType[mtype].preass;
 
   if (! dupid) RETURN_ERROR(DMPETSC_MATOVF);
@@ -1014,6 +1228,7 @@ DM_INLINE_STATIC P mat_create(
   if ((r = MatAssemblyBegin(*A, MAT_FINAL_ASSEMBLY)))
     goto err;
 
+  OPAQUE_WIRED(pframe) = TRUE;
   moveframe(pframe, rpframe);
   return OK;
 
@@ -1022,6 +1237,48 @@ DM_INLINE_STATIC P mat_create(
   FREEvm = oldfreevm;
   if (retc) return retc;
   RETURN_ERROR(errmap[r]);
+}
+
+DM_INLINE_STATIC P mat_create_from(Mat A, B* restrict rpframe)
+{
+  enum DMMatrixType mtype;
+  MatType type;
+  B* pframe;
+  P retc = OK;
+  B* oldfreevm = FREEvm;
+
+  if (! dupid) RETURN_ERROR(DMPETSC_MATOVF);
+
+  MAKE_DMPETSC_MATRIX(pframe);
+  DMPETSC_MATRIX_MATRIX(pframe) = A;
+
+  DMPETSC_ERRCHECK_(retc, MatGetType(A, &type));
+  if (retc) goto ret;
+  for (mtype = (enum DMMatrixType) 0; mtype < DMMatrixTypeMax; mtype++)
+    if (! strcmp(petscMatrixType[mtype], type)) break;
+  if (mtype == DMMatrixTypeMax)  {
+    retc = ll_type | DMPETSC_UNKNOWN_MATRIX_TYPE;
+    goto ret;
+  }
+  DMPETSC_MATRIX_MTYPE(pframe) = mtype;
+  
+  DMPETSC_ERRCHECK_(retc, MatGetLocalSize(A, &DMPETSC_MATRIX_M(pframe), 
+					  &DMPETSC_MATRIX_N(pframe)));
+  if (retc) goto ret;
+
+  DMPETSC_ERRCHECK_(retc, MatGetOwnershipRange(A, &DMPETSC_MATRIX_GM(pframe), 
+					       PETSC_NULL));
+  if (retc) goto ret;
+
+  DMPETSC_MATRIX_DUPID(pframe) = dupid++;
+  DMPETSC_MATRIX_ASS(pframe) = ASSEMBLED;
+
+  OPAQUE_WIRED(pframe) = TRUE;
+  moveframe(pframe, rpframe);
+
+ ret:
+  if (retc) FREEvm = oldfreevm;
+  return retc;
 }
 
 // m n | mat
@@ -1231,12 +1488,37 @@ DM_INLINE_STATIC P petsc_mat_dup(void) {
   RETURN_ERROR(retc ? retc : errmap[r]);
 }
 
+// A a | A (A*=a)
+DM_INLINE_STATIC P petsc_mat_mul(void) {
+  Mat A;
+  D a;
+  
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != NUM) return OPD_CLA;
+  INIT_MAT(o_2, A);
+  if (TYPE(o_1) < SINGLETYPE) {
+    P v;
+    if (! PVALUE(o_1, &v)) return UNDF_VAL;
+    if (v == 0) DMPETSC_ERRCHECK(MatZeroEntries(A));
+    if (v == 0 || v == 1) {
+      FREEopds = o_1;
+      return OK;
+    }
+  }
+
+  if (! DVALUE(o_1, &a)) return UNDF_VAL;
+  DMPETSC_ERRCHECK(MatScale(A, a));
+  
+  FREEopds = o_1;
+  return OK;
+}
+
 // A | A
 DM_INLINE_STATIC P petsc_mat_syncto(void) {
   Mat A;
 
   if (o_1 < FLOORopds) return OPDS_UNF;
-  INIT_MAT(o_1, A);
+  INIT_MAT_WRITE(o_1, A);
 
   return OK;
 }
@@ -1336,7 +1618,7 @@ DM_INLINE_STATIC P petsc_mat_copyto(void) {
   MatGetrowFunc getrow;
 
   if (o_4 < FLOORopds) return OPDS_UNF;
-  INIT_MAT(o_1, A);
+  INIT_MAT_WRITE(o_1, A);
   if (CLASS(o_2) != NUM || CLASS(o_3) != NUM) return OPD_CLA;
   if (! PVALUE(o_2, &n) || ! PVALUE(o_3, &m)) return UNDF_VAL;
   if (n < 0) return RNG_CHK;
@@ -1349,8 +1631,11 @@ DM_INLINE_STATIC P petsc_mat_copyto(void) {
   if ((retc = getrow(A, &ncols, gm+m))) return retc;
   if (n + len_arr > ncols) return RNG_CHK;
   a = (D*) VALUE_PTR(o_4);
-  row = (D*) FREEvm;
-  moveD(a, row+n, len_arr);
+  if (len_arr == ncols) row = a;
+  else {
+    row = (D*) FREEvm;
+    moveD(a, row+n, len_arr);
+  }
 
   copyto = matType[DMPETSC_MATRIX_MTYPE(o_1)].copyto;
   if ((retc = copyto(A, gm+m, row, ncols))) return retc;
@@ -1636,6 +1921,7 @@ DM_INLINE_STATIC P petsc_ksp_create(void) {
   }
   else if (TAG(pcparam) != NULLOBJ) kspretc(OPD_ERR);
 
+  OPAQUE_WIRED(pframe) = TRUE;
   moveframe(pframe, o_5);
   FREEopds = o_4;
   return OK;
@@ -1815,19 +2101,9 @@ DM_INLINE_STATIC P petsc_vec_norm(void) {
 }
 
 
-/*   { */
-/*     PetscInt m1, n1, m2, n2, m3, n3; */
-/*     P r = getworldrank(); */
-/*     MatGetOwnershipRange(A, &m1, &n1); */
-/*     MatGetLocalSize(A, &m2, &n2); */
-/*     MatGetSize(A, &m3, &n3); */
-/*     fprintf(stderr, "Post: Rank: %i, Range: (%i,%i), LSize: (%i,%i), Size(%i,%i)\n", */
-/* 	    (int) r, (int) m1, (int) n1, (int) m2, (int) n2,  */
-/* 	    (int) m3, (int) n3); */
-/*   } */
-
 // MatA | MatA(transposed)
-DM_INLINE_STATIC P petsc_mat_transpose(void) {
+DM_INLINE_STATIC P petsc_mat_transpose(void) 
+{
   Mat A, At;
   L32 m, n, gm;
   P retc;
@@ -1866,6 +2142,125 @@ DM_INLINE_STATIC P petsc_mat_transpose(void) {
   return OK;
 }
 
+// MatA & MatB -- just structure
+// MatC -- to be used in petsc_mat_matmul
+// MatA transA MatB transB fill | MatC
+DM_INLINE_STATIC P petsc_mat_matmulsu(void)
+{
+  Mat mA, mB, mC;
+  MatTransposeFunc trans;
+  D fill;
+  P retc = OK, retc_ = OK;
+  BOOLEAN transA, transB;
+  static B pframe[FRAMEBYTES];
+  
+  if (o_5 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != NUM) return OPD_CLA;
+  if (! DVALUE(o_1, &fill)) fill = 0.5;
+  if (TAG(o_2) != BOOL || TAG(o_4) != BOOL) return OPD_CLA;
+  INIT_MAT(o_3, mB);
+  INIT_MAT(o_5, mA);
+
+  transB = BOOL_VAL(o_2);
+  transA = BOOL_VAL(o_4);
+  if (transA) {
+    Mat At;
+    trans = matType[DMPETSC_MATRIX_MTYPE(o_5)].trans;
+    retc = trans(mA, &At);
+    mA = At;
+    if (retc) goto A;
+  };
+  if (transB) {
+    Mat Bt;
+    trans = matType[DMPETSC_MATRIX_MTYPE(o_3)].trans;
+    retc = trans(mB, &Bt);
+    mB = Bt;
+    if (retc) goto B;
+  };
+
+  DMPETSC_ERRCHECK_(retc, MatMatMultSymbolic(mA, mB, fill, &mC));
+  if (retc) goto B;
+  
+  if ((retc = mat_create_from(mC, pframe))) goto C;
+  moveframe(pframe, o_5);
+  FREEopds = o_4;
+
+  C: if (retc)   DMPETSC_ERRCHECK_(retc_, MatDestroy(mC));
+  B: if (transB) DMPETSC_ERRCHECK_(retc_, MatDestroy(mB));
+  A: if (transA) DMPETSC_ERRCHECK_(retc_, MatDestroy(mA));
+  return retc ? retc : retc_;
+}  
+
+// MatC MatA transA MatB transB | MatC(=MatAt?*MatBt?)
+DM_INLINE_STATIC P petsc_mat_matmul(void) {
+  Mat mA, mB, mC;
+  BOOLEAN transA, transB;
+  MatTransposeFunc trans;
+  P retc = OK, retc_ = OK;
+  
+  if (o_5 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != BOOL || TAG(o_3) != BOOL) return OPD_CLA;
+  INIT_MAT(o_2, mB);
+  INIT_MAT(o_4, mA);
+  INIT_MAT(o_5, mC);
+
+  transB = BOOL_VAL(o_1);
+  transA = BOOL_VAL(o_3);
+  if (transA) {
+    Mat At;
+    trans = matType[DMPETSC_MATRIX_MTYPE(o_4)].trans;
+    retc = trans(mA, &At);
+    mA = At;
+    if (retc) goto A;
+  }
+  if (transB) {
+    Mat Bt;
+    trans = matType[DMPETSC_MATRIX_MTYPE(o_2)].trans;
+    retc = trans(mB, &Bt);
+    mB = Bt;
+    if (retc) goto B;
+  }
+
+  DMPETSC_ERRCHECK_(retc, MatMatMultNumeric(mA, mB, mC));
+  if (retc) goto B;
+
+  FREEopds = o_4;
+
+  B: if (transB) DMPETSC_ERRCHECK_(retc_, MatDestroy(mB));
+  A: if (transA) DMPETSC_ERRCHECK_(retc_, MatDestroy(mA));
+  return retc ? retc : retc_;
+}
+
+// MatA | MatA = 0
+DM_INLINE_STATIC P petsc_mat_zero(void) {
+  Mat A;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  INIT_MAT(o_1, A);
+  DMPETSC_ERRCHECK(MatZeroEntries(A));
+  return OK;
+}
+
+// MatA MatB | MatA += MatB
+DM_INLINE_STATIC P petsc_mat_matadd(void) {
+  Mat A, B, C;
+  Mat mats[2];
+  P retc = OK;
+
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  INIT_MAT(o_1, B);
+  INIT_MAT(o_1, A);
+  mats[0] = A;
+  mats[1] = B;
+  
+  DMPETSC_ERRCHECK(MatCreateComposite(PETSC_COMM_WORLD, 2, mats, &C));
+  DMPETSC_ERRCHECK_(retc, MatCopy(C, A, SAME_NONZERO_PATTERN));
+  DMPETSC_ERRCHECK(MatDestroy(C));
+  if (retc) return retc;
+  
+  FREEopds = o_1;
+  return OK;
+}
+
 // MatA | number-of-local-nonzeros
 DM_INLINE_STATIC P petsc_mat_getnzs(void) {
   Mat A;
@@ -1892,7 +2287,6 @@ DM_INLINE_STATIC P petsc_mat_getnzs(void) {
 }
 
 // <l irows> <l icols> MatA | <l irows> <l icols>
-// icols is allocated by getcsr
 DM_INLINE_STATIC P petsc_mat_getcsr(void) {
   Mat A;
   L32 m, gm;

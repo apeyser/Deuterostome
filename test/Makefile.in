@@ -680,7 +680,7 @@ tmp = @tmp@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-dist_noinst_DATA = benchmark.d arr.d.in matrix-test.d petsc-tester.d
+dist_noinst_DATA = benchmark.d arr.d.in petsc-tester.d matrix-test.d
 noinst_DATA = arr.d
 all: all-am
 

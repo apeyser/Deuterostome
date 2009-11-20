@@ -598,10 +598,10 @@ end def |========= end of mpi data ================
       pop
 
       {
-        nwait 0 eq {exit} if
+        nwait 0 eq ~exit if
         halt
       } loop
-    } stopped end {stop} if
+    } stopped end ~stop if
   } lock
 } bind def
 
@@ -645,6 +645,48 @@ end def |========= end of mpi data ================
   } stopped /module_send_ _layer end ~stop if
 } bind def
 
+
+|=================== names_send =====================
+| [/name... ] | --
+|
+| copies each name to the pawns, transcribing composite objects
+|  at the receiving end.
+|
+/names_send {
+  save openlist 3 -1 roll {
+    {~[exch dup find {recv_transcribe def} ~exec] sexecpawns} forall
+  } stopped cleartomark restore ~stop if
+} bind def
+
+|-------------------------- inlayerall
+| ~active /layer_name | ...
+|
+| Wraps up /layer_name layer ~active stopped /layer_name _layer ~stop if
+|  which is a common usage pattern for layers.
+| ... is whatever active leaves behind.
+|
+| This version also handles pawns -- it starts a layer on the pawns,
+|   halts the pawns, does an inlayer with the active object
+|   and then restarts the pawns to close the layer.
+|
+| {} /name | --
+/inlayerall {
+  {
+    ~[{kickdnode ~stop if} 3 -1 roll ~inlayer] sexecpawns
+    exec kickpawns
+  } 1 index ~inlayer stopped {~stop sexecall} if
+} bind def
+
+|-------------------------- restoreall
+| /save_name | ...
+|
+| restores the /savename on dnode & pawns
+|
+/restoreall {
+  save ~[2 index mkact ~restore] sexecpawns restore
+  find restore
+} bind def
+
 |==================================== end of pawn functions
 @ENABLE_RTHREADS_END@
 
@@ -663,7 +705,9 @@ end def |========= end of mpi data ================
 
 /dvtrespond {
   save
-  console ~[userdict /knode get {dvt begin setready_dnode} ~exec] send 
+  console ~[userdict /knode get {
+    userdict /dvt get begin setready_dnode
+  } ~exec] send 
   restore
 } bind def
 

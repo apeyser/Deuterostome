@@ -10,6 +10,7 @@ B* _sysop[] =
   (B*) "toconsole", (B*) op_toconsole,
   (B*) "tostderr", (B*) op_tostderr,
   (B*) "pop", (B*) op_pop,
+  (B*) "push", (B*) op_push,
   (B*) "exch", (B*) op_exch,
   (B*) "dup", (B*) op_dup,
   (B*) "copy", (B*) op_copy,
@@ -42,6 +43,7 @@ B* _sysop[] =
   (B*) "capsave", (B*) op_capsave,
   (B*) "restore", (B*) op_restore,
   (B*) "vmstatus", (B*) op_vmstatus,
+  (B*) "getplugindir", (B*) op_getplugindir,
   (B*) "bind", (B*) op_bind,
   (B*) "null", (B*) op_null,
   (B*) "not", (B*) op_not,
@@ -56,6 +58,8 @@ B* _sysop[] =
   (B*) "exit", (B*) op_exit,
   (B*) "stop", (B*) op_stop,
   (B*) "stopped", (B*) op_stopped,
+  (B*) "exitto", (B*) op_exitto,
+  (B*) "exitlabel", (B*) op_exitlabel,
   (B*) "countexecstack", (B*) op_countexecstack,
   (B*) "execstack", (B*) op_execstack,
   (B*) "checkFPU", (B*) op_checkFPU,
@@ -161,7 +165,6 @@ B* _sysop[] =
   (B*) "halt", (B*) op_halt,
   (B*) "continue", (B*) op_continue,
   (B*) "vmresize", (B*) op_vmresize,
-  (B*) "getplugindir", (B*) op_getplugindir,
 #ifdef BUILD_ATLAS
   (B*) "matmul_blas", (B*) op_matmul_blas,
   (B*) "decompLU_lp", (B*) op_decompLU_lp,
@@ -218,6 +221,7 @@ P _syserrc[] = {
   DICTS_UNF,
   INV_EXT,
   INV_STOP,
+  INV_EXITTO,
   EXECS_COR,
   INV_REST,
   BAD_TOK,
@@ -262,10 +266,14 @@ P _syserrc[] = {
   VMR_STATE,
   ILL_OPAQUE,
   FOLD_OPAQUE,
+  ACTIVE_OPAQUE,
+  ACTIVE_STREAM,
   NO_PLUGINS,
 #ifdef BUILD_ATLAS
 #endif //BUILD_ATLAS
 #ifdef HAVE_ATLAS
+  MATRIX_VECTOR_SIZE,
+  MATRIX_PIVOT_CORR,
   MATRIX_UNDEF_CUT,
   MATRIX_ILLEGAL_CUT,
   MATRIX_UNDER_CUT,
@@ -313,6 +321,7 @@ B* _syserrm[] = {
   (B*) "** Dictionary stack underflow",
   (B*) "** Invalid exit",
   (B*) "** Invalid stop",
+  (B*) "** Invalid goto",
   (B*) "** Excution stack corrupted",
   (B*) "** Stack holds discardable object",
   (B*) "** Bad token",
@@ -357,10 +366,14 @@ B* _syserrm[] = {
   (B*) "** Memory alread minimized",
   (B*) "** Opaque dict type mismatch",
   (B*) "** Illegal attempt to fold opaque object",
+  (B*) "** Unable to restore active opaque object",
+  (B*) "** Unable to restore open stream object",
   (B*) "** Compiled without plugin support",
 #ifdef BUILD_ATLAS
 #endif //BUILD_ATLAS
 #ifdef HAVE_ATLAS
+  (B*) "Matrix Error: illegal vector size",
+  (B*) "Matrix Error: pivot array corrupted",
   (B*) "Matrix Error: undefined value in cut",
   (B*) "Matrix Error: cut dimension less than 1",
   (B*) "Matrix Error: number of cut dimensions too small",

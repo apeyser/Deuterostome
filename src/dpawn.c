@@ -19,6 +19,7 @@
 #include "dm-mpi.h"
 #include "dm-vm.h"
 #include "dm7.h"
+#include "dm8.h"
 
 /*----------------- DM global variables -----------------------------*/
 
@@ -35,8 +36,9 @@
 #include "threads.h"
 #include "dm-dpawn.h"
 #include "dregex.h"
-#include "dm6.h"
+#include "dm4.h"
 #include "dm5.h"
+#include "dm6.h"
 
 
 #include "dpawn_0.h"
@@ -131,6 +133,7 @@ int main(int argc DM_UNUSED,
   sysop = _sysop;
   syserrm = _syserrm;
   syserrc = _syserrc;
+  check_plugin = _check_plugin;
 
   createfds();
   run_dpawn_mill();

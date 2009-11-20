@@ -59,10 +59,10 @@
 
 #include <string.h>
 #include <stdio.h>
-#include <math.h>
 
 #include "dm6.h"
 #include "dm2.h"
+#include "dm8.h"
 
 /*---------------------------------------------------- checkFPU
      -- | bool
@@ -482,6 +482,29 @@ DM_INLINE_STATIC void shift_stack(B* caplevel, P offset,
 	&& (VALUE_PTR(cframe) <= CEILvm))
       shift_subframe(cframe, offset);
 }
+
+DM_INLINE_STATIC P check_wired(B* floor, B* top) {
+  P retc;
+
+  if (o2 > CEILopds) return OPDS_OVF;
+  moveframe(floor, o1);
+  FREEopds = o2;
+
+ again:
+  if (check_plugin && (retc = check_plugin())) return retc;
+  if (CLASS(o_1) == STREAM && STREAM_FD(VALUE_PTR(o_1)) != -1)
+    return ACTIVE_STREAM;
+  
+  if ((retc = op_nextobject())) return retc;
+  FREEopds = o_1;
+  if (BOOL_VAL(o1)) {
+    if (VALUE_PTR(o_1) - FRAMEBYTES < top) goto again;
+    FREEopds = o_1;
+  }
+
+  return OK;
+}
+    
   
 /*----------------------------------------------- restore
      VM_box | ---
@@ -523,6 +546,8 @@ P op_restore(void)
     capped = FALSE; 
     caplevel = FREEvm; 
   }
+  if ((retc = check_wired(savefloor, caplevel))) return retc;
+
   offset = caplevel - savefloor;
   FREEopds = o_1;
 

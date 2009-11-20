@@ -4,6 +4,7 @@
           _ null
           - ]
           - pop
+	  - push
           - exch
           - dup
           - index
@@ -31,9 +32,6 @@
 */
 
 #include "dm.h"
-
-#include <math.h>
-
 #include "dm2.h"
 
 /*------------------------------------- null
@@ -100,6 +98,27 @@ P op_pop(void)
 {
   if (FREEopds <= FLOORopds) return OPDS_UNF;
   FREEopds -= FRAMEBYTES;
+  return OK;
+}
+
+/*-------------------------------------- push
+  [ any... | --
+  any.. are moved to the execution stack
+*/
+
+P op_push(void) {
+  B* i;
+  P framebytes;
+
+  for (i = o_1; i >= FLOORopds && TAG(i) != MARK; i -= FRAMEBYTES);
+  if (TAG(i) != MARK) return OPDS_UNF;
+  framebytes = FREEopds - i - FRAMEBYTES;
+
+  if (x1 + framebytes > CEILexecs) return EXECS_OVF;
+  moveframes(i+FRAMEBYTES, x1, framebytes/FRAMEBYTES);
+  FREEexecs = x1 + framebytes;
+  FREEopds = i;
+
   return OK;
 }
 

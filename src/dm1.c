@@ -5,7 +5,6 @@
 
 #include "dm.h"
 
-#include <math.h>
 #include <stdio.h>
 #include <errno.h>
 #include <unistd.h>
@@ -15,6 +14,7 @@
 #include "dm.h"
 #include "dm2.h"
 #include "dm3.h"
+#include "dm4.h"
 
 /* NOTE: the '~' enjoys some fortuitous encoding */
 

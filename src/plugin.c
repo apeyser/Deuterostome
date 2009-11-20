@@ -14,6 +14,7 @@ P op_nextlib(void) {return NO_PLUGINS;}
 P op_loadlib(void) {return NO_PLUGINS;}
 void closealllibs(void) {}
 void initialize_plugins(void) {}
+P _check_plugin(void) {return OK;}
 
 #else //ENABLE_PLUGINS_SUPPORT
 
@@ -26,7 +27,9 @@ B saveboxname[FRAMEBYTES];
 B buffernameframe[FRAMEBYTES];
 B fininame[FRAMEBYTES];
 B initname[FRAMEBYTES];
+B wiredname[FRAMEBYTES];
 static B nullframe[FRAMEBYTES];
+static B wiredframe[FRAMEBYTES];
 
 void initialize_plugins(void) {
   if (lt_dlinit()) {
@@ -40,8 +43,12 @@ void initialize_plugins(void) {
   makename((B*)"BUFFER", buffernameframe);
   makename((B*)"INIT_", initname);
   makename((B*)"FINI_", fininame);
+  makename((B*)"WIRED", wiredname);
   TAG(nullframe) = NULLOBJ; 
   ATTR(nullframe) = READONLY;
+  TAG(wiredframe) = BOOL;
+  ATTR(wiredframe) = READONLY;
+  BOOL_VAL(wiredframe) = FALSE;
 }
 
 /*------------------------------------------------closealllibs
@@ -260,7 +267,7 @@ B* make_opaque_frame(P n, B* pluginnameframe, ...) {
   
   if (op_save() != OK) return NULL;
 
-  if ((dict = makedict(len + 2 + (n ? 1 : 0))) == (B*) -1L) {
+  if ((dict = makedict(len + 3 + (n ? 1 : 0))) == (B*) -1L) {
     FREEvm = oldFREEvm;
     FREEopds = o_1;
     return NULL;
@@ -286,6 +293,7 @@ B* make_opaque_frame(P n, B* pluginnameframe, ...) {
   insert(saveboxname, dict, o_1);
   ATTR(pluginnameframe) |= READONLY;
   insert(opaquename, dict, pluginnameframe);
+  insert(wiredname, dict, wiredframe);
   if (buffer) insert(buffernameframe, dict, buffer);
 
   va_start(nameframes, pluginnameframe);
@@ -320,5 +328,12 @@ P wrap_readcode(const char* file) {
   FREEexecs = o2;
   return OK;
 }
+
+P _check_plugin(void) {
+  if (TAG(o_1) == (DICT|OPAQUETYPE)
+      && BOOL_VAL(lookup(wiredname, VALUE_PTR(o_1))))
+    return ACTIVE_OPAQUE;
+  return OK;
+}     
 
 #endif //ENABLE_PLUGINS_SUPPORT

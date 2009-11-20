@@ -11,10 +11,10 @@ namespace Cpp
   {
     typedef deque<int> dq;
     dq* l;
-		char* buf;
+    char* buf;
 
-		Tester(void) : l(new dq()), buf(NULL) {};
-		~Tester(void) {delete l; delete buf;};
+    Tester(void) : l(new dq()), buf(NULL) {};
+    ~Tester(void) {delete l; delete buf;};
     
     static void init(Tester** t) {*t = new Tester();};
     static void addElem(Tester* t, int i) {t->l->push_back(i);};

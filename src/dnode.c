@@ -24,6 +24,7 @@
 #include "dm-convert.h"
 #include "pluginlib.h"
 #include "dm3.h"
+#include "dm4.h"
 #include "dqueen.h"
 #include "dm-nextevent.h"
 #include "dm-proc.h"
@@ -32,6 +33,7 @@
 #include "dm7.h"
 #include "dm6.h"
 #include "dm5.h"
+#include "dm8.h"
 
 #include "dnode_0.h"
 
@@ -177,6 +179,7 @@ int main(int argc, char *argv[])
   sysop = _sysop;
   syserrm = _syserrm;
   syserrc = _syserrc;
+  check_plugin = _check_plugin;
 
 #if HAVE_SETSID
   // separate from current session - don't die if term closed.

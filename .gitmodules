@@ -1,6 +1,3 @@
-[submodule "modules/debian"]
-	path = modules/debian
-	url = git@disks.nonnerlab:git/debian.git
 [submodule "modules/gentoo"]
 	path = modules/gentoo
 	url = git@disks.nonnerlab:git/portage-local.git

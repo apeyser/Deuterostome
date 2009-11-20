@@ -479,6 +479,7 @@ P op_makeproc(void) {
     OPAQUE_MEM_SET(procframe, PROCESS_STATE_N, initframe);
     OPAQUE_MEM_SET(procframe, PROCESS_BUFFC_N, initframe);
 
+    OPAQUE_WIRED(procframe) = TRUE;
     moveframe(procframe, o_1);	
     return OK;
 }
