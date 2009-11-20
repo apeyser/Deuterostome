@@ -418,6 +418,9 @@ end def
       /backsubLU_lp
       /invertLU_lp
       /norm2_blas
+      /vecmul_blas
+      /vecscale_blas
+      /veccopy_blas
       /matvecmul_blas
       /solvetriang_blas
       /givens_blas
@@ -433,6 +436,7 @@ end def
       /MATRIX_ILLEGAL_CUT (Matrix Error: cut dimension less than 1) def
       /MATRIX_UNDER_CUT (Matrix Error: number of cut dimensions too small) def
       /MATRIX_NONMATCH_CUT (Matrix Error: array too small for cut) def
+      /MATRIX_VECTOR_NONMATCH (Matrix Error: vector dimensions don't match) def
       /MATRIX_NONMATCH_SHAPE (Matrix Error: matrix dimensions don't match) def
       /MATRIX_PARAM_ERROR (Matrix Error: parameters to clapack illegal) def
       /MATRIX_INT_ERR (Matrix Error: Internal Error - message on stack) def
