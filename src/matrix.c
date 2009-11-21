@@ -403,17 +403,17 @@ P op_norm2_blas(void) {
   return OK;
 }
 
-// y a x | y (yi=yi+a*xi)
-P op_vecmul_blas(void) {
+// y x a | y (yi=yi+a*xi)
+P op_vecadd_blas(void) {
   D alpha;
   P sz;
   if (o3 < FLOORopds) return OPDS_UNF;
-  if (CLASS(o_1) != ARRAY || CLASS(o_2) != NUM || CLASS(o_3) != ARRAY) 
+  if (CLASS(o_1) != ARRAY || CLASS(o_2) != ARRAY || CLASS(o_3) != NUM) 
     return OPD_CLA;
-  if (TYPE(o_1) != DOUBLETYPE || TYPE(o_3) != DOUBLETYPE) return OPD_TYP;
-  if ((sz = ARRAY_SIZE(o_1)) != ARRAY_SIZE(o_3)) return MATRIX_VECTOR_NONMATCH;
-  if (! DVALUE(o_2, &alpha)) return UNDF_VAL;
-  cblas_daxpy(sz, alpha, (D*) VALUE_PTR(o_3), 1, (D*) VALUE_PTR(o_1), 1);
+  if (TYPE(o_1) != DOUBLETYPE || TYPE(o_2) != DOUBLETYPE) return OPD_TYP;
+  if ((sz = ARRAY_SIZE(o_1)) != ARRAY_SIZE(o_2)) return MATRIX_VECTOR_NONMATCH;
+  if (! DVALUE(o_3, &alpha)) return UNDF_VAL;
+  cblas_daxpy(sz, alpha, (D*) VALUE_PTR(o_3), 1, (D*) VALUE_PTR(o_2), 1);
   CHECK_ERR;
 
   FREEopds = o_2;

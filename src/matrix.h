@@ -13,7 +13,7 @@ P op_backsubLU_lp(void);
 P op_invertLU_lp(void);
 P op_norm2_blas(void);
 P op_matvecmul_blas(void);
-P op_vecmul_blas(void);
+P op_vecadd_blas(void);
 P op_vecscale_blas(void);
 P op_veccopy_blas(void);
 P op_solvetriang_blas(void);
