@@ -154,7 +154,7 @@ P op_profiletime(void) {
   if (! (ATTR(o_2) & ACTIVE)) return OPD_ATR;
   if (TAG(o_1) != (ARRAY|LONG64TYPE)) return OPD_TYP;
   if (ARRAY_SIZE(o_1) < 8) return RNG_CHK;
-  if (x5 < CEILexecs) return EXECS_OVF;  
+  if (x4 > CEILexecs) return EXECS_OVF;  
 
   moveframe(o_1, x1);
   ARRAY_SIZE(x1) = 8;
