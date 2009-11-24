@@ -235,7 +235,7 @@
   "backsubLU_lp"
   "invertLU_lp"
   "norm2_blas"
-  "vecmul_blas"
+  "vecadd_blas"
   "vecscale_blas"
   "veccopy_blas"
   "matvecmul_blas"

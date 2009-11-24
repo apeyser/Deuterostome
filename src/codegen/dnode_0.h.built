@@ -177,7 +177,7 @@ B* _sysop[] =
   (B*) "backsubLU_lp", (B*) op_backsubLU_lp,
   (B*) "invertLU_lp", (B*) op_invertLU_lp,
   (B*) "norm2_blas", (B*) op_norm2_blas,
-  (B*) "vecmul_blas", (B*) op_vecmul_blas,
+  (B*) "vecadd_blas", (B*) op_vecadd_blas,
   (B*) "vecscale_blas", (B*) op_vecscale_blas,
   (B*) "veccopy_blas", (B*) op_veccopy_blas,
   (B*) "matvecmul_blas", (B*) op_matvecmul_blas,
