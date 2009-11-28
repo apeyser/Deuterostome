@@ -867,12 +867,12 @@
   } bind userdict 3 -1 roll put
 
   userdict /dm_type get /dvt ne {
-    /procthreads null def
+    /procthreads ~threads def
 
     | ~active | ...
     /multiproc {
       {
-        /procthreads_live procthreads null eq ~threads ~procthreads ifelse def
+        /procthreads_live procthreads def
         /procthreads_layer {
           0 1 procthreads_live 1 sub {
             {/procthreads_rank name end exec true} fds bg exch pop exch
@@ -880,7 +880,7 @@
         } layerdef
         procthreads_live {(multiproc) ~wait_quiet unlock} repeat
       } lock 
-    } currentdictdef
+    } bind userdictdef
   } if
 
 } moduledef

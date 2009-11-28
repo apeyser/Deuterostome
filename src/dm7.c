@@ -95,7 +95,7 @@ P op_gettimeofday(void)
   0,1 = user time
   2,3 = system time
   4,5 = user time of children
-  6.7 = system time of children
+  6,7 = system time of children
   times are in seconds, useconds
 */
 
