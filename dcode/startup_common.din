@@ -146,25 +146,25 @@
   } exch indict
 } bind def
 
-|---------------- currentdictdef ---------------------------
-| /name ~active | --
+|---------------- dictdef ---------------------------
+| /name ~active dict | --
 |
-| defines /name in currentdict with a procedure
-| that calls executes active in currentdict
+| defines /name in dict with a procedure
+| that executes active in currentdict
 |
-/currentdictdef {
-  ~[exch destruct_exec currentdict ~indict]
-  def
+/currentdef {
+  ~[3 -1 roll destruct_exec currentdict ~indict]
+  exch 3 -1 roll put
 } bind def
 
 |----------------- userdef --------------------------
 | /name ~active | --
 |
 | defines /name in userdict with a procedure
-| that calls executes active in currentdict
+| that executes active in currentdict
 |
 /userdef {
-  ~currentdictdef userdict indict
+  userdict currentdef
 } bind def
 
 

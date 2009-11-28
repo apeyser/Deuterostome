@@ -880,7 +880,7 @@
         } layerdef
         procthreads_live {(multiproc) ~wait_quiet unlock} repeat
       } lock 
-    } bind userdictdef
+    } bind userdef
   } if
 
 } moduledef
