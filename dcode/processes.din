@@ -427,9 +427,24 @@
   | If process does not return status 0, throws a NOSYSTEM error
   |   coming from (source).
   |
+  /wait_done_buf 128 /b array def
   /wait_ {
     dup class /arrayclass ne {(wait)} if
-    exch wait (Done\n) toconsole ~pop {/NOSYSTEM makeerror} ifelse
+    exch dup {
+      ~wait unlock
+      wait_done_buf 0 (Done: ) fax * 5 -1 roll unpid * number (\n) fax
+      0 exch getinterval toconsole
+    } lock
+    ~pop {/NOSYSTEM makeerror} ifelse
+  } bind def
+
+  |============================ wait_quiet =============================
+  | pid / pid (source) | --
+  |
+  | Just like wait_, 'cept it doesn't message on completion
+  /wait_quiet {
+    dup class /arrayclass ne {(wait)} if
+    exch wait ~pop {/NOSYSTEM makeerror} ifelse
   } bind def
 
   |======================= socketdead ============================
@@ -850,5 +865,22 @@
       } if
     } /fromsystem_ ~caplayer PROCESSES indict
   } bind userdict 3 -1 roll put
+
+  userdict /dm_type get /dvt ne {
+    /procthreads ~threads def
+
+    | ~active | ...
+    /multiproc {
+      {
+        /procthreads_live procthreads def
+        /procthreads_layer {
+          0 1 procthreads_live 1 sub {
+            {/procthreads_rank name end exec true} fds bg exch pop exch
+          } for pop
+        } layerdef
+        procthreads_live {(multiproc) ~wait_quiet unlock} repeat
+      } lock 
+    } bind userdef
+  } if
 
 } moduledef

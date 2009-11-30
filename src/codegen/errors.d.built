@@ -102,20 +102,21 @@
   /MATRIX_ILLEGAL_CUT                  99x def
   /MATRIX_UNDER_CUT                   100x def
   /MATRIX_NONMATCH_CUT                101x def
-  /MATRIX_NONMATCH_SHAPE              102x def
-  /MATRIX_PARAM_ERROR                 103x def
-  /MATRIX_INT_ERR                     104x def
-  /MATRIX_SINGULAR                    105x def
-  /RTHREADS_UNSET                     106x def
-  /RTHREADS_NUMTYPE                   107x def
-  /RTHREADS_NUMUNDF                   108x def
-  /RTHREADS_NUMRNG                    109x def
-  /RTHREADS_DICTTYPE                  110x def
-  /RTHREADS_VALTYPE                   111x def
-  /RTHREADS_VALSIZE                   112x def
-  /RTHREADS_VALEMPTY                  113x def
-  /RTHREADS_KEYSIZE                   114x def
-  /RTHREADS_VALATR                    115x def
-  /NEXTEVENT_NOEVENT                  116x def
-  /MPI_NOMSG                          117x def
+  /MATRIX_VECTOR_NONMATCH             102x def
+  /MATRIX_NONMATCH_SHAPE              103x def
+  /MATRIX_PARAM_ERROR                 104x def
+  /MATRIX_INT_ERR                     105x def
+  /MATRIX_SINGULAR                    106x def
+  /RTHREADS_UNSET                     107x def
+  /RTHREADS_NUMTYPE                   108x def
+  /RTHREADS_NUMUNDF                   109x def
+  /RTHREADS_NUMRNG                    110x def
+  /RTHREADS_DICTTYPE                  111x def
+  /RTHREADS_VALTYPE                   112x def
+  /RTHREADS_VALSIZE                   113x def
+  /RTHREADS_VALEMPTY                  114x def
+  /RTHREADS_KEYSIZE                   115x def
+  /RTHREADS_VALATR                    116x def
+  /NEXTEVENT_NOEVENT                  117x def
+  /MPI_NOMSG                          118x def
 end _module
