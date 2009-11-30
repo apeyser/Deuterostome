@@ -379,7 +379,7 @@ P op_invertLU_lp(void) {
   MATRIX_SQUARE(o_2, o_3, N);
   PIVOT_CHECK(o_1, N);
 
-  if (clapack_dgetri(CblasRowMajor, N, 
+  if (clapack_dgetri(CblasRowMajor, N,
                      (D*) VALUE_PTR(o_3), N,
                      (L32*) VALUE_PTR(o_1)))
     return MATRIX_PARAM_ERROR;
@@ -388,10 +388,10 @@ P op_invertLU_lp(void) {
   return OK;
 }
 
-// array | ||array||_2
+// x | sqrt(sum_i x_i^2)
 P op_norm2_blas(void) {
   D r;
-  if (FLOORopds > o_1) return OPDS_UNF;
+  if (o1 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != ARRAY) return OPD_CLA;
   if (TYPE(o_1) != DOUBLETYPE) return OPD_TYP;
   r = cblas_dnrm2(ARRAY_SIZE(o_1), (D*) VALUE_PTR(o_1), 1);
@@ -402,6 +402,73 @@ P op_norm2_blas(void) {
   *(D*) NUM_VAL(o_1) = r;
   return OK;
 }
+
+// y x a | y (yi=yi+a*xi)
+P op_vecadd_blas(void) {
+  D alpha;
+  P sz;
+  if (o3 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != ARRAY || CLASS(o_2) != ARRAY || CLASS(o_3) != NUM) 
+    return OPD_CLA;
+  if (TYPE(o_1) != DOUBLETYPE || TYPE(o_2) != DOUBLETYPE) return OPD_TYP;
+  if ((sz = ARRAY_SIZE(o_1)) != ARRAY_SIZE(o_2)) return MATRIX_VECTOR_NONMATCH;
+  if (! DVALUE(o_3, &alpha)) return UNDF_VAL;
+  cblas_daxpy(sz, alpha, (D*) VALUE_PTR(o_3), 1, (D*) VALUE_PTR(o_2), 1);
+  CHECK_ERR;
+
+  FREEopds = o_2;
+  return OK;
+}
+
+// x alpha | x (xi=alpha*xi)
+P op_vecscale_blas(void) {
+  D alpha;
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != NUM || CLASS(o_2) != ARRAY) return OPD_CLA;
+  if (TYPE(o_2) != DOUBLETYPE) return OPD_TYP;
+  if (! DVALUE(o_1, &alpha)) return UNDF_VAL;
+  
+  cblas_dscal(ARRAY_SIZE(o_2), alpha, (D*) VALUE_PTR(o_2), 1);
+  CHECK_ERR;
+
+  FREEopds = o_1;
+  return OK;
+}
+
+// y x | y (y_i=x_i)
+P op_veccopy_blas(void) {
+  P sz;
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != ARRAY || CLASS(o_2) != ARRAY) return OPD_CLA;
+  if (TYPE(o_1) != DOUBLETYPE || TYPE(o_2) != DOUBLETYPE) return OPD_TYP;
+  if ((sz = ARRAY_SIZE(o_1)) != ARRAY_SIZE(o_2)) return MATRIX_VECTOR_NONMATCH;
+  
+  cblas_dcopy(sz, (D*) VALUE_PTR(o_1), 1, (D*) VALUE_PTR(o_2), 1);
+  CHECK_ERR;
+
+  FREEopds = o_1;
+  return OK;
+}
+
+// x y | x.y
+P op_dot_blas(void) {
+  P sz;
+  D r;
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != ARRAY || CLASS(o_2) != ARRAY) return OPD_CLA;
+  if (TYPE(o_1) != DOUBLETYPE || TYPE(o_2) != DOUBLETYPE) return OPD_TYP;
+  if ((sz = ARRAY_SIZE(o_1)) != ARRAY_SIZE(o_2)) return MATRIX_VECTOR_NONMATCH;
+
+  r = cblas_ddot(sz, (D*) VALUE_PTR(o_1), 1, (D*) VALUE_PTR(o_2), 1);
+  CHECK_ERR;
+  
+  TAG(o_2) = (NUM|DOUBLETYPE);
+  ATTR(o_2) = 0;
+  *(D*) NUM_VAL(o_2) = r;
+  FREEopds = o_1;
+  return OK;
+}
+ 
 
 // y beta A <cuts> transpose x alpha | y=alpha*A*x+beta*y
 P op_matvecmul_blas(void) {

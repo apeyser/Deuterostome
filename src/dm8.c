@@ -196,7 +196,7 @@ P op_fax(void)
     dest_dict src_dict | dest_dict
 
  - accepts any combination of dictionaries
- - acts like 'put' operator with all entries of the socket
+ - acts like 'put' operator with all entries of the dict
 */
 
 P op_merge(void)
