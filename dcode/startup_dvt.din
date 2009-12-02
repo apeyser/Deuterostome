@@ -1956,7 +1956,7 @@ Xwindows {
 | Read ~/.dvt, if it exists    
 {
   save 1024 /b array 1 index capsave |[
-    {(processes.d) (eps.d)} ~loadstartup forall
+    {(processes.d)} ~loadstartup forall
     {{getconfdir (dvt.d)} {gethomedir (.dvt)}} {exec loadopt} forall |]
   pop restore
 } aborted {countdictstack 2 sub ~end repeat clear} if

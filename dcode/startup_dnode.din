@@ -839,7 +839,7 @@ Xwindows_ {
 (Starting...\n) toconsole
 
 save 1024 /b array 1 index capsave |[
-  {(matrix.d) (processes.d) (eps.d)} ~loadstartup forall
+  {(matrix.d) (processes.d)} ~loadstartup forall
   {
 @ENABLE_PETSC_START@
     {getstartupdir (petsc.d)}
