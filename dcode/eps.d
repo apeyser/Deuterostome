@@ -80,7 +80,7 @@
 
   |----------------------- eps_ -------------------
   |
-  | -- <</input, ptsize, wr, ewr defined>> | true/false
+  | -- <</input, ptsize, wr, ewr defined>> | --
   |
   | Here are the sinews. eps_ does all the scripting work, 
   |  constructing a latex document out of ptsize (10,11 or 12)
@@ -100,31 +100,30 @@
     ('\n) writefd pop
 
     /pwd getwdir def
-    tdir tsdir setwdirp {
+    tdir tsdir setwdirp {{{
       (.) (eps.tex) wropen {
         predoc {(XX) 0 * ptsize * number pop} pre input post
       } {exec writefd} forall close
         
       [(pdflatex) (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
-        NULLR ewr dup sh_ wait not {true /process exitto} if |]
+        NULLR ewr dup sh_ wait not {true /estreamwith exitto} if |]
         
       [(gs) (-q) RESOLUTION (-dLanguageLevel=3) 
         (-dNOPAUSE) (-dBATCH) (-dSAFER)
         (-sDEVICE=epswrite) (-sOutputFile=-)
         (eps.pdf)
-        NULLR wr ewr sh_ wait not {true /process exitto} if |]
+        NULLR wr ewr sh_ wait not {true /estreamwith exitto} if |]
 
       [(sed) (-e) (s/pt$//) (eps.comment)
-        NULLR wr ewr sh_ wait not {true /process exitto} if |]
+        NULLR wr ewr sh_ wait not {true /estreamwith exitto} if |]
           
       wr (%%EOF) writefd close
       false
-    } /process ~exitlabel ~stopped aborted 
+    } /estreamwith exitlabel} stopped} aborted
     pwd setwdir 
-    ~abort if ~stop if ~false {
-      tdir tsdir removedir
-      true
-    } ifelse
+    ~abort if ~stop if {true /estreamwith exitto} if
+
+    tdir tsdir removedir
   } bind def
 
   |------------------------ eps ---------------------------
@@ -154,7 +153,7 @@
           rd closeifopen
           stop
         } if
-      } layerdef 
+      } layerdef
 
       {pop rd suckfd} {
         cleartomark 
