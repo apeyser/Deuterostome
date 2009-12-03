@@ -781,11 +781,12 @@
     /estreamrd name
   } def
 
-  | bool | bool
+  | bool bool | bool bool
   | if true, output contents of estreams
   /_estreamclose {
     estreamwt dup null eq ~pop {
-      close estreamrd 1 index {suckfd toconsole} ~close ifelse
+      close 
+      2 copy or {estreamrd suckfd toconsole} {estreamrd close} ifelse
       /estreamwt null def /estreamrd null def
     } ifelse
   } bind def
@@ -819,9 +820,9 @@
       /error ~name estreamdict indict
     } PROCESSES indict
 
-    exch estreamdict ~swapdict stopped
+    exch {exec false} /estreamwith ~exitlabel estreamdict ~swapdict stopped
     ~_estreamclose PROCESSES indict 
-    ~stop if
+    ~stop if not
   } bind def
 
   |======================== tosystem ===========================
