@@ -101,32 +101,30 @@
 
     /pwd getwdir def
     tdir tsdir setwdirp {
-      {
-        {
-          (.) (eps.tex) wropen {
-            predoc {(XX) 0 * ptsize * number pop} pre input post
-          } {exec writefd} forall close
+      (.) (eps.tex) wropen {
+        predoc {(XX) 0 * ptsize * number pop} pre input post
+      } {exec writefd} forall close
         
-          [(pdflatex) (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
-            NULLR ewr dup sh_ wait not {false /eps exitto} if |]
+      [(pdflatex) (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
+        NULLR ewr dup sh_ wait not {true /process exitto} if |]
         
-          [(gs) (-q) RESOLUTION (-dLanguageLevel=3) 
-            (-dNOPAUSE) (-dBATCH) (-dSAFER)
-            (-sDEVICE=epswrite) (-sOutputFile=-)
-            (eps.pdf)
-            NULLR wr ewr sh_ wait not {false /eps exitto} if |]
+      [(gs) (-q) RESOLUTION (-dLanguageLevel=3) 
+        (-dNOPAUSE) (-dBATCH) (-dSAFER)
+        (-sDEVICE=epswrite) (-sOutputFile=-)
+        (eps.pdf)
+        NULLR wr ewr sh_ wait not {true /process exitto} if |]
 
-          [(sed) (-e) (s/pt$//) (eps.comment)
-            NULLR wr ewr sh_ wait not {false /eps exitto} if |]
+      [(sed) (-e) (s/pt$//) (eps.comment)
+        NULLR wr ewr sh_ wait not {true /process exitto} if |]
           
-          wr (%%EOF) writefd close
-          true
-        } /eps exitlabel
-      } stopped pwd setwdir 
-    } aborted {pwd setwdir abort} if
-    ~stop if
-
-    dup {tdir tsdir removedir} if
+      wr (%%EOF) writefd close
+      false
+    } /process ~exitlabel ~stopped aborted 
+    pwd setwdir 
+    ~abort if ~stop if ~false {
+      tdir tsdir removedir
+      true
+    } ifelse
   } bind def
 
   |------------------------ eps ---------------------------
@@ -156,12 +154,12 @@
           rd closeifopen
           stop
         } if
-      } layerdef
+      } layerdef 
 
-      {rd suckfd exch pop} {
+      {pop rd suckfd} {
+        cleartomark 
         wr closeifopen 
         rd suckfd toconsole
-        cleartomark 
         hamuti
       } ifelse
     } PROCESSES swapdict
