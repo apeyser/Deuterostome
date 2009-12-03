@@ -634,15 +634,11 @@ end def  | of xtext_dict
 | use: dirname filename | objects..  (and/or side effects)
 
 /fromfiles {
-  save /fromfilessave name 3 dict {
-    true    1 index /fileid_dict put
-    2 copy          /filename    put
-    2 index 1 index /dirname     put
-    {
-      vmstatus sub 3 div /b array fromfilessave capsave
-      readfile mkact exec
-    } exch mkread indict
-  } stopped fromfilessave restore ~stop if
+  save {
+    3 1 roll 0 openfd ~suckfd stopped {closefd stop} if
+    exch capsave mkact exec
+  } [2 index ~stopped push | ]
+  restore ~stop if
 } bind def
 
 | fromxfiles does the same as fromfiles, but first checks that the file

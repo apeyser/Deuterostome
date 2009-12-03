@@ -1845,3 +1845,5 @@ end definefont pop   % Symbols font
 
 
 end _module
+
+userdict /EPS known not {getstartupdir (eps.d) fromfiles} if
