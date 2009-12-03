@@ -39,8 +39,8 @@
 |
 
 /EPSfigure {
-/figurelayer layer
-{   countdictstack /ndict name
+  {
+    countdictstack /ndict name
     /generator name
     /EPSfile name
     /EPSpath name
@@ -53,56 +53,53 @@
 
 |-- phase 1 (logical design)
 
-  phase1 begin COMPOSE begin 
-     (\n1) toconsole
-    ~[ generator ] bind /root name 
-  end end
+    phase1 begin COMPOSE begin 
+      (\n1) toconsole
+      ~[ generator ] bind /root name 
+    end end
 
 |-- phase 2 (physical design)
 
-  /bbox * 4 /d array copy def
-  phase2 begin
-    (\n2) toconsole
-    root
+    /bbox * 4 /d array copy def
+    phase2 begin
+      (\n2) toconsole
+      root
     end
 
 |-- phase 3 (EPS code generation)
  
-  |-- insert EPS wrapper, leading part
+    |-- insert EPS wrapper, leading part
 
-  (%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: ) faxPS
-     { bbox { * exch /l ctype * number ( ) fax } forall } genPS 
-  (\n%%HiResBoundingBox: ) faxPS
-     { bbox { * exch * number ( ) fax } forall } genPS 
-  (\n%%DocumentData: Clean7Bit\n%%LanguageLevel: 3\n) faxPS  
+    (%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: ) faxPS
+      { bbox { * exch /l ctype * number ( ) fax } forall } genPS 
+    (\n%%HiResBoundingBox: ) faxPS
+      { bbox { * exch * number ( ) fax } forall } genPS 
+    (\n%%DocumentData: Clean7Bit\n%%LanguageLevel: 3\n) faxPS  
 
-  |-- insert PS code for setting global parameters and defining symbol font
+    |-- insert PS code for setting global parameters and defining symbol font
 
-  PSprefix faxPS
-  setlinewidth
-  symbolsize setsymbolsize
-  ( symbolfont setfont ) faxPS
+    PSprefix faxPS
+    setlinewidth
+    symbolsize setsymbolsize
+    ( symbolfont setfont ) faxPS
   
-  |-- assemble PS code of figure
-
-  phase3 begin
-    (\n3) toconsole
-    root 
+    |-- assemble PS code of figure
+    
+    phase3 begin
+      (\n3) toconsole
+      root 
     end
 
-  |-- assemble EPS wrapper, trailing part
+    |-- assemble EPS wrapper, trailing part
 
-  (\n%%EOF\n) faxPS
+    (\n%%EOF\n) faxPS
 
 |-- write EPS output file
 
-  EPSbuf 0 EPSidx getinterval EPSpath EPSfile writefile
-  (\nEPS file written: ) toconsole EPSfile toconsole (\n) toconsole
+    EPSbuf 0 EPSidx getinterval EPSpath EPSfile writefile
+    (\nEPS file written: ) toconsole EPSfile toconsole (\n) toconsole
 
-} stopped dup { countdictstack ndict sub ~end repeat } if
-
-/figurelayer _layer
-
+  } {stopped {countdictstack ndict sub ~end repeat stop} if} /figurelayer inlayer
 } bind def
 
 |============== Primitives for creating figure elements ====================
@@ -938,7 +935,8 @@
 
 |------------------------------------------ gpgraf, phase 1
 
-{ currentdict
+{ 
+  currentdict
   100 dict begin
   /parent name
   /placement name
@@ -952,39 +950,39 @@
 
 |-- find logical ranges  of axes
 
-   abscissa dup 0 get /scanX name
-      dup 1 get /minX name 2 get /maxX name
-   ordinate dup 0 get /scanY name 
-      dup 1 get /minY name 2 get /maxY name
-   selection { /selitem name
-       report selitem 0 get get
-         dup class /arrayclass eq
-           { /X name
-             report selitem 1 get get
-               dup class /listclass ne { [ exch ] } if /Ys name
-           }
-           { dup 0 get /X name 1 get [ exch ] /Ys name
-           }
-           ifelse
-         scanXYs
-      } forall
+  abscissa dup 0 get /scanX name
+    dup 1 get /minX name 2 get /maxX name
+  ordinate dup 0 get /scanY name 
+    dup 1 get /minY name 2 get /maxY name
+  selection { /selitem name
+    report selitem 0 get get
+    dup class /arrayclass eq {/X name
+      report selitem 1 get get
+      dup class /listclass ne { [ exch ] } if /Ys name
+    } { 
+      dup 0 get /X name 1 get [ exch ] /Ys name
+    } ifelse
+    scanXYs
+  } forall
 
 |-- design the logical axes
 
-   gpXdesigners abscissa 3 get get exec 
-   gpYdesigners ordinate 3 get get exec
+  gpXdesigners abscissa 3 get get exec 
+  gpYdesigners ordinate 3 get get exec
 
 |-- construct generator of label elements
  
-   ~[ gpXlabels abscissa 3 get get exec
-      gpYlabels ordinate 3 get get exec
-    ] bind /children name 
+  /children ~[ 
+    gpXlabels abscissa 3 get get exec
+    gpYlabels ordinate 3 get get exec
+  ] bind def
   end
 } bind phase1 /gpgraf put
 
 |--------------------------------------------- gpgraf, phase 2
 
-{ begin
+{ 
+  begin
   |-- prime bounding box
 
   /bbox 0 4 /d array copy def
@@ -998,7 +996,8 @@
 
 |--------------------------------------------- gpgraf, phase 3
 
-{ begin
+{ 
+  begin
   [ ~save inverse ~concat ] { toPS } forall
   setlinewidth
   symbolsize setsymbolsize
@@ -1009,26 +1008,24 @@
   ~save toPS gpYplotters ordinate 3 get get exec ~restore toPS
 
   selection { /selitem name
-      selitem length 2 gt
-        { report selitem 0 get get /X name
-          report selitem 1 get get dup class /arrayclass eq
-             { [ exch ] } if /Ys name
-          selitem 2 get /pres name
-        }
-        { report selitem 0 get get 0 get /X name
-          report selitem 0 get get 1 get [ exch ] /Ys name
-          selitem 1 get /pres name
-        }
-        ifelse
+      selitem length 2 gt { 
+        report selitem 0 get get /X name
+        report selitem 1 get get dup class /arrayclass eq { [ exch ] } if /Ys name
+        selitem 2 get /pres name
+      } { 
+        report selitem 0 get get 0 get /X name
+        report selitem 0 get get 1 get [ exch ] /Ys name
+        selitem 1 get /pres name
+      } ifelse
       /Yidx 0 def 
       ~save toPS 
       Ys length { pres /Yidx Yidx 1 add def } repeat
       ~restore toPS
-    } forall 
+  } forall 
 
   verboxe { bbox toPS ~drawbbox toPS } if
   ~restore toPS
-  end   
+  end
 } bind phase3 /gpgraf put
 
 
@@ -1037,16 +1034,16 @@
 |-------------- scan X, Ys
 | 
 /scanXYs {
-   scanX { minX * eq { /minX X 0 get def } if
-           maxX * eq { /maxX X 0 get def } if
-           minX maxX X extrema /maxX name /minX name
-         } if
-   scanY { minY * eq { Ys 0 get 0 get /minY name } if
-           maxY * eq { Ys 0 get 0 get /maxY name } if
-           Ys { minY maxY 3 -1 roll extrema
-                /maxY name /minY name
-              } forall
-         } if 
+   scanX { 
+     minX * eq { /minX X 0 get def } if
+     maxX * eq { /maxX X 0 get def } if
+     minX maxX X extrema /maxX name /minX name
+   } if
+   scanY { 
+     minY * eq { Ys 0 get 0 get /minY name } if
+     maxY * eq { Ys 0 get 0 get /maxY name } if
+     Ys {minY maxY 3 -1 roll extrema /maxY name /minY name} forall
+   } if 
 } bind def 
 
 |--------------- design gp axes
@@ -1054,31 +1051,29 @@
 /gpXdesigners 2 dict dup begin
   /log {
      minX maxX DesignLg10Axis /Xaxis name
-     { lg } { 10.0 exch exp } Xaxis 0 get Xaxis 1 get
+     { lg } { 10.0 exch exp } Xaxis 0 get  Xaxis 1 get 
      0.0 xdim DefXTransform
   } bind def
  
   /lin {
      minX maxX DesignLinearAxis /Xaxis name
-     { } { } Xaxis 0 get Xaxis 1 get
+     { } { } Xaxis 0 get  Xaxis 1 get 
      0.0 xdim DefXTransform
   } bind def
-
 end def
 
 /gpYdesigners 2 dict dup begin
   /log {
      minY maxY DesignLg10Axis /Yaxis name
-     { lg } { 10.0 exch exp } Yaxis 0 get Yaxis 1 get
+     { lg } { 10.0 exch exp } Yaxis 0 get  Yaxis 1 get 
      0.0 ydim DefYTransform
   } bind def
  
    /lin {
      minY maxY DesignLinearAxis /Yaxis name
-     { } { } Yaxis 0 get Yaxis 1 get
+     { } { } Yaxis 0 get  Yaxis 1 get 
      0.0 ydim DefYTransform
   } bind def
-
 end def
 
 |--------------- construct gp abscissa labels
@@ -1088,22 +1083,24 @@ end def
 /gpXlabels 2 dict dup begin
 
   /lin {
-    Xaxis 0 get Xaxis 2 get almost Xaxis 1 get { /xtick name
-        10 /b array 0 ($) fax
-        |-- scale by unit and round to integer
-        * xtick Xaxis 3 get div round /l ctype * number
-        ($)fax 0 exch getinterval
-        |-- center on xtick, top adjust half a line below axis
-        ~[ xtick ~X_to_x textsize -0.5 mul ~translate
-           ~alignCT
-         ] latex
-      } for  
+    Xaxis 0 get  Xaxis 2 get almost Xaxis 1 get { /xtick name
+      10 /b array 0 ($) fax
+      |-- scale by unit and round to integer
+      * xtick Xaxis 3 get div round /l ctype * number
+      ($) fax 0 exch getinterval
+      |-- center on xtick, top adjust half a line below axis
+      ~[ 
+        xtick ~X_to_x textsize -0.5 mul ~translate
+        ~alignCT
+      ] latex
+    } for  
     |-- place descr /unit axis label
     Xaxis 3 get abscissa 5 get abscissa 4 get LinAxisLabel
-    ~[ xdim 0.5 mul
-       ~parent /bbox ~get 1 ~get textsize 0.5 mul ~sub ~translate
-       ~alignCT
-     ] latex
+    ~[ 
+      0.5 xdim mul
+      ~parent /bbox ~get 1 ~get textsize 0.5 mul ~sub ~translate
+      ~alignCT
+    ] latex
   } bind def
 
   /log {
@@ -1114,14 +1111,15 @@ end def
         ~[ xtick X_to_x textsize -1.5 mul ~translate
            ~alignCB
          ] latex
-      } forall
+    } forall
     |-- place descr/unit axis label
     100 /b array 0 abscissa 5 get fax
         ( / ) fax abscissa 4 get fax 0 exch getinterval
-    ~[ xdim 0.5 mul
-       ~parent /bbox ~get 1 ~get textsize 0.5 mul ~sub ~translate
-       ~alignCT
-     ] latex
+    ~[ 
+      xdim 0.5 mul
+      ~parent /bbox ~get 1 ~get textsize 0.5 mul ~sub ~translate
+      ~alignCT
+    ] latex
   } bind def
 
 end def
@@ -1129,22 +1127,24 @@ end def
 /gpYlabels 2 dict dup begin
  
   /lin {
-    Yaxis 0 get Yaxis 2 get almost Yaxis 1 get { /ytick name
+    Yaxis 0 get  Yaxis 2 get almost Yaxis 1 get { /ytick name
         10 /b array 0 ($) fax
         |-- scale by unit and round to integer
         * ytick Yaxis 3 get div round /l ctype * number
           ($)fax 0 exch getinterval
-        ~[ textsize -0.5 mul ytick ~Y_to_y ~translate
-           ~alignRC
+        ~[ 
+          textsize -0.5 mul ytick ~Y_to_y ~translate
+          ~alignRC
          ] latex
-      } for
+    } for
     |-- place descr/power unit axis label
     Yaxis 3 get ordinate 5 get ordinate 4 get LinAxisLabel
-    ~[ ~parent /bbox ~get 0 ~get textsize 0.5 mul ~sub 
-       ydim 0.5 mul ~translate
+    ~[ 
+      ~parent /bbox ~get 0 ~get textsize 0.5 mul ~sub 
+       0.5 ydim mul ~translate
        90.0 ~rotate
        ~alignCB
-     ] latex
+    ] latex
   } bind def
 
   /log {
@@ -1156,7 +1156,7 @@ end def
         ~[ textsize -0.5 mul ytick ~Y_to_y ~translate
            ~alignRC
          ] latex
-      } forall
+    } forall
     |-- place descr/unit axis label
     100 /b array 0 ordinate 5 get fax
         ( / ) fax ordinate 4 get fax 0 exch getinterval
@@ -1210,21 +1210,21 @@ end def
   /lin {
     symbolsize setsymbolsize
     ( gsave symbolfont setfont newpath 2 setlinecap ) faxPS 
-    Xaxis 0 get X_to_x toPS 0.0 toPS ~moveto toPS
-    Xaxis 1 get X_to_x toPS 0.0 toPS ( lineto stroke ) faxPS
+    Xaxis 0 get  X_to_x toPS 0.0 toPS ~moveto toPS
+    Xaxis 1 get  X_to_x toPS 0.0 toPS ( lineto stroke ) faxPS
     /symbol vbarba def
-    Xaxis 0 get Xaxis 2 get Xaxis 1 get {
+    Xaxis 0 get  Xaxis 2 get  Xaxis 1 get {
         X_to_x toPS 0.0 toPS ( moveto ) faxPS
         symbol toPS ( show ) faxPS
-      } for
+    } for
     ( newpath ) faxPS
-    Xaxis 0 get X_to_x toPS ydim toPS ~moveto toPS
-    Xaxis 1 get X_to_x toPS ydim toPS ( lineto stroke ) faxPS
+    Xaxis 0 get  X_to_x toPS ydim toPS ~moveto toPS
+    Xaxis 1 get  X_to_x toPS ydim toPS ( lineto stroke ) faxPS
     /symbol vbarta def
-    Xaxis 0 get Xaxis 2 get Xaxis 1 get {
+    Xaxis 0 get  Xaxis 2 get  Xaxis 1 get {
         X_to_x toPS ydim toPS ( moveto ) faxPS
         symbol toPS ( show ) faxPS
-      } for
+    } for
     ( grestore ) faxPS 
 } bind def
 
@@ -1244,7 +1244,7 @@ end def
     Yaxis 2 get {
         0.0 toPS Y_to_y toPS ( moveto ) faxPS
         symbol toPS ( show ) faxPS
-      } forall
+    } forall
     /symbol hbarra def
     Yaxis 2 get {
         xdim toPS Y_to_y toPS ( moveto ) faxPS
@@ -1269,21 +1269,21 @@ end def
 /lin {
     symbolsize setsymbolsize
     ( gsave symbolfont setfont newpath 2 setlinecap ) faxPS 
-    0.0 toPS Yaxis 0 get Y_to_y toPS  ( moveto ) faxPS
-    0.0 toPS Yaxis 1 get Y_to_y toPS  ( lineto stroke ) faxPS
+    0.0 toPS Yaxis 0 get  Y_to_y toPS  ( moveto ) faxPS
+    0.0 toPS Yaxis 1 get  Y_to_y toPS  ( lineto stroke ) faxPS
     /symbol hbarla def
-    Yaxis 0 get Yaxis 2 get Yaxis 1 get {
-        0.0 toPS Y_to_y toPS ( moveto ) faxPS
-        symbol toPS ( show ) faxPS
-      } for
+    Yaxis 0 get  Yaxis 2 get  Yaxis 1 get {
+      0.0 toPS Y_to_y toPS ( moveto ) faxPS
+      symbol toPS ( show ) faxPS
+    } for
     ( newpath ) faxPS
-    xdim toPS Yaxis 0 get Y_to_y toPS  ( moveto ) faxPS
-    xdim toPS Yaxis 1 get Y_to_y toPS  ( lineto stroke ) faxPS
+    xdim toPS Yaxis 0 get  Y_to_y toPS  ( moveto ) faxPS
+    xdim toPS Yaxis 1 get  Y_to_y toPS  ( lineto stroke ) faxPS
     /symbol hbarra def
-    Yaxis 0 get Yaxis 2 get Yaxis 1 get {
+    Yaxis 0 get  Yaxis 2 get  Yaxis 1 get {
         xdim toPS Y_to_y toPS ( moveto ) faxPS
         symbol toPS ( show ) faxPS
-      } for
+    } for
     ( grestore ) faxPS 
 } bind def
 
@@ -1304,7 +1304,7 @@ end def
   0 1 X length 1 sub { /k name
       X k get X_to_x toPS Ys Yidx get k get Y_to_y toPS
       k 0 eq {~moveto} {~lineto} ifelse toPS
-    } for
+  } for
   ~stroke toPS 
   ~grestore toPS
 } bind def
@@ -1318,7 +1318,7 @@ end def
   0 1 X length 1 sub { /k name
       X k get X_to_x toPS Ys Yidx get k get Y_to_y toPS
       symbol toPS ~showsymbol toPS 
-    } for
+  } for
   ~grestore toPS
 } bind def
 
@@ -1700,16 +1700,16 @@ end definefont pop   % Symbols font
 |                 unit is power of 10 that divided into the axis range
 |                 gives a number between 0.1 and 999.
 
-/DesignLinearAxis { /max name /min name
+/DesignLinearAxis {/d ctype /max name /d ctype /min name
    max min eq {
-      max 0 eq
-       { -1e-6 1e-6 }
-       { max 0 gt { min 0.9 mul max 1.1 mul }
-                  { min 1.1 mul max 0.9 mul }
-                  ifelse
-       }
-       ifelse /max name /min name
-    } if
+     max 0 eq { -1e-6 1e-6 } { 
+       max 0 gt { 
+         min 0.9 mul max 1.1 mul 
+       } { 
+         min 1.1 mul max 0.9 mul 
+       } ifelse
+     } ifelse /max name /min name
+   } if
    min 0 gt { max min div 5 gt { /min 0.0 def } if } if
    max 0 lt { min max div 5 gt { /max 0.0 def } if } if
    max min sub abs lg dup floor dup /exp10 name sub /mant name
@@ -1743,7 +1743,7 @@ end definefont pop   % Symbols font
 | - the returned min, max are adjusted to the actual spanned range and span
 |   at least one decade
 
-/DesignLg10Axis { /max name /min name
+/DesignLg10Axis {/d ctype /max name /d ctype /min name
    max min div /range name
    1.0 range 1e2 gt { pop 2.0 } if
      range 1e5 gt { pop 5.0 } if /step name
@@ -1791,12 +1791,12 @@ end definefont pop   % Symbols font
      { poweroften 1e-15 lt { power_prefix stop } if
        poweroften 1e9 gt { power_prefix stop } if
        unit length 0 eq { power_prefix stop } if
-       letter_prefix stop
+       letter_prefix /AxisUnit exitto
      } if
      unit length 0 ne { (\() fax power_prefix (\)) fax }
                       { power_prefix }
                       ifelse
-   } stopped pop
+   } /AxisUnit exitlabel
 } bind def
 
 /power_prefix {
@@ -1820,27 +1820,28 @@ end definefont pop   % Symbols font
 | appends to a running text a string formatted as a power of ten.
 
 /PowerOfTen { /unit name
-   unit 1 ne { * (10^{) text 
-               * unit lg roundup /l ctype -1 number 
-               * (}) text
-             } 
-             { * (1) text 
-             } ifelse 
+   unit 1 ne { 
+     * (10^{) text 
+     * unit lg roundup /l ctype -1 number 
+     * (}) text
+   } { 
+     * (1) text 
+   } ifelse 
 } bind def
 
 |------------------------ specific roundings
 
 |-- round to nearest integer
-/round { dup 0 ge { 0.5 add floor }{ 0.5 sub ceil } ifelse } bind def
+/round {dup 0 ge {0.5 exch add floor}{-0.5 exch add ceil} ifelse} bind def
 
 |-- round up to next higher power of ten
-/roundup { dup 0 ge { ceil } { floor } ifelse } bind def
+/roundup {dup 0 ge ~ceil ~floor ifelse} bind def
 
 |-- reduce the value of a number by a tiny amount
-/almost ~[ 1.0 1e-14 sub ~mul ] bind def
+/almost ~[1.0 1e-14 sub ~exch ~mul] bind def
 
 |-- logarithm base 10
-/lg ~[ ~ln 10.0 ln -1 pwr ~mul ] bind def
+/lg ~[/d ~ctype ~ln 10.0 ln -1 pwr ~mul] bind def
 
 
 end _module
