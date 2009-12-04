@@ -604,34 +604,42 @@ P exec(L32 turns)
 /* ---------------------------------------- fetch phase */
  
   switch (fclass = CLASS(x_1)) {
-    case LIST:   goto f_list;
-    case ARRAY:  goto f_arr;
-    case STREAM: if (execfd_func) goto f_str;
-    // otherwise fall through
+    case LIST:   
+      if (ACTIVE & ATTR(x_1)) goto f_list;
+      break;
+
+    case ARRAY:  
+      if ((ACTIVE & ATTR(x_1)) && TAG(x_1) == (ARRAY|BYTETYPE)) goto f_arr;
+      break;
+
+    case STREAM: 
+      if ((ACTIVE & ATTR(x_1)) && execfd_func) goto f_str;
+      break;
+      
+    default: 
+      if (fclass > BOX) {
+	errsource = fetch_err; 
+	return CORR_OBJ;
+      }
+      break;
   }
-  if (fclass < BOX) {
-    f = x_1; 
-    FREEexecs = x_1; 
-    goto x_e; 
-  }
-  errsource = fetch_err; 
-  return CORR_OBJ;
+
+  f = x_1;
+  FREEexecs = x_1;
+  goto x_e;
   
  f_arr:
-  if (TAG(x_1) == (ARRAY | BYTETYPE)) {
-    switch((retc = tokenize(x_1))) {
-      case OK: break;
-      case DONE: 
-	FREEexecs = x_1; 
-	goto x_t; 
-    
-      default:
-	errsource = transl_err; 
-	return retc;
-    }
-    f = FREEopds = o_1;
+  switch((retc = tokenize(x_1))) {
+    case OK: break;
+    case DONE: 
+      FREEexecs = x_1; 
+      goto x_t; 
+      
+    default:
+      errsource = transl_err; 
+      return retc;
   }
-  else f = x_1;
+  f = FREEopds = o_1;
   goto x_e;
 
  f_str:
@@ -1329,6 +1337,7 @@ P tosource(B* rootf, BOOLEAN mksave, SourceFunc w1, SourceFunc w2) {
 	if (FREEvm + FRAMEBYTES + ARRAY_SIZE(rootf) >= CEILvm)
 	  return VM_OVF;
       
+	ATTR(rootf) |= ACTIVE;
 	moveframe(rootf, FREEvm);
 	moveB(VALUE_PTR(rootf), FREEvm+FRAMEBYTES, ARRAY_SIZE(rootf));
 	VALUE_PTR(FREEvm) = NULL;
@@ -1397,6 +1406,7 @@ P fromsource(B* bufferf, SourceFunc r1, SourceFunc r2) {
 	if (ARRAY_SIZE(xrootf) > ARRAY_SIZE(bufferf)) return RNG_CHK;
 
 	// reserve this space in the passed in buffer object
+	ATTR(xrootf) |= ACTIVE;
 	VALUE_PTR(xrootf) = VALUE_PTR(bufferf);
 	VALUE_PTR(bufferf) += ARRAY_SIZE(xrootf);
 	ARRAY_SIZE(bufferf) -= ARRAY_SIZE(xrootf);
@@ -1426,7 +1436,7 @@ P fromsource(B* bufferf, SourceFunc r1, SourceFunc r2) {
       
       irootf = FREEvm;
       moveframe(xrootf, irootf);
-      ATTR(irootf) = PARENT;
+      ATTR(irootf) |= PARENT;
       FREEvm += FRAMEBYTES;
 
       if ((retc = r2(FREEvm, BOX_NB(xboxf)))) {
