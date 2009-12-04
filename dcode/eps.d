@@ -100,28 +100,28 @@
     ('\n) writefd pop
 
     /pwd getwdir def
-    tdir tsdir setwdirp {
-      {
-        (.) (eps.tex) wropen {
-          predoc {(XX) 0 * ptsize * number pop} pre input post
-        } {exec writefd} forall close
+    tdir tsdir setwdirp {{{
+      (.) (eps.tex) wropen {
+        predoc {(XX) 0 * ptsize * number pop} pre input post
+      } {exec writefd} forall close
         
-        [(pdflatex) (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
-          NULLR ewr dup sh_ wait not ~stop if |]
+      [(pdflatex) (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
+        NULLR ewr dup sh_ wait not {true /estreamwith exitto} if |]
         
-        [(gs) (-q) RESOLUTION (-dLanguageLevel=3) 
-          (-dNOPAUSE) (-dBATCH) (-dSAFER)
-          (-sDEVICE=epswrite) (-sOutputFile=-)
-          (eps.pdf)
-          NULLR wr ewr sh_ wait not ~stop if |]
+      [(gs) (-q) RESOLUTION (-dLanguageLevel=3) 
+        (-dNOPAUSE) (-dBATCH) (-dSAFER)
+        (-sDEVICE=epswrite) (-sOutputFile=-)
+        (eps.pdf)
+        NULLR wr ewr sh_ wait not {true /estreamwith exitto} if |]
 
-        [(sed) (-e) (s/pt$//) (eps.comment)
-          NULLR wr ewr sh_ wait not ~stop if |]
-
-        wr (%%EOF) writefd close
-      } stopped pwd setwdir 
-    } aborted {pwd setwdir abort} if
-    ~stop if
+      [(sed) (-e) (s/pt$//) (eps.comment)
+        NULLR wr ewr sh_ wait not {true /estreamwith exitto} if |]
+          
+      wr (%%EOF) writefd close
+      false
+    } /estreamwith exitlabel} stopped} aborted
+    pwd setwdir 
+    ~abort if ~stop if {true /estreamwith exitto} if
 
     tdir tsdir removedir
   } bind def
@@ -146,17 +146,22 @@
   |
   /eps {/ptsize name /input name
     {
-      pipefd /wr name /rd name
-      openlist {/ewr name eps_} ~estreamwith stopped
-    } {
-      {
+      /_eps {
+        pipefd /wr name /rd name
+        openlist {/ewr name eps_} ~estreamwith stopped {
+          wr closeifopen
+          rd closeifopen
+          stop
+        } if
+      } layerdef
+
+      {pop rd suckfd} {
+        cleartomark 
         wr closeifopen 
         rd suckfd toconsole
-        cleartomark hamuti
-      } {
-        rd suckfd exch pop
+        hamuti
       } ifelse
-    } /_eps ~caplayer PROCESSES swapdict
+    } PROCESSES swapdict
   } bind def
 
   | Hamuti!
