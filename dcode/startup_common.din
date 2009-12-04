@@ -633,13 +633,31 @@ end def  | of xtext_dict
 | into a transient string object and executing that string.
 | use: dirname filename | objects..  (and/or side effects)
 
-/fromfiles {
-  save {
-    3 1 roll 0 openfd ~suckfd stopped {closefd stop} if
-    exch capsave mkact exec
-  } [2 index ~stopped push | ]
-  restore ~stop if
-} bind def
+/fromfiles_dict {
+  /fd {
+    save {
+      3 1 roll 0 openfd ~suckfd stopped {closefd stop} if
+      exch capsave mkact exec
+    } [2 index ~stopped push | ]
+    restore ~stop if
+  }
+
+  | override fromfiles -- we need the old, simple version 
+  | since we don't have fd handling.
+  /read {
+    save /fromfilessave name {
+      vmstatus sub 3 div /b array fromfilessave capsave
+      readfile mkact exec
+    } stopped fromfilessave restore ~stop if
+  }
+
+  /dgen /read
+  /dnode /fd
+  /dvt /fd
+  /dpawn /read
+} bind makestruct def
+
+/fromfiles fromfiles_dict dup dm_type get get def
 
 | fromxfiles does the same as fromfiles, but first checks that the file
 | exists.
