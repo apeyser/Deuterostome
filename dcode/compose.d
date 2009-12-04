@@ -1701,26 +1701,29 @@ end definefont pop   % Symbols font
 |                 gives a number between 0.1 and 999.
 
 /DesignLinearAxis {/d ctype /max name /d ctype /min name
-   max min eq {
-     max 0 eq { -1e-6 1e-6 } { 
-       max 0 gt { 
-         min 0.9 mul max 1.1 mul 
-       } { 
-         min 1.1 mul max 0.9 mul 
-       } ifelse
-     } ifelse /max name /min name
-   } if
-   min 0 gt { max min div 5 gt { /min 0.0 def } if } if
-   max 0 lt { min max div 5 gt { /max 0.0 def } if } if
-   max min sub abs lg dup floor dup /exp10 name sub /mant name
-   0.2 mant 0.1 ge { pop 0.5 } if mant 0.5 ge { pop 1.0 } if
-   10.0 exp10 pwr mul /step name
-   /min min step div floor step mul def
-   /max max step div ceil step mul def
-   /unit 10.0 min abs max abs 2 copy lt { exch } if pop
-      lg 3 div floor 3 mul pwr def
-   [ min max step unit ]
-} bind def 
+  max min eq {
+    max 0 eq { -1e-6 1e-6 } { 
+      max 0 gt { 
+        min 0.9 mul max 1.1 mul 
+      } { 
+        min 1.1 mul max 0.9 mul 
+      } ifelse
+    } ifelse /max name /min name
+  } if
+  min 0 gt { max min div 5 gt { /min 0.0 def } if } if
+  max 0 lt { min max div 5 gt { /max 0.0 def } if } if
+  max min sub abs lg dup floor dup /exp10 name sub /mant name
+  0.2 mant 0.1 ge { pop 0.5 } if mant 0.5 ge { pop 1.0 } if
+  10.0 exp10 pwr mul /step name
+  /min min step div floor step mul def
+  /max max step div ceil step mul def
+  /unit |[
+    min abs max abs 2 copy lt ~exch if pop
+    lg 3 div floor 3 mul 
+    10.0 exch pwr |]
+  def
+  [min max step unit]
+} bind def
 
 |-------------------------- make label of linear axis ----------------------
 
