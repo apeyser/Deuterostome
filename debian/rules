@@ -17,6 +17,7 @@ DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 
 
 CFLAGS = -Wall -g
+CPPFLAGS = -I/usr/include/mpich2
 
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -O0
@@ -33,7 +34,7 @@ endif
 ifneq "$(wildcard /usr/share/misc/config.guess)" ""
 	cp -f /usr/share/misc/config.guess config.guess
 endif
-	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info --sysconfdir=/etc CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs" --with-mpi="-lmpich -lrt -lpthread" --enable-rthreads --enable-mpi --without-petsc --with-emacs --enable-setuid --enable-daemon --enable-threads --enable-plugins --enable-plugins-support --enable-doc --with-x
+	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info --sysconfdir=/etc CFLAGS="$(CFLAGS)" CPPFLAGS="$(CPPFLAGS)" LDFLAGS="-Wl,-z,defs" --with-mpi="-lmpich -lrt -lpthread" --enable-rthreads --enable-mpi --without-petsc --with-emacs --enable-setuid --enable-daemon --enable-threads --enable-plugins --enable-plugins-support --enable-doc --with-x
 
 
 build: build-stamp
