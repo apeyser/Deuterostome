@@ -793,7 +793,7 @@ c_         list all connections
     /dicts 200    def
     /execs 200    def
     /mb    500    def
-    /user  200    def
+    /user  400    def
     end userdict 3 -1 roll put
 
     /dnode_resize {
