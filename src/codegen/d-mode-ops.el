@@ -118,6 +118,8 @@
   "localtime"
   "getwdir"
   "setwdir"
+  "random"
+  "random_init"
   "readfile"
   "writefile"
   "findfiles"

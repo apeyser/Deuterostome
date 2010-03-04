@@ -217,6 +217,7 @@
       /ctype /parcel /text /number
       /token /search /anchorsearch 
       /gettime /gettimeofday /profiletime /localtime /getwdir /setwdir
+      /random /random_init
       /readfile /writefile /findfiles /findfile /readboxfile /writeboxfile
       /transcribe
       /fax /merge /nextobject

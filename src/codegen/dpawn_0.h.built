@@ -117,6 +117,8 @@ B* _sysop[] =
   (B*) "localtime", (B*) op_localtime,
   (B*) "getwdir", (B*) op_getwdir,
   (B*) "setwdir", (B*) op_setwdir,
+  (B*) "random", (B*) op_random,
+  (B*) "random_init", (B*) op_random_init,
   (B*) "readfile", (B*) op_readfile,
   (B*) "writefile", (B*) op_writefile,
   (B*) "findfiles", (B*) op_findfiles,
