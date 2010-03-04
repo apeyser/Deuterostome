@@ -233,6 +233,17 @@ DM_INLINE_STATIC P mult(B* num, D* val) {
   return OK;
 }
 
+#define DEF_CHECK_OVERLAP(tp, tp2)				       \
+  DM_INLINE_STATIC BOOLEAN check_overlap_##tp(const tp2* a, LBIG na,   \
+					      const tp2* b, LBIG nb) { \
+    if (a >= b && a < b+nb) return TRUE;			       \
+    if (b >= a && b < a+na) return TRUE;			       \
+    return FALSE;						       \
+  }
+
+DEF_CHECK_OVERLAP(dd, D)
+DEF_CHECK_OVERLAP(ll, L32)
+
 #define MATRIX_RETCHECK(func) do { \
     P r;			   \
     if ((r = func)) return r;	   \
@@ -273,6 +284,17 @@ DM_INLINE_STATIC P mult(B* num, D* val) {
 #define MULT(num, val) \
   MATRIX_RETCHECK(mult((num), &(val)))
 
+
+#define CHECK_OVERLAP(tp, a, na, b, nb) do {			\
+    if (check_overlap_##tp(a, na, b, nb)) return MATRIX_OVERLAP;	\
+  } while (0)
+
+#define CHECK_OVERLAP_DD(a, na, b, nb) \
+  CHECK_OVERLAP(dd, a, na, b, nb)
+
+#define CHECK_OVERLAP_LL(a, na, b, nb) \
+  CHECK_OVERLAP(ll, a, na, b, nb)
+
 /*--------------------------------------------- matmul_blas
  * C <cuts> beta A <cuts> transA B <cuts> transB alpha | C <cuts>
  * alpha*A*B + beta*C -> C
@@ -304,6 +326,9 @@ P op_matmul_blas(void)
 
     if (Ncola_ != Nrowb_ || Nrowc != Nrowa_ || Ncolc != Ncolb_) 
       return MATRIX_NONMATCH_SHAPE;
+
+    CHECK_OVERLAP_DD(cp, Nrowc*Ncolc, ap, Nrowa*Ncola);
+    CHECK_OVERLAP_DD(cp, Nrowc*Ncolc, bp, Nrowb*Ncolb);
 
     cblas_dgemm(CblasRowMajor,
 		transA,
@@ -413,6 +438,8 @@ P op_vecadd_blas(void) {
   if (TYPE(o_1) != DOUBLETYPE || TYPE(o_2) != DOUBLETYPE) return OPD_TYP;
   if ((sz = ARRAY_SIZE(o_1)) != ARRAY_SIZE(o_2)) return MATRIX_VECTOR_NONMATCH;
   if (! DVALUE(o_3, &alpha)) return UNDF_VAL;
+
+  CHECK_OVERLAP_DD((D*) VALUE_PTR(o_3), sz, (D*) VALUE_PTR(o_2), sz);
   cblas_daxpy(sz, alpha, (D*) VALUE_PTR(o_3), 1, (D*) VALUE_PTR(o_2), 1);
   CHECK_ERR;
 
@@ -459,6 +486,7 @@ P op_dot_blas(void) {
   if (TYPE(o_1) != DOUBLETYPE || TYPE(o_2) != DOUBLETYPE) return OPD_TYP;
   if ((sz = ARRAY_SIZE(o_1)) != ARRAY_SIZE(o_2)) return MATRIX_VECTOR_NONMATCH;
 
+  CHECK_OVERLAP_DD((D*) VALUE_PTR(o_1), sz, (D*) VALUE_PTR(o_2), sz);
   r = cblas_ddot(sz, (D*) VALUE_PTR(o_1), 1, (D*) VALUE_PTR(o_2), 1);
   CHECK_ERR;
   
@@ -487,6 +515,7 @@ P op_matvecmul_blas(void) {
   MULT(o_1, alpha);
   MULT(o_6, beta);
 
+  CHECK_OVERLAP_DD((D*) VALUE_PTR(o_7), Nrowa_, (D*) VALUE_PTR(o_2), Ncola_);
   cblas_dgemv(CblasRowMajor,
               trans,
               Nrowa, Ncola, alpha,
@@ -561,6 +590,7 @@ P op_rotate_blas(void) {
   MULT(o_3, s);
   MULT(o_4, c);
 
+  CHECK_OVERLAP_DD((D*) VALUE_PTR(o_2), rows, (D*) VALUE_PTR(o_1), rows);
   cblas_drot(rows, (D*) VALUE_PTR(o_2), 1, (D*) VALUE_PTR(o_1), 1,
              c, s);
   CHECK_ERR;

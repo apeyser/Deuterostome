@@ -441,7 +441,8 @@ end def
       /MATRIX_NONMATCH_SHAPE (Matrix Error: matrix dimensions don't match) def
       /MATRIX_PARAM_ERROR (Matrix Error: parameters to clapack illegal) def
       /MATRIX_INT_ERR (Matrix Error: Internal Error - message on stack) def
-      /MATRIX_SINGULAR (Matrix Error: lu matrix is singular) def |]
+      /MATRIX_SINGULAR (Matrix Error: lu matrix is singular) def 
+      /MATRIX_OVERLAP (Matrix Error: illegal overlap) def |]
     end def |]
   end def |]
 end def

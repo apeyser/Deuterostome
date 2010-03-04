@@ -357,6 +357,7 @@ P _syserrc[] = {
   MATRIX_PARAM_ERROR,
   MATRIX_INT_ERR,
   MATRIX_SINGULAR,
+  MATRIX_OVERLAP,
 #endif //HAVE_ATLAS
   NO_XWINDOWS,
   X_ERR,
@@ -490,6 +491,7 @@ B* _syserrm[] = {
   (B*) "Matrix Error: parameters to clapack illegal",
   (B*) "Matrix Error: Internal Error - message on stack",
   (B*) "Matrix Error: lu matrix is singular",
+  (B*) "Matrix Error: illegal overlap",
 #endif //HAVE_ATLAS
   (B*) "** X windows unavailable",
   (B*) "** Error in X windows",
