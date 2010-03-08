@@ -117,6 +117,8 @@ B* _sysop[] =
   (B*) "localtime", (B*) op_localtime,
   (B*) "getwdir", (B*) op_getwdir,
   (B*) "setwdir", (B*) op_setwdir,
+  (B*) "random", (B*) op_random,
+  (B*) "random_init", (B*) op_random_init,
   (B*) "readfile", (B*) op_readfile,
   (B*) "writefile", (B*) op_writefile,
   (B*) "findfiles", (B*) op_findfiles,
@@ -355,6 +357,7 @@ P _syserrc[] = {
   MATRIX_PARAM_ERROR,
   MATRIX_INT_ERR,
   MATRIX_SINGULAR,
+  MATRIX_OVERLAP,
 #endif //HAVE_ATLAS
   NO_XWINDOWS,
   X_ERR,
@@ -488,6 +491,7 @@ B* _syserrm[] = {
   (B*) "Matrix Error: parameters to clapack illegal",
   (B*) "Matrix Error: Internal Error - message on stack",
   (B*) "Matrix Error: lu matrix is singular",
+  (B*) "Matrix Error: illegal overlap",
 #endif //HAVE_ATLAS
   (B*) "** X windows unavailable",
   (B*) "** Error in X windows",
