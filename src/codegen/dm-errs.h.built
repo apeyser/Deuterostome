@@ -224,36 +224,38 @@
 #define MATRIX_INT_ERR                ((P)      105L)
 // Matrix Error: lu matrix is singular
 #define MATRIX_SINGULAR               ((P)      106L)
+// Matrix Error: illegal overlap
+#define MATRIX_OVERLAP                ((P)      107L)
 #endif //HAVE_ATLAS
 #ifdef DM_ENABLE_RTHREADS
 // ** Rthreads are inactive
-#define RTHREADS_UNSET                ((P)      107L)
+#define RTHREADS_UNSET                ((P)      108L)
 // ** Rthreads: nodes for dictionay not a numeral
-#define RTHREADS_NUMTYPE              ((P)      108L)
+#define RTHREADS_NUMTYPE              ((P)      109L)
 // ** Rthreads: nodes for dictionary undefined
-#define RTHREADS_NUMUNDF              ((P)      109L)
+#define RTHREADS_NUMUNDF              ((P)      110L)
 // ** Rthreads: nodes for dictionary out of range
-#define RTHREADS_NUMRNG               ((P)      110L)
+#define RTHREADS_NUMRNG               ((P)      111L)
 // ** Rthreads: illegal class for info dictionary
-#define RTHREADS_DICTTYPE             ((P)      111L)
+#define RTHREADS_DICTTYPE             ((P)      112L)
 // ** Rthreads: key/val pair: val not a string
-#define RTHREADS_VALTYPE              ((P)      112L)
+#define RTHREADS_VALTYPE              ((P)      113L)
 // ** Rthreads: key/val pair: val too long
-#define RTHREADS_VALSIZE              ((P)      113L)
+#define RTHREADS_VALSIZE              ((P)      114L)
 // ** Rthreads: key/val pair: val empty
-#define RTHREADS_VALEMPTY             ((P)      114L)
+#define RTHREADS_VALEMPTY             ((P)      115L)
 // ** Rthreads: key/val pair: key too long
-#define RTHREADS_KEYSIZE              ((P)      115L)
+#define RTHREADS_KEYSIZE              ((P)      116L)
 // ** Rthreads: key/val pair: val is active
-#define RTHREADS_VALATR               ((P)      116L)
+#define RTHREADS_VALATR               ((P)      117L)
 #endif //DM_ENABLE_RTHREADS
 #ifdef DM_HOST_IS_32_BIT
 #endif //DM_HOST_IS_32_BIT
 #ifdef DM_ENABLE_PLUGINS_SUPPORT
 #endif //DM_ENABLE_PLUGINS_SUPPORT
 // ** no socket events -- internal
-#define NEXTEVENT_NOEVENT             ((P)      117L)
+#define NEXTEVENT_NOEVENT             ((P)      118L)
 // ** No mpi message msg received -- internal
-#define MPI_NOMSG                     ((P)      118L)
+#define MPI_NOMSG                     ((P)      119L)
 
 #endif //DM_ERRS_H

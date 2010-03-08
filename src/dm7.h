@@ -4,6 +4,8 @@
 #include "dm.h"
 
 /*-- time/date and file access  */
+DLL_SCOPE P op_random(void);
+DLL_SCOPE P op_random_init(void);
 DLL_SCOPE P op_gettime(void);
 DLL_SCOPE P op_gettimeofday(void);
 DLL_SCOPE P op_profiletime(void);
