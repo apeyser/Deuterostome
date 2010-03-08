@@ -34,9 +34,43 @@
 #include <signal.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <limits.h>
 
 #include "dm7.h"
 #include "dm2.h"
+#include "srandomdev-local.h"
+
+/*------------------------------------------------ random
+  -- | [0d..1d]
+*/
+
+P op_random(void) 
+{
+  if (o2 > CEILopds) return OPDS_OVF;
+  TAG(o1) = NUM | DOUBLETYPE;
+  ATTR(o1) = 0;
+  DOUBLE_VAL(o1) = random() / (double) RAND_MAX;
+  FREEopds = o2;
+  return OK;
+}
+
+//  integer/* | --
+P op_random_init(void) 
+{
+  LBIG v;
+
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != NUM) return OPD_CLA;
+  if (TYPE(o_1) >= SINGLETYPE) return OPD_TYP;
+
+  if (! VALUE(o_1, &v)) srandomdev();
+  else srandom((unsigned int) (v % UINT_MAX));
+  
+  FREEopds = o_1;
+  return OK;
+}
+
+//
 
 /*--------------------------------------------------- gettime
    -- | time
