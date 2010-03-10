@@ -951,6 +951,9 @@ P foldobj_ext(B* frame)
   foldobj_free();
   if (retc != VM_OVF) return retc;
 
+  freemem = &freemem_;
+  ceilmem = &ceilmem_;
+
   moveframe(frame_, frame);
   depth = 0;
   if (! (vmalloc = (B*) malloc((CEILvm - FLOORvm))))
