@@ -536,14 +536,17 @@ P op_writeboxfile(void)
   atmost = top - base;
   
   oldfreemem = freemem;
-  if (freemem + ARRAY_SIZE(o_2) + 1 > CEILvm) return VM_OVF;
+  if (freemem + ARRAY_SIZE(o_2) + 1 > CEILvm) {
+    retc = VM_OVF;
+    goto err;
+  }
   moveB(VALUE_PTR(o_2), freemem, ARRAY_SIZE(o_2));
   freemem += ARRAY_SIZE(o_2);
   if (freemem[-1] != '/') (freemem++)[0] = '/';
 
   if (freemem + ARRAY_SIZE(o_1) + 1 > CEILvm) {
-    FREEvm = oldFREEvm;
-    return VM_OVF;
+    retc = VM_OVF;
+    goto err;
   }
   moveB(VALUE_PTR(o_1), freemem, ARRAY_SIZE(o_1));
   freemem[ARRAY_SIZE(o_1)] = '\000';
@@ -553,17 +556,23 @@ P op_writeboxfile(void)
 		    S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH))
 	 == -1)
     if (errno == EINTR) {
-      if ((retc = checkabort_())) {foldobj_free(); return retc;}
+      if ((retc = checkabort_())) goto fderr;
     } 
-    else {retc = -errno; foldobj_free(); return retc;}
+    else {
+      retc = -errno; 
+      goto fderr;
+    }
 
   do {
     while ((nb = write(fd, base, atmost)) == -1)
       if (errno == EINTR) {
-	if ((retc = checkabort_())) {foldobj_free(); return retc;}
+	if ((retc = checkabort_())) goto fderr;
       }
-      else {retc = -errno; foldobj_free(); return retc;}
-    if (nb < atmost && (retc = checkabort_())) {foldobj_free(); return retc;}
+      else {
+	retc = -errno; 
+	goto fderr;
+      }
+    if (nb < atmost && (retc = checkabort_())) goto fderr;
     base += nb;
     atmost -= nb;
   } while (atmost > 0);
@@ -576,6 +585,12 @@ P op_writeboxfile(void)
  
   FREEopds = o_3;
   return OK;
+
+ fderr:
+  close(fd);
+ err:
+  foldobj_free();
+  return retc;
 }
 
 /*---------------------------------------------- findfiles
