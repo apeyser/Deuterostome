@@ -12,6 +12,14 @@
 | the new system provides a general toolbox for making notebooks and preparing
 | figures for publication. 
 |
+|----------------------------------------- things to do (or not)
+|
+| - the labeling of scale partitions in 'gpgraf' does not cope with
+|   axis ranges that are a small fraction of the offset of the range on
+|   the axis (only one decimal is included). One might replace the in-line
+|   code for label formatting by a named procedure so that specific
+|   manipulation of the format is possible when necessary.
+|
 |
 |============================== Front Ends ==================================
 |
@@ -33,7 +41,7 @@
 | of the figure elements with respect to one another is handled by a
 | (`placement') procedure given as an argument to  each primitive.
 |
-| `EPSfigure' generates an EPS wrapper for the PS code and writes the PS code
+| `EPSfigure' generates an EPS wrapper f or the PS code and writes the PS code
 | together with a prefix (defining a symbol font and some PS tools) to the
 | output file.  
 |
@@ -45,7 +53,7 @@
     /EPSfile name
     /EPSpath name
     /EPSidx 0 def
-    /EPSbuf 1e6 /b array def
+    /EPSbuf 1e7 /b array def
     /includebuf 1e6 /b array def
     /includeidx 0 def
     /xbox 4 /d array def
@@ -99,7 +107,8 @@
     EPSbuf 0 EPSidx getinterval EPSpath EPSfile writefile
     (\nEPS file written: ) toconsole EPSfile toconsole (\n) toconsole
 
-  } {stopped {countdictstack ndict sub ~end repeat stop} if} /figurelayer inlayer
+  } { stopped { countdictstack ndict sub ~end repeat stop } if }
+  /figurelayer inlayer
 } bind def
 
 |============== Primitives for creating figure elements ====================
@@ -113,17 +122,17 @@
 | original tree by child elements that are generated automatically by certain
 | primitives (e.g., a self-labeling graph primitive). Since the tree of
 | elements cannot be extended in phases 2 or 3, a primitive generating
-| child elements must do the the logical design needed to define its offspring
+| child elements must do the logical design needed to define its offspring
 | in phase 1.
 |
-| D code other than invocations of primitives contained in original generators
-| is executed only in phase 1 -- it is not passed on to the secondary
-| generators. This limits the usage of such code to setting representation
-| parameters for the element and its descendents in the figure tree. It is
-| irrelevant where in the generator code these parameters are set. Their
-| settings are stored in the private dictionary of the element that is
-| constructed in phase 1. Phases 2 and 3 use these parameter values for
-| all components of the element (including descendents).
+| D code other than invocations of primitives that is contained in original
+| generators is executed only in phase 1 -- it is not passed on to the
+| secondary generators. This limits the usage of such code to setting
+| representation parameters for the element and its descendents in the
+| figure tree. It is irrelevant where in the generator code these parameters
+| are set. Their settings are stored in the private dictionary of the 
+| element that is constructed in phase 1. Phases 2 and 3 use these parameter
+| values for all components of the element (including descendents).
 |
 | Phases 2 and 3 execute the secondary generator procedure. In turn, a
 | primitive executed in these phases executes any generator given to it
@@ -283,7 +292,7 @@
 
 |-------- map:  x' y' map | x y
 |         where x',y' are the coordinates in the child space, `map' is
-|         the transform map from the child to the parent space, and x,'
+|         the transform map from the child to the parent space, and x,y
 |         are the coordinates in the parent space.
 
 /map { /m name /y name /x name
@@ -369,7 +378,7 @@
 |--------- aligners 
 |
 | These use the bounding box. If you want finer alignments you need write
-| your own (e.g. for placing text with consideration of descenders.
+| your own (e.g. for placing text with consideration of descenders).
 |
 | The capital letters define the x and y alignment coordinates (LB = left,
 | bottom; CT = center, top).
@@ -419,12 +428,17 @@
 | A report is a source of information used by primitives to generate graphs.
 | The root object of a report is a dictionary.
 |
-| The following objects, associated with names in a report, are interpretable
-| as data by the primitives:
+| The following objects, associated with names in a report, are accepted
+| by the primitive `gpgraf':
 |
 |  < >                 - a single array (abscissa or ordinate)
 |  [ < > < > ... ]     - a list of ordinate arrays
 |  [ < > < > ]         - a list containing an abscissa and an ordinate array
+|
+| The primitive `fcgraf' accepts 
+|
+|  [ < > < > < > ]     - a list containing the horizontal and vertical
+|                        independent variables and the dependent variable
 |
 
 |........................... graphical symbols ............................
@@ -516,7 +530,7 @@
 |      - textsize 
 |     
 |     The element uses the parameter values defined by its own generator,
-|     or if it does not define them itself, uses the values defined by
+|     or if it does not define them itself uses the values defined by
 |     the nearest ancestor in the element tree (this happens automatically
 |     as elements leave their dictionary on the D dictionary stack when they
 |     execute the generator for a child element).
@@ -778,7 +792,6 @@
 
 |--------- phase 2:
 
-| - compile the LaTEX string and extract metrics
 | - backtransform bbox and adjust parent bbox
 
 { begin
@@ -1010,7 +1023,8 @@
   selection { /selitem name
       selitem length 2 gt { 
         report selitem 0 get get /X name
-        report selitem 1 get get dup class /arrayclass eq { [ exch ] } if /Ys name
+        report selitem 1 get get dup class /arrayclass eq { [ exch ] } if
+          /Ys name
         selitem 2 get /pres name
       } { 
         report selitem 0 get get 0 get /X name
@@ -1085,8 +1099,8 @@ end def
   /lin {
     Xaxis 0 get  Xaxis 2 get almost Xaxis 1 get { /xtick name
       10 /b array 0 ($) fax
-      |-- scale by unit and round to integer
-      * xtick Xaxis 3 get div round /l ctype * number
+      |-- scale by unit and round to fixed point with one decimal
+      * xtick Xaxis 3 get div -1 number
       ($) fax 0 exch getinterval
       |-- center on xtick, top adjust half a line below axis
       ~[ 
@@ -1129,8 +1143,8 @@ end def
   /lin {
     Yaxis 0 get  Yaxis 2 get almost Yaxis 1 get { /ytick name
         10 /b array 0 ($) fax
-        |-- scale by unit and round to integer
-        * ytick Yaxis 3 get div round /l ctype * number
+        |-- scale by unit and round to fixed point with one decimal
+        * ytick Yaxis 3 get div -1 number
           ($)fax 0 exch getinterval
         ~[ 
           textsize -0.5 mul ytick ~Y_to_y ~translate
@@ -1322,6 +1336,425 @@ end def
   ~grestore toPS
 } bind def
 
+|============================ primitive: `pcgraf' ==========================
+|
+| `pcgraf' generates a `pseudocolor graph' from a `report'  (a dictionary):
+|
+|   report name abs ord color xdim ydim  { placement } | --
+| 
+| the name argument specifies the list in `report' that specifies the arrays
+| of the horizontal and vertical independent variables, as well as the
+| dependent variable to be represented in the pseudocolor dimension. The
+| horizontal and vertical independent variable values are stored in simple
+| arrays (as the abscissae and ordinates of one row and one column,
+| respectively). The variable of the pseudocolor dimension is specified
+| by a matrix followed by its map (outer: row; inner:column).
+|
+| `xdim' and `ydim' specify the dimensions (in points) to be spanned by
+| the axis system described by `abs' and `ord'. The bounding box of the graph
+| will be larger than the axis box as it comprises the labels automatically
+| added to the axis system plus a color calibration axis plotted on the right
+| hand side and outside of the xdim,ydim box.
+|
+|  `abs'   - [ scan min max type unit descr ]    - directs design of
+|                                                    abscissa axis
+|  `ord'   - [ scan min max type unit descr ]    - directs design of
+|                                                    ordinate axis
+|  `color' - [ scan min max type unit descr ]    - directs design of
+|                                                    pseudocolor axis
+| Axis design is directed by
+| 
+|  scan      - boolean, enables scan for axis limits 
+|  min, max  - extrema (if `scan' enabled, these prime the extrema unless
+|              they are specified as `undefined' value 
+|  type      - /lin (linear) or /log (logarithmic)  ...to be extended
+|  unit      - LaTEX string, used in unit specification added to description
+|  descr     - LaTEX string, description of axis
+|
+| The x,y axis system is plotted as a stroked box with inward pointing scale
+| marks on all margins. Labels appear left of and below the box. Axis
+| descriptions are complemented by '/', power of ten, and the unit (with
+| the denominator in parentheses if necessary).
+|
+| The lower left corner of the axis box is also the origin of the physical
+| x,y coordinate space of this figure element (important if you want to add
+| your own enhancements). Note that using an `alignXY' command inside
+| the placement procedure of `pcgraf' will shift the origin of the pcgraf
+| box. 
+|
+| The pseudocolors are generated automatically so that the range between
+| `min' and `max' of the color axis is mapped on the spectral colors ranging
+| between purple and red. A vertical color bar is shown on the right hand
+| side of the x,y area together with a labeled axis.
+|
+| Labels are generated as LaTEX figure elements (appended to the figure
+| tree). They use the text font size specified in parameter `textsize'
+| as that of the `normal' LaTEX font.
+|
+| The graph is placed as specified by the `placement' procedure into its
+| parent element.
+|
+
+|------------------------------------------ pcgraf, phase 1
+
+{ 
+  currentdict
+  100 dict begin
+  /parent name
+  /placement name
+  /d ctype /ydim name /d ctype /xdim name
+  /color name /ordinate name /abscissa name
+  /selection name 
+  /report name
+  report selection
+  currentdict ~pcgraf  | => secondary generator
+
+|-- build pseudocolor space 
+
+    makepseudocolors
+
+|-- find logical ranges  of axes
+
+  abscissa dup 0 get /scanX name
+    dup 1 get /minX name 2 get /maxX name
+  ordinate dup 0 get /scanY name 
+    dup 1 get /minY name 2 get /maxY name
+  color dup 0 get /scanZ name
+    dup 1 get /minZ name 2 get /maxZ name
+  report selection get dup 0 get /X name
+    dup 1 get /Y name dup 2 get /Z name 3 get /Zmap name
+    Z 0 Zmap 0 get getinterval /Z name  | clip garbage
+  scanX { 
+     minX * eq { /minX X 0 get def } if
+     maxX * eq { /maxX X 0 get def } if
+     minX maxX X extrema /maxX name /minX name
+   } if
+   scanY { 
+     minY * eq { Y 0 get /minY name } if
+     maxY * eq { Y 0 get /maxY name } if
+     minY maxY Y extrema /maxY name /minY name
+   } if 
+  scanZ { 
+     minZ * eq { /minZ Z 0 get def } if
+     maxZ * eq { /maxZ Z 0 get def } if
+     minZ maxZ Z extrema /maxZ name /minZ name
+   } if
+
+|-- design the logical axes
+
+  gpXdesigners abscissa 3 get get exec 
+  gpYdesigners ordinate 3 get get exec
+  pcZdesigners color 3 get get exec
+
+|-- construct generator of label elements
+ 
+  /children ~[ 
+    gpXlabels abscissa 3 get get exec
+    gpYlabels ordinate 3 get get exec
+    pcZlabels color 3 get get exec
+  ] bind def
+  end
+} bind phase1 /pcgraf put
+
+|--------------------------------------------- pcgraf, phase 2
+
+{ 
+  begin
+  |-- prime bounding box
+
+  /bbox 0 4 /d array copy def
+  symbolsize linewidth add 2 div dup
+  xdim add bbox 2 put ydim add bbox 3 put
+
+  (+) toconsole children (-) toconsole
+  makeinverse stretchpbbox
+  end
+} bind phase2 /pcgraf put
+
+|--------------------------------------------- pcgraf, phase 3
+
+{ 
+  begin
+  [ ~save inverse ~concat ] { toPS } forall
+  setlinewidth
+  symbolsize setsymbolsize
+  ( symbolfont setfont ) faxPS
+  (+) toconsole children (-) toconsole
+
+  /Nrows Zmap 0 get Zmap 1 get div def
+  /Ncols Zmap 1 get def
+  ~save toPS
+  [ /CIEBasedABC colordict ] toPS ~setcolorspace toPS
+  0 1 Nrows 2 sub { /krow name
+      Y krow get /yb name Y krow 1 add get /yt name
+      0 1 Ncols 2 sub { /kcol name
+          X kcol get /xl name X kcol 1 add get /xr name 
+          Z Zmap krow ss pop kcol get
+          Z Zmap krow 1 add ss pop kcol get add
+          Z Zmap krow ss pop kcol 1 add get add
+          Z Zmap krow 1 add ss pop kcol 1 add get add
+          4 div C_to_c /zpix name
+          renderpix
+        } for
+    } for
+  ~restore toPS
+
+  ~save toPS
+  [ /CIEBasedABC colordict ] toPS ~setcolorspace toPS
+  /xl maxX 1.1 mul def  /xr maxX 1.2 mul def
+  0 1 Npc 2 sub { /krow name
+      /yb minY maxY minY sub Npc 1 sub div krow mul add def
+      /yt minY maxY minY sub Npc 1 sub div krow 1 add mul add def
+      krow krow 1 add add 2 div /zpix name
+      renderpix
+    } for
+  ~restore toPS
+  
+  ~save toPS gpXplotters abscissa 3 get get exec ~restore toPS
+  ~save toPS gpYplotters ordinate 3 get get exec ~restore toPS
+  ~save toPS pcZplotters color 3 get get exec ~restore toPS
+
+  verboxe { bbox toPS ~drawbbox toPS } if
+  ~restore toPS
+  end
+} bind phase3 /pcgraf put
+
+
+|--------------- design pcgraf color axis (maps z range onto 0,255)
+
+/pcZdesigners 2 dict dup begin
+  /log {
+     minZ maxZ DesignLg10Axis /Zaxis name
+     { lg } { 10.0 exch exp } Zaxis 0 get  Zaxis 1 get 
+     2 copy 0.0 ydim DefineTrans /z_to_Z name /Z_to_z name 
+     0.0 Npc /d ctype DefineTrans /c_to_C name /C_to_c name 
+  } bind def
+ 
+  /lin {
+     minZ maxZ DesignLinearAxis /Zaxis name
+     { } { } Zaxis 0 get  Zaxis 1 get
+     4 copy 0.0 ydim DefineTrans /z_to_Z name /Z_to_z name 
+     0.0 Npc /d ctype DefineTrans /c_to_C name /C_to_c name   
+  } bind def
+ end def
+
+/pcZlabels 2 dict dup begin
+ 
+  /lin {
+    Zaxis 0 get  Zaxis 2 get almost Zaxis 1 get { /ztick name
+        10 /b array 0 ($) fax
+        |-- scale by unit and round to fixed point with one decimal
+        * ztick Zaxis 3 get div -1 number
+          ($)fax 0 exch getinterval
+        ~[ 
+          textsize -0.5 mul ytick ~Z_to_z ~translate
+          ~alignRC
+         ] latex
+    } for
+    |-- place descr/power unit axis label
+    Zaxis 3 get color 5 get color 4 get LinAxisLabel
+    ~[ 
+      ~parent /bbox ~get 0 ~get textsize 0.5 mul ~sub 
+       0.5 ydim mul ~translate
+       90.0 ~rotate
+       ~alignCB
+    ] latex
+  } bind def
+
+  /log {
+    Zaxis 2 get { /ztick name
+        |-- represent as power of 10
+        10 /b array 0 ($) fax
+        ztick PowerOfTen ($) fax 0 exch getinterval
+        |-- 0.5 line to the left, center on ytick
+        ~[ textsize -0.5 mul ztick ~Z_to_z ~translate
+           ~alignRC
+         ] latex
+    } forall
+    |-- place descr/unit axis label
+    100 /b array 0 color 5 get fax
+        ( / ) fax color 4 get fax 0 exch getinterval
+    ~[ ~parent /bbox ~get 0 ~get textsize 0.5 mul ~sub 
+       ydim 0.5 mul ~translate
+       90 ~rotate
+       ~alignCB
+     ] latex
+  } bind def
+end def
+
+|------------------------------------- render pseudocolor pixel
+| (xl,xr,yb,yt,zpix} -- | --
+
+/renderpix {
+  ~newpath toPS
+  xl X_to_x toPS yb Y_to_y toPS ~moveto toPS
+  xl X_to_x toPS yt Y_to_y toPS ~lineto toPS
+  xr X_to_x toPS yt Y_to_y toPS ~lineto toPS
+  xr X_to_x toPS yb Y_to_y toPS ~lineto toPS
+  ~closepath toPS
+  pcX zpix get toPS pcY zpix get toPS pcZ zpix get toPS
+  ~setcolor toPS
+  ~fill toPS
+} bind def
+
+/pcZplotters 2 dict dup begin
+  
+  /log {
+    symbolsize setsymbolsize
+    ( gsave symbolfont setfont newpath 2 setlinecap ) faxPS 
+    xdim 1.2 mul toPS minZ Z_toz toPS  ( moveto ) faxPS
+    xdim 1.2 mul toPS maxZ Z_to_z toPS  ( lineto stroke ) faxPS
+    /symbol hbarra def
+    Zaxis 2 get {
+        xdim 1.2 mul toPS Z_to_z toPS ( moveto ) faxPS
+        symbol toPS ( show ) faxPS
+    } forall
+    symbolsize 0.6 mul setsymbolsize
+    ( symbolfont setfont ) faxPS
+    /symbol hbarra def
+    Yaxis 3 get {
+        xdim 1.2 mul toPS Z_to_z toPS ( moveto ) faxPS
+        symbol toPS ( show ) faxPS
+      } forall
+    ( grestore ) faxPS 
+  } bind def
+
+/lin {
+    symbolsize setsymbolsize
+    ( gsave symbolfont setfont newpath 2 setlinecap ) faxPS 
+    xdim 1.2 mul toPS Zaxis 0 get  Z_to_z toPS  ( moveto ) faxPS
+    xdim 1.2 mul toPS Zaxis 1 get  Z_to_z toPS  ( lineto stroke ) faxPS
+    /symbol hbarra def
+    Zaxis 0 get  Zaxis 2 get  Zaxis 1 get {
+      xdim 1.2 mul toPS Z_to_z toPS ( moveto ) faxPS
+      symbol toPS ( show ) faxPS
+    } for
+    ( grestore ) faxPS 
+} bind def
+
+end def
+
+|---------------------------------------- pseudocolors
+| We use the CIE31 color model. Spectral color weights  are produced by
+| sampling the x_bar, y_bar, and z_bar functions tabulated below.
+| Using no interpolation, we have 95 discrete spectral colors
+| (from purple to red) upon which we map the Z range of the data.
+|
+
+/makepseudocolors {
+  /Npc 216 4 div def
+  /pcX Npc /d array def
+  /pcY Npc /d array def
+  /pcZ Npc /d array def
+  CIEfunctions 32 216 getinterval 1 4 pcX extract pop
+  CIEfunctions 32 216 getinterval 2 4 pcY extract pop
+  CIEfunctions 32 216 getinterval 3 4 pcZ extract pop
+  /XYZrange [ 0.0 0.0 pcX extrema 0.0 0.0 pcY extrema 0.0 0.0 pcZ extrema ] def
+  /colordict 10 dict dup begin
+    /RangeABC XYZrange def
+    /RangeLMN XYZrange def
+    /WhitePoint [ 1 1 1 ] def
+  end def
+} bind def
+
+/CIEfunctions <d
+       360 0.0001299 3.917E-06 0.0006061
+       365 0.0002321 6.965E-06  0.001086
+       370 0.0004149 0.00001239  0.001946
+       375 0.0007416 0.00002202  0.003486
+       380  0.001368  0.000039   0.00645
+       385  0.002236  0.000064 0.01054999
+       390  0.004243   0.00012 0.02005001
+       395   0.00765  0.000217   0.03621
+       400   0.01431  0.000396 0.06785001
+       405   0.02319   0.00064    0.1102
+       410   0.04351   0.00121    0.2074
+       415   0.07763   0.00218    0.3713
+       420   0.13438     0.004    0.6456
+       425   0.21477    0.0073 1.0390501
+       430    0.2839    0.0116    1.3856
+       435    0.3285   0.01684   1.62296
+       440   0.34828     0.023   1.74706
+       445   0.34806    0.0298    1.7826
+       450    0.3362     0.038   1.77211
+       455    0.3187     0.048    1.7441
+       460    0.2908      0.06    1.6692
+       465    0.2511    0.0739    1.5281
+       470   0.19536   0.09098   1.28764
+       475    0.1421    0.1126    1.0419
+       480   0.09564   0.13902 0.8129501
+       485 0.05795001    0.1693    0.6162
+       490   0.03201   0.20802   0.46518
+       495    0.0147    0.2586    0.3533
+       500    0.0049     0.323     0.272
+       505    0.0024    0.4073    0.2123
+       510    0.0093     0.503    0.1582
+       515    0.0291    0.6082    0.1117
+       520   0.06327      0.71 0.07824999
+       525    0.1096    0.7932 0.05725001
+       530    0.1655     0.862   0.04216
+       535 0.2257499 0.9148501   0.02984
+       540    0.2904     0.954    0.0203
+       545    0.3597    0.9803    0.0134
+       550 0.4334499 0.9949501   0.00875
+       555 0.5120501         1   0.00575
+       560    0.5945     0.995    0.0039
+       565    0.6784    0.9786   0.00275
+       570    0.7621     0.952    0.0021
+       575    0.8425    0.9154    0.0018
+       580    0.9163      0.87   0.00165
+       585    0.9786    0.8163    0.0014
+       590    1.0263     0.757    0.0011
+       595    1.0567    0.6949     0.001
+       600    1.0622     0.631    0.0008
+       605    1.0456    0.5668    0.0006
+       610    1.0026     0.503   0.00034
+       615    0.9384    0.4412   0.00024
+       620 0.8544499     0.381   0.00019
+       625    0.7514     0.321    0.0001
+       630    0.6424     0.265     5E-05
+       635    0.5419     0.217   0.00003
+       640    0.4479     0.175   0.00002
+       645    0.3608    0.1382   0.00001
+       650    0.2835     0.107         0
+       655    0.2187    0.0816         0
+       660    0.1649     0.061         0
+       665    0.1212   0.04458         0
+       670    0.0874     0.032         0
+       675    0.0636    0.0232         0
+       680   0.04677     0.017         0
+       685    0.0329   0.01192         0
+       690    0.0227   0.00821         0
+       695   0.01584  0.005723         0
+       700 0.01135916  0.004102         0
+       705 0.00811092  0.002929         0
+       710 0.00579035  0.002091         0
+       715 0.00410946  0.001484         0
+       720 0.00289933  0.001047         0
+       725 0.00204919   0.00074         0
+       730 0.00143997   0.00052         0
+       735 0.00099995 0.0003611         0
+       740 0.00069008 0.0002492         0
+       745 0.00047602 0.0001719         0
+       750 0.0003323   0.00012         0
+       755 0.00023483 0.0000848         0
+       760 0.00016615   0.00006         0
+       765 0.00011741 0.0000424         0
+       770 8.3075E-05   0.00003         0
+       775 5.8707E-05 0.0000212         0
+       780 4.151E-05 0.00001499         0
+       785 2.9353E-05 0.0000106         0
+       790 2.0674E-05 7.4657E-06         0
+       795 1.456E-05 5.2578E-06         0
+       800 1.0254E-05 3.7029E-06         0
+       805 7.2215E-06 2.6078E-06         0
+       810 5.0859E-06 1.8366E-06         0
+       815 3.5817E-06 1.2934E-06         0
+       820 2.5225E-06 9.1093E-07         0
+       825 1.7765E-06 6.4153E-07         0
+       830 1.2511E-06 4.5181E-07         0
+> def
+ 
 
 |||||||||||||||||||||||||||||| last primitive ||||||||||||||||||||||||||||||||
 |         -------------- make primitives readonly ----------------
