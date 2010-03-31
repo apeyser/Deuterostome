@@ -477,7 +477,10 @@ end def
              } def
 /numclass    { * theobj 1 get * number * theobj 1 get type mkact text
              } def
-/nullclass   { (null) fax nulltypes /theobj find type get fax} def
+/nullclass   { 
+  /theobj find active {(~) fax} if (null) fax 
+  nulltypes /theobj find type get fax
+} def
 /opclass     { } def
 /nameclass   { } def
 /boolclass   { } def
@@ -925,7 +928,10 @@ end mkread /nulltypes name
 
 12 dict dup begin
 /nullclass   {
-  {(null) fax nulltypes /theitem find type get fax} BG show_value
+  {
+    /theitem find active {(~) fax} if (null) fax 
+    nulltypes /theitem find type get fax
+  } BG show_value
 } bind def
 
 /numclass    { { * theitem dup type /D eq { 7 } { * } ifelse number }
