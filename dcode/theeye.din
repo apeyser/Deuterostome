@@ -496,17 +496,19 @@ end mkread /infoclasses name
 
 /nodot true def
 /findfiles_nd {
-  findfiles nodot {[
-    exch {
-      dup 0 get 0 get 46 eq {
+  findfiles nodot {         | [file...]
+    dup length list 0       | [file...] [null...] 0
+    3 -1 roll {             | [file... null...] i file
+      dup 0 get 0 get 46 ne {3 copy pop put 1 add} {
         dup 0 get length 2 lt ~pop {
           dup 0 get length 2 gt ~pop {
-            dup 0 get 1 get 46 ne ~pop if
+            dup 0 get 1 get 46 ne ~pop {3 copy pop put 1 add} ifelse
           } ifelse
         } ifelse
-      } if
-    } forall
-  ]} if
+      } ifelse              | [file... null...] i
+    } forall                | [file... null...] i
+    0 exch getinterval      | [file...]
+  } if                      | [file...]
 } bind def
 
 |-------- opening file directory
