@@ -1547,17 +1547,18 @@ end def
         * ztick Zaxis 3 get div -1 number
           ($)fax 0 exch getinterval
         ~[ 
-          textsize -0.5 mul ytick ~Z_to_z ~translate
-          ~alignRC
+           ~xdim 1.2 ~mul textsize 0.5 mul ~add
+           ztick ~Z_to_z ~translate
+          ~alignLC
          ] latex
     } for
     |-- place descr/power unit axis label
     Zaxis 3 get color 5 get color 4 get LinAxisLabel
     ~[ 
-      ~parent /bbox ~get 0 ~get textsize 0.5 mul ~sub 
+       ~parent /bbox ~get 2 ~get textsize 0.5 mul ~add 
        0.5 ydim mul ~translate
        90.0 ~rotate
-       ~alignCB
+       ~alignCT
     ] latex
   } bind def
 
