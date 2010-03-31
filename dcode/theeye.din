@@ -477,7 +477,10 @@ end def
              } def
 /numclass    { * theobj 1 get * number * theobj 1 get type mkact text
              } def
-/nullclass   { (null) fax nulltypes theobj type get fax} def
+/nullclass   { 
+  /theobj find active {(~) fax} if (null) fax 
+  nulltypes /theobj find type get fax
+} def
 /opclass     { } def
 /nameclass   { } def
 /boolclass   { } def
@@ -493,17 +496,19 @@ end mkread /infoclasses name
 
 /nodot true def
 /findfiles_nd {
-  findfiles nodot {[
-    exch {
-      dup 0 get 0 get 46 eq {
+  findfiles nodot {         | [file...]
+    dup length list 0       | [file...] [null...] 0
+    3 -1 roll {             | [file... null...] i file
+      dup 0 get 0 get 46 ne {3 copy pop put 1 add} {
         dup 0 get length 2 lt ~pop {
           dup 0 get length 2 gt ~pop {
-            dup 0 get 1 get 46 ne ~pop if
+            dup 0 get 1 get 46 ne ~pop {3 copy pop put 1 add} ifelse
           } ifelse
         } ifelse
-      } if
-    } forall
-  ]} if
+      } ifelse              | [file... null...] i
+    } forall                | [file... null...] i
+    0 exch getinterval      | [file...]
+  } if                      | [file...]
 } bind def
 
 |-------- opening file directory
@@ -925,7 +930,10 @@ end mkread /nulltypes name
 
 12 dict dup begin
 /nullclass   {
-  {(null) fax nulltypes theitem type get fax} BG show_value
+  {
+    /theitem find active {(~) fax} if (null) fax 
+    nulltypes /theitem find type get fax
+  } BG show_value
 } bind def
 
 /numclass    { { * theitem dup type /D eq { 7 } { * } ifelse number }

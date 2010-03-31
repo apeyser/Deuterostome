@@ -331,7 +331,10 @@
 end mkread def
 
 /oclasses 12 dict dup begin                      | object
-   /nullclass  { (null) fax nulltypes object type get exec} bind def
+   /nullclass  { 
+     /object find active {(~) fax} if (null) fax 
+     nulltypes /object find type get exec
+   } bind def
    /numclass   { * object * number } bind def
    /opclass    { * (op: ) text * /object find text } bind def
    /nameclass  { 
@@ -516,7 +519,10 @@ dup dup class /arrayclass eq exch type /B eq and
 
 /objstr @NAMEBYTES@ 2 mul /b array def
 
-/nullclass  { pop (null) ftext } bind def
+/nullclass  { 
+  3 1 roll (null) ftext 
+  3 -1 roll active {(mkact) ftext} if | this isn't quite right.
+} bind def
 /numclass   { dup type mkact exec } bind def
 /opclass    { objstr 0 * 4 -1 roll text 0 exch getinterval ftext
             } bind def
