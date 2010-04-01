@@ -706,7 +706,7 @@ end def |========= end of mpi data ================
 /dvtrespond {
   save
   console ~[userdict /knode get {
-    userdict /dvt get begin setready_dnode
+    dvtsup begin setready_dnode
   } ~exec] send 
   restore
 } bind def
@@ -744,12 +744,12 @@ end def |========= end of mpi data ================
 |----------------------- color loader and setup
 | [/color_name ...] | -- <<redefines toconsole>>
 /loadcolor {
-  userdict /color known not {getstartupdir (color.d) fromfiles} if
+  userdict /COLOR known not {getstartupdir (color.d) fromfiles} if
 } bind def
 
 /make_toconsole {
   loadcolor
-  color /make_toconsole get exec
+  COLOR /make_toconsole get exec
   whoami
 } bind def
 
