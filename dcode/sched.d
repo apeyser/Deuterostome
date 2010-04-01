@@ -1,6 +1,6 @@
 |===================== a scheduler for cluster operation ========================
 |
-| - schedules from a dvt the solving of a model in a cluster of dnodes
+| - schedules from a dvtsup the solving of a model in a cluster of dnodes
 | - each dnode has the same code that solves the model
 | - there is no limit on the number of dnodes
 | - a job involves a two-dimensional variation in model parameters
@@ -25,7 +25,7 @@
 |   time when a joblet is completed (or has failed)
 | - the dnode code that solves a joblet returns on the operand stack a
 |   status (2 - done; 3 - failed), which is automatically reported back to
-|   the job scheduler in the dvt
+|   the job scheduler in the dvtsup
 | - the scheduler attempts to spawn as many joblets as possible, given the
 |   joblets left to do, their dependencies, and the availability of dnodes
 | - joblets whose dependencies involve failed joblets will not be solved
@@ -48,7 +48,7 @@
 | [ {dependency test} status {command} ] (procedures can be replaced by
 |                                         active strings)
 |
-| The dependency test is executed in the dvt and usually inspects the job
+| The dependency test is executed in the dvtsup and usually inspects the job
 | list to check dependencies; the test returns a boolean indicating resolution
 | the joblet's dependencies.
 |
@@ -129,14 +129,14 @@
               joblet 1 get 0 eq {              | to do
                 joblet 0 get exec {            | dependencies are resolved
                     finddnode { /knode name    | a node is ready
-                        knode dvt begin setbusy end  | node goes busy
-                        dvt /nodelist get knode get /node name
+                        knode dvtsup begin setbusy end  | node goes busy
+                        dvtsup /nodelist get knode get /node name
                         buildresponse
                         node 2 get 
                         [ ~[ dnoderesponse /response ~name
                              joblet 2 get {} forall       | do it
                              ~response completionidx ~put
-                             ~console           | report back to dvt
+                             ~console           | report back to dvtsup
                                2 ~list ~dup
                                ~response ~mkact ~exch 0 ~put
                                ~dup (exec) ~exch 1 ~put 
@@ -165,10 +165,10 @@
   fillrectangle
 } bind def
 
-|---------------------------------------- build response: dnode -> dvt
-| This is built originally in the dvt, to include job and dnode info, and
+|---------------------------------------- build response: dnode -> dvtsup
+| This is built originally in the dvtsup, to include job and dnode info, and
 | then handed to the dnode. The dnode inserts its completion status and sends
-| this as completion message to the dvt.
+| this as completion message to the dvtsup.
 
 /buildresponse {
    [ jobdictname ~find ~begin
@@ -177,7 +177,7 @@
      null ~joblet 1 ~put              | completion comes from dnode!
      ~showjoblet
      ~end
-     ~dvt ~begin knode ~setready ~end
+     ~dvtsup ~begin knode ~setready ~end
      jobdictname ~schedule
    ] /dnoderesponse name
    /completionidx 16 def
@@ -188,7 +188,7 @@
 |    | false
 
 /finddnode {
-  dvt begin
+  dvtsup begin
   false
   0 1 nodelist length 1 sub { /knode name
       nodelist knode get /node name
