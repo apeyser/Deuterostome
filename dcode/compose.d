@@ -1643,13 +1643,13 @@ end def
 |
 
 /makepseudocolors {
-  /Npc 216 4 div def
+  /Npc 200 4 div def
   /pcX Npc /d array def
   /pcY Npc /d array def
   /pcZ Npc /d array def
-  CIEfunctions 32 216 getinterval 1 4 pcX extract pop
-  CIEfunctions 32 216 getinterval 2 4 pcY extract pop
-  CIEfunctions 32 216 getinterval 3 4 pcZ extract pop
+  CIEfunctions 48 200 getinterval 1 4 pcX extract pop
+  CIEfunctions 48 200 getinterval 2 4 pcY extract pop
+  CIEfunctions 48 200 getinterval 3 4 pcZ extract pop
   /XYZrange [ 0.0 0.0 pcX extrema 0.0 0.0 pcY extrema 0.0 0.0 pcZ extrema ] def
   /colordict 10 dict dup begin
     /RangeABC XYZrange def
