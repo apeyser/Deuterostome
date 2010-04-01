@@ -1501,7 +1501,7 @@ end def
 
   ~save toPS
   [ /CIEBasedABC colordict ] toPS ~setcolorspace toPS
-  /xl maxX 1.1 mul def  /xr maxX 1.2 mul def
+  /xl xdim 1.1 mul x_to_X def  /xr xdim 1.2 mul x_to_X def
   0 1 Npc 2 sub { /krow name
       /yb minY maxY minY sub Npc 1 sub div krow mul add def
       /yt minY maxY minY sub Npc 1 sub div krow 1 add mul add def
@@ -1520,21 +1520,21 @@ end def
 } bind phase3 /pcgraf put
 
 
-|--------------- design pcgraf color axis (maps z range onto 0,255)
+|--------------- design pcgraf color axis (maps z range onto color table)
 
 /pcZdesigners 2 dict dup begin
   /log {
      minZ maxZ DesignLg10Axis /Zaxis name
      { lg } { 10.0 exch exp } Zaxis 0 get  Zaxis 1 get 
      2 copy 0.0 ydim DefineTrans /z_to_Z name /Z_to_z name 
-     0.0 Npc /d ctype DefineTrans /c_to_C name /C_to_c name 
+     0.0 Npc 2 sub /d ctype DefineTrans /c_to_C name /C_to_c name 
   } bind def
  
   /lin {
      minZ maxZ DesignLinearAxis /Zaxis name
      { } { } Zaxis 0 get  Zaxis 1 get
      4 copy 0.0 ydim DefineTrans /z_to_Z name /Z_to_z name 
-     0.0 Npc /d ctype DefineTrans /c_to_C name /C_to_c name   
+     0.0 Npc 2 sub /d ctype DefineTrans /c_to_C name /C_to_c name   
   } bind def
  end def
 
@@ -1593,7 +1593,13 @@ end def
   xr X_to_x toPS yt Y_to_y toPS ~lineto toPS
   xr X_to_x toPS yb Y_to_y toPS ~lineto toPS
   ~closepath toPS
-  pcX zpix get toPS pcY zpix get toPS pcZ zpix get toPS
+  /zpix zpix 1 add def | shift in color table for interpolations
+  pcX zpix ceil get pcX zpix floor get sub
+      zpix dup floor sub mul pcX zpix floor get add toPS
+  pcY zpix ceil get pcY zpix floor get sub
+      zpix dup floor sub mul pcY zpix floor get add toPS
+  pcZ zpix ceil get pcZ zpix floor get sub
+      zpix dup floor sub mul pcZ zpix floor get add toPS
   ~setcolor toPS
   ~fill toPS
 } bind def
@@ -1649,7 +1655,7 @@ end def
   /pcZ Npc /d array def
   CIEfunctions 48 200 getinterval 1 4 pcX extract pop
   CIEfunctions 48 200 getinterval 2 4 pcY extract pop
-  CIEfunctions 48 200 getinterval 3 4 pcZ extract pop
+  CIEfunctions 48 200  getinterval 3 4 pcZ extract pop
   /XYZrange [ 0.0 0.0 pcX extrema 0.0 0.0 pcY extrema 0.0 0.0 pcZ extrema ] def
   /colordict 10 dict dup begin
     /RangeABC XYZrange def
