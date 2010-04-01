@@ -168,7 +168,7 @@
 |---------------------------------------- build response: dnode -> dvtsup
 | This is built originally in the dvtsup, to include job and dnode info, and
 | then handed to the dnode. The dnode inserts its completion status and sends
-| this as completion message to the dvtsup.
+| this as completion message to the dvt.
 
 /buildresponse {
    [ jobdictname ~find ~begin
