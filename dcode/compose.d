@@ -1097,10 +1097,11 @@ end def
 /gpXlabels 2 dict dup begin
 
   /lin {
+    Xaxis 2 get Xaxis 3 get div labelformatter
     Xaxis 0 get  Xaxis 2 get almost Xaxis 1 get { /xtick name
       10 /b array 0 ($) fax
       |-- scale by unit and round to fixed point with one decimal
-      * xtick Xaxis 3 get div -1 number
+      xtick Xaxis 3 get div numberlabel 
       ($) fax 0 exch getinterval
       |-- center on xtick, top adjust half a line below axis
       ~[ 
@@ -1141,10 +1142,11 @@ end def
 /gpYlabels 2 dict dup begin
  
   /lin {
+    Yaxis 2 get Yaxis 3 get div labelformatter
     Yaxis 0 get  Yaxis 2 get almost Yaxis 1 get { /ytick name
         10 /b array 0 ($) fax
         |-- scale by unit and round to fixed point with one decimal
-        * ytick Yaxis 3 get div -1 number
+        ytick Yaxis 3 get div numberlabel
           ($)fax 0 exch getinterval
         ~[ 
           textsize -0.5 mul ytick ~Y_to_y ~translate
@@ -1543,10 +1545,11 @@ end def
 /pcZlabels 2 dict dup begin
  
   /lin {
+    Zaxis 2 get Zaxis 3 get div labelformatter
     Zaxis 0 get  Zaxis 2 get almost Zaxis 1 get { /ztick name
         10 /b array 0 ($) fax
         |-- scale by unit and round to fixed point with one decimal
-        * ztick Zaxis 3 get div -1 number
+        ztick Zaxis 3 get div numberlabel
           ($)fax 0 exch getinterval
         ~[ 
            ~xdim 1.2 ~mul textsize 0.5 mul ~add
@@ -2193,7 +2196,7 @@ end definefont pop   % Symbols font
        unit fax
      }
      { poweroften 1 eq not
-         { unit length 0 ne {( / \($10^{)} {( / $10^{)} ifelse fax
+         { unit length 0 ne {( / \($10^{)} {( / $10^{)}  ifelse fax
            * poweroften lg roundup /l ctype -1 number
            (}$ ) fax unit fax
            unit length 0 ne { (\)) fax } if
@@ -2279,6 +2282,20 @@ end definefont pop   % Symbols font
 
 |-- logarithm base 10
 /lg ~[/d ~ctype ~ln 10.0 ln -1 pwr ~mul] bind def
+
+|-- number formatter for labels
+| number | (proc `numberlabel')
+|
+| Makes the procedure `numberlabel' that extends the `number' operator to
+| automatically format axis labels (integer if `number' is greater than 1;
+| fixed point, one decimal otherwise).
+
+/labelformatter { 
+  1 lt { { /l ctype * exch * number } }
+       { { * exch -1 number } }
+       ifelse
+  /numberlabel name
+} bind def
 
 
 end _module
