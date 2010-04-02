@@ -1506,7 +1506,7 @@ end def
   0 1 98 { /krow name
       Zaxis 0 get delz krow mul add /zpix name
       /yb zpix Z_to_z y_to_Y def
-      /yt zpix delz add Z_to_z y_to_Y def
+      /yt zpix delz add Z_to_z y_to_Y def 
       /zpix zpix C_to_c def
       renderpix
     } for
@@ -2193,7 +2193,7 @@ end definefont pop   % Symbols font
        unit fax
      }
      { poweroften 1 eq not
-         { unit length 0 ne ( / \($10^{) ( / $10^{) if fax
+         { unit length 0 ne {( / \($10^{)} {( / $10^{)} ifelse fax
            * poweroften lg roundup /l ctype -1 number
            (}$ ) fax unit fax
            unit length 0 ne { (\)) fax } if
