@@ -1488,7 +1488,7 @@ end def
   0 1 Nrows 2 sub { /krow name
       Y krow get /yb name Y krow 1 add get /yt name
       0 1 Ncols 2 sub { /kcol name
-          X kcol get /xl name X kcol 1 add get /xr name 
+           X kcol get /xl name X kcol 1 add get /xr name 
           Z Zmap krow ss pop kcol get
           Z Zmap krow 1 add ss pop kcol get add
           Z Zmap krow ss pop kcol 1 add get add
@@ -1502,12 +1502,12 @@ end def
   ~save toPS
   [ /CIEBasedABC colordict ] toPS ~setcolorspace toPS
   /xl xdim 1.1 mul x_to_X def  /xr xdim 1.2 mul x_to_X def
-  0 1 Npc 2 sub { /krow name
-      /yb Yaxis 0 get Yaxis 1 get Yaxis 0 get sub
-        Npc 1 sub div krow mul add def
-      /yt Yaxis 0 get Yaxis 1 get Yaxis 0 get sub
-        Npc 1 sub div krow 1 add mul add def
-      krow krow 1 add add 2 div /zpix name
+      /delz Zaxis 1 get Zaxis 0 get sub 99.0 div def
+  0 1 98 { /krow name
+      Zaxis 0 get delz krow mul add /zpix name
+      /yb zpix Z_to_z y_to_Y def
+      /yt zpix delz add Z_to_z y_to_Y def
+      /zpix zpix C_to_c def
       renderpix
     } for
   ~restore toPS
@@ -1587,6 +1587,8 @@ end def
 
 |------------------------------------- render pseudocolor pixel
 | (xl,xr,yb,yt,zpix} -- | --
+| Coordinates are in logical units, except zpix, which is in physical
+| units.
 
 /renderpix {
   ~newpath toPS
@@ -2168,14 +2170,43 @@ end definefont pop   % Symbols font
 } bind def
 
 |-------------------------- make label of linear axis ----------------------
+| (letterprefix)  poweroften axdesc axunit | label
+|
+| A string buffer is made and the description string is appended. A decision
+| is made whether a unit string is to be appended. If so, dependent on
+| boolean `letterprefix', either is the unit with a letter prefix indicating
+| the order of magnitude appended (provided the order of magnitude is in range
+| and the unit string is not blank), or a power of 10 is appended as number,
+| followed by whatever the unit string provides. Other typographical details
+| are also observed in the formatting.
 
 /LinAxisLabel { /unit name /axdesc name /poweroften name
   
   100 /b array 0 axdesc fax
-  poweroften 1 eq unit length 0 eq and not
-    { ( / ) fax AxisUnit
-    } if 0 exch getinterval
+  
+  letterprefix 
+  poweroften 1e-15 ge and
+  poweroften 1e9 le and
+  unit length 0 gt and
+     { ( / ) fax
+       letterlist poweroften lg 15 add 3 div 0.8999999999999999 add get fax
+       unit fax
+     }
+     { poweroften 1 eq not
+         { unit length 0 ne ( / \($10^{) ( / $10^{) if fax
+           * poweroften lg roundup /l ctype -1 number
+           (}$ ) fax unit fax
+           unit length 0 ne { (\)) fax } if
+         }
+         { unit length 0 ne { ( / ) fax unit fax } if
+         }
+         ifelse                      
+     }
+     ifelse
+  0 exch getinterval
 } bind def
+
+/letterlist [ (f) (p) (n) ($\mu$) (m) () (K) (M) (G) ] def 
 
 |------------------------ designing a log10 axis ---------------------------
 | use: min max | [ min max [ decades ] [ subdecades ] ]
@@ -2219,45 +2250,6 @@ end definefont pop   % Symbols font
 /a_decade { | use: real | bool  (tests if 'real' is a power of ten)
    lg dup round sub abs 1e-12 le
 } bind def
-
-
-|------------------- prefix a unit label
-| use: textbuf textindex | textbuf textindex
-|
-| expects three input values in:
-|  unit          - string, describing physical unit
-|  poweroften    - power of 10^3 (axis range stripped of mantissa)
-|  letterprefix  - boolean: express poweroften by letter code else
-|                  write power of ten as number
-| 
-
-/AxisUnit { 
-   { letterprefix
-     { poweroften 1e-15 lt { power_prefix stop } if
-       poweroften 1e9 gt { power_prefix stop } if
-       unit length 0 eq { power_prefix stop } if
-       letter_prefix /AxisUnit exitto
-     } if
-     unit length 0 ne { (\() fax power_prefix (\)) fax }
-                      { power_prefix }
-                      ifelse
-   } /AxisUnit exitlabel
-} bind def
-
-/power_prefix {
-  poweroften 1 ne { ($10^{) fax 
-                     * poweroften lg roundup /l ctype -1 number 
-                    (}$ ) fax unit fax 
-                  } if
-  unit fax 
-} bind def
-
-/letter_prefix {
-  letterlist poweroften lg 15 add 3 div 0.8999999999999999 add get fax
-  unit fax
-} bind def
-
-/letterlist [ (f) (p) (n) ($\mu$) (m) () (K) (M) (G) ] def 
 
 |---------------------- deposit a power of 10
 | use: textbuf textindex power | textbuf textindex
