@@ -1190,11 +1190,11 @@ end def
   /log {
     symbolsize setsymbolsize
     ( gsave symbolfont setfont newpath 2 setlinecap ) faxPS 
-    minX X_to_x toPS 0.0 toPS ~moveto toPS
-    maxX X_to_x toPS 0.0 toPS ( lineto stroke ) faxPS
+    Xaxis 0 get X_to_x toPS 0.0 toPS ~moveto toPS
+    Xaxis 1 get X_to_x toPS 0.0 toPS ( lineto stroke ) faxPS
     ( newpath ) faxPS
-    minX X_to_x toPS ydim toPS ( moveto ) faxPS
-    maxX X_to_x toPS ydim toPS ( lineto stroke ) faxPS
+    Xaxis 0 get X_to_x toPS ydim toPS ( moveto ) faxPS
+    Xaxis 1 get X_to_x toPS ydim toPS ( lineto stroke ) faxPS
     /symbol vbarba def
     Xaxis 2 get {
         X_to_x toPS 0.0 toPS ( moveto ) faxPS
@@ -1249,11 +1249,11 @@ end def
   /log {
     symbolsize setsymbolsize
     ( gsave symbolfont setfont newpath 2 setlinecap ) faxPS 
-    0.0 toPS minY Y_to_y toPS  ( moveto ) faxPS
-    0.0 toPS maxY Y_to_y toPS  ( lineto stroke ) faxPS
+    0.0 toPS Yaxis 0 get Y_to_y toPS  ( moveto ) faxPS
+    0.0 toPS Yaxis 1 get Y_to_y toPS  ( lineto stroke ) faxPS
     ( newpath ) faxPS
-    xdim toPS minY Y_to_y toPS  ( moveto ) faxPS
-    xdim toPS maxY Y_to_y toPS  ( lineto stroke ) faxPS
+    xdim toPS Yaxis 0 get Y_to_y toPS  ( moveto ) faxPS
+    xdim toPS Yaxis 1 get Y_to_y toPS  ( lineto stroke ) faxPS
     /symbol hbarla def
     Yaxis 2 get {
         0.0 toPS Y_to_y toPS ( moveto ) faxPS
@@ -1406,7 +1406,7 @@ end def
   /color name /ordinate name /abscissa name
   /selection name 
   /report name
-  report selection
+
   currentdict ~pcgraf  | => secondary generator
 
 |-- build pseudocolor space 
@@ -1488,7 +1488,7 @@ end def
   0 1 Nrows 2 sub { /krow name
       Y krow get /yb name Y krow 1 add get /yt name
       0 1 Ncols 2 sub { /kcol name
-          X kcol get /xl name X kcol 1 add get /xr name 
+           X kcol get /xl name X kcol 1 add get /xr name 
           Z Zmap krow ss pop kcol get
           Z Zmap krow 1 add ss pop kcol get add
           Z Zmap krow ss pop kcol 1 add get add
@@ -1502,10 +1502,12 @@ end def
   ~save toPS
   [ /CIEBasedABC colordict ] toPS ~setcolorspace toPS
   /xl xdim 1.1 mul x_to_X def  /xr xdim 1.2 mul x_to_X def
-  0 1 Npc 2 sub { /krow name
-      /yb minY maxY minY sub Npc 1 sub div krow mul add def
-      /yt minY maxY minY sub Npc 1 sub div krow 1 add mul add def
-      krow krow 1 add add 2 div /zpix name
+      /delz Zaxis 1 get Zaxis 0 get sub 99.0 div def
+  0 1 98 { /krow name
+      Zaxis 0 get delz krow mul add /zpix name
+      /yb zpix Z_to_z y_to_Y def
+      /yt zpix delz add Z_to_z y_to_Y def
+      /zpix zpix C_to_c def
       renderpix
     } for
   ~restore toPS
@@ -1569,7 +1571,7 @@ end def
         ztick PowerOfTen ($) fax 0 exch getinterval
         |-- 0.5 line to the left, center on ytick
         ~[ textsize -0.5 mul ztick ~Z_to_z ~translate
-           ~alignRC
+           ~alignLC
          ] latex
     } forall
     |-- place descr/unit axis label
@@ -1578,13 +1580,15 @@ end def
     ~[ ~parent /bbox ~get 0 ~get textsize 0.5 mul ~sub 
        ydim 0.5 mul ~translate
        90 ~rotate
-       ~alignCB
+       ~alignCT
      ] latex
   } bind def
 end def
 
 |------------------------------------- render pseudocolor pixel
 | (xl,xr,yb,yt,zpix} -- | --
+| Coordinates are in logical units, except zpix, which is in physical
+| units.
 
 /renderpix {
   ~newpath toPS
@@ -1593,7 +1597,7 @@ end def
   xr X_to_x toPS yt Y_to_y toPS ~lineto toPS
   xr X_to_x toPS yb Y_to_y toPS ~lineto toPS
   ~closepath toPS
-  /zpix zpix 1 add def | shift in color table for interpolations
+  /zpix zpix 1 add def | shift  in color table for interpolations
   pcX zpix ceil get pcX zpix floor get sub
       zpix dup floor sub mul pcX zpix floor get add toPS
   pcY zpix ceil get pcY zpix floor get sub
@@ -1609,8 +1613,8 @@ end def
   /log {
     symbolsize setsymbolsize
     ( gsave symbolfont setfont newpath 2 setlinecap ) faxPS 
-    xdim 1.2 mul toPS minZ Z_toz toPS  ( moveto ) faxPS
-    xdim 1.2 mul toPS maxZ Z_to_z toPS  ( lineto stroke ) faxPS
+    xdim 1.2 mul toPS Zaxis 0 get Z_toz toPS  ( moveto ) faxPS
+    xdim 1.2 mul toPS Zaxis 1 get Z_to_z toPS  ( lineto stroke ) faxPS
     /symbol hbarra def
     Zaxis 2 get {
         xdim 1.2 mul toPS Z_to_z toPS ( moveto ) faxPS
@@ -2166,14 +2170,43 @@ end definefont pop   % Symbols font
 } bind def
 
 |-------------------------- make label of linear axis ----------------------
+| (letterprefix)  poweroften axdesc axunit | label
+|
+| A string buffer is made and the description string is appended. A decision
+| is made whether a unit string is to be appended. If so, dependent on
+| boolean `letterprefix', either is the unit with a letter prefix indicating
+| the order of magnitude appended (provided the order of magnitude is in range
+| and the unit string is not blank), or a power of 10 is appended as number,
+| followed by whatever the unit string provides. Other typographical details
+| are also observed in the formatting.
 
 /LinAxisLabel { /unit name /axdesc name /poweroften name
   
   100 /b array 0 axdesc fax
-  poweroften 1 eq unit length 0 eq and not
-    { ( / ) fax AxisUnit
-    } if 0 exch getinterval
+  
+  letterprefix 
+  poweroften 1e-15 ge and
+  poweroften 1e9 le and
+  unit length 0 gt and
+     { ( / ) fax
+       letterlist poweroften lg 15 add 3 div 0.8999999999999999 add get fax
+       unit fax
+     }
+     { poweroften 1 eq not
+         { unit length 0 ne ( / \($10^{) ( / $10^{) if fax
+           * poweroften lg roundup /l ctype -1 number
+           (}$ ) fax unit fax
+           unit length 0 ne { (\)) fax } if
+         }
+         { unit length 0 ne { ( / ) fax unit fax } if
+         }
+         ifelse                      
+     }
+     ifelse
+  0 exch getinterval
 } bind def
+
+/letterlist [ (f) (p) (n) ($\mu$) (m) () (K) (M) (G) ] def 
 
 |------------------------ designing a log10 axis ---------------------------
 | use: min max | [ min max [ decades ] [ subdecades ] ]
@@ -2217,45 +2250,6 @@ end definefont pop   % Symbols font
 /a_decade { | use: real | bool  (tests if 'real' is a power of ten)
    lg dup round sub abs 1e-12 le
 } bind def
-
-
-|------------------- prefix a unit label
-| use: textbuf textindex | textbuf textindex
-|
-| expects three input values in:
-|  unit          - string, describing physical unit
-|  poweroften    - power of 10^3 (axis range stripped of mantissa)
-|  letterprefix  - boolean: express poweroften by letter code else
-|                  write power of ten as number
-| 
-
-/AxisUnit { 
-   { letterprefix
-     { poweroften 1e-15 lt { power_prefix stop } if
-       poweroften 1e9 gt { power_prefix stop } if
-       unit length 0 eq { power_prefix stop } if
-       letter_prefix /AxisUnit exitto
-     } if
-     unit length 0 ne { (\() fax power_prefix (\)) fax }
-                      { power_prefix }
-                      ifelse
-   } /AxisUnit exitlabel
-} bind def
-
-/power_prefix {
-  poweroften 1 ne { ($10^{) fax 
-                     * poweroften lg roundup /l ctype -1 number 
-                    (}$ ) fax unit fax 
-                  } if
-  unit fax 
-} bind def
-
-/letter_prefix {
-  letterlist poweroften lg 15 add 3 div 0.8999999999999999 add get fax
-  unit fax
-} bind def
-
-/letterlist [ (f) (p) (n) ($\mu$) (m) () (K) (M) (G) ] def 
 
 |---------------------- deposit a power of 10
 | use: textbuf textindex power | textbuf textindex
