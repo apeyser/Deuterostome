@@ -36,7 +36,7 @@ startup_common_save capsave {
 
 |--------------------------- Supervisor of the dvt ---------------------------
 
-/dvt 100 dict dup begin | {
+/dvtsup 100 dict dup begin | {
 
   /linebuf 8192 /b array def
   /linebuf2 8192 /b array def
@@ -77,7 +77,7 @@ startup_common_save capsave {
     {
       {linebuf nextevent} aborted { 
         countdictstack 2 sub ~end repeat
-        clear dvt begin
+        clear dvtsup begin
         /kbdowner 0 def 
         {c_} aborted {(!! c_ error\n)} if
       } if
@@ -382,7 +382,7 @@ c_         list all connections
 |---------------------------------------------------- list active connections
 
   /c_ {
-    dvt begin
+    dvtsup begin
     0 1 nodelist length 1 sub { /knode name
       nodelist knode get /node name
       printnode
@@ -397,7 +397,7 @@ c_         list all connections
 | the node is assigned a group number (enter as NEGATIVE integer)
 
   /_c {
-    dvt begin {
+    dvtsup begin {
       false 0 1 nodelist length 1 sub { /knode name
         nodelist knode get /node name
         node 0 get class /nullclass eq { pop true exit } if
@@ -417,7 +417,7 @@ c_         list all connections
 | the node is assigned a group number (enter as NEGATIVE integer)
 
   /_cc {
-    dvt begin {
+    dvtsup begin {
       false 0 1 nodelist length 1 sub { /knode name
         nodelist knode get /node name
         node 0 get class /nullclass eq { pop true exit } if
@@ -430,7 +430,7 @@ c_         list all connections
       save
       node 2 get ~[node 0 get knode {
         getsocket setconsole /dvtnodeid name
-        console ~[3 -1 roll ~dvt ~begin ~_cc1] send
+        console ~[3 -1 roll ~dvtsup ~begin ~_cc1] send
       } ~exec ~restore] send
       restore
     } stopped pop end
@@ -458,7 +458,7 @@ c_         list all connections
 
   Xwindows {
     /_cx {
-      dvt begin {
+      dvtsup begin {
         false 0 1 nodelist length 1 sub { /knode name
           nodelist knode get /node name
           node 0 get class /nullclass eq { pop true exit } if
@@ -484,7 +484,7 @@ c_         list all connections
             getstartupdir (theeye.d) fbuf readfile mkact exec
           } stopped pop filesave restore
           
-          console ~[knode ~dvt ~begin ~_cx1] send
+          console ~[knode ~dvtsup ~begin ~_cx1] send
         } ~exec] send
         restore
       } stopped pop end
@@ -504,7 +504,7 @@ c_         list all connections
 
   Xwindows {
     /_ccx {
-      dvt begin {
+      dvtsup begin {
         false 0 1 nodelist length 1 sub { /knode name
           nodelist knode get /node name
           node 0 get class /nullclass eq { pop true exit } if
@@ -531,7 +531,7 @@ c_         list all connections
             getstartupdir (theeye.d) fbuf readfile mkact exec
           } stopped pop filesave restore
 
-          console ~[knode ~dvt ~begin ~_ccx1] send
+          console ~[knode ~dvtsup ~begin ~_ccx1] send
         } ~exec]  send
         restore
       } stopped pop end
@@ -553,7 +553,7 @@ c_         list all connections
 | but can be redefined in userdict
 
   /_csu {
-    dvt begin
+    dvtsup begin
     { 
       false 0 1 nodelist length 1 sub {/knode name
         nodelist knode get /node name
@@ -584,7 +584,9 @@ c_         list all connections
         } stopped pop filesave restore
 
         console ~[knode 
-          otherXwindows {~dvt ~begin ~_csu1x} {~dvt ~begin ~csu1nox} ifelse
+          otherXwindows {
+            ~dvtsup ~begin ~_csu1x
+          } {~dvtsup ~begin ~csu1nox} ifelse
         ] send
       } ~exec] send
       restore
@@ -623,7 +625,7 @@ c_         list all connections
           1 index capsave
           getdnodedisplay Xconnect
           dup length /b array copy userdict /myid put
-          save console ~[knode ~dvt ~begin ~_csu2x] send restore
+          save console ~[knode ~dvtsup ~begin ~_csu2x] send restore
         } ~exec ~restore
       ] send
       restore
@@ -639,7 +641,7 @@ c_         list all connections
         knode {/knode name
           1 index capsave
           dup length /b array copy userdict /myid put
-          save console ~[knode ~dvt ~begin ~_csu2nox] send restore
+          save console ~[knode ~dvtsup ~begin ~_csu2nox] send restore
         } ~exec ~restore
       ] send
       restore
@@ -659,7 +661,7 @@ c_         list all connections
           getstartupdir (theeye.d) fbuf readfile mkact exec
         } stopped pop filesave restore
 
-        save console ~[knode ~dvt ~begin ~_csu3] send restore
+        save console ~[knode ~dvtsup ~begin ~_csu3] send restore
       } ~exec] send
       restore
     } stopped pop end
@@ -670,7 +672,7 @@ c_         list all connections
       nodelist knode get /node name 
       node 2 get ~[
         knode {/knode name
-          console [knode ~dvt ~begin ~_csu3] send
+          console [knode ~dvtsup ~begin ~_csu3] send
         } ~exec ~restore
       ] send
       restore
@@ -690,17 +692,17 @@ c_         list all connections
 | In addition to normal _csu behavior, colors the node on setup
 |
   /_ccsu {
-    _csu dvt begin {node 6 put} stopped pop end
+    _csu dvtsup begin {node 6 put} stopped pop end
   } bind userdict 3 -1 roll put
 
   /_ccsum {
-    _csum dvt begin {node 6 put} stopped pop end
+    _csum dvtsup begin {node 6 put} stopped pop end
   } bind userdict 3 -1 roll put
 |---------------------------------------------------- disconnect
 |  node# | --
 
   /_dc {
-    dvt begin /knode name
+    dvtsup begin /knode name
     nodelist knode get /node name
     node 0 get class /nullclass ne { 
       node 2 get disconnect
@@ -728,19 +730,19 @@ c_         list all connections
       } for 
       {(socketdead) ERRORS /DEAD_SOCKET get showerror} if 
       ~error if
-    } dvt indict
+    } dvtsup indict
   } bind userdict 3 -1 roll put
 
   Xwindows {
     /_dx {
-      dvt begin /knode name
+      dvtsup begin /knode name
       nodelist knode get /node name
       node 0 get class /nullclass ne {
         save
         node 2 get ~[
           knode {/knode name
             Xwindows {Xdisconnect} if
-            console ~[knode ~dvt ~begin ~_dx1] send
+            console ~[knode ~dvtsup ~begin ~_dx1] send
           } ~exec ~restore
         ] send
         restore
@@ -751,12 +753,12 @@ c_         list all connections
       nodelist knode get /node name
       node 2 get disconnect
       nodeclear
-      end | dvt dict
+      end | dvtsup dict
     } bind def
   } if
 
   /_kill {
-    dvt begin /knode name
+    dvtsup begin /knode name
     nodelist knode get /node name
     node 0 get class /nullclass ne {
       node 2 get dup (getsocket setconsole null vmresize) send disconnect
@@ -766,7 +768,7 @@ c_         list all connections
   } bind userdict 3 -1 roll put
 
   /_sendabort {
-    dvt begin /knode name
+    dvtsup begin /knode name
     knode 0 ne {
       nodelist knode get /node name
       node 0 get class /nullclass ne {
@@ -848,7 +850,7 @@ c_         list all connections
 | <0  - group#
 
   /_t {
-    dvt begin {/target name
+    dvtsup begin {/target name
       target 0 ge { 
         target nodelist length ge ~stop if
         nodelist target get /node name 
@@ -875,7 +877,7 @@ c_         list all connections
   } bind userdict 3 -1 roll put
 
   /_r {
-    dvt begin {
+    dvtsup begin {
       dup * eq {{pop knode setready} fornodes} {
         dup nodelist length ge {pop stop} if
         setready
@@ -950,7 +952,7 @@ c_         list all connections
           0 exch getinterval toconsole
         } if
       } ifelse
-    } dvt indict
+    } dvtsup indict
   } bind def
 
 |-------------------------------------- setready or setbusy
@@ -982,7 +984,7 @@ c_         list all connections
 |
   /setcolor {
     Xwindows {
-      dvt begin colorize begin {/knode name /colorlist name
+      dvtsup begin colorize begin {/knode name /colorlist name
         /node nodelist knode get def
         reset
         colorlist {mkact exec} forall
@@ -1010,7 +1012,7 @@ c_         list all connections
 | <<nodelist->node#->6 is set/null>> node# | --
 |
   /color_node_def {
-    dvt /nodelist get 1 index get 6 get
+    dvtsup /nodelist get 1 index get 6 get
     dup null eq {pop pop Xwindows ~drawnode if} {exch color_node} ifelse
   } bind userdict 3 -1 roll put
   
@@ -1508,7 +1510,7 @@ Xwindows {
 /color_node {
   2 copy setcolor
   exch color_send 0 put
-  dvt begin nodelist exch get 2 get end color_send send
+  dvtsup begin nodelist exch get 2 get end color_send send
 } bind def
 
 |----------------------------------------- color_nodes
@@ -1577,7 +1579,7 @@ Xwindows {
 
   /raise_thehorses {TheHorsesWid true mapwindow end} bind def
   /raise_all {
-    dvt /nodelist get 1 1 index length 1 sub getinterval {
+    dvtsup /nodelist get 1 1 index length 1 sub getinterval {
       dup 0 get null eq {pop} {
         dup 3 get {pop} {
           2 get {{null true mapwindow} lock restore} send
@@ -1587,7 +1589,7 @@ Xwindows {
     null true mapwindow end
   } bind def
   /hide_all {
-    dvt /nodelist get 1 1 index length 1 sub getinterval {
+    dvtsup /nodelist get 1 1 index length 1 sub getinterval {
       dup 0 get null eq {pop} {
         dup 3 get {pop} {
           2 get {{null false mapwindow} lock restore} send
@@ -1961,7 +1963,7 @@ Xwindows {
   pop restore
 } aborted {countdictstack 2 sub ~end repeat clear} if
 
-dvt begin
+dvtsup begin
 save /cleanDVT name
 /kbdowner 0 def
 Xwindows {
@@ -1970,7 +1972,7 @@ Xwindows {
   screensize /scrH name /scrW name
   [ [ scrW wW sub 10 sub scrH wH sub 10 sub wW wH ] | ]
     (TheHorses) (Horses) makewindow /wid name pop
-  dvt userdict debug_dict /line get 0 (/w) fax * wid * number
+  dvtsup userdict debug_dict /line get 0 (/w) fax * wid * number
       0 exch getinterval mkact exec put
   /busy false def
   wid true mapwindow  

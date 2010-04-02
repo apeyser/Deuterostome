@@ -60,12 +60,12 @@
     (@\(rsync -av \) fax faxRpage \(/. \) fax faxLpage \(/.\) fax\n)
     (@\(rsync -av --delete \) fax faxRpage \(/. \) fax faxLpage \(/.\) fax\n)
 |-- Dnodes
-    (% dvt begin dnode_resize end\n)
-    (% dvt begin ~_cx ~_ccx dnode_up end\n)
-    (% dvt begin ~_c ~_cc dnode_up end\n)
-    (% dvt begin {knode _kill} fornodes end\n)
-    (% dvt begin {knode _dx} fornodes end\n)
-    (% dvt begin {knode _sendabort} fornodes end\n)
+    (% dvtsup begin dnode_resize end\n)
+    (% dvtsup begin ~_cx ~_ccx dnode_up end\n)
+    (% dvtsup begin ~_c ~_cc dnode_up end\n)
+    (% dvtsup begin {knode _kill} fornodes end\n)
+    (% dvtsup begin {knode _dx} fornodes end\n)
+    (% dvtsup begin {knode _sendabort} fornodes end\n)
 @ENABLE_PERL_START@     
 |-- PrintFrom
     (@getstartupdir fax \(print.pl talk \) fax )

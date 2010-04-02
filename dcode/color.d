@@ -1,4 +1,4 @@
-/color module 100 dict dup begin
+/COLOR module 100 dict dup begin
 
 |======================== color module ============================
 |
@@ -59,7 +59,7 @@
 |
 |========================================================================
 
-userdict /dvt known {/dvt} {/dnode} ifelse userdict /dnode_escape put
+userdict /dm_type get /dvt eq {/dvt} {/dnode} ifelse userdict /dnode_escape put
 
 /escape_ { | /l-number (buffer) index -> string
   * 4 -1 roll * number (m) fax
@@ -114,7 +114,7 @@ userdict /dvt known {/dvt} {/dnode} ifelse userdict /dnode_escape put
 } bind def
 
 /color_fax { | (buffer) /l-index [/color ...] (string) --> (buffer) /l-index  
-  color begin {
+  COLOR begin {
     /string name
     /colors name
     _color_fax
@@ -122,7 +122,7 @@ userdict /dvt known {/dvt} {/dnode} ifelse userdict /dnode_escape put
 } bind def
 
 /color_text {| (buffer) /l-index [/color ...] {} --> (buffer) /l-index
-  color begin save /color_text_ name {
+  COLOR begin save /color_text_ name {
     /proc   name
     /colors name
     /i      name
@@ -138,7 +138,7 @@ userdict /dvt known {/dvt} {/dnode} ifelse userdict /dnode_escape put
 } bind def
 
 /color_string { | [/color ...] (string) --> (string)
-  color begin {
+  COLOR begin {
     /string name
     /colors name
     /i 0 def
@@ -164,7 +164,7 @@ userdict /dvt known {/dvt} {/dnode} ifelse userdict /dnode_escape put
 /node_buffer 1024 10 mul /b array def
 | [/color ...] | -- (defines new /toconsole in userdict)
 /make_toconsole {
-  color begin {
+  COLOR begin {
     /node_color name
 | (string) | -- <<output>>
     /node_toconsole ~[

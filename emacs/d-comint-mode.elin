@@ -317,12 +317,12 @@ Derived from `comint-mode' with font-lock from `d-mode'.
 
 (defun d-comint-mode-next-talk ()
   (interactive)
-  (d-comint-mode-send-quiet "% dvt begin emacs_next_talk")
+  (d-comint-mode-send-quiet "% dvtsup begin emacs_next_talk")
   )
 
 (defun d-comint-mode-last-talk ()
   (interactive)
-  (d-comint-mode-send-quiet "% dvt begin emacs_last_talk")
+  (d-comint-mode-send-quiet "% dvtsup begin emacs_last_talk")
   )
 
 (defun d-comint-mode-next-pawn-talk ()
