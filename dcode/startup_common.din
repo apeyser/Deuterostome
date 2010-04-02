@@ -146,6 +146,71 @@
   } exch indict
 } bind def
 
+|-------------- caplocal ----------------------------
+| n1 ... nn-x ~names ~active | ...
+| ~names: n1 .. nn-x | n1 .. nn [/n1 .. /nn]
+|
+| in a save context, executes ~names, then creates
+| from the operand stack a dictionary with the names /n1 .. /nn
+| defined as n1 ... nn.
+|
+| Caps the save, and executes active with the dictionary as currentdict.
+| All is done in a stopped context. Afterwards, the save
+| is restored, and stop propagated if necessary.
+|
+| So: 1 2 3 {1 dict exch [/a /b /c /d]} {a _ b 0 2 /d array copy} caplocal
+|  prints 1, and leaves 1 2 <d 0 0> on the stack. 
+|  /d is equal 3 and /c is a dictionary which is removed from memory
+|  afterwards.
+|
+/caplocal {
+  save {
+    [exch 3 -1 roll mkpass {
+      exec openlist exch {} forall makestruct_stack
+    } push |]
+    capsave mkact exch indict
+  } [2 index ~stopped push |]
+  restore ~stop if
+} bind def
+
+|--------------- localdef -----------------------------
+| n1 .. nn \[ /n1 .. /nn /layer ~active | ...
+|
+| creates /layer layer, calls makestruct_stack on operands before
+| ~active, and executes ~active with that new dictionary as the
+| current dictionary in a stopped context. Calls _layer on /layer
+| and propagates stop if necessary.
+|
+| So: 1 2 3 \[ /a /b /c {a _ b 0 2 /d array copy} /x localdef
+|  prints 1, and leaves 1 2 <d 0 0> on the stack
+|  with a layer named /x created, where the array is inside the layer
+|
+/localdef {
+  exch {
+    counttomark 1 sub 2 mul 2 add 1 roll makestruct_stack indict
+  } layerdef
+} bind def
+
+|--------------- exlocaldef -------------------------------
+| n1 .. nn-x /layer ~names ~active | ...
+| ~names: n1 .. nn-x | n1 .. nn [n1 .. nn]
+|
+| Like localdef, except dictionary names come from list and
+|   difference in operand order.
+|
+| So: 1 2 3 /x {2 /d array exch [/a /b /c /d]} {a _ b 0 c copy} exlocaldef
+|  prints 1, and leaves 1 2 <d 0 0> on the stack
+|  with a layer named /x created, where the array is inside the layer
+|
+/exlocaldef {
+  3 -1 roll {
+    [exch mkpass {
+      exec openlist exch {} forall makestruct_stack
+    } push |]
+    mkact exch indict
+  } layerdef
+} bind def
+
 |---------------- dictdef ---------------------------
 | /name ~active dict | --
 |
