@@ -181,7 +181,7 @@
 | current dictionary in a stopped context. Calls _layer on /layer
 | and propagates stop if necessary.
 |
-| So: 1 2 3 \[ /a /b /c {a _ b 0 2 /d array copy} /x localdef
+| So: 1 2 3 \[ /a /b /c /x {a _ b 0 2 /d array copy} localdef
 |  prints 1, and leaves 1 2 <d 0 0> on the stack
 |  with a layer named /x created, where the array is inside the layer
 |
