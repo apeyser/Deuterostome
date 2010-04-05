@@ -161,7 +161,7 @@
         rd suckfd toconsole
         hamuti
       } ifelse
-    } PROCESSES swapdict
+    } PROCESSES underdict
   } bind def
 
   | Hamuti!
