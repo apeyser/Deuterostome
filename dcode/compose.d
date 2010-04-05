@@ -1098,7 +1098,8 @@ end def
 
   /lin {
     Xaxis 2 get Xaxis 3 get div labelformatter
-    Xaxis 0 get  Xaxis 2 get almost Xaxis 1 get { /xtick name
+    Xaxis 1 get Xaxis 0 get sub Xaxis 2 get div 0.5 add /l ctype
+    0 1 3 -1 roll { Xaxis 2 get mul Xaxis 0 get add /xtick name
       10 /b array 0 ($) fax
       |-- scale by unit and round to fixed point with one decimal
       xtick Xaxis 3 get div numberlabel 
@@ -1143,7 +1144,8 @@ end def
  
   /lin {
     Yaxis 2 get Yaxis 3 get div labelformatter
-    Yaxis 0 get  Yaxis 2 get almost Yaxis 1 get { /ytick name
+    Yaxis 1 get Yaxis 0 get sub Yaxis 2 get div 0.5 add /l ctype
+    0 1 3 -1 roll { Yaxis 2 get mul Yaxis 0 get add /ytick name
         10 /b array 0 ($) fax
         |-- scale by unit and round to fixed point with one decimal
         ytick Yaxis 3 get div numberlabel
@@ -1546,7 +1548,8 @@ end def
  
   /lin {
     Zaxis 2 get Zaxis 3 get div labelformatter
-    Zaxis 0 get  Zaxis 2 get almost Zaxis 1 get { /ztick name
+    Zaxis 1 get Zaxis 0 get sub Zaxis 2 get div 0.5 add /l ctype
+    0 1 3 -1 roll { Zaxis 2 get mul Zaxis 0 get add /ztick name
         10 /b array 0 ($) fax
         |-- scale by unit and round to fixed point with one decimal
         ztick Zaxis 3 get div numberlabel
