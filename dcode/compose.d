@@ -2294,7 +2294,7 @@ end definefont pop   % Symbols font
 | fixed point, one decimal otherwise).
 
 /labelformatter { 
-  1 lt { { /l ctype * exch * number } }
+  1 ge { { /l ctype * exch * number } }
        { { * exch -1 number } }
        ifelse
   /numberlabel name
