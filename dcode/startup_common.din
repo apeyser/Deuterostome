@@ -148,7 +148,7 @@
 
 |-------------- caplocal ----------------------------
 | n1 ... nn-x ~names ~active | ...
-| ~names: n1 .. nn-x | n1 .. nn [/n1 .. /nn]
+| ~names: n1 .. nn-x | n1 .. nn [/n1 .. /nn |]
 |
 | in a save context, executes ~names, then creates
 | from the operand stack a dictionary with the names /n1 .. /nn
@@ -165,50 +165,83 @@
 |
 /caplocal {
   save {
-    [exch 3 -1 roll mkpass {
-      exec openlist exch {} forall makestruct_stack
-    } push |]
+    [exch 3 -1 roll mkpass {exec makestruct_stack} push |]
     capsave mkact exch indict
   } [2 index ~stopped push |]
   restore ~stop if
 } bind def
 
-|--------------- localdef -----------------------------
-| n1 .. nn \[ /n1 .. /nn /layer ~active | ...
+|---------------- caplocalfunc -----------------------------
+| ~names ~active | ~caplocalfunc
 |
-| creates /layer layer, calls makestruct_stack on operands before
-| ~active, and executes ~active with that new dictionary as the
-| current dictionary in a stopped context. Calls _layer on /layer
-| and propagates stop if necessary.
+| returns a new procedure: {~name ~active caplocalfunc}
 |
-| So: 1 2 3 \[ /a /b /c /x {a _ b 0 2 /d array copy} localdef
+/caplocalfunc {
+  ~[3 -1 roll destruct_exec 3 -1 roll destruct_exec ~caplocal]
+} bind def
+
+|--------------- local -------------------------------
+| n1 .. nn-x /layer ~names ~active | ...
+| ~names: n1 .. nn-x | n1 .. nn [n1 .. nn |]
+|
+| Like slocal, except dictionary names come from list and
+|   difference in operand order.
+|
+| So: 1 2 3 /x {2 /d array exch [/a /b /c /d]} {a _ b 0 c copy} local
 |  prints 1, and leaves 1 2 <d 0 0> on the stack
 |  with a layer named /x created, where the array is inside the layer
 |
-/localdef {
-  exch {
-    counttomark 1 sub 2 mul 2 add 1 roll makestruct_stack indict
+/local {
+  3 -1 roll {
+    [exch mkpass {exec makestruct_stack} push |]
+    mkact exch indict
   } layerdef
 } bind def
 
-|--------------- exlocaldef -------------------------------
-| n1 .. nn-x /layer ~names ~active | ...
-| ~names: n1 .. nn-x | n1 .. nn [n1 .. nn]
+|--------------------- localfunc -----------------------
+| /name ~names ~active | /name ~localfunc
 |
-| Like localdef, except dictionary names come from list and
-|   difference in operand order.
+| returns a new procedure: {/name_l ~names ~active local}
 |
-| So: 1 2 3 /x {2 /d array exch [/a /b /c /d]} {a _ b 0 c copy} exlocaldef
-|  prints 1, and leaves 1 2 <d 0 0> on the stack
-|  with a layer named /x created, where the array is inside the layer
+/localfunc_ @NAMEBYTES@ /b array def
+/localfunc {
+  localfunc_ 0 * 5 index mkact text (_l) fax 0 exch getinterval
+  token pop exch pop mkpass
+  ~[exch 4 -1 roll destruct_exec 4 -1 roll destruct_exec ~local]
+} bind def
+
+|-------------- rlocal ----------------------------
+| n1 ... nn-x ~names ~active | ...
+| ~names: n1 .. nn-x | n1 .. nn [/n1 .. /nn |]
 |
-/exlocaldef {
-  3 -1 roll {
-    [exch mkpass {
-      exec openlist exch {} forall makestruct_stack
-    } push |]
+| in a save context, executes ~names, then creates
+| from the operand stack a dictionary with the names /n1 .. /nn
+| defined as n1 ... nn.
+|
+| Executes active with the dictionary as currentdict.
+| All is done in a stopped context. Afterwards, the save
+| is restored, and stop propagated if necessary.
+|
+| So: 1 2 3 {1 dict exch [/a /b /c /d]} {a _ b 0 2 /d array copy} caplocal
+|  prints 1, and leaves 1 2 on the stack; <d 0 0> is 'restore'd off the stack. 
+|  /d is equal 3 and /c is a dictionary which is removed from memory
+|  afterwards.
+|
+/rlocal {
+  {
+    [exch mkpass {exec makestruct_stack} push |]
     mkact exch indict
-  } layerdef
+  } [save ~stopped push |]
+  restore ~stop if
+} bind def
+
+|-------------- rlocalfunc -----------------------
+| ~names ~active | {~names ~active rlocal}
+|
+| Creates a new wrapper procedure.
+|
+/rlocalfunc {
+  ~[3 -1 roll destruct_exec 3 -1 roll destruct_exec ~rlocal]
 } bind def
 
 |---------------- dictdef ---------------------------
@@ -308,20 +341,34 @@
 |
 /indict {begin stopped end ~stop if} bind def
 
-|----------------- swapdict -----------------
+|----------------- underdict -----------------
 | ~exec dict | ...
 |
 | executes ~exec in current dictionary
 | with dict directly underneath
 |
-/swapdict {
-  currentdict end exch begin begin
-  stopped
-  currentdict end end begin
-  ~stop if
+/underdict {
+  currentdict end exch begin begin | ~exec 
+  stopped                          | ... true/false
+  currentdict end end begin        | ... true/false
+  ~stop if                         | ...
 } bind def
 
-|----------------- indict -----------------
+|----------------- swapdict -----------------
+| ~exec | ...
+|
+| executes ~exec with the top two dicts swapped
+|
+/swapdict {
+  currentdict end currentdict end | ~exec top next
+  exch begin begin                | ~exec
+  stopped                         | ... true/false
+  currentdict end currentdict end | ... true/false next top
+  exch begin begin                | ... true/false
+  ~stop if                        | ...
+} bind def
+
+|----------------- notindict -----------------
 | ~exec dict | ...
 |
 | executes ~exec without the sequence
@@ -332,9 +379,19 @@
     1 index currentdict ne ~exit if
     end 1 add
   } loop
-  openlist 3 1 roll exch ~stopped push
+  [3 1 roll exch ~stopped push|]
   {dup begin} repeat pop
   ~stop if
+} bind def
+
+|------------------- enddict ------------
+| ~exec | ...
+|
+| execute ~exec with currentdict end'ed
+|
+/enddict {
+  [currentdict end ~stopped push|] ... true/false currentdict
+  begin ~stop if
 } bind def
 
 |============================================ SIGNALS

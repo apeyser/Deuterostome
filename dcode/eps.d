@@ -14,7 +14,8 @@
   |  predoc is the everything up to the optional
   |    document class parameters
   |  pre is everything from the end of the optional
-  |    documentclass parameters through the embedded 
+  |    documentclass parameters to the optional preamble.
+  | main is the embedded 
   |    macro. Basically, everything -- the gist is 
   |    defined in \eps. 
   | post is from the end of the main parameter to the
@@ -73,7 +74,9 @@
       \\comment{Depth}{\\the\\epsdepth}%
       \\usebox{\\epsbox}%
   \\end{document}
-}
+}%
+) def
+  /main(%
 \\eps{) def
 
   /post (}\\immediate\\closeout\\epscomment) def
@@ -102,7 +105,7 @@
     /pwd getwdir def
     tdir tsdir setwdirp {{{
       (.) (eps.tex) wropen {
-        predoc {(XX) 0 * ptsize * number pop} pre input post
+        predoc {(XX) 0 * ptsize * number pop} pre preamble main input post
       } {exec writefd} forall close
         
       [(pdflatex) (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
@@ -130,8 +133,20 @@
   |
   | (latex) ptsize | (eps)
   |
-  | (latex) is any latex string that can go between 
-  |   \document{begin}...\document{end}
+  | same as xeps, except that preamble is empty
+  |
+  /eps {() 3 1 roll xeps} bind def
+  
+  |------------------------ xeps ---------------------------
+  |
+  | (preamble) (latex) ptsize | (eps)
+  |
+  | (preamble) is any string that can go in the preamble 
+  |   after \documentclass[xpt]{report} and the standard preamble,
+  |   and before \begin{document}.
+  | (latex) is any movable latex string that can go between 
+  |   \document{begin}...\document{end} (it actually goes in
+  |   \eps{...}, which then expands to the document)
   | ptsize can be 10, 11, or 12 to set the base font size
   | (eps) is the body for an eps file.
   | On error, the eps prints "hamuti".
@@ -144,7 +159,7 @@
   |  that will dump the error stream to console if a stop or error
   |  happen internally.
   |
-  /eps {/ptsize name /input name
+  /xeps { /ptsize name /input name /preamble name
     {
       /_eps {
         pipefd /wr name /rd name
@@ -161,7 +176,7 @@
         rd suckfd toconsole
         hamuti
       } ifelse
-    } PROCESSES swapdict
+    } PROCESSES underdict
   } bind def
 
   | Hamuti!
