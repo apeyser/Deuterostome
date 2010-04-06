@@ -820,7 +820,7 @@
       /error ~name estreamdict indict
     } PROCESSES indict
 
-    exch {exec false} /estreamwith ~exitlabel estreamdict ~swapdict stopped
+    exch {exec false} /estreamwith ~exitlabel estreamdict ~underdict stopped
     ~_estreamclose PROCESSES indict 
     ~stop if not
   } bind def

@@ -84,7 +84,8 @@ sub shellb(@) {
 
 sub shellq(;$) {
     local $_ = defined $_[0] ? $_[0] : $_;
-    s{([^A-Za-z0-9_/.\-])}{\\$1}og;
+    s{([*?])}{\\$1}og;
+    #s{([^A-Za-z0-9_/.\-])}{\\$1}og;
     return $_;
 }
 
