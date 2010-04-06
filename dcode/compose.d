@@ -729,6 +729,14 @@
 | dictionary in execution phase 2. Note that the text coordinate system is
 | that of a large page, with the text starting near the left edge and top
 | of the page (you see that from the coordinates of the bounding box).
+|
+| The variable latexpreamble defines a string that is used as the preamble
+| for the latex document that generates the eps string. By default, it's
+| empty. It can include \usepackage, \def, and so forth. Useful for 
+| calling \usepackage{verbdef}\verbdef\x|...|, then using \x in the
+| main string.
+
+/latexpreamble () def
 
 |-------- phase 1:
 
@@ -739,7 +747,7 @@
   /placement name
   /latexstring name
 | - compile the LaTEX string and extract metrics
-  EPS begin latexstring textsize eps end /epsstring name
+  EPS begin latexpreamble latexstring textsize xeps end /epsstring name
   readDSC
   currentdict ~latex     | => secondary generator
   end 
