@@ -89,6 +89,9 @@
 /* Path to ENV */
 #undef ENABLE_ENV
 
+/* Path to EPSTPDF */
+#undef ENABLE_EPSTPDF
+
 /* Path to GS */
 #undef ENABLE_GS
 

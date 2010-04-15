@@ -19,6 +19,7 @@ my %tools = (
     a2ps => '@ENABLE_ATPS@',
     lp => '@ENABLE_LP@',
     ps2pdf => '@ENABLE_PSTPDF@',
+    eps2pdf => '@ENABLE_EPSTPDF@',
     pdf2ps => '@ENABLE_PDFTPS@',
     dvipdf => '@ENABLE_DVIPDF@',
     xdvi => '@ENABLE_XDVI@',
@@ -137,7 +138,7 @@ push @qx1psfiles, shellify foreach @x1psfiles;
 
 my $xps = {
     gs => sub {
-	gs(@GSDVTPSPATH, '-sPAPERSIZE=letter', '-dBATCH', @xpsfiles, $_)
+	gs(@GSDVTPSPATH, '-sPAPERSIZE=letter', @xpsfiles, $_)
 	    foreach @_;
     },
     lw => sub {
@@ -194,9 +195,24 @@ $funcs = {
 	    } pdf => @_;
 	}
     },
+    eps => {
+	gs => sub {
+	    gs($_) foreach @_;
+	},
+	xpdf => sub {
+	    sys {mytool('eps2pdf'), $_[0], "--outfile=$_[1]", '&&',  
+		 '@guipdf@', $_[1]
+	    } pdf => @_;
+	},
+	lw => sub {
+	    sys {mytool('eps2pdf'), $_[0], "--outfile=$_[1]", '&&',
+		 mytool('lp'), $_[1]
+	    } pdf => @_;
+	}
+    },
     ps => {
 	gs => sub {
-	    gs('-sPAPERSIZE=letter', '-dBATCH', $_) foreach @_;
+	    gs('-sPAPERSIZE=letter', $_) foreach @_;
 	},
 	xpdf => sub {
 	    sys {mytool('ps2pdf'), $_[0], $_[1], '&&',  
@@ -213,7 +229,7 @@ $funcs = {
     x2ps => $xps,
     x1ps =>  {
 	gs => sub {
-	    gs(@GSDVTPSPATH, '-sPAPERSIZE=letter', '-dBATCH', @x1psfiles, $_)
+	    gs(@GSDVTPSPATH, '-sPAPERSIZE=letter', @x1psfiles, $_)
 		foreach @_;
 	},
 	lw => sub {
