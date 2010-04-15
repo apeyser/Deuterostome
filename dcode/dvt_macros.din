@@ -24,6 +24,7 @@
     (PrintFrom:) PRE (  Talk) KEY 
                      (  Ascii) KEY 
                      (  PS) KEY
+                     (  EPS) KEY
 @ENABLE_XPS_START@    
                      ( xPS) KEY
 @ENABLE_XPS_ELSE@
@@ -71,6 +72,7 @@
     (@getstartupdir fax \(print.pl talk \) fax )
     (@getstartupdir fax \(print.pl ascii \) fax )
     (@getstartupdir fax \(print.pl ps \) fax )
+    (@getstartupdir fax \(print.pl eps \) fax )
 @ENABLE_XPS_START@     
     (@getstartupdir fax \(print.pl x2ps \) fax )
 @ENABLE_XPS_ELSE@

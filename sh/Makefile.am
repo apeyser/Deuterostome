@@ -41,6 +41,7 @@ edit = -e 's,[@]pkgpsdatadir[@],$(pkgpsdatadir),g' \
        -e 's,[@]ENABLE_ATPS[@],$(ENABLE_ATPS),g' \
        -e 's,[@]ENABLE_LP[@],$(ENABLE_LP),g' \
        -e 's,[@]ENABLE_PSTPDF[@],$(ENABLE_PSTPDF),g' \
+       -e 's,[@]ENABLE_EPSTPDF[@],$(ENABLE_EPSTPDF),g' \
        -e 's,[@]ENABLE_PDFTPS[@],$(ENABLE_PDFTPS),g' \
        -e 's,[@]ENABLE_DVIPDF[@],$(ENABLE_DVIPDF),g' \
        -e 's,[@]ENABLE_XDVI[@],$(ENABLE_XDVI),g' \
