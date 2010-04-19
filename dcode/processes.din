@@ -511,7 +511,7 @@
   } bind def
 
   |======================== _sh_ ================================
-  | \[ (exec) ... fd-in fd-out fd-err | \{ (exec) ... pid
+  | \[ (exec) ... fd-in fd-out fd-err | \[ (exec) ... pid
   |
   | Execute (exec) with following operands in child process,
   |  using fd-in fd-out and fd-err as redirects.
