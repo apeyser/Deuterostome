@@ -783,20 +783,29 @@ The path operand of file operators is a directory tree following the Linux conve
 
 \subsection{Time and date}
 
-\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
--- & gettime & time\\
-time long-array-of-6 & localtime & array\\\\
-\end{tabular}
+\def\microsecs{$\mu$secs}
+\def\simactive{$\sim$active}
 
-\index{Operators!gettime}
-\index{Operators!localtime}
+\begin{ops}
+  --                      & gettime      & time                \\
+  --                      & gettimeofday & secs \microsecs     \\
+  time long-array-of-6    & localtime    & array               \\
+  \simactive x-array-of-8 & profiletime  & \ldots x-array-of-8 \\
+  seconds nanoseconds     & sleep        & --                  \\
+\end{ops}
 
-
-\emph{gettime} returns compacted Linux time as an extended numeral
-(seconds since something). \emph{localtime} converts this long numeral
+\op{gettime} returns compacted Linux time as an extended numeral
+(seconds since something). \op{localtime} converts this long numeral
 into a local time and date and deposits the detailed result in the
 array; the entries are: year month day hour min sec. The time of day
-is the military version of the Babylonian, or whatever they call it.
+is the military version of the Babylonian, or whatever they call
+it. \op{gettimeofday} returns the ``seconds since something'' of
+\op{gettime} plus $\mu$seconds. \op{sleep} pauses for seconds plus
+nanoseconds. \op{profiletime} executes `$\sim$active', storing the
+user time in 0 \& 1 of array, the system time in 2 \& 3 of array, the
+user time of children in 4 \& 5 of array, and the system time of
+children in 6 \& 7. The times are second \& $\mu$second pairs;
+children in this context mean forked subprocesses.
 
 \subsection{Networking}\label{ssec:network}
 
