@@ -35,6 +35,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <limits.h>
+#include <time.h>
 
 #include "dm7.h"
 #include "dm2.h"
@@ -259,7 +260,31 @@ P op_localtime(void)
   return OK;
 }
 
-/*---------------------------------------------------- gwdir
+// sec nano-sec | --
+P op_sleep(void) {
+  LBIG sec, nsec;
+  struct timespec req, rem;
+
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_2) != NUM || CLASS(o_1) != NUM) return OPD_CLA;
+  if (! VALUE(o_2, &sec) || ! VALUE(o_1, &nsec)) return UNDF_VAL;
+  if (nsec > LONG_MAX || nsec < 0) return RNG_CHK;
+  if (((LBIG) ((time_t) sec)) != sec || sec < 0) return RNG_CHK;
+  req.tv_sec = (time_t) sec;
+  req.tv_nsec = (long) nsec;
+  while (nanosleep(&req, &rem)) {
+    switch (errno) {
+      case EINTR: checkabort();
+      default: return -errno;
+    }
+    req = rem;
+  }
+
+  FREEopds = o_2;
+  return OK;
+}
+
+/*---------------------------------------------------- getwdir
    --- | substring
 
   - returns in 'substring' of 'string' the absolute filename of

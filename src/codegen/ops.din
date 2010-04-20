@@ -215,8 +215,8 @@
       /active /tilde /mkread /mkact /mkpass /mktilde
       /closelist /openlist
       /ctype /parcel /text /number
-      /token /search /anchorsearch 
-      /gettime /gettimeofday /profiletime /localtime /getwdir /setwdir
+      /token /search /anchorsearch
+      /gettime /gettimeofday /profiletime /localtime /getwdir /setwdir /sleep
       /random /random_init
       /readfile /writefile /findfiles /findfile /readboxfile /writeboxfile
       /transcribe
