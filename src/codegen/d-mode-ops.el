@@ -118,6 +118,7 @@
   "localtime"
   "getwdir"
   "setwdir"
+  "sleep"
   "random"
   "random_init"
   "readfile"
