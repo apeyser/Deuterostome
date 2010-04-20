@@ -511,7 +511,7 @@
   } bind def
 
   |======================== _sh_ ================================
-  | \[ (exec) ... fd-in fd-out fd-err | \{ (exec) ... pid
+  | \[ (exec) ... fd-in fd-out fd-err | \[ (exec) ... pid
   |
   | Execute (exec) with following operands in child process,
   |  using fd-in fd-out and fd-err as redirects.
@@ -546,6 +546,21 @@
     ~_spawnsh fds bg
     counttomark 1 add 1 roll cleartomark
     (sh) wait_
+  } bind def
+
+  |======================= sh ===================================
+  | \[ (exec) ... | --
+  | 
+  | Execute (exec) with following operands as child process in
+  |   the foreground (using the same in, out, and err fds as
+  |   parent).
+  | Blocks until child execution finished; if (exec) returns
+  |  non-zero exec status, throws NOSYSTEM error.
+  |
+  /sh_quiet {
+    ~_spawnsh fds bg
+    counttomark 1 add 1 roll cleartomark
+    (sh) wait_quiet
   } bind def
 
   |====================== pipe ==================================

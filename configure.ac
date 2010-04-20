@@ -1,4 +1,4 @@
-AC_INIT([D-Machine], [4.5.20], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
+AC_INIT([D-Machine], [4.5.21], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
 AC_CONFIG_MACRO_DIR([m4 libltdl/m4])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_AUX_DIR([libltdl/config])
@@ -175,6 +175,7 @@ CF_AM_PROG([XTERM], [xterm])
 CF_AM_PROG([LP], [lp])
 CF_AM_PROG([ATPS], [a2ps])
 CF_AM_PROG([PSTPDF], [ps2pdf])
+CF_AM_PROG([EPSTPDF], [epstopdf])
 CF_AM_PROG([PDFTPS], [pdf2ps])
 CF_AM_PROG([DVIPDF], [dvipdf])
 CF_AM_PROG([XDVI], [xdvi])
