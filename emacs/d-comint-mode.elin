@@ -325,6 +325,16 @@ Derived from `comint-mode' with font-lock from `d-mode'.
   (d-comint-mode-send-quiet "% dvtsup begin emacs_last_talk")
   )
 
+(defun d-comint-mode-next-group-talk ()
+  (interactive)
+  (d-comint-mode-send-quiet "% dvtsup begin emacs_next_group_talk")
+  )
+
+(defun d-comint-mode-last-group-talk ()
+  (interactive)
+  (d-comint-mode-send-quiet "% dvtsup begin emacs_last_group_talk")
+  )
+
 (defun d-comint-mode-next-pawn-talk ()
   (interactive)
   (d-comint-mode-send-quiet 
@@ -477,8 +487,12 @@ Derived from `comint-mode' with font-lock from `d-mode'.
   (define-key d-comint-mode-map [(meta down)] 'd-comint-mode-next-talk)
   (define-key d-comint-mode-map [(meta up)]   'd-comint-mode-last-talk)
   (define-key d-comint-mode-map [(meta shift down)] 
+    'd-comint-mode-next-group-talk)
+  (define-key d-comint-mode-map [(meta shift up)]
+    'd-comint-mode-last-group-talk)
+  (define-key d-comint-mode-map [(escape) (meta down)] 
     'd-comint-mode-next-pawn-talk)
-  (define-key d-comint-mode-map [(meta shift up)]   
+  (define-key d-comint-mode-map [(escape) (meta up)]
     'd-comint-mode-last-pawn-talk)
   )
 ;;(eval-when-compile (setq d-comint-mode-map-setup t))
