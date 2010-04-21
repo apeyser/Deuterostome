@@ -783,15 +783,12 @@ The path operand of file operators is a directory tree following the Linux conve
 
 \subsection{Time and date}
 
-\def\microsecs{$\mu$secs}
-\def\simactive{$\sim$active}
-
 \begin{ops}
-  --                      & gettime      & time                \\
-  --                      & gettimeofday & secs \microsecs     \\
-  time long-array-of-6    & localtime    & array               \\
-  \simactive x-array-of-8 & profiletime  & \ldots x-array-of-8 \\
-  seconds nanoseconds     & sleep        & --                  \\
+  --                    & gettime      & time                \\
+  --                    & gettimeofday & secs \math{\mu}secs \\
+  time long-array-of-6  & localtime    & array               \\
+  \*active x-array-of-8 & profiletime  & \ldots x-array-of-8 \\
+  seconds nanoseconds   & sleep        & --                  \\
 \end{ops}
 
 \op{gettime} returns compacted Linux time as an extended numeral

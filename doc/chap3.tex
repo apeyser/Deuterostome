@@ -600,6 +600,13 @@ the \dcomp{dvt} process is started up. The three windows are:
   it. If you have a multi-button mouse: shift/click and control/click
   are equivalent to clicking on buttons 2 or 3.
 
+  From the keyboard, the emacs key sequence \texttt{meta-down}
+  (usually Alt-Cursor\_Down) and \texttt{meta-up} (Alt-Cursor\_Up)
+  switch between targets in \win{TheHorses}. The emacs key sequence
+  \texttt{meta-shift-down} (Alt-Shift-Cursor\_Down) and
+  \texttt{meta-shift-down} (Alt-Shift-Cursor\_Up) selects the next
+  \emph{group} or last \emph{group}.
+
 \item[\win{DVT Macros}] displays a list of command mnemonics. When you
   click on a mnemonic, a string is placed into the console screen. You
   can execute this string as a console phrase by moving the cursor
@@ -608,7 +615,7 @@ the \dcomp{dvt} process is started up. The three windows are:
   a complete command, one designating a source and the other a
   destination object. The source and destination objects, in turn, are
   derived from objects selected in the third window, called
-  \win{TheEye}. 
+  \win{TheEye}.
 
   \begin{nopb}
   For instance, you may: 
@@ -631,6 +638,11 @@ the \dcomp{dvt} process is started up. The three windows are:
   command phrase is placed into the console buffer so that you can
   execute it (press `F1'), or execute it after some editing from your
   hand.
+
+  The bottom line is a gui interface to keyboard commands: press
+  ``f1-send'' to send the last command, as if by pressing `F1',
+  ``f2-continue'' acts as if you pressed the 'F2' key, sending
+  \texttt{!}~\texttt{continue} and ending ``scream mode'', and so forth.
 
 \item[\win{TheEye}] lets you view any object contained in the
   associated D machine, and any file system known to the host from
@@ -1119,27 +1131,27 @@ these mappings are identified by name in the dictionary
 \subsection{The PETSc procedure library of the \dcomp{dnode}}
 \label{section:petsc-procs}
 \begin{procs}
-   /A \ldots /type rows columns & mat_create      & A \\
-                      /X length & vec_create      & X \\
-                           /Y X & vec_dup         & Y \\
-                         X data & vec_fill        & -- \\
-                   A ~row-maker & mat_fill        & -- \\
-                        X data  & get_vector      & data \\
-                         A data & get_matrix      & data \\
-                           /B A & mat_dup         & B\\
-                       \ldots A & mat_transpose   & --\\
-        Y beta A Atrans X alpha & pmatvecmul      & -- \\
-   data Y beta A Atrans X alpha & get_matvecmul   & data \\
-                          /name & ksp_create      & K \\
-                              X & vec_destroy     & -- \\
-                              A & mat_destroy     & --\\
-                              K & ksp_destroy     & --\\
-                        K A X Y & ksp_solve       & --\\
-                          K X Y & ksp_resolve     & --\\
-                   K A X Y data & get_ksp_solve   & data\\
-                     K X Y data & get_ksp_resolve & data\\
-                           bool & report          & --\\
-                 length ~active & execrange       & --\\
+   /A \ldots /type rows columns  & mat_create      & A    \\
+                      /X length  & vec_create      & X    \\
+                           /Y X  & vec_dup         & Y    \\
+                         X data  & vec_fill        & --   \\
+                   A \*row-maker & mat_fill        & --   \\
+                        X data   & get_vector      & data \\
+                         A data  & get_matrix      & data \\
+                           /B A  & mat_dup         & B    \\
+                       \ldots A  & mat_transpose   & --   \\
+        Y beta A Atrans X alpha  & pmatvecmul      & --   \\
+   data Y beta A Atrans X alpha  & get_matvecmul   & data \\
+                          /name  & ksp_create      & K    \\
+                              X  & vec_destroy     & --   \\
+                              A  & mat_destroy     & --   \\
+                              K  & ksp_destroy     & --   \\
+                        K A X Y  & ksp_solve       & --   \\
+                          K X Y  & ksp_resolve     & --   \\
+                   K A X Y data  & get_ksp_solve   & data \\
+                     K X Y data  & get_ksp_resolve & data \\
+                           bool  & report          & --   \\
+                 length \*active & execrange       & --   \\
 \end{procs}
 
 These procedures internally communicate with a cluster of
