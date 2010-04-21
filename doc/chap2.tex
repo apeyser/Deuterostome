@@ -23,7 +23,10 @@ Composite objects & array\\
 
 \begin{itemize}
 
-\item The \textbf{null} object fills a space and serves as a void. Some types of null object serve as the vehicle of a simple value that the D machine does not operate on but that it needs to opaquely pass around among operators (e.g., the handle of a network socket).
+\item The \op{null} object fills a space and serves as a void. Some
+  types of null object serve as the vehicle of a simple value that the
+  D machine does not operate on but that it needs to opaquely pass
+  around among operators (e.g., the handle of a network socket).
 
 \item The  \textbf{numeral} object comes in several types of number representation and range. The  numeral types comprise four ranges of signed integer (\emph{byte}, \emph{word}, \emph{long}, and \emph{extended} of 8, 16, 32, and 64 bit), and two precisions of IEEE real, \emph{single} and \emph{double} (32-bit and 64-bit). Operators that work on  numeral  objects use the intrinsic type specification to determine what arithmetics and conversions are required.  Where numeral types need to  be specified explicitly (e.g. when creating an array),  this is done by (passive) name objects whose  initial character is a type mnemonic, e.g., /w or /Word.
 
@@ -60,7 +63,19 @@ Numeral  values  can  be  \emph{undefined}.  Mathematical  operators  using  an 
 
 A \textbf{name} is a sequence of letters,  digits, or `underline' characters (the leading character must not be a digit). Names are limited to 29 significant characters (longer names are silently truncated).  Upper and lower case are distinguished. A name preceded by `/' is given the \emph{passive} attribute; otherwise the attribute is \emph{active}.  If you are familiar with  PostScript, please note the difference that D does not let you use characters like `?!@\#\&\$' in names.
 
-Simple  objects  other  than  numeral  or  name  have  no  direct   text representation.  Such  objects  are specified through  associated  names: `null' for the \textbf{null} object,  `true' or `false' for a \textbf{boolean},  and  names such as `add' for \textbf{operator} objects.  The \textbf{mark} object and a  complementary list  operator  are accessed through the `[' and `]'  special  characters, making  list  \emph{construction} formally  similar  to  array  or   procedure \emph{enumeration}. Note, however, that the objects that are enclosed between the `[' and `]' operators are executed at the time when this text is interpreted; their \emph{results} (which are accumulated on the operand stack) become the body of the list finally created by `]'. In this way passive-list contents are always computed rather than enumerated.
+Simple objects other than numeral or name have no direct text
+representation.  Such objects are specified through associated names:
+`null' for the \op{null} object, `true' or `false' for a
+\textbf{boolean}, and names such as `add' for \textbf{operator}
+objects.  The \textbf{mark} object and a complementary list operator
+are accessed through the `[' and `]' special characters, making list
+\emph{construction} formally similar to array or procedure
+\emph{enumeration}. Note, however, that the objects that are enclosed
+between the `[' and `]' operators are executed at the time when this
+text is interpreted; their \emph{results} (which are accumulated on
+the operand stack) become the body of the list finally created by
+`]'. In this way passive-list contents are always computed rather than
+enumerated.
 
 All  classes of \textbf{composite} object can be created through  operators,  but only  \textbf{arrays}  and active lists (\textbf{procedures}) can be  defined  directly  in text form by enumerating their elements.
 
@@ -144,7 +159,7 @@ An  \emph{active} object passed to the execution phase is given special attentio
 
 Execution  of other active objects also is directed by object class:
 \begin{itemize}
-\item A \emph{null} object is discarded.
+\item A \op{null} object is discarded.
 \item An \emph{operator}  object  is  invoked, i.e.  the  host  program  module represented  by the operator is executed.  A large set of system operators has been built into the D machine and is accessible through the system dictionary \emph{systemdict}, which is permanently present at the bottom of the dictionary stack. Libraries of additional operators (your personal extensions to the D operator set) can be loaded using certain operators and then become also incorporated into \emph{systemdict}.
 \item Any other object is executed like a passive object,  by  transferring it to the top of the operand stack (thus the active/passive sttribute is ignored).
 \end{itemize}
@@ -267,7 +282,9 @@ A word of caution: juggling objects on the stack can avoid making `variables' (a
 
 There are facilities to mark a position on the stack ([) and to count  or delete the elements following the latest mark (\emph{counttomark}, The main use of `[' will be in list construction, as is described later.
 
-There  is no text representation of the null or  boolean  objects. Associations of these objects with names are provided in the system or user dictionaries (\emph{null}, \emph{true}, \emph{false}). 
+There is no text representation of the null or boolean
+objects. Associations of these objects with names are provided in the
+system or user dictionaries (\op{null}, \op{true}, \op{false}).
 
 \subsection{Mathematical operations}\label{ssec:mathops}
 
@@ -424,7 +441,13 @@ To tile the contents of one array into successive subarrays of a larger array, u
 
 \emph{extrema} updates the two running extrema given to it as numerals to comprise the extrema of the given array value. It takes any numeral and array types, and it returns the new extrema in the types of the old extrema. All numeral types encountered in \emph{extrema} are converted to /D type prior to the operation.
 
-\emph{ran1} generates a sequence of random numbers in an array of type `/S'. If the boolean operand is \emph{true} the sequence starts from the seed (which is internally set and always the same to allow generation of pseudo-random sequences), else the sequence is continued. Random numbers  are between 0.0 and 1.0 excluding the exact boundaries. The period of the generator is $\approx 10^8$ cycles. This is the function \emph{ran1} described in Press et al. (page 280).
+\emph{ran1} generates a sequence of random numbers in an array of type
+`/S'. If the boolean operand is \op{true} the sequence starts from the
+seed (which is internally set and always the same to allow generation
+of pseudo-random sequences), else the sequence is continued. Random
+numbers are between 0.0 and 1.0 excluding the exact boundaries. The
+period of the generator is $\approx 10^8$ cycles. This is the function
+\emph{ran1} described in Press et al. (page 280).
 
 \emph{forall} applies a procedure sequentially to all elements of an array, providing the current element to the procedure (as top element of the operand stack).
 
@@ -651,19 +674,19 @@ procedure indefinitely (unless terminated from within). \op{forall}
 executes a procedure for each element of a composite object, providing
 the procedure with the current element as top element of the operand
 stack. Any loop operator can be terminated by executing one of the
-operators \op{exit}, \op{stop}, or \op{abort} within the dynamic
-context of the loop body. \op{exit} terminates the execution of the
-current loop and resumes execution of the object following the loop
-operator of the terminated loop. \op{exitto} is a generalized
+operators \op{exit}, \op{exitto}, \op{stop}, or \op{abort} within the
+dynamic context of the loop body. \op{exit} terminates the execution
+of the current loop and resumes execution of the object following the
+loop operator of the terminated loop. \op{exitto} is a generalized
 \op{exit} -- it transfers control from the current point to the object
-following the enclosing \op{exitlabel} operator. Matching means that
-the /name matches.
+following the enclosing matching \op{exitlabel} operator. Matching
+means that the \textproc{/name} matches.
 
 \op{stopped} executes an object (usually a procedure) with a provision
 for two alternate kinds of termination, normal or stopped. Stopped
 termination (effected by the \op{stop} operator executed from within
-the dynamic context of the object) returns \op*{false}, normal
-termination returns \op*{true}, and execution continues execution with
+the dynamic context of the object) returns \op{false}, normal
+termination returns \op{true}, and execution continues execution with
 the object immediately following \op{stopped}. This construct helps
 prepare contexts that terminate on exceptional events and turn control
 over to a supervisory context. The exceptional termination removes
@@ -747,7 +770,18 @@ null or parent & nextobject & obj true\\
 
 The  values of internal objects that are created during a D  session  are accumulated  in  the  virtual memory (VM),  eventually  filling  all  available physical space. \emph{vmstatus} lets you examine the current capacity and usage of VM space (returned as number of bytes). \emph{save}, \emph{capsave}, and \emph{restore} let you mark and reclaim used VM space.
 
-\emph{save} creates a box object in VM that marks the current level of used VM space. When following some further activities \emph{restore} is applied to this box object, it discards all VM objects created after that instance of \emph{save}. This could leave object descriptions in the machine (on the stacks or in composite objects remaining in the VM) that refer to discarded VM objects. Therefore, \emph{restore} scans the stack for such references before it makes changes (it terminates with an error if it finds a reference). \emph{restore} then discards the VM objects and scans all remaining VM objects for references to discarded objects. It replaces discarded objects in lists by \emph{null} or purges associations with discarded objects from dictionaries.
+\emph{save} creates a box object in VM that marks the current level of
+used VM space. When following some further activities \emph{restore}
+is applied to this box object, it discards all VM objects created
+after that instance of \emph{save}. This could leave object
+descriptions in the machine (on the stacks or in composite objects
+remaining in the VM) that refer to discarded VM objects. Therefore,
+\emph{restore} scans the stack for such references before it makes
+changes (it terminates with an error if it finds a
+reference). \emph{restore} then discards the VM objects and scans all
+remaining VM objects for references to discarded objects. It replaces
+discarded objects in lists by \op{null} or purges associations with
+discarded objects from dictionaries.
 
 When \emph{capsave} is applied to a \emph{save} box object, the range of discardable VM objects is restricted to those created between the executions of \emph{save} and \emph{capsave}. When \emph{restore} is applied to a `capped' save box, it deletes the enclosed range of VM objects and in addition moves all objects created after those in the discarded range to compact the used VM space (references to moved objects will be automatically corrected in remaining objects).
 
@@ -831,7 +865,7 @@ requests). The port number is an offset into the range of user
 reserved ports, starting with `0'; it is assigned to the \dcomp{dnode}
 when the \dcomp{dnode} process is started up by a shell command to the
 respective host. \op{connect} returns a socket number opaquely stored
-as the value of a typed \emph{null} object (you cannot play with it,
+as the value of a typed \op{null} object (you cannot play with it,
 but you can pass it around in the D machine). The connection is closed
 by \op{disconnect}.
 
@@ -979,7 +1013,7 @@ window\# xy (text) [ \ldots ] & drawtext & window\# x y\\
 
 Hooking up a \emph{dvt} and its \emph{dnodes} to an X window server is rather complicated because the X window system involves security issues because it allows transfer of information among hosts. When a \emph{dvt} process is started from a shell, it will connect automatically to the local X server (it is authorized by the shell). When the \emph{dvt} thereafter connects to a \emph{dnode} it checks whether the security extension is built into the local X windows server (\emph{Xauth}). If the extension does not exist the \emph{dnode} will not be given authorization info and will be instructed to simply attempt to connect to the X server. If the extension does exist the \emph{dvt} generates an authorization using \emph{Xauthgen} and instructs the \emph{dnode} to give its X library that authorization (\emph{Xauthset}). From then on, the \emph{dnode} can execute \emph{Xconnect} to connect to the X server and use X windows services (see also X window operators for \emph{dnodes} in \ref{ssec:opsdnode}).
 
-\emph{Xauthgen} takes three operands. The \emph{name} string gives the name of a security method to be used. We use `MIT-MAGIC-COOKIE-1', which requires no \emph{data} so that the second-operand string \emph{data} can be left empty (that is not generally the case with other methods). The third operand \emph{bool-trusted} should be set to \emph{true} unless your D machines are to run on a cluster of the DOD. A \emph{dnode} has 60 sec to connect to the X server before the authorization is automatically revoked (this can also be explicitly done by \emph{Xauthrev}). The byte array \emph{data} returned by \emph{Xauthgen} is the authorization key to be given to \emph{Xauthset}. The also returned integer \emph{id} is a handle for this authorization (needed by \emph{Xauthrev}).
+\emph{Xauthgen} takes three operands. The \emph{name} string gives the name of a security method to be used. We use `MIT-MAGIC-COOKIE-1', which requires no \emph{data} so that the second-operand string \emph{data} can be left empty (that is not generally the case with other methods). The third operand \emph{bool-trusted} should be set to \op{true} unless your D machines are to run on a cluster of the DOD. A \emph{dnode} has 60 sec to connect to the X server before the authorization is automatically revoked (this can also be explicitly done by \emph{Xauthrev}). The byte array \emph{data} returned by \emph{Xauthgen} is the authorization key to be given to \emph{Xauthset}. The also returned integer \emph{id} is a handle for this authorization (needed by \emph{Xauthrev}).
 
 A \emph{dvt} setting up a \emph{dnode} also needs to inform the \emph{dnode} which display name to use when connecting to the X server (that name is of the form `hostname:number'). The \emph{dvt} executes \emph{Xdisplayname} to retrieve this information. In some instances, the hostname `localhost' is inserted into the display name. This is not a problem when both the \emph{dvt} and \emph{dnode} run on one and the same host. It is a problem when the hosts are different. In this case, the \emph{dvt} needs to edit the display name, replacing `localhost' by the string returned by \emph{getmyfqdn} (see \ref{ssec:network}). 
 
@@ -1006,7 +1040,14 @@ x y modifiers & mouseclick & -- `react to mouseclick'\\\\
 
 \emph{windowsize} responds by executing \emph{resizewindow}. It uses the new dimensions found on the stack; or a modification thereof (e.g. maintaining a certain aspect ratio); or discards the new and re-uses the old dimensions (for a window that resists resizing). \emph{drawwindow}  draws the contents of the window. \emph{mouseclick} receives as operands the coordinates of the mouse pointer and modifier numeral (see \emph{nextevent} in \ref{ssec:dvtops} for details).
 
-\emph{topwindow} places a window on top of any others when used with a \emph{true} boolean. \emph{mapwindow} has more complex effects on the visibility of windows. If applied to a specified window, it raises the window to the top if the boolean operand is \emph{true} or else hides the window. If \emph{null} is specified in place of a window\# either all windows associated with the X connection are raised to the top or hidden, dependent on \emph{bool}. To delete a window use \emph{deletewindow}.
+\emph{topwindow} places a window on top of any others when used with a
+\op{true} boolean. \emph{mapwindow} has more complex effects on the
+visibility of windows. If applied to a specified window, it raises the
+window to the top if the boolean operand is \emph{true} or else hides
+the window. If \op{null} is specified in place of a window\# either
+all windows associated with the X connection are raised to the top or
+hidden, dependent on \emph{bool}. To delete a window use
+\emph{deletewindow}.
 
 \emph{mapcolor} translates a color specified in an array of the form $<$ red green blue $>$ (intensities are numbers from 0.0 to 1.0) into a color index, a simple numeral. Drawing operators use the color index to select colors.
 

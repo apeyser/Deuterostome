@@ -644,10 +644,9 @@
     \let ]=\newbook@sqr%
     \let\*=\newbook@squig%
     %
-    \newtoks\ldotstoks%
-    \expandafter\ldotstoks\expandafter=\expandafter{\ldots}%
-    \edef\ldots{\noexpand\hspace{0.5em}\the\ldotstoks\noexpand\hspace{0.5em}}%
-    \edef\lldots{\the\ldotstoks\noexpand\hspace{0.5em}}%
+    \let\newbook@ldots=\ldots%
+    \def\ldots{\hspace{0.5em}\newbook@ldots\hspace{0.5em}}%
+    \def\lldots{\newbook@ldots\hspace{0.5em}}%
     %
     \def\math##1{$##1$}%
     \def\sub##1{$_##1$}%
