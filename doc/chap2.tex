@@ -604,79 +604,86 @@ Logical operations (\emph{and}, \emph{or}, \emph{xor},  \emph{not}) use booleans
 
 \subsection{Controlling execution}\label{ssec:controlops}
 
-\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
-obj & start & --\\\relax
-[ obj ... & push & --\\
-obj & exec & --\\
-bool proc & if & --\\
-bool proc$_1$ proc$_2$ & ifelse & --\\
-init incr limit proc & for & --\\
-count proc & repeat & --\\
-proc & loop & --\\
-array/list/dict proc & forall & --\\
--- & exit & --\\
-/name & exitto & -- \\
-proc /name & exitlabel & -- \\
-obj & stopped & bool\\
--- & stop & --\\
--- & abort & --\\
--- & countexecstack & num\\
-list & execstack & sublist\\\\
+\begin{ops}
+\*active                             & start          & \lldots      \\\relax
+[ obj ...                            & push           & \lldots      \\
+\*obj                                & exec           & \lldots      \\
+bool \*active                        & if             & \lldots      \\
+bool \*active\sub{1} \*active\sub{2} & ifelse         & \lldots      \\
+init incr limit \*active             & for            & \lldots      \\
+count \*active                       & repeat         & \lldots      \\
+\*active                             & loop           & \lldots      \\
+array/list/dict \*active             & forall         & \lldots      \\
+--                                   & exit           & --          \\
+/name                                & exitto         & --          \\
+\*active /name                       & exitlabel      & \lldots      \\
+\*active                             & stopped        & \lldots bool \\
+--                                   & stop           & --          \\
+--                                   & abort          & --          \\
+--                                   & countexecstack & num         \\
+list                                 & execstack      & sublist     \\
+\end{ops}
 
-\end{tabular}
-
-\index{Operators!start}
-\index{Operators!push}
-\index{Operators!exec}
-\index{Operators!if}
-\index{Operators!ifelse}
-\index{Operators!for}
-\index{Operators!repeat}
-\index{Operators!loop}
-\index{Operators!forall}
-\index{Operators!exit}
-\index{Operators!exitto}
-\index{Operators!exitlabel}
-\index{Operators!stopped}
-\index{Operators!stop}
-\index{Operators!abort}
-\index{Operators!countexecstack}
-\index{Operators!execstack}
-
-
-Control operators modify the usual linear execution of objects. Many work with a procedure operand that they execute conditionally or repeatedly. In addition to the control operators listed in this section, other events, like those originating from communication with connected D machines or X Windows can also schedule objects for execution.
+Control operators modify the usual linear execution of objects. Many
+work with a procedure operand that they execute conditionally or
+repeatedly. In addition to the control operators listed in this
+section, other events, like those originating from communication with
+connected D machines or X Windows can also schedule objects for
+execution.
 
 Any object carrying the \emph{active} attribute is pushed onto the
-execution stack for immediate execution by \emph{exec}. \emph{start}
-does so, too, \emph{after} popping the currently executing object from
-the execution stack. \emph{push} transfers the objects follow the last
-mark onto the execution stack, in effect executing them in reverse
-order; this allows temporary hiding of a portion of the operand stack
-during execution of a given procedure and its automatic replacement on
-top afterwards. A procedure (or any active object provided in its
-place) is executed conditionally, dependent on the value of a boolean
-operand (\emph{if}), or one of two procedures is executed dependent on
-a boolean (\emph{ifelse}). Several operators execute a procedure
-repeatedly. \emph{for} takes three numeral operands defining a range
-and step to control an internal count and executes a procedure for
-each count of the range, providing the procedure with the current
-count as the top element of the operand stack. \emph{repeat} executes
-a procedure a prescribed number of times. \emph{loop} repeats the
-execution of the procedure indefinitely (unless terminated from
-within). \emph{forall} executes a procedure for each element of a
-composite object, providing the procedure with the current element as
-top element of the operand stack. Any loop operator can be terminated
-by executing one of the operators \emph{exit}, \emph{stop}, or
-\emph{abort} within the dynamic context of the loop body. \emph{exit}
-terminates the execution of the current loop and resumes execution of
-the object following the loop operator of the terminated
-loop. \emph{exitto} is a generalized \emph{exit} -- it transfers
-control from the current point to the object following the enclosing
-\emph{exitlabel} operator. Matching means that the /name matches.
+execution stack for immediate execution by \op{exec}. \op{start} does
+so, too, \emph{after} popping the currently executing object from the
+execution stack. \op{push} transfers the objects follow the last mark
+onto the execution stack, in effect executing them in reverse order;
+this allows temporary hiding of a portion of the operand stack during
+execution of a given procedure and its automatic replacement on top
+afterwards. A procedure (or any active object provided in its place)
+is executed conditionally, dependent on the value of a boolean operand
+(\op{if}), or one of two procedures is executed dependent on a boolean
+(\op{ifelse}). Several operators execute a procedure
+repeatedly. \op{for} takes three numeral operands defining a range and
+step to control an internal count and executes a procedure for each
+count of the range, providing the procedure with the current count as
+the top element of the operand stack. \op{repeat} executes a procedure
+a prescribed number of times. \op{loop} repeats the execution of the
+procedure indefinitely (unless terminated from within). \op{forall}
+executes a procedure for each element of a composite object, providing
+the procedure with the current element as top element of the operand
+stack. Any loop operator can be terminated by executing one of the
+operators \op{exit}, \op{stop}, or \op{abort} within the dynamic
+context of the loop body. \op{exit} terminates the execution of the
+current loop and resumes execution of the object following the loop
+operator of the terminated loop. \op{exitto} is a generalized
+\op{exit} -- it transfers control from the current point to the object
+following the enclosing \op{exitlabel} operator. Matching means that
+the /name matches.
 
-\emph{stopped} executes an object (usually a procedure) with a provision for two alternate kinds of termination, normal or stopped. Stopped termination  (effected  by  the \emph{stop} operator  executed from  within  the dynamic context of the object) returns \emph{false}, normal termination returns \emph{true}, and execution continues execution with the object immediately following \emph{stopped}. This construct helps  prepare  contexts that terminate on  exceptional events and turn control over to a supervisory context. The exceptional termination removes from the execution stack all objects that belong to the stopped context (such as pending procedures and loops in execution); it provides a clean exit from a domain of structured code. \emph{abort} drops the execution stack down to the most basic level (an \emph{aborted} capsule in the \emph{dvt} or the very bottom of the stack in the \emph{dnode} variety of machine). The loop termination operator, \emph{exit}, cannot move control outside the context of a stopped operator (the attempt produces an error), and \emph{stop} cannot move control outside an \emph{aborted} context in a \emph{dvt}.
+\op{stopped} executes an object (usually a procedure) with a provision
+for two alternate kinds of termination, normal or stopped. Stopped
+termination (effected by the \op{stop} operator executed from within
+the dynamic context of the object) returns \op*{false}, normal
+termination returns \op*{true}, and execution continues execution with
+the object immediately following \op{stopped}. This construct helps
+prepare contexts that terminate on exceptional events and turn control
+over to a supervisory context. The exceptional termination removes
+from the execution stack all objects that belong to the stopped
+context (such as pending procedures and loops in execution); it
+provides a clean exit from a domain of structured code. \op{abort}
+drops the execution stack down to the most basic level (an
+\op{aborted} capsule in the \dcomp{dvt} or the very bottom of the
+stack in the \dcomp{dnode} variety of machine). The loop termination
+operator, \op{exit}, cannot move control outside the context of a
+stopped operator (the attempt produces an error), and \op{stop} cannot
+move control outside an \op{aborted} context in a \dcomp{dvt}.
 
-The operand described above as \emph{proc} typically is an active list (objects enclosed between `\{ \}'). You may supply instead any active object. A convenient method to supply an active name as operand to the control operator is to give the name with the \emph{tilde} attribute. When the tilded object is executed it is converted to an \emph{active} object and pushed on the operand stack, where the control operator will consume it.
+The operand described above as \emph{active} typically is an active
+list (objects enclosed between `\{ \}'). You may supply instead any
+active object. A convenient method to supply an active name as operand
+to the control operator is to give the name with the \emph{tilde}
+attribute. When the tilded object is executed it is converted to an
+\emph{active} object and pushed on the operand stack, where the
+control operator will consume it.
 
 
 \subsection{Types, attributes, and their conversions}
@@ -787,7 +794,7 @@ The path operand of file operators is a directory tree following the Linux conve
   --                    & gettime      & time                \\
   --                    & gettimeofday & secs \math{\mu}secs \\
   time long-array-of-6  & localtime    & array               \\
-  \*active x-array-of-8 & profiletime  & \ldots x-array-of-8 \\
+  \*active x-array-of-8 & profiletime  & \lldots x-array-of-8 \\
   seconds nanoseconds   & sleep        & --                  \\
 \end{ops}
 

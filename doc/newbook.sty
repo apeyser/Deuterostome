@@ -277,7 +277,9 @@
 %  and ! is active and defined as a small return and line skip
 %  [ and ] are active and defined as $[$ $]$,
 %  \* is defined as $\sim$,
-%  and \math#1 is $#1$.
+%  \lldots is \ldots without a space before it
+%  \math#1 is $#1$
+%  and \sub#1 is $_#1$.
 %
 \begingroup%
   \catcode`\&=\active%
@@ -298,7 +300,9 @@
 %  and ! is active and defined as a small return and line skip
 %  [ and ] are active and defined as $[$ $]$,
 %  \* is defined as $\sim$,
-%  and \math#1 is $#1$.
+%  \lldots is \ldots without a space before it
+%  \math#1 is $#1$
+%  and \sub#1 is $_#1$.
 %
 \begingroup%
   \catcode`\&=\active%
@@ -643,8 +647,10 @@
     \newtoks\ldotstoks%
     \expandafter\ldotstoks\expandafter=\expandafter{\ldots}%
     \edef\ldots{\noexpand\hspace{0.5em}\the\ldotstoks\noexpand\hspace{0.5em}}%
+    \edef\lldots{\the\ldotstoks\noexpand\hspace{0.5em}}%
     %
     \def\math##1{$##1$}%
+    \def\sub##1{$_##1$}%
   }%
 \endgroup%
 %
