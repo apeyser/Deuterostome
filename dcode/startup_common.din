@@ -106,8 +106,22 @@
     0 2 3 -1 roll 1 sub {                      | dict [/name val ...] i
       1 index exch 2 getinterval {} forall def | dict [/name val ...]
     } for
-  } stopped end {stop} if
+  } stopped end ~stop if
   pop
+} bind def
+
+|------------------ makestruct_close ----------------
+| [ /name val /name2 val2 ... | dict
+|
+| Like makestruct, except the list isn't closed and the
+| memory for making the list is returned.
+|
+/makestruct_close {
+  save                                           | [/name val... save     |]
+  counttomark 1 add 1 roll closelist ~makestruct | save [/name val..] ~mk
+  [ 4 -1 roll dup capsave ~stopped push |]       | dict stopped save
+  restore                                        | dict stopped
+  ~stop if                                       | dict
 } bind def
 
 |---------------- makestruct_stack ----------------
