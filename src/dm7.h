@@ -18,6 +18,7 @@ DLL_SCOPE P op_readfile(void);
 DLL_SCOPE P op_findfiles(void);
 DLL_SCOPE P op_findfile(void);
 DLL_SCOPE P op_readboxfile(void);
+DLL_SCOPE P op_umask(void);
 DLL_SCOPE P op_writeboxfile(void); 
 DLL_SCOPE P op_transcribe(void);
 DLL_SCOPE P op_tostderr(void);

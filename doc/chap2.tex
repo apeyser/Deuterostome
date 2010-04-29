@@ -791,36 +791,74 @@ When \emph{capsave} is applied to a \emph{save} box object, the range of discard
 
 \subsection{File access}
 
-\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
--- & getwdir & substring\\
-string & setwdir & --\\
-(path/) (filename) string & readfile & substring\\
-string (path/) (filename) & writefile & --\\
-(path/) (filename) & readboxfile & rootobj\\
-rootobj (path/) (filename) & writeboxfile & --\\
-(path/) & findfiles & filelist\\
-string & tosystem & --\\
-string$_1$ & fromsystem & string$_2$\\\\
-\end{tabular}
+\begin{ops}
+--                        & getwdir      & substring \\
+string                    & setwdir      & --        \\
+(path) (filename) string  & readfile     & substring \\
+string (path) (filename)  & writefile    & --        \\
+(path) (filename)         & readboxfile  & rootobj   \\
+rootobj (path) (filename) & writeboxfile & --        \\
+(path)                    & findfiles    & filelist  \\
 
-\index{Operators!getwdir}
-\index{Operators!setwdir}
-\index{Operators!readfile}
-\index{Operators!writefile}
-\index{Operators!readboxfile}
-\index{Operators!writeboxfile}
-\index{Operators!findfiles}
-\index{Operators!tosystem}
-\index{Operators!fromsystem}
+(path) (filename) & findfile & false / filesize datetime attribute-bits true \\
 
+string            & tosystem   & --                \\
+string\sub1       & fromsystem & string\sub2       \\
+new-umask-integer & umask      & old-umask-integer \\
+\end{ops}
 
-The path operand of file operators is a directory tree following the Linux convention and concluded by `/'. \emph{readfile} reads the file contents into the buffer \emph{string} and returns the filled substring (if \emph{string} cannot hold the entire file, an error results). Box files contain a folded tree of objects that is described to \emph{writeboxfile} by the root object (a list or dictionary); \emph{readboxfile} copies the objects of the tree to the VM and returns the root object of the tree. Box files could be written and read by different generations of D machine and/or D machines running on different platforms. For interconversion issues see \ref{ssec:network}.
+The path operand of file operators is a directory tree following the
+Linux convention (final `/' is optional). \op{readfile} reads the file
+contents into the buffer \emph{string} and returns the filled
+substring (if \emph{string} cannot hold the entire file, an error
+results). Box files contain a folded tree of objects that is described
+to \op{writeboxfile} by the root object (a list or dictionary);
+\op{readboxfile} copies the objects of the tree to the VM and returns
+the root object of the tree. Box files could be written and read by
+different generations of D machine and/or D machines running on
+different platforms. For interconversion issues see
+\ref{ssec:network}.
 
-\emph{getwdir} and \emph{setwdir} return the current directory or set a new current directory for subsequent file accesses.
+\op{getwdir} and \op{setwdir} return the current directory or set a
+new current directory for subsequent file accesses.
 
-\emph{findfiles} scans the specified file directory and returns a sorted list of the entries; each entry is described by a list containing: filename (string), file size (numeral, in bytes), compact date/time of last modification, and the file attributes (a /W numeral whose bitwise interpretation is: \texttt {TTTT---uuugggooo}, where TTTT = 1100 - socket, 1010 - symbolic link, 1000 - regular file, 0110 - block device, 0100 - directory, 0010 - character device, 0001 - fifo, and where uuu, ggg, and ooo are bits defining the user (owner), group, and all (user, group,and all others) access privileges (read/write/execute)). The list of entries is sorted in the order directories, files, with each subgroup sorted alphabetically.
+\op{findfiles} scans the specified file directory and returns a sorted
+list of the entries; each entry is described by a list containing:
+filename (string), file size (numeral, in bytes), compact date/time of
+last modification, and the file attributes (a /W numeral whose bitwise
+interpretation is: \\\texttt {TTTT---uuugggooo}, where TTTT = 1100 -
+socket, 1010 - symbolic link, 1000 - regular file, 0110 - block
+device, 0100 - directory, 0010 - character device, 0001 - fifo, and
+where uuu, ggg, and ooo are bits defining the user (owner), group, and
+all (user, group,and all others) access privileges
+(read/write/execute)). The list of entries is sorted in the order
+directories, files, with each subgroup sorted
+alphabetically. \op{findfile} looks for a specific \emph{filename}.
+If it doesn't exist, false is returned; otherwise it returns the
+values of the entry for that file from \op{findfiles} and true.
 
-\emph{tosystem} submits the string as a Linux command to the bash/emacs shell without waiting for completion. The operator is listed \emph{here} because many file manipulations (like moving or deleting) are not supported by D operators, but are instead left to existing Linux commands. \emph{tosystem} has unlimited other uses. \emph{fromsystem} is a generalization of \emph{tosystem}. It submits its operand string to the current Linux shell, blocks until the command has been completed, and returns a newly created string object holding the output of the invoked Linux command(s). (The returned string is created by \emph{fromsystem}; use \emph{save} and \emph{restore} to discard such strings to prevent their accumulation.)
+\op{tosystem} submits the string as a Linux command to the bash/emacs
+shell without waiting for completion. The operator is listed
+\emph{here} because many file manipulations (like moving or deleting)
+are not supported by D operators, but are instead left to existing
+Linux commands. \op{tosystem} has unlimited other
+uses. \op{fromsystem} is a generalization of \op{tosystem}. It submits
+its operand string to the current Linux shell, blocks until the
+command has been completed, and returns a newly created string object
+holding the output of the invoked Linux command(s). (The returned
+string is created by \op{fromsystem}; use \op{save} and \op{restore}
+to discard such strings to prevent their accumulation.)
+
+\op{umask} sets the umask for the process, and returns the old
+umask. The umask in an integer from $0$ to $511$ ($777$ in octal),
+where the bits are \texttt{rwx|rwx|rwx}: r = read, w = write and x =
+execute, the first group is user permissions, the second group is
+group permissions and the final is other permissions. Write operators
+such \op{writeboxfile} and \op{writefile} use a mask of
+\texttt{rw|rw|r} or $664$ in octal; this mask is \textop{and}ed with
+\textop{not} umask to produce the final permission set. In most cases,
+the default umask is $022$ in octal (\texttt{|w|w}) so group write is
+removed: $664\And\neg022 = 644$, in octal.
 
 \subsection{Time and date}
 

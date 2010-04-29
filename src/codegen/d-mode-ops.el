@@ -127,6 +127,7 @@
   "findfile"
   "readboxfile"
   "writeboxfile"
+  "umask"
   "transcribe"
   "fax"
   "merge"
