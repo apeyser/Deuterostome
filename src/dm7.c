@@ -34,6 +34,7 @@
 #include <signal.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <sys/types.h>
 #include <limits.h>
 #include <time.h>
 
@@ -518,6 +519,27 @@ P op_readboxfile(void)
   FREEopds = o_1;
   return OK;
 }
+
+/*----------------------------------------------- umask
+  new-mask | old-mask
+  set umask for the machine, and return the previous one.
+  They are integers from 0..0777 -- see umask posix function.
+*/
+
+P op_umask(void) {
+  LBIG mask;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != NUM) return OPD_CLA;
+  if (TYPE(o_1) >= SINGLETYPE) return OPD_TYP;
+  if (! VALUE(o_1, &mask)) return UNDF_VAL;
+  if (mask < 0 || mask > 0777) return RNG_CHK;
+
+  LONGBIG_VAL(o_1) = (LBIG) umask((mode_t) mask);
+  TAG(o_1) = NUM|LONGBIGTYPE;
+
+  return OK;
+}
+  
 
 /*---------------------------------------------------- writeboxfile
    root dir filename | --
