@@ -490,9 +490,9 @@ Derived from `comint-mode' with font-lock from `d-mode'.
     'd-comint-mode-next-group-talk)
   (define-key d-comint-mode-map [(meta shift up)]
     'd-comint-mode-last-group-talk)
-  (define-key d-comint-mode-map [(escape) (meta down)] 
+  (define-key d-comint-mode-map [(meta super down)] 
     'd-comint-mode-next-pawn-talk)
-  (define-key d-comint-mode-map [(escape) (meta up)]
+  (define-key d-comint-mode-map [(meta super up)]
     'd-comint-mode-last-pawn-talk)
   )
 ;;(eval-when-compile (setq d-comint-mode-map-setup t))
