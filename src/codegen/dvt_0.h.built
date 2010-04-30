@@ -126,6 +126,7 @@ B* _sysop[] =
   (B*) "findfile", (B*) op_findfile,
   (B*) "readboxfile", (B*) op_readboxfile,
   (B*) "writeboxfile", (B*) op_writeboxfile,
+  (B*) "umask", (B*) op_umask,
   (B*) "transcribe", (B*) op_transcribe,
   (B*) "fax", (B*) op_fax,
   (B*) "merge", (B*) op_merge,

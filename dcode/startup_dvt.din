@@ -887,6 +887,8 @@ c_         list all connections
   } bind userdict 3 -1 roll put
 
   /emacs_next_talk {
+    kbdowner 0 lt {0 {pop knode} fornodes _t} if
+
     kbdowner {
       1 add nodelist length mod
       dup kbdowner eq {false exit} if
@@ -900,6 +902,8 @@ c_         list all connections
   } bind def
 
   /emacs_last_talk {
+    kbdowner 0 lt {0 {pop knode exit} fornodes _t} if
+
     kbdowner {
       1 sub dup 0 lt {pop nodelist length 1 sub} if
       dup kbdowner eq {false exit} if
@@ -911,6 +915,51 @@ c_         list all connections
     ~_t ~pop ifelse
     end
   } bind def
+
+  /emacs_next_group_talk {
+    kbdowner 0 gt {nodelist kbdowner get 4 get _t} if
+
+    -1000
+    0 1 nodelist last {/knode name
+      nodelist knode get /node name
+      node 2 get null ne {
+        node 4 get kbdowner lt {
+          node 4 get 2 copy lt ~exch if pop
+        } if
+      } if
+    } for
+    dup kbdowner eq {pop 0} if
+    dup -1000 eq {pop 0} if
+
+    _t
+    end
+  } bind def
+
+  /emacs_last_group_talk {
+    kbdowner 0 gt {nodelist kbdowner get 4 get _t} if
+
+    0
+    0 1 nodelist last {/knode name
+      nodelist knode get /node name
+      node 2 get null ne {
+        node 4 get kbdowner gt {
+          node 4 get 2 copy gt ~exch if pop
+        } if
+      } if
+    } for
+    dup kbdowner eq {
+      0 1 nodelist last {/knode name
+        nodelist knode get /node name
+        node 2 get null ne {
+          node 4 get 2 copy gt ~exch if pop
+        } if
+      } for
+    } if
+
+    _t
+    end
+  } bind def
+
 
 |------------------------ front end support ------------------------
 
@@ -1187,16 +1236,18 @@ c_         list all connections
 
     /drawnode {
       wid noderects knode get 
-      node 3 get { HBG } { BG } ifelse fillrectangle
+      node 3 get ~HBG ~BG ifelse fillrectangle
+
       node 0 get class /nullclass ne {
         wid nodelocs knode get exec
         pbuf 0 node 0 get fax
         knode 0 ne {
-          (:) fax * node 1 get * number
+          (:) fax * node 1 get     * number
+          ( ) fax * node 4 get neg * number
         } if 
         0 exch getinterval
-        kbdowner 0 ge {knode} {node 4 get} ifelse
-        kbdowner eq {HIGHTEXT} {NORMALTEXT} ifelse
+        kbdowner 0 ge ~knode {node 4 get} ifelse kbdowner eq 
+        ~HIGHTEXT ~NORMALTEXT ifelse
         drawtext node 5 get exec pop pop pop
       } if
     } bind def

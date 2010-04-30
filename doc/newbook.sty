@@ -275,6 +275,11 @@
 %   with prologue ROL (see column types above).
 % op is defined as \op*{op},
 %  and ! is active and defined as a small return and line skip
+%  [ and ] are active and defined as $[$ $]$,
+%  \* is defined as $\sim$,
+%  \lldots is \ldots without a space before it
+%  \math#1 is $#1$
+%  and \sub#1 is $_#1$.
 %
 \begingroup%
   \catcode`\&=\active%
@@ -291,8 +296,13 @@
 % \end{procs}
 % Defines a supertabular environment 
 %   with prologue RPL (see column types above).
-%  proc is defined as \proc*{proc},
-%    and ! is active and defined as a small return and line skip.
+% proc is defined as \proc*{proc},
+%  and ! is active and defined as a small return and line skip
+%  [ and ] are active and defined as $[$ $]$,
+%  \* is defined as $\sim$,
+%  \lldots is \ldots without a space before it
+%  \math#1 is $#1$
+%  and \sub#1 is $_#1$.
 %
 \begingroup%
   \catcode`\&=\active%
@@ -611,19 +621,35 @@
 }%
 \newcommand\newbook@align{&\newbook@redefss}%
 %
+\newcommand\newbook@sql{$[$}
+\newcommand\newbook@sqr{$]$}
+\newcommand\newbook@squig{$\sim$}
+%
 \begingroup%
 %
   \catcode`\!=\active%
   \catcode`\&=\active%
+  \catcode`\[=\active%
+  \catcode`\]=\active%
   % 
   \gdef\newbook@common{%
     \catcode`\!=\active%
     \catcode`\&=\active%
+    \catcode`\[=\active%
+    \catcode`\]=\active%
+    %
     \let !=\newrow%
     \let &=\newbook@align%
-    \newtoks\ldotstoks%
-    \expandafter\ldotstoks\expandafter=\expandafter{\ldots}%
-    \edef\ldots{\noexpand\hspace{0.5em}\the\ldotstoks\noexpand\hspace{0.5em}}%
+    \let [=\newbook@sql%
+    \let ]=\newbook@sqr%
+    \let\*=\newbook@squig%
+    %
+    \let\newbook@ldots=\ldots%
+    \def\ldots{\hspace{0.5em}\newbook@ldots\hspace{0.5em}}%
+    \def\lldots{\newbook@ldots\hspace{0.5em}}%
+    %
+    \def\math##1{$##1$}%
+    \def\sub##1{$_##1$}%
   }%
 \endgroup%
 %

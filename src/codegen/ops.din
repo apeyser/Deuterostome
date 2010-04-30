@@ -219,6 +219,7 @@
       /gettime /gettimeofday /profiletime /localtime /getwdir /setwdir /sleep
       /random /random_init
       /readfile /writefile /findfiles /findfile /readboxfile /writeboxfile
+      /umask
       /transcribe
       /fax /merge /nextobject
       /interpolate /integrateOH /extrema 

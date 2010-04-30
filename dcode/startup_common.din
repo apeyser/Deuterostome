@@ -106,8 +106,22 @@
     0 2 3 -1 roll 1 sub {                      | dict [/name val ...] i
       1 index exch 2 getinterval {} forall def | dict [/name val ...]
     } for
-  } stopped end {stop} if
+  } stopped end ~stop if
   pop
+} bind def
+
+|------------------ makestruct_close ----------------
+| [ /name val /name2 val2 ... | dict
+|
+| Like makestruct, except the list isn't closed and the
+| memory for making the list is returned.
+|
+/makestruct_close {
+  save                                           | [/name val... save     |]
+  counttomark 1 add 1 roll closelist ~makestruct | save [/name val..] ~mk
+  [ 4 -1 roll dup capsave ~stopped push |]       | dict stopped save
+  restore                                        | dict stopped
+  ~stop if                                       | dict
 } bind def
 
 |---------------- makestruct_stack ----------------
@@ -422,6 +436,72 @@
 | send signal to all pawns by name (only if you have pawns!)
 |
 /rsignal ~[SIGNALS ~exch ~get ~rsendsig] bind def
+
+|============================================ PERMS
+|
+| file mask permission bits & functions around
+| umask.
+| The perm bit flags in PERMS are {USER,GROUP,OTHER}_{R,W,X}
+| as per posix standard (OTHER_EXECUTE = 1, OTHER_WRITE = 2, ...).
+|
+/PERMS [
+  0 1 {
+    /OTHER_X /OTHER_W /OTHER_R
+    /GROUP_X /GROUP_W /GROUP_R
+    /USER_X  /USER_W  /USER_R 
+  } {
+    3 1 roll dup 3 1 roll
+    exch 1 index or exch
+    1 bitshift
+  } forall pop
+  /ALL exch
+] makestruct def
+
+|--------------------- _setfilemask -------------------
+| \[ /PERM_NAME... | \[ old-umask
+|
+| Internal: takes PERM names and sets the umask to 
+| not or(perms...). Returns previous umask.
+|
+/_setfilemask {
+  0 counttomark 1 sub {PERMS 3 -1 roll get or} repeat not
+  PERMS /ALL get and
+  umask
+} bind def
+
+|---------------------- setfilemask ---------------------
+| \[ /PERM_NAME... | --
+|
+| Sets the file mask to the union of the bits from PERM by /PERM_NAME.
+| Aka, umask = not or(perms).
+|
+/setfilemask {_setfilemask pop pop} bind def
+
+|----------------------- filemask --------------------------
+| [ /PERM_NAME.. | [ /PERM_NAME...
+|
+| Like setfilemask, except it returns the mask permission names.
+|
+/filemask {
+  _setfilemask not PERMS {
+    1 index /ALL eq {pop pop} {
+      2 index and 0 eq ~pop ~exch ifelse
+    } ifelse
+  } forall pop
+} bind def
+
+|--------------------- getfilemask ----------------------------
+| -- | [ /PERM_NAME....
+|
+| Gets the current permission names for use in setfilemask.
+| So: getfilemask setfilemask does nothing at all.
+|
+/getfilemask {
+  {
+    openlist filemask
+    counttomark 1 add copy setfilemask
+  } lock
+} bind def
 
 |------------------------ low-level information -------------------------
 | For debugging and quick information about objects, stacks, and system

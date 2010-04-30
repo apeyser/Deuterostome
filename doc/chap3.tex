@@ -600,6 +600,13 @@ the \dcomp{dvt} process is started up. The three windows are:
   it. If you have a multi-button mouse: shift/click and control/click
   are equivalent to clicking on buttons 2 or 3.
 
+  From the keyboard, the emacs key sequence \texttt{meta-down}
+  (usually Alt-Cursor\_Down) and \texttt{meta-up} (Alt-Cursor\_Up)
+  switch between targets in \win{TheHorses}. The emacs key sequence
+  \texttt{meta-shift-down} (Alt-Shift-Cursor\_Down) and
+  \texttt{meta-shift-down} (Alt-Shift-Cursor\_Up) selects the next
+  \emph{group} or last \emph{group}.
+
 \item[\win{DVT Macros}] displays a list of command mnemonics. When you
   click on a mnemonic, a string is placed into the console screen. You
   can execute this string as a console phrase by moving the cursor
@@ -608,7 +615,7 @@ the \dcomp{dvt} process is started up. The three windows are:
   a complete command, one designating a source and the other a
   destination object. The source and destination objects, in turn, are
   derived from objects selected in the third window, called
-  \win{TheEye}. 
+  \win{TheEye}.
 
   \begin{nopb}
   For instance, you may: 
@@ -631,6 +638,11 @@ the \dcomp{dvt} process is started up. The three windows are:
   command phrase is placed into the console buffer so that you can
   execute it (press `F1'), or execute it after some editing from your
   hand.
+
+  The bottom line is a gui interface to keyboard commands: press
+  ``f1-send'' to send the last command, as if by pressing `F1',
+  ``f2-continue'' acts as if you pressed the 'F2' key, sending
+  \texttt{!}~\texttt{continue} and ending ``scream mode'', and so forth.
 
 \item[\win{TheEye}] lets you view any object contained in the
   associated D machine, and any file system known to the host from
@@ -830,9 +842,9 @@ null/lib_dict      & nextlib      & dict true             \\
 \end{ops}
 
 The \dcomp{dnode} lets you resize the VM and stack dimensions
-(\op{vmresize}). When given the \op*{null} object as operand,
+(\op{vmresize}). When given the \op{null} object as operand,
 \op{vmresize} establishes a tiny VM, renders the \dcomp{dnode}
-dormant, and returns \op*{true}. When given the array of type long as
+dormant, and returns \op{true}. When given the array of type long as
 operand, \op{vmresize} establishes stack, VM, and \op{userdict}
 dimensions as specified by the elements of the array, in the order:
 operand stack size (in objects), dictionary stack size, execution
@@ -867,8 +879,8 @@ automatically creates an unlocked context for itself).
 Several operators allow a \dcomp{dnode} to organize its interactions
 with the current console. \op{console} inquires the socket currently
 subserving the console connection. It returns a socket-type
-\op*{null} object when a console is connected. Otherwise, a plain
-\op*{null} object is returned. \op{setconsole} when given the
+\op{null} object when a console is connected. Otherwise, a plain
+\op{null} object is returned. \op{setconsole} when given the
 object returned by \op{console} directs \op{toconsole} to the
 connected console or to 'stderr' of the \dcomp{dnode}
 host. \op{toconsole} sends the contents of its string operand to the
@@ -938,7 +950,21 @@ array dir & sineFFT & array\\\\
 
 \emph{solve\_bandmat} solves a linear equation system whose coefficients are a bandmatrix (based on \emph{bandet1} and \emph{bansol1} of Wilkinson/Reinsch I/6). The list \emph{bandlist} contains the coefficients as band arrays running parallel to the main diagonal and starting with the bottom-most diagonal; the index of the main diagonal array in \emph{bandlist} is given by the numeral \emph{main\_idx}. The first element of all band arrays corresponds to the first column of the matrix; positions falling outside the matrix must be filled by zeroes. \emph{bandrh} provides the right-hand side vector and is overwritten by the solution, whose validity is indicated by \emph{bool}. All arrays must have identical dimensions and type `/D'.
 
-\emph{decompLU} performs the LU-decomposition of the matrix \emph{a} in place (given as a list of row arrays of type `/D'). The array \emph{idx} is of type `/X' and receives row permutation information to be used by \emph{backsubLU}. The returned numeral \emph{d} signals an even/odd number of permutations, and \emph{bool} signals a valid decomposition (or a singular matrix). \emph{backsubLU} computes the solution of a linear equation system using the LU-decomposed coefficient matrix \emph{a} with the permutation information \emph{idx} and a column vector of right-hand values \emph{b}, which is overwritten by the solution. \emph{invertLU} inverts the matrix \emph{a} and returns the inverse in matrix \emph{b} (internally using LU-decomposition and repeated backsubstitution); upon return, \emph{a} and array \emph{idx} contain the LU-decomposed matrix and row permutation information. A \op*{false} value of \emph{bool} signals singularity of the matrix.
+\emph{decompLU} performs the LU-decomposition of the matrix \emph{a}
+in place (given as a list of row arrays of type `/D'). The array
+\emph{idx} is of type `/X' and receives row permutation information to
+be used by \emph{backsubLU}. The returned numeral \emph{d} signals an
+even/odd number of permutations, and \emph{bool} signals a valid
+decomposition (or a singular matrix). \emph{backsubLU} computes the
+solution of a linear equation system using the LU-decomposed
+coefficient matrix \emph{a} with the permutation information
+\emph{idx} and a column vector of right-hand values \emph{b}, which is
+overwritten by the solution. \emph{invertLU} inverts the matrix
+\emph{a} and returns the inverse in matrix \emph{b} (internally using
+LU-decomposition and repeated backsubstitution); upon return, \emph{a}
+and array \emph{idx} contain the LU-decomposed matrix and row
+permutation information. A \op{false} value of \emph{bool} signals
+singularity of the matrix.
 
 \emph{bandLU} performs the LU-decomposition of a bandmatrix described by \emph{bandlist} and \emph{main\_idx} (see \emph{solve\_bandmat}) and returns the results in \emph{bandlist}, the bandmatrix buffer \emph{llist}, and the `/X' array \emph{idx} (see \emph{decompLU}). \emph{bool} is set false when singularity is discovered. For details see Press et al. 2.4. \emph{bandbs} computes a solution of the banded linear equation system for the right-hand vector given in array \emph{b}, which overwrites the vector.  
 
@@ -1080,7 +1106,7 @@ object) for communication with the rook via the \dcomp{dnode} operator
 \dcomp{dnode} will be addressed (via \emph{mpi}) to the rook, who
 communicates them to the \dcomp{dnode} through the socket established
 by \op{makethreads}. A second usage of \op{makerthreads}, taking a
-\op*{null} argument, kills the rook and the current
+\op{null} argument, kills the rook and the current
 \dcomp[dpawn]{dpawns} (it returns nothing). The rook is used to couple
 \dcomp{dnode} and \dcomp[dpawn]{dpawns} in this way in order to
 facilitate cleanup of failed \dcomp{dpawn} activities without
@@ -1088,11 +1114,11 @@ compromising the continuity of the \dcomp{dnode} itself.
 
 \op{rthreads} inquires the current number of \dcomp[dpawn]{dpawns},
 independent of their functional states. \op{checkrthreads} returns
-\op*{true} if the rook and all current \dcomp[dpawn]{dpawns} are
+\op{true} if the rook and all current \dcomp[dpawn]{dpawns} are
 responsive. If the rook is unresponsive, \op{checkrthreads} eliminates
-all remote threads from the \dcomp{dnode} and returns \op*{false}. If
+all remote threads from the \dcomp{dnode} and returns \op{false}. If
 one or more \dcomp[dpawn]{dpawns} are unresponsive, \op{checkrthreads}
-simply returns \op*{false}.
+simply returns \op{false}.
 
 You can send messages to the rook using \op{send} with the socket
 number obtained from \op{makerthreads}. The rook will broadcast such a
@@ -1119,27 +1145,27 @@ these mappings are identified by name in the dictionary
 \subsection{The PETSc procedure library of the \dcomp{dnode}}
 \label{section:petsc-procs}
 \begin{procs}
-   /A \ldots /type rows columns & mat_create      & A \\
-                      /X length & vec_create      & X \\
-                           /Y X & vec_dup         & Y \\
-                         X data & vec_fill        & -- \\
-                   A ~row-maker & mat_fill        & -- \\
-                        X data  & get_vector      & data \\
-                         A data & get_matrix      & data \\
-                           /B A & mat_dup         & B\\
-                       \ldots A & mat_transpose   & --\\
-        Y beta A Atrans X alpha & pmatvecmul      & -- \\
-   data Y beta A Atrans X alpha & get_matvecmul   & data \\
-                          /name & ksp_create      & K \\
-                              X & vec_destroy     & -- \\
-                              A & mat_destroy     & --\\
-                              K & ksp_destroy     & --\\
-                        K A X Y & ksp_solve       & --\\
-                          K X Y & ksp_resolve     & --\\
-                   K A X Y data & get_ksp_solve   & data\\
-                     K X Y data & get_ksp_resolve & data\\
-                           bool & report          & --\\
-                 length ~active & execrange       & --\\
+   /A \ldots /type rows columns  & mat_create      & A    \\
+                      /X length  & vec_create      & X    \\
+                           /Y X  & vec_dup         & Y    \\
+                         X data  & vec_fill        & --   \\
+                   A \*row-maker & mat_fill        & --   \\
+                        X data   & get_vector      & data \\
+                         A data  & get_matrix      & data \\
+                           /B A  & mat_dup         & B    \\
+                       \ldots A  & mat_transpose   & --   \\
+        Y beta A Atrans X alpha  & pmatvecmul      & --   \\
+   data Y beta A Atrans X alpha  & get_matvecmul   & data \\
+                          /name  & ksp_create      & K    \\
+                              X  & vec_destroy     & --   \\
+                              A  & mat_destroy     & --   \\
+                              K  & ksp_destroy     & --   \\
+                        K A X Y  & ksp_solve       & --   \\
+                          K X Y  & ksp_resolve     & --   \\
+                   K A X Y data  & get_ksp_solve   & data \\
+                     K X Y data  & get_ksp_resolve & data \\
+                           bool  & report          & --   \\
+                 length \*active & execrange       & --   \\
 \end{procs}
 
 These procedures internally communicate with a cluster of
@@ -1231,7 +1257,7 @@ Associated with \textproc{ksptype} is \textproc{kspparam}, and with
 \textproc{pctype} is \textproc{pcparam}. The `*param' names map to
 \emph{D} objects that are necessary for the solver (and its
 preconditioner). Currently, none of the defined types use them - both
-should be \textop{null}.
+should be \op{null}.
 
 \proc{mat_create} creates a matrix distributed over the
 \dcomp[dpawn]{dpawns}. The \textproc{rows} and \textproc{columns}
@@ -1341,7 +1367,7 @@ memory allocation only occurs on the \dcomp[dpawns]{dpawn}, and not on
 the \dcomp{dnode}.
 
 \proc{report} simply turns on or off verbose reporting
-(\textproc{true} to turn verbose reporting on).
+(\op{true} to turn verbose reporting on).
 
 \proc{execrange} runs an active object on all \dcomp[dpawns]{dpawns},
 passing in the range for that pawn in particular. It should be used
@@ -1685,12 +1711,12 @@ Ax$ is applied.
 \op{petsc_ksp_create} creates a solver object (`ksp'). The parameter
 `ksptype' is an integer, as enumerated in \textproc{ksptypes} of
 \textproc{PETSC}, defining the solver type (GMRES, ...); if
-\textop{null}, then the PETSc default is used. The `kspparam' is a
-solver type specific parameter, currently \textop{null} for
+\op{null}, then the PETSc default is used. The `kspparam' is a
+solver type specific parameter, currently \op{null} for
 all. Likewise, `pctype' defines the precondition; the possible values
 are defined in \textproc{pctypes} of \textproc{PETSC}. As well,
 `pcparam' is a preconditioner specific parameter (currently
-\textop{null} for all). This operator is matched by
+\op{null} for all). This operator is matched by
 \op{petsc_ksp_destroy}, which discards the `ksp' dictionary and any
 associated PETSc memory.
 
@@ -1714,7 +1740,7 @@ errors, and their mappings from PETSc error codes).
 
 \op{petsc_ksp_solve} actually solves for $x$ in $Ax = b$. On the first
 use, $A$ must be given; for later solutions with the same left-hand
-side matrix, \textop{null} can be used instead (which will optimize
+side matrix, \op{null} can be used instead (which will optimize
 the solver). If a new $A$ is used, it \emph{must} be a `duplicate' of
 the original matrix, as created by \op{petsc_mat_dup}. This guarantees
 that the `zero' elements in the same column/rows; the values, of
