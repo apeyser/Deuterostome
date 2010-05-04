@@ -1191,6 +1191,312 @@ end def  | of xtext_dict
   userdict /color known not {getstartupdir (color.d) fromfiles} if
 } bind def
 
+
+|========================= mouse & font functions ===================
+
+/basefontdesc 8 dict dup begin
+  /family (lucida) def
+  /weight (medium) def
+  /slant (r) def
+  /points (140) def
+  /BOLDFONT 2 dict dup begin /weight (bold) def /slant (r) def end def
+  /ITALICFONT 1 dict dup begin /slant (i) def end def
+  /BOLDITALICFONT 2 dict dup begin /weight (bold) def /slant (i) def end def
+end def
+
+/mkfontdict {/fontdesc name
+  4 dict {
+    /NORMALFONT /BOLDFONT /ITALICFONT /BOLDITALICFONT
+  } {/fontname name
+    /fontlength 0 def [
+      {
+        /foundry /family /weight /slant /width /style /pixels /points
+        /resx /resy /space /avgwidth /registry /encoding
+      } {/fontvalue name
+        (-) (*) {
+          fontdesc fontname known {
+            fontdesc fontname get fontvalue known {
+              pop fontdesc fontname get fontvalue get
+              exit
+            } if
+          } if
+          
+          fontdesc fontvalue known {pop fontdesc fontvalue get exit} if
+          
+          basefontdesc fontname known {
+            basefontdesc fontname get fontvalue known {
+              pop basefontdesc fontname get fontvalue get exit} if
+          } if
+          
+          basefontdesc fontvalue known {pop basefontdesc fontvalue get} if
+          exit
+        } loop
+
+        dup length fontlength add 1 add /fontlength name
+      } forall
+    ] fontlength /b array 0 3 -1 roll {fax} forall pop
+    1 index fontname put
+  } forall
+  mkread
+} bind def
+
+/fontdict1 1 dict mkfontdict def
+/fontdict4 1 dict dup begin 
+  /points (100) def
+end mkfontdict def
+/fontdict2 3 dict dup begin
+  /family (helvetica) def
+  /ITALICFONT 1 dict dup begin /slant (o) def end def
+  /BOLDITALICFONT 1 dict dup begin /slant (o) def end def
+end mkfontdict def
+/fontdict3 4 dict dup begin
+  /family (helvetica) def
+  /points (100) def
+  /ITALICFONT 1 dict dup begin /slant (o) def end def
+  /BOLDITALICFONT 1 dict dup begin /slant (o) def end def
+end mkfontdict def
+
+/fontdict fontdict1 def
+/lucida_140_fontdict fontdict1 def
+/lucida_100_fontdict fontdict4 def
+/helvetica_140_fontdict fontdict2 def
+/helvetica_100_fontdict fontdict3 def
+
+|-- mouse key combos
+/mousebuttons 11 dict dup begin | {
+  /left        1  def
+  /middle      2  def
+  /right       3  def
+  /scrollUp    4  def
+  /scrollDown  5  def
+  /scrollLeft  6  def
+  /scrollRight 7  def 
+  /button8     8  def
+  /button9     9  def
+  /button10    10 def
+  /button11    11 def| }
+end mkread def
+
+/mousekeys 12 dict dup begin | {
+  /plain    0            def 
+  /shift    1 0 bitshift def
+  /capslock 1 1 bitshift def 
+  /ctrl     1 2 bitshift def
+  /mod1     1 3 bitshift def
+  /mod2     1 4 bitshift def
+  /mod3     1 5 bitshift def
+  /mod4     1 6 bitshift def
+  /mod5     1 7 bitshift def
+  | aliases
+  /alt     mod1 def
+  /numlock mod2 def
+  /super   mod4 def | }
+end mkread def
+
+| [/key1...] or /key, /button | {mB n1 eq mM n2 eq and}
+/mkmousepair {
+  ~[
+    exch mousebuttons 1 index known {mousebuttons exch get} {
+      (Warning unknown mouse button: ) toconsole _ pop -1
+    } ifelse
+    ~mB ~eq
+
+    0 6 -1 roll dup class /listclass ne {[exch]} if {
+      mousekeys 1 index known {mousekeys exch get or} {
+        (Warning unknown mouse key: ) toconsole _ pop
+      } ifelse
+    } forall
+    ~mM ~eq ~and
+  ] bind
+} bind def
+
+/basemousedesc [
+  /windows [/theeye /thehorses /macros /default]
+  /events [
+    /scrollProp /scrollUp /scrollDown /pageUp /pageDown 
+    /click /open /check /remove
+    /cancel /group /map /raise
+  ]
+
+  /ignore     [/capslock /numlock] | ignore for all
+  /macros [ | ignore for macros
+    /ignore [/capslock /numlock /ctrl /shift /alt /super]
+  ] makestruct
+
+  /click      [/plain /left       mkmousepair] | all 
+  /remove     [/shift /left       mkmousepair] | theeye
+  /scrollUp   [/plain /scrollUp   mkmousepair] | theeye
+  /scrollDown [/plain /scrollDown mkmousepair] | theeye
+
+  /pageUp     [
+    /ctrl          /scrollUp   mkmousepair
+    /plain         /scrollLeft mkmousepair
+  ]  | theeye
+  /pageDown   [
+    /ctrl         /scrollDown  mkmousepair
+    /plain        /scrollRight mkmousepair
+  ] | theeye
+
+  /scrollProp [ | theeye
+    /plain        /right  mkmousepair 
+    /shift        /left   mkmousepair
+  ] 
+  /open [       | theeye
+    /plain        /right  mkmousepair
+    /ctrl         /left   mkmousepair 
+  ] 
+  /check [      | theeye
+    /plain        /middle mkmousepair
+    /alt          /left   mkmousepair 
+  ] 
+
+  /map [        | thehorses
+    /alt          /left   mkmousepair
+    [/ctrl /alt]  /right  mkmousepair
+    [/shift /alt] /right  mkmousepair
+  ] 
+  /cancel [    | thehorses
+    /plain        /right  mkmousepair
+    /shift        /left   mkmousepair 
+  ] 
+  /group  [    | thehorses
+    /plain        /middle mkmousepair
+    /ctrl         /left   mkmousepair 
+    /shift        /right  mkmousepair
+  ] 
+  /raise  [    | thehorses
+    /ctrl         /right  mkmousepair 
+    [/shift /alt] /left   mkmousepair
+    [/ctrl  /alt] /left   mkmousepair
+  ]
+] makestruct def
+
+/mkmousedict_types {
+  /mousedesc name
+  mousedesc /basedesc known {
+    mousedesc /basedesc get /mousebasedesc name
+    mousebasedesc /windows known {
+      mousebasedesc /windows get /mousewindows name
+    } if
+    mousebasedesc /events known {
+      mousebasedesc /events get /mouseevents name
+    } if
+  } {
+    /mousebasedesc 0 dict def
+  } ifelse
+
+  mousedesc /windows known {mousedesc /windows get /mousewindows name} if
+  mousedesc /events known {mousedesc /events get /mouseevents name} if
+
+  mousewindows length dict 
+  mousewindows {/mousepage name
+    mouseevents length 1 add dict 1 index mousepage put 
+    [mouseevents {} forall /ignore] {/event name
+      null {
+        mousedesc mousepage known {
+          mousedesc mousepage get event known {
+            pop mousedesc mousepage get event get /mousepage exitto
+          } if
+        } if
+          
+        mousedesc event known {
+          pop mousedesc event get /mousepage exitto
+        } if
+        
+        mousebasedesc mousepage known {
+          mousebasedesc mousepage get event known {
+            pop mousebasedesc mousepage get event get /mousepage exitto
+          } if
+        } if
+        
+        mousebasedesc event known {pop mousebasedesc event get} if
+      } /mousepage exitlabel
+      1 index mousepage get event put
+    } forall
+    dup mousepage get /ignore get null eq {
+      [] 1 index mousepage get /ignore put
+    } if
+  } forall
+} bind def
+
+/mkmousedict_keys {
+  dup {/mousepage name pop
+    mousepage {
+      1 index /ignore eq {
+        dup class /listclass ne {mousekeys exch get} {
+          0 exch {mousekeys exch get or} forall
+        } ifelse not
+      } {
+        ~[
+          ~[
+            false 4 -1 roll {
+              dup active {
+                dup class /listclass eq {~exec} if
+              } {
+                (Warning illegal mouse command: ) toconsole _ pop
+              } ifelse
+              {pop true /mousepage exitto} ~if
+            } forall 
+          ] /mousepage ~exitlabel
+        ] bind 
+      } ifelse mousepage 3 -1 roll put
+    } forall
+  } forall
+  mkread
+} bind def
+    
+/mkmousedict {
+  {mkmousedict_types mkmousedict_keys} 10 dict indict
+} bind def
+
+/no_alt_mousedesc [
+  /basedesc basemousedesc
+  /check [      | theeye
+    /super          /left   mkmousepair 
+    /plain         /middle  mkmousepair
+  ]
+
+  /map        [ | thehorses
+    /super /left            mkmousepair
+    [/ctrl /super]  /right  mkmousepair
+    [/shift /super] /right  mkmousepair
+  ]
+  /cancel [    | thehorses
+    /shift          /left   mkmousepair 
+    /plain          /right  mkmousepair
+  ]
+  /group  [    | thehorses
+    /ctrl           /left   mkmousepair 
+    /plain          /middle mkmousepair
+    /shift          /right  mkmousepair
+  ]
+  /raise  [    | thehorses
+    [/shift /super] /left   mkmousepair
+    [/ctrl  /super] /left   mkmousepair
+    /ctrl           /right  mkmousepair 
+  ]
+] makestruct def
+
+/basemousedict [/basedesc basemousedesc] makestruct mkmousedict def
+/no_alt_mousedict no_alt_mousedesc mkmousedict def
+/commonmousedict basemousedict def
+
+| mousestate /wintype actiondict mousedict | -- <<action exec'd>> 
+/mouseaction {/mousedict name /actiondict name
+  | bottom 8 bits are the modifier keys, bottom 8 of top 16 is mouse button
+  | Why? No clear reason.
+  exch dup -16 bitshift /mB name 255 and /mM name   | /wintype
+  mousedict 1 index get /ignore get mM and /mM name | /wintype
+  false mousedict 3 -1 roll get {                   | false /event {}
+    1 index /ignore eq {pop pop} {
+      actiondict 2 index known not {pop pop} {
+        exec {exch pop true exit} {pop} ifelse
+      } ifelse
+    } ifelse
+  } forall
+  {actiondict exch get exec true} {false} ifelse
+} bind def
+
 save 1024 /b array 1 index capsave | [
   dup 0 (Home:  )   fax gethomedir    fax (\n) fax 0 exch getinterval toconsole
   dup 0 (Startup: ) fax getstartupdir fax (\n) fax 0 exch getinterval toconsole
