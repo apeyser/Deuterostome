@@ -374,7 +374,9 @@ end def
        mX wW 3 sub nodot_size sub ge {/nodot nodot not def} if
        inforect_draw stop
      } if
-     mY wH 15 sub ge {mS /theeye scroll_actions mouseaction pop stop} if
+     mY wH 15 sub ge {
+       mS /theeye scroll_actions commonmousedict mouseaction pop stop
+     } if
      /mL mY 15 sub 13 div def
      mX wW 3 sub 2 div 1 add le {hitL} {hitR} ifelse
   } stopped cleartomark | ]
@@ -667,7 +669,7 @@ end def
  { | stopped
    leftpageT mL add dup leftpageU ge {pop stop} if /theidx name
    rebuildLpage {showLpage stop} if
-   mS /theeye left_actions mouseaction pop
+   mS /theeye left_actions commonmousedict mouseaction pop
  } stopped pop
 } def
 
@@ -870,7 +872,7 @@ end def
      wid ritepagerect BG fillrectangle
      rebuildLpage pop showLpage
    } if
-   mS /theeye right_actions mouseaction pop
+   mS /theeye right_actions commonmousedict mouseaction pop
  } stopped pop
 } def
 

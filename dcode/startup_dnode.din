@@ -251,7 +251,7 @@ startup_common_save capsave {
         winmade not {stop} if
         /mS name /mY name /mX name
         /kpawn mY 1 sub 13 div def
-        mS /default actions mouseaction pop
+        mS /default actions commonmousedict mouseaction pop
       } stopped end {cleartomark stop} if pop
     } bind def
 
@@ -751,22 +751,6 @@ end def |========= end of mpi data ================
   loadcolor
   COLOR /make_toconsole get exec
   whoami
-} bind def
-
-| mousestate /wintype actiondict | -- <<action exec'd>> 
-/mouseaction {/actiondict name
-  | bottom 8 bits are the modifier keys, bottom 8 of top 16 is mouse button
-  | Why? No clear reason.
-  exch dup -16 bitshift /mB name 255 and /mM name   | /wintype
-  mousedict 1 index get /ignore get mM and /mM name | /wintype
-  false mousedict 3 -1 roll get {| false /event {}
-    1 index /ignore eq {pop pop} {
-      actiondict 2 index known not {pop pop} {
-        exec {exch pop true exit} {pop} ifelse
-      } ifelse
-    } ifelse
-  } forall
-  {actiondict exch get exec true} {false} ifelse
 } bind def
 
 | (base-dir) (file) | --
