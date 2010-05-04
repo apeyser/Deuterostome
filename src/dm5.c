@@ -411,7 +411,7 @@ P op_stop(void)
 // ~active /name | ...
 //
 // label an active for a goto.
-// inside, a /name goto will return control to the
+// inside, a /name exitto will return control to the
 // next operation after label.
 //
 static P x_op_exitlabel(void) {
@@ -446,8 +446,14 @@ P op_exitlabel(void) {
   return OK;
 }
 
-//-------------------------
-// -- | --
+/*------------------------- exitto
+  /name | --
+  
+  return to the first enveloping exitlabel context labeled /name.
+  Error if it can't find /name exitlabel, or hits a stopped or aborted
+  context first.
+*/
+
 P op_exitto(void) {
   B *frame; W m;
   isstopping = FALSE;
