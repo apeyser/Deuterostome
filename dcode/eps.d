@@ -15,14 +15,14 @@
   |    document class parameters
   |  pre is everything from the end of the optional
   |    documentclass parameters to the optional preamble.
-  | main is the embedded 
-  |    macro. Basically, everything -- the gist is 
-  |    defined in \eps. 
+  | main is the embedded
+  |    macro. Basically, everything -- the gist is
+  |    defined in \eps.
   | post is from the end of the main parameter to the
   |   end of the document.
   |
   | The document is a report, with the fonts defaulted to
-  |   san-serif. The two parameters are 'XXpt' to set the 
+  |   san-serif. The two parameters are 'XXpt' to set the
   |   the default point size for the report, and the actual
   |   latex to be embedded.
   |
@@ -85,7 +85,7 @@
   |
   | -- <</input, ptsize, wr, ewr defined>> | --
   |
-  | Here are the sinews. eps_ does all the scripting work, 
+  | Here are the sinews. eps_ does all the scripting work,
   |  constructing a latex document out of ptsize (10,11 or 12)
   |  and input, an arbitary latex string.
   | It creates a temporary directory, puts the document in there,
@@ -93,13 +93,13 @@
   |   uses sed to append the latex bounding box details (and strip pt
   |   from those numbers, since I can't seem to make latex do that),
   |   and finally appends an %%EOF to the entire thing.
-  | The output sits in a pipe, as well as an error messages from 
+  | The output sits in a pipe, as well as an error messages from
   |  the subprocesses.
   |
   /eps_ {
     null (eps) tmpdir /tsdir name /tdir name
     ewr (Working in temporary directory: `) writefd
-    tdir writefd tsdir writefd 
+    tdir writefd tsdir writefd
     ('\n) writefd pop
 
     /pwd getwdir def
@@ -107,11 +107,11 @@
       (.) (eps.tex) wropen {
         predoc {(XX) 0 * ptsize * number pop} pre preamble main input post
       } {exec writefd} forall close
-        
+
       [(pdflatex) (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
         NULLR ewr dup sh_ wait not {true /estreamwith exitto} if |]
-        
-      [(gs) (-q) RESOLUTION (-dLanguageLevel=3) 
+
+      [(gs) (-q) RESOLUTION (-dLanguageLevel=3)
         (-dNOPAUSE) (-dBATCH) (-dSAFER)
         (-sDEVICE=epswrite) (-sOutputFile=-)
         (eps.pdf)
@@ -119,12 +119,12 @@
 
       [(sed) (-e) (s/pt$//) (eps.comment)
         NULLR wr ewr sh_ wait not {true /estreamwith exitto} if |]
-          
+
       wr (%%EOF) writefd close
       false
     } /estreamwith exitlabel} stopped} aborted
-    pwd setwdir 
-    ~abort if ~stop if {true /estreamwith exitto} if
+    pwd setwdir
+    ~abort if {true stop} if {true /estreamwith exitto} if
 
     tdir tsdir removedir
   } bind def
@@ -136,25 +136,25 @@
   | same as xeps, except that preamble is empty
   |
   /eps {() 3 1 roll xeps} bind def
-  
+
   |------------------------ xeps ---------------------------
   |
   | (preamble) (latex) ptsize | (eps)
   |
-  | (preamble) is any string that can go in the preamble 
+  | (preamble) is any string that can go in the preamble
   |   after \documentclass[xpt]{report} and the standard preamble,
   |   and before \begin{document}.
-  | (latex) is any movable latex string that can go between 
+  | (latex) is any movable latex string that can go between
   |   \document{begin}...\document{end} (it actually goes in
   |   \eps{...}, which then expands to the document)
   | ptsize can be 10, 11, or 12 to set the base font size
   | (eps) is the body for an eps file.
   | On error, the eps prints "hamuti".
   |
-  | The resolution is defined by RESOLUTION defined in this 
+  | The resolution is defined by RESOLUTION defined in this
   |   module -- defaults to 1200 dpi.
   |
-  | eps calls eps_, after defining ptsize and input, setting up 
+  | eps calls eps_, after defining ptsize and input, setting up
   |  input and output streams, and wrapping it in an error catcher
   |  that will dump the error stream to console if a stop or error
   |  happen internally.
@@ -171,8 +171,8 @@
       } layerdef
 
       {pop rd suckfd} {
-        cleartomark 
-        wr closeifopen 
+        cleartomark
+        wr closeifopen
         rd suckfd toconsole
         hamuti
       } ifelse
@@ -180,7 +180,7 @@
   } bind def
 
   | Hamuti!
-  /hamuti <B   
+  /hamuti <B
   37   33   80   83   45   65  100  111   98  101   45   51   46   48
   32   69   80   83   70   45   51   46   48   10   37   37   66  111
   117  110  100  105  110  103   66  111  120   58   32   40   97  116
@@ -578,6 +578,6 @@
   49   52   56   51   50   10   37   37   76   97  116  101  120   72
   101  105  103  104  116   58   32   56   46   51   51   51   51   49
   10   37   37   76   97  116  101  120   68  101  112  116  104   58
-  32   48   46   48   10   37   37   69   79   70 
+  32   48   46   48   10   37   37   69   79   70
   > def
 } moduledef
