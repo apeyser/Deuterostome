@@ -796,12 +796,14 @@
     /estreamrd name
   } def
 
-  | bool bool | bool bool
+  | bool false | bool false
+  | true | true
   | if true, output contents of estreams
   /_estreamclose {
     estreamwt dup null eq ~pop {
       close 
-      2 copy or {estreamrd suckfd toconsole} {estreamrd close} ifelse
+      dup not {1 index} if
+      {estreamrd suckfd toconsole} {estreamrd close} ifelse
       /estreamwt null def /estreamrd null def
     } ifelse
   } bind def

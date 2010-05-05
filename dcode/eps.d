@@ -124,7 +124,7 @@
       false
     } /estreamwith exitlabel} stopped} aborted
     pwd setwdir
-    ~abort if {true stop} if {true /estreamwith exitto} if
+    ~abort if ~stop if {true /estreamwith exitto} if
 
     tdir tsdir removedir
   } bind def
