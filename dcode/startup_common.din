@@ -279,7 +279,6 @@
   userdict currentdef
 } bind def
 
-
 |================ makelist =======================
 | ~store | dict
 | 
@@ -406,6 +405,17 @@
 /enddict {
   [currentdict end ~stopped push|] ... true/false currentdict
   begin ~stop if
+} bind def
+
+|------------------ tostring -------------
+| (string-buf) ~active | (sub-string-buf)
+| active: (string-buf) index | (string-buf) index
+|
+| Wraps up common idiom of:
+|   buffer 0 .... 0 exch getinterval
+|
+/tostring {
+  0 exch exec 0 exch getinterval
 } bind def
 
 |============================================ SIGNALS
