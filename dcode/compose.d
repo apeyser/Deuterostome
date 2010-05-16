@@ -1,6 +1,27 @@
 /COMPOSE module
 200 dict dup begin
 
+/verbose [
+  /quiet ~[
+    /loud ~pop
+    /medium ~pop
+    /quiet ~toconsole
+  ] bind makestruct
+  /medium ~[
+    /loud ~pop
+    /medium ~toconsole
+    /quiet ~toconsole
+  ] bind makestruct
+  /loud ~[
+    /loud ~toconsole
+    /medium ~toconsole
+    /quiet ~toconsole
+  ] bind makestruct
+] makestruct def
+
+/setvolume {dup /volume name verbose exch get ~def forall} bind def
+/loud setvolume
+
 |=============================== Prologue ====================================
 |
 | This D code has evolved from struct.ps as a tool for making structured
@@ -10,7 +31,11 @@
 | made by tools in graf.ps are now made by integrated tools of the new system.
 | Elements existing in the form of EPS files can be incorporated. This way,
 | the new system provides a general toolbox for making notebooks and preparing
-| figures for publication. 
+| figures for publication.
+|
+| Note: We use recursion ad nauseam. Expect that the code that you see is 
+|       only the tip of the iceberg.
+|        
 |
 |----------------------------------------- things to do (or not)
 |
@@ -62,7 +87,7 @@
 |-- phase 1 (logical design)
 
     phase1 begin COMPOSE begin 
-      (\n1) toconsole
+      (\n1) loud
       ~[ generator ] bind /root name 
     end end
 
@@ -70,7 +95,7 @@
 
     /bbox * 4 /d array copy def
     phase2 begin
-      (\n2) toconsole
+      (\n2) loud
       root
     end
 
@@ -94,7 +119,7 @@
     |-- assemble PS code of figure
     
     phase3 begin
-      (\n3) toconsole
+      (\n3) loud
       root 
     end
 
@@ -105,7 +130,7 @@
 |-- write EPS output file
 
     EPSbuf 0 EPSidx getinterval EPSpath EPSfile writefile
-    (\nEPS file written: ) toconsole EPSfile toconsole (\n) toconsole
+    (\n) loud (EPS file written: ) medium EPSfile medium (\n) medium
 
   } { stopped { countdictstack ndict sub ~end repeat stop } if }
   /figurelayer inlayer
@@ -437,8 +462,9 @@
 |
 | The primitive `fcgraf' accepts 
 |
-|  [ < > < > < > ]     - a list containing the horizontal and vertical
-|                        independent variables and the dependent variable
+|  [ array array matrix map ] - a list containing the horizontal and vertical
+|                               independent variables as 1D arrays and the
+|                               dependent variable as mapped 2D matrix
 |
 
 |........................... graphical symbols ............................
@@ -514,6 +540,7 @@
 |  `includeEPS'  (2)
 |  `PS'          (2)
 |  `gpgraf'      (3)
+|  `pcgraf'      (3)
 |
 | The element built by a primitive is safeguarded against interference with
 | other elements, but certain graphical parameters can be passed on to
@@ -543,7 +570,7 @@
 /linewidth 0.7 def     | general, points
 /symbolsize 7 def      | for graphs, points
 /textsize 10 def       | for LaTEX (and graphs), points
-/letterprefix true def | lineaar axis label: use letter prefix
+/letterprefix true def | linear axis label: use letter prefix
                        |   (else power of 10)
 
 /verboxe false def      | switch: outline bounding boxes
@@ -571,7 +598,7 @@
   20 dict begin
   /parent name
   /placement name
-   (+) toconsole ~[ exch exec ] /children name (-) toconsole
+   (+) loud ~[ exch exec ] /children name (-) loud
   currentdict ~panel     | => secondary generator
   end 
 } bind phase1 /panel put
@@ -583,7 +610,7 @@
 
 { begin
   /bbox <d * * * * > 4 /d array copy def
-  (+) toconsole children (-) toconsole
+  (+) loud children (-) loud
   makeinverse stretchpbbox
   end
 } bind phase2 /panel put
@@ -593,7 +620,7 @@
 
 { begin
   [ ~save inverse ~concat ] { toPS } forall
-  (+) toconsole children (-) toconsole
+  (+) loud children (-) loud
   verboxe { bbox toPS ~drawbbox toPS } if
   ~restore toPS
   end
@@ -630,7 +657,7 @@
   /spacing name
   /genlist name
   currentdict ~panelarray     | => secondary generator
-  (+) toconsole
+  (+) loud
   /nrows 0 def /ncols 0 def /rowidx 0 def
    [ genlist { /colidx 0 def
         [ exch
@@ -643,7 +670,7 @@
         nrows rowidx le { /nrows rowidx def } if
       } forall
    ] /childrenlist name
-  (-) toconsole
+  (-) loud
   end 
 } bind phase1 /panelarray put
 
@@ -655,7 +682,7 @@
   /wr 0 ncols /d array copy def
   /wb 0 nrows /d array copy def
   /wt 0 nrows /d array copy def
-  (+) toconsole
+  (+) loud
   /xaligns 0 ncols /d array copy def
   /yaligns 0 nrows /d array copy def
   /bbox 4 /d array def
@@ -674,7 +701,7 @@
          } for
       /rowidx rowidx 1 add def
     } forall
-  (-) toconsole
+  (-) loud
   |-- finalize placement of the panel boxes
   0.0 0 1 ncols 1 sub { /colidx name
       wl colidx get sub dup xaligns colidx put
@@ -687,9 +714,9 @@
   |-- rerun phase2 of subtree to establish correct placements of panel
   |   elements and correct panel array bbox
   * bbox copy pop
-  (\n +) toconsole
+  (\n +) loud
   childrenlist { mkact exec } forall
-  (-) toconsole
+  (-) loud
   |-- establish panel array placement and parent bbox
   makeinverse stretchpbbox
   end
@@ -700,9 +727,9 @@
 
 { begin
   [ ~save inverse ~concat ] { toPS } forall
-  (+) toconsole
+  (+) loud
   childrenlist { mkact exec } forall
-  (-) toconsole
+  (-) loud
   verboxe { bbox toPS ~drawbbox toPS } if
   ~restore toPS
   end
@@ -1010,7 +1037,7 @@
   symbolsize linewidth add 2 div dup
   xdim add bbox 2 put ydim add bbox 3 put
 
-  (+) toconsole children (-) toconsole
+  (+) loud children (-) loud
   makeinverse stretchpbbox
   end
 } bind phase2 /gpgraf put
@@ -1023,7 +1050,7 @@
   setlinewidth
   symbolsize setsymbolsize
   ( symbolfont setfont ) faxPS
-  (+) toconsole children (-) toconsole
+  (+) loud children (-) loud
 
   ~save toPS gpXplotters abscissa 3 get get exec ~restore toPS
   ~save toPS gpYplotters ordinate 3 get get exec ~restore toPS
@@ -1350,7 +1377,7 @@ end def
 
 |============================ primitive: `pcgraf' ==========================
 |
-| `pcgraf' generates a `pseudocolor graph' from a `report'  (a dictionary):
+| `pcgraf' generates a `pseudocolor graph' from a `report':
 |
 |   report name abs ord color xdim ydim  { placement } | --
 | 
@@ -1385,8 +1412,9 @@ end def
 |
 | The x,y axis system is plotted as a stroked box with inward pointing scale
 | marks on all margins. Labels appear left of and below the box. Axis
-| descriptions are complemented by '/', power of ten, and the unit (with
-| the denominator in parentheses if necessary).
+| descriptions are complemented by '/', power of ten (boolean `letterprefix'
+| selects between letter or numeral representation), and the unit (with the
+| denominator in parentheses if necessary).
 |
 | The lower left corner of the axis box is also the origin of the physical
 | x,y coordinate space of this figure element (important if you want to add
@@ -1478,7 +1506,7 @@ end def
   symbolsize linewidth add 2 div dup
   xdim add bbox 2 put ydim add bbox 3 put
 
-  (+) toconsole children (-) toconsole
+  (+) loud children (-) loud
   makeinverse stretchpbbox
   end
 } bind phase2 /pcgraf put
@@ -1491,7 +1519,7 @@ end def
   setlinewidth
   symbolsize setsymbolsize
   ( symbolfont setfont ) faxPS
-  (+) toconsole children (-) toconsole
+  (+) loud children (-) loud
 
   /Nrows Zmap 0 get Zmap 1 get div def
   /Ncols Zmap 1 get def
@@ -1663,7 +1691,9 @@ end def
 | We use the CIE31 color model. Spectral color weights  are produced by
 | sampling the x_bar, y_bar, and z_bar functions tabulated below.
 | Using no interpolation, we have 95 discrete spectral colors
-| (from purple to red) upon which we map the Z range of the data.
+| (from purple to red) upon which we map the Z range of the data. We
+| actually use only a subset so that the physical rendering is not
+| challenged beyond its gamut.
 |
 
 /makepseudocolors {
@@ -2302,7 +2332,7 @@ end definefont pop   % Symbols font
 | fixed point, one decimal otherwise).
 
 /labelformatter { 
-  1 ge { { /l ctype * exch * number } }
+  1 ge  { { /l ctype * exch * number } }
        { { * exch -1 number } }
        ifelse
   /numberlabel name
