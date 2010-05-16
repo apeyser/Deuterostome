@@ -17,11 +17,10 @@
     /medium ~toconsole
     /quiet ~toconsole
   ] bind makestruct
-] makestruct
+] makestruct def
 
-/setvolume {/volume name
-  {/loud /quiet /medium} {verbose volume get 1 index get def} forall
-} bind def
+/setvolume {dup /volume name verbose exch get ~def forall} bind def
+/loud setvolume
 
 |=============================== Prologue ====================================
 |
@@ -131,7 +130,7 @@
 |-- write EPS output file
 
     EPSbuf 0 EPSidx getinterval EPSpath EPSfile writefile
-    (\nEPS file written: ) medium EPSfile medium (\n) medium
+    (\n) loud (EPS file written: ) medium EPSfile medium (\n) medium
 
   } { stopped { countdictstack ndict sub ~end repeat stop } if }
   /figurelayer inlayer
