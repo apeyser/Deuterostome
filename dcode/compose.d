@@ -10,7 +10,11 @@
 | made by tools in graf.ps are now made by integrated tools of the new system.
 | Elements existing in the form of EPS files can be incorporated. This way,
 | the new system provides a general toolbox for making notebooks and preparing
-| figures for publication. 
+| figures for publication.
+|
+| Note: We use recursion ad nauseam. Expect that the code that you see is 
+|       only the tip of the iceberg.
+|        
 |
 |----------------------------------------- things to do (or not)
 |
@@ -437,8 +441,9 @@
 |
 | The primitive `fcgraf' accepts 
 |
-|  [ < > < > < > ]     - a list containing the horizontal and vertical
-|                        independent variables and the dependent variable
+|  [ array array matrix map ] - a list containing the horizontal and vertical
+|                               independent variables as 1D arrays and the
+|                               dependent variable as mapped 2D matrix
 |
 
 |........................... graphical symbols ............................
@@ -514,6 +519,7 @@
 |  `includeEPS'  (2)
 |  `PS'          (2)
 |  `gpgraf'      (3)
+|  `pcgraf'      (3)
 |
 | The element built by a primitive is safeguarded against interference with
 | other elements, but certain graphical parameters can be passed on to
@@ -543,7 +549,7 @@
 /linewidth 0.7 def     | general, points
 /symbolsize 7 def      | for graphs, points
 /textsize 10 def       | for LaTEX (and graphs), points
-/letterprefix true def | lineaar axis label: use letter prefix
+/letterprefix true def | linear axis label: use letter prefix
                        |   (else power of 10)
 
 /verboxe false def      | switch: outline bounding boxes
@@ -1350,7 +1356,7 @@ end def
 
 |============================ primitive: `pcgraf' ==========================
 |
-| `pcgraf' generates a `pseudocolor graph' from a `report'  (a dictionary):
+| `pcgraf' generates a `pseudocolor graph' from a `report':
 |
 |   report name abs ord color xdim ydim  { placement } | --
 | 
@@ -1385,8 +1391,9 @@ end def
 |
 | The x,y axis system is plotted as a stroked box with inward pointing scale
 | marks on all margins. Labels appear left of and below the box. Axis
-| descriptions are complemented by '/', power of ten, and the unit (with
-| the denominator in parentheses if necessary).
+| descriptions are complemented by '/', power of ten (boolean `letterprefix'
+| selects between letter or numeral representation), and the unit (with the
+| denominator in parentheses if necessary).
 |
 | The lower left corner of the axis box is also the origin of the physical
 | x,y coordinate space of this figure element (important if you want to add
@@ -1663,7 +1670,9 @@ end def
 | We use the CIE31 color model. Spectral color weights  are produced by
 | sampling the x_bar, y_bar, and z_bar functions tabulated below.
 | Using no interpolation, we have 95 discrete spectral colors
-| (from purple to red) upon which we map the Z range of the data.
+| (from purple to red) upon which we map the Z range of the data. We
+| actually use only a subset so that the physical rendering is not
+| challenged beyond its gamut.
 |
 
 /makepseudocolors {
@@ -2302,7 +2311,7 @@ end definefont pop   % Symbols font
 | fixed point, one decimal otherwise).
 
 /labelformatter { 
-  1 ge { { /l ctype * exch * number } }
+  1 ge  { { /l ctype * exch * number } }
        { { * exch -1 number } }
        ifelse
   /numberlabel name
