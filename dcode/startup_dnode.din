@@ -696,18 +696,16 @@ end def |========= end of mpi data ================
 
 |  ~exec save knode true-if-send-to-active-pawn | ...
 /dvtreceive_base {
-  exch userdict /knode put
-  exch dup capsave userdict /dvtsave put
-  {~rthreads_exec ~unlock ifelse} stopped pop
-  userdict /dvtsave known {userdict /dvtsave get restore} if
+  {~rthreads_exec} {~unlock} ifelse 
+  openlist 4 -2 roll exch dup capsave ~stopped push | ... stop save knode
+  exch restore exch pop | ... knode
   dvtrespond
 } bind def
 
+| knode | ...
 /dvtrespond {
   save
-  console ~[userdict /knode get {
-    dvtsup begin setready_dnode
-  } ~exec] send 
+  console ~[4 -1 roll {dvtsup begin setready_dnode} ~exec] send
   restore
 } bind def
 
