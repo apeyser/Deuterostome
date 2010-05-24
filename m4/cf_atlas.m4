@@ -57,7 +57,7 @@ dnl
                      AC_MSG_RESULT([no])
                     ], 
                     [$ATLAS_LIBS])
-     AC_MSG_CHECKING([for cblass_sgemm in ptcblas or cblas])
+     AC_MSG_CHECKING([for cblas_sgemm in ptcblas or cblas])
      if test $cf_atlas_ok = no ; then
         AC_MSG_ERROR([No atlas cblas found])
      else
