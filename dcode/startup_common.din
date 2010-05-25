@@ -111,7 +111,7 @@
 } bind def
 
 |------------------ makestruct_close ----------------
-| [ /name val /name2 val2 ... | dict
+| \[ /name val /name2 val2 ... | dict
 |
 | Like makestruct, except the list isn't closed and the
 | memory for making the list is returned.
@@ -160,6 +160,44 @@
   } exch indict
 } bind def
 
+|===================== save encapsulations =====================
+
+|----------------------- incap -----------------------------
+| ~active | ... save
+|
+| exec ~active in a save environment, cap it and return it
+|
+/incap {
+  openlist save ~stopped push | ... stop save
+  exch {restore stop} if      | ... save
+  dup capsave                 | ... save
+} bind def
+
+|--------------------- insave -------------------------------------
+| ~active | ...
+|
+| exec ~active in a save environment, then restore it after exec
+|
+/insave {
+  openlist save ~stopped push | ... stop save
+  restore ~stop if            | ...
+} bind def
+
+|----------------------- incapsave ----------------------------------
+|
+| ~active-cap ~active | ...
+|
+| exec ~active-cap in a save, cap the save, execute ~active
+|  then restore the save.
+|
+/incapsave {
+  ~incap openlist 3 -1 roll mkpass ~stopped push |   ... save false /active
+                                                 | / ...      true  /active
+  exch {pop stop} if                             | ... save /active
+  mkact openlist 3 -1 roll ~stopped push         | ... stop save
+  restore ~stop if                               | ...
+} bind def
+
 |-------------- caplocal ----------------------------
 | n1 ... nn-x ~names ~active | ...
 | ~names: n1 .. nn-x | n1 .. nn [/n1 .. /nn |]
@@ -178,11 +216,9 @@
 |  afterwards.
 |
 /caplocal {
-  save {
-    [exch 3 -1 roll mkpass {exec makestruct_stack} push |]
-    capsave mkact exch indict
-  } [2 index ~stopped push |]
-  restore ~stop if
+  {openlist exch mkpass {exec makestruct_stack} push} 
+  {mkact exch indict}
+  incapsave
 } bind def
 
 |---------------- caplocalfunc -----------------------------
@@ -194,20 +230,21 @@
   ~[3 -1 roll destruct_exec 3 -1 roll destruct_exec ~caplocal]
 } bind def
 
-|--------------- local -------------------------------
+|--------------- layerlocal -------------------------------
 | n1 .. nn-x /layer ~names ~active | ...
 | ~names: n1 .. nn-x | n1 .. nn [n1 .. nn |]
 |
-| Like slocal, except dictionary names come from list and
-|   difference in operand order.
+| like caplocal, except it creates a layer for the entire
+| ~active procedure with name /layer, instead of a save-cap-restore
+| sequence
 |
 | So: 1 2 3 /x {2 /d array exch [/a /b /c /d]} {a _ b 0 c copy} local
 |  prints 1, and leaves 1 2 <d 0 0> on the stack
 |  with a layer named /x created, where the array is inside the layer
 |
-/local {
+/layerlocal {
   3 -1 roll {
-    [exch mkpass {exec makestruct_stack} push |]
+    openlist exch mkpass {exec makestruct_stack} push
     mkact exch indict
   } layerdef
 } bind def
@@ -217,9 +254,9 @@
 |
 | returns a new procedure: {/name_l ~names ~active local}
 |
-/localfunc_ @NAMEBYTES@ /b array def
-/localfunc {
-  localfunc_ 0 * 5 index mkact text (_l) fax 0 exch getinterval
+/layerlocalfunc_ @NAMEBYTES@ /b array def
+/layerlocalfunc {
+  layerlocalfunc_ 0 * 5 index mkact text (_l) fax 0 exch getinterval
   token pop exch pop mkpass
   ~[exch 4 -1 roll destruct_exec 4 -1 roll destruct_exec ~local]
 } bind def
@@ -241,24 +278,23 @@
 |  /d is equal 3 and /c is a dictionary which is removed from memory
 |  afterwards.
 |
-/rlocal {
+/local {
   {
-    [exch mkpass {exec makestruct_stack} push |]
+    openlist exch mkpass {exec makestruct_stack} push
     mkact exch indict
-  } [save ~stopped push |]
-  restore ~stop if
+  } insave
 } bind def
 
 |-------------- rlocalfunc -----------------------
-| ~names ~active | {~names ~active rlocal}
+| ~names ~active | {~names ~active local}
 |
 | Creates a new wrapper procedure.
 |
-/rlocalfunc {
+/localfunc {
   ~[3 -1 roll destruct_exec 3 -1 roll destruct_exec ~rlocal]
 } bind def
 
-|---------------- dictdef ---------------------------
+|---------------- currentdef ---------------------------
 | /name ~active dict | --
 |
 | defines /name in dict with a procedure
