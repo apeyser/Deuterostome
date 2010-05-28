@@ -697,8 +697,11 @@ end def |========= end of mpi data ================
 |  ~exec save knode true-if-send-to-active-pawn | ...
 /dvtreceive_base {
   {~rthreads_exec} {~unlock} ifelse 
-  openlist 4 -2 roll exch dup capsave ~stopped push | ... stop save knode
-  exch restore exch pop | ... knode
+  openlist 4 -2 roll exch dup capsave null ~stopped push 
+  | ... stop null save knode / ... stop null knode
+  exch dup class /nullclass eq ~pop {restore exch pop} ifelse
+  | ... stop knode
+  exch pop | ... knode
   dvtrespond
 } bind def
 
