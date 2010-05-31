@@ -883,17 +883,24 @@
     } /fromsystem_ ~caplayer PROCESSES indict
   } bind userdict 3 -1 roll put
 
+  |=========================== multiproc =======================
+  |
+  | ~active | ...
+  |
+  | call active in procthreads processes (default threads)
+  | waits for all processes to end.
+  | to send back info, use console ~[] send: NB, in main node in PROCESSES.
+  |
   userdict /dm_type get /dvt ne {
     /procthreads ~threads def
-
-    | ~active | ...
     /multiproc {
       {
         /procthreads_live procthreads def
-        /procthreads_layer {
-          0 1 procthreads_live 1 sub {
-            {/procthreads_rank name end exec true} fds bg exch pop exch
-          } for pop
+        /procthreads_layer {                              |... ~active
+          0 1 procthreads_live 1 sub {                    |... ~active rank
+            {/procthreads_rank name end exec true} fds bg |... ~active rank pid
+            exch pop exch                                 |... pid ~active
+          } for pop                                       |pidn... pid0
         } layerdef
         procthreads_live {(multiproc) ~wait_quiet unlock} repeat
       } lock 
