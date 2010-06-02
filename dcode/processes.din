@@ -895,15 +895,30 @@
     /procthreads ~threads def
     /multiproc {
       {
+        /procthreads_base procthreads def
         /procthreads_live procthreads def
         /procthreads_layer {                              |... ~active
           0 1 procthreads_live 1 sub {                    |... ~active rank
-            {/procthreads_rank name end exec true} fds bg |... ~active rank pid
+            {
+              /procthreads_rank name end 
+              stopped
+              console {{
+                {
+                  /procthreads_live procthreads_live 1 sub def
+                } PROCESSES indict
+                restore
+              } lock} send
+              ~stop if
+              true
+            } fds bg                                      |... ~active rank pid
             exch pop exch                                 |... pid ~active
           } for pop                                       |pidn... pid0
-        } layerdef
-        procthreads_live {(multiproc) ~wait_quiet unlock} repeat
-      } lock 
+        } layerdef {
+          ~halt ~enddict unlock 
+          procthreads_live 0 eq ~exit if
+        } loop
+        procthreads_base {(multiproc) ~wait_quiet unlock} repeat
+      } lock
     } bind userdef
   } if
 
