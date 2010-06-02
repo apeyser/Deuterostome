@@ -114,7 +114,7 @@
   :type 'hook
   :group 'd-mode)
 
-(defcustom d-mode-replace-cr-do t
+(defcustom d-mode-replace-cr-do nil
   "*If true, when opening a new file run `d-mode-replace-cr', 
 and check/try to convert to unix line-ends."
   :type 'boolean
