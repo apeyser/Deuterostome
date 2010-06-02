@@ -164,15 +164,17 @@ userdict /dm_type get /dvt eq {/dvt} {/dnode} ifelse userdict /dnode_escape put
 /node_buffer 1024 10 mul /b array def
 | [/color ...] | -- (defines new /toconsole in userdict)
 /make_toconsole {
-  COLOR begin {
+  {
     /node_color name
 | (string) | -- <<output>>
     /node_toconsole ~[
-      node_buffer 0 node_color 4 -1 ~roll
-      ~color_fax 0 ~exch ~getinterval ~toconsole_base
+      ~[
+        node_buffer 0 node_color 4 -1 ~roll
+        ~color_fax 0 ~exch ~getinterval ~toconsole_base
+      ] ~lock
     ] bind userdef
     ~node_toconsole userdict /toconsole put
-  } stopped end ~stop if
+  } COLOR indict
 } bind def
 
 end _module
