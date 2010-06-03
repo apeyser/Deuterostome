@@ -48,41 +48,55 @@ void thread_unlock_lock(void* arg) {
   THREADERR(pthread_mutex_unlock, thread_lock[thread_id]);
 }
 
-#define THREAD_DISCARD(p) do {			\
-    free(p);					\
-    p = NULL;					\
+#define THREAD_DISCARD(p, check) do {				\
+    if (check && ! p) {						\
+      error_local(EXIT_FAILURE, 0, "Illegal discard at %s:%d",	\
+		  __FILE__, __LINE__);				\
+    };								\
+    free(p);							\
+    p = NULL;							\
   } while (0)
 
-#define THREAD_ALLOC(p) do {			\
-    p = malloc(sizeof(*p));			\
+#define THREAD_ALLOC(p, check) do {				\
+    if (check && p) {						\
+      error_local(EXIT_FAILURE, 0, "Illegal alloc at %s:%d",	\
+		  __FILE__, __LINE__);				\
+    };								\
+    p = malloc(sizeof(*p));					\
   } while (0)
 
 void thread_destroy_lock(void* arg) {
   UL32 thread_id = (UL32) (P) arg;
   THREADERR(pthread_mutex_destroy, thread_lock[thread_id]);
-  THREAD_DISCARD(thread_lock[thread_id]);
+  THREAD_DISCARD(thread_lock[thread_id], TRUE);
 }
 
 void thread_destroy_wait(void* arg) {
   UL32 thread_id = (UL32) (P) arg;
   THREADERR(pthread_cond_destroy, thread_wait[thread_id]);
-  THREAD_DISCARD(thread_wait[thread_id]);
+  THREAD_DISCARD(thread_wait[thread_id], TRUE);
 }
 
-#define THREADS_INIT_TEST(func, p, ...) do {		 \
-    if (! p) {						 \
-      THREAD_ALLOC(p);					 \
-      THREADERR(func, p, __VA_ARGS__);			 \
-    }							 \
+#define THREADS_INIT_OBJ_TEST(func, p, ...) do {		 \
+    if (! p) {							 \
+      THREAD_ALLOC(p, FALSE);					 \
+      THREADERR(func, p, __VA_ARGS__);				 \
+    }								 \
   } while (0)
+
+#define THREADS_INIT_OBJ(func, p, ...) do {		 \
+    THREAD_ALLOC(p, TRUE);				 \
+    THREADERR(func, p, __VA_ARGS__);			 \
+  } while (0)
+
 
 void* thread_routine(void* arg) {
   UL32 thread_id = (UL32) (P) arg;
 
-  THREADS_INIT_TEST(pthread_cond_init, thread_wait[thread_id], NULL);
+  THREADS_INIT_OBJ(pthread_cond_init, thread_wait[thread_id], NULL);
   pthread_cleanup_push(thread_destroy_wait, (void*) (P) thread_id);
 
-  THREADS_INIT_TEST(pthread_mutex_init, thread_lock[thread_id], NULL);
+  THREADS_INIT_OBJ(pthread_mutex_init, thread_lock[thread_id], NULL);
   pthread_cleanup_push(thread_destroy_lock, (void*) (P) thread_id);
 
   THREADERR(pthread_mutex_lock, thread_lock[thread_id]);
@@ -235,12 +249,12 @@ P threads_destroy(P errno_) {
 void threads_discard_all(void) {
   UL32 i;
   for (i = 1; i < thread_num_; i++) {
-    THREAD_DISCARD(thread_lock[i]);
-    THREAD_DISCARD(thread_wait[i]);
+    THREAD_DISCARD(thread_lock[i], FALSE);
+    THREAD_DISCARD(thread_wait[i], FALSE);
   }
-  THREAD_DISCARD(share_lock);
-  THREAD_DISCARD(main_lock);
-  THREAD_DISCARD(main_wait);
+  THREAD_DISCARD(share_lock, FALSE);
+  THREAD_DISCARD(main_lock, FALSE);
+  THREAD_DISCARD(main_wait, FALSE);
 
   thread_num_ = 1;
 }
@@ -255,9 +269,9 @@ P threads_init(L32 num) {
     threads_child_atfork = threads_discard_all;
     THREADERR(pthread_atfork, NULL, NULL, threads_child_atfork);
   }
-  THREADS_INIT_TEST(pthread_mutex_init, share_lock, NULL);
-  THREADS_INIT_TEST(pthread_mutex_init, main_lock,  NULL);
-  THREADS_INIT_TEST(pthread_cond_init,  main_wait,  NULL);
+  THREADS_INIT_OBJ_TEST(pthread_mutex_init, share_lock, NULL);
+  THREADS_INIT_OBJ_TEST(pthread_mutex_init, main_lock,  NULL);
+  THREADS_INIT_OBJ_TEST(pthread_cond_init,  main_wait,  NULL);
 
   MAINERR(pthread_mutex_lock, main_lock);
   for (; thread_num_ < (UL32)num; thread_num_++)
