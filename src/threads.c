@@ -11,6 +11,10 @@
 
 #if DM_ENABLE_THREADS
 
+thread_func thread_function = NULL;
+const void* thread_data_global = NULL;
+sigset_t sigmask;
+
 // thread[0] is the main thread in all arrays
 // Therefore, elements 0 is empty.
 pthread_t threads[THREADNUM] = {};
@@ -18,27 +22,20 @@ BOOLEAN thread_start[THREADNUM] = {};
 UL32 thread_end = 0;
 UL32 thread_num_ = 1;
 UL32 thread_max_ = 0;
-pthread_cond_t thread_wait[THREADNUM] = {};
-pthread_mutex_t thread_lock[THREADNUM] = {};
-thread_func thread_function = NULL;
-P thread_error[THREADNUM] = {};
-const void* thread_data_global = NULL;
-void* thread_data_local[THREADNUM] = {};
-sigset_t sigmask;
 
-//pthread_attr_t attr;
-//BOOLEAN attr_i = FALSE;
-pthread_cond_t main_wait;
-BOOLEAN main_wait_i = FALSE;
-pthread_mutex_t main_lock;
-BOOLEAN main_lock_i = FALSE;
-pthread_mutex_t share_lock;
-BOOLEAN share_lock_i = FALSE;
+pthread_cond_t*  thread_wait[THREADNUM] = {};
+pthread_mutex_t* thread_lock[THREADNUM] = {};
+P thread_error[THREADNUM] = {};
+void* thread_data_local[THREADNUM] = {};
+
+pthread_cond_t*  main_wait  = NULL;
+pthread_mutex_t* main_lock  = NULL;
+pthread_mutex_t* share_lock = NULL;
 
 #define THREAD_ERROR_EXIT(func, msg, ...) do {                          \
     int err;                                                            \
     if ((err = func(__VA_ARGS__)))                                      \
-      error_local(EXIT_FAILURE, err,                                          \
+      error_local(EXIT_FAILURE, err,					\
             "%s in %s:%d with %s(%s)",                                  \
             msg, __FILE__, __LINE__, #func, #__VA_ARGS__);              \
   } while (0)
@@ -48,44 +45,76 @@ BOOLEAN share_lock_i = FALSE;
 
 void thread_unlock_lock(void* arg) {
   UL32 thread_id = (UL32) (P) arg;
-  THREADERR(pthread_mutex_unlock, thread_lock+thread_id);
+  THREADERR(pthread_mutex_unlock, thread_lock[thread_id]);
 }
+
+#define THREAD_DISCARD(p, check) do {				\
+    if (check && ! p) {						\
+      error_local(EXIT_FAILURE, 0, "Illegal discard at %s:%d",	\
+		  __FILE__, __LINE__);				\
+    };								\
+    free(p);							\
+    p = NULL;							\
+  } while (0)
+
+#define THREAD_ALLOC(p, check) do {				\
+    if (check && p) {						\
+      error_local(EXIT_FAILURE, 0, "Illegal alloc at %s:%d",	\
+		  __FILE__, __LINE__);				\
+    };								\
+    p = malloc(sizeof(*p));					\
+  } while (0)
 
 void thread_destroy_lock(void* arg) {
   UL32 thread_id = (UL32) (P) arg;
-  THREADERR(pthread_mutex_destroy, thread_lock+thread_id);
+  THREADERR(pthread_mutex_destroy, thread_lock[thread_id]);
+  THREAD_DISCARD(thread_lock[thread_id], TRUE);
 }
 
 void thread_destroy_wait(void* arg) {
   UL32 thread_id = (UL32) (P) arg;
-  THREADERR(pthread_cond_destroy, thread_wait+thread_id);
+  THREADERR(pthread_cond_destroy, thread_wait[thread_id]);
+  THREAD_DISCARD(thread_wait[thread_id], TRUE);
 }
+
+#define THREADS_INIT_OBJ_TEST(func, p, ...) do {		 \
+    if (! p) {							 \
+      THREAD_ALLOC(p, FALSE);					 \
+      THREADERR(func, p, __VA_ARGS__);				 \
+    }								 \
+  } while (0)
+
+#define THREADS_INIT_OBJ(func, p, ...) do {		 \
+    THREAD_ALLOC(p, TRUE);				 \
+    THREADERR(func, p, __VA_ARGS__);			 \
+  } while (0)
+
 
 void* thread_routine(void* arg) {
   UL32 thread_id = (UL32) (P) arg;
 
-  THREADERR(pthread_cond_init, thread_wait+thread_id, NULL);
+  THREADS_INIT_OBJ(pthread_cond_init, thread_wait[thread_id], NULL);
   pthread_cleanup_push(thread_destroy_wait, (void*) (P) thread_id);
 
-  THREADERR(pthread_mutex_init, thread_lock+thread_id, NULL);
+  THREADS_INIT_OBJ(pthread_mutex_init, thread_lock[thread_id], NULL);
   pthread_cleanup_push(thread_destroy_lock, (void*) (P) thread_id);
 
-  THREADERR(pthread_mutex_lock, thread_lock+thread_id);
+  THREADERR(pthread_mutex_lock, thread_lock[thread_id]);
   pthread_cleanup_push(thread_unlock_lock, (void*) (P) thread_id);
 
   THREADERR(pthread_sigmask, SIG_BLOCK, &sigmask, NULL);
 
-  THREADERR(pthread_mutex_lock, &main_lock);
+  THREADERR(pthread_mutex_lock, main_lock);
   --thread_end;
-  THREADERR(pthread_cond_signal, &main_wait);
-  THREADERR(pthread_mutex_unlock, &main_lock);
+  THREADERR(pthread_cond_signal, main_wait);
+  THREADERR(pthread_mutex_unlock, main_lock);
 
   while (TRUE) {
         thread_start[thread_id] = FALSE;
         do {          
           THREADERR(pthread_cond_wait, 
-                    thread_wait+thread_id, 
-                    thread_lock+thread_id);
+                    thread_wait[thread_id], 
+                    thread_lock[thread_id]);
           // The following is due to fucked up osx pthread_cancel
           pthread_testcancel();
         } while (! thread_start[thread_id]);
@@ -93,10 +122,10 @@ void* thread_routine(void* arg) {
 	thread_error[thread_id]
             = thread_function(thread_id, thread_data_global,
                               thread_data_local[thread_id]);
-	THREADERR(pthread_mutex_lock, &main_lock);
+	THREADERR(pthread_mutex_lock, main_lock);
         --thread_end;
-	THREADERR(pthread_cond_signal, &main_wait);
-	THREADERR(pthread_mutex_unlock, &main_lock);
+	THREADERR(pthread_cond_signal, main_wait);
+	THREADERR(pthread_mutex_unlock, main_lock);
   }
 
   pthread_cleanup_pop(1);
@@ -118,12 +147,12 @@ P threads_do_int(UL32 nways, thread_func func,
   if (local) for (i = nways; i--;) thread_data_local[i] = local+s*i;
   else       for (i = nways; i--;) thread_data_local[i] = NULL;
 
-  MAINERR(pthread_mutex_lock, &main_lock);
+  MAINERR(pthread_mutex_lock, main_lock);
   for (i = 1; i < nways; ++i) {
-    MAINERR(pthread_mutex_lock, thread_lock+i);
+    MAINERR(pthread_mutex_lock, thread_lock[i]);
     thread_start[i] = TRUE;
-    MAINERR(pthread_cond_signal, thread_wait+i);
-    MAINERR(pthread_mutex_unlock, thread_lock+i);
+    MAINERR(pthread_cond_signal, thread_wait[i]);
+    MAINERR(pthread_mutex_unlock, thread_lock[i]);
   }
 
   thread_error[0] = thread_function(0, thread_data_global,
@@ -131,8 +160,8 @@ P threads_do_int(UL32 nways, thread_func func,
 
   thread_end = thread_max();
   while (thread_end)    
-    MAINERR(pthread_cond_wait, &main_wait, &main_lock);
-  MAINERR(pthread_mutex_unlock, &main_lock);
+    MAINERR(pthread_cond_wait, main_wait, main_lock);
+  MAINERR(pthread_mutex_unlock, main_lock);
 
   for (i = 0; i < nways; ++i)
     if (thread_error[i]) return thread_error[i];
@@ -189,10 +218,10 @@ P threads_destroy(P errno_) {
   while (thread_num_ > 1) {
     --thread_num_;
     // The following is due to fucked up osx pthread_cancel
-    MAINERR(pthread_mutex_lock, thread_lock+thread_num_);
+    MAINERR(pthread_mutex_lock, thread_lock[thread_num_]);
     THREADS_DESTROY(pthread_cancel, threads[thread_num_]);
-    MAINERR(pthread_cond_signal, thread_wait+thread_num_);
-    MAINERR(pthread_mutex_unlock, thread_lock+thread_num_);
+    MAINERR(pthread_cond_signal, thread_wait[thread_num_]);
+    MAINERR(pthread_mutex_unlock, thread_lock[thread_num_]);
   }
   
   for (; n; --n)
@@ -201,22 +230,11 @@ P threads_destroy(P errno_) {
   return -errno_;
 }
 
-#define THREADS_INIT_TEST(p, func, ...) do {             \
-    if (! p##_i) {                                       \
-      int _errno;                                        \
-      if ((_errno = func(&p, __VA_ARGS__))) {            \
-        PRINT_ERRNO(func, &p, __VA_ARGS__);              \
-        return threads_destroy(_errno);                  \
-      }                                                  \
-      p##_i = TRUE;                                      \
-    }                                                    \
-  } while (0)
-
 #define THREADS_INITD() do {                                            \
     thread_end = thread_num_-1;                                         \
     while(thread_end)                                                   \
-      MAINERR(pthread_cond_wait, &main_wait, &main_lock);               \
-    MAINERR(pthread_mutex_unlock, &main_lock);                          \
+      MAINERR(pthread_cond_wait, main_wait, main_lock);			\
+    MAINERR(pthread_mutex_unlock, main_lock);				\
   } while (0)
 
 #define THREADS_INIT(func, ...) do {              \
@@ -228,18 +246,34 @@ P threads_destroy(P errno_) {
     }                                             \
   } while (0)
 
+void threads_discard_all(void) {
+  UL32 i;
+  for (i = 1; i < thread_num_; i++) {
+    THREAD_DISCARD(thread_lock[i], FALSE);
+    THREAD_DISCARD(thread_wait[i], FALSE);
+  }
+  THREAD_DISCARD(share_lock, FALSE);
+  THREAD_DISCARD(main_lock, FALSE);
+  THREAD_DISCARD(main_wait, FALSE);
 
+  thread_num_ = 1;
+}
+void (*threads_child_atfork)(void) = NULL;
 
 P threads_init(L32 num) {
   if (num < 1 || num > THREADNUM) return RNG_CHK;
   if (num == 1) return OK;
 
   if (sigfillset(&sigmask)) return -errno;
-  THREADS_INIT_TEST(share_lock, pthread_mutex_init, NULL);
-  THREADS_INIT_TEST(main_lock, pthread_mutex_init, NULL);
-  THREADS_INIT_TEST(main_wait, pthread_cond_init, NULL);
+  if (! threads_child_atfork) {
+    threads_child_atfork = threads_discard_all;
+    THREADERR(pthread_atfork, NULL, NULL, threads_child_atfork);
+  }
+  THREADS_INIT_OBJ_TEST(pthread_mutex_init, share_lock, NULL);
+  THREADS_INIT_OBJ_TEST(pthread_mutex_init, main_lock,  NULL);
+  THREADS_INIT_OBJ_TEST(pthread_cond_init,  main_wait,  NULL);
 
-  MAINERR(pthread_mutex_lock, &main_lock);
+  MAINERR(pthread_mutex_lock, main_lock);
   for (; thread_num_ < (UL32)num; thread_num_++)
     THREADS_INIT(pthread_create,
                  threads + thread_num_,
@@ -252,11 +286,11 @@ P threads_init(L32 num) {
 }
 
 void thread_share_unlock_f(void) {
-  THREADERR(pthread_mutex_unlock, &share_lock);
+  THREADERR(pthread_mutex_unlock, share_lock);
 }
 
 void thread_share_lock_f(void) {
-    THREADERR(pthread_mutex_lock, &share_lock);
+    THREADERR(pthread_mutex_lock, share_lock);
 }
 
 
