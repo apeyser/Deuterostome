@@ -11,26 +11,27 @@
 
 #if DM_ENABLE_THREADS
 
-thread_func thread_function = NULL;
-const void* thread_data_global = NULL;
-sigset_t sigmask;
-
-// thread[0] is the main thread in all arrays
-// Therefore, elements 0 is empty.
-pthread_t threads[THREADNUM] = {};
-BOOLEAN thread_start[THREADNUM] = {};
-UL32 thread_end = 0;
 UL32 thread_num_ = 1;
 UL32 thread_max_ = 0;
 
-pthread_cond_t*  thread_wait[THREADNUM] = {};
-pthread_mutex_t* thread_lock[THREADNUM] = {};
-P thread_error[THREADNUM] = {};
-void* thread_data_local[THREADNUM] = {};
+static thread_func thread_function = NULL;
+static const void* thread_data_global = NULL;
+static sigset_t sigmask;
 
-pthread_cond_t*  main_wait  = NULL;
-pthread_mutex_t* main_lock  = NULL;
-pthread_mutex_t* share_lock = NULL;
+// thread[0] is the main thread in all arrays
+// Therefore, elements 0 is empty.
+static pthread_t threads[THREADNUM] = {};
+static BOOLEAN thread_start[THREADNUM] = {};
+static UL32 thread_end = 0;
+
+static pthread_cond_t*  thread_wait[THREADNUM] = {};
+static pthread_mutex_t* thread_lock[THREADNUM] = {};
+static P thread_error[THREADNUM] = {};
+static void* thread_data_local[THREADNUM] = {};
+
+static pthread_cond_t*  main_wait  = NULL;
+static pthread_mutex_t* main_lock  = NULL;
+static pthread_mutex_t* share_lock = NULL;
 
 #define THREAD_ERROR_EXIT(func, msg, ...) do {                          \
     int err;                                                            \
@@ -42,11 +43,6 @@ pthread_mutex_t* share_lock = NULL;
 
 #define THREADERR(func, ...) THREAD_ERROR_EXIT(func, "thread", __VA_ARGS__)
 #define MAINERR(func, ...) THREAD_ERROR_EXIT(func, "main", __VA_ARGS__)
-
-void thread_unlock_lock(void* arg) {
-  UL32 thread_id = (UL32) (P) arg;
-  THREADERR(pthread_mutex_unlock, thread_lock[thread_id]);
-}
 
 #define THREAD_DISCARD(p, check) do {				\
     if (check && ! p) {						\
@@ -65,13 +61,18 @@ void thread_unlock_lock(void* arg) {
     p = malloc(sizeof(*p));					\
   } while (0)
 
-void thread_destroy_lock(void* arg) {
+static void thread_unlock_lock(void* arg) {
+  UL32 thread_id = (UL32) (P) arg;
+  THREADERR(pthread_mutex_unlock, thread_lock[thread_id]);
+}
+
+static void thread_destroy_lock(void* arg) {
   UL32 thread_id = (UL32) (P) arg;
   THREADERR(pthread_mutex_destroy, thread_lock[thread_id]);
   THREAD_DISCARD(thread_lock[thread_id], TRUE);
 }
 
-void thread_destroy_wait(void* arg) {
+static void thread_destroy_wait(void* arg) {
   UL32 thread_id = (UL32) (P) arg;
   THREADERR(pthread_cond_destroy, thread_wait[thread_id]);
   THREAD_DISCARD(thread_wait[thread_id], TRUE);
@@ -90,7 +91,7 @@ void thread_destroy_wait(void* arg) {
   } while (0)
 
 
-void* thread_routine(void* arg) {
+static void* thread_routine(void* arg) {
   UL32 thread_id = (UL32) (P) arg;
 
   THREADS_INIT_OBJ(pthread_cond_init, thread_wait[thread_id], NULL);
@@ -211,7 +212,7 @@ P threads_do_pool_int(UL32 nways, thread_func func,
     }                                                         \
   } while (0)
 
-P threads_destroy(P errno_) {
+DM_INLINE_STATIC P threads_destroy(P errno_) {
   P n = thread_num_-1;
   if (thread_num_ == 1) return OK;
     
@@ -246,21 +247,22 @@ P threads_destroy(P errno_) {
     }                                             \
   } while (0)
 
-void threads_discard_all(void) {
+// most general -- simply null out left overs.
+static void threads_discard_all(void) {
   UL32 i;
   for (i = 1; i < thread_num_; i++) {
-    THREAD_DISCARD(thread_lock[i], FALSE);
-    THREAD_DISCARD(thread_wait[i], FALSE);
+    thread_lock[i] = NULL;
+    thread_wait[i] = NULL;
   }
-  THREAD_DISCARD(share_lock, FALSE);
-  THREAD_DISCARD(main_lock, FALSE);
-  THREAD_DISCARD(main_wait, FALSE);
+  share_lock = NULL;
+  main_lock  = NULL;
+  main_wait  = NULL;
 
   thread_num_ = 1;
 }
-void (*threads_child_atfork)(void) = NULL;
+static void (*threads_child_atfork)(void) = NULL;
 
-P threads_init(L32 num) {
+DM_INLINE_STATIC P threads_init(L32 num) {
   if (num < 1 || num > THREADNUM) return RNG_CHK;
   if (num == 1) return OK;
 
@@ -292,7 +294,6 @@ void thread_share_unlock_f(void) {
 void thread_share_lock_f(void) {
     THREADERR(pthread_mutex_lock, share_lock);
 }
-
 
 /**************************************** op_threads
  *
