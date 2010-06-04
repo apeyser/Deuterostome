@@ -39,8 +39,8 @@ host_triplet = @host@
 target_triplet = @target@
 bin_PROGRAMS = dvt$(EXEEXT) dnode$(EXEEXT) dgen$(EXEEXT) \
 	$(am__EXEEXT_1) $(am__EXEEXT_2) dmprop$(EXEEXT) \
-	dvt-x-set-input-focus$(EXEEXT)
-noinst_PROGRAMS = testwordorder$(EXEEXT) $(am__EXEEXT_3)
+	$(am__EXEEXT_3)
+noinst_PROGRAMS = testwordorder$(EXEEXT) $(am__EXEEXT_4)
 @ENABLE_PLUGINS_SUPPORT_TRUE@am__append_1 = @INCLTDL@
 DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(dist_pkgdata_SCRIPTS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
@@ -77,13 +77,13 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
 	$(top_srcdir)/m4/ax_set_version_info.m4 \
-	$(top_srcdir)/m4/cf_atlas.m4 $(top_srcdir)/m4/cf_latex.m4 \
-	$(top_srcdir)/m4/cf_mpi.m4 $(top_srcdir)/m4/cf_petsc.m4 \
-	$(top_srcdir)/m4/codeset.m4 $(top_srcdir)/m4/configure.m4 \
-	$(top_srcdir)/m4/d-type.m4 $(top_srcdir)/m4/dirent_h.m4 \
-	$(top_srcdir)/m4/dirfd.m4 $(top_srcdir)/m4/errno_h.m4 \
-	$(top_srcdir)/m4/extensions.m4 $(top_srcdir)/m4/fnmatch.m4 \
-	$(top_srcdir)/m4/getlogin_r.m4 \
+	$(top_srcdir)/m4/cf_X11.m4 $(top_srcdir)/m4/cf_atlas.m4 \
+	$(top_srcdir)/m4/cf_latex.m4 $(top_srcdir)/m4/cf_mpi.m4 \
+	$(top_srcdir)/m4/cf_petsc.m4 $(top_srcdir)/m4/codeset.m4 \
+	$(top_srcdir)/m4/configure.m4 $(top_srcdir)/m4/d-type.m4 \
+	$(top_srcdir)/m4/dirent_h.m4 $(top_srcdir)/m4/dirfd.m4 \
+	$(top_srcdir)/m4/errno_h.m4 $(top_srcdir)/m4/extensions.m4 \
+	$(top_srcdir)/m4/fnmatch.m4 $(top_srcdir)/m4/getlogin_r.m4 \
 	$(top_srcdir)/m4/gettimeofday.m4 $(top_srcdir)/m4/glibc21.m4 \
 	$(top_srcdir)/m4/glob.m4 $(top_srcdir)/m4/gnulib-common.m4 \
 	$(top_srcdir)/m4/gnulib-comp.m4 \
@@ -174,8 +174,9 @@ am_libdmnodal_la_OBJECTS = dm-vm.lo $(am__objects_6) plugin.lo
 libdmnodal_la_OBJECTS = $(am_libdmnodal_la_OBJECTS)
 @ENABLE_DAEMON_TRUE@am__EXEEXT_1 = dnode-daemon$(EXEEXT)
 @ENABLE_RTHREADS_TRUE@am__EXEEXT_2 = drook$(EXEEXT) dpawn$(EXEEXT)
+@ENABLE_X11_TRUE@am__EXEEXT_3 = dvt-x-set-input-focus$(EXEEXT)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-@ENABLE_SETUID_TRUE@am__EXEEXT_3 = dnode-nice$(EXEEXT)
+@ENABLE_SETUID_TRUE@am__EXEEXT_4 = dnode-nice$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_dgen_OBJECTS = dgen-dgen.$(OBJEXT) dgen-dm-nextevent.$(OBJEXT) \
 	dgen-dm3.$(OBJEXT)
@@ -236,9 +237,12 @@ dvt_DEPENDENCIES = $(builddir)/libdmglobals.la $(am__DEPENDENCIES_3) \
 dvt_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(dvt_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am_dvt_x_set_input_focus_OBJECTS = x-set-input-focus.$(OBJEXT)
+am__dvt_x_set_input_focus_SOURCES_DIST = x-set-input-focus.c
+@ENABLE_X11_TRUE@am_dvt_x_set_input_focus_OBJECTS =  \
+@ENABLE_X11_TRUE@	x-set-input-focus.$(OBJEXT)
 dvt_x_set_input_focus_OBJECTS = $(am_dvt_x_set_input_focus_OBJECTS)
-dvt_x_set_input_focus_DEPENDENCIES = $(am__DEPENDENCIES_1)
+@ENABLE_X11_TRUE@dvt_x_set_input_focus_DEPENDENCIES =  \
+@ENABLE_X11_TRUE@	$(am__DEPENDENCIES_1)
 am_testwordorder_OBJECTS = test-word-order.$(OBJEXT)
 testwordorder_OBJECTS = $(am_testwordorder_OBJECTS)
 testwordorder_LDADD = $(LDADD)
@@ -269,7 +273,7 @@ DIST_SOURCES = $(libdmbootstrap_la_SOURCES) \
 	$(am__libdmglobals_la_SOURCES_DIST) \
 	$(am__libdmnodal_la_SOURCES_DIST) $(dgen_SOURCES) \
 	$(dmprop_SOURCES) $(am__dnode_SOURCES_DIST) $(dpawn_SOURCES) \
-	$(dvt_SOURCES) $(dvt_x_set_input_focus_SOURCES) \
+	$(dvt_SOURCES) $(am__dvt_x_set_input_focus_SOURCES_DIST) \
 	$(testwordorder_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
@@ -930,6 +934,9 @@ edit = -e 's,[@]bindir[@],$(bindir),g' \
 @ENABLE_RTHREADS_TRUE@MPI_PROGS = drook dpawn
 @ENABLE_RTHREADS_TRUE@DNODE_MPI_SRCS = dqueen.h
 @ENABLE_RTHREADS_TRUE@NODIST_DNODE_MPI_SRCS = dqueen.c
+@ENABLE_X11_TRUE@DVTXSETINPUTFOCUSBIN = dvt-x-set-input-focus
+@ENABLE_X11_TRUE@dvt_x_set_input_focus_SOURCES = x-set-input-focus.c
+@ENABLE_X11_TRUE@dvt_x_set_input_focus_LDADD = $(X_LDFLAGS)
 @ENABLE_CPPPLUGIN_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@CPPPLUGIN_HDR = cppplugin.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_HDR = plugin.h $(CPPPLUGIN_HDR) $(top_srcdir)/libltdl/ltdl.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_LD = @LIBLTDL@
@@ -979,8 +986,6 @@ dpawn_LDADD = $(builddir)/libdmglobals.la \
 
 dpawn_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dpawn_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS) $(MPI_FLAGS)
-dvt_x_set_input_focus_SOURCES = x-set-input-focus.c
-dvt_x_set_input_focus_LDADD = $(X_LDFLAGS)
 testwordorder_SOURCES = test-word-order.c
 GLOBSRCS = dmglobals.c \
 	dmnuminc.h dmnum.c dsp1f.h dsp1.c dsp2.c \

@@ -16,7 +16,8 @@ dist_noinst_DATA = \
 	ax_set_version_info.m4 \
 	petsc.make \
 	cf_latex.m4 cf_latex.make \
-	cf_gentoo.make cf_debian.make cf_in.make
+	cf_gentoo.make cf_debian.make cf_in.make \
+	cf_X11.m4
 
 GNULIB = 00gnulib.m4 gnulib-cache.m4 dirfd.m4 d-type.m4 extensions.m4 \
 	fnmatch.m4 glob.m4 gnulib-common.m4 gnulib-comp.m4 \
