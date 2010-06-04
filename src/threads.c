@@ -44,11 +44,6 @@ static pthread_mutex_t* share_lock = NULL;
 #define THREADERR(func, ...) THREAD_ERROR_EXIT(func, "thread", __VA_ARGS__)
 #define MAINERR(func, ...) THREAD_ERROR_EXIT(func, "main", __VA_ARGS__)
 
-void thread_unlock_lock(void* arg) {
-  UL32 thread_id = (UL32) (P) arg;
-  THREADERR(pthread_mutex_unlock, thread_lock[thread_id]);
-}
-
 #define THREAD_DISCARD(p, check) do {				\
     if (check && ! p) {						\
       error_local(EXIT_FAILURE, 0, "Illegal discard at %s:%d",	\
@@ -66,13 +61,18 @@ void thread_unlock_lock(void* arg) {
     p = malloc(sizeof(*p));					\
   } while (0)
 
-void thread_destroy_lock(void* arg) {
+static void thread_unlock_lock(void* arg) {
+  UL32 thread_id = (UL32) (P) arg;
+  THREADERR(pthread_mutex_unlock, thread_lock[thread_id]);
+}
+
+static void thread_destroy_lock(void* arg) {
   UL32 thread_id = (UL32) (P) arg;
   THREADERR(pthread_mutex_destroy, thread_lock[thread_id]);
   THREAD_DISCARD(thread_lock[thread_id], TRUE);
 }
 
-void thread_destroy_wait(void* arg) {
+static void thread_destroy_wait(void* arg) {
   UL32 thread_id = (UL32) (P) arg;
   THREADERR(pthread_cond_destroy, thread_wait[thread_id]);
   THREAD_DISCARD(thread_wait[thread_id], TRUE);
@@ -91,7 +91,7 @@ void thread_destroy_wait(void* arg) {
   } while (0)
 
 
-void* thread_routine(void* arg) {
+static void* thread_routine(void* arg) {
   UL32 thread_id = (UL32) (P) arg;
 
   THREADS_INIT_OBJ(pthread_cond_init, thread_wait[thread_id], NULL);
@@ -212,7 +212,7 @@ P threads_do_pool_int(UL32 nways, thread_func func,
     }                                                         \
   } while (0)
 
-P threads_destroy(P errno_) {
+DM_INLINE_STATIC P threads_destroy(P errno_) {
   P n = thread_num_-1;
   if (thread_num_ == 1) return OK;
     
@@ -262,7 +262,7 @@ static void threads_discard_all(void) {
 }
 static void (*threads_child_atfork)(void) = NULL;
 
-P threads_init(L32 num) {
+DM_INLINE_STATIC P threads_init(L32 num) {
   if (num < 1 || num > THREADNUM) return RNG_CHK;
   if (num == 1) return OK;
 
@@ -294,7 +294,6 @@ void thread_share_unlock_f(void) {
 void thread_share_lock_f(void) {
     THREADERR(pthread_mutex_lock, share_lock);
 }
-
 
 /**************************************** op_threads
  *
