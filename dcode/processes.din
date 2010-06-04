@@ -324,7 +324,7 @@
       3 ~closeifopen repeat
     
       unlock {0} {1} ifelse die
-    }  ~stopped aborted -1 die_base
+    } ~stopped aborted -1 die_base
   } bind def
 
   |========================== bg ============================
@@ -907,7 +907,7 @@
         0 1 procthreads_live 1 sub {          | ~active rank
           {
             /procthreads_rank name end 
-            stopped
+            ~stopped aborted
             console {
               {
                 PROCESSES /procthreads_live get 1 sub
@@ -916,7 +916,7 @@
                 restore
               } lock
             } send
-            ~stop if
+            ~abort if ~stop if
             true
           } fds bg                            | ~active rank pid
           procthreads_pids 3 -1 roll put      | ~active
