@@ -38,7 +38,8 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 bin_PROGRAMS = dvt$(EXEEXT) dnode$(EXEEXT) dgen$(EXEEXT) \
-	$(am__EXEEXT_1) $(am__EXEEXT_2) dmprop$(EXEEXT)
+	$(am__EXEEXT_1) $(am__EXEEXT_2) dmprop$(EXEEXT) \
+	dvt-x-set-input-focus$(EXEEXT)
 noinst_PROGRAMS = testwordorder$(EXEEXT) $(am__EXEEXT_3)
 @ENABLE_PLUGINS_SUPPORT_TRUE@am__append_1 = @INCLTDL@
 DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(dist_pkgdata_SCRIPTS) \
@@ -235,6 +236,9 @@ dvt_DEPENDENCIES = $(builddir)/libdmglobals.la $(am__DEPENDENCIES_3) \
 dvt_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(dvt_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
+am_dvt_x_set_input_focus_OBJECTS = x-set-input-focus.$(OBJEXT)
+dvt_x_set_input_focus_OBJECTS = $(am_dvt_x_set_input_focus_OBJECTS)
+dvt_x_set_input_focus_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_testwordorder_OBJECTS = test-word-order.$(OBJEXT)
 testwordorder_OBJECTS = $(am_testwordorder_OBJECTS)
 testwordorder_LDADD = $(LDADD)
@@ -260,12 +264,13 @@ SOURCES = $(libdmbootstrap_la_SOURCES) \
 	$(nodist_dnode_SOURCES) $(nodist_dnode_daemon_SOURCES) \
 	$(nodist_dnode_nice_SOURCES) $(dpawn_SOURCES) \
 	$(nodist_drook_SOURCES) $(dvt_SOURCES) $(nodist_dvt_SOURCES) \
-	$(testwordorder_SOURCES)
+	$(dvt_x_set_input_focus_SOURCES) $(testwordorder_SOURCES)
 DIST_SOURCES = $(libdmbootstrap_la_SOURCES) \
 	$(am__libdmglobals_la_SOURCES_DIST) \
 	$(am__libdmnodal_la_SOURCES_DIST) $(dgen_SOURCES) \
 	$(dmprop_SOURCES) $(am__dnode_SOURCES_DIST) $(dpawn_SOURCES) \
-	$(dvt_SOURCES) $(testwordorder_SOURCES)
+	$(dvt_SOURCES) $(dvt_x_set_input_focus_SOURCES) \
+	$(testwordorder_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -974,6 +979,8 @@ dpawn_LDADD = $(builddir)/libdmglobals.la \
 
 dpawn_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dpawn_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS) $(MPI_FLAGS)
+dvt_x_set_input_focus_SOURCES = x-set-input-focus.c
+dvt_x_set_input_focus_LDADD = $(X_LDFLAGS)
 testwordorder_SOURCES = test-word-order.c
 GLOBSRCS = dmglobals.c \
 	dmnuminc.h dmnum.c dsp1f.h dsp1.c dsp2.c \
@@ -1160,6 +1167,9 @@ drook$(EXEEXT): $(drook_OBJECTS) $(drook_DEPENDENCIES)
 dvt$(EXEEXT): $(dvt_OBJECTS) $(dvt_DEPENDENCIES) 
 	@rm -f dvt$(EXEEXT)
 	$(dvt_LINK) $(dvt_OBJECTS) $(dvt_LDADD) $(LIBS)
+dvt-x-set-input-focus$(EXEEXT): $(dvt_x_set_input_focus_OBJECTS) $(dvt_x_set_input_focus_DEPENDENCIES) 
+	@rm -f dvt-x-set-input-focus$(EXEEXT)
+	$(LINK) $(dvt_x_set_input_focus_OBJECTS) $(dvt_x_set_input_focus_LDADD) $(LIBS)
 testwordorder$(EXEEXT): $(testwordorder_OBJECTS) $(testwordorder_DEPENDENCIES) 
 	@rm -f testwordorder$(EXEEXT)
 	$(LINK) $(testwordorder_OBJECTS) $(testwordorder_LDADD) $(LIBS)
@@ -1253,6 +1263,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-threads.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-word-order.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/x-set-input-focus.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

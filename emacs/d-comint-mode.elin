@@ -638,6 +638,13 @@ This quotes per `shell-quote-argument', then requotes per `d-comint-mode-quote'"
     (comint-goto-process-mark)
     (delete-region (point) (point-max))))
 
+(defun d-comint-mode-x-focus-frame (frame)
+  (when (eq window-system 'x)
+    (let ((win (frame-parameter frame 'outer-window-id)))
+      (call-process "@bindir@/dvt-x-set-input-focus" 
+		    nil 0 nil
+		    win))))
+
 (defun d-comint-mode-focus (dvt-buffer-name &optional override)
   "Set input focus to dvt buffer. 
 Used by dvt to signal to emacs that it should re-take focus.
@@ -648,7 +655,9 @@ even if `d-comint-mode-keep-focus' is nil.
   (when (or d-comint-mode-keep-focus override)
     (select-frame (d-comint-mode-find-dvt-frame dvt-buffer-name))
     (select-window (get-buffer-window dvt-buffer-name))
-    (when (eq window-system 'x) (x-focus-frame (selected-frame)))))
+    (d-comint-mode-x-focus-frame (selected-frame))
+    ;;(when (eq window-system 'x) (x-focus-frame (selected-frame)))
+))
 
 (defvar d-comint-mode-minibuffer-frames nil)
 
