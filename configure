@@ -1152,6 +1152,8 @@ ac_ct_CXX
 CXXFLAGS
 CXX
 GCC_CFLAGS
+ENABLE_X11_FALSE
+ENABLE_X11_TRUE
 X_LDFLAGS
 X_DISPLAY_MISSING
 X_DISPLAY_MISSING_FALSE
@@ -17256,13 +17258,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:17259: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:17261: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:17262: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:17264: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:17265: output\"" >&5)
+  (eval echo "\"\$as_me:17267: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -18453,7 +18455,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 18456 "configure"' > conftest.$ac_ext
+  echo '#line 18458 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -19818,11 +19820,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19821: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19823: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:19825: \$? = $ac_status" >&5
+   echo "$as_me:19827: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -20157,11 +20159,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:20160: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:20162: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:20164: \$? = $ac_status" >&5
+   echo "$as_me:20166: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -20262,11 +20264,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:20265: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:20267: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:20269: \$? = $ac_status" >&5
+   echo "$as_me:20271: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -20317,11 +20319,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:20320: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:20322: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:20324: \$? = $ac_status" >&5
+   echo "$as_me:20326: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -23130,7 +23132,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 23133 "configure"
+#line 23135 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -23226,7 +23228,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 23229 "configure"
+#line 23231 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -25083,6 +25085,25 @@ fi
   fi
 
 
+      if test x"$no_x" == xyes; then
+         if false; then
+  ENABLE_X11_TRUE=
+  ENABLE_X11_FALSE='#'
+else
+  ENABLE_X11_TRUE='#'
+  ENABLE_X11_FALSE=
+fi
+
+  else
+         if :; then
+  ENABLE_X11_TRUE=
+  ENABLE_X11_FALSE='#'
+else
+  ENABLE_X11_TRUE='#'
+  ENABLE_X11_FALSE=
+fi
+
+  fi
   for cf_prepend_var in XLIB LIBM ; do
     eval LIBS="\"\$$cf_prepend_var \$LIBS\""
   done
@@ -29666,7 +29687,11 @@ $as_echo "$as_me: error: Header sys/resource.h not found" >&2;}
 fi
 
 
-if test "${ac_cv_header_X11_Xlib_h+set}" = set; then
+    if test x"$no_x" == xyes; then
+    :
+  else
+
+  if test "${ac_cv_header_X11_Xlib_h+set}" = set; then
   { $as_echo "$as_me:$LINENO: checking for X11/Xlib.h" >&5
 $as_echo_n "checking for X11/Xlib.h... " >&6; }
 if test "${ac_cv_header_X11_Xlib_h+set}" = set; then
@@ -29798,9 +29823,16 @@ fi
 $as_echo "$ac_cv_header_X11_Xlib_h" >&6; }
 
 fi
+if test "x$ac_cv_header_X11_Xlib_h" = x""yes; then
+  :
+else
+    { { $as_echo "$as_me:$LINENO: error: Header X11/Xlib.h not found" >&5
+$as_echo "$as_me: error: Header X11/Xlib.h not found" >&2;}
+   { (exit 1); exit 1; }; }
+fi
 
 
-if test "${ac_cv_header_X11_Xutil_h+set}" = set; then
+  if test "${ac_cv_header_X11_Xutil_h+set}" = set; then
   { $as_echo "$as_me:$LINENO: checking for X11/Xutil.h" >&5
 $as_echo_n "checking for X11/Xutil.h... " >&6; }
 if test "${ac_cv_header_X11_Xutil_h+set}" = set; then
@@ -29932,9 +29964,16 @@ fi
 $as_echo "$ac_cv_header_X11_Xutil_h" >&6; }
 
 fi
+if test "x$ac_cv_header_X11_Xutil_h" = x""yes; then
+  :
+else
+    { { $as_echo "$as_me:$LINENO: error: Header X11/Xutil.h not found" >&5
+$as_echo "$as_me: error: Header X11/Xutil.h not found" >&2;}
+   { (exit 1); exit 1; }; }
+fi
 
 
-  cf_check_sec=false
+    cf_check_sec=false
     cf_ac_includes_default="${ac_includes_default}"
   for i in X11/Xlib.h X11/Xutil.h ; do
       ac_includes_default="
@@ -30163,6 +30202,8 @@ $as_echo "$as_me: error: Checking for Xext library for XSecurity... not found" >
    { (exit 1); exit 1; }; }
 
 fi
+
+  fi
 
   fi
 if test "${ac_cv_header_strings_h+set}" = set; then
@@ -35264,11 +35305,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:35267: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:35308: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:35271: \$? = $ac_status" >&5
+   echo "$as_me:35312: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -35363,11 +35404,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:35366: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:35407: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:35370: \$? = $ac_status" >&5
+   echo "$as_me:35411: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -35415,11 +35456,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:35418: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:35459: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:35422: \$? = $ac_status" >&5
+   echo "$as_me:35463: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -49108,6 +49149,20 @@ if test -z "${X_DISPLAY_MISSING_TRUE}" && test -z "${X_DISPLAY_MISSING_FALSE}"; 
   { { $as_echo "$as_me:$LINENO: error: conditional \"X_DISPLAY_MISSING\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 $as_echo "$as_me: error: conditional \"X_DISPLAY_MISSING\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${ENABLE_X11_TRUE}" && test -z "${ENABLE_X11_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"ENABLE_X11\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"ENABLE_X11\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${ENABLE_X11_TRUE}" && test -z "${ENABLE_X11_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"ENABLE_X11\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"ENABLE_X11\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
