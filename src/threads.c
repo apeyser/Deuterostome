@@ -246,19 +246,20 @@ P threads_destroy(P errno_) {
     }                                             \
   } while (0)
 
-void threads_discard_all(void) {
+// most general -- simply null out left overs.
+static void threads_discard_all(void) {
   UL32 i;
   for (i = 1; i < thread_num_; i++) {
-    THREAD_DISCARD(thread_lock[i], FALSE);
-    THREAD_DISCARD(thread_wait[i], FALSE);
+    thread_lock[i] = NULL;
+    thread_wait[i] = NULL;
   }
-  THREAD_DISCARD(share_lock, FALSE);
-  THREAD_DISCARD(main_lock, FALSE);
-  THREAD_DISCARD(main_wait, FALSE);
+  share_lock = NULL;
+  main_lock  = NULL;
+  main_wait  = NULL;
 
   thread_num_ = 1;
 }
-void (*threads_child_atfork)(void) = NULL;
+static void (*threads_child_atfork)(void) = NULL;
 
 P threads_init(L32 num) {
   if (num < 1 || num > THREADNUM) return RNG_CHK;
