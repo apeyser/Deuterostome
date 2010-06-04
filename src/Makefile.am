@@ -83,7 +83,9 @@ DNODE_MPI_SRCS = dqueen.h
 NODIST_DNODE_MPI_SRCS = dqueen.c
 endif ENABLE_RTHREADS
 
-bin_PROGRAMS = dvt dnode dgen $(DNODEDAEMONBIN) $(MPI_PROGS) dmprop
+bin_PROGRAMS = dvt dnode dgen \
+	$(DNODEDAEMONBIN) $(MPI_PROGS) dmprop \
+	dvt-x-set-input-focus
 noinst_PROGRAMS = testwordorder $(DNODENICEBIN)
 
 if ENABLE_PLUGINS_SUPPORT
@@ -137,6 +139,9 @@ dpawn_LDADD = $(builddir)/libdmglobals.la \
 	$(AM_LDADD) $(ATLAS_LIBS) $(MPI_LIBS)
 dpawn_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dpawn_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS) $(MPI_FLAGS)
+
+dvt_x_set_input_focus_SOURCES = x-set-input-focus.c
+dvt_x_set_input_focus_LDADD = $(X_LDFLAGS)
 
 testwordorder_SOURCES = test-word-order.c
 
