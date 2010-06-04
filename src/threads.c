@@ -11,26 +11,27 @@
 
 #if DM_ENABLE_THREADS
 
-thread_func thread_function = NULL;
-const void* thread_data_global = NULL;
-sigset_t sigmask;
-
-// thread[0] is the main thread in all arrays
-// Therefore, elements 0 is empty.
-pthread_t threads[THREADNUM] = {};
-BOOLEAN thread_start[THREADNUM] = {};
-UL32 thread_end = 0;
 UL32 thread_num_ = 1;
 UL32 thread_max_ = 0;
 
-pthread_cond_t*  thread_wait[THREADNUM] = {};
-pthread_mutex_t* thread_lock[THREADNUM] = {};
-P thread_error[THREADNUM] = {};
-void* thread_data_local[THREADNUM] = {};
+static thread_func thread_function = NULL;
+static const void* thread_data_global = NULL;
+static sigset_t sigmask;
 
-pthread_cond_t*  main_wait  = NULL;
-pthread_mutex_t* main_lock  = NULL;
-pthread_mutex_t* share_lock = NULL;
+// thread[0] is the main thread in all arrays
+// Therefore, elements 0 is empty.
+static pthread_t threads[THREADNUM] = {};
+static BOOLEAN thread_start[THREADNUM] = {};
+static UL32 thread_end = 0;
+
+static pthread_cond_t*  thread_wait[THREADNUM] = {};
+static pthread_mutex_t* thread_lock[THREADNUM] = {};
+static P thread_error[THREADNUM] = {};
+static void* thread_data_local[THREADNUM] = {};
+
+static pthread_cond_t*  main_wait  = NULL;
+static pthread_mutex_t* main_lock  = NULL;
+static pthread_mutex_t* share_lock = NULL;
 
 #define THREAD_ERROR_EXIT(func, msg, ...) do {                          \
     int err;                                                            \
