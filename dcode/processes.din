@@ -283,9 +283,11 @@
     console null ne {
       console ~[
         2 rollerror getpid unpid {
-          (From child ) fax * 4 -1 roll * number (: ) fax
-          2 rollerror 1024 /b array errormessage fax 1 sub
-        } ~warning ~restore
+          {
+            (From child ) fax * 4 -1 roll * number (: ) fax
+            2 rollerror 1024 /b array errormessage fax 1 sub
+          } warning restore
+        } ~lock
       ] send
     } if
     abort
