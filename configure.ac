@@ -207,7 +207,7 @@ AC_SUBST(LIBTOOL_DEP)
 LT_CONFIG_LTDL_DIR([libltdl])
 
 AC_CHECK_LIBM
-CF_AC_PATH_XTRA
+CF_X11_ENABLE
 CF_PREPEND_VARS([LIBS], [XLIB LIBM])
 AC_C_BIGENDIAN
 dnl check pid_t for plugins/process.c
@@ -243,9 +243,11 @@ CF_AC_CHECK_HEADER([signal.h])
 CF_AC_CHECK_HEADER([time.h])
 CF_AC_CHECK_HEADER([sys/time.h])
 CF_AC_CHECK_HEADER([sys/resource.h])
-AC_CHECK_HEADER([X11/Xlib.h])
-AC_CHECK_HEADER([X11/Xutil.h])
-CF_AC_CHECK_XSEC()
+CF_X11_ENABLED([
+  CF_AC_CHECK_HEADER([X11/Xlib.h])
+  CF_AC_CHECK_HEADER([X11/Xutil.h])
+  CF_AC_CHECK_XSEC()
+])
 CF_AC_CHECK_HEADER([strings.h])
 CF_AC_CHECK_HEADER([inttypes.h])
 CF_AC_CHECK_HEADER([sys/wait.h])
