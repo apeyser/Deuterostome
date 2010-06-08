@@ -535,7 +535,7 @@
     _sh_ counttomark 1 add 1 roll cleartomark
   } bind def
 
-  |======================== sh_bg ================================
+  |======================== sh_ ================================
   | \[ (exec) ... fd-in fd-out fd-err | bool
   |
   | Execute (exec) with following operands in child process,
