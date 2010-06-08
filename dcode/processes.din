@@ -524,15 +524,37 @@
     {~_spawnsh fds bg wait} 4 1 roll bg
   } bind def
 
-  |======================== sh_ ================================
+  |======================== sh_bg ================================
   | \[ (exec) ... fd-in fd-out fd-err | pid
   |
   | Execute (exec) with following operands in child process,
   |  using fd-in fd-out and fd-err as redirects.
   | Returns pid of child process running in bg.
   |
-  /sh_ {
+  /sh_bg {
     _sh_ counttomark 1 add 1 roll cleartomark
+  } bind def
+
+  |======================== sh_bg ================================
+  | \[ (exec) ... fd-in fd-out fd-err | bool
+  |
+  | Execute (exec) with following operands in child process,
+  |  using fd-in fd-out and fd-err as redirects.
+  | Returns pid of child process running in bg.
+  |
+  /sh_ {
+    sh_bg wait
+  } bind def
+
+  |======================== sh_io ================================
+  | \[ (exec) ... fd-in fd-out fd-err | --
+  |
+  | Execute (exec) with following operands in child process,
+  |  using fd-in fd-out and fd-err as redirects.
+  | Waits until process is done, and errors out if process fails.
+  |
+  /sh_io {
+    sh_bg (sh) wait_
   } bind def
 
   |======================= sh ===================================
@@ -739,7 +761,7 @@
     {
       pipefd 2 copy counttomark 1 add 2 roll | pr pw \[.. pr pw 
       exch pop STDIN exch STDERR             | \[.. STDIN pw STDERR
-      sh_ wait not {                         | pr pw
+      sh_ not {                              | pr pw
         close close                          | --
         (readresult) /NOSYSTEM makeerror     | --
       } if                                   | pr pw
@@ -761,7 +783,7 @@
     {
       pipefd 2 copy counttomark 1 add 2 roll | pr pw \[.. pr pw 
       exch pop STDIN exch STDERR             | \[.. STDIN pw STDERR
-      sh_ wait not {                         | pr pw
+      sh_ not {                              | pr pw
         close close                          | --
         (readresult) /NOSYSTEM makeerror     | --
       } if                                   | pr pw
@@ -782,7 +804,7 @@
     {
       pipefd 2 copy counttomark 1 add 2 roll | pr pw \[.. pr pw 
       exch pop STDIN exch STDERR             | \[.. STDIN pw STDERR
-      sh_ wait not {                         | pr pw
+      sh_ not {                              | pr pw
         close close                          | --
         (readresult) /NOSYSTEM makeerror     | --
       } if                                   | pr pw
@@ -907,7 +929,7 @@
   /tosystem {
     {
       openlist (@ENABLE_BASH@) (-c) 4 -1 roll NULLR NULLW STDERR 
-      sh_ wait not {(tosystem) /NOSYSTEM makeerror} if
+      sh_ not {(tosystem) /NOSYSTEM makeerror} if
     } PROCESSES indict
   } bind userdict 3 -1 roll put
 
@@ -925,7 +947,7 @@
     ~pipefd {
       /wt name /rd name {
         openlist (@ENABLE_BASH@) (-c) 4 -1 roll NULLR wt STDERR 
-        sh_ wait not {
+        sh_ not {
           wt close rd close
           (fromsystem) /NOSYSTEM makeerror
         } if
