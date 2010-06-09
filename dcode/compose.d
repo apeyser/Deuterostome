@@ -503,7 +503,7 @@
   1 /b array dup k 97 add exch 0 put def /k k 1 add def 
 } forall
 
-(path) (file)
+| (path) (file) | --
 /output_symbols {
   {
     {
@@ -511,7 +511,10 @@
         [symbols {} forall _symbols {} forall] {/sym name
           [
             ~[
-              256 /b array {* sym text (: ) fax} tostring {alignLC} ~latex
+              256 /b array {* sym text (: ) fax} tostring 
+              dup 0 get (_) 0 get eq {
+                256 /b array {(\\) fax 3 -1 roll fax} tostring
+              } if {alignLC} ~latex
             ]
             ~[
               ~[
