@@ -751,10 +751,10 @@
   |========================= get... =================================
   |======================= _getfromactive ==========================
   | ~active ~postfunc (name) | ...
-  | active: fd-in fd-out fd-err | pid
+  | active: -- | --
   | postfunc: pipe-rd | ...
   /_getfromactive {pipefd openlist /func /pfunc /nm /rd /wr} {
-    STDIN wr STDERR /func find ~enddict stopped
+    openlist /func find STDIN wr STDERR ~pipe ~enddict stopped
     wr close {rd close stop} if {
       nm ~wait_quiet enddict
       rd /pfunc find enddict 
@@ -763,7 +763,7 @@
 
   |============================== getline ============================
   | ~active | (string)
-  | active: fd-in fd-out fd-err | pid
+  | active: -- | --
   | 
   | Executes active, and sets fd-out to a pipe. 
   | Reads first line (stripping out final newline) from pipe and closes pipe.
@@ -775,7 +775,7 @@
 
   |============================== getlines ============================
   | ~active | [ (string)... ]
-  | active: fd-in fd-out fd-err | pid
+  | active: -- | --
   |
   | Executes active, and sets fd-out to a pipe. 
   | Reads all lines from pipe (stripping out final newlines).
@@ -787,7 +787,7 @@
 
   |============================== getall ============================
   | ~active | (string)
-  | active: fd-in fd-out fd-err | pid
+  | active: -- | --
   |
   | Executes active, and sets fd-out to a pipe. 
   | Reads all lines from pipe and returns as a single string.
