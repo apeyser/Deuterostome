@@ -474,7 +474,8 @@
 | partitions in graphs. They are referred to in generators by the names:
 
 /k 0 def  | '\A' and up -- centered symbols
-[ /dot                 /diamond              /fsquare
+/symbols [ 
+  /dot                 /diamond              /fsquare
   /square              /squareb              /cross
   /times               /filledcircle         /circle
   /circleb             /asterisk             /futriangle
@@ -483,10 +484,13 @@
   /hbarca              /hbarla               /hbarra
   /utriangle           /dtriangle            /rtriangle
   /ltriangle
- ] { 1 /b array dup k 65 add exch 0 put def /k k 1 add def } forall
+] dup 3 -1 roll name { 
+  1 /b array dup k 65 add exch 0 put def /k k 1 add def 
+} forall
 
 /k 0 def  | '\a' and up  -- text version of symbols
-[ /_dot                 /_diamond              /_fsquare
+/_symbols [ 
+  /_dot                 /_diamond              /_fsquare
   /_square              /_squareb              /_cross
   /_times               /_filledcircle         /_circle
   /_circleb             /_asterisk             /_futriangle
@@ -495,7 +499,31 @@
   /_hbarca              /_hbarla               /_hbarra
   /_utriangle           /_dtriangle            /_rtriangle
   /_ltriangle
- ] { 1 /b array dup k 97 add exch 0 put def /k k 1 add def } forall
+] dup 3 -1 roll name { 
+  1 /b array dup k 97 add exch 0 put def /k k 1 add def 
+} forall
+
+(path) (file)
+/output_symbols {
+  {
+    {
+      [
+        [symbols {} forall _symbols {} forall] {/sym name
+          [
+            ~[
+              256 /b array {* sym text (: ) fax} tostring {alignLC} ~latex
+            ]
+            ~[
+              ~[
+                ~gsave 12 0 sym mkact exec ~showsymbol ~grestore
+              ] <d 0 -2 24 2> {alignLC} ~PS
+            ]
+          ]
+        } forall
+      ] 5 {} panelarray
+    } EPSfigure
+  } insave
+} bind def
 
 | The size of symbols is set by the parameter `symbolsize'. The stroke weight
 | of open symbols is given by the `linewidth' parameter.
