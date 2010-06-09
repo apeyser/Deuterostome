@@ -1070,11 +1070,20 @@ P op_ungetfd(void) {
   return OK;
 }
 
+DM_INLINE_STATIC P read_char(P fd, B* c) {
+  ssize_t nb;
+  while ((nb = read(fd, c, 1)) == -1) {
+    if (errno != EINTR) return -errno;
+    checkabort();
+  }
+  checkabort();
+  return nb ? OK : DONE;
+}
+
 // (buffer) fd char | (subbuffer) fd true / (subbuffer) false
 P op_readtomarkfd(void) {
   P retc;
   P fd;
-  ssize_t nb;
   B* streambox;
   B* curr;
   B* end;
@@ -1094,54 +1103,54 @@ P op_readtomarkfd(void) {
   if (STREAM_BUFFERED(streambox)) {
     if (ARRAY_SIZE(o_3) < 1) return RNG_CHK;
     STREAM_BUFFERED(streambox) = FALSE;
-    *curr = STREAM_CHAR(streambox);
-    if (*curr == c || fd == -1) {
-      ARRAY_SIZE(o_3) = (*curr == c) ? 0 : 1;
-      ATTR(o_3) &= ~PARENT;
-      TAG(o_1) = BOOL;
-      ATTR(o_1) = 0;
-      if (fd != -1) BOOL_VAL(o_1) = TRUE;
-      else {
-	moveframe(o_1, o_2);
-	BOOL_VAL(o_2) = FALSE;
-	FREEopds = o_1;
-      }
-      return OK;
+    if ((*curr = STREAM_CHAR(streambox)) == c) {
+      if (fd == -1) goto closed;
+      goto open;
     }
     ++curr;
+    if (fd == -1) goto closed;
   }
-
-  if (fd == -1) return STREAM_CLOSED;
+  else if (fd == -1) return STREAM_CLOSED;
   
   end = VALUE_PTR(o_3) + ARRAY_SIZE(o_3);
   if (curr == end) return RNG_CHK;
-  do {
-    while ((nb = read(fd, curr, 1)) == -1) {
-      if (errno != EINTR) return -errno;
-      checkabort();
-    }
-    if (nb < 1) checkabort();
-  } while (nb && *curr != c && ++curr < end);
+  while (! ((retc = read_char(fd, curr))) && *curr != c && ++curr < end);
   if (curr == end) return RNG_CHK;
-
-  if (! nb) {
-    STREAM_FD(streambox) = -1;
-    if ((retc = delsocket_proc(fd))) return retc;
-    ARRAY_SIZE(o_3) = curr - VALUE_PTR(o_3);
-    ATTR(o_3) &= ~PARENT;
-    TAG(o_2) = BOOL;
-    ATTR(o_2) = 0;
-    BOOL_VAL(o_2) = FALSE;
-    FREEopds = o_1;
-    return OK;
+  switch (retc) {
+    case OK:
+      STREAM_CHAR(streambox) = c;
+      break;
+    case DONE:
+      if (curr != VALUE_PTR(o_3)) STREAM_CHAR(streambox) = *(curr-1);
+      goto closed;
+    default: 
+      return retc;
   }
 
+ open:
+  switch (retc = read_char(fd, &STREAM_CHAR(streambox))) {
+    case OK:   break;
+    case DONE: goto closed;
+    default:   return retc;
+  }
+  STREAM_BUFFERED(streambox) = TRUE;
   ARRAY_SIZE(o_3) = curr - VALUE_PTR(o_3);
   ATTR(o_3) &= ~PARENT;
   TAG(o_1) = BOOL;
   ATTR(o_1) = 0;
   BOOL_VAL(o_1) = TRUE;
   return OK;
+
+ closed:
+  STREAM_FD(streambox) = -1;
+  if (fd != -1 && (retc = delsocket_proc(fd))) return retc;
+  ARRAY_SIZE(o_3) = curr - VALUE_PTR(o_3);
+  ATTR(o_3) &= ~PARENT;
+  TAG(o_2) = BOOL;
+  ATTR(o_2) = 0;
+  BOOL_VAL(o_2) = FALSE;
+  FREEopds = o_1;
+  return OK;  
 }
 
 // fd char | (buffer) fd true / (buffer) false
@@ -1172,55 +1181,51 @@ P op_readtomarkfd_nb(void) {
   fd = STREAM_FD(streambox);
   if (STREAM_BUFFERED(streambox)) {
     STREAM_BUFFERED(streambox) = FALSE;
-    *curr = STREAM_CHAR(streambox);
-    if (*curr == c || fd == -1) {
-      P len = (*curr == c) ? 0 : 1;
-      ARRAY_SIZE(FREEvm) = len;
-      if (fd == -1) {
-	BOOL_VAL(o1) = FALSE;
-	moveframe(o1, o_1);
-	moveframe(FREEvm, o_2);
-	FREEvm += FRAMEBYTES + DALIGN(len);
-	return OK;
-      }
-      moveframe(o_2, o_1);
-      moveframe(FREEvm, o_2);
-      BOOL_VAL(o1) = TRUE;
-      FREEopds = o2;
-      FREEvm += FRAMEBYTES + DALIGN(len);
-      return OK;
+    if ((*curr = STREAM_CHAR(streambox)) == c) {
+      if (fd == -1) goto closed;
+      goto open;
     }
     ++curr;
+    if (fd == -1) goto closed;
   }
-
-  if (fd == -1) return STREAM_CLOSED;
+  else if (fd == -1) return STREAM_CLOSED;
 
   if (curr + 1 >= CEILvm) return VM_OVF;
-  do {
-    while ((nb = read(fd, curr, 1)) == -1) {
-      if (errno != EINTR) return -errno;
-      checkabort();
-    }
-    if (nb < 1) checkabort();
-  } while (nb && *curr != c && ++curr < CEILvm);
+  while (! ((retc = read_char(fd, curr))) && *curr != c && ++curr < CEILvm);
   if ((B*) DALIGN(curr) >= CEILvm) return VM_OVF;
-
-  if (! nb) {
-    STREAM_FD(streambox) = -1;
-    if ((retc = delsocket_proc(fd))) return retc;
-    BOOL_VAL(o1) = FALSE;
-    moveframe(o1, o_1);
-    nb = ARRAY_SIZE(FREEvm) = curr - (FREEvm + FRAMEBYTES);
-    moveframe(FREEvm, o_2);
-    FREEvm += FRAMEBYTES + DALIGN(nb);
-    return OK;
+  switch (retc) {
+    case OK:
+      STREAM_CHAR(streambox) = c;
+      break;
+    case DONE:
+      if (curr != VALUE_PTR(FREEvm)) STREAM_CHAR(streambox) = *(curr-1);
+      goto closed;
+    default:
+      return retc;
   }
-  
+
+ open:
+  switch (retc = read_char(fd, &STREAM_CHAR(streambox))) {
+    case OK:   break;
+    case DONE: goto closed;
+    default:   return retc;
+  }
+  STREAM_BUFFERED(streambox) = TRUE;
   nb = ARRAY_SIZE(FREEvm) = curr - (FREEvm + FRAMEBYTES);
   moveframe(o_2, o_1);
   moveframe(FREEvm, o_2);
   BOOL_VAL(o1) = TRUE;
   FREEopds = o2;
+  FREEvm += FRAMEBYTES + DALIGN(nb);
+  return OK;
+
+ closed:
+  STREAM_FD(streambox) = -1;
+  if (fd != -1 && (retc = delsocket_proc(fd))) return retc;
+  BOOL_VAL(o1) = FALSE;
+  moveframe(o1, o_1);
+  nb = ARRAY_SIZE(FREEvm) = curr - (FREEvm + FRAMEBYTES);
+  moveframe(FREEvm, o_2);
   FREEvm += FRAMEBYTES + DALIGN(nb);
   return OK;
 }

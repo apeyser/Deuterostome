@@ -524,15 +524,37 @@
     {~_spawnsh fds bg wait} 4 1 roll bg
   } bind def
 
-  |======================== sh_ ================================
+  |======================== sh_bg ================================
   | \[ (exec) ... fd-in fd-out fd-err | pid
   |
   | Execute (exec) with following operands in child process,
   |  using fd-in fd-out and fd-err as redirects.
   | Returns pid of child process running in bg.
   |
-  /sh_ {
+  /sh_bg {
     _sh_ counttomark 1 add 1 roll cleartomark
+  } bind def
+
+  |======================== sh_ ================================
+  | \[ (exec) ... fd-in fd-out fd-err | bool
+  |
+  | Execute (exec) with following operands in child process,
+  |  using fd-in fd-out and fd-err as redirects.
+  | Returns pid of child process running in bg.
+  |
+  /sh_ {
+    sh_bg wait
+  } bind def
+
+  |======================== sh_io ================================
+  | \[ (exec) ... fd-in fd-out fd-err | --
+  |
+  | Execute (exec) with following operands in child process,
+  |  using fd-in fd-out and fd-err as redirects.
+  | Waits until process is done, and errors out if process fails.
+  |
+  /sh_io {
+    sh_bg (sh) wait_
   } bind def
 
   |======================= sh ===================================
@@ -688,7 +710,7 @@
   } bind def
 
   |=============================== readtomark ===============================
-  | (buffer) offset fd char | (buffer) offset fd true / (buffer) offset false
+  | (buffer) offset fd (char) | (buffer) offset fd true / (buffer) offset false
   |
   | Fills (buffer) from offset by reading fd until char is found.
   | Blocks until either found char, or reached end-of-file
@@ -696,16 +718,17 @@
   | char is not inserted into buffer.
   | offset is updated to offset after characters inserted.
   |
-  /readtomark {
-    4 copy pop pop  | (buffer) offset fd char (buffer) offset
-    1 index length exch sub getinterval 3 -1 roll
-    | (buffer) offset (subbuffer) fd char
-    readtomarkfd    | (buffer) offset (subbuffer) /fd true/false/
-    dup {4 -2 roll} {3 -1 roll} if
-    | (buffer) /fd true/false/ offset (subbuffer)
-    length add 1 index {3 -1 roll} ~exch ifelse
-    | (buffer) offset /fd true/false/
-  } bind def
+  /readtomark {0 get openlist /buf /off /fd /char} {
+    buf off buf length off sub getinterval | (sub-buf)
+    fd char readtomarkfd {                 | (sub-sub-buf) fd
+      pop                                  | (sub-sub-buf)
+      length off add                       | new-off
+      buf exch fd true                     | (buf) new-off fd true
+    } {                                    | (sub-sub-buf)
+      length off add                       | new-off
+      buf exch false                       | (buf) new-off false
+    } ifelse
+  } localfunc bind def
 
   |=============================== readline ===============================
   | (buffer) offset fd | (buffer) offset fd true / (buffer) offset false
@@ -716,7 +739,16 @@
     (\n) readtomark
   } bind def
 
-  |============================== readresult ============================
+  |=============================== readlines ===============================
+  | fd | [ (line)... ]
+  |
+  | read lines (not including newlines), and put in list
+  |
+  /readlines {
+    [exch {(\n) 0 get readtomarkfd_nb not ~exit if} loop]
+  } bind def
+
+  |============================== getline ============================
   | \[(exec) ... | (string)
   |
   | Executes (exec) with ... string parameters.
@@ -725,19 +757,61 @@
   | Otherwise throws NOSYSTEM.
   | Blocks until (exec) ends.
   |
-  /readresult {
+  /getline {
     {
       pipefd 2 copy counttomark 1 add 2 roll | pr pw \[.. pr pw 
       exch pop STDIN exch STDERR             | \[.. STDIN pw STDERR
-      sh_ wait not {                         | pr pw
+      sh_ not {                              | pr pw
         close close                          | --
         (readresult) /NOSYSTEM makeerror     | --
       } if                                   | pr pw
-      close (\n) readtomarkfd_nb             | (buffer) pr true / (buffer) false
+      close (\n) 0 get readtomarkfd_nb       | (buffer) pr true / (buffer) false
       ~close if                              | (buffer)
-    } /readresult_ inlayer
-    dup length /b array copy
+    } ~transcribe incapsave
   } bind def
+
+  |============================== getlines ============================
+  | \[(exec) ... | [ (string)... ]
+  |
+  | Executes (exec) with ... string parameters.
+  | If (exec) returns zero-exec status, returns all lines in a list
+  |  (not including newlines).
+  | Otherwise throws NOSYSTEM.
+  | Blocks until (exec) ends.
+  |
+  /getlines {
+    {
+      pipefd 2 copy counttomark 1 add 2 roll | pr pw \[.. pr pw 
+      exch pop STDIN exch STDERR             | \[.. STDIN pw STDERR
+      sh_ not {                              | pr pw
+        close close                          | --
+        (readresult) /NOSYSTEM makeerror     | --
+      } if                                   | pr pw
+      close readlines                        | [ (line)... ]
+    } ~transcribe incapsave
+  } bind def
+    
+
+  |============================== getall ============================
+  | \[(exec) ... | (string)
+  |
+  | Executes (exec) with ... string parameters.
+  | If (exec) returns zero-exec status, returns all output.
+  | Otherwise throws NOSYSTEM.
+  | Blocks until (exec) ends.
+  |
+  /getall {
+    {
+      pipefd 2 copy counttomark 1 add 2 roll | pr pw \[.. pr pw 
+      exch pop STDIN exch STDERR             | \[.. STDIN pw STDERR
+      sh_ not {                              | pr pw
+        close close                          | --
+        (readresult) /NOSYSTEM makeerror     | --
+      } if                                   | pr pw
+      close suckfd                           | (buffer)
+    } ~transcribe incapsave
+  } bind def
+
 
 |=============================== removepath functions =====================
 
@@ -855,7 +929,7 @@
   /tosystem {
     {
       openlist (@ENABLE_BASH@) (-c) 4 -1 roll NULLR NULLW STDERR 
-      sh_ wait not {(tosystem) /NOSYSTEM makeerror} if
+      sh_ not {(tosystem) /NOSYSTEM makeerror} if
     } PROCESSES indict
   } bind userdict 3 -1 roll put
 
@@ -873,7 +947,7 @@
     ~pipefd {
       /wt name /rd name {
         openlist (@ENABLE_BASH@) (-c) 4 -1 roll NULLR wt STDERR 
-        sh_ wait not {
+        sh_ not {
           wt close rd close
           (fromsystem) /NOSYSTEM makeerror
         } if

@@ -109,16 +109,16 @@
       } {exec writefd} forall close
 
       [(pdflatex) (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
-        NULLR ewr dup sh_ wait not {true /estreamwith exitto} if |]
+        NULLR ewr dup sh_ not {true /estreamwith exitto} if |]
 
       [(gs) (-q) RESOLUTION (-dLanguageLevel=3)
         (-dNOPAUSE) (-dBATCH) (-dSAFER)
         (-sDEVICE=epswrite) (-sOutputFile=-)
         (eps.pdf)
-        NULLR wr ewr sh_ wait not {true /estreamwith exitto} if |]
+        NULLR wr ewr sh_ not {true /estreamwith exitto} if |]
 
       [(sed) (-e) (s/pt$//) (eps.comment)
-        NULLR wr ewr sh_ wait not {true /estreamwith exitto} if |]
+        NULLR wr ewr sh_ not {true /estreamwith exitto} if |]
 
       wr (%%EOF) writefd close
       false
