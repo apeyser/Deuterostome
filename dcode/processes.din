@@ -587,7 +587,7 @@
     (sh) wait_quiet
   } bind def
 
-  |====================== pipe ==================================
+  |====================== pipee ==================================
   | \[ ~active ... fd-in fd-out fd-err | pid
   |
   | Runs a pipe of child processes, with ~active1's output feeding
@@ -748,70 +748,54 @@
     [exch {(\n) 0 get readtomarkfd_nb not ~exit if} loop]
   } bind def
 
+  |========================= get... =================================
+  |======================= _getfromactive ==========================
+  | ~active ~postfunc (name) | ...
+  | active: fd-in fd-out fd-err | pid
+  | postfunc: pipe-rd | ...
+  /_getfromactive {pipefd openlist /func /pfunc /nm /rd /wr} {
+    STDIN wr STDERR /func find ~enddict stopped
+    wr close {rd close stop} if {
+      nm ~wait_quiet enddict
+      rd /pfunc find enddict 
+    } stopped rd closeifopen ~stop if
+  } caplocalfunc bind def
+
   |============================== getline ============================
-  | \[(exec) ... | (string)
-  |
-  | Executes (exec) with ... string parameters.
-  | If (exec) returns zero-exec status, returns the first line
-  |   of output (not including newline).
-  | Otherwise throws NOSYSTEM.
-  | Blocks until (exec) ends.
+  | ~active | (string)
+  | active: fd-in fd-out fd-err | pid
+  | 
+  | Executes active, and sets fd-out to a pipe. 
+  | Reads first line (stripping out final newline) from pipe and closes pipe.
+  | Blocks until active ends.
   |
   /getline {
-    {
-      pipefd 2 copy counttomark 1 add 2 roll | pr pw \[.. pr pw 
-      exch pop STDIN exch STDERR             | \[.. STDIN pw STDERR
-      sh_ not {                              | pr pw
-        close close                          | --
-        (readresult) /NOSYSTEM makeerror     | --
-      } if                                   | pr pw
-      close (\n) 0 get readtomarkfd_nb       | (buffer) pr true / (buffer) false
-      ~close if                              | (buffer)
-    } ~transcribe incapsave
+    {(\n) 0 get readtomarkfd_nb ~close if} (getline) _getfromactive
   } bind def
 
   |============================== getlines ============================
-  | \[(exec) ... | [ (string)... ]
+  | ~active | [ (string)... ]
+  | active: fd-in fd-out fd-err | pid
   |
-  | Executes (exec) with ... string parameters.
-  | If (exec) returns zero-exec status, returns all lines in a list
-  |  (not including newlines).
-  | Otherwise throws NOSYSTEM.
-  | Blocks until (exec) ends.
+  | Executes active, and sets fd-out to a pipe. 
+  | Reads all lines from pipe (stripping out final newlines).
+  | Blocks until active ends.
   |
   /getlines {
-    {
-      pipefd 2 copy counttomark 1 add 2 roll | pr pw \[.. pr pw 
-      exch pop STDIN exch STDERR             | \[.. STDIN pw STDERR
-      sh_ not {                              | pr pw
-        close close                          | --
-        (readresult) /NOSYSTEM makeerror     | --
-      } if                                   | pr pw
-      close readlines                        | [ (line)... ]
-    } ~transcribe incapsave
-  } bind def
-    
+    ~readlines (getlines) _getfromactive
+  } bind def    
 
   |============================== getall ============================
-  | \[(exec) ... | (string)
+  | ~active | (string)
+  | active: fd-in fd-out fd-err | pid
   |
-  | Executes (exec) with ... string parameters.
-  | If (exec) returns zero-exec status, returns all output.
-  | Otherwise throws NOSYSTEM.
-  | Blocks until (exec) ends.
+  | Executes active, and sets fd-out to a pipe. 
+  | Reads all lines from pipe and returns as a single string.
+  | Blocks until active ends.
   |
   /getall {
-    {
-      pipefd 2 copy counttomark 1 add 2 roll | pr pw \[.. pr pw 
-      exch pop STDIN exch STDERR             | \[.. STDIN pw STDERR
-      sh_ not {                              | pr pw
-        close close                          | --
-        (readresult) /NOSYSTEM makeerror     | --
-      } if                                   | pr pw
-      close suckfd                           | (buffer)
-    } ~transcribe incapsave
+    ~suckfd (getall) _getfromactive
   } bind def
-
 
 |=============================== removepath functions =====================
 
