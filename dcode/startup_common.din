@@ -261,7 +261,7 @@
   ~[exch 4 -1 roll destruct_exec 4 -1 roll destruct_exec ~layerlocal]
 } bind def
 
-|-------------- rlocal ----------------------------
+|-------------- local ----------------------------
 | n1 ... nn-x ~names ~active | ...
 | ~names: n1 .. nn-x | n1 .. nn [/n1 .. /nn |]
 |
@@ -285,7 +285,7 @@
   } insave
 } bind def
 
-|-------------- rlocalfunc -----------------------
+|-------------- localfunc -----------------------
 | ~names ~active | {~names ~active local}
 |
 | Creates a new wrapper procedure.

@@ -967,30 +967,32 @@
         /procthreads_live procthreads def
         /procthreads_pids procthreads list def
       } {
-        0 1 procthreads_live 1 sub {          | ~active rank
-          {
-            /procthreads_rank name end 
-            ~stopped aborted
-            console {
-              {
-                PROCESSES /procthreads_live get 1 sub
-                PROCESSES /procthreads_live put
-                continue
-                restore
-              } lock
-            } send
-            ~abort if ~stop if
-            true
-          } fds bg                            | ~active rank pid
-          procthreads_pids 3 -1 roll put      | ~active
-        } for pop                             |
-
         {
-          ~halt ~enddict unlock
-          procthreads_live 0 eq ~exit if
-        } loop
+          0 1 procthreads_live 1 sub {          | ~active rank
+            {
+              /procthreads_rank name end 
+              ~stopped aborted
+              console {
+                {
+                  PROCESSES /procthreads_live get 1 sub
+                  PROCESSES /procthreads_live put
+                  continue
+                  restore
+                } lock
+              } send
+              ~abort if ~stop if
+              true
+            } fds bg                            | ~active rank pid
+            procthreads_pids 3 -1 roll put      | ~active
+          } for pop                             |
+
+          {
+            ~halt ~enddict unlock
+            procthreads_live 0 eq ~exit if
+          } loop
         
-        procthreads_pids {(multiproc) ~wait_quiet unlock} forall
+          procthreads_pids {(multiproc) ~wait_quiet unlock} forall
+        } stopped {terminateall stop} if
       } ~incapsave lock
     } bind userdef
   } if
