@@ -288,7 +288,7 @@ P op_sleep(void) {
 /*---------------------------------------------------- getwdir
    --- | substring
 
-  - returns in 'substring' of 'string' the absolute filename of
+  - allocates 'string', the absolute filename of
     the current working directory
 */
 

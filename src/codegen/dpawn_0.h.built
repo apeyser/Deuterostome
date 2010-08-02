@@ -83,6 +83,7 @@ B* _sysop[] =
   (B*) "floor", (B*) op_floor,
   (B*) "ceil", (B*) op_ceil,
   (B*) "acos", (B*) op_acos,
+  (B*) "asin", (B*) op_asin,
   (B*) "eq", (B*) op_eq,
   (B*) "ne", (B*) op_ne,
   (B*) "ge", (B*) op_ge,
