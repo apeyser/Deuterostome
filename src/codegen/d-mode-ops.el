@@ -84,6 +84,7 @@
   "floor"
   "ceil"
   "acos"
+  "asin"
   "eq"
   "ne"
   "ge"

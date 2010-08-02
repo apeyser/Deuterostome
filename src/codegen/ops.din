@@ -209,7 +209,7 @@
       /countexecstack /execstack
       /checkFPU /neg /abs /thearc /add /mod
       /sub /mul /div /sqrt /exp /ln /lg /pwr /cos
-      /sin /tan /atan /floor /ceil /acos
+      /sin /tan /atan /floor /ceil /acos /asin
       /eq /ne /ge /gt /le /lt /and /or /xor
       /bitshift /class /type /readonly
       /active /tilde /mkread /mkact /mkpass /mktilde
