@@ -759,7 +759,8 @@
   | active: -- | --
   | postfunc: pipe-rd | ...
   /_getfromactive {pipefd openlist /func /pfunc /nm /rd /wr} {
-    openlist /func find STDIN wr STDERR ~pipe ~enddict stopped
+    openlist ~[/func find construct_exec true] 
+    STDIN wr STDERR ~pipe ~enddict stopped 
     wr close {rd close stop} if {
       nm ~wait_quiet enddict
       rd /pfunc find enddict 
