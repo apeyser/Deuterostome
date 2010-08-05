@@ -7,8 +7,8 @@ DLL_SCOPE int xsocket;
 
 #if ! DM_X_DISPLAY_MISSING
 
-#define MAXDVTWINDOWS  ((P)20)
-#define MAXCACHEDFONTS ((P)10)
+#define MAXDVTWINDOWS  ((P)127)
+#define MAXCACHEDFONTS ((P)63)
 
 DLL_SCOPE Display *dvtdisplay;
 DLL_SCOPE B displayname[80];
