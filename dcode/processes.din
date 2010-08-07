@@ -996,6 +996,65 @@
         } stopped {terminateall stop} if
       } ~incapsave lock
     } bind userdef
-  } if
 
+  |=========================== forallproc =======================
+  |
+  | start step last ~active | ...
+  |
+  | call active in n processes (default threads), procthreads at a time.
+  | waits for all processes to end.
+  | to send back info, use console ~[] send: NB, in main node in PROCESSES.
+  |
+  | procthreads determines the number of processes -- defaults to threads
+  | procthreads_rank in PROCESSES is the rank number of the process
+  |   0..procthreads-1
+  |
+    /forproc {
+      /procthreads_func name
+      /procthreads_last name
+      /procthreads_step name
+      /procthreads_first name
+
+      /procthreads_live 0 def
+      /procthreads_max procthreads def
+      /procthreads_n 0 procthreads_first procthreads_step procthreads_last {
+        pop 1 add
+      } for def
+
+      {/procthreads_pids procthreads_n list def} {
+        {
+          /procthreads_i 0 def
+          procthreads_first procthreads_step procthreads_last {/procthreads_j name
+            {
+              procthreads_live procthreads_max lt ~exit if
+              ~halt ~enddict unlock
+            } loop
+
+            /procthreads_live procthreads_live 1 add def
+            {
+              procthreads_j /procthreads_func find ~enddict ~stopped aborted
+              console {
+                {
+                  {/procthreads_live procthreads_live 1 sub def} PROCESSES indict
+                  continue
+                  restore
+                } lock
+              } send
+              ~abort if ~stop if
+              true
+            } fds bg                            | pid
+            procthreads_pids procthreads_i put  |
+            /procthreads_i procthreads_i 1 add def
+          } for
+
+          {
+            procthreads_live 0 eq ~exit if
+            ~halt ~enddict unlock
+          } loop
+
+          procthreads_pids {(forproc) ~wait_quiet unlock} forall
+        } stopped {terminateall stop} if
+      } ~incapsave lock
+    } bind userdef
+  } if | not in dvt
 } moduledef
