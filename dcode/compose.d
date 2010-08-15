@@ -104,10 +104,15 @@
     |-- insert EPS wrapper, leading part
 
     (%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: ) faxPS
-      { bbox { * exch /l ctype * number ( ) fax } forall } genPS 
-    (\n%%HiResBoundingBox: ) faxPS
-      { bbox { * exch * number ( ) fax } forall } genPS 
-    (\n%%DocumentData: Clean7Bit\n%%LanguageLevel: 3\n) faxPS  
+    { 
+      * bbox 0 get floor /l ctype * number ( ) fax
+      * bbox 1 get floor /l ctype * number ( ) fax
+      * bbox 2 get ceil  /l ctype * number ( ) fax
+      * bbox 3 get ceil  /l ctype * number (\n) fax
+    } genPS
+    (%%HiResBoundingBox: ) faxPS
+    {bbox {* exch * number ( ) fax} forall 1 sub (\n) fax} genPS 
+    (%%DocumentData: Clean7Bit\n%%LanguageLevel: 3\n) faxPS  
 
     |-- insert PS code for setting global parameters and defining symbol font
 
