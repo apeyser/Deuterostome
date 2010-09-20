@@ -120,11 +120,12 @@ endif ENABLE_PLUGINS
 endif ENABLE_PLUGINS_SUPPORT
 
 SEM_START = /^[[:space:]]*[@]ENABLE_SEM_START[@][[:space:]]*$$/
+SEM_ELSE = /^[[:space:]]*[@]ENABLE_SEM_ELSE[@][[:space:]]*$$/
 SEM_END   = /^[[:space:]]*[@]ENABLE_SEM_END[@][[:space:]]*$$/
 if ENABLE_SEM
-SEM_EDIT = -e '$(SEM_START) d' -e '$(SEM_END) d'
+SEM_EDIT = -e '$(SEM_START) d' -e '$(SEM_ELSE),$(SEM_END) d'
 else !ENABLE_SEM
-SEM_EDIT = -e '$(SEM_START),$(SEM_END) d'
+SEM_EDIT = -e '$(SEM_START),$(SEM_ELSE) d' -e '$(SEM_END) d'
 endif !ENABLE_SEM
 
 edit = -e 's,[@]pkglibdir[@],$(pkglibdir),g' \

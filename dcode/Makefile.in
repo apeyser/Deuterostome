@@ -767,9 +767,10 @@ PETSC_EDIT_OFF = -e '$(PETSC_START),$(PETSC_END) d'
 @ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@PETSC_EDIT = $(PETSC_EDIT_OFF)
 @ENABLE_PLUGINS_SUPPORT_FALSE@PETSC_EDIT = $(PETSC_EDIT_OFF)
 SEM_START = /^[[:space:]]*[@]ENABLE_SEM_START[@][[:space:]]*$$/
+SEM_ELSE = /^[[:space:]]*[@]ENABLE_SEM_ELSE[@][[:space:]]*$$/
 SEM_END = /^[[:space:]]*[@]ENABLE_SEM_END[@][[:space:]]*$$/
-@ENABLE_SEM_FALSE@SEM_EDIT = -e '$(SEM_START),$(SEM_END) d'
-@ENABLE_SEM_TRUE@SEM_EDIT = -e '$(SEM_START) d' -e '$(SEM_END) d'
+@ENABLE_SEM_FALSE@SEM_EDIT = -e '$(SEM_START),$(SEM_ELSE) d' -e '$(SEM_END) d'
+@ENABLE_SEM_TRUE@SEM_EDIT = -e '$(SEM_START) d' -e '$(SEM_ELSE),$(SEM_END) d'
 edit = -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
        -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
        -e 's,[@]ENABLE_BASH[@],$(ENABLE_BASH),g' \
