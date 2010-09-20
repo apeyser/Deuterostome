@@ -152,6 +152,10 @@ specific \file{startup_xxx.d} files.
 \op*{serialize} & - & + & + \\
 \op*{threads} & - & + & + \\
 \op*{makethreads} & - & + & + \\
+\op*{inter_lock} & - & + & + \\
+\op*{inter_unlock} & - & + & + \\
+\op*{inter_lock_implicit} & - & + & + \\
+\op*{inter_lock_set} & - & + & + \\
 \op*{tostderr} & - & + & + \\
 \op*{halt} & - & + & + \\
 \op*{continue} & - & + & + \\
@@ -811,34 +815,38 @@ respond to \dcomp{dnode} and X window connections.
 \subsection{Operators for administrating  a \dcomp{dnode}}\label{ssec:opsdnode} 
 
 \begin{ops}
-long_array/null    & vmresize     & bool                  \\
---                 & halt         & --                    \\
---                 & continue     & --                    \\
---                 & stop         & --                    \\
---                 & abort        & --                    \\
-active_obj         & lock         & ??                    \\ 
-active_obj         & unlock       & ??                    \\
---                 & console      & consolesocket/null    \\
-consolesocket/null & setconsole   & --                    \\
-string             & toconsole    & --                    \\
-string             & tostderr     & --                    \\
+long_array/null    & vmresize            & bool                  \\
+--                 & halt                & --                    \\
+--                 & continue            & --                    \\
+--                 & stop                & --                    \\
+--                 & abort               & --                    \\
+active_obj         & lock                & ??                    \\ 
+active_obj         & unlock              & ??                    \\
+--                 & console             & consolesocket/null    \\
+consolesocket/null & setconsole          & --                    \\
+string             & toconsole           & --                    \\
+string             & tostderr            & --                    \\
 hostname port# sourcestr!
-numerr             & error        & --                    \\
+numerr             & error               & --                    \\
 hostname port# sourcestr!
-numerr strbuf      & errormessage & mesg_str              \\
---                 & getmyport    & port#                 \\
---                 & Xwindows_    & bool                  \\
-(hostname:screen#) & Xconnect     & --                    \\
---                 & Xdisconnect  & --                    \\
-num                & makethreads  & --                    \\ 
---                 & threads      & num                   \\ 
-active_obj         & serialize    & --                    \\
---                 & getlibdir    & string                \\
-(path) (filename)  & loadlib      & lib_dict              \\
---                 & hi           & (library description) \\
---                 & libnum       & num                   \\
-null/lib_dict      & nextlib      & dict true             \\
-                   &              & false                 \\
+numerr strbuf      & errormessage        & mesg_str              \\
+--                 & getmyport           & port#                 \\
+--                 & Xwindows_           & bool                  \\
+(hostname:screen#) & Xconnect            & --                    \\
+--                 & Xdisconnect         & --                    \\
+num                & makethreads         & --                    \\ 
+--                 & threads             & num                   \\ 
+active_obj         & serialize           & ...                   \\
+active_obj         & inter_lock          & ...                   \\
+active_obj         & inter_unlock        & ...                   \\
+active_obj         & inter_lock_implicit & ...                   \\
+bool               & inter_lock_set      & --                    \\
+--                 & getlibdir           & string                \\
+(path) (filename)  & loadlib             & lib_dict              \\
+--                 & hi                  & (library description) \\
+--                 & libnum              & num                   \\
+null/lib_dict      & nextlib             & dict true             \\
+                   &                     & false                 \\
 \end{ops}
 
 The \dcomp{dnode} lets you resize the VM and stack dimensions
@@ -887,13 +895,80 @@ host. \op{toconsole} sends the contents of its string operand to the
 target chosen by \op{setconsole}. \op{tostderr} sends its string
 operand always to `stderr' of the host.
 
-Upon detecting an error the \dcomp{dnode} mill invokes the active name \emph{error}, which it provides with four operands: hostname (string), port number (where the \dcomp{dnode} is listening for connection requests, actually an offset used when the \dcomp{dnode} is started from a shell), a string describing the source of the error, and a numeral specifying the nature of the error (positive: D machine error; negative: extrinsic operator error) on the operand stack. \emph{error} is by defaults associated with an operator that composes an error message from this information (in red) and sends it to the current console (or `stderr' by default). \emph{error} executes \emph{halt} after the error information has been successfully decoded; otherwise it executes \emph{abort}. \emph{errormessage}, rather than sending the error message to the console and interrupting execution in the \dcomp{dnode}, simply places the message into a string buffer and returns the message string (excluding color accents) for use by \dcomp{dnode} code itself..
+Upon detecting an error the \dcomp{dnode} mill invokes the active name
+\emph{error}, which it provides with four operands: hostname (string),
+port number (where the \dcomp{dnode} is listening for connection
+requests, actually an offset used when the \dcomp{dnode} is started
+from a shell), a string describing the source of the error, and a
+numeral specifying the nature of the error (positive: D machine error;
+negative: extrinsic operator error) on the operand stack. \emph{error}
+is by defaults associated with an operator that composes an error
+message from this information (in red) and sends it to the current
+console (or `stderr' by default). \emph{error} executes \emph{halt}
+after the error information has been successfully decoded; otherwise
+it executes \emph{abort}. \emph{errormessage}, rather than sending the
+error message to the console and interrupting execution in the
+\dcomp{dnode}, simply places the message into a string buffer and
+returns the message string (excluding color accents) for use by
+\dcomp{dnode} code itself..
 
-\emph{Xwindows\_} inquires whether X Window capabilities have been compiled into this \dcomp{dnode} when the \dcomp{dnode} was built (by contrast, the common operator \emph{Xwindows} inquires whether a connection to an X Window system has been established so that you can make windows). An X Window connection is made by \emph{Xconnect} and broken by \emph{Xdisconnect}. See \ref{ssec:windows} for a description of the protocols by which the \dcomp{dvt} and \dcomp{dnode} cooperate to connect up to X windows.
+\emph{Xwindows\_} inquires whether X Window capabilities have been
+compiled into this \dcomp{dnode} when the \dcomp{dnode} was built (by
+contrast, the common operator \emph{Xwindows} inquires whether a
+connection to an X Window system has been established so that you can
+make windows). An X Window connection is made by \emph{Xconnect} and
+broken by \emph{Xdisconnect}. See \ref{ssec:windows} for a description
+of the protocols by which the \dcomp{dvt} and \dcomp{dnode} cooperate
+to connect up to X windows.
 
-The standard mathematical operators described in Chapter \ref{chap:machine}, and their `old-style' extensions described in \ref{ssec:oldstyle}, can be executed using multiple threads (processors) available in the host Linux box. \emph{makethreads} creates the number of threads specified by the numeral operand (1 through a maximal number, which currently is 8). When a \dcomp{dnode} is started up or when it is reduced to the dormant state by \emph{vmresize}, it operates with a single thread. It is possible, though unlikely to be helpful, to have more threads than physical processors in a Linux box. If you wish to execute a context in a single thread although multiple threads currently exist, submit the context to \emph{serialize}. \emph{threads} inquires the current number of created threads. The `new-style' (BLAS- and LAPACK-based) extensions of mathematical operators use an intrinsically set number of threads (fixed when the \dcomp{dnode} program is built for the particular host).
+The standard mathematical operators described in Chapter
+\ref{chap:machine}, and their `old-style' extensions described in
+\ref{ssec:oldstyle}, can be executed using multiple threads
+(processors) available in the host Linux box. \emph{makethreads}
+creates the number of threads specified by the numeral operand (1
+through a maximal number, which currently is 8). When a \dcomp{dnode}
+is started up or when it is reduced to the dormant state by
+\emph{vmresize}, it operates with a single thread. It is possible,
+though unlikely to be helpful, to have more threads than physical
+processors in a Linux box. If you wish to execute a context in a
+single thread although multiple threads currently exist, submit the
+context to \emph{serialize}. \emph{threads} inquires the current
+number of created threads. The `new-style' (BLAS- and LAPACK-based)
+extensions of mathematical operators use an intrinsically set number
+of threads (fixed when the \dcomp{dnode} program is built for the
+particular host).
 
-In addition to the intrinsic operators, \dcomp[dnode]{dnodes} can make use of libraries of extrinsic operators (which typically support specific projects or experimental extensions of the D machine). \emph{getlibdir} inquires the directory path where libraries for the \dcomp{dnode} are stored (this path is established when the \dcomp{dnode} is started). \emph{loadlib} loads a library of operators; libraries are stored from the top of the VM downwards (competing for VM space with D objects, which are stored from bottom up) and returns the dictionary of the extrinsic operators contained in that library. \emph{loadlib} also merges the extrinsic operators of the library into \emph{systemdict} (with the exceptions of \emph{hi} and \emph{libnum}). You cannot load multiple copies of the same library. A library dictionary must include two obligatory operators with library-specific effects, \emph{hi} and \emph{libnum}. \emph{hi} returns a string specifying the library name and version. \emph{libnum} returns a dynamic index for this library (1,..., in the order of loading). You can inquire which libraries are currently loaded by \emph{nextlib}, which works similarly to \emph{nextobj}. Extrinsic operator libraries are not individually unloaded; they rather are altogether removed by \emph{vmresize}.
+The \emph{inter\_lock} operators are for coordinating the actions of
+forked children, especially regarding the behavior of multi-threaded
+operators. If \op{inter_lock_set} is called with a value of `true',
+then all threaded operators (such as BLAS and array operators) will
+block on a semaphore shared between all d-machines descended from the
+man \dcomp{dnode} or \dcomp{dpawn}. \op{inter_lock_implicit} behaves
+the same way for an arbitrary chunk of d-code. The operators
+\op{inter_lock} and \op{inter_unlock} force an inter-process semaphore
+lock or unlock respectively while executing its operand, regardless of
+the \op{inter_lock_set} state.
+
+In addition to the intrinsic operators, \dcomp[dnode]{dnodes} can make
+use of libraries of extrinsic operators (which typically support
+specific projects or experimental extensions of the D
+machine). \emph{getlibdir} inquires the directory path where libraries
+for the \dcomp{dnode} are stored (this path is established when the
+\dcomp{dnode} is started). \emph{loadlib} loads a library of
+operators; libraries are stored from the top of the VM downwards
+(competing for VM space with D objects, which are stored from bottom
+up) and returns the dictionary of the extrinsic operators contained in
+that library. \emph{loadlib} also merges the extrinsic operators of
+the library into \emph{systemdict} (with the exceptions of \emph{hi}
+and \emph{libnum}). You cannot load multiple copies of the same
+library. A library dictionary must include two obligatory operators
+with library-specific effects, \emph{hi} and \emph{libnum}. \emph{hi}
+returns a string specifying the library name and
+version. \emph{libnum} returns a dynamic index for this library
+(1,..., in the order of loading). You can inquire which libraries are
+currently loaded by \emph{nextlib}, which works similarly to
+\emph{nextobj}. Extrinsic operator libraries are not individually
+unloaded; they rather are altogether removed by \emph{vmresize}.
 
 
 \subsection{More mathematical operators (old style)}\label{ssec:oldstyle}
