@@ -471,6 +471,9 @@
 /* unroll math loops to 2^rollbits */
 #undef ROLLBITS
 
+/* name for semaphore shared by processes (without leading slash) */
+#undef SEM_DNODE_NAME
+
 /* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
    'sig_atomic_t'. */
 #undef SIG_ATOMIC_T_SUFFIX

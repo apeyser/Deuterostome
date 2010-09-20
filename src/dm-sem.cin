@@ -1,3 +1,5 @@
+#line 2 "@srcdir@/dm-sem.cin"
+
 #include "dm-sem.h"
 
 #if DM_ENABLE_SEM
@@ -6,10 +8,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <semaphore.h>
-
-#ifndef SEM_DNODE_NAME
-#define SEM_DNODE_NAME "dnode"
-#endif
 
 static sem_t* lock = NULL;
 static char SEM_NAME[] = SEM_DNODE_NAME;
@@ -248,3 +246,7 @@ P op_inter_lock_set(void) {
 }
 
 #endif //ENABLE_SEM
+
+// Local Variables:
+// mode: c
+// End:

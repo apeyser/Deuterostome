@@ -10,7 +10,7 @@ INCLUDES =
 
 DIST_SUBDIRS = codegen
 BUILT_SOURCES = dnode-nice.c dnode-daemon.c paths.h \
-		drook.c dqueen.c dm-prop.c
+		drook.c dqueen.c dm-prop.c dm-sem.c
 INFILES = $(BUILT_SOURCES)
 EXTRA_DIST = $(INFILES:=in) $(IDFILES)
 CLEANFILES = $(INFILES)
@@ -38,7 +38,8 @@ edit = -e 's,[@]bindir[@],$(bindir),g' \
        -e 's,[@]dmsockdir[@],$(dmsockdir),g' \
        -e 's,[@]dmstartdir[@],$(dmstartdir),g' \
        -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
-       -e 's,[@]dmconfdir[@],$(dmconfdir),g'
+       -e 's,[@]dmconfdir[@],$(dmconfdir),g' \
+       -e 's,[@]SEM_DNODE_NAME[@],$(SEM_DNODE_NAME),g'
 
 
 if ENABLE_SETUID
@@ -167,8 +168,8 @@ lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la libdmnodal.la
 libdmglobals_la_LIBADD = $(ATLAS_LIBS) $(AM_LIBADD)
 libdmglobals_la_SOURCES = $(GLOBSRCS) \
 	matrix.c matrix.h \
-	$(THREADSRC) $(SEM_SRC) $(REGEX_SRC) dm-convert.h dm-convert.c
-nodist_libdmglobals_la_SOURCES = $(NODIST_GLOBSRCS)
+	$(THREADSRC) $(REGEX_SRC) dm-convert.h dm-convert.c
+nodist_libdmglobals_la_SOURCES = $(NODIST_GLOBSRCS) $(SEM_SRC)
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 
 libdmnodal_la_SOURCES = dm-vm.c dm-vm.h dm-dvt-vm.h \

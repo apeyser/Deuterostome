@@ -138,7 +138,12 @@ CF_IF_ENABLED([plugins], [
   ])
 ])
 
-CF_IF_ENABLED([sem], [CF_SEM])
+CF_IF_ENABLED([sem], [
+  CF_SEM
+  CF_AC_ARG_VAR([SEM_DNODE_NAME], 
+                [name for semaphore shared by processes (without leading slash)],
+	        [dnode])
+])
 
 CF_ON_TARGET([*-*-darwin*], [
   AC_CHECK_PROG([guipdf], [launch], [launch -i com.apple.Preview])
