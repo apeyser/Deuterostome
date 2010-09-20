@@ -309,6 +309,10 @@
     } if
   } bind def
 
+  userdict /dm_type get /dvt eq {
+    /set_inter_lock ~pop bind def
+  } if
+
   | ~active fd-in fd-out fd-err \[fd-chained... | --
   | Never returns.
   /_bg_ {
@@ -322,7 +326,8 @@
         1 index exch dupfd 3 1 roll
       } forall
       3 ~closeifopen repeat
-    
+      true set_inter_lock
+
       unlock {0} {1} ifelse die
     } ~stopped aborted -1 die_base
   } bind def

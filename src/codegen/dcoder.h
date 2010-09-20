@@ -85,6 +85,7 @@ struct emap emap[] = {
   {"X_SEC_GEN", X_SEC_GEN},
   {"X_SEC_REV", X_SEC_REV},
   {"X_SEC_LIB", X_SEC_LIB},
+  {"INTER_LOCK_NOT_DEF", INTER_LOCK_NOT_DEF},
   {"LIB_LOAD", LIB_LOAD},
   {"LIB_EXPORT", LIB_EXPORT},
   {"LIB_LINK", LIB_LINK},

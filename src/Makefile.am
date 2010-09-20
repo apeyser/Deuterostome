@@ -65,13 +65,18 @@ DNODEDAEMONBIN = dnode-daemon
 endif ENABLE_DAEMON
 
 if ENABLE_ATLAS
-ATLAS_ACTIVATE = -DATLAS_LIB
+  ATLAS_ACTIVATE = -DATLAS_LIB
 endif ENABLE_ATLAS
 
 if ENABLE_THREADS
   THREAD_HDR=threads.h
   THREADSRC=threads.c
 endif ENABLE_THREADS
+
+if ENABLE_SEM
+  SEM_HDR=dm-sem.h
+  SEM_SRC=dm-sem.c
+endif ENABLE_SEM
 
 if ENABLE_REGEX
   REGEX_SRC=dregex.c dregex.h
@@ -104,7 +109,7 @@ INCLUDES += @INCLTDL@
 endif ENABLE_PLUGINS_SUPPORT
 
 pkginclude_HEADERS = dm.h dm-errs.h pluginlib.h $(PLUGIN_HDR) \
-	dmx.h $(THREAD_HDR) \
+	dmx.h $(THREAD_HDR) $(SEM_HDR) \
 	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h \
 	basic-defs.h dm-types.h dm-nextevent.h \
 	dm2.h dm3.h dm4.h dm5.h dm6.h \
@@ -162,7 +167,7 @@ lib_LTLIBRARIES = libdmglobals.la libdmbootstrap.la libdmnodal.la
 libdmglobals_la_LIBADD = $(ATLAS_LIBS) $(AM_LIBADD)
 libdmglobals_la_SOURCES = $(GLOBSRCS) \
 	matrix.c matrix.h \
-	$(THREADSRC) $(REGEX_SRC) dm-convert.h dm-convert.c
+	$(THREADSRC) $(SEM_SRC) $(REGEX_SRC) dm-convert.h dm-convert.c
 nodist_libdmglobals_la_SOURCES = $(NODIST_GLOBSRCS)
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 
@@ -204,6 +209,7 @@ libdmbootstrap_la_SOURCES = $(GLOBSRCS)
 nodist_libdmbootstrap_la_SOURCES = $(NODIST_GLOBSRCS)
 libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_THREADS=1 -DDM_DISABLE_REGEX=1 \
-	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1
+	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 \
+	-DDM_DISABLE_SEM=1
 
 include $(top_srcdir)/m4/cf_in.make
