@@ -125,6 +125,9 @@
 /* Activate mpi */
 #undef ENABLE_RTHREADS
 
+/* compile d with cross-process semaphores */
+#undef ENABLE_SEM
+
 /* Path to TAIL */
 #undef ENABLE_TAIL
 

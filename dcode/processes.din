@@ -311,7 +311,7 @@
 
 @ENABLE_SEM_START@
   userdict /dm_type get /dvt eq {
-    /set_lock_set ~pop bind def
+    /inter_lock_set ~pop bind def
   } if
 @ENABLE_SEM_END@
 

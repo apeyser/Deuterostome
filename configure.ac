@@ -123,7 +123,7 @@ CF_AM_ENABLE([cppplugin],
 CF_AM_ENABLE([dmflex], 
              [compile or install dmflex plugin], 
              [no], [yes])
-CF_AM_ENABLE([sem],
+CF_AC_ENABLE([sem],
 	     [compile d with cross-process semaphores],
 	     [yes])
 

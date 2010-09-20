@@ -6,8 +6,13 @@
 
 #include <errno.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <semaphore.h>
+
+#include "dm2.h"
+#include "dm-dvt-vm.h"
 
 static sem_t* lock = NULL;
 static char SEM_NAME[] = "@SEM_DNODE_NAME@";
@@ -31,7 +36,8 @@ P inter_lock_init(void) {
     return MEM_OVF;
   
   
-  while (! (lock = sem_open(sem_name, O_CREAT|O_EXCL, 0, 1))) {
+  while (! (lock = sem_open(sem_name, O_CREAT|O_EXCL, 
+			    S_IRUSR|S_IWUSR, 1))) {
     if (errno == EINTR) checkabort();
     else return -errno;
   }
@@ -80,7 +86,7 @@ P do_inter_unlock(void) {
 // use_interlocks_bool | --
 P op_inter_lock_set(void) {
   if (o_1 < FLOORopds) return OPDS_UNF;
-  if (TAG(o_1) =! BOOL) return OPD_CLA;
+  if (TAG(o_1) != BOOL) return OPD_CLA;
   
   use_locks = BOOL_VAL(o_1);
   FREEopds = o_1;
