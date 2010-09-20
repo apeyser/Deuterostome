@@ -10,10 +10,10 @@
 #include <semaphore.h>
 
 static sem_t* lock = NULL;
-static char SEM_NAME[] = SEM_DNODE_NAME;
+static char SEM_NAME[] = "@SEM_DNODE_NAME@";
 
 P inter_lock_init(void) {
-  char sem_name[sizeof(SEM_NAME)/sizeof(char) + 10];
+  char sem_name[sizeof(SEM_NAME)/sizeof(char) + 30]; // big enough for 64 bit pid_t
   const size_t sz = sizeof(sem_name)/sizeof(char);
 
   if (lock) {
