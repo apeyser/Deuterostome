@@ -393,7 +393,9 @@ end def
     /commands [
       /lock /unlock /serialize /threads /makethreads 
       /halt /continue 
-      /vmresize /inter_lock /inter_lock_implicit /set_inter_lock
+      /vmresize 
+      /inter_lock /inter_unlock 
+      /inter_lock_implicit /inter_lock_set
     ] def
     /errors 100 dict dup begin |[
       /INTER_LOCK_NOT_DEF (** Inter locks not defined) def

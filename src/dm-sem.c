@@ -80,7 +80,7 @@ P do_inter_unlock(void) {
 }
 
 // use_interlocks_bool | --
-P op_set_inter_lock(void) {
+P op_inter_lock_set(void) {
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) =! BOOL) return OPD_CLA;
   
@@ -223,10 +223,6 @@ P inter_lock_init(void) {
   return OK;
 }
 
-P reset_inter_lock(void) {
-  return OK;
-}
-
 P do_inter_lock(void) {
   return OK;
 }
@@ -245,10 +241,9 @@ P op_inter_unlock(void) {
 
 P op_inter_lock_implicit(void) {
   return INTER_LOCK_NOT_DEF;
-}
-  
+}  
 
-P op_set_inter_lock(void) {
+P op_inter_lock_set(void) {
   return INTER_LOCK_NOT_DEF;
 }
 

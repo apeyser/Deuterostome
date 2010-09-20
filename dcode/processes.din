@@ -309,9 +309,11 @@
     } if
   } bind def
 
+@ENABLE_SEM_START@
   userdict /dm_type get /dvt eq {
-    /set_inter_lock ~pop bind def
+    /set_lock_set ~pop bind def
   } if
+@ENABLE_SEM_END@
 
   | ~active fd-in fd-out fd-err \[fd-chained... | --
   | Never returns.
@@ -326,7 +328,9 @@
         1 index exch dupfd 3 1 roll
       } forall
       3 ~closeifopen repeat
-      true set_inter_lock
+@ENABLE_SEM_START@
+      true inter_lock_set
+@ENABLE_SEM_END@
 
       unlock {0} {1} ifelse die
     } ~stopped aborted -1 die_base
