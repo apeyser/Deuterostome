@@ -22,6 +22,7 @@
 #include "dm-signals.h"
 #include "dm6.h"
 #include "dm8.h"
+#include "dm-sem.h"
 #include "error-local.h"
 
 // (dir)/null (prefix) | fdr fdw (dir) (prefix)
@@ -416,6 +417,7 @@ P op_fork(void) {
       if (close(sockets[0])) error_local(1, errno, "close sockets[0]");
 
       closesockets_fork();
+      do_inter_lock_reset();
 
       if ((retc = addsocket(sockets[1], &sockettype, &defaultsocketinfo)))
 	error_local(1, retc < 0 ? -retc : 0, 

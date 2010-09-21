@@ -17,6 +17,7 @@ P inter_lock_init(void);
 P reset_inter_lock(void);
 P do_inter_lock(void);
 P do_inter_unlock(void);
+P do_inter_lock_reset(void);
 
 P op_inter_lock(void);
 P op_inter_unlock(void);

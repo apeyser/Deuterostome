@@ -136,19 +136,6 @@ P op_inter_lock(void) {
   return OK;
 }
 
-static P x_op_inter_lock_implicit(void) {
-  P retc;
-
-  if (x_1 < FLOORexecs) return EXECS_UNF;
-  if (TAG(x_1) != BOOL) return EXECS_COR;
-
-  if (! BOOL_VAL(x_1) && (retc = x_inter_unlock()))
-    return retc;
-  
-  FREEexecs = x_1;
-  return repush_stop();
-}
-
 // ~active | --
 P op_inter_lock_implicit(void) {
   P retc;
@@ -163,8 +150,8 @@ P op_inter_lock_implicit(void) {
   
   TAG(x2) = OP; 
   ATTR(x2) = ACTIVE;
-  OP_NAME(x2) = "x_inter_lock_implicit"; 
-  OP_CODE(x2) = x_op_inter_lock_implicit;
+  OP_NAME(x2) = "x_inter_lock"; 
+  OP_CODE(x2) = x_op_inter_lock;
 
   TAG(x3) = BOOL; 
   ATTR(x3) = (STOPMARK | ABORTMARK | ACTIVE);
@@ -206,7 +193,7 @@ P op_inter_unlock(void) {
   
   TAG(x2) = OP; 
   ATTR(x2) = ACTIVE;
-  OP_NAME(x2) = "x_inter_unlock"; 
+  OP_NAME(x2) = "x_inter_unlock";
   OP_CODE(x2) = x_op_inter_unlock;
 
   TAG(x3) = BOOL; 
@@ -221,6 +208,26 @@ P op_inter_unlock(void) {
   return OK;
 }
 
+P do_inter_lock_reset(void) {
+  B* f;
+
+  for (f = FREEexecs-FRAMEBYTES; f > FLOORexecs; f -= FRAMEBYTES)
+    if (TAG(f) == OP && (ATTR(f) & ACTIVE)
+	&& (OP_CODE(f) == x_op_inter_unlock
+	    || OP_CODE(f) == x_op_inter_lock)) {
+      f -= FRAMEBYTES;
+      if (f+FRAMEBYTES*3 < FREEexecs) {
+	FREEexecs -= FRAMEBYTES*3;
+	moveframes(f+FRAMEBYTES*3, f, FREEexecs - f);
+      }
+      else
+	FREEexecs = f;
+    };
+
+  interlocked = FALSE;
+  return OK;
+}
+
 #else // ! ENABLE_SEM
 
 P inter_lock_init(void) {
@@ -232,6 +239,10 @@ P do_inter_lock(void) {
 }
 
 P do_inter_unlock(void) {
+  return OK;
+}
+
+P do_inter_lock_reset(void) {
   return OK;
 }
 
