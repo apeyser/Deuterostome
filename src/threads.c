@@ -142,6 +142,7 @@ P threads_do_int(UL32 nways, thread_func func,
                  void* local, size_t s) {
   P retc;
   UL32 i;
+  BOOLEAN inter_unlock;
   if (nways > thread_num()) return RNG_CHK;
   
   thread_max_ = nways-1;
@@ -150,8 +151,13 @@ P threads_do_int(UL32 nways, thread_func func,
   if (local) for (i = nways; i--;) thread_data_local[i] = local+s*i;
   else       for (i = nways; i--;) thread_data_local[i] = NULL;
   
-  if (do_inter_lock && (retc = do_inter_lock())) 
-    return retc;
+  fprintf(stderr, "%lu in thread_inter_lock\n", (unsigned long) getpid());
+  switch (retc = (do_inter_lock ? do_inter_lock() : DONE)) {
+    case OK: inter_unlock = TRUE; break;
+    case DONE: inter_unlock = FALSE; break;
+    default: return retc;
+  };
+  fprintf(stderr, "%lu out thread_inter_lock\n", (unsigned long) getpid());
 
   MAINERR(pthread_mutex_lock, main_lock);
   for (i = 1; i < nways; ++i) {
@@ -169,11 +175,14 @@ P threads_do_int(UL32 nways, thread_func func,
     MAINERR(pthread_cond_wait, main_wait, main_lock);
   MAINERR(pthread_mutex_unlock, main_lock);
 
-  retc = do_inter_unlock ? do_inter_unlock() : OK;
+  fprintf(stderr, "%lu in thread_inter_unlock\n", (unsigned long) getpid());
+  retc = do_inter_unlock ? do_inter_unlock(inter_unlock) : OK;
+  fprintf(stderr, "%lu out thread_inter_unlock\n", (unsigned long) getpid());
+
   for (i = 0; i < nways; ++i)
     if (thread_error[i]) return thread_error[i];
 
-  return retc;
+  return retc != DONE ? retc : OK;
 }
 
 DM_INLINE_STATIC P threads_do_pool_int_(UL32 nways, thread_func func, 

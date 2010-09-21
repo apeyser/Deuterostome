@@ -10,16 +10,22 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <semaphore.h>
+#include <stdlib.h>
 
 #include "dm2.h"
 #include "dm-dvt-vm.h"
 
 static sem_t* lock = NULL;
 static char SEM_NAME[] = "@SEM_DNODE_NAME@";
+static BOOLEAN use_locks = FALSE;
+static BOOLEAN interlocked = FALSE;
 
 P _do_inter_lock_init(void) {
   char sem_name[sizeof(SEM_NAME)/sizeof(char) + 30]; // big enough for 64 bit pid_t
   const size_t sz = sizeof(sem_name)/sizeof(char);
+
+  use_locks = FALSE;
+  interlocked = FALSE;
 
   if (lock) {
     sem_t* lock_ = lock;
@@ -50,37 +56,67 @@ P _do_inter_lock_init(void) {
   return OK;
 }
 
-static BOOLEAN use_locks = FALSE;
-static BOOLEAN interlocked = FALSE;
-
 DM_INLINE_STATIC P x_inter_lock(BOOLEAN force) {
-  if (! interlocked && (force || use_locks) && lock)
+  P retc = DONE;
+
+  fprintf(stderr, "lock-in    %lu: %i, %i, %i, %i\n",
+	  (unsigned long) getpid(), 
+	  abs(interlocked),
+	  abs(force),
+	  abs(use_locks),
+	  lock ? 1 : 0);
+
+  if (force && ! interlocked && lock) {
     while (sem_wait(lock)) {
       if (errno == EINTR) checkabort();
       else return -errno;
     }
+    interlocked = TRUE;
+    retc = OK;
+  }
   
-  interlocked = (force || use_locks) && lock;
-  return OK;
+  fprintf(stderr, "lock-out   %lu: %i, %i, %i, %i\n",
+	  (unsigned long) getpid(), 
+	  abs(interlocked),
+	  abs(force),
+	  abs(use_locks),
+	  lock ? 1 : 0);
+  return retc;
 }
 
-DM_INLINE_STATIC P x_inter_unlock(void) {
-  if (interlocked && lock)
+DM_INLINE_STATIC P x_inter_unlock(BOOLEAN force) {
+  P retc = DONE;
+
+  fprintf(stderr, "unlock-in  %lu: %i, %i, %i\n",
+	  (unsigned long) getpid(), 
+	  abs(interlocked),
+	  abs(use_locks),
+	  lock ? 1 : 0);
+
+  if (force && interlocked && lock) {
     while (sem_post(lock)) {
       if (errno == EINTR) checkabort();
       else return -errno;
     }
+    interlocked = FALSE;
+    retc = OK;
+  }
 
-  interlocked = FALSE;
-  return OK;
+  fprintf(stderr, "unlock-out %lu: %i, %i, %i\n",
+	  (unsigned long) getpid(), 
+	  abs(interlocked),
+	  abs(use_locks),
+	  lock ? 1 : 0);
+
+  return retc;
 }
 
 P _do_inter_lock(void) {
-  return x_inter_lock(FALSE);
+  return x_inter_lock(use_locks);
 }
 
-P _do_inter_unlock(void) {
-  return x_inter_unlock();
+P _do_inter_unlock(BOOLEAN force) {
+  return x_inter_unlock(force);
 }
 
 // use_interlocks_bool | --
@@ -96,13 +132,32 @@ P op_inter_lock_set(void) {
 static P x_op_inter_lock(void) {
   P retc;
 
+  fprintf(stderr, "%lu in x_op_inter_lock\n", (long int) getpid());
+
   if (x_1 < FLOORexecs) return EXECS_UNF;
   if (TAG(x_1) != BOOL) return EXECS_COR;
 
-  if (! BOOL_VAL(x_1) && (retc = x_inter_unlock())) 
+  if ((retc = x_inter_unlock(BOOL_VAL(x_1))))
     return retc;
   
   FREEexecs = x_1;
+  fprintf(stderr, "%lu out x_op_inter_lock\n", (long int) getpid());
+  return repush_stop();
+}
+
+static P x_op_inter_unlock(void) {
+  P retc;
+
+  fprintf(stderr, "%lu in x_op_inter_unlock\n", (long int) getpid());
+
+  if (x_1 < FLOORexecs) return EXECS_UNF;
+  if (TAG(x_1) != BOOL) return EXECS_COR;
+
+  if ((retc = x_inter_lock(BOOL_VAL(x_1))))
+    return retc;
+  
+  FREEexecs = x_1;
+  fprintf(stderr, "%lu out x_op_inter_unlock\n", (long int) getpid());
   return repush_stop();
 }
 
@@ -110,13 +165,14 @@ static P x_op_inter_lock(void) {
 P op_inter_lock(void) {
   P retc;
 
+  fprintf(stderr, "%lu in op_inter_lock\n", (long int) getpid());
+
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (CEILexecs < x5) return EXECS_OVF;
   if (! (ATTR(o_1) & ACTIVE)) return OPD_ATR;
   
-  TAG(x1) = BOOL; 
+  TAG(x1) = BOOL;
   ATTR(x1) = 0;
-  BOOL_VAL(x1) = interlocked;
   
   TAG(x2) = OP; 
   ATTR(x2) = ACTIVE;
@@ -129,10 +185,15 @@ P op_inter_lock(void) {
   
   moveframe(o_1, x4);
 
-  if ((retc = x_inter_lock(TRUE))) return retc;
+  switch (retc = x_inter_lock(TRUE)) {
+    case OK: BOOL_VAL(x1) = TRUE; break;
+    case DONE: BOOL_VAL(x1) = FALSE; break;
+    default: return retc;
+  };
 
   FREEexecs = x5;
   FREEopds = o_1;
+  fprintf(stderr, "%lu out op_inter_lock\n", (long int) getpid());
   return OK;
 }
 
@@ -146,7 +207,6 @@ P op_inter_lock_implicit(void) {
   
   TAG(x1) = BOOL; 
   ATTR(x1) = 0;
-  BOOL_VAL(x1) = interlocked;
   
   TAG(x2) = OP; 
   ATTR(x2) = ACTIVE;
@@ -159,29 +219,22 @@ P op_inter_lock_implicit(void) {
   
   moveframe(o_1, x4);
 
-  if ((retc = x_inter_lock(FALSE))) return retc;
+  switch (retc = x_inter_lock(use_locks)) {
+    case OK: BOOL_VAL(x1) = TRUE; break;
+    case DONE: BOOL_VAL(x1) = FALSE; break;
+    default: return retc;
+  };
 
   FREEexecs = x5;
   FREEopds = o_1;
   return OK;
 }
 
-static P x_op_inter_unlock(void) {
-  P retc;
-
-  if (x_1 < FLOORexecs) return EXECS_UNF;
-  if (TAG(x_1) != BOOL) return EXECS_COR;
-
-  if (BOOL_VAL(x_1) && (retc = x_inter_lock(TRUE)))
-    return retc;
-  
-  FREEexecs = x_1;
-  return repush_stop();
-}
-
 // ~active | --
 P op_inter_unlock(void) {
   P retc;
+
+  fprintf(stderr, "%lu in op_inter_unlock\n", (long int) getpid());
 
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (CEILexecs < x5) return EXECS_OVF;
@@ -189,7 +242,6 @@ P op_inter_unlock(void) {
   
   TAG(x1) = BOOL; 
   ATTR(x1) = 0;
-  BOOL_VAL(x1) = interlocked;
   
   TAG(x2) = OP; 
   ATTR(x2) = ACTIVE;
@@ -201,15 +253,22 @@ P op_inter_unlock(void) {
   BOOL_VAL(x3) = FALSE;
   
   moveframe(o_1, x4);
-  if ((retc = x_inter_unlock())) return retc;
+  switch (retc = x_inter_unlock(TRUE)) {
+    case OK: BOOL_VAL(x1) = TRUE; break;
+    case DONE: BOOL_VAL(x1) = FALSE; break;
+    default: return retc;
+  };
 
   FREEexecs = x5;
   FREEopds = o_1;
+  fprintf(stderr, "%lu out op_inter_unlock\n", (long int) getpid());
   return OK;
 }
 
 P _do_inter_lock_reset(void) {
   B* f;
+  use_locks = FALSE;
+  interlocked = FALSE;
 
   for (f = FREEexecs-FRAMEBYTES; f > FLOORexecs; f -= FRAMEBYTES)
     if (TAG(f) == OP && (ATTR(f) & ACTIVE)
@@ -223,8 +282,7 @@ P _do_inter_lock_reset(void) {
       else
 	FREEexecs = f;
     };
-
-  interlocked = FALSE;
+  
   return OK;
 }
 

@@ -297,14 +297,18 @@ DEF_CHECK_OVERLAP(ll, L32)
 #define CHECK_OVERLAP_LL(a, na, b, nb) \
   CHECK_OVERLAP(ll, a, na, b, nb)
 
-#define CHECKIN_SEM() do {				\
-    P retc = do_inter_lock ? do_inter_lock() : OK;	\
-    if (retc) return retc;				\
+#define CHECKIN_SEM() do {					\
+    P retc;							\
+    switch (retc = (do_inter_lock ? do_inter_lock() : DONE)) {	\
+      case OK: unlock = TRUE; break;				\
+      case DONE: unlock = FALSE; break;				\
+      default: return retc;					\
+    };								\
   } while (0)
-
-#define CHECKOUT_SEM(err) do {				\
-    P retc = do_inter_unlock ? do_inter_unlock() : OK;	\
-    if (err || retc) return err ? err : retc;		\
+      
+#define CHECKOUT_SEM(err) do {				      \
+    P retc = do_inter_unlock ? do_inter_unlock(unlock) : OK;  \
+    if (err || (retc && retc != DONE)) return err ? err : retc;	\
   } while (0)
 
 /*--------------------------------------------- matmul_blas
@@ -320,6 +324,7 @@ P op_matmul_blas(void)
     D alpha, beta;
     enum CBLAS_TRANSPOSE transA, transB;
     BOOLEAN transA_, transB_;
+    BOOLEAN unlock;
 
     if (o_10 < FLOORopds) return OPDS_UNF;
     if (ATTR(o_10) & READONLY) return OPD_ATR;
@@ -362,6 +367,7 @@ P op_decompLU_lp(void) {
   INDEX_SIZE N;
   P info;
   BOOLEAN nsing = TRUE;
+  BOOLEAN unlock;
   
   if (o_3 < FLOORopds) return OPDS_UNF;
   if (o2 > CEILopds) return OPDS_OVF;
@@ -388,6 +394,7 @@ P op_decompLU_lp(void) {
 // rhs lumatrix <cut> <pivot> | solution(rhs)
 P op_backsubLU_lp(void) {
   INDEX_SIZE N;
+  BOOLEAN unlock;
 
   if (o_4 < FLOORopds) return OPDS_UNF;
   if (ATTR(o_4) & READONLY) return OPD_ATR;
@@ -412,6 +419,7 @@ P op_backsubLU_lp(void) {
 // lumatrix <cuts> pivot | invmatrix(lumatrix) <cuts>
 P op_invertLU_lp(void) {
   INDEX_SIZE N;
+  BOOLEAN unlock;
   
   if (o_3 < FLOORopds) return OPDS_UNF;
   if (ATTR(o_3) & READONLY) return OPD_ATR;
@@ -433,6 +441,8 @@ P op_invertLU_lp(void) {
 // x | sqrt(sum_i x_i^2)
 P op_norm2_blas(void) {
   D r;
+  BOOLEAN unlock;
+
   if (o1 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != ARRAY) return OPD_CLA;
   if (TYPE(o_1) != DOUBLETYPE) return OPD_TYP;
@@ -451,6 +461,8 @@ P op_norm2_blas(void) {
 P op_vecadd_blas(void) {
   D alpha;
   P sz;
+  BOOLEAN unlock;
+
   if (o3 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != ARRAY || CLASS(o_2) != ARRAY || CLASS(o_3) != NUM) 
     return OPD_CLA;
@@ -470,6 +482,8 @@ P op_vecadd_blas(void) {
 // x alpha | x (xi=alpha*xi)
 P op_vecscale_blas(void) {
   D alpha;
+  BOOLEAN unlock;
+
   if (o_2 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != NUM || CLASS(o_2) != ARRAY) return OPD_CLA;
   if (TYPE(o_2) != DOUBLETYPE) return OPD_TYP;
@@ -486,6 +500,8 @@ P op_vecscale_blas(void) {
 // y x | y (y_i=x_i)
 P op_veccopy_blas(void) {
   P sz;
+  BOOLEAN unlock;
+
   if (o_2 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != ARRAY || CLASS(o_2) != ARRAY) return OPD_CLA;
   if (TYPE(o_1) != DOUBLETYPE || TYPE(o_2) != DOUBLETYPE) return OPD_TYP;
@@ -503,6 +519,8 @@ P op_veccopy_blas(void) {
 P op_dot_blas(void) {
   P sz;
   D r;
+  BOOLEAN unlock;
+
   if (o_2 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != ARRAY || CLASS(o_2) != ARRAY) return OPD_CLA;
   if (TYPE(o_1) != DOUBLETYPE || TYPE(o_2) != DOUBLETYPE) return OPD_TYP;
@@ -527,6 +545,7 @@ P op_matvecmul_blas(void) {
   INDEX_SIZE Nrowa, Ncola, Nrowa_, Ncola_, lda;
   enum CBLAS_TRANSPOSE trans;
   BOOLEAN trans_;
+  BOOLEAN unlock;
 
   if (o_7 < FLOORopds) return OPDS_UNF;
   if (ATTR(o_7) & READONLY) return OPD_ATR;
@@ -557,6 +576,7 @@ P op_solvetriang_blas(void) {
   enum CBLAS_TRANSPOSE trans;
   BOOLEAN uplo, unit, trans_;
   INDEX_SIZE N;
+  BOOLEAN unlock;
   
   if (FLOORopds > o_6) return OPDS_UNF;
   if (CLASS(o_1) != BOOL || CLASS(o_2) != BOOL)
@@ -583,6 +603,7 @@ P op_solvetriang_blas(void) {
 // <d h1 h2> | c s (h1=rot, h2=0)
 P op_givens_blas(void) {
   D c, s;
+  BOOLEAN unlock;
 
   if (FLOORopds > o_1) return OPDS_UNF;
   if (CEILopds < o_2) return OPDS_OVF;
@@ -608,6 +629,7 @@ P op_givens_blas(void) {
 P op_rotate_blas(void) {
   D c, s;
   INDEX_SIZE rows;
+  BOOLEAN unlock;
 
   if (FLOORopds > o_4) return OPDS_UNF;
   if ((ATTR(o_1) & READONLY) || (ATTR(o_2) & READONLY)) return OPD_ATR;
@@ -629,6 +651,7 @@ P op_rotate_blas(void) {
 
 P op_xerbla_test(void) {
   BOOLEAN test;
+  BOOLEAN unlock;
 
   if (FLOORopds > o_1) return OPDS_UNF;
   if (CLASS(o_1) != BOOL) return OPD_CLA;

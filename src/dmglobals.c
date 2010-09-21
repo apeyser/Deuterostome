@@ -55,7 +55,7 @@ P (*check_plugin)(void) = NULL;
 P (*do_inter_lock_init)(void) = NULL;
 P (*do_inter_lock_reset)(void) = NULL;
 P (*do_inter_lock)(void) = NULL;
-P (*do_inter_unlock)(void) = NULL;
+P (*do_inter_unlock)(BOOLEAN force) = NULL;
 
 /*---------------------------- ASCII character classification table
 
