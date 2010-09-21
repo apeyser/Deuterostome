@@ -59,12 +59,12 @@ P _do_inter_lock_init(void) {
 DM_INLINE_STATIC P x_inter_lock(BOOLEAN force) {
   P retc = DONE;
 
-  fprintf(stderr, "lock-in    %lu: %i, %i, %i, %i\n",
-	  (unsigned long) getpid(), 
-	  abs(interlocked),
-	  abs(force),
-	  abs(use_locks),
-	  lock ? 1 : 0);
+  /* fprintf(stderr, "lock-in    %lu: %i, %i, %i, %i\n", */
+  /* 	  (unsigned long) getpid(),  */
+  /* 	  abs(interlocked), */
+  /* 	  abs(force), */
+  /* 	  abs(use_locks), */
+  /* 	  lock ? 1 : 0); */
 
   if (force && ! interlocked && lock) {
     while (sem_wait(lock)) {
@@ -75,23 +75,23 @@ DM_INLINE_STATIC P x_inter_lock(BOOLEAN force) {
     retc = OK;
   }
   
-  fprintf(stderr, "lock-out   %lu: %i, %i, %i, %i\n",
-	  (unsigned long) getpid(), 
-	  abs(interlocked),
-	  abs(force),
-	  abs(use_locks),
-	  lock ? 1 : 0);
+  /* fprintf(stderr, "lock-out   %lu: %i, %i, %i, %i\n", */
+  /* 	  (unsigned long) getpid(),  */
+  /* 	  abs(interlocked), */
+  /* 	  abs(force), */
+  /* 	  abs(use_locks), */
+  /* 	  lock ? 1 : 0); */
   return retc;
 }
 
 DM_INLINE_STATIC P x_inter_unlock(BOOLEAN force) {
   P retc = DONE;
 
-  fprintf(stderr, "unlock-in  %lu: %i, %i, %i\n",
-	  (unsigned long) getpid(), 
-	  abs(interlocked),
-	  abs(use_locks),
-	  lock ? 1 : 0);
+  /* fprintf(stderr, "unlock-in  %lu: %i, %i, %i\n", */
+  /* 	  (unsigned long) getpid(),  */
+  /* 	  abs(interlocked), */
+  /* 	  abs(use_locks), */
+  /* 	  lock ? 1 : 0); */
 
   if (force && interlocked && lock) {
     while (sem_post(lock)) {
@@ -102,11 +102,11 @@ DM_INLINE_STATIC P x_inter_unlock(BOOLEAN force) {
     retc = OK;
   }
 
-  fprintf(stderr, "unlock-out %lu: %i, %i, %i\n",
-	  (unsigned long) getpid(), 
-	  abs(interlocked),
-	  abs(use_locks),
-	  lock ? 1 : 0);
+  /* fprintf(stderr, "unlock-out %lu: %i, %i, %i\n", */
+  /* 	  (unsigned long) getpid(),  */
+  /* 	  abs(interlocked), */
+  /* 	  abs(use_locks), */
+  /* 	  lock ? 1 : 0); */
 
   return retc;
 }
@@ -132,7 +132,7 @@ P op_inter_lock_set(void) {
 static P x_op_inter_lock(void) {
   P retc;
 
-  fprintf(stderr, "%lu in x_op_inter_lock\n", (long int) getpid());
+  /* fprintf(stderr, "%lu in x_op_inter_lock\n", (long int) getpid()); */
 
   if (x_1 < FLOORexecs) return EXECS_UNF;
   if (TAG(x_1) != BOOL) return EXECS_COR;
@@ -141,14 +141,14 @@ static P x_op_inter_lock(void) {
     return retc;
   
   FREEexecs = x_1;
-  fprintf(stderr, "%lu out x_op_inter_lock\n", (long int) getpid());
+  /* fprintf(stderr, "%lu out x_op_inter_lock\n", (long int) getpid()); */
   return repush_stop();
 }
 
 static P x_op_inter_unlock(void) {
   P retc;
 
-  fprintf(stderr, "%lu in x_op_inter_unlock\n", (long int) getpid());
+  /* fprintf(stderr, "%lu in x_op_inter_unlock\n", (long int) getpid()); */
 
   if (x_1 < FLOORexecs) return EXECS_UNF;
   if (TAG(x_1) != BOOL) return EXECS_COR;
@@ -157,7 +157,7 @@ static P x_op_inter_unlock(void) {
     return retc;
   
   FREEexecs = x_1;
-  fprintf(stderr, "%lu out x_op_inter_unlock\n", (long int) getpid());
+  /* fprintf(stderr, "%lu out x_op_inter_unlock\n", (long int) getpid()); */
   return repush_stop();
 }
 
@@ -165,7 +165,7 @@ static P x_op_inter_unlock(void) {
 P op_inter_lock(void) {
   P retc;
 
-  fprintf(stderr, "%lu in op_inter_lock\n", (long int) getpid());
+  /* fprintf(stderr, "%lu in op_inter_lock\n", (long int) getpid()); */
 
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (CEILexecs < x5) return EXECS_OVF;
@@ -193,7 +193,7 @@ P op_inter_lock(void) {
 
   FREEexecs = x5;
   FREEopds = o_1;
-  fprintf(stderr, "%lu out op_inter_lock\n", (long int) getpid());
+  /* fprintf(stderr, "%lu out op_inter_lock\n", (long int) getpid()); */
   return OK;
 }
 
@@ -234,7 +234,7 @@ P op_inter_lock_implicit(void) {
 P op_inter_unlock(void) {
   P retc;
 
-  fprintf(stderr, "%lu in op_inter_unlock\n", (long int) getpid());
+  /* fprintf(stderr, "%lu in op_inter_unlock\n", (long int) getpid()); */
 
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (CEILexecs < x5) return EXECS_OVF;
@@ -261,7 +261,7 @@ P op_inter_unlock(void) {
 
   FREEexecs = x5;
   FREEopds = o_1;
-  fprintf(stderr, "%lu out op_inter_unlock\n", (long int) getpid());
+  /* fprintf(stderr, "%lu out op_inter_unlock\n", (long int) getpid()); */
   return OK;
 }
 
