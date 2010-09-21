@@ -10,7 +10,7 @@ INCLUDES =
 
 DIST_SUBDIRS = codegen
 BUILT_SOURCES = dnode-nice.c dnode-daemon.c paths.h \
-		drook.c dqueen.c dm-prop.c
+		drook.c dqueen.c dm-prop.c dm-sem.c
 INFILES = $(BUILT_SOURCES)
 EXTRA_DIST = $(INFILES:=in) $(IDFILES)
 CLEANFILES = $(INFILES)
@@ -38,7 +38,8 @@ edit = -e 's,[@]bindir[@],$(bindir),g' \
        -e 's,[@]dmsockdir[@],$(dmsockdir),g' \
        -e 's,[@]dmstartdir[@],$(dmstartdir),g' \
        -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
-       -e 's,[@]dmconfdir[@],$(dmconfdir),g'
+       -e 's,[@]dmconfdir[@],$(dmconfdir),g' \
+       -e 's,[@]SEM_DNODE_NAME[@],$(SEM_DNODE_NAME),g'
 
 
 if ENABLE_SETUID
@@ -65,13 +66,18 @@ DNODEDAEMONBIN = dnode-daemon
 endif ENABLE_DAEMON
 
 if ENABLE_ATLAS
-ATLAS_ACTIVATE = -DATLAS_LIB
+  ATLAS_ACTIVATE = -DATLAS_LIB
 endif ENABLE_ATLAS
 
 if ENABLE_THREADS
   THREAD_HDR=threads.h
   THREADSRC=threads.c
 endif ENABLE_THREADS
+
+if ENABLE_SEM
+  SEM_HDR=dm-sem.h
+  SEM_SRC=dm-sem.c
+endif ENABLE_SEM
 
 if ENABLE_REGEX
   REGEX_SRC=dregex.c dregex.h
@@ -104,7 +110,7 @@ INCLUDES += @INCLTDL@
 endif ENABLE_PLUGINS_SUPPORT
 
 pkginclude_HEADERS = dm.h dm-errs.h pluginlib.h $(PLUGIN_HDR) \
-	dmx.h $(THREAD_HDR) \
+	dmx.h $(THREAD_HDR) $(SEM_HDR) \
 	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h \
 	basic-defs.h dm-types.h dm-nextevent.h \
 	dm2.h dm3.h dm4.h dm5.h dm6.h \
@@ -131,7 +137,7 @@ dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dnode_SOURCES = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
 	$(SOCKSRCS) \
 	$(DNODE_MPI_SRCS)
-nodist_dnode_SOURCES = $(NODIST_SOCKSRCS) $(NODIST_DNODE_MPI_SRCS)
+nodist_dnode_SOURCES = $(NODIST_SOCKSRCS) $(NODIST_DNODE_MPI_SRCS) $(SEM_SRC)
 dnode_LDADD = $(builddir)/libdmglobals.la \
 	$(builddir)/libdmnodal.la \
 	$(AM_LDADD) $(ATLAS_LIBS) $(MPI_LIBS)
@@ -204,6 +210,7 @@ libdmbootstrap_la_SOURCES = $(GLOBSRCS)
 nodist_libdmbootstrap_la_SOURCES = $(NODIST_GLOBSRCS)
 libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_THREADS=1 -DDM_DISABLE_REGEX=1 \
-	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1
+	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 \
+	-DDM_DISABLE_SEM=1
 
 include $(top_srcdir)/m4/cf_in.make

@@ -34,6 +34,7 @@
 #include "dm6.h"
 #include "dm5.h"
 #include "dm8.h"
+#include "dm-sem.h"
 
 #include "dnode_0.h"
 
@@ -179,7 +180,12 @@ int main(int argc, char *argv[])
   sysop = _sysop;
   syserrm = _syserrm;
   syserrc = _syserrc;
+
   check_plugin = _check_plugin;
+  do_inter_lock_init  = _do_inter_lock_init;
+  do_inter_lock_reset = _do_inter_lock_reset;
+  do_inter_lock = _do_inter_lock;
+  do_inter_unlock = _do_inter_unlock;
 
 #if HAVE_SETSID
   // separate from current session - don't die if term closed.

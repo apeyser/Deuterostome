@@ -35,15 +35,16 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@am__append_1 = dm-dmpetsc-main.h dm-dmpetsc-header.h dmpetsc.c
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am__append_2 =  \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	process2.c \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	process2.h \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	dm-stats-main.h \
+@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@am__append_2 = dmpetsc.d
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am__append_3 = dm-stats-main.h \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	dm-stats-header.h \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptester.c \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptester.h
-@ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am__append_3 = dmflex.c
-@ENABLE_PETSC_FALSE@@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@am__append_4 = .plugins
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am__append_4 =  \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	stats.d \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptester.d
+@ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am__append_5 = dmflex.c
+@ENABLE_PETSC_FALSE@@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@am__append_6 = .plugins
 DIST_COMMON = $(am__dist_noinst_DATA_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/dmflex.l.in \
 	$(top_srcdir)/m4/cf_in.make
@@ -67,11 +68,12 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/ax_set_version_info.m4 \
 	$(top_srcdir)/m4/cf_X11.m4 $(top_srcdir)/m4/cf_atlas.m4 \
 	$(top_srcdir)/m4/cf_latex.m4 $(top_srcdir)/m4/cf_mpi.m4 \
-	$(top_srcdir)/m4/cf_petsc.m4 $(top_srcdir)/m4/codeset.m4 \
-	$(top_srcdir)/m4/configure.m4 $(top_srcdir)/m4/d-type.m4 \
-	$(top_srcdir)/m4/dirent_h.m4 $(top_srcdir)/m4/dirfd.m4 \
-	$(top_srcdir)/m4/errno_h.m4 $(top_srcdir)/m4/extensions.m4 \
-	$(top_srcdir)/m4/fnmatch.m4 $(top_srcdir)/m4/getlogin_r.m4 \
+	$(top_srcdir)/m4/cf_petsc.m4 $(top_srcdir)/m4/cf_sem.m4 \
+	$(top_srcdir)/m4/codeset.m4 $(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/d-type.m4 $(top_srcdir)/m4/dirent_h.m4 \
+	$(top_srcdir)/m4/dirfd.m4 $(top_srcdir)/m4/errno_h.m4 \
+	$(top_srcdir)/m4/extensions.m4 $(top_srcdir)/m4/fnmatch.m4 \
+	$(top_srcdir)/m4/getlogin_r.m4 \
 	$(top_srcdir)/m4/gettimeofday.m4 $(top_srcdir)/m4/glibc21.m4 \
 	$(top_srcdir)/m4/glob.m4 $(top_srcdir)/m4/gnulib-common.m4 \
 	$(top_srcdir)/m4/gnulib-comp.m4 \
@@ -142,19 +144,6 @@ dmpetsc_la_OBJECTS = $(am_dmpetsc_la_OBJECTS) \
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@	$(pkglibdir)
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_dmpetsc_la_rpath = -rpath \
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(pkglibdir)
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process_la_DEPENDENCIES = $(am__DEPENDENCIES_3)
-am__process_la_SOURCES_DIST = process.c process.h
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_process_la_OBJECTS =  \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	process.lo
-process_la_OBJECTS = $(am_process_la_OBJECTS)
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@am_process_la_rpath = -rpath \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@	$(pkglibdir)
-process2_la_LIBADD =
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@nodist_process2_la_OBJECTS =  \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	process2.lo
-process2_la_OBJECTS = $(nodist_process2_la_OBJECTS)
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@am_process2_la_rpath = -rpath \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@	$(pkglibdir)
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@stats_la_DEPENDENCIES = $(am__DEPENDENCIES_3)
 am__stats_la_SOURCES_DIST = stats.c
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@am_stats_la_OBJECTS =  \
@@ -212,15 +201,13 @@ CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 SOURCES = $(cpptester_la_SOURCES) $(nodist_cpptester_la_SOURCES) \
 	$(dmflex_la_SOURCES) $(nodist_dmflex_la_SOURCES) \
 	$(dmpetsc_la_SOURCES) $(nodist_dmpetsc_la_SOURCES) \
-	$(process_la_SOURCES) $(nodist_process2_la_SOURCES) \
 	$(stats_la_SOURCES) $(nodist_stats_la_SOURCES) \
 	$(test_la_SOURCES) $(test2_la_SOURCES) $(throw_la_SOURCES)
 DIST_SOURCES = $(am__cpptester_la_SOURCES_DIST) \
 	$(am__dmflex_la_SOURCES_DIST) $(am__dmpetsc_la_SOURCES_DIST) \
-	$(am__process_la_SOURCES_DIST) $(am__stats_la_SOURCES_DIST) \
-	$(am__test_la_SOURCES_DIST) $(am__test2_la_SOURCES_DIST) \
-	$(am__throw_la_SOURCES_DIST)
-am__dist_noinst_DATA_DIST = dmpetsc.d process2.d stats.d cpptester.d
+	$(am__stats_la_SOURCES_DIST) $(am__test_la_SOURCES_DIST) \
+	$(am__test2_la_SOURCES_DIST) $(am__throw_la_SOURCES_DIST)
+am__dist_noinst_DATA_DIST = dmpetsc.d stats.d cpptester.d
 nodist_dmstartDATA_INSTALL = $(INSTALL_DATA)
 pkglibDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(dist_noinst_DATA) $(nodist_dmstart_DATA) \
@@ -307,6 +294,7 @@ ENABLE_PLUGINS_SUPPORT = @ENABLE_PLUGINS_SUPPORT@
 ENABLE_PSTPDF = @ENABLE_PSTPDF@
 ENABLE_REGEX = @ENABLE_REGEX@
 ENABLE_RTHREADS = @ENABLE_RTHREADS@
+ENABLE_SEM = @ENABLE_SEM@
 ENABLE_TAIL = @ENABLE_TAIL@
 ENABLE_THREADS = @ENABLE_THREADS@
 ENABLE_UNIX_SOCKETS = @ENABLE_UNIX_SOCKETS@
@@ -705,6 +693,7 @@ REPLACE_WCWIDTH = @REPLACE_WCWIDTH@
 REPLACE_WRITE = @REPLACE_WRITE@
 ROLLBITS = @ROLLBITS@
 SED = @SED@
+SEM_DNODE_NAME = @SEM_DNODE_NAME@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SIG_ATOMIC_T_SUFFIX = @SIG_ATOMIC_T_SUFFIX@
@@ -838,25 +827,18 @@ SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
 @ENABLE_PLUGINS_SUPPORT_TRUE@        -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g'
 
 @ENABLE_PLUGINS_SUPPORT_TRUE@BUILT_SOURCES = errors.d new-plugin.d \
-@ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__append_1) $(am__append_2) \
-@ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__append_3) $(am__append_4) \
+@ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__append_1) $(am__append_3) \
+@ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__append_5) $(am__append_6) \
 @ENABLE_PLUGINS_SUPPORT_TRUE@	$(IPETSC_D)
 @ENABLE_PLUGINS_SUPPORT_TRUE@nodist_noinst_DATA = errors.d
+@ENABLE_PLUGINS_SUPPORT_TRUE@dist_noinst_DATA = $(am__append_2) \
+@ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__append_4)
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@IPETSC_LIB = dmpetsc.la
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@IPETSC_D = petsc.d
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@dmpetsc_la_SOURCES = dmpetsc.h dmpetsc-bug.c
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@nodist_dmpetsc_la_SOURCES = dm-dmpetsc-main.h dm-dmpetsc-header.h dmpetsc.c
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@dmpetsc_la_LIBADD = $(AM_LIBADD) $(PETSC_LIB)
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@dmpetsc_la_CPPFLAGS = $(PETSC_CCPPFLAGS) $(AM_CPPFLAGS)
-@ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@dist_noinst_DATA = dmpetsc.d
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dist_noinst_DATA =  \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	process2.d \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	stats.d \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	cpptester.d
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@@ENABLE_PROCESS_TRUE@PROCESS_LIB = process.la process2.la
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process_la_SOURCES = process.c process.h
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process_la_LIBADD = $(AM_LIBADD)
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@nodist_process2_la_SOURCES = process2.c process2.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@stats_la_SOURCES = stats.c
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@nodist_stats_la_SOURCES = dm-stats-main.h dm-stats-header.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@stats_la_LIBADD = $(AM_LIBADD)
@@ -869,7 +851,7 @@ SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
 @ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@nodist_dmflex_la_SOURCES = dmflex.c
 @ENABLE_DMFLEX_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dmflex_la_LIBADD = $(AM_LIBADD)
 @ENABLE_PLUGINS_FALSE@@ENABLE_PLUGINS_SUPPORT_TRUE@PLUGINS = $(IPETSC_LIB)
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@PLUGINS = test.la test2.la $(PROCESS_LIB) throw.la \
+@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@PLUGINS = test.la test2.la throw.la \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	$(DMFLEX_LIB) $(IPETSC_LIB) \
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	stats.la $(CPPPLUGIN_LIB)
 
@@ -959,10 +941,6 @@ dmflex.la: $(dmflex_la_OBJECTS) $(dmflex_la_DEPENDENCIES)
 	$(LINK) $(am_dmflex_la_rpath) $(dmflex_la_OBJECTS) $(dmflex_la_LIBADD) $(LIBS)
 dmpetsc.la: $(dmpetsc_la_OBJECTS) $(dmpetsc_la_DEPENDENCIES) 
 	$(LINK) $(am_dmpetsc_la_rpath) $(dmpetsc_la_OBJECTS) $(dmpetsc_la_LIBADD) $(LIBS)
-process.la: $(process_la_OBJECTS) $(process_la_DEPENDENCIES) 
-	$(LINK) $(am_process_la_rpath) $(process_la_OBJECTS) $(process_la_LIBADD) $(LIBS)
-process2.la: $(process2_la_OBJECTS) $(process2_la_DEPENDENCIES) 
-	$(LINK) $(am_process2_la_rpath) $(process2_la_OBJECTS) $(process2_la_LIBADD) $(LIBS)
 stats.la: $(stats_la_OBJECTS) $(stats_la_DEPENDENCIES) 
 	$(LINK) $(am_stats_la_rpath) $(stats_la_OBJECTS) $(stats_la_LIBADD) $(LIBS)
 test.la: $(test_la_OBJECTS) $(test_la_DEPENDENCIES) 
@@ -983,8 +961,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmflex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmpetsc_la-dmpetsc-bug.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmpetsc_la-dmpetsc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stats.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test2.Plo@am__quote@
@@ -1298,16 +1274,6 @@ uninstall-am: uninstall-nodist_dmstartDATA uninstall-pkglibDATA \
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@	"$(top_srcdir)/src/dgen-build" \
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" \
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@	"dmpetsc.d" "$@" false true
-
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process2.c: process2.d plugin.d
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"process2.d" "$@" true true
-
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@process2.h: process2.d plugin.d
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" \
-@ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@		"process2.d" "$@" false true
 
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@dm-stats-main.h: stats.d new-plugin.d
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@	"$(top_srcdir)/src/dgen-build" \

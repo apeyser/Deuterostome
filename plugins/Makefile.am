@@ -26,6 +26,8 @@ errors.d: $(builddir)/../dcode/errors.d
 
 BUILT_SOURCES += new-plugin.d
 
+dist_noinst_DATA =
+
 if ENABLE_PETSC
 IPETSC_LIB=dmpetsc.la
 IPETSC_D=petsc.d
@@ -45,32 +47,11 @@ dmpetsc_la_SOURCES = dmpetsc.h dmpetsc-bug.c
 nodist_dmpetsc_la_SOURCES = dm-dmpetsc-main.h dm-dmpetsc-header.h dmpetsc.c
 dmpetsc_la_LIBADD = $(AM_LIBADD) $(PETSC_LIB)
 dmpetsc_la_CPPFLAGS = $(PETSC_CCPPFLAGS) $(AM_CPPFLAGS)
-dist_noinst_DATA = dmpetsc.d
+dist_noinst_DATA += dmpetsc.d
 
 endif ENABLE_PETSC
 
 if ENABLE_PLUGINS
-
-if ENABLE_PROCESS
-PROCESS_LIB=process.la process2.la
-endif ENABLE_PROCESS
-
-process2.c: process2.d plugin.d
-	"$(top_srcdir)/src/dgen-build" \
-		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" \
-		"process2.d" "$@" true true
-
-process2.h: process2.d plugin.d
-	"$(top_srcdir)/src/dgen-build" \
-		"$(top_builddir)/src/codegen/dgen" "$(srcdir)" \
-		"process2.d" "$@" false true
-
-BUILT_SOURCES += process2.c process2.h
-
-process_la_SOURCES = process.c process.h
-process_la_LIBADD = $(AM_LIBADD)
-nodist_process2_la_SOURCES = process2.c process2.h
-dist_noinst_DATA = process2.d
 
 dm-stats-main.h: stats.d new-plugin.d
 	"$(top_srcdir)/src/dgen-build" \
@@ -127,7 +108,7 @@ endif !ENABLE_PETSC
 endif !ENABLE_PLUGINS
 
 if ENABLE_PLUGINS
-PLUGINS = test.la test2.la $(PROCESS_LIB) throw.la \
+PLUGINS = test.la test2.la throw.la \
 	$(DMFLEX_LIB) $(IPETSC_LIB) \
 	stats.la $(CPPPLUGIN_LIB)
 else !ENABLE_PLUGINS

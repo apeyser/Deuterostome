@@ -1,6 +1,7 @@
 #include "dm.h"
 
 #include "matrix.h"
+#include "dm-sem.h"
 
 #if BUILD_ATLAS
 #include <cblas.h>
@@ -102,8 +103,9 @@ int cblas_errprn(int ierr, int info, char *form, ...)
     xerbla_background = FALSE;             \
     if (xerbla_err || errprn_err) {        \
       xerbla_err = errprn_err = FALSE;     \
-      return MATRIX_INT_ERR;               \
+      CHECKOUT_SEM(MATRIX_INT_ERR);	   \
     }                                      \
+    CHECKOUT_SEM(OK);			   \
   } while (0)
 
 DM_INLINE_STATIC P matrix_dims(B* cuts, B* array, 
@@ -295,6 +297,20 @@ DEF_CHECK_OVERLAP(ll, L32)
 #define CHECK_OVERLAP_LL(a, na, b, nb) \
   CHECK_OVERLAP(ll, a, na, b, nb)
 
+#define CHECKIN_SEM() do {					\
+    P retc;							\
+    switch (retc = (do_inter_lock ? do_inter_lock() : DONE)) {	\
+      case OK: unlock = TRUE; break;				\
+      case DONE: unlock = FALSE; break;				\
+      default: return retc;					\
+    };								\
+  } while (0)
+      
+#define CHECKOUT_SEM(err) do {				      \
+    P retc = do_inter_unlock ? do_inter_unlock(unlock) : OK;  \
+    if (err || (retc && retc != DONE)) return err ? err : retc;	\
+  } while (0)
+
 /*--------------------------------------------- matmul_blas
  * C <cuts> beta A <cuts> transA B <cuts> transB alpha | C <cuts>
  * alpha*A*B + beta*C -> C
@@ -308,6 +324,7 @@ P op_matmul_blas(void)
     D alpha, beta;
     enum CBLAS_TRANSPOSE transA, transB;
     BOOLEAN transA_, transB_;
+    BOOLEAN unlock;
 
     if (o_10 < FLOORopds) return OPDS_UNF;
     if (ATTR(o_10) & READONLY) return OPD_ATR;
@@ -330,6 +347,7 @@ P op_matmul_blas(void)
     CHECK_OVERLAP_DD(cp, Nrowc*Ncolc, ap, Nrowa*Ncola);
     CHECK_OVERLAP_DD(cp, Nrowc*Ncolc, bp, Nrowb*Ncolb);
 
+    CHECKIN_SEM();
     cblas_dgemm(CblasRowMajor,
 		transA,
 		transB,
@@ -349,6 +367,7 @@ P op_decompLU_lp(void) {
   INDEX_SIZE N;
   P info;
   BOOLEAN nsing = TRUE;
+  BOOLEAN unlock;
   
   if (o_3 < FLOORopds) return OPDS_UNF;
   if (o2 > CEILopds) return OPDS_OVF;
@@ -357,10 +376,11 @@ P op_decompLU_lp(void) {
   MATRIX_SQUARE(o_2, o_3, N);
   PIVOT_DIMS(o_1, N);
 
+  CHECKIN_SEM();
   if ((info = clapack_dgetrf(CblasRowMajor,  N,  N, 
                              (D*) VALUE_PTR(o_3),  N,
                              (L32*) VALUE_PTR(o_1))) < 0)
-    return MATRIX_PARAM_ERROR;
+    CHECKOUT_SEM(MATRIX_PARAM_ERROR);
   else if (info > 0) nsing = FALSE;
   CHECK_ERR;
   
@@ -374,6 +394,7 @@ P op_decompLU_lp(void) {
 // rhs lumatrix <cut> <pivot> | solution(rhs)
 P op_backsubLU_lp(void) {
   INDEX_SIZE N;
+  BOOLEAN unlock;
 
   if (o_4 < FLOORopds) return OPDS_UNF;
   if (ATTR(o_4) & READONLY) return OPD_ATR;
@@ -382,12 +403,13 @@ P op_backsubLU_lp(void) {
   PIVOT_CHECK(o_1, N);
   VECTOR_DIM(o_4, N);
 
+  CHECKIN_SEM();
   if (clapack_dgetrs(CblasRowMajor, CblasNoTrans,
                      N, 1, 
                      (D*) VALUE_PTR(o_3), N, 
                      (L32*) VALUE_PTR(o_1),
                      (D*) VALUE_PTR(o_4), N))
-    return MATRIX_PARAM_ERROR;
+    CHECKOUT_SEM(MATRIX_PARAM_ERROR);
   CHECK_ERR;
   
   FREEopds = o_3;
@@ -397,17 +419,20 @@ P op_backsubLU_lp(void) {
 // lumatrix <cuts> pivot | invmatrix(lumatrix) <cuts>
 P op_invertLU_lp(void) {
   INDEX_SIZE N;
+  BOOLEAN unlock;
   
   if (o_3 < FLOORopds) return OPDS_UNF;
   if (ATTR(o_3) & READONLY) return OPD_ATR;
 
   MATRIX_SQUARE(o_2, o_3, N);
   PIVOT_CHECK(o_1, N);
-
+  
+  CHECKIN_SEM();
   if (clapack_dgetri(CblasRowMajor, N,
                      (D*) VALUE_PTR(o_3), N,
                      (L32*) VALUE_PTR(o_1)))
-    return MATRIX_PARAM_ERROR;
+    CHECKOUT_SEM(MATRIX_PARAM_ERROR);
+  CHECKOUT_SEM(OK);
 
   FREEopds = o_1;
   return OK;
@@ -416,9 +441,13 @@ P op_invertLU_lp(void) {
 // x | sqrt(sum_i x_i^2)
 P op_norm2_blas(void) {
   D r;
+  BOOLEAN unlock;
+
   if (o1 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != ARRAY) return OPD_CLA;
   if (TYPE(o_1) != DOUBLETYPE) return OPD_TYP;
+
+  CHECKIN_SEM();
   r = cblas_dnrm2(ARRAY_SIZE(o_1), (D*) VALUE_PTR(o_1), 1);
   CHECK_ERR;
 
@@ -432,6 +461,8 @@ P op_norm2_blas(void) {
 P op_vecadd_blas(void) {
   D alpha;
   P sz;
+  BOOLEAN unlock;
+
   if (o3 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != ARRAY || CLASS(o_2) != ARRAY || CLASS(o_3) != NUM) 
     return OPD_CLA;
@@ -440,6 +471,7 @@ P op_vecadd_blas(void) {
   if (! DVALUE(o_3, &alpha)) return UNDF_VAL;
 
   CHECK_OVERLAP_DD((D*) VALUE_PTR(o_3), sz, (D*) VALUE_PTR(o_2), sz);
+  CHECKIN_SEM();
   cblas_daxpy(sz, alpha, (D*) VALUE_PTR(o_3), 1, (D*) VALUE_PTR(o_2), 1);
   CHECK_ERR;
 
@@ -450,11 +482,14 @@ P op_vecadd_blas(void) {
 // x alpha | x (xi=alpha*xi)
 P op_vecscale_blas(void) {
   D alpha;
+  BOOLEAN unlock;
+
   if (o_2 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != NUM || CLASS(o_2) != ARRAY) return OPD_CLA;
   if (TYPE(o_2) != DOUBLETYPE) return OPD_TYP;
   if (! DVALUE(o_1, &alpha)) return UNDF_VAL;
   
+  CHECKIN_SEM();
   cblas_dscal(ARRAY_SIZE(o_2), alpha, (D*) VALUE_PTR(o_2), 1);
   CHECK_ERR;
 
@@ -465,11 +500,14 @@ P op_vecscale_blas(void) {
 // y x | y (y_i=x_i)
 P op_veccopy_blas(void) {
   P sz;
+  BOOLEAN unlock;
+
   if (o_2 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != ARRAY || CLASS(o_2) != ARRAY) return OPD_CLA;
   if (TYPE(o_1) != DOUBLETYPE || TYPE(o_2) != DOUBLETYPE) return OPD_TYP;
   if ((sz = ARRAY_SIZE(o_1)) != ARRAY_SIZE(o_2)) return MATRIX_VECTOR_NONMATCH;
   
+  CHECKIN_SEM();
   cblas_dcopy(sz, (D*) VALUE_PTR(o_1), 1, (D*) VALUE_PTR(o_2), 1);
   CHECK_ERR;
 
@@ -481,12 +519,15 @@ P op_veccopy_blas(void) {
 P op_dot_blas(void) {
   P sz;
   D r;
+  BOOLEAN unlock;
+
   if (o_2 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != ARRAY || CLASS(o_2) != ARRAY) return OPD_CLA;
   if (TYPE(o_1) != DOUBLETYPE || TYPE(o_2) != DOUBLETYPE) return OPD_TYP;
   if ((sz = ARRAY_SIZE(o_1)) != ARRAY_SIZE(o_2)) return MATRIX_VECTOR_NONMATCH;
 
   CHECK_OVERLAP_DD((D*) VALUE_PTR(o_1), sz, (D*) VALUE_PTR(o_2), sz);
+  CHECKIN_SEM();
   r = cblas_ddot(sz, (D*) VALUE_PTR(o_1), 1, (D*) VALUE_PTR(o_2), 1);
   CHECK_ERR;
   
@@ -504,6 +545,7 @@ P op_matvecmul_blas(void) {
   INDEX_SIZE Nrowa, Ncola, Nrowa_, Ncola_, lda;
   enum CBLAS_TRANSPOSE trans;
   BOOLEAN trans_;
+  BOOLEAN unlock;
 
   if (o_7 < FLOORopds) return OPDS_UNF;
   if (ATTR(o_7) & READONLY) return OPD_ATR;
@@ -516,6 +558,7 @@ P op_matvecmul_blas(void) {
   MULT(o_6, beta);
 
   CHECK_OVERLAP_DD((D*) VALUE_PTR(o_7), Nrowa_, (D*) VALUE_PTR(o_2), Ncola_);
+  CHECKIN_SEM();
   cblas_dgemv(CblasRowMajor,
               trans,
               Nrowa, Ncola, alpha,
@@ -533,6 +576,7 @@ P op_solvetriang_blas(void) {
   enum CBLAS_TRANSPOSE trans;
   BOOLEAN uplo, unit, trans_;
   INDEX_SIZE N;
+  BOOLEAN unlock;
   
   if (FLOORopds > o_6) return OPDS_UNF;
   if (CLASS(o_1) != BOOL || CLASS(o_2) != BOOL)
@@ -543,6 +587,7 @@ P op_solvetriang_blas(void) {
   uplo = trans_ ? !BOOL_VAL(o_2) : BOOL_VAL(o_2);
   unit = BOOL_VAL(o_1);
   
+  CHECKIN_SEM();
   cblas_dtrsv(CblasRowMajor, 
               uplo ? CblasUpper : CblasLower, 
               trans,
@@ -558,12 +603,14 @@ P op_solvetriang_blas(void) {
 // <d h1 h2> | c s (h1=rot, h2=0)
 P op_givens_blas(void) {
   D c, s;
+  BOOLEAN unlock;
 
   if (FLOORopds > o_1) return OPDS_UNF;
   if (CEILopds < o_2) return OPDS_OVF;
   if (ATTR(o_1) & READONLY) return OPD_ATR;
   VECTOR_DIM(o_1, 2);
   
+  CHECKIN_SEM();
   cblas_drotg((D*) VALUE_PTR(o_1), ((D*) VALUE_PTR(o_1))+1, &c, &s);
   CHECK_ERR;
   ((D*) VALUE_PTR(o_1))[1] = 0;
@@ -582,6 +629,7 @@ P op_givens_blas(void) {
 P op_rotate_blas(void) {
   D c, s;
   INDEX_SIZE rows;
+  BOOLEAN unlock;
 
   if (FLOORopds > o_4) return OPDS_UNF;
   if ((ATTR(o_1) & READONLY) || (ATTR(o_2) & READONLY)) return OPD_ATR;
@@ -591,6 +639,7 @@ P op_rotate_blas(void) {
   MULT(o_4, c);
 
   CHECK_OVERLAP_DD((D*) VALUE_PTR(o_2), rows, (D*) VALUE_PTR(o_1), rows);
+  CHECKIN_SEM();
   cblas_drot(rows, (D*) VALUE_PTR(o_2), 1, (D*) VALUE_PTR(o_1), 1,
              c, s);
   CHECK_ERR;
@@ -602,12 +651,14 @@ P op_rotate_blas(void) {
 
 P op_xerbla_test(void) {
   BOOLEAN test;
+  BOOLEAN unlock;
 
   if (FLOORopds > o_1) return OPDS_UNF;
   if (CLASS(o_1) != BOOL) return OPD_CLA;
   test = BOOL_VAL(o_1);
   
   xerbla_background = TRUE;
+  CHECKIN_SEM();
   if (test) {
     cblas_dgemv(CblasRowMajor, CblasTrans, 
                 0, 0, 0, NULL, 0, NULL, 0, 0, NULL, 0);

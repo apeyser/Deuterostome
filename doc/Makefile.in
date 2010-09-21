@@ -56,11 +56,12 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/ax_set_version_info.m4 \
 	$(top_srcdir)/m4/cf_X11.m4 $(top_srcdir)/m4/cf_atlas.m4 \
 	$(top_srcdir)/m4/cf_latex.m4 $(top_srcdir)/m4/cf_mpi.m4 \
-	$(top_srcdir)/m4/cf_petsc.m4 $(top_srcdir)/m4/codeset.m4 \
-	$(top_srcdir)/m4/configure.m4 $(top_srcdir)/m4/d-type.m4 \
-	$(top_srcdir)/m4/dirent_h.m4 $(top_srcdir)/m4/dirfd.m4 \
-	$(top_srcdir)/m4/errno_h.m4 $(top_srcdir)/m4/extensions.m4 \
-	$(top_srcdir)/m4/fnmatch.m4 $(top_srcdir)/m4/getlogin_r.m4 \
+	$(top_srcdir)/m4/cf_petsc.m4 $(top_srcdir)/m4/cf_sem.m4 \
+	$(top_srcdir)/m4/codeset.m4 $(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/d-type.m4 $(top_srcdir)/m4/dirent_h.m4 \
+	$(top_srcdir)/m4/dirfd.m4 $(top_srcdir)/m4/errno_h.m4 \
+	$(top_srcdir)/m4/extensions.m4 $(top_srcdir)/m4/fnmatch.m4 \
+	$(top_srcdir)/m4/getlogin_r.m4 \
 	$(top_srcdir)/m4/gettimeofday.m4 $(top_srcdir)/m4/glibc21.m4 \
 	$(top_srcdir)/m4/glob.m4 $(top_srcdir)/m4/gnulib-common.m4 \
 	$(top_srcdir)/m4/gnulib-comp.m4 \
@@ -180,6 +181,7 @@ ENABLE_PLUGINS_SUPPORT = @ENABLE_PLUGINS_SUPPORT@
 ENABLE_PSTPDF = @ENABLE_PSTPDF@
 ENABLE_REGEX = @ENABLE_REGEX@
 ENABLE_RTHREADS = @ENABLE_RTHREADS@
+ENABLE_SEM = @ENABLE_SEM@
 ENABLE_TAIL = @ENABLE_TAIL@
 ENABLE_THREADS = @ENABLE_THREADS@
 ENABLE_UNIX_SOCKETS = @ENABLE_UNIX_SOCKETS@
@@ -578,6 +580,7 @@ REPLACE_WCWIDTH = @REPLACE_WCWIDTH@
 REPLACE_WRITE = @REPLACE_WRITE@
 ROLLBITS = @ROLLBITS@
 SED = @SED@
+SEM_DNODE_NAME = @SEM_DNODE_NAME@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SIG_ATOMIC_T_SUFFIX = @SIG_ATOMIC_T_SUFFIX@

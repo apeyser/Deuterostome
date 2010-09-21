@@ -374,6 +374,10 @@ DLL_SCOPE B** syserrm;
 DLL_SCOPE P* syserrc;
 DLL_SCOPE B** sysop;
 DLL_SCOPE P (*check_plugin)(void);
+DLL_SCOPE P (*do_inter_lock_init)(void);
+DLL_SCOPE P (*do_inter_lock_reset)(void);
+DLL_SCOPE P (*do_inter_lock)(void);
+DLL_SCOPE P (*do_inter_unlock)(BOOLEAN force);
 
 DLL_SCOPE B locked;
 DLL_SCOPE B serialized;

@@ -10,6 +10,7 @@
 #include "pluginlib.h"
 #include "dm2.h"
 #include "dm-signals.h"
+#include "dm-sem.h"
 
 // original directory for vmresize
 static char* original_dir;
@@ -68,7 +69,7 @@ void maketinysetup(void) {
     VM dimension is in MB)
   - sets up startup dir & switches back to original working directory
   - puts sysdict at top
-	- pushes true if memory allocation succeeded.
+  - pushes true if memory allocation succeeded.
 */
 
 static P VMRESIZE_ERR(P err, BOOLEAN bool) {
@@ -126,9 +127,11 @@ P op_vmresize_(void)
     setupdirs();
   }
 
-  if (chdir(original_dir)) error_local(EXIT_FAILURE,errno,"chdir");
+  if (chdir(original_dir)) 
+    error_local(EXIT_FAILURE, errno, "chdir");
 
-  return VMRESIZE_ERR(OK, TRUE);
+  return VMRESIZE_ERR(do_inter_lock_init ? do_inter_lock_init() : OK, 
+		      TRUE);
 }
 
 /*-------------------------- Dnode operators -------------------------*/

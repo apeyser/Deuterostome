@@ -79,11 +79,12 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/ax_set_version_info.m4 \
 	$(top_srcdir)/m4/cf_X11.m4 $(top_srcdir)/m4/cf_atlas.m4 \
 	$(top_srcdir)/m4/cf_latex.m4 $(top_srcdir)/m4/cf_mpi.m4 \
-	$(top_srcdir)/m4/cf_petsc.m4 $(top_srcdir)/m4/codeset.m4 \
-	$(top_srcdir)/m4/configure.m4 $(top_srcdir)/m4/d-type.m4 \
-	$(top_srcdir)/m4/dirent_h.m4 $(top_srcdir)/m4/dirfd.m4 \
-	$(top_srcdir)/m4/errno_h.m4 $(top_srcdir)/m4/extensions.m4 \
-	$(top_srcdir)/m4/fnmatch.m4 $(top_srcdir)/m4/getlogin_r.m4 \
+	$(top_srcdir)/m4/cf_petsc.m4 $(top_srcdir)/m4/cf_sem.m4 \
+	$(top_srcdir)/m4/codeset.m4 $(top_srcdir)/m4/configure.m4 \
+	$(top_srcdir)/m4/d-type.m4 $(top_srcdir)/m4/dirent_h.m4 \
+	$(top_srcdir)/m4/dirfd.m4 $(top_srcdir)/m4/errno_h.m4 \
+	$(top_srcdir)/m4/extensions.m4 $(top_srcdir)/m4/fnmatch.m4 \
+	$(top_srcdir)/m4/getlogin_r.m4 \
 	$(top_srcdir)/m4/gettimeofday.m4 $(top_srcdir)/m4/glibc21.m4 \
 	$(top_srcdir)/m4/glob.m4 $(top_srcdir)/m4/gnulib-common.m4 \
 	$(top_srcdir)/m4/gnulib-comp.m4 \
@@ -197,7 +198,9 @@ am_dnode_OBJECTS = dnode-dnode.$(OBJEXT) dnode-dm-dnode.$(OBJEXT) \
 	$(am__objects_7) $(am__objects_2)
 am__objects_8 = dnode-dm-prop.$(OBJEXT)
 @ENABLE_RTHREADS_TRUE@am__objects_9 = dnode-dqueen.$(OBJEXT)
-nodist_dnode_OBJECTS = $(am__objects_8) $(am__objects_9)
+@ENABLE_SEM_TRUE@am__objects_10 = dnode-dm-sem.$(OBJEXT)
+nodist_dnode_OBJECTS = $(am__objects_8) $(am__objects_9) \
+	$(am__objects_10)
 dnode_OBJECTS = $(am_dnode_OBJECTS) $(nodist_dnode_OBJECTS)
 dnode_DEPENDENCIES = $(builddir)/libdmglobals.la \
 	$(builddir)/libdmnodal.la $(am__DEPENDENCIES_3) \
@@ -225,12 +228,12 @@ nodist_drook_OBJECTS = drook-drook.$(OBJEXT)
 drook_OBJECTS = $(nodist_drook_OBJECTS)
 drook_DEPENDENCIES = $(builddir)/libdmbootstrap.la \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_1)
-am__objects_10 = dvt-dm-nextevent.$(OBJEXT) dvt-dm3.$(OBJEXT) \
+am__objects_11 = dvt-dm-nextevent.$(OBJEXT) dvt-dm3.$(OBJEXT) \
 	dvt-dm-proc.$(OBJEXT) dvt-dm-glob.$(OBJEXT)
 am_dvt_OBJECTS = dvt-dvt.$(OBJEXT) dvt-dm-dvt.$(OBJEXT) \
-	$(am__objects_10)
-am__objects_11 = dvt-dm-prop.$(OBJEXT)
-nodist_dvt_OBJECTS = $(am__objects_11)
+	$(am__objects_11)
+am__objects_12 = dvt-dm-prop.$(OBJEXT)
+nodist_dvt_OBJECTS = $(am__objects_12)
 dvt_OBJECTS = $(am_dvt_OBJECTS) $(nodist_dvt_OBJECTS)
 dvt_DEPENDENCIES = $(builddir)/libdmglobals.la $(am__DEPENDENCIES_3) \
 	$(am__DEPENDENCIES_1)
@@ -287,9 +290,9 @@ DATA = $(nodist_pkgconfiglib_DATA)
 nodist_pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 am__pkginclude_HEADERS_DIST = dm.h dm-errs.h pluginlib.h plugin.h \
 	cppplugin.h $(top_srcdir)/libltdl/ltdl.h dmx.h threads.h \
-	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h \
-	basic-defs.h dm-types.h dm-nextevent.h dm2.h dm3.h dm4.h dm5.h \
-	dm6.h
+	dm-sem.h error-local.h dm-snprintf.h srandomdev-local.h \
+	dmnum.h basic-defs.h dm-types.h dm-nextevent.h dm2.h dm3.h \
+	dm4.h dm5.h dm6.h
 pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(nodist_pkginclude_HEADERS) $(pkginclude_HEADERS)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
@@ -376,6 +379,7 @@ ENABLE_PLUGINS_SUPPORT = @ENABLE_PLUGINS_SUPPORT@
 ENABLE_PSTPDF = @ENABLE_PSTPDF@
 ENABLE_REGEX = @ENABLE_REGEX@
 ENABLE_RTHREADS = @ENABLE_RTHREADS@
+ENABLE_SEM = @ENABLE_SEM@
 ENABLE_TAIL = @ENABLE_TAIL@
 ENABLE_THREADS = @ENABLE_THREADS@
 ENABLE_UNIX_SOCKETS = @ENABLE_UNIX_SOCKETS@
@@ -774,6 +778,7 @@ REPLACE_WCWIDTH = @REPLACE_WCWIDTH@
 REPLACE_WRITE = @REPLACE_WRITE@
 ROLLBITS = @ROLLBITS@
 SED = @SED@
+SEM_DNODE_NAME = @SEM_DNODE_NAME@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SIG_ATOMIC_T_SUFFIX = @SIG_ATOMIC_T_SUFFIX@
@@ -901,7 +906,7 @@ AM_LDADD = $(AM_LIBS) $(top_builddir)/lib/libgnu.la
 INCLUDES = $(am__append_1)
 DIST_SUBDIRS = codegen
 BUILT_SOURCES = dnode-nice.c dnode-daemon.c paths.h \
-		drook.c dqueen.c dm-prop.c
+		drook.c dqueen.c dm-prop.c dm-sem.c
 
 INFILES = $(BUILT_SOURCES)
 EXTRA_DIST = $(INFILES:=in) $(IDFILES)
@@ -921,7 +926,8 @@ edit = -e 's,[@]bindir[@],$(bindir),g' \
        -e 's,[@]dmsockdir[@],$(dmsockdir),g' \
        -e 's,[@]dmstartdir[@],$(dmstartdir),g' \
        -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
-       -e 's,[@]dmconfdir[@],$(dmconfdir),g'
+       -e 's,[@]dmconfdir[@],$(dmconfdir),g' \
+       -e 's,[@]SEM_DNODE_NAME[@],$(SEM_DNODE_NAME),g'
 
 @ENABLE_SETUID_TRUE@nodist_dnode_nice_SOURCES = dnode-nice.c
 @ENABLE_SETUID_TRUE@DNODENICEBIN = dnode-nice
@@ -930,6 +936,8 @@ edit = -e 's,[@]bindir[@],$(bindir),g' \
 @ENABLE_ATLAS_TRUE@ATLAS_ACTIVATE = -DATLAS_LIB
 @ENABLE_THREADS_TRUE@THREAD_HDR = threads.h
 @ENABLE_THREADS_TRUE@THREADSRC = threads.c
+@ENABLE_SEM_TRUE@SEM_HDR = dm-sem.h
+@ENABLE_SEM_TRUE@SEM_SRC = dm-sem.c
 @ENABLE_REGEX_TRUE@REGEX_SRC = dregex.c dregex.h
 @ENABLE_RTHREADS_TRUE@MPI_PROGS = drook dpawn
 @ENABLE_RTHREADS_TRUE@DNODE_MPI_SRCS = dqueen.h
@@ -941,7 +949,7 @@ edit = -e 's,[@]bindir[@],$(bindir),g' \
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_HDR = plugin.h $(CPPPLUGIN_HDR) $(top_srcdir)/libltdl/ltdl.h
 @ENABLE_PLUGINS_SUPPORT_TRUE@PLUGIN_LD = @LIBLTDL@
 pkginclude_HEADERS = dm.h dm-errs.h pluginlib.h $(PLUGIN_HDR) \
-	dmx.h $(THREAD_HDR) \
+	dmx.h $(THREAD_HDR) $(SEM_HDR) \
 	error-local.h dm-snprintf.h srandomdev-local.h dmnum.h \
 	basic-defs.h dm-types.h dm-nextevent.h \
 	dm2.h dm3.h dm4.h dm5.h dm6.h \
@@ -970,7 +978,7 @@ dnode_SOURCES = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
 	$(SOCKSRCS) \
 	$(DNODE_MPI_SRCS)
 
-nodist_dnode_SOURCES = $(NODIST_SOCKSRCS) $(NODIST_DNODE_MPI_SRCS)
+nodist_dnode_SOURCES = $(NODIST_SOCKSRCS) $(NODIST_DNODE_MPI_SRCS) $(SEM_SRC)
 dnode_LDADD = $(builddir)/libdmglobals.la \
 	$(builddir)/libdmnodal.la \
 	$(AM_LDADD) $(ATLAS_LIBS) $(MPI_LIBS)
@@ -1036,7 +1044,8 @@ libdmbootstrap_la_SOURCES = $(GLOBSRCS)
 nodist_libdmbootstrap_la_SOURCES = $(NODIST_GLOBSRCS)
 libdmbootstrap_la_CPPFLAGS = $(AM_CPPFLAGS) \
 	-DDM_DISABLE_THREADS=1 -DDM_DISABLE_REGEX=1 \
-	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1
+	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 \
+	-DDM_DISABLE_SEM=1
 
 Makefile = Makefile
 INFILES_RULE = \
@@ -1217,6 +1226,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dm-nextevent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dm-proc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dm-prop.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dm-sem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dm3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dnode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dqueen.Po@am__quote@
@@ -1724,6 +1734,20 @@ dnode-dqueen.obj: dqueen.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dqueen.c' object='dnode-dqueen.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dqueen.obj `if test -f 'dqueen.c'; then $(CYGPATH_W) 'dqueen.c'; else $(CYGPATH_W) '$(srcdir)/dqueen.c'; fi`
+
+dnode-dm-sem.o: dm-sem.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dm-sem.o -MD -MP -MF $(DEPDIR)/dnode-dm-sem.Tpo -c -o dnode-dm-sem.o `test -f 'dm-sem.c' || echo '$(srcdir)/'`dm-sem.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dnode-dm-sem.Tpo $(DEPDIR)/dnode-dm-sem.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-sem.c' object='dnode-dm-sem.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dm-sem.o `test -f 'dm-sem.c' || echo '$(srcdir)/'`dm-sem.c
+
+dnode-dm-sem.obj: dm-sem.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dm-sem.obj -MD -MP -MF $(DEPDIR)/dnode-dm-sem.Tpo -c -o dnode-dm-sem.obj `if test -f 'dm-sem.c'; then $(CYGPATH_W) 'dm-sem.c'; else $(CYGPATH_W) '$(srcdir)/dm-sem.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dnode-dm-sem.Tpo $(DEPDIR)/dnode-dm-sem.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-sem.c' object='dnode-dm-sem.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dm-sem.obj `if test -f 'dm-sem.c'; then $(CYGPATH_W) 'dm-sem.c'; else $(CYGPATH_W) '$(srcdir)/dm-sem.c'; fi`
 
 dpawn-dpawn.o: dpawn.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dpawn_CPPFLAGS) $(CPPFLAGS) $(dpawn_CFLAGS) $(CFLAGS) -MT dpawn-dpawn.o -MD -MP -MF $(DEPDIR)/dpawn-dpawn.Tpo -c -o dpawn-dpawn.o `test -f 'dpawn.c' || echo '$(srcdir)/'`dpawn.c

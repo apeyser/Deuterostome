@@ -1,4 +1,4 @@
-AC_INIT([D-Machine], [4.5.39], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
+AC_INIT([D-Machine], [4.5.40], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
 AC_CONFIG_MACRO_DIR([m4 libltdl/m4])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_AUX_DIR([libltdl/config])
@@ -117,15 +117,15 @@ CF_BASIC_DEFS
 
 CF_AC_ENABLE([plugins-support], [compile or install plugin support], [yes])
 CF_AM_ENABLE([plugins], [compile or install plugins], [yes])
-CF_AM_ENABLE([process], 
-             [compile or install process plugin], 
-	     [no], [yes])
 CF_AM_ENABLE([cppplugin], 
              [compile or install cpp memory library for plugins], 
 	     [no], [yes])
 CF_AM_ENABLE([dmflex], 
              [compile or install dmflex plugin], 
              [no], [yes])
+CF_AC_ENABLE([sem],
+	     [compile d with cross-process semaphores],
+	     [yes])
 
 CF_AC_ARG_VAR_SUBST_EVAL([STRINGBUF], 
       [Max buffer size for dmflex, must be at least $NAMEBYTES + 2], 
@@ -136,6 +136,13 @@ CF_IF_ENABLED([plugins], [
   CF_IF_ENABLED([dmflex], [
     CF_PROG_LEX
   ])
+])
+
+CF_IF_ENABLED([sem], [
+  CF_SEM
+  CF_AC_ARG_VAR([SEM_DNODE_NAME], 
+                [name for semaphore shared by processes (without leading slash)],
+	        [dnode])
 ])
 
 CF_ON_TARGET([*-*-darwin*], [

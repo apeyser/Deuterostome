@@ -388,6 +388,17 @@ end def
   end def |]
 end def
 
+/sem 1 dict dup begin |[
+  /all 2 dict dup begin |[
+    /commands [
+      /inter_lock /inter_unlock /inter_lock_set
+    ] def
+    /errors 1 dict dup begin |[
+      /INTER_LOCK_NOT_DEF (** Inter locks not defined) def |]
+    end def |]
+  end def |]
+end def
+
 /node 3 dict dup begin |[
   /all 2 dict dup begin |[
     /commands [
@@ -509,7 +520,7 @@ end def end def
 end def end def
 
 /alltypes [
-  /common /regex /dies /quitable /proc /net /x /node 
+  /common /regex /dies /quitable /proc /sem /net /x /node 
   /xnode /master /plugins /socketevents
   /terminal /pawn /consolable
 ] def
@@ -528,7 +539,7 @@ end def
 /dnodedict 1 dict dup begin |[
   /parents [
     /common /net /socketevents /node /x /xnode /master /regex /plugins
-    /dies /proc /consolable
+    /dies /proc /sem /consolable
   ] def |]
 end def
 

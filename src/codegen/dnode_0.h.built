@@ -271,6 +271,9 @@ B* _sysop[] =
   (B*) "glob", (B*) op_glob,
   (B*) "setenv", (B*) op_setenv,
   (B*) "getenv", (B*) op_getenv,
+  (B*) "inter_lock", (B*) op_inter_lock,
+  (B*) "inter_unlock", (B*) op_inter_unlock,
+  (B*) "inter_lock_set", (B*) op_inter_lock_set,
   (B*) "console", (B*) op_console,
   (B*) "setconsole", (B*) op_setconsole,
   (B*) "]", (B*) op_closelist,
@@ -408,6 +411,7 @@ P _syserrc[] = {
   STREAM_DIR,
   STREAM_EPIPE,
   STREAM_OVF,
+  INTER_LOCK_NOT_DEF,
   0L
 };
 
@@ -542,5 +546,6 @@ B* _syserrm[] = {
   (B*) "*** operation on wrong direction stream",
   (B*) "*** Stream closed while attempting to write",
   (B*) "*** double unget on stream",
+  (B*) "** Inter locks not defined",
   (B*) NULL
 };

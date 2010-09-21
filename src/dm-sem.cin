@@ -1,0 +1,294 @@
+#line 2 "@srcdir@/dm-sem.cin"
+
+#include "dm-sem.h"
+
+#if DM_ENABLE_SEM
+
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <semaphore.h>
+#include <stdlib.h>
+
+#include "dm2.h"
+#include "dm-dvt-vm.h"
+
+static sem_t* lock = NULL;
+static char SEM_NAME[] = "@SEM_DNODE_NAME@";
+static BOOLEAN use_locks = FALSE;
+static BOOLEAN interlocked = FALSE;
+
+P _do_inter_lock_init(void) {
+  char sem_name[sizeof(SEM_NAME)/sizeof(char) + 30]; // big enough for 64 bit pid_t
+  const size_t sz = sizeof(sem_name)/sizeof(char);
+
+  use_locks = FALSE;
+  interlocked = FALSE;
+
+  if (lock) {
+    sem_t* lock_ = lock;
+    lock = NULL;
+    while (sem_close(lock_)) {
+      if (errno == EINTR) checkabort();
+      else return -errno;
+    }
+  }
+
+  if (snprintf(sem_name, sz, "/%s-%lu",
+	       SEM_NAME, (unsigned long) getpid())
+      >= sz)
+    return MEM_OVF;
+  
+  
+  while (! (lock = sem_open(sem_name, O_CREAT|O_EXCL, 
+			    S_IRUSR|S_IWUSR, 1))) {
+    if (errno == EINTR) checkabort();
+    else return -errno;
+  }
+
+  while (sem_unlink(sem_name)) {
+    if (errno == EINTR) checkabort();
+    else return -errno;
+  }
+  
+  return OK;
+}
+
+DM_INLINE_STATIC P x_inter_lock(BOOLEAN force) {
+  P retc = DONE;
+
+  /* fprintf(stderr, "lock-in    %lu: %i, %i, %i, %i\n", */
+  /* 	  (unsigned long) getpid(),  */
+  /* 	  abs(interlocked), */
+  /* 	  abs(force), */
+  /* 	  abs(use_locks), */
+  /* 	  lock ? 1 : 0); */
+
+  if (force && ! interlocked && lock) {
+    while (sem_wait(lock)) {
+      if (errno == EINTR) checkabort();
+      else return -errno;
+    }
+    interlocked = TRUE;
+    retc = OK;
+  }
+  
+  /* fprintf(stderr, "lock-out   %lu: %i, %i, %i, %i\n", */
+  /* 	  (unsigned long) getpid(),  */
+  /* 	  abs(interlocked), */
+  /* 	  abs(force), */
+  /* 	  abs(use_locks), */
+  /* 	  lock ? 1 : 0); */
+  return retc;
+}
+
+DM_INLINE_STATIC P x_inter_unlock(BOOLEAN force) {
+  P retc = DONE;
+
+  /* fprintf(stderr, "unlock-in  %lu: %i, %i, %i\n", */
+  /* 	  (unsigned long) getpid(),  */
+  /* 	  abs(interlocked), */
+  /* 	  abs(use_locks), */
+  /* 	  lock ? 1 : 0); */
+
+  if (force && interlocked && lock) {
+    while (sem_post(lock)) {
+      if (errno == EINTR) checkabort();
+      else return -errno;
+    }
+    interlocked = FALSE;
+    retc = OK;
+  }
+
+  /* fprintf(stderr, "unlock-out %lu: %i, %i, %i\n", */
+  /* 	  (unsigned long) getpid(),  */
+  /* 	  abs(interlocked), */
+  /* 	  abs(use_locks), */
+  /* 	  lock ? 1 : 0); */
+
+  return retc;
+}
+
+P _do_inter_lock(void) {
+  return x_inter_lock(use_locks);
+}
+
+P _do_inter_unlock(BOOLEAN force) {
+  return x_inter_unlock(force);
+}
+
+// use_interlocks_bool | --
+P op_inter_lock_set(void) {
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (TAG(o_1) != BOOL) return OPD_CLA;
+  
+  use_locks = BOOL_VAL(o_1);
+  FREEopds = o_1;
+  return OK;
+}
+
+static P x_op_inter_lock(void) {
+  P retc;
+
+  /* fprintf(stderr, "%lu in x_op_inter_lock\n", (long int) getpid()); */
+
+  if (x_1 < FLOORexecs) return EXECS_UNF;
+  if (TAG(x_1) != BOOL) return EXECS_COR;
+
+  if ((retc = x_inter_unlock(BOOL_VAL(x_1))))
+    return retc;
+  
+  FREEexecs = x_1;
+  /* fprintf(stderr, "%lu out x_op_inter_lock\n", (long int) getpid()); */
+  return repush_stop();
+}
+
+static P x_op_inter_unlock(void) {
+  P retc;
+
+  /* fprintf(stderr, "%lu in x_op_inter_unlock\n", (long int) getpid()); */
+
+  if (x_1 < FLOORexecs) return EXECS_UNF;
+  if (TAG(x_1) != BOOL) return EXECS_COR;
+
+  if ((retc = x_inter_lock(BOOL_VAL(x_1))))
+    return retc;
+  
+  FREEexecs = x_1;
+  /* fprintf(stderr, "%lu out x_op_inter_unlock\n", (long int) getpid()); */
+  return repush_stop();
+}
+
+// ~active | --
+P op_inter_lock(void) {
+  P retc;
+
+  /* fprintf(stderr, "%lu in op_inter_lock\n", (long int) getpid()); */
+
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (CEILexecs < x5) return EXECS_OVF;
+  if (! (ATTR(o_1) & ACTIVE)) return OPD_ATR;
+  
+  TAG(x1) = BOOL;
+  ATTR(x1) = 0;
+  
+  TAG(x2) = OP; 
+  ATTR(x2) = ACTIVE;
+  OP_NAME(x2) = "x_inter_lock"; 
+  OP_CODE(x2) = x_op_inter_lock;
+
+  TAG(x3) = BOOL; 
+  ATTR(x3) = (STOPMARK | ABORTMARK | ACTIVE);
+  BOOL_VAL(x3) = FALSE;
+  
+  moveframe(o_1, x4);
+
+  switch (retc = x_inter_lock(use_locks)) {
+    case OK: BOOL_VAL(x1) = TRUE; break;
+    case DONE: BOOL_VAL(x1) = FALSE; break;
+    default: return retc;
+  };
+
+  FREEexecs = x5;
+  FREEopds = o_1;
+  /* fprintf(stderr, "%lu out op_inter_lock\n", (long int) getpid()); */
+  return OK;
+}
+
+// ~active | --
+P op_inter_unlock(void) {
+  P retc;
+
+  /* fprintf(stderr, "%lu in op_inter_unlock\n", (long int) getpid()); */
+
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (CEILexecs < x5) return EXECS_OVF;
+  if (! (ATTR(o_1) & ACTIVE)) return OPD_ATR;
+  
+  TAG(x1) = BOOL; 
+  ATTR(x1) = 0;
+  
+  TAG(x2) = OP; 
+  ATTR(x2) = ACTIVE;
+  OP_NAME(x2) = "x_inter_unlock";
+  OP_CODE(x2) = x_op_inter_unlock;
+
+  TAG(x3) = BOOL; 
+  ATTR(x3) = (STOPMARK | ABORTMARK | ACTIVE);
+  BOOL_VAL(x3) = FALSE;
+  
+  moveframe(o_1, x4);
+  switch (retc = x_inter_unlock(TRUE)) {
+    case OK: BOOL_VAL(x1) = TRUE; break;
+    case DONE: BOOL_VAL(x1) = FALSE; break;
+    default: return retc;
+  };
+
+  FREEexecs = x5;
+  FREEopds = o_1;
+  /* fprintf(stderr, "%lu out op_inter_unlock\n", (long int) getpid()); */
+  return OK;
+}
+
+P _do_inter_lock_reset(void) {
+  B* f;
+  use_locks = FALSE;
+  interlocked = FALSE;
+
+  for (f = FREEexecs-FRAMEBYTES; f > FLOORexecs; f -= FRAMEBYTES)
+    if (TAG(f) == OP && (ATTR(f) & ACTIVE)
+	&& (OP_CODE(f) == x_op_inter_unlock
+	    || OP_CODE(f) == x_op_inter_lock)) {
+      f -= FRAMEBYTES;
+      if (f+FRAMEBYTES*3 < FREEexecs) {
+	FREEexecs -= FRAMEBYTES*3;
+	moveframes(f+FRAMEBYTES*3, f, FREEexecs - f);
+      }
+      else
+	FREEexecs = f;
+    };
+  
+  return OK;
+}
+
+#else // ! ENABLE_SEM
+
+P _do_inter_lock_init(void) {
+  return OK;
+}
+
+P _do_inter_lock(void) {
+  return OK;
+}
+
+P _do_inter_unlock(void) {
+  return OK;
+}
+
+P _do_inter_lock_reset(void) {
+  return OK;
+}
+
+P op_inter_lock(void) {
+  return INTER_LOCK_NOT_DEF;
+}
+
+P op_inter_unlock(void) {
+  return INTER_LOCK_NOT_DEF;
+}
+
+P op_inter_lock_implicit(void) {
+  return INTER_LOCK_NOT_DEF;
+}  
+
+P op_inter_lock_set(void) {
+  return INTER_LOCK_NOT_DEF;
+}
+
+#endif //ENABLE_SEM
+
+// Local Variables:
+// mode: c
+// End:
