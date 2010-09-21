@@ -19,7 +19,6 @@ P _do_inter_unlock(BOOLEAN force);
 
 P op_inter_lock(void);
 P op_inter_unlock(void);
-P op_inter_lock_implicit(void);
 P op_inter_lock_set(void);
 
 #endif //DM_SEM_H

@@ -154,7 +154,6 @@ specific \file{startup_xxx.d} files.
 \op*{makethreads} & - & + & + \\
 \op*{inter_lock} & - & + & + \\
 \op*{inter_unlock} & - & + & + \\
-\op*{inter_lock_implicit} & - & + & + \\
 \op*{inter_lock_set} & - & + & + \\
 \op*{tostderr} & - & + & + \\
 \op*{halt} & - & + & + \\
@@ -839,7 +838,6 @@ num                & makethreads         & --                    \\
 active_obj         & serialize           & ...                   \\
 active_obj         & inter_lock          & ...                   \\
 active_obj         & inter_unlock        & ...                   \\
-active_obj         & inter_lock_implicit & ...                   \\
 bool               & inter_lock_set      & --                    \\
 --                 & getlibdir           & string                \\
 (path) (filename)  & loadlib             & lib_dict              \\
@@ -943,11 +941,10 @@ forked children, especially regarding the behavior of multi-threaded
 operators. If \op{inter_lock_set} is called with a value of `true',
 then all threaded operators (such as BLAS and array operators) will
 block on a semaphore shared between all d-machines descended from the
-man \dcomp{dnode} or \dcomp{dpawn}. \op{inter_lock_implicit} behaves
-the same way for an arbitrary chunk of d-code. The operators
-\op{inter_lock} and \op{inter_unlock} force an inter-process semaphore
-lock or unlock respectively while executing its operand, regardless of
-the \op{inter_lock_set} state.
+man \dcomp{dnode} or \dcomp{dpawn}. The operators \op{inter_lock} and
+\op{inter_unlock}apply the same inter-process semaphore lock or unlock
+respectively while executing its operand, respecting
+\op{inter_lock_set}.
 
 In addition to the intrinsic operators, \dcomp[dnode]{dnodes} can make
 use of libraries of extrinsic operators (which typically support

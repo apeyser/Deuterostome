@@ -185,40 +185,6 @@ P op_inter_lock(void) {
   
   moveframe(o_1, x4);
 
-  switch (retc = x_inter_lock(TRUE)) {
-    case OK: BOOL_VAL(x1) = TRUE; break;
-    case DONE: BOOL_VAL(x1) = FALSE; break;
-    default: return retc;
-  };
-
-  FREEexecs = x5;
-  FREEopds = o_1;
-  /* fprintf(stderr, "%lu out op_inter_lock\n", (long int) getpid()); */
-  return OK;
-}
-
-// ~active | --
-P op_inter_lock_implicit(void) {
-  P retc;
-
-  if (o_1 < FLOORopds) return OPDS_UNF;
-  if (CEILexecs < x5) return EXECS_OVF;
-  if (! (ATTR(o_1) & ACTIVE)) return OPD_ATR;
-  
-  TAG(x1) = BOOL; 
-  ATTR(x1) = 0;
-  
-  TAG(x2) = OP; 
-  ATTR(x2) = ACTIVE;
-  OP_NAME(x2) = "x_inter_lock"; 
-  OP_CODE(x2) = x_op_inter_lock;
-
-  TAG(x3) = BOOL; 
-  ATTR(x3) = (STOPMARK | ABORTMARK | ACTIVE);
-  BOOL_VAL(x3) = FALSE;
-  
-  moveframe(o_1, x4);
-
   switch (retc = x_inter_lock(use_locks)) {
     case OK: BOOL_VAL(x1) = TRUE; break;
     case DONE: BOOL_VAL(x1) = FALSE; break;
@@ -227,6 +193,7 @@ P op_inter_lock_implicit(void) {
 
   FREEexecs = x5;
   FREEopds = o_1;
+  /* fprintf(stderr, "%lu out op_inter_lock\n", (long int) getpid()); */
   return OK;
 }
 

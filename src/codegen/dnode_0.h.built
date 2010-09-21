@@ -273,7 +273,6 @@ B* _sysop[] =
   (B*) "getenv", (B*) op_getenv,
   (B*) "inter_lock", (B*) op_inter_lock,
   (B*) "inter_unlock", (B*) op_inter_unlock,
-  (B*) "inter_lock_implicit", (B*) op_inter_lock_implicit,
   (B*) "inter_lock_set", (B*) op_inter_lock_set,
   (B*) "console", (B*) op_console,
   (B*) "setconsole", (B*) op_setconsole,

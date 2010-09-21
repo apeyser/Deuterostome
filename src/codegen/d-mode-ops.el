@@ -205,7 +205,6 @@
   "getenv"
   "inter_lock"
   "inter_unlock"
-  "inter_lock_implicit"
   "inter_lock_set"
   "connect"
   "disconnect"

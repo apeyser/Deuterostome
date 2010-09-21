@@ -391,8 +391,7 @@ end def
 /sem 1 dict dup begin |[
   /all 2 dict dup begin |[
     /commands [
-      /inter_lock /inter_unlock 
-      /inter_lock_implicit /inter_lock_set
+      /inter_lock /inter_unlock /inter_lock_set
     ] def
     /errors 1 dict dup begin |[
       /INTER_LOCK_NOT_DEF (** Inter locks not defined) def |]
