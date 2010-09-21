@@ -137,7 +137,7 @@ dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dnode_SOURCES = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
 	$(SOCKSRCS) \
 	$(DNODE_MPI_SRCS)
-nodist_dnode_SOURCES = $(NODIST_SOCKSRCS) $(NODIST_DNODE_MPI_SRCS)
+nodist_dnode_SOURCES = $(NODIST_SOCKSRCS) $(NODIST_DNODE_MPI_SRCS) $(SEM_SRC)
 dnode_LDADD = $(builddir)/libdmglobals.la \
 	$(builddir)/libdmnodal.la \
 	$(AM_LDADD) $(ATLAS_LIBS) $(MPI_LIBS)
@@ -169,7 +169,7 @@ libdmglobals_la_LIBADD = $(ATLAS_LIBS) $(AM_LIBADD)
 libdmglobals_la_SOURCES = $(GLOBSRCS) \
 	matrix.c matrix.h \
 	$(THREADSRC) $(REGEX_SRC) dm-convert.h dm-convert.c
-nodist_libdmglobals_la_SOURCES = $(NODIST_GLOBSRCS) $(SEM_SRC)
+nodist_libdmglobals_la_SOURCES = $(NODIST_GLOBSRCS)
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 
 libdmnodal_la_SOURCES = dm-vm.c dm-vm.h dm-dvt-vm.h \

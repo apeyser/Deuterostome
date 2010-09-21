@@ -127,9 +127,11 @@ P op_vmresize_(void)
     setupdirs();
   }
 
-  if (chdir(original_dir)) error_local(EXIT_FAILURE,errno,"chdir");
+  if (chdir(original_dir)) 
+    error_local(EXIT_FAILURE, errno, "chdir");
 
-  return VMRESIZE_ERR(inter_lock_init(), TRUE);
+  return VMRESIZE_ERR(do_inter_lock_init ? do_inter_lock_init() : OK, 
+		      TRUE);
 }
 
 /*-------------------------- Dnode operators -------------------------*/

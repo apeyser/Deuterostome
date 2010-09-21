@@ -17,7 +17,7 @@
 static sem_t* lock = NULL;
 static char SEM_NAME[] = "@SEM_DNODE_NAME@";
 
-P inter_lock_init(void) {
+P _do_inter_lock_init(void) {
   char sem_name[sizeof(SEM_NAME)/sizeof(char) + 30]; // big enough for 64 bit pid_t
   const size_t sz = sizeof(sem_name)/sizeof(char);
 
@@ -75,11 +75,11 @@ DM_INLINE_STATIC P x_inter_unlock(void) {
   return OK;
 }
 
-P do_inter_lock(void) {
+P _do_inter_lock(void) {
   return x_inter_lock(FALSE);
 }
 
-P do_inter_unlock(void) {
+P _do_inter_unlock(void) {
   return x_inter_unlock();
 }
 
@@ -208,7 +208,7 @@ P op_inter_unlock(void) {
   return OK;
 }
 
-P do_inter_lock_reset(void) {
+P _do_inter_lock_reset(void) {
   B* f;
 
   for (f = FREEexecs-FRAMEBYTES; f > FLOORexecs; f -= FRAMEBYTES)
@@ -230,19 +230,19 @@ P do_inter_lock_reset(void) {
 
 #else // ! ENABLE_SEM
 
-P inter_lock_init(void) {
+P _do_inter_lock_init(void) {
   return OK;
 }
 
-P do_inter_lock(void) {
+P _do_inter_lock(void) {
   return OK;
 }
 
-P do_inter_unlock(void) {
+P _do_inter_unlock(void) {
   return OK;
 }
 
-P do_inter_lock_reset(void) {
+P _do_inter_lock_reset(void) {
   return OK;
 }
 

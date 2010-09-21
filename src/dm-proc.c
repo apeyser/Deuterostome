@@ -417,7 +417,7 @@ P op_fork(void) {
       if (close(sockets[0])) error_local(1, errno, "close sockets[0]");
 
       closesockets_fork();
-      do_inter_lock_reset();
+      if (do_inter_lock_reset) do_inter_lock_reset();
 
       if ((retc = addsocket(sockets[1], &sockettype, &defaultsocketinfo)))
 	error_local(1, retc < 0 ? -retc : 0, 

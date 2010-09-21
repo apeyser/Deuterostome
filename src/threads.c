@@ -150,7 +150,8 @@ P threads_do_int(UL32 nways, thread_func func,
   if (local) for (i = nways; i--;) thread_data_local[i] = local+s*i;
   else       for (i = nways; i--;) thread_data_local[i] = NULL;
   
-  if ((retc = do_inter_unlock())) return retc;
+  if (do_inter_lock && (retc = do_inter_lock())) 
+    return retc;
 
   MAINERR(pthread_mutex_lock, main_lock);
   for (i = 1; i < nways; ++i) {
@@ -168,7 +169,7 @@ P threads_do_int(UL32 nways, thread_func func,
     MAINERR(pthread_cond_wait, main_wait, main_lock);
   MAINERR(pthread_mutex_unlock, main_lock);
 
-  retc = do_inter_unlock();
+  retc = do_inter_unlock ? do_inter_unlock() : OK;
   for (i = 0; i < nways; ++i)
     if (thread_error[i]) return thread_error[i];
 

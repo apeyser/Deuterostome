@@ -388,17 +388,26 @@ end def
   end def |]
 end def
 
+/sem 1 dict dup begin |[
+  /all 2 dict dup begin |[
+    /commands [
+      /inter_lock /inter_unlock 
+      /inter_lock_implicit /inter_lock_set
+    ] def
+    /errors 1 dict dup begin |[
+      /INTER_LOCK_NOT_DEF (** Inter locks not defined) def |]
+    end def |]
+  end def |]
+end def
+
 /node 3 dict dup begin |[
   /all 2 dict dup begin |[
     /commands [
       /lock /unlock /serialize /threads /makethreads 
       /halt /continue 
       /vmresize 
-      /inter_lock /inter_unlock 
-      /inter_lock_implicit /inter_lock_set
     ] def
     /errors 100 dict dup begin |[
-      /INTER_LOCK_NOT_DEF (** Inter locks not defined) def
       /LIB_LOAD (** Unable to load dynamically linked library) def
       /LIB_EXPORT (** Unable to find object in shared library) def
       /LIB_LINK (** Library has not been loaded) def
@@ -512,7 +521,7 @@ end def end def
 end def end def
 
 /alltypes [
-  /common /regex /dies /quitable /proc /net /x /node 
+  /common /regex /dies /quitable /proc /sem /net /x /node 
   /xnode /master /plugins /socketevents
   /terminal /pawn /consolable
 ] def
@@ -531,7 +540,7 @@ end def
 /dnodedict 1 dict dup begin |[
   /parents [
     /common /net /socketevents /node /x /xnode /master /regex /plugins
-    /dies /proc /consolable
+    /dies /proc /sem /consolable
   ] def |]
 end def
 

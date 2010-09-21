@@ -297,15 +297,14 @@ DEF_CHECK_OVERLAP(ll, L32)
 #define CHECK_OVERLAP_LL(a, na, b, nb) \
   CHECK_OVERLAP(ll, a, na, b, nb)
 
-#define CHECKIN_SEM() do {			\
-    P retc = do_inter_lock();			\
-    if (retc) return retc;			\
+#define CHECKIN_SEM() do {				\
+    P retc = do_inter_lock ? do_inter_lock() : OK;	\
+    if (retc) return retc;				\
   } while (0)
 
-#define CHECKOUT_SEM(err) do {			\
-    P retc = do_inter_unlock();			\
-    if (retc) return err ? err : retc;		\
-    if (err) return err;			\
+#define CHECKOUT_SEM(err) do {				\
+    P retc = do_inter_unlock ? do_inter_unlock() : OK;	\
+    if (err || retc) return err ? err : retc;		\
   } while (0)
 
 /*--------------------------------------------- matmul_blas

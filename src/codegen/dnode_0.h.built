@@ -176,10 +176,6 @@ B* _sysop[] =
   (B*) "halt", (B*) op_halt,
   (B*) "continue", (B*) op_continue,
   (B*) "vmresize", (B*) op_vmresize,
-  (B*) "inter_lock", (B*) op_inter_lock,
-  (B*) "inter_unlock", (B*) op_inter_unlock,
-  (B*) "inter_lock_implicit", (B*) op_inter_lock_implicit,
-  (B*) "inter_lock_set", (B*) op_inter_lock_set,
 #ifdef BUILD_ATLAS
   (B*) "matmul_blas", (B*) op_matmul_blas,
   (B*) "decompLU_lp", (B*) op_decompLU_lp,
@@ -275,6 +271,10 @@ B* _sysop[] =
   (B*) "glob", (B*) op_glob,
   (B*) "setenv", (B*) op_setenv,
   (B*) "getenv", (B*) op_getenv,
+  (B*) "inter_lock", (B*) op_inter_lock,
+  (B*) "inter_unlock", (B*) op_inter_unlock,
+  (B*) "inter_lock_implicit", (B*) op_inter_lock_implicit,
+  (B*) "inter_lock_set", (B*) op_inter_lock_set,
   (B*) "console", (B*) op_console,
   (B*) "setconsole", (B*) op_setconsole,
   (B*) "]", (B*) op_closelist,
@@ -335,7 +335,6 @@ P _syserrc[] = {
   ILL_SOCK,
   DEAD_SOCKET,
   NEXTEVENT_NOEVENT,
-  INTER_LOCK_NOT_DEF,
   LIB_LOAD,
   LIB_EXPORT,
   LIB_LINK,
@@ -413,6 +412,7 @@ P _syserrc[] = {
   STREAM_DIR,
   STREAM_EPIPE,
   STREAM_OVF,
+  INTER_LOCK_NOT_DEF,
   0L
 };
 
@@ -470,7 +470,6 @@ B* _syserrm[] = {
   (B*) "** Attempted to send a signal to a socket without that capability",
   (B*) "** Dead socket",
   (B*) "** no socket events -- internal",
-  (B*) "** Inter locks not defined",
   (B*) "** Unable to load dynamically linked library",
   (B*) "** Unable to find object in shared library",
   (B*) "** Library has not been loaded",
@@ -548,5 +547,6 @@ B* _syserrm[] = {
   (B*) "*** operation on wrong direction stream",
   (B*) "*** Stream closed while attempting to write",
   (B*) "*** double unget on stream",
+  (B*) "** Inter locks not defined",
   (B*) NULL
 };

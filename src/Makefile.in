@@ -163,16 +163,15 @@ am__objects_3 = libdmglobals_la-dmglobals.lo libdmglobals_la-dmnum.lo \
 am_libdmglobals_la_OBJECTS = $(am__objects_3) \
 	libdmglobals_la-matrix.lo $(am__objects_4) $(am__objects_5) \
 	libdmglobals_la-dm-convert.lo
-@ENABLE_SEM_TRUE@am__objects_6 = libdmglobals_la-dm-sem.lo
-nodist_libdmglobals_la_OBJECTS = $(am__objects_2) $(am__objects_6)
+nodist_libdmglobals_la_OBJECTS = $(am__objects_2)
 libdmglobals_la_OBJECTS = $(am_libdmglobals_la_OBJECTS) \
 	$(nodist_libdmglobals_la_OBJECTS)
 libdmnodal_la_DEPENDENCIES = $(builddir)/libdmglobals.la \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_1)
 am__libdmnodal_la_SOURCES_DIST = dm-vm.c dm-vm.h dm-dvt-vm.h plugin.h \
 	cppplugin.h $(top_srcdir)/libltdl/ltdl.h pluginlib.h plugin.c
-@ENABLE_PLUGINS_SUPPORT_TRUE@am__objects_7 = $(am__objects_2)
-am_libdmnodal_la_OBJECTS = dm-vm.lo $(am__objects_7) plugin.lo
+@ENABLE_PLUGINS_SUPPORT_TRUE@am__objects_6 = $(am__objects_2)
+am_libdmnodal_la_OBJECTS = dm-vm.lo $(am__objects_6) plugin.lo
 libdmnodal_la_OBJECTS = $(am_libdmnodal_la_OBJECTS)
 @ENABLE_DAEMON_TRUE@am__EXEEXT_1 = dnode-daemon$(EXEEXT)
 @ENABLE_RTHREADS_TRUE@am__EXEEXT_2 = drook$(EXEEXT) dpawn$(EXEEXT)
@@ -193,13 +192,15 @@ dmprop_DEPENDENCIES = $(am__DEPENDENCIES_3)
 am__dnode_SOURCES_DIST = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
 	dm-nextevent.c dm-nextevent.h dm3.c dm3.h dm-proc.c dm-proc.h \
 	dm-glob.c dm-glob.h dm-prop.h dm-dvt-vm.h dqueen.h
-am__objects_8 = dnode-dm-nextevent.$(OBJEXT) dnode-dm3.$(OBJEXT) \
+am__objects_7 = dnode-dm-nextevent.$(OBJEXT) dnode-dm3.$(OBJEXT) \
 	dnode-dm-proc.$(OBJEXT) dnode-dm-glob.$(OBJEXT)
 am_dnode_OBJECTS = dnode-dnode.$(OBJEXT) dnode-dm-dnode.$(OBJEXT) \
-	$(am__objects_8) $(am__objects_2)
-am__objects_9 = dnode-dm-prop.$(OBJEXT)
-@ENABLE_RTHREADS_TRUE@am__objects_10 = dnode-dqueen.$(OBJEXT)
-nodist_dnode_OBJECTS = $(am__objects_9) $(am__objects_10)
+	$(am__objects_7) $(am__objects_2)
+am__objects_8 = dnode-dm-prop.$(OBJEXT)
+@ENABLE_RTHREADS_TRUE@am__objects_9 = dnode-dqueen.$(OBJEXT)
+@ENABLE_SEM_TRUE@am__objects_10 = dnode-dm-sem.$(OBJEXT)
+nodist_dnode_OBJECTS = $(am__objects_8) $(am__objects_9) \
+	$(am__objects_10)
 dnode_OBJECTS = $(am_dnode_OBJECTS) $(nodist_dnode_OBJECTS)
 dnode_DEPENDENCIES = $(builddir)/libdmglobals.la \
 	$(builddir)/libdmnodal.la $(am__DEPENDENCIES_3) \
@@ -977,7 +978,7 @@ dnode_SOURCES = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
 	$(SOCKSRCS) \
 	$(DNODE_MPI_SRCS)
 
-nodist_dnode_SOURCES = $(NODIST_SOCKSRCS) $(NODIST_DNODE_MPI_SRCS)
+nodist_dnode_SOURCES = $(NODIST_SOCKSRCS) $(NODIST_DNODE_MPI_SRCS) $(SEM_SRC)
 dnode_LDADD = $(builddir)/libdmglobals.la \
 	$(builddir)/libdmnodal.la \
 	$(AM_LDADD) $(ATLAS_LIBS) $(MPI_LIBS)
@@ -1009,7 +1010,7 @@ libdmglobals_la_SOURCES = $(GLOBSRCS) \
 	matrix.c matrix.h \
 	$(THREADSRC) $(REGEX_SRC) dm-convert.h dm-convert.c
 
-nodist_libdmglobals_la_SOURCES = $(NODIST_GLOBSRCS) $(SEM_SRC)
+nodist_libdmglobals_la_SOURCES = $(NODIST_GLOBSRCS)
 libdmglobals_la_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) $(ATLAS_FLAGS)
 libdmnodal_la_SOURCES = dm-vm.c dm-vm.h dm-dvt-vm.h \
 	$(PLUGIN_HDR) pluginlib.h plugin.c
@@ -1225,6 +1226,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dm-nextevent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dm-proc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dm-prop.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dm-sem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dm3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dnode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnode-dqueen.Po@am__quote@
@@ -1257,7 +1259,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dsp2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm-conv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm-convert.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm-sem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm-signals.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm-types.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmglobals_la-dm1.Plo@am__quote@
@@ -1538,13 +1539,6 @@ libdmglobals_la-dm-convert.lo: dm-convert.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdmglobals_la-dm-convert.lo `test -f 'dm-convert.c' || echo '$(srcdir)/'`dm-convert.c
 
-libdmglobals_la-dm-sem.lo: dm-sem.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libdmglobals_la-dm-sem.lo -MD -MP -MF $(DEPDIR)/libdmglobals_la-dm-sem.Tpo -c -o libdmglobals_la-dm-sem.lo `test -f 'dm-sem.c' || echo '$(srcdir)/'`dm-sem.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libdmglobals_la-dm-sem.Tpo $(DEPDIR)/libdmglobals_la-dm-sem.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-sem.c' object='libdmglobals_la-dm-sem.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdmglobals_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdmglobals_la-dm-sem.lo `test -f 'dm-sem.c' || echo '$(srcdir)/'`dm-sem.c
-
 dgen-dgen.o: dgen.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dgen_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dgen-dgen.o -MD -MP -MF $(DEPDIR)/dgen-dgen.Tpo -c -o dgen-dgen.o `test -f 'dgen.c' || echo '$(srcdir)/'`dgen.c
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dgen-dgen.Tpo $(DEPDIR)/dgen-dgen.Po
@@ -1740,6 +1734,20 @@ dnode-dqueen.obj: dqueen.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dqueen.c' object='dnode-dqueen.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dqueen.obj `if test -f 'dqueen.c'; then $(CYGPATH_W) 'dqueen.c'; else $(CYGPATH_W) '$(srcdir)/dqueen.c'; fi`
+
+dnode-dm-sem.o: dm-sem.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dm-sem.o -MD -MP -MF $(DEPDIR)/dnode-dm-sem.Tpo -c -o dnode-dm-sem.o `test -f 'dm-sem.c' || echo '$(srcdir)/'`dm-sem.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dnode-dm-sem.Tpo $(DEPDIR)/dnode-dm-sem.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-sem.c' object='dnode-dm-sem.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dm-sem.o `test -f 'dm-sem.c' || echo '$(srcdir)/'`dm-sem.c
+
+dnode-dm-sem.obj: dm-sem.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -MT dnode-dm-sem.obj -MD -MP -MF $(DEPDIR)/dnode-dm-sem.Tpo -c -o dnode-dm-sem.obj `if test -f 'dm-sem.c'; then $(CYGPATH_W) 'dm-sem.c'; else $(CYGPATH_W) '$(srcdir)/dm-sem.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/dnode-dm-sem.Tpo $(DEPDIR)/dnode-dm-sem.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dm-sem.c' object='dnode-dm-sem.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dnode_CPPFLAGS) $(CPPFLAGS) $(dnode_CFLAGS) $(CFLAGS) -c -o dnode-dm-sem.obj `if test -f 'dm-sem.c'; then $(CYGPATH_W) 'dm-sem.c'; else $(CYGPATH_W) '$(srcdir)/dm-sem.c'; fi`
 
 dpawn-dpawn.o: dpawn.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dpawn_CPPFLAGS) $(CPPFLAGS) $(dpawn_CFLAGS) $(CFLAGS) -MT dpawn-dpawn.o -MD -MP -MF $(DEPDIR)/dpawn-dpawn.Tpo -c -o dpawn-dpawn.o `test -f 'dpawn.c' || echo '$(srcdir)/'`dpawn.c

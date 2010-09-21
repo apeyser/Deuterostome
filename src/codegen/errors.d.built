@@ -70,18 +70,18 @@
   /STREAM_DIR                          67x def
   /STREAM_EPIPE                        68x def
   /STREAM_OVF                          69x def
-  /LOST_CONN                           70x def
-  /ILL_SOCK                            71x def
-  /DEAD_SOCKET                         72x def
-  /NO_XWINDOWS                         73x def
-  /X_ERR                               74x def
-  /X_BADFONT                           75x def
-  /X_BADHOST                           76x def
-  /X_SEC_MISS                          77x def
-  /X_SEC_GEN                           78x def
-  /X_SEC_REV                           79x def
-  /X_SEC_LIB                           80x def
-  /INTER_LOCK_NOT_DEF                  81x def
+  /INTER_LOCK_NOT_DEF                  70x def
+  /LOST_CONN                           71x def
+  /ILL_SOCK                            72x def
+  /DEAD_SOCKET                         73x def
+  /NO_XWINDOWS                         74x def
+  /X_ERR                               75x def
+  /X_BADFONT                           76x def
+  /X_BADHOST                           77x def
+  /X_SEC_MISS                          78x def
+  /X_SEC_GEN                           79x def
+  /X_SEC_REV                           80x def
+  /X_SEC_LIB                           81x def
   /LIB_LOAD                            82x def
   /LIB_EXPORT                          83x def
   /LIB_LINK                            84x def
