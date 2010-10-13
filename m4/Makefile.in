@@ -48,7 +48,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/latex/ac_prog_pdflatex.m4 \
 	$(top_srcdir)/m4/latex/ac_prog_latex.m4 \
 	$(top_srcdir)/m4/00gnulib.m4 $(top_srcdir)/m4/acx_pthread.m4 \
-	$(top_srcdir)/m4/alloca.m4 \
+	$(top_srcdir)/m4/alloca.m4 $(top_srcdir)/m4/argz.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
 	$(top_srcdir)/m4/ax_set_version_info.m4 \
@@ -116,6 +116,7 @@ ALLOCA_H = @ALLOCA_H@
 AMTAR = @AMTAR@
 APPLE_UNIVERSAL_BUILD = @APPLE_UNIVERSAL_BUILD@
 AR = @AR@
+ARGZ_H = @ARGZ_H@
 AS = @AS@
 ATLAS_FLAGS = @ATLAS_FLAGS@
 ATLAS_LIBS = @ATLAS_LIBS@
@@ -437,6 +438,10 @@ LDFLAGS = @LDFLAGS@
 LEX = @LEX@
 LEXLIB = @LEXLIB@
 LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
+LIBADD_DL = @LIBADD_DL@
+LIBADD_DLD_LINK = @LIBADD_DLD_LINK@
+LIBADD_DLOPEN = @LIBADD_DLOPEN@
+LIBADD_SHL_LOAD = @LIBADD_SHL_LOAD@
 LIBDM_DLL_IMPORT = @LIBDM_DLL_IMPORT@
 LIBLTDL = @LIBLTDL@
 LIBM = @LIBM@
@@ -444,7 +449,7 @@ LIBOBJS = @LIBOBJS@
 LIBPLUGIN_DLL_IMPORT = @LIBPLUGIN_DLL_IMPORT@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
-LIBTOOL_DEP = @LIBTOOL_DEP@
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LOCALCHARSET_TESTS_ENVIRONMENT = @LOCALCHARSET_TESTS_ENVIRONMENT@
@@ -454,7 +459,11 @@ LOCALE_ZH_CN = @LOCALE_ZH_CN@
 LTALLOCA = @LTALLOCA@
 LTDLDEPS = @LTDLDEPS@
 LTDLINCL = @LTDLINCL@
+LTDLOPEN = @LTDLOPEN@
 LTLIBOBJS = @LTLIBOBJS@
+LT_CONFIG_H = @LT_CONFIG_H@
+LT_DLLOADERS = @LT_DLLOADERS@
+LT_DLPREOPEN = @LT_DLPREOPEN@
 M4DATADIR = @M4DATADIR@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
@@ -504,6 +513,7 @@ PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
+PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PCCFLAGS = @PCCFLAGS@
@@ -671,7 +681,8 @@ libexecdir = @libexecdir@
 lispdir = @lispdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
-lt_ECHO = @lt_ECHO@
+ltdl_LIBOBJS = @ltdl_LIBOBJS@
+ltdl_LTLIBOBJS = @ltdl_LTLIBOBJS@
 m4datadir = @m4datadir@
 makeindex = @makeindex@
 mandir = @mandir@
@@ -691,6 +702,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 subdirs = @subdirs@
+sys_symbol_underscore = @sys_symbol_underscore@
 sysconfdir = @sysconfdir@
 target = @target@
 target_alias = @target_alias@

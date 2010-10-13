@@ -206,18 +206,14 @@ AC_PROG_LN_S
 
 CF_SET_TOP_DIR
 
-AC_LIBTOOL_WIN32_DLL
-AC_LIBTOOL_DLOPEN
-AC_LIBLTDL_CONVENIENCE
-AC_PROG_LIBTOOL
-AC_SUBST(LIBTOOL_DEP)
-LT_CONFIG_LTDL_DIR([libltdl])
+CF_LIBTOOL
 
 AC_CHECK_LIBM
 CF_X11_ENABLE
 CF_PREPEND_VARS([LIBS], [XLIB LIBM])
 AC_C_BIGENDIAN
 dnl check pid_t for plugins/process.c
+
 CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([pid_t], [4])])
 CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([int], [4])])
 
@@ -314,10 +310,6 @@ CF_DEFINE_IF_CODE_GCC([NORETURN], [
   #include <stdlib.h>
   __attribute__ ((__noreturn__)) void x(void) {exit(0);}
 ])
-
-AC_SUBST([INCLTDL])
-AC_SUBST([LIBLTDL])
-AC_CONFIG_SUBDIRS([libltdl])
 
 CF_WIN_DLL_IMPORT([DM])
 CF_WIN_DLL_IMPORT([PLUGIN])

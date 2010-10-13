@@ -13,8 +13,8 @@
 
 m4_ifndef([AC_AUTOCONF_VERSION],
   [m4_copy([m4_PACKAGE_VERSION], [AC_AUTOCONF_VERSION])])dnl
-m4_if(m4_defn([AC_AUTOCONF_VERSION]), [2.63],,
-[m4_warning([this file was generated for autoconf 2.63.
+m4_if(m4_defn([AC_AUTOCONF_VERSION]), [2.65],,
+[m4_warning([this file was generated for autoconf 2.65.
 You have another version of autoconf.  It may work, but is not guaranteed to.
 If you have problems, you may need to regenerate the build system entirely.
 To do so, use the procedure documented by the package, typically `autoreconf'.])])
@@ -1030,6 +1030,7 @@ m4_include([m4/latex/ac_prog_latex.m4])
 m4_include([m4/00gnulib.m4])
 m4_include([m4/acx_pthread.m4])
 m4_include([m4/alloca.m4])
+m4_include([m4/argz.m4])
 m4_include([m4/ax_cflags_strict_prototypes.m4])
 m4_include([m4/ax_prefix_config_h.m4])
 m4_include([m4/ax_set_version_info.m4])

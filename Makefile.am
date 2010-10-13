@@ -34,4 +34,7 @@ gencode:
 	cd lib && $(MAKE) $(AM_MAKEFLAGS) all
 	cd src && $(MAKE) $(AM_MAKEFLAGS) gencode
 
+libtool: $(LIBTOOL_DEPS)
+	$(SHELL) ./config.status --recheck
+
 include $(srcdir)/m4/cf_bundle.make
