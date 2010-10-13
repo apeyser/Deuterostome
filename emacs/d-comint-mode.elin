@@ -565,16 +565,16 @@ Otherwise, one argument `-i' is passed to the shell.
 	     (cdir default-directory)
 	     dvt-buffer)
 	(save-excursion
-	  (set-buffer
-	   (setq dvt-buffer 
-		 (apply 'make-comint-in-buffer "dvt" buffer prog
-			(when (file-exists-p startfile) startfile)
-			(when (and xargs-name (boundp xargs-name))
-			  (symbol-value xargs-name)))))
-	  (d-comint-mode)
-	  (d-comint-mode-server)
-	  (when dm-server-process
-	    (run-at-time 1 nil 'd-comint-mode-take-input dvt-buffer)))
+	  (with-current-buffer
+	      (setq dvt-buffer 
+		    (apply 'make-comint-in-buffer "dvt" buffer prog
+			   (when (file-exists-p startfile) startfile)
+			   (when (and xargs-name (boundp xargs-name))
+			     (symbol-value xargs-name))))
+	    (d-comint-mode)
+	    (d-comint-mode-server)
+	    (when dm-server-process
+	      (run-at-time 1 nil 'd-comint-mode-take-input dvt-buffer))))
 	
 	(when (or d-comint-mode-keep-focus override)
 	  (dvt-special-frame buffer)
@@ -586,15 +586,15 @@ Otherwise, one argument `-i' is passed to the shell.
 
 (defun d-comint-mode-take-input (dvt-buffer)
   (save-excursion 
-    (set-buffer dvt-buffer)
-    (process-send-string 
-     (get-buffer-process dvt-buffer)
-     (concat 
-      "Xwindows {(" 
-      (d-comint-mode-shell-quote dm-server-name) 
-      ") ("
-      (d-comint-mode-shell-quote (buffer-name dvt-buffer)) 
-      ") take_input_setup} if\n"))))
+    (with-current-buffer dvt-buffer
+      (process-send-string 
+       (get-buffer-process dvt-buffer)
+       (concat 
+	"Xwindows {(" 
+	(d-comint-mode-shell-quote dm-server-name) 
+	") ("
+	(d-comint-mode-shell-quote (buffer-name dvt-buffer)) 
+	") take_input_setup} if\n")))))
 
 (defun d-comint-mode-quote (string)
   "Quote a string to be sent to and interpreted by the dvt.
@@ -776,6 +776,8 @@ dvt buffer. Used from global key-binding"
 
 (defvar d-comint-dnode-mode-prog nil)
 
+(defvar d-comint-dnode-mode-name "dnode")
+
 (define-derived-mode d-comint-dnode-mode comint-mode "dnode"
   "Major mode for handling dnodes.
 \\{d-comint-dnode-mode-map}"
@@ -786,7 +788,7 @@ dvt buffer. Used from global key-binding"
   (insert "\n")
   (goto-char (point-max))
   (apply 'make-comint-in-buffer 
-	 name 
+	 d-comint-dnode-mode-name
 	 d-comint-dnode-mode-dnode-buffer
 	 d-comint-dnode-mode-prog 
 	 nil 
@@ -823,10 +825,10 @@ dvt buffer. Used from global key-binding"
 	     (d-comint-dnode-mode-dnode-args 
 	      (append d-comint-dnode-mode-dnode-args (list port-string))))
 	(save-excursion
-	  (set-buffer 
-	   (setq d-comint-dnode-mode-dnode-buffer 
-		 (get-buffer-create dnode-buffer-name)))
-	  (d-comint-dnode-mode))))
+	  (with-current-buffer
+	      (setq d-comint-dnode-mode-dnode-buffer 
+		    (get-buffer-create dnode-buffer-name))
+	    (d-comint-dnode-mode)))))
     
     (if (eq major-mode 'd-comint-dnode-mode)
 	(switch-to-buffer d-comint-dnode-mode-dnode-buffer)
