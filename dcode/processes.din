@@ -533,7 +533,6 @@
   | Used only in child process.
   /_spawnsh {
     {
-|      countdictstack 2 sub ~end repeat PROCESSES begin
       console dup null eq ~pop {
         ~[
           ~[
@@ -607,7 +606,7 @@
     (sh) wait_
   } bind def
 
-  |======================= sh ===================================
+  |======================= sh_quiet ===================================
   | \[ (exec) ... | --
   | 
   | Execute (exec) with following operands as child process in

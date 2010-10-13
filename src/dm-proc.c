@@ -885,7 +885,7 @@ P op_openfd(void) {
   return OK;
 }
 
-// (buffer) fd | (sub-buffer) fd true / (sub-buffer) false
+// (buffer) fd | (buffer) fd true / (sub-buffer) false
 P op_readfd(void) {
   P retc;
   P fd;

@@ -292,7 +292,7 @@ startup_common_save capsave {
 | The node list stores information on the whereabouts, state, and grouping
 | of the nodes. Node list entries are lists themselves:
 | 
-| [ (hostname) port# socket status group color_list color_name ssh-pid]
+| [(hostname) port# socket status group color_list color_name ssh-pid]
 |
 | The status is busy (true) or ready (false). Busy nodes are not given
 | dvt phrases unless this is forced by the '!' tag. The group is a negative
@@ -306,8 +306,8 @@ startup_common_save capsave {
 | machinery of the nodes window.
 
   /nodelist [
-    [ (dvt) null null false 0 {} null null]
-    9 { [ null null null false 0 {} null null] } repeat
+    [(dvt) null null false 0 {} null null]
+    9 {[null null null false 0 {} null null]} repeat
   ] def
 
 |------------------------------- front-end ------------------------------
@@ -440,58 +440,65 @@ c_         list all connections
     exch restore {color_node_def} stopped pop end
   } bind userdict 3 -1 roll put
 
+  | ------ handle ssh connections for display -----------
+  Xwindows {
+    /ssh_display [
+      /result 1024 /b array def
+      /flags []
+
+      | -- | [ (ssh) flags node | ]
+      /command {
+        openlist (ssh) flags {} forall node 0 get (dvtgetdisplay)
+      } bind
+      
+      | -- | (display) pid
+      /ssh {
+        pipefd command {
+          NULLR counttomark 2 add -1 roll STDERR sh_bg
+        } PROCESSES indict | readfd pid
+
+        result {
+          4 -1 roll readline {~close PROCESSES indict} if
+        } tostring | pid sub-result
+        exch
+      } bind
+
+      | -- | (display)
+      /display {
+        node 7 get dup null eq ~pop {
+          dup /QUIT {kill wait pop} PROCESSES indict
+        } ifelse
+        
+        getdisplayhost (^\(localhost\)?:) regexs {
+          3 ~pop repeat
+          ssh dup ~isdead PROCESSES indict not {node 7 put} {
+            pop pop null node 7 put
+            (display) /NOSYSTEM makeerror
+          } ifelse
+        } if
+      } bind
+    ] makestruct def
+
+    /getdnodedisplay {~display ssh_display indict} bind def
+  } {
+    /getdnodedisplay {null} def
+  } ifelse
+
 |---------------------------------------------------- connect to node
-| hostname port# group# sshname | -- 
+| hostname port# group# | -- 
 |
 | connects to the node and makes itself the current dvt of the node;
 | the node is assigned a group number (enter as NEGATIVE integer)
 | Also connects the eye.
 
-  /ssh_display [
-    /result 1024 /b array def
-    /flags []
-
-    | (display) | pid
-    /command {
-      openlist (ssh) ssh_flags {} forall 
-      counttomark 1 add -1 roll 
-      (dvtgetdisplay) sh
-    } bind
-
-    | (display-host) | (display) pid
-    /ssh {
-      pipefd 
-      3 -1 roll ~command {NULLR 4 -1 roll STDERR bg} PROCESSES indict
-      result 3 -1 roll readfd ~closefd if        
-    } bind
-
-    | (display-host) | (display)
-    /display {
-      node 7 get dup null ne {
-        dup /QUIT {kill wait} PROCESSES indict
-      } if pop
-
-      getdisplayhost dup null eq {pop node 0 get} if
-      dup (^localhost$) regexs {4 ~pop repeat} {
-        ssh dup ~isdead PROCESSES indict {
-          null node 7 put (display) /NOSYSTEM makeerror
-        } if
-        node 7 put
-      } ifelse
-    } bind
-  ] makestruct def
-
-  /getdnodedisplay
-    Xwindows not ~null {~[~display ssh_display indict]} ifelse
-  bind def
-
   Xwindows {
+    | hostname port# group | --
     /_cx {
       dvtsup begin {
-        false 0 1 nodelist length 1 sub { /knode name
+        false 0 1 nodelist length 1 sub {/knode name
           nodelist knode get /node name
-          node 0 get class /nullclass eq { pop true exit } if
-        } for not { (Too many nodes!\n) toconsole stop } if
+          node 0 get class /nullclass eq {pop true exit} if
+        } for not {(Too many nodes!\n) toconsole stop} if
         node 4 put
         2 copy connect node 2 put node 1 put node 0 put
         true node 3 put printnode
@@ -525,7 +532,7 @@ c_         list all connections
   } if
 
 |---------------------------------------------------- connect to node
-| [/color...] hostname port# group# sshname | -- 
+| [/color...] hostname port# group# | -- 
 |
 | connects to the node and makes itself the current dvt of the node;
 | the node is assigned a group number (enter as NEGATIVE integer)
@@ -572,7 +579,7 @@ c_         list all connections
   } if
   
 |---------------------------------------------------- set up node
-| hostname port# group# sshname <l opds dicts execs vm/M userdict > | -- 
+| hostname port# group# <l opds dicts execs vm/M userdict > | -- 
 |
 | connects to the node like '-c', primes its memory setup, reads
 | startup_dnode.d, and makes itself the dvt of the node;
@@ -621,10 +628,6 @@ c_         list all connections
       restore
     } stopped pop end
   } bind userdict 3 -1 roll put
-
-  Xwindows {
-    /getdisplayhost null def
-  } if
 
   /_csu1x {
     /knode name {
@@ -793,8 +796,10 @@ c_         list all connections
 |---------------------------------------------------- connection convenience
 |
   Xwindows {
-    /dnode_memory_ <x 0 0 0 0 0> def
-    
+    /getdvtdisplay Xdisplayname def
+    /getdisplayhost ~getdvtdisplay def
+
+    /dnode_memory_ <x 0 0 0 0 0> def    
     /dnode_setup 11 dict dup begin
     /display ~getdvtdisplay def
     /host (localhost) def
@@ -810,35 +815,38 @@ c_         list all connections
     end userdict 3 -1 roll put
 
     /dnode_resize {
-      /getdisplayhost dup find exch dnode_setup /display get def
-      dnode_setup begin
-      color dup null eq {pop ~_csu} {
-        dup class /listclass ne {[exch]} if
-        ~_ccsu
-      } ifelse
-      host port group dnode_memory_
-      opds  1 index 0 put
-      dicts 1 index 1 put
-      execs 1 index 2 put
-      mb    1 index 3 put
-      user  1 index 4 put
-      end 5 -1 roll exec
-      /getdisplayhost name
+      /_getdisplayhost getdisplayhost def
+      /getdisplayhost dnode_setup /display get def
+      {
+        color dup null eq {pop ~_csu} {
+          dup class /listclass ne {[exch]} if
+          ~_ccsu
+        } ifelse
+        host port group dnode_memory_
+        opds  1 index 0 put
+        dicts 1 index 1 put
+        execs 1 index 2 put
+        mb    1 index 3 put
+        user  1 index 4 put
+      } dnode_setup indict 
+      5 -1 roll exec
+      /getdisplayhost _getdisplayhost def
     } bind def
 
-  | ~_c ~_cc | --
+    | ~_c ~_cc | --
     /dnode_up {
-      /getdisplayhost dup find dnode_setup /display get def
-      dnode_setup begin
-      color dup null eq {pop pop} {
-        3 -1 roll pop
-        dup class /listclass ne {[exch]} if
-        exch
-      } ifelse
-      host port group ssh
-      end
+      /_getdisplayhost getdisplayhost def
+      /getdisplayhost dnode_setup /display get def
+      {
+        color dup null eq {pop pop} {
+          3 -1 roll pop
+          dup class /listclass ne {[exch]} if
+          exch
+        } ifelse
+        host port group
+      } dnode_setup indict
       4 -1 roll exec
-      /getdisplayhost name
+      /getdisplayhost getdisplayhost def
     } bind def
 
     /dnode_display {dnode_setup /display put} bind userdict 3 -1 roll put
