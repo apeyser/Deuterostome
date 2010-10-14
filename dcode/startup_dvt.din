@@ -475,7 +475,7 @@ c_         list all connections
         
         getdisplayhost localhost regexs {
           3 ~pop repeat
-          ssh_proc dup a_ ~isdead PROCESSES indict not {node 7 put} {
+          ssh_proc dup ~isdead PROCESSES indict not {node 7 put} {
             pop pop null node 7 put
             (display) /NOSYSTEM makeerror
           } ifelse
