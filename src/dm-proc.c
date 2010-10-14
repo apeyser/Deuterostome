@@ -764,24 +764,24 @@ P op_killpid(void) {
 // pid | signal-val/exit-val/* true-if-exited
 //       if nb true-if-child-stopped
 DM_INLINE_STATIC P dmwait(BOOLEAN nb) {
-  pid_t pid;
-  int status;
+  siginfo_t status = {0};
 
   if (FLOORopds > o_1) return OPDS_UNF;
   if (CEILopds < o3) return OPDS_OVF;
   if (TAG(o_1) != (NULLOBJ|PIDTYPE)) return OPD_ERR;
-
   
   DEBUG("waiting for %li", (long) PID_VAL(o_1));
-  while ((pid = waitpid((pid_t) PID_VAL(o_1), &status, 
-			nb ? (WNOHANG|WNOWAIT) : 0))
+  while (waitid(P_PID,
+		(id_t) PID_VAL(o_1),
+		&status, 
+		nb ? (WNOHANG|WNOWAIT|WEXITED) : WEXITED)
 	 == -1) {
     if (errno != EINTR) return -errno;
     checkabort();
   }
-  DEBUG("received %i from %li", status, (long) PID_VAL(o_1));
+  DEBUG("received %i from %li", (int) status.si_pid, (long) PID_VAL(o_1));
 
-  if (nb && ! pid) {
+  if (nb && ! status.si_pid) {
     TAG(o_1) = BOOL;
     ATTR(o_1) = 0;
     BOOL_VAL(o_1) = FALSE;
@@ -795,18 +795,15 @@ DM_INLINE_STATIC P dmwait(BOOLEAN nb) {
   TAG(o1) = BOOL;
   ATTR(o1) = 0;
 
-  if (WIFEXITED(status)) {
-    BYTE_VAL(o_1) = WEXITSTATUS(status);
-    BOOL_VAL(o1) = TRUE;
-  }
-  else {
-    if (WIFSIGNALED(status))
-      BYTE_VAL(o_1) = WTERMSIG(status);
-    else
-      BYTE_VAL(o_1) = BINF;
-
-    BOOL_VAL(o1) = FALSE;
-  }
+  BYTE_VAL(o_1) = status.si_status;
+  switch (status.si_code) {
+    case CLD_EXITED: BOOL_VAL(o1) = TRUE;
+      break;
+    case CLD_DUMPED: BYTE_VAL(o_1) = BINF;
+      // intentional fall-through
+    case CLD_KILLED: BOOL_VAL(o1) = FALSE;
+      break;
+  };
 
   if (nb) {
     TAG(o2) = BOOL;
