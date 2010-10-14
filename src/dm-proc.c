@@ -1082,6 +1082,31 @@ DM_INLINE_STATIC P read_char(P fd, B* c) {
   return nb ? OK : DONE;
 }
 
+DM_INLINE_STATIC P read_char_nb(P fd, B* c) {
+  int flags;
+  P retc;
+
+  if ((flags = fcntl(fd, F_GETFL)) == -1
+      || fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1)
+    return -errno;
+
+  switch (retc = read_char(fd, c)) {
+#if EAGAIN != EWOULDBLOCK    
+    case -EAGAIN: 
+#endif
+    case -EWOULDBLOCK: retc = OK;   break;
+    case OK:           retc = MORE; break;
+    default:           break;
+  };
+
+  if (fcntl(fd, F_SETFL, flags) == -1)
+    return retc < 0 ? retc : -errno;
+
+  checkabort();
+  return retc;
+}
+
+
 // (buffer) fd char | (subbuffer) fd true / (subbuffer) false
 P op_readtomarkfd(void) {
   P retc;
@@ -1116,8 +1141,10 @@ P op_readtomarkfd(void) {
   
   end = VALUE_PTR(o_3) + ARRAY_SIZE(o_3);
   if (curr == end) return RNG_CHK;
+
   while (! ((retc = read_char(fd, curr))) && *curr != c && ++curr < end);
   if (curr == end) return RNG_CHK;
+
   switch (retc) {
     case OK:
       STREAM_CHAR(streambox) = c;
@@ -1130,12 +1157,13 @@ P op_readtomarkfd(void) {
   }
 
  open:
-  switch (retc = read_char(fd, &STREAM_CHAR(streambox))) {
+  switch (retc = read_char_nb(fd, &STREAM_CHAR(streambox))) {
     case OK:   break;
+    case MORE: STREAM_BUFFERED(streambox) = TRUE; break;
     case DONE: goto closed;
     default:   return retc;
-  }
-  STREAM_BUFFERED(streambox) = TRUE;
+  };
+
   ARRAY_SIZE(o_3) = curr - VALUE_PTR(o_3);
   ATTR(o_3) &= ~PARENT;
   TAG(o_1) = BOOL;
@@ -1207,12 +1235,13 @@ P op_readtomarkfd_nb(void) {
   }
 
  open:
-  switch (retc = read_char(fd, &STREAM_CHAR(streambox))) {
+  switch (retc = read_char_nb(fd, &STREAM_CHAR(streambox))) {
     case OK:   break;
+    case MORE: STREAM_BUFFERED(streambox) = TRUE; break;
     case DONE: goto closed;
     default:   return retc;
   }
-  STREAM_BUFFERED(streambox) = TRUE;
+
   nb = ARRAY_SIZE(FREEvm) = curr - (FREEvm + FRAMEBYTES);
   moveframe(o_2, o_1);
   moveframe(FREEvm, o_2);
