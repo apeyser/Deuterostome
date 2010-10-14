@@ -373,17 +373,12 @@ end def
       /Xsync /mapcolor /drawline
       /drawsymbols /fillrectangle /drawtext
       /makewindowtop 
-      /Xauth /Xauthrev /Xauthgen /Xauthset
     ] def
     /errors 8 dict dup begin |[
       /NO_XWINDOWS(** X windows unavailable) def
       /X_ERR (** Error in X windows) def
       /X_BADFONT (** Bad X windows font) def
-      /X_BADHOST (** Cannot connect to X server) def
-      /X_SEC_MISS (** X Security Extension missing) def
-      /X_SEC_GEN (** X Security Extension unable to generate) def
-      /X_SEC_REV (** X Security Extension unable to revoke) def
-      /X_SEC_LIB (** X Security library missing) def |]
+      /X_BADHOST (** Cannot connect to X server) def |]
     end def |]
   end def |]
 end def

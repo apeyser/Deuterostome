@@ -1,4 +1,4 @@
-AC_INIT([D-Machine], [4.5.40], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
+AC_INIT([D-Machine], [4.6.1], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
 AC_CONFIG_MACRO_DIR([m4 libltdl/m4])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_AUX_DIR([libltdl/config])
@@ -206,18 +206,14 @@ AC_PROG_LN_S
 
 CF_SET_TOP_DIR
 
-AC_LIBTOOL_WIN32_DLL
-AC_LIBTOOL_DLOPEN
-AC_LIBLTDL_CONVENIENCE
-AC_PROG_LIBTOOL
-AC_SUBST(LIBTOOL_DEP)
-LT_CONFIG_LTDL_DIR([libltdl])
+CF_LIBTOOL
 
 AC_CHECK_LIBM
 CF_X11_ENABLE
 CF_PREPEND_VARS([LIBS], [XLIB LIBM])
 AC_C_BIGENDIAN
 dnl check pid_t for plugins/process.c
+
 CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([pid_t], [4])])
 CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([int], [4])])
 
@@ -253,7 +249,6 @@ CF_AC_CHECK_HEADER([sys/resource.h])
 CF_X11_ENABLED([
   CF_AC_CHECK_HEADER([X11/Xlib.h])
   CF_AC_CHECK_HEADER([X11/Xutil.h])
-  CF_AC_CHECK_XSEC()
 ])
 CF_AC_CHECK_HEADER([strings.h])
 CF_AC_CHECK_HEADER([inttypes.h])
@@ -315,10 +310,6 @@ CF_DEFINE_IF_CODE_GCC([NORETURN], [
   #include <stdlib.h>
   __attribute__ ((__noreturn__)) void x(void) {exit(0);}
 ])
-
-AC_SUBST([INCLTDL])
-AC_SUBST([LIBLTDL])
-AC_CONFIG_SUBDIRS([libltdl])
 
 CF_WIN_DLL_IMPORT([DM])
 CF_WIN_DLL_IMPORT([PLUGIN])

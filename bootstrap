@@ -31,9 +31,10 @@ libtool=false
 gnulibtool=false
 for i ; do
     case "$i" in
-	--libtool)    libtool=: ;;
+	--libtool)    libtool=:    ;;
 	--gnulibtool) gnulibtool=: ;;
-	--help)       usage ;;
+	--help)       usage        ;;
+	*=*)          eval "$i"    ;;
 	*) break ;;
     esac
     shift

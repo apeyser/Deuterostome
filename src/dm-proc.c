@@ -764,24 +764,24 @@ P op_killpid(void) {
 // pid | signal-val/exit-val/* true-if-exited
 //       if nb true-if-child-stopped
 DM_INLINE_STATIC P dmwait(BOOLEAN nb) {
-  pid_t pid;
-  int status;
+  siginfo_t status = {0};
 
   if (FLOORopds > o_1) return OPDS_UNF;
   if (CEILopds < o3) return OPDS_OVF;
   if (TAG(o_1) != (NULLOBJ|PIDTYPE)) return OPD_ERR;
-
   
   DEBUG("waiting for %li", (long) PID_VAL(o_1));
-  while ((pid = waitpid((pid_t) PID_VAL(o_1), &status, 
-			nb ? (WNOHANG|WNOWAIT) : 0))
+  while (waitid(P_PID,
+		(id_t) PID_VAL(o_1),
+		&status, 
+		nb ? (WNOHANG|WNOWAIT|WEXITED) : WEXITED)
 	 == -1) {
     if (errno != EINTR) return -errno;
     checkabort();
   }
-  DEBUG("received %i from %li", status, (long) PID_VAL(o_1));
+  DEBUG("received %i from %li", (int) status.si_pid, (long) PID_VAL(o_1));
 
-  if (nb && ! pid) {
+  if (nb && ! status.si_pid) {
     TAG(o_1) = BOOL;
     ATTR(o_1) = 0;
     BOOL_VAL(o_1) = FALSE;
@@ -795,18 +795,15 @@ DM_INLINE_STATIC P dmwait(BOOLEAN nb) {
   TAG(o1) = BOOL;
   ATTR(o1) = 0;
 
-  if (WIFEXITED(status)) {
-    BYTE_VAL(o_1) = WEXITSTATUS(status);
-    BOOL_VAL(o1) = TRUE;
-  }
-  else {
-    if (WIFSIGNALED(status))
-      BYTE_VAL(o_1) = WTERMSIG(status);
-    else
-      BYTE_VAL(o_1) = BINF;
-
-    BOOL_VAL(o1) = FALSE;
-  }
+  BYTE_VAL(o_1) = status.si_status;
+  switch (status.si_code) {
+    case CLD_EXITED: BOOL_VAL(o1) = TRUE;
+      break;
+    case CLD_DUMPED: BYTE_VAL(o_1) = BINF;
+      // intentional fall-through
+    case CLD_KILLED: BOOL_VAL(o1) = FALSE;
+      break;
+  };
 
   if (nb) {
     TAG(o2) = BOOL;
@@ -885,7 +882,7 @@ P op_openfd(void) {
   return OK;
 }
 
-// (buffer) fd | (sub-buffer) fd true / (sub-buffer) false
+// (buffer) fd | (buffer) fd true / (sub-buffer) false
 P op_readfd(void) {
   P retc;
   P fd;
@@ -1082,6 +1079,31 @@ DM_INLINE_STATIC P read_char(P fd, B* c) {
   return nb ? OK : DONE;
 }
 
+DM_INLINE_STATIC P read_char_nb(P fd, B* c) {
+  int flags;
+  P retc;
+
+  if ((flags = fcntl(fd, F_GETFL)) == -1
+      || fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1)
+    return -errno;
+
+  switch (retc = read_char(fd, c)) {
+#if EAGAIN != EWOULDBLOCK    
+    case -EAGAIN: 
+#endif
+    case -EWOULDBLOCK: retc = OK;   break;
+    case OK:           retc = MORE; break;
+    default:           break;
+  };
+
+  if (fcntl(fd, F_SETFL, flags) == -1)
+    return retc < 0 ? retc : -errno;
+
+  checkabort();
+  return retc;
+}
+
+
 // (buffer) fd char | (subbuffer) fd true / (subbuffer) false
 P op_readtomarkfd(void) {
   P retc;
@@ -1116,8 +1138,10 @@ P op_readtomarkfd(void) {
   
   end = VALUE_PTR(o_3) + ARRAY_SIZE(o_3);
   if (curr == end) return RNG_CHK;
+
   while (! ((retc = read_char(fd, curr))) && *curr != c && ++curr < end);
   if (curr == end) return RNG_CHK;
+
   switch (retc) {
     case OK:
       STREAM_CHAR(streambox) = c;
@@ -1130,12 +1154,13 @@ P op_readtomarkfd(void) {
   }
 
  open:
-  switch (retc = read_char(fd, &STREAM_CHAR(streambox))) {
+  switch (retc = read_char_nb(fd, &STREAM_CHAR(streambox))) {
     case OK:   break;
+    case MORE: STREAM_BUFFERED(streambox) = TRUE; break;
     case DONE: goto closed;
     default:   return retc;
-  }
-  STREAM_BUFFERED(streambox) = TRUE;
+  };
+
   ARRAY_SIZE(o_3) = curr - VALUE_PTR(o_3);
   ATTR(o_3) &= ~PARENT;
   TAG(o_1) = BOOL;
@@ -1207,12 +1232,13 @@ P op_readtomarkfd_nb(void) {
   }
 
  open:
-  switch (retc = read_char(fd, &STREAM_CHAR(streambox))) {
+  switch (retc = read_char_nb(fd, &STREAM_CHAR(streambox))) {
     case OK:   break;
+    case MORE: STREAM_BUFFERED(streambox) = TRUE; break;
     case DONE: goto closed;
     default:   return retc;
   }
-  STREAM_BUFFERED(streambox) = TRUE;
+
   nb = ARRAY_SIZE(FREEvm) = curr - (FREEvm + FRAMEBYTES);
   moveframe(o_2, o_1);
   moveframe(FREEvm, o_2);

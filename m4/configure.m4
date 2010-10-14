@@ -104,15 +104,37 @@ AC_DEFUN([CF_IF_UNDEF], [dnl
   fi dnl
 ])dnl
 dnl
+AC_DEFUN([CF_LIBTOOL], [dnl
+  AC_REQUIRE([CF_LIBTOOL_INT])dnl
+  AC_REQUIRE([CF_LTDL_INT])dnl
+])dnl
+dnl
+AC_DEFUN([CF_LIBTOOL_INT], [dnl
+  LT_INIT
+  AC_SUBST(LIBTOOL_DEPS)
+  AC_LIBTOOL_WIN32_DLL
+  AC_LIBTOOL_DLOPEN
+  AC_LIBLTDL_CONVENIENCE
+])dnl
+dnl
+AC_DEFUN([CF_LTDL_INT], [dnl
+  LT_CONFIG_LTDL_DIR([libltdl])dnl
+  LTDL_INIT dnl
+  AC_SUBST([INCLTDL])dnl
+  AC_SUBST([LIBLTDL])dnl
+])dnl
+dnl
 AC_DEFUN([CF_GCC_COMPILER_OPTION], [dnl
   AC_REQUIRE([AC_PROG_CC])dnl
-  AC_REQUIRE([AC_PROG_LIBTOOL])dnl
+  CF_LIBTOOL dnl
   CF_GCC_COMPILER_OPTION_INT([$1], [GCC], [C], ifelse([$2],[],[GCC_CFLAGS],[$2]))dnl
 ])dnl
 dnl
 AC_DEFUN([CF_GXX_COMPILER_OPTION], [dnl
-  AC_REQUIRE([AC_PROG_CXX])dnl
-  AC_REQUIRE([AC_PROG_LIBTOOL])dnl
+  LT_LANG([C++]) dnl
+  AC_REQUIRE([AC_PROG_CXX]) dnl
+  dnl AC_REQUIRE([AC_PROG_CXX])dnl
+  CF_LIBTOOL dnl
   CF_GCC_COMPILER_OPTION_INT([$1], [GXX], [C++], ifelse([$2],[],[GCC_CXXFLAGS],[$2]))dnl
 ])dnl
 dnl
@@ -657,24 +679,6 @@ dnl appends 'text' + newline to file
 dnl The 'literal' series inserts without expansion
 dnl
 AC_DEFUN([CF_APPEND_LITERAL], [CF_INSERT_([>>], [$1], [$2], [\])])dnl
-dnl
-AC_DEFUN([CF_AC_CHECK_XSEC], [dnl
-  cf_check_sec=false
-  CF_AC_CHECK_HEADER_WITH([X11/extensions/security.h], 
-    [X11/Xlib.h X11/Xutil.h], [
-    AC_DEFINE([HAVE_X11_EXTENSIONS_SECURITY_H], 
-              [1], 
-	      [Define to 1 if you have <X11/extensions/security.h])
-    cf_check_sec=:
-  ])
-  if $cf_check_sec ; then
-    AC_CHECK_LIB([Xext], [XSecurityGenerateAuthorization], [
-      X_LDFLAGS="$X_LDFLAGS -lXext"
-    ], [
-      AC_MSG_ERROR([Checking for Xext library for XSecurity... not found])
-    ])
-  fi dnl
-])dnl
 dnl
 AC_DEFUN([CF_C_INLINE], [dnl
   AC_C_INLINE

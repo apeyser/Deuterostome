@@ -39,7 +39,7 @@ host_triplet = @host@
 target_triplet = @target@
 bin_PROGRAMS = dvt$(EXEEXT) dnode$(EXEEXT) dgen$(EXEEXT) \
 	$(am__EXEEXT_1) $(am__EXEEXT_2) dmprop$(EXEEXT) \
-	$(am__EXEEXT_3)
+	dvtgetdisplay$(EXEEXT) $(am__EXEEXT_3)
 noinst_PROGRAMS = testwordorder$(EXEEXT) $(am__EXEEXT_4)
 @ENABLE_PLUGINS_SUPPORT_TRUE@am__append_1 = @INCLTDL@
 DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(dist_pkgdata_SCRIPTS) \
@@ -73,7 +73,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/latex/ac_prog_pdflatex.m4 \
 	$(top_srcdir)/m4/latex/ac_prog_latex.m4 \
 	$(top_srcdir)/m4/00gnulib.m4 $(top_srcdir)/m4/acx_pthread.m4 \
-	$(top_srcdir)/m4/alloca.m4 \
+	$(top_srcdir)/m4/alloca.m4 $(top_srcdir)/m4/argz.m4 \
 	$(top_srcdir)/m4/ax_cflags_strict_prototypes.m4 \
 	$(top_srcdir)/m4/ax_prefix_config_h.m4 \
 	$(top_srcdir)/m4/ax_set_version_info.m4 \
@@ -246,6 +246,9 @@ am__dvt_x_set_input_focus_SOURCES_DIST = x-set-input-focus.c
 dvt_x_set_input_focus_OBJECTS = $(am_dvt_x_set_input_focus_OBJECTS)
 @ENABLE_X11_TRUE@dvt_x_set_input_focus_DEPENDENCIES =  \
 @ENABLE_X11_TRUE@	$(am__DEPENDENCIES_1)
+dvtgetdisplay_SOURCES = dvtgetdisplay.c
+dvtgetdisplay_OBJECTS = dvtgetdisplay.$(OBJEXT)
+dvtgetdisplay_LDADD = $(LDADD)
 am_testwordorder_OBJECTS = test-word-order.$(OBJEXT)
 testwordorder_OBJECTS = $(am_testwordorder_OBJECTS)
 testwordorder_LDADD = $(LDADD)
@@ -271,13 +274,14 @@ SOURCES = $(libdmbootstrap_la_SOURCES) \
 	$(nodist_dnode_SOURCES) $(nodist_dnode_daemon_SOURCES) \
 	$(nodist_dnode_nice_SOURCES) $(dpawn_SOURCES) \
 	$(nodist_drook_SOURCES) $(dvt_SOURCES) $(nodist_dvt_SOURCES) \
-	$(dvt_x_set_input_focus_SOURCES) $(testwordorder_SOURCES)
+	$(dvt_x_set_input_focus_SOURCES) dvtgetdisplay.c \
+	$(testwordorder_SOURCES)
 DIST_SOURCES = $(libdmbootstrap_la_SOURCES) \
 	$(am__libdmglobals_la_SOURCES_DIST) \
 	$(am__libdmnodal_la_SOURCES_DIST) $(dgen_SOURCES) \
 	$(dmprop_SOURCES) $(am__dnode_SOURCES_DIST) $(dpawn_SOURCES) \
 	$(dvt_SOURCES) $(am__dvt_x_set_input_focus_SOURCES_DIST) \
-	$(testwordorder_SOURCES)
+	dvtgetdisplay.c $(testwordorder_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -309,6 +313,7 @@ ALLOCA_H = @ALLOCA_H@
 AMTAR = @AMTAR@
 APPLE_UNIVERSAL_BUILD = @APPLE_UNIVERSAL_BUILD@
 AR = @AR@
+ARGZ_H = @ARGZ_H@
 AS = @AS@
 ATLAS_FLAGS = @ATLAS_FLAGS@
 ATLAS_LIBS = @ATLAS_LIBS@
@@ -630,6 +635,10 @@ LDFLAGS = @LDFLAGS@
 LEX = @LEX@
 LEXLIB = @LEXLIB@
 LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
+LIBADD_DL = @LIBADD_DL@
+LIBADD_DLD_LINK = @LIBADD_DLD_LINK@
+LIBADD_DLOPEN = @LIBADD_DLOPEN@
+LIBADD_SHL_LOAD = @LIBADD_SHL_LOAD@
 LIBDM_DLL_IMPORT = @LIBDM_DLL_IMPORT@
 LIBLTDL = @LIBLTDL@
 LIBM = @LIBM@
@@ -637,7 +646,7 @@ LIBOBJS = @LIBOBJS@
 LIBPLUGIN_DLL_IMPORT = @LIBPLUGIN_DLL_IMPORT@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
-LIBTOOL_DEP = @LIBTOOL_DEP@
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LOCALCHARSET_TESTS_ENVIRONMENT = @LOCALCHARSET_TESTS_ENVIRONMENT@
@@ -647,7 +656,11 @@ LOCALE_ZH_CN = @LOCALE_ZH_CN@
 LTALLOCA = @LTALLOCA@
 LTDLDEPS = @LTDLDEPS@
 LTDLINCL = @LTDLINCL@
+LTDLOPEN = @LTDLOPEN@
 LTLIBOBJS = @LTLIBOBJS@
+LT_CONFIG_H = @LT_CONFIG_H@
+LT_DLLOADERS = @LT_DLLOADERS@
+LT_DLPREOPEN = @LT_DLPREOPEN@
 M4DATADIR = @M4DATADIR@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
@@ -697,6 +710,7 @@ PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
+PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PCCFLAGS = @PCCFLAGS@
@@ -864,7 +878,8 @@ libexecdir = @libexecdir@
 lispdir = @lispdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
-lt_ECHO = @lt_ECHO@
+ltdl_LIBOBJS = @ltdl_LIBOBJS@
+ltdl_LTLIBOBJS = @ltdl_LTLIBOBJS@
 m4datadir = @m4datadir@
 makeindex = @makeindex@
 mandir = @mandir@
@@ -884,6 +899,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 subdirs = @subdirs@
+sys_symbol_underscore = @sys_symbol_underscore@
 sysconfdir = @sysconfdir@
 target = @target@
 target_alias = @target_alias@
@@ -1184,6 +1200,9 @@ dvt$(EXEEXT): $(dvt_OBJECTS) $(dvt_DEPENDENCIES)
 dvt-x-set-input-focus$(EXEEXT): $(dvt_x_set_input_focus_OBJECTS) $(dvt_x_set_input_focus_DEPENDENCIES) 
 	@rm -f dvt-x-set-input-focus$(EXEEXT)
 	$(LINK) $(dvt_x_set_input_focus_OBJECTS) $(dvt_x_set_input_focus_LDADD) $(LIBS)
+dvtgetdisplay$(EXEEXT): $(dvtgetdisplay_OBJECTS) $(dvtgetdisplay_DEPENDENCIES) 
+	@rm -f dvtgetdisplay$(EXEEXT)
+	$(LINK) $(dvtgetdisplay_OBJECTS) $(dvtgetdisplay_LDADD) $(LIBS)
 testwordorder$(EXEEXT): $(testwordorder_OBJECTS) $(testwordorder_DEPENDENCIES) 
 	@rm -f testwordorder$(EXEEXT)
 	$(LINK) $(testwordorder_OBJECTS) $(testwordorder_LDADD) $(LIBS)
@@ -1242,6 +1261,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvt-dm-prop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvt-dm3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvt-dvt.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvtgetdisplay.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm-conv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm-signals.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdmbootstrap_la-dm-types.Plo@am__quote@

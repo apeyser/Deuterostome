@@ -430,6 +430,22 @@
 
   /jobconsoles {~jobconsoles pidsockets ~indict lock} bind def
   
+  |============================ isdead ==============================
+  | pid | bool true / -- false
+  |
+  | Checks for process end.
+  | Returns true if process is dead,
+  |   on top of true iff process returns status 0
+  | Otherwise, just false
+  |
+  /isdead {
+    dup checkpid {
+      {0 eq} {pop false} ifelse
+      exch ~pidwaited pidsockets ~indict lock
+      true
+    } {pop false} ifelse
+  } bind def
+
   |============================ wait ==============================
   | pid | bool
   |
@@ -517,7 +533,6 @@
   | Used only in child process.
   /_spawnsh {
     {
-|      countdictstack 2 sub ~end repeat PROCESSES begin
       console dup null eq ~pop {
         ~[
           ~[
@@ -591,7 +606,7 @@
     (sh) wait_
   } bind def
 
-  |======================= sh ===================================
+  |======================= sh_quiet ===================================
   | \[ (exec) ... | --
   | 
   | Execute (exec) with following operands as child process in

@@ -169,15 +169,6 @@ xhack(XChangeProperty,
       H(Window w, Atom p, Atom t, int f, int m, unsigned char* d, int n),
       H(w, p, t, f, m, d, n));
 
-#if HAVE_X11_EXTENSIONS_SECURITY_H
-xhacks(XSecurityQueryExtension, H(int* m1, int* m2), H(m1, m2));
-xhackr(XSecurityGenerateAuthorization, Xauth*, NULL,
-       H(Xauth* ai, unsigned long m, XSecurityAuthorizationAttributes* a,
-	 XSecurityAuthorization* id),
-       H(ai, m, a, id));
-xhacks(XSecurityRevokeAuthorization, H(XSecurityAuthorization i), H(i));
-#endif //HAVE_X11_EXTENSIONS_SECURITY_H
-
 #undef xhackd
 #undef xhacks
 #undef xhackv

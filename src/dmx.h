@@ -47,11 +47,6 @@ P op_fillrectangle(void);
 P op_drawtext(void);
 P op_makewindowtop(void);
 
-P op_Xauthrev(void);
-P op_Xauthset(void);
-P op_Xauthgen(void);
-P op_Xauth(void);
-
 #endif
 
 
