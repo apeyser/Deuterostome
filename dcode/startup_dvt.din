@@ -445,20 +445,23 @@ c_         list all connections
     /ssh_display [
       /result 1024 /b array def
       /flags []
+      /dvtgetdisplay (@dvtgetdisplay@) def
+      /ssh (ssh) def
+      /localhost (^\(localhost\)?:) def
 
       | -- | [ (ssh) flags node | ]
       /command {
-        openlist (ssh) flags {} forall node 0 get (dvtgetdisplay)
+        openlist ssh flags {} forall node 0 get dvtgetdisplay
       } bind
       
       | -- | (display) pid
-      /ssh {
+      /ssh_proc {
         pipefd command {
           NULLR counttomark 2 add -1 roll STDERR sh_bg
         } PROCESSES indict | readfd pid
 
         result {
-          4 -1 roll readline {~close PROCESSES indict} if
+          4 -1 roll {readline ~close if} PROCESSES indict
         } tostring | pid sub-result
         exch
       } bind
@@ -469,9 +472,9 @@ c_         list all connections
           dup /QUIT {kill wait pop} PROCESSES indict
         } ifelse
         
-        getdisplayhost (^\(localhost\)?:) regexs {
+        getdisplayhost localhost regexs {
           3 ~pop repeat
-          ssh dup ~isdead PROCESSES indict not {node 7 put} {
+          ssh_proc dup ~isdead PROCESSES indict not {node 7 put} {
             pop pop null node 7 put
             (display) /NOSYSTEM makeerror
           } ifelse
