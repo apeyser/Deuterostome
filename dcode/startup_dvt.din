@@ -443,11 +443,11 @@ c_         list all connections
   | ------ handle ssh connections for display -----------
   Xwindows {
     /ssh_display [
-      /result 1024 /b array def
+      /result 1024 /b array
       /flags []
-      /dvtgetdisplay (@dvtgetdisplay@) def
-      /ssh (ssh) def
-      /localhost (^\(localhost\)?:) def
+      /dvtgetdisplay (@dvtgetdisplay@)
+      /ssh (ssh)
+      /localhost (^\(localhost\)?:)
 
       | -- | [ (ssh) flags node | ]
       /command {
@@ -457,11 +457,12 @@ c_         list all connections
       | -- | (display) pid
       /ssh_proc {
         pipefd command {
-          NULLR counttomark 2 add -1 roll STDERR sh_bg
-        } PROCESSES indict | readfd pid
+          NULLR counttomark 1 add index STDERR sh_bg  | readfd writefd pid
+          3 1 roll closefd                            | pid readfd
+        } PROCESSES indict
 
         result {
-          4 -1 roll {readline ~close if} PROCESSES indict
+          3 -1 roll {readline ~close if} PROCESSES indict
         } tostring | pid sub-result
         exch
       } bind
@@ -474,11 +475,12 @@ c_         list all connections
         
         getdisplayhost localhost regexs {
           3 ~pop repeat
-          ssh_proc dup ~isdead PROCESSES indict not {node 7 put} {
+          ssh_proc dup a_ ~isdead PROCESSES indict not {node 7 put} {
             pop pop null node 7 put
             (display) /NOSYSTEM makeerror
           } ifelse
         } if
+        dup userdict /lastdvtdisplay put
       } bind
     ] makestruct def
 
