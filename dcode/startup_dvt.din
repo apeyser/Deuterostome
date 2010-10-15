@@ -447,7 +447,8 @@ c_         list all connections
       /flags []
       /dvtgetdisplay (@dvtgetdisplay@)
       /ssh (ssh)
-      /localhost (^\(localhost\)?:)
+      /localhostdisplay (^\(localhost|127.0.0.1\)?:)
+      /localhost (^\(localhost|127.0.0.1\)$)
 
       | -- | [ (ssh) flags node | ]
       /command {
@@ -473,13 +474,17 @@ c_         list all connections
           dup /QUIT {kill wait pop} PROCESSES indict
         } ifelse
         
-        getdisplayhost localhost regexs {
+        getdisplayhost
+        node 0 get localhost regexs not ~pop {
           3 ~pop repeat
-          ssh_proc dup ~isdead PROCESSES indict not {node 7 put} {
-            pop pop null node 7 put
-            (display) /NOSYSTEM makeerror
-          } ifelse
-        } if
+          localhostdisplay regexs {
+            3 ~pop repeat
+            ssh_proc dup ~isdead PROCESSES indict not {node 7 put} {
+              pop pop null node 7 put
+              (display) /NOSYSTEM makeerror
+            } ifelse
+          } if
+        } ifelse
         dup userdict /lastdvtdisplay put
       } bind
     ] makestruct def
