@@ -184,8 +184,8 @@ DM_INLINE_STATIC P int_regexs(BOOLEAN case_sensitive)
 
 /*------------------------------ op_regex
  * (string) (pattern) |
- * if found: post match pre [submatches] true
- * else: (string) false
+ * if found: (post) (match) (pre) [(submatch)...] true
+ * else:                                 (string) false
  */
 
 P op_regex(void) 
@@ -195,8 +195,8 @@ P op_regex(void)
 
 /*------------------------------ op_regexi
  * (string) (pattern) |
- * if found: post match pre [submatches] true
- * else: (string) false
+ * if found: (post) (match) (pre) [(submatch)...] true
+ * else:                                 (string) false
  * Done case-insensitively
  */
 
@@ -207,8 +207,8 @@ P op_regexi(void)
 
 /*------------------------------ op_regexs
  * (string) (pattern) |
- * if found: post match pre true
- * else: (string) false
+ * if found: (post) (match) (pre) true
+ * else:                 (string) false
  */
 
 P op_regexs(void) 
@@ -218,8 +218,8 @@ P op_regexs(void)
 
 /*------------------------------ op_regexsi
  * (string) (pattern) |
- * if found: post match pre true
- * else: (string) false
+ * if found: (post) (match) (pre) true
+ * else:                 (string) false
  * Done case-insensitively
  */
 
