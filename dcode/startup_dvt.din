@@ -475,8 +475,7 @@ c_         list all connections
         in_w 3 -1 roll | (display) fd pid
       } bind
 
-      | -- | (display)
-      /display {
+      /nodeclear {
         | clear out old ssh display connection
         node 7 get dup 0 get dup null eq {pop pop} { | [pid fd] pid
           1 index dup 1 get dup null eq {pop pop} {  | [pid fd] pid [pid fd] fd
@@ -491,15 +490,19 @@ c_         list all connections
           } PROCESSES indict       | [pid fd]
           null exch 0 put          | --
         } ifelse                   | --
+      } bind
 
+      | -- | (display)
+      /display {
+        nodeclear
         | and setup the new if necessary
         getdisplayhost
         node 0 get localhost regexs {3 ~pop repeat} {pop 
           localhostdisplay regexs {
             3 ~pop repeat
             ssh_proc dup ~isdead PROCESSES indict not {
-              node 7 get 1 put
               node 7 get 0 put
+              node 7 get 1 put
             } {
               pop pop pop
               (display) /NOSYSTEM makeerror
@@ -736,10 +739,7 @@ c_         list all connections
   } bind userdict 3 -1 roll put
 
   /_csu3 {
-    exch restore {
-      dup setready
-      color_node_def
-    } stopped pop end
+    exch restore {dup color_node_def _cx_ready} stopped pop end
   } bind userdict 3 -1 roll put
 
 |---------------------------------------------------- set up node
@@ -1039,10 +1039,7 @@ c_         list all connections
     0     node 4 put
     {}    node 5 put
     null  node 6 put
-    node 7 get dup null eq {
-      {dup isdead not {dup /QUIT kill wait} if} PROCESSES indict
-    } if pop
-    null  node 7 put
+    ~nodeclear ssh_display indict
 
     knode kbdowner eq {0 _t} if
   } bind def
