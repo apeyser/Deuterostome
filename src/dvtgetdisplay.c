@@ -1,9 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <errno.h>
 
 int main(int argc, char* argv[]) {
   const char* display = getenv("DISPLAY");
+  char q;
+
   if (! display) {
     fprintf(stderr, "Display not defined!\n");
     fprintf(stdout, "\n");
@@ -21,6 +24,10 @@ int main(int argc, char* argv[]) {
     return 3;
   }
 
-  pause();
-  return 0;
+  if (fclose(stderr)) {
+    perror("dvtdisplay failure");
+    return 3;
+  }
+
+  return read(STDIN_FILENO,  &q, 1) != -1 ? 0 : errno == EINTR ? 0 : 5;
 }

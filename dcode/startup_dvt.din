@@ -292,7 +292,7 @@ startup_common_save capsave {
 | The node list stores information on the whereabouts, state, and grouping
 | of the nodes. Node list entries are lists themselves:
 | 
-| [(hostname) port# socket status group color_list color_name ssh-pid]
+| [(hostname) port# socket status group color_list color_name [ssh-pid ssh-fd]]
 |
 | The status is busy (true) or ready (false). Busy nodes are not given
 | dvt phrases unless this is forced by the '!' tag. The group is a negative
@@ -306,8 +306,8 @@ startup_common_save capsave {
 | machinery of the nodes window.
 
   /nodelist [
-    [(dvt) null null false 0 {} null null]
-    9 {[null null null false 0 {} null null]} repeat
+       [(dvt) null null false 0 {} null [null null]]
+    9 {[null  null null false 0 {} null [null null]]} repeat
   ] def
 
 |------------------------------- front-end ------------------------------
@@ -449,38 +449,59 @@ c_         list all connections
       /ssh (ssh)
       /localhostdisplay (^\(localhost|127.0.0.1\)?:)
       /localhost (^\(localhost|127.0.0.1\)$)
+      /in_w null
+      /in_r null
+      /out_r null
+      /out_w null
 
       | -- | [ (ssh) flags node | ]
       /command {
         openlist ssh flags {} forall node 0 get dvtgetdisplay
       } bind
       
-      | -- | (display) pid
+      | -- | (display) fd pid
       /ssh_proc {
-        pipefd command {
-          NULLR counttomark 1 add index STDERR sh_bg  | readfd writefd pid
-          3 1 roll closefd                            | pid readfd
-        } PROCESSES indict
+        pipefd /in_w  name /in_r  name
+        pipefd /out_w name /out_r name
+        command {
+          in_r out_w STDERR sh_bg
+          in_r close out_w close
+        } PROCESSES indict | pid
 
         result {
-          3 -1 roll {readline ~close if} PROCESSES indict
-        } tostring | pid sub-result
-        exch
+          out_r {readline ~close if} PROCESSES indict
+        } tostring | pid (display)
+
+        in_w 3 -1 roll | (display) fd pid
       } bind
 
       | -- | (display)
       /display {
-        node 7 get dup null eq ~pop {
-          dup /QUIT {kill wait pop} PROCESSES indict
-        } ifelse
-        
+        | clear out old ssh display connection
+        node 7 get dup 0 get dup null eq {pop pop} { | [pid fd] pid
+          1 index dup 1 get dup null eq {pop pop} {  | [pid fd] pid [pid fd] fd
+            ~close PROCESSES indict
+            null exch 1 put
+          } ifelse | [pid fd] pid
+          {
+            dup isdead {pop pop} { | [pid fd] pid
+              dup /QUIT kill       | [pid fd] pid
+              wait pop             | [pid fd]
+            } ifelse               | [pid fd]
+          } PROCESSES indict       | [pid fd]
+          null exch 0 put          | --
+        } ifelse                   | --
+
+        | and setup the new if necessary
         getdisplayhost
         node 0 get localhost regexs {3 ~pop repeat} {pop 
           localhostdisplay regexs {
             3 ~pop repeat
-            ssh_proc dup ~isdead PROCESSES indict not {node 7 put} {
-              pop pop 
-              null node 7 put
+            ssh_proc dup ~isdead PROCESSES indict not {
+              node 7 get 1 put
+              node 7 get 0 put
+            } {
+              pop pop pop
               (display) /NOSYSTEM makeerror
             } ifelse
           } if
@@ -535,10 +556,20 @@ c_         list all connections
         restore
       } stopped pop end
     } bind userdict 3 -1 roll put
+
+    | knode | --
+    /_cx_ready {
+      nodelist 1 index get 7 get dup 1 get dup null eq {pop pop} {
+        (X) writefd ~close PROCESSES indict
+        null exch 1 put
+      } ifelse
+      setready
+    } bind def
   
+    | save knode | -- <<end dvtsup>>
     /_cx1 {
-      {setready} stopped pop end restore
-    } bind userdict 3 -1 roll put
+      exch restore ~_cx_ready stopped pop end
+    } bind def
   } if
 
 |---------------------------------------------------- connect to node
@@ -583,9 +614,10 @@ c_         list all connections
       } stopped pop end
     } bind userdict 3 -1 roll put
     
+    | save knode | -- <<end dvtsup>>
     /_ccx1 {
-      exch restore {dup color_node_def setready} stopped pop end
-    } bind userdict 3 -1 roll put
+      exch restore {dup color_node_def _cx_ready} stopped pop end
+    } bind def
   } if
   
 |---------------------------------------------------- set up node
