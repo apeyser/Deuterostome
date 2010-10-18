@@ -99,7 +99,7 @@ bin_PROGRAMS = dvt dnode dgen \
 	$(DNODEDAEMONBIN) $(MPI_PROGS) dmprop \
 	$(DVTXSETINPUTFOCUSBIN)
 noinst_PROGRAMS = testwordorder $(DNODENICEBIN)
-dmstart_PROGRAMS = getdisplay
+pkglib_PROGRAMS = getdisplay
 
 if ENABLE_PLUGINS_SUPPORT
 if ENABLE_CPPPLUGIN

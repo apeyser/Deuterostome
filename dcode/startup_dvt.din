@@ -450,7 +450,7 @@ c_         list all connections
     /ssh_display [
       /result 1024 /b array
       /flags []
-      /dnodestartup null
+      /dnodeplugin null
       /ssh (ssh)
       /localhostdisplay (^\(localhost|127.0.0.1\)?:)
       /localhost (^\(localhost|127.0.0.1\)$)
@@ -462,8 +462,8 @@ c_         list all connections
       | -- | [ (ssh) flags node | ]
       /command {
         openlist ssh flags {} forall node 0 get
-        dnodestartup length (/getdisplay) length add /b array {
-          dnodestartup fax (/getdisplay) fax
+        dnodeplugin length (/getdisplay) length add /b array {
+          dnodeplugin fax (/getdisplay) fax
         } tostring
       } bind
       
@@ -501,7 +501,7 @@ c_         list all connections
       } bind
 
       | (startupdir) (default-display) | (dnode-display)
-      /display {exch /dnodestartup name
+      /display {exch /dnodeplugin name
         nodeclear
         | and setup the new if necessary
         node 0 get localhost regexs {3 ~pop repeat} {pop 
@@ -528,7 +528,7 @@ c_         list all connections
             /displayhost name /knode name /dvtnext name
             getsocket ~[
               ~dup ~capsave
-              /dvtnext find getstartupdir displayhost knode {
+              /dvtnext find getplugindir displayhost knode {
                 {
                   /knode name
                   /node nodelist knode get def
