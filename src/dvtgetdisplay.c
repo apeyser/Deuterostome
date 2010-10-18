@@ -24,10 +24,10 @@ int main(int argc, char* argv[]) {
     return 3;
   }
 
-  if (fclose(stderr)) {
-    perror("dvtdisplay close stderr failure");
+  if (read(STDIN_FILENO,  &q, 1) == -1 && errno != EINTR) {
+    perror("dvtdisplay read failure");
     return 4;
   }
 
-  return read(STDIN_FILENO,  &q, 1) != -1 ? 0 : errno == EINTR ? 0 : 5;
+  return 0;
 }
