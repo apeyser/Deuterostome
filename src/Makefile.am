@@ -97,9 +97,9 @@ endif ENABLE_X11
 
 bin_PROGRAMS = dvt dnode dgen \
 	$(DNODEDAEMONBIN) $(MPI_PROGS) dmprop \
-	dvtgetdisplay \
 	$(DVTXSETINPUTFOCUSBIN)
 noinst_PROGRAMS = testwordorder $(DNODENICEBIN)
+dmstart_PROGRAMS = getdisplay
 
 if ENABLE_PLUGINS_SUPPORT
 if ENABLE_CPPPLUGIN

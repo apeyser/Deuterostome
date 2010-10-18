@@ -128,11 +128,8 @@ else !ENABLE_SEM
 SEM_EDIT = -e '$(SEM_START),$(SEM_ELSE) d' -e '$(SEM_END) d'
 endif !ENABLE_SEM
 
-dvtgetdisplay = $(bindir)/dvtgetdisplay
-
 edit = -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
        -e 's,[@]bindir[@],$(bindir),g' \
-       -e 's,[@]dvtgetdisplay[@],$(dvtgetdisplay),g' \
        -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
        -e 's,[@]ENABLE_BASH[@],$(ENABLE_BASH),g' \
        $(PLUGINS_DELETE) \

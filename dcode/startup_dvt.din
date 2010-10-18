@@ -450,7 +450,7 @@ c_         list all connections
     /ssh_display [
       /result 1024 /b array
       /flags []
-      /dvtgetdisplay (@dvtgetdisplay@)
+      /dnodestartup null
       /ssh (ssh)
       /localhostdisplay (^\(localhost|127.0.0.1\)?:)
       /localhost (^\(localhost|127.0.0.1\)$)
@@ -461,7 +461,10 @@ c_         list all connections
 
       | -- | [ (ssh) flags node | ]
       /command {
-        openlist ssh flags {} forall node 0 get dvtgetdisplay
+        openlist ssh flags {} forall node 0 get
+        dnodestartup length (/getdisplay) length /b array {
+          dnodestartup fax (/getdisplay) fax
+        } tostring
       } bind
       
       | -- | (display) fd pid
@@ -497,11 +500,10 @@ c_         list all connections
         } ifelse                   | --
       } bind
 
-      | -- | (display)
-      /display {
+      | (startupdir) (default-display) | (dnode-display)
+      /display {exch /dnodestartup name
         nodeclear
         | and setup the new if necessary
-        getdisplayhost
         node 0 get localhost regexs {3 ~pop repeat} {pop 
           localhostdisplay regexs {
             3 ~pop repeat
@@ -518,9 +520,31 @@ c_         list all connections
       } bind
     ] makestruct def
 
-    /getdnodedisplay {~display ssh_display indict} bind def
+    | ~next | --
+    /getdnodedisplay {
+      {
+        node 2 get ~[
+          3 -1 roll destruct_exec knode getdisplayhost {{
+            /displayhost name /knode name /dvtnext name
+            getsocket ~[
+              ~dup ~capsave
+              /dvtnext find getstartupdir displayhost knode {
+                {
+                  /knode name
+                  /node nodelist knode get def
+                  ~display ssh_display indict
+                  exch exec
+                } dvtsup indict
+                restore
+              } ~exec
+            ] send
+            restore
+          } userdict indict} ~lock
+        ] send
+      } insave
+    } bind def
   } {
-    /getdnodedisplay {null} def
+    /getdnodedisplay {null exch exec} def
   } ifelse
 
 |---------------------------------------------------- connect to node
@@ -533,7 +557,7 @@ c_         list all connections
   Xwindows {
     | hostname port# group | --
     /_cx {
-      dvtsup begin {
+      {
         false 0 1 nodelist last {/knode name
           nodelist knode get /node name
           node 0 get class /nullclass eq {pop true exit} if
@@ -542,8 +566,13 @@ c_         list all connections
         2 copy connect node 2 put node 1 put node 0 put
         true node 3 put printnode
         
-        getdnodedisplay | needs to be outside of save box
-        save
+        ~_cx1 getdnodedisplay
+      } dvtsup indict
+    } bind userdict 3 -1 roll put
+
+    | (display) | --
+    /_cx1 {
+      {
         node 2 get ~[4 -1 roll knode fontdict commonmousedict node 0 get {
           getsocket setconsole /dvtnodeid name
           /commonmousedict name /fontdict name /knode name /getdnodedisplay name
@@ -559,11 +588,10 @@ c_         list all connections
             getstartupdir (theeye.d) fbuf readfile mkact exec
           } stopped pop filesave restore
           
-          console ~[knode ~dvtsup ~begin ~_cx1] send
+          console ~[knode ~dvtsup ~begin ~_cx2] send
         } ~exec] send
-        restore
-      } stopped pop end
-    } bind userdict 3 -1 roll put
+      } insave
+    } bind def
 
     | knode | --
     /_cx_ready {
@@ -575,7 +603,7 @@ c_         list all connections
     } bind def
   
     | save knode | -- <<end dvtsup>>
-    /_cx1 {
+    /_cx2 {
       exch restore ~_cx_ready stopped pop end
     } bind def
   } if
@@ -1265,6 +1293,7 @@ c_         list all connections
         } for
       ] def
 
+      screensize /scrH name /scrW name
       [ [ scrW wW sub 10 sub scrH wH sub 10 sub wW wH ] | ]
       (TheHorses) (Horses) makewindow /wid name pop
       dvtsup userdict debug_dict /line get {
