@@ -462,7 +462,7 @@ c_         list all connections
       | -- | [ (ssh) flags node | ]
       /command {
         openlist ssh flags {} forall node 0 get
-        dnodestartup length (/getdisplay) length /b array {
+        dnodestartup length (/getdisplay) length add /b array {
           dnodestartup fax (/getdisplay) fax
         } tostring
       } bind
@@ -524,7 +524,7 @@ c_         list all connections
     /getdnodedisplay {
       {
         node 2 get ~[
-          3 -1 roll destruct_exec knode getdisplayhost {{
+          3 -1 roll destruct_exec knode getdisplayhost {
             /displayhost name /knode name /dvtnext name
             getsocket ~[
               ~dup ~capsave
@@ -539,7 +539,7 @@ c_         list all connections
               } ~exec
             ] send
             restore
-          } userdict indict} ~lock
+          } ~lock
         ] send
       } insave
     } bind def
@@ -678,9 +678,11 @@ c_         list all connections
       4 1 roll node 4 put
       2 copy connect node 2 put node 1 put node 0 put
       true node 3 put printnode
-      save
-      node 2 get ~[4 -1 roll ~exch ~pop ~getsocket ~setconsole ~vmresize] send
-      restore
+      {
+        node 2 get ~[
+          3 -1 roll {exch pop getsocket setconsole vmresize} ~lock
+        ] send
+      } insave
       null node 6 put
 
       ~_csu1 getdnodedisplay
