@@ -573,7 +573,7 @@ c_         list all connections
     | (display) | --
     /_cx1 {
       {
-        node 2 get ~[4 -1 roll knode fontdict commonmousedict node 0 get {
+        node 2 get ~[3 -1 roll knode fontdict commonmousedict node 0 get {
           getsocket setconsole /dvtnodeid name
           /commonmousedict name /fontdict name /knode name /getdnodedisplay name
           capsave
@@ -617,7 +617,7 @@ c_         list all connections
 
   Xwindows {
     /_ccx {
-      dvtsup begin {
+      {
         false 0 1 nodelist last { /knode name
           nodelist knode get /node name
           node 0 get class /nullclass eq { pop true exit } if
@@ -627,9 +627,13 @@ c_         list all connections
         node 6 put
         true node 3 put printnode
    
-        getdnodedisplay 
-        save
-        node 2 get ~[4 -1 roll knode fontdict commonmousedict node 0 get {
+        ~_ccx1 getdnodedisplay
+      } dvtsup indict
+    } bind userdict 3 -1 roll put
+
+    /_ccx1 {
+      {
+        node 2 get ~[3 -1 roll knode fontdict commonmousedict node 0 get {
           getsocket setconsole /dvtnodeid name
           /commonmousedict name /fontdict name /knode name /getdnodedisplay name
           capsave
@@ -644,14 +648,13 @@ c_         list all connections
             getstartupdir (theeye.d) fbuf readfile mkact exec
           } stopped pop filesave restore
 
-          console ~[knode ~dvtsup ~begin ~_ccx1] send
+          console ~[knode ~dvtsup ~begin ~_ccx2] send
         } ~exec]  send
-        restore
-      } stopped pop end
-    } bind userdict 3 -1 roll put
+      } insave
+    } bind def
     
     | save knode | -- <<end dvtsup>>
-    /_ccx1 {
+    /_ccx2 {
       exch restore {dup color_node_def _cx_ready} stopped pop end
     } bind def
   } if
@@ -667,7 +670,6 @@ c_         list all connections
 | but can be redefined in userdict
 
   /_csu {
-    dvtsup begin
     { 
       false 0 1 nodelist last {/knode name
         nodelist knode get /node name
@@ -681,9 +683,14 @@ c_         list all connections
       restore
       null node 6 put
 
-      getdnodedisplay
-      save
-      node 2 get ~[4 -1 roll Xwindows knode node 0 get {
+      ~_csu1 getdnodedisplay
+    } dvtsup indict
+  } bind userdict 3 -1 roll put
+
+  | (display) | --
+  /_csu1 {
+    {
+      node 2 get ~[3 -1 roll Xwindows knode node 0 get {
         getsocket setconsole
         6 -1 roll not {killsockets abort} if | bool from vmresize
         /dvtnodeid name /knode name 
@@ -703,9 +710,8 @@ c_         list all connections
           } {~dvtsup ~begin ~csu1nox} ifelse
         ] send
       } ~exec] send
-      restore
-    } stopped pop end
-  } bind userdict 3 -1 roll put
+    } insave
+  } bind def
 
   /_csu1x {
     /knode name {
