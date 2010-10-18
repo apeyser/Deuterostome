@@ -20,14 +20,14 @@ int main(int argc, char* argv[]) {
   }
 
   if (fclose(stdout)) {
-    perror("dvtdisplay failure");
+    perror("dvtdisplay close stdout failure");
     return 3;
   }
 
-  if (fclose(stderr)) {
-    perror("dvtdisplay failure");
-    return 3;
+  if (read(STDIN_FILENO,  &q, 1) == -1 && errno != EINTR) {
+    perror("dvtdisplay read failure");
+    return 4;
   }
 
-  return read(STDIN_FILENO,  &q, 1) != -1 ? 0 : errno == EINTR ? 0 : 5;
+  return 0;
 }

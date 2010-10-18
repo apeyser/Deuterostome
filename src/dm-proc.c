@@ -1089,11 +1089,10 @@ DM_INLINE_STATIC P read_char_nb(P fd, B* c) {
 
   switch (retc = read_char(fd, c)) {
 #if EAGAIN != EWOULDBLOCK    
-    case -EAGAIN: 
+    case -EAGAIN:
 #endif
-    case -EWOULDBLOCK: retc = OK;   break;
-    case OK:           retc = MORE; break;
-    default:           break;
+    case -EWOULDBLOCK:
+      retc = MORE; break;
   };
 
   if (fcntl(fd, F_SETFL, flags) == -1)
@@ -1155,8 +1154,8 @@ P op_readtomarkfd(void) {
 
  open:
   switch (retc = read_char_nb(fd, &STREAM_CHAR(streambox))) {
-    case OK:   break;
-    case MORE: STREAM_BUFFERED(streambox) = TRUE; break;
+    case OK:   STREAM_BUFFERED(streambox) = TRUE; break;
+    case MORE: break;
     case DONE: goto closed;
     default:   return retc;
   };
@@ -1233,8 +1232,8 @@ P op_readtomarkfd_nb(void) {
 
  open:
   switch (retc = read_char_nb(fd, &STREAM_CHAR(streambox))) {
-    case OK:   break;
-    case MORE: STREAM_BUFFERED(streambox) = TRUE; break;
+    case OK:   STREAM_BUFFERED(streambox) = TRUE; break;
+    case MORE: break;
     case DONE: goto closed;
     default:   return retc;
   }

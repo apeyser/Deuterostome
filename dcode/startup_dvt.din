@@ -272,7 +272,7 @@ startup_common_save capsave {
       /knode kbdowner def /node nodelist knode get def
       procfornodes
     } { 
-      1 1 nodelist length 1 sub { /knode name
+      1 1 nodelist last { /knode name
         nodelist knode get /node name
         node 4 get kbdowner eq ~procfornodes if
       } for
@@ -305,10 +305,15 @@ startup_common_save capsave {
 | interface of node administration is defined first, followed by the
 | machinery of the nodes window.
 
-  /nodelist [
-       [(dvt) null null false 0 {} null [null null]]
-    9 {[null  null null false 0 {} null [null null]]} repeat
-  ] def
+  /max_nodes 10 ~def userdict indict
+  /makeNodes {
+    /nodelist [
+        [(dvt) null null false 0 {} null [null null]]
+      max_nodes 1 sub {
+        [null  null null false 0 {} null [null null]]
+      } repeat
+    ] def
+  } bind def
 
 |------------------------------- front-end ------------------------------
 | Note that thes procedures are defined in userdict!
@@ -383,7 +388,7 @@ c_         list all connections
 
   /c_ {
     dvtsup begin
-    0 1 nodelist length 1 sub { /knode name
+    0 1 nodelist last { /knode name
       nodelist knode get /node name
       printnode
     } for
@@ -398,7 +403,7 @@ c_         list all connections
 
   /_c {
     dvtsup begin {
-      false 0 1 nodelist length 1 sub { /knode name
+      false 0 1 nodelist last { /knode name
         nodelist knode get /node name
         node 0 get class /nullclass eq { pop true exit } if
       } for not { (Too many nodes!\n) toconsole stop } if
@@ -418,7 +423,7 @@ c_         list all connections
 
   /_cc {
     dvtsup begin {
-      false 0 1 nodelist length 1 sub { /knode name
+      false 0 1 nodelist last { /knode name
         nodelist knode get /node name
         node 0 get class /nullclass eq { pop true exit } if
       } for not { (Too many nodes!\n) toconsole stop } if
@@ -445,7 +450,7 @@ c_         list all connections
     /ssh_display [
       /result 1024 /b array
       /flags []
-      /dvtgetdisplay (@dvtgetdisplay@)
+      /dnodestartup null
       /ssh (ssh)
       /localhostdisplay (^\(localhost|127.0.0.1\)?:)
       /localhost (^\(localhost|127.0.0.1\)$)
@@ -456,7 +461,10 @@ c_         list all connections
 
       | -- | [ (ssh) flags node | ]
       /command {
-        openlist ssh flags {} forall node 0 get dvtgetdisplay
+        openlist ssh flags {} forall node 0 get
+        dnodestartup length (/getdisplay) length add /b array {
+          dnodestartup fax (/getdisplay) fax
+        } tostring
       } bind
       
       | -- | (display) fd pid
@@ -492,11 +500,10 @@ c_         list all connections
         } ifelse                   | --
       } bind
 
-      | -- | (display)
-      /display {
+      | (startupdir) (default-display) | (dnode-display)
+      /display {exch /dnodestartup name
         nodeclear
         | and setup the new if necessary
-        getdisplayhost
         node 0 get localhost regexs {3 ~pop repeat} {pop 
           localhostdisplay regexs {
             3 ~pop repeat
@@ -513,9 +520,31 @@ c_         list all connections
       } bind
     ] makestruct def
 
-    /getdnodedisplay {~display ssh_display indict} bind def
+    | ~next | --
+    /getdnodedisplay {
+      {
+        node 2 get ~[
+          3 -1 roll destruct_exec knode getdisplayhost {
+            /displayhost name /knode name /dvtnext name
+            getsocket ~[
+              ~dup ~capsave
+              /dvtnext find getstartupdir displayhost knode {
+                {
+                  /knode name
+                  /node nodelist knode get def
+                  ~display ssh_display indict
+                  exch exec
+                } dvtsup indict
+                restore
+              } ~exec
+            ] send
+            restore
+          } ~lock
+        ] send
+      } insave
+    } bind def
   } {
-    /getdnodedisplay {null} def
+    /getdnodedisplay {null exch exec} def
   } ifelse
 
 |---------------------------------------------------- connect to node
@@ -528,8 +557,8 @@ c_         list all connections
   Xwindows {
     | hostname port# group | --
     /_cx {
-      dvtsup begin {
-        false 0 1 nodelist length 1 sub {/knode name
+      {
+        false 0 1 nodelist last {/knode name
           nodelist knode get /node name
           node 0 get class /nullclass eq {pop true exit} if
         } for not {(Too many nodes!\n) toconsole stop} if
@@ -537,9 +566,14 @@ c_         list all connections
         2 copy connect node 2 put node 1 put node 0 put
         true node 3 put printnode
         
-        getdnodedisplay | needs to be outside of save box
-        save
-        node 2 get ~[4 -1 roll knode fontdict commonmousedict node 0 get {
+        ~_cx1 getdnodedisplay
+      } dvtsup indict
+    } bind userdict 3 -1 roll put
+
+    | (display) | --
+    /_cx1 {
+      {
+        node 2 get ~[3 -1 roll knode fontdict commonmousedict node 0 get {
           getsocket setconsole /dvtnodeid name
           /commonmousedict name /fontdict name /knode name /getdnodedisplay name
           capsave
@@ -554,11 +588,10 @@ c_         list all connections
             getstartupdir (theeye.d) fbuf readfile mkact exec
           } stopped pop filesave restore
           
-          console ~[knode ~dvtsup ~begin ~_cx1] send
+          console ~[knode ~dvtsup ~begin ~_cx2] send
         } ~exec] send
-        restore
-      } stopped pop end
-    } bind userdict 3 -1 roll put
+      } insave
+    } bind def
 
     | knode | --
     /_cx_ready {
@@ -570,7 +603,7 @@ c_         list all connections
     } bind def
   
     | save knode | -- <<end dvtsup>>
-    /_cx1 {
+    /_cx2 {
       exch restore ~_cx_ready stopped pop end
     } bind def
   } if
@@ -584,8 +617,8 @@ c_         list all connections
 
   Xwindows {
     /_ccx {
-      dvtsup begin {
-        false 0 1 nodelist length 1 sub { /knode name
+      {
+        false 0 1 nodelist last { /knode name
           nodelist knode get /node name
           node 0 get class /nullclass eq { pop true exit } if
         } for not { (Too many nodes!\n) toconsole stop } if
@@ -594,9 +627,13 @@ c_         list all connections
         node 6 put
         true node 3 put printnode
    
-        getdnodedisplay 
-        save
-        node 2 get ~[4 -1 roll knode fontdict commonmousedict node 0 get {
+        ~_ccx1 getdnodedisplay
+      } dvtsup indict
+    } bind userdict 3 -1 roll put
+
+    /_ccx1 {
+      {
+        node 2 get ~[3 -1 roll knode fontdict commonmousedict node 0 get {
           getsocket setconsole /dvtnodeid name
           /commonmousedict name /fontdict name /knode name /getdnodedisplay name
           capsave
@@ -611,14 +648,13 @@ c_         list all connections
             getstartupdir (theeye.d) fbuf readfile mkact exec
           } stopped pop filesave restore
 
-          console ~[knode ~dvtsup ~begin ~_ccx1] send
+          console ~[knode ~dvtsup ~begin ~_ccx2] send
         } ~exec]  send
-        restore
-      } stopped pop end
-    } bind userdict 3 -1 roll put
+      } insave
+    } bind def
     
     | save knode | -- <<end dvtsup>>
-    /_ccx1 {
+    /_ccx2 {
       exch restore {dup color_node_def _cx_ready} stopped pop end
     } bind def
   } if
@@ -634,23 +670,29 @@ c_         list all connections
 | but can be redefined in userdict
 
   /_csu {
-    dvtsup begin
     { 
-      false 0 1 nodelist length 1 sub {/knode name
+      false 0 1 nodelist last {/knode name
         nodelist knode get /node name
         node 0 get class /nullclass eq { pop true exit } if
       } for not { (Too many nodes!\n) toconsole stop } if
       4 1 roll node 4 put
       2 copy connect node 2 put node 1 put node 0 put
       true node 3 put printnode
-      save
-      node 2 get ~[4 -1 roll ~exch ~pop ~getsocket ~setconsole ~vmresize] send
-      restore
+      {
+        node 2 get ~[
+          3 -1 roll {exch pop getsocket setconsole vmresize} ~lock
+        ] send
+      } insave
       null node 6 put
 
-      getdnodedisplay
-      save
-      node 2 get ~[4 -1 roll Xwindows knode node 0 get {
+      ~_csu1 getdnodedisplay
+    } dvtsup indict
+  } bind userdict 3 -1 roll put
+
+  | (display) | --
+  /_csu1 {
+    {
+      node 2 get ~[3 -1 roll Xwindows knode node 0 get {
         getsocket setconsole
         6 -1 roll not {killsockets abort} if | bool from vmresize
         /dvtnodeid name /knode name 
@@ -670,9 +712,8 @@ c_         list all connections
           } {~dvtsup ~begin ~csu1nox} ifelse
         ] send
       } ~exec] send
-      restore
-    } stopped pop end
-  } bind userdict 3 -1 roll put
+    } insave
+  } bind def
 
   /_csu1x {
     /knode name {
@@ -919,7 +960,7 @@ c_         list all connections
           target /kbdowner name /knode target def
         } ~stop ifelse
       } { 
-        false 1 1 nodelist length 1 sub { /knode name
+        false 1 1 nodelist last { /knode name
           nodelist knode get /node name
           node 0 get class /nullclass ne { 
             node 4 get target eq { /kbdowner target def pop true } if
@@ -928,7 +969,7 @@ c_         list all connections
         not ~stop if
       } ifelse
 
-      0 1 nodelist length 1 sub {/knode name
+      0 1 nodelist last {/knode name
         nodelist knode get /node name
         printnode
       } for
@@ -1239,23 +1280,37 @@ c_         list all connections
 | that you can invoke from the keyboard (obviously this is your resort when
 | Xwindows is not available).
   Xwindows {
-    /wW 200 2 add def
-    /wH nodelist length 13 mul 2 add def
-    /woutline [ 0 0 wW 1 sub 0 wW 1 sub wH 1 sub 0 wH 1 sub 0 0 ] def
-    /noderects [
-      /x 1 def
-      1 13 nodelist length 1 sub 13 mul 1 add { /y name
-        /r 4 /w array def
-        x r 0 put  y r 1 put wW 2 sub r 2 put 13 r 3 put
-        r
-      } for
-    ] def
-    /nodelocs [
-      /x 5 def
-      12 13 nodelist length 1 sub 13 mul 12 add { /y name
-        [ x y 6 sub ] mkact
-      } for
-    ] def
+    /makeTheHorses {
+      /wW 200 2 add def
+      /wH nodelist length 13 mul 2 add def
+      /woutline [ 0 0 wW 1 sub 0 wW 1 sub wH 1 sub 0 wH 1 sub 0 0 ] def
+
+      /noderects [
+        /x 1 def
+        1 13 nodelist length 1 sub 13 mul 1 add { /y name
+          /r 4 /w array def
+          x r 0 put  y r 1 put wW 2 sub r 2 put 13 r 3 put
+          r
+        } for
+      ] def
+
+      /nodelocs [
+        /x 5 def
+        12 13 nodelist length 1 sub 13 mul 12 add { /y name
+          [ x y 6 sub ] mkact
+        } for
+      ] def
+
+      screensize /scrH name /scrW name
+      [ [ scrW wW sub 10 sub scrH wH sub 10 sub wW wH ] | ]
+      (TheHorses) (Horses) makewindow /wid name pop
+      dvtsup userdict debug_dict /line get {
+        (/w) fax * wid * number
+      } tostring mkact exec put
+      /busy false def
+      wid true mapwindow
+      wid userdict /TheHorsesWid put
+    } bind def
 
     /NORMALFONT {fontdict /NORMALFONT get} def
     /BOLDFONT {fontdict /BOLDFONT get} def
@@ -1730,21 +1785,15 @@ Xwindows {
   pop restore
 } aborted {countdictstack 2 sub ~end repeat clear} if
 
-dvtsup begin
-save /cleanDVT name
-/kbdowner 0 def
-Xwindows {
-  getstartupdir (theeye.d) fromfiles
-  getstartupdir (dvt_macros.d) fromfiles
-  screensize /scrH name /scrW name
-  [ [ scrW wW sub 10 sub scrH wH sub 10 sub wW wH ] | ]
-    (TheHorses) (Horses) makewindow /wid name pop
-  dvtsup userdict debug_dict /line get 0 (/w) fax * wid * number
-      0 exch getinterval mkact exec put
-  /busy false def
-  wid true mapwindow  
-  |wid true makewindowtop
-  wid userdict /TheHorsesWid put
-} if  
+dvtsup begin |{
+  save /cleanDVT name
+  /kbdowner 0 def
+  makeNodes
+  Xwindows {
+    getstartupdir (theeye.d) fromfiles
+    getstartupdir (dvt_macros.d) fromfiles
+    makeTheHorses
+  } if
 
-supervisor   | we never return
+  supervisor   | we never return
+| }
