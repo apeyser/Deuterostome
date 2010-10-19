@@ -160,6 +160,7 @@ specific \file{startup_xxx.d} files.
 \op*{continue} & - & + & + \\
 \op*{vmresize} & - & + & + \\
 \op*{getplugindir} & - & + & + \\\\
+\op*{getexecdir} & + & + & + \\\\
 
 \op*{matmul_blas} & - & + & + \\
 \op*{decompLU_lp} & - & + & + \\
@@ -949,17 +950,19 @@ respectively while executing its operand, respecting
 In addition to the intrinsic operators, \dcomp[dnode]{dnodes} can make
 use of libraries of extrinsic operators (which typically support
 specific projects or experimental extensions of the D
-machine). \emph{getlibdir} inquires the directory path where libraries
-for the \dcomp{dnode} are stored (this path is established when the
-\dcomp{dnode} is started). \emph{loadlib} loads a library of
-operators; libraries are stored from the top of the VM downwards
-(competing for VM space with D objects, which are stored from bottom
-up) and returns the dictionary of the extrinsic operators contained in
-that library. \emph{loadlib} also merges the extrinsic operators of
-the library into \emph{systemdict} (with the exceptions of \emph{hi}
-and \emph{libnum}). You cannot load multiple copies of the same
-library. A library dictionary must include two obligatory operators
-with library-specific effects, \emph{hi} and \emph{libnum}. \emph{hi}
+machine). \op{getplugindir} inquires the directory path where
+libraries for the \dcomp{dnode} are stored (this path is established
+when the \dcomp{dnode} is started); \op{getexecdir} returns the path
+to internal executables (executables not intended for direct end-user
+use). \emph{loadlib} loads a library of operators; libraries are
+stored from the top of the VM downwards (competing for VM space with D
+objects, which are stored from bottom up) and returns the dictionary
+of the extrinsic operators contained in that library. \emph{loadlib}
+also merges the extrinsic operators of the library into
+\emph{systemdict} (with the exceptions of \emph{hi} and
+\emph{libnum}). You cannot load multiple copies of the same library. A
+library dictionary must include two obligatory operators with
+library-specific effects, \emph{hi} and \emph{libnum}. \emph{hi}
 returns a string specifying the library name and
 version. \emph{libnum} returns a dynamic index for this library
 (1,..., in the order of loading). You can inquire which libraries are
