@@ -406,6 +406,7 @@ DLL_SCOPE B* startup_dir_frame; // points the frame holding ^^^,
 DLL_SCOPE B* home_dir_frame; //points to the frame holding $HOME
 DLL_SCOPE B* plugin_dir_frame; //points to the frame holding plugindir
 DLL_SCOPE B* conf_dir_frame; //points to frame holding confdir
+DLL_SCOPE B* exec_dir_frame; //points to frame holding execdir
 DLL_SCOPE B* myname_frame;  //points to frame holding my hostname
 DLL_SCOPE B* myfqdn_frame; // point to frame holding my fully qualified domain name
 DLL_SCOPE B* myxname_frame; //points to the frame buffering the DISPLAY name

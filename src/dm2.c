@@ -1224,6 +1224,20 @@ P op_getconfdir(void)
     return OK;
 }
 
+/*---------------------------------------------------- getexecdir
+  -- | string
+ *  returns the hardcoded path (hidden at bottom of vm)
+ *  to the internal exec directory for the node
+ */
+P op_getexecdir(void)
+{    
+	if (CEILopds < o2) return OPDS_OVF;
+	if (!plugin_dir_frame) return CORR_OBJ;
+	moveframe(exec_dir_frame, o1);
+	FREEopds = o2;
+	return OK;
+}
+
 /*---------------------------------------------------- gethomedir
    -- | string
    - returns $HOME
@@ -1263,6 +1277,10 @@ DM_INLINE_STATIC void setupname(B** frame, const char* string, BOOLEAN app) {
 #define CONF_DIR ""
 #endif
 
+#ifndef EXEC_DIR
+#define EXEC_DIR ""
+#endif
+
 void setupdirs(void) {
   const char* home_env = getenv("HOME");
   const char* home_dir = "/";
@@ -1271,6 +1289,8 @@ void setupdirs(void) {
   const char* startup_env = getenv("DVTSCRIPTPATH");
   const char* conf_dir = CONF_DIR;
   const char* conf_env = getenv("DMCONFDIR");
+  const char* exec_env = getenv("DMEXECPATH");
+  const char* exec_dir = EXEC_DIR;
   char  myname[1024];
   char  myxname[1024];
   struct hostent* h;
@@ -1280,6 +1300,7 @@ void setupdirs(void) {
   if (startup_env && *startup_env) startup_dir = startup_env;
   else startup_dir = STARTUP_DIR;
   if (conf_env && *conf_env) conf_dir = conf_env;
+  if (exec_env && *exec_env) exec_dir = exec_env;
 
   if (gethostname(myname, sizeof(myname)))
     error_local(1, errno, "gethostname failure");
@@ -1293,6 +1314,7 @@ void setupdirs(void) {
   setupname(&startup_dir_frame, startup_dir, TRUE);
   setupname(&plugin_dir_frame, plugin_dir, TRUE);
   setupname(&conf_dir_frame, conf_dir, TRUE);
+  setupname(&exec_dir_frame, exec_dir, TRUE);
   setupname(&myname_frame, myname, FALSE);
   setupname(&myfqdn_frame, h->h_name, FALSE);
   setupname(&myxname_frame, myxname, FALSE);

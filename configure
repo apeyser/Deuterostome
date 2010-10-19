@@ -960,8 +960,6 @@ PCCXXFLAGS
 PCLDFLAGS
 PCCFLAGS
 PCLIBS
-pkgincludedir
-pkglibdir
 LIBPLUGIN_DLL_IMPORT
 LIBDM_DLL_IMPORT
 GCC_CXXFLAGS
@@ -1133,6 +1131,12 @@ DMSOCKDIR
 ENABLE_UNIX_SOCKETS
 ENABLE_UNIX_SOCKETS_FALSE
 ENABLE_UNIX_SOCKETS_TRUE
+pkgincludedir
+PKGINCLUDEDIR
+pkglibexecdir
+PKGLIBEXECDIR
+pkglibdir
+PKGLIBDIR
 pkgconfiglibdir
 PKGCONFIGLIBDIR
 real_tmp
@@ -1153,8 +1157,6 @@ dmstartdir
 DMSTARTDIR
 pkgdatadir
 PKGDATADIR
-dmbindir
-DMBINDIR
 PTHREAD_CFLAGS
 PTHREAD_LIBS
 PTHREAD_CC
@@ -1362,7 +1364,6 @@ CFLAGS
 LDFLAGS
 LIBS
 CPPFLAGS
-DMBINDIR
 PKGDATADIR
 DMSTARTDIR
 DMCONFDIR
@@ -1373,6 +1374,9 @@ PKGLISPDIR
 TMP
 REAL_TMP
 PKGCONFIGLIBDIR
+PKGLIBDIR
+PKGLIBEXECDIR
+PKGINCLUDEDIR
 DMSOCKDIR
 CPP
 STRINGBUF
@@ -2102,7 +2106,6 @@ Some influential environment variables:
   LIBS        libraries to pass to the linker, e.g. -l<library>
   CPPFLAGS    (Objective) C/C++ preprocessor flags, e.g. -I<include dir> if
               you have headers in a nonstandard directory <include dir>
-  DMBINDIR    location for dm binary, default=${bindir}/${PACKAGE}
   PKGDATADIR  location for data files, default=${datadir}/${PACKAGE}
   DMSTARTDIR  location for dm scripts, default=${pkgdatadir}
   DMCONFDIR   locations for per-host configuration,
@@ -2117,6 +2120,12 @@ Some influential environment variables:
   REAL_TMP    location of real temp dir, default=${tmp}
   PKGCONFIGLIBDIR
               location for pkg-config pc files, default=${libdir}/pkgconfig
+  PKGLIBDIR   location for plugins, default=${libdir}/${PACKAGE}
+  PKGLIBEXECDIR
+              location for internal executables,
+              default=${libexecdir}/${PACKAGE}
+  PKGINCLUDEDIR
+              location for package includes, default=${includedir}/${PACKAGE}
   DMSOCKDIR   location for dm unix sockets,
               default=${real_tmp}/${PACKAGE}/sockets
   CPP         C preprocessor
@@ -6382,17 +6391,6 @@ $as_echo "yes" >&6; }
 
 
 
-        cf_ac_cv_dir_val="DMBINDIR"
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if ${cf_ac_cv_dir_val} is set" >&5
-$as_echo_n "checking if ${cf_ac_cv_dir_val} is set... " >&6; }
-
-  if test "${DMBINDIR-set}" == set ; then
-    dmbindir="${bindir}/${PACKAGE}"
-  else
-    dmbindir="${DMBINDIR}"
-  fi
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: setting to ${dmbindir}" >&5
-$as_echo "setting to ${dmbindir}" >&6; }
         cf_ac_cv_dir_val="PKGDATADIR"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if ${cf_ac_cv_dir_val} is set" >&5
 $as_echo_n "checking if ${cf_ac_cv_dir_val} is set... " >&6; }
@@ -6503,6 +6501,39 @@ $as_echo_n "checking if ${cf_ac_cv_dir_val} is set... " >&6; }
   fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: setting to ${pkgconfiglibdir}" >&5
 $as_echo "setting to ${pkgconfiglibdir}" >&6; }
+        cf_ac_cv_dir_val="PKGLIBDIR"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if ${cf_ac_cv_dir_val} is set" >&5
+$as_echo_n "checking if ${cf_ac_cv_dir_val} is set... " >&6; }
+
+  if test "${PKGLIBDIR-set}" == set ; then
+    pkglibdir="${libdir}/${PACKAGE}"
+  else
+    pkglibdir="${PKGLIBDIR}"
+  fi
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: setting to ${pkglibdir}" >&5
+$as_echo "setting to ${pkglibdir}" >&6; }
+        cf_ac_cv_dir_val="PKGLIBEXECDIR"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if ${cf_ac_cv_dir_val} is set" >&5
+$as_echo_n "checking if ${cf_ac_cv_dir_val} is set... " >&6; }
+
+  if test "${PKGLIBEXECDIR-set}" == set ; then
+    pkglibexecdir="${libexecdir}/${PACKAGE}"
+  else
+    pkglibexecdir="${PKGLIBEXECDIR}"
+  fi
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: setting to ${pkglibexecdir}" >&5
+$as_echo "setting to ${pkglibexecdir}" >&6; }
+        cf_ac_cv_dir_val="PKGINCLUDEDIR"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if ${cf_ac_cv_dir_val} is set" >&5
+$as_echo_n "checking if ${cf_ac_cv_dir_val} is set... " >&6; }
+
+  if test "${PKGINCLUDEDIR-set}" == set ; then
+    pkgincludedir="${includedir}/${PACKAGE}"
+  else
+    pkgincludedir="${PKGINCLUDEDIR}"
+  fi
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: setting to ${pkgincludedir}" >&5
+$as_echo "setting to ${pkgincludedir}" >&6; }
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking if unix-sockets is enabled" >&5
 $as_echo_n "checking if unix-sockets is enabled... " >&6; }
@@ -27724,10 +27755,6 @@ fi
 fi
 
 
-
-    pkglibdir="\${libdir}/${PACKAGE}"
-
-    pkgincludedir="\${includedir}/${PACKAGE}"
 
     PCLIBS=" ${LTLIBOBJS} -ldmglobals"
 

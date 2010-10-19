@@ -14,8 +14,13 @@ dm-server.el: dm-server-source.el
 
 nodist_pkglisp_LISP = $(INFILES) d-mode-ops.el dm-server.el
 
-edit = -e 's,@bindir\@,$(bindir),g' \
-       -e 's,@pkglispdir\@,$(pkglispdir),g' \
+edit = -e 's,[@]bindir[@],$(bindir),g' \
+       -e 's,[@]pkglispdir[@],$(pkglispdir),g' \
+       -e 's,[@]pkgpsdatadir[@],$(pkgpsdatadir),g' \
+       -e 's,[@]dmstartdir[@],$(dmstartdir),g' \
+       -e 's,[@]pkglispdir[@],$(pkglispdir),g' \
+       -e 's,[@]dmconfdir[@],$(dmconfdir),g' \
+       -e 's,[@]pkglibexecdir[@],$(pkglibexecdir),g' \
        -e 's,[@]NAMEBYTES[@],@NAMEBYTES@,g'
 
 include $(top_srcdir)/m4/cf_in.make

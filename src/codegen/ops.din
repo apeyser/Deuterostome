@@ -201,7 +201,7 @@
       /begin /end /def /name 
       /find /get /put /known
       /getinterval /countdictstack /dictstack
-      /save /capsave /restore /vmstatus /getplugindir
+      /save /capsave /restore /vmstatus /getplugindir /getexecdir
       /bind /null /not
       /start /exec
       /if /ifelse /for /repeat /loop /forall /exit

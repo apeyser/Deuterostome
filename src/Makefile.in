@@ -38,10 +38,10 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 bin_PROGRAMS = dvt$(EXEEXT) dnode$(EXEEXT) dgen$(EXEEXT) \
-	$(am__EXEEXT_1) $(am__EXEEXT_2) dmprop$(EXEEXT) \
-	$(am__EXEEXT_3)
-noinst_PROGRAMS = testwordorder$(EXEEXT) $(am__EXEEXT_4)
-pkglib_PROGRAMS = getdisplay$(EXEEXT)
+	$(am__EXEEXT_1)
+noinst_PROGRAMS = testwordorder$(EXEEXT) $(am__EXEEXT_2)
+pkglibexec_PROGRAMS = getdisplay$(EXEEXT) dmprop$(EXEEXT) \
+	$(am__EXEEXT_3) $(am__EXEEXT_4)
 @ENABLE_PLUGINS_SUPPORT_TRUE@am__append_1 = @INCLTDL@
 DIST_COMMON = $(am__pkginclude_HEADERS_DIST) $(dist_pkgdata_SCRIPTS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
@@ -122,7 +122,7 @@ am__vpath_adj = case $$p in \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
-	"$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(pkgdatadir)" \
+	"$(DESTDIR)$(pkglibexecdir)" "$(DESTDIR)$(pkgdatadir)" \
 	"$(DESTDIR)$(pkgconfiglibdir)" "$(DESTDIR)$(pkgincludedir)" \
 	"$(DESTDIR)$(pkgincludedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
@@ -176,12 +176,12 @@ am__libdmnodal_la_SOURCES_DIST = dm-vm.c dm-vm.h dm-dvt-vm.h plugin.h \
 am_libdmnodal_la_OBJECTS = dm-vm.lo $(am__objects_6) plugin.lo
 libdmnodal_la_OBJECTS = $(am_libdmnodal_la_OBJECTS)
 @ENABLE_DAEMON_TRUE@am__EXEEXT_1 = dnode-daemon$(EXEEXT)
-@ENABLE_RTHREADS_TRUE@am__EXEEXT_2 = drook$(EXEEXT) dpawn$(EXEEXT)
-@ENABLE_X11_TRUE@am__EXEEXT_3 = dvt-x-set-input-focus$(EXEEXT)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-@ENABLE_SETUID_TRUE@am__EXEEXT_4 = dnode-nice$(EXEEXT)
-pkglibPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS) $(pkglib_PROGRAMS)
+@ENABLE_SETUID_TRUE@am__EXEEXT_2 = dnode-nice$(EXEEXT)
+@ENABLE_X11_TRUE@am__EXEEXT_3 = dvt-x-set-input-focus$(EXEEXT)
+@ENABLE_RTHREADS_TRUE@am__EXEEXT_4 = drook$(EXEEXT) dpawn$(EXEEXT)
+pkglibexecPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
+PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS) $(pkglibexec_PROGRAMS)
 am_dgen_OBJECTS = dgen-dgen.$(OBJEXT) dgen-dm-nextevent.$(OBJEXT) \
 	dgen-dm3.$(OBJEXT)
 nodist_dgen_OBJECTS = dgen-dm-prop.$(OBJEXT)
@@ -347,7 +347,6 @@ DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DIRENT_H = @DIRENT_H@
 DLLTOOL = @DLLTOOL@
-DMBINDIR = @DMBINDIR@
 DMCONFDIR = @DMCONFDIR@
 DMSOCKDIR = @DMSOCKDIR@
 DMSTARTDIR = @DMSTARTDIR@
@@ -726,6 +725,9 @@ PETSC_DIR = @PETSC_DIR@
 PETSC_LIB = @PETSC_LIB@
 PKGCONFIGLIBDIR = @PKGCONFIGLIBDIR@
 PKGDATADIR = @PKGDATADIR@
+PKGINCLUDEDIR = @PKGINCLUDEDIR@
+PKGLIBDIR = @PKGLIBDIR@
+PKGLIBEXECDIR = @PKGLIBEXECDIR@
 PKGLISPDIR = @PKGLISPDIR@
 PKGPSDATADIR = @PKGPSDATADIR@
 PLUGINDATADIR = @PLUGINDATADIR@
@@ -852,7 +854,6 @@ build_vendor = @build_vendor@
 builddir = @builddir@
 datadir = @datadir@
 datarootdir = @datarootdir@
-dmbindir = @dmbindir@
 dmconfdir = @dmconfdir@
 dmsockdir = @dmsockdir@
 dmstartdir = @dmstartdir@
@@ -891,6 +892,7 @@ oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
 pdflatex = @pdflatex@
 pkgconfiglibdir = @pkgconfiglibdir@
+pkglibexecdir = @pkglibexecdir@
 pkglispdir = @pkglispdir@
 pkgpsdatadir = @pkgpsdatadir@
 plugindatadir = @plugindatadir@
@@ -932,9 +934,9 @@ EXTRA_DIST = $(INFILES:=in) $(IDFILES)
 CLEANFILES = $(INFILES)
 DISTCLEANFILES = dm-config.h
 SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
-dpawn = $(bindir)/dpawn
-drook = $(bindir)/drook
-dmprop = $(bindir)/dmprop
+dpawn = $(pkglibexecdir)/dpawn
+drook = $(pkglibexecdir)/drook
+dmprop = $(pkglibexecdir)/dmprop
 edit = -e 's,[@]bindir[@],$(bindir),g' \
        -e 's,[@]srcdir[@],$(srcdir),g' \
        -e 's,[@]drook[@],$(drook),g' \
@@ -946,6 +948,7 @@ edit = -e 's,[@]bindir[@],$(bindir),g' \
        -e 's,[@]dmstartdir[@],$(dmstartdir),g' \
        -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
        -e 's,[@]dmconfdir[@],$(dmconfdir),g' \
+       -e 's,[@]pkglibexecdir[@],$(pkglibexecdir),g' \
        -e 's,[@]SEM_DNODE_NAME[@],$(SEM_DNODE_NAME),g'
 
 @ENABLE_SETUID_TRUE@nodist_dnode_nice_SOURCES = dnode-nice.c
@@ -1176,30 +1179,30 @@ clean-noinstPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-install-pkglibPROGRAMS: $(pkglib_PROGRAMS)
+install-pkglibexecPROGRAMS: $(pkglibexec_PROGRAMS)
 	@$(NORMAL_INSTALL)
-	test -z "$(pkglibdir)" || $(MKDIR_P) "$(DESTDIR)$(pkglibdir)"
-	@list='$(pkglib_PROGRAMS)'; for p in $$list; do \
+	test -z "$(pkglibexecdir)" || $(MKDIR_P) "$(DESTDIR)$(pkglibexecdir)"
+	@list='$(pkglibexec_PROGRAMS)'; for p in $$list; do \
 	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
 	  if test -f $$p \
 	     || test -f $$p1 \
 	  ; then \
 	    f=`echo "$$p1" | sed 's,^.*/,,;$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(pkglibPROGRAMS_INSTALL) '$$p' '$(DESTDIR)$(pkglibdir)/$$f'"; \
-	   $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(pkglibPROGRAMS_INSTALL) "$$p" "$(DESTDIR)$(pkglibdir)/$$f" || exit 1; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(pkglibexecPROGRAMS_INSTALL) '$$p' '$(DESTDIR)$(pkglibexecdir)/$$f'"; \
+	   $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(pkglibexecPROGRAMS_INSTALL) "$$p" "$(DESTDIR)$(pkglibexecdir)/$$f" || exit 1; \
 	  else :; fi; \
 	done
 
-uninstall-pkglibPROGRAMS:
+uninstall-pkglibexecPROGRAMS:
 	@$(NORMAL_UNINSTALL)
-	@list='$(pkglib_PROGRAMS)'; for p in $$list; do \
+	@list='$(pkglibexec_PROGRAMS)'; for p in $$list; do \
 	  f=`echo "$$p" | sed 's,^.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
-	  echo " rm -f '$(DESTDIR)$(pkglibdir)/$$f'"; \
-	  rm -f "$(DESTDIR)$(pkglibdir)/$$f"; \
+	  echo " rm -f '$(DESTDIR)$(pkglibexecdir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(pkglibexecdir)/$$f"; \
 	done
 
-clean-pkglibPROGRAMS:
-	@list='$(pkglib_PROGRAMS)'; for p in $$list; do \
+clean-pkglibexecPROGRAMS:
+	@list='$(pkglibexec_PROGRAMS)'; for p in $$list; do \
 	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
@@ -2193,7 +2196,7 @@ install-binPROGRAMS: install-libLTLIBRARIES
 
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(pkgdatadir)" "$(DESTDIR)$(pkgconfiglibdir)" "$(DESTDIR)$(pkgincludedir)" "$(DESTDIR)$(pkgincludedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkglibexecdir)" "$(DESTDIR)$(pkgdatadir)" "$(DESTDIR)$(pkgconfiglibdir)" "$(DESTDIR)$(pkgincludedir)" "$(DESTDIR)$(pkgincludedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -2230,7 +2233,7 @@ clean: clean-recursive
 
 clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
 	clean-libtool clean-local clean-noinstPROGRAMS \
-	clean-pkglibPROGRAMS mostlyclean-am
+	clean-pkglibexecPROGRAMS mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -rf ./$(DEPDIR)
@@ -2259,7 +2262,7 @@ install-dvi: install-dvi-recursive
 install-dvi-am:
 
 install-exec-am: install-binPROGRAMS install-exec-local \
-	install-libLTLIBRARIES install-pkglibPROGRAMS
+	install-libLTLIBRARIES install-pkglibexecPROGRAMS
 
 install-html: install-html-recursive
 
@@ -2303,7 +2306,7 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_pkgdataSCRIPTS \
 	uninstall-libLTLIBRARIES uninstall-local \
 	uninstall-nodist_pkgconfiglibDATA \
 	uninstall-nodist_pkgincludeHEADERS uninstall-pkgincludeHEADERS \
-	uninstall-pkglibPROGRAMS
+	uninstall-pkglibexecPROGRAMS
 
 .MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) install-am \
 	install-strip
@@ -2311,7 +2314,7 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_pkgdataSCRIPTS \
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am all-local check check-am clean clean-binPROGRAMS \
 	clean-generic clean-libLTLIBRARIES clean-libtool clean-local \
-	clean-noinstPROGRAMS clean-pkglibPROGRAMS ctags \
+	clean-noinstPROGRAMS clean-pkglibexecPROGRAMS ctags \
 	ctags-recursive distclean distclean-compile distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-binPROGRAMS \
@@ -2321,9 +2324,9 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_pkgdataSCRIPTS \
 	install-info-am install-libLTLIBRARIES install-man \
 	install-nodist_pkgconfiglibDATA \
 	install-nodist_pkgincludeHEADERS install-pdf install-pdf-am \
-	install-pkgincludeHEADERS install-pkglibPROGRAMS install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs installdirs-am maintainer-clean \
+	install-pkgincludeHEADERS install-pkglibexecPROGRAMS \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs installdirs-am maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags tags-recursive uninstall uninstall-am \
@@ -2331,7 +2334,7 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_pkgdataSCRIPTS \
 	uninstall-libLTLIBRARIES uninstall-local \
 	uninstall-nodist_pkgconfiglibDATA \
 	uninstall-nodist_pkgincludeHEADERS uninstall-pkgincludeHEADERS \
-	uninstall-pkglibPROGRAMS
+	uninstall-pkglibexecPROGRAMS
 
 
 all-local:
