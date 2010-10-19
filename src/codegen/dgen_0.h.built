@@ -44,6 +44,7 @@ B* _sysop[] =
   (B*) "restore", (B*) op_restore,
   (B*) "vmstatus", (B*) op_vmstatus,
   (B*) "getplugindir", (B*) op_getplugindir,
+  (B*) "getexecdir", (B*) op_getexecdir,
   (B*) "bind", (B*) op_bind,
   (B*) "null", (B*) op_null,
   (B*) "not", (B*) op_not,

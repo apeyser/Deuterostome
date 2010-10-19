@@ -46,6 +46,7 @@ DLL_SCOPE P op_getconfdir(void);
 DLL_SCOPE P op_gethomedir(void);
 DLL_SCOPE P op_getmyport(void);
 DLL_SCOPE P op_getplugindir(void);
+DLL_SCOPE P op_getexecdir(void);
 
 DLL_SCOPE P op_syshi(void);
 DLL_SCOPE P op_syslibnum(void);
