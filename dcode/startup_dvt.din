@@ -462,8 +462,8 @@ c_         list all connections
       | -- | [ (ssh) flags node | ]
       /command {
         openlist ssh flags {} forall node 0 get
-        dnodeexec length (exec/getdisplay) length add /b array {
-          dnodeexec fax (exec/getdisplay) fax
+        dnodeexec length (getdisplay) length add /b array {
+          dnodeexec fax (getdisplay) fax
         } tostring
       } bind
       
