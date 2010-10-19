@@ -161,6 +161,9 @@ specific \file{startup_xxx.d} files.
 \op*{vmresize} & - & + & + \\
 \op*{getplugindir} & - & + & + \\\\
 \op*{getexecdir} & + & + & + \\\\
+\op*{getstartupdir} & + & + & + \\\\
+\op*{getconfdir}   & + & + & + \\\\
+\op*{gethomedir}   & + & + & + \\\\
 
 \op*{matmul_blas} & - & + & + \\
 \op*{decompLU_lp} & - & + & + \\
@@ -954,12 +957,14 @@ machine). \op{getplugindir} inquires the directory path where
 libraries for the \dcomp{dnode} are stored (this path is established
 when the \dcomp{dnode} is started); \op{getexecdir} returns the path
 to internal executables (executables not intended for direct end-user
-use). \emph{loadlib} loads a library of operators; libraries are
-stored from the top of the VM downwards (competing for VM space with D
-objects, which are stored from bottom up) and returns the dictionary
-of the extrinsic operators contained in that library. \emph{loadlib}
-also merges the extrinsic operators of the library into
-\emph{systemdict} (with the exceptions of \emph{hi} and
+use). \op{gethomedir} returns the home directory of the user who
+launched the D-machine. \op{getconfdir} returns the system
+configuration directory. \emph{loadlib} loads a library of operators;
+libraries are stored from the top of the VM downwards (competing for
+VM space with D objects, which are stored from bottom up) and returns
+the dictionary of the extrinsic operators contained in that
+library. \emph{loadlib} also merges the extrinsic operators of the
+library into \emph{systemdict} (with the exceptions of \emph{hi} and
 \emph{libnum}). You cannot load multiple copies of the same library. A
 library dictionary must include two obligatory operators with
 library-specific effects, \emph{hi} and \emph{libnum}. \emph{hi}
