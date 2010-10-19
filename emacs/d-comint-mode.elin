@@ -34,6 +34,22 @@
   :group 'd-comint-mode
   :type '(choice (const nil) (file :must-match t)))
 
+(defun get-dvt-file-name ()
+  (or explicit-dvt-file-name
+      (getenv "EDVT")
+      (getenv "DVT")
+      "@bindir@/dvt"))
+
+(defcustom explicit-dvt-exec-path nil
+  "*dvt program name"
+  :group 'd-comint-mode
+  :type '(choice (const nil) (file :must-match t)))
+
+(defun get-dvt-exec-path ()
+  (or explicit-dvt-exec-path
+      (getenv "DMEXECPATH")
+      "@pkglibexecdir@"))
+
 (defcustom d-comint-mode-global-override nil
   "*Use custom global keybindings even if those keys are already defined
 
@@ -93,8 +109,6 @@ Calls (d-comint-mode-switch-to-dvt-global-set ignored-symbol key-vector)
 				 (character :tag "character"))))
   :set 'd-comint-mode-switch-to-dvt-global-set
   :initialize 'custom-initialize-set)
-
-(require 'comint)
 
 (defvar d-comint-mode-highlight-output 
   'd-comint-mode-highlight-output 
@@ -554,10 +568,7 @@ Otherwise, one argument `-i' is passed to the shell.
 	"*dvt*")))
   (if (not d-comint-mode-map-setup) (d-comint-mode-setup-map))
   (if (not (comint-check-proc buffer))
-      (let* ((prog (or explicit-dvt-file-name
-		       (getenv "EDVT")
-		       (getenv "DVT")
-		       "@bindir@/dvt"))
+      (let* ((prog (get-dvt-file-name))
 	     (name (file-name-nondirectory prog))
 	     (dir (file-name-directory prog))
 	     (startfile (concat "~/.emacs_" name))
@@ -641,7 +652,7 @@ This quotes per `shell-quote-argument', then requotes per `d-comint-mode-quote'"
 (defun d-comint-mode-x-focus-frame (frame)
   (when (eq window-system 'x)
     (let ((win (frame-parameter frame 'outer-window-id)))
-      (call-process "@bindir@/dvt-x-set-input-focus" 
+      (call-process (concat (get-dvt-exec-path) "/" "dvt-x-set-input-focus")
 		    nil 0 nil
 		    win))))
 
@@ -763,9 +774,15 @@ dvt buffer. Used from global key-binding"
   :type '(repeat string))
 
 (defcustom explicit-dnode-file-name nil
-  "*Name of programe to run dnode"
+  "*Name of program to run dnode"
   :group 'd-comint-dnode-mode
   :type '(choice (const nil) file))
+
+(defun get-dnode-file-name ()
+  (or explicit-dnode-file-name
+      (getenv "EDNODE")
+      (getenv "DNODE")
+      "@bindir@/dnode"))
 
 (defcustom d-comint-dnode-mode-hook nil
   "Hooks for d-comint-dnode-mode"
@@ -801,7 +818,8 @@ dvt buffer. Used from global key-binding"
   (interactive)
   (setq d-comint-dnode-mode-map-setup t)
   (define-key d-comint-dnode-mode-map [f8] 'dnode))
-(if (not d-comint-dnode-mode-map-setup) (d-comint-dnode-mode-setup-map))
+(if (not d-comint-dnode-mode-map-setup) 
+    (d-comint-dnode-mode-setup-map))
 
 (defun dnode (port &optional buffer-pre)
   (interactive (list
@@ -814,10 +832,7 @@ dvt buffer. Used from global key-binding"
     
     (when (or (null d-comint-dnode-mode-dnode-buffer) 
 	      (not (comint-check-proc d-comint-dnode-mode-dnode-buffer)))
-      (let* ((d-comint-dnode-mode-prog (or explicit-dnode-file-name
-					   (getenv "EDNODE")
-					   (getenv "DNODE")
-					   "@bindir@/dnode"))
+      (let* ((d-comint-dnode-mode-prog (get-dnode-file-name))
 	     (port-string (format "%d" port))
 	     (name (format "%s-%d" 
 			   (file-name-nondirectory d-comint-dnode-mode-prog) 
