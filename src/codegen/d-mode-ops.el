@@ -45,6 +45,7 @@
   "restore"
   "vmstatus"
   "getplugindir"
+  "getexecdir"
   "bind"
   "null"
   "not"

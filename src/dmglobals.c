@@ -44,6 +44,7 @@ B* startup_dir_frame; // points the frame holding ^^^, at the bottom of the vm
 B* home_dir_frame; //points to the frame holding $HOME
 B* plugin_dir_frame; //points to the frame holding the plugindir
 B* conf_dir_frame; //points to the frame holding confdir
+B* exec_dir_frame; //points to the frame holding execdir
 B* myname_frame; //points to the frame holding my hostname
 B* myfqdn_frame; //points to the frame holding my fully qualified domain name
 B* myxname_frame; //points to the frame buffering the DISPLAY name

@@ -8,20 +8,20 @@
   (setq load-path (append (list nil dmlispdir) load-path)))
 (setenv "TERM" "ansi")
 
-;(setq init-el-compile nil)
-;(eval-when-compile (setq init-el-compile t))
-;(eval-and-compile (if (not init-el-compile) (require 'd-mode)))
-
-;(eval-and-compile (if (not init-el-compile) (require 'd-comint-mode)))
 (require 'd-mode)
+;;(require 'd-comint-mode)
+
+;; (setenv "DVT" "@bindir@/dvt") ; overrides bindir/dvt
+;; (setenv "EDVT" "@bindir@/dvt") ; overrides bindir/dvt
+;; (setenv "DNODE" "@bindir@/dnode") ; overrides bindir/dnode
+;; (setenv "EDNODE" "@bindir@/dnode") ; overrides bindir/dnode
+;; (setq explicit-dvt-file-name "@bindir@/dvt") ; overrides bindir/dvt (highest)
+;; (setq explicit-dnode-file-name "@bindir@/dnode") ; overrides bindir/dnode (highest)
+;; (setenv "DVTPSPATH" "@pkgpsdatadir@") ; overrides pkgpsdatadir
+;; (setenv "DVTSCRIPTPATH" "@dmstartdir@") ; overrides dmstartdir
+;; (setenv "DMLISPDIR" "@pkglispdir@") ; overrides pkglispdir
+;; (setq explicit-dmlispdir "@pkglispdir@") ; overrides pkglispdir
+;; (setq "DMCONFDIR" "@dmconfdir@") ; overrides dmconfdir
+;; (setq "DMEXECPATH" "@pkglibexecdir@") ; overrides pkglibexecdir
+
 (require 'd-comint-mode)
-
-;; (setenv "DVT" "some-dvt-path") ; overrides bindir/dvt
-;; (setenv "EDVT" "some-dvt-path") ; overrides bindir/dvt
-;; (setq explicit-dvt-file-name "some-dvt-path") ; overrides bindir/dvt
-;; (setenv "DVTPSPATH" "some-path-to-ps-files") ; overrides pkgpsdatadir
-;; (setenv "DVTSCRIPTPATH" "some-path-to-scripts") ; overrides dmstartdir
-;; (setenv "DMLISPDIR" "some-path-to-emacs-code") ; overrides pkglispdir
-;; (setq explicit-dmlispdir "some-path-to-emacs-code") ; overrides pkglispdir
-;; (setq "DMCONFDIR" "some-path-to-dmconf") ; overrides dmconfdir
-

@@ -24,9 +24,9 @@ clean-local:
 	! test -e codegen/Makefile \
 	|| (cd codegen && $(MAKE) $(AM_MAKEFLAGS) clean)
 
-dpawn = $(bindir)/dpawn
-drook = $(bindir)/drook
-dmprop = $(bindir)/dmprop
+dpawn = $(pkglibexecdir)/dpawn
+drook = $(pkglibexecdir)/drook
+dmprop = $(pkglibexecdir)/dmprop
 
 edit = -e 's,[@]bindir[@],$(bindir),g' \
        -e 's,[@]srcdir[@],$(srcdir),g' \
@@ -39,6 +39,7 @@ edit = -e 's,[@]bindir[@],$(bindir),g' \
        -e 's,[@]dmstartdir[@],$(dmstartdir),g' \
        -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
        -e 's,[@]dmconfdir[@],$(dmconfdir),g' \
+       -e 's,[@]pkglibexecdir[@],$(pkglibexecdir),g' \
        -e 's,[@]SEM_DNODE_NAME[@],$(SEM_DNODE_NAME),g'
 
 
@@ -95,11 +96,10 @@ dvt_x_set_input_focus_SOURCES = x-set-input-focus.c
 dvt_x_set_input_focus_LDADD = $(X_LDFLAGS)
 endif ENABLE_X11
 
-bin_PROGRAMS = dvt dnode dgen \
-	$(DNODEDAEMONBIN) $(MPI_PROGS) dmprop \
-	$(DVTXSETINPUTFOCUSBIN)
+bin_PROGRAMS = dvt dnode dgen $(DNODEDAEMONBIN)
 noinst_PROGRAMS = testwordorder $(DNODENICEBIN)
-dmstart_PROGRAMS = getdisplay
+pkglibexec_PROGRAMS = getdisplay dmprop \
+  $(DVTXSETINPUTFOCUSBIN) $(MPI_PROGS)
 
 if ENABLE_PLUGINS_SUPPORT
 if ENABLE_CPPPLUGIN

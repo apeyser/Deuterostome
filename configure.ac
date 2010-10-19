@@ -1,4 +1,4 @@
-AC_INIT([D-Machine], [4.6.3], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
+AC_INIT([D-Machine], [4.6.4], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
 AC_CONFIG_MACRO_DIR([m4 libltdl/m4])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_AUX_DIR([libltdl/config])
@@ -62,7 +62,6 @@ CF_IF_ENABLED([rthreads], [
   CF_ACX_PTHREAD_REQUIRE([no, please disable rthreads])
 ])
 
-CF_AC_ARG_DIR([dmbindir], [location for dm binary], [${bindir}/${PACKAGE}])
 CF_AC_ARG_DIR([pkgdatadir], [location for data files], 
   [${datadir}/${PACKAGE}])
 CF_AC_ARG_DIR([dmstartdir], [location for dm scripts], [${pkgdatadir}])
@@ -80,6 +79,11 @@ CF_AC_ARG_DIR([tmp], [location of temp dir], [/tmp])
 CF_AC_ARG_DIR([real_tmp], [location of real temp dir], [${tmp}])
 CF_AC_ARG_DIR([pkgconfiglibdir], [location for pkg-config pc files],
   [${libdir}/pkgconfig])
+CF_AC_ARG_DIR([pkglibdir], [location for plugins], [${libdir}/${PACKAGE}])
+CF_AC_ARG_DIR([pkglibexecdir], [location for internal executables], 
+  [${libexecdir}/${PACKAGE}])
+CF_AC_ARG_DIR([pkgincludedir], [location for package includes], 
+  [${includedir}/${PACKAGE}])
 
 CF_AC_ENABLE([unix-sockets], [compile and install unix domain sockets], [yes])
 CF_IF_ENABLED([unix-sockets], [
@@ -316,8 +320,6 @@ CF_WIN_DLL_IMPORT([PLUGIN])
 
 LIB_SOCKET_NSL
 
-CF_AC_SUBST([pkglibdir], [\${libdir}/${PACKAGE}])
-CF_AC_SUBST([pkgincludedir], [\${includedir}/${PACKAGE}])
 CF_AC_SUBST([PCLIBS], [ ${LTLIBOBJS} -ldmglobals])
 CF_AC_SUBST([PCCFLAGS], [${CFLAGS} ${GCC_CFLAGS} ${LIBDM_DLL_IMPORT} ${X_CFLAGS}])
 CF_AC_SUBST([PCLDFLAGS], [-module -no-undefined])

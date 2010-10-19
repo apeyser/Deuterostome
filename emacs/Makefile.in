@@ -146,7 +146,6 @@ DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DIRENT_H = @DIRENT_H@
 DLLTOOL = @DLLTOOL@
-DMBINDIR = @DMBINDIR@
 DMCONFDIR = @DMCONFDIR@
 DMSOCKDIR = @DMSOCKDIR@
 DMSTARTDIR = @DMSTARTDIR@
@@ -525,6 +524,9 @@ PETSC_DIR = @PETSC_DIR@
 PETSC_LIB = @PETSC_LIB@
 PKGCONFIGLIBDIR = @PKGCONFIGLIBDIR@
 PKGDATADIR = @PKGDATADIR@
+PKGINCLUDEDIR = @PKGINCLUDEDIR@
+PKGLIBDIR = @PKGLIBDIR@
+PKGLIBEXECDIR = @PKGLIBEXECDIR@
 PKGLISPDIR = @PKGLISPDIR@
 PKGPSDATADIR = @PKGPSDATADIR@
 PLUGINDATADIR = @PLUGINDATADIR@
@@ -651,7 +653,6 @@ build_vendor = @build_vendor@
 builddir = @builddir@
 datadir = @datadir@
 datarootdir = @datarootdir@
-dmbindir = @dmbindir@
 dmconfdir = @dmconfdir@
 dmsockdir = @dmsockdir@
 dmstartdir = @dmstartdir@
@@ -690,6 +691,7 @@ oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
 pdflatex = @pdflatex@
 pkgconfiglibdir = @pkgconfiglibdir@
+pkglibexecdir = @pkglibexecdir@
 pkglispdir = @pkglispdir@
 pkgpsdatadir = @pkgpsdatadir@
 plugindatadir = @plugindatadir@
@@ -718,8 +720,13 @@ EXTRA_DIST = $(INFILES:=in) $(IDFILES) dm-server-source.el
 CLEANFILES = $(BUILT_SOURCES) dm-server-script
 SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
 nodist_pkglisp_LISP = $(INFILES) d-mode-ops.el dm-server.el
-edit = -e 's,@bindir\@,$(bindir),g' \
-       -e 's,@pkglispdir\@,$(pkglispdir),g' \
+edit = -e 's,[@]bindir[@],$(bindir),g' \
+       -e 's,[@]pkglispdir[@],$(pkglispdir),g' \
+       -e 's,[@]pkgpsdatadir[@],$(pkgpsdatadir),g' \
+       -e 's,[@]dmstartdir[@],$(dmstartdir),g' \
+       -e 's,[@]pkglispdir[@],$(pkglispdir),g' \
+       -e 's,[@]dmconfdir[@],$(dmconfdir),g' \
+       -e 's,[@]pkglibexecdir[@],$(pkglibexecdir),g' \
        -e 's,[@]NAMEBYTES[@],@NAMEBYTES@,g'
 
 Makefile = Makefile
