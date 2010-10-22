@@ -18,8 +18,8 @@ END {
 my %tools = (
     a2ps => '@ENABLE_ATPS@',
     lp => '@ENABLE_LP@',
-    ps2pdf => '@ENABLE_PSTPDF@',
-    eps2pdf => '@ENABLE_EPSTPDF@',
+    ps2pdf => ['@ENABLE_PSTPDF@', '-dNOSAFER'],
+    eps2pdf => ['@ENABLE_EPSTPDF@', '-dNOSAFER'],
     pdf2ps => '@ENABLE_PDFTPS@',
     dvipdf => '@ENABLE_DVIPDF@',
     xdvi => '@ENABLE_XDVI@',
