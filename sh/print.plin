@@ -18,8 +18,8 @@ END {
 my %tools = (
     a2ps => '@ENABLE_ATPS@',
     lp => '@ENABLE_LP@',
-    ps2pdf => '@ENABLE_PSTPDF@',
-    eps2pdf => '@ENABLE_EPSTPDF@',
+    ps2pdf => ['@ENABLE_PSTPDF@', '-dNOSAFER'],
+    eps2pdf => ['@ENABLE_EPSTPDF@', '-dNOSAFER'],
     pdf2ps => '@ENABLE_PDFTPS@',
     dvipdf => '@ENABLE_DVIPDF@',
     xdvi => '@ENABLE_XDVI@',
@@ -29,11 +29,11 @@ my %tools = (
     );
 
 foreach my $tool (keys %tools) {
-    my $path = $tools{$tool};
-    if (! length($path)) {
+    my @path = ref($tools{$tool}) ? @{$tools{$tool}} : ($tools{$tool});
+    if (! length($path[0])) {
 	$tools{$tool} = ['@dmstartdir@/runtool.sh', 'no', $tool];
     } {
-	$tools{$tool} = ['@dmstartdir@/runtool.sh', 'yes', $path];
+	$tools{$tool} = ['@dmstartdir@/runtool.sh', 'yes', @path];
     }
 }
 
