@@ -29,11 +29,11 @@ my %tools = (
     );
 
 foreach my $tool (keys %tools) {
-    my $path = $tools{$tool};
-    if (! length($path)) {
+    my @path = ref($tools{$tool}) ? @{$tools{$tool}} : ($tools{$tool});
+    if (! length($path[0])) {
 	$tools{$tool} = ['@dmstartdir@/runtool.sh', 'no', $tool];
     } {
-	$tools{$tool} = ['@dmstartdir@/runtool.sh', 'yes', $path];
+	$tools{$tool} = ['@dmstartdir@/runtool.sh', 'yes', @path];
     }
 }
 
