@@ -43,7 +43,7 @@
     (\n) fax
   } color_text 
   0 exch getinterval toconsole_base
-} bind def
+} bind userdef
 
 |================================ makefont ===========================
 | ~font-spec-getter [null col_idx h_align v_align] | ~drawtextproc
