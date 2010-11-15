@@ -34,16 +34,18 @@
 | ~active just fills a buffer and updates the index to the end.
 | 
 /warning_buffer 1024 /b array def
-/warning {
-  /warning_func name
-  loadcolor
-  warning_buffer 0 {/red} {
-    (Warning: ) fax 
-    warning_func
-    (\n) fax
-  } color_text 
-  0 exch getinterval toconsole_base
-} bind userdef
+/warning ~[
+  {
+    /warning_func name
+    loadcolor
+    warning_buffer 0 {/red} {
+      (Warning: ) fax 
+      warning_func
+      (\n) fax
+    } color_text 
+    0 exch getinterval toconsole_base
+  } userdict ~indict
+] bind def
 
 |================================ makefont ===========================
 | ~font-spec-getter [null col_idx h_align v_align] | ~drawtextproc
