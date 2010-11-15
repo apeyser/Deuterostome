@@ -842,14 +842,22 @@ end mkread def
 /streamclass {pop (null) ftext} bind def
 /boolclass  { {(true)} {(false)} ifelse ftext } bind def
 
-/_stringclass { /obj name
-                newline * (\() text * obj text * (\)) text } bind def
-/_arrayclass { /obj name
-               newline objstr 0 * (<) text * obj type text
-               0 exch getinterval ftext 3 indent
-               obj { dup type mkact exec } forall
-               -3 indent (>) ftext
-             } bind def
+/_stringclass {/obj name
+  newline
+  (\() fax obj fax (\)) fax
+  obj active {( cvx) fax} if
+} bind def
+
+/_arrayclass {/obj name
+  newline
+  objstr 0
+    (<) fax * obj type text
+  0 exch getinterval ftext
+  3 indent
+  obj {dup type mkact exec} forall
+  -3 indent
+  (>) ftext
+} bind def
 
 /B { objstr 0 4 4 -1 roll * number 0 exch getinterval ftext } bind def
 /W { objstr 0 6 4 -1 roll * number 0 exch getinterval ftext } bind def
