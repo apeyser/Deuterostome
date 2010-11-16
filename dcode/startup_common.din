@@ -38,14 +38,15 @@
   {
     /warning_func name
     loadcolor
-    warning_buffer 0 {/red} {
-      (Warning: ) fax 
-      warning_func
-      (\n) fax
-    } color_text 
-    0 exch getinterval toconsole_base
-  } userdict ~indict
-] bind def
+    warning_buffer {
+      {/red} {
+        (Warning: ) fax
+        warning_func
+        (\n) fax
+      } color_text
+    } tostring
+  } bind userdict ~indict ~toconsole_base
+] def
 
 |================================ makefont ===========================
 | ~font-spec-getter [null col_idx h_align v_align] | ~drawtextproc
