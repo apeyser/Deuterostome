@@ -582,8 +582,8 @@
 end mkread def
 
 /oclasses 12 dict dup begin                      | object
-   /nullclass  { 
-     /object find active {(~) fax} if (null) fax 
+   /nullclass  {
+     /object find active {(~) fax} if (null) fax
      nulltypes /object find type get exec
    } bind def
    /numclass   { * object * number } bind def
@@ -747,111 +747,142 @@ dup dup class /arrayclass eq exch type /B eq and
 | arrays into lists for use by PostScript.
 | 
 | use:  textbuffer index object | textbuffer index
+|
+| active handling isn't quite right. It needs to know whether it's in
+| or out of a procedure.
 
-/xtext  { xtext_dict begin /dprec 15 def /d_bnum  totext end } bind def
-/xtexts { xtext_dict begin /dprec 15 def /d_blit  totext end } bind def
-/pstext { xtext_dict begin /dprec 6 def  /ps_blit totext end } bind def
+/xtext  {15 ~d_bnum  (mkact) ~totext xtext_dict indict} bind def
+/xtexts {15 ~d_blit  (mkact) ~totext xtext_dict indict} bind def
+/pstext {6  ~ps_blit (cvx)   ~totext xtext_dict indict} bind def
 
 /xtext_dict 40 dict dup begin
  
-/inword { dup class mkact exec } bind def
+/inword {dup class mkact exec} bind def
 
-/newline { * (\n) text indents () text /colleft 75 indents sub def 
+/newline {
+  * (\n) text
+  indents () text
+  /colleft 75 indents sub def
 } bind def
 
-/indent { indents add /indents name } bind def
+/indent {indents add /indents name} bind def
 
-/ftext { /chunk name 
-  colleft chunk length 1 add sub /colleft name colleft 0 lt 
-    { newline * chunk text /colleft colleft chunk length sub def } 
-    { * ( ) text * chunk text }
-    ifelse
+/ftext {/chunk name
+  colleft chunk length 1 add sub /colleft name colleft 0 lt {
+    newline * chunk text /colleft colleft chunk length sub def
+  } {
+    * ( ) text * chunk text
+  } ifelse
 } bind def
 
 /objstr @NAMEBYTES@ 2 mul /b array def
 
-/nullclass  { 
-  3 1 roll (null) ftext 
-  3 -1 roll active {(mkact) ftext} if | this isn't quite right.
+/nullclass {/obj name
+  (null) ftext
+  /obj find active {act ftext} if
 } bind def
-/numclass   { dup type mkact exec } bind def
-/opclass    { objstr 0 * 4 -1 roll text 0 exch getinterval ftext
-            } bind def
-/nameclass  { /obj name
-              objstr 0 /obj find active not { * (/) text } if
-              * /obj find text 0 exch getinterval ftext
-            } bind def
+/numclass {dup type mkact exec} bind def
+/opclass {
+  objstr 0 * 4 -1 roll text 0 exch getinterval ftext
+} bind def
+/nameclass {/obj name
+  objstr 0
+    /obj find active not {(/) fax} if
+    * /obj find text
+  0 exch getinterval ftext
+  /obj find tilde {act ftext} if
+} bind def
 
 | arrayclass is alternately associated with:
 
-/d_bnum { mkpass _arrayclass } bind def
+/d_bnum {
+  d_bnum 1 index type get exec
+} bind def
 
-/d_blit { mkpass dup
-          type mkact d_blit_dict begin exec end mkact exec
+/d_bnum 6 dict dup begin
+   /B ~_arrayclass def
+   /W {mkpass _arrayclass} def
+   /L {mkpass _arrayclass} def
+   /X {mkpass _arrayclass} def
+   /S {mkpass _arrayclass} def
+   /D {mkpass _arrayclass} def
+end mkread def
+
+/d_blit {
+  d_blit_dict 1 index type get exec
 } bind def
 
 /d_blit_dict 6 dict dup begin
-   /B /_stringclass def
-   /W /_arrayclass def
-   /L /_arrayclass def
-   /X /_arrayclass def
-   /S /_arrayclass def
-   /D /_arrayclass def
+   /B ~_stringclass def
+   /W {mkpass _arrayclass} def
+   /L {mkpass _arrayclass} def
+   /X {mkpass _arrayclass} def
+   /S {mkpass _arrayclass} def
+   /D {mkpass _arrayclass} def
 end mkread def
 
-/ps_blit { mkpass dup 
-           type mkact ps_blit_dict begin exec end mkact exec
+/ps_blit {
+  ps_blit_dict 1 index type get exec
 } bind def
 
 /ps_blit_dict 6 dict dup begin
-   /B /_stringclass def
-   /W /listclass def
-   /L /listclass def
-   /X /listclass def
-   /S /listclass def
-   /D /listclass def
+   /B ~_stringclass def
+   /W {mkpass listclass} def
+   /L {mkpass listclass} def
+   /X {mkpass listclass} def
+   /S {mkpass listclass} def
+   /D {mkpass listclass} def
 end mkread def
 
-/listclass  { dup /obj name active
-              { newline ({) ftext 2 indent 
-                /obj find { inword } forall
-                -2 indent (}) ftext
-              }
-              { newline ([) ftext 2 indent 
-                obj { inword } forall
-                -2 indent (]) ftext
-              }
-              ifelse
-            } bind def
-/dictclass  { mkpass /obj name
-              |obj type /Q ne {
-                  newline
-                  obj length 
-                  objstr 0 * 4 -1 roll * number 0 exch getinterval
-                  ftext (dict dup begin) ftext
-                  2 indent
-                  obj {
-                      4 -2 roll newline
-                      4 -1 roll inword 3 -1 roll inword (def) ftext
-                  } forall
-                  -2 indent (end) ftext
-              |} if
-            } bind def
-/boxclass   { pop (null) ftext} bind def | discard a box object
-/markclass  { pop * ([) text } bind def
+/listclass {
+  dup /obj name active {
+    newline ({)
+      ftext 2 indent
+      /obj find ~inword forall
+      -2 indent
+    (}) ftext
+  } {
+    newline ([)
+      ftext 2 indent
+      obj ~inword forall
+      -2 indent
+    (]) ftext
+  } ifelse
+} bind def
+
+/dictclass  {mkpass /obj name
+  newline
+  obj length
+  objstr 0 * 4 -1 roll * number 0 exch getinterval
+  ftext (dict dup begin) ftext
+  2 indent
+  obj {
+    4 -2 roll newline
+    4 -1 roll inword 3 -1 roll inword (def) ftext
+  } forall
+  -2 indent (end) ftext
+} bind def
+
+/boxclass    {pop (null) ftext} bind def | discard a box object
+/markclass   {/obj name
+  ([) ftext
+  /obj find tilde {(mktilde) ftext} if
+} bind def
 /streamclass {pop (null) ftext} bind def
-/boolclass  { {(true)} {(false)} ifelse ftext } bind def
+/boolclass   {
+  {(true)} {(false)} ifelse ftext
+} bind def
 
 /_stringclass {/obj name
   newline
-  (\() fax obj fax (\)) fax
-  obj active {( cvx) fax} if
+  (\() fax /obj find fax (\)) fax
+  /obj find active {newline act ftext} if
 } bind def
 
 /_arrayclass {/obj name
   newline
   objstr 0
-    (<) fax * obj type text
+    (<) fax * /obj find type text
   0 exch getinterval ftext
   3 indent
   obj {dup type mkact exec} forall
@@ -859,15 +890,17 @@ end mkread def
   (>) ftext
 } bind def
 
-/B { objstr 0 4 4 -1 roll * number 0 exch getinterval ftext } bind def
-/W { objstr 0 6 4 -1 roll * number 0 exch getinterval ftext } bind def
-/L { objstr 0 11 4 -1 roll * number 0 exch getinterval ftext } bind def
-/X { objstr 0 21 4 -1 roll * number 0 exch getinterval ftext } bind def
-/S { objstr 0 13 4 -1 roll 6 number 0 exch getinterval ftext } bind def
-/D { objstr 0 dprec 8 add 4 -1 roll dprec number
-     0 exch getinterval ftext } bind def
+/B {objstr 0 4 4 -1 roll * number 0 exch getinterval ftext} bind def
+/W {objstr 0 6 4 -1 roll * number 0 exch getinterval ftext} bind def
+/L {objstr 0 11 4 -1 roll * number 0 exch getinterval ftext} bind def
+/X {objstr 0 21 4 -1 roll * number 0 exch getinterval ftext} bind def
+/S {objstr 0 13 4 -1 roll 6 number 0 exch getinterval ftext} bind def
+/D {
+  objstr 0 dprec 8 add 4 -1 roll dprec number
+  0 exch getinterval ftext
+} bind def
 
-/totext {find /arrayclass name /obj name
+/totext {/act name /arrayclass name /dprec name /obj name
    /indents 0 def newline
    /obj find inword
    newline
