@@ -751,9 +751,27 @@ dup dup class /arrayclass eq exch type /B eq and
 | active handling isn't quite right. It needs to know whether it's in
 | or out of a procedure.
 
-/xtext  {15 ~d_bnum  (mkact) ~totext xtext_dict indict} bind def
-/xtexts {15 ~d_blit  (mkact) ~totext xtext_dict indict} bind def
-/pstext {6  ~ps_blit (cvx)   ~totext xtext_dict indict} bind def
+/xtext  {~totext xtext_dict ~indict xtext_d_bnum  indict} bind def
+/xtexts {~totext xtext_dict ~indict xtext_d_blit  indict} bind def
+/pstext {~totext xtext_dict ~indict xtext_ps_blit indict} bind def
+
+/xtext_d_bnum 3 dict dup begin
+  /dprec 15 def
+  /array_class ~d_bnum def
+  /act (mkact) def
+end mkread def
+
+/xtext_d_blit 3 dict dup begin
+  /dprec 15 def
+  /array_class ~d_blit def
+  /act (mkact) def
+end mkread def
+
+/xtext_ps_blit 3 dict dup begin
+  /dprec 6 def
+  /array_class ~ps_blit def
+  /act (cvx) def
+end mkread  def
 
 /xtext_dict 40 dict dup begin
  
@@ -900,7 +918,7 @@ end mkread def
   0 exch getinterval ftext
 } bind def
 
-/totext {/act name /arrayclass name /dprec name /obj name
+/totext {/obj name
    /indents 0 def newline
    /obj find inword
    newline
