@@ -22,7 +22,7 @@
 /setvolume {dup /volume name verbose exch get ~def forall} bind def
 /loud setvolume
 
-/EPSbufsz 1e7 def
+/EPSbufsz 1e8 def
 /includebufsz 1e6 def
 
 |=============================== Prologue ====================================
