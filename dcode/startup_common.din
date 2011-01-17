@@ -1241,18 +1241,27 @@ end def  | of xtext_dict
 | dictstack in userdict->[d_dictstack]
 | execstack in userdict->[d_execstack]
 /reverse { | [ n1 .. nx ] | [ nx ... n1] 
-  [exch dup length 1 sub -1 0 { | \[ [] i
-    1 index exch get | \[ [] x
-    exch | \[ x []   
-  } for pop]
+  dup length list 2 copy {
+    dup length 0 eq ~exit if
+    1 index 0 get 1 index dup last put
+    0 1 index last getinterval exch
+    1 1 index last getinterval exch
+  } loop
+  pop pop exch pop
 } bind def
 
 /dstate_ {
+  userdict /dstate_sv known {dstate_sv restore} if
+  save userdict /dstate_sv put
+
   countexecstack list execstack dup length 1 sub 0 exch getinterval
     reverse
     userdict /d_execstack put
 
-  [count 1 ne {count 1 roll} if] dup
+  count list {
+    count 1 eq ~exit if
+    dup 3 1 roll 3 sub put
+  } loop
     reverse
     userdict /d_opstack put
     {} forall
@@ -1260,6 +1269,8 @@ end def  | of xtext_dict
   countdictstack list dictstack dup length 2 sub 2 exch getinterval
     reverse
     userdict /d_dictstack put
+
+  userdict /dstate_sv get capsave
 } bind def
 
 | e1...ex ... n | ... e1..ex
