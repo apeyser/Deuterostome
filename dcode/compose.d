@@ -22,6 +22,9 @@
 /setvolume {dup /volume name verbose exch get ~def forall} bind def
 /loud setvolume
 
+/EPSbufsz 1e7 def
+/includebufsz 1e6 def
+
 |=============================== Prologue ====================================
 |
 | This D code has evolved from struct.ps as a tool for making structured
@@ -78,8 +81,8 @@
     /EPSfile name
     /EPSpath name
     /EPSidx 0 def
-    /EPSbuf 1e7 /b array def
-    /includebuf 1e6 /b array def
+    /EPSbuf EPSbufsz /b array def
+    /includebuf includebufsz /b array def
     /includeidx 0 def
     /xbox 4 /d array def
     /ybox 4 /d array def
