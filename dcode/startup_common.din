@@ -1260,7 +1260,7 @@ end def  | of xtext_dict
 
   count list {
     count 1 eq ~exit if
-    dup 3 1 roll 3 sub put
+    dup 3 1 roll count 3 sub put
   } loop
     reverse
     userdict /d_opstack put
