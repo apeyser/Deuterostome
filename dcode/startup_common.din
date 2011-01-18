@@ -1262,11 +1262,11 @@ end def  | of xtext_dict
     count 1 eq ~exit if
     dup 3 1 roll count 3 sub put
   } loop
-    reverse
+    dup reverse
     userdict /d_opstack put
     {} forall
     
-  countdictstack list dictstack dup length 2 sub 2 exch getinterval
+  countdictstack list dictstack dup length 0 exch getinterval
     reverse
     userdict /d_dictstack put
 
