@@ -757,19 +757,19 @@ dup dup class /arrayclass eq exch type /B eq and
 
 /xtext_d_bnum 3 dict dup begin
   /dprec 15 def
-  /array_class ~d_bnum def
+  /arrayclass ~d_bnum def
   /act (mkact) def
 end mkread def
 
 /xtext_d_blit 3 dict dup begin
   /dprec 15 def
-  /array_class ~d_blit def
+  /arrayclass ~d_blit def
   /act (mkact) def
 end mkread def
 
 /xtext_ps_blit 3 dict dup begin
   /dprec 6 def
-  /array_class ~ps_blit def
+  /arrayclass ~ps_blit def
   /act (cvx) def
 end mkread  def
 
