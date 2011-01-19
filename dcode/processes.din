@@ -92,13 +92,13 @@
       true pd _setstate
     } bind
 
-    |====================== socketdead ===================
+    |====================== _socketdead ===================
     | socket | bool-was-found
     |
     | Handle a socket disconnect event.
     | Pid may continue alive.
     |
-    /socketdead {/s name
+    /_socketdead {/s name
       /t false def
       {dup /p name _data /pd name
         false
@@ -498,7 +498,7 @@
   /socketdead ~[
     ~[
       /socketdead destruct_execn {             | ... bool socket {}
-        1 index ~socketdead pidsockets indict {| ... bool socket {}
+        1 index ~_socketdead pidsockets indict {| ... bool socket {}
           pop pop ~error if
         } ~exec ifelse                         | --
       } currentdict ~indict
