@@ -111,7 +111,7 @@
       [(pdflatex) (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
         NULLR ewr dup sh_ not {true /estreamwith exitto} if |]
 
-      [(pdfcrop) (eps.pdf)
+      [(pdfcrop) (eps.pdf) (--hires)
         NULLR wr ewr sh_ not {true /estreamwith exitto} if |]
 
       [
