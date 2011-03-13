@@ -112,7 +112,7 @@
         NULLR ewr dup sh_ not {true /estreamwith exitto} if |]
 
       [(pdfcrop) (eps.pdf) (--hires)
-        NULLR wr ewr sh_ not {true /estreamwith exitto} if |]
+        NULLR ewr dup sh_ not {true /estreamwith exitto} if |]
 
       [
         {openlist (pdftops) (-eps) (eps-crop.pdf) (-) fds sh_}
