@@ -140,6 +140,7 @@
     setlinewidth
     symbolsize setsymbolsize
     ( symbolfont setfont ) faxPS
+    (\nsave\n) faxPS | Why? Dunno -- but without it, the image disappears
   
     |-- assemble PS code of figure
     
@@ -150,7 +151,8 @@
 
     |-- assemble EPS wrapper, trailing part
 
-    (\n%%EOF\n) faxPS
+    (\npop\n) faxPS | See save above
+    (%%EOF\n) faxPS
 
 |-- write EPS output file
 
@@ -849,12 +851,14 @@
 | - output placement instruction and PS string 
 
 { begin
+  (\nBeginEPSF\n) faxPS
   DSCoff faxPS (whatever\n) faxPS
   [ ~save inverse ~concat ] ~toPS forall
   epsstring faxPS
   verboxe { bbox toPS ~drawbbox toPS } if
   ~restore toPS
   DSCon faxPS
+  (EndEPSF\n) faxPS
   end
 } bind phase3 /latex put
 
@@ -895,12 +899,14 @@
 | - output placement instruction and PS string 
 
 { begin
+  (\nBeginEPSF\n) faxPS
   DSCoff faxPS (whatever\n) faxPS
   [ ~save inverse ~concat ] ~toPS forall
   epsstring faxPS
   verboxe { bbox toPS ~drawbbox toPS } if
   ~restore toPS
   DSCon faxPS
+  (EndEPSF\n) faxPS
   end
 } bind phase3 /includeEPS put
 
@@ -943,6 +949,7 @@
 |------------------------------- phase 3
 
 { begin
+  (\nBeginEPSF\n) faxPS
   DSCoff faxPS (whatever\n) faxPS
   [ ~save inverse ~concat ] ~toPS forall 
   setlinewidth
@@ -952,6 +959,7 @@
   verboxe { bbox toPS ~drawbbox toPS } if
   ~restore toPS
   DSCon faxPS
+  (EndEPSF\n) faxPS
   end
 } bind phase3 /PS put
 
@@ -1911,6 +1919,28 @@ phase3 mkread /phase3 name
 | provided under the corresponding small letters.
 
 /PSprefix (
+  /BeginEPSF {
+    /b4_Inc_state save def            % Save state for cleanup
+    /dict_count countdictstack def    % Count objects on dict stack
+    /op_count count 1 sub def         % Count objects on operand stack
+    userdict begin                    % Push userdict on dict stack
+    /showpage { } def                 % Redefine showpage, { } = null proc
+    0 setgray 0 setlinecap            % Prepare graphics state
+    1 setlinewidth 0 setlinejoin
+    10 setmiterlimit [ ] 0 setdash newpath
+    /languagelevel where {            % If level not equal to 1 then
+      pop languagelevel               % set strokeadjust and
+      1 ne {                          % overprint to their defaults.
+        false setstrokeadjust false setoverprint
+      } if
+    } if
+  } bind def
+
+  /EndEPSF { %def
+    count op_count sub {pop} repeat       % Clean up stacks
+    countdictstack dict_count sub {end} repeat
+    b4_Inc_state restore
+  } bind def
 
   /Symbols 100 dict dup begin
 
