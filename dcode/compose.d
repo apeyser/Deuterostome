@@ -3,16 +3,25 @@
 
 /verbose [
   /quiet ~[
+    /debug ~pop
     /loud ~pop
     /medium ~pop
     /quiet ~toconsole
   ] bind makestruct
   /medium ~[
+    /debug ~pop
     /loud ~pop
     /medium ~toconsole
     /quiet ~toconsole
   ] bind makestruct
   /loud ~[
+    /debug ~pop
+    /loud ~toconsole
+    /medium ~toconsole
+    /quiet ~toconsole
+  ] bind makestruct
+  /debug ~[
+    /debug ~toconsole
     /loud ~toconsole
     /medium ~toconsole
     /quiet ~toconsole
@@ -114,7 +123,15 @@
       * bbox 3 get ceil  /l ctype * number (\n) fax
     } genPS
     (%%HiResBoundingBox: ) faxPS
-    {bbox {* exch * number ( ) fax} forall 1 sub (\n) fax} genPS 
+    {
+      bbox {
+        100 /b array {* 4 -1 roll * number} tostring
+        (\(-?[0-9.]+[eE]\)\\+\([0-9]+\)) regex not ~fax {
+          4 1 roll pop pop pop ~fax forall
+        } ifelse
+        ( ) fax
+      } forall 1 sub (\n) fax
+    } genPS
     (%%DocumentData: Clean7Bit\n%%LanguageLevel: 3\n) faxPS  
 
     |-- insert PS code for setting global parameters and defining symbol font
@@ -123,6 +140,7 @@
     setlinewidth
     symbolsize setsymbolsize
     ( symbolfont setfont ) faxPS
+    (\nsave\n) faxPS | Why? Dunno -- but without it, the image disappears
   
     |-- assemble PS code of figure
     
@@ -133,7 +151,8 @@
 
     |-- assemble EPS wrapper, trailing part
 
-    (\n%%EOF\n) faxPS
+    (\npop\n) faxPS | See save above
+    (%%EOF\n) faxPS
 
 |-- write EPS output file
 
@@ -832,12 +851,14 @@
 | - output placement instruction and PS string 
 
 { begin
+  (\nBeginEPSF\n) faxPS
   DSCoff faxPS (whatever\n) faxPS
   [ ~save inverse ~concat ] ~toPS forall
   epsstring faxPS
   verboxe { bbox toPS ~drawbbox toPS } if
   ~restore toPS
   DSCon faxPS
+  (EndEPSF\n) faxPS
   end
 } bind phase3 /latex put
 
@@ -878,12 +899,14 @@
 | - output placement instruction and PS string 
 
 { begin
+  (\nBeginEPSF\n) faxPS
   DSCoff faxPS (whatever\n) faxPS
   [ ~save inverse ~concat ] ~toPS forall
   epsstring faxPS
   verboxe { bbox toPS ~drawbbox toPS } if
   ~restore toPS
   DSCon faxPS
+  (EndEPSF\n) faxPS
   end
 } bind phase3 /includeEPS put
 
@@ -926,6 +949,7 @@
 |------------------------------- phase 3
 
 { begin
+  (\nBeginEPSF\n) faxPS
   DSCoff faxPS (whatever\n) faxPS
   [ ~save inverse ~concat ] ~toPS forall 
   setlinewidth
@@ -935,6 +959,7 @@
   verboxe { bbox toPS ~drawbbox toPS } if
   ~restore toPS
   DSCon faxPS
+  (EndEPSF\n) faxPS
   end
 } bind phase3 /PS put
 
@@ -1894,6 +1919,28 @@ phase3 mkread /phase3 name
 | provided under the corresponding small letters.
 
 /PSprefix (
+  /BeginEPSF {
+    /b4_Inc_state save def            % Save state for cleanup
+    /dict_count countdictstack def    % Count objects on dict stack
+    /op_count count 1 sub def         % Count objects on operand stack
+    userdict begin                    % Push userdict on dict stack
+    /showpage { } def                 % Redefine showpage, { } = null proc
+    0 setgray 0 setlinecap            % Prepare graphics state
+    1 setlinewidth 0 setlinejoin
+    10 setmiterlimit [ ] 0 setdash newpath
+    /languagelevel where {            % If level not equal to 1 then
+      pop languagelevel               % set strokeadjust and
+      1 ne {                          % overprint to their defaults.
+        false setstrokeadjust false setoverprint
+      } if
+    } if
+  } bind def
+
+  /EndEPSF { %def
+    count op_count sub {pop} repeat       % Clean up stacks
+    countdictstack dict_count sub {end} repeat
+    b4_Inc_state restore
+  } bind def
 
   /Symbols 100 dict dup begin
 
@@ -2104,28 +2151,50 @@ end definefont pop   % Symbols font
 
    |-- carve out DSC prefix and postfix
 
-   epsstring endcomments regex not { pop stop } if
+   epsstring (\(^%[^%][^\n]*\n\)+) regex not {
+     (EPS: missing shebang comment\n) load
+     epsstring debug
+     pop stop
+   } if
+   pop pop pop
+   endcomments regex not {
+     (EPS: missing explicit or implicit %%EndComments\n) loud
+     epsstring debug
+     pop stop
+   } if
    pop /DSCprefix name pop
-   DSCoff search { pop pop { DSCon search not { exit } if } loop } if
-   (\n%%Trailer) search not { pop stop } if pop pop 
+   DSCoff search {pop pop {DSCon search not ~exit if} loop} if
+   (\n%%Trailer) search not {
+     (EPS: missing %%Trailer\n) loud
+     epsstring debug
+     pop stop
+   } if pop pop
    /DSCpostfix name | excludes %%Trailer
 
    |-- distill box info
 
-   DSCprefix (\n%%HiResBoundingBox:) search not
-     { (\n%%BoundingBox:) search not { pop stop } if
-     } if pop pop 
-   (\n) search { 3 1 roll pop pop } if
+   DSCprefix (\n%%HiResBoundingBox:) search not {
+     (\n%%BoundingBox:) search not {
+       (EPS: Missing prologue HiResBoundingBox and BoundingBox\n) loud
+       epsstring debug
+       pop stop
+     } if
+   } if pop pop
+   (\n) search {3 1 roll pop pop} if
    mkact exec    | try to extract box coordinates
    dup class /arrayclass eq {
        |-- (atend)!
        pop
-       DSCpostfix (\n%%HiResBoundingBox:) search not
-         { (\n%%BoundingBox:) search not { pop stop } if
-         } if pop pop 
-       (\n) search { 3 1 roll pop pop } if
-       mkact exec | try again
-     } if
+       DSCpostfix (\n%%HiResBoundingBox:) search not {
+         (\n%%BoundingBox:) search not {
+           (EPS: Missing Trailer HiResBoundingBox and BoundingBox\n) loud
+           epsstring debug
+           pop stop
+         } if
+       } if pop pop
+     (\n) search {3 1 roll pop pop} if
+     mkact exec | try again
+   } if
    /bbox 4 /d array def
    bbox 3 put bbox 2 put bbox 1 put bbox 0 put
 

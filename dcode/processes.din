@@ -574,7 +574,7 @@
   |
   | Execute (exec) with following operands in child process,
   |  using fd-in fd-out and fd-err as redirects.
-  | Returns pid of child process running in bg.
+  | Returns true if (exec) returns zero.
   |
   /sh_ {
     sh_bg wait
