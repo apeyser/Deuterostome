@@ -122,7 +122,7 @@
       [(sed) (-e) (s/pt$//) (eps.comment)
         NULLR wr ewr sh_ not {true /estreamwith exitto} if |]
 
-      wr close
+      wr (%%EOF) writefd close
       false
     } /estreamwith exitlabel} stopped} aborted
     pwd setwdir
