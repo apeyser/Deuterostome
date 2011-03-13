@@ -111,11 +111,13 @@
       [(pdflatex) (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
         NULLR ewr dup sh_ not {true /estreamwith exitto} if |]
 
-      [(gs) (-q) RESOLUTION (-dLanguageLevel=3)
-        (-dNOPAUSE) (-dBATCH) (-dSAFER)
-        (-sDEVICE=epswrite) (-sOutputFile=-)
-        (eps.pdf)
+      [(pdfcrop) (eps.pdf)
         NULLR wr ewr sh_ not {true /estreamwith exitto} if |]
+
+      [
+        {openlist (pdftops) (-eps) (eps-crop.pdf) (-) fds sh_}
+        {openlist (head) (-n) (-1) fds sh_}
+        NULLR wr ewr pipe wait not {true /estreamwith exitto} if |]
 
       [(sed) (-e) (s/pt$//) (eps.comment)
         NULLR wr ewr sh_ not {true /estreamwith exitto} if |]
