@@ -3,16 +3,25 @@
 
 /verbose [
   /quiet ~[
+    /debug ~pop
     /loud ~pop
     /medium ~pop
     /quiet ~toconsole
   ] bind makestruct
   /medium ~[
+    /debug ~pop
     /loud ~pop
     /medium ~toconsole
     /quiet ~toconsole
   ] bind makestruct
   /loud ~[
+    /debug ~pop
+    /loud ~toconsole
+    /medium ~toconsole
+    /quiet ~toconsole
+  ] bind makestruct
+  /debug ~[
+    /debug ~toconsole
     /loud ~toconsole
     /medium ~toconsole
     /quiet ~toconsole
@@ -114,7 +123,15 @@
       * bbox 3 get ceil  /l ctype * number (\n) fax
     } genPS
     (%%HiResBoundingBox: ) faxPS
-    {bbox {* exch * number ( ) fax} forall 1 sub (\n) fax} genPS 
+    {
+      bbox {
+        100 /b array {* 4 -1 roll * number} tostring
+        (\(-?[0-9.]+[eE]\)\\+\([0-9]+\)) regex not ~fax {
+          4 1 roll pop pop pop ~fax forall
+        } ifelse
+        ( ) fax
+      } forall 1 sub (\n) fax
+    } genPS
     (%%DocumentData: Clean7Bit\n%%LanguageLevel: 3\n) faxPS  
 
     |-- insert PS code for setting global parameters and defining symbol font
@@ -2104,28 +2121,50 @@ end definefont pop   % Symbols font
 
    |-- carve out DSC prefix and postfix
 
-   epsstring endcomments regex not { pop stop } if
+   epsstring (\(^%[^%][^\n]*\n\)+) regex not {
+     (EPS: missing shebang comment\n) load
+     epsstring debug
+     pop stop
+   } if
+   pop pop pop
+   endcomments regex not {
+     (EPS: missing explicit or implicit %%EndComments\n) loud
+     epsstring debug
+     pop stop
+   } if
    pop /DSCprefix name pop
-   DSCoff search { pop pop { DSCon search not { exit } if } loop } if
-   (\n%%Trailer) search not { pop stop } if pop pop 
+   DSCoff search {pop pop {DSCon search not ~exit if} loop} if
+   (\n%%Trailer) search not {
+     (EPS: missing %%Trailer\n) loud
+     epsstring debug
+     pop stop
+   } if pop pop
    /DSCpostfix name | excludes %%Trailer
 
    |-- distill box info
 
-   DSCprefix (\n%%HiResBoundingBox:) search not
-     { (\n%%BoundingBox:) search not { pop stop } if
-     } if pop pop 
-   (\n) search { 3 1 roll pop pop } if
+   DSCprefix (\n%%HiResBoundingBox:) search not {
+     (\n%%BoundingBox:) search not {
+       (EPS: Missing prologue HiResBoundingBox and BoundingBox\n) loud
+       epsstring debug
+       pop stop
+     } if
+   } if pop pop
+   (\n) search {3 1 roll pop pop} if
    mkact exec    | try to extract box coordinates
    dup class /arrayclass eq {
        |-- (atend)!
        pop
-       DSCpostfix (\n%%HiResBoundingBox:) search not
-         { (\n%%BoundingBox:) search not { pop stop } if
-         } if pop pop 
-       (\n) search { 3 1 roll pop pop } if
-       mkact exec | try again
-     } if
+       DSCpostfix (\n%%HiResBoundingBox:) search not {
+         (\n%%BoundingBox:) search not {
+           (EPS: Missing Trailer HiResBoundingBox and BoundingBox\n) loud
+           epsstring debug
+           pop stop
+         } if
+       } if pop pop
+     (\n) search {3 1 roll pop pop} if
+     mkact exec | try again
+   } if
    /bbox 4 /d array def
    bbox 3 put bbox 2 put bbox 1 put bbox 0 put
 

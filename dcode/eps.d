@@ -116,13 +116,13 @@
 
       [ {openlist (pdftops) (-eps) (-level3) (-preload)
           (eps-crop.pdf) (-) fds sh_}
-        {openlist (head) (-n) (-1) fds sh_}
+        {openlist (sed) (-re) (/^%%EOF$/,$ d) fds sh_}
         NULLR wr ewr pipe_ not {true /estreamwith exitto} if |]
 
       [(sed) (-e) (s/pt$//) (eps.comment)
         NULLR wr ewr sh_ not {true /estreamwith exitto} if |]
 
-      wr (%%EOF) writefd close
+      wr close
       false
     } /estreamwith exitlabel} stopped} aborted
     pwd setwdir
