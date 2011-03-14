@@ -163,6 +163,51 @@
   /figurelayer inlayer
 } bind def
 
+
+|========================= Making an PDF figure ============================
+|
+| To make a composite figure in PDF (encapsulated for inclusion) format, use
+| `PDFfigure':
+|
+|    PDFpath PDFfile { generator } | --
+|
+| `path' and `file' direct the output. The `generator' procedure builds the
+| composite figure using primitives described below. Some primitives, again,
+| take a generator procedure (or a list thereof) for argument, so that a
+| tree of generators is formed. The tree of generators produces a hierarchy
+| of graphical elements, in a hierarchy of bounding boxes. The alignment
+| of the figure elements with respect to one another is handled by a
+| (`placement') procedure given as an argument to  each primitive.
+|
+| `PDFfigure' generates an EPS wrapper f or the PS code and writes the PS code
+| together with a prefix (defining a symbol font and some PS tools) to the
+| output file.  That is then converted to a PDF.
+|
+| Wolfgang must be doing something funky with saves -- I can't wrap this.
+|
+/PDFfigure {
+  {
+    /pdf_gen  name
+    /pdf_file name
+    /pdf_path name
+    null (eps) tmpfile
+    /pdf_nfile name /pdf_ndir name /pdf_fdw name /pdf_fdr name {
+      pdf_fdw closefd
+      (Tmp: ) loud pdf_ndir loud pdf_nfile loud
+      pdf_ndir pdf_nfile /pdf_gen find ~EPSfigure enddict
+      /pdf_fdw |{
+        pdf_path pdf_file PROCESSES /FFLAGS get /WRITE_TRUNCATE get openfd |}
+      def
+      openlist PROGS /EPSTOPDF get (--hires) (--filter) pdf_fdr pdf_fdw
+      {STDERR sh_io} PROCESSES indict
+      (\n) loud (PDF file written: ) medium pdf_file medium (\n) medium
+    } stopped
+    pdf_fdw pdf_fdr {closeifopen closeifopen} PROCESSES indict
+    pdf_ndir pdf_nfile rmpath
+    {/stop stop} if
+  } COMPOSE indict
+} bind def
+
 |============== Primitives for creating figure elements ====================
 |
 | A primitive is implemented in three phases, by procedures associated with
@@ -851,14 +896,14 @@
 | - output placement instruction and PS string 
 
 { begin
+  [ ~save inverse ~concat ] ~toPS forall
   (\nBeginEPSF\n) faxPS
   DSCoff faxPS (whatever\n) faxPS
-  [ ~save inverse ~concat ] ~toPS forall
   epsstring faxPS
   verboxe { bbox toPS ~drawbbox toPS } if
-  ~restore toPS
   DSCon faxPS
   (EndEPSF\n) faxPS
+  ~restore toPS
   end
 } bind phase3 /latex put
 

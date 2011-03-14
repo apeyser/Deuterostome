@@ -1,4 +1,4 @@
-AC_INIT([D-Machine], [4.6.7], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
+AC_INIT([D-Machine], [4.6.8], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
 AC_CONFIG_MACRO_DIR([m4 libltdl/m4])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_AUX_DIR([libltdl/config])
@@ -101,7 +101,7 @@ CF_IF_ENABLED([doc], [
   CF_LATEX_CLASS_ARTICLE
   CF_LATEX_CLASS_BOOK
   CF_LATEX_PACKAGE_AMSMATH
-  CF_LATEX_PACKAGES([array,makeidx,supertabular,pdf,options,hyperref,newbook,caption,calc,avant,mathpazo,relsize], 
+  CF_LATEX_PACKAGES([array,makeidx,supertabular,pdf,options,hyperref,relsize,caption,calc,avant,mathpazo,newbook], 
                     [book], [`cd $srcdir; pwd -P`/doc])
   CF_LATEX_PACKAGES([pdf,hyperref,natbib,redefs], 
                     [article], [`cd $srcdir; pwd -P`/doc])
@@ -194,6 +194,8 @@ CF_AM_PROG([GS], [gs])
 CF_AM_PROG([PDFLATEX], [pdflatex])
 CF_AM_PROG([LATEX], [latex])
 CF_AM_PROG([EMACSCLIENT], [emacsclient])
+CF_AM_PROG([PDFCROP], [pdfcrop])
+CF_AM_PROG([PDFTOPS], [pdftops])
 
 CF_AC_ARG_VAR_QUOTE([guipdf],
  [name of program to display pdf's, eg gnome-open or launch -i com.apple.Preview],

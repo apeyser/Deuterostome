@@ -128,6 +128,14 @@ else !ENABLE_SEM
 SEM_EDIT = -e '$(SEM_START),$(SEM_ELSE) d' -e '$(SEM_END) d'
 endif !ENABLE_SEM
 
+PROGS_EDIT = -e 's,[@]GS[@],$(ENABLE_GS),g' \
+	     -e 's,[@]PDFLATEX[@],$(ENABLE_PDFLATEX),g' \
+	     -e 's,[@]LATEX[@],$(ENABLE_LATEX),g' \
+	     -e 's,[@]EPSTOPDF[@],$(ENABLE_EPSTPDF),g' \
+	     -e 's,[@]PDFCROP[@],$(ENABLE_PDFCROP),g' \
+	     -e 's,[@]PDFTOPS[@],$(ENABLE_PDFTOPS),g' \
+	     -e 's,[@]SED[@],$(SED),g'
+
 edit = -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
        -e 's,[@]bindir[@],$(bindir),g' \
        -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g' \
@@ -142,6 +150,7 @@ edit = -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
        $(RTHREADS_EDIT) \
        $(REGEX_DELETE) \
        $(PETSC_EDIT) \
-       $(SEM_EDIT)
+       $(SEM_EDIT) \
+       $(PROGS_EDIT)
 
 include $(top_srcdir)/m4/cf_in.make

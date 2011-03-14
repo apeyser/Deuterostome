@@ -101,8 +101,14 @@
 /* Path to LP */
 #undef ENABLE_LP
 
+/* Path to PDFCROP */
+#undef ENABLE_PDFCROP
+
 /* Path to PDFLATEX */
 #undef ENABLE_PDFLATEX
+
+/* Path to PDFTOPS */
+#undef ENABLE_PDFTOPS
 
 /* Path to PDFTPS */
 #undef ENABLE_PDFTPS

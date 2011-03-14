@@ -108,18 +108,19 @@
         predoc {(XX) 0 * ptsize * number pop} pre preamble main input post
       } {exec writefd} forall close
 
-      [(pdflatex) (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
+      [PROGS /PDFLATEX get (--halt-on-error) (--interaction=nonstopmode) 
+        (eps.tex)
         NULLR ewr dup sh_ not {true /estreamwith exitto} if |]
 
-      [(pdfcrop) (--hires) (eps.pdf) (eps-crop.pdf)
+      [PROGS /PDFCROP get (--hires) (eps.pdf) (eps-crop.pdf)
         NULLR ewr dup sh_ not {true /estreamwith exitto} if |]
 
-      [ {openlist (pdftops) (-eps) (-level3) (-preload)
+      [ {openlist PROGS /PDFTOPS get (-eps) (-level3) (-preload)
           (eps-crop.pdf) (-) fds sh_}
-        {openlist (sed) (-re) (/^%%EOF$/,$ d) fds sh_}
+        {openlist PROGS /SED get (-re) (/^%%EOF$/,$ d) fds sh_}
         NULLR wr ewr pipe_ not {true /estreamwith exitto} if |]
 
-      [(sed) (-e) (s/pt$//) (eps.comment)
+      [PROGS /SED get (-e) (s/pt$//) (eps.comment)
         NULLR wr ewr sh_ not {true /estreamwith exitto} if |]
 
       wr (%%EOF) writefd close
