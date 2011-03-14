@@ -128,12 +128,12 @@ else !ENABLE_SEM
 SEM_EDIT = -e '$(SEM_START),$(SEM_ELSE) d' -e '$(SEM_END) d'
 endif !ENABLE_SEM
 
-PROGS_EDIT = -e 's,[@]GS[@],@GS@,g' \
-	     -e 's,[@]PDFLATEX[@],@PDFLATEX@,g' \
-	     -e 's,[@]LATEX[@],@LATEX@,g' \
-	     -e 's,[@]EPSTOPDF[@],@EPSTOPDF@,g' \
-	     -e 's,[@]PDFCROP[@],@PDFCROP@,g' \
-	     -e 's,[@]PDFTOPS[@],@PDFTOPS@,g' \
+PROGS_EDIT = -e 's,[@]GS[@],@ENABLE_GS@,g' \
+	     -e 's,[@]PDFLATEX[@],@ENABLE_PDFLATEX@,g' \
+	     -e 's,[@]LATEX[@],@ENABLE_LATEX@,g' \
+	     -e 's,[@]EPSTOPDF[@],@ENABLE_EPSTOPDF@,g' \
+	     -e 's,[@]PDFCROP[@],@ENABLE_PDFCROP@,g' \
+	     -e 's,[@]PDFTOPS[@],@ENABLE_PDFTOPS@,g' \
 	     -e 's,[@]SED[@],@SED@,g'
 
 edit = -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
