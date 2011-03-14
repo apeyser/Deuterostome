@@ -1619,7 +1619,7 @@ end mkread def
 /PROGS {
   /GS (@GS@)
   /PDFLATEX (@PDFLATEX@)
-  /EPSTOPDF (@EPSTOPDF)
+  /EPSTOPDF (@EPSTOPDF@)
   /PDFCROP (@PDFCROP@)
   /PDFTOPS (@PDFTOPS@)
   /SED (@SED@)
