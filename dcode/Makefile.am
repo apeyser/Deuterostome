@@ -131,7 +131,7 @@ endif !ENABLE_SEM
 PROGS_EDIT = -e 's,[@]GS[@],$(ENABLE_GS),g' \
 	     -e 's,[@]PDFLATEX[@],$(ENABLE_PDFLATEX),g' \
 	     -e 's,[@]LATEX[@],$(ENABLE_LATEX),g' \
-	     -e 's,[@]EPSTOPDF[@],$(ENABLE_EPSTOPDF),g' \
+	     -e 's,[@]EPSTOPDF[@],$(ENABLE_EPSTPDF),g' \
 	     -e 's,[@]PDFCROP[@],$(ENABLE_PDFCROP),g' \
 	     -e 's,[@]PDFTOPS[@],$(ENABLE_PDFTOPS),g' \
 	     -e 's,[@]SED[@],$(SED),g'

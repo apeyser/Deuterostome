@@ -194,7 +194,6 @@ CF_AM_PROG([GS], [gs])
 CF_AM_PROG([PDFLATEX], [pdflatex])
 CF_AM_PROG([LATEX], [latex])
 CF_AM_PROG([EMACSCLIENT], [emacsclient])
-CF_AM_PROG([EPSTOPDF], [epstopdf])
 CF_AM_PROG([PDFCROP], [pdfcrop])
 CF_AM_PROG([PDFTOPS], [pdftops])
 
