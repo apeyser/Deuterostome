@@ -255,7 +255,7 @@
 |--------------------- localfunc -----------------------
 | /name ~names ~active | /name ~localfunc
 |
-| returns a new procedure: {/name_l ~names ~active local}
+| returns a new procedure: {/name_l ~names ~active layerlocal}
 |
 /layerlocalfunc_ @NAMEBYTES@ /b array def
 /layerlocalfunc {

@@ -165,23 +165,24 @@
 
 | path file ~generator | --
 /PDFfigure {
-  tmpfile openlist
-  /path /file /generator 
-  /fdr /fdw /ndir /nfile
-} {
-  {
-    fdw closefd
-    /fdw path file PROCESSES /FFLAGS get /WRITE_TRUNCATE get openfd def
-    ndir file /generator find ~EPSFigure enddict
-    {
-      openlist PROGS /EPSTOPDF get (--hires) (--filter) fdr fdw STDERR
-      sh_ not ~stop if
-    } PROCESSES indict
-  } stopped 
-  fdr closefd fdw closefd
-  ndir nfile rmpath
-  ~stop if
-} layerlocalfunc bind def
+  /pdf_gen  name
+  /pdf_file name
+  /pdf_path name
+  null (eps) tmpfile
+  /pdf_nfile name /pdf_ndir name /pdf_fdw name /pdf_fdr name {
+    pdf_fdw closefd
+    (Tmp: ) loud pdf_ndir loud pdf_nfile loud
+    pdf_ndir pdf_nfile /pdf_gen find EPSfigure
+    /pdf_fdw |{
+      pdf_path pdf_file PROCESSES /FFLAGS get /WRITE_TRUNCATE get openfd |}
+    def
+    openlist PROGS /EPSTOPDF get (--hires) (--filter) pdf_fdr pdf_fdw
+    {STDERR sh_io} PROCESSES indict
+  } stopped
+  pdf_fdw pdf_fdr {closeifopen closeifopen} PROCESSES indict
+  pdf_ndir pdf_nfile rmpath
+  {/stop stop} if
+} bind def
 
 |============== Primitives for creating figure elements ====================
 |
