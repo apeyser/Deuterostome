@@ -178,6 +178,7 @@
     def
     openlist PROGS /EPSTOPDF get (--hires) (--filter) pdf_fdr pdf_fdw
     {STDERR sh_io} PROCESSES indict
+    (\n) loud (PDF file written: ) medium pdf_file medium (\n) medium
   } stopped
   pdf_fdw pdf_fdr {closeifopen closeifopen} PROCESSES indict
   pdf_ndir pdf_nfile rmpath
