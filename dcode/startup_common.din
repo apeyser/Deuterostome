@@ -1616,9 +1616,18 @@ end mkread def
   {actiondict exch get exec true} {false} ifelse
 } bind def
 
+/PROGS {
+  /GS (@GS@)
+  /PDFLATEX (@PDFLATEX@)
+  /EPSTOPDF (@EPSTOPDF)
+  /PDFCROP (@PDFCROP@)
+  /PDFTOPS (@PDFTOPS@)
+  /SED (@SED@)
+} makestruct def
+
+
 save 1024 /b array 1 index capsave | [
   dup 0 (Home:  )   fax gethomedir    fax (\n) fax 0 exch getinterval toconsole
   dup 0 (Startup: ) fax getstartupdir fax (\n) fax 0 exch getinterval toconsole
   {(errors.d) (linkedlist.d)} ~loadstartup forall
 pop restore
-

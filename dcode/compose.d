@@ -163,6 +163,26 @@
   /figurelayer inlayer
 } bind def
 
+| path file ~generator | --
+/PDFFigure {
+  tmpfile openlist
+  /path /file /generator 
+  /fdr /fdw /ndir /nfile
+} {
+  {
+    fdw closefd
+    /fdw path file PROCESSES /FFLAGS get /WRITE_TRUNCATE get openfd def
+    ndir file /generator find ~EPSFigure enddict
+    {
+      openlist PROGS /EPSTOPDF get (--hires) (--filter) fdr fdw STDERR
+      sh_ not ~stop if
+    } PROCESSES indict
+  } stopped 
+  fdr closefd fdw closefd
+  ndir nfile rmpath
+  ~stop if
+} layerlocalfunc bind def
+
 |============== Primitives for creating figure elements ====================
 |
 | A primitive is implemented in three phases, by procedures associated with
