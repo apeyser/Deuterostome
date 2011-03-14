@@ -164,7 +164,7 @@
 } bind def
 
 | path file ~generator | --
-/PDFFigure {
+/PDFfigure {
   tmpfile openlist
   /path /file /generator 
   /fdr /fdw /ndir /nfile
