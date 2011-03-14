@@ -872,14 +872,14 @@
 | - output placement instruction and PS string 
 
 { begin
+  [ ~save inverse ~concat ] ~toPS forall
   (\nBeginEPSF\n) faxPS
   DSCoff faxPS (whatever\n) faxPS
-  [ ~save inverse ~concat ] ~toPS forall
   epsstring faxPS
   verboxe { bbox toPS ~drawbbox toPS } if
-  ~restore toPS
   DSCon faxPS
   (EndEPSF\n) faxPS
+  ~restore toPS
   end
 } bind phase3 /latex put
 
