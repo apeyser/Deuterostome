@@ -483,6 +483,7 @@ DM_INLINE_STATIC void shift_stack(B* caplevel, P offset,
       shift_subframe(cframe, offset);
 }
 
+P (*cleanupfd_func)(void);
 DM_INLINE_STATIC P check_wired(B* floor, B* top) {
   P retc;
 
@@ -492,8 +493,7 @@ DM_INLINE_STATIC P check_wired(B* floor, B* top) {
 
  again:
   if (check_plugin && (retc = check_plugin())) return retc;
-  if (CLASS(o_1) == STREAM && STREAM_FD(VALUE_PTR(o_1)) != -1)
-    return ACTIVE_STREAM;
+  if (cleanupfd_func && (retc = cleanupfd_func())) return retc;
   
   if ((retc = op_nextobject())) return retc;
   FREEopds = o_1;
