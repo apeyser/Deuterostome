@@ -3,28 +3,28 @@
 
 /verbose [
   /quiet ~[
-    /debug ~pop
-    /loud ~pop
-    /medium ~pop
-    /quiet ~toconsole
+    /debug_msg ~pop
+    /loud_msg ~pop
+    /medium_msg ~pop
+    /quiet_msg ~toconsole
   ] bind makestruct
   /medium ~[
-    /debug ~pop
-    /loud ~pop
-    /medium ~toconsole
-    /quiet ~toconsole
+    /debug_msg ~pop
+    /loud_msg ~pop
+    /medium_msg ~toconsole
+    /quiet_msg ~toconsole
   ] bind makestruct
   /loud ~[
-    /debug ~pop
-    /loud ~toconsole
-    /medium ~toconsole
-    /quiet ~toconsole
+    /debug_msg ~pop
+    /loud_msg ~toconsole
+    /medium_msg ~toconsole
+    /quiet_msg ~toconsole
   ] bind makestruct
   /debug ~[
-    /debug ~toconsole
-    /loud ~toconsole
-    /medium ~toconsole
-    /quiet ~toconsole
+    /debug_msg ~toconsole
+    /loud_msg ~toconsole
+    /medium_msg ~toconsole
+    /quiet_msg ~toconsole
   ] bind makestruct
 ] makestruct def
 
@@ -99,7 +99,7 @@
 |-- phase 1 (logical design)
 
     phase1 begin COMPOSE begin 
-      (\n1) loud
+      (\n1) loud_msg
       ~[ generator ] bind /root name 
     end end
 
@@ -107,7 +107,7 @@
 
     /bbox * 4 /d array copy def
     phase2 begin
-      (\n2) loud
+      (\n2) loud_msg
       root
     end
 
@@ -145,7 +145,7 @@
     |-- assemble PS code of figure
     
     phase3 begin
-      (\n3) loud
+      (\n3) loud_msg
       root 
     end
 
@@ -157,7 +157,7 @@
 |-- write EPS output file
 
     EPSbuf 0 EPSidx getinterval EPSpath EPSfile writefile
-    (\n) loud (EPS file written: ) medium EPSfile medium (\n) medium
+    (\n) loud_msg (EPS file written: ) medium_msg EPSfile medium_msg (\n) medium_msg
 
   } { stopped { countdictstack ndict sub ~end repeat stop } if }
   /figurelayer inlayer
@@ -193,14 +193,15 @@
     null (eps) tmpfile
     /pdf_nfile name /pdf_ndir name /pdf_fdw name /pdf_fdr name {
       pdf_fdw closefd
-      (Tmp: ) loud pdf_ndir loud pdf_nfile loud
+      (Tmp: ) loud_msg pdf_ndir loud_msg pdf_nfile loud_msg
       pdf_ndir pdf_nfile /pdf_gen find ~EPSfigure enddict
       /pdf_fdw |{
         pdf_path pdf_file PROCESSES /FFLAGS get /WRITE_TRUNCATE get openfd |}
       def
       openlist PROGS /EPSTOPDF get (--hires) (--filter) pdf_fdr pdf_fdw
       {STDERR sh_io} PROCESSES indict
-      (\n) loud (PDF file written: ) medium pdf_file medium (\n) medium
+      (\n) loud_msg 
+      (PDF file written: ) medium_msg pdf_file medium_msg (\n) medium_msg
     } stopped
     pdf_fdw pdf_fdr {closeifopen closeifopen} PROCESSES indict
     pdf_ndir pdf_nfile rmpath
@@ -701,7 +702,7 @@
   20 dict begin
   /parent name
   /placement name
-   (+) loud ~[ exch exec ] /children name (-) loud
+   (+) loud_msg ~[ exch exec ] /children name (-) loud_msg
   currentdict ~panel     | => secondary generator
   end 
 } bind phase1 /panel put
@@ -713,7 +714,7 @@
 
 { begin
   /bbox <d * * * * > 4 /d array copy def
-  (+) loud children (-) loud
+  (+) loud_msg children (-) loud_msg
   makeinverse stretchpbbox
   end
 } bind phase2 /panel put
@@ -723,7 +724,7 @@
 
 { begin
   [ ~save inverse ~concat ] { toPS } forall
-  (+) loud children (-) loud
+  (+) loud_msg children (-) loud_msg
   verboxe { bbox toPS ~drawbbox toPS } if
   ~restore toPS
   end
@@ -760,7 +761,7 @@
   /spacing name
   /genlist name
   currentdict ~panelarray     | => secondary generator
-  (+) loud
+  (+) loud_msg
   /nrows 0 def /ncols 0 def /rowidx 0 def
    [ genlist { /colidx 0 def
         [ exch
@@ -773,7 +774,7 @@
         nrows rowidx le { /nrows rowidx def } if
       } forall
    ] /childrenlist name
-  (-) loud
+  (-) loud_msg
   end 
 } bind phase1 /panelarray put
 
@@ -785,7 +786,7 @@
   /wr 0 ncols /d array copy def
   /wb 0 nrows /d array copy def
   /wt 0 nrows /d array copy def
-  (+) loud
+  (+) loud_msg
   /xaligns 0 ncols /d array copy def
   /yaligns 0 nrows /d array copy def
   /bbox 4 /d array def
@@ -804,7 +805,7 @@
          } for
       /rowidx rowidx 1 add def
     } forall
-  (-) loud
+  (-) loud_msg
   |-- finalize placement of the panel boxes
   0.0 0 1 ncols 1 sub { /colidx name
       wl colidx get sub dup xaligns colidx put
@@ -817,9 +818,9 @@
   |-- rerun phase2 of subtree to establish correct placements of panel
   |   elements and correct panel array bbox
   * bbox copy pop
-  (\n +) loud
+  (\n +) loud_msg
   childrenlist { mkact exec } forall
-  (-) loud
+  (-) loud_msg
   |-- establish panel array placement and parent bbox
   makeinverse stretchpbbox
   end
@@ -830,9 +831,9 @@
 
 { begin
   [ ~save inverse ~concat ] { toPS } forall
-  (+) loud
+  (+) loud_msg
   childrenlist { mkact exec } forall
-  (-) loud
+  (-) loud_msg
   verboxe { bbox toPS ~drawbbox toPS } if
   ~restore toPS
   end
@@ -1146,7 +1147,7 @@
   symbolsize linewidth add 2 div dup
   xdim add bbox 2 put ydim add bbox 3 put
 
-  (+) loud children (-) loud
+  (+) loud_msg children (-) loud_msg
   makeinverse stretchpbbox
   end
 } bind phase2 /gpgraf put
@@ -1159,7 +1160,7 @@
   setlinewidth
   symbolsize setsymbolsize
   ( symbolfont setfont ) faxPS
-  (+) loud children (-) loud
+  (+) loud_msg children (-) loud_msg
 
   ~save toPS gpXplotters abscissa 3 get get exec ~restore toPS
   ~save toPS gpYplotters ordinate 3 get get exec ~restore toPS
@@ -1615,7 +1616,7 @@ end def
   symbolsize linewidth add 2 div dup
   xdim add bbox 2 put ydim add bbox 3 put
 
-  (+) loud children (-) loud
+  (+) loud_msg children (-) loud_msg
   makeinverse stretchpbbox
   end
 } bind phase2 /pcgraf put
@@ -1628,7 +1629,7 @@ end def
   setlinewidth
   symbolsize setsymbolsize
   ( symbolfont setfont ) faxPS
-  (+) loud children (-) loud
+  (+) loud_msg children (-) loud_msg
 
   /Nrows Zmap 0 get Zmap 1 get div def
   /Ncols Zmap 1 get def
@@ -2198,20 +2199,20 @@ end definefont pop   % Symbols font
 
    epsstring (\(^%[^%][^\n]*\n\)+) regex not {
      (EPS: missing shebang comment\n) load
-     epsstring debug
+     epsstring debug_msg
      pop stop
    } if
    pop pop pop
    endcomments regex not {
-     (EPS: missing explicit or implicit %%EndComments\n) loud
-     epsstring debug
+     (EPS: missing explicit or implicit %%EndComments\n) loud_msg
+     epsstring debug_msg
      pop stop
    } if
    pop /DSCprefix name pop
    DSCoff search {pop pop {DSCon search not ~exit if} loop} if
    (\n%%Trailer) search not {
-     (EPS: missing %%Trailer\n) loud
-     epsstring debug
+     (EPS: missing %%Trailer\n) loud_msg
+     epsstring debug_msg
      pop stop
    } if pop pop
    /DSCpostfix name | excludes %%Trailer
@@ -2220,8 +2221,8 @@ end definefont pop   % Symbols font
 
    DSCprefix (\n%%HiResBoundingBox:) search not {
      (\n%%BoundingBox:) search not {
-       (EPS: Missing prologue HiResBoundingBox and BoundingBox\n) loud
-       epsstring debug
+       (EPS: Missing prologue HiResBoundingBox and BoundingBox\n) loud_msg
+       epsstring debug_msg
        pop stop
      } if
    } if pop pop
@@ -2232,8 +2233,8 @@ end definefont pop   % Symbols font
        pop
        DSCpostfix (\n%%HiResBoundingBox:) search not {
          (\n%%BoundingBox:) search not {
-           (EPS: Missing Trailer HiResBoundingBox and BoundingBox\n) loud
-           epsstring debug
+           (EPS: Missing Trailer HiResBoundingBox and BoundingBox\n) loud_msg
+           epsstring debug_msg
            pop stop
          } if
        } if pop pop
