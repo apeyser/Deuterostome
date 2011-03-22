@@ -83,7 +83,7 @@
 
   |----------------------- eps_ -------------------
   |
-  | -- <</input, ptsize, wr, ewr defined>> | --
+  | (preamble) (latex) ptsize | --
   |
   | Here are the sinews. eps_ does all the scripting work,
   |  constructing a latex document out of ptsize (10,11 or 12)
@@ -97,48 +97,44 @@
   |  the subprocesses.
   |
   /eps_ {
-    null (eps) tmpdir /tsdir name /tdir name
-    ewr (Working in temporary directory: `) writefd
-    tdir writefd tsdir writefd
-    ('\n) writefd pop
+    null (eps) tmpdir openlist
+    /preamble /input /ptsize
+    /tdir /tsdir
+    makestruct_stack {
+      STDERR [
+        (Working in temporary directory: `) tdir tsdir ('\n)
+      ] ~writefd forall pop
 
-    /pwd getwdir def
-    tdir tsdir setwdirp {{{
-      (.) (eps.tex) wropen {
-        predoc {(XX) 0 * ptsize * number pop} pre preamble main input post
-      } {exec writefd} forall close
+      tdir tsdir setwdirp
+      (.) (eps.tex) wropen [
+        predoc (XX) 0 * ptsize * number pop pre preamble main input post
+      ] ~writefd forall close
 
       [PROGS /PDFLATEX get (--halt-on-error) (--interaction=nonstopmode) 
-        (eps.tex)
-        NULLR ewr dup sh_ not {true /estreamwith exitto} if |]
+        (eps.tex) |]
+      STDIN STDERR dup sh_bg (pdflatex) wait_quiet
 
-      [PROGS /PDFCROP get (--hires) (eps.pdf) (eps-crop.pdf)
-        NULLR ewr dup sh_ not {true /estreamwith exitto} if |]
+      [PROGS /PDFCROP get (--hires) (eps.pdf) (eps-crop.pdf) |]
+      STDIN STDERR dup sh_bg (pdfcrop) wait_quiet
 
-      [ {openlist PROGS /PDFTOPS get (-eps) (-level3) (-preload)
-          (eps-crop.pdf) (-) fds sh_}
-        {openlist PROGS /SED get (-re) (/^%%EOF$/,$ d) fds sh_}
-        NULLR wr ewr pipe_ not {true /estreamwith exitto} if |]
+      [
+        {
+          [PROGS /PDFTOPS get (-eps) (-level3) (-preload)
+            (eps-crop.pdf) (-) |]
+          fds sh_bg (pipe pdftops) wait_quiet true
+        } {
+          [PROGS /SED get (-re) (/^%%EOF$/ d) |]
+          fds sh_bg (pipe sed) wait_quiet true
+        } |]
+      fds pipe (pipe) wait_quiet
 
       [PROGS /SED get (-e) (s/pt$//) (eps.comment)
-        NULLR wr ewr sh_ not {true /estreamwith exitto} if |]
+        fds sh_bg (sed) wait_quiet |]
 
-      wr (%%EOF) writefd close
-      false
-    } /estreamwith exitlabel} stopped} aborted
-    pwd setwdir
-    ~abort if ~stop if {true /estreamwith exitto} if
-
-    tdir tsdir removedir
+      STDOUT (%%EOF\n) writefd pop
+      tdir tsdir removedir
+    } exch indict
   } bind def
-
-  |------------------------ eps ---------------------------
-  |
-  | (latex) ptsize | (eps)
-  |
-  | same as xeps, except that preamble is empty
-  |
-  /eps {() 3 1 roll xeps} bind def
 
   |------------------------ xeps ---------------------------
   |
@@ -157,30 +153,25 @@
   | The resolution is defined by RESOLUTION defined in this
   |   module -- defaults to 1200 dpi.
   |
-  | eps calls eps_, after defining ptsize and input, setting up
+  | eps calls eps_ setting up
   |  input and output streams, and wrapping it in an error catcher
   |  that will dump the error stream to console if a stop or error
   |  happen internally.
   |
-  /xeps { /ptsize name /input name /preamble name
-    {
-      /_eps {
-        pipefd /wr name /rd name
-        openlist {/ewr name eps_} ~estreamwith stopped {
-          wr closeifopen
-          rd closeifopen
-          stop
-        } if
-      } layerdef
-
-      {pop rd suckfd} {
-        cleartomark
-        wr closeifopen
-        rd suckfd toconsole
-        hamuti
-      } ifelse
-    } PROCESSES underdict
+  /xeps {
+    {~[4 1 roll ~eps_] ~readstream PROCESSES underdict} {
+      {pop transcribe} {toconsole pop hamuti} ifelse
+    } incapsave
   } bind def
+
+  |------------------------ eps ---------------------------
+  |
+  | (latex) ptsize | (eps)
+  |
+  | same as xeps, except that preamble is empty
+  |
+  /eps ~[() 3 1 ~roll /xeps find ~exec] bind def
+
 
   | Hamuti!
   /hamuti <B
