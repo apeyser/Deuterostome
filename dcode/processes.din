@@ -346,7 +346,7 @@
     } ~stopped aborted -1 die_base
   } bind def
 
-  |========================== bg ============================
+  |========================== bg_ ============================
   | ~active fd-in fd-out fd-err \[fd-chained... | pid
   |
   | Background a job. ~active is executed with fd's redirected
@@ -837,6 +837,59 @@
     ~suckfd (getall) _getfromactive
   } bind def
 
+  |============================= readstream ===========================
+  | ~func | (stdout) (stderr) true/false
+  | ~func: -- | --
+  |
+  | func is run as a seperate process, with its STDIN set to NULLR,
+  |  its STDOUT and STDERR piped out. The output of the pipes are
+  |   returned as strings.
+  | Returns true iff ~func doesn't error out or abort.
+  |
+  /readstream {
+    4 {null null} repeat
+    3 {null} repeat
+    openlist
+    /func
+    /rd /wr /erd /ewr /rdrd /rdwr /erdrd /erdwr
+    /pid_eps /pid_out /pid_err
+  } {
+    ~_readstream {
+      3 1 roll transcribe
+      3 1 roll transcribe
+      3 1 roll
+    } incapsave
+  } caplocalfunc bind def
+
+  | -- | (stdout) (stderr) true/false
+  /_readstream {
+    {
+      pipefd /wr  name /rd  name
+      pipefd /ewr name /erd name {
+        /func find enddict true
+      } NULLR wr ewr openlist rd erd bg_ /pid_eps name
+      [wr ewr] ~close forall
+
+      pipefd /erdwr name /erdrd name {
+        STDIN suckfd STDOUT exch writefd close true
+      } erd erdwr STDERR openlist rd erdrd bg_ /pid_err name
+      [erd erdwr] ~close forall
+
+      pipefd /rdwr name /rdrd name {
+        STDIN suckfd STDOUT exch writefd close true
+      } rd rdwr STDERR openlist erdrd rdrd bg_ /pid_out name
+      [rd rdwr] ~close forall
+    } ~stopped aborted
+    {erdrd suckfd toconsole abort} if
+    {erdrd suckfd toconsole stop} if
+
+    erdrd suckfd pid_err wait_quiet
+    rdrd  suckfd pid_out wait_quiet
+    exch         pid_eps wait       | (stdout) (stderr) bool
+  } bind def
+
+
+
 |=============================== removepath functions =====================
 
   | (dir) (file) norecur-bool | --
@@ -884,62 +937,6 @@
     exch setwdir setwdir
   } bind def
 
-|================================ process error handling ==========
-
-  /estreamrd null def
-  /estreamwt null def
-
-  | -- | writefd
-  /_estreamopen {
-    pipefd dup 3 1 roll
-    /estreamwt name
-    /estreamrd name
-  } def
-
-  | bool false | bool false
-  | true | true
-  | if true, output contents of estreams
-  /_estreamclose {
-    estreamwt dup null eq ~pop {
-      close
-      dup ~true {1 index} ifelse
-      {estreamrd suckfd toconsole} {estreamrd close} ifelse
-      /estreamwt null def /estreamrd null def
-    } ifelse
-  } bind def
-
-  | ... | --
-  /_estreamerror {
-    ~error_base PROCESSES /childproc get ~exec {
-      PROCESSES /estreamdict get /error put
-      showerror
-    } ifelse
-    stop
-  } bind def
-
-  /estreamdict 1 dict def
-
-  |====================== estreamwith ========================
-  | ~active | ...
-  |
-  | ~active: ... fd-err | ...
-  |
-  | Executes error in a context where errors become a stop,
-  |  and the output from an error stream is dumped before
-  |  propagating the stop.
-  |
-  | ~active receives the error stream to use for it's children
-  |  on the operand stack.
-  |
-  /estreamwith {
-    /_estreamerror find {
-      _estreamopen exch
-      /error ~name estreamdict indict
-    } PROCESSES indict
-
-    exch {exec false} /estreamwith ~exitlabel estreamdict ~underdict stopped
-    ~_estreamclose PROCESSES indict ~stop if not
-  } bind def
 
   |======================== tosystem ===========================
   | (exec ...) | --

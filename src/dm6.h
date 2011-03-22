@@ -53,4 +53,6 @@ DM_HOT DLL_SCOPE P op_bind(void);
 
 DLL_SCOPE P op_socketval(void);
 
+DLL_SCOPE P (*cleanupfd_func)(void);
+
 #endif //DM6_H

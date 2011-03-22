@@ -98,6 +98,7 @@ int main(void)
   sysop = _sysop;
   syserrm = _syserrm;
   syserrc = _syserrc;
+
   serialized = TRUE; // no serialize operator
 
  /*----------------- include stdin into socket table */ 

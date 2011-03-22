@@ -1570,7 +1570,16 @@ DM_INLINE_STATIC P usedfd(void) {
   return OK;
 }
 
+DM_INLINE_STATIC P cleanupfd(void) {
+  P retc = OK;
+  if (CLASS(o_1) == STREAM && STREAM_FD(VALUE_PTR(o_1)) != -1)
+    retc = op_closefd();
+
+  return retc;
+}
+
 void setupfd(void) {
+  cleanupfd_func = cleanupfd;
   execfd_func = execfd;
   tokenfd_func = tokenfd;
   usedfd_func = usedfd;
