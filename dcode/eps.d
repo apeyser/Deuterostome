@@ -90,45 +90,52 @@
   |  the subprocesses.
   |
   /eps_ {
-    null (eps) tmpdir
+    getwdir
+    null (eps) tmpdir setwdirp getwdir
     (.) (eps-out.eps) wropen
-    (.) (eps-err.eps) wropen openlist
+    (.) (eps-out.eps) rdopen
+    (.) (eps-err.eps) wropen
+    (.) (eps-err.eps) rdopen
+    openlist
     /preamble /input /ptsize
-    /tdir /tsdir
-    /wr /ewr
+    /pwd /twd /wr /rd /ewr /erd
   } {
-    ewr [
-      (Working in temporary directory: `) tdir tsdir ('\n)
-    ] ~writefd forall pop
+    {
+      ewr [
+        (Working in temporary directory: `) twd ('\n)
+      ] ~writefd forall pop
 
-    tdir tsdir setwdirp
-    (.) (eps.tex) wropen [
-      predoc (XX) 0 * ptsize * number pop pre preamble main input post
-    ] ~writefd forall close
+      (.) (eps.tex) wropen [
+        predoc (XX) 0 * ptsize * number pop pre preamble main input post
+      ] ~writefd forall close
 
-    /PDFLATEX prog (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
-    STDIN ewr ewr sh_bg (pdflatex) wait_quiet
+      /PDFLATEX prog (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
+      STDIN ewr ewr sh_bg (pdflatex) wait_quiet
 
-    /PDFCROP prog (--hires) (eps.pdf) (eps-crop.pdf)
-    STDIN ewr ewr sh_bg (pdfcrop) wait_quiet
+      /PDFCROP prog (--hires) (eps.pdf) (eps-crop.pdf)
+      STDIN ewr ewr sh_bg (pdfcrop) wait_quiet
 
-    /PDFTOPS prog (-eps) (-level3) (-preload) (eps-crop.pdf) (eps-crop.eps)
-    STDIN ewr ewr sh_bg (pdftops) wait_quiet
+      /PDFTOPS prog (-eps) (-level3) (-preload) (eps-crop.pdf) (eps-crop.eps)
+      STDIN ewr ewr sh_bg (pdftops) wait_quiet
 
-    /SED prog (-re) (/^%%EOF$/ d) (eps-crop.eps)
-    STDIN wr ewr sh_bg (sed EOF) wait_quiet
+      /SED prog (-re) (/^%%EOF$/ d) (eps-crop.eps)
+      STDIN wr ewr sh_bg (sed EOF) wait_quiet
 
-    /SED prog (-e) (s/pt$//) (eps.comment)
-    STDIN wr ewr sh_bg (sed COMMENTS) wait_quiet
+      /SED prog (-e) (s/pt$//) (eps.comment)
+      STDIN wr ewr sh_bg (sed COMMENTS) wait_quiet
 
-    wr (%%EOF\n) writefd close
-    ewr close
+      wr (%%EOF\n) writefd pop
+    } ~stopped aborted
 
-    /CAT prog (eps-err.eps) STDIN STDERR STDERR sh_bg
-    /CAT prog (eps-out.eps) STDIN STDOUT STDERR sh_bg
+    wr close ewr close
+    {STDOUT STDIN suckfd writefd pop true} erd STDERR dup    bg
+    {STDOUT STDIN suckfd writefd pop true} rd  STDOUT STDERR bg
+
+    3 -1 roll ~abort if 3 -1 roll ~stop if
+
     (cat out) wait_quiet (cat err) wait_quiet
-
-    tdir tsdir removedir
+    pwd setwdir
+    twd () removedir
   } caplocalfunc bind def
 
   | /PROG | openlist (prog)
