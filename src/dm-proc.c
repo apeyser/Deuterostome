@@ -1571,10 +1571,14 @@ DM_INLINE_STATIC P usedfd(void) {
 }
 
 DM_INLINE_STATIC P cleanupfd(void) {
-  P retc = OK;
-  if (CLASS(o_1) == STREAM && STREAM_FD(VALUE_PTR(o_1)) != -1)
-    retc = op_closefd();
+  P retc;
 
+  if (CLASS(o_1) != STREAM
+      || STREAM_FD(VALUE_PTR(o_1)) == -1)
+    return OK;
+
+  if (! (retc = op_closefd()))
+    FREEopds = o1;
   return retc;
 }
 
