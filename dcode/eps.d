@@ -90,8 +90,8 @@
   |  the subprocesses.
   |
   /eps_ {
-    getwdir
-    null (eps) tmpdir setwdirp getwdir
+    getwdir transcribe
+    null (eps) tmpdir setwdirp getwdir transcribe
     (.) (eps-out.eps) wropen
     (.) (eps-out.eps) rdopen
     (.) (eps-err.eps) wropen
