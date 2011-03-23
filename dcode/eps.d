@@ -1,13 +1,6 @@
 | -*- mode: d; -*-
 
 /EPS 100 {
-  |------------ RESOLUTION -------------------
-  |
-  | The resolution argument to ghostscript.
-  | Either -rX or -rXxY.
-  |
-  /RESOLUTION (-r2688) def
-
   |-------------- latex ----------------------
   |
   | The latex document is divided into 3 pieces:
@@ -97,43 +90,51 @@
   |  the subprocesses.
   |
   /eps_ {
-    null (eps) tmpdir openlist
+    null (eps) tmpdir
+    (.) (eps-out.eps) wropen
+    (.) (eps-err.eps) wropen
+    2 {null} repeat openlist
     /preamble /input /ptsize
     /tdir /tsdir
-    makestruct_stack {
-      STDERR [
-        (Working in temporary directory: `) tdir tsdir ('\n)
-      ] ~writefd forall pop
+    /wr /ewr
+  } {
+    ewr [
+      (Working in temporary directory: `) tdir tsdir ('\n)
+    ] ~writefd forall pop
 
-      tdir tsdir setwdirp
-      (.) (eps.tex) wropen [
-        predoc (XX) 0 * ptsize * number pop pre preamble main input post
-      ] ~writefd forall close
+    tdir tsdir setwdirp
+    (.) (eps.tex) wropen [
+      predoc (XX) 0 * ptsize * number pop pre preamble main input post
+    ] ~writefd forall close
 
-      [PROGS /PDFLATEX get (--halt-on-error) (--interaction=nonstopmode) 
-        (eps.tex) |]
-      STDIN STDERR dup sh_bg (pdflatex) wait_quiet
+    /PDFLATEX prog (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
+    STDIN ewr ewr sh_bg (pdflatex) wait_quiet
 
-      [PROGS /PDFCROP get (--hires) (eps.pdf) (eps-crop.pdf) |]
-      STDIN STDERR dup sh_bg (pdfcrop) wait_quiet
+    /PDFCROP prog (--hires) (eps.pdf) (eps-crop.pdf)
+    STDIN ewr ewr sh_bg (pdfcrop) wait_quiet
 
-      [
-        {
-          [PROGS /PDFTOPS get (-eps) (-level3) (-preload)
-            (eps-crop.pdf) (-) |]
-          fds sh_bg (pipe pdftops) wait_quiet true
-        } {
-          [PROGS /SED get (-re) (/^%%EOF$/ d) |]
-          fds sh_bg (pipe sed) wait_quiet true
-        } |]
-      fds pipe (pipe) wait_quiet
+    /PDFTOPS prog (-eps) (-level3) (-preload) (eps-crop.pdf) (eps-crop.eps)
+    STDIN ewr ewr sh_bg (pdftops) wait_quiet
 
-      [PROGS /SED get (-e) (s/pt$//) (eps.comment)
-        fds sh_bg (sed) wait_quiet |]
+    /SED prog (-re) (/^%%EOF$/ d) (eps-crop.eps)
+    STDIN wr ewr sh_bg (sed EOF) wait_quiet
 
-      STDOUT (%%EOF\n) writefd pop
-      tdir tsdir removedir
-    } exch indict
+    /SED prog (-e) (s/pt$//) (eps.comment)
+    STDIN wr ewr sh_bg (sed COMMENTS) wait_quiet
+
+    wr (%%EOF\n) writefd close
+    ewr close
+
+    /CAT prog (eps-err.eps) STDIN STDERR STDERR sh_bg
+    /CAT prog (eps-out.eps) STDIN STDOUT STDERR sh_bg
+    (cat out) wait_quiet (cat err) wait_quiet
+
+    tdir tsdir removedir
+  } caplocalfunc bind def
+
+  | /PROG | openlist (prog)
+  /prog {
+    [PROGS 3 -1 roll get |]
   } bind def
 
   |------------------------ xeps ---------------------------

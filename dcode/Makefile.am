@@ -134,7 +134,8 @@ PROGS_EDIT = -e 's,[@]GS[@],$(ENABLE_GS),g' \
 	     -e 's,[@]EPSTOPDF[@],$(ENABLE_EPSTPDF),g' \
 	     -e 's,[@]PDFCROP[@],$(ENABLE_PDFCROP),g' \
 	     -e 's,[@]PDFTOPS[@],$(ENABLE_PDFTOPS),g' \
-	     -e 's,[@]SED[@],$(SED),g'
+	     -e 's,[@]SED[@],$(SED),g' \
+	     -e 's,[@]CAT[@],$(ENABLE_CAT),g'
 
 edit = -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
        -e 's,[@]bindir[@],$(bindir),g' \
