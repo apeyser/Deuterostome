@@ -2080,7 +2080,7 @@ Some influential environment variables:
   MAX_NUM_DICTS
               maximum dict stack size in frames, default=10000
   MAX_NUM_EXECS
-              maximum exec stack size in frame, default=5000
+              maximum exec stack size in frame, default=20000
   MAX_MEM_SIZE
               maximum vm allocation size in mb, default=4000
   MAX_USER_DICT_SIZE
@@ -4247,7 +4247,7 @@ $as_echo "setting to ${MAX_NUM_DICTS}" >&6; }
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if ${cf_ac_cv_arg_val} is set" >&5
 $as_echo_n "checking if ${cf_ac_cv_arg_val} is set... " >&6; }
 
-  if test "${MAX_NUM_EXECS-set}" == set ; then MAX_NUM_EXECS="5000"; fi
+  if test "${MAX_NUM_EXECS-set}" == set ; then MAX_NUM_EXECS="20000"; fi
 
 cat >>confdefs.h <<_ACEOF
 #define MAX_NUM_EXECS ${MAX_NUM_EXECS}
