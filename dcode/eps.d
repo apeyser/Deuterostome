@@ -100,38 +100,32 @@
     /preamble /input /ptsize
     /pwd /twd /wr /rd /ewr /erd
   } {
-    {
-      ewr [
-        (Working in temporary directory: `) twd ('\n)
-      ] ~writefd forall pop
+    ewr [
+      (Working in temporary directory: `) twd ('\n)
+    ] ~writefd forall pop
 
-      (.) (eps.tex) wropen [
-        predoc (XX) 0 * ptsize * number pop pre preamble main input post
-      ] ~writefd forall close
+    (.) (eps.tex) wropen [
+      predoc (XX) 0 * ptsize * number pop pre preamble main input post
+    ] ~writefd forall close
 
-      /PDFLATEX prog (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
-      STDIN ewr ewr sh_bg (pdflatex) wait_quiet
+    /PDFLATEX prog (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
+    STDIN ewr ewr sh_bg (pdflatex) wait_quiet
 
-      /PDFCROP prog (--hires) (eps.pdf) (eps-crop.pdf)
-      STDIN ewr ewr sh_bg (pdfcrop) wait_quiet
+    /PDFCROP prog (--hires) (eps.pdf) (eps-crop.pdf)
+    STDIN ewr ewr sh_bg (pdfcrop) wait_quiet
 
-      /PDFTOPS prog (-eps) (-level3) (-preload) (eps-crop.pdf) (eps-crop.eps)
-      STDIN ewr ewr sh_bg (pdftops) wait_quiet
+    /PDFTOPS prog (-eps) (-level3) (-preload) (eps-crop.pdf) (eps-crop.eps)
+    STDIN ewr ewr sh_bg (pdftops) wait_quiet
 
-      /SED prog (-re) (/^%%EOF$/ d) (eps-crop.eps)
-      STDIN wr ewr sh_bg (sed EOF) wait_quiet
+    /SED prog (-re) (/^%%EOF$/ d) (eps-crop.eps)
+    STDIN wr ewr sh_bg (sed EOF) wait_quiet
 
-      /SED prog (-e) (s/pt$//) (eps.comment)
-      STDIN wr ewr sh_bg (sed COMMENTS) wait_quiet
+    /SED prog (-e) (s/pt$//) (eps.comment)
+    STDIN wr ewr sh_bg (sed COMMENTS) wait_quiet
 
-      wr (%%EOF\n) writefd pop
-    } ~stopped aborted
-
-    wr close ewr close
+    wr (%%EOF\n) writefd close ewr close
     {STDOUT STDIN suckfd writefd pop true} erd STDERR dup    bg
     {STDOUT STDIN suckfd writefd pop true} rd  STDOUT STDERR bg
-
-    3 -1 roll ~abort if 3 -1 roll ~stop if
 
     (cat out) wait_quiet (cat err) wait_quiet
     pwd setwdir
