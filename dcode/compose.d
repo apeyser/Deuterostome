@@ -98,7 +98,8 @@
 
 |-- phase 1 (logical design)
 
-    (\n) loud_msg (EPS file to write: ) loud_msg EPSfile loud_msg (\n) loud_msg
+    (\n) medium_msg (EPS file to write: ) medium_msg EPSfile medium_msg 
+    (\n) medium_msg
     phase1 begin COMPOSE begin 
       (\n1) loud_msg
       ~[ generator ] bind /root name 
