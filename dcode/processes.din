@@ -37,6 +37,11 @@
     FFLAGS /WRITE_APPEND get openfd
   } bind def
 
+  | (dir) (file) | fd
+  /rdopen {
+    FFLAGS /READ_ONLY get openfd
+  } bind def
+
   | fd | --
   /close {
     dup unmakefd 5 lt ~pop ~closefd ifelse
