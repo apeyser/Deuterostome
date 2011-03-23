@@ -1024,9 +1024,6 @@ gunzip
 ENABLE_EMACS_FALSE
 ENABLE_EMACS_TRUE
 GUIPDF
-ENABLE_CAT_FALSE
-ENABLE_CAT_TRUE
-ENABLE_CAT
 ENABLE_PDFTOPS_FALSE
 ENABLE_PDFTOPS_TRUE
 ENABLE_PDFTOPS
@@ -13543,58 +13540,6 @@ _ACEOF
 else
   ENABLE_PDFTOPS_TRUE='#'
   ENABLE_PDFTOPS_FALSE=
-fi
-
-  # Extract the first word of "cat", so it can be a program name with args.
-set dummy cat; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if test "${ac_cv_prog_ENABLE_CAT+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$ENABLE_CAT"; then
-  ac_cv_prog_ENABLE_CAT="$ENABLE_CAT" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_ENABLE_CAT="$as_dir/$ac_word$ac_exec_ext"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-ENABLE_CAT=$ac_cv_prog_ENABLE_CAT
-if test -n "$ENABLE_CAT"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ENABLE_CAT" >&5
-$as_echo "$ENABLE_CAT" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  if test -n "$ENABLE_CAT" ; then
-
-cat >>confdefs.h <<_ACEOF
-#define ENABLE_CAT "${ENABLE_CAT}"
-_ACEOF
-
-  fi
-   if test "${ENABLE_CAT+set}" = set; then
-  ENABLE_CAT_TRUE=
-  ENABLE_CAT_FALSE='#'
-else
-  ENABLE_CAT_TRUE='#'
-  ENABLE_CAT_FALSE=
 fi
 
 
@@ -33853,10 +33798,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${ENABLE_PDFTOPS_TRUE}" && test -z "${ENABLE_PDFTOPS_FALSE}"; then
   as_fn_error "conditional \"ENABLE_PDFTOPS\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${ENABLE_CAT_TRUE}" && test -z "${ENABLE_CAT_FALSE}"; then
-  as_fn_error "conditional \"ENABLE_CAT\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${ENABLE_EMACS_TRUE}" && test -z "${ENABLE_EMACS_FALSE}"; then

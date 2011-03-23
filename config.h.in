@@ -74,9 +74,6 @@
 /* Path to BASH */
 #undef ENABLE_BASH
 
-/* Path to CAT */
-#undef ENABLE_CAT
-
 /* enable extra debug in dmnum */
 #undef ENABLE_DEBUG_DMNUM
 

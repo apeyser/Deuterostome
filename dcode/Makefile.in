@@ -171,7 +171,6 @@ EMULTIHOP_HIDDEN = @EMULTIHOP_HIDDEN@
 EMULTIHOP_VALUE = @EMULTIHOP_VALUE@
 ENABLE_ATPS = @ENABLE_ATPS@
 ENABLE_BASH = @ENABLE_BASH@
-ENABLE_CAT = @ENABLE_CAT@
 ENABLE_DEBUG_DMNUM = @ENABLE_DEBUG_DMNUM@
 ENABLE_DOC = @ENABLE_DOC@
 ENABLE_DVIPDF = @ENABLE_DVIPDF@
@@ -794,8 +793,7 @@ PROGS_EDIT = -e 's,[@]GS[@],$(ENABLE_GS),g' \
 	     -e 's,[@]EPSTOPDF[@],$(ENABLE_EPSTPDF),g' \
 	     -e 's,[@]PDFCROP[@],$(ENABLE_PDFCROP),g' \
 	     -e 's,[@]PDFTOPS[@],$(ENABLE_PDFTOPS),g' \
-	     -e 's,[@]SED[@],$(SED),g' \
-	     -e 's,[@]CAT[@],$(ENABLE_CAT),g'
+	     -e 's,[@]SED[@],$(SED),g'
 
 edit = -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
        -e 's,[@]bindir[@],$(bindir),g' \

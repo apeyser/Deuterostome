@@ -196,7 +196,6 @@ CF_AM_PROG([LATEX], [latex])
 CF_AM_PROG([EMACSCLIENT], [emacsclient])
 CF_AM_PROG([PDFCROP], [pdfcrop])
 CF_AM_PROG([PDFTOPS], [pdftops])
-CF_AM_PROG([CAT], [cat])
 
 CF_AC_ARG_VAR_QUOTE([guipdf],
  [name of program to display pdf's, eg gnome-open or launch -i com.apple.Preview],

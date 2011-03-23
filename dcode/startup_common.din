@@ -1623,7 +1623,6 @@ end mkread def
   /PDFCROP (@PDFCROP@)
   /PDFTOPS (@PDFTOPS@)
   /SED (@SED@)
-  /CAT (@CAT@)
 } makestruct def
 
 
