@@ -1576,7 +1576,7 @@ DM_INLINE_STATIC P cleanupfd(void) {
     return OK;
 
   if (! (retc = op_closefd()))
-    FREEopds = o1;
+    FREEopds = o2;
   return retc;
 }
 
