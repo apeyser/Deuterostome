@@ -92,8 +92,7 @@
   /eps_ {
     null (eps) tmpdir
     (.) (eps-out.eps) wropen
-    (.) (eps-err.eps) wropen
-    2 {null} repeat openlist
+    (.) (eps-err.eps) wropen openlist
     /preamble /input /ptsize
     /tdir /tsdir
     /wr /ewr
