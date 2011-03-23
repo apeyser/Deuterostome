@@ -159,7 +159,8 @@
 |-- write EPS output file
 
     EPSbuf 0 EPSidx getinterval EPSpath EPSfile writefile
-    (\n) loud_msg (EPS file written: ) medium_msg EPSfile medium_msg (\n) medium_msg
+    (\n) loud_msg
+    (EPS file written: ) medium_msg EPSfile medium_msg (\n) medium_msg
 
   } { stopped { countdictstack ndict sub ~end repeat stop } if }
   /figurelayer inlayer
@@ -194,6 +195,7 @@
     /pdf_path name
     null (eps) tmpfile
     /pdf_nfile name /pdf_ndir name /pdf_fdw name /pdf_fdr name {
+      (PDF file to write: ) medium_msg pdf_file medium_msg (\n) medium_msg
       pdf_fdw closefd
       (Tmp: ) loud_msg pdf_ndir loud_msg pdf_nfile loud_msg
       pdf_ndir pdf_nfile /pdf_gen find ~EPSfigure enddict
@@ -880,7 +882,7 @@
   /placement name
   /latexstring name
 | - compile the LaTEX string and extract metrics
-  EPS begin latexpreamble latexstring textsize xeps end /epsstring name
+  latexpreamble latexstring textsize ~xeps EPS indict /epsstring name
   readDSC
   currentdict ~latex     | => secondary generator
   end 
@@ -2206,14 +2208,14 @@ end definefont pop   % Symbols font
    } if
    pop pop pop
    endcomments regex not {
-     (EPS: missing explicit or implicit %%EndComments\n) loud_msg
+     (EPS: missing explicit or implicit %%EndComments\n) quiet_msg
      epsstring debug_msg
      pop stop
    } if
    pop /DSCprefix name pop
    DSCoff search {pop pop {DSCon search not ~exit if} loop} if
    (\n%%Trailer) search not {
-     (EPS: missing %%Trailer\n) loud_msg
+     (EPS: missing %%Trailer\n) quiet_msg
      epsstring debug_msg
      pop stop
    } if pop pop
@@ -2223,7 +2225,7 @@ end definefont pop   % Symbols font
 
    DSCprefix (\n%%HiResBoundingBox:) search not {
      (\n%%BoundingBox:) search not {
-       (EPS: Missing prologue HiResBoundingBox and BoundingBox\n) loud_msg
+       (EPS: Missing prologue HiResBoundingBox and BoundingBox\n) quiet_msg
        epsstring debug_msg
        pop stop
      } if
@@ -2235,7 +2237,7 @@ end definefont pop   % Symbols font
        pop
        DSCpostfix (\n%%HiResBoundingBox:) search not {
          (\n%%BoundingBox:) search not {
-           (EPS: Missing Trailer HiResBoundingBox and BoundingBox\n) loud_msg
+           (EPS: Missing Trailer HiResBoundingBox and BoundingBox\n) quiet_msg
            epsstring debug_msg
            pop stop
          } if
