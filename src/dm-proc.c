@@ -299,7 +299,6 @@ P op_rmpath(void) {
       return OPD_ERR;
   };
 
-  if (! ARRAY_SIZE(o_1)) return RNG_CHK;
   if (curr[-1] != '/') (curr++)[0] = '/';
   if (curr + ARRAY_SIZE(o_1) + 1 >= CEILvm) return VM_OVF;
   moveB(VALUE_PTR(o_1), curr, ARRAY_SIZE(o_1));
