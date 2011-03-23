@@ -847,38 +847,27 @@
   | Returns true iff ~func doesn't error out or abort.
   |
   /readstream {
-    4 {null null} repeat
+    4 ~pipefd repeat
     3 {null} repeat
     openlist
     /func
     /rd /wr /erd /ewr /rdrd /rdwr /erdrd /erdwr
     /pid_eps /pid_out /pid_err
   } {
-    ~_readstream {
-      3 1 roll transcribe
-      3 1 roll transcribe
-      3 1 roll
-    } incapsave
-  } caplocalfunc bind def
-
-  | -- | (stdout) (stderr) true/false
-  /_readstream {
     {
-      pipefd /wr  name /rd  name
-      pipefd /ewr name /erd name {
-        /func find enddict true
-      } NULLR wr ewr openlist rd erd bg_ /pid_eps name
-      [wr ewr] ~close forall
+      {/func find enddict true} NULLR wr ewr
+      openlist rd erd rdrd rdwr erdrd erdwr
+      bg_ /pid_eps name
+      [wr ewr] ~close forall | rd erd rdrd rdwr erdrd erdwr
 
-      pipefd /erdwr name /erdrd name {
-        STDIN suckfd STDOUT exch writefd close true
-      } erd erdwr STDERR openlist rd erdrd bg_ /pid_err name
-      [erd erdwr] ~close forall
+      {STDIN suckfd STDOUT exch writefd close true} erd erdwr STDERR
+      openlist rd rdrd rdwr erdrd
+      bg_ /pid_err name
+      [erd erdwr] ~close forall | rd rdrd rdwr erdrd
 
-      pipefd /rdwr name /rdrd name {
-        STDIN suckfd STDOUT exch writefd close true
-      } rd rdwr STDERR openlist erdrd rdrd bg_ /pid_out name
-      [rd rdwr] ~close forall
+      {STDIN suckfd STDOUT exch writefd close true} rd rdwr STDERR
+      openlist erdrd rdrd bg_ /pid_out name
+      [rd rdwr] ~close forall | rdrd erdrd
     } ~stopped aborted
     {erdrd suckfd toconsole abort} if
     {erdrd suckfd toconsole stop} if
@@ -886,9 +875,7 @@
     erdrd suckfd pid_err wait_quiet
     rdrd  suckfd pid_out wait_quiet
     exch         pid_eps wait       | (stdout) (stderr) bool
-  } bind def
-
-
+  } caplocalfunc bind def
 
 |=============================== removepath functions =====================
 
