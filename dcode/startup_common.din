@@ -446,6 +446,31 @@
   begin ~stop if
 } bind def
 
+|------------------- enddicts -----------
+| ~active | ...
+|
+| executes ~active with all dicts above
+| systemdict and userdict temporarily ended.
+| On return, dictstack is returned to original
+| state. Error is reported if any extra dicts
+| are left on stack.
+|
+/enddicts {
+  {[
+    {
+      countdictstack 2 ne {(enddicts) /RNG_CHK makeerror} if
+      ~begin repeat
+    }
+    countdictstack 2 sub dup 0 ne {
+      currentdict end
+      2 1 3 index {
+        currentdict end exch 1 roll
+      } for
+    } if
+    ~unlock push |]
+  } lock
+} bind def
+
 |------------------ tostring -------------
 | (string-buf) ~active | (sub-string-buf)
 | active: (string-buf) index | (string-buf) index

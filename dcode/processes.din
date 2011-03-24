@@ -50,6 +50,11 @@
   /closeifopen {
     dup closedfd ~pop ~close ifelse
   } bind def
+
+  | ~active | ...
+  /inpidsockets {
+    {{~pidsockets PROCESSES indict indict} lock} enddicts
+  } bind def
   
   /pidsockets [
     /ll 20 {[null null false]} ~static makelist
@@ -306,7 +311,7 @@
       console dup null eq ~pop {
         ~[
           ~[
-            getpid unpid {~piddead pidsockets indict} ~PROCESSES ~indict
+            getpid unpid {~piddead inpidsockets} ~PROCESSES ~indict
             ~restore
           ] ~lock
         ] send
@@ -333,7 +338,7 @@
   | Never returns.
   /_bg_ {
     {
-      ~cleanall pidsockets indict
+      ~cleanall inpidsockets
       true PROCESSES /childproc put
       set_bgerror_
       
@@ -371,7 +376,7 @@
       get_threads fork {setconsole set_threads _bg_} if | threads pid socket
       3 -1 roll pop                                     | pid socket
 
-      1 index 3 1 roll ~add_process pidsockets indict
+      1 index 3 1 roll ~add_process inpidsockets
       {exch dup class /markclass eq ~exit if pop} loop pop
 
       5 1 roll 4 ~pop repeat
@@ -400,12 +405,12 @@
 
   | /SIGNAME | --
   /killall {
-    SIGNALS exch get ~killall pidsockets ~indict lock
+    SIGNALS exch get ~killall inpidsockets
   } bind def
 
   | -- | --
   /terminateall {
-    ~terminateall pidsockets ~indict lock
+    ~terminateall inpidsockets
   } bind def
 
   |=============================== job ============================
@@ -414,7 +419,7 @@
   | Get pid for the nth proces, as listed by jobs, starting from 0.
   | Not stable after a ~wait.
   |
-  /job {~job pidsockets ~indict lock} bind def
+  /job {~job inpidsockets} bind def
 
   |=============================== jobconsole ============================
   | n | pid 
@@ -422,7 +427,7 @@
   | Get the socket for the nth proces, as listed by jobs, starting from 0.
   | Not stable after a ~wait.
   |
-  /jobconsole {~jobconsole pidsockets ~indict lock} bind def
+  /jobconsole {~jobconsole inpidsockets} bind def
 
   |============================ jobs ==============================
   | -- | --
@@ -431,9 +436,9 @@
   | #: pid: alive or dead.
   | Not stable after a ~wait.
   |
-  /jobs {~jobs pidsockets ~indict lock} bind def
+  /jobs {~jobs inpidsockets} bind def
 
-  /jobconsoles {~jobconsoles pidsockets ~indict lock} bind def
+  /jobconsoles {~jobconsoles inpidsockets} bind def
   
   |============================ isdead ==============================
   | pid | bool true / -- false
@@ -446,7 +451,7 @@
   /isdead {
     dup checkpid {
       {0 eq} {pop false} ifelse
-      exch ~pidwaited pidsockets ~indict lock
+      exch ~pidwaited inpidsockets
       true
     } {pop false} ifelse
   } bind def
@@ -459,7 +464,7 @@
   |
   /wait {
     dup waitpid {0 eq} {pop false} ifelse
-    exch ~pidwaited pidsockets ~indict lock
+    exch ~pidwaited inpidsockets
   } bind def
 
   |============================ wait_ =============================
@@ -503,7 +508,7 @@
   /socketdead ~[
     ~[
       /socketdead destruct_execn {             | ... bool socket {}
-        1 index ~_socketdead pidsockets indict {| ... bool socket {}
+        1 index ~_socketdead inpidsockets {    | ... bool socket {}
           pop pop ~error if
         } ~exec ifelse                         | --
       } currentdict ~indict
@@ -541,7 +546,7 @@
       console dup null eq ~pop {
         ~[
           ~[
-            getpid unpid {~piddisconnect pidsockets indict} ~PROCESSES ~indict
+            getpid unpid {~piddisconnect inpidsockets} ~PROCESSES ~indict
             ~restore
           ] ~lock
         ] send
