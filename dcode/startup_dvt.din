@@ -891,8 +891,8 @@ c_         list all connections
     /color null def
     /memory (=== Memory names ==) def
     /opds  100000 def
-    /dicts 200    def
-    /execs 200    def
+    /dicts 5000    def
+    /execs 5000    def
     /mb    500    def
     /user  400    def
     end userdict 3 -1 roll put
