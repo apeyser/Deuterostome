@@ -1546,6 +1546,35 @@ P op_aborted(void)
   return OK;
 }
 
+/*--------------------------------------- aborted
+   use:  -- | pid
+
+   - returns pid of current process
+*/
+P op_getpid(void) {
+  if (CEILopds < o2) return OPDS_OVF;
+  TAG(o1) = (NULLOBJ|PIDTYPE);
+  ATTR(o1) = 0;
+  PID_VAL(o1) = getpid();
+  FREEopds = o2;
+  return OK;
+}
+
+/*--------------------------------------- unpid
+   use:  pid | pid#
+
+   - converts a pid object to its numerical representation
+
+*/
+P op_unpid(void) {
+  if (FLOORopds > o_1) return OPDS_UNF;
+  if (TAG(o_1) != (NULLOBJ|PIDTYPE)) return OPD_ERR;
+  TAG(o_1) = (NUM|LONGBIGTYPE);
+  ATTR(o_1) = 0;
+  LONGBIG_VAL(o_1) = (LBIG) PID_VAL(o_1);
+  return OK;
+}
+
 /////////////////////////////////////////// signal handling code
 
 /*--------- signal handler: SIGFPE */

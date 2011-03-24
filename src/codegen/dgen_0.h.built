@@ -163,6 +163,8 @@ B* _sysop[] =
   (B*) "socketval", (B*) op_socketval,
   (B*) "getmyname", (B*) op_getmyname,
   (B*) "getmyfqdn", (B*) op_getmyfqdn,
+  (B*) "getpid", (B*) op_getpid,
+  (B*) "unpid", (B*) op_unpid,
   (B*) "die", (B*) op_die,
   (B*) "quit", (B*) op_quit,
   (B*) "fromconsole", (B*) op_fromconsole,

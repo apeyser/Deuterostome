@@ -98,22 +98,27 @@ P op_error(void)
   
   p = strb; 
   atmost = 255;
-  nb = dm_snprintf((char*)p,atmost,"\033[31m");
+  nb = dm_snprintf((char*)p, atmost, "\033[31m");
   p += nb; 
   atmost -= nb;
  
   if (e < 0) { /*Clib error */
-    nb = dm_snprintf((char*)p,atmost,"%s",(char*)strerror(-e));
+    nb = dm_snprintf((char*) p, atmost,"%s",
+		     (char*) strerror(-e));
   }
   else { /* one of our error codes: decode */
     m = geterror(e);
-    nb = dm_snprintf((char*)p,atmost,"%s",(char*)m);
+    nb = dm_snprintf((char*) p, atmost, "%s",
+		     (char*) m);
   }
-
   p += nb; 
   atmost -= nb;
-  nb = dm_snprintf((char*)p,atmost," in %s\033[0m\n", (B*)VALUE_BASE(o_2));
+
+  nb = dm_snprintf((char*) p, atmost, " in %*s\033[0m\n",
+		   (int) ARRAY_SIZE(o_2),
+		   (B*) VALUE_BASE(o_2));
   nb += (P) (p - strb);
+
   toconsole(strb, nb);
   FREEopds = o_2;
   return op_abort();
@@ -148,7 +153,7 @@ P op_errormessage(void)
 		     (char*) strerror(-e));
   } else { /* one of our error codes: decode */
     m = geterror(e);
-    nb = strlen((char*)m);
+    nb = strlen((char*) m);
     if (nb > tnb) nb = tnb;
     moveB(m, s, nb);
   }
@@ -157,8 +162,9 @@ P op_errormessage(void)
 
   nb = snprintf((char*) s, tnb, " in %*s\n",
 		(int) ARRAY_SIZE(o_3),
-		(char *)VALUE_BASE(o_3));
+		(char*) VALUE_BASE(o_3));
   if (nb > tnb) nb = tnb;
+
   ARRAY_SIZE(o_1) = (P)(s + nb) - VALUE_BASE(o_1);
   moveframe(o_1,o_3);
   FREEopds = o_2;
@@ -227,12 +233,17 @@ void makeerror(P retc, B* error_source) {
   if (retc == EXECS_OVF) FREEexecs = FLOORexecs;
   if (o2 >= CEILopds) FREEopds = FLOORopds;
   if (x1 >= CEILexecs) FREEexecs = FLOORexecs;
-  TAG(o1) = ARRAY | BYTETYPE; 
+
+  TAG(o1) = (ARRAY | BYTETYPE);
   ATTR(o1) = READONLY;
   VALUE_BASE(o1) = (P)error_source; 
   ARRAY_SIZE(o1) = strlen((char*)error_source);
-  TAG(o2) = NUM | LONGBIGTYPE; ATTR(o2) = 0;
+
+  TAG(o2) = (NUM | LONGBIGTYPE);
+  ATTR(o2) = 0;
   LONGBIG_VAL(o2) = retc;
+
   moveframe(errorframe,x1);
-  FREEopds = o3; FREEexecs = x2;
+  FREEopds = o3;
+  FREEexecs = x2;
 }

@@ -163,6 +163,8 @@ B* _sysop[] =
   (B*) "socketval", (B*) op_socketval,
   (B*) "getmyname", (B*) op_getmyname,
   (B*) "getmyfqdn", (B*) op_getmyfqdn,
+  (B*) "getpid", (B*) op_getpid,
+  (B*) "unpid", (B*) op_unpid,
   (B*) "lock", (B*) op_lock,
   (B*) "unlock", (B*) op_unlock,
   (B*) "serialize", (B*) op_serialize,

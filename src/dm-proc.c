@@ -462,16 +462,6 @@ P op_fork(void) {
   return OK;
 }
 
-// -- | pid
-P op_getpid(void) {
-  if (CEILopds < o2) return OPDS_OVF;
-  TAG(o1) = (NULLOBJ|PIDTYPE);
-  ATTR(o1) = 0;
-  PID_VAL(o1) = getpid();
-  FREEopds = o2;
-  return OK;
-}
-
 // -- | ppid
 P op_getppid(void) {
   if (CEILopds < o2) return OPDS_OVF;
@@ -729,16 +719,6 @@ P op_pipefd(void) {
 
   FREEvm += FRAMEBYTES + STREAMBOXBYTES;
   FREEopds = o3;
-  return OK;
-}
-
-// pid | pid#
-P op_unpid(void) {
-  if (FLOORopds > o_1) return OPDS_UNF;
-  if (TAG(o_1) != (NULLOBJ|PIDTYPE)) return OPD_ERR;
-  TAG(o_1) = (NUM|LONGBIGTYPE);
-  ATTR(o_1) = 0;
-  LONGBIG_VAL(o_1) = (LBIG) PID_VAL(o_1);
   return OK;
 }
 

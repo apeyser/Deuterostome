@@ -1298,6 +1298,16 @@ end def  | of xtext_dict
   userdict /dstate_sv get capsave
 } bind def
 
+
+| (source) /ERROR_NAME | --
+/makeerror {
+  {
+    _makeerror {error_ops_length dup 2 sub roll} if
+    ERRORS exch get
+  } userdict indict
+  error
+} bind def
+
 | e1...ex ... n | ... e1..ex
 /rollerror {error_ops_length 1 index add exch roll} bind def
 

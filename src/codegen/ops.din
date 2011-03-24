@@ -231,6 +231,7 @@
       /dilute_add /matvecmul
       /getstartupdir /gethomedir /getconfdir
       /socketval /getmyname /getmyfqdn
+      /getpid /unpid
     ] def
     /errors 100 dict dup begin |[
       /ABORT (** Internal ABORT returned -- should never appear as error) def
@@ -295,7 +296,7 @@ end def |]
 /proc 1 dict dup begin |[
   /all 2 dict dup begin |[
     /commands [
-      /fork /killpid /waitpid /checkpid /getpid /getppid /unpid /spawn 
+      /fork /killpid /waitpid /checkpid /getppid /spawn 
       /copyfd /readonlyfd /makefd /unmakefd /dupfd /pipefd
       /openfd /readfd /readtomarkfd /readtomarkfd_nb 
       /tmpfile /tmpdir /rmpath /finddir

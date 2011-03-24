@@ -39,6 +39,7 @@ B hostname[256] = {};
      errsocket string
      port#
      hostname string
+     pid int
   - prints message on current console or startup
     terminal (default)
   - aborts on corrupted error info
@@ -47,53 +48,67 @@ B hostname[256] = {};
 
 P op_error(void)
 {
-  LBIG e;
+  LBIG e, pid, port;
   P nb, atmost; 
   B *m, strb[256], *p;
 
   p = strb; 
   atmost = 255;
-  if (o_4 < FLOORopds) goto baderror;
+  if (o_5 < FLOORopds) goto baderror;
+  if (CLASS(o_5) != NUM) goto baderror;
+  if (! VALUE(o_5, &pid)) goto baderror;
   if (TAG(o_4) != (ARRAY | BYTETYPE)) goto baderror;
-  if (TAG(o_3) != (NUM | LONGBIGTYPE)) goto baderror;
+  if (CLASS(o_3) != NUM) goto baderror;
+  if (! VALUE(o_3, &port)) goto baderror;
   if (TAG(o_2) != (ARRAY | BYTETYPE)) goto baderror;
   if (CLASS(o_1) != NUM) goto baderror;
-  if (!VALUE(o_1,&e)) goto baderror;
+  if (! VALUE(o_1, &e)) goto baderror;
 
-  nb = dm_snprintf((char*)p,atmost,"\033[31mOn %*s port %lld: ",
-                   (int) ARRAY_SIZE(o_4), (char*)VALUE_BASE(o_4), 
-                   (long long) LONGBIG_VAL(o_3));
+  nb = dm_snprintf((char*) p, atmost, "\033[31mOn %*s port %llu, pid %llu: ",
+                   (int) ARRAY_SIZE(o_4),
+		   (char*) VALUE_BASE(o_4), 
+                   (unsigned long long) port,
+		   (unsigned long long) pid);
 
-  p += nb; atmost -= nb;
+  p += nb;
+  atmost -= nb;
   if ((P)e < 0) /*Clib error */
-    nb = dm_snprintf((char*)p,atmost,"%s",(char*)strerror((P)-e));
+    nb = dm_snprintf((char*) p, atmost, "%s",
+		     (char*) strerror((P) -e));
   else { /* one of our error codes: decode */
-    m = geterror((P)e);
-    nb = dm_snprintf((char*)p,atmost,"%s",(char*)m);
+    m = geterror((P) e);
+    nb = dm_snprintf((char*) p, atmost, "%s",
+		     (char*) m);
   }
-  p += nb; atmost -= nb;
-  nb = dm_snprintf((char*)p,atmost," in %s\033[0m\n", (char*)VALUE_BASE(o_2));
+  p += nb;
+  atmost -= nb;
+
+  nb = dm_snprintf((char*) p, atmost, " in %*s\033[0m\n",
+		   (int) ARRAY_SIZE(o_2),
+		   (char*) VALUE_BASE(o_2));
   nb += (P)(p - strb);
-  TAG(o_4) = ARRAY | BYTETYPE; 
-  ATTR(o_4) = READONLY;
-  VALUE_BASE(o_4) = (P)strb; 
-  ARRAY_SIZE(o_4) = nb;
-  FREEopds = o_3;
+
+  TAG(o_5) = ARRAY | BYTETYPE; 
+  ATTR(o_5) = READONLY;
+  VALUE_BASE(o_5) = (P) strb; 
+  ARRAY_SIZE(o_5) = nb;
+  FREEopds = o_4;
   op_toconsole();
   if (op_halt() == DONE) return DONE;
 
-  nb = dm_snprintf((char*)p, atmost, "** Error in internal halt!\n");
+  nb = dm_snprintf((char*) p, atmost, "%s",
+		   "** Error in internal halt!\n");
   goto baderror2;
 
  baderror: 
-  nb = dm_snprintf((char*)p,atmost,
+  nb = dm_snprintf((char*)p, atmost,
                    "**Error with corrupted error info on operand stack!\n");
  baderror2:
   op_abort();
   nb += (P)(p - strb);
   TAG(o1) = ARRAY | BYTETYPE; 
   ATTR(o1) = READONLY;
-  VALUE_BASE(o1) = (P)strb; 
+  VALUE_BASE(o1) = (P) strb; 
   ARRAY_SIZE(o1) = nb;
   FREEopds = o2;
   return op_toconsole();
@@ -106,21 +121,25 @@ P op_error(void)
      errsocket string
      port#
      hostname string
+     pid int
   - composes an error message and returns it in a subarray of string buffer
 */
 
 P op_errormessage(void)
 {
-  LBIG e;
+  LBIG e, pid, port;
   P nb, tnb; 
   B *m, *s;
 
-  if (o_5 < FLOORopds) goto baderror;
+  if (o_6 < FLOORopds) goto baderror;
+  if (CLASS(o_6) != NUM) goto baderror;
+  if (! VALUE(o_6, &pid)) goto baderror;
   if (TAG(o_5) != (ARRAY | BYTETYPE)) goto baderror;
-  if (TAG(o_4) != (NUM | LONGBIGTYPE)) goto baderror;
+  if (CLASS(o_4) != NUM) goto baderror;
+  if (! VALUE(o_4, &port)) goto baderror;
   if (TAG(o_3) != (ARRAY | BYTETYPE)) goto baderror;
   if (CLASS(o_2) != NUM) goto baderror;
-  if (!VALUE(o_2,&e)) goto baderror;
+  if (!VALUE(o_2, &e)) goto baderror;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) goto baderror;
 
   s = (B *)VALUE_BASE(o_1); 
@@ -128,8 +147,8 @@ P op_errormessage(void)
   nb = dm_snprintf((char*) s, tnb, "On %*s port %llu, pid %llu: ",
 		   (int) ARRAY_SIZE(o_5),
 		   (char*) VALUE_BASE(o_5),
-                   (long long) LONGBIG_VAL(o_4),
-		   (long long) getpid());
+                   (unsigned long long) port,
+		   (unsigned long long) pid);
   s += nb;
   tnb -= nb;
 
@@ -150,8 +169,8 @@ P op_errormessage(void)
 		   (char*) VALUE_BASE(o_3));
 
   ARRAY_SIZE(o_1) = (P)(s + nb) - VALUE_BASE(o_1);
-  moveframe(o_1,o_5);
-  FREEopds = o_4;
+  moveframe(o_1,o_6);
+  FREEopds = o_5;
   return OK;
 
  baderror:
@@ -462,27 +481,37 @@ P wm_button_press(XEvent* event, B* userdict) {
    errsocket string
    port#
    hostname string
+   pid
    and push active name 'error' on execution stack
 */
 void makeerror(P retc, B* error_source) {   
-  if (o4 >= CEILopds) FREEopds = FLOORopds;
+  if (o5 >= CEILopds) FREEopds = FLOORopds;
   if (x1 >= CEILexecs) FREEexecs = FLOORexecs;
-  TAG(o1) = ARRAY | BYTETYPE; 
-  ATTR(o1) = READONLY;
-  VALUE_BASE(o1) = (P)hostname; 
-  ARRAY_SIZE(o1) = strlen((char*)hostname);
-  TAG(o2) = NUM | LONGBIGTYPE; 
-  ATTR(o2) = 0;
-  LONGBIG_VAL(o2) = serverport - getportoffset();
-  TAG(o3) = ARRAY | BYTETYPE; 
-  ATTR(o3) = READONLY;
-  VALUE_PTR(o3) = (B*) error_source; 
-  ARRAY_SIZE(o3) = strlen((char*)error_source);
-  TAG(o4) = NUM | LONGBIGTYPE; 
-  ATTR(o4) = 0; 
-  LONGBIG_VAL(o4) = retc;
+
+  TAG(o1) = (NUM | LONGBIGTYPE);
+  ATTR(o1) = 0;
+  LONGBIG_VAL(o1) = (LBIG) getpid();
+
+  TAG(o2) = (ARRAY | BYTETYPE);
+  ATTR(o2) = READONLY;
+  VALUE_BASE(o2) = (P) hostname;
+  ARRAY_SIZE(o2) = strlen((char*) hostname);
+
+  TAG(o3) = (NUM | LONGBIGTYPE);
+  ATTR(o3) = 0;
+  LONGBIG_VAL(o3) = serverport - getportoffset();
+
+  TAG(o4) = (ARRAY | BYTETYPE);
+  ATTR(o4) = READONLY;
+  VALUE_PTR(o4) = (B*) error_source; 
+  ARRAY_SIZE(o4) = strlen((char*) error_source);
+
+  TAG(o5) = (NUM | LONGBIGTYPE);
+  ATTR(o5) = 0;
+  LONGBIG_VAL(o5) = retc;
+
   moveframe(errorframe, x1);
-  FREEopds = o5; 
+  FREEopds = o6;
   FREEexecs = x2;
 }
 

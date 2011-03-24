@@ -93,7 +93,7 @@ DM_INLINE_STATIC P fromconsole(void)
 /*-------------------- DVT-specific operators -------------------------*/
 
 /*-------------------------------------- 'error'
-   use: instance_string error_numeral | (->abort)
+   use: pid instance_string error_numeral | (->abort)
 
   - Clib error numerals are negative errno of Clib
   - decodes the error numeral and writes message
@@ -104,66 +104,74 @@ DM_INLINE_STATIC P fromconsole(void)
 
 P op_error(void)
 {
-  LBIG e; 
+  LBIG e, pid;
   B *m;
   B *p, strb[256];
   P nb, atmost; 
 
-  if (o_2 < FLOORopds) goto baderror;
+  if (o_3 < FLOORopds) goto baderror;
+  if (CLASS(o_3) != NUM) goto baderror;
+  if (! VALUE(o_3, &pid)) goto baderror;
   if (TAG(o_2) != (ARRAY | BYTETYPE)) goto baderror;
   if (CLASS(o_1) != NUM) goto baderror;
-  if (!VALUE(o_1,&e)) goto baderror;
+  if (!VALUE(o_1, &e)) goto baderror;
 
-  p = strb; 
+  p = strb;
   atmost = 255;
-  nb = dm_snprintf((char*)p,atmost,"\033[31m");
-  p += nb; 
+  nb = dm_snprintf((char*) p, atmost, "\033[31mPid %llu: ",
+		   (unsigned long long) pid);
+  p += nb;
   atmost -= nb;
  
   if ((P)e < 0) /*Clib error */
-    nb = dm_snprintf((char*)p,atmost,"%s",(char*)strerror(-e));
+    nb = dm_snprintf((char*) p, atmost, "%s",
+		     (char*) strerror(-e));
   else { /* one of our error codes: decode */
-    m = geterror((P)e);
-    nb = dm_snprintf((char*)p,atmost,"%s",(char*)m);
+    m = geterror((P) e);
+    nb = dm_snprintf((char*) p, atmost, "%s",
+		     (char*) m);
   }
-
   p += nb; 
   atmost -= nb;
-  nb = dm_snprintf((char*)p,atmost," in %s\033[0m\n", (char*)VALUE_BASE(o_2));
+
+  nb = dm_snprintf((char*) p, atmost," in %*s\033[0m\n",
+		   (int) ARRAY_SIZE(o_2),
+		   (char*) VALUE_BASE(o_2));
   nb += (P) (p - strb);
+
   toconsole(strb, nb);
-  FREEopds = o_2;
-  //return op_abort();
+  FREEopds = o_3;
   return ABORT;
 
  baderror: 
-  toconsole((B*)"Error with corrupted error info on operand stack!\n", -1L);
-  //return op_abort();
+  toconsole((B*) "Error with corrupted error info on operand stack!\n", -1L);
   return ABORT;
 }
 
 /*-------------------------------------- 'errormessage'
-  use: instance_string error-numeral stringbuf | substring_of_stringbuf
+  use: pid instance_string error-numeral stringbuf | substring_of_stringbuf
 
   - composes an error message and returns it in a subarray of string buffer
 */
 
 P op_errormessage(void)
 {
-  LBIG e;
+  LBIG e, pid;
   P nb, tnb; 
   B *m, *s;
 
-  if (o_3 < FLOORopds) return OPDS_UNF;
+  if (o_4 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_4) != NUM) return OPD_CLA;
+  if (! VALUE(o_4, &pid)) return UNDF_VAL;
   if (TAG(o_3) != (ARRAY | BYTETYPE)) return OPD_ERR;
   if (CLASS(o_2) != NUM) return OPD_CLA;
-  if (!VALUE(o_2,&e)) return UNDF_VAL;
+  if (! VALUE(o_2, &e)) return UNDF_VAL;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
 
-  s = (B *)VALUE_BASE(o_1);
+  s = (B*) VALUE_BASE(o_1);
   tnb = ARRAY_SIZE(o_1);
   nb = dm_snprintf((char*) s, tnb, "Pid %llu: ",
-		   (long long) getpid());
+		   (unsigned long long) pid);
   s += nb;
   tnb -= nb;
 
@@ -184,8 +192,8 @@ P op_errormessage(void)
 		   (char*) VALUE_BASE(o_3));
 
   ARRAY_SIZE(o_1) = (P)(s + nb) - VALUE_BASE(o_1);
-  moveframe(o_1,o_3);
-  FREEopds = o_2;
+  moveframe(o_1, o_4);
+  FREEopds = o_3;
   return OK;
 }
 
@@ -390,23 +398,31 @@ P wm_button_press(XEvent* event, B* userdict) {
 
 #endif //! X_DISPLAY_MISSING
 
-/* we push the errsource string followed by the error code on
+/* we push pid, the errsource string then the error code on
    the operand stack, and 'error' on the execution stack 
 */
 
 void makeerror(P retc, B* error_source) {
   if (retc == OPDS_OVF) FREEopds = FLOORopds;
   if (retc == EXECS_OVF) FREEexecs = FLOORexecs;
-  if (o2 >= CEILopds) FREEopds = FLOORopds;
+  if (o3 >= CEILopds) FREEopds = FLOORopds;
   if (x1 >= CEILexecs) FREEexecs = FLOORexecs;
-  TAG(o1) = ARRAY | BYTETYPE; ATTR(o1) = READONLY;
-  VALUE_BASE(o1) = (P)error_source; 
-  ARRAY_SIZE(o1) = strlen((char*)error_source);
-  TAG(o2) = NUM | LONGBIGTYPE; 
-  ATTR(o2) = 0;
-  LONGBIG_VAL(o2) = retc;
-  moveframe(errorframe,x1);
-  FREEopds = o3; 
+
+  TAG(o1) = (NUM | LONGBIGTYPE);
+  ATTR(o1) = 0;
+  LONGBIG_VAL(o1) = (LBIG) getpid();
+
+  TAG(o2) = (ARRAY | BYTETYPE);
+  ATTR(o2) = READONLY;
+  VALUE_BASE(o2) = (P) error_source; 
+  ARRAY_SIZE(o2) = strlen((char*) error_source);
+
+  TAG(o3) = (NUM | LONGBIGTYPE);
+  ATTR(o3) = 0;
+  LONGBIG_VAL(o3) = retc;
+
+  moveframe(errorframe, x1);
+  FREEopds = o4; 
   FREEexecs = x2;
 }
 
@@ -457,11 +473,13 @@ void run_dvt_mill(void) {
 
   setupdirs();
 /*----------------- construct frames for use in execution of D code */
-  makename((B*)"error",errorframe); 
+  makename((B*) "error", errorframe); 
   ATTR(errorframe) = ACTIVE;
-  makename((B*)"abort", abortframe); 
+
+  makename((B*) "abort", abortframe);
   ATTR(abortframe) = ACTIVE;
-  makename((B*)"quit", quitframe);
+
+  makename((B*) "quit", quitframe);
   ATTR(quitframe) = ACTIVE;
 
 /*----------- read startup_dvt.d and push on execs ----------*/
