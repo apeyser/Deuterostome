@@ -622,8 +622,11 @@
   |
   /sh_quiet {
     ~_spawnsh fds bg
-    counttomark 1 add 1 roll cleartomark
-    (sh) wait_quiet
+    counttomark 1 add 1 roll | pid \[ (exec) ...
+    counttomark 1 sub index  | pid \[ (exec) ... (exec)
+    counttomark 1 add 1 roll | pid (exec) \[ (exec) ...
+    cleartomark              | pid (exec)
+    wait_quiet
   } bind def
 
   |====================== pipe ==================================
