@@ -1009,7 +1009,7 @@ end def  | of xtext_dict
 
 | (dir) (file) | bool
 /fileisdir {
-  findfile not {/FILE_NOSUCH makeerror} if
+  findfile not {(fileisdir) /FILE_NOSUCH makeerror} if
   3 1 roll pop pop FTYPEMASK and DIRTYPE eq
 } bind def
 
