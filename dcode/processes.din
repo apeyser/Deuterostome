@@ -641,30 +641,26 @@
   |  if ~active returns false or throws an error.
   |
   /pipe {
-    {
-      |  (master: ) toconsole getpid _ pop
-      counttomark openlist exch 2 add 1 roll | \[ \[ ~active ...
-      STDOUT {                   | \[pid socket... \[~active... out
-        2 index class /markclass eq ~exit if
+    /pipe_err name /pipe_out name /pipe_in name
+    {closelist /pipe_actives name
+      true [
+        pipe_actives length 0 ne {
+          /pipe_in STDIN def
+          pipe_actives 0 1 index last getinterval {
+            pipefd /pipe_out name /pipe_nin name
+            pipe_in pipe_out STDERR openlist pipe_nin bg_
+            pipe_in close pipe_out close
+            /pipe_in pipe_nin def
+          } forall
 
-        pipefd 3 copy 7 3 roll   | ... out inr inw ~active out inr inw
-        | must close inw in child to avoid file-descriptor loop
-        3 1 roll exch STDERR     | ... out inr inw ~active inw inr out STDERR
-        openlist 5 -1 roll bg_   | ... out inr inw pid
-        counttomark 1 add 1 roll | ... out inr inw
-        3 1 roll close close     | ... inw
-      } loop                     | \[pid... \[ ~active fd-out
-
-      exch STDIN 2 index STDERR bg   | \[pid ... \[fd-out pid
-      3 1 roll close pop             | \[pid ... 
-    
-      true {                         | \[pid... bool
-        exch wait and                | \[pid... bool
-        1 index class /markclass eq ~exit if
-      } loop                         | \[bool
-      exch pop                       | bool
-    } 4 1 roll bg                    | \[~active... fd-in fd-out fd-err pid
-    counttomark 1 add 1 roll cleartomark | pid
+          /pipe_out STDOUT def
+          pipe_actives dup last get pipe_in pipe_out STDERR bg
+          pipe_in close pipe_out close
+        } if
+        STDIN closefd STDOUT closefd
+      ] {wait and} forall
+    } pipe_in pipe_out pipe_err bg /pipe_pid name
+    cleartomark pipe_pid
   } bind def
 
   |====================== pipe ==================================
