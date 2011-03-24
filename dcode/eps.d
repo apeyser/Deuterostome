@@ -89,52 +89,52 @@
   | The output sits in a pipe, as well as an error messages from
   |  the subprocesses.
   |
+  /process {PROCESSES indict} def
   /eps_ {
     getwdir transcribe
-    null (eps) tmpdir setwdirp getwdir transcribe
-    (.) (eps-out.eps) wropen
-    (.) (eps-out.eps) rdopen
-    (.) (eps-err.eps) wropen
-    (.) (eps-err.eps) rdopen
+    null (eps) tmpdir ~setwdirp process getwdir transcribe
     openlist
     /preamble /input /ptsize
-    /pwd /twd /wr /rd /ewr /erd
+    /pwd /twd
   } {
-    ewr [
+    ~STDERR process [
       (Working in temporary directory: `) twd ('\n)
     ] ~writefd forall pop
 
-    (.) (eps.tex) wropen [
+    (.) (eps.tex) ~wropen process [
       predoc (XX) 0 * ptsize * number pop pre preamble main input post
-    ] ~writefd forall close
+    ] ~writefd forall ~close process
 
-    /PDFLATEX prog (--halt-on-error) (--interaction=nonstopmode) (eps.tex)
-    STDIN ewr ewr sh_bg (pdflatex) wait_quiet
+    /PDFLATEX prog {STDIN STDERR dup sh_bg (pdflatex) wait_quiet} process
+    /PDFCROP  prog {STDIN STDERR dup sh_bg (pdfcrop)  wait_quiet} process
 
-    /PDFCROP prog (--hires) (eps.pdf) (eps-crop.pdf)
-    STDIN ewr ewr sh_bg (pdfcrop) wait_quiet
+    [
+      {/PDFTOPS  ~prog EPS indict sh_quiet true}
+      {/SED_PIPE ~prog EPS indict sh_quiet true} |]
+    {fds pipe (pdftops | sed) wait_quiet} process
 
-    /PDFTOPS prog (-eps) (-level3) (-preload) (eps-crop.pdf) (eps-crop.eps)
-    STDIN ewr ewr sh_bg (pdftops) wait_quiet
+    /SED_COMMENT prog ~sh_quiet process
+    ~STDOUT process (%%EOF\n) writefd pop
 
-    /SED prog (-re) (/^%%EOF$/ d) (eps-crop.eps)
-    STDIN wr ewr sh_bg (sed EOF) wait_quiet
-
-    /SED prog (-e) (s/pt$//) (eps.comment)
-    STDIN wr ewr sh_bg (sed COMMENTS) wait_quiet
-
-    wr (%%EOF\n) writefd close ewr close
-    {STDOUT STDIN suckfd writefd pop true} erd STDERR dup    bg
-    {STDOUT STDIN suckfd writefd pop true} rd  STDOUT STDERR bg
-
-    (cat out) wait_quiet (cat err) wait_quiet
     pwd setwdir
-    twd () removedir
+    twd () ~removedir process
   } caplocalfunc bind def
+
+  | /prog | /progname [params...]
+  /CMD [
+    /PDFLATEX    {{(--halt-on-error) (--interaction=nonstopmode) (eps.tex)}}
+    /PDFCROP     {{(--hires) (eps.pdf) (eps-crop.pdf)}}
+    /PDFTOPS     {{(-eps) (-level3) (-preload) (eps-crop.pdf) (-)}}
+    /SED_PIPE    {pop /SED {(-re) (/^%%EOF$/ d)}}
+    /SED_COMMENT {pop /SED {(-e) (s/pt$//) (eps.comment)}}
+  ] makestruct def
 
   | /PROG | openlist (prog)
   /prog {
-    [PROGS 3 -1 roll get |]
+    [ exch                 | \[ /PROG
+      CMD 1 index get exec | \[ /progname [params...]
+      PROGS 3 -1 roll get  | \[ [params...] (progname)
+      exch {} forall       | \[ (progname) params...    ]
   } bind def
 
   |------------------------ xeps ---------------------------
@@ -160,7 +160,7 @@
   |  happen internally.
   |
   /xeps {
-    {~[4 1 roll ~eps_] ~readstream PROCESSES underdict} {
+    {~[4 1 roll ~eps_] ~readstream process} {
       {pop transcribe} {toconsole pop hamuti} ifelse
     } incapsave
   } bind def
