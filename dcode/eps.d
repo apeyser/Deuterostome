@@ -82,8 +82,10 @@
   |  constructing a latex document out of ptsize (10,11 or 12)
   |  and input, an arbitary latex string.
   | It creates a temporary directory, puts the document in there,
-  |   calls pdflatex on it, uses ghostscript to make it a cropped eps,
-  |   uses sed to append the latex bounding box details (and strip pt
+  |   calls pdflatex on it, uses pdfcrop to make it a cropped pdf,
+  |   converts it to an eps with pdftops (that protects the fonts --
+  |   ghostscript screws them up), clear out the %%EOF's with sed,
+  |   and uses sed to append the latex bounding box details (and strip pt
   |   from those numbers, since I can't seem to make latex do that),
   |   and finally appends an %%EOF to the entire thing.
   | The output sits in a pipe, as well as an error messages from
@@ -151,10 +153,7 @@
   | (eps) is the body for an eps file.
   | On error, the eps prints "hamuti".
   |
-  | The resolution is defined by RESOLUTION defined in this
-  |   module -- defaults to 1200 dpi.
-  |
-  | eps calls eps_ setting up
+  | xeps calls eps_ setting up
   |  input and output streams, and wrapping it in an error catcher
   |  that will dump the error stream to console if a stop or error
   |  happen internally.
