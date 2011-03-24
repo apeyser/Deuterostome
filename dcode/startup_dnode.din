@@ -48,20 +48,19 @@ startup_common_save capsave {
 | error-pending socket | -- <<error thrown>>
 /socketdead {{
   false exch
-  userdict /mpidata known {
-    mpidata /socket known {
-      mpidata begin {
-        dup socket eq {
-          {
-            (On ) fax myname fax ( port ) fax * getmyport * number (: ) fax
-            (** rthreads socket dead) fax
-          } warning
-          /socket -1 def kill
-          exch pop true exch
-        } if
-      } stopped end ~stop if
+  {
+    currentdict /socket known {
+      dup socket eq {
+        {
+          (On ) fax myname fax ( port ) fax * getmyport * number (: ) fax
+          (** rthreads socket dead) fax
+        } warning
+        /socket -1 def kill
+        exch pop true exch
+      } if
     } if
-  } if 
+  } userdict /mpidata known {mpidata indict} ~pop ifelse
+
   exch ~pop {
     disconnect
     myname getmyport (socketdead) ERRORS /DEAD_SOCKET get showerror
