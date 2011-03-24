@@ -1305,9 +1305,6 @@ end def  | of xtext_dict
 /showerror ~[
   ~[
     2 ~rollerror 1024 /b array ~errormessage ~fax 1 ~sub
-    systemdict /getpid known {
-      ( [) ~fax * ~getpid ~unpid * ~number (]) ~fax
-    } if
   ] ~warning
 ] bind def
 

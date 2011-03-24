@@ -428,20 +428,28 @@ P op_errormessage(void)
 
   s = (B *)VALUE_BASE(o_1); 
   tnb = ARRAY_SIZE(o_1);
-  nb = dm_snprintf((char*)s,
-		   tnb,"On rank %lld: ", (long long) r);
-  s += nb; tnb -= nb;
+  nb = dm_snprintf((char*) s, tnb, "On rank %llu, pid %llu: ",
+		   (long long) r,
+		   (long long) getpid());
+  s += nb;
+  tnb -= nb;
 
   if ((P)e < 0) /*Clib error */
-    nb = dm_snprintf((char*)s,tnb,"%s",(char*)strerror(-e));
+    nb = dm_snprintf((char*) s, tnb, "%s",
+		     (char*) strerror(-e));
   else { /* one of our error codes: decode */
-    m = geterror((P)e);
-    nb = strlen((char*)m);
+    m = geterror((P) e);
+    nb = strlen((char*) m);
     if (nb > tnb) nb = tnb;
-    moveB(m,s,nb);
+    moveB(m, s, nb);
   }
-  s += nb; tnb -= nb;
-  nb = dm_snprintf((char*)s,tnb," in %s\n", (char*)VALUE_BASE(o_3));
+  s += nb;
+  tnb -= nb;
+
+  nb = dm_snprintf((char*) s, tnb, " in %*s\n",
+		   (int) ARRAY_SIZE(o_3),
+		   (char*) VALUE_BASE(o_3));
+
   ARRAY_SIZE(o_1) = (P)(s + nb) - VALUE_BASE(o_1);
   moveframe(o_1,o_4);
   FREEopds = o_3;

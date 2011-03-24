@@ -140,18 +140,24 @@ P op_errormessage(void)
   if (CLASS(o_2) != NUM) return OPD_CLA;
   if (!PVALUE(o_2,&e)) return UNDF_VAL;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
-  s = (B *)VALUE_BASE(o_1); tnb = ARRAY_SIZE(o_1);
+
+  s = (B *)VALUE_BASE(o_1);
+  tnb = ARRAY_SIZE(o_1);
   if (e < 0) { /*Clib error */
-    nb = dm_snprintf((char*)s,tnb,"%s",(char*)strerror(-e));
+    nb = dm_snprintf((char*) s, tnb, "%s",
+		     (char*) strerror(-e));
   } else { /* one of our error codes: decode */
     m = geterror(e);
     nb = strlen((char*)m);
     if (nb > tnb) nb = tnb;
-    moveB(m,s,nb);
+    moveB(m, s, nb);
   }
   s += nb; 
   tnb -= nb;
-  nb = snprintf((char*)s,tnb," in %s\n", (B *)VALUE_BASE(o_3));
+
+  nb = snprintf((char*) s, tnb, " in %*s\n",
+		(int) ARRAY_SIZE(o_3),
+		(char *)VALUE_BASE(o_3));
   if (nb > tnb) nb = tnb;
   ARRAY_SIZE(o_1) = (P)(s + nb) - VALUE_BASE(o_1);
   moveframe(o_1,o_3);
