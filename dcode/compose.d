@@ -1,5 +1,4 @@
-/COMPOSE module
-200 dict dup begin
+/COMPOSE 200 {
 
 /verbose [
   /quiet ~[
@@ -45,9 +44,9 @@
 | the new system provides a general toolbox for making notebooks and preparing
 | figures for publication.
 |
-| Note: We use recursion ad nauseam. Expect that the code that you see is 
+| Note: We use recursion ad nauseam. Expect that the code that you see is
 |       only the tip of the iceberg.
-|        
+|
 |
 |----------------------------------------- things to do (or not)
 |
@@ -80,90 +79,80 @@
 |
 | `EPSfigure' generates an EPS wrapper f or the PS code and writes the PS code
 | together with a prefix (defining a symbol font and some PS tools) to the
-| output file.  
+| output file.
 |
 
 /EPSfigure {
-  {
-    countdictstack /ndict name
-    /generator name
-    /EPSfile name
-    /EPSpath name
-    /EPSidx 0 def
-    /EPSbuf EPSbufsz /b array def
-    /includebuf includebufsz /b array def
-    /includeidx 0 def
-    /xbox 4 /d array def
-    /ybox 4 /d array def
+  /generator name
+  /EPSfile name
+  /EPSpath name
+  /EPSidx 0 def
+  /EPSbuf EPSbufsz /b array def
+  /includebuf includebufsz /b array def
+  /includeidx 0 def
+  /xbox 4 /d array def
+  /ybox 4 /d array def
 
 |-- phase 1 (logical design)
 
-    (\n) medium_msg (EPS file to write: ) medium_msg EPSfile medium_msg 
-    (\n) medium_msg
-    phase1 begin COMPOSE begin 
-      (\n1) loud_msg
-      ~[ generator ] bind /root name 
-    end end
+  (\n) medium_msg (EPS file to write: ) medium_msg EPSfile medium_msg
+  (\n) medium_msg
+
+  (\n1) loud_msg
+  {~[generator] bind /root name} COMPOSE ~indict phase1 indict
 
 |-- phase 2 (physical design)
 
-    /bbox * 4 /d array copy def
-    phase2 begin
-      (\n2) loud_msg
-      root
-    end
+  /bbox * 4 /d array copy def
+  (\n2) loud_msg
+  ~root phase2 indict
 
 |-- phase 3 (EPS code generation)
- 
+
     |-- insert EPS wrapper, leading part
 
-    (%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: ) faxPS
-    { 
-      * bbox 0 get floor /l ctype * number ( ) fax
-      * bbox 1 get floor /l ctype * number ( ) fax
-      * bbox 2 get ceil  /l ctype * number ( ) fax
-      * bbox 3 get ceil  /l ctype * number (\n) fax
-    } genPS
-    (%%HiResBoundingBox: ) faxPS
-    {
-      bbox {
-        100 /b array {* 4 -1 roll * number} tostring
-        (\(-?[0-9.]+[eE]\)\\+\([0-9]+\)) regex not ~fax {
-          4 1 roll pop pop pop ~fax forall
-        } ifelse
-        ( ) fax
-      } forall 1 sub (\n) fax
-    } genPS
-    (%%DocumentData: Clean7Bit\n%%LanguageLevel: 3\n) faxPS  
+  (%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: ) faxPS
+  {
+    * bbox 0 get floor /l ctype * number ( ) fax
+    * bbox 1 get floor /l ctype * number ( ) fax
+    * bbox 2 get ceil  /l ctype * number ( ) fax
+    * bbox 3 get ceil  /l ctype * number (\n) fax
+  } genPS
+  (%%HiResBoundingBox: ) faxPS
+  {
+    bbox {
+      100 /b array {* 4 -1 roll * number} tostring
+      (\(-?[0-9.]+[eE]\)\\+\([0-9]+\)) regex not ~fax {
+        4 1 roll pop pop pop ~fax forall
+      } ifelse
+      ( ) fax
+    } forall 1 sub (\n) fax
+  } genPS
+  (%%DocumentData: Clean7Bit\n%%LanguageLevel: 3\n) faxPS
 
-    |-- insert PS code for setting global parameters and defining symbol font
+  |-- insert PS code for setting global parameters and defining symbol font
 
-    PSprefix faxPS
-    setlinewidth
-    symbolsize setsymbolsize
-    ( symbolfont setfont ) faxPS
-    (\nsave\n) faxPS | Why? Dunno -- but without it, the image disappears
-  
-    |-- assemble PS code of figure
-    
-    phase3 begin
-      (\n3) loud_msg
-      root 
-    end
+  PSprefix faxPS
+  setlinewidth
+  symbolsize setsymbolsize
+  ( symbolfont setfont ) faxPS
+  (\nsave\n) faxPS | Why? Dunno -- but without it, the image disappears
 
-    |-- assemble EPS wrapper, trailing part
+  |-- assemble PS code of figure
 
-    (\npop\n) faxPS | See save above
-    (%%EOF\n) faxPS
+  (\n3) loud_msg
+  ~root phase3 indict
 
-|-- write EPS output file
+  |-- assemble EPS wrapper, trailing part
 
-    EPSbuf 0 EPSidx getinterval EPSpath EPSfile writefile
-    (\n) loud_msg
-    (EPS file written: ) medium_msg EPSfile medium_msg (\n) medium_msg
+  (\npop\n) faxPS | See save above
+  (%%EOF\n) faxPS
 
-  } { stopped { countdictstack ndict sub ~end repeat stop } if }
-  /figurelayer inlayer
+  |-- write EPS output file
+
+  EPSbuf 0 EPSidx getinterval EPSpath EPSfile writefile
+  (\n) loud_msg
+  (EPS file written: ) medium_msg EPSfile medium_msg (\n) medium_msg
 } bind def
 
 
@@ -204,7 +193,7 @@
       def
       openlist PROGS /EPSTOPDF get (--hires) (--filter) pdf_fdr pdf_fdw
       {STDERR sh_io} PROCESSES indict
-      (\n) loud_msg 
+      (\n) loud_msg
       (PDF file written: ) medium_msg pdf_file medium_msg (\n) medium_msg
     } stopped
     pdf_fdw pdf_fdr {closeifopen closeifopen} PROCESSES indict
@@ -232,7 +221,7 @@
 | secondary generators. This limits the usage of such code to setting
 | representation parameters for the element and its descendents in the
 | figure tree. It is irrelevant where in the generator code these parameters
-| are set. Their settings are stored in the private dictionary of the 
+| are set. Their settings are stored in the private dictionary of the
 | element that is constructed in phase 1. Phases 2 and 3 use these parameter
 | values for all components of the element (including descendents).
 |
@@ -255,7 +244,7 @@
 | starts a new line and a digit. Each step toward the periphery of the tree is
 | indicated by `+', and each step in the reverse direction by `-'. Some
 | primitives execute the part of the tree peripheral to their position twice;
-| the second execution is traced on a new line starting with `space'. 
+| the second execution is traced on a new line starting with `space'.
 
 |--------------------- General concepts of primitives ----------------------
 |
@@ -267,18 +256,18 @@
 |
 |........................... coordinate spaces ..............................
 |
-| The placement of figure elements is the A and O of a composition. We follow 
+| The placement of figure elements is the A and O of a composition. We follow
 | the PS model here, but describe the model from scratch because its
 | description in the PS reference manual is incorrect, incomplete, and
 | misleading. (Don't go there before having assimilated the following!)
 |
-| Each element of the figure tree has its own coordinate space, so that 
+| Each element of the figure tree has its own coordinate space, so that
 | elements can be designed independently of each other. At the origin of
 | the tree of coordinate spaces is the coordinate space initially established
 | by the PS interpreter. We call this space the `device' space. As coordinate
 | spaces are constructed along the figure tree, maps relating tree element
 | spaces to their precursors in the tree are constructed. These maps specify
-| how corresponding coordinates in the parent space are computed from 
+| how corresponding coordinates in the parent space are computed from
 | coordinates in the child space. Thus, all maps are pointing backwards, toward
 | the root of the figure tree (ultimately, to the device space so that ink can
 | be dispatched there). No forward maps are generated as they are not needed.
@@ -301,7 +290,7 @@
 | M_{k+1,k} M_{k,k+1} = I because going from child space to parent space and
 | back to child space produces the original coordinates in child space. The
 | identity map I is <d 1 0 0 1 0 0 >.
-| 
+|
 | Consider the path from child k+2 to a parent k+1 to a grandparent k in a tree:
 |
 |   r_{k+1} = M_{k+2,k+1} r_{k+2}
@@ -337,7 +326,7 @@
 | `translate' origin by tx, ty:
 |     r_{k} = <d 1 0 0 1 tx ty > r_{k+1}
 |
-| 'rotate' axis system by ccw angle: 
+| 'rotate' axis system by ccw angle:
 |     r_{k} = <d cos(phi) sin(phi) -sin(phi) cos(phi) 0 0 > r_{k+1}
 |
 | 'scale' axis units by sx, sy:
@@ -351,10 +340,10 @@
 |
 | `concat'            m1 m2 | m1'
 | `translate'       m tx ty | m'
-| `rotate'        m phi_ccw | m' 
-| `scale'           m sx sy | m' 
+| `rotate'        m phi_ccw | m'
+| `scale'           m sx sy | m'
 |
-| where the primes denote modified argument maps returned on the stack.       
+| where the primes denote modified argument maps returned on the stack.
 |
 
 /t1 6 /d array def
@@ -416,7 +405,7 @@
 | (1) translate origin from the origin of the parent space to the alignment
 |     point in parent space
 |
-| (2) rotate, scale as needed to match the child space 
+| (2) rotate, scale as needed to match the child space
 |
 | (3) you are now in `child space', with the origin at the alignment
 |     point of the parent. If the child's origin is the intended alignment
@@ -445,7 +434,7 @@
 | order matters (the map operations do not commute).
 |
 | If the primitive is the root primitive of the figure tree, the placement
-| is in device space.  
+| is in device space.
 
 |------- make the inverse map (child to parent)
 
@@ -460,7 +449,7 @@
   parent /bbox get /pbbox name
   bbox 0 get bbox 1 get inverse map ybox 0 put xbox 0 put
   bbox 0 get bbox 3 get inverse map ybox 1 put xbox 1 put
-  bbox 2 get bbox 1 get inverse map ybox 2 put xbox 2 put 
+  bbox 2 get bbox 1 get inverse map ybox 2 put xbox 2 put
   bbox 2 get bbox 3 get inverse map ybox 3 put xbox 3 put
 
   xbox 0 get dup xbox extrema
@@ -477,7 +466,7 @@
                      ifelse
 } bind def
 
-|--------- aligners 
+|--------- aligners
 |
 | These use the bounding box. If you want finer alignments you need write
 | your own (e.g. for placing text with consideration of descenders).
@@ -537,7 +526,7 @@
 |  [ < > < > ... ]     - a list of ordinate arrays
 |  [ < > < > ]         - a list containing an abscissa and an ordinate array
 |
-| The primitive `fcgraf' accepts 
+| The primitive `fcgraf' accepts
 |
 |  [ array array matrix map ] - a list containing the horizontal and vertical
 |                               independent variables as 1D arrays and the
@@ -551,7 +540,7 @@
 | partitions in graphs. They are referred to in generators by the names:
 
 /k 0 def  | '\A' and up -- centered symbols
-/symbols [ 
+/symbols [
   /dot                 /diamond              /fsquare
   /square              /squareb              /cross
   /times               /filledcircle         /circle
@@ -561,12 +550,12 @@
   /hbarca              /hbarla               /hbarra
   /utriangle           /dtriangle            /rtriangle
   /ltriangle
-] dup 3 -1 roll name { 
-  1 /b array dup k 65 add exch 0 put def /k k 1 add def 
+] dup 3 -1 roll name {
+  1 /b array dup k 65 add exch 0 put def /k k 1 add def
 } forall
 
 /k 0 def  | '\a' and up  -- text version of symbols
-/_symbols [ 
+/_symbols [
   /_dot                 /_diamond              /_fsquare
   /_square              /_squareb              /_cross
   /_times               /_filledcircle         /_circle
@@ -576,8 +565,8 @@
   /_hbarca              /_hbarla               /_hbarra
   /_utriangle           /_dtriangle            /_rtriangle
   /_ltriangle
-] dup 3 -1 roll name { 
-  1 /b array dup k 97 add exch 0 put def /k k 1 add def 
+] dup 3 -1 roll name {
+  1 /b array dup k 97 add exch 0 put def /k k 1 add def
 } forall
 
 | (path) (file) | --
@@ -588,7 +577,7 @@
         [symbols {} forall _symbols {} forall] {/sym name
           [
             ~[
-              256 /b array {* sym text (: ) fax} tostring 
+              256 /b array {* sym text (: ) fax} tostring
               dup 0 get (_) 0 get eq {
                 256 /b array {(\\) fax 3 -1 roll fax} tostring
               } if {alignLC} ~latex
@@ -660,10 +649,10 @@
 |
 | (2) The PS code rendering an element is automatically prefixed by PS code
 |     establishing the current settings of the parameters
-|      - linewidth 
+|      - linewidth
 |      - symbolsize
-|      - textsize 
-|     
+|      - textsize
+|
 |     The element uses the parameter values defined by its own generator,
 |     or if it does not define them itself uses the values defined by
 |     the nearest ancestor in the element tree (this happens automatically
@@ -683,7 +672,7 @@
 
 /verboxe false def      | switch: outline bounding boxes
 
- 
+
 
 |========================== primitive: `panel' =============================
 |
@@ -691,7 +680,7 @@
 |
 |     { generator } { placement } | --
 |
-| 
+|
 | the generator procedure creates the elements of the panel using as many
 | primitives as needed. The origin of the panel's coordinate space will be
 | that of the first element generated in the panel. The placement procedure is
@@ -702,13 +691,13 @@
 |-------- phase 1:
 | - make secondary generator
 
-{ currentdict
-  20 dict begin
-  /parent name
-  /placement name
-   (+) loud_msg ~[ exch exec ] /children name (-) loud_msg
-  currentdict ~panel     | => secondary generator
-  end 
+{
+  currentdict {
+    /parent name
+    /placement name
+    (+) loud_msg ~[ exch exec ] /children name (-) loud_msg
+    currentdict ~panel     | => secondary generator
+  } 20 dict indict
 } bind phase1 /panel put
 
 
@@ -716,25 +705,27 @@
 | - extract metrics
 | - compute backtransform and adjust parent bbox
 
-{ begin
-  /bbox <d * * * * > 4 /d array copy def
-  (+) loud_msg children (-) loud_msg
-  makeinverse stretchpbbox
-  end
+{
+  {
+    /bbox <d * * * * > 4 /d array copy def
+    (+) loud_msg children (-) loud_msg
+    makeinverse stretchpbbox
+  } exch indict
 } bind phase2 /panel put
 
 |--------- phase 3:
-| - output placement instruction and children elements 
+| - output placement instruction and children elements
 
-{ begin
-  [ ~save inverse ~concat ] { toPS } forall
-  (+) loud_msg children (-) loud_msg
-  verboxe { bbox toPS ~drawbbox toPS } if
-  ~restore toPS
-  end
+{
+  {
+    [ ~save inverse ~concat ] { toPS } forall
+    (+) loud_msg children (-) loud_msg
+    verboxe { bbox toPS ~drawbbox toPS } if
+    ~restore toPS
+  } exch indict
 } bind phase3 /panel put
-  
- 
+
+
 |======================== primitive: `panelarray' ===========================
 |
 | create a two-dimensional array of panels:
@@ -758,89 +749,91 @@
 
 |------------------------ phase 1:
 
-{ currentdict
-  100 dict begin
-  /parent name 
-  /placement name
-  /spacing name
-  /genlist name
-  currentdict ~panelarray     | => secondary generator
-  (+) loud_msg
-  /nrows 0 def /ncols 0 def /rowidx 0 def
-   [ genlist { /colidx 0 def
-        [ exch
-          { ~[ ~xaligns colidx ~get ~yaligns rowidx ~get ~translate ] panel
-            /colidx colidx 1 add def
-            ncols colidx le { /ncols colidx def } if
-          } forall
-        ] 
-        /rowidx rowidx 1 add def
-        nrows rowidx le { /nrows rowidx def } if
-      } forall
-   ] /childrenlist name
-  (-) loud_msg
-  end 
+{
+  currentdict {
+    /parent name
+    /placement name
+    /spacing name
+    /genlist name
+    currentdict ~panelarray     | => secondary generator
+    (+) loud_msg
+    /nrows 0 def /ncols 0 def /rowidx 0 def
+    [ genlist { /colidx 0 def
+      [ exch
+        { ~[ ~xaligns colidx ~get ~yaligns rowidx ~get ~translate ] panel
+          /colidx colidx 1 add def
+          ncols colidx le { /ncols colidx def } if
+        } forall
+      ]
+      /rowidx rowidx 1 add def
+      nrows rowidx le { /nrows rowidx def } if
+    } forall
+    ] /childrenlist name
+    (-) loud_msg
+  } 100 dict indict
 } bind phase1 /panelarray put
 
 |-------------------------- phase 2:
 
-{ begin
-  |-- determine the extents of all panel boxes relative to their origins
-  /wl 0 ncols /d array copy def
-  /wr 0 ncols /d array copy def
-  /wb 0 nrows /d array copy def
-  /wt 0 nrows /d array copy def
-  (+) loud_msg
-  /xaligns 0 ncols /d array copy def
-  /yaligns 0 nrows /d array copy def
-  /bbox 4 /d array def
-  /rowidx 0 def
-  childrenlist { /rowlist name
+{
+  {
+    |-- determine the extents of all panel boxes relative to their origins
+    /wl 0 ncols /d array copy def
+    /wr 0 ncols /d array copy def
+    /wb 0 nrows /d array copy def
+    /wt 0 nrows /d array copy def
+    (+) loud_msg
+    /xaligns 0 ncols /d array copy def
+    /yaligns 0 nrows /d array copy def
+    /bbox 4 /d array def
+    /rowidx 0 def
+    childrenlist { /rowlist name
       /colidx 0 def
       0 2 rowlist length 2 sub { /childidx name
-           rowlist childidx get /child name
-           * bbox copy pop  | prime for each child element
-           child rowlist childidx 1 add get exec
-           bbox 0 get dup wl colidx get lt { wl colidx put } ~pop ifelse
-           bbox 1 get dup wb rowidx get lt { wb rowidx put } ~pop ifelse
-           bbox 2 get dup wr colidx get gt { wr colidx put } ~pop ifelse
-           bbox 3 get dup wt rowidx get gt { wt rowidx put } ~pop ifelse
-           /colidx colidx 1 add def
-         } for
+        rowlist childidx get /child name
+        * bbox copy pop  | prime for each child element
+        child rowlist childidx 1 add get exec
+        bbox 0 get dup wl colidx get lt { wl colidx put } ~pop ifelse
+        bbox 1 get dup wb rowidx get lt { wb rowidx put } ~pop ifelse
+        bbox 2 get dup wr colidx get gt { wr colidx put } ~pop ifelse
+        bbox 3 get dup wt rowidx get gt { wt rowidx put } ~pop ifelse
+        /colidx colidx 1 add def
+      } for
       /rowidx rowidx 1 add def
     } forall
-  (-) loud_msg
-  |-- finalize placement of the panel boxes
-  0.0 0 1 ncols 1 sub { /colidx name
+    (-) loud_msg
+    |-- finalize placement of the panel boxes
+    0.0 0 1 ncols 1 sub { /colidx name
       wl colidx get sub dup xaligns colidx put
       wr colidx get add spacing add
     } for pop
-  0.0 0 1 nrows 1 sub { /rowidx name
+    0.0 0 1 nrows 1 sub { /rowidx name
       wt rowidx get sub dup yaligns rowidx put
       wb rowidx get add spacing sub
     } for spacing add yaligns exch sub pop | align from top down
-  |-- rerun phase2 of subtree to establish correct placements of panel
-  |   elements and correct panel array bbox
-  * bbox copy pop
-  (\n +) loud_msg
-  childrenlist { mkact exec } forall
-  (-) loud_msg
-  |-- establish panel array placement and parent bbox
-  makeinverse stretchpbbox
-  end
+    |-- rerun phase2 of subtree to establish correct placements of panel
+    |   elements and correct panel array bbox
+    * bbox copy pop
+    (\n +) loud_msg
+    childrenlist { mkact exec } forall
+    (-) loud_msg
+    |-- establish panel array placement and parent bbox
+    makeinverse stretchpbbox
+  } exch indict
 } bind phase2 /panelarray put
 
 
 |-------------------------- phase 3:
 
-{ begin
-  [ ~save inverse ~concat ] { toPS } forall
-  (+) loud_msg
-  childrenlist { mkact exec } forall
-  (-) loud_msg
-  verboxe { bbox toPS ~drawbbox toPS } if
-  ~restore toPS
-  end
+{
+  {
+    [ ~save inverse ~concat ] { toPS } forall
+    (+) loud_msg
+    childrenlist { mkact exec } forall
+    (-) loud_msg
+    verboxe { bbox toPS ~drawbbox toPS } if
+    ~restore toPS
+  } exch indict
 } bind phase3 /panelarray put
 
 
@@ -867,7 +860,7 @@
 |
 | The variable latexpreamble defines a string that is used as the preamble
 | for the latex document that generates the eps string. By default, it's
-| empty. It can include \usepackage, \def, and so forth. Useful for 
+| empty. It can include \usepackage, \def, and so forth. Useful for
 | calling \usepackage{verbdef}\verbdef\x|...|, then using \x in the
 | main string.
 
@@ -876,40 +869,39 @@
 |-------- phase 1:
 
 {
-  currentdict
-  30 dict begin 
-  /parent name
-  /placement name
-  /latexstring name
-| - compile the LaTEX string and extract metrics
-  latexpreamble latexstring textsize ~xeps EPS indict /epsstring name
-  readDSC
-  currentdict ~latex     | => secondary generator
-  end 
+  currentdict {
+    /parent name
+    /placement name
+    /latexstring name
+    | - compile the LaTEX string and extract metrics
+    latexpreamble latexstring textsize ~xeps EPS indict /epsstring name
+    readDSC
+    currentdict ~latex     | =\> secondary generator
+  } 30 dict indict
 } bind phase1 /latex put
 
 
 |--------- phase 2:
-| - backtransform bbox and adjust parent bbox 
+| - backtransform bbox and adjust parent bbox
 
-{ begin
-  makeinverse stretchpbbox
-  end
+{
+  {makeinverse stretchpbbox} exch indict
 } bind phase2 /latex put
 
 |--------- phase 3:
-| - output placement instruction and PS string 
+| - output placement instruction and PS string
 
-{ begin
-  [ ~save inverse ~concat ] ~toPS forall
-  (\nBeginEPSF\n) faxPS
-  DSCoff faxPS (whatever\n) faxPS
-  epsstring faxPS
-  verboxe { bbox toPS ~drawbbox toPS } if
-  DSCon faxPS
-  (EndEPSF\n) faxPS
-  ~restore toPS
-  end
+{
+  {
+    [ ~save inverse ~concat ] ~toPS forall
+    (\nBeginEPSF\n) faxPS
+    DSCoff faxPS (whatever\n) faxPS
+    epsstring faxPS
+    verboxe { bbox toPS ~drawbbox toPS } if
+    DSCon faxPS
+    (EndEPSF\n) faxPS
+    ~restore toPS
+  } exch indict
 } bind phase3 /latex put
 
 
@@ -923,44 +915,44 @@
 |
 | - read the EPS file into the `include' buffer
 
-{ currentdict
-  30 dict begin
-  /parent name
-  /placement name
-  includebuf includeidx includebuf length includeidx sub getinterval
-  readfile /epsstring name
-  includeidx epsstring length add COMPOSE /includeidx put
-  readDSC
-  currentdict ~includeEPS     | => secondary generator
-  end 
+{
+  currentdict {
+    /parent name
+    /placement name
+    includebuf includeidx includebuf length includeidx sub getinterval
+    readfile /epsstring name
+    includeidx epsstring length add COMPOSE /includeidx put
+    readDSC
+    currentdict ~includeEPS     | => secondary generator
+  } 30 dict indict
 } bind phase1 /includeEPS put
 
 |--------- phase 2:
 
 | - backtransform bbox and adjust parent bbox
 
-{ begin
-  makeinverse stretchpbbox
-  end
+{
+  {makeinverse stretchpbbox} exch indict
 } bind phase2 /includeEPS put
 
 |--------- phase 3:
 
-| - output placement instruction and PS string 
+| - output placement instruction and PS string
 
-{ begin
-  (\nBeginEPSF\n) faxPS
-  DSCoff faxPS (whatever\n) faxPS
-  [ ~save inverse ~concat ] ~toPS forall
-  epsstring faxPS
-  verboxe { bbox toPS ~drawbbox toPS } if
-  ~restore toPS
-  DSCon faxPS
-  (EndEPSF\n) faxPS
-  end
+{
+  {
+    (\nBeginEPSF\n) faxPS
+    DSCoff faxPS (whatever\n) faxPS
+    [ ~save inverse ~concat ] ~toPS forall
+    epsstring faxPS
+    verboxe { bbox toPS ~drawbbox toPS } if
+    ~restore toPS
+    DSCon faxPS
+    (EndEPSF\n) faxPS
+  } exch indict
 } bind phase3 /includeEPS put
 
-  
+
 |============================== primitive: PS ==============================
 |
 | Include artwork directly encoded in PostSript:
@@ -979,38 +971,38 @@
 
 |------------------------------- phase 1
 
-{ currentdict
-  100 dict begin
-  /parent name
-  /placement name
-  /bbox name
-  /postscript name
-  currentdict ~PS   | => secondary generator
-  end
+{
+  currentdict {
+    /parent name
+    /placement name
+    /bbox name
+    /postscript name
+    currentdict ~PS   | =\> secondary generator
+  } 100 dict indict
 } bind phase1 /PS put
 
 |------------------------------- phase 2
 
-{ begin
-  makeinverse stretchpbbox
-  end
+{
+  {makeinverse stretchpbbox} exch indict
 } bind phase2 /PS put
 
 |------------------------------- phase 3
 
-{ begin
-  (\nBeginEPSF\n) faxPS
-  DSCoff faxPS (whatever\n) faxPS
-  [ ~save inverse ~concat ] ~toPS forall 
-  setlinewidth
-  symbolsize setsymbolsize
-  ( symbolfont setfont ) faxPS
-  [ /postscript find ~exec ] ~toPS forall
-  verboxe { bbox toPS ~drawbbox toPS } if
-  ~restore toPS
-  DSCon faxPS
-  (EndEPSF\n) faxPS
-  end
+{
+  {
+    (\nBeginEPSF\n) faxPS
+    DSCoff faxPS (whatever\n) faxPS
+    [ ~save inverse ~concat ] ~toPS forall
+    setlinewidth
+    symbolsize setsymbolsize
+    ( symbolfont setfont ) faxPS
+    [ /postscript find ~exec ] ~toPS forall
+    verboxe { bbox toPS ~drawbbox toPS } if
+    ~restore toPS
+    DSCon faxPS
+    (EndEPSF\n) faxPS
+  } exch indict
 } bind phase3 /PS put
 
 
@@ -1020,7 +1012,7 @@
 | `gpgraf' generates a `general-purpose graph' from a report:
 |
 |   report [ [ name(s) {..} ]..] abs ord xdim ydim  { placement } | --
-| 
+|
 | the list argument specifies the report data to be included. Each data set
 | is selected by one or two names that refer to data objects in the `report'.
 | If two names are given, the first specifies a single abscissa array, and
@@ -1068,10 +1060,10 @@
 |  `ord'  - [ scan min max type unit descr ]    - directs design of
 |                                                    ordinate axis
 | Axis design is directed by
-| 
-|  scan      - boolean, enables scan for axis limits 
+|
+|  scan      - boolean, enables scan for axis limits
 |  min, max  - extrema (if `scan' enabled, these prime the extrema unless
-|              they are specified as `undefined' value 
+|              they are specified as `undefined' value
 |  type      - /lin (linear) or /log (logarithmic)  ...to be extended
 |  unit      - LaTEX string, used in unit specification added to description
 |  descr     - LaTEX string, description of axis
@@ -1085,7 +1077,7 @@
 | coordinate space of this figure element (important if you want to add
 | your own enhancements). Note that using an `alignXY' command inside
 | the placement procedure of `gpgraf' will shift the origin of the gpgraf
-| box. 
+| box.
 |
 | Labels are generated as LaTEX figure elements (appended to the figure
 | tree). They use the text font size specified in parameter `textsize'
@@ -1097,176 +1089,173 @@
 
 |------------------------------------------ gpgraf, phase 1
 
-{ 
-  currentdict
-  100 dict begin
-  /parent name
-  /placement name
-  /d ctype /ydim name /d ctype /xdim name
-  /ordinate name /abscissa name
-  /selection name 
-  /report name
+{
+  currentdict {
+    /parent name
+    /placement name
+    /d ctype /ydim name /d ctype /xdim name
+    /ordinate name /abscissa name
+    /selection name
+    /report name
 
-  currentdict ~gpgraf  | => secondary generator
+    currentdict ~gpgraf  | =\> secondary generator
 
+    |-- find logical ranges  of axes
 
-|-- find logical ranges  of axes
+    abscissa dup 0 get /scanX name
+      dup 1 get /minX name 2 get /maxX name
+    ordinate dup 0 get /scanY name
+      dup 1 get /minY name 2 get /maxY name
+    selection { /selitem name
+      report selitem 0 get get
+      dup class /arrayclass eq {/X name
+        report selitem 1 get get
+        dup class /listclass ne { [ exch ] } if /Ys name
+      } {
+        dup 0 get /X name 1 get [ exch ] /Ys name
+      } ifelse
+      scanXYs
+    } forall
 
-  abscissa dup 0 get /scanX name
-    dup 1 get /minX name 2 get /maxX name
-  ordinate dup 0 get /scanY name 
-    dup 1 get /minY name 2 get /maxY name
-  selection { /selitem name
-    report selitem 0 get get
-    dup class /arrayclass eq {/X name
-      report selitem 1 get get
-      dup class /listclass ne { [ exch ] } if /Ys name
-    } { 
-      dup 0 get /X name 1 get [ exch ] /Ys name
-    } ifelse
-    scanXYs
-  } forall
+    |-- design the logical axes
 
-|-- design the logical axes
+    gpXdesigners abscissa 3 get get exec
+    gpYdesigners ordinate 3 get get exec
 
-  gpXdesigners abscissa 3 get get exec 
-  gpYdesigners ordinate 3 get get exec
+    |-- construct generator of label elements
 
-|-- construct generator of label elements
- 
-  /children ~[ 
-    gpXlabels abscissa 3 get get exec
-    gpYlabels ordinate 3 get get exec
-  ] bind def
-  end
+    /children ~[
+      gpXlabels abscissa 3 get get exec
+      gpYlabels ordinate 3 get get exec
+    ] bind def
+  } 100 dict indict
 } bind phase1 /gpgraf put
 
 |--------------------------------------------- gpgraf, phase 2
 
-{ 
-  begin
-  |-- prime bounding box
+{
+  {
+    |-- prime bounding box
 
-  /bbox 0 4 /d array copy def
-  symbolsize linewidth add 2 div dup
-  xdim add bbox 2 put ydim add bbox 3 put
+    /bbox 0 4 /d array copy def
+    symbolsize linewidth add 2 div dup
+    xdim add bbox 2 put ydim add bbox 3 put
 
-  (+) loud_msg children (-) loud_msg
-  makeinverse stretchpbbox
-  end
+    (+) loud_msg children (-) loud_msg
+    makeinverse stretchpbbox
+  } exch indict
 } bind phase2 /gpgraf put
 
 |--------------------------------------------- gpgraf, phase 3
 
-{ 
-  begin
-  [ ~save inverse ~concat ] { toPS } forall
-  setlinewidth
-  symbolsize setsymbolsize
-  ( symbolfont setfont ) faxPS
-  (+) loud_msg children (-) loud_msg
+{
+  {
+    [ ~save inverse ~concat ] { toPS } forall
+    setlinewidth
+    symbolsize setsymbolsize
+    ( symbolfont setfont ) faxPS
+    (+) loud_msg children (-) loud_msg
 
-  ~save toPS gpXplotters abscissa 3 get get exec ~restore toPS
-  ~save toPS gpYplotters ordinate 3 get get exec ~restore toPS
+    ~save toPS gpXplotters abscissa 3 get get exec ~restore toPS
+    ~save toPS gpYplotters ordinate 3 get get exec ~restore toPS
 
-  selection { /selitem name
-      selitem length 2 gt { 
+    selection { /selitem name
+      selitem length 2 gt {
         report selitem 0 get get /X name
         report selitem 1 get get dup class /arrayclass eq { [ exch ] } if
           /Ys name
         selitem 2 get /pres name
-      } { 
+      } {
         report selitem 0 get get 0 get /X name
         report selitem 0 get get 1 get [ exch ] /Ys name
         selitem 1 get /pres name
       } ifelse
-      /Yidx 0 def 
-      ~save toPS 
+      /Yidx 0 def
+      ~save toPS
       Ys length { pres /Yidx Yidx 1 add def } repeat
       ~restore toPS
-  } forall 
+    } forall
 
-  verboxe { bbox toPS ~drawbbox toPS } if
-  ~restore toPS
-  end
+    verboxe { bbox toPS ~drawbbox toPS } if
+    ~restore toPS
+  } exch indict
 } bind phase3 /gpgraf put
 
 
 |------------------------ support for gpgraf -----------------------------
 
 |-------------- scan X, Ys
-| 
+|
 /scanXYs {
-   scanX { 
+   scanX {
      minX * eq { /minX X 0 get def } if
      maxX * eq { /maxX X 0 get def } if
      minX maxX X extrema /maxX name /minX name
    } if
-   scanY { 
+   scanY {
      minY * eq { Ys 0 get 0 get /minY name } if
      maxY * eq { Ys 0 get 0 get /maxY name } if
      Ys {minY maxY 3 -1 roll extrema /maxY name /minY name} forall
-   } if 
-} bind def 
+   } if
+} bind def
 
 |--------------- design gp axes
 
-/gpXdesigners 2 dict dup begin
+/gpXdesigners {
   /log {
-     minX maxX DesignLg10Axis /Xaxis name
-     { lg } { 10.0 exch exp } Xaxis 0 get  Xaxis 1 get 
-     0.0 xdim DefXTransform
-  } bind def
- 
-  /lin {
-     minX maxX DesignLinearAxis /Xaxis name
-     { } { } Xaxis 0 get  Xaxis 1 get 
-     0.0 xdim DefXTransform
-  } bind def
-end def
+    minX maxX DesignLg10Axis /Xaxis name
+    { lg } { 10.0 exch exp } Xaxis 0 get  Xaxis 1 get
+    0.0 xdim DefXTransform
+  }
 
-/gpYdesigners 2 dict dup begin
+  /lin {
+    minX maxX DesignLinearAxis /Xaxis name
+    { } { } Xaxis 0 get  Xaxis 1 get
+    0.0 xdim DefXTransform
+  }
+} bind makestruct def
+
+/gpYdesigners {
   /log {
-     minY maxY DesignLg10Axis /Yaxis name
-     { lg } { 10.0 exch exp } Yaxis 0 get  Yaxis 1 get 
-     0.0 ydim DefYTransform
-  } bind def
- 
-   /lin {
-     minY maxY DesignLinearAxis /Yaxis name
-     { } { } Yaxis 0 get  Yaxis 1 get 
-     0.0 ydim DefYTransform
-  } bind def
-end def
+    minY maxY DesignLg10Axis /Yaxis name
+    { lg } { 10.0 exch exp } Yaxis 0 get  Yaxis 1 get
+    0.0 ydim DefYTransform
+  }
+
+  /lin {
+    minY maxY DesignLinearAxis /Yaxis name
+    { } { } Yaxis 0 get  Yaxis 1 get
+    0.0 ydim DefYTransform
+  }
+} bind makestruct def
 
 |--------------- construct gp abscissa labels
 | (we use the expansion of the pbbox by the numerical axis labels
 | to place the global axis label)
 
-/gpXlabels 2 dict dup begin
-
+/gpXlabels {
   /lin {
     Xaxis 2 get Xaxis 3 get div labelformatter
     Xaxis 1 get Xaxis 0 get sub Xaxis 2 get div 0.5 add /l ctype
     0 1 3 -1 roll { Xaxis 2 get exch mul Xaxis 0 get add /xtick name
       10 /b array 0 ($) fax
       |-- scale by unit and round to fixed point with one decimal
-      xtick Xaxis 3 get div numberlabel 
+      xtick Xaxis 3 get div numberlabel
       ($) fax 0 exch getinterval
       |-- center on xtick, top adjust half a line below axis
-      ~[ 
+      ~[
         xtick ~X_to_x textsize -0.5 mul ~translate
         ~alignCT
       ] latex
-    } for  
+    } for
     |-- place descr /unit axis label
     Xaxis 3 get abscissa 5 get abscissa 4 get LinAxisLabel
-    ~[ 
+    ~[
       0.5 xdim mul
       ~parent /bbox ~get 1 ~get textsize 0.5 mul ~sub ~translate
       ~alignCT
     ] latex
-  } bind def
+  }
 
   /log {
     Xaxis 2 get { /xtick name
@@ -1280,17 +1269,15 @@ end def
     |-- place descr/unit axis label
     100 /b array 0 abscissa 5 get fax
         ( / ) fax abscissa 4 get fax 0 exch getinterval
-    ~[ 
+    ~[
       xdim 0.5 mul
       ~parent /bbox ~get 1 ~get textsize 0.5 mul ~sub ~translate
       ~alignCT
     ] latex
-  } bind def
+  }
+} bind makestruct def
 
-end def
- 
-/gpYlabels 2 dict dup begin
- 
+/gpYlabels {
   /lin {
     Yaxis 2 get Yaxis 3 get div labelformatter
     Yaxis 1 get Yaxis 0 get sub Yaxis 2 get div 0.5 add /l ctype
@@ -1299,20 +1286,20 @@ end def
         |-- scale by unit and round to fixed point with one decimal
         ytick Yaxis 3 get div numberlabel
           ($)fax 0 exch getinterval
-        ~[ 
+        ~[
           textsize -0.5 mul ytick ~Y_to_y ~translate
           ~alignRC
          ] latex
     } for
     |-- place descr/power unit axis label
     Yaxis 3 get ordinate 5 get ordinate 4 get LinAxisLabel
-    ~[ 
-      ~parent /bbox ~get 0 ~get textsize 0.5 mul ~sub 
+    ~[
+      ~parent /bbox ~get 0 ~get textsize 0.5 mul ~sub
        0.5 ydim mul ~translate
        90.0 ~rotate
        ~alignCB
     ] latex
-  } bind def
+  }
 
   /log {
     Yaxis 2 get { /ytick name
@@ -1327,22 +1314,20 @@ end def
     |-- place descr/unit axis label
     100 /b array 0 ordinate 5 get fax
         ( / ) fax ordinate 4 get fax 0 exch getinterval
-    ~[ ~parent /bbox ~get 0 ~get textsize 0.5 mul ~sub 
+    ~[ ~parent /bbox ~get 0 ~get textsize 0.5 mul ~sub
        ydim 0.5 mul ~translate
        90 ~rotate
        ~alignCB
      ] latex
-  } bind def
-
-end def 
+  }
+} bind makestruct def
 
 |--------------- gp axis plotters
 
-/gpXplotters 2 dict dup begin
-  
+/gpXplotters {
   /log {
     symbolsize setsymbolsize
-    ( gsave symbolfont setfont newpath 2 setlinecap ) faxPS 
+    ( gsave symbolfont setfont newpath 2 setlinecap ) faxPS
     Xaxis 0 get X_to_x toPS 0.0 toPS ~moveto toPS
     Xaxis 1 get X_to_x toPS 0.0 toPS ( lineto stroke ) faxPS
     ( newpath ) faxPS
@@ -1370,13 +1355,13 @@ end def
     Xaxis 3 get {
         X_to_x toPS ydim toPS ( moveto ) faxPS
         symbol toPS ( show ) faxPS
-      } forall   
-    ( grestore ) faxPS 
-  } bind def
+      } forall
+    ( grestore ) faxPS
+  }
 
   /lin {
     symbolsize setsymbolsize
-    ( gsave symbolfont setfont newpath 2 setlinecap ) faxPS 
+    ( gsave symbolfont setfont newpath 2 setlinecap ) faxPS
     Xaxis 0 get  X_to_x toPS 0.0 toPS ~moveto toPS
     Xaxis 1 get  X_to_x toPS 0.0 toPS ( lineto stroke ) faxPS
     /symbol vbarba def
@@ -1392,16 +1377,14 @@ end def
         X_to_x toPS ydim toPS ( moveto ) faxPS
         symbol toPS ( show ) faxPS
     } for
-    ( grestore ) faxPS 
-} bind def
+    ( grestore ) faxPS
+  }
+} bind makestruct def
 
-end def
-
-/gpYplotters 2 dict dup begin
-  
+/gpYplotters {
   /log {
     symbolsize setsymbolsize
-    ( gsave symbolfont setfont newpath 2 setlinecap ) faxPS 
+    ( gsave symbolfont setfont newpath 2 setlinecap ) faxPS
     0.0 toPS Yaxis 0 get Y_to_y toPS  ( moveto ) faxPS
     0.0 toPS Yaxis 1 get Y_to_y toPS  ( lineto stroke ) faxPS
     ( newpath ) faxPS
@@ -1429,13 +1412,13 @@ end def
     Yaxis 3 get {
         xdim toPS Y_to_y toPS ( moveto ) faxPS
         symbol toPS ( show ) faxPS
-      } forall   
-    ( grestore ) faxPS 
-  } bind def
+      } forall
+    ( grestore ) faxPS
+  }
 
-/lin {
+  /lin {
     symbolsize setsymbolsize
-    ( gsave symbolfont setfont newpath 2 setlinecap ) faxPS 
+    ( gsave symbolfont setfont newpath 2 setlinecap ) faxPS
     0.0 toPS Yaxis 0 get  Y_to_y toPS  ( moveto ) faxPS
     0.0 toPS Yaxis 1 get  Y_to_y toPS  ( lineto stroke ) faxPS
     /symbol hbarla def
@@ -1451,40 +1434,39 @@ end def
         xdim toPS Y_to_y toPS ( moveto ) faxPS
         symbol toPS ( show ) faxPS
     } for
-    ( grestore ) faxPS 
-} bind def
-
-end def
+    ( grestore ) faxPS
+  }
+} bind makestruct def
 
 |------------------------------ presentation operators
 
 |------------- ps:  [... ] | --
- 
+
 /ps {
   { toPS } forall
 } bind def
 
 |------------- Line: -- | --
 
-/Line { 
+/Line {
   ~gsave toPS ~newpath toPS
   0 1 X length 1 sub { /k name
       X k get X_to_x toPS Ys Yidx get k get Y_to_y toPS
       k 0 eq {~moveto} {~lineto} ifelse toPS
   } for
-  ~stroke toPS 
+  ~stroke toPS
   ~grestore toPS
 } bind def
 
 |------------- Points:  symbol | --
 
-/Points { /symbol name 
+/Points { /symbol name
   ~gsave toPS
   symbolsize setsymbolsize
-  ( symbolfont setfont ) faxPS 
+  ( symbolfont setfont ) faxPS
   0 1 X length 1 sub { /k name
       X k get X_to_x toPS Ys Yidx get k get Y_to_y toPS
-      symbol toPS ~showsymbol toPS 
+      symbol toPS ~showsymbol toPS
   } for
   ~grestore toPS
 } bind def
@@ -1494,7 +1476,7 @@ end def
 | `pcgraf' generates a `pseudocolor graph' from a `report':
 |
 |   report name abs ord color xdim ydim  { placement } | --
-| 
+|
 | the name argument specifies the list in `report' that specifies the arrays
 | of the horizontal and vertical independent variables, as well as the
 | dependent variable to be represented in the pseudocolor dimension. The
@@ -1516,10 +1498,10 @@ end def
 |  `color' - [ scan min max type unit descr ]    - directs design of
 |                                                    pseudocolor axis
 | Axis design is directed by
-| 
-|  scan      - boolean, enables scan for axis limits 
+|
+|  scan      - boolean, enables scan for axis limits
 |  min, max  - extrema (if `scan' enabled, these prime the extrema unless
-|              they are specified as `undefined' value 
+|              they are specified as `undefined' value
 |  type      - /lin (linear) or /log (logarithmic)  ...to be extended
 |  unit      - LaTEX string, used in unit specification added to description
 |  descr     - LaTEX string, description of axis
@@ -1534,7 +1516,7 @@ end def
 | x,y coordinate space of this figure element (important if you want to add
 | your own enhancements). Note that using an `alignXY' command inside
 | the placement procedure of `pcgraf' will shift the origin of the pcgraf
-| box. 
+| box.
 |
 | The pseudocolors are generated automatically so that the range between
 | `min' and `max' of the color axis is mapped on the spectral colors ranging
@@ -1551,195 +1533,193 @@ end def
 
 |------------------------------------------ pcgraf, phase 1
 
-{ 
-  currentdict
-  100 dict begin
-  /parent name
-  /placement name
-  /d ctype /ydim name /d ctype /xdim name
-  /color name /ordinate name /abscissa name
-  /selection name 
-  /report name
+{
+  currentdict {
+    /parent name
+    /placement name
+    /d ctype /ydim name /d ctype /xdim name
+    /color name /ordinate name /abscissa name
+    /selection name
+    /report name
 
-  currentdict ~pcgraf  | => secondary generator
+    currentdict ~pcgraf  | =\> secondary generator
 
-|-- build pseudocolor space 
+    |-- build pseudocolor space
 
     makepseudocolors
 
-|-- find logical ranges  of axes
+    |-- find logical ranges  of axes
 
-  abscissa dup 0 get /scanX name
-    dup 1 get /minX name 2 get /maxX name
-  ordinate dup 0 get /scanY name 
-    dup 1 get /minY name 2 get /maxY name
-  color dup 0 get /scanZ name
-    dup 1 get /minZ name 2 get /maxZ name
-  report selection get dup 0 get /X name
-    dup 1 get /Y name dup 2 get /Z name 3 get /Zmap name
-    Z 0 Zmap 0 get getinterval /Z name  | clip garbage
-  scanX { 
-     minX * eq { /minX X 0 get def } if
-     maxX * eq { /maxX X 0 get def } if
-     minX maxX X extrema /maxX name /minX name
-   } if
-   scanY { 
-     minY * eq { Y 0 get /minY name } if
-     maxY * eq { Y 0 get /maxY name } if
-     minY maxY Y extrema /maxY name /minY name
-   } if 
-  scanZ { 
-     minZ * eq { /minZ Z 0 get def } if
-     maxZ * eq { /maxZ Z 0 get def } if
-     minZ maxZ Z extrema /maxZ name /minZ name
-   } if
+    abscissa dup 0 get /scanX name
+      dup 1 get /minX name 2 get /maxX name
+    ordinate dup 0 get /scanY name
+      dup 1 get /minY name 2 get /maxY name
+    color dup 0 get /scanZ name
+      dup 1 get /minZ name 2 get /maxZ name
+    report selection get dup 0 get /X name
+      dup 1 get /Y name dup 2 get /Z name 3 get /Zmap name
+      Z 0 Zmap 0 get getinterval /Z name  | clip garbage
+    scanX {
+      minX * eq { /minX X 0 get def } if
+      maxX * eq { /maxX X 0 get def } if
+      minX maxX X extrema /maxX name /minX name
+    } if
+    scanY {
+      minY * eq { Y 0 get /minY name } if
+      maxY * eq { Y 0 get /maxY name } if
+      minY maxY Y extrema /maxY name /minY name
+    } if
+    scanZ {
+      minZ * eq { /minZ Z 0 get def } if
+      maxZ * eq { /maxZ Z 0 get def } if
+      minZ maxZ Z extrema /maxZ name /minZ name
+    } if
 
-|-- design the logical axes
+    |-- design the logical axes
 
-  gpXdesigners abscissa 3 get get exec 
-  gpYdesigners ordinate 3 get get exec
-  pcZdesigners color 3 get get exec
+    gpXdesigners abscissa 3 get get exec
+    gpYdesigners ordinate 3 get get exec
+    pcZdesigners color 3 get get exec
 
-|-- construct generator of label elements
- 
-  /children ~[ 
-    gpXlabels abscissa 3 get get exec
-    gpYlabels ordinate 3 get get exec
-    pcZlabels color 3 get get exec
-  ] bind def
-  end
+    |-- construct generator of label elements
+
+    /children ~[
+      gpXlabels abscissa 3 get get exec
+      gpYlabels ordinate 3 get get exec
+      pcZlabels color 3 get get exec
+    ] bind def
+  } 100 dict indict
 } bind phase1 /pcgraf put
 
 |--------------------------------------------- pcgraf, phase 2
 
-{ 
-  begin
-  |-- prime bounding box
+{
+  {
+    |-- prime bounding box
 
-  /bbox 0 4 /d array copy def
-  symbolsize linewidth add 2 div dup
-  xdim add bbox 2 put ydim add bbox 3 put
+    /bbox 0 4 /d array copy def
+    symbolsize linewidth add 2 div dup
+    xdim add bbox 2 put ydim add bbox 3 put
 
-  (+) loud_msg children (-) loud_msg
-  makeinverse stretchpbbox
-  end
+    (+) loud_msg children (-) loud_msg
+    makeinverse stretchpbbox
+  } exch indict
 } bind phase2 /pcgraf put
 
 |--------------------------------------------- pcgraf, phase 3
 
-{ 
-  begin
-  [ ~save inverse ~concat ] { toPS } forall
-  setlinewidth
-  symbolsize setsymbolsize
-  ( symbolfont setfont ) faxPS
-  (+) loud_msg children (-) loud_msg
+{
+  {
+    [ ~save inverse ~concat ] { toPS } forall
+    setlinewidth
+    symbolsize setsymbolsize
+    ( symbolfont setfont ) faxPS
+    (+) loud_msg children (-) loud_msg
 
-  /Nrows Zmap 0 get Zmap 1 get div def
-  /Ncols Zmap 1 get def
-  ~save toPS
-  [ /CIEBasedABC colordict ] toPS ~setcolorspace toPS
-  0 1 Nrows 2 sub { /krow name
+    /Nrows Zmap 0 get Zmap 1 get div def
+    /Ncols Zmap 1 get def
+    ~save toPS
+    [ /CIEBasedABC colordict ] toPS ~setcolorspace toPS
+    0 1 Nrows 2 sub { /krow name
       Y krow get /yb name Y krow 1 add get /yt name
       0 1 Ncols 2 sub { /kcol name
-           X kcol get /xl name X kcol 1 add get /xr name 
-          Z Zmap krow ss pop kcol get
-          Z Zmap krow 1 add ss pop kcol get add
-          Z Zmap krow ss pop kcol 1 add get add
-          Z Zmap krow 1 add ss pop kcol 1 add get add
-          4 div C_to_c /zpix name
-          renderpix
-        } for
+        X kcol get /xl name X kcol 1 add get /xr name
+        Z Zmap krow ss pop kcol get
+        Z Zmap krow 1 add ss pop kcol get add
+        Z Zmap krow ss pop kcol 1 add get add
+        Z Zmap krow 1 add ss pop kcol 1 add get add
+        4 div C_to_c /zpix name
+        renderpix
+      } for
     } for
-  ~restore toPS
+    ~restore toPS
 
-  ~save toPS
-  [ /CIEBasedABC colordict ] toPS ~setcolorspace toPS
-  /xl xdim 1.1 mul x_to_X def  /xr xdim 1.2 mul x_to_X def
-      /delz Zaxis 1 get Zaxis 0 get sub 99.0 div def
-  0 1 98 { /krow name
+    ~save toPS
+    [ /CIEBasedABC colordict ] toPS ~setcolorspace toPS
+    /xl xdim 1.1 mul x_to_X def  /xr xdim 1.2 mul x_to_X def
+    /delz Zaxis 1 get Zaxis 0 get sub 99.0 div def
+    0 1 98 { /krow name
       Zaxis 0 get delz krow mul add /zpix name
       /yb zpix Z_to_z y_to_Y def
-      /yt zpix delz add Z_to_z y_to_Y def 
+      /yt zpix delz add Z_to_z y_to_Y def
       /zpix zpix C_to_c def
       renderpix
     } for
-  ~restore toPS
-  
-  ~save toPS gpXplotters abscissa 3 get get exec ~restore toPS
-  ~save toPS gpYplotters ordinate 3 get get exec ~restore toPS
-  ~save toPS pcZplotters color 3 get get exec ~restore toPS
+    ~restore toPS
 
-  verboxe { bbox toPS ~drawbbox toPS } if
-  ~restore toPS
-  end
+    ~save toPS gpXplotters abscissa 3 get get exec ~restore toPS
+    ~save toPS gpYplotters ordinate 3 get get exec ~restore toPS
+    ~save toPS pcZplotters color 3 get get exec ~restore toPS
+
+    verboxe { bbox toPS ~drawbbox toPS } if
+    ~restore toPS
+  } exch indict
 } bind phase3 /pcgraf put
 
 
 |--------------- design pcgraf color axis (maps z range onto color table)
 
-/pcZdesigners 2 dict dup begin
+/pcZdesigners {
   /log {
-     minZ maxZ DesignLg10Axis /Zaxis name
-     { lg } { 10.0 exch exp } Zaxis 0 get  Zaxis 1 get 
-     2 copy 0.0 ydim DefineTrans /z_to_Z name /Z_to_z name 
-     0.0 Npc 2 sub /d ctype DefineTrans /c_to_C name /C_to_c name 
-  } bind def
- 
-  /lin {
-     minZ maxZ DesignLinearAxis /Zaxis name
-     { } { } Zaxis 0 get  Zaxis 1 get
-     4 copy 0.0 ydim DefineTrans /z_to_Z name /Z_to_z name 
-     0.0 Npc 2 sub /d ctype DefineTrans /c_to_C name /C_to_c name   
-  } bind def
- end def
+    minZ maxZ DesignLg10Axis /Zaxis name
+    { lg } { 10.0 exch exp } Zaxis 0 get  Zaxis 1 get
+    2 copy 0.0 ydim DefineTrans /z_to_Z name /Z_to_z name
+    0.0 Npc 2 sub /d ctype DefineTrans /c_to_C name /C_to_c name
+  }
 
-/pcZlabels 2 dict dup begin
- 
+  /lin {
+    minZ maxZ DesignLinearAxis /Zaxis name
+    { } { } Zaxis 0 get  Zaxis 1 get
+    4 copy 0.0 ydim DefineTrans /z_to_Z name /Z_to_z name
+    0.0 Npc 2 sub /d ctype DefineTrans /c_to_C name /C_to_c name
+  }
+} bind makestruct def
+
+/pcZlabels {
   /lin {
     Zaxis 2 get Zaxis 3 get div labelformatter
     Zaxis 1 get Zaxis 0 get sub Zaxis 2 get div 0.5 add /l ctype
     0 1 3 -1 roll { Zaxis 2 get exch mul Zaxis 0 get add /ztick name
-        10 /b array 0 ($) fax
-        |-- scale by unit and round to fixed point with one decimal
-        ztick Zaxis 3 get div numberlabel
-          ($)fax 0 exch getinterval
-        ~[ 
-           ~xdim 1.2 ~mul textsize 0.5 mul ~add
-           ztick ~Z_to_z ~translate
-          ~alignLC
-         ] latex
+      10 /b array 0 ($) fax
+      |-- scale by unit and round to fixed point with one decimal
+      ztick Zaxis 3 get div numberlabel
+      ($)fax 0 exch getinterval
+      ~[
+        ~xdim 1.2 ~mul textsize 0.5 mul ~add
+        ztick ~Z_to_z ~translate
+        ~alignLC
+      ] latex
     } for
     |-- place descr/power unit axis label
     Zaxis 3 get color 5 get color 4 get LinAxisLabel
-    ~[ 
-       ~parent /bbox ~get 2 ~get textsize 0.5 mul ~add 
-       0.5 ydim mul ~translate
-       90.0 ~rotate
-       ~alignCT
+    ~[
+      ~parent /bbox ~get 2 ~get textsize 0.5 mul ~add
+      0.5 ydim mul ~translate
+      90.0 ~rotate
+      ~alignCT
     ] latex
-  } bind def
+  }
 
   /log {
     Zaxis 2 get { /ztick name
-        |-- represent as power of 10
-        10 /b array 0 ($) fax
-        ztick PowerOfTen ($) fax 0 exch getinterval
-        |-- 0.5 line to the left, center on ytick
-        ~[ textsize -0.5 mul ztick ~Z_to_z ~translate
-           ~alignLC
-         ] latex
+      |-- represent as power of 10
+      10 /b array 0 ($) fax
+      ztick PowerOfTen ($) fax 0 exch getinterval
+      |-- 0.5 line to the left, center on ytick
+      ~[ textsize -0.5 mul ztick ~Z_to_z ~translate
+        ~alignLC
+      ] latex
     } forall
     |-- place descr/unit axis label
     100 /b array 0 color 5 get fax
-        ( / ) fax color 4 get fax 0 exch getinterval
-    ~[ ~parent /bbox ~get 0 ~get textsize 0.5 mul ~sub 
-       ydim 0.5 mul ~translate
-       90 ~rotate
-       ~alignCT
-     ] latex
-  } bind def
-end def
+    ( / ) fax color 4 get fax 0 exch getinterval
+    ~[ ~parent /bbox ~get 0 ~get textsize 0.5 mul ~sub
+      ydim 0.5 mul ~translate
+      90 ~rotate
+      ~alignCT
+    ] latex
+  }
+} bind makestruct def
 
 |------------------------------------- render pseudocolor pixel
 | (xl,xr,yb,yt,zpix} -- | --
@@ -1764,31 +1744,30 @@ end def
   ~fill toPS
 } bind def
 
-/pcZplotters 2 dict dup begin
-  
+/pcZplotters {
   /log {
     symbolsize setsymbolsize
-    ( gsave symbolfont setfont newpath 2 setlinecap ) faxPS 
+    ( gsave symbolfont setfont newpath 2 setlinecap ) faxPS
     xdim 1.2 mul toPS Zaxis 0 get Z_toz toPS  ( moveto ) faxPS
     xdim 1.2 mul toPS Zaxis 1 get Z_to_z toPS  ( lineto stroke ) faxPS
     /symbol hbarra def
     Zaxis 2 get {
-        xdim 1.2 mul toPS Z_to_z toPS ( moveto ) faxPS
-        symbol toPS ( show ) faxPS
+      xdim 1.2 mul toPS Z_to_z toPS ( moveto ) faxPS
+      symbol toPS ( show ) faxPS
     } forall
     symbolsize 0.6 mul setsymbolsize
     ( symbolfont setfont ) faxPS
     /symbol hbarra def
     Yaxis 3 get {
-        xdim 1.2 mul toPS Z_to_z toPS ( moveto ) faxPS
-        symbol toPS ( show ) faxPS
-      } forall
-    ( grestore ) faxPS 
-  } bind def
+      xdim 1.2 mul toPS Z_to_z toPS ( moveto ) faxPS
+      symbol toPS ( show ) faxPS
+    } forall
+    ( grestore ) faxPS
+  }
 
-/lin {
+  /lin {
     symbolsize setsymbolsize
-    ( gsave symbolfont setfont newpath 2 setlinecap ) faxPS 
+    ( gsave symbolfont setfont newpath 2 setlinecap ) faxPS
     xdim 1.2 mul toPS Zaxis 0 get  Z_to_z toPS  ( moveto ) faxPS
     xdim 1.2 mul toPS Zaxis 1 get  Z_to_z toPS  ( lineto stroke ) faxPS
     /symbol hbarra def
@@ -1796,10 +1775,9 @@ end def
       xdim 1.2 mul toPS Z_to_z toPS ( moveto ) faxPS
       symbol toPS ( show ) faxPS
     } for
-    ( grestore ) faxPS 
-} bind def
-
-end def
+    ( grestore ) faxPS
+  }
+} bind makestruct def
 
 |---------------------------------------- pseudocolors
 | We use the CIE31 color model. Spectral color weights  are produced by
@@ -1819,11 +1797,11 @@ end def
   CIEfunctions 48 200 getinterval 2 4 pcY extract pop
   CIEfunctions 48 200  getinterval 3 4 pcZ extract pop
   /XYZrange [ 0.0 0.0 pcX extrema 0.0 0.0 pcY extrema 0.0 0.0 pcZ extrema ] def
-  /colordict 10 dict dup begin
+  /colordict 10 dict {
     /RangeABC XYZrange def
     /RangeLMN XYZrange def
     /WhitePoint [ 1 1 1 ] def
-  end def
+  } 1 index indict def
 } bind def
 
 /CIEfunctions <d
@@ -1923,7 +1901,7 @@ end def
        825 1.7765E-06 6.4153E-07         0
        830 1.2511E-06 4.5181E-07         0
 > def
- 
+
 
 |||||||||||||||||||||||||||||| last primitive ||||||||||||||||||||||||||||||||
 |         -------------- make primitives readonly ----------------
@@ -1945,19 +1923,15 @@ phase3 mkread /phase3 name
 |
 
 /toPS {
-  COMPOSE begin
-  EPSbuf EPSidx 3 -1 roll pstext /EPSidx name pop
-  end
+  {EPSbuf EPSidx 3 -1 roll pstext /EPSidx name pop} COMPOSE indict
 } bind def
 
 /faxPS {
-  COMPOSE begin
-  EPSbuf EPSidx 3 -1 roll fax /EPSidx name pop
-  end 
+  {EPSbuf EPSidx 3 -1 roll fax /EPSidx name pop} COMPOSE indict
 } bind def
 
 /genPS {
-  COMPOSE begin EPSbuf EPSidx end
+  {EPSbuf EPSidx} COMPOSE indict
   3 -1 roll exec
   COMPOSE /EPSidx put pop
 } bind def
@@ -2068,7 +2042,7 @@ phase3 mkread /phase3 name
                  -700 -700 moveto -700 700 lineto 700 700 lineto
                  700 -700 lineto closepath stroke } def
     /symbol_6  { symbolweight setlinewidth
-                 -1000 0 moveto 1000 0 lineto stroke 
+                 -1000 0 moveto 1000 0 lineto stroke
                  0 -1000 moveto 0 1000 lineto stroke } def
     /symbol_7  { symbolweight setlinewidth
                  -707 -707 moveto 707 707 lineto stroke
@@ -2080,8 +2054,8 @@ phase3 mkread /phase3 name
                   798 0 moveto 0 0 798 180 360 arc fill
                   798 0 moveto 0 0 798 0 360 arc stroke } def
     /symbol_11  { symbolweight setlinewidth
-                  -1000 0 moveto 1000 0 lineto stroke 
-                  0 -1000 moveto 0 1000 lineto stroke 
+                  -1000 0 moveto 1000 0 lineto stroke
+                  0 -1000 moveto 0 1000 lineto stroke
                   -707 -707 moveto 707 707 lineto stroke
                   -707 707 moveto 707 -707 lineto stroke } def
     /symbol_12  { 0 1000 moveto 866 -500 lineto -866 -500 lineto
@@ -2170,7 +2144,7 @@ end definefont pop   % Symbols font
   bbox 0 get bbox 3 get lineto
   bbox 2 get bbox 3 get lineto
   bbox 2 get bbox 1 get lineto
-  closepath stroke 
+  closepath stroke
   grestore
 } bind def
 
@@ -2190,32 +2164,32 @@ end definefont pop   % Symbols font
 
 
 |---------------------------- cook EPS string - ----------------------------
-| -- determines the bounding box etc of an EPS object 
-| -- also extracts data for text alignment 
+| -- determines the bounding box etc of an EPS object
+| -- also extracts data for text alignment
 |
 | (epsstring) -- | -- (bbox, and more, see below)
 
 /endcomments (\n\(%%EndComments[^\n]*|%\([ \011][^\n]*\)?\)\n) def
 
-/readDSC { 
+/readDSC {
 
    |-- carve out DSC prefix and postfix
 
    epsstring (\(^%[^%][^\n]*\n\)+) regex not {
-     (EPS: missing shebang comment\n) load
+     (\nEPS: missing shebang comment\n) quiet_msg
      epsstring debug_msg
      pop stop
    } if
    pop pop pop
    endcomments regex not {
-     (EPS: missing explicit or implicit %%EndComments\n) quiet_msg
+     (\nEPS: missing explicit or implicit %%EndComments\n) quiet_msg
      epsstring debug_msg
      pop stop
    } if
    pop /DSCprefix name pop
    DSCoff search {pop pop {DSCon search not ~exit if} loop} if
    (\n%%Trailer) search not {
-     (EPS: missing %%Trailer\n) quiet_msg
+     (\nEPS: missing %%Trailer\n) quiet_msg
      epsstring debug_msg
      pop stop
    } if pop pop
@@ -2225,7 +2199,7 @@ end definefont pop   % Symbols font
 
    DSCprefix (\n%%HiResBoundingBox:) search not {
      (\n%%BoundingBox:) search not {
-       (EPS: Missing prologue HiResBoundingBox and BoundingBox\n) quiet_msg
+       (\nEPS: Missing prologue HiResBoundingBox and BoundingBox\n) quiet_msg
        epsstring debug_msg
        pop stop
      } if
@@ -2251,15 +2225,15 @@ end definefont pop   % Symbols font
    |-- distill detailed text metrics from postfix (LaTEX only)
 
    /LatexW * def /LatexH * def /LatexD * def
-   DSCpostfix (\n%%LatexWidth:) search 
+   DSCpostfix (\n%%LatexWidth:) search
        {  pop pop (\n) search { 3 1 roll pop pop } if
           mkact exec /LatexW name
        } { pop } ifelse
-   DSCpostfix (\n%%LatexHeight:) search 
+   DSCpostfix (\n%%LatexHeight:) search
        {  pop pop (\n) search { 3 1 roll pop pop } if
           mkact exec /LatexH name
        } { pop } ifelse
-   DSCpostfix (\n%%LatexDepth:) search 
+   DSCpostfix (\n%%LatexDepth:) search
        {  pop pop (\n) search { 3 1 roll pop pop } if
           mkact exec /LatexD name
        } { pop } ifelse
@@ -2271,7 +2245,7 @@ end definefont pop   % Symbols font
 /DSCoff (\n%%BeginDocument: ) def
 /DSCon (\n%%EndDocument\n) def
 
- 
+
 |---------------------------------------------------------------------------
 |
 |                  General Tools for graph generators
@@ -2280,7 +2254,7 @@ end definefont pop   % Symbols font
 |
 |  - DefXTransform
 |  - DefYTransform
-|  - X_to_x, Y_to_y, x_to_X, y_to_Y 
+|  - X_to_x, Y_to_y, x_to_X, y_to_Y
 |  - DesignLinearAxis
 |  - DesignLg10Axis
 |  - LinAxisLabel
@@ -2299,10 +2273,10 @@ end definefont pop   % Symbols font
 | The procedure arguments translate (non-linear) logical cordinates into
 | the physical coordinates, and vice versa. The P and p parameters give
 | the coordinates of two points in logical space (P1, P2) that correspond
-| to two given points in physical space (p1, p2). For instance, 
+| to two given points in physical space (p1, p2). For instance,
 |
 |  { ln 10.0 ln div } { 10.0 exch pwr }
-|     0.01 10.0 0 xdim DefXTransform   
+|     0.01 10.0 0 xdim DefXTransform
 |
 | maps a logarithmic logical abscissa ranging from 0.01 to 10 onto the
 | horizontal physical extent of a graph.
@@ -2326,7 +2300,7 @@ end definefont pop   % Symbols font
    ~[ /trans find { } forall
       /a p2 p1 sub pi2 pi1 sub div def
       /b a pi1 mul neg p1 add def
-      a ~mul b ~add 
+      a ~mul b ~add
    ] bind
    ~[ /a pi2 pi1 sub p2 p1 sub div def
       /b a p1 mul neg pi1 add def
@@ -2348,11 +2322,11 @@ end definefont pop   % Symbols font
 
 /DesignLinearAxis {/d ctype /max name /d ctype /min name
   max min eq {
-    max 0 eq { -1e-6 1e-6 } { 
-      max 0 gt { 
-        min 0.9 mul max 1.1 mul 
-      } { 
-        min 1.1 mul max 0.9 mul 
+    max 0 eq { -1e-6 1e-6 } {
+      max 0 gt {
+        min 0.9 mul max 1.1 mul
+      } {
+        min 1.1 mul max 0.9 mul
       } ifelse
     } ifelse /max name /min name
   } if
@@ -2365,7 +2339,7 @@ end definefont pop   % Symbols font
   /max max step div ceil step mul def
   /unit |[
     min abs max abs 2 copy lt ~exch if pop
-    lg 3 div floor 3 mul 
+    lg 3 div floor 3 mul
     10.0 exch pwr |]
   def
   [min max step unit]
@@ -2383,10 +2357,10 @@ end definefont pop   % Symbols font
 | are also observed in the formatting.
 
 /LinAxisLabel { /unit name /axdesc name /poweroften name
-  
+
   100 /b array 0 axdesc fax
-  
-  letterprefix 
+
+  letterprefix
   poweroften 1e-15 ge and
   poweroften 1e9 le and
   unit length 0 gt and
@@ -2402,13 +2376,13 @@ end definefont pop   % Symbols font
          }
          { unit length 0 ne { ( / ) fax unit fax } if
          }
-         ifelse                      
+         ifelse
      }
      ifelse
   0 exch getinterval
 } bind def
 
-/letterlist [ (f) (p) (n) ($\mu$) (m) () (K) (M) (G) ] def 
+/letterlist [ (f) (p) (n) ($\mu$) (m) () (K) (M) (G) ] def
 
 |------------------------ designing a log10 axis ---------------------------
 | use: min max | [ min max [ decades ] [ subdecades ] ]
@@ -2416,7 +2390,7 @@ end definefont pop   % Symbols font
 | - a subdecade step (factor corresponding to scale subpartition) is
 |   chosen dependent on the # of decades in original min | max range and
 |   is either 1, 2, 5, or 10
-| - the full-decade partitions and decade subpartitions are returned in 
+| - the full-decade partitions and decade subpartitions are returned in
 |   separate arrays
 | - the returned min, max are adjusted to the actual spanned range and span
 |   at least one decade
@@ -2430,13 +2404,13 @@ end definefont pop   % Symbols font
    /max max pwr_mant step div ceil step mul mul def
    max min div 10.0 lt { /min 10.0 min lg floor pwr def } if
    max min div 10.0 lt { /max 10.0 max lg ceil pwr def } if
-   [ min max 
+   [ min max
      [ min almost lg ceil 1.0 max lg floor { 10.0 exch pwr } for ]
      [ /lgstep 10.0 min lg floor min a_decade { 1 sub } if pwr step mul def
        min { /part name part almost max gt { exit } if
              part a_decade
                 { /lgstep lgstep 10.0 mul def
-                  step 1.0 eq { part lgstep add } { lgstep } ifelse 
+                  step 1.0 eq { part lgstep add } { lgstep } ifelse
                 }
                 { part dup lgstep add }
                 ifelse
@@ -2459,13 +2433,13 @@ end definefont pop   % Symbols font
 | appends to a running text a string formatted as a power of ten.
 
 /PowerOfTen { /unit name
-   unit 1 ne { 
-     * (10^{) text 
-     * unit lg roundup /l ctype -1 number 
+   unit 1 ne {
+     * (10^{) text
+     * unit lg roundup /l ctype -1 number
      * (}) text
-   } { 
-     * (1) text 
-   } ifelse 
+   } {
+     * (1) text
+   } ifelse
 } bind def
 
 |------------------------ specific roundings
@@ -2489,7 +2463,7 @@ end definefont pop   % Symbols font
 | automatically format axis labels (integer if `number' is greater than 1;
 | fixed point, one decimal otherwise).
 
-/labelformatter { 
+/labelformatter {
   1 ge  { { round /l ctype * exch * number } }
        { { * exch -1 number } }
        ifelse
@@ -2497,6 +2471,6 @@ end definefont pop   % Symbols font
 } bind def
 
 
-end _module
+} moduledef
 
 userdict /EPS known not {getstartupdir (eps.d) fromfiles} if
