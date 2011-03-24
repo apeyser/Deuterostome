@@ -635,57 +635,41 @@
   } bind def
 
   |====================== pipe ==================================
-  | \[ ~active ... fd-in fd-out fd-err | pid
+  | \[ ~active ... fd-in fd-out fd-err | bool
   |
   | Runs a pipe of child processes, with ~active1's output feeding
   |  into ~active2's input, and so forth.
   | active1's input is fd-in, activen's output is fd-out,
   |  and all active's error is fd-err.
-  | Returns pid of entire pipeline. Pipeline returns non-zero
-  |  status if any child returns non-zero status, which occurs
-  |  if ~active returns false or throws an error.
+  | Returns true if every sub-process returns a zero (which happens
+  |  if active returns true or zero if its an exec)
   |
   /pipe {
-    /pipe_err name /pipe_out name /pipe_in name
-    {closelist /pipe_actives name
-      true [
-        pipe_actives length 0 ne {
-          /pipe_in STDIN def
-          pipe_actives 0 1 index last getinterval {
-            pipefd /pipe_out name /pipe_nin name
-            pipe_in pipe_out STDERR openlist pipe_nin bg_
-            pipe_in close pipe_out close
-            /pipe_in pipe_nin def
-          } forall
+    counttomark 1 add 3 roll closelist
+    dup length list 0
+    2 {null} repeat openlist
+    /in /out_ /err /actives
+    /pids /i
+    /out /nin
+  } {
+    true
+    actives length 0 ne {
+      /in in copyfd def
+      actives last {
+        pipefd /out name /nin name
+        actives i get in out err openlist nin ~bg_ enddict pids i put
+        /i i 1 add def
+        in close out close
+        /in nin def
+      } repeat
 
-          /pipe_out STDOUT def
-          pipe_actives dup last get pipe_in pipe_out STDERR bg
-          pipe_in close pipe_out close
-        } if
-        STDIN closefd STDOUT closefd
-      ] {wait and} forall
-    } pipe_in pipe_out pipe_err bg /pipe_pid name
-    cleartomark pipe_pid
-  } bind def
+      /out out_ copyfd def
+      actives i get in out err ~bg enddict pids i put
+      in close out close
 
-  |====================== pipe ==================================
-  | \[ ~active ... fd-in fd-out fd-err | bool
-  |
-  | See pipe. Runs pipe, waits for it to return and returns true
-  | if pipe succeeds
-  /pipe_ {
-    pipe wait
-  } bind def
-
-  |============================= pipefg ============================
-  | \[ ~active ... | --
-  |
-  | See pipe. Runs pipe, waits for it to return and errors out 
-  | if pipe fails. Uses default stdin, stdout, stderr. 
-  |
-  /pipefg {
-    fds pipe (pipefg) wait_
-  } bind def
+      pids {wait and} forall
+    } if
+  } localfunc bind def
 
   |============================== andp =============================
   | \[ ~active ... fd-in fd-out fd-err | pid

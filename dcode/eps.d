@@ -113,7 +113,7 @@
     [
       {/PDFTOPS  ~prog EPS indict sh_quiet true}
       {/SED_PIPE ~prog EPS indict sh_quiet true} |]
-    {fds pipe (pdftops | sed) wait_quiet} process
+    {fds pipe not {(pdftops | sed) /NOSYSTEM makeerror} if} process
 
     /SED_COMMENT prog ~sh_quiet process
     ~STDOUT process (%%EOF\n) writefd pop
