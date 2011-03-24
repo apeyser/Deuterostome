@@ -889,7 +889,7 @@
 
   | (dir) (file) norecur-bool | --
   /_removepath {
-    /norecur exch {{/DIR_NOTEMPTY makeerror}} {null mkact} ifelse def
+    /norecur exch {{(removefile) /DIR_NOTEMPTY makeerror}} {null mkact} ifelse def
     __removepath
   } bind def
 
