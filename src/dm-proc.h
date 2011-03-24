@@ -4,7 +4,6 @@
 #include "dm.h"
 
 DLL_SCOPE P op_fork(void);
-DLL_SCOPE P op_getpid(void);
 DLL_SCOPE P op_getppid(void);
 DLL_SCOPE P op_makefd(void);
 DLL_SCOPE P op_unmakefd(void);
@@ -14,7 +13,6 @@ DLL_SCOPE P op_spawn(void);
 DLL_SCOPE P op_setenv(void);
 DLL_SCOPE P op_getenv(void);
 DLL_SCOPE P op_pipefd(void);
-DLL_SCOPE P op_unpid(void);
 DLL_SCOPE P op_copyfd(void);
 DLL_SCOPE P op_killpid(void);
 DLL_SCOPE P op_waitpid(void);

@@ -187,8 +187,7 @@ P op_finddir(void) {
       return OPD_ERR;
   };
 
-  if (! ARRAY_SIZE(o_1)) return RNG_CHK;
-  if (curr[-1] != '/') (curr++)[0] = '/';
+  if (curr[-1] != '/' && ARRAY_SIZE(o_1)) (curr++)[0] = '/';
   if (curr + ARRAY_SIZE(o_1) + 1 >= CEILvm) return VM_OVF;
   moveB(VALUE_PTR(o_1), curr, ARRAY_SIZE(o_1));
   curr[ARRAY_SIZE(o_1)] = '\0';
@@ -299,7 +298,6 @@ P op_rmpath(void) {
       return OPD_ERR;
   };
 
-  if (! ARRAY_SIZE(o_1)) return RNG_CHK;
   if (curr[-1] != '/') (curr++)[0] = '/';
   if (curr + ARRAY_SIZE(o_1) + 1 >= CEILvm) return VM_OVF;
   moveB(VALUE_PTR(o_1), curr, ARRAY_SIZE(o_1));
@@ -461,16 +459,6 @@ P op_fork(void) {
   BOOL_VAL(o3) = FALSE;
     
   FREEopds = o4;
-  return OK;
-}
-
-// -- | pid
-P op_getpid(void) {
-  if (CEILopds < o2) return OPDS_OVF;
-  TAG(o1) = (NULLOBJ|PIDTYPE);
-  ATTR(o1) = 0;
-  PID_VAL(o1) = getpid();
-  FREEopds = o2;
   return OK;
 }
 
@@ -731,16 +719,6 @@ P op_pipefd(void) {
 
   FREEvm += FRAMEBYTES + STREAMBOXBYTES;
   FREEopds = o3;
-  return OK;
-}
-
-// pid | pid#
-P op_unpid(void) {
-  if (FLOORopds > o_1) return OPDS_UNF;
-  if (TAG(o_1) != (NULLOBJ|PIDTYPE)) return OPD_ERR;
-  TAG(o_1) = (NUM|LONGBIGTYPE);
-  ATTR(o_1) = 0;
-  LONGBIG_VAL(o_1) = (LBIG) PID_VAL(o_1);
   return OK;
 }
 
@@ -1571,10 +1549,14 @@ DM_INLINE_STATIC P usedfd(void) {
 }
 
 DM_INLINE_STATIC P cleanupfd(void) {
-  P retc = OK;
-  if (CLASS(o_1) == STREAM && STREAM_FD(VALUE_PTR(o_1)) != -1)
-    retc = op_closefd();
+  P retc;
 
+  if (CLASS(o_1) != STREAM
+      || STREAM_FD(VALUE_PTR(o_1)) == -1)
+    return OK;
+
+  if (! (retc = op_closefd()))
+    FREEopds = o2;
   return retc;
 }
 

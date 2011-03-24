@@ -48,24 +48,32 @@ static P handle_error(P retc) {
   static B buf[FRAMEBYTES+1024];
   if (! retc) return OK;
 
-  if (o4 >= CEILopds) goto baderr;
+  if (o5 >= CEILopds) goto baderr;
 
   TAG(o1) = (NUM|LONGBIGTYPE);
   ATTR(o1) = 0;
-  LONGBIG_VAL(o1) = getworldrank();
-  TAG(o2) = (ARRAY|BYTETYPE);
+  LONGBIG_VAL(o1) = getpid();
+
+  TAG(o2) = (NUM|LONGBIGTYPE);
   ATTR(o2) = 0;
-  VALUE_PTR(o2) = (B*) "mpi error";
-  ARRAY_SIZE(o2) = strlen((char*) VALUE_PTR(o2));
-  TAG(o3) = (NUM|LONGBIGTYPE);
+  LONGBIG_VAL(o2) = getworldrank();
+
+  TAG(o3) = (ARRAY|BYTETYPE);
   ATTR(o3) = 0;
-  LONGBIG_VAL(o3) = retc;
+  VALUE_PTR(o3) = (B*) "mpi error";
+  ARRAY_SIZE(o3) = strlen((char*) VALUE_PTR(o3));
+
+  TAG(o4) = (NUM|LONGBIGTYPE);
+  ATTR(o4) = 0;
+  LONGBIG_VAL(o4) = retc;
+
   TAG(buf) = (ARRAY|BYTETYPE);
   ATTR(buf) = 0;
   VALUE_PTR(buf) = buf+FRAMEBYTES;
   ARRAY_SIZE(buf) = sizeof(buf)-FRAMEBYTES;
-  moveframe(buf, o4);
-  FREEopds = o4;
+  moveframe(buf, o5);
+
+  FREEopds = o6;
   if (op_errormessage()) goto baderr;  
   error_local(1, 0, "%.*s", (int) ARRAY_SIZE(o_1), VALUE_PTR(o_1));
   
@@ -235,23 +243,32 @@ P op_vmresize(void) {
    error code    (top)
    errsource string
    rank#
+   pid
    and push active name 'error' on execution stack
 */
 void makeerror(P retc, B* error_source) {   
-  if (o3 >= CEILopds) FREEopds = FLOORopds;
+  if (o4 >= CEILopds) FREEopds = FLOORopds;
   if (x1 >= CEILexecs) FREEexecs = FLOORexecs;
-  TAG(o1) = NUM | LONGBIGTYPE; 
+
+  TAG(o1) = (NUM | LONGBIGTYPE);
   ATTR(o1) = 0;
-  LONGBIG_VAL(o1) = getworldrank(); 
-  TAG(o2) = ARRAY | BYTETYPE; 
-  ATTR(o2) = READONLY;
-  VALUE_PTR(o2) = error_source; 
-  ARRAY_SIZE(o2) = strlen((char*)error_source);
-  TAG(o3) = NUM | LONGBIGTYPE; 
-  ATTR(o3) = 0; 
-  LONGBIG_VAL(o3) = retc;
-  moveframe(errorframe,x1);
-  FREEopds = o4; 
+  LONGBIG_VAL(o1) = (LBIG) getpid();
+
+  TAG(o2) = (NUM | LONGBIGTYPE);
+  ATTR(o2) = 0;
+  LONGBIG_VAL(o2) = getworldrank();
+
+  TAG(o3) = (ARRAY | BYTETYPE);
+  ATTR(o3) = READONLY;
+  VALUE_PTR(o3) = error_source; 
+  ARRAY_SIZE(o3) = strlen((char*)error_source);
+
+  TAG(o4) = (NUM | LONGBIGTYPE);
+  ATTR(o4) = 0;
+  LONGBIG_VAL(o4) = retc;
+
+  moveframe(errorframe, x1);
+  FREEopds = o5;
   FREEexecs = x2;
 }
 
@@ -339,6 +356,7 @@ DM_INLINE_STATIC P clear_toconsole(void) {
      error code    (top)
      errsource string
      rank#
+     pid
   - prints message on current console or startup
     terminal (default)
   - aborts on corrupted error info
@@ -347,7 +365,7 @@ DM_INLINE_STATIC P clear_toconsole(void) {
 
 P op_error(void)
 {
-  LBIG e, r;
+  LBIG e, r, pid;
   P nb, atmost; 
   B *m, strb[256], *p;
   P ret;
@@ -355,42 +373,54 @@ P op_error(void)
 
   p = strb; 
   atmost = 255;
-  if (o_3 < FLOORopds) goto baderror;
+  if (o_4 < FLOORopds) goto baderror;
+  if (CLASS(o_4) != NUM) goto baderror;
+  if (! VALUE(o_4, &pid)) goto baderror;
   if (CLASS(o_3) != NUM) goto baderror;
   if (! VALUE(o_3, &r)) goto baderror;
   if (TAG(o_2) != (ARRAY | BYTETYPE)) goto baderror;
   if (CLASS(o_1) != NUM) goto baderror;
-  if (!VALUE(o_1,&e)) goto baderror;
+  if (!VALUE(o_1, &e)) goto baderror;
+      
+  nb = dm_snprintf((char*)p, atmost, "\033[31mOn rank %llu, pid %llu: ",
+                   (unsigned long long) r,
+		   (unsigned long long) pid);
+      
+  p += nb;
+  atmost -= nb;
 
-  nb = dm_snprintf((char*)p,atmost,"\033[31mOn rank %lld: ",
-                   (long long) r);
-
-  p += nb; atmost -= nb;
   if ((P)e < 0) /*Clib error */
     nb = dm_snprintf((char*)p,atmost,"%s",(char*)strerror((P)-e));
   else { /* one of our error codes: decode */
     m = geterror((P)e);
     nb = dm_snprintf((char*)p,atmost,"%s",(char*)m);
   }
-  p += nb; atmost -= nb;
-  nb = dm_snprintf((char*)p,atmost," in %s\033[0m\n", (char*)VALUE_BASE(o_2));
+  p += nb;
+  atmost -= nb;
+
+  nb = dm_snprintf((char*)p, atmost, " in %*s\033[0m\n",
+		   (int) ARRAY_SIZE(o_2),
+		   (char*) VALUE_BASE(o_2));
   nb += (P)(p - strb);
-  TAG(o_3) = ARRAY | BYTETYPE; 
-  ATTR(o_3) = READONLY;
-  VALUE_BASE(o_3) = (P)strb; 
-  ARRAY_SIZE(o_3) = nb;
-  FREEopds = o_2;
+
+  TAG(o_4) = ARRAY | BYTETYPE; 
+  ATTR(o_4) = READONLY;
+  VALUE_BASE(o_4) = (P) strb; 
+  ARRAY_SIZE(o_4) = nb;
+  FREEopds = o_3;
+
   clear_toconsole();
   groupconsole = FALSE;
   op_toconsole();
   groupconsole = groupconsole_;
   if ((ret = op_halt()) == DONE) return DONE;
 
-  nb = dm_snprintf((char*)p, atmost, "** Error in internal halt!\n");
+  nb = dm_snprintf((char*) p, atmost, "%s",
+		   "** Error in internal halt!\n");
   goto baderror2;
 
  baderror: 
-  nb = dm_snprintf((char*)p,atmost,
+  nb = dm_snprintf((char*) p, atmost, "%s",
                    "**Error with corrupted error info on operand stack!\n");
  baderror2:
   op_abort();
@@ -408,17 +438,20 @@ P op_error(void)
      string buffer (top)
      error code
      errsource string
-     rank#
+     rank# int
+     pid int
   - composes an error message and returns it in a subarray of string buffer
 */
 
 P op_errormessage(void)
 {
-  LBIG e, r;
-  P nb, tnb; 
+  LBIG e, r, pid;
+  P nb, tnb;
   B *m, *s;
 
-  if (o_4 < FLOORopds) goto baderror;
+  if (o_5 < FLOORopds) goto baderror;
+  if (CLASS(o_5) != NUM) goto baderror;
+  if (! VALUE(o_5, &pid)) goto baderror;
   if (CLASS(o_4) != NUM) goto baderror;
   if (! VALUE(o_4, &r)) goto baderror;
   if (TAG(o_3) != (ARRAY | BYTETYPE)) goto baderror;
@@ -428,23 +461,31 @@ P op_errormessage(void)
 
   s = (B *)VALUE_BASE(o_1); 
   tnb = ARRAY_SIZE(o_1);
-  nb = dm_snprintf((char*)s,
-		   tnb,"On rank %lld: ", (long long) r);
-  s += nb; tnb -= nb;
+  nb = dm_snprintf((char*) s, tnb, "On rank %llu, pid %llu: ",
+		   (unsigned long long) r,
+		   (unsigned long long) pid);
+  s += nb;
+  tnb -= nb;
 
   if ((P)e < 0) /*Clib error */
-    nb = dm_snprintf((char*)s,tnb,"%s",(char*)strerror(-e));
+    nb = dm_snprintf((char*) s, tnb, "%s",
+		     (char*) strerror(-e));
   else { /* one of our error codes: decode */
-    m = geterror((P)e);
-    nb = strlen((char*)m);
+    m = geterror((P) e);
+    nb = strlen((char*) m);
     if (nb > tnb) nb = tnb;
-    moveB(m,s,nb);
+    moveB(m, s, nb);
   }
-  s += nb; tnb -= nb;
-  nb = dm_snprintf((char*)s,tnb," in %s\n", (char*)VALUE_BASE(o_3));
+  s += nb;
+  tnb -= nb;
+
+  nb = dm_snprintf((char*) s, tnb, " in %*s\n",
+		   (int) ARRAY_SIZE(o_3),
+		   (char*) VALUE_BASE(o_3));
+
   ARRAY_SIZE(o_1) = (P)(s + nb) - VALUE_BASE(o_1);
-  moveframe(o_1,o_4);
-  FREEopds = o_3;
+  moveframe(o_1, o_5);
+  FREEopds = o_4;
   return OK;
 
  baderror:

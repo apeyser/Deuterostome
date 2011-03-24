@@ -1,4 +1,4 @@
-AC_INIT([D-Machine], [4.6.9], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
+AC_INIT([D-Machine], [4.6.10], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
 AC_CONFIG_MACRO_DIR([m4 libltdl/m4])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_AUX_DIR([libltdl/config])
@@ -19,7 +19,7 @@ CF_AC_ENABLE([regex], [include regex], [yes])
 CF_AC_ARG_VAR([SYS_DICT_SIZE], [system dictionary size], [500])
 CF_AC_ARG_VAR([MAX_NUM_OPDS], [maximum operand stack size in frames], [100000])
 CF_AC_ARG_VAR([MAX_NUM_DICTS], [maximum dict stack size in frames], [10000])
-CF_AC_ARG_VAR([MAX_NUM_EXECS], [maximum exec stack size in frame], [5000])
+CF_AC_ARG_VAR([MAX_NUM_EXECS], [maximum exec stack size in frame], [20000])
 CF_AC_ARG_VAR([MAX_MEM_SIZE], [maximum vm allocation size in mb], [4000])
 CF_AC_ARG_VAR([MAX_USER_DICT_SIZE], [maximum user dict size], [5000])
 

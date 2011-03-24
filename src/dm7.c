@@ -804,23 +804,25 @@ P op_findfiles(void)
 P op_findfile(void) 
 {
   struct stat buf;
-	BOOLEAN addslash;
-	P dirlen;
+  B addslash;
+  P dirlen;
 
   if (o_2 < FLOORopds) return OPDS_UNF;
   if ((TAG(o_1) != (ARRAY | BYTETYPE)) || (TAG(o_2) != (ARRAY | BYTETYPE)))
     return OPD_ERR;
-	if (ARRAY_SIZE(o_1) == 0 || ARRAY_SIZE(o_2) == 0)
+  if (! ARRAY_SIZE(o_2))
     return RNG_CHK;
 
-	dirlen = ARRAY_SIZE(o_2);
-	addslash = (VALUE_PTR(o_2)[dirlen-1] != '/');
+  dirlen = ARRAY_SIZE(o_2);
+  addslash = ((VALUE_PTR(o_2)[ARRAY_SIZE(o_2)-1] != '/') 
+	      && ARRAY_SIZE(o_1)) 
+    ? 1 : 0;
   // make null terminated file string
-	if (FREEvm+ARRAY_SIZE(o_1)+ARRAY_SIZE(o_2)+1+(addslash ? 1 : 0) >= CEILvm)
+  if (ARRAY_SIZE(o_1) + ARRAY_SIZE(o_2) + 1 + addslash >= CEILvm - FREEvm)
     return VM_OVF;
 
-  moveB(VALUE_PTR(o_2), FREEvm, dirlen);
-	if (addslash) FREEvm[dirlen++] = '/';
+  moveB(VALUE_PTR(o_2), FREEvm, ARRAY_SIZE(o_2));
+  if (addslash) FREEvm[dirlen++] = '/';
   moveB(VALUE_PTR(o_1), FREEvm + dirlen, ARRAY_SIZE(o_1));
   FREEvm[dirlen+ARRAY_SIZE(o_1)] = '\0';
 

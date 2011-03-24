@@ -37,6 +37,11 @@
     FFLAGS /WRITE_APPEND get openfd
   } bind def
 
+  | (dir) (file) | fd
+  /rdopen {
+    FFLAGS /READ_ONLY get openfd
+  } bind def
+
   | fd | --
   /close {
     dup unmakefd 5 lt ~pop ~closefd ifelse
@@ -44,6 +49,11 @@
 
   /closeifopen {
     dup closedfd ~pop ~close ifelse
+  } bind def
+
+  | ~active | ...
+  /inpidsockets {
+    {{~pidsockets PROCESSES indict indict} lock} enddicts
   } bind def
   
   /pidsockets [
@@ -301,7 +311,7 @@
       console dup null eq ~pop {
         ~[
           ~[
-            getpid unpid {~piddead pidsockets indict} ~PROCESSES ~indict
+            getpid unpid {~piddead inpidsockets} ~PROCESSES ~indict
             ~restore
           ] ~lock
         ] send
@@ -328,7 +338,7 @@
   | Never returns.
   /_bg_ {
     {
-      ~cleanall pidsockets indict
+      ~cleanall inpidsockets
       true PROCESSES /childproc put
       set_bgerror_
       
@@ -366,7 +376,7 @@
       get_threads fork {setconsole set_threads _bg_} if | threads pid socket
       3 -1 roll pop                                     | pid socket
 
-      1 index 3 1 roll ~add_process pidsockets indict
+      1 index 3 1 roll ~add_process inpidsockets
       {exch dup class /markclass eq ~exit if pop} loop pop
 
       5 1 roll 4 ~pop repeat
@@ -395,12 +405,12 @@
 
   | /SIGNAME | --
   /killall {
-    SIGNALS exch get ~killall pidsockets ~indict lock
+    SIGNALS exch get ~killall inpidsockets
   } bind def
 
   | -- | --
   /terminateall {
-    ~terminateall pidsockets ~indict lock
+    ~terminateall inpidsockets
   } bind def
 
   |=============================== job ============================
@@ -409,7 +419,7 @@
   | Get pid for the nth proces, as listed by jobs, starting from 0.
   | Not stable after a ~wait.
   |
-  /job {~job pidsockets ~indict lock} bind def
+  /job {~job inpidsockets} bind def
 
   |=============================== jobconsole ============================
   | n | pid 
@@ -417,7 +427,7 @@
   | Get the socket for the nth proces, as listed by jobs, starting from 0.
   | Not stable after a ~wait.
   |
-  /jobconsole {~jobconsole pidsockets ~indict lock} bind def
+  /jobconsole {~jobconsole inpidsockets} bind def
 
   |============================ jobs ==============================
   | -- | --
@@ -426,9 +436,9 @@
   | #: pid: alive or dead.
   | Not stable after a ~wait.
   |
-  /jobs {~jobs pidsockets ~indict lock} bind def
+  /jobs {~jobs inpidsockets} bind def
 
-  /jobconsoles {~jobconsoles pidsockets ~indict lock} bind def
+  /jobconsoles {~jobconsoles inpidsockets} bind def
   
   |============================ isdead ==============================
   | pid | bool true / -- false
@@ -441,7 +451,7 @@
   /isdead {
     dup checkpid {
       {0 eq} {pop false} ifelse
-      exch ~pidwaited pidsockets ~indict lock
+      exch ~pidwaited inpidsockets
       true
     } {pop false} ifelse
   } bind def
@@ -454,7 +464,7 @@
   |
   /wait {
     dup waitpid {0 eq} {pop false} ifelse
-    exch ~pidwaited pidsockets ~indict lock
+    exch ~pidwaited inpidsockets
   } bind def
 
   |============================ wait_ =============================
@@ -498,7 +508,7 @@
   /socketdead ~[
     ~[
       /socketdead destruct_execn {             | ... bool socket {}
-        1 index ~_socketdead pidsockets indict {| ... bool socket {}
+        1 index ~_socketdead inpidsockets {    | ... bool socket {}
           pop pop ~error if
         } ~exec ifelse                         | --
       } currentdict ~indict
@@ -536,7 +546,7 @@
       console dup null eq ~pop {
         ~[
           ~[
-            getpid unpid {~piddisconnect pidsockets indict} ~PROCESSES ~indict
+            getpid unpid {~piddisconnect inpidsockets} ~PROCESSES ~indict
             ~restore
           ] ~lock
         ] send
@@ -617,66 +627,49 @@
   |
   /sh_quiet {
     ~_spawnsh fds bg
-    counttomark 1 add 1 roll cleartomark
-    (sh) wait_quiet
-  } bind def
-
-  |====================== pipe ==================================
-  | \[ ~active ... fd-in fd-out fd-err | pid
-  |
-  | Runs a pipe of child processes, with ~active1's output feeding
-  |  into ~active2's input, and so forth.
-  | active1's input is fd-in, activen's output is fd-out,
-  |  and all active's error is fd-err.
-  | Returns pid of entire pipeline. Pipeline returns non-zero
-  |  status if any child returns non-zero status, which occurs
-  |  if ~active returns false or throws an error.
-  |
-  /pipe {
-    {
-      |  (master: ) toconsole getpid _ pop
-      counttomark openlist exch 2 add 1 roll | \[ \[ ~active ...
-      STDOUT {                   | \[pid socket... \[~active... out
-        2 index class /markclass eq ~exit if
-
-        pipefd 3 copy 7 3 roll   | ... out inr inw ~active out inr inw
-        | must close inw in child to avoid file-descriptor loop
-        3 1 roll exch STDERR     | ... out inr inw ~active inw inr out STDERR
-        openlist 5 -1 roll bg_   | ... out inr inw pid
-        counttomark 1 add 1 roll | ... out inr inw
-        3 1 roll close close     | ... inw
-      } loop                     | \[pid... \[ ~active fd-out
-
-      exch STDIN 2 index STDERR bg   | \[pid ... \[fd-out pid
-      3 1 roll close pop             | \[pid ... 
-    
-      true {                         | \[pid... bool
-        exch wait and                | \[pid... bool
-        1 index class /markclass eq ~exit if
-      } loop                         | \[bool
-      exch pop                       | bool
-    } 4 1 roll bg                    | \[~active... fd-in fd-out fd-err pid
-    counttomark 1 add 1 roll cleartomark | pid
+    counttomark 1 add 1 roll | pid \[ (exec) ...
+    counttomark 1 sub index  | pid \[ (exec) ... (exec)
+    counttomark 1 add 1 roll | pid (exec) \[ (exec) ...
+    cleartomark              | pid (exec)
+    wait_quiet
   } bind def
 
   |====================== pipe ==================================
   | \[ ~active ... fd-in fd-out fd-err | bool
   |
-  | See pipe. Runs pipe, waits for it to return and returns true
-  | if pipe succeeds
-  /pipe_ {
-    pipe wait
-  } bind def
+  | Runs a pipe of child processes, with ~active1's output feeding
+  |  into ~active2's input, and so forth.
+  | active1's input is fd-in, activen's output is fd-out,
+  |  and all active's error is fd-err.
+  | Returns true if every sub-process returns a zero (which happens
+  |  if active returns true or zero if its an exec)
+  |
+  /pipe {
+    counttomark 1 add 3 roll closelist
+    dup length list 0
+    2 {null} repeat openlist
+    /in /out_ /err /actives
+    /pids /i
+    /out /nin
+  } {
+    true
+    actives length 0 ne {
+      /in in copyfd def
+      actives last {
+        pipefd /out name /nin name
+        actives i get in out err openlist nin ~bg_ enddict pids i put
+        /i i 1 add def
+        in close out close
+        /in nin def
+      } repeat
 
-  |============================= pipefg ============================
-  | \[ ~active ... | --
-  |
-  | See pipe. Runs pipe, waits for it to return and errors out 
-  | if pipe fails. Uses default stdin, stdout, stderr. 
-  |
-  /pipefg {
-    fds pipe (pipefg) wait_
-  } bind def
+      /out out_ copyfd def
+      actives i get in out err ~bg enddict pids i put
+      in close out close
+
+      pids {wait and} forall
+    } if
+  } localfunc bind def
 
   |============================== andp =============================
   | \[ ~active ... fd-in fd-out fd-err | pid
@@ -847,38 +840,27 @@
   | Returns true iff ~func doesn't error out or abort.
   |
   /readstream {
-    4 {null null} repeat
+    4 ~pipefd repeat
     3 {null} repeat
     openlist
     /func
     /rd /wr /erd /ewr /rdrd /rdwr /erdrd /erdwr
     /pid_eps /pid_out /pid_err
   } {
-    ~_readstream {
-      3 1 roll transcribe
-      3 1 roll transcribe
-      3 1 roll
-    } incapsave
-  } caplocalfunc bind def
-
-  | -- | (stdout) (stderr) true/false
-  /_readstream {
     {
-      pipefd /wr  name /rd  name
-      pipefd /ewr name /erd name {
-        /func find enddict true
-      } NULLR wr ewr openlist rd erd bg_ /pid_eps name
-      [wr ewr] ~close forall
+      {/func find enddict true} NULLR wr ewr
+      openlist rd erd rdrd rdwr erdrd erdwr
+      bg_ /pid_eps name
+      [wr ewr] ~close forall | rd erd rdrd rdwr erdrd erdwr
 
-      pipefd /erdwr name /erdrd name {
-        STDIN suckfd STDOUT exch writefd close true
-      } erd erdwr STDERR openlist rd erdrd bg_ /pid_err name
-      [erd erdwr] ~close forall
+      {STDIN suckfd STDOUT exch writefd close true} erd erdwr STDERR
+      openlist rd rdrd rdwr erdrd
+      bg_ /pid_err name
+      [erd erdwr] ~close forall | rd rdrd rdwr erdrd
 
-      pipefd /rdwr name /rdrd name {
-        STDIN suckfd STDOUT exch writefd close true
-      } rd rdwr STDERR openlist erdrd rdrd bg_ /pid_out name
-      [rd rdwr] ~close forall
+      {STDIN suckfd STDOUT exch writefd close true} rd rdwr STDERR
+      openlist erdrd rdrd bg_ /pid_out name
+      [rd rdwr] ~close forall | rdrd erdrd
     } ~stopped aborted
     {erdrd suckfd toconsole abort} if
     {erdrd suckfd toconsole stop} if
@@ -886,15 +868,13 @@
     erdrd suckfd pid_err wait_quiet
     rdrd  suckfd pid_out wait_quiet
     exch         pid_eps wait       | (stdout) (stderr) bool
-  } bind def
-
-
+  } caplocalfunc bind def
 
 |=============================== removepath functions =====================
 
   | (dir) (file) norecur-bool | --
   /_removepath {
-    /norecur exch {{/DIR_NOTEMPTY makeerror}} {null mkact} ifelse def
+    /norecur exch {{(removefile) /DIR_NOTEMPTY makeerror}} {null mkact} ifelse def
     __removepath
   } bind def
 

@@ -115,8 +115,12 @@ int main(void)
     error_local(EXIT_FAILURE, 0, "D memory");
   
 /*----------------- construct frames for use in execution of D code */
-  makename((B*)"error",errorframe); ATTR(errorframe) = ACTIVE;
-  makename((B*)"fromconsole",fromconsoleframe); ATTR(fromconsoleframe) = ACTIVE;
+  makename((B*) "error", errorframe);
+  ATTR(errorframe) = ACTIVE;
+
+  makename((B*) "fromconsole", fromconsoleframe);
+  ATTR(fromconsoleframe) = ACTIVE;
+
   TAG(FREEvm) = STRING;
   ARRAY_SIZE(FREEvm) = 1024;
   VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;

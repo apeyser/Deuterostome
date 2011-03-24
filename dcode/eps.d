@@ -1,13 +1,6 @@
 | -*- mode: d; -*-
 
 /EPS 100 {
-  |------------ RESOLUTION -------------------
-  |
-  | The resolution argument to ghostscript.
-  | Either -rX or -rXxY.
-  |
-  /RESOLUTION (-r2688) def
-
   |-------------- latex ----------------------
   |
   | The latex document is divided into 3 pieces:
@@ -89,51 +82,61 @@
   |  constructing a latex document out of ptsize (10,11 or 12)
   |  and input, an arbitary latex string.
   | It creates a temporary directory, puts the document in there,
-  |   calls pdflatex on it, uses ghostscript to make it a cropped eps,
-  |   uses sed to append the latex bounding box details (and strip pt
+  |   calls pdflatex on it, uses pdfcrop to make it a cropped pdf,
+  |   converts it to an eps with pdftops (that protects the fonts --
+  |   ghostscript screws them up), clear out the %%EOF's with sed,
+  |   and uses sed to append the latex bounding box details (and strip pt
   |   from those numbers, since I can't seem to make latex do that),
   |   and finally appends an %%EOF to the entire thing.
   | The output sits in a pipe, as well as an error messages from
   |  the subprocesses.
   |
+  /process {PROCESSES indict} def
   /eps_ {
-    null (eps) tmpdir openlist
+    getwdir transcribe
+    null (eps) tmpdir ~setwdirp process getwdir transcribe
+    openlist
     /preamble /input /ptsize
-    /tdir /tsdir
-    makestruct_stack {
-      STDERR [
-        (Working in temporary directory: `) tdir tsdir ('\n)
-      ] ~writefd forall pop
+    /pwd /twd
+  } {
+    ~STDERR process [
+      (Working in temporary directory: `) twd ('\n)
+    ] ~writefd forall pop
 
-      tdir tsdir setwdirp
-      (.) (eps.tex) wropen [
-        predoc (XX) 0 * ptsize * number pop pre preamble main input post
-      ] ~writefd forall close
+    (.) (eps.tex) ~wropen process [
+      predoc (XX) 0 * ptsize * number pop pre preamble main input post
+    ] ~writefd forall ~close process
 
-      [PROGS /PDFLATEX get (--halt-on-error) (--interaction=nonstopmode) 
-        (eps.tex) |]
-      STDIN STDERR dup sh_bg (pdflatex) wait_quiet
+    /PDFLATEX prog {STDIN STDERR dup sh_bg (pdflatex) wait_quiet} process
+    /PDFCROP  prog {STDIN STDERR dup sh_bg (pdfcrop)  wait_quiet} process
 
-      [PROGS /PDFCROP get (--hires) (eps.pdf) (eps-crop.pdf) |]
-      STDIN STDERR dup sh_bg (pdfcrop) wait_quiet
+    [
+      {/PDFTOPS  ~prog EPS indict sh_quiet true}
+      {/SED_PIPE ~prog EPS indict sh_quiet true} |]
+    {fds pipe not {(pdftops | sed) /NOSYSTEM makeerror} if} process
 
-      [
-        {
-          [PROGS /PDFTOPS get (-eps) (-level3) (-preload)
-            (eps-crop.pdf) (-) |]
-          fds sh_bg (pipe pdftops) wait_quiet true
-        } {
-          [PROGS /SED get (-re) (/^%%EOF$/ d) |]
-          fds sh_bg (pipe sed) wait_quiet true
-        } |]
-      fds pipe (pipe) wait_quiet
+    /SED_COMMENT prog ~sh_quiet process
+    ~STDOUT process (%%EOF\n) writefd pop
 
-      [PROGS /SED get (-e) (s/pt$//) (eps.comment)
-        fds sh_bg (sed) wait_quiet |]
+    pwd setwdir
+    twd () ~removedir process
+  } caplocalfunc bind def
 
-      STDOUT (%%EOF\n) writefd pop
-      tdir tsdir removedir
-    } exch indict
+  | /prog | /progname [params...]
+  /CMD [
+    /PDFLATEX    {{(--halt-on-error) (--interaction=nonstopmode) (eps.tex)}}
+    /PDFCROP     {{(--hires) (eps.pdf) (eps-crop.pdf)}}
+    /PDFTOPS     {{(-eps) (-level3) (-preload) (eps-crop.pdf) (-)}}
+    /SED_PIPE    {pop /SED {(-re) (/^%%EOF$/ d)}}
+    /SED_COMMENT {pop /SED {(-e) (s/pt$//) (eps.comment)}}
+  ] makestruct def
+
+  | /PROG | openlist (prog)
+  /prog {
+    [ exch                 | \[ /PROG
+      CMD 1 index get exec | \[ /progname [params...]
+      PROGS 3 -1 roll get  | \[ [params...] (progname)
+      exch {} forall       | \[ (progname) params...    ]
   } bind def
 
   |------------------------ xeps ---------------------------
@@ -150,16 +153,13 @@
   | (eps) is the body for an eps file.
   | On error, the eps prints "hamuti".
   |
-  | The resolution is defined by RESOLUTION defined in this
-  |   module -- defaults to 1200 dpi.
-  |
-  | eps calls eps_ setting up
+  | xeps calls eps_ setting up
   |  input and output streams, and wrapping it in an error catcher
   |  that will dump the error stream to console if a stop or error
   |  happen internally.
   |
   /xeps {
-    {~[4 1 roll ~eps_] ~readstream PROCESSES underdict} {
+    {~[4 1 roll ~eps_] ~readstream process} {
       {pop transcribe} {toconsole pop hamuti} ifelse
     } incapsave
   } bind def

@@ -19,11 +19,11 @@ startup_common_save capsave {
   stop
 } if
 
-| (source) /ERROR_NAME
-/makeerror ~[~ERRORS ~exch bind ~get bind ~error] def
-
 | (source) code
 /error_ops_length 2 def
+
+| -- | false
+/_makeerror {false} def
 
 |============================= userdict =================================
 

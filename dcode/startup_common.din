@@ -446,6 +446,31 @@
   begin ~stop if
 } bind def
 
+|------------------- enddicts -----------
+| ~active | ...
+|
+| executes ~active with all dicts above
+| systemdict and userdict temporarily ended.
+| On return, dictstack is returned to original
+| state. Error is reported if any extra dicts
+| are left on stack.
+|
+/enddicts {
+  {[
+    {
+      countdictstack 2 ne {(enddicts) /RNG_CHK makeerror} if
+      ~begin repeat
+    }
+    countdictstack 2 sub dup 0 ne {
+      currentdict end
+      2 1 3 index {
+        currentdict end exch 1 roll
+      } for
+    } if
+    ~unlock push |]
+  } lock
+} bind def
+
 |------------------ tostring -------------
 | (string-buf) ~active | (sub-string-buf)
 | active: (string-buf) index | (string-buf) index
@@ -984,7 +1009,7 @@ end def  | of xtext_dict
 
 | (dir) (file) | bool
 /fileisdir {
-  findfile not {/FILE_NOSUCH makeerror} if
+  findfile not {(fileisdir) /FILE_NOSUCH makeerror} if
   3 1 roll pop pop FTYPEMASK and DIRTYPE eq
 } bind def
 
@@ -1273,12 +1298,22 @@ end def  | of xtext_dict
   userdict /dstate_sv get capsave
 } bind def
 
+
+| (source) /ERROR_NAME | --
+/makeerror {
+  {
+    _makeerror {error_ops_length dup 2 sub roll} if
+    ERRORS exch get
+  } userdict indict
+  error
+} bind def
+
 | e1...ex ... n | ... e1..ex
 /rollerror {error_ops_length 1 index add exch roll} bind def
 
 | ... | --
 /showerror ~[
-  ~[ 
+  ~[
     2 ~rollerror 1024 /b array ~errormessage ~fax 1 ~sub
   ] ~warning
 ] bind def
