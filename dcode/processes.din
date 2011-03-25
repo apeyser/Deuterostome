@@ -57,7 +57,7 @@
   } bind def
   
   /pidsockets [
-    /ll 20 {[null null false]} ~static makelist
+    /ll 400 {[null null false]} ~static makelist
     {/s /p /pd /t} ~null forall
 
     | [next data <<pid socket>>] | <<pid socket>>
