@@ -21,6 +21,8 @@ startup_common_save capsave {
   stop
 } if
 
+/abort {dstate_ abort} bind def
+
 | pid (source) code
 /error_ops_length 3 def
 
