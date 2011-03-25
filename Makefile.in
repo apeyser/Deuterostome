@@ -1278,7 +1278,7 @@ gentoo/dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild: gentoo-git
 	cd gentoo \
 	&& if ! test -e $$dmver ; then \
 	  cp `echo dev-lang/dm/dm-*.ebuild | sed -e 's/[ \t]\+/\n/g' \
-	      | sort | tail -n 1` $$dmver \
+	      | sort -V | tail -n 1` $$dmver \
 	  && git add dev-lang/dm/dm-@PACKAGE_VERSION@.ebuild; \
 	fi
 
