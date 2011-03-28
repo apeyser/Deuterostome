@@ -198,7 +198,7 @@
     } stopped
     pdf_fdw pdf_fdr {closeifopen closeifopen} PROCESSES indict
     pdf_ndir pdf_nfile rmpath
-    {/stop stop} if
+    ~stop if
   } COMPOSE indict
 } bind def
 
