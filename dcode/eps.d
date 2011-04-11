@@ -126,7 +126,7 @@
   /CMD [
     /PDFLATEX    {{(--halt-on-error) (--interaction=nonstopmode) (eps.tex)}}
     /PDFCROP     {{(--hires) (eps.pdf) (eps-crop.pdf)}}
-    /PDFTOPS     {{(-eps) (-level3) (-preload) (eps-crop.pdf) (-)}}
+    /PDFTOPS     {{(-eps) (-level3) (eps-crop.pdf) (-)}}
     /SED_PIPE    {pop /SED {(-re) (/^%%EOF$/ d)}}
     /SED_COMMENT {pop /SED {(-e) (s/pt$//) (eps.comment)}}
   ] makestruct def
