@@ -53,7 +53,7 @@
 
   | ~active | ...
   /inpidsockets {
-    {{{pidsockets indict} PROCESSES indict} lock} enddicts
+    {{{pidsockets indict} PROCESSES indict} enddicts} lock
   } bind def
   
   /pidsockets [
@@ -1000,7 +1000,7 @@
           } for pop                             |
 
           {
-            ~halt ~enddict unlock
+            ~halt enddict
             procthreads_live 0 eq ~exit if
           } loop
         
@@ -1039,7 +1039,7 @@
           procthreads_first procthreads_step procthreads_last {/procthreads_j name
             {
               procthreads_live procthreads_max lt ~exit if
-              ~halt ~enddict unlock
+              ~halt enddict
             } loop
 
             /procthreads_live procthreads_live 1 add def
@@ -1061,7 +1061,7 @@
 
           {
             procthreads_live 0 eq ~exit if
-            ~halt ~enddict unlock
+            ~halt enddict
           } loop
 
           procthreads_pids {(forproc) ~wait_quiet unlock} forall

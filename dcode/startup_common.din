@@ -456,7 +456,7 @@
 | are left on stack.
 |
 /enddicts {
-  {[
+  [
     {
       countdictstack 2 ne {(enddicts) /RNG_CHK makeerror} if
       ~begin repeat
@@ -467,8 +467,7 @@
         currentdict end exch 1 roll
       } for
     } if
-    ~unlock push |]
-  } lock
+    counttomark 2 add -1 roll push |]
 } bind def
 
 |------------------ tostring -------------
