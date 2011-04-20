@@ -23,6 +23,7 @@ PDEBUILD_SED = \
 	          -e "s/[@]DATE[@]/`date -R`/g" \
 	          debian/changelog.in >debian/changelog \
 	&& $(SED) -e "s/[@]ATLAS_VERSION[@]/$$ATLAS_VERSION/g" \
+		  -e "s/[@]EMACS_VERSION[@]/$$EMACS_VERSION/g" \
 	          debian/control.in >debian/control 
 
 PDEBUILD_ACTION = \
@@ -43,6 +44,7 @@ debian-setup:
 .PHONY: debian-sed
 debian-sed:
 	@: $${ATLAS_VERSION=''}; \
+	: $${EMACS_VERSION=23}; \
 	$(PDEBUILD_SED)
 
 .PHONY: debian-action
@@ -69,6 +71,7 @@ debian:
 .PHONY: ubuntu-sed
 ubuntu-sed:
 	@: $${ATLAS_VERSION='(>= 3.6.0-22ubuntu2)'}; \
+	: $${EMACS_VERSION=23}; \
 	$(PDEBUILD_SED)
 
 .PHONY: ubuntu-init
