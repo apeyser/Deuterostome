@@ -579,6 +579,19 @@
     _sh_ counttomark 1 add 1 roll cleartomark
   } bind def
 
+  |======================== sh_bg ================================
+  | \[ (exec) ... fd-in fd-out fd-err | pid (exec)
+  |
+  | Execute (exec) with following operands in child process,
+  |  using fd-in fd-out and fd-err as redirects.
+  | Returns pid of child process running in bg and name of executable,
+  |  useful for wait variation.
+  |
+  /sh_bg_ {
+    counttomark 1 sub index counttomark 1 add 1 roll | (exec) \[ (exec) ...
+    sh_bg exch
+  } bind def
+
   |======================== sh_ ================================
   | \[ (exec) ... fd-in fd-out fd-err | bool
   |
@@ -586,9 +599,8 @@
   |  using fd-in fd-out and fd-err as redirects.
   | Returns true if (exec) returns zero.
   |
-  /sh_ {
-    sh_bg wait
-  } bind def
+  /sh_ {sh_bg wait} bind def
+
 
   |======================== sh_io ================================
   | \[ (exec) ... fd-in fd-out fd-err | --
@@ -597,9 +609,7 @@
   |  using fd-in fd-out and fd-err as redirects.
   | Waits until process is done, and errors out if process fails.
   |
-  /sh_io {
-    sh_bg (sh) wait_
-  } bind def
+  /sh_io {sh_bg_ wait_} bind def
 
   |======================= sh ===================================
   | \[ (exec) ... | --
@@ -610,11 +620,7 @@
   | Blocks until child execution finished; if (exec) returns
   |  non-zero exec status, throws NOSYSTEM error.
   |
-  /sh {
-    ~_spawnsh fds bg
-    counttomark 1 add 1 roll cleartomark
-    (sh) wait_
-  } bind def
+  /sh {fds sh_io} bind def
 
   |======================= sh_quiet ===================================
   | \[ (exec) ... | --
@@ -625,14 +631,17 @@
   | Blocks until child execution finished; if (exec) returns
   |  non-zero exec status, throws NOSYSTEM error.
   |
-  /sh_quiet {
-    ~_spawnsh fds bg
-    counttomark 1 add 1 roll | pid \[ (exec) ...
-    counttomark 1 sub index  | pid \[ (exec) ... (exec)
-    counttomark 1 add 1 roll | pid (exec) \[ (exec) ...
-    cleartomark              | pid (exec)
-    wait_quiet
-  } bind def
+  /sh_quiet {fds sh_io_quiet} bind def
+
+  |======================= sh_quiet ===================================
+  | \[ (exec) ... fd-in fd-out fd-err | --
+  | 
+  | Execute (exec) with following operands as child process in
+  |   the foreground (redirecting to fd-in fd-out fd-err).
+  | Blocks until child execution finished; if (exec) returns
+  |  non-zero exec status, throws NOSYSTEM error.
+  |
+  /sh_io_quiet {sh_bg_ wait_quiet} bind def
 
   |====================== pipe ==================================
   | \[ ~active ... fd-in fd-out fd-err | bool
