@@ -1064,7 +1064,7 @@ P op_Xdisplayname(void)
 }
 
 //------------------------------------------------- Xbell
-// -1,0...100 -1,0.. -1,0.. -100...100 | --
+// 0...100 0.. 0.. -100...100 | --
 // percent-vol pitch-Hz duration-ms vol-change (-1 is default)
 //
 P op_bell(void) {
@@ -1087,39 +1087,37 @@ P op_bell(void) {
       || TYPE(o_3) > LONGBIGTYPE
       || TYPE(o_4) > LONGBIGTYPE)
     return OPD_TYP;
-  if (! VALUE(o_1, &ms)
-      || ! VALUE(o_2, &hz)
-      || ! VALUE(o_3, &vol)
-      || ! VALUE(o_4, &p))
-    return UNDF_VAL;
-  if (ms < -1 
-      || hz < -1
-      || vol < -1
-      || p < -100 || p > 100)
-    return RNG_CHK;
 
-  HXGetKeyboardControl(dvtdisplay, &s);
-
-  if (vol != -1) {
-    c.bell_percent = vol;
-    mask |= KBBellPercent;
-  }
-  if (hz != -1) {
-    c.bell_pitch = hz;
-    mask |= KBBellPitch;
-  }
-  if (ms != -1) {
-    c.bell_duration = ms;
+  if (! VALUE(o_1, &p)) return UNDF_VAL;
+  if (p < -100 || p > 100) return RNG_CHK;
+  
+  if (VALUE(o_2, &ms)) {
     mask |= KBBellDuration;
+    if (ms < 0) return RNG_CHK;
+  }
+  if (VALUE(o_3, &hz)) {
+    mask |= KBBellPitch;
+    if (hz < 0) return RNG_CHK;
+  }
+  if (VALUE(o_4, &vol)) {
+    mask |= KBBellPercent;
+    if (vol < 0 || vol > 100) return RNG_CHK;
+  }
+  
+  if (mask) {
+    HXGetKeyboardControl(dvtdisplay, &s);
+    c.bell_percent  = vol;
+    c.bell_pitch    = hz;
+    c.bell_duration = ms;
+    HXChangeKeyboardControl(dvtdisplay, mask, &c);
   }
 
-  if (mask) XChangeKeyboardControl(dvtdisplay, mask, &c);
   HXBell(dvtdisplay, (int) p);
 
   if (mask) {
-    if (vol != -1) c.bell_percent  = s.bell_percent;
-    if (hz  != -1) c.bell_pitch    = s.bell_pitch;
-    if (ms  != -1) c.bell_duration = s.bell_duration;
+    c.bell_percent  = s.bell_percent;
+    c.bell_pitch    = s.bell_pitch;
+    c.bell_duration = s.bell_duration;
     HXChangeKeyboardControl(dvtdisplay, mask, &c);
   }
 

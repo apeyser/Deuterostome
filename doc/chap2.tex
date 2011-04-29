@@ -1149,12 +1149,12 @@ alternating uses do not produce unreasonable delays.
 
 \op{bell} dings the X window bell at volume \emph{vol} (as a positive
 percentage up to 100), at pitch \emph{pitch} (in Hz), for
-\emph{duration} (in milliseconds). If any of those 3 are -1, the
+\emph{duration} (in milliseconds). If any of those 3 are undefined, the
 current X server values are used. \emph{vol-delta} is a percentage
-(-100...100), to alter the volume by -- so if \emph{vol} is -1,
+(-100...100) to alter the volume by -- so if \emph{vol} is undefined,
 \emph{vol-delta} alters uses the x server default altered by
 \emph{vol-delta} as defined by the \texttt{XBell} algorithm.
- 
+
 The X window library buffers X window commands prior to transmitting
 them to the X server. \op{Xsync} transmits that buffer instantly.
 
