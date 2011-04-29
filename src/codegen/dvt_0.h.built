@@ -185,6 +185,7 @@ B* _sysop[] =
   (B*) "fillrectangle", (B*) op_fillrectangle,
   (B*) "drawtext", (B*) op_drawtext,
   (B*) "makewindowtop", (B*) op_makewindowtop,
+  (B*) "bell", (B*) op_bell,
   (B*) "nextevent", (B*) op_nextevent,
 #ifdef DM_ENABLE_REGEX
   (B*) "regex", (B*) op_regex,

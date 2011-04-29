@@ -211,6 +211,7 @@ B* _sysop[] =
   (B*) "fillrectangle", (B*) op_fillrectangle,
   (B*) "drawtext", (B*) op_drawtext,
   (B*) "makewindowtop", (B*) op_makewindowtop,
+  (B*) "bell", (B*) op_bell,
   (B*) "Xwindows_", (B*) op_Xwindows_,
   (B*) "Xconnect", (B*) op_Xconnect,
   (B*) "Xdisconnect", (B*) op_Xdisconnect,

@@ -227,6 +227,7 @@
   "fillrectangle"
   "drawtext"
   "makewindowtop"
+  "bell"
   "lock"
   "unlock"
   "locked"
