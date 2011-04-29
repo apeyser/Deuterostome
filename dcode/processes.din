@@ -477,8 +477,7 @@
   /wait_done_buf 128 /b array def
   /wait_ {
     dup class /arrayclass ne {(wait)} if
-    exch dup {
-      ~wait unlock
+    exch dup wait {
       wait_done_buf 0 (Done: ) fax * 5 -1 roll unpid * number (\n) fax
       0 exch getinterval toconsole
     } lock
@@ -624,7 +623,7 @@
 
   |======================= sh_quiet ===================================
   | \[ (exec) ... | --
-  | 
+  |
   | Execute (exec) with following operands as child process in
   |   the foreground (using the same in, out, and err fds as
   |   parent).
@@ -633,9 +632,9 @@
   |
   /sh_quiet {fds sh_io_quiet} bind def
 
-  |======================= sh_quiet ===================================
+  |======================= sh_io_quiet =================================
   | \[ (exec) ... fd-in fd-out fd-err | --
-  | 
+  |
   | Execute (exec) with following operands as child process in
   |   the foreground (redirecting to fd-in fd-out fd-err).
   | Blocks until child execution finished; if (exec) returns
