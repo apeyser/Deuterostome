@@ -229,6 +229,7 @@
   "makewindowtop"
   "lock"
   "unlock"
+  "locked"
   "serialize"
   "threads"
   "makethreads"
