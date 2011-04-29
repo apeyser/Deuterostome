@@ -1064,7 +1064,7 @@ P op_Xdisplayname(void)
 }
 
 //------------------------------------------------- Xbell
-// 0...100 0.. 0.. -100...100 | --
+// -1...100 -1.. -1.. -100...100 | --
 // percent-vol pitch-Hz duration-ms vol-change (-1 is default)
 //
 P op_bell(void) {
@@ -1076,6 +1076,7 @@ P op_bell(void) {
   XKeyboardControl c;
   unsigned long mask = 0;
 
+  if (dvtdisplay == NULL) return NO_XWINDOWS;
   if (o_4 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != NUM 
       || CLASS(o_2) != NUM 
@@ -1106,9 +1107,9 @@ P op_bell(void) {
   
   if (mask) {
     HXGetKeyboardControl(dvtdisplay, &s);
-    c.bell_percent  = vol;
-    c.bell_pitch    = hz;
-    c.bell_duration = ms;
+    c.bell_percent  = (int) vol;
+    c.bell_pitch    = (int) hz;
+    c.bell_duration = (int) ms;
     HXChangeKeyboardControl(dvtdisplay, mask, &c);
   }
 

@@ -1152,8 +1152,10 @@ percentage up to 100), at pitch \emph{pitch} (in Hz), for
 \emph{duration} (in milliseconds). If any of those 3 are undefined, the
 current X server values are used. \emph{vol-delta} is a percentage
 (-100...100) to alter the volume by -- so if \emph{vol} is undefined,
-\emph{vol-delta} alters uses the x server default altered by
-\emph{vol-delta} as defined by the \texttt{XBell} algorithm.
+\emph{vol-delta} alters uses the current X server setting, altered by
+\emph{vol-delta} as defined by the \texttt{XBell} algorithm. If
+\emph{vol}, \emph{pitch}, or \emph{duration} are -1, the X server
+default is used (rather than the current value or a new value).
 
 The X window library buffers X window commands prior to transmitting
 them to the X server. \op{Xsync} transmits that buffer instantly.
