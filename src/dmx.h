@@ -46,6 +46,7 @@ P op_drawsymbols(void);
 P op_fillrectangle(void);
 P op_drawtext(void);
 P op_makewindowtop(void);
+P op_bell(void);
 
 #endif
 
