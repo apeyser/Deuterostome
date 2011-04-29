@@ -149,6 +149,7 @@ specific \file{startup_xxx.d} files.
 \op*{quit} & + & - & + \\
 \op*{lock} & - & + & + \\
 \op*{unlock} & - & + & + \\
+\op*{locked} & - & + & + \\
 \op*{serialize} & - & + & + \\
 \op*{threads} & - & + & + \\
 \op*{makethreads} & - & + & + \\
@@ -825,6 +826,7 @@ long_array/null    & vmresize            & bool                  \\
 --                 & abort               & --                    \\
 active_obj         & lock                & ??                    \\ 
 active_obj         & unlock              & ??                    \\
+--                 & locked              & bool                  \\
 --                 & console             & consolesocket/null    \\
 consolesocket/null & setconsole          & --                    \\
 string             & toconsole           & --                    \\
@@ -884,7 +886,10 @@ interrupted this way, execute this context by making it the operand of
 calling \op{unlock} with an active object to be executed. Both
 operators return whatever their operand returns, unchanged. Both are
 also \op{stop}, \op{abort}, and \op{halt} safe (\op{halt}
-automatically creates an unlocked context for itself).
+automatically creates an unlocked context for itself). \op{locked}
+reports whether the innermost lock context is \op{lock}'ed or
+\op{unlock}'ed. If the \dcomp{dnode} hits the bottom of the execution
+stack (say via an \op{abort}), the lock context is reset to unlocked.
 
 Several operators allow a \dcomp{dnode} to organize its interactions
 with the current console. \op{console} inquires the socket currently

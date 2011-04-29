@@ -398,7 +398,7 @@ end def
 /node 3 dict dup begin |[
   /all 2 dict dup begin |[
     /commands [
-      /lock /unlock /serialize /threads /makethreads 
+      /lock /unlock /locked /serialize /threads /makethreads
       /halt /continue 
       /vmresize 
     ] def

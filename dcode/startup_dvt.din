@@ -38,6 +38,7 @@ startup_common_save capsave {
 
 /lock   ~exec bind def    | just to make dnodes & dvts symmetric
 /unlock ~exec bind def
+/locked false def
 
 |--------------------------- Supervisor of the dvt ---------------------------
 
