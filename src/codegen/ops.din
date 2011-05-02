@@ -373,7 +373,7 @@ end def
       /deletewindow /mapwindow /resizewindow
       /Xsync /mapcolor /drawline
       /drawsymbols /fillrectangle /drawtext
-      /makewindowtop 
+      /makewindowtop /bell
     ] def
     /errors 8 dict dup begin |[
       /NO_XWINDOWS(** X windows unavailable) def
@@ -398,7 +398,7 @@ end def
 /node 3 dict dup begin |[
   /all 2 dict dup begin |[
     /commands [
-      /lock /unlock /serialize /threads /makethreads 
+      /lock /unlock /locked /serialize /threads /makethreads
       /halt /continue 
       /vmresize 
     ] def

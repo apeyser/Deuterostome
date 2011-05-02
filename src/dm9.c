@@ -1062,3 +1062,67 @@ P op_Xdisplayname(void)
     return OK;
 #endif
 }
+
+//------------------------------------------------- Xbell
+// -1...100 -1.. -1.. -100...100 | --
+// percent-vol pitch-Hz duration-ms vol-change (-1 is default)
+//
+P op_bell(void) {
+#if X_DISPLAY_MISSING
+  return NO_XWINDOWS;
+#else
+  LBIG vol, hz, ms, p;
+  XKeyboardState s;
+  XKeyboardControl c;
+  unsigned long mask = 0;
+
+  if (dvtdisplay == NULL) return NO_XWINDOWS;
+  if (o_4 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != NUM
+      || CLASS(o_2) != NUM
+      || CLASS(o_3) != NUM
+      || CLASS(o_4) != NUM)
+    return OPD_CLA;
+  if (TYPE(o_1) > LONGBIGTYPE
+      || TYPE(o_2) > LONGBIGTYPE
+      || TYPE(o_3) > LONGBIGTYPE
+      || TYPE(o_4) > LONGBIGTYPE)
+    return OPD_TYP;
+
+  if (! VALUE(o_1, &p)) return UNDF_VAL;
+  if (p < -100 || p > 100) return RNG_CHK;
+
+  if (VALUE(o_2, &ms)) {
+    if (ms < -1) return RNG_CHK;
+    mask |= KBBellDuration;
+    c.bell_duration = (int) ms;
+  }
+  if (VALUE(o_3, &hz)) {
+    if (hz < -1) return RNG_CHK;
+    mask |= KBBellPitch;
+    c.bell_pitch = (int) hz;
+  }
+  if (VALUE(o_4, &vol)) {
+    if (vol < -1 || vol > 100) return RNG_CHK;
+    mask |= KBBellPercent;
+    c.bell_percent = (int) vol;
+  }
+  
+  if (mask) {
+    HXGetKeyboardControl(dvtdisplay, &s);
+    HXChangeKeyboardControl(dvtdisplay, mask, &c);
+  }
+
+  HXBell(dvtdisplay, (int) p);
+
+  if (mask) {
+    c.bell_percent  = s.bell_percent;
+    c.bell_pitch    = s.bell_pitch;
+    c.bell_duration = s.bell_duration;
+    HXChangeKeyboardControl(dvtdisplay, mask, &c);
+  }
+
+  FREEopds = o_4;
+  return OK;
+#endif
+}

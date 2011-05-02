@@ -199,6 +199,17 @@ P op_unlock(void) {
   return OK;
 }
 
+/* -- | bool */
+P op_locked(void) {
+  if (o1 >= CEILopds) return OPDS_OVF;
+
+  TAG(o1) = BOOL;
+  ATTR(o1) = 0;
+  BOOL_VAL(o1) = locked;
+
+  FREEopds = o2;
+  return OK;
+}
 
 static P x_op_serialize(void) {
   if (x_1 < FLOORexecs) return EXECS_UNF;

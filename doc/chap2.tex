@@ -373,7 +373,12 @@ The mathematical operators described here are executed in different ways by the 
 
 \subsection{Working with composite objects}
 
-Each class of composite object is created by a specific  operator, \emph{array},  \emph{list}, ], \emph{dict}, and \emph{save}. (Other operators can also create composite objects in VM; these include: \emph{readboxfile}, \emph{send} (in the target), \emph{token}, \emph{save}, \emph{regex}, \emph{regexi}, \emph{fromscreen}, \emph{Xauthgen}, \emph{loadlib}).
+Each class of composite object is created by a specific operator,
+\emph{array}, \emph{list}, ], \emph{dict}, and \emph{save}. (Other
+operators can also create composite objects in VM; these include:
+\emph{readboxfile}, \emph{send} (in the target), \emph{token},
+\emph{save}, \emph{regex}, \emph{regexi}, \emph{fromscreen},
+\emph{loadlib}).
 
 Several  operators  perform  analogous  tasks  on  composite  objects  of several classes. They inquire the dimension of the object (\emph{length}), access or replace individual elements (\emph{get}, \emph{put}), physically copy the elements of the object value to another object (\emph{copy}),  or present the elements of  the value successively to a procedure, which is invoked once for every element (\emph{forall}).  Arrays  or  lists  (but  not  dictionaries)  may  be  logically subdivided into subarrays or sublists (\emph{getinterval}). Subarrays or sublists physically  share their elements with their parents and  siblings;  hence, changes  made  to  one  member of the object  family  affect  others  that represent  concerned elements of the value.\\
 
@@ -457,17 +462,17 @@ Five array operators specialize in strings (byte arrays).  These dissect  a stri
 \noindent The following operators deal with LIST objects:
 
 \begin{supertabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
-n & list & list\\
--- & [ & mark\\
-mark obj$_0$ \ldots obj$_{n-1}$ & ] & list\\
-list index & get & obj\\
-obj list index & put & --\\
-list index n & getinterval & sublist\\
-list$_1$ list$_2$ & copy & (sub)list$_2$\\
-list$_1$ index list$_2$ & fax & list$_1$ index\\
-oldmin oldmax list & extrema & newmin newmax\\
-list proc & forall & --\\
-list & transcribe & list\\\\
+n                               & list        & list\\
+--                              & [           & mark\\
+mark obj$_0$ \ldots obj$_{n-1}$ & ]           & list\\
+list index                      & get         & obj\\
+obj list index                  & put         & --\\
+list index n                    & getinterval & sublist\\
+list$_1$ list$_2$               & copy        & (sub)list$_2$\\
+list$_1$ index list$_2$         & fax         & list$_1$ index\\
+oldmin oldmax list              & extrema     & newmin newmax\\
+list proc                       & forall      & --\\
+list                            & transcribe  & list\\\\
 \end{supertabular}
 
 \index{Operators!list}
@@ -493,26 +498,26 @@ A list, or any other object, submitted to \emph{transcribe} will be replicated, 
 \noindent The following operators deal with DICTIONARIES:\\
 
 \begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
-n & dict & dict\\
-dict & length & num\\
-dict & used & num\\
-dict & begin & --\\
--- & end & --\\
-/name obj & def & --\\
-obj /name & name & --\\
-dict /name & get & obj\\
-obj dict /name & put & --\\
-dict /name & known & bool\\
-/name & find & obj\\
-dict$_1$ dict$_2$ & merge & dict$_1$\\
-dict & cleardict & dict \\
-dict proc & forall & --\\
--- & systemdict & dict\\
--- & userdict & dict\\
--- & currentdict & dict\\
--- & countdictstack & num\\
-list & dictstack & sublist\\
-dict & transcribe & dict\\\\
+n & dict          & dict\\
+dict              & length         & num\\
+dict              & used           & num\\
+dict              & begin          & --\\
+--                & end            & --\\
+/name obj         & def            & --\\
+obj /name         & name           & --\\
+dict /name        & get            & obj\\
+obj dict /name    & put            & --\\
+dict /name        & known          & bool\\
+/name             & find           & obj\\
+dict$_1$ dict$_2$ & merge          & dict$_1$\\
+dict              & cleardict      & dict \\
+dict proc         & forall         & --\\
+--                & systemdict     & dict\\
+--                & userdict       & dict\\
+--                & currentdict    & dict\\
+--                & countdictstack & num\\
+list              & dictstack      & sublist\\
+dict              & transcribe     & dict\\\\
 \end{tabular}
 
 \index{Operators!dict}
@@ -547,9 +552,9 @@ Two  dictionaries  always  present  on  the  dictionary  stack  and   the dictio
 
 \begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
 -- & save & box\\
-box & capsave & --\\
-box & restore & --\\
-box & length & num (\# of bytes)\\\\
+box       & capsave & --\\
+box       & restore & --\\
+box       & length  & num (\# of bytes)\\\\
 \end{tabular}
 
 \index{Operators!save}
@@ -565,13 +570,13 @@ The VM management operators are used by a set of procedures (included in \emph{u
 \noindent MODULE and LAYER are implemented using the operators:\\
 
 \begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
-/module\_name & module & /module\_name savebox\\
-/module\_name savebox dict & \_module & --\\
-/module\_name & forgetmodule & --\\
-/module\_name /snapshot\_name & savemodule & --\\
-/snapshot\_name & restoremodule & --\\
-/layer\_name & layer & --\\
-boolean /layer\_name & \_layer & boolean\\\\
+/module\_name                 & module        & /module\_name savebox\\
+/module\_name savebox dict    & \_module      & --\\
+/module\_name                 & forgetmodule  & --\\
+/module\_name /snapshot\_name & savemodule    & --\\
+/snapshot\_name               & restoremodule & --\\
+/layer\_name                  & layer         & --\\
+boolean /layer\_name          & \_layer       & boolean\\\\
 \end{tabular}
 
 \index{Operators!module}
@@ -593,19 +598,19 @@ Sets of objects created during the execution of a module can be organized as a '
 \subsection{Tests and logics}
 
 \begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
-any$_1$ any$_2$ & eq & bool\\
-any$_1$ any$_2$ & ne & bool\\
-num$_1$ num$_2$ & gt & bool\\
-num$_1$ num$_2$ & ge & bool\\
-num$_1$ num$_2$ & lt & bool\\
-num$_1$ num$_2$ & le & bool\\
-bool$_1$/num$_1$ bool$_2$/num$_2$ & and & bool/num\\
-bool$_1$/num$_1$ bool$_2$/num$_2$ & or & bool/num\\
-bool$_1$/num$_1$ bool$_2$/num$_2$ & xor & bool/num\\
-bool/num & not & bool/num\\
--- & true & true\\
--- & false & false\\
-num shift & bitshift & num\\\\
+any$_1$ any$_2$ & eq              & bool\\
+any$_1$ any$_2$                   & ne       & bool\\
+num$_1$ num$_2$                   & gt       & bool\\
+num$_1$ num$_2$                   & ge       & bool\\
+num$_1$ num$_2$                   & lt       & bool\\
+num$_1$ num$_2$                   & le       & bool\\
+bool$_1$/num$_1$ bool$_2$/num$_2$ & and      & bool/num\\
+bool$_1$/num$_1$ bool$_2$/num$_2$ & or       & bool/num\\
+bool$_1$/num$_1$ bool$_2$/num$_2$ & xor      & bool/num\\
+bool/num                          & not      & bool/num\\
+--                                & true     & true\\
+--                                & false    & false\\
+num shift                         & bitshift & num\\\\
 \end{tabular}
 
 \index{Operators!eq}
@@ -628,7 +633,7 @@ Logical operations (\emph{and}, \emph{or}, \emph{xor},  \emph{not}) use booleans
 \subsection{Controlling execution}\label{ssec:controlops}
 
 \begin{ops}
-\*active                             & start          & \lldots      \\\relax
+\*active & start                     & \lldots      \\\relax
 [ obj ...                            & push           & \lldots      \\
 \*obj                                & exec           & \lldots      \\
 bool \*active                        & if             & \lldots      \\
@@ -712,20 +717,20 @@ control operator will consume it.
 \subsection{Types, attributes, and their conversions}
 
 \begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
-obj & class & /class\\
-num/array & type & /type\\
-obj & readonly & bool\\
-obj & active & bool\\
-obj & parent & bool\\
-obj & tilde & bool\\
-obj & mkread & obj\\
-obj & mkact & obj\\
-obj & mkpass & obj\\
-num/array /type & ctype & num/array\\
-array n /type & parcel & rest-of-array subarray\\
-stringbuf index width obj & text & stringbuf index\\
-stringbuf index width num format & number & stringbuf index\\
-proc & bind & proc\\\\
+obj                              & class    & /class\\
+num/array                        & type     & /type\\
+obj                              & readonly & bool\\
+obj                              & active   & bool\\
+obj                              & parent   & bool\\
+obj                              & tilde    & bool\\
+obj                              & mkread   & obj\\
+obj                              & mkact    & obj\\
+obj                              & mkpass   & obj\\
+num/array /type                  & ctype    & num/array\\
+array n /type                    & parcel   & rest-of-array subarray\\
+stringbuf index width obj        & text     & stringbuf index\\
+stringbuf index width num format & number   & stringbuf index\\
+proc                             & bind     & proc\\\\
 \end{tabular}
 
 \index{Operators!class}
@@ -754,12 +759,12 @@ Subjecting  a procedure to the \emph{bind} operator replaces name  objects  that
 \subsection{Controlling VM resources}
 
 \begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
--- & vmstatus & max used\\
--- & save & box\\
-box & capsave & --\\
-box & restore & --\\
+-- & vmstatus  & max used\\
+--             & save       & box\\
+box            & capsave    & --\\
+box            & restore    & --\\
 null or parent & nextobject & obj true\\
-            &            & or false\\\\
+               &            & or false\\\\
 \end{tabular} 
 
 \index{Operators!vmstatus}
@@ -792,7 +797,7 @@ When \emph{capsave} is applied to a \emph{save} box object, the range of discard
 \subsection{File access}
 
 \begin{ops}
---                        & getwdir      & substring \\
+-- & getwdir              & substring \\
 string                    & setwdir      & --        \\
 (path) (filename) string  & readfile     & substring \\
 string (path) (filename)  & writefile    & --        \\
@@ -984,11 +989,11 @@ platform neutral \emph{D} enumerations.
 
 \begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
 -- & getstartupdir & (path) `where startup file is'\\
--- & getmyname & string `host name where we are'\\
--- & getmyport & port\# `where we are listening (dnode)'\\
--- & getmyfqdn & string `hostname.domainname'\\
--- & getconfdir & string `typically /etc/dm'\\
--- & gethomedir & string 'your home dir on this host'\\\\
+-- & getmyname     & string `host name where we are'\\
+-- & getmyport     & port\# `where we are listening (dnode)'\\
+-- & getmyfqdn     & string `hostname.domainname'\\
+-- & getconfdir    & string `typically /etc/dm'\\
+-- & gethomedir    & string 'your home dir on this host'\\\\
 \end{tabular}
 
 \index{Operators!getstartupdir}
@@ -1010,53 +1015,47 @@ Before you run D machines that use the X Window system, make sure that the X ser
 Hooking up X window services in a D machine cluster requires a ritual. We describe the ritual below without apologies (we did not invent it). This ritual is well hidden in `startup' code so that you need not normally immerse in it -- you may nevertheless read about it for an idea of what might go wrong. \\ 
  
 
-\begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
--- & Xauth & bool\\
-(name) data bool-trusted & Xauthgen & (name) data id\\
-(name) data & Xauthset & --\\
-id & Xauthrev & --\\ 
--- & Xwindows & bool\\
--- & Xdisplayname & string\\
--- & screensize & width height\\
-xy (name) (iconname) & makewindow & window\#\\
-window\# bool & mapwindow & --\\
-window\# width height & resizewindow & --\\
-window\# bool & topwindow & --\\
-window\# &deletewindow & --\\
-RGB-array & mapcolor & color-index\\
-window\# xy color-index & drawline & --\\
-window\# xy color-index symbol\# size & drawsymbols & --\\
-window\# xy color-index & fillrectangle & --\\
-window\# xy (text) [ \ldots ] & drawtext & window\# x y\\
--- & Xsync & --\\\\
-\end{tabular}
+\begin{ops}
+--                                    & Xwindows      & bool         \\
+--                                    & Xdisplayname  & string       \\
+--                                    & screensize    & width height \\
+xy (name) (iconname)                  & makewindow    & window\#     \\
+window\# bool                         & mapwindow     & --           \\
+window\# width height                 & resizewindow  & --           \\
+window\# bool                         & topwindow     & --           \\
+window\#                              & deletewindow  & --           \\
+RGB-array                             & mapcolor      & color-index  \\
+window\# xy color-index               & drawline      & --           \\
+window\# xy color-index symbol\# size & drawsymbols   & --           \\
+window\# xy color-index               & fillrectangle & --           \\
+window\# xy (text) [ \ldots ]         & drawtext      & window\# x y \\
+vol pitch duration vol-delta          & bell          & --           \\
+--                                    & Xsync         & --           \\\\
+\end{ops}
 
-\index{Operators!Xwindows}
-\index{Operators!Xsync}
-\index{Operators!Xdisplayname}
-\index{Operators!makewindow}
-\index{Operators!deletewindow}
-\index{Operators!mapwindow}
-\index{Operators!resizewindow}
-\index{Operators!mapcolor}
-\index{Operators!drawline}
-\index{Operators!drawsymbols}
-\index{Operators!fillrectangle}
-\index{Operators!drawtext}
-\index{Operators!screensize}
-\index{Operators!topwindow}
-\index{Operators!Xauthrev}
-\index{Operators!Xauthset}
-\index{Operators!Xauthgen}
-\index{Operators!Xauth}
+The \dcomp{dnode} executes \op{Xconnect} to connect to the X server
+and use X windows services (see also X window operators for
+\dcomp[dnode]{dnodes} in \ref{ssec:opsdnode}). Authorizations can be
+done via ssh.
 
-Hooking up a \emph{dvt} and its \emph{dnodes} to an X window server is rather complicated because the X window system involves security issues because it allows transfer of information among hosts. When a \emph{dvt} process is started from a shell, it will connect automatically to the local X server (it is authorized by the shell). When the \emph{dvt} thereafter connects to a \emph{dnode} it checks whether the security extension is built into the local X windows server (\emph{Xauth}). If the extension does not exist the \emph{dnode} will not be given authorization info and will be instructed to simply attempt to connect to the X server. If the extension does exist the \emph{dvt} generates an authorization using \emph{Xauthgen} and instructs the \emph{dnode} to give its X library that authorization (\emph{Xauthset}). From then on, the \emph{dnode} can execute \emph{Xconnect} to connect to the X server and use X windows services (see also X window operators for \emph{dnodes} in \ref{ssec:opsdnode}).
+A \dcomp{dvt} setting up a \dcomp{dnode} also needs to inform the
+\dcomp{dnode} which display name to use when connecting to the X server
+(that name is of the form `hostname:number'). The \dcomp{dvt} executes
+\op{Xdisplayname} to retrieve this information. In some instances,
+the hostname `localhost' is inserted into the display name. This is
+not a problem when both the \dcomp{dvt} and \dcomp{dnode} run on one and
+the same host. It is a problem when the hosts are different. In this
+case, the \dcomp{dvt} needs to edit the display name, replacing
+`localhost' by the string returned by \op{getmyfqdn} (see
+\ref{ssec:network}).
 
-\emph{Xauthgen} takes three operands. The \emph{name} string gives the name of a security method to be used. We use `MIT-MAGIC-COOKIE-1', which requires no \emph{data} so that the second-operand string \emph{data} can be left empty (that is not generally the case with other methods). The third operand \emph{bool-trusted} should be set to \op{true} unless your D machines are to run on a cluster of the DOD. A \emph{dnode} has 60 sec to connect to the X server before the authorization is automatically revoked (this can also be explicitly done by \emph{Xauthrev}). The byte array \emph{data} returned by \emph{Xauthgen} is the authorization key to be given to \emph{Xauthset}. The also returned integer \emph{id} is a handle for this authorization (needed by \emph{Xauthrev}).
-
-A \emph{dvt} setting up a \emph{dnode} also needs to inform the \emph{dnode} which display name to use when connecting to the X server (that name is of the form `hostname:number'). The \emph{dvt} executes \emph{Xdisplayname} to retrieve this information. In some instances, the hostname `localhost' is inserted into the display name. This is not a problem when both the \emph{dvt} and \emph{dnode} run on one and the same host. It is a problem when the hosts are different. In this case, the \emph{dvt} needs to edit the display name, replacing `localhost' by the string returned by \emph{getmyfqdn} (see \ref{ssec:network}). 
-
-\emph{Xwindows} informs a D machine whether it is currently connected to an X window server. \emph{screensize} returns the screen dimensions for the design of windows that you create with \emph{makewindow}. \emph{makewindow} takes three operands. The first operand \emph{xy} specifies the position and dimensions of the window. The notation \emph{xy} is shorthand for a number of options of how coordinate information can be presented to X window operators:\\
+\op{Xwindows} informs a D machine whether it is currently connected
+to an X window server. \op{screensize} returns the screen dimensions
+for the design of windows that you create with
+\op{makewindow}. \op{makewindow} takes three operands. The first
+operand \emph{xy} specifies the position and dimensions of the
+window. The notation \emph{xy} is shorthand for a number of options of
+how coordinate information can be presented to X window operators:\\
 
 \begin{tabular}{>{\sffamily}r} 
 $<$ x y \ldots $>$\\{}
@@ -1067,9 +1066,18 @@ $[$ x \ldots $]$ $<$ y \ldots $>$\\{}
 $[$ x \ldots $]$ $[$ y \ldots $]$\\{}
 \end{tabular}
 
-The other operands of \emph{makewindow} provide two strings for the header of the window (no more than 30 characters) and for the label of the iconized window (no more than 12 characters). A numeral \emph{window\#} is returned to serve as handle for specifying the window to other window operators.
+The other operands of \op{makewindow} provide two strings for the
+header of the window (no more than 30 characters) and for the label of
+the iconized window (no more than 12 characters). A numeral
+\emph{window\#} is returned to serve as handle for specifying the
+window to other window operators.
 
-When you create a window with \emph{makewindow} you become also responsible for creating a dictionary that holds the procedures named \emph{windowsize}, \emph{drawwindow}, and \emph{mouseclick}, and is included in \emph{userdict} under the name formed by concatenating the letter `w' with the window\# returned by \emph{makewindow}. The three procedures are designed for the usage:\\
+When you create a window with \op{makewindow} you become also
+responsible for creating a dictionary that holds the procedures named
+\emph{windowsize}, \emph{drawwindow}, and \emph{mouseclick}, and is
+included in \emph{userdict} under the name formed by concatenating the
+letter `w' with the window\# returned by \op{makewindow}. The three
+procedures are designed for the usage:\\
 
 \begin{tabular}{>{\sffamily}r>{\sffamily\bfseries}l>{\sffamily}l}
 width height & windowsize & -- `be notified of change in dimensions'\\
@@ -1077,22 +1085,34 @@ width height & windowsize & -- `be notified of change in dimensions'\\
 x y modifiers & mouseclick & -- `react to mouseclick'\\\\
 \end{tabular}
 
-\emph{windowsize} responds by executing \emph{resizewindow}. It uses the new dimensions found on the stack; or a modification thereof (e.g. maintaining a certain aspect ratio); or discards the new and re-uses the old dimensions (for a window that resists resizing). \emph{drawwindow}  draws the contents of the window. \emph{mouseclick} receives as operands the coordinates of the mouse pointer and modifier numeral (see \emph{nextevent} in \ref{ssec:dvtops} for details).
+\emph{windowsize} responds by executing \op{resizewindow}. It uses
+the new dimensions found on the stack; or a modification thereof
+(e.g. maintaining a certain aspect ratio); or discards the new and
+re-uses the old dimensions (for a window that resists
+resizing). \emph{drawwindow} draws the contents of the
+window. \emph{mouseclick} receives as operands the coordinates of the
+mouse pointer and modifier numeral (see \op{nextevent} in
+\ref{ssec:dvtops} for details).
 
-\emph{topwindow} places a window on top of any others when used with a
-\op{true} boolean. \emph{mapwindow} has more complex effects on the
+\op{topwindow} places a window on top of any others when used with a
+\op{true} boolean. \op{mapwindow} has more complex effects on the
 visibility of windows. If applied to a specified window, it raises the
 window to the top if the boolean operand is \emph{true} or else hides
 the window. If \op{null} is specified in place of a window\# either
 all windows associated with the X connection are raised to the top or
 hidden, dependent on \emph{bool}. To delete a window use
-\emph{deletewindow}.
+\op{deletewindow}.
 
-\emph{mapcolor} translates a color specified in an array of the form $<$ red green blue $>$ (intensities are numbers from 0.0 to 1.0) into a color index, a simple numeral. Drawing operators use the color index to select colors.
+\op{mapcolor} translates a color specified in an array of the form
+$<$ red green blue $>$ (intensities are numbers from 0.0 to 1.0) into
+a color index, a simple numeral. Drawing operators use the color index
+to select colors.
 
-\emph{fillrectangle} fills a rectangular area of the window with uniform color. \emph{drawline} interconnects a set of coordinate points by a line, following the order of the points in \emph{xy}. Similarly, \emph{drawsymbols} marks each coordinate point with a symbol selected by \emph{symbol}, a numeral:\\
-
- 
+\op{fillrectangle} fills a rectangular area of the window with
+uniform color. \op{drawline} interconnects a set of coordinate
+points by a line, following the order of the points in
+\emph{xy}. Similarly, \op{drawsymbols} marks each coordinate point
+with a symbol selected by \emph{symbol}, a numeral:\\
 \begin{tabular}{>{\sffamily}r>{\sffamily}l}
            0 & dot\\
            1 & stroked diamond\\
@@ -1117,9 +1137,28 @@ hidden, dependent on \emph{bool}. To delete a window use
           20 & horizontal bar, right adjusted\\\\
 \end{tabular}
 
-\emph{drawtext} draws text starting at the position given by \emph{x} and \emph{y} and returns the window\# and coordinates (only \emph{x} is modified) of the position following the last written character for a subsequent use of \emph{drawtext}. Details are specified in the list operand: the string \emph{font\_spec} selects a font name in the X windows convention; \emph{col\_idx} a color; \emph{h\_align} and \emph{v\_align} an alignment ($<$0 - left (bottom); 0 - center; $>0$ - right (top)). Note that X windows caches up to 10 fonts so that their alternating uses do not produce unreasonable delays.
- 
-The X window library buffers X window commands prior to transmitting them to the X server. \emph{Xsync} transmits that buffer instantly.
+\op{drawtext} draws text starting at the position given by \emph{x}
+and \emph{y} and returns the window\# and coordinates (only \emph{x}
+is modified) of the position following the last written character for
+a subsequent use of \op{drawtext}. Details are specified in the list
+operand: the string \emph{font\_spec} selects a font name in the X
+windows convention; \emph{col\_idx} a color; \emph{h\_align} and
+\emph{v\_align} an alignment ($<$0 - left (bottom); 0 - center; $>0$ -
+right (top)). Note that X windows caches up to 10 fonts so that their
+alternating uses do not produce unreasonable delays.
+
+\op{bell} dings the X window bell at volume \emph{vol} (as a positive
+percentage up to 100), at pitch \emph{pitch} (in Hz), for
+\emph{duration} (in milliseconds). If any of those 3 are undefined, the
+current X server values are used. \emph{vol-delta} is a percentage
+(-100...100) to alter the volume by -- so if \emph{vol} is undefined,
+\emph{vol-delta} alters uses the current X server setting, altered by
+\emph{vol-delta} as defined by the \texttt{XBell} algorithm. If
+\emph{vol}, \emph{pitch}, or \emph{duration} are -1, the X server
+default is used (rather than the current value or a new value).
+
+The X window library buffers X window commands prior to transmitting
+them to the X server. \op{Xsync} transmits that buffer instantly.
 
 %%% Local Variables: 
 %%% mode: latex

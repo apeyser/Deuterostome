@@ -167,6 +167,7 @@ B* _sysop[] =
   (B*) "unpid", (B*) op_unpid,
   (B*) "lock", (B*) op_lock,
   (B*) "unlock", (B*) op_unlock,
+  (B*) "locked", (B*) op_locked,
   (B*) "serialize", (B*) op_serialize,
   (B*) "threads", (B*) op_threads,
   (B*) "makethreads", (B*) op_makethreads,

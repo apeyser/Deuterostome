@@ -10,6 +10,7 @@ DLL_SCOPE void maketinysetup(void);
 DLL_SCOPE P op_vmresize_(void);
 DLL_SCOPE P op_lock(void);
 DLL_SCOPE P op_unlock(void);
+DLL_SCOPE P op_locked(void);
 DLL_SCOPE P op_serialize(void);
 DLL_SCOPE P op_halt(void);
 DLL_SCOPE P x_op_halt(void);

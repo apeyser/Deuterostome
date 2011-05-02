@@ -192,7 +192,7 @@
         pdf_path pdf_file PROCESSES /FFLAGS get /WRITE_TRUNCATE get openfd |}
       def
       openlist PROGS /EPSTOPDF get (--hires) (--filter) pdf_fdr pdf_fdw
-      {STDERR sh_io} PROCESSES indict
+      {STDERR sh_io_quiet} PROCESSES indict
       (\n) loud_msg
       (PDF file written: ) medium_msg pdf_file medium_msg (\n) medium_msg
     } stopped

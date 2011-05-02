@@ -169,6 +169,9 @@ xhack(XChangeProperty,
       H(Window w, Atom p, Atom t, int f, int m, unsigned char* d, int n),
       H(w, p, t, f, m, d, n));
 
+xhack(XGetKeyboardControl, H(XKeyboardState* s), H(s));
+xhack(XChangeKeyboardControl, H(unsigned long m, XKeyboardControl* v), H(m, v));
+
 #undef xhackd
 #undef xhacks
 #undef xhackv
