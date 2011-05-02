@@ -358,7 +358,7 @@ BOOLEAN masterinput(P* retc, B* bufferf) {
 #if ! X_DISPLAY_MISSING
 P wm_delete_window(XEvent* event __attribute__ ((__unused__)), 
 		   B* userdict __attribute__ ((__unused__)) ) {
-  HXBell(dvtdisplay, 0); 
+  bell(0); 
   return OK;
 }
 

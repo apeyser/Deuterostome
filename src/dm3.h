@@ -136,6 +136,8 @@ DLL_SCOPE P init_sockaddr(struct sockaddr_in *name,
 DLL_SCOPE P forksighandler(P sigsocket, P tcp_sigsocket, P serverport, P* pid);
 DLL_SCOPE void initfds(void);
 
+DLL_SCOPE void closedisplay(void);
+
 #if ! DM_X_DISPLAY_MISSING
 
 DLL_SCOPE P wm_take_focus_(XEvent* event, B* userdict);

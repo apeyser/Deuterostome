@@ -1029,7 +1029,7 @@ window\# xy color-index               & drawline      & --           \\
 window\# xy color-index symbol\# size & drawsymbols   & --           \\
 window\# xy color-index               & fillrectangle & --           \\
 window\# xy (text) [ \ldots ]         & drawtext      & window\# x y \\
-vol pitch duration vol-delta          & bell          & --           \\
+vol                                   & bell          & --           \\
 --                                    & Xsync         & --           \\\\
 \end{ops}
 
@@ -1147,15 +1147,10 @@ windows convention; \emph{col\_idx} a color; \emph{h\_align} and
 right (top)). Note that X windows caches up to 10 fonts so that their
 alternating uses do not produce unreasonable delays.
 
-\op{bell} dings the X window bell at volume \emph{vol} (as a positive
-percentage up to 100), at pitch \emph{pitch} (in Hz), for
-\emph{duration} (in milliseconds). If any of those 3 are undefined, the
-current X server values are used. \emph{vol-delta} is a percentage
-(-100...100) to alter the volume by -- so if \emph{vol} is undefined,
-\emph{vol-delta} alters uses the current X server setting, altered by
-\emph{vol-delta} as defined by the \texttt{XBell} algorithm. If
-\emph{vol}, \emph{pitch}, or \emph{duration} are -1, the X server
-default is used (rather than the current value or a new value).
+\op{bell} dings the X window bell at relative volume \emph{vol} (as a
+negative or positive percentage of the server settings). A $-100$ is
+silent, and a $+100$ is maximal volume, with $0$ signifying the
+current bell setting.
 
 The X window library buffers X window commands prior to transmitting
 them to the X server. \op{Xsync} transmits that buffer instantly.

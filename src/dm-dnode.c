@@ -189,13 +189,12 @@ static P int_Xdisconnect(BOOLEAN nocheck) {
 #if X_DISPLAY_MISSING
   return NO_XWINDOWS;
 #else
+  closedisplay();
   if (nocheck || dvtdisplay)  {
-    if (dvtdisplay) HXCloseDisplay(dvtdisplay);
     delsocket_force(xsocket);
     if (defaultdisplay) setenv("DISPLAY", defaultdisplay, 1);
     else unsetenv("DISPLAY");
   }
-  *displayname = '\0';
   return OK;
 #endif
 }

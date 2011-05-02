@@ -43,6 +43,7 @@ int xsocket = -1;
 #include <X11/Xatom.h>
 Display *dvtdisplay;
 B displayname[80] = "";
+B xkbext = 0;
 Screen *dvtscreen;
 Window dvtrootwindow;
 XWindowAttributes rootwindowattr;
@@ -1063,66 +1064,73 @@ P op_Xdisplayname(void)
 #endif
 }
 
-//------------------------------------------------- Xbell
-// -1...100 -1.. -1.. -100...100 | --
-// percent-vol pitch-Hz duration-ms vol-change (-1 is default)
+//------------------------------------------------- bell
+// -100...100 | --
+// vol-change
 //
+
+#if ! X_DISPLAY_MISSING && HAVE_X11_XKBLIB_H
+DM_INLINE_STATIC BOOLEAN xkbextcheck(void) {
+  if (! xkbext) {
+    static BOOLEAN xkbext_client_checked = FALSE;
+    static BOOLEAN xkbext_client_good = FALSE;
+    static int major = XkbMajorVersion;
+    static int minor = XkbMinorVersion;
+
+    if (! xkbext_client_checked) {
+      xkbext_client_checked = TRUE;
+      if (XkbLibraryVersion(&major, &minor)) {
+	xkbext_client_good = TRUE;
+      }
+    }
+    
+    if (dvtdisplay) {
+      xkbext = -1;
+      if (xkbext_client_good) {
+	int major_ = major, minor_ = minor, opcode, event, error;
+	if (XkbQueryExtension(dvtdisplay, 
+			      &opcode, &event, &error, 
+			      &major_, &minor_))
+	  xkbext = 1;
+      }
+    }
+  }
+
+  return xkbext == 1 ? TRUE : FALSE;
+}
+#endif //! X_DISPLAY_MISSING && HAVE_X11_XKBLIB_H
+
+void bell(P p) {
+#if ! X_DISPLAY_MISSING 
+#if HAVE_X11_XKBLIB_H
+  if (xkbextcheck()) {
+    HXkbBell(dvtdisplay, None, p, (Atom) NULL);
+    return;
+  }
+#endif // HAVE_X11_XKBLIB_H
+  if (dvtdisplay) HXBell(dvtdisplay, p);
+#endif // ! X_DISPLAY_MISSING
+}
+
 P op_bell(void) {
 #if X_DISPLAY_MISSING
   return NO_XWINDOWS;
 #else
-  LBIG vol, hz, ms, p;
-  XKeyboardState s;
-  XKeyboardControl c;
-  unsigned long mask = 0;
+  LBIG p;
 
   if (dvtdisplay == NULL) return NO_XWINDOWS;
-  if (o_4 < FLOORopds) return OPDS_UNF;
-  if (CLASS(o_1) != NUM
-      || CLASS(o_2) != NUM
-      || CLASS(o_3) != NUM
-      || CLASS(o_4) != NUM)
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  if (CLASS(o_1) != NUM)
     return OPD_CLA;
-  if (TYPE(o_1) > LONGBIGTYPE
-      || TYPE(o_2) > LONGBIGTYPE
-      || TYPE(o_3) > LONGBIGTYPE
-      || TYPE(o_4) > LONGBIGTYPE)
+  if (TYPE(o_1) > LONGBIGTYPE)
     return OPD_TYP;
 
   if (! VALUE(o_1, &p)) return UNDF_VAL;
   if (p < -100 || p > 100) return RNG_CHK;
 
-  if (VALUE(o_2, &ms)) {
-    if (ms < -1) return RNG_CHK;
-    mask |= KBBellDuration;
-    c.bell_duration = (int) ms;
-  }
-  if (VALUE(o_3, &hz)) {
-    if (hz < -1) return RNG_CHK;
-    mask |= KBBellPitch;
-    c.bell_pitch = (int) hz;
-  }
-  if (VALUE(o_4, &vol)) {
-    if (vol < -1 || vol > 100) return RNG_CHK;
-    mask |= KBBellPercent;
-    c.bell_percent = (int) vol;
-  }
-  
-  if (mask) {
-    HXGetKeyboardControl(dvtdisplay, &s);
-    HXChangeKeyboardControl(dvtdisplay, mask, &c);
-  }
+  bell(p);
 
-  HXBell(dvtdisplay, (int) p);
-
-  if (mask) {
-    c.bell_percent  = s.bell_percent;
-    c.bell_pitch    = s.bell_pitch;
-    c.bell_duration = s.bell_duration;
-    HXChangeKeyboardControl(dvtdisplay, mask, &c);
-  }
-
-  FREEopds = o_4;
+  FREEopds = o_1;
   return OK;
 #endif
 }

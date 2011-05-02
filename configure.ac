@@ -1,4 +1,4 @@
-AC_INIT([D-Machine], [4.6.15], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
+AC_INIT([D-Machine], [4.6.16], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
 AC_CONFIG_MACRO_DIR([m4 libltdl/m4])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_AUX_DIR([libltdl/config])
@@ -255,6 +255,7 @@ CF_AC_CHECK_HEADER([sys/resource.h])
 CF_X11_ENABLED([
   CF_AC_CHECK_HEADER([X11/Xlib.h])
   CF_AC_CHECK_HEADER([X11/Xutil.h])
+  AC_CHECK_HEADERS([X11/XKBlib.h])
 ])
 CF_AC_CHECK_HEADER([strings.h])
 CF_AC_CHECK_HEADER([inttypes.h])

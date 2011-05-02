@@ -410,13 +410,14 @@ P closesockets_resize(void) {
   return _closesockets(_DelModeResize);
 }
 
-static void closedisplay(void) {
+void closedisplay(void) {
 #if ! X_DISPLAY_MISSING
   if (dvtdisplay) {
     HXCloseDisplay(dvtdisplay);
-    displayname[0] = '\0';
     dvtdisplay = NULL;
   }
+  displayname[0] = '\0';
+  xkbext = 0;
 #endif
 }
 

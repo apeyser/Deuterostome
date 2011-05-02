@@ -12,6 +12,7 @@ DLL_SCOPE int xsocket;
 
 DLL_SCOPE Display *dvtdisplay;
 DLL_SCOPE B displayname[80];
+DLL_SCOPE B xkbext;
 DLL_SCOPE Screen *dvtscreen;
 DLL_SCOPE Window dvtrootwindow;
 DLL_SCOPE XWindowAttributes rootwindowattr;
@@ -46,6 +47,7 @@ P op_drawsymbols(void);
 P op_fillrectangle(void);
 P op_drawtext(void);
 P op_makewindowtop(void);
+void bell(P percent);
 P op_bell(void);
 
 #endif
