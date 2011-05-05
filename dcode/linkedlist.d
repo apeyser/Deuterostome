@@ -166,12 +166,12 @@
   | expects linked list at top of dict stack, with
   |  LINKEDLIST directly underneath
   |
-  /iter {null openlist /func /ip} {
-    head {
+  /iter {openlist /func} {
+    false head {
+      exch        {pop true exit} if
       dup null eq {pop false exit} if
-      dup /ip name
-      /func find ~enddict ~enddict enddict {true exit} if
-      ip _next
+      /func find ~enddict ~enddict
+      [ 4 index _next ~enddict push |]
     } loop
   } caplocalfunc def
 
