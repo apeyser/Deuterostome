@@ -166,14 +166,19 @@
   | expects linked list at top of dict stack, with
   |  LINKEDLIST directly underneath
   |
-  /iter {openlist /func} {
-    false head {
-      exch        {pop true exit} if
-      dup null eq {pop false exit} if
-      /func find ~enddict ~enddict
-      [ 4 index _next ~enddict push |]
-    } loop
-  } caplocalfunc def
+  /iter {
+    false head 3 -1 roll mkpass {              | bool next /func
+      3 -1 roll        {pop pop true  exit} if | next /func
+      exch dup null eq {pop pop false exit} if | /func next
+
+      [ 
+        3 1 roll               | [ /func next             |]
+        1 index mkact 4 1 roll | ~func [ /func next       |]
+        dup           5 1 roll | next ~func [ /func next  |]
+        _next                  | next ~func [ /func next+ |]]
+      {~enddict enddict} push  | bool next+ /func
+    } loop                     | bool
+  } bind def
 
 |==================== internal ==========================  
 
