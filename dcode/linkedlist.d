@@ -172,13 +172,14 @@
   | expects linked list at top of dict stack, with
   |  LINKEDLIST directly underneath
   |
-  /iter {
-    destruct_exec /ifunc find 0 put
-    head /ip name {
-      ip dup null eq {pop false exit} if
-      dup _next /ip name ifunc {true exit} if
+  /iter {null openlist /func /ip} {
+    head {
+      dup null eq {pop false exit} if
+      dup /ip name
+      /func find ~enddict ~enddict enddict {true exit} if
+      ip _next
     } loop
-  } bind def
+  } caplocalfunc def
 
 |==================== internal ==========================  
 
