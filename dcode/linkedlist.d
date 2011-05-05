@@ -63,7 +63,7 @@
   /new {
     [
       /store 3 -1 roll
-      {/head /tail /ip} ~null forall
+      {/head /tail} ~null forall
       /len 0 |]
     makestruct_close
   } def
