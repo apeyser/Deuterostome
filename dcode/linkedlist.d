@@ -177,7 +177,7 @@
         _next                  | next ~func [ /func next+ |]]
       {~enddict enddict} push  | bool next+ /func
     } loop                     | bool
-  } bind def
+  } def
 
 |==================== internal ==========================  
 
