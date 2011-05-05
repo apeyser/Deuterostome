@@ -11,20 +11,20 @@
   |  by 'default'
   |
   /static {
-    save [
-      /default 4 -1 roll
-      /size 6 -1 roll
+    [
+      /default 3 -1 roll
+      /size 5 -1 roll
       /free null
-      /_getfree {free dup _next /free name} bind
-      /_setfree {free 1 index _setnext /free name} bind
-    ] 1 index capsave makestruct {
+      /_getfree {free dup _next /free name}
+      /_setfree {free 1 index _setnext /free name}
+    |]
+    makestruct_close {
       /free null size {
         [exch null default]
         dup _next dup null eq ~pop {1 index exch _setprev} ifelse
       } repeat def
     } 1 index indict
-    exch restore
-  } bind def
+  } def
   
   |=============== dynamic =================================
   | ~default | store
@@ -33,16 +33,15 @@
   |  fill in data element for new elements by 'default'
   |
   /dynamic {
-    save [
-      /default 4 -1 roll
+    [
+      /default 3 -1 roll
       /free null
       /_getfree {
         free null eq {[null null default]} {free dup _next /free name} ifelse
-      } bind
-      /_setfree {free 1 index _setnext /free name} bind
-    ] 1 index capsave makestruct
-    exch restore
-  } bind def
+      }
+      /_setfree {free 1 index _setnext /free name} |]
+    makestruct_close
+  } def
 
   |==================== linked ==========================
   | linkedlist | store
