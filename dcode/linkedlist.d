@@ -61,18 +61,12 @@
   |   used to add and destroy links.
   |
   /new {
-    save [
-      /store 4 -1 roll
-      {/ifunc /head /tail /ip} ~null forall
-      /len 0
-    ] 1 index capsave makestruct {
-      /ifunc ~[
-        null {end end stopped} bind ~exec bind
-        currentdict LINKEDLIST {begin begin ~stop if} bind ~exec bind
-      ] def
-    } 1 index indict
-    exch restore
-  } bind def
+    [
+      /store 3 -1 roll
+      {/head /tail /ip} ~null forall
+      /len 0 |]
+    makestruct_close
+  } def
 
 |================ funcs called in link list ===============
 
