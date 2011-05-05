@@ -11,20 +11,20 @@
   |  by 'default'
   |
   /static {
-    save [
-      /default 4 -1 roll
-      /size 6 -1 roll
+    [
+      /default 3 -1 roll
+      /size 5 -1 roll
       /free null
-      /_getfree {free dup _next /free name} bind
-      /_setfree {free 1 index _setnext /free name} bind
-    ] 1 index capsave makestruct {
+      /_getfree {free dup _next /free name}
+      /_setfree {free 1 index _setnext /free name}
+    |]
+    makestruct_close {
       /free null size {
         [exch null default]
         dup _next dup null eq ~pop {1 index exch _setprev} ifelse
       } repeat def
     } 1 index indict
-    exch restore
-  } bind def
+  } def
   
   |=============== dynamic =================================
   | ~default | store
@@ -33,16 +33,15 @@
   |  fill in data element for new elements by 'default'
   |
   /dynamic {
-    save [
-      /default 4 -1 roll
+    [
+      /default 3 -1 roll
       /free null
       /_getfree {
         free null eq {[null null default]} {free dup _next /free name} ifelse
-      } bind
-      /_setfree {free 1 index _setnext /free name} bind
-    ] 1 index capsave makestruct
-    exch restore
-  } bind def
+      }
+      /_setfree {free 1 index _setnext /free name} |]
+    makestruct_close
+  } def
 
   |==================== linked ==========================
   | linkedlist | store
@@ -50,7 +49,7 @@
   | Share store with 'linkedlist' (originally initialized
   |  with another 'linked' or a dynamic or static).
   |
-  /linked {/store get} bind def
+  /linked {/store get} def
 
 |=================== constructor ============================
 
@@ -61,18 +60,12 @@
   |   used to add and destroy links.
   |
   /new {
-    save [
-      /store 4 -1 roll
-      {/ifunc /head /tail /ip} ~null forall
-      /len 0
-    ] 1 index capsave makestruct {
-      /ifunc ~[
-        null {end end stopped} bind ~exec bind
-        currentdict LINKEDLIST {begin begin ~stop if} bind ~exec bind
-      ] def
-    } 1 index indict
-    exch restore
-  } bind def
+    [
+      /store 3 -1 roll
+      {/head /tail} ~null forall
+      /len 0 |]
+    makestruct_close
+  } def
 
 |================ funcs called in link list ===============
 
@@ -81,14 +74,14 @@
   |
   | get the data element of a link
   |
-  /data {2 get} bind def
+  /data {2 get} def
 
   |=================== setdata ==============
   | data [next prev ?] | --
   |
   | replace the data element of a link
   |
-  /setdata {2 put} bind def
+  /setdata {2 put} def
 
   |================= remove ======================
   | [next prev data] | --
@@ -96,7 +89,7 @@
   | remove an allocated link, and put it on
   |  the free store.
   |
-  /remove {dup _unlink _setfree} bind def
+  /remove {dup _unlink _setfree} def
 
   |================== prepend ====================
   | -- | [next prev data]
@@ -104,7 +97,7 @@
   | allocate a link from the store and make it
   | the head of the list
   |
-  /prepend {_getfree null 1 index _insert} bind def
+  /prepend {_getfree null 1 index _insert} def
 
   |================== append ====================
   | -- | [next prev data]
@@ -112,7 +105,7 @@
   | allocate a link from the store and make it
   | the tail of the list
   |
-  /append {_getfree tail 1 index _insert} bind def
+  /append {_getfree tail 1 index _insert} def
 
   |============== insert ========================
   |
@@ -123,7 +116,7 @@
   |  reordering, without reordering the rest of the links.
   | If the first link is null, prepend the second to the list.
   |
-  /insert {dup _unlink _insert} bind def
+  /insert {dup _unlink _insert} def
 
   |==================== move ========================
   | dest-linked-list [next prev data]/null [next prev data] | --
@@ -134,7 +127,7 @@
   | Both dictionaries must a common store allocator.
   | If the first link is null, prepend the second to the list.
   |
-  /move {dup _unlink ~_insert 4 -1 roll indict} bind def
+  /move {dup _unlink ~_insert 4 -1 roll indict} def
 
   |================== nth ======================
   | n | dict
@@ -148,7 +141,7 @@
     } {
       tail -2 -1 4 -1 roll {pop _prev} for
     } ifelse
-  } bind def
+  } def
 
   |=============== getlength ====================
   | -- | length
@@ -173,11 +166,17 @@
   |  LINKEDLIST directly underneath
   |
   /iter {
-    destruct_exec /ifunc find 0 put
-    head /ip name {
-      ip dup null eq {pop false exit} if
-      dup _next /ip name ifunc {true exit} if
-    } loop
+    false head 3 -1 roll mkpass {              | bool next /func
+      3 -1 roll        {pop pop true  exit} if | next /func
+      exch dup null eq {pop pop false exit} if | /func next
+
+      [
+        3 1 roll               | [ /func next             |]
+        1 index mkact 4 1 roll | ~func [ /func next       |]
+        dup           5 1 roll | next ~func [ /func next  |]
+        _next                  | next ~func [ /func next+ |]]
+      {~enddict enddict} push  | bool next+ /func
+    } loop                     | bool
   } bind def
 
 |==================== internal ==========================  
@@ -196,7 +195,7 @@
       _next /head name
     } ifelse
     /len len 1 sub def
-  } bind def
+  } def
 
   | [next prev data]/null [next prev data] | --
   /_insert {
@@ -218,26 +217,26 @@
     } ifelse
     
     /len len 1 add def
-  } bind def
+  } def
   
   | [next prev data] | next
-  /_next {0 get} bind def
+  /_next {0 get} def
 
   | [next prev data] | prev
-  /_prev {1 get} bind def  
+  /_prev {1 get} def
 
   | next [? prev data] | --
-  /_setnext {0 put} bind def
+  /_setnext {0 put} def
 
   | prev [next ? data] | --
-  /_setprev {1 put} bind def
+  /_setprev {1 put} def
 
   |============ allocation store ==================
 
   | -- | [? ? ?]
-  /_getfree {~_getfree store indict} bind def
+  /_getfree {~_getfree store indict} def
 
   | [? ? ?] | --
-  /_setfree {~_setfree store indict} bind def
+  /_setfree {~_setfree store indict} def
 
-} moduledef
+} bind moduledef
