@@ -395,12 +395,7 @@ end def
   end def |]
 end def
 
-/node 3 dict dup begin |[
-  /ENABLE_THREADS 2 dict dup begin |[
-    /commands [
-      /threads /makethreads
-    ] def |]
-  end def
+/node 4 dict dup begin |[
   /all 2 dict dup begin |[
     /commands [
       /lock /unlock /locked /serialize
@@ -424,6 +419,11 @@ end def
       /ACTIVE_STREAM (** Unable to restore open stream object) def
       /NO_PLUGINS (** Compiled without plugin support) def |]
     end def |]
+  end def
+  /ENABLE_THREADS 1 dict dup begin |[
+    /commands [
+      /threads /makethreads
+    ] def |]
   end def
   /BUILD_ATLAS 1 dict dup begin |[
     /commands [
