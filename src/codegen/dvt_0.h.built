@@ -187,12 +187,12 @@ B* _sysop[] =
   (B*) "makewindowtop", (B*) op_makewindowtop,
   (B*) "bell", (B*) op_bell,
   (B*) "nextevent", (B*) op_nextevent,
-#ifdef DM_ENABLE_REGEX
+#ifdef ENABLE_REGEX
   (B*) "regex", (B*) op_regex,
   (B*) "regexi", (B*) op_regexi,
   (B*) "regexs", (B*) op_regexs,
   (B*) "regexsi", (B*) op_regexsi,
-#endif //DM_ENABLE_REGEX
+#endif //ENABLE_REGEX
   (B*) "die", (B*) op_die,
   (B*) "quit", (B*) op_quit,
   (B*) "fork", (B*) op_fork,
@@ -291,7 +291,7 @@ P _syserrc[] = {
   X_ERR,
   X_BADFONT,
   X_BADHOST,
-#ifdef DM_ENABLE_REGEX
+#ifdef ENABLE_REGEX
   REGEX_BADPAT,
   REGEX_ECOLLATE,
   REGEX_ECTYPE,
@@ -305,7 +305,7 @@ P _syserrc[] = {
   REGEX_ESPACE,
   REGEX_BADRPT,
   REGEX_UNKNOWN,
-#endif //DM_ENABLE_REGEX
+#endif //ENABLE_REGEX
   FILE_NOSUCH,
   DIR_NOTEMPTY,
   CHILD_FAILURE,
@@ -374,7 +374,7 @@ B* _syserrm[] = {
   (B*) "** Error in X windows",
   (B*) "** Bad X windows font",
   (B*) "** Cannot connect to X server",
-#ifdef DM_ENABLE_REGEX
+#ifdef ENABLE_REGEX
   (B*) "Regex Error: Invalid regular expression",
   (B*) "Regex Error: Invalid collating element",
   (B*) "Regex Error: Invalid character class",
@@ -388,7 +388,7 @@ B* _syserrm[] = {
   (B*) "Regex Error: ran out of memory",
   (B*) "Regex Error: `?', `*', or `+' operand invalid",
   (B*) "Regex Error: Unknown error",
-#endif //DM_ENABLE_REGEX
+#endif //ENABLE_REGEX
   (B*) "** No such file or directory",
   (B*) "** Directory not empty",
   (B*) "*** Child process failed",

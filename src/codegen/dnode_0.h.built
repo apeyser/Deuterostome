@@ -175,13 +175,13 @@ B* _sysop[] =
   (B*) "unlock", (B*) op_unlock,
   (B*) "locked", (B*) op_locked,
   (B*) "serialize", (B*) op_serialize,
+  (B*) "halt", (B*) op_halt,
+  (B*) "continue", (B*) op_continue,
+  (B*) "vmresize", (B*) op_vmresize,
 #ifdef ENABLE_THREADS
   (B*) "threads", (B*) op_threads,
   (B*) "makethreads", (B*) op_makethreads,
 #endif //ENABLE_THREADS
-  (B*) "halt", (B*) op_halt,
-  (B*) "continue", (B*) op_continue,
-  (B*) "vmresize", (B*) op_vmresize,
 #ifdef BUILD_ATLAS
   (B*) "matmul_blas", (B*) op_matmul_blas,
   (B*) "decompLU_lp", (B*) op_decompLU_lp,
@@ -352,6 +352,8 @@ P _syserrc[] = {
   ACTIVE_OPAQUE,
   ACTIVE_STREAM,
   NO_PLUGINS,
+#ifdef ENABLE_THREADS
+#endif //ENABLE_THREADS
 #ifdef BUILD_ATLAS
 #endif //BUILD_ATLAS
 #ifdef HAVE_ATLAS
@@ -410,7 +412,9 @@ P _syserrc[] = {
   STREAM_DIR,
   STREAM_EPIPE,
   STREAM_OVF,
+#ifdef ENABLE_SEM
   INTER_LOCK_NOT_DEF,
+#endif //ENABLE_SEM
   0L
 };
 
@@ -483,6 +487,8 @@ B* _syserrm[] = {
   (B*) "** Unable to restore active opaque object",
   (B*) "** Unable to restore open stream object",
   (B*) "** Compiled without plugin support",
+#ifdef ENABLE_THREADS
+#endif //ENABLE_THREADS
 #ifdef BUILD_ATLAS
 #endif //BUILD_ATLAS
 #ifdef HAVE_ATLAS
@@ -541,6 +547,8 @@ B* _syserrm[] = {
   (B*) "*** operation on wrong direction stream",
   (B*) "*** Stream closed while attempting to write",
   (B*) "*** double unget on stream",
+#ifdef ENABLE_SEM
   (B*) "** Inter locks not defined",
+#endif //ENABLE_SEM
   (B*) NULL
 };
