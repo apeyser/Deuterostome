@@ -182,6 +182,7 @@ int main(int argc, char *argv[])
   syserrc = _syserrc;
 
   check_plugin = _check_plugin;
+#if ENABLE_SEM
   do_inter_lock_init  = _do_inter_lock_init;
   do_inter_lock_reset = _do_inter_lock_reset;
   do_inter_lock = _do_inter_lock;

@@ -10,8 +10,10 @@
 #endif //DM_DISABLE_THREADS
 #endif //DM_ENABLE_THREADS
 
+#if DM_ENABLE_THREADS
 P op_threads(void);
 P op_makethreads(void);
+#endif
 
 #if DM_ENABLE_THREADS
 

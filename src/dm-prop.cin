@@ -47,8 +47,10 @@ static void redirect_sig(int sig) {
 
 static void redirector_exit(void) {
   struct sockaddr_un name;
+#if ENABLE_UNIX_SOCKETS
   if (serverport >= 0 && init_unix_sockaddr(&name, serverport, FALSE))
     unlink(name.sun_path);
+#endif //ENABLE_UNIX_SOCKETS
 }
 
 static fd_set rin;

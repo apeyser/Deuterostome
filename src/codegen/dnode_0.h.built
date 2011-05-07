@@ -175,8 +175,10 @@ B* _sysop[] =
   (B*) "unlock", (B*) op_unlock,
   (B*) "locked", (B*) op_locked,
   (B*) "serialize", (B*) op_serialize,
+#ifdef ENABLE_THREADS
   (B*) "threads", (B*) op_threads,
   (B*) "makethreads", (B*) op_makethreads,
+#endif //ENABLE_THREADS
   (B*) "halt", (B*) op_halt,
   (B*) "continue", (B*) op_continue,
   (B*) "vmresize", (B*) op_vmresize,
@@ -217,26 +219,26 @@ B* _sysop[] =
   (B*) "Xdisconnect", (B*) op_Xdisconnect,
   (B*) "getmyport", (B*) op_getmyport,
   (B*) "killsockets", (B*) op_killsockets,
-#ifdef DM_ENABLE_RTHREADS
+#ifdef ENABLE_RTHREADS
   (B*) "rthreads", (B*) op_rthreads,
   (B*) "checkrthreads", (B*) op_checkrthreads,
   (B*) "makerthreads", (B*) op_makerthreads,
   (B*) "rsend", (B*) op_rsend,
   (B*) "rsendsig", (B*) op_rsendsig,
-#endif //DM_ENABLE_RTHREADS
-#ifdef DM_HOST_IS_32_BIT
+#endif //ENABLE_RTHREADS
+#ifdef HOST_IS_32_BIT
   (B*) "readf32", (B*) op_readf32,
-#endif //DM_HOST_IS_32_BIT
-#ifdef DM_ENABLE_REGEX
+#endif //HOST_IS_32_BIT
+#ifdef ENABLE_REGEX
   (B*) "regex", (B*) op_regex,
   (B*) "regexi", (B*) op_regexi,
   (B*) "regexs", (B*) op_regexs,
   (B*) "regexsi", (B*) op_regexsi,
-#endif //DM_ENABLE_REGEX
-#ifdef DM_ENABLE_PLUGINS_SUPPORT
+#endif //ENABLE_REGEX
+#ifdef ENABLE_PLUGINS_SUPPORT
   (B*) "loadlib", (B*) op_loadlib,
   (B*) "nextlib", (B*) op_nextlib,
-#endif //DM_ENABLE_PLUGINS_SUPPORT
+#endif //ENABLE_PLUGINS_SUPPORT
   (B*) "die", (B*) op_die,
   (B*) "fork", (B*) op_fork,
   (B*) "killpid", (B*) op_killpid,
@@ -270,9 +272,11 @@ B* _sysop[] =
   (B*) "glob", (B*) op_glob,
   (B*) "setenv", (B*) op_setenv,
   (B*) "getenv", (B*) op_getenv,
+#ifdef ENABLE_SEM
   (B*) "inter_lock", (B*) op_inter_lock,
   (B*) "inter_unlock", (B*) op_inter_unlock,
   (B*) "inter_lock_set", (B*) op_inter_lock_set,
+#endif //ENABLE_SEM
   (B*) "console", (B*) op_console,
   (B*) "setconsole", (B*) op_setconsole,
   (B*) "]", (B*) op_closelist,
@@ -368,7 +372,7 @@ P _syserrc[] = {
   X_ERR,
   X_BADFONT,
   X_BADHOST,
-#ifdef DM_ENABLE_RTHREADS
+#ifdef ENABLE_RTHREADS
   RTHREADS_UNSET,
   RTHREADS_NUMTYPE,
   RTHREADS_NUMUNDF,
@@ -379,10 +383,10 @@ P _syserrc[] = {
   RTHREADS_VALEMPTY,
   RTHREADS_KEYSIZE,
   RTHREADS_VALATR,
-#endif //DM_ENABLE_RTHREADS
-#ifdef DM_HOST_IS_32_BIT
-#endif //DM_HOST_IS_32_BIT
-#ifdef DM_ENABLE_REGEX
+#endif //ENABLE_RTHREADS
+#ifdef HOST_IS_32_BIT
+#endif //HOST_IS_32_BIT
+#ifdef ENABLE_REGEX
   REGEX_BADPAT,
   REGEX_ECOLLATE,
   REGEX_ECTYPE,
@@ -396,9 +400,9 @@ P _syserrc[] = {
   REGEX_ESPACE,
   REGEX_BADRPT,
   REGEX_UNKNOWN,
-#endif //DM_ENABLE_REGEX
-#ifdef DM_ENABLE_PLUGINS_SUPPORT
-#endif //DM_ENABLE_PLUGINS_SUPPORT
+#endif //ENABLE_REGEX
+#ifdef ENABLE_PLUGINS_SUPPORT
+#endif //ENABLE_PLUGINS_SUPPORT
   FILE_NOSUCH,
   DIR_NOTEMPTY,
   CHILD_FAILURE,
@@ -499,7 +503,7 @@ B* _syserrm[] = {
   (B*) "** Error in X windows",
   (B*) "** Bad X windows font",
   (B*) "** Cannot connect to X server",
-#ifdef DM_ENABLE_RTHREADS
+#ifdef ENABLE_RTHREADS
   (B*) "** Rthreads are inactive",
   (B*) "** Rthreads: nodes for dictionay not a numeral",
   (B*) "** Rthreads: nodes for dictionary undefined",
@@ -510,10 +514,10 @@ B* _syserrm[] = {
   (B*) "** Rthreads: key/val pair: val empty",
   (B*) "** Rthreads: key/val pair: key too long",
   (B*) "** Rthreads: key/val pair: val is active",
-#endif //DM_ENABLE_RTHREADS
-#ifdef DM_HOST_IS_32_BIT
-#endif //DM_HOST_IS_32_BIT
-#ifdef DM_ENABLE_REGEX
+#endif //ENABLE_RTHREADS
+#ifdef HOST_IS_32_BIT
+#endif //HOST_IS_32_BIT
+#ifdef ENABLE_REGEX
   (B*) "Regex Error: Invalid regular expression",
   (B*) "Regex Error: Invalid collating element",
   (B*) "Regex Error: Invalid character class",
@@ -527,9 +531,9 @@ B* _syserrm[] = {
   (B*) "Regex Error: ran out of memory",
   (B*) "Regex Error: `?', `*', or `+' operand invalid",
   (B*) "Regex Error: Unknown error",
-#endif //DM_ENABLE_REGEX
-#ifdef DM_ENABLE_PLUGINS_SUPPORT
-#endif //DM_ENABLE_PLUGINS_SUPPORT
+#endif //ENABLE_REGEX
+#ifdef ENABLE_PLUGINS_SUPPORT
+#endif //ENABLE_PLUGINS_SUPPORT
   (B*) "** No such file or directory",
   (B*) "** Directory not empty",
   (B*) "*** Child process failed",
