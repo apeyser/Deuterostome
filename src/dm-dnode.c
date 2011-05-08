@@ -639,7 +639,7 @@ P op_killsockets(void) {
 void restart(void) __attribute__((noreturn));
 void restart(void) {
   static const union sigval val = {.sival_int = 1};
-  if (sigqueue(getppid(), RESTART, val))
+  if (sigqueue(getppid(), DM_RESTART, val))
     error_local(EXIT_FAILURE, errno, "sigqueue");
   exit(0);
 }
@@ -647,7 +647,7 @@ void restart(void) {
 P op_vmresize(void) {
   P retc;
   if (o_1 >= FLOORopds && CLASS(o_1) == NULLOBJ)
-    dm_restart();
+    restart();
 
   if ((retc = op_vmresize_())) return retc;
   if ((retc = closesockets_resize())) return retc;
