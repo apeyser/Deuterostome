@@ -1194,10 +1194,6 @@ THREADNUM
 ENABLE_THREADS
 ENABLE_THREADS_FALSE
 ENABLE_THREADS_TRUE
-ENABLE_SETUID_FALSE
-ENABLE_SETUID_TRUE
-ENABLE_DAEMON_FALSE
-ENABLE_DAEMON_TRUE
 ENABLE_DEBUG_DMNUM
 ENABLE_DEBUG_DMNUM_FALSE
 ENABLE_DEBUG_DMNUM_TRUE
@@ -1311,8 +1307,6 @@ enable_maintainer_mode
 enable_xps
 enable_regex
 enable_debug_dmnum
-enable_daemon
-enable_setuid
 enable_threads
 enable_rthreads
 enable_dependency_tracking
@@ -2022,8 +2016,6 @@ Optional Features:
   --enable-xps            compile or install only new xps (yes)
   --enable-regex          include regex (yes)
   --enable-debug-dmnum    enable extra debug in dmnum (no)
-  --enable-daemon         compile and install daemonizer (no)
-  --enable-setuid         compile or install setuid wrapper (yes)
   --enable-threads        compile and install threads, value is default number
                           (1)
   --enable-rthreads       Activate mpi (yes)
@@ -4445,54 +4437,6 @@ _ACEOF
 
   ENABLE_DEBUG_DMNUM="${enable_debug_dmnum-no}"
 
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if daemon is enabled" >&5
-$as_echo_n "checking if daemon is enabled... " >&6; }
-            if test "${enable_daemon-set}" == set ; then enable_daemon='no'; fi
-  if test "${enable_daemon}" == "yes" ; then enable_daemon='yes'; fi
-  # Check whether --enable-daemon was given.
-if test "${enable_daemon+set}" = set; then :
-  enableval=$enable_daemon;
-fi
-
-     if test "${enable_daemon-no}" != "no"; then
-  ENABLE_DAEMON_TRUE=
-  ENABLE_DAEMON_FALSE='#'
-else
-  ENABLE_DAEMON_TRUE='#'
-  ENABLE_DAEMON_FALSE=
-fi
-
-  if test "${enable_daemon-no}" == "no" ; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no, not enabled" >&5
-$as_echo "no, not enabled" >&6; }
-  else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes, enabled (${enable_daemon})" >&5
-$as_echo "yes, enabled (${enable_daemon})" >&6; }
-  fi
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if setuid is enabled" >&5
-$as_echo_n "checking if setuid is enabled... " >&6; }
-            if test "${enable_setuid-set}" == set ; then enable_setuid='yes'; fi
-  if test "${enable_setuid}" == "yes" ; then enable_setuid='yes'; fi
-  # Check whether --enable-setuid was given.
-if test "${enable_setuid+set}" = set; then :
-  enableval=$enable_setuid;
-fi
-
-     if test "${enable_setuid-no}" != "no"; then
-  ENABLE_SETUID_TRUE=
-  ENABLE_SETUID_FALSE='#'
-else
-  ENABLE_SETUID_TRUE='#'
-  ENABLE_SETUID_FALSE=
-fi
-
-  if test "${enable_setuid-no}" == "no" ; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no, not enabled" >&5
-$as_echo "no, not enabled" >&6; }
-  else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes, enabled (${enable_setuid})" >&5
-$as_echo "yes, enabled (${enable_setuid})" >&6; }
-  fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking if threads is enabled" >&5
 $as_echo_n "checking if threads is enabled... " >&6; }
             if test "${enable_threads-set}" == set ; then enable_threads='1'; fi
@@ -33666,14 +33610,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${ENABLE_DEBUG_DMNUM_TRUE}" && test -z "${ENABLE_DEBUG_DMNUM_FALSE}"; then
   as_fn_error "conditional \"ENABLE_DEBUG_DMNUM\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${ENABLE_DAEMON_TRUE}" && test -z "${ENABLE_DAEMON_FALSE}"; then
-  as_fn_error "conditional \"ENABLE_DAEMON\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${ENABLE_SETUID_TRUE}" && test -z "${ENABLE_SETUID_FALSE}"; then
-  as_fn_error "conditional \"ENABLE_SETUID\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${ENABLE_THREADS_TRUE}" && test -z "${ENABLE_THREADS_FALSE}"; then
