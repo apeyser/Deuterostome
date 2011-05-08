@@ -12,6 +12,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <unistd.h>
+#include <errno.h>
 
 #define DM_IGNORE_RETURN(a) if (a);
 
@@ -32,7 +33,7 @@ static void error_local(int __status,
   if (__errnum) s = asprintf(&str, ": %s\n", strerror(__errnum));
   else s = asprintf(&str, "\n");
   if (s != -1) {
-    DM_IGNORE_RETURN(write(DM_STDERR_FILENO, str, strlen(str)));
+    DM_IGNORE_RETURN(write(1, str, strlen(str)));
     free(str);
   }
   if (__status) exit(__status);
@@ -49,7 +50,7 @@ static sigset_t oset;
 
 #define RESTART_WAIT (10)
 
-#define err(fn, f) if (fn(f)) error_local(EXIT_FAILURE, errno, #fn)
+#define err(fn, f) if (fn f) error_local(EXIT_FAILURE, errno, #fn)
 
 DM_INLINE_STATIC pid_t dnode_fork(int argc, char *argv[]) {
   pid_t pid = fork();
