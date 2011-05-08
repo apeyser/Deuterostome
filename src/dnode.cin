@@ -113,7 +113,7 @@ static void sigchild(int sig) {
   sigstate = SIGSTATE_CHILD;
 }
 
-static enum SIGSTATE sig(const sigset_t* sigs) {
+DM_INLINE_STATIC enum SIGSTATE sig(const sigset_t* sigs) {
   sigstate = SIGSTATE_NONE;
   sigsuspend(sigs);
   if (errno != EINTR)
