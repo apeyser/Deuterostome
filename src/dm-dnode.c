@@ -22,6 +22,7 @@
 #include "dm-proc.h"
 #include "dm-prop.h"
 #include "error-local.h"
+#include "dnode.h"
 
 #if ! X_DISPLAY_MISSING
 #include "xhack.h"
@@ -634,8 +635,20 @@ P op_killsockets(void) {
   return retc ? retc : retc_ ? retc_ : ABORT;
 }
 
+
+void restart(void) __attribute__((noreturn));
+void restart(void) {
+  static const union sigval val = {.sival_int = 1};
+  if (sigqueue(getppid(), RESTART, val))
+    error_local(EXIT_FAILURE, errno, "sigqueue");
+  exit(0);
+}
+
 P op_vmresize(void) {
   P retc;
+  if (o_1 >= FLOORopds && CLASS(o_1) == NULLOBJ)
+    dm_restart();
+
   if ((retc = op_vmresize_())) return retc;
   if ((retc = closesockets_resize())) return retc;
 #if DM_ENABLE_RTHREADS

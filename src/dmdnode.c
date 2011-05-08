@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
 /*------------------------ get host name */
 
   if (gethostname((char*)hostname,255) == -1) 
-    error_local(EXIT_FAILURE,errno,"gethostname");
+    error_local(EXIT_FAILURE, errno, "gethostname");
 
 /*------------------------ parse arguments */
   if (argc != 2) usage_error(0);

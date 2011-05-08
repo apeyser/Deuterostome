@@ -42,8 +42,6 @@ CF_AC_ARG_VAR([ROLLBITS], [unroll math loops to 2^rollbits], [3])
 CF_AC_ARG_VAR([BYTECORRECT], [align to this many bytes], [8])
 CF_AC_ENABLE([debug-dmnum], [enable extra debug in dmnum], [no], [yes])
 
-CF_AM_ENABLE([daemon], [compile and install daemonizer], [no], [yes])
-CF_AM_ENABLE([setuid], [compile or install setuid wrapper], [yes])
 CF_AC_ENABLE([threads], 
              [compile and install threads, value is default number], 
              [1])
