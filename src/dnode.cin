@@ -41,7 +41,6 @@ static void error_local(int __status,
   if (__status) exit(__status);
 }
 
-
 static int propsignals[] = {
   SIGABRT, SIGQUIT, SIGINT, SIGTERM
 };
@@ -52,7 +51,9 @@ static sigset_t oset;
 
 #define RESTART_WAIT (10)
 
-#define err(fn, f) if (fn f) error_local(EXIT_FAILURE, errno, #fn)
+#define err(fn, f) do {					\
+    if (fn f) error_local(EXIT_FAILURE, errno, #fn);	\
+  } while (0)
 
 DM_INLINE_STATIC pid_t dnode_fork(int argc, char *argv[]) {
   pid_t pid = fork();
@@ -85,10 +86,20 @@ enum SIGSTATE {
 };
 volatile enum SIGSTATE sigstate;
 
-static pid_t pid;
+static pid_t pid = 0;
 static void sigprop(int sig) {
   err(kill, (pid, sig));
   sigstate = SIGSTATE_PROP;
+}
+
+static void die(void) {
+  if (pid > 0) err(kill, (pid, SIGTERM));
+}
+
+DM_INLINE_STATIC int waitchild(int* status) {
+  pid_t _pid = pid;
+  pid = 0;
+  return waitpid(_pid, status, 0);
 }
 
 static void handle_restart(int sig, siginfo_t* info, void* context) {
@@ -152,6 +163,8 @@ int main(int argc, char *argv[]) {
   err(sigaddset, (&nset, DM_RESTART));
   err(sigaction, (DM_RESTART, &q, &qa));
 
+  atexit(die);
+
  restart:
   pid = dnode_fork(argc, argv);
   
@@ -162,11 +175,11 @@ int main(int argc, char *argv[]) {
 
     case SIGSTATE_RESTART:
       sig(&cset);
-      err(waitpid, (pid, &status, 0));
+      err(waitchild, (&status));
       goto restart;
 
     case SIGSTATE_CHILD:
-      err(waitpid, (pid, &status, 0));
+      err(waitchild, (&status));
       alarm(RESTART_WAIT);
       if (sig(&aset) == SIGSTATE_RESTART) goto restart;
   }
