@@ -8,7 +8,7 @@
 /dmprop
 /dnode
 /dnode.c
-/dmdnode
+/dmrunnode
 /dnode-daemon.c
 /dnode-nice
 /dnode-nice.c

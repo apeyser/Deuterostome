@@ -72,7 +72,7 @@ DM_INLINE_STATIC pid_t dnode_fork(int argc, char *argv[]) {
     sigaction(SIGCHLD, &ra, NULL);
 
     sigprocmask(SIG_SETMASK, &oset, NULL);
-    err(execv, ("@dmdnode@", _argv));
+    err(execv, "@dmrunnode@", _argv);
   }
 
   return pid;

@@ -27,7 +27,7 @@ clean-local:
 dpawn = $(pkglibexecdir)/dpawn
 drook = $(pkglibexecdir)/drook
 dmprop = $(pkglibexecdir)/dmprop
-dmdnode = $(pkglibexecdir)/dmdnode
+dmrunnode = $(pkglibexecdir)/dmrunnode
 
 edit = -e 's,[@]bindir[@],$(bindir),g' \
        -e 's,[@]srcdir[@],$(srcdir),g' \
@@ -38,7 +38,7 @@ edit = -e 's,[@]bindir[@],$(bindir),g' \
        -e 's,[@]dmprop[@],$(dmprop),g' \
        -e 's,[@]dmsockdir[@],$(dmsockdir),g' \
        -e 's,[@]dmstartdir[@],$(dmstartdir),g' \
-       -e 's,[@]dmdnode[@],$(dmdnode),g' \
+       -e 's,[@]dmrunnode[@],$(dmrunnode),g' \
        -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
        -e 's,[@]dmconfdir[@],$(dmconfdir),g' \
        -e 's,[@]pkglibexecdir[@],$(pkglibexecdir),g' \
@@ -76,7 +76,7 @@ endif ENABLE_X11
 
 bin_PROGRAMS = dvt dnode dgen
 noinst_PROGRAMS = testwordorder
-pkglibexec_PROGRAMS = getdisplay dmprop dmdnode \
+pkglibexec_PROGRAMS = getdisplay dmprop dmrunnode \
   $(DVTXSETINPUTFOCUSBIN) $(MPI_PROGS)
 
 if ENABLE_PLUGINS_SUPPORT
@@ -113,15 +113,15 @@ dvt_LDADD = $(builddir)/libdmglobals.la \
 dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS)
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 
-dmdnode_SOURCES = dmdnode.c dnode_0.h dm-dnode.h dm-dnode.c dnode.h \
+dmrunnode_SOURCES = dmrunnode.c dnode_0.h dm-dnode.h dm-dnode.c dnode.h \
 	$(SOCKSRCS) \
 	$(DNODE_MPI_SRCS)
-nodist_dmdnode_SOURCES = $(NODIST_SOCKSRCS) $(NODIST_DNODE_MPI_SRCS) $(SEM_SRC)
-dmdnode_LDADD = $(builddir)/libdmglobals.la \
+nodist_dmrunnode_SOURCES = $(NODIST_SOCKSRCS) $(NODIST_DNODE_MPI_SRCS) $(SEM_SRC)
+dmrunnode_LDADD = $(builddir)/libdmglobals.la \
 	$(builddir)/libdmnodal.la \
 	$(AM_LDADD) $(ATLAS_LIBS) $(MPI_LIBS)
-dmdnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
-dmdnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) \
+dmrunnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
+dmrunnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) \
 	$(ATLAS_FLAGS) $(MPI_FLAGS)
 
 dnode_SOURCES = dnode.h error-local.h
