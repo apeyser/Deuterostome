@@ -14,6 +14,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+/*************************************** error handling *****************/
+
 #include "dnode.h"
 
 #define DM_IGNORE_RETURN(a) if (a);
@@ -41,6 +43,13 @@ static void error_local(int __status,
   if (__status) exit(__status);
 }
 
+#define err(fn, ...) do {					\
+    if (fn(__VA_ARGS__)) error_local(EXIT_FAILURE, errno, #fn);	\
+  } while (0)
+
+/**********************************************************************/
+
+
 static int propsignals[] = {
   SIGABRT, SIGQUIT, SIGINT, SIGTERM
 };
@@ -50,10 +59,6 @@ static struct sigaction ra;
 static sigset_t oset;
 
 #define RESTART_WAIT (10)
-
-#define err(fn, f) do {					\
-    if (fn f) error_local(EXIT_FAILURE, errno, #fn);	\
-  } while (0)
 
 DM_INLINE_STATIC pid_t dnode_fork(int argc, char *argv[]) {
   pid_t pid = fork();
@@ -88,12 +93,12 @@ volatile enum SIGSTATE sigstate;
 
 static pid_t pid = 0;
 static void sigprop(int sig) {
-  err(kill, (pid, sig));
+  err(kill, pid, sig);
   sigstate = SIGSTATE_PROP;
 }
 
 static void die(void) {
-  if (pid > 0) err(kill, (pid, SIGTERM));
+  if (pid > 0) err(kill, pid, SIGTERM);
 }
 
 DM_INLINE_STATIC int waitchild(int* status) {
@@ -137,31 +142,31 @@ int main(int argc, char *argv[]) {
     .sa_flags = 0
   };
 
-  err(sigfillset, (&bset));
-  err(sigprocmask, (SIG_BLOCK, &bset, &oset));
+  err(sigfillset, &bset);
+  err(sigprocmask, SIG_BLOCK, &bset, &oset);
 
-  err(sigemptyset, (&aset));
-  err(sigaddset, (&aset, SIGALRM));
-  err(sigaddset, (&aset, DM_RESTART));
+  err(sigemptyset, &aset);
+  err(sigaddset, &aset, SIGALRM);
+  err(sigaddset, &aset, DM_RESTART);
 
-  err(sigfillset, (&s.sa_mask));
-  err(sigfillset, (&q.sa_mask));
-  err(sigfillset, (&r.sa_mask));
+  err(sigfillset, &s.sa_mask);
+  err(sigfillset, &q.sa_mask);
+  err(sigfillset, &r.sa_mask);
 
-  err(sigemptyset, (&cset));
-  err(sigemptyset, (&nset));
+  err(sigemptyset, &cset);
+  err(sigemptyset, &nset);
 
   for (i = 0; i < sizeof(propsignals)/sizeof(propsignals[0]); i++) {
-    err(sigaddset, (&nset, propsignals[i]));
-    err(sigaction, (propsignals[i], &s, sa+i));
+    err(sigaddset, &nset, propsignals[i]);
+    err(sigaction, propsignals[i], &s, sa+i);
   };
 
-  err(sigaddset, (&nset, SIGCHLD));
-  err(sigaddset, (&cset, SIGCHLD));
-  err(sigaction, (SIGCHLD, &r, &ra));
+  err(sigaddset, &nset, SIGCHLD);
+  err(sigaddset, &cset, SIGCHLD);
+  err(sigaction, SIGCHLD, &r, &ra);
 
-  err(sigaddset, (&nset, DM_RESTART));
-  err(sigaction, (DM_RESTART, &q, &qa));
+  err(sigaddset, &nset, DM_RESTART);
+  err(sigaction, DM_RESTART, &q, &qa);
 
   atexit(die);
 
@@ -175,11 +180,11 @@ int main(int argc, char *argv[]) {
 
     case SIGSTATE_RESTART:
       sig(&cset);
-      err(waitchild, (&status));
+      err(waitchild, &status);
       goto restart;
 
     case SIGSTATE_CHILD:
-      err(waitchild, (&status));
+      err(waitchild, &status);
       alarm(RESTART_WAIT);
       if (sig(&aset) == SIGSTATE_RESTART) goto restart;
   }
