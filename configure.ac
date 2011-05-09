@@ -260,10 +260,7 @@ CF_AC_CHECK_HEADER([inttypes.h])
 CF_AC_CHECK_HEADER([sys/wait.h])
 CF_IF_ENABLED([plugins-support], [CF_AC_CHECK_HEADER([stdarg.h])])
 CF_IF_ENABLED([regex], [CF_AC_CHECK_HEADER([regex.h])])
-CF_IF_ENABLED([daemon], [
-  AC_CHECK_HEADERS([sys/prctl.h])
-  AC_CHECK_FUNCS([prctl])
-])
+CF_AC_CHECK_HEADER([spawn.h])
 
 AC_CHECK_FUNCS([setsid])
 AC_CHECK_FUNCS([srandomdev])
