@@ -13,6 +13,7 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <errno.h>
+#include <spawn.h>
 
 /*************************************** error handling *****************/
 
@@ -43,62 +44,66 @@ static void error_local(int __status,
   if (__status) exit(__status);
 }
 
-#define err(fn, ...) do {					\
-    if (fn(__VA_ARGS__)) error_local(EXIT_FAILURE, errno, #fn);	\
+#define err(fn, ...) do {						\
+    if (fn(__VA_ARGS__) < 0) error_local(EXIT_FAILURE, errno, #fn);	\
+  } while (0)
+
+#define perr(fn, ...) do {						\
+    int p;								\
+    if ((p = posix_##fn(__VA_ARGS__)))					\
+      error_local(EXIT_FAILURE, p, "posix_"#fn);			\
   } while (0)
 
 /**********************************************************************/
 
-
-static int propsignals[] = {
-  SIGABRT, SIGQUIT, SIGINT, SIGTERM
-};
-static struct sigaction sa[sizeof(propsignals)/sizeof(propsignals[0])];
-static struct sigaction qa;
-static struct sigaction ra;
-static sigset_t oset;
+static sigset_t block_all;
+static sigset_t original_set;
+static sigset_t alarm_set;
 
 #define RESTART_WAIT (10)
 
-DM_INLINE_STATIC pid_t dnode_fork(int argc, char *argv[]) {
-  pid_t pid = fork();
-  if (pid < 0) error_local(EXIT_FAILURE, errno, "fork");
-
-  if (! pid) {
-    int i;
-    char** _argv = malloc(sizeof(char*)*(argc+1));
-    for (i = 0; i < argc; i++)
-      _argv[i] = argv[i];
-    _argv[argc] = NULL;
-
-    for (i = 0; i < sizeof(propsignals)/sizeof(propsignals[0]); i++)
-      sigaction(propsignals[i], sa+i, NULL);
-    sigaction(DM_RESTART, &qa, NULL);
-    sigaction(SIGCHLD, &ra, NULL);
-
-    sigprocmask(SIG_SETMASK, &oset, NULL);
-    err(execv, "@dmrunnode@", _argv);
-  }
-
-  return pid;
-}
-
-enum SIGSTATE {
-  SIGSTATE_NONE,
-  SIGSTATE_PROP,
-  SIGSTATE_RESTART,
-  SIGSTATE_CHILD
-};
-volatile enum SIGSTATE sigstate;
-
+extern char** environ;
+static posix_spawnattr_t attrp;
+static char** _argv;
+static int _argc;
 static pid_t pid = 0;
-static void sigprop(int sig) {
-  err(kill, pid, sig);
-  sigstate = SIGSTATE_PROP;
+
+DM_INLINE_STATIC void dnode(void) {
+  perr(spawn, &pid, "@dmrunnode@", NULL, &attrp, _argv, environ);
 }
+
+DM_INLINE_STATIC void makealarm(int s) {
+  sigset_t p;
+  alarm(0);
+  while (1) {
+    err(sigpending, &p);
+    if (! sigismember(&p, SIGALRM)) break;
+
+    err(sigemptyset, &p);
+    err(sigaddset,   &p, SIGALRM);
+    err(sigwaitinfo, &p, NULL);
+  }
+  alarm(s);
+}
+
+static void killterm(int sig) {
+  err(kill, pid, SIGKILL);
+}
+
+static struct sigaction killterm_sa = {
+  .sa_handler = killterm,
+  .sa_flags = 0
+};
 
 static void die(void) {
-  if (pid > 0) err(kill, pid, SIGTERM);
+  if (! pid) return;
+
+  err(kill, pid, SIGTERM);
+  err(sigaction, SIGALRM, &killterm_sa, NULL);
+  makealarm(RESTART_WAIT);
+  err(sigprocmask, SIG_UNBLOCK, &alarm_set, NULL);
+
+  if (wait(NULL) < 0) err(wait, NULL);
 }
 
 DM_INLINE_STATIC int waitchild(int* status) {
@@ -107,87 +112,73 @@ DM_INLINE_STATIC int waitchild(int* status) {
   return waitpid(_pid, status, 0);
 }
 
-static void handle_restart(int sig, siginfo_t* info, void* context) {
-  if (info->si_code == SI_QUEUE && info->si_value.sival_int == 1)
-    sigstate = SIGSTATE_RESTART;
-  else
-    sigstate = SIGSTATE_PROP;
-}
+enum SIGSTATE {
+  SIGSTATE_NONE,
+  SIGSTATE_PROP,
+  SIGSTATE_RESTART,
+  SIGSTATE_CHILD,
+  SIGSTATE_ALARM,
+};
 
-static void sigchild(int sig) {
-  sigstate = SIGSTATE_CHILD;
-}
+DM_INLINE_STATIC enum SIGSTATE nextsig(const sigset_t* sigs, int* sig) {
+  static int _sig;
+  siginfo_t info;
+  if (! sig) sig = &_sig;
 
-DM_INLINE_STATIC enum SIGSTATE sig(const sigset_t* sigs) {
-  sigstate = SIGSTATE_NONE;
-  sigsuspend(sigs);
-  if (errno != EINTR)
-    error_local(EXIT_FAILURE, errno, "sigsuspend");
-  return sigstate;
+  switch ((*sig = sigwaitinfo(sigs, &info))) {
+    case -1: error_local(EXIT_FAILURE, errno, "sigwaitinfo");
+    case SIGALRM:    return SIGSTATE_ALARM;
+    case SIGCHLD:    return SIGSTATE_CHILD;
+    case DM_RESTART:
+      if (info.si_code == SI_QUEUE && info.si_value.sival_int == 1)
+	return SIGSTATE_RESTART;
+    // intentional fallthrough
+    default: return SIGSTATE_PROP;
+  }
 }
 
 int main(int argc, char *argv[]) {
-  sigset_t nset, bset, cset, aset;
-  int status, i;
-  struct sigaction q = {
-    .sa_sigaction = handle_restart,
-    .sa_flags = SA_SIGINFO
-  };
-  struct sigaction s = {
-    .sa_handler = sigprop,
-    .sa_flags = 0
-  };
-  struct sigaction r = {
-    .sa_handler = sigchild,
-    .sa_flags = 0
-  };
+  sigset_t main_set, restart_set;
+  int status;
+  int sig;
 
-  err(sigfillset, &bset);
-  err(sigprocmask, SIG_BLOCK, &bset, &oset);
+  err(sigfillset,  &block_all);
+  err(sigemptyset, &original_set);
+  err(sigprocmask, SIG_BLOCK, &block_all, &original_set);
 
-  err(sigemptyset, &aset);
-  err(sigaddset, &aset, SIGALRM);
-  err(sigaddset, &aset, DM_RESTART);
+  main_set = original_set;
+  err(sigaddset,   &main_set, SIGCHLD);
 
-  err(sigfillset, &s.sa_mask);
-  err(sigfillset, &q.sa_mask);
-  err(sigfillset, &r.sa_mask);
+  err(sigemptyset, &restart_set);
+  err(sigaddset,   &restart_set, DM_RESTART);
+  err(sigaddset,   &restart_set, SIGALRM);
 
-  err(sigemptyset, &cset);
-  err(sigemptyset, &nset);
+  err(sigemptyset, &alarm_set);
+  err(sigaddset,   &alarm_set, SIGALRM);
+  err(sigfillset,  &killterm_sa.sa_mask);
 
-  for (i = 0; i < sizeof(propsignals)/sizeof(propsignals[0]); i++) {
-    err(sigaddset, &nset, propsignals[i]);
-    err(sigaction, propsignals[i], &s, sa+i);
-  };
+  _argv = malloc(sizeof(char*)*(argc+1));
+  _argc = argc;
 
-  err(sigaddset, &nset, SIGCHLD);
-  err(sigaddset, &cset, SIGCHLD);
-  err(sigaction, SIGCHLD, &r, &ra);
+  for (; argc > 0; argc--) _argv[argc] = argv[argc];
+  _argv[0] = "@dmrunnode@";
 
-  err(sigaddset, &nset, DM_RESTART);
-  err(sigaction, DM_RESTART, &q, &qa);
+  perr(spawnattr_init,       &attrp);
+  perr(spawnattr_setflags,   &attrp, POSIX_SPAWN_SETSIGMASK);
+  perr(spawnattr_setsigmask, &attrp, &original_set);
 
   atexit(die);
 
  restart:
-  pid = dnode_fork(argc, argv);
+  dnode();
+
+  while (nextsig(&main_set, &sig) == SIGSTATE_PROP)
+    err(kill, pid, sig);
   
- signal:
-  switch (sig(&nset)) {
-    case SIGSTATE_NONE: goto signal;
-    case SIGSTATE_PROP: goto signal;
-
-    case SIGSTATE_RESTART:
-      sig(&cset);
-      err(waitchild, &status);
-      goto restart;
-
-    case SIGSTATE_CHILD:
-      err(waitchild, &status);
-      alarm(RESTART_WAIT);
-      if (sig(&aset) == SIGSTATE_RESTART) goto restart;
-  }
+  err(waitchild, &status);
+  makealarm(RESTART_WAIT);
+  if (nextsig(&restart_set, NULL) == SIGSTATE_RESTART)
+    goto restart;
 
   if (WIFEXITED(status)) return WEXITSTATUS(status);
   return -1;
