@@ -212,12 +212,6 @@ static void execsighandler(P sigsocket, P tcp_sigsocket, P serverport,
   
 /****************** signal redirector ********************/
 
-#if HAVE_PTHREAD
-#define dmsigmask sigprocmask
-#else
-#define dmsigmask pthread_sigmask
-#endif //HAVE_PTHREAD
-
 P spawnsighandler(P sigsocket, P tcp_sigsocket, P serverport,
 		  P (*closesockets_func)(void),
 		  P* pid) {
