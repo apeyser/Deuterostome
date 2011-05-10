@@ -604,8 +604,8 @@ void run_dpawn_mill(void) {
   P retc;
   B abortframe[FRAMEBYTES], dieframe[FRAMEBYTES];
 
-  initmpi();
   setuphandlers();
+  initmpi();
   maketinysetup();
 
 /*----------------- construct frames for use in execution of D code */
@@ -631,6 +631,8 @@ void run_dpawn_mill(void) {
   serialized = FALSE;
   groupconsole = FALSE;
   while (1) {
+    int _quitsig;
+
     switch (retc = exec(100)) {
       case MORE: 
 	if (locked) continue;
@@ -648,12 +650,11 @@ void run_dpawn_mill(void) {
 	retc = nextevent(cmsf);
 	break;
 
-      case TERM:
-	exit(exitval);
+      case TERM: die();
 	
-      default:
-	break;
-    }
+      default: break;
+    };
+
     switch (retc) {
       case OK: continue;
 
@@ -671,6 +672,8 @@ void run_dpawn_mill(void) {
 
       case QUIT:
 	recvd_quit = FALSE;
+	_quitsig = quitsig;
+	quitsig = 0;
 	if (o1 >= CEILopds) {
 	  retc = OPDS_OVF;
 	  errsource = (B*) "supervisor";
@@ -680,9 +683,9 @@ void run_dpawn_mill(void) {
 	  errsource = (B*) "supervisor";
 	}
 	else {
-	  TAG(o1) = (NUM|BYTETYPE);
+	  TAG(o1) = (NUM|WORDTYPE);
 	  ATTR(o1) = 0;
-	  BYTE_VAL(o1) = 0;
+	  WORD_VAL(o1) = (_quitsig << 8);
 	  FREEopds = o2;
 	  
 	  moveframe(dieframe, x1);

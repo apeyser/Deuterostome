@@ -33,6 +33,8 @@
 
 #include <stdio.h>
 #include <limits.h>
+#include <signal.h>
+#include <errno.h>
 
 #include "dm2.h"
 #include "dm5.h"
@@ -572,6 +574,17 @@ P op_die(void) {
     return RNG_CHK;
 
   return TERM;
+}
+
+void die(void) {
+  sigset_t s;
+  if (sigfillset(&s))
+    error_local(EXIT_FAILURE, errno, "sigfillset");
+  if (DM_SIGPROCMASK(SIG_SETMASK, &s, NULL))
+    error_local(EXIT_FAILURE, errno, "sigprocmask");
+  
+  DEBUG("Exiting: %i", (int) exitval);
+  exit((int) (exitval && ~ ((B) 0)));
 }
 
 /*---------------------------------------------------- eq

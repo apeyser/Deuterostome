@@ -221,5 +221,14 @@ int main(int argc, char *argv[]) {
   debug("Exiting");
   err(waitchild, &status);
   if (WIFEXITED(status)) return WEXITSTATUS(status);
+  if (WIFSIGNALED(status)) {
+    struct sigaction sa = {
+      .sa_handler = SIG_DFL,
+      .sa_flags = 0
+    };
+    err(sigemptyset, &sa.sa_mask);
+    err(sigaction, WTERMSIG(status), &sa, NULL);
+    err(raise, WTERMSIG(status));
+  }
   return -1;
 }

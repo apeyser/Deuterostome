@@ -181,12 +181,13 @@ int main(void)
 	moveframe(fromconsoleframe, x1); 
 	FREEexecs=x2; 
 	continue;
+      case ABORT:
+	printf("Failure...\n");
+	exitval = EXIT_FAILURE;
+	die();
       case QUIT: case TERM: 
 	printf("Success..\n"); 
-	exit((int) exitval);
-      case ABORT:
-	printf("Failure...\n"); 
-	exit(EXIT_FAILURE);
+	die();
       default: break;
     }
 

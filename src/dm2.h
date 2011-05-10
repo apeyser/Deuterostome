@@ -55,6 +55,8 @@ DLL_SCOPE P op_syshi(void);
 DLL_SCOPE P op_syslibnum(void);
 
 DLL_SCOPE P op_aborted(void);
+
+// this needs to be called before any other onexit handlers are set.
 DLL_SCOPE void setuphandlers(void);
 
 DLL_SCOPE P int_repush_stop(P (*abortfunc)(void));

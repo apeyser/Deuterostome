@@ -24,6 +24,7 @@ volatile BOOLEAN timeout = FALSE;    /* for I/O operations          */
 volatile BOOLEAN abortflag = FALSE;
 volatile BOOLEAN numovf = FALSE;     /* FPU overflow status            */
 volatile BOOLEAN recvd_quit = FALSE; /* quit signal */
+volatile int     quitsig = 0;    /* what signal to propagate */
 
 P exitval;
 fd_set sock_fds;

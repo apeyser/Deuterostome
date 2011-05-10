@@ -1603,6 +1603,7 @@ static void quithandler(int sig, siginfo_t* info,
   fprintf(stderr, "%li: Exiting on signal %i from %li\n", 
 	  (long) getpid(), sig, info ? (long) info->si_pid : 0);
   recvd_quit = TRUE;
+  quitsig = sig;
 }
 
 /* --------------- signal handler: job control... */
@@ -1676,7 +1677,37 @@ static void makeshellhandler(void)
   sethandler(SIGCONT, conthandler);
 }
 
+static void diehandler(void) {
+  static sigset_t s;
+  static struct sigaction sa = {
+    .sa_handler = SIG_DFL,
+    .sa_flags = 0
+  };
+  static int sig;
+
+  sig = (exitval >> 8);
+  if (! sig) return;
+
+  sigfillset(&sa.sa_mask);
+  if (sigaction(sig, &sa, NULL)) 
+    error_local(EXIT_FAILURE, errno, "sigaction");
+  
+  if (sigemptyset(&s))
+    error_local(EXIT_FAILURE, errno, "sigemptyset");
+  if (sigaddset(&s, sig))
+    error_local(EXIT_FAILURE, errno, "sigaddset");
+  if (DM_SIGPROCMASK(SIG_UNBLOCK, &s, NULL))
+    error_local(EXIT_FAILURE, errno, "sigprocmask");
+  if (raise(sig))
+    error_local(EXIT_FAILURE, errno, "raise");
+}
+
 void setuphandlers(void) {
+  // first, setup an exit handler to propagate signals
+  // this needs to be called last.
+  if (atexit(diehandler))
+    error_local(EXIT_FAILURE, errno, "atexit");
+
 /*----------------- SIGNALS that we wish to handle */
 /* FPU indigestion is recorded in the numovf flag;
    we do not wish to be killed by it

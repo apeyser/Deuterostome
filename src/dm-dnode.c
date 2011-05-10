@@ -763,6 +763,7 @@ socksdone:
   locked = FALSE;
   serialized = FALSE;
   while (1) {
+    int _quitsig;
     switch (retc = exec(100)) {
       case MORE: 
 	if (locked) continue; 
@@ -779,13 +780,11 @@ socksdone:
 	retc = nextevent(cmsf);
 	break;
 
-      case TERM:
-	DEBUG("Exiting: %i", (int) exitval);
-	exit(exitval);
+      case TERM: die();
 	
-      default:
-	break;
+      default: break;
     }
+
     switch (retc) {
       case OK: continue;
 
@@ -803,6 +802,8 @@ socksdone:
 
       case QUIT:
 	recvd_quit = FALSE;
+	_quitsig = quitsig;
+	quitsig = 0;
 	if (o1 >= CEILopds) {
 	  retc = OPDS_OVF;
 	  errsource = (B*) "supervisor";
@@ -812,9 +813,9 @@ socksdone:
 	  errsource = (B*) "supervisor";
 	}
 	else {
-	  TAG(o1) = (NUM|BYTETYPE);
+	  TAG(o1) = (NUM|WORDTYPE);
 	  ATTR(o1) = 0;
-	  BYTE_VAL(o1) = 0;
+	  WORD_VAL(o1) = (_quitsig << 8);
 	  FREEopds = o2;
 	  
 	  moveframe(dieframe, x1);
