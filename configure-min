@@ -1,7 +1,0 @@
-#!/bin/sh
-
-exec ./configure --disable-xps --disable-regex --disable-setuid \
-     --disable-threads --disable-rthreads --disable-unix-sockets \
-     --disable-doc --disable-plugins-support --disable-plugins \
-     --disable-shared --without-atlas --without-mpi --without-petsc \
-     --without-x EMACS=no

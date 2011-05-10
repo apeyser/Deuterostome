@@ -1,0 +1,26 @@
+#!/bin/sh
+
+if [ "$1" == max ]; then
+    CONFFLAGS=" \
+--enable-plugins --enable-plugins-support --enable-maintainer-mode \
+--enable-petsc --enable-rthreads --with-petsc=/opt/petsc/ \
+--with-petsc-arch=linux_deb_d \
+CPPFLAGS='-g -Wall' \
+CFLAGS='-g -Wall' \
+--prefix=/home/ap/dm-root --with-mpi-flags=-pthread \
+"
+elif [ "$1" == min ]; then
+    CONFFLAGS=" \
+--disable-xps --disable-regex --disable-setuid \
+--disable-threads --disable-rthreads --disable-unix-sockets \
+--disable-doc --disable-plugins-support --disable-plugins \
+--disable-shared --without-atlas --without-mpi --without-petsc \
+--without-x EMACS=no \
+"
+else
+    echo "param1: $1, should be min or max" 1>&2
+    exit 1
+fi
+
+exec ./configure $CONFFLAGS
+
