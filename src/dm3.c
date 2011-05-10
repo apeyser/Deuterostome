@@ -217,7 +217,7 @@ DM_INLINE_STATIC P _delsocket(P fd, enum _DelMode delmode) {
 
       if (next->type.listener) {
 	clearsocket(fd);
-	if (next->info.listener.sigfd != -1) 
+	if (next->info.listener.sigfd != -1)
 	  close(next->info.listener.sigfd);
 	if (next->info.listener.recsigfd != -1) 
 	  close(next->info.listener.recsigfd);
@@ -348,6 +348,7 @@ P addsocket(P fd, const struct SocketType* type, const union SocketInfo* info) {
   }
 
   if (type->listener) {
+    DEBUG("add: %li", fd);
     FD_SET(fd, &sock_fds);
     if (fd >= maxsocket) maxsocket = fd+1;
     if (recsocket < 0) recsocket = fd;
@@ -413,6 +414,7 @@ P closesockets_resize(void) {
 void closedisplay(void) {
 #if ! X_DISPLAY_MISSING
   if (dvtdisplay) {
+    DEBUG("close display%s", "");
     HXCloseDisplay(dvtdisplay);
     dvtdisplay = NULL;
   }
@@ -656,11 +658,25 @@ P waitsocket(BOOLEAN ispending, fd_set* out_fds) {
   P i;
   if (! maxsocket) return NEXTEVENT_NOEVENT;
 
+  DEBUG("select max: %li", maxsocket);
+  if (DEBUG_ACTIVE)
+    for (i = 0; i < maxsocket; i++) {
+      read_fds = sock_fds;
+      if (FD_ISSET(i, &read_fds)) {
+	struct timeval onesec = {0, 0};
+	DEBUG("select: %li", i);
+	FD_ZERO(&read_fds);
+	FD_SET(i, &read_fds);
+	err_fds = read_fds;
+	if (select(i+1, &read_fds, NULL, &err_fds, &onesec) == -1)
+	  DEBUG("bad socket: %li", i);
+      }
+    }
+
   zerosec = zerosec_;
   read_fds = sock_fds;
   err_fds = sock_fds;
   
-  DEBUG("select%s", "");
   if ((nact = select(maxsocket, &read_fds, NULL, &err_fds, 
 		     ispending ? &zerosec : NULL)) == -1) {
     if (errno == EINTR) return NEXTEVENT_NOEVENT;

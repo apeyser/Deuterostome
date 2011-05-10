@@ -605,6 +605,7 @@ void run_dpawn_mill(void) {
   B abortframe[FRAMEBYTES], dieframe[FRAMEBYTES];
 
   initmpi();
+  setuphandlers();
   maketinysetup();
 
 /*----------------- construct frames for use in execution of D code */

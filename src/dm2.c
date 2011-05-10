@@ -1695,9 +1695,6 @@ void setuphandlers(void) {
 
   sethandler(SIGALRM, SIGALRMhandler);
 
-// Switched the following to SIGABRT, produced by kill -ABRT
-// rather than control-c, that normally terminates the job
-//
 /* The interrupt signal is produced by the control-c key of the
    console keyboard, it triggers the execution of 'abort'
 */

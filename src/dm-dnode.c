@@ -190,9 +190,15 @@ static P int_Xdisconnect(BOOLEAN nocheck) {
 #if X_DISPLAY_MISSING
   return NO_XWINDOWS;
 #else
+  if (! nocheck && dvtdisplay) nocheck = TRUE;
+
   closedisplay();
-  if (nocheck || dvtdisplay)  {
+  if (xsocket != -1) {
     delsocket_force(xsocket);
+    xsocket = -1;
+  }
+
+  if (nocheck)  {
     if (defaultdisplay) setenv("DISPLAY", defaultdisplay, 1);
     else unsetenv("DISPLAY");
   }
@@ -243,6 +249,7 @@ P op_Xconnect(void)
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
   if (ARRAY_SIZE(o_1) > (P) sizeof(displayname)-1) return RNG_CHK;
+  DEBUG("open display%s", "");
   if (ARRAY_SIZE(o_1) > 0) {
     moveB((B *)VALUE_BASE(o_1), displayname, ARRAY_SIZE(o_1));
     displayname[ARRAY_SIZE(o_1)] = '\000';
@@ -269,6 +276,10 @@ P op_Xconnect(void)
   dvtgc = HXCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
   xsocket = ConnectionNumber(dvtdisplay);
   if ((retc = addsocket(xsocket, &sockettype, &defaultsocketinfo))) {
+    if (retc == SOCK_STATE) {
+      if (close(xsocket)) return -errno;
+      xsocket = -1;
+    }
     int_Xdisconnect(TRUE);
     return retc;
   }
@@ -687,8 +698,10 @@ void run_dnode_mill(void) {
   defaultdisplay = getenv("DISPLAY");
 #endif
 
+  setuphandlers();
   set_closesockets_atexit();
   setupfd();
+  maketinysetup();
 
   if ((serversocket = make_socket(&port, TRUE, PACKET_SIZE, &retc)) == -1)
     sock_error(TRUE, retc < 0 ? -retc : 0, "making internet server socket");
@@ -724,7 +737,6 @@ void run_dnode_mill(void) {
 #endif //ENABLE_UNIX_SOCKETS
 
 socksdone:
-  maketinysetup();
 #if DM_ENABLE_RTHREADS
   rthreads_init();
 #endif //DM_ENABLE_RTHREADS

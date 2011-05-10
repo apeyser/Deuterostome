@@ -55,8 +55,6 @@ void maketinysetup(void) {
 
   if (! (original_dir = getcwd(NULL, 0))) 
     error_local(EXIT_FAILURE,errno,"getcwd");  
-
-  setuphandlers();
 }
 
 /*-------------------------------------------- vmresize
@@ -85,12 +83,14 @@ P op_vmresize_(void)
   B *userdict, *sysdict;
 
   if (o_1 < FLOORopds) return VMRESIZE_ERR(OPDS_UNF, FALSE);
-	FREEopds = o_1;
+  FREEopds = o_1;
+
+  if ((tinymemory ? 1 : 0) == ((CLASS(o1) == NULLOBJ) ? 1 : 0)) {
+    op_abort();
+    return VMRESIZE_ERR(VMR_STATE, FALSE);
+  }
+
   if (CLASS(o1) == NULLOBJ) { 
-    if (tinymemory) {
-      op_abort(); 
-      return VMRESIZE_ERR(VMR_STATE, FALSE);
-    };
     closealllibs();
     maketinysetup();
   }
@@ -106,11 +106,6 @@ P op_vmresize_(void)
         || (setup[2] > MAX_NUM_EXECS) || (setup[3] > MAX_MEM_SIZE)
         || (setup[4] > MAX_USER_DICT_SIZE))
       return VMRESIZE_ERR(RNG_CHK, FALSE);
-    
-    if (!tinymemory) {
-      closealllibs();
-      maketinysetup();
-    }
     
     if (makeDmemory(setup)) 
       return VMRESIZE_ERR(VMR_ERR, FALSE);

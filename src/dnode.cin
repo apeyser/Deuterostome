@@ -54,6 +54,17 @@ static void error_local(int __status,
       error_local(EXIT_FAILURE, p, "posix_"#fn);			\
   } while (0)
 
+#define DEBUG (1)
+
+#define debug(...) do {							\
+    if (DEBUG) {							\
+      fprintf(stderr, "%li: file: %s, line: %u: ",			\
+	      (long int) getpid(), __FILE__, __LINE__);			\
+      fprintf(stderr, __VA_ARGS__);					\
+      fprintf(stderr, "\n");						\
+    };									\
+  } while (0)
+
 /**********************************************************************/
 
 static sigset_t block_all;
@@ -75,6 +86,8 @@ DM_INLINE_STATIC void dnode(void) {
 DM_INLINE_STATIC void makealarm(int s) {
   sigset_t p;
   alarm(0);
+  err(sigemptyset, &p);
+
   while (1) {
     err(sigpending, &p);
     if (! sigismember(&p, SIGALRM)) break;
@@ -108,16 +121,17 @@ static void die(void) {
 
 DM_INLINE_STATIC int waitchild(int* status) {
   pid_t _pid = pid;
+  if (! pid) return 0;
+
   pid = 0;
+  debug("wait for: %li ", (long int) _pid);
   return waitpid(_pid, status, 0);
 }
 
 enum SIGSTATE {
-  SIGSTATE_NONE,
   SIGSTATE_PROP,
   SIGSTATE_RESTART,
-  SIGSTATE_CHILD,
-  SIGSTATE_ALARM,
+  SIGSTATE_CHILD
 };
 
 DM_INLINE_STATIC enum SIGSTATE nextsig(const sigset_t* sigs, int* sig) {
@@ -127,31 +141,37 @@ DM_INLINE_STATIC enum SIGSTATE nextsig(const sigset_t* sigs, int* sig) {
 
   switch ((*sig = sigwaitinfo(sigs, &info))) {
     case -1: error_local(EXIT_FAILURE, errno, "sigwaitinfo");
-    case SIGALRM:    return SIGSTATE_ALARM;
     case SIGCHLD:    return SIGSTATE_CHILD;
     case DM_RESTART:
-      if (info.si_code == SI_QUEUE && info.si_value.sival_int == 1)
+      if (info.si_code == SI_QUEUE && info.si_value.sival_int == 1) {
+	debug("restart");
 	return SIGSTATE_RESTART;
+      }
+      else debug("not restart");
     // intentional fallthrough
     default: return SIGSTATE_PROP;
   }
 }
 
 int main(int argc, char *argv[]) {
-  sigset_t main_set, restart_set;
+  sigset_t main_set, restart_set, pending, child_set;
   int status;
   int sig;
 
   err(sigfillset,  &block_all);
   err(sigemptyset, &original_set);
-  err(sigprocmask, SIG_BLOCK, &block_all, &original_set);
-
-  main_set = original_set;
+  err(sigemptyset, &main_set);
+  err(sigprocmask, SIG_SETMASK, &block_all, &original_set);
+  err(sigprocmask, SIG_UNBLOCK, &original_set, NULL);
+  err(sigprocmask, SIG_SETMASK, &block_all, &main_set);
   err(sigaddset,   &main_set, SIGCHLD);
+  err(sigaddset,   &main_set, DM_RESTART);
+
+  err(sigemptyset, &child_set);
+  err(sigaddset,   &child_set, SIGCHLD);
 
   err(sigemptyset, &restart_set);
   err(sigaddset,   &restart_set, DM_RESTART);
-  err(sigaddset,   &restart_set, SIGALRM);
 
   err(sigemptyset, &alarm_set);
   err(sigaddset,   &alarm_set, SIGALRM);
@@ -170,16 +190,35 @@ int main(int argc, char *argv[]) {
   atexit(die);
 
  restart:
+  err(waitchild, NULL);
+  debug("dnode");
   dnode();
+  debug("started dnode: %li", (long int) pid);
 
-  while (nextsig(&main_set, &sig) == SIGSTATE_PROP)
-    err(kill, pid, sig);
-  
+ nextsig:
+  debug("next signal");
+  switch (nextsig(&main_set, &sig)) {
+    case SIGSTATE_PROP:
+      debug("received: %i", sig);
+      err(kill, pid, sig);
+      goto nextsig;
+
+    case SIGSTATE_RESTART:
+      debug("grab child for: %li", (long int) pid);
+      nextsig(&child_set, NULL);
+      goto restart;
+
+    case SIGSTATE_CHILD:
+      err(sigpending, &pending);
+      if (! sigismember(&pending, DM_RESTART)) break;
+
+      debug("grab restart for: %li", (long int) pid);
+      nextsig(&restart_set, &sig);
+      goto restart;
+  };
+
+  debug("Exiting");
   err(waitchild, &status);
-  makealarm(RESTART_WAIT);
-  if (nextsig(&restart_set, NULL) == SIGSTATE_RESTART)
-    goto restart;
-
   if (WIFEXITED(status)) return WEXITSTATUS(status);
   return -1;
 }
