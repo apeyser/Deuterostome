@@ -11,39 +11,73 @@
 
 #define DM_IGNORE_RETURN(a) if (a);
 
-__attribute__ ((unused, format (printf, 3, 4)))
-static void error_local(int __status, 
-			int __errnum, 
-			const char* __format, ...)
+static void va_error_local_msg(int errnum,
+			       const char* format,
+			       va_list ap)
 {
   char* str;
   int s;
 
-  va_list ap;
-  va_start(ap, __format);
-  if (vasprintf(&str, __format, ap) != -1) {
+  if (vasprintf(&str, format, ap) != -1) {
     DM_IGNORE_RETURN(write(DM_STDERR_FILENO, str, strlen(str)));
     free(str);
   }
-  if (__errnum) s = asprintf(&str, ": %s\n", strerror(__errnum));
+
+  if (errnum) s = asprintf(&str, ": %s\n", strerror(errnum));
   else s = asprintf(&str, "\n");
+
   if (s != -1) {
     DM_IGNORE_RETURN(write(DM_STDERR_FILENO, str, strlen(str)));
     free(str);
   }
-  if (__status) exit(__status);
 }
 
+__attribute__ ((unused, format (printf, 2, 3)))
+static void error_local_msg(int errnum,
+			    const char* format,
+			    ...)
+{
+  va_list ap;
+  va_start(ap, format);
+  va_error_local_msg(errnum, format, ap);
+  va_end(ap);
+}
+
+static void va_error_local(int status,
+			   int errnum,
+			   const char* format,
+			   va_list ap)
+{
+  va_error_local_msg(errnum, format, ap);
+  if (status) exit(status);
+}
+
+
+__attribute__ ((unused, format (printf, 3, 4)))
+static void error_local(int status,
+			int errnum,
+			const char* format,
+			...)
+{
+  va_list ap;
+  va_start(ap, format);
+  va_error_local(status, errnum, format, ap);
+  va_end(ap);
+}
+
+
 #define error MAKEITANERROR
+
+#define DEBUG_(t, format, ...) do {					\
+    if (t) {								\
+      error_local_msg(0, "%li: " format,				\
+		      (long) getpid(), __VA_ARGS__);			\
+    };									\
+  } while (0)
 
 #ifndef DEBUG_ACTIVE
 #define DEBUG_ACTIVE 0
 #endif //DEBUG_ACTIVE
-#define DEBUG(format, ...) do {						\
-    if (DEBUG_ACTIVE) {							\
-      error_local(0, 0, "%li: " format,					\
-		  (long) getpid(), __VA_ARGS__);			\
-    };									\
-  } while (0)
+#define DEBUG(...) DEBUG_(DEBUG_ACTIVE, __VA_ARGS__)
 
 #endif //ERROR_H
