@@ -45,7 +45,8 @@ static void error_local(int __status,
 }
 
 #define err(fn, ...) do {						\
-    if (fn(__VA_ARGS__) < 0) error_local(EXIT_FAILURE, errno, #fn);	\
+    if (fn(__VA_ARGS__) < 0)						\
+      error_local(EXIT_FAILURE, errno, #fn);				\
   } while (0)
 
 #define perr(fn, ...) do {						\
