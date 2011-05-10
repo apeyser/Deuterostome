@@ -381,7 +381,7 @@ B* _syserrm[] = {
   (B*) "** Unable to merge library into sysdict",
   (B*) "** Unable to initialize loaded library",
   (B*) "** Cannot allocate D memory",
-  (B*) "** Memory alread minimized",
+  (B*) "** Memory already minimized",
   (B*) "** Opaque dict type mismatch",
   (B*) "** Illegal attempt to fold opaque object",
   (B*) "** Unable to restore active opaque object",
