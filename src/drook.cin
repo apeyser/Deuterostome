@@ -475,7 +475,7 @@ void mainthread(void) {
 DM_INLINE_STATIC void blocksigs(void) {
   sigset_t set;
   if (sigfillset(&set)) error_local(1, errno, "Unable to empty sigset");
-  if (sigprocmask(SIG_BLOCK, &set, NULL)) 
+  if (DM_SIGPROCMASK(SIG_BLOCK, &set, NULL)) 
     error_local(1, errno, "Unable to block sigs");
 }
 
