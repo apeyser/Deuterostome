@@ -1684,6 +1684,7 @@ static void diehandler(void) {
     .sa_flags = 0
   };
   static int sig;
+  static int err;
 
   sig = (exitval >> 8);
   if (! sig) return;
@@ -1696,8 +1697,8 @@ static void diehandler(void) {
     error_local(EXIT_FAILURE, errno, "sigemptyset");
   if (sigaddset(&s, sig))
     error_local(EXIT_FAILURE, errno, "sigaddset");
-  if (DM_SIGPROCMASK(SIG_UNBLOCK, &s, NULL))
-    error_local(EXIT_FAILURE, errno, "sigprocmask");
+  if ((err = DM_SIGPROCMASK(SIG_UNBLOCK, &s, NULL)))
+    error_local(EXIT_FAILURE, err, "sigprocmask");
   if (raise(sig))
     error_local(EXIT_FAILURE, errno, "raise");
 }

@@ -598,7 +598,7 @@ DM_HOT DM_INLINE_STATIC BOOLEAN L32VALUE(B* frame, L32* var) {
 #if HAVE_PTHREAD
 #define DM_SIGPROCMASK pthread_sigmask
 #else
-#define DM_SIGPROCMASK sigprocmask
+#define DM_SIGPROCMASK(h, s, o) (sigprocmask((h), (s), (o)) ? errno : 0)
 #endif
 
 #if __cplusplus

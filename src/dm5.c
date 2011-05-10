@@ -577,11 +577,12 @@ P op_die(void) {
 }
 
 void die(void) {
-  sigset_t s;
+  static sigset_t s;
+  static int err;
   if (sigfillset(&s))
     error_local(EXIT_FAILURE, errno, "sigfillset");
-  if (DM_SIGPROCMASK(SIG_SETMASK, &s, NULL))
-    error_local(EXIT_FAILURE, errno, "sigprocmask");
+  if ((err = DM_SIGPROCMASK(SIG_SETMASK, &s, NULL)))
+    error_local(EXIT_FAILURE, err, "sigprocmask");
   
   DEBUG("Exiting: %i", (int) exitval);
   exit((int) (exitval && ~ ((B) 0)));
