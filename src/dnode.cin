@@ -54,7 +54,7 @@ static void error_local(int __status,
       error_local(EXIT_FAILURE, p, "posix_"#fn);			\
   } while (0)
 
-#define DEBUG (1)
+#define DEBUG (0)
 
 #define debug(...) do {							\
     if (DEBUG) {							\
