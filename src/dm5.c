@@ -38,6 +38,7 @@
 
 #include "dm2.h"
 #include "dm5.h"
+#include "dm-signals.h"
 
 #include "error-local.h"
 
@@ -554,7 +555,7 @@ P op_execstack(void)
    ---|---
 */
 
-P op_quit(void)  
+P op_quit(void)
 {
   DEBUG("%s", "quitting");
   recvd_quit = FALSE;
@@ -579,9 +580,9 @@ P quit(void) {
   if (o1 >= CEILopds) return OPDS_OVF;
   if (x1 >= CEILexecs) return EXECS_OVF;
 
-  TAG(o1) = (NUM|LONGBIGTYPE);
+  TAG(o1) = (NUM|LONG32TYPE);
   ATTR(o1) = 0;
-  LONGBIG_VAL(o1) = (_quitsig << 8);
+  LONG32_VAL(o1) = ((L32) encodesig(_quitsig)) << 8;
   FREEopds = o2;
 
   moveframe(dieframe, x1);
@@ -597,7 +598,7 @@ P op_die(void) {
 
   if (FLOORopds > o_1) return OPDS_UNF;
   if (CLASS(o_1) != NUM) return OPD_CLA;
-  if (! VALUE(o_1, &exitval)) return UNDF_VAL;
+  if (! L32VALUE(o_1, &exitval)) return UNDF_VAL;
 
   return TERM;
 }
@@ -611,7 +612,7 @@ void die(void) {
     error_local(EXIT_FAILURE, err, "sigprocmask");
   
   DEBUG("Exiting: %i", (int) exitval);
-  exit((int) exitval);
+  exit(((int) exitval) & 0xFF);
 }
 
 /*---------------------------------------------------- eq

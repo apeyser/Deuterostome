@@ -1687,8 +1687,7 @@ static void diehandler(void) {
   static int sig;
   static int err;
 
-  sig = (exitval >> 8);
-  if (! sig) return;
+  if (! (sig = decodesig((UW) (exitval >> 8)))) return;
 
   sigfillset(&sa.sa_mask);
   if (sigaction(sig, &sa, NULL)) 

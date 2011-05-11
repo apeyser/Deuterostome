@@ -183,7 +183,7 @@ int main(void)
 	continue;
       case ABORT:
 	printf("Failure...\n");
-	exitval = EXIT_FAILURE;
+	exitval = ((UL32) EXIT_FAILURE) & 0xFF;
 	die();
       case QUIT: case TERM: 
 	printf("Success..\n"); 

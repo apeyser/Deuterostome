@@ -8,14 +8,37 @@
 
 // these must be kept in the same order as SIGMAP_* in dm-signals.h
 // and SIGNALS in startup_common.din
-int sigmap[] = {
+// from
+// http://pubs.opengroup.org/onlinepubs/009695399/basedefs/signal.h.html
+static int sigmap[] = {
   SIGQUIT,
   SIGKILL,
-  SIGTERM, 
-  SIGHUP, 
-  SIGINT, 
-  SIGALRM, 
-  SIGFPE
+  SIGTERM,
+  SIGHUP,
+  SIGINT,
+  SIGALRM,
+  SIGFPE,
+  SIGABRT,
+  SIGBUS,
+  SIGCHLD,
+  SIGCONT,
+  SIGILL,
+  SIGPIPE,
+  SIGSEGV,
+  SIGSTOP,
+  SIGTSTP,
+  SIGTTIN,
+  SIGTTOU,
+  SIGUSR1,
+  SIGUSR2,
+  SIGPOLL,
+  SIGPROF,
+  SIGSYS,
+  SIGTRAP,
+  SIGURG,
+  SIGVTALRM,
+  SIGXCPU,
+  SIGXFSZ,
 };
 
 void propagate_sig(B sig, void (*redirect_sigf)(int sig)) {
@@ -25,6 +48,32 @@ void propagate_sig(B sig, void (*redirect_sigf)(int sig)) {
   }
 
   redirect_sigf(sigmap[sig]);
+}
+
+enum SIGMAP getcookedsig(int sig) {
+  int i;
+  for (i = 0; i < SIGMAP_LEN; i++)
+    if (sig == sigmap[i]) return (enum SIGMAP) i;
+  return (enum SIGMAP) SIGMAP_LEN;
+}
+
+UW encodesig(int sig) {
+  int i;
+  for (i = 0; i < (int) SIGMAP_LEN; i++)
+    if (sig == sigmap[i]) return (((UW) 0xFF) << 8) | (UW) i;
+
+  return ((UW) sig) << 8;
+}
+
+int decodesig(UW sig) {
+  UW dsig = sig >> 8;
+  if (dsig != 0xFF) return dsig;
+
+  sig &= 0xFF;
+  if (sig >= 0 && sig < (int) SIGMAP_LEN)
+    return sigmap[sig];
+
+  return 0;
 }
 
 void clearhandler(int sig) 

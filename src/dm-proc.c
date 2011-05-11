@@ -722,24 +722,24 @@ P op_pipefd(void) {
   return OK;
 }
 
-// pid sig | --
+// pid sig-encoded | --
 P op_killpid(void) {
-  P sig;
+  int sig;
+  UL32 sig_;
   if (FLOORopds > o_2) return OPDS_UNF;
   if (TAG(o_2) != (NULLOBJ|PIDTYPE)) return OPD_ERR;
   if (CLASS(o_1) != NUM) return OPD_CLA;
-  if (! PVALUE(o_1, &sig)) return UNDF_VAL;
-  if (sig >= SIGMAP_LEN || sig < 0) 
-    return RNG_CHK;
+  if (! L32VALUE(o_1, (L32*) &sig_)) return UNDF_VAL;
 
-  if (kill(PID_VAL(o_2), sigmap[sig]))
-    return -errno;
+  if (! (sig_ >> 8)) sig_ |= (((UW) 0xFF) << 8);
+  if (! (sig = decodesig((UW) sig_))) return RNG_CHK;
+  if (kill(PID_VAL(o_2), sig)) return -errno;
 
   FREEopds = o_2;
   return OK;
 }
 
-// pid | {signal-val << 8 | exit-val} {true-if-child-stopped if nb}?
+// pid | exit-val-encode {true-if-child-stopped if nb}?
 DM_INLINE_STATIC P dmwait(BOOLEAN nb) {
   siginfo_t status;
   pid_t pid;
@@ -775,23 +775,24 @@ DM_INLINE_STATIC P dmwait(BOOLEAN nb) {
     BOOL_VAL(o_1) = TRUE;
   }
 
-  TAG(o_status) = (NUM|LONGBIGTYPE);
+  TAG(o_status) = (NUM|LONG32TYPE);
   ATTR(o_status) = 0;
-  LONGBIG_VAL(o_status) = status.si_status;
-  if (status.si_code != CLD_EXITED)
-    LONGBIG_VAL(o_status) <<= 8;
+  if (status.si_code == CLD_EXITED)
+    LONG32_VAL(o_status) = (L32) (status.si_status & 0xFF);
+  else
+    LONG32_VAL(o_status) = ((L32) encodesig(status.si_status)) << 8;
 
   DEBUG("wait %i", 2);
   return OK;
 }
 
-// pid | {signal-val << 8 | exit-val}
+// pid | exit-val-encoded
 P op_waitpid(void) {
   return dmwait(FALSE);
 }
 
 // pid | false
-//     | {signal-val << 8 | exit-val} true
+//     | exit-val-encoded true
 P op_checkpid(void) {
   return dmwait(TRUE);
 }

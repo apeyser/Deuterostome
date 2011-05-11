@@ -466,11 +466,46 @@
   | pid | status
   |
   | Block until process pid ends.
-  | Returns status in format for die: signal << 8 | exit
+  | Returns status in format for die: (-1 << 16 | cooked-signal << 8)
+  |                                   raw-signal << 16
+  |                                   exit
   |
   /waitdie {
     dup waitpid
     exch ~pidwaited inpidsockets
+  } bind def
+
+  |================= exitstatus ====================
+  | status | exit-status true
+  |        | false
+  /exitstatus {
+    dup -16 bitshift 0 ne {pop false} {255 and true} ifelse
+  } bind def
+
+  |================ signal status ====================
+  | status | /signalname  true
+  |        | signalnumber true
+  |        | false
+  /signalstatus {
+    dup -16 bitshift dup 0 eq {pop pop false} {
+      dup 255 ne {exch pop} {
+        pop
+        -8 bitshift 255 and
+        SIGNALS {
+          2 index eq {exch pop exit} if
+          pop
+        } forall
+      } ifelse
+      true
+    } ifelse
+  } bind def
+
+  |====================== signaldie =============================
+  | /signalname | --
+  | signalnum   | --
+  /signaldie {
+    dup class /nameclass eq {SIGNALS exch get 255l} {0l exch} ifelse
+    8 bitshift exch or 8 bitshift die
   } bind def
 
   |============================ wait_ =============================

@@ -26,7 +26,7 @@ volatile BOOLEAN numovf = FALSE;     /* FPU overflow status            */
 volatile BOOLEAN recvd_quit = FALSE; /* quit signal */
 volatile int     quitsig = 0;    /* what signal to propagate */
 
-LBIG exitval;
+UL32 exitval;
 fd_set sock_fds;
 BOOLEAN isstopping; // propagate stops through other locks
 BOOLEAN tinymemory;

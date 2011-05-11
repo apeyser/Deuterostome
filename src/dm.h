@@ -389,7 +389,7 @@ DLL_SCOPE volatile BOOLEAN numovf;     /* FPU overflow status            */
 DLL_SCOPE volatile BOOLEAN recvd_quit; /* quit signal */
 DLL_SCOPE volatile int     quitsig;    /* what signal to propagate */
 
-DLL_SCOPE LBIG exitval;
+DLL_SCOPE UL32 exitval;
 DLL_SCOPE BOOLEAN halt_flag;          /* execution block due to 'halt'     */
 DLL_SCOPE fd_set sock_fds;
 DLL_SCOPE BOOLEAN isstopping; // propagate stops through other locks

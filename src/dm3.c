@@ -1125,7 +1125,7 @@ P op_disconnect(void)
   socket sig | --
 
   sends signal to dnode, where signal is defined by a mapping 
-  in dm-signals.c (sigmap), and is between 0 and up to 255 (as defined 
+  in dm-signals.c (sigmap), and is between 0 and up to SIGMAP_LEN (as defined 
   in sigmap)
 */
 
@@ -1138,7 +1138,7 @@ P op_sendsig(void) {
   if (TAG(o_2) != (NULLOBJ | SOCKETTYPE)) return OPD_ERR;
   if (CLASS(o_1) != NUM) return OPD_CLA;
   if (! PVALUE(o_1, &sig_)) return UNDF_VAL;
-  if (sig_ < 0 || sig_ >= 256) return RNG_CHK;
+  if (sig_ < 0 || sig_ >= SIGMAP_LEN) return RNG_CHK;
 
   sig = (B) sig_;
   if ((fd = DGRAM_VAL(o_2)) == -1) return ILL_SOCK;
