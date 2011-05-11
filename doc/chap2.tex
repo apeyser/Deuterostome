@@ -633,7 +633,7 @@ Logical operations (\emph{and}, \emph{or}, \emph{xor},  \emph{not}) use booleans
 \subsection{Controlling execution}\label{ssec:controlops}
 
 \begin{ops}
-\*active & start                     & \lldots      \\\relax
+\*active                             & start          & \lldots      \\\relax
 [ obj ...                            & push           & \lldots      \\
 \*obj                                & exec           & \lldots      \\
 bool \*active                        & if             & \lldots      \\
@@ -642,14 +642,14 @@ init incr limit \*active             & for            & \lldots      \\
 count \*active                       & repeat         & \lldots      \\
 \*active                             & loop           & \lldots      \\
 array/list/dict \*active             & forall         & \lldots      \\
---                                   & exit           & --          \\
-/name                                & exitto         & --          \\
+--                                   & exit           & --           \\
+/name                                & exitto         & --           \\
 \*active /name                       & exitlabel      & \lldots      \\
 \*active                             & stopped        & \lldots bool \\
---                                   & stop           & --          \\
---                                   & abort          & --          \\
---                                   & countexecstack & num         \\
-list                                 & execstack      & sublist     \\
+--                                   & stop           & --           \\
+--                                   & abort          & --           \\
+--                                   & countexecstack & num          \\
+list                                 & execstack      & sublist      \\
 \end{ops}
 
 Control operators modify the usual linear execution of objects. Many
@@ -1154,6 +1154,174 @@ current bell setting.
 
 The X window library buffers X window commands prior to transmitting
 them to the X server. \op{Xsync} transmits that buffer instantly.
+
+\subsection{Processes and File System Operators}
+
+There are a number of operators for accessing POSIX operating system
+process and filesystem values. Most of these operators are wrapped in
+\file{processes.d} into procedures for running sub-processes and
+handling file descriptors (in dictionary \proc{PROCESSES}). Two new
+objects are used here -- file descriptors, which are heap allocated
+objects for writing and reading to and from files and pipes, and pids,
+which encapsulate processes id numbers as opaque objects on the stack.
+
+\begin{ops}
+--                     & fork            & pid socket false                !
+                       &                 & socket true                           \\
+--                     & getppid         & pid                                   \\
+[(exec) (param)...]    & spawn           & --                                    \\
+pid int-sig            & killpid         & --                                    \\
+pid                    & waitpid         & int-exit                              \\
+pid                    & checkpid        & false                           !
+                       &                 & int-exit true                         \\
+/name (val)            & setenv          & --                              !
+/name \op*{null}       &                 &                                       \\
+/name                  & getenv          & (val)                           !
+                       &                 & \op*{null}                            \\
+                                                                                 \\
+int bool-readonly      & makefd          & fd                                    \\
+fd                     & unmakefd        & int                                   \\
+fd                     & readonlyfd      & bool                                  \\
+fd-src fd-target       & dupfd           & --                                    \\\relax
+fd                     & copyfd          & fd                                    \\
+--                     & pipe            & fd-read fd-write                      \\
+(dir) (file) int-flags & openfd          & fd                                    \\
+fd                     & suckfd          & (buffer)                              \\
+fd (buffer)            & writefd         & fd                                    \\
+fd                     & getfd           & byte                            !
+                       &                 & *                                     \\
+fd                     & ungetfd         & --                                    \\
+fd                     & closefd         & --                                    \\
+fd                     & closedfd        & bool                                  \\
+                                                                                 \\
+(buffer) fd            & readfd          & (buffer) fd true                !
+                       &                 & (sub-buffer) false                    \\
+(buffer) fd char       & readtomarkfd    & (sub-buffer) fd true            !
+                       &                 & (sub-buffer) false                    \\
+fd char                & readtomarkfd_nb & (buffer) fd true                !
+                       &                 & (buffer) false                        \\
+                                                                                 \\
+(dir) (prefix)         & tmpfile         & fd-read fd-write (dir) (prefixXXXXXX) \\
+\op*{null} (prefix)    &                 &                                       \\
+(dir) (subdir)         & tmpdir          & (dir) (subdirXXXXXX)            !
+null (subdir)          &                 &                                       \\
+(dir) (path)           & rmpath          & --                              !
+null (path)            &                 &                                       \\
+(dir) (subdir)         & finddir         & (dir/subdir) [(file)...] true   !
+null (subdir)          &                 &                                 !
+(dir) (subdir)         &                 & false                           !
+null (subdir)          &                 &                                       \\
+                                                                                 \\
+\*active fd            & lockfd          & \lldots                               \\
+\*active fd            & unlockfd        & \lldots                               \\
+\*active fd            & trylockfd       & \lldots true                    !
+                       &                 & false                                 \\
+\end{ops}
+
+The \op{fork} operator forks the current process, duplicating the
+current \dcomp{dm}. The child process receives a connecting socket to
+the parent and \textop{true}. The parent receives a \emph{pid} object
+representing the child's process id, a socket to the child and
+false. The socket object can be used to \op{send} procedures and
+objects between the parent and child. To get the parent pid in the
+child, call \op{getppid}. The processes have identical stacks and
+heaps, other than the mentioned distinctions. The child can then
+replace itself with an executable image with \op{spawn}, which takes a
+list specifying the path to the executable (which can be found in the
+\textop{PATH} environmental variable) and parameters; of course, it
+never returns.
+
+Parent and child processes can be signaled with \op{killpid}, which
+takes the process id and the signal integer and returns nothing. The
+signal integer mapping are defined in \proc{SIGNALS} -- they are not
+the operating system signal integers, but a mapping of a subset of
+signals which are common across architectures, as used by \op{sendsig}
+and \op{rsendsig}. Children can be reaped with \op{waitpid}, which
+takes a pid and return an exit value when the child exits (and
+therefore blocks). The exit value is the bottom 8 bits of the child
+processes exit value OR'd with any signal which caused an abnormal
+termination (shifted by 8 bits leftward, of course). The signal in
+this case is the raw operating system values and not the internal,
+architecture free signals. This value could be propagated directly by
+calling \op{die} on it. \op{checkpid} is the non-blocking version; it
+returns false if the child hasn't died, and true and the exit value if
+it has died (however, it still leaves the child unreaped, requiring an
+\op{waitpid} call on it).
+
+Environmental variables can be accessed with \op{getenv}. The name of
+the variable as a \emph{D} name is given to it; if such a variable
+exists, the value is returned as a (possibly empty) string, otherwise
+\textop{null} is returned. \op{setenv} is the symmetric operator,
+setting \textop{/name} variable to the value passed or unsetting the
+variable if \textop{null} is passed to it.
+
+\op{makefd} converts a raw integer representing a file descriptor into
+a read-only or write-only file descriptor object. \op{unmakefd}
+returns the integer representing a file descriptor. The raw integers
+are needed for creating stdin, stdout and stderr file descriptor
+objects. \op{readonlyfd} returns true if the file descriptor is a read
+descriptor, rather than a write descriptor. \op{dupfd} makes the
+target file descriptor point to the same underlying stream as the
+source file descriptor; they must both be write (or read) file
+descriptors which are open. Therefore \textop{stdout} \textop{stderr}
+\op{dupfd} makes anything written to \textop{stderr} appear on
+\textop{stdout}, even after \textop{stdout} has been
+closed. \op{copyfd} creates a new file descriptor (with an arbitrary
+new file descriptor number) that points at the same underlying stream
+as the source file descriptor.
+
+\op{pipefd} creates two new connected file descriptors. Writing on the
+write fd produces that same sequence appear as input on the read fd,
+which is useful for creating arbitrary connections of
+processes. \op{openfd} opens a file for reading or writing: if the
+flag is 0, the file (which must exist) is opened for reading; if the
+flag is 1, the file (which may or may not exist) is truncated and
+opened for writing; or if the flag is 2, the file (which must exist)
+is opened for writing by appending. Read file descriptors can be
+consumed by \op{suckfd}, which reads the file descriptor until the end
+and allocates a string with everything read in; the file descriptor is
+then closed. \op{getfd} reads a single character, or returns undefined
+if the end of the file descriptor has been reached. The last character
+read can be unread with \op{ungetfd}. An open read or write file
+descriptor can be closed with \op{closefd}. The closed state can be
+tested with \op{closedfd}, which returns true if the file descriptor
+has had \op{closefd} called on it (or it's been \op{suckfd}'d dry or
+other read operators applied which close the stream).
+
+\op{readfd} will fill a passed-in buffer with the contents of the file
+descriptor until the buffer is full. If the end of the file descriptor
+is reached before that, the file descriptor is closed and
+\textop{false} is returned as the final value over the interval of the
+buffer that has been filled in. \op{readtomarkfd} works similarly, but
+reads up to a given character (such as a newline), and that character
+is discarded. \op{readtomarkfd_nb} is the non-blocking version of the
+operator; if the read would block, it returns everything read up to
+that point.
+
+\op{tmpfile} creates a temporary file in a set directory, or the
+directory identified by the environmental variable \textproc{TMPDIR},
+or \file{/tmp} if no such variable is set, with the name \file{prefix}
+with six random characters appended to it. A read and write file
+descriptor is returned and the directory and name of the
+file. \op{tmpdir} creates a similar temporary directory. Neither is
+automatically cleaned up. \op{rmpath} will remove a file or empty
+directory. \op{finddir} will return the path of the directory, a list
+of the files in the directory, and true if the directory is non-empty;
+if the directory is empty, the call will just return false.
+
+A file descriptor can be locked as a form of inter-process
+synchronization. \op{lockfd} blocks until an exclusive lock (as per
+POSIX \textop{lockf}) is available, then locks the file descriptor
+while $\sim$active is executing. Inside that lock the file descriptor
+can be unlocked for a section of code via
+\op{unlockfd}. \op{trylockfd} will execute $\sim$active if the
+exclusive lock is available without locking, and add \textop{true} to
+the stack after executing it while fd is locked; otherwise, it does
+not execute $\sim$active and just returns \textop{false}. These
+operators handle \op{stop}, \op{abort}, \op{exit} and \op{exitto}
+exits from the encapsulated contexts, automatically releasing (or
+re-taking) locks.
+
 
 %%% Local Variables: 
 %%% mode: latex

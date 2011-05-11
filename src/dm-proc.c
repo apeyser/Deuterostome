@@ -25,7 +25,7 @@
 #include "dm-sem.h"
 #include "error-local.h"
 
-// (dir)/null (prefix) | fdr fdw (dir) (prefix)
+// (dir)/null (prefix) | fdr fdw (dir) (prefixXXXXXX)
 P op_tmpfile(void) {
   P retc;
   B* curr = FREEvm;

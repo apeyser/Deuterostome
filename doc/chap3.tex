@@ -363,8 +363,8 @@ resumes normal execution.
 \op{quit} terminates the \dcomp{dvt} process. \op{die} will terminate
 the process like quit, but allows a return value. If the operand
 shifted down by 8 is nonzero, then the process dies as if it had been
-signaled by that value; otherwise the process exits with the bottom 8
-bits.
+signaled by that value (the raw, operating system signal integer);
+otherwise the process exits with the bottom 8 bits.
 
 \subsubsection{Supervising of \dcomp[dnode]{dnodes}}
 
@@ -1044,7 +1044,7 @@ array dir & sineFFT & array\\\\
 \emph{decompLU} performs the LU-decomposition of the matrix \emph{a}
 in place (given as a list of row arrays of type `/D'). The array
 \emph{idx} is of type `/X' and receives row permutation information to
-be used by \emph{backsubLU}. The returned numeral \emph{d} signals an
+be used by \emph{backsubLU}. The returned numeral \emph{D} signals an
 even/odd number of permutations, and \emph{bool} signals a valid
 decomposition (or a singular matrix). \emph{backsubLU} computes the
 solution of a linear equation system using the LU-decomposed
