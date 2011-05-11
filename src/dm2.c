@@ -1642,13 +1642,14 @@ static void aborthandler(int sig,
   abortflag = TRUE;
 }
 
-static void quit(void) {
-  int quitsigs[] = {SIGQUIT, SIGTERM, SIGHUP, 0};
-  int* i;
+static void unquit(void) {
+  static int quitsigs[] = {SIGQUIT, SIGTERM, SIGHUP, 0};
   static struct sigaction sa = {
     .sa_handler = SIG_DFL,
     .sa_flags   = SA_NOCLDWAIT|SA_NOCLDSTOP
   };
+  static int* i;
+
   sigfillset(&sa.sa_mask);
   if (sigaction(SIGCHLD, &sa, NULL))
     error_local(0, errno, "Unable to dezombify");
@@ -1665,7 +1666,7 @@ static void makequithandler(void)
   int* i;
   if (getpid() != getpgid(0) && setpgid(0, 0)) 
     error_local(1, errno, "Failed to set process group");
-  if (atexit(quit)) error_local(1, 0, "Failed to set exit handler for quit");
+  if (atexit(unquit)) error_local(1, 0, "Failed to set exit handler for quit");
   for (i = quitsigs; *i; i++) sethandler(*i, quithandler);
 }
 

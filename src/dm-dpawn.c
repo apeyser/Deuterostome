@@ -602,7 +602,7 @@ P op_groupconsole(void) {
 
 void run_dpawn_mill(void) {
   P retc;
-  B abortframe[FRAMEBYTES], dieframe[FRAMEBYTES];
+  B abortframe[FRAMEBYTES];
 
   setuphandlers();
   initmpi();
@@ -614,9 +614,6 @@ void run_dpawn_mill(void) {
 
   makename((B*) "abort", abortframe); 
   ATTR(abortframe) = ACTIVE;
-
-  makename((B*) "die", dieframe);
-  ATTR(dieframe) = ACTIVE;
 
 /*-------------- you are entering the scheduler -------------------*/\
 /* We start with no D code on the execution stack, so we doze
@@ -631,8 +628,6 @@ void run_dpawn_mill(void) {
   serialized = FALSE;
   groupconsole = FALSE;
   while (1) {
-    int _quitsig;
-
     switch (retc = exec(100)) {
       case MORE: 
 	if (locked) continue;
@@ -660,39 +655,22 @@ void run_dpawn_mill(void) {
 
       case ABORT:
 	abortflag = FALSE;
-	if (x1 < CEILexecs) {
-	  moveframe(abortframe, x1);
-	  FREEexecs = x2;
-	  continue;
-	}
-
-	retc = EXECS_OVF; 
-	errsource = (B*) "supervisor"; 
-	break;
-
-      case QUIT:
-	recvd_quit = FALSE;
-	_quitsig = quitsig;
-	quitsig = 0;
-	if (o1 >= CEILopds) {
-	  retc = OPDS_OVF;
-	  errsource = (B*) "supervisor";
-	}
-	else if (x1 >= CEILexecs) {
+	if (x1 >= CEILexecs) {
 	  retc = EXECS_OVF;
 	  errsource = (B*) "supervisor";
+	  break;
 	}
-	else {
-	  TAG(o1) = (NUM|WORDTYPE);
-	  ATTR(o1) = 0;
-	  WORD_VAL(o1) = (_quitsig << 8);
-	  FREEopds = o2;
-	  
-	  moveframe(dieframe, x1);
-	  FREEexecs = x2;
-	  continue;
+
+	moveframe(abortframe, x1);
+	FREEexecs = x2;
+	continue;
+
+      case QUIT:
+	if ((retc = quit())) {
+	  errsource = (B*) "supervisor";
+	  break;
 	}
-	break;
+	continue;
 
       default: break;
     }

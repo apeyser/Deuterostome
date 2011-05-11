@@ -55,7 +55,9 @@ static void error_local(int __status,
       error_local(EXIT_FAILURE, p, "posix_"#fn);			\
   } while (0)
 
+#ifndef DEBUG
 #define DEBUG (0)
+#endif
 
 #define debug(...) do {							\
     if (DEBUG) {							\
@@ -155,9 +157,13 @@ DM_INLINE_STATIC enum SIGSTATE nextsig(const sigset_t* sigs, int* sig) {
 }
 
 int main(int argc, char *argv[]) {
-  sigset_t main_set, restart_set, pending, child_set;
+  sigset_t main_set, restart_set, pending, child_set, recvd_set;
   int status;
   int sig;
+  struct sigaction recvd_sa = {
+    .sa_handler = SIG_DFL,
+    .sa_flags = 0
+  };
 
   err(sigfillset,  &block_all);
   err(sigemptyset, &original_set);
@@ -220,15 +226,20 @@ int main(int argc, char *argv[]) {
 
   debug("Exiting");
   err(waitchild, &status);
-  if (WIFEXITED(status)) return WEXITSTATUS(status);
-  if (WIFSIGNALED(status)) {
-    struct sigaction sa = {
-      .sa_handler = SIG_DFL,
-      .sa_flags = 0
-    };
-    err(sigemptyset, &sa.sa_mask);
-    err(sigaction, WTERMSIG(status), &sa, NULL);
-    err(raise, WTERMSIG(status));
+  if (WIFEXITED(status)) {
+    debug("exit with %i", WIFEXITED(status));
+    return WEXITSTATUS(status);
   }
+
+  debug("signal exit with %i", WTERMSIG(status));
+  err(sigfillset, &recvd_sa.sa_mask);
+  err(sigaction, WTERMSIG(status), &recvd_sa, NULL);
+
+  err(sigemptyset, &recvd_set);
+  err(sigaddset,   &recvd_set, WTERMSIG(status));
+  err(sigprocmask, SIG_UNBLOCK, &recvd_set, NULL);
+  err(raise, WTERMSIG(status));
+
+  error_local(EXIT_FAILURE, 0, "No exit value, no signal?");
   return -1;
 }

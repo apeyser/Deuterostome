@@ -436,7 +436,7 @@ static void SIGINThandler(int sig __attribute__ ((__unused__)),
 
 void run_dvt_mill(void) {
   P retc;
-  B abortframe[FRAMEBYTES], dieframe[FRAMEBYTES], *sf;
+  B abortframe[FRAMEBYTES], *sf;
   B* startup_dvt;
   P nb, tnb;
   B* sysdict;
@@ -478,9 +478,6 @@ void run_dvt_mill(void) {
   makename((B*) "abort", abortframe);
   ATTR(abortframe) = ACTIVE;
 
-  makename((B*) "die", dieframe);
-  ATTR(dieframe) = ACTIVE;
-
 /*----------- read startup_dvt.d and push on execs ----------*/
   startup_dvt 
     = (B*) strcat(strcpy(malloc(strlen((char*)startup_dir) 
@@ -509,47 +506,29 @@ void run_dvt_mill(void) {
   FREEexecs = x2;
 
   while (1) {
-    int _quitsig;
     switch(retc = exec(1000)) {
       case MORE: case DONE: continue; 
 
       case TERM: die();
 
-      case QUIT: 
-	recvd_quit = FALSE;
-	_quitsig = quitsig;
-	quitsig = 0;
-	if (o1 >= CEILopds) {
-	  retc = OPDS_OVF;
+      case QUIT:
+	if ((retc = quit())) {
 	  errsource = (B*) "supervisor";
+	  break;
 	}
-	else if (x1 >= CEILexecs) {
-	  retc = EXECS_OVF;
-	  errsource = (B*) "supervisor";
-	}
-	else {
-	  TAG(o1) = (NUM|WORDTYPE);
-	  ATTR(o1) = 0;
-	  WORD_VAL(o1) = (_quitsig << 8);
-	  FREEopds = o2;
-	  
-	  moveframe(dieframe, x1);
-	  FREEexecs = x2;
-	  continue;
-	}
-	break;
+	continue;
 
       case ABORT:
 	abortflag = FALSE;
-	if (x1 < CEILexecs) {
-	  moveframe(abortframe, x1); 
-	  FREEexecs = x2;
-	  continue;
+	if (x1 >= CEILexecs) {
+	  retc = EXECS_OVF;
+	  errsource = (B*)"supervisor";
+	  break;
 	}
 
-	retc = EXECS_OVF; 
-	errsource = (B*)"supervisor"; 
-	break;
+	moveframe(abortframe, x1);
+	FREEexecs = x2;
+	continue;
 
       default: break;
     }

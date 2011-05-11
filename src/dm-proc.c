@@ -739,67 +739,59 @@ P op_killpid(void) {
   return OK;
 }
 
-// pid | signal-val/exit-val/* true-if-exited
-//       if nb true-if-child-stopped
+// pid | {signal-val << 8 | exit-val} {true-if-child-stopped if nb}?
 DM_INLINE_STATIC P dmwait(BOOLEAN nb) {
-  siginfo_t status = {0};
+  siginfo_t status;
+  pid_t pid;
+  B* o_status = o_1;
 
   if (FLOORopds > o_1) return OPDS_UNF;
-  if (CEILopds < o3) return OPDS_OVF;
+  if (nb && CEILopds < o2) return OPDS_OVF;
   if (TAG(o_1) != (NULLOBJ|PIDTYPE)) return OPD_ERR;
   
   DEBUG("waiting for %li", (long) PID_VAL(o_1));
-  while (waitid(P_PID,
-		(id_t) PID_VAL(o_1),
-		&status, 
-		nb ? (WNOHANG|WNOWAIT|WEXITED) : WEXITED)
+  while ((pid = waitid(P_PID,
+		       (id_t) PID_VAL(o_1),
+		       &status,
+		       nb ? (WNOHANG|WNOWAIT|WEXITED) : WEXITED))
 	 == -1) {
     if (errno != EINTR) return -errno;
     checkabort();
   }
   DEBUG("received %i from %li", (int) status.si_pid, (long) PID_VAL(o_1));
 
-  if (nb && ! status.si_pid) {
+  if (nb) {
+    if (! pid) {
+      TAG(o_1) = BOOL;
+      ATTR(o_1) = 0;
+      BOOL_VAL(o_1) = FALSE;
+      DEBUG("wait %i", 1);
+      return OK;
+    }
+
+    FREEopds = o2;
     TAG(o_1) = BOOL;
     ATTR(o_1) = 0;
-    BOOL_VAL(o_1) = FALSE;
-    DEBUG("wait %i", 1);
-    return OK;
+    BOOL_VAL(o_1) = TRUE;
   }
 
-  TAG(o_1) = (NUM|BYTETYPE);
-  ATTR(o_1) = 0;
+  TAG(o_status) = (NUM|LONGBIGTYPE);
+  ATTR(o_status) = 0;
+  LONGBIG_VAL(o_status) = status.si_status;
+  if (status.si_code != CLD_EXITED)
+    LONGBIG_VAL(o_status) <<= 8;
 
-  TAG(o1) = BOOL;
-  ATTR(o1) = 0;
-
-  BYTE_VAL(o_1) = status.si_status;
-  switch (status.si_code) {
-    case CLD_EXITED: BOOL_VAL(o1) = TRUE;
-      break;
-    case CLD_DUMPED: BYTE_VAL(o_1) = BINF;
-      // intentional fall-through
-    case CLD_KILLED: BOOL_VAL(o1) = FALSE;
-      break;
-  };
-
-  if (nb) {
-    TAG(o2) = BOOL;
-    ATTR(o2) = 0;
-    BOOL_VAL(o2) = TRUE;
-    FREEopds = o3;
-  }
-  else FREEopds = o2;
   DEBUG("wait %i", 2);
   return OK;
 }
 
-// pid | signal-val/exit-val/* true-if-exited
+// pid | {signal-val << 8 | exit-val}
 P op_waitpid(void) {
   return dmwait(FALSE);
 }
 
-// pid | false / signal-val/exit-val/* true-if-exited true
+// pid | false
+//     | {signal-val << 8 | exit-val} true
 P op_checkpid(void) {
   return dmwait(TRUE);
 }

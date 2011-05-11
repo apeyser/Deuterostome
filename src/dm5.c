@@ -562,6 +562,34 @@ P op_quit(void)
   return TERM;
 }
 
+P quit(void) {
+  static BOOLEAN init = FALSE;
+  static B dieframe[FRAMEBYTES] = {0};
+  int _quitsig = quitsig;
+
+  if (! init) {
+    init = TRUE;
+    makename((B*) "die", dieframe);
+    ATTR(dieframe) = ACTIVE;
+  };
+
+  recvd_quit = FALSE;
+  quitsig = 0;
+
+  if (o1 >= CEILopds) return OPDS_OVF;
+  if (x1 >= CEILexecs) return EXECS_OVF;
+
+  TAG(o1) = (NUM|LONGBIGTYPE);
+  ATTR(o1) = 0;
+  LONGBIG_VAL(o1) = (_quitsig << 8);
+  FREEopds = o2;
+
+  moveframe(dieframe, x1);
+  FREEexecs = x2;
+
+  return OK;
+}
+
 // num | exited
 P op_die(void) {
   DEBUG("%s", "dieing");
@@ -569,9 +597,7 @@ P op_die(void) {
 
   if (FLOORopds > o_1) return OPDS_UNF;
   if (CLASS(o_1) != NUM) return OPD_CLA;
-  if (! PVALUE(o_1, &exitval)) return UNDF_VAL;
-  if (sizeof(P) > sizeof(int) && exitval > INT_MAX) 
-    return RNG_CHK;
+  if (! VALUE(o_1, &exitval)) return UNDF_VAL;
 
   return TERM;
 }
@@ -585,7 +611,7 @@ void die(void) {
     error_local(EXIT_FAILURE, err, "sigprocmask");
   
   DEBUG("Exiting: %i", (int) exitval);
-  exit((int) (exitval && ~ ((B) 0)));
+  exit((int) exitval);
 }
 
 /*---------------------------------------------------- eq

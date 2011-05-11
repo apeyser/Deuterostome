@@ -446,14 +446,12 @@
   | Checks for process end.
   | Returns true if process is dead,
   |   on top of true iff process returns status 0
-  | Otherwise, just false
+  | Otherwise, just false.
+  |
+  | NB: if isdead returns true, the pid has been waited on.
   |
   /isdead {
-    dup checkpid {
-      {0 eq} {pop false} ifelse
-      exch ~pidwaited inpidsockets
-      true
-    } {pop false} ifelse
+    dup checkpid {pop wait true} {pop false} ifelse
   } bind def
 
   |============================ wait ==============================
@@ -462,8 +460,16 @@
   | Block until process pid ends.
   | Returns true iff process returns status 0.
   |
-  /wait {
-    dup waitpid {0 eq} {pop false} ifelse
+  /wait {waitdie 0 eq} bind def
+
+  |============================ waitdie ==============================
+  | pid | status
+  |
+  | Block until process pid ends.
+  | Returns status in format for die: signal << 8 | exit
+  |
+  /waitdie {
+    dup waitpid
     exch ~pidwaited inpidsockets
   } bind def
 
@@ -564,7 +570,7 @@
   | -- without clear to mark
   |
   /_sh_ {
-    {~_spawnsh fds bg wait} 4 1 roll bg
+    {~_spawnsh fds bg waitdie die} 4 1 roll bg
   } bind def
 
   |======================== sh_bg ================================
