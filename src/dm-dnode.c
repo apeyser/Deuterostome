@@ -647,10 +647,9 @@ P op_killsockets(void) {
 }
 
 
-void restart(void) __attribute__((noreturn));
+DM_INLINE_STATIC void restart(void) __attribute__((noreturn));
 void restart(void) {
-  static const union sigval val = {.sival_int = 1};
-  if (sigqueue(getppid(), DM_RESTART, val))
+  if (sigqueue(getppid(), DM_RESTART, DM_RESTART_VAL))
     error_local(EXIT_FAILURE, errno, "sigqueue");
   exit(0);
 }

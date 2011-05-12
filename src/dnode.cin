@@ -146,7 +146,8 @@ DM_INLINE_STATIC enum SIGSTATE nextsig(const sigset_t* sigs, int* sig) {
     case -1: error_local(EXIT_FAILURE, errno, "sigwaitinfo");
     case SIGCHLD:    return SIGSTATE_CHILD;
     case DM_RESTART:
-      if (info.si_code == SI_QUEUE && info.si_value.sival_int == 1) {
+      if (info.si_code == SI_QUEUE
+	  && info.si_value.sival_int == DM_RESTART_VAL.sival_int) {
 	debug("restart");
 	return SIGSTATE_RESTART;
       }

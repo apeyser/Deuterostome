@@ -450,7 +450,7 @@ void run_dvt_mill(void) {
   if (makeDmemory(memsetup))
     error_local(EXIT_FAILURE, 0, "D memory");
 
-  sethandler(SIGINT, SIGINThandler); //override abort on int
+  sethandler(SIGMAP_INT, SIGINThandler); //override abort on int
 
 /* The system dictionary is created in the workspace of the tiny D machine.
    If the operator 'makeVM' is used to create a large D machine, this larger

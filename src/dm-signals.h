@@ -40,10 +40,10 @@ DLL_SCOPE void propagate_sig(B sig, void (*redirect_sigf)(int sig));
 DLL_SCOPE UW encodesig(int sig);
 DLL_SCOPE int decodesig(UW sig);
 
-DLL_SCOPE void sethandler(int sig, 
+DLL_SCOPE void sethandler(enum SIGMAP sig,
 			  void (*handler)(int sig, 
 					  siginfo_t* info, 
 					  void* ucon));
-DLL_SCOPE void clearhandler(int sig);
+DLL_SCOPE void clearhandler(enum SIGMAP sig);
 
 #endif //DM_SIGNALS

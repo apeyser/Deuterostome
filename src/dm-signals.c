@@ -72,22 +72,31 @@ int decodesig(UW sig) {
   return 0;
 }
 
-void clearhandler(int sig) 
+DM_INLINE_STATIC void initsa(struct sigaction* sa, BOOLEAN* init) {
+  if (*init) return;
+  *init = TRUE;
+  sigfillset(&sa->sa_mask);
+}
+#define initsa(flags)				\
+  static BOOLEAN init = FALSE;			\
+  static struct sigaction sa = {		\
+    .sa_handler = SIG_IGN,			\
+    .sa_flags = flags				\
+  };						\
+  initsa(&sa, &init)
+
+void clearhandler(enum SIGMAP sig)
 {
-  struct sigaction sa;
-  sa.sa_handler = SIG_IGN;
-  sigfillset(&sa.sa_mask);
-  sa.sa_flags = 0;
-  if (sigaction(sig, &sa, NULL))
+  initsa(0);
+  if (sigaction(sigmap[sig], &sa, NULL))
     error_local(1, errno, "Unable to set signal handler for %i", sig);
 }
 
-void sethandler(int sig, void (*handler)(int sig, siginfo_t* info, void* ucon))
+void sethandler(enum SIGMAP sig,
+		void (*handler)(int sig, siginfo_t* info, void* ucon))
 {
-  struct sigaction sa;
+  initsa(SA_SIGINFO);
   sa.sa_sigaction = handler;
-  sigfillset(&sa.sa_mask);
-  sa.sa_flags = SA_SIGINFO;
-  if (sigaction(sig, &sa, NULL))
+  if (sigaction(sigmap[sig], &sa, NULL))
     error_local(1, errno, "Unable to set signal handler for %i", sig);
 }

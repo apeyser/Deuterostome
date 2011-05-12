@@ -1643,17 +1643,17 @@ static void aborthandler(int sig,
 }
 
 static void unquit(void) {
-  static int quitsigs[] = {SIGQUIT, SIGTERM, SIGHUP, 0};
+  static enum SIGMAP quitsigs[] = {SIGMAP_QUIT, SIGMAP_TERM, SIGMAP_HUP, SIGMAP_LEN};
   static struct sigaction sa = {
     .sa_handler = SIG_DFL,
     .sa_flags   = SA_NOCLDWAIT|SA_NOCLDSTOP
   };
-  static int* i;
+  static enum SIGMAP* i;
 
   sigfillset(&sa.sa_mask);
   if (sigaction(SIGCHLD, &sa, NULL))
     error_local(0, errno, "Unable to dezombify");
-  for (i = quitsigs; *i; i++) clearhandler(*i);
+  for (i = quitsigs; *i != SIGMAP_LEN; i++) clearhandler(*i);
 
   if (getpid() == getpgrp() && kill(0, SIGQUIT))
     error_local(0, errno, "Failed to send quit signal to process group");
@@ -1662,20 +1662,20 @@ static void unquit(void) {
 
 static void makequithandler(void)
 {
-  int quitsigs[] = {SIGQUIT, SIGTERM, SIGHUP, 0};
-  int* i;
+  enum SIGMAP quitsigs[] = {SIGMAP_QUIT, SIGMAP_TERM, SIGMAP_HUP, SIGMAP_LEN};
+  enum SIGMAP* i;
   if (getpid() != getpgid(0) && setpgid(0, 0)) 
     error_local(1, errno, "Failed to set process group");
   if (atexit(unquit)) error_local(1, 0, "Failed to set exit handler for quit");
-  for (i = quitsigs; *i; i++) sethandler(*i, quithandler);
+  for (i = quitsigs; *i != SIGMAP_LEN; i++) sethandler(*i, quithandler);
 }
 
 static void makeshellhandler(void)
 {
-  int quitsigs[] = {SIGTSTP, SIGTTIN, SIGTTOU, 0};
-  int* i;
-  for (i = quitsigs; *i; i++) sethandler(*i, shellhandler);
-  sethandler(SIGCONT, conthandler);
+  enum SIGMAP quitsigs[] = {SIGMAP_TSTP, SIGMAP_TTIN, SIGMAP_TTOU, SIGMAP_LEN};
+  enum SIGMAP* i;
+  for (i = quitsigs; *i != SIGMAP_LEN; i++) sethandler(*i, shellhandler);
+  sethandler(SIGMAP_CONT, conthandler);
 }
 
 static void diehandler(void) {
@@ -1715,22 +1715,22 @@ void setuphandlers(void) {
 */
 
   numovf = FALSE;
-  sethandler(SIGFPE, SIGFPEhandler);
+  sethandler(SIGMAP_FPE, SIGFPEhandler);
 
 /* The broken pipe signal is ignored, so it cannot kill us;
    it will pop up in attempts to send on a broken connection
 */
 
-  clearhandler(SIGPIPE);
+  clearhandler(SIGMAP_PIPE);
 
 /* We use alarms to limit read/write operations on sockets  */
 
-  sethandler(SIGALRM, SIGALRMhandler);
+  sethandler(SIGMAP_ALRM, SIGALRMhandler);
 
 /* The interrupt signal is produced by the control-c key of the
    console keyboard, it triggers the execution of 'abort'
 */
-  sethandler(SIGINT, aborthandler);
+  sethandler(SIGMAP_INT, aborthandler);
 
   makequithandler();
   makeshellhandler();
