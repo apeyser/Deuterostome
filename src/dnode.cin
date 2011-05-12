@@ -228,7 +228,7 @@ int main(int argc, char *argv[]) {
   debug("Exiting");
   err(waitchild, &status);
   if (WIFEXITED(status)) {
-    debug("exit with %i", WIFEXITED(status));
+    debug("exit with %i", WEXITSTATUS(status));
     return WEXITSTATUS(status);
   }
 

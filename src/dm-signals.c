@@ -50,13 +50,6 @@ void propagate_sig(B sig, void (*redirect_sigf)(int sig)) {
   redirect_sigf(sigmap[sig]);
 }
 
-enum SIGMAP getcookedsig(int sig) {
-  int i;
-  for (i = 0; i < SIGMAP_LEN; i++)
-    if (sig == sigmap[i]) return (enum SIGMAP) i;
-  return (enum SIGMAP) SIGMAP_LEN;
-}
-
 UW encodesig(int sig) {
   UB i;
   for (i = 0; i < (UB) SIGMAP_LEN; i++)
@@ -66,10 +59,12 @@ UW encodesig(int sig) {
 }
 
 int decodesig(UW sig) {
-  UB subsig = (UB) (sig & 0xFF);
-  if (! subsig)                 return sig >> 8;
-  if (subsig < (UB) SIGMAP_LEN) return sigmap[sig];
-  return 0;
+  UB subsig;
+  if (! (sig & 0xFF)) return sig >> 8;
+
+  subsig = (UB) (sig & 0x7F);
+  if (subsig >= (UB) SIGMAP_LEN) return 0;
+  return sigmap[subsig];
 }
 
 DM_INLINE_STATIC void initsa(struct sigaction* sa, BOOLEAN* init) {
