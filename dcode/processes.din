@@ -1,6 +1,14 @@
 | -*- mode: d; -*-
 
 /PROCESSES 100 {
+  |================== process ======================
+  | ~active | ...
+  |
+  | executes active in PROCESSES -- equivalent to
+  | PROCESSES indict, but predeclared in userdict.
+  |
+  /inprocess ~exec userdef
+
   | These need to be in the same order as
   |  flags struct array in dm-proc.c.
   /FFLAGS {
