@@ -25,7 +25,7 @@
 #include "dm-sem.h"
 #include "error-local.h"
 
-// (dir)/null (prefix) | fdr fdw (dir) (prefix)
+// (dir)/null (prefix) | fdr fdw (dir) (prefixXXXXXX)
 P op_tmpfile(void) {
   P retc;
   B* curr = FREEvm;
@@ -722,84 +722,77 @@ P op_pipefd(void) {
   return OK;
 }
 
-// pid sig | --
+// pid sig-encoded | --
 P op_killpid(void) {
-  P sig;
+  int sig;
+  UL32 sig_;
   if (FLOORopds > o_2) return OPDS_UNF;
   if (TAG(o_2) != (NULLOBJ|PIDTYPE)) return OPD_ERR;
   if (CLASS(o_1) != NUM) return OPD_CLA;
-  if (! PVALUE(o_1, &sig)) return UNDF_VAL;
-  if (sig >= SIGMAP_LEN || sig < 0) 
-    return RNG_CHK;
+  if (! L32VALUE(o_1, (L32*) &sig_)) return UNDF_VAL;
 
-  if (kill(PID_VAL(o_2), sigmap[sig]))
-    return -errno;
+  if (! (sig_ && 0xFF00)) sig_ |= 0x80;
+  if (! (sig = decodesig((UW) sig_))) return RNG_CHK;
+  if (kill(PID_VAL(o_2), sig)) return -errno;
 
   FREEopds = o_2;
   return OK;
 }
 
-// pid | signal-val/exit-val/* true-if-exited
-//       if nb true-if-child-stopped
+// pid | exit-val-encode {true-if-child-stopped if nb}?
 DM_INLINE_STATIC P dmwait(BOOLEAN nb) {
-  siginfo_t status = {0};
+  siginfo_t status;
+  pid_t pid;
+  B* o_status = o_1;
 
   if (FLOORopds > o_1) return OPDS_UNF;
-  if (CEILopds < o3) return OPDS_OVF;
+  if (nb && CEILopds < o2) return OPDS_OVF;
   if (TAG(o_1) != (NULLOBJ|PIDTYPE)) return OPD_ERR;
   
   DEBUG("waiting for %li", (long) PID_VAL(o_1));
-  while (waitid(P_PID,
-		(id_t) PID_VAL(o_1),
-		&status, 
-		nb ? (WNOHANG|WNOWAIT|WEXITED) : WEXITED)
+  while ((pid = waitid(P_PID,
+		       (id_t) PID_VAL(o_1),
+		       &status,
+		       nb ? (WNOHANG|WNOWAIT|WEXITED) : WEXITED))
 	 == -1) {
     if (errno != EINTR) return -errno;
     checkabort();
   }
   DEBUG("received %i from %li", (int) status.si_pid, (long) PID_VAL(o_1));
 
-  if (nb && ! status.si_pid) {
+  if (nb) {
+    if (! pid) {
+      TAG(o_1) = BOOL;
+      ATTR(o_1) = 0;
+      BOOL_VAL(o_1) = FALSE;
+      DEBUG("wait %i", 1);
+      return OK;
+    }
+
+    FREEopds = o2;
     TAG(o_1) = BOOL;
     ATTR(o_1) = 0;
-    BOOL_VAL(o_1) = FALSE;
-    DEBUG("wait %i", 1);
-    return OK;
+    BOOL_VAL(o_1) = TRUE;
   }
 
-  TAG(o_1) = (NUM|BYTETYPE);
-  ATTR(o_1) = 0;
+  TAG(o_status) = (NUM|LONG32TYPE);
+  ATTR(o_status) = 0;
+  if (status.si_code == CLD_EXITED)
+    LONG32_VAL(o_status) = (L32) (status.si_status & 0xFF);
+  else
+    LONG32_VAL(o_status) = ((L32) encodesig(status.si_status)) << 8;
 
-  TAG(o1) = BOOL;
-  ATTR(o1) = 0;
-
-  BYTE_VAL(o_1) = status.si_status;
-  switch (status.si_code) {
-    case CLD_EXITED: BOOL_VAL(o1) = TRUE;
-      break;
-    case CLD_DUMPED: BYTE_VAL(o_1) = BINF;
-      // intentional fall-through
-    case CLD_KILLED: BOOL_VAL(o1) = FALSE;
-      break;
-  };
-
-  if (nb) {
-    TAG(o2) = BOOL;
-    ATTR(o2) = 0;
-    BOOL_VAL(o2) = TRUE;
-    FREEopds = o3;
-  }
-  else FREEopds = o2;
   DEBUG("wait %i", 2);
   return OK;
 }
 
-// pid | signal-val/exit-val/* true-if-exited
+// pid | exit-val-encoded
 P op_waitpid(void) {
   return dmwait(FALSE);
 }
 
-// pid | false / signal-val/exit-val/* true-if-exited true
+// pid | false
+//     | exit-val-encoded true
 P op_checkpid(void) {
   return dmwait(TRUE);
 }

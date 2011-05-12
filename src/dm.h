@@ -387,8 +387,9 @@ DLL_SCOPE volatile BOOLEAN timeout;    /* for I/O operations          */
 DLL_SCOPE volatile BOOLEAN abortflag;
 DLL_SCOPE volatile BOOLEAN numovf;     /* FPU overflow status            */
 DLL_SCOPE volatile BOOLEAN recvd_quit; /* quit signal */
+DLL_SCOPE volatile int     quitsig;    /* what signal to propagate */
 
-DLL_SCOPE P exitval;
+DLL_SCOPE UL32 exitval;
 DLL_SCOPE BOOLEAN halt_flag;          /* execution block due to 'halt'     */
 DLL_SCOPE fd_set sock_fds;
 DLL_SCOPE BOOLEAN isstopping; // propagate stops through other locks
@@ -593,6 +594,12 @@ DM_HOT DM_INLINE_STATIC BOOLEAN L32VALUE(B* frame, L32* var) {
   *var = (L32) v;
   return TRUE;
 }
+
+#if HAVE_PTHREAD
+#define DM_SIGPROCMASK pthread_sigmask
+#else
+#define DM_SIGPROCMASK(h, s, o) (sigprocmask((h), (s), (o)) ? errno : 0)
+#endif
 
 #if __cplusplus
 }

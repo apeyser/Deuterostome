@@ -1,4 +1,4 @@
-AC_INIT([D-Machine], [4.6.17], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
+AC_INIT([D-Machine], [4.6.18], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
 AC_CONFIG_MACRO_DIR([m4 libltdl/m4])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_AUX_DIR([libltdl/config])
@@ -42,8 +42,6 @@ CF_AC_ARG_VAR([ROLLBITS], [unroll math loops to 2^rollbits], [3])
 CF_AC_ARG_VAR([BYTECORRECT], [align to this many bytes], [8])
 CF_AC_ENABLE([debug-dmnum], [enable extra debug in dmnum], [no], [yes])
 
-CF_AM_ENABLE([daemon], [compile and install daemonizer], [no], [yes])
-CF_AM_ENABLE([setuid], [compile or install setuid wrapper], [yes])
 CF_AC_ENABLE([threads], 
              [compile and install threads, value is default number], 
              [1])
@@ -262,10 +260,7 @@ CF_AC_CHECK_HEADER([inttypes.h])
 CF_AC_CHECK_HEADER([sys/wait.h])
 CF_IF_ENABLED([plugins-support], [CF_AC_CHECK_HEADER([stdarg.h])])
 CF_IF_ENABLED([regex], [CF_AC_CHECK_HEADER([regex.h])])
-CF_IF_ENABLED([daemon], [
-  AC_CHECK_HEADERS([sys/prctl.h])
-  AC_CHECK_FUNCS([prctl])
-])
+CF_AC_CHECK_HEADER([spawn.h])
 
 AC_CHECK_FUNCS([setsid])
 AC_CHECK_FUNCS([srandomdev])

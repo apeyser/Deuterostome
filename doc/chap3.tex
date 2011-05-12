@@ -145,6 +145,7 @@ specific \file{startup_xxx.d} files.
 \op*{loadlib} & - & + & + \\
 \op*{nextlib} & - & + & + \\
 \op*{quit} & + & - & + \\
+\op*{die}  & + & + & + \\
 \op*{lock} & - & + & + \\
 \op*{unlock} & - & + & + \\
 \op*{locked} & - & + & + \\
@@ -289,6 +290,7 @@ the file \file{startup_dvt.d}.
   instance-string error-num           & error        & --                 \\
   instance-string error-num stringbuf & errormessage & message\_substring \\
 --                                    & quit         & --                 \\
+  return-int                          & die          & --                 \\
 \end{ops}
 
 \op{nextevent} takes a string buffer as operand and blocks
@@ -358,7 +360,15 @@ message on the console screen, and forces the execution of
 returns the message as substring of the designated string buffer and
 resumes normal execution.
 
-\op{quit} terminates the \dcomp{dvt} process.
+\op{quit} terminates the \dcomp{dvt} process. \op{die} will terminate
+the process like quit, but allows a return value. If the bits above
+the least significant byte are zero, then the lest significant byte is
+the return value. Otherwise, if the next byte is non-zero, then it's 7
+least signifcant bits (top bit masked) refers to the architecture
+neutral signal (as in \textproc{SIGNALS} in
+\file{startup_common.dvt}. The last options is the remaining bits,
+which if non-zero when shifted right by 16 is the raw, operating
+system specific signal, as in \emph{C}'s \textproc{kill}.
 
 \subsubsection{Supervising of \dcomp[dnode]{dnodes}}
 
@@ -859,12 +869,14 @@ operand, \op{vmresize} establishes stack, VM, and \op{userdict}
 dimensions as specified by the elements of the array, in the order:
 operand stack size (in objects), dictionary stack size, execution
 stack size, VM capacity (in MB), and userdict capacity (in
-associations). \op{vmresize} indicates sucess/failure of the
-attempted memory allocation in \emph{bool}. When used with the array
-operand, \op{vmresize} also sets the startup and working file
-directories back to the original working directory (from which the
-\dcomp{dnode} has been started up); lastly, \op{vmresize} makes the
-\dcomp{dnode} interpret the file \file{startup_dnode.d}.
+associations). \op{vmresize} indicates sucess/failure of the attempted
+memory allocation in \emph{bool}. When used with the array operand,
+\op{vmresize} also sets the startup and working file directories back
+to the original working directory (from which the \dcomp{dnode} has
+been started up); lastly, \op{vmresize} makes the \dcomp{dnode}
+interpret the file \file{startup_dnode.d}. \op{vmresize} requires that
+\dcomp{dnode} be in `tiny' state if it gets passed an array, and that
+it \emph{not} be in tiny state if it gets pass \op{null}.
 
 \op{halt} suspends the execution of the object file currently held
 on the execution stack, while accepting and executing keyboard phrases
@@ -1036,7 +1048,7 @@ array dir & sineFFT & array\\\\
 \emph{decompLU} performs the LU-decomposition of the matrix \emph{a}
 in place (given as a list of row arrays of type `/D'). The array
 \emph{idx} is of type `/X' and receives row permutation information to
-be used by \emph{backsubLU}. The returned numeral \emph{d} signals an
+be used by \emph{backsubLU}. The returned numeral \emph{D} signals an
 even/odd number of permutations, and \emph{bool} signals a valid
 decomposition (or a singular matrix). \emph{backsubLU} computes the
 solution of a linear equation system using the LU-decomposed

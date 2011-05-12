@@ -9,7 +9,7 @@ AM_LDADD = $(AM_LIBS) $(top_builddir)/lib/libgnu.la
 INCLUDES =
 
 DIST_SUBDIRS = codegen
-BUILT_SOURCES = dnode-nice.c dnode-daemon.c paths.h \
+BUILT_SOURCES = paths.h dnode.c \
 		drook.c dqueen.c dm-prop.c dm-sem.c
 INFILES = $(BUILT_SOURCES)
 EXTRA_DIST = $(INFILES:=in) $(IDFILES)
@@ -27,6 +27,7 @@ clean-local:
 dpawn = $(pkglibexecdir)/dpawn
 drook = $(pkglibexecdir)/drook
 dmprop = $(pkglibexecdir)/dmprop
+dmrunnode = $(pkglibexecdir)/dmrunnode
 
 edit = -e 's,[@]bindir[@],$(bindir),g' \
        -e 's,[@]srcdir[@],$(srcdir),g' \
@@ -37,34 +38,11 @@ edit = -e 's,[@]bindir[@],$(bindir),g' \
        -e 's,[@]dmprop[@],$(dmprop),g' \
        -e 's,[@]dmsockdir[@],$(dmsockdir),g' \
        -e 's,[@]dmstartdir[@],$(dmstartdir),g' \
+       -e 's,[@]dmrunnode[@],$(dmrunnode),g' \
        -e 's,[@]pkglibdir[@],$(pkglibdir),g' \
        -e 's,[@]dmconfdir[@],$(dmconfdir),g' \
        -e 's,[@]pkglibexecdir[@],$(pkglibexecdir),g' \
        -e 's,[@]SEM_DNODE_NAME[@],$(SEM_DNODE_NAME),g'
-
-
-if ENABLE_SETUID
-
-nodist_dnode_nice_SOURCES = dnode-nice.c
-DNODENICEBIN = dnode-nice
-
-install-exec-local:
-	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
-	$(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install \
-		$(INSTALL) -m 4755 "dnode-nice$(EXEEXT)" \
-			"$(DESTDIR)$(bindir)/dnode-nice$(EXEEXT)" 
-
-uninstall-local:
-	-rm -f "$(DESTDIR)$(bindir)/dnode-nice$(EXEEXT)"
-
-endif ENABLE_SETUID
-
-if ENABLE_DAEMON
-
-nodist_dnode_daemon_SOURCES = dnode-daemon.c
-DNODEDAEMONBIN = dnode-daemon
-
-endif ENABLE_DAEMON
 
 if ENABLE_ATLAS
   ATLAS_ACTIVATE = -DATLAS_LIB
@@ -96,9 +74,9 @@ dvt_x_set_input_focus_SOURCES = x-set-input-focus.c
 dvt_x_set_input_focus_LDADD = $(X_LDFLAGS)
 endif ENABLE_X11
 
-bin_PROGRAMS = dvt dnode dgen $(DNODEDAEMONBIN)
-noinst_PROGRAMS = testwordorder $(DNODENICEBIN)
-pkglibexec_PROGRAMS = getdisplay dmprop \
+bin_PROGRAMS = dvt dnode dgen
+noinst_PROGRAMS = testwordorder
+pkglibexec_PROGRAMS = getdisplay dmprop dmrunnode \
   $(DVTXSETINPUTFOCUSBIN) $(MPI_PROGS)
 
 if ENABLE_PLUGINS_SUPPORT
@@ -135,16 +113,19 @@ dvt_LDADD = $(builddir)/libdmglobals.la \
 dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS)
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 
-dnode_SOURCES = dnode.c dnode_0.h dm-dnode.h dm-dnode.c \
+dmrunnode_SOURCES = dmrunnode.c dnode_0.h dm-dnode.h dm-dnode.c dnode.h \
 	$(SOCKSRCS) \
 	$(DNODE_MPI_SRCS)
-nodist_dnode_SOURCES = $(NODIST_SOCKSRCS) $(NODIST_DNODE_MPI_SRCS) $(SEM_SRC)
-dnode_LDADD = $(builddir)/libdmglobals.la \
+nodist_dmrunnode_SOURCES = $(NODIST_SOCKSRCS) $(NODIST_DNODE_MPI_SRCS) $(SEM_SRC)
+dmrunnode_LDADD = $(builddir)/libdmglobals.la \
 	$(builddir)/libdmnodal.la \
 	$(AM_LDADD) $(ATLAS_LIBS) $(MPI_LIBS)
-dnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
-dnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) \
+dmrunnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@ 
+dmrunnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) \
 	$(ATLAS_FLAGS) $(MPI_FLAGS)
+
+dnode_SOURCES = dnode.h error-local.h
+nodist_dnode_SOURCES = dnode.c
 
 dpawn_SOURCES = dpawn.c dpawn_0.h dm-dpawn.h dm-dpawn.c dm-mpi.h dm-mpi.c
 dpawn_LDADD = $(builddir)/libdmglobals.la \

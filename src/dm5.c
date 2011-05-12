@@ -33,9 +33,12 @@
 
 #include <stdio.h>
 #include <limits.h>
+#include <signal.h>
+#include <errno.h>
 
 #include "dm2.h"
 #include "dm5.h"
+#include "dm-signals.h"
 
 #include "error-local.h"
 
@@ -552,12 +555,40 @@ P op_execstack(void)
    ---|---
 */
 
-P op_quit(void)  
+P op_quit(void)
 {
   DEBUG("%s", "quitting");
   recvd_quit = FALSE;
   exitval = 0;
   return TERM;
+}
+
+P quit(void) {
+  static BOOLEAN init = FALSE;
+  static B dieframe[FRAMEBYTES] = {0};
+  int _quitsig = quitsig;
+
+  if (! init) {
+    init = TRUE;
+    makename((B*) "die", dieframe);
+    ATTR(dieframe) = ACTIVE;
+  };
+
+  recvd_quit = FALSE;
+  quitsig = 0;
+
+  if (o1 >= CEILopds) return OPDS_OVF;
+  if (x1 >= CEILexecs) return EXECS_OVF;
+
+  TAG(o1) = (NUM|LONG32TYPE);
+  ATTR(o1) = 0;
+  LONG32_VAL(o1) = ((L32) encodesig(_quitsig)) << 8;
+  FREEopds = o2;
+
+  moveframe(dieframe, x1);
+  FREEexecs = x2;
+
+  return OK;
 }
 
 // num | exited
@@ -567,11 +598,21 @@ P op_die(void) {
 
   if (FLOORopds > o_1) return OPDS_UNF;
   if (CLASS(o_1) != NUM) return OPD_CLA;
-  if (! PVALUE(o_1, &exitval)) return UNDF_VAL;
-  if (sizeof(P) > sizeof(int) && exitval > INT_MAX) 
-    return RNG_CHK;
+  if (! L32VALUE(o_1, &exitval)) return UNDF_VAL;
 
   return TERM;
+}
+
+void die(void) {
+  static sigset_t s;
+  static int err;
+  if (sigfillset(&s))
+    error_local(EXIT_FAILURE, errno, "sigfillset");
+  if ((err = DM_SIGPROCMASK(SIG_SETMASK, &s, NULL)))
+    error_local(EXIT_FAILURE, err, "sigprocmask");
+  
+  DEBUG("Exiting: %i", (int) exitval);
+  exit(((int) exitval) & 0xFF);
 }
 
 /*---------------------------------------------------- eq

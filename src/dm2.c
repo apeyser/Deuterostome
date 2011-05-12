@@ -1603,6 +1603,7 @@ static void quithandler(int sig, siginfo_t* info,
   fprintf(stderr, "%li: Exiting on signal %i from %li\n", 
 	  (long) getpid(), sig, info ? (long) info->si_pid : 0);
   recvd_quit = TRUE;
+  quitsig = sig;
 }
 
 /* --------------- signal handler: job control... */
@@ -1641,17 +1642,18 @@ static void aborthandler(int sig,
   abortflag = TRUE;
 }
 
-static void quit(void) {
-  int quitsigs[] = {SIGQUIT, SIGTERM, SIGHUP, 0};
-  int* i;
+static void unquit(void) {
+  static enum SIGMAP quitsigs[] = {SIGMAP_QUIT, SIGMAP_TERM, SIGMAP_HUP, SIGMAP_LEN};
   static struct sigaction sa = {
     .sa_handler = SIG_DFL,
     .sa_flags   = SA_NOCLDWAIT|SA_NOCLDSTOP
   };
+  static enum SIGMAP* i;
+
   sigfillset(&sa.sa_mask);
   if (sigaction(SIGCHLD, &sa, NULL))
     error_local(0, errno, "Unable to dezombify");
-  for (i = quitsigs; *i; i++) clearhandler(*i);
+  for (i = quitsigs; *i != SIGMAP_LEN; i++) clearhandler(*i);
 
   if (getpid() == getpgrp() && kill(0, SIGQUIT))
     error_local(0, errno, "Failed to send quit signal to process group");
@@ -1660,48 +1662,77 @@ static void quit(void) {
 
 static void makequithandler(void)
 {
-  int quitsigs[] = {SIGQUIT, SIGTERM, SIGHUP, 0};
-  int* i;
+  enum SIGMAP quitsigs[] = {SIGMAP_QUIT, SIGMAP_TERM, SIGMAP_HUP, SIGMAP_LEN};
+  enum SIGMAP* i;
   if (getpid() != getpgid(0) && setpgid(0, 0)) 
     error_local(1, errno, "Failed to set process group");
-  if (atexit(quit)) error_local(1, 0, "Failed to set exit handler for quit");
-  for (i = quitsigs; *i; i++) sethandler(*i, quithandler);
+  if (atexit(unquit)) error_local(1, 0, "Failed to set exit handler for quit");
+  for (i = quitsigs; *i != SIGMAP_LEN; i++) sethandler(*i, quithandler);
 }
 
 static void makeshellhandler(void)
 {
-  int quitsigs[] = {SIGTSTP, SIGTTIN, SIGTTOU, 0};
-  int* i;
-  for (i = quitsigs; *i; i++) sethandler(*i, shellhandler);
-  sethandler(SIGCONT, conthandler);
+  enum SIGMAP quitsigs[] = {SIGMAP_TSTP, SIGMAP_TTIN, SIGMAP_TTOU, SIGMAP_LEN};
+  enum SIGMAP* i;
+  for (i = quitsigs; *i != SIGMAP_LEN; i++) sethandler(*i, shellhandler);
+  sethandler(SIGMAP_CONT, conthandler);
+}
+
+static void diehandler(void) {
+  static sigset_t s;
+  static struct sigaction sa = {
+    .sa_handler = SIG_DFL,
+    .sa_flags = 0
+  };
+  static int sig;
+  static int err;
+
+  DEBUG("diehandler%s", "");
+  if (! (sig = decodesig((UW) (exitval >> 8)))) return;
+
+  DEBUG("sig: %i", sig);
+  sigfillset(&sa.sa_mask);
+  if (sigaction(sig, &sa, NULL)) 
+    error_local(EXIT_FAILURE, errno, "sigaction");
+  
+  if (sigemptyset(&s))
+    error_local(EXIT_FAILURE, errno, "sigemptyset");
+  if (sigaddset(&s, sig))
+    error_local(EXIT_FAILURE, errno, "sigaddset");
+  if ((err = DM_SIGPROCMASK(SIG_UNBLOCK, &s, NULL)))
+    error_local(EXIT_FAILURE, err, "sigprocmask");
+  if (raise(sig))
+    error_local(EXIT_FAILURE, errno, "raise");
 }
 
 void setuphandlers(void) {
+  // first, setup an exit handler to propagate signals
+  // this needs to be called last.
+  if (atexit(diehandler))
+    error_local(EXIT_FAILURE, errno, "atexit");
+
 /*----------------- SIGNALS that we wish to handle */
 /* FPU indigestion is recorded in the numovf flag;
    we do not wish to be killed by it
 */
 
   numovf = FALSE;
-  sethandler(SIGFPE, SIGFPEhandler);
+  sethandler(SIGMAP_FPE, SIGFPEhandler);
 
 /* The broken pipe signal is ignored, so it cannot kill us;
    it will pop up in attempts to send on a broken connection
 */
 
-  clearhandler(SIGPIPE);
+  clearhandler(SIGMAP_PIPE);
 
 /* We use alarms to limit read/write operations on sockets  */
 
-  sethandler(SIGALRM, SIGALRMhandler);
+  sethandler(SIGMAP_ALRM, SIGALRMhandler);
 
-// Switched the following to SIGABRT, produced by kill -ABRT
-// rather than control-c, that normally terminates the job
-//
 /* The interrupt signal is produced by the control-c key of the
    console keyboard, it triggers the execution of 'abort'
 */
-  sethandler(SIGINT, aborthandler);
+  sethandler(SIGMAP_INT, aborthandler);
 
   makequithandler();
   makeshellhandler();

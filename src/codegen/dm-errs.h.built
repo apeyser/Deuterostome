@@ -105,7 +105,7 @@
 #define UNKNOWN_ERR                   ((P)       48L)
 // ** Internal buffer overflow
 #define BUF_OVF                       ((P)       49L)
-#ifdef DM_ENABLE_REGEX
+#ifdef ENABLE_REGEX
 // Regex Error: Invalid regular expression
 #define REGEX_BADPAT                  ((P)       50L)
 // Regex Error: Invalid collating element
@@ -132,7 +132,7 @@
 #define REGEX_BADRPT                  ((P)       61L)
 // Regex Error: Unknown error
 #define REGEX_UNKNOWN                 ((P)       62L)
-#endif //DM_ENABLE_REGEX
+#endif //ENABLE_REGEX
 // ** No such file or directory
 #define FILE_NOSUCH                   ((P)       63L)
 // ** Directory not empty
@@ -147,8 +147,10 @@
 #define STREAM_EPIPE                  ((P)       68L)
 // *** double unget on stream
 #define STREAM_OVF                    ((P)       69L)
+#ifdef ENABLE_SEM
 // ** Inter locks not defined
 #define INTER_LOCK_NOT_DEF            ((P)       70L)
+#endif //ENABLE_SEM
 // ** Lost connection
 #define LOST_CONN                     ((P)       71L)
 // ** Attempted to send a signal to a socket without that capability
@@ -181,7 +183,7 @@
 #define LIB_INIT                      ((P)       85L)
 // ** Cannot allocate D memory
 #define VMR_ERR                       ((P)       86L)
-// ** Memory alread minimized
+// ** Memory already minimized
 #define VMR_STATE                     ((P)       87L)
 // ** Opaque dict type mismatch
 #define ILL_OPAQUE                    ((P)       88L)
@@ -193,6 +195,8 @@
 #define ACTIVE_STREAM                 ((P)       91L)
 // ** Compiled without plugin support
 #define NO_PLUGINS                    ((P)       92L)
+#ifdef ENABLE_THREADS
+#endif //ENABLE_THREADS
 #ifdef BUILD_ATLAS
 #endif //BUILD_ATLAS
 #ifdef HAVE_ATLAS
@@ -221,7 +225,7 @@
 // Matrix Error: illegal overlap
 #define MATRIX_OVERLAP                ((P)      104L)
 #endif //HAVE_ATLAS
-#ifdef DM_ENABLE_RTHREADS
+#ifdef ENABLE_RTHREADS
 // ** Rthreads are inactive
 #define RTHREADS_UNSET                ((P)      105L)
 // ** Rthreads: nodes for dictionay not a numeral
@@ -242,11 +246,11 @@
 #define RTHREADS_KEYSIZE              ((P)      113L)
 // ** Rthreads: key/val pair: val is active
 #define RTHREADS_VALATR               ((P)      114L)
-#endif //DM_ENABLE_RTHREADS
-#ifdef DM_HOST_IS_32_BIT
-#endif //DM_HOST_IS_32_BIT
-#ifdef DM_ENABLE_PLUGINS_SUPPORT
-#endif //DM_ENABLE_PLUGINS_SUPPORT
+#endif //ENABLE_RTHREADS
+#ifdef HOST_IS_32_BIT
+#endif //HOST_IS_32_BIT
+#ifdef ENABLE_PLUGINS_SUPPORT
+#endif //ENABLE_PLUGINS_SUPPORT
 // ** no socket events -- internal
 #define NEXTEVENT_NOEVENT             ((P)      115L)
 // ** No mpi message msg received -- internal

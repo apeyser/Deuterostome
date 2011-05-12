@@ -63,7 +63,7 @@ P op_rsendsig(void) {
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (CLASS(o_1) != NUM) return OPD_CLA;
   if (! PVALUE(o_1, &sig_)) return UNDF_VAL;
-  if (sig_ < 0 || sig_ >= 256) return RNG_CHK;
+  if (sig_ < 0 || sig_ >= SIGMAP_LEN) return RNG_CHK;
   
   sig = (B) sig_;
   while (send(sigfd, &sig, 1, 0) == -1) {
@@ -158,10 +158,10 @@ P killrthreads(void) {
   P r = OK;
 
   if (sigfd != -1) {
-    B sig = SIGMAP_QUIT;
+    B sig = (B) SIGMAP_QUIT;
     send(sigfd, &sig, 1, 0);
     sleep(5);
-    sig = SIGMAP_KILL;
+    sig = (B) SIGMAP_KILL;
     send(sigfd, &sig, 1, 0);
     if (close(sigfd) && ! r) r = -errno;
     sigfd = -1;

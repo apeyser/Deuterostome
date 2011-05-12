@@ -474,9 +474,10 @@ void mainthread(void) {
 
 DM_INLINE_STATIC void blocksigs(void) {
   sigset_t set;
+  int err;
   if (sigfillset(&set)) error_local(1, errno, "Unable to empty sigset");
-  if (sigprocmask(SIG_BLOCK, &set, NULL)) 
-    error_local(1, errno, "Unable to block sigs");
+  if ((err = DM_SIGPROCMASK(SIG_BLOCK, &set, NULL)))
+    error_local(1, err, "Unable to block sigs");
 }
 
 int main(int argc, char* argv[]) {

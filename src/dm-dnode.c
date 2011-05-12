@@ -22,6 +22,7 @@
 #include "dm-proc.h"
 #include "dm-prop.h"
 #include "error-local.h"
+#include "dnode.h"
 
 #if ! X_DISPLAY_MISSING
 #include "xhack.h"
@@ -189,9 +190,10 @@ static P int_Xdisconnect(BOOLEAN nocheck) {
 #if X_DISPLAY_MISSING
   return NO_XWINDOWS;
 #else
+  if (! nocheck && dvtdisplay) nocheck = TRUE;
+
   closedisplay();
-  if (nocheck || dvtdisplay)  {
-    delsocket_force(xsocket);
+  if (nocheck)  {
     if (defaultdisplay) setenv("DISPLAY", defaultdisplay, 1);
     else unsetenv("DISPLAY");
   }
@@ -242,6 +244,7 @@ P op_Xconnect(void)
   if (o_1 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
   if (ARRAY_SIZE(o_1) > (P) sizeof(displayname)-1) return RNG_CHK;
+  DEBUG("open display%s", "");
   if (ARRAY_SIZE(o_1) > 0) {
     moveB((B *)VALUE_BASE(o_1), displayname, ARRAY_SIZE(o_1));
     displayname[ARRAY_SIZE(o_1)] = '\000';
@@ -268,6 +271,10 @@ P op_Xconnect(void)
   dvtgc = HXCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
   xsocket = ConnectionNumber(dvtdisplay);
   if ((retc = addsocket(xsocket, &sockettype, &defaultsocketinfo))) {
+    if (retc == SOCK_STATE) {
+      if (close(xsocket)) return -errno;
+      xsocket = -1;
+    }
     int_Xdisconnect(TRUE);
     return retc;
   }
@@ -634,8 +641,19 @@ P op_killsockets(void) {
   return retc ? retc : retc_ ? retc_ : ABORT;
 }
 
+
+DM_INLINE_STATIC void restart(void) __attribute__((noreturn));
+void restart(void) {
+  if (sigqueue(getppid(), DM_RESTART, DM_RESTART_VAL))
+    error_local(EXIT_FAILURE, errno, "sigqueue");
+  exit(0);
+}
+
 P op_vmresize(void) {
   P retc;
+  if (o_1 >= FLOORopds && CLASS(o_1) == NULLOBJ)
+    restart();
+
   if ((retc = op_vmresize_())) return retc;
   if ((retc = closesockets_resize())) return retc;
 #if DM_ENABLE_RTHREADS
@@ -666,7 +684,7 @@ DM_INLINE_STATIC void sock_error(BOOLEAN ex, P errno_, const char* msg) {
 
 void run_dnode_mill(void) {
   P retc;
-  B abortframe[FRAMEBYTES], dieframe[FRAMEBYTES];
+  B abortframe[FRAMEBYTES];
   union SocketInfo socketinfo = defaultsocketinfo;
   UW port = (UW) serverport;
 
@@ -674,8 +692,10 @@ void run_dnode_mill(void) {
   defaultdisplay = getenv("DISPLAY");
 #endif
 
+  setuphandlers();
   set_closesockets_atexit();
   setupfd();
+  maketinysetup();
 
   if ((serversocket = make_socket(&port, TRUE, PACKET_SIZE, &retc)) == -1)
     sock_error(TRUE, retc < 0 ? -retc : 0, "making internet server socket");
@@ -711,7 +731,6 @@ void run_dnode_mill(void) {
 #endif //ENABLE_UNIX_SOCKETS
 
 socksdone:
-  maketinysetup();
 #if DM_ENABLE_RTHREADS
   rthreads_init();
 #endif //DM_ENABLE_RTHREADS
@@ -722,9 +741,6 @@ socksdone:
 
   makename((B*) "abort", abortframe); 
   ATTR(abortframe) = ACTIVE;
-
-  makename((B*) "die", dieframe);
-  ATTR(dieframe) = ACTIVE;
 
 /*-------------- you are entering the scheduler -------------------*/\
 /* We start with no D code on the execution stack, so we doze
@@ -754,49 +770,32 @@ socksdone:
 	retc = nextevent(cmsf);
 	break;
 
-      case TERM:
-	DEBUG("Exiting: %i", (int) exitval);
-	exit(exitval);
+      case TERM: die();
 	
-      default:
-	break;
+      default: break;
     }
+
     switch (retc) {
       case OK: continue;
 
       case ABORT:
 	abortflag = FALSE;
-	if (x1 < CEILexecs) {
-	  moveframe(abortframe, x1);
-	  FREEexecs = x2;
-	  continue;
-	}
-	
-	retc = EXECS_OVF; 
-	errsource = (B*) "supervisor"; 
-	break;
-
-      case QUIT:
-	recvd_quit = FALSE;
-	if (o1 >= CEILopds) {
-	  retc = OPDS_OVF;
-	  errsource = (B*) "supervisor";
-	}
-	else if (x1 >= CEILexecs) {
+	if (x1 >= CEILexecs) {
 	  retc = EXECS_OVF;
 	  errsource = (B*) "supervisor";
+	  break;
 	}
-	else {
-	  TAG(o1) = (NUM|BYTETYPE);
-	  ATTR(o1) = 0;
-	  BYTE_VAL(o1) = 0;
-	  FREEopds = o2;
-	  
-	  moveframe(dieframe, x1);
-	  FREEexecs = x2;
-	  continue;
+
+	moveframe(abortframe, x1);
+	FREEexecs = x2;
+	continue;
+
+      case QUIT:
+	if ((retc = quit())) {
+	  errsource = (B*) "supervisor";
+	  break;
 	}
-	break;
+	continue;
 
       default: break;
     }

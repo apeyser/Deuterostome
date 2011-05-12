@@ -362,9 +362,6 @@
 /* Define to 1 if you have the <petsc.h> header file. */
 #undef HAVE_PETSC_H
 
-/* Define to 1 if you have the `prctl' function. */
-#undef HAVE_PRCTL
-
 /* Define if libtool can extract symbol lists from object files. */
 #undef HAVE_PRELOADED_SYMBOLS
 
@@ -437,9 +434,6 @@
 
 /* Define to 1 if you have the <sys/inttypes.h> header file. */
 #undef HAVE_SYS_INTTYPES_H
-
-/* Define to 1 if you have the <sys/prctl.h> header file. */
-#undef HAVE_SYS_PRCTL_H
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H

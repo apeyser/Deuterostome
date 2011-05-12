@@ -436,7 +436,7 @@ static void SIGINThandler(int sig __attribute__ ((__unused__)),
 
 void run_dvt_mill(void) {
   P retc;
-  B abortframe[FRAMEBYTES], quitframe[FRAMEBYTES], *sf;
+  B abortframe[FRAMEBYTES], *sf;
   B* startup_dvt;
   P nb, tnb;
   B* sysdict;
@@ -444,14 +444,13 @@ void run_dvt_mill(void) {
   B* p;
   int sufd;
 
+  setuphandlers();
   set_closesockets_atexit();
   setupfd();
-
   if (makeDmemory(memsetup))
     error_local(EXIT_FAILURE, 0, "D memory");
 
-  setuphandlers();
-  sethandler(SIGINT, SIGINThandler); //override abort on int
+  sethandler(SIGMAP_INT, SIGINThandler); //override abort on int
 
 /* The system dictionary is created in the workspace of the tiny D machine.
    If the operator 'makeVM' is used to create a large D machine, this larger
@@ -478,9 +477,6 @@ void run_dvt_mill(void) {
 
   makename((B*) "abort", abortframe);
   ATTR(abortframe) = ACTIVE;
-
-  makename((B*) "quit", quitframe);
-  ATTR(quitframe) = ACTIVE;
 
 /*----------- read startup_dvt.d and push on execs ----------*/
   startup_dvt 
@@ -513,31 +509,26 @@ void run_dvt_mill(void) {
     switch(retc = exec(1000)) {
       case MORE: case DONE: continue; 
 
-      case TERM:
-	exit(exitval);
+      case TERM: die();
 
-      case QUIT: 
-	recvd_quit = FALSE;
-	if (x1 < CEILexecs) {
-	  moveframe(quitframe, x1);
-	  FREEexecs = x2;
-	  continue;
+      case QUIT:
+	if ((retc = quit())) {
+	  errsource = (B*) "supervisor";
+	  break;
 	}
-	retc = EXECS_OVF;
-	errsource = (B*) "supervisor";
-	break;
+	continue;
 
       case ABORT:
 	abortflag = FALSE;
-	if (x1 < CEILexecs) {
-	  moveframe(abortframe, x1); 
-	  FREEexecs = x2;
-	  continue;
+	if (x1 >= CEILexecs) {
+	  retc = EXECS_OVF;
+	  errsource = (B*)"supervisor";
+	  break;
 	}
 
-	retc = EXECS_OVF; 
-	errsource = (B*)"supervisor"; 
-	break;
+	moveframe(abortframe, x1);
+	FREEexecs = x2;
+	continue;
 
       default: break;
     }

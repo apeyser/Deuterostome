@@ -487,13 +487,34 @@
 | for the use of sendsig, rsendsig.
 |
 /SIGNALS {
-  /QUIT 
+  /QUIT
   /KILL
   /TERM
-  /HUP 
+  /HUP
   /INT
   /ALRM
   /FPE
+  /ABRT
+  /BUS
+  /CHLD
+  /CONT
+  /ILL
+  /PIPE
+  /SEGV
+  /STOP
+  /TSTP
+  /TTIN
+  /TTOU
+  /USR1
+  /USR2
+  /POLL
+  /PROF
+  /SYS
+  /TRAP
+  /URG
+  /VTALRM
+  /XCPU
+  /XFSZ
 } makeenum def
 
 |------------ signal ---------------

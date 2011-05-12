@@ -149,6 +149,7 @@ enum _DelMode {
   _DelModeForce,
   _DelModeResize,
   _DelModeProc,
+  _DelModeCleanup,
 };
 
 DM_INLINE_STATIC void sockprintdebug(const char* mode, 
@@ -194,6 +195,9 @@ DM_INLINE_STATIC P _delsocket(P fd, enum _DelMode delmode) {
       switch (delmode) {
 	case _DelModeForce: 
 	  break;
+	case _DelModeCleanup:
+	  if (fd == DM_STDERR_FILENO) return OK;
+	  break;
 	case _DelModeFork:
 	  if (! next->type.fork) return OK;
 	  break;
@@ -217,7 +221,7 @@ DM_INLINE_STATIC P _delsocket(P fd, enum _DelMode delmode) {
 
       if (next->type.listener) {
 	clearsocket(fd);
-	if (next->info.listener.sigfd != -1) 
+	if (next->info.listener.sigfd != -1)
 	  close(next->info.listener.sigfd);
 	if (next->info.listener.recsigfd != -1) 
 	  close(next->info.listener.recsigfd);
@@ -226,8 +230,8 @@ DM_INLINE_STATIC P _delsocket(P fd, enum _DelMode delmode) {
 	if (mypid == next->pid) {
 	  if (next->redirector != -1) {
 	    if (kill(next->redirector, SIGQUIT)) {
-	      error_local(0, errno, "Unable to kill redirector %li", 
-		    (long) next->redirector);
+	      dm_error_msg(errno, "Unable to kill redirector %li",
+			   (long) next->redirector);
 	      if (! retc) retc = -errno;
 	    }
 	    else while (waitpid((pid_t) next->redirector, NULL, 0) == -1) {
@@ -348,6 +352,7 @@ P addsocket(P fd, const struct SocketType* type, const union SocketInfo* info) {
   }
 
   if (type->listener) {
+    DEBUG("add: %li", fd);
     FD_SET(fd, &sock_fds);
     if (fd >= maxsocket) maxsocket = fd+1;
     if (recsocket < 0) recsocket = fd;
@@ -378,13 +383,15 @@ DM_INLINE_STATIC P _closesockets(enum _DelMode delmode) {
     next = next->next;
     if ((retc_ = _delsocket(fd, delmode))){
       if (! retc) retc = retc_;
-      error_local(0, retc < 0 ? -retc : 0, 
-	    "Deleting socket %li, forking %s, execing %s, force %s, resize %s",
-	    (long) fd, 
-	    delmode == _DelModeFork ? "yes" : "no", 
-	    delmode == _DelModeExec ? "yes" : "no", 
-	    delmode == _DelModeForce ? "yes" : "no",
-	    delmode == _DelModeResize ? "yes" : "no");
+      dm_error_msg(retc < 0 ? -retc : 0,
+		   "Deleting socket %li, forking %s, "
+		   "execing %s, force %s, resize %s, cleanup %s",
+		   (long) fd,
+		   delmode == _DelModeFork ? "yes" : "no",
+		   delmode == _DelModeExec ? "yes" : "no",
+		   delmode == _DelModeForce ? "yes" : "no",
+		   delmode == _DelModeResize ? "yes" : "no",
+		   delmode == _DelModeCleanup ? "yes" : "no");
     }
   }
   return retc;
@@ -410,23 +417,32 @@ P closesockets_resize(void) {
   return _closesockets(_DelModeResize);
 }
 
+P closesockets_cleanup(void) {
+  return _closesockets(_DelModeCleanup);
+}
+
 void closedisplay(void) {
 #if ! X_DISPLAY_MISSING
   if (dvtdisplay) {
+    DEBUG("close display%s", "");
     HXCloseDisplay(dvtdisplay);
     dvtdisplay = NULL;
+  }
+  if (xsocket != -1) {
+    delsocket_force(xsocket);
+    xsocket = -1;
   }
   displayname[0] = '\0';
   xkbext = 0;
 #endif
 }
 
-static void _closesockets_force(void) {
-  closesockets_force();
+static void _closesockets_cleanup(void) {
+  closesockets_cleanup();
 }
 
 void set_closesockets_atexit(void) {
-  if (atexit(_closesockets_force))
+  if (atexit(_closesockets_cleanup))
     error_local(1, -errno, "Setting atexit closesockets");
   if (atexit(closedisplay))
     error_local(1, -errno, "Setting atexit closedisplay");
@@ -656,11 +672,25 @@ P waitsocket(BOOLEAN ispending, fd_set* out_fds) {
   P i;
   if (! maxsocket) return NEXTEVENT_NOEVENT;
 
+  DEBUG("select max: %li", maxsocket);
+  if (DEBUG_ACTIVE)
+    for (i = 0; i < maxsocket; i++) {
+      read_fds = sock_fds;
+      if (FD_ISSET(i, &read_fds)) {
+	struct timeval onesec = {0, 0};
+	DEBUG("select: %li", i);
+	FD_ZERO(&read_fds);
+	FD_SET(i, &read_fds);
+	err_fds = read_fds;
+	if (select(i+1, &read_fds, NULL, &err_fds, &onesec) == -1)
+	  DEBUG("bad socket: %li", i);
+      }
+    }
+
   zerosec = zerosec_;
   read_fds = sock_fds;
   err_fds = sock_fds;
   
-  DEBUG("select%s", "");
   if ((nact = select(maxsocket, &read_fds, NULL, &err_fds, 
 		     ispending ? &zerosec : NULL)) == -1) {
     if (errno == EINTR) return NEXTEVENT_NOEVENT;
@@ -1109,7 +1139,7 @@ P op_disconnect(void)
   socket sig | --
 
   sends signal to dnode, where signal is defined by a mapping 
-  in dm-signals.c (sigmap), and is between 0 and up to 255 (as defined 
+  in dm-signals.c (sigmap), and is between 0 and up to SIGMAP_LEN (as defined 
   in sigmap)
 */
 
@@ -1122,7 +1152,7 @@ P op_sendsig(void) {
   if (TAG(o_2) != (NULLOBJ | SOCKETTYPE)) return OPD_ERR;
   if (CLASS(o_1) != NUM) return OPD_CLA;
   if (! PVALUE(o_1, &sig_)) return UNDF_VAL;
-  if (sig_ < 0 || sig_ >= 256) return RNG_CHK;
+  if (sig_ < 0 || sig_ >= SIGMAP_LEN) return RNG_CHK;
 
   sig = (B) sig_;
   if ((fd = DGRAM_VAL(o_2)) == -1) return ILL_SOCK;

@@ -1,6 +1,14 @@
 | -*- mode: d; -*-
 
 /PROCESSES 100 {
+  |================== process ======================
+  | ~active | ...
+  |
+  | executes active in PROCESSES -- equivalent to
+  | PROCESSES indict, but predeclared in userdict.
+  |
+  /inprocess ~exec userdef
+
   | These need to be in the same order as
   |  flags struct array in dm-proc.c.
   /FFLAGS {
@@ -446,14 +454,12 @@
   | Checks for process end.
   | Returns true if process is dead,
   |   on top of true iff process returns status 0
-  | Otherwise, just false
+  | Otherwise, just false.
+  |
+  | NB: if isdead returns true, the pid has been waited on.
   |
   /isdead {
-    dup checkpid {
-      {0 eq} {pop false} ifelse
-      exch ~pidwaited inpidsockets
-      true
-    } {pop false} ifelse
+    dup checkpid {pop wait true} {pop false} ifelse
   } bind def
 
   |============================ wait ==============================
@@ -462,10 +468,57 @@
   | Block until process pid ends.
   | Returns true iff process returns status 0.
   |
-  /wait {
-    dup waitpid {0 eq} {pop false} ifelse
+  /wait {waitdie 0 eq} bind def
+
+  |============================ waitdie ==============================
+  | pid | status
+  |
+  | Block until process pid ends.
+  | Returns status in format for die: (cooked-signal | 128 << 8)
+  |                                   raw-signal << 16
+  |                                   exit
+  |
+  /waitdie {
+    dup waitpid
     exch ~pidwaited inpidsockets
   } bind def
+
+  |================= exitstatus ====================
+  | status | exit-status true
+  |        | false
+  /exitstatus {
+    dup 255 and dup 3 1 roll eq ~true {pop false} ifelse
+  } bind def
+
+  |================ signal status ====================
+  | status | /signalname  true
+  |        | signalnumber true
+  |        | false
+  /signalstatus {
+    dup 255 and 1 index eq {pop false} {
+      -8 bitshift
+      dup 255 and 0 eq {-8 bitshift} {
+        127 and SIGNALS {
+          2 index eq ~exit if
+          pop
+        } forall exch pop
+      } ifelse
+      true
+    } ifelse
+  } bind def
+
+  |====================== signaldie =============================
+  | /signalname | --
+  | signalnum   | --
+  /signaldie {
+    dup class mkact signaldie_ indict
+    or 8 bitshift die
+  } bind def
+
+  /signaldie_ {
+    /nameclass {0l SIGNALS 3 -1 roll get 128 or}
+    /numclass  {8 bitshift 0l}
+  } bind makestruct def
 
   |============================ wait_ =============================
   | pid / pid (source) | --
@@ -564,7 +617,7 @@
   | -- without clear to mark
   |
   /_sh_ {
-    {~_spawnsh fds bg wait} 4 1 roll bg
+    {~_spawnsh fds bg waitdie die} 4 1 roll bg
   } bind def
 
   |======================== sh_bg ================================

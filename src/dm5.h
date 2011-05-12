@@ -5,7 +5,8 @@
 
 DLL_SCOPE P op_die(void);
 DLL_SCOPE P op_quit(void);
-DLL_SCOPE P op_quit(void);
+DLL_SCOPE DM_NORETURN void die(void);
+DLL_SCOPE P quit(void);
 
 /*-- relational, boolean, bitwise */ 
 DM_HOT DLL_SCOPE P op_eq(void);

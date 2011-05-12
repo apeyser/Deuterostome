@@ -317,7 +317,7 @@ end def |]
 end def |]
 
 /regex 2 dict dup begin |[
-  /DM_ENABLE_REGEX 2 dict dup begin |[
+  /ENABLE_REGEX 2 dict dup begin |[
     /commands [/regex /regexi /regexs /regexsi] def
     /errors 100 dict dup begin |[
       /REGEX_BADPAT (Regex Error: Invalid regular expression) def
@@ -385,7 +385,7 @@ end def
 end def
 
 /sem 1 dict dup begin |[
-  /all 2 dict dup begin |[
+  /ENABLE_SEM 2 dict dup begin |[
     /commands [
       /inter_lock /inter_unlock /inter_lock_set
     ] def
@@ -395,10 +395,10 @@ end def
   end def |]
 end def
 
-/node 3 dict dup begin |[
+/node 4 dict dup begin |[
   /all 2 dict dup begin |[
     /commands [
-      /lock /unlock /locked /serialize /threads /makethreads
+      /lock /unlock /locked /serialize
       /halt /continue 
       /vmresize 
     ] def
@@ -412,13 +412,18 @@ end def
       /LIB_MERGE (** Unable to merge library into sysdict) def
       /LIB_INIT (** Unable to initialize loaded library) def
 	    /VMR_ERR (** Cannot allocate D memory) def
-      /VMR_STATE (** Memory alread minimized) def
+      /VMR_STATE (** Memory already minimized) def
       /ILL_OPAQUE (** Opaque dict type mismatch) def
       /FOLD_OPAQUE (** Illegal attempt to fold opaque object) def
       /ACTIVE_OPAQUE (** Unable to restore active opaque object) def
       /ACTIVE_STREAM (** Unable to restore open stream object) def
       /NO_PLUGINS (** Compiled without plugin support) def |]
     end def |]
+  end def
+  /ENABLE_THREADS 1 dict dup begin |[
+    /commands [
+      /threads /makethreads
+    ] def |]
   end def
   /BUILD_ATLAS 1 dict dup begin |[
     /commands [
@@ -465,7 +470,7 @@ end def
   /all 1 dict dup begin |[
     /commands [/getmyport /killsockets] def 
   end def
-  /DM_ENABLE_RTHREADS 2 dict dup begin  |[
+  /ENABLE_RTHREADS 2 dict dup begin  |[
     /errors 10 dict dup begin |[
       /RTHREADS_UNSET (** Rthreads are inactive) def 
       /RTHREADS_NUMTYPE (** Rthreads: nodes for dictionay not a numeral) def
@@ -480,12 +485,12 @@ end def
     end def
     /commands [/rthreads /checkrthreads /makerthreads /rsend /rsendsig] def |]
   end def
-  /DM_HOST_IS_32_BIT 1 dict dup begin |[
+  /HOST_IS_32_BIT 1 dict dup begin |[
     /commands [/readf32] def |]
   end def |]
 end def
 
-/plugins 1 dict dup begin /DM_ENABLE_PLUGINS_SUPPORT 1 dict dup begin |[
+/plugins 1 dict dup begin /ENABLE_PLUGINS_SUPPORT 1 dict dup begin |[
   /commands [/loadlib /nextlib] def |]
 end def end def
 

@@ -182,29 +182,20 @@ int main(int argc, char *argv[])
   syserrc = _syserrc;
 
   check_plugin = _check_plugin;
+#if ENABLE_SEM
   do_inter_lock_init  = _do_inter_lock_init;
   do_inter_lock_reset = _do_inter_lock_reset;
   do_inter_lock = _do_inter_lock;
   do_inter_unlock = _do_inter_unlock;
-
-#if HAVE_SETSID
-  // separate from current session - don't die if term closed.
-  if (argc < 3) setsid(); 
-  else if (argc == 3) {
-    char* endptr;
-    long ss = strtol(argv[2], &endptr, 10);
-    if (! argv[2] || *endptr) usage_error(0);
-    if (ss) setsid();
-  }
 #endif
 
 /*------------------------ get host name */
 
   if (gethostname((char*)hostname,255) == -1) 
-    error_local(EXIT_FAILURE,errno,"gethostname");
+    error_local(EXIT_FAILURE, errno, "gethostname");
 
 /*------------------------ parse arguments */
-  if (argc < 2) usage_error(0);
+  if (argc != 2) usage_error(0);
   switch (serverport = strtol(argv[1], &endptr, 0)) {
     case LONG_MAX: case LONG_MIN: 
       if (errno) usage_error(errno);

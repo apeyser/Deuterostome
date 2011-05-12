@@ -47,8 +47,10 @@ static void redirect_sig(int sig) {
 
 static void redirector_exit(void) {
   struct sockaddr_un name;
+#if ENABLE_UNIX_SOCKETS
   if (serverport >= 0 && init_unix_sockaddr(&name, serverport, FALSE))
     unlink(name.sun_path);
+#endif //ENABLE_UNIX_SOCKETS
 }
 
 static fd_set rin;
@@ -93,8 +95,9 @@ static void redirector_alarm(void) {
 
 int main(int argc, char* argv[]) {
   fd_set rout, eout;
-  int quitsigs[] = {SIGQUIT, SIGTERM, SIGHUP, 0};
-  int *i, fd;
+  enum SIGMAP quitsigs[] = {SIGMAP_QUIT, SIGMAP_TERM, SIGMAP_HUP, SIGMAP_LEN};
+  enum SIGMAP* i;
+  int fd;
   const struct timeval timerin = {.tv_sec = KILL_TIME, .tv_usec = 0};
   struct timeval timer;
   int zero, one;
@@ -107,8 +110,8 @@ int main(int argc, char* argv[]) {
   if (atexit(redirector_exit))
     error_local(1, errno, "atexit for redirector");
 
-  for (i = quitsigs; *i; i++) sethandler(*i, redirector_quit);
-  clearhandler(SIGINT);
+  for (i = quitsigs; *i != SIGMAP_LEN; i++) sethandler(*i, redirector_quit);
+  clearhandler(SIGMAP_INT);
 
   FD_ZERO(&rin);
   nfds = 0;
@@ -209,12 +212,6 @@ static void execsighandler(P sigsocket, P tcp_sigsocket, P serverport,
 }
   
 /****************** signal redirector ********************/
-
-#if HAVE_PTHREAD
-#define dmsigmask sigprocmask
-#else
-#define dmsigmask pthread_sigmask
-#endif //HAVE_PTHREAD
 
 P spawnsighandler(P sigsocket, P tcp_sigsocket, P serverport,
 		  P (*closesockets_func)(void),

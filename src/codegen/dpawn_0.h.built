@@ -169,11 +169,13 @@ B* _sysop[] =
   (B*) "unlock", (B*) op_unlock,
   (B*) "locked", (B*) op_locked,
   (B*) "serialize", (B*) op_serialize,
-  (B*) "threads", (B*) op_threads,
-  (B*) "makethreads", (B*) op_makethreads,
   (B*) "halt", (B*) op_halt,
   (B*) "continue", (B*) op_continue,
   (B*) "vmresize", (B*) op_vmresize,
+#ifdef ENABLE_THREADS
+  (B*) "threads", (B*) op_threads,
+  (B*) "makethreads", (B*) op_makethreads,
+#endif //ENABLE_THREADS
 #ifdef BUILD_ATLAS
   (B*) "matmul_blas", (B*) op_matmul_blas,
   (B*) "decompLU_lp", (B*) op_decompLU_lp,
@@ -201,16 +203,16 @@ B* _sysop[] =
   (B*) "mpirank", (B*) op_mpirank,
   (B*) "mpisize", (B*) op_mpisize,
   (B*) "groupconsole", (B*) op_groupconsole,
-#ifdef DM_ENABLE_REGEX
+#ifdef ENABLE_REGEX
   (B*) "regex", (B*) op_regex,
   (B*) "regexi", (B*) op_regexi,
   (B*) "regexs", (B*) op_regexs,
   (B*) "regexsi", (B*) op_regexsi,
-#endif //DM_ENABLE_REGEX
-#ifdef DM_ENABLE_PLUGINS_SUPPORT
+#endif //ENABLE_REGEX
+#ifdef ENABLE_PLUGINS_SUPPORT
   (B*) "loadlib", (B*) op_loadlib,
   (B*) "nextlib", (B*) op_nextlib,
-#endif //DM_ENABLE_PLUGINS_SUPPORT
+#endif //ENABLE_PLUGINS_SUPPORT
   (B*) "die", (B*) op_die,
   (B*) "]", (B*) op_closelist,
   (B*) "", (B*) NULL
@@ -281,6 +283,8 @@ P _syserrc[] = {
   ACTIVE_OPAQUE,
   ACTIVE_STREAM,
   NO_PLUGINS,
+#ifdef ENABLE_THREADS
+#endif //ENABLE_THREADS
 #ifdef BUILD_ATLAS
 #endif //BUILD_ATLAS
 #ifdef HAVE_ATLAS
@@ -298,7 +302,7 @@ P _syserrc[] = {
   MATRIX_OVERLAP,
 #endif //HAVE_ATLAS
   MPI_NOMSG,
-#ifdef DM_ENABLE_REGEX
+#ifdef ENABLE_REGEX
   REGEX_BADPAT,
   REGEX_ECOLLATE,
   REGEX_ECTYPE,
@@ -312,9 +316,9 @@ P _syserrc[] = {
   REGEX_ESPACE,
   REGEX_BADRPT,
   REGEX_UNKNOWN,
-#endif //DM_ENABLE_REGEX
-#ifdef DM_ENABLE_PLUGINS_SUPPORT
-#endif //DM_ENABLE_PLUGINS_SUPPORT
+#endif //ENABLE_REGEX
+#ifdef ENABLE_PLUGINS_SUPPORT
+#endif //ENABLE_PLUGINS_SUPPORT
   0L
 };
 
@@ -377,12 +381,14 @@ B* _syserrm[] = {
   (B*) "** Unable to merge library into sysdict",
   (B*) "** Unable to initialize loaded library",
   (B*) "** Cannot allocate D memory",
-  (B*) "** Memory alread minimized",
+  (B*) "** Memory already minimized",
   (B*) "** Opaque dict type mismatch",
   (B*) "** Illegal attempt to fold opaque object",
   (B*) "** Unable to restore active opaque object",
   (B*) "** Unable to restore open stream object",
   (B*) "** Compiled without plugin support",
+#ifdef ENABLE_THREADS
+#endif //ENABLE_THREADS
 #ifdef BUILD_ATLAS
 #endif //BUILD_ATLAS
 #ifdef HAVE_ATLAS
@@ -400,7 +406,7 @@ B* _syserrm[] = {
   (B*) "Matrix Error: illegal overlap",
 #endif //HAVE_ATLAS
   (B*) "** No mpi message msg received -- internal",
-#ifdef DM_ENABLE_REGEX
+#ifdef ENABLE_REGEX
   (B*) "Regex Error: Invalid regular expression",
   (B*) "Regex Error: Invalid collating element",
   (B*) "Regex Error: Invalid character class",
@@ -414,8 +420,8 @@ B* _syserrm[] = {
   (B*) "Regex Error: ran out of memory",
   (B*) "Regex Error: `?', `*', or `+' operand invalid",
   (B*) "Regex Error: Unknown error",
-#endif //DM_ENABLE_REGEX
-#ifdef DM_ENABLE_PLUGINS_SUPPORT
-#endif //DM_ENABLE_PLUGINS_SUPPORT
+#endif //ENABLE_REGEX
+#ifdef ENABLE_PLUGINS_SUPPORT
+#endif //ENABLE_PLUGINS_SUPPORT
   (B*) NULL
 };

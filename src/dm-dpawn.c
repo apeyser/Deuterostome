@@ -602,8 +602,9 @@ P op_groupconsole(void) {
 
 void run_dpawn_mill(void) {
   P retc;
-  B abortframe[FRAMEBYTES], dieframe[FRAMEBYTES];
+  B abortframe[FRAMEBYTES];
 
+  setuphandlers();
   initmpi();
   maketinysetup();
 
@@ -613,9 +614,6 @@ void run_dpawn_mill(void) {
 
   makename((B*) "abort", abortframe); 
   ATTR(abortframe) = ACTIVE;
-
-  makename((B*) "die", dieframe);
-  ATTR(dieframe) = ACTIVE;
 
 /*-------------- you are entering the scheduler -------------------*/\
 /* We start with no D code on the execution stack, so we doze
@@ -647,48 +645,32 @@ void run_dpawn_mill(void) {
 	retc = nextevent(cmsf);
 	break;
 
-      case TERM:
-	exit(exitval);
+      case TERM: die();
 	
-      default:
-	break;
-    }
+      default: break;
+    };
+
     switch (retc) {
       case OK: continue;
 
       case ABORT:
 	abortflag = FALSE;
-	if (x1 < CEILexecs) {
-	  moveframe(abortframe, x1);
-	  FREEexecs = x2;
-	  continue;
-	}
-
-	retc = EXECS_OVF; 
-	errsource = (B*) "supervisor"; 
-	break;
-
-      case QUIT:
-	recvd_quit = FALSE;
-	if (o1 >= CEILopds) {
-	  retc = OPDS_OVF;
-	  errsource = (B*) "supervisor";
-	}
-	else if (x1 >= CEILexecs) {
+	if (x1 >= CEILexecs) {
 	  retc = EXECS_OVF;
 	  errsource = (B*) "supervisor";
+	  break;
 	}
-	else {
-	  TAG(o1) = (NUM|BYTETYPE);
-	  ATTR(o1) = 0;
-	  BYTE_VAL(o1) = 0;
-	  FREEopds = o2;
-	  
-	  moveframe(dieframe, x1);
-	  FREEexecs = x2;
-	  continue;
+
+	moveframe(abortframe, x1);
+	FREEexecs = x2;
+	continue;
+
+      case QUIT:
+	if ((retc = quit())) {
+	  errsource = (B*) "supervisor";
+	  break;
 	}
-	break;
+	continue;
 
       default: break;
     }
