@@ -58,21 +58,17 @@ enum SIGMAP getcookedsig(int sig) {
 }
 
 UW encodesig(int sig) {
-  int i;
-  for (i = 0; i < (int) SIGMAP_LEN; i++)
-    if (sig == sigmap[i]) return (((UW) 0xFF) << 8) | (UW) i;
+  UB i;
+  for (i = 0; i < (UB) SIGMAP_LEN; i++)
+    if (sig == sigmap[i]) return (UW) (0x80 | i);
 
-  return ((UW) sig) << 8;
+  return (UW) (sig << 8);
 }
 
 int decodesig(UW sig) {
-  UW dsig = sig >> 8;
-  if (dsig != 0xFF) return dsig;
-
-  sig &= 0xFF;
-  if (sig >= 0 && sig < (int) SIGMAP_LEN)
-    return sigmap[sig];
-
+  UB subsig = (UB) (sig & 0xFF);
+  if (! subsig)                 return sig >> 8;
+  if (subsig < (UB) SIGMAP_LEN) return sigmap[sig];
   return 0;
 }
 

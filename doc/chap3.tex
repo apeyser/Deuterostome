@@ -361,11 +361,14 @@ returns the message as substring of the designated string buffer and
 resumes normal execution.
 
 \op{quit} terminates the \dcomp{dvt} process. \op{die} will terminate
-the process like quit, but allows a return value. If the operand
-shifted down by 8 is nonzero, then if the top 8 bits of the word are
-0xFF, then the bottom 8 bits is the architecture neutral mapping in
-\textproc{SIGNALS} in \file{startup_common.dvt}; otherwise, the top 8
-bits refer to the raw, operating system specific signal.
+the process like quit, but allows a return value. If the bits above
+the least significant byte are zero, then the lest significant byte is
+the return value. Otherwise, if the next byte is non-zero, then it's 7
+least signifcant bits (top bit masked) refers to the architecture
+neutral signal (as in \textproc{SIGNALS} in
+\file{startup_common.dvt}. The last options is the remaining bits,
+which if non-zero when shifted right by 16 is the raw, operating
+system specific signal, as in \emph{C}'s \textproc{kill}.
 
 \subsubsection{Supervising of \dcomp[dnode]{dnodes}}
 

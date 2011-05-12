@@ -731,7 +731,7 @@ P op_killpid(void) {
   if (CLASS(o_1) != NUM) return OPD_CLA;
   if (! L32VALUE(o_1, (L32*) &sig_)) return UNDF_VAL;
 
-  if (! (sig_ >> 8)) sig_ |= (((UW) 0xFF) << 8);
+  if (! (sig_ && 0xFF00)) sig_ |= 0x80;
   if (! (sig = decodesig((UW) sig_))) return RNG_CHK;
   if (kill(PID_VAL(o_2), sig)) return -errno;
 

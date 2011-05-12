@@ -1243,7 +1243,7 @@ therefore blocks). The exit value is the bottom 8 bits of the child
 processes exit value OR'd with any signal which caused an abnormal
 termination (shifted by 16 bits leftward if it's not a posix standard
 signal, or 8 bits after being converted to a \proc{SIGNALS} value and
-or'd with 0xFF00). This value can be propagated directly by calling
+or'd with 0x80). This value can be propagated directly by calling
 \op{die} on it. \op{checkpid} is the non-blocking version; it returns
 false if the child hasn't died, and true and the exit value if it has
 died (however, it still leaves the child unreaped, requiring an

@@ -474,7 +474,7 @@
   | pid | status
   |
   | Block until process pid ends.
-  | Returns status in format for die: (-1 << 16 | cooked-signal << 8)
+  | Returns status in format for die: (cooked-signal | 128 << 8)
   |                                   raw-signal << 16
   |                                   exit
   |
@@ -487,7 +487,7 @@
   | status | exit-status true
   |        | false
   /exitstatus {
-    dup -16 bitshift 0 ne {pop false} {255 and true} ifelse
+    dup 255 and dup 3 1 roll eq ~true {pop false} ifelse
   } bind def
 
   |================ signal status ====================
@@ -495,14 +495,13 @@
   |        | signalnumber true
   |        | false
   /signalstatus {
-    dup -16 bitshift dup 0 eq {pop pop false} {
-      dup 255 ne {exch pop} {
-        pop
-        -8 bitshift 255 and
-        SIGNALS {
-          2 index eq {exch pop exit} if
+    dup 255 and 1 index eq {pop false} {
+      -8 bitshift
+      dup 255 and 0 eq {-8 bitshift} {
+        127 and SIGNALS {
+          2 index eq ~exit if
           pop
-        } forall
+        } forall exch pop
       } ifelse
       true
     } ifelse
@@ -512,9 +511,14 @@
   | /signalname | --
   | signalnum   | --
   /signaldie {
-    dup class /nameclass eq {SIGNALS exch get 255l} {0l exch} ifelse
-    8 bitshift exch or 8 bitshift die
+    dup class mkact signaldie_ indict
+    or 8 bitshift die
   } bind def
+
+  /signaldie_ {
+    /nameclass {0l SIGNALS 3 -1 roll get 128 or}
+    /numclass  {8 bitshift 0l}
+  } bind makestruct def
 
   |============================ wait_ =============================
   | pid / pid (source) | --
