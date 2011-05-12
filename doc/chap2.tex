@@ -1236,16 +1236,17 @@ takes the process id and the signal integer and returns nothing. The
 signal integer mapping are defined in \proc{SIGNALS} -- they are not
 the operating system signal integers, but a mapping of a subset of
 signals which are common across architectures, as used by \op{sendsig}
-and \op{rsendsig}. Children can be reaped with \op{waitpid}, which
-takes a pid and return an exit value when the child exits (and
+and \op{rsendsig}; a raw, operating system specific signal can be sent
+by shifting it by 8 bits. Children can be reaped with \op{waitpid},
+which takes a pid and return an exit value when the child exits (and
 therefore blocks). The exit value is the bottom 8 bits of the child
 processes exit value OR'd with any signal which caused an abnormal
-termination (shifted by 8 bits leftward, of course). The signal in
-this case is the raw operating system values and not the internal,
-architecture free signals. This value could be propagated directly by
-calling \op{die} on it. \op{checkpid} is the non-blocking version; it
-returns false if the child hasn't died, and true and the exit value if
-it has died (however, it still leaves the child unreaped, requiring an
+termination (shifted by 16 bits leftward if it's not a posix standard
+signal, or 8 bits after being converted to a \proc{SIGNALS} value and
+or'd with 0xFF00). This value can be propagated directly by calling
+\op{die} on it. \op{checkpid} is the non-blocking version; it returns
+false if the child hasn't died, and true and the exit value if it has
+died (however, it still leaves the child unreaped, requiring an
 \op{waitpid} call on it).
 
 Environmental variables can be accessed with \op{getenv}. The name of

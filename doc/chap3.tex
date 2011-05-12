@@ -362,9 +362,10 @@ resumes normal execution.
 
 \op{quit} terminates the \dcomp{dvt} process. \op{die} will terminate
 the process like quit, but allows a return value. If the operand
-shifted down by 8 is nonzero, then the process dies as if it had been
-signaled by that value (the raw, operating system signal integer);
-otherwise the process exits with the bottom 8 bits.
+shifted down by 8 is nonzero, then if the top 8 bits of the word are
+0xFF, then the bottom 8 bits is the architecture neutral mapping in
+\textproc{SIGNALS} in \file{startup_common.dvt}; otherwise, the top 8
+bits refer to the raw, operating system specific signal.
 
 \subsubsection{Supervising of \dcomp[dnode]{dnodes}}
 
