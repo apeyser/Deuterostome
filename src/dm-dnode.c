@@ -193,11 +193,6 @@ static P int_Xdisconnect(BOOLEAN nocheck) {
   if (! nocheck && dvtdisplay) nocheck = TRUE;
 
   closedisplay();
-  if (xsocket != -1) {
-    delsocket_force(xsocket);
-    xsocket = -1;
-  }
-
   if (nocheck)  {
     if (defaultdisplay) setenv("DISPLAY", defaultdisplay, 1);
     else unsetenv("DISPLAY");

@@ -418,6 +418,10 @@ void closedisplay(void) {
     HXCloseDisplay(dvtdisplay);
     dvtdisplay = NULL;
   }
+  if (xsocket != -1) {
+    delsocket_force(xsocket);
+    xsocket = -1;
+  }
   displayname[0] = '\0';
   xkbext = 0;
 #endif
