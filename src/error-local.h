@@ -11,9 +11,9 @@
 
 #define DM_IGNORE_RETURN(a) if (a);
 
-static void va_error_local_msg(int errnum,
-			       const char* format,
-			       va_list ap)
+static void va_dm_error_msg(int errnum,
+			    const char* format,
+			    va_list ap)
 {
   char* str;
   int s;
@@ -33,22 +33,22 @@ static void va_error_local_msg(int errnum,
 }
 
 __attribute__ ((unused, format (printf, 2, 3)))
-static void error_local_msg(int errnum,
-			    const char* format,
-			    ...)
+static void dm_error_msg(int errnum,
+			 const char* format,
+			 ...)
 {
   va_list ap;
   va_start(ap, format);
-  va_error_local_msg(errnum, format, ap);
+  va_dm_error_msg(errnum, format, ap);
   va_end(ap);
 }
 
-static void va_error_local(int status,
-			   int errnum,
-			   const char* format,
-			   va_list ap)
+static void va_dm_error(int status,
+			int errnum,
+			const char* format,
+			va_list ap)
 {
-  va_error_local_msg(errnum, format, ap);
+  va_dm_error_msg(errnum, format, ap);
   if (status) exit(status);
 }
 
@@ -61,7 +61,7 @@ static void error_local(int status,
 {
   va_list ap;
   va_start(ap, format);
-  va_error_local(status, errnum, format, ap);
+  va_dm_error(status, errnum, format, ap);
   va_end(ap);
 }
 
@@ -70,8 +70,9 @@ static void error_local(int status,
 
 #define DEBUG_(t, format, ...) do {					\
     if (t) {								\
-      error_local_msg(0, "%li: " format,				\
-		      (long) getpid(), __VA_ARGS__);			\
+      dm_error_msg(0,							\
+		   "%li: " format,					\
+		   (long) getpid(), __VA_ARGS__);			\
     };									\
   } while (0)
 
@@ -79,5 +80,6 @@ static void error_local(int status,
 #define DEBUG_ACTIVE 0
 #endif //DEBUG_ACTIVE
 #define DEBUG(...) DEBUG_(DEBUG_ACTIVE, __VA_ARGS__)
+#define DEBUG_T(...) DEBUG_(1, __VA_ARGS__)
 
 #endif //ERROR_H

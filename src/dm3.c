@@ -230,8 +230,8 @@ DM_INLINE_STATIC P _delsocket(P fd, enum _DelMode delmode) {
 	if (mypid == next->pid) {
 	  if (next->redirector != -1) {
 	    if (kill(next->redirector, SIGQUIT)) {
-	      error_local(0, errno, "Unable to kill redirector %li", 
-		    (long) next->redirector);
+	      dm_error_msg(errno, "Unable to kill redirector %li",
+			   (long) next->redirector);
 	      if (! retc) retc = -errno;
 	    }
 	    else while (waitpid((pid_t) next->redirector, NULL, 0) == -1) {
@@ -383,15 +383,15 @@ DM_INLINE_STATIC P _closesockets(enum _DelMode delmode) {
     next = next->next;
     if ((retc_ = _delsocket(fd, delmode))){
       if (! retc) retc = retc_;
-      error_local(0, retc < 0 ? -retc : 0,
-		  "Deleting socket %li, forking %s, "
-		  "execing %s, force %s, resize %s, cleanup %s",
-		  (long) fd,
-		  delmode == _DelModeFork ? "yes" : "no",
-		  delmode == _DelModeExec ? "yes" : "no",
-		  delmode == _DelModeForce ? "yes" : "no",
-		  delmode == _DelModeResize ? "yes" : "no",
-		  delmode == _DelModeCleanup ? "yes" : "no");
+      dm_error_msg(retc < 0 ? -retc : 0,
+		   "Deleting socket %li, forking %s, "
+		   "execing %s, force %s, resize %s, cleanup %s",
+		   (long) fd,
+		   delmode == _DelModeFork ? "yes" : "no",
+		   delmode == _DelModeExec ? "yes" : "no",
+		   delmode == _DelModeForce ? "yes" : "no",
+		   delmode == _DelModeResize ? "yes" : "no",
+		   delmode == _DelModeCleanup ? "yes" : "no");
     }
   }
   return retc;
