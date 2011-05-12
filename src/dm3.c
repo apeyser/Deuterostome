@@ -149,6 +149,7 @@ enum _DelMode {
   _DelModeForce,
   _DelModeResize,
   _DelModeProc,
+  _DelModeCleanup,
 };
 
 DM_INLINE_STATIC void sockprintdebug(const char* mode, 
@@ -193,6 +194,9 @@ DM_INLINE_STATIC P _delsocket(P fd, enum _DelMode delmode) {
     if (next->fd == fd) {
       switch (delmode) {
 	case _DelModeForce: 
+	  break;
+	case _DelModeCleanup:
+	  if (fd == DM_STDERR_FILENO) return OK;
 	  break;
 	case _DelModeFork:
 	  if (! next->type.fork) return OK;
@@ -379,13 +383,15 @@ DM_INLINE_STATIC P _closesockets(enum _DelMode delmode) {
     next = next->next;
     if ((retc_ = _delsocket(fd, delmode))){
       if (! retc) retc = retc_;
-      error_local(0, retc < 0 ? -retc : 0, 
-	    "Deleting socket %li, forking %s, execing %s, force %s, resize %s",
-	    (long) fd, 
-	    delmode == _DelModeFork ? "yes" : "no", 
-	    delmode == _DelModeExec ? "yes" : "no", 
-	    delmode == _DelModeForce ? "yes" : "no",
-	    delmode == _DelModeResize ? "yes" : "no");
+      error_local(0, retc < 0 ? -retc : 0,
+		  "Deleting socket %li, forking %s, "
+		  "execing %s, force %s, resize %s, cleanup %s",
+		  (long) fd,
+		  delmode == _DelModeFork ? "yes" : "no",
+		  delmode == _DelModeExec ? "yes" : "no",
+		  delmode == _DelModeForce ? "yes" : "no",
+		  delmode == _DelModeResize ? "yes" : "no",
+		  delmode == _DelModeCleanup ? "yes" : "no");
     }
   }
   return retc;
@@ -411,6 +417,10 @@ P closesockets_resize(void) {
   return _closesockets(_DelModeResize);
 }
 
+P closesockets_cleanup(void) {
+  return _closesockets(_DelModeCleanup);
+}
+
 void closedisplay(void) {
 #if ! X_DISPLAY_MISSING
   if (dvtdisplay) {
@@ -427,12 +437,12 @@ void closedisplay(void) {
 #endif
 }
 
-static void _closesockets_force(void) {
-  closesockets_force();
+static void _closesockets_cleanup(void) {
+  closesockets_cleanup();
 }
 
 void set_closesockets_atexit(void) {
-  if (atexit(_closesockets_force))
+  if (atexit(_closesockets_cleanup))
     error_local(1, -errno, "Setting atexit closesockets");
   if (atexit(closedisplay))
     error_local(1, -errno, "Setting atexit closedisplay");
