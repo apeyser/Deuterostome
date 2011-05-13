@@ -34,7 +34,7 @@ endif
 ifneq "$(wildcard /usr/share/misc/config.guess)" ""
 	cp -f /usr/share/misc/config.guess config.guess
 endif
-	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info --sysconfdir=/etc CFLAGS="$(CFLAGS)" CPPFLAGS="$(CPPFLAGS)" LDFLAGS="-Wl,-z,defs" --with-mpi="-lmpich -lrt -lpthread" --enable-rthreads --enable-mpi --without-petsc --with-emacs --enable-setuid --enable-daemon --enable-threads --enable-plugins --enable-plugins-support --enable-doc --with-x
+	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info --sysconfdir=/etc CFLAGS="$(CFLAGS)" CPPFLAGS="$(CPPFLAGS)" LDFLAGS="-Wl,-z,defs" --with-mpi="-lmpich -lrt -lpthread" --enable-rthreads --enable-mpi --without-petsc --with-emacs --enable-setuid --enable-threads --enable-plugins --enable-plugins-support --enable-doc --with-x
 
 
 build: build-stamp
@@ -98,7 +98,6 @@ binary-arch: build install
 #	dh_strip
 	dh_compress
 	dh_fixperms
-	chmod u+s $(CURDIR)/debian/dm/usr/bin/dnode-nice
 #	dh_perl
 #	dh_makeshlibs
 	dh_installdeb
