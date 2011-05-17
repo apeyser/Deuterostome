@@ -478,7 +478,7 @@ DM_INLINE_STATIC P closebox(int fd) {
   return OK;
 }
 
-DM_INLINE_STATIC P readbox (int fd, B* p, size_t atmost, size_t* nread) {
+DM_INLINE_STATIC P readbox(int fd, B* p, size_t atmost, size_t* nread) {
   ssize_t nb;
   B* s = p;
   do {
@@ -529,15 +529,11 @@ P op_readboxfile(void)
     if (errno == EINTR) checkabort();
     else return -errno;
 
-  if ((retc = readbox(fd, sha1, 1, &nread))) goto fderr;
-  if (! nread) {
+  if ((retc = readbox(fd, sha1, FRAMEBYTES, &nread))) goto fderr;
+  if (nread != FRAMEBYTES) {
     retc = BADBOX;
     goto fderr;
   };
-  if (! GETNATIVEFORMAT(sha1) || ! GETNATIVEUNDEF(sha1)) {
-    retc = BAD_FMT;
-    goto fderr;
-  }
 
   //isnonnative = GETNONNATIVE(sha1);
   base = FREEvm;

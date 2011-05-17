@@ -197,11 +197,8 @@ extern "C" {
 /* Format specifier */
 #define FORMAT32                   ((UB) 0x10)
 #define FORMAT64                   ((UB) 0x20)
-#define FORMATMASK                 ((UB) 0x30)
-
-#define SHA1OFF                    ((UB) 0x00)
-#define SHA1ON                     ((UB) 0x40)
-#define SHA1MASK                   ((UB) 0x40)
+#define FORMATSHA1                 ((UB) 0x30)
+#define FORMATMASK                 ((UB) 0xF0)
 
 #define FORMAT_BITS_DEFAULT        FORMAT64
 #if DM_HOST_IS_32_BIT
@@ -225,22 +222,25 @@ extern "C" {
 #endif //DM_WORDS_BIGENDIAN
 
 #define HOSTLAYOUTMASK            ((B) (HOSTBITSMASK | ENDIANMASK))
-#define HOSTLAYOUT_DEFAULT         ((B) (HOSTBITS_DEFAULT | ENDIAN_DEFAULT))
+#define HOSTLAYOUT_DEFAULT        ((B) (HOSTBITS_DEFAULT | ENDIAN_DEFAULT))
 
 #define GETNATIVE_FORMATSTATE(frame, mask, defaultbits) \
   ((BOOLEAN) ((FORMAT(frame) & (mask)) == (defaultbits)))
-#define SETNATIVE_FORMATSTATE(frame, defaultbits) \
-  do {FORMAT(frame) |= (defaultbits);} while (0)
+#define SETNATIVE_FORMATSTATE(frame, mask, defaultbits)	\
+  do {							\
+    FORMAT(frame) &= ~(mask);				\
+    FORMAT(frame) |= (defaultbits);			\
+  } while (0)
 
 #define GETNATIVEENDIAN(frame)                              \
   GETNATIVE_FORMATSTATE(frame, ENDIANMASK, ENDIAN_DEFAULT)
 #define SETNATIVEENDIAN(frame)                  \
-  SETNATIVE_FORMATSTATE(frame, ENDIAN_DEFAULT)
+  SETNATIVE_FORMATSTATE(frame, ENDIANMASK, ENDIAN_DEFAULT)
 
 #define GETNATIVEHOSTBITS(frame)                                \
   GETNATIVE_FORMATSTATE(frame, HOSTBITSMASK, HOSTBITS_DEFAULT)
 #define SETNATIVEHOSTBITS(frame) \
-  SETNATIVE_FORMATSTATE(frame, HOSTBITS_DEFAULT)
+  SETNATIVE_FORMATSTATE(frame, HOSTBITSMASK, HOSTBITS_DEFAULT)
 
 #if ! NO_ENDIAN_HDR && __FLOAT_WORD_ORDER
 #if __FLOAT_WORD_ORDER != __BYTE_ORDER
@@ -253,13 +253,13 @@ extern "C" {
 #define GETNATIVEFORMAT(frame) \
   GETNATIVE_FORMATSTATE(frame, FORMATMASK, FORMAT_BITS_DEFAULT)
 #define SETNATIVEFORMAT(frame) \
-  SETNATIVE_FORMATSTATE(frame, FORMAT_BITS_DEFAULT)
+  SETNATIVE_FORMATSTATE(frame, FORMATMASK, FORMAT_BITS_DEFAULT)
 
 #define GETSHA1(frame) \
-  GETNATIVE_FORMATSTATE(frame, SHA1MASK, SHA1ON)
+  GETNATIVE_FORMATSTATE(frame, FORMATMASK, FORMATSHA1)
 
 #define SETSHA1(frame) \
-  SETNATIVE_FORMATSTATE(frame, SHA1ON)
+  SETNATIVE_FORMATSTATE(frame, FORMATMASK, FORMATSHA1)
 
 #define GETNATIVE(frame)                        \
   (GETNATIVEFORMAT(frame)                       \
