@@ -1,8 +1,8 @@
 AM_CPPFLAGS = -DDM_HAVE_CONFIG_H -I"$(top_builddir)/lib" -I"$(top_srcdir)/lib"
-AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS)
+AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS) $(OPENSSL_CFLAGS)
 AM_CXXFLAGS = $(GCC_CXXFLAGS)
 AM_LDFLAGS = -no-undefined 
-AM_LIBS = $(PTHREAD_LIBS) $(X_LDFLAGS) 
+AM_LIBS = $(PTHREAD_LIBS) $(X_LDFLAGS) $(OPENSSL_LIBS)
 AM_LIBADD = $(AM_LIBS) @RELEASE_INFO@ @VERSION_INFO@ \
 	$(top_builddir)/lib/libgnu.la
 AM_LDADD = $(AM_LIBS) $(top_builddir)/lib/libgnu.la

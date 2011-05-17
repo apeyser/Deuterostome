@@ -75,14 +75,14 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/latex/ac_prog_makeindex.m4 \
 	$(top_srcdir)/m4/mbsrtowcs.m4 $(top_srcdir)/m4/mbstate_t.m4 \
 	$(top_srcdir)/m4/mempcpy.m4 $(top_srcdir)/m4/mkdtemp.m4 \
 	$(top_srcdir)/m4/multiarch.m4 $(top_srcdir)/m4/onceonly.m4 \
-	$(top_srcdir)/m4/stdbool.m4 $(top_srcdir)/m4/stdint.m4 \
-	$(top_srcdir)/m4/stdio_h.m4 $(top_srcdir)/m4/stdlib_h.m4 \
-	$(top_srcdir)/m4/string_h.m4 $(top_srcdir)/m4/sys_stat_h.m4 \
-	$(top_srcdir)/m4/sys_time_h.m4 $(top_srcdir)/m4/tempname.m4 \
-	$(top_srcdir)/m4/unistd_h.m4 $(top_srcdir)/m4/wchar.m4 \
-	$(top_srcdir)/m4/wctype.m4 $(top_srcdir)/m4/wint_t.m4 \
-	$(top_srcdir)/acinclude.m4 $(top_srcdir)/m4/basic-defs.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/plugin-config.m4 $(top_srcdir)/m4/stdbool.m4 \
+	$(top_srcdir)/m4/stdint.m4 $(top_srcdir)/m4/stdio_h.m4 \
+	$(top_srcdir)/m4/stdlib_h.m4 $(top_srcdir)/m4/string_h.m4 \
+	$(top_srcdir)/m4/sys_stat_h.m4 $(top_srcdir)/m4/sys_time_h.m4 \
+	$(top_srcdir)/m4/tempname.m4 $(top_srcdir)/m4/unistd_h.m4 \
+	$(top_srcdir)/m4/wchar.m4 $(top_srcdir)/m4/wctype.m4 \
+	$(top_srcdir)/m4/wint_t.m4 $(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/m4/basic-defs.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -179,6 +179,7 @@ ENABLE_EPSTPDF = @ENABLE_EPSTPDF@
 ENABLE_GS = @ENABLE_GS@
 ENABLE_LATEX = @ENABLE_LATEX@
 ENABLE_LP = @ENABLE_LP@
+ENABLE_OPENSSL = @ENABLE_OPENSSL@
 ENABLE_PDFCROP = @ENABLE_PDFCROP@
 ENABLE_PDFLATEX = @ENABLE_PDFLATEX@
 ENABLE_PDFTOPS = @ENABLE_PDFTOPS@
@@ -507,6 +508,8 @@ NO_PTHREAD_CFLAGS = @NO_PTHREAD_CFLAGS@
 NO_PTHREAD_LIBS = @NO_PTHREAD_LIBS@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
+OPENSSL_CFLAGS = @OPENSSL_CFLAGS@
+OPENSSL_LIBS = @OPENSSL_LIBS@
 OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
@@ -532,6 +535,9 @@ PKGLIBDIR = @PKGLIBDIR@
 PKGLIBEXECDIR = @PKGLIBEXECDIR@
 PKGLISPDIR = @PKGLISPDIR@
 PKGPSDATADIR = @PKGPSDATADIR@
+PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 PLUGINDATADIR = @PLUGINDATADIR@
 PRAGMA_SYSTEM_HEADER = @PRAGMA_SYSTEM_HEADER@
 PTHREAD_CC = @PTHREAD_CC@

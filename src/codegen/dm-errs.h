@@ -62,6 +62,7 @@
 #define INV_MSG     (P)0x00000705L /* operand constitutes invalid message   */
 #define BAD_FMT     (P)0x00000707L /* message not in native format          */
 #define LONG_OVF    (P)0x00000708L /* 64 bit long doesn't fit in 32 bit long*/
+#define NEED_SSL    (P)0x00000709L /* sha1 hashed box */
 
 #define LIB_LOAD    (P)0x00000807L /* unable to dlload                      */
 #define LIB_EXPORT  (P)0x00000808L /* unable to find object in lib          */

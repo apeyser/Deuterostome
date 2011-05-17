@@ -19,6 +19,9 @@
 */
 
 #include "dm.h"
+#if DISABLE_OPENSSL
+#undef ENABLE_OPENSSL
+#endif //DISABLE_OPENSSL
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -38,9 +41,14 @@
 #include <limits.h>
 #include <time.h>
 
+#if ENABLE_OPENSSL
+#include <openssl/sha.h>
+#endif //ENABLE_OPENSSL
+
 #include "dm7.h"
 #include "dm2.h"
 #include "srandomdev-local.h"
+
 
 /*------------------------------------------------ random
   -- | [0d..1d]
@@ -462,13 +470,43 @@ P op_writefile(void)
   - pushes root object of the tree on operand stack
 */
 
+DM_INLINE_STATIC P closebox(int fd) {
+  while (close(fd) == -1)
+    if (errno == EINTR) checkabort();
+    else return -errno;
+  
+  return OK;
+}
+
+DM_INLINE_STATIC P readbox (int fd, B* p, size_t atmost, size_t* nread) {
+  ssize_t nb;
+  B* s = p;
+  do {
+    while ((nb = read(fd, p, atmost)) == -1)
+      if (errno == EINTR) checkabort();
+      else return -errno;
+    if (nb < atmost) checkabort();
+    p += nb;
+    atmost -= nb;
+  } while (atmost && nb);
+  
+  *nread = p - s;
+  return OK;
+}
+
 P op_readboxfile(void)
 {
   int fd;
-  P nb, atmost, retc;
-  B *p; 
+  size_t nread;
+  P retc;
   B isnonnative;
   B* oldfreevm = FREEvm;
+  B* base;
+  static B sha1[FRAMEBYTES+20];
+  B *esha1;
+#if ENABLE_OPENSSL
+  static B rsha1[20];
+#endif //ENABLE_OPENSSL
 
   if (o_2 < FLOORopds) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
@@ -487,37 +525,82 @@ P op_readboxfile(void)
   FREEvm[ARRAY_SIZE(o_1)] = '\000';
   FREEvm = oldfreevm;
 
-  atmost = CEILvm - FREEvm;   
-
   while ((fd = open((char*)FREEvm, O_RDONLY)) == -1)
     if (errno == EINTR) checkabort();
     else return -errno;
 
-  p = FREEvm;
-  do {
-    while ((nb = read(fd, p, atmost)) == -1)
-      if (errno == EINTR) checkabort();
-      else return -errno;
-    if (nb < atmost) checkabort();
-    p += nb;
-    atmost -= nb;
-    if (! atmost) return VM_OVF;
-  } while (nb);
- 
-  while (close(fd) == -1)
-    if (errno == EINTR) checkabort();
-    else return -errno;
+  if ((retc = readbox(fd, sha1, 1, &nread))) goto fderr;
+  if (! nread) {
+    retc = BADBOX;
+    goto fderr;
+  };
+  if (! GETNATIVEFORMAT(sha1) || ! GETNATIVEUNDEF(sha1)) {
+    retc = BAD_FMT;
+    goto fderr;
+  }
+
+  //isnonnative = GETNONNATIVE(sha1);
+  base = FREEvm;
+  if (! GETSHA1(sha1)) {
+    if (FREEvm + FRAMEBYTES > CEILvm) {
+      retc = VM_OVF;
+      goto fderr;
+    }
+    moveframe(sha1, FREEvm);
+    FREEvm += FRAMEBYTES;
+    esha1 = NULL;
+  }
+  else {
+#if ! ENABLE_OPENSSL
+    retc = NEED_SSL;
+    goto fderr;
+#else
+    esha1 = sha1 + FRAMEBYTES;
+    if ((retc = readbox(fd, esha1, 20, &nread))) goto fderr;
+    if (nread != 20) {
+      retc = BADBOX;
+      goto fderr;
+    };
+    //if ((retc = deendian_frame(sha1, isnnonnative))) goto fderr; //not needed
+#endif // ! ENABLE_OPENSSL
+  };
   
-  nb = DALIGN(p - FREEvm);
-  if (! GETNATIVEFORMAT(FREEvm) || ! GETNATIVEUNDEF(FREEvm)) return BAD_FMT;
-  isnonnative = GETNONNATIVE(FREEvm);
-  if ((retc = deendian_frame(FREEvm, isnonnative)) != OK) return retc;
-  if ((retc = unfoldobj(FREEvm, (P)FREEvm, isnonnative)) != OK) return retc;
-  FORMAT(FREEvm) = 0;
-  moveframe(FREEvm,o_2);
-  FREEvm += nb;
+  if ((retc = readbox(fd, FREEvm, CEILvm - FREEvm, &nread))) goto fderr;
+  if (nread == CEILvm - FREEvm) {
+    retc = VM_OVF;
+    goto fderr;
+  };
+  if ((retc = closebox(fd))) return retc;
+
+#if ENABLE_OPENSSL
+  if (esha1) {
+    SHA1((unsigned char*) FREEvm, nread, (unsigned char*) rsha1);
+    if (memcmp(esha1, rsha1, 20)) {
+      retc = BADBOX;
+      goto err;
+    }
+  }
+#endif // ENABLE_OPENSSL
+
+  FREEvm += DALIGN(nread);
+  if (! GETNATIVEFORMAT(base) || ! GETNATIVEUNDEF(base)) {
+    retc = BAD_FMT;
+    goto err;
+  }
+  isnonnative = GETNONNATIVE(base);
+  if ((retc = deendian_frame(base, isnonnative))) goto err;
+  if ((retc = unfoldobj(base, (P)base, isnonnative))) goto err;
+
+  FORMAT(base) = 0;
+  moveframe(base, o_2);
   FREEopds = o_1;
   return OK;
+
+ fderr:
+  closebox(fd);
+ err:
+  FREEvm = oldfreevm;
+  return retc;
 }
 
 /*----------------------------------------------- umask
@@ -549,14 +632,36 @@ P op_umask(void) {
     specified by the strings 'dir' and 'filename'
 */
 
+DM_INLINE_STATIC P writebox(int fd, B* base, ssize_t atmost) {
+  ssize_t nb;
+  P retc;
+  do {
+    while ((nb = write(fd, base, atmost)) == -1)
+      if (errno == EINTR) {
+	if ((retc = checkabort_())) return retc;
+      }
+      else return -errno;
+
+    if (nb < atmost && (retc = checkabort_())) return retc;
+    base += nb;
+    atmost -= nb;
+  } while (atmost > 0);
+
+  return OK;
+}
+
 P op_writeboxfile(void) 
 {
   int fd;
-  P nb, atmost, retc;
+  size_t atmost;
+  P retc;
   B *oldFREEvm = FREEvm;
   B* oldfreemem;
   B *base, *top, *freemem;
   B frame[FRAMEBYTES];
+#if ENABLE_OPENSSL
+  static B sha1[FRAMEBYTES+20];
+#endif //ENABLE_OPENSSL
 
   if (o_3 < FLOORopds) return OPDS_UNF;
   if (!((CLASS(o_3) == ARRAY)
@@ -610,31 +715,25 @@ P op_writeboxfile(void)
       goto fderr;
     }
 
-  do {
-    while ((nb = write(fd, base, atmost)) == -1)
-      if (errno == EINTR) {
-	if ((retc = checkabort_())) goto fderr;
-      }
-      else {
-	retc = -errno; 
-	goto fderr;
-      }
-    if (nb < atmost && (retc = checkabort_())) goto fderr;
-    base += nb;
-    atmost -= nb;
-  } while (atmost > 0);
-		
+#if ENABLE_OPENSSL
+  TAG(sha1) = ARRAY|BYTETYPE;
+  ATTR(sha1) = 0;
+  SETNATIVE(sha1);
+  SETSHA1(sha1);
+  ARRAY_SIZE(sha1) = 20;
+  SHA1((unsigned char*) base, atmost, (unsigned char*) (sha1+FRAMEBYTES));
+
+  if ((retc = writebox(fd, sha1, FRAMEBYTES+20))) goto fderr;
+#endif // ENABLE_OPENSSL
+  if ((retc = writebox(fd, base, atmost))) goto fderr;
+
   foldobj_free();
-  while (close(fd) == -1) {
-    if (errno == EINTR) checkabort();
-    else return -errno;
-  }
- 
+  if ((retc = closebox(fd))) return retc; 
   FREEopds = o_3;
   return OK;
 
  fderr:
-  close(fd);
+  closebox(fd);
  err:
   foldobj_free();
   return retc;

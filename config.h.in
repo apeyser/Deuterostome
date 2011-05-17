@@ -101,6 +101,9 @@
 /* Path to LP */
 #undef ENABLE_LP
 
+/* hash box files with sha1 */
+#undef ENABLE_OPENSSL
+
 /* Path to PDFCROP */
 #undef ENABLE_PDFCROP
 

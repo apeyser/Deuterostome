@@ -956,6 +956,11 @@ ALLOCA
 LTALLOCA
 GL_COND_LIBTOOL_FALSE
 GL_COND_LIBTOOL_TRUE
+OPENSSL_LIBS
+OPENSSL_CFLAGS
+PKG_CONFIG_LIBDIR
+PKG_CONFIG
+PKG_CONFIG_PATH
 PCCXXFLAGS
 PCLDFLAGS
 PCCFLAGS
@@ -1212,6 +1217,9 @@ MAX_NUM_EXECS
 MAX_NUM_DICTS
 MAX_NUM_OPDS
 SYS_DICT_SIZE
+ENABLE_OPENSSL
+ENABLE_OPENSSL_FALSE
+ENABLE_OPENSSL_TRUE
 ENABLE_REGEX
 ENABLE_REGEX_FALSE
 ENABLE_REGEX_TRUE
@@ -1306,6 +1314,7 @@ with_lispdir
 enable_maintainer_mode
 enable_xps
 enable_regex
+enable_openssl
 enable_debug_dmnum
 enable_threads
 enable_rthreads
@@ -1386,7 +1395,12 @@ XMKMF
 CXX
 CXXFLAGS
 CCC
-CXXCPP'
+CXXCPP
+PKG_CONFIG
+PKG_CONFIG_PATH
+PKG_CONFIG_LIBDIR
+OPENSSL_CFLAGS
+OPENSSL_LIBS'
 ac_subdirs_all='libltdl'
 
 # Initialize some variables set by options.
@@ -2015,6 +2029,7 @@ Optional Features:
 			  (and sometimes confusing) to the casual installer
   --enable-xps            compile or install only new xps (yes)
   --enable-regex          include regex (yes)
+  --enable-openssl        hash box files with sha1 (yes)
   --enable-debug-dmnum    enable extra debug in dmnum (no)
   --enable-threads        compile and install threads, value is default number
                           (1)
@@ -2138,6 +2153,15 @@ Some influential environment variables:
   CXX         C++ compiler command
   CXXFLAGS    C++ compiler flags
   CXXCPP      C++ preprocessor
+  PKG_CONFIG  path to pkg-config utility
+  PKG_CONFIG_PATH
+              directories to add to pkg-config's search path
+  PKG_CONFIG_LIBDIR
+              path overriding pkg-config's built-in search path
+  OPENSSL_CFLAGS
+              C compiler flags for OPENSSL, overriding pkg-config
+  OPENSSL_LIBS
+              linker flags for OPENSSL, overriding pkg-config
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -4194,6 +4218,49 @@ _ACEOF
 
 
   ENABLE_REGEX="${enable_regex-no}"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if openssl is enabled" >&5
+$as_echo_n "checking if openssl is enabled... " >&6; }
+            if test "${enable_openssl-set}" == set ; then enable_openssl='yes'; fi
+  if test "${enable_openssl}" == "yes" ; then enable_openssl='yes'; fi
+  # Check whether --enable-openssl was given.
+if test "${enable_openssl+set}" = set; then :
+  enableval=$enable_openssl;
+fi
+
+     if test "${enable_openssl-no}" != "no"; then
+  ENABLE_OPENSSL_TRUE=
+  ENABLE_OPENSSL_FALSE='#'
+else
+  ENABLE_OPENSSL_TRUE='#'
+  ENABLE_OPENSSL_FALSE=
+fi
+
+  if test "${enable_openssl-no}" == "no" ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no, not enabled" >&5
+$as_echo "no, not enabled" >&6; }
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes, enabled (${enable_openssl})" >&5
+$as_echo "yes, enabled (${enable_openssl})" >&6; }
+  fi
+                          if test "${enable_openssl-no}" != "no" ; then
+
+      case "${enable_openssl-no}" in
+    yes) cf_ac_define_if_enabled_define=1 ;;
+	*) cf_ac_define_if_enabled_define="${enable_openssl-no}" ;;
+  esac
+  if test "${cf_ac_define_if_enabled_define}" != "no" ; then
+
+cat >>confdefs.h <<_ACEOF
+#define ENABLE_OPENSSL ${cf_ac_define_if_enabled_define}
+_ACEOF
+
+  fi
+
+    fi
+
+
+
+  ENABLE_OPENSSL="${enable_openssl-no}"
 
 
   cf_ac_cv_arg_val="SYS_DICT_SIZE"
@@ -22981,6 +23048,18 @@ else
 fi
 
 
+              if test "${enable_openssl-no}" != "no" ; then
+       ac_fn_c_check_header_mongrel "$LINENO" "openssl/sha.h" "ac_cv_header_openssl_sha_h" "$ac_includes_default"
+if test "x$ac_cv_header_openssl_sha_h" = x""yes; then :
+
+else
+    as_fn_error "Header openssl/sha.h not found" "$LINENO" 5
+fi
+
+
+    fi
+
+
 
 for ac_func in setsid
 do :
@@ -27818,6 +27897,365 @@ fi
 
 
   PCCXXFLAGS=''
+
+    fi
+
+
+
+
+
+
+
+
+
+
+if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then
+	if test -n "$ac_tool_prefix"; then
+  # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
+set dummy ${ac_tool_prefix}pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_PKG_CONFIG+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $PKG_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PKG_CONFIG="$PKG_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_PKG_CONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+PKG_CONFIG=$ac_cv_path_PKG_CONFIG
+if test -n "$PKG_CONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PKG_CONFIG" >&5
+$as_echo "$PKG_CONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+fi
+if test -z "$ac_cv_path_PKG_CONFIG"; then
+  ac_pt_PKG_CONFIG=$PKG_CONFIG
+  # Extract the first word of "pkg-config", so it can be a program name with args.
+set dummy pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_ac_pt_PKG_CONFIG+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $ac_pt_PKG_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_ac_pt_PKG_CONFIG="$ac_pt_PKG_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_ac_pt_PKG_CONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+ac_pt_PKG_CONFIG=$ac_cv_path_ac_pt_PKG_CONFIG
+if test -n "$ac_pt_PKG_CONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_pt_PKG_CONFIG" >&5
+$as_echo "$ac_pt_PKG_CONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+  if test "x$ac_pt_PKG_CONFIG" = x; then
+    PKG_CONFIG=""
+  else
+    case $cross_compiling:$ac_tool_warned in
+yes:)
+{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: using cross tools not prefixed with host triplet" >&5
+$as_echo "$as_me: WARNING: using cross tools not prefixed with host triplet" >&2;}
+ac_tool_warned=yes ;;
+esac
+    PKG_CONFIG=$ac_pt_PKG_CONFIG
+  fi
+else
+  PKG_CONFIG="$ac_cv_path_PKG_CONFIG"
+fi
+
+fi
+if test -n "$PKG_CONFIG"; then
+	_pkg_min_version=0.9.0
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking pkg-config is at least version $_pkg_min_version" >&5
+$as_echo_n "checking pkg-config is at least version $_pkg_min_version... " >&6; }
+	if $PKG_CONFIG --atleast-pkgconfig-version $_pkg_min_version; then
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	else
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+		PKG_CONFIG=""
+	fi
+fi
+              if test "${enable_openssl-no}" != "no" ; then
+
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for OPENSSL" >&5
+$as_echo_n "checking for OPENSSL... " >&6; }
+
+if test -n "$OPENSSL_CFLAGS"; then
+    pkg_cv_OPENSSL_CFLAGS="$OPENSSL_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"openssl\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "openssl") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_OPENSSL_CFLAGS=`$PKG_CONFIG --cflags "openssl" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$OPENSSL_LIBS"; then
+    pkg_cv_OPENSSL_LIBS="$OPENSSL_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"openssl\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "openssl") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_OPENSSL_LIBS=`$PKG_CONFIG --libs "openssl" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        OPENSSL_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "openssl" 2>&1`
+        else
+	        OPENSSL_PKG_ERRORS=`$PKG_CONFIG --print-errors "openssl" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$OPENSSL_PKG_ERRORS" >&5
+
+	as_fn_error "Package requirements (openssl) were not met:
+
+$OPENSSL_PKG_ERRORS
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables OPENSSL_CFLAGS
+and OPENSSL_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details." "$LINENO" 5
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables OPENSSL_CFLAGS
+and OPENSSL_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
+See \`config.log' for more details." "$LINENO" 5; }
+else
+	OPENSSL_CFLAGS=$pkg_cv_OPENSSL_CFLAGS
+	OPENSSL_LIBS=$pkg_cv_OPENSSL_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+fi
+  if test $pkg_failed = untried ; then
+    as_fn_error "Failed to find pkg-config" "$LINENO" 5
+  fi
+
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for OPENSSL" >&5
+$as_echo_n "checking for OPENSSL... " >&6; }
+
+if test -n "$OPENSSL_CFLAGS"; then
+    pkg_cv_OPENSSL_CFLAGS="$OPENSSL_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"openssl\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "openssl") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_OPENSSL_CFLAGS=`$PKG_CONFIG --cflags "openssl" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$OPENSSL_LIBS"; then
+    pkg_cv_OPENSSL_LIBS="$OPENSSL_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"openssl\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "openssl") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_OPENSSL_LIBS=`$PKG_CONFIG --libs "openssl" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        OPENSSL_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "openssl" 2>&1`
+        else
+	        OPENSSL_PKG_ERRORS=`$PKG_CONFIG --print-errors "openssl" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$OPENSSL_PKG_ERRORS" >&5
+
+	as_fn_error "Package requirements (openssl) were not met:
+
+$OPENSSL_PKG_ERRORS
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables OPENSSL_CFLAGS
+and OPENSSL_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details." "$LINENO" 5
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables OPENSSL_CFLAGS
+and OPENSSL_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
+See \`config.log' for more details." "$LINENO" 5; }
+else
+	OPENSSL_CFLAGS=$pkg_cv_OPENSSL_CFLAGS
+	OPENSSL_LIBS=$pkg_cv_OPENSSL_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+fi
+  if test $pkg_failed = untried ; then
+    as_fn_error "Failed to find pkg-config" "$LINENO" 5
+  fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pkg-config value of flag cflags in openssl" >&5
+$as_echo_n "checking for pkg-config value of flag cflags in openssl... " >&6; }
+    if test "${OPENSSL_CFLAGS+set}" = set ; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: OPENSSL_CFLAGS set from command line" >&5
+$as_echo "$as_me: WARNING: OPENSSL_CFLAGS set from command line" >&2;}
+      pkg_failed=no
+    elif OPENSSL_CFLAGS=`$PKG_CONFIG \
+			     --define-variable=prefix=\\${OPENSSL_PREFIX} \
+				 --cflags "openssl"` ; then
+    :
+    else
+      as_fn_error "Unable to get variable cflags" "$LINENO" 5
+    fi
+    OPENSSL_CFLAGS_BASE=${CF_PACKAGE_MODULES_VAR}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: found, is \`${OPENSSL_CFLAGS}'" >&5
+$as_echo "found, is \`${OPENSSL_CFLAGS}'" >&6; }
+
+
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pkg-config value of variable libs in openssl" >&5
+$as_echo_n "checking for pkg-config value of variable libs in openssl... " >&6; }
+    if test "${OPENSSL_LIBS+set}" = set ; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: OPENSSL_LIBS set from command line" >&5
+$as_echo "$as_me: WARNING: OPENSSL_LIBS set from command line" >&2;}
+      pkg_failed=no
+    else
+		if test "libs" = "prefix" && \
+		   OPENSSL_LIBS=`$PKG_CONFIG \
+               --variable="libs" "openssl"` ; then
+		   :
+        elif test "libs" != "prefix" && \
+    	   OPENSSL_LIBS=`$PKG_CONFIG \
+		     --define-variable=prefix=\\${OPENSSL_PREFIX} \
+			 --variable="libs" "openssl"` ; then
+    	   :
+		else
+		   as_fn_error "Unable to get variable libs" "$LINENO" 5
+		fi
+    fi
+    OPENSSL_LIBS_BASE=${CF_PACKAGE_MODULES_VAR}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: found, is \`${OPENSSL_LIBS}'" >&5
+$as_echo "found, is \`${OPENSSL_LIBS}'" >&6; }
+
+
 
     fi
 
@@ -33585,6 +34023,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${ENABLE_REGEX_TRUE}" && test -z "${ENABLE_REGEX_FALSE}"; then
   as_fn_error "conditional \"ENABLE_REGEX\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${ENABLE_OPENSSL_TRUE}" && test -z "${ENABLE_OPENSSL_FALSE}"; then
+  as_fn_error "conditional \"ENABLE_OPENSSL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${ENABLE_DEBUG_DMNUM_TRUE}" && test -z "${ENABLE_DEBUG_DMNUM_FALSE}"; then

@@ -282,7 +282,8 @@
       /READ_ERROR (** Internal Read error) def
       /SOCK_STATE (** Attempt to change file descriptor state) def
       /UNKNOWN_ERR (** Internal Unknown error) def
-      /BUF_OVF (** Internal buffer overflow) def |]
+      /BUF_OVF (** Internal buffer overflow) def
+      /NEED_SSL (** Need openssl to read box file) def|]
     end def |]
   end def |]
 end def

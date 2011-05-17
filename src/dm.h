@@ -197,7 +197,11 @@ extern "C" {
 /* Format specifier */
 #define FORMAT32                   ((UB) 0x10)
 #define FORMAT64                   ((UB) 0x20)
-#define FORMATMASK                 ((UB) 0xF0)
+#define FORMATMASK                 ((UB) 0x30)
+
+#define SHA1OFF                    ((UB) 0x00)
+#define SHA1ON                     ((UB) 0x40)
+#define SHA1MASK                   ((UB) 0x40)
 
 #define FORMAT_BITS_DEFAULT        FORMAT64
 #if DM_HOST_IS_32_BIT
@@ -250,6 +254,12 @@ extern "C" {
   GETNATIVE_FORMATSTATE(frame, FORMATMASK, FORMAT_BITS_DEFAULT)
 #define SETNATIVEFORMAT(frame) \
   SETNATIVE_FORMATSTATE(frame, FORMAT_BITS_DEFAULT)
+
+#define GETSHA1(frame) \
+  GETNATIVE_FORMATSTATE(frame, SHA1MASK, SHA1ON)
+
+#define SETSHA1(frame) \
+  SETNATIVE_FORMATSTATE(frame, SHA1ON)
 
 #define GETNATIVE(frame)                        \
   (GETNATIVEFORMAT(frame)                       \
