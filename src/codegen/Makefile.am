@@ -36,7 +36,7 @@ AM_CFLAGS = $(GCC_CFLAGS)
 AM_CPPFLAGS = \
 	-DDM_DISABLE_THREADS=1 -DDM_HAVE_CONFIG_H -DDM_DISABLE_REGEX=1 \
 	-DDM_DISABLE_XDISPLAY=1 -DDISABLE_NEXTEVENT=1 \
-	-DDM_NO_PROP=1 \
+	-DDM_NO_PROP=1 -DDISABLE_OPENSSL=1 \
 	-I"$(top_srcdir)/src" -I"$(top_builddir)/src" \
 	-I"$(top_builddir)/lib" -I"$(top_srcdir)/lib"
 AM_LDFLAGS = -no-undefined

@@ -1,4 +1,4 @@
-AC_INIT([D-Machine], [4.6.18], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
+AC_INIT([D-Machine], [4.7.0], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
 AC_CONFIG_MACRO_DIR([m4 libltdl/m4])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_AUX_DIR([libltdl/config])
@@ -15,6 +15,7 @@ CF_CLEAR_DEF([CFLAGS])
 
 CF_AC_ENABLE([xps], [compile or install only new xps], [yes])
 CF_AC_ENABLE([regex], [include regex], [yes])
+CF_AC_ENABLE([openssl], [hash box files with sha1], [yes])
 
 CF_AC_ARG_VAR([SYS_DICT_SIZE], [system dictionary size], [500])
 CF_AC_ARG_VAR([MAX_NUM_OPDS], [maximum operand stack size in frames], [100000])
@@ -261,6 +262,7 @@ CF_AC_CHECK_HEADER([sys/wait.h])
 CF_IF_ENABLED([plugins-support], [CF_AC_CHECK_HEADER([stdarg.h])])
 CF_IF_ENABLED([regex], [CF_AC_CHECK_HEADER([regex.h])])
 CF_AC_CHECK_HEADER([spawn.h])
+CF_IF_ENABLED([openssl], [CF_AC_CHECK_HEADER([openssl/sha.h])])
 
 AC_CHECK_FUNCS([setsid])
 AC_CHECK_FUNCS([srandomdev])
@@ -327,6 +329,12 @@ CF_IF_ENABLED([cppplugin], [
 ], [
   CF_AC_SUBST([PCCXXFLAGS])
   PCCXXFLAGS=''
+])
+
+AC_SUBST([PKG_CONFIG_PATH])
+CF_IF_ENABLED([openssl], [
+  CF_PKG_CHECK_MODULES([openssl])
+  CF_PKG_CHECK_FLAGS([openssl], [cflags], [libs])
 ])
 
 gl_INIT

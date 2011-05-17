@@ -7,7 +7,7 @@ Build-Depends: debhelper (>= 5), autotools-dev,
   a2ps, ghostscript, perl, xterm, texlive, texlive-latex-extra, 
   cups | cupsys, xorg, evince, 
   libatlas3gf-base, libatlas-base-dev @ATLAS_VERSION@, libatlas-headers, 
-  pkg-config, libmpich2-dev, mpich2, libx11-dev
+  pkg-config, libmpich2-dev, mpich2, libx11-dev, libssl-dev
 Standards-Version: 3.7.2
 
 Package: dm

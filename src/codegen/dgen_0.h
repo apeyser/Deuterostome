@@ -191,6 +191,7 @@ P _syserrc[] = {
   LIB_LOAD, LIB_EXPORT, LIB_LINK, LIB_ADD, LIB_LOADED, LIB_OVF, LIB_MERGE,
   LIB_INIT,
   CLOCK_ERR, LONG_OVF, SOCK_STATE,
+  NEED_SSL,
   0L,
 };
 
@@ -253,6 +254,6 @@ B *_syserrm[] = {
   (B*)"** Unable to initialize loaded library",
   (B*)"** Error accessing clock",
   (B*)"** Error loading 64 bit integer into 32 bit machine",
-  (B*)"** Attempt to change file descriptor state"
+  (B*)"** Attempt to change file descriptor state",
+  (B*)"** Need ssl to read sha1 stampted box"
 };
-
