@@ -60,6 +60,7 @@
 |============================== Front Ends ==================================
 |
 | - EPSfigure
+| - PDFfigure
 |
 |
 |========================= Making an EPS figure ============================
@@ -75,9 +76,9 @@
 | tree of generators is formed. The tree of generators produces a hierarchy
 | of graphical elements, in a hierarchy of bounding boxes. The alignment
 | of the figure elements with respect to one another is handled by a
-| (`placement') procedure given as an argument to  each primitive.
+| (`placement') procedure given as an argument to each primitive.
 |
-| `EPSfigure' generates an EPS wrapper f or the PS code and writes the PS code
+| `EPSfigure' generates an EPS wrapper for the PS code and writes the PS code
 | together with a prefix (defining a symbol font and some PS tools) to the
 | output file.
 |
@@ -171,12 +172,12 @@
 | of the figure elements with respect to one another is handled by a
 | (`placement') procedure given as an argument to  each primitive.
 |
-| `PDFfigure' generates an EPS wrapper f or the PS code and writes the PS code
+| `PDFfigure' generates an EPS wrapper for the PS code and writes the PS code
 | together with a prefix (defining a symbol font and some PS tools) to the
 | output file.  That is then converted to a PDF.
 |
 | Wolfgang must be doing something funky with saves -- I can't wrap this.
-|
+
 /PDFfigure {
   {
     /pdf_gen  name
@@ -1051,9 +1052,9 @@
 |
 | `xdim' and `ydim' specify the dimensions (in points) to be spanned by
 | the axis system described by `abs' and `ord'. The bounding box of the graph
-| will be larger than the axis box as it comprises the labels automatically
-| added to the axis system plus an alottment of space for symbols that might
-| extend beyond the axes.
+| will be larger than the axis box as it usually comprises the labels
+| automatically added to the axis system and always an alottment of space for
+| symbols that might extend beyond the axes.
 |
 |  `abs'  - [ scan min max type unit descr ]    - directs design of
 |                                                    abscissa axis
@@ -1067,6 +1068,10 @@
 |  type      - /lin (linear) or /log (logarithmic)  ...to be extended
 |  unit      - LaTEX string, used in unit specification added to description
 |  descr     - LaTEX string, description of axis
+|
+| A shortened axis description list, including only the first 4 elements,
+| will generate an unlabelled axis (useful for multi-panel gpgraphs with
+| identical axes).
 |
 | The axis system is plotted as a stroked box with inward pointing scale
 | marks on all margins. Labels appear left of and below the box. Axis
@@ -1125,8 +1130,8 @@
     |-- construct generator of label elements
 
     /children ~[
-      gpXlabels abscissa 3 get get exec
-      gpYlabels ordinate 3 get get exec
+      abscissa length 6 eq { gpXlabels abscissa 3 get get exec } if
+      ordinate length 6 eq { gpYlabels ordinate 3 get get exec } if
     ] bind def
   } 100 dict indict
 } bind phase1 /gpgraf put
@@ -1506,6 +1511,11 @@
 |  unit      - LaTEX string, used in unit specification added to description
 |  descr     - LaTEX string, description of axis
 |
+| A shortened axis description list, including only the first 4 elements,
+| will generate an unlabeled axis (useful for multi-panel pcgraphs with
+| identical axes). If the `color' axis is shortened, the color calibration
+| bar is omitted altogether.
+|
 | The x,y axis system is plotted as a stroked box with inward pointing scale
 | marks on all margins. Labels appear left of and below the box. Axis
 | descriptions are complemented by '/', power of ten (boolean `letterprefix'
@@ -1584,14 +1594,16 @@
     |-- construct generator of label elements
 
     /children ~[
-      gpXlabels abscissa 3 get get exec
-      gpYlabels ordinate 3 get get exec
-      pcZlabels color 3 get get exec
+      abscissa length 6 eq { gpXlabels abscissa 3 get get exec } if
+      ordinate length 6 eq { gpYlabels ordinate 3 get get exec } if
+      color length 6 eq { pcZlabels color 3 get get exec } if
     ] bind def
   } 100 dict indict
 } bind phase1 /pcgraf put
 
 |--------------------------------------------- pcgraf, phase 2
+| The stretching of the graph box beyond xdim,ydim is done implicitly,
+| by the label of the color calibration bar
 
 {
   {
@@ -1634,22 +1646,26 @@
     } for
     ~restore toPS
 
-    ~save toPS
-    [ /CIEBasedABC colordict ] toPS ~setcolorspace toPS
-    /xl xdim 1.1 mul x_to_X def  /xr xdim 1.2 mul x_to_X def
-    /delz Zaxis 1 get Zaxis 0 get sub 99.0 div def
-    0 1 98 { /krow name
-      Zaxis 0 get delz krow mul add /zpix name
-      /yb zpix Z_to_z y_to_Y def
-      /yt zpix delz add Z_to_z y_to_Y def
-      /zpix zpix C_to_c def
-      renderpix
-    } for
-    ~restore toPS
+    color length 6 eq {
+        ~save toPS
+        [ /CIEBasedABC colordict ] toPS ~setcolorspace toPS
+        /xl xdim 1.1 mul x_to_X def  /xr xdim 1.2 mul x_to_X def
+        /delz Zaxis 1 get Zaxis 0 get sub 99.0 div def
+        0 1 98 { /krow name
+          Zaxis 0 get delz krow mul add /zpix name
+          /yb zpix Z_to_z y_to_Y def
+          /yt zpix delz add Z_to_z y_to_Y def
+          /zpix zpix C_to_c def
+          renderpix
+        } for
+        ~restore toPS
+      } if
 
     ~save toPS gpXplotters abscissa 3 get get exec ~restore toPS
     ~save toPS gpYplotters ordinate 3 get get exec ~restore toPS
-    ~save toPS pcZplotters color 3 get get exec ~restore toPS
+    color length 6 eq {
+        ~save toPS pcZplotters color 3 get get exec ~restore toPS
+      } if
 
     verboxe { bbox toPS ~drawbbox toPS } if
     ~restore toPS
