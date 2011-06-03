@@ -1512,8 +1512,9 @@
 |  descr     - LaTEX string, description of axis
 |
 | A shortened axis description list, including only the first 4 elements,
-| will generate an unlabelled axis (useful for multi-panel pcgraphs with
-| identical axes).
+| will generate an unlabeled axis (useful for multi-panel pcgraphs with
+| identical axes). If the `color' axis is shortened, the color calibration
+| bar is omitted altogether.
 |
 | The x,y axis system is plotted as a stroked box with inward pointing scale
 | marks on all margins. Labels appear left of and below the box. Axis
@@ -1601,6 +1602,8 @@
 } bind phase1 /pcgraf put
 
 |--------------------------------------------- pcgraf, phase 2
+| The stretching of the graph box beyond xdim,ydim is done implicitly,
+| by the label of the color calibration bar
 
 {
   {
@@ -1643,22 +1646,26 @@
     } for
     ~restore toPS
 
-    ~save toPS
-    [ /CIEBasedABC colordict ] toPS ~setcolorspace toPS
-    /xl xdim 1.1 mul x_to_X def  /xr xdim 1.2 mul x_to_X def
-    /delz Zaxis 1 get Zaxis 0 get sub 99.0 div def
-    0 1 98 { /krow name
-      Zaxis 0 get delz krow mul add /zpix name
-      /yb zpix Z_to_z y_to_Y def
-      /yt zpix delz add Z_to_z y_to_Y def
-      /zpix zpix C_to_c def
-      renderpix
-    } for
-    ~restore toPS
+    color length 6 eq {
+        ~save toPS
+        [ /CIEBasedABC colordict ] toPS ~setcolorspace toPS
+        /xl xdim 1.1 mul x_to_X def  /xr xdim 1.2 mul x_to_X def
+        /delz Zaxis 1 get Zaxis 0 get sub 99.0 div def
+        0 1 98 { /krow name
+          Zaxis 0 get delz krow mul add /zpix name
+          /yb zpix Z_to_z y_to_Y def
+          /yt zpix delz add Z_to_z y_to_Y def
+          /zpix zpix C_to_c def
+          renderpix
+        } for
+        ~restore toPS
+      } if
 
     ~save toPS gpXplotters abscissa 3 get get exec ~restore toPS
     ~save toPS gpYplotters ordinate 3 get get exec ~restore toPS
-    ~save toPS pcZplotters color 3 get get exec ~restore toPS
+    color length 6 eq {
+        ~save toPS pcZplotters color 3 get get exec ~restore toPS
+      } if
 
     verboxe { bbox toPS ~drawbbox toPS } if
     ~restore toPS
