@@ -583,9 +583,13 @@ BOOLEAN insert(B *nameframe, B *dict, B *framedef)
  of an error, '_errsource' points to a string identifying the instance.
 */
 
-P (*execfd_func)(void) = NULL;
+static UL32 turns;
+void exec_extend(void) {
+  if (! turns) turns = 1;
+}
 
-P exec(L32 turns)
+P (*execfd_func)(void) = NULL;
+P exec(UL32 turns)
 {
   static B fetch_err[] = "fetch phase\n";
   static B transl_err[] = "translation phase\n";
@@ -598,13 +602,14 @@ P exec(L32 turns)
 
  x_t:
   if (FREEexecs <= FLOORexecs) return DONE;
-  if (turns-- <= 0) return MORE;
+  if (turns) turns -= 1;
+  else if (! locked) return MORE;
   checkabort();
 
 /* ---------------------------------------- fetch phase */
  
   switch (fclass = CLASS(x_1)) {
-    case LIST:   
+    case LIST:
       if (ACTIVE & ATTR(x_1)) goto f_list;
       break;
 
@@ -612,13 +617,13 @@ P exec(L32 turns)
       if ((ACTIVE & ATTR(x_1)) && TAG(x_1) == (ARRAY|BYTETYPE)) goto f_arr;
       break;
 
-    case STREAM: 
+    case STREAM:
       if ((ACTIVE & ATTR(x_1)) && execfd_func) goto f_str;
       break;
       
-    default: 
+    default:
       if (fclass > BOX) {
-	errsource = fetch_err; 
+	errsource = fetch_err;
 	return CORR_OBJ;
       }
       break;
@@ -627,7 +632,7 @@ P exec(L32 turns)
   f = x_1;
   FREEexecs = x_1;
   goto x_e;
-  
+
  f_arr:
   switch((retc = tokenize(x_1))) {
     case OK: break;
@@ -648,6 +653,7 @@ P exec(L32 turns)
     case DONE: 
       FREEexecs = x_1;
       goto x_t;
+
     default:
       errsource = transl_err;
       return retc;
@@ -657,7 +663,7 @@ P exec(L32 turns)
 
  f_list:
   if (VALUE_BASE(x_1) >= LIST_CEIL(x_1)) { 
-    FREEexecs = x_1; 
+    FREEexecs = x_1;
     goto x_t; 
   }
   f = VALUE_PTR(x_1);
@@ -679,7 +685,7 @@ P exec(L32 turns)
   }
 
  e_opd:                               /* push object on operand stack */
-  if (FREEopds >= CEILopds) { 
+  if (FREEopds >= CEILopds) {
     retc = OPDS_OVF; 
     goto e_er_1; 
   }
