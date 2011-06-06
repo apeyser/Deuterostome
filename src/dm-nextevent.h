@@ -15,7 +15,6 @@ DLL_SCOPE P op_send(void);
 DLL_SCOPE BOOLEAN masterinput(P* retc, B* bufferf);
 DLL_SCOPE P clientinput(void);
 DLL_SCOPE BOOLEAN pending(void);
-DLL_SCOPE void setpending(void);
 DLL_SCOPE void makeerror(P retc, B* error_source);
 
 DLL_SCOPE P waitsocket(BOOLEAN ispending, fd_set* out_fds);

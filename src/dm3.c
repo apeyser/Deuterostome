@@ -538,11 +538,14 @@ P wm_take_focus_(XEvent* event, B* userdict) {
 
   snprintf((char*)namestring, sizeof(namestring),
 	   "w%lld", (long long) wid);
-  makename(namestring, namef); ATTR(namef) = ACTIVE;
+  makename(namestring, namef);
+  ATTR(namef) = ACTIVE;
+
   if ((dictf = lookup(namef, userdict)) == 0L) return UNDF;
   if (FREEdicts >= CEILdicts) return DICTS_OVF;
   moveframe(dictf, FREEdicts); 
   FREEdicts += FRAMEBYTES;
+
   if (x1 >= CEILexecs) return EXECS_OVF;
   makename((B*)"take_input_focus", x1); 
   ATTR(x1) = ACTIVE;

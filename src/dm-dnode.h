@@ -5,7 +5,6 @@
 
 DLL_SCOPE P op_toconsole(void);
 DLL_SCOPE BOOLEAN pending(void);
-DLL_SCOPE void setpending(void);
 DLL_SCOPE P clientinput(void);
 DLL_SCOPE P op_killsockets(void);
 DLL_SCOPE P op_error(void);
