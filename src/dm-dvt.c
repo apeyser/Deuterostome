@@ -298,8 +298,6 @@ P op_toconsole(void)
        modifier values of 0,1,2,4, or 8.
 */
 
-static BOOLEAN ispending;
-
 P op_nextevent(void)
 {
   static B bufferf[FRAMEBYTES];
@@ -311,12 +309,12 @@ P op_nextevent(void)
   moveframe(o_1, bufferf);
   FREEopds = o_1;
 
-  ispending = FALSE;
   return nextevent(bufferf);
 }
 
-BOOLEAN pending(void) {return ispending || recvd_quit;}
-void setpending(void) {ispending = TRUE;}
+BOOLEAN pending(void) {
+  return (recvd_quit || FREEexecs != FLOORexecs);
+}
 
 P clientinput(void) {
   if (x1 >= CEILexecs) return EXECS_OVF;
@@ -324,7 +322,7 @@ P clientinput(void) {
   makename((B*)"nodemessage", x1);
   ATTR(x1) = ACTIVE;
   FREEexecs = x2;
-  ispending = TRUE;
+
   return OK;
 }
 
@@ -351,7 +349,6 @@ BOOLEAN masterinput(P* retc, B* bufferf) {
   makename((B*)"consoleline",x1);
   ATTR(x1) = ACTIVE;
   FREEexecs = x2;
-  ispending = TRUE;
   return TRUE;
 }
 
@@ -376,7 +373,6 @@ DM_INLINE_STATIC P wrap_stop(P retc) {
   OP_NAME(x_1) = "pop";
   OP_CODE(x_1) = op_pop;
 
-  ispending = TRUE;
   return op_stopped();
 }
 

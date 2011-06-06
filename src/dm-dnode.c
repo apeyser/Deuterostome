@@ -607,16 +607,14 @@ P op_toconsole(void)
 
 BOOLEAN pending(void) {
   if (halt_flag) {
-    if (x_1 >= FLOORexecs 
-	&& TAG(x_1) == OP 
+    if (x_1 >= FLOORexecs
+	&& TAG(x_1) == OP
 	&& OP_CODE(x_1) == x_op_halt)
       return FALSE;
   }
 
   return (recvd_quit || FREEexecs != FLOORexecs);
 }
-
-void setpending(void) {}
 
 P clientinput(void) {
   if (x1 >= CEILexecs) return EXECS_OVF;
@@ -625,7 +623,7 @@ P clientinput(void) {
   moveframe(o_1, x1);
   FREEopds = o_1;
   FREEexecs = x2;
-  
+
   return OK;
 }
 
@@ -755,18 +753,16 @@ socksdone:
   serialized = FALSE;
   while (1) {
     switch (retc = exec(100)) {
-      case MORE: 
-	if (locked) continue; 
-	retc = nextevent(cmsf);
-	break;
-
-      case DONE: 
+      case DONE:
 	locked = FALSE; 
 	serialized = FALSE;
 	if (FREEexecs == FLOORexecs) {
 	  moveframe(msf,cmsf);
 	  halt_flag = FALSE;
 	}
+
+      // intentional fall-through
+      case MORE:
 	retc = nextevent(cmsf);
 	break;
 

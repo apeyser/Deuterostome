@@ -274,8 +274,8 @@ void makeerror(P retc, B* error_source) {
 
 static BOOLEAN pending(void) {
   if (halt_flag) {
-    if (x_1 >= FLOORexecs 
-	&& TAG(x_1) == OP 
+    if (x_1 >= FLOORexecs
+	&& TAG(x_1) == OP
 	&& OP_CODE(x_1) == x_op_halt)
       return FALSE;
   }
@@ -629,11 +629,6 @@ void run_dpawn_mill(void) {
   groupconsole = FALSE;
   while (1) {
     switch (retc = exec(100)) {
-      case MORE: 
-	if (locked) continue;
-	retc = nextevent(cmsf);
-	break;
-
       case DONE: 
 	locked = FALSE; 
 	serialized = FALSE;
@@ -642,6 +637,9 @@ void run_dpawn_mill(void) {
 	  halt_flag = FALSE;
 	  groupconsole = FALSE;
 	}
+
+	//intentional fall-throught
+      case MORE:
 	retc = nextevent(cmsf);
 	break;
 

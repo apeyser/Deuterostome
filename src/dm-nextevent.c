@@ -12,9 +12,6 @@
 #include "dm2.h"
 
 // ------------------------------------- centralize socket handler
-#if DISABLE_NEXTEVENT
-void setpending(void) {}
-#endif
 
 
 // -------- makesocketdead ------------------------

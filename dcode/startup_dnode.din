@@ -698,7 +698,7 @@ end def |========= end of mpi data ================
 |  ~exec save knode true-if-send-to-active-pawn | ...
 /dvtreceive_base {
   {~rthreads_exec} {~unlock} ifelse 
-  openlist 4 -2 roll exch dup capsave null ~stopped push 
+  openlist 4 -2 roll exch dup capsave null ~stopped push
   | ... stop null save knode / ... stop null knode
   exch dup class /nullclass eq ~pop {restore exch pop} ifelse
   | ... stop knode
@@ -708,9 +708,7 @@ end def |========= end of mpi data ================
 
 | knode | ...
 /dvtrespond {
-  save
-  console ~[4 -1 roll {dvtsup begin setready_dnode} ~exec] send
-  restore
+  {console ~[3 -1 roll {dvtsup begin setready_dnode} ~exec] send} insave
 } bind def
 
 | (line) | {line}
