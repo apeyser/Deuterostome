@@ -708,7 +708,7 @@ end def |========= end of mpi data ================
 
 | knode | ...
 /dvtrespond {
-  {console ~[4 -1 roll {dvtsup begin setready_dnode} ~exec] send} insave
+  {console ~[3 -1 roll {dvtsup begin setready_dnode} ~exec] send} insave
 } bind def
 
 | (line) | {line}

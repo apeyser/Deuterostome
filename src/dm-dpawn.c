@@ -637,9 +637,9 @@ void run_dpawn_mill(void) {
 	  halt_flag = FALSE;
 	  groupconsole = FALSE;
 	}
-	
+
 	//intentional fall-throught
-      case MORE: 
+      case MORE:
 	retc = nextevent(cmsf);
 	break;
 
