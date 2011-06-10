@@ -1611,7 +1611,8 @@
 
     /bbox 0 4 /d array copy def
     symbolsize linewidth add 2 div dup
-    xdim add bbox 2 put ydim add bbox 3 put
+    neg dup bbox 0 put bbox 1 put 
+    dup xdim add bbox 2 put ydim add bbox 3 put
 
     (+) loud_msg children (-) loud_msg
     makeinverse stretchpbbox
@@ -1801,17 +1802,16 @@
 | Using no interpolation, we have 95 discrete spectral colors
 | (from purple to red) upon which we map the Z range of the data. We
 | actually use only a subset so that the physical rendering is not
-| challenged beyond its gamut.
-|
+| challenged beyond its gamut (old start: 48).
 
 /makepseudocolors {
   /Npc 200 4 div def
   /pcX Npc /d array def
   /pcY Npc /d array def
   /pcZ Npc /d array def
-  CIEfunctions 48 200 getinterval 1 4 pcX extract pop
-  CIEfunctions 48 200 getinterval 2 4 pcY extract pop
-  CIEfunctions 48 200  getinterval 3 4 pcZ extract pop
+  CIEfunctions 60 200 getinterval 1 4 pcX extract pop
+  CIEfunctions 60 200 getinterval 2 4 pcY extract pop
+  CIEfunctions 60 200  getinterval 3 4 pcZ extract pop
   /XYZrange [ 0.0 0.0 pcX extrema 0.0 0.0 pcY extrema 0.0 0.0 pcZ extrema ] def
   /colordict 10 dict {
     /RangeABC XYZrange def
