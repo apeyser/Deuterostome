@@ -605,6 +605,7 @@ P (*execfd_func)(void) = NULL;
 DM_INLINE_STATIC P fetch_phase(B** f) {
   static B fetch_err[] = "fetch phase\n";
   static B transl_err[] = "translation phase\n";
+  P retc;
   UB fclass;
   *f = NULL;
 
