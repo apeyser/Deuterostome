@@ -601,40 +601,9 @@ P exec(UL32 turns) {
   return retc;
 }
 
-P (*execfd_func)(void) = NULL;
-DM_INLINE_STATIC P fetch_phase(B** f) {
-  static B fetch_err[] = "fetch phase\n";
-  static B transl_err[] = "translation phase\n";
+static B transl_err[] = "translation phase\n";
+DM_INLINE_STATIC P f_arr(B** f) {
   P retc;
-  UB fclass;
-  *f = NULL;
-
-  /* ---------------------------------------- fetch phase */
-  switch (fclass = CLASS(x_1)) {
-    case LIST:
-      if (ACTIVE & ATTR(x_1)) goto f_list;
-      break;
-
-    case ARRAY:  
-      if ((ACTIVE & ATTR(x_1)) && TAG(x_1) == (ARRAY|BYTETYPE)) goto f_arr;
-      break;
-
-    case STREAM:
-      if ((ACTIVE & ATTR(x_1)) && execfd_func) goto f_str;
-      break;
-      
-    default:
-      if (fclass > BOX) {
-	errsource = fetch_err;
-	return CORR_OBJ;
-      }
-      break;
-  }
-
-  *f = FREEexecs = x_1;
-  return OK;
-
- f_arr:
   switch((retc = tokenize(x_1))) {
     case OK: break;
     case DONE: 
@@ -647,8 +616,10 @@ DM_INLINE_STATIC P fetch_phase(B** f) {
   }
   *f = FREEopds = o_1;
   return OK;
+}
 
- f_str:
+DM_INLINE_STATIC P f_str(B** f) {
+  P retc;
   switch ((retc = execfd_func())) {
     case OK: break;
     case DONE:
@@ -661,8 +632,9 @@ DM_INLINE_STATIC P fetch_phase(B** f) {
   }
   *f = FREEopds = o_1;
   return OK;
+}
 
- f_list:
+DM_INLINE_STATIC P f_list(B** f) {
   if (VALUE_BASE(x_1) >= LIST_CEIL(x_1)) { 
     FREEexecs = x_1;
     return OK;
@@ -671,6 +643,32 @@ DM_INLINE_STATIC P fetch_phase(B** f) {
   *f = VALUE_PTR(x_1);
   if ((VALUE_BASE(x_1) += FRAMEBYTES) >= LIST_CEIL(x_1))
     FREEexecs = x_1;
+  return OK;
+}
+
+P (*execfd_func)(void) = NULL;
+DM_INLINE_STATIC P fetch_phase(B** f) {
+  static B fetch_err[] = "fetch phase\n";
+  *f = NULL;
+  /* ---------------------------------------- fetch phase */
+  if (CLASS(x_1) > BOX) {
+    errsource = fetch_err;
+    return CORR_OBJ;
+  }
+
+  if (ACTIVE & ATTR(x_1)) {
+    switch (TAG(x_1)) {
+      case LIST:
+	return f_list(f);
+      case ARRAY|BYTETYPE:
+	return f_arr(f);
+      case STREAM:
+	if (execfd_func) return f_str(f);
+	break;
+    };
+  };
+      
+  *f = FREEexecs = x_1;
   return OK;
 }
 
@@ -723,11 +721,10 @@ DM_INLINE_STATIC P e_name(B* f) {
     return OK;
   }
 
-  pullname(f, undfn_buf);  
-  errsource = undfn_buf; 
+  pullname(f, undfn_buf);
+  errsource = undfn_buf;
   return UNDF;
 };
-
 
 DM_INLINE_STATIC P exec_phase(B* f) {
   UB fclass;
