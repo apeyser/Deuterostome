@@ -412,8 +412,8 @@ end def
       /LIB_OVF (** Overflow in malloc while loading library) def
       /LIB_MERGE (** Unable to merge library into sysdict) def
       /LIB_INIT (** Unable to initialize loaded library) def
-	    /VMR_ERR (** Cannot allocate D memory) def
-      /VMR_STATE (** Memory already minimized) def
+      /VMR_ERR (** Cannot allocate D memory) def
+      /VMR_STATE (** vmresize operand doesn't match vm state) def
       /ILL_OPAQUE (** Opaque dict type mismatch) def
       /FOLD_OPAQUE (** Illegal attempt to fold opaque object) def
       /ACTIVE_OPAQUE (** Unable to restore active opaque object) def

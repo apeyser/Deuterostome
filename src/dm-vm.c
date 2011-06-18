@@ -13,7 +13,7 @@
 #include "dm-sem.h"
 
 // original directory for vmresize
-static char* original_dir;
+static char* original_dir = NULL;
 
 B msf[FRAMEBYTES] = {}, cmsf[FRAMEBYTES] = {};
 /*-- setup: opds, execs, dicts, VM/MB, userdict */
@@ -43,6 +43,7 @@ static void setupbase(B* sysdict, B* userdict) {
 void maketinysetup(void) {
   B *sysdict, *userdict;
   LBIG tinysetup[5] = { 100, 50, 10, 1 , 100 };
+  size_t sz = 0;
   
   if (makeDmemory(tinysetup))
     error_local(1, errno, "Insufficient memory");
@@ -53,8 +54,23 @@ void maketinysetup(void) {
   tinymemory = TRUE;
   setupbase(sysdict, userdict);
 
-  if (! (original_dir = getcwd(NULL, 0))) 
-    error_local(EXIT_FAILURE,errno,"getcwd");  
+  if (original_dir) free(original_dir);
+  while (1) {
+    sz += 1024;
+    if (! (original_dir = (B*) malloc(sz*sizeof(B))))
+      error_local(EXIT_FAILURE, 0, "malloc");
+
+    if (getcwd(original_dir, sz)) {
+      sz = strlen(original_dir) + 1;
+      if (! (original_dir = realloc(original_dir, sz)))
+	error_local(EXIT_FAILURE, 0, "realloc");
+      break;
+    };
+
+    if (errno != ERANGE)
+      error_local(EXIT_FAILURE, errno, "getcwd");
+    free(original_dir);
+  };
 }
 
 /*-------------------------------------------- vmresize
@@ -137,7 +153,6 @@ static P x_op_lock(void) {
 	
   locked = BOOL_VAL(x_1);
   FREEexecs = x_1;
-  exec_extend();
   return repush_stop();
 }
 

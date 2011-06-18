@@ -297,6 +297,7 @@ P op_toconsole(void)
        one button (up to 5), these are reported (from left to right) by
        modifier values of 0,1,2,4, or 8.
 */
+static BOOLEAN ispending = TRUE;
 
 P op_nextevent(void)
 {
@@ -309,11 +310,12 @@ P op_nextevent(void)
   moveframe(o_1, bufferf);
   FREEopds = o_1;
 
+  ispending = FALSE;
   return nextevent(bufferf);
 }
 
 BOOLEAN pending(void) {
-  return (recvd_quit || FREEexecs != FLOORexecs);
+  return (recvd_quit || ispending);
 }
 
 P clientinput(void) {
@@ -322,6 +324,7 @@ P clientinput(void) {
   makename((B*)"nodemessage", x1);
   ATTR(x1) = ACTIVE;
   FREEexecs = x2;
+  ispending = TRUE;
 
   return OK;
 }
@@ -349,6 +352,8 @@ BOOLEAN masterinput(P* retc, B* bufferf) {
   makename((B*)"consoleline",x1);
   ATTR(x1) = ACTIVE;
   FREEexecs = x2;
+
+  ispending = TRUE;
   return TRUE;
 }
 
@@ -373,6 +378,7 @@ DM_INLINE_STATIC P wrap_stop(P retc) {
   OP_NAME(x_1) = "pop";
   OP_CODE(x_1) = op_pop;
 
+  ispending = TRUE;
   return op_stopped();
 }
 
