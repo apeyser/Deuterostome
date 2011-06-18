@@ -28,7 +28,7 @@ DM_HOT DLL_SCOPE BOOLEAN insert(B *nameframe, B *dict, B *framedef);
 DLL_SCOPE BOOLEAN mergedict(B *socket, B *sink);
 DLL_SCOPE P (*execfd_func)(void);
 DM_HOT DLL_SCOPE P exec(UL32 turns);
-DM_HOT DLL_SCOPE void exec_extend(void);
+DM_HOT DLL_SCOPE P exec_step(void);
 DLL_SCOPE P foldobj(B *frame);
 DLL_SCOPE P transcribe(B* frame);
 DLL_SCOPE P unfoldobj(B *frame, P base, B isnonnative);
