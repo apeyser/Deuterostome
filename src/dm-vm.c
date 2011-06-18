@@ -13,7 +13,7 @@
 #include "dm-sem.h"
 
 // original directory for vmresize
-static char* original_dir;
+static char* original_dir = NULL;
 
 B msf[FRAMEBYTES] = {}, cmsf[FRAMEBYTES] = {};
 /*-- setup: opds, execs, dicts, VM/MB, userdict */
@@ -54,6 +54,7 @@ void maketinysetup(void) {
   tinymemory = TRUE;
   setupbase(sysdict, userdict);
 
+  if (original_dir) free(original_dir);
   while (1) {
     sz += 1024;
     if (! (original_dir = (B*) malloc(sz*sizeof(B))))
