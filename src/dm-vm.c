@@ -43,7 +43,7 @@ static void setupbase(B* sysdict, B* userdict) {
 void maketinysetup(void) {
   B *sysdict, *userdict;
   LBIG tinysetup[5] = { 100, 50, 10, 1 , 100 };
-  size_t sz;
+  size_t sz = 0;
   
   if (makeDmemory(tinysetup))
     error_local(1, errno, "Insufficient memory");
@@ -54,13 +54,22 @@ void maketinysetup(void) {
   tinymemory = TRUE;
   setupbase(sysdict, userdict);
 
-  if ((sz = pathconf(".", _PC_PATH_MAX)) == -1)
-    error_local(EXIT_FAILURE, errno, "pathconf PC_PATH_MAX .");
-  if (! (original_dir = (B*) malloc((sz+1)*sizeof(B))))
-    error_local(EXIT_FAILURE, 0, "malloc: out of memory");
+  while (1) {
+    sz += 1024;
+    if (! (original_dir = (B*) malloc(sz*sizeof(B))))
+      error_local(EXIT_FAILURE, 0, "malloc");
 
-  if (! getcwd(original_dir, sz))
-    error_local(EXIT_FAILURE, errno, "getcwd");
+    if (getcwd(original_dir, sz)) {
+      sz = strlen(original_dir) + 1;
+      if (! (original_dir = realloc(original_dir, sz)))
+	error_local(EXIT_FAILURE, 0, "realloc");
+      break;
+    };
+
+    if (errno != ERANGE)
+      error_local(EXIT_FAILURE, errno, "getcwd");
+    free(original_dir);
+  };
 }
 
 /*-------------------------------------------- vmresize
