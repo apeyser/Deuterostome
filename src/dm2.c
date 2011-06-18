@@ -595,12 +595,13 @@ P exec(UL32 turns) {
   P retc;
   /* ------------------------------------------- test phase */
   while (! (retc = test_phase(turns))
-	 && ! (retc = exec_step))
+	 && ! (retc = exec_step()))
     if (turns) turns -= 1;
 
   return retc;
 }
 
+P (*execfd_func)(void) = NULL;
 DM_INLINE_STATIC P fetch_phase(B** f) {
   static B fetch_err[] = "fetch phase\n";
   static B transl_err[] = "translation phase\n";
@@ -672,32 +673,11 @@ DM_INLINE_STATIC P fetch_phase(B** f) {
   return OK;
 }
 
-P (*execfd_func)(void) = NULL;
-DM_INLINE_STATIC exec_phase(B* f) {
-  static B exec_err[] = "execution phase\n";
-  static B undfn_buf[NAMEBYTES+1];
-
-  P retc;
-  UB fclass;
-  OPER tmis;
-
-  /* -----------------------------------------  execution phase */
-  if (ATTR(f) & ACTIVE) {
-    switch ((fclass = CLASS(f))) {
-      case OP:      goto e_op;
-      case NAME:    goto e_name;
-      case NULLOBJ: return OK;
-    }
-    if (fclass > BOX) {
-      retc = CORR_OBJ;
-      goto e_er_1;
-    }
-  }
-
-  /* push object on operand stack */
+static B exec_err[] = "execution phase\n";
+DM_INLINE_STATIC P e_opd(B* f) { /* push object on operand stack */
   if (FREEopds >= CEILopds) {
-    retc = OPDS_OVF; 
-    goto e_er_1; 
+    errsource = exec_err;
+    return OPDS_OVF; 
   }
   moveframe(f, o1);
   ATTR(o1) &= ~XMARK; // leave active alone -- might be procedure
@@ -711,42 +691,61 @@ DM_INLINE_STATIC exec_phase(B* f) {
 
   FREEopds = o2;
   return OK;
+}
 
- e_op:                                /* only C operators for the time! */
-  tmis = OP_CODE(f);
+DM_INLINE_STATIC P e_op(B* f) {
+  P retc;
+  OPER tmis = OP_CODE(f);
   errsource = (B*) OP_NAME(f);
   if ((retc = tmis())) return retc;
   return OK;
+}
 
- e_name: {
-  B * dict = FREEdicts;
-  while ((dict -= FRAMEBYTES) >= FLOORdicts) {
-    B *af;
-    if ((af = lookup(f, VALUE_PTR(dict)))) { 
-      f = af;
-      if (ATTR(af) & ACTIVE) { 
-	if (FREEexecs >= CEILexecs) { 
-	  retc = EXECS_OVF; 
-	  goto e_er_1; 
-	}
-	moveframe(f, x1); 
-	FREEexecs = x2; 
-	return OK;
-      }
-      else goto e_opd;
+DM_INLINE_STATIC P e_name(B* f) {
+  static B undfn_buf[NAMEBYTES+1];
+  B *dict;
+  B *af;
+
+  for (dict = FREEdicts - FRAMEBYTES;
+       dict >= FLOORdicts;
+       dict -= FRAMEBYTES)
+  {
+    if (! (af = lookup(f, VALUE_PTR(dict)))) continue;
+    if (! (ATTR(af) & ACTIVE)) return e_opd(af);
+
+    if (FREEexecs >= CEILexecs) { 
+      errsource = exec_err;
+      return EXECS_OVF; 
     }
+    moveframe(af, x1); 
+    FREEexecs = x2; 
+    return OK;
   }
+
   pullname(f, undfn_buf);  
   errsource = undfn_buf; 
   return UNDF;
- }
+};
 
- e_er_1:
-  errsource = exec_err; 
-  return retc;
+
+DM_INLINE_STATIC P exec_phase(B* f) {
+  UB fclass;
+
+  /* -----------------------------------------  execution phase */
+  if (ATTR(f) & ACTIVE) {
+    switch ((fclass = CLASS(f))) {
+      case OP:      return e_op(f);
+      case NAME:    return e_name(f);
+      case NULLOBJ: return OK;
+      default:      break;
+    }
+  }
+
+  return e_opd(f);
 }
 
 P exec_step(void) {
+  P retc;
   B* f;
   if ((retc = fetch_phase(&f)) || ! f) return retc;
   return exec_phase(f);
