@@ -576,38 +576,38 @@ BOOLEAN insert(B *nameframe, B *dict, B *framedef)
     - an error has been encountered (error code)
     - 'turns' number of objects has been executed (MORE)
 
- 'turns' is passed by address, so it can be reset asynchronously to
- stop the mill.
-
  The returned longvalue is indicated in parentheses. In the case
  of an error, '_errsource' points to a string identifying the instance.
+
+ exec_step executes the top object on the stack, returning any of the above
+ or OK.
 */
 
-static UL32 turns;
-void exec_extend(void) {
-  if (! turns) turns = 1;
-}
-
-P (*execfd_func)(void) = NULL;
-P exec(UL32 turns)
-{
-  static B fetch_err[] = "fetch phase\n";
-  static B transl_err[] = "translation phase\n";
-  static B exec_err[] = "execution phase\n";
-  static B undfn_buf[NAMEBYTES+1];
-  B *f, *af, *dict; P  retc; UB fclass;
-  OPER tmis;
-
-/* ------------------------------------------- test phase */
-
- x_t:
+DM_INLINE_STATIC P test_phase(UL32 turns) {
   if (FREEexecs <= FLOORexecs) return DONE;
-  if (turns) turns -= 1;
-  else if (! locked) return MORE;
+  if (! turns && ! locked) return MORE;
   checkabort();
 
-/* ---------------------------------------- fetch phase */
- 
+  return OK;
+}
+
+P exec(UL32 turns) {
+  P retc;
+  /* ------------------------------------------- test phase */
+  while (! (retc = test_phase(turns))
+	 && ! (retc = exec_step))
+    if (turns) turns -= 1;
+
+  return retc;
+}
+
+DM_INLINE_STATIC P fetch_phase(B** f) {
+  static B fetch_err[] = "fetch phase\n";
+  static B transl_err[] = "translation phase\n";
+  UB fclass;
+  *f = NULL;
+
+  /* ---------------------------------------- fetch phase */
   switch (fclass = CLASS(x_1)) {
     case LIST:
       if (ACTIVE & ATTR(x_1)) goto f_list;
@@ -629,62 +629,72 @@ P exec(UL32 turns)
       break;
   }
 
-  f = x_1;
-  FREEexecs = x_1;
-  goto x_e;
+  *f = FREEexecs = x_1;
+  return OK;
 
  f_arr:
   switch((retc = tokenize(x_1))) {
     case OK: break;
     case DONE: 
-      FREEexecs = x_1; 
-      goto x_t; 
+      FREEexecs = x_1;
+      return OK;
       
     default:
       errsource = transl_err; 
       return retc;
   }
-  f = FREEopds = o_1;
-  goto x_e;
+  *f = FREEopds = o_1;
+  return OK;
 
  f_str:
   switch ((retc = execfd_func())) {
     case OK: break;
-    case DONE: 
+    case DONE:
       FREEexecs = x_1;
-      goto x_t;
+      return OK;
 
     default:
       errsource = transl_err;
       return retc;
   }
-  f = FREEopds = o_1;
-  goto x_e;
+  *f = FREEopds = o_1;
+  return OK;
 
  f_list:
   if (VALUE_BASE(x_1) >= LIST_CEIL(x_1)) { 
     FREEexecs = x_1;
-    goto x_t; 
+    return OK;
   }
-  f = VALUE_PTR(x_1);
+
+  *f = VALUE_PTR(x_1);
   if ((VALUE_BASE(x_1) += FRAMEBYTES) >= LIST_CEIL(x_1))
     FREEexecs = x_1;
-  goto x_e;
+  return OK;
+}
 
-/* -----------------------------------------  execution phase */
- x_e:
-  if (! (ATTR(f) & ACTIVE)) goto e_opd;
-  switch ((fclass = CLASS(f))) {
-    case OP:      goto e_op;
-    case NAME:    goto e_name;
-    case NULLOBJ: goto x_t;
-  }
-  if (fclass > BOX) {
-    retc = CORR_OBJ;
-    goto e_er_1;
+P (*execfd_func)(void) = NULL;
+DM_INLINE_STATIC exec_phase(B* f) {
+  static B exec_err[] = "execution phase\n";
+  static B undfn_buf[NAMEBYTES+1];
+
+  P retc;
+  UB fclass;
+  OPER tmis;
+
+  /* -----------------------------------------  execution phase */
+  if (ATTR(f) & ACTIVE) {
+    switch ((fclass = CLASS(f))) {
+      case OP:      goto e_op;
+      case NAME:    goto e_name;
+      case NULLOBJ: return OK;
+    }
+    if (fclass > BOX) {
+      retc = CORR_OBJ;
+      goto e_er_1;
+    }
   }
 
- e_opd:                               /* push object on operand stack */
+  /* push object on operand stack */
   if (FREEopds >= CEILopds) {
     retc = OPDS_OVF; 
     goto e_er_1; 
@@ -700,17 +710,18 @@ P exec(UL32 turns)
   }
 
   FREEopds = o2;
-  goto x_t;
+  return OK;
 
  e_op:                                /* only C operators for the time! */
   tmis = OP_CODE(f);
   errsource = (B*) OP_NAME(f);
   if ((retc = tmis())) return retc;
-  goto x_t;
+  return OK;
 
- e_name:
-  dict = FREEdicts;
-  while ((dict -= FRAMEBYTES) >= FLOORdicts) { 
+ e_name: {
+  B * dict = FREEdicts;
+  while ((dict -= FRAMEBYTES) >= FLOORdicts) {
+    B *af;
     if ((af = lookup(f, VALUE_PTR(dict)))) { 
       f = af;
       if (ATTR(af) & ACTIVE) { 
@@ -720,7 +731,7 @@ P exec(UL32 turns)
 	}
 	moveframe(f, x1); 
 	FREEexecs = x2; 
-	goto x_t;
+	return OK;
       }
       else goto e_opd;
     }
@@ -728,10 +739,17 @@ P exec(UL32 turns)
   pullname(f, undfn_buf);  
   errsource = undfn_buf; 
   return UNDF;
+ }
 
- e_er_1:   
+ e_er_1:
   errsource = exec_err; 
   return retc;
+}
+
+P exec_step(void) {
+  B* f;
+  if ((retc = fetch_phase(&f)) || ! f) return retc;
+  return exec_phase(f);
 }
 
 /*-------------------- tree handling support --------------------------*/
@@ -1769,7 +1787,7 @@ P int_repush_stop(P (*abortfunc)(void)) {
   }
   FREEopds = o_1;
 
-  return OK;
+  return exec_step();
 }
 
 void createfds(void) {

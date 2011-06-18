@@ -137,7 +137,6 @@ static P x_op_lock(void) {
 	
   locked = BOOL_VAL(x_1);
   FREEexecs = x_1;
-  exec_extend();
   return repush_stop();
 }
 
