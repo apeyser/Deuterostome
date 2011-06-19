@@ -167,7 +167,7 @@ int main(int argc, char* argv[]) {
 #else
 
 DM_NORETURN
-static void execsighandler(P sigsocket, P tcp_sigsocket, P serverport, 
+static void execsighandler(P sigsocket, P tcp_sigsocket, P serverport,
 			   P (*closesockets_func)(void)) {
   int sigsocket_ = -1, tcp_sigsocket_ = -1;
   P retc;
@@ -205,10 +205,9 @@ static void execsighandler(P sigsocket, P tcp_sigsocket, P serverport,
 	sigsocket != -1 ? "1" : "0",
 	NULL);
 
-  dm_error(errno, 
-	      "Unable to exec: @dmprop@ %s %i", _serverport,
-	      tcp_sigsocket != -1 ? 1 : 0);
-  exit(1);
+  dm_error(errno,
+	   "Unable to exec: @dmprop@ %s %i", _serverport,
+	   tcp_sigsocket != -1 ? 1 : 0);
 }
   
 /****************** signal redirector ********************/
