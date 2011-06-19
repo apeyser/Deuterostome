@@ -21,7 +21,7 @@
 
 #define DM_IGNORE_RETURN(a) if (a);
 
-__attribute__ ((noreturn, unused, format (printf, 3, 4)))
+__attribute__ ((noreturn, unused, format (printf, 2, 3)))
 static void dm_error(int __errnum, 
 		     const char* __format, ...)
 {
