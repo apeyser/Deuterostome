@@ -53,7 +53,7 @@ static void va_dm_error(int errnum,
 }
 
 
-__attribute__ ((noreturn, unused, format (printf, 3, 4)))
+__attribute__ ((noreturn, unused, format (printf, 2, 3)))
 static void dm_error(int errnum,
 		     const char* format,
 		     ...)
