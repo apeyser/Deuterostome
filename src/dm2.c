@@ -1284,7 +1284,7 @@ DM_INLINE_STATIC void setupname(B** frame, const char* string, BOOLEAN app) {
   if (app && (len == 0 || string[len-1] != '/')) lenapp++;
 
   if (FREEvm + FRAMEBYTES + DALIGN(len) > CEILvm)
-    error_local(EXIT_FAILURE,0,"VM overflow");
+    dm_error(0,"VM overflow");
 
   *frame = FREEvm;
   FREEvm += FRAMEBYTES + DALIGN(lenapp);
@@ -1330,10 +1330,10 @@ void setupdirs(void) {
   if (exec_env && *exec_env) exec_dir = exec_env;
 
   if (gethostname(myname, sizeof(myname)))
-    error_local(1, errno, "gethostname failure");
+    dm_error(errno, "gethostname failure");
 
   if (! (h = gethostbyname(myname)))
-    error_local(1, h_errno, "gethostbyname failure: %s", myname);
+    dm_error(h_errno, "gethostbyname failure: %s", myname);
   
   memset(myxname, '*', sizeof(myxname)-1);
 
@@ -1642,7 +1642,7 @@ static void shellhandler(int sig,
   sigset_t set;
   if (info && info->si_pid == getpid()) return;
   if (getpid() == getpgrp() && kill(0, sig))
-    error_local(0, errno, "Unable to propagate %i", sig);
+    dm_error_msg(errno, "Unable to propagate %i", sig);
 
   sigfillset(&set);
   sigdelset(&set, SIGCONT);
@@ -1655,7 +1655,7 @@ static void conthandler(int sig,
 {
   pid_t me = getpid();
   if ((! info || info->si_pid != me) && me == getpgrp() && kill(0, SIGCONT))
-    error_local(0, 0, "Unable to propagate %i", sig);
+    dm_error_msg(0, "Unable to propagate %i", sig);
 }
 
 /*---------- signal handler: SIGINT */
@@ -1679,11 +1679,11 @@ static void unquit(void) {
 
   sigfillset(&sa.sa_mask);
   if (sigaction(SIGCHLD, &sa, NULL))
-    error_local(0, errno, "Unable to dezombify");
+    dm_error_msg(errno, "Unable to dezombify");
   for (i = quitsigs; *i != SIGMAP_LEN; i++) clearhandler(*i);
 
   if (getpid() == getpgrp() && kill(0, SIGQUIT))
-    error_local(0, errno, "Failed to send quit signal to process group");
+    dm_error_msg(errno, "Failed to send quit signal to process group");
   while (wait(NULL) != -1 || (errno == EINTR && ! checkabort_()));
 }
 
@@ -1692,8 +1692,8 @@ static void makequithandler(void)
   enum SIGMAP quitsigs[] = {SIGMAP_QUIT, SIGMAP_TERM, SIGMAP_HUP, SIGMAP_LEN};
   enum SIGMAP* i;
   if (getpid() != getpgid(0) && setpgid(0, 0)) 
-    error_local(1, errno, "Failed to set process group");
-  if (atexit(unquit)) error_local(1, 0, "Failed to set exit handler for quit");
+    dm_error(errno, "Failed to set process group");
+  if (atexit(unquit)) dm_error(0, "Failed to set exit handler for quit");
   for (i = quitsigs; *i != SIGMAP_LEN; i++) sethandler(*i, quithandler);
 }
 
@@ -1720,23 +1720,23 @@ static void diehandler(void) {
   DEBUG("sig: %i", sig);
   sigfillset(&sa.sa_mask);
   if (sigaction(sig, &sa, NULL)) 
-    error_local(EXIT_FAILURE, errno, "sigaction");
+    dm_error(errno, "sigaction");
   
   if (sigemptyset(&s))
-    error_local(EXIT_FAILURE, errno, "sigemptyset");
+    dm_error(errno, "sigemptyset");
   if (sigaddset(&s, sig))
-    error_local(EXIT_FAILURE, errno, "sigaddset");
+    dm_error(errno, "sigaddset");
   if ((err = DM_SIGPROCMASK(SIG_UNBLOCK, &s, NULL)))
-    error_local(EXIT_FAILURE, err, "sigprocmask");
+    dm_error(err, "sigprocmask");
   if (raise(sig))
-    error_local(EXIT_FAILURE, errno, "raise");
+    dm_error(errno, "raise");
 }
 
 void setuphandlers(void) {
   // first, setup an exit handler to propagate signals
   // this needs to be called last.
   if (atexit(diehandler))
-    error_local(EXIT_FAILURE, errno, "atexit");
+    dm_error(errno, "atexit");
 
 /*----------------- SIGNALS that we wish to handle */
 /* FPU indigestion is recorded in the numovf flag;
@@ -1797,31 +1797,31 @@ void createfds(void) {
   int fdr, fdw;
 
   if ((fdr = open("/dev/null", O_RDONLY)) == -1)
-    error_local(1, errno, "Failed to open /dev/null for read");
+    dm_error(errno, "Failed to open /dev/null for read");
   if (fdr != DM_NULLR_FILENO) {
     if (dup2(fdr, DM_NULLR_FILENO) == -1)
-      error_local(1, errno, "Failed to move %i to %i for /dev/null", 
+      dm_error(errno, "Failed to move %i to %i for /dev/null", 
 	    fdr, DM_NULLR_FILENO);
     if (close(fdr))
-      error_local(1, errno, "Failed to close %i for /dev/null", fdr);
+      dm_error(errno, "Failed to close %i for /dev/null", fdr);
   }
   
   if ((fdw = open("/dev/null", O_WRONLY)) == -1)
-    error_local(1, errno, "Failed to open /dev/null for write");
+    dm_error(errno, "Failed to open /dev/null for write");
   if (fdw != DM_NULLW_FILENO) {
     if (dup2(fdw, DM_NULLW_FILENO) == -1)
-      error_local(1, errno, "Failed to move %i to %i for /dev/null", 
+      dm_error(errno, "Failed to move %i to %i for /dev/null", 
 	    fdw, DM_NULLW_FILENO);
     if (close(fdw))
-      error_local(1, errno, "Failed to close %i for /dev/null", fdw);
+      dm_error(errno, "Failed to close %i for /dev/null", fdw);
   }
 
   if (dup2(STDIN_FILENO, DM_STDIN_FILENO) == -1)
-    error_local(1, errno, "Failed to dup2 STDIN to %i", DM_STDIN_FILENO);
+    dm_error(errno, "Failed to dup2 STDIN to %i", DM_STDIN_FILENO);
   if (dup2(STDOUT_FILENO, DM_STDOUT_FILENO) == -1)
-    error_local(1, errno, "Failed to dup2 STDOUT to %i", DM_STDOUT_FILENO);
+    dm_error(errno, "Failed to dup2 STDOUT to %i", DM_STDOUT_FILENO);
   if (dup2(STDERR_FILENO, DM_STDERR_FILENO) == -1)
-    error_local(1, errno, "Failed to dup2 STDERR to %i", DM_STDERR_FILENO);
+    dm_error(errno, "Failed to dup2 STDERR to %i", DM_STDERR_FILENO);
 }
 
 

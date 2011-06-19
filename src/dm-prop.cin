@@ -39,10 +39,10 @@ static void redirector_quit(int sig,
 static pid_t myppid;
 static void redirect_sig(int sig) {
   if (kill(myppid, sig))
-    error_local(EXIT_FAILURE, errno, 
-		"redirector %li unable to "
-		"signal parent %li",
-		(long) getpid(), (long) getppid());
+    dm_error(errno, 
+	     "redirector %li unable to "
+	     "signal parent %li",
+	     (long) getpid(), (long) getppid());
 }
 
 static void redirector_exit(void) {
@@ -59,7 +59,7 @@ static int nfds;
 static void handle_connect(void) {
   int fd;
   if ((fd = accept(0, NULL, NULL)) == -1)
-    error_local(1, errno, "redirector accept error");
+    dm_error(errno, "redirector accept error");
 
   if (fd >= nfds) nfds = fd+1;
   FD_SET(fd, &rin);
@@ -71,7 +71,7 @@ static void handle_redirect(P fd) {
  repeat:
   switch (recv(fd, &sig, 1, 0)) {
     case 0:
-      if (fd == 1) error_local(1, 0, "redirector received close on recv");
+      if (fd == 1) dm_error(0, "redirector received close on recv");
 
       close(fd);
       FD_CLR(fd, &rin);
@@ -80,7 +80,7 @@ static void handle_redirect(P fd) {
 
     case -1:
       if (errno == EINTR) goto repeat;
-      error_local(1, errno, "redirector recv");
+      dm_error(errno, "redirector recv");
   };
 
   DEBUG("Received sig %i", (int) sig);
@@ -89,7 +89,7 @@ static void handle_redirect(P fd) {
 
 static void redirector_alarm(void) {
   if (kill(myppid, 0))
-    error_local(1, errno, "%li: parent %li dead", 
+    dm_error(errno, "%li: parent %li dead", 
 		(long) getpid(), (long) getppid());
 }
 
@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
   myppid = getppid();
 
   if (atexit(redirector_exit))
-    error_local(1, errno, "atexit for redirector");
+    dm_error(errno, "atexit for redirector");
 
   for (i = quitsigs; *i != SIGMAP_LEN; i++) sethandler(*i, redirector_quit);
   clearhandler(SIGMAP_INT);
@@ -141,7 +141,7 @@ int main(int argc, char* argv[]) {
     switch (select(nfds, &rout, NULL, &eout, &timer)) {
       case -1:
 	if (errno == EINTR) break;
-	error_local(1, errno, "select failed in redirector");
+	dm_error(errno, "select failed in redirector");
 	break;
 
       case 0:  
@@ -174,27 +174,27 @@ static void execsighandler(P sigsocket, P tcp_sigsocket, P serverport,
   char* _serverport;
 
   if (sigsocket != -1 && (sigsocket_ = dup(sigsocket)) == -1)
-    error_local(1, errno, "Unable to dup sigsocket %li", (long) sigsocket);
+    dm_error(errno, "Unable to dup sigsocket %li", (long) sigsocket);
   if (tcp_sigsocket != -1 && (tcp_sigsocket_ = dup(tcp_sigsocket)) == -1)
-    error_local(1, errno, "Unable to dup tcp_sigsocket %li", 
+    dm_error(errno, "Unable to dup tcp_sigsocket %li", 
 		(long) tcp_sigsocket);
 
   if ((retc = closesockets_func()))
-    error_local(1, retc < 0 ? -retc : 0, 
+    dm_error(retc < 0 ? -retc : 0, 
 	  "Unable to close sockets: %li", (long) getpid());
 
   if (sigsocket_ != -1 
       && (dup2(sigsocket_, 1) == -1 || close(sigsocket_))) 
-    error_local(1, errno, "Unable to dup sigsocket %li to stdout", 
+    dm_error(errno, "Unable to dup sigsocket %li to stdout", 
 	  (long) sigsocket);
 
   if (tcp_sigsocket_ != -1 
       && (dup2(tcp_sigsocket_, 0) == -1 || close(tcp_sigsocket_)))
-    error_local(1, errno, "Unable to dup tcp_sigsocket %li to stdin", 
+    dm_error(errno, "Unable to dup tcp_sigsocket %li to stdin", 
 	  (long) tcp_sigsocket);
 
   if (asprintf(&_serverport, "%li", (long) serverport) == -1)
-    error_local(1, 0, "Unable to asprintf serverport");
+    dm_error(0, "Unable to asprintf serverport");
   
   DEBUG("exec: @dmprop@ %s %i %i", _serverport, 
 	tcp_sigsocket != -1 ? 1 : 0, sigsocket != -1 ? 1 : 0);
@@ -205,7 +205,7 @@ static void execsighandler(P sigsocket, P tcp_sigsocket, P serverport,
 	sigsocket != -1 ? "1" : "0",
 	NULL);
 
-  error_local(1, errno, 
+  dm_error(errno, 
 	      "Unable to exec: @dmprop@ %s %i", _serverport,
 	      tcp_sigsocket != -1 ? 1 : 0);
   exit(1);
@@ -220,7 +220,7 @@ P spawnsighandler(P sigsocket, P tcp_sigsocket, P serverport,
   switch ((*pid = fork())) {
     case -1:
      retc = -errno;
-     error_local(0, errno, "forking for signal redirector");
+     dm_error_msg(errno, "forking for signal redirector");
      break;
 
     case 0:
@@ -232,11 +232,11 @@ P spawnsighandler(P sigsocket, P tcp_sigsocket, P serverport,
       if (sigsocket != -1 && close(sigsocket)) {
 	retc = -errno;
 	if (tcp_sigsocket != -1) close(tcp_sigsocket);
-	error_local(0, -retc, "closing sigsocket");
+	dm_error_msg(-retc, "closing sigsocket");
       }
       if (tcp_sigsocket != -1 && close(tcp_sigsocket)) {
 	retc = -errno;
-	error_local(0, -retc, "closing tcp_sigsocket");
+	dm_error_msg(-retc, "closing tcp_sigsocket");
       }
       break;
   }

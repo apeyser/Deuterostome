@@ -412,14 +412,14 @@ P op_fork(void) {
   switch ((child = fork())) {
     case -1: return -errno;
     case 0:
-      if (close(sockets[0])) error_local(1, errno, "close sockets[0]");
+      if (close(sockets[0])) dm_error(errno, "close sockets[0]");
 
       closesockets_fork();
       if (do_inter_lock_reset) do_inter_lock_reset();
 
       if ((retc = addsocket(sockets[1], &sockettype, &defaultsocketinfo)))
-	error_local(1, retc < 0 ? -retc : 0, 
-	      "on addsocket for child-server connection");
+	dm_error(retc < 0 ? -retc : 0, 
+		 "on addsocket for child-server connection");
       
       TAG(o1) = (NULLOBJ|SOCKETTYPE);
       ATTR(o1) = 0;

@@ -105,9 +105,9 @@ int main(void)
   initfds();
   /* we monitor console input */
   if ((consolesocket = dup(STDIN_FILENO)) == -1)
-    error_local(1, errno, "Unable to dup stdin");
+    dm_error(errno, "Unable to dup stdin");
   if ((retc = addsocket(consolesocket, &sockettype, &defaultsocketinfo)))
-    error_local(1, retc < 0 ? -retc : 0, "Unable to add console socket");
+    dm_error(retc < 0 ? -retc : 0, "Unable to add console socket");
 
  /*-------------- fire up Xwindows (if there is) -----------------------*/
 #if ! X_DISPLAY_MISSING
@@ -118,13 +118,13 @@ int main(void)
     dvtscreen = HXDefaultScreenOfDisplay(dvtdisplay);
     dvtrootwindow = HXDefaultRootWindow(dvtdisplay);
     if (HXGetWindowAttributes(dvtdisplay,dvtrootwindow,&rootwindowattr) == 0)
-      error_local(EXIT_FAILURE,0,"Xwindows: no root window attributes");
+      dm_error(0, "Xwindows: no root window attributes");
     ndvtwindows = 0; 
     ncachedfonts = 0;
     dvtgc = HXCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
     xsocket = ConnectionNumber(dvtdisplay);
     if ((retc = addsocket(xsocket, &sockettype, &defaultsocketinfo)))
-      error_local(1, retc < 0 ? -retc : 0, "Unable to add x socket");
+      dm_error(retc < 0 ? -retc : 0, "Unable to add x socket");
   }
   else {
     dvtdisplay = NULL;

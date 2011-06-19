@@ -74,12 +74,11 @@ static P handle_error(P retc) {
   moveframe(buf, o5);
 
   FREEopds = o6;
-  if (op_errormessage()) goto baderr;  
-  error_local(1, 0, "%.*s", (int) ARRAY_SIZE(o_1), VALUE_PTR(o_1));
+  if (op_errormessage()) goto baderr;
+  dm_error(0, "%.*s", (int) ARRAY_SIZE(o_1), VALUE_PTR(o_1));
   
  baderr:
-  error_local(1, 0, "Unable to compose error for %lli\n", (long long) retc);
-  return retc;
+  dm_error(0, "Unable to compose error for %lli\n", (long long) retc);
 }
 
 static P fromrook(B* bufferf) {
@@ -344,7 +343,7 @@ DM_INLINE_STATIC P clear_toconsole(void) {
   ARRAY_SIZE(stringf) = groupconsole_len;
   groupconsole_len = 0;
   if ((retc = tompi(stringf, getparentcomm(), TRUE, 0))) {
-    error_local(0, 0, "Unable to propagate: %s", stringf);
+    dm_error_msg(0, "Unable to propagate: %s", stringf);
     return retc;
   }
 

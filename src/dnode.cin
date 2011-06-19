@@ -21,10 +21,9 @@
 
 #define DM_IGNORE_RETURN(a) if (a);
 
-__attribute__ ((unused, format (printf, 3, 4)))
-static void error_local(int __status, 
-			int __errnum, 
-			const char* __format, ...)
+__attribute__ ((noreturn, unused, format (printf, 3, 4)))
+static void dm_error(int __errnum, 
+		     const char* __format, ...)
 {
   char* str;
   int s;
@@ -41,18 +40,18 @@ static void error_local(int __status,
     DM_IGNORE_RETURN(write(1, str, strlen(str)));
     free(str);
   }
-  if (__status) exit(__status);
+  exit(EXIT_FAILURE);
 }
 
 #define err(fn, ...) do {						\
     if (fn(__VA_ARGS__) < 0)						\
-      error_local(EXIT_FAILURE, errno, #fn);				\
+      dm_error(errno, #fn);						\
   } while (0)
 
 #define perr(fn, ...) do {						\
     int p;								\
     if ((p = posix_##fn(__VA_ARGS__)))					\
-      error_local(EXIT_FAILURE, p, "posix_"#fn);			\
+      dm_error(p, "posix_"#fn);						\
   } while (0)
 
 #ifndef DEBUG
@@ -143,8 +142,10 @@ DM_INLINE_STATIC enum SIGSTATE nextsig(const sigset_t* sigs, int* sig) {
   if (! sig) sig = &_sig;
 
   switch ((*sig = sigwaitinfo(sigs, &info))) {
-    case -1: error_local(EXIT_FAILURE, errno, "sigwaitinfo");
-    case SIGCHLD:    return SIGSTATE_CHILD;
+    case -1:
+      dm_error(errno, "sigwaitinfo");
+    case SIGCHLD:
+      return SIGSTATE_CHILD;
     case DM_RESTART:
       if (info.si_code == SI_QUEUE
 	  && info.si_value.sival_int == DM_RESTART_VAL.sival_int) {
@@ -153,7 +154,8 @@ DM_INLINE_STATIC enum SIGSTATE nextsig(const sigset_t* sigs, int* sig) {
       }
       else debug("not restart");
     // intentional fallthrough
-    default: return SIGSTATE_PROP;
+    default:
+      return SIGSTATE_PROP;
   }
 }
 
@@ -241,6 +243,5 @@ int main(int argc, char *argv[]) {
   err(sigprocmask, SIG_UNBLOCK, &recvd_set, NULL);
   err(raise, WTERMSIG(status));
 
-  error_local(EXIT_FAILURE, 0, "No exit value, no signal?");
-  return -1;
+  dm_error(0, "No exit value, no signal?");
 }

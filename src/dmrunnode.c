@@ -51,10 +51,9 @@
 
 /*----------------------- supervisor tools -------------------------*/
 
-DM_INLINE_STATIC void usage_error(int errno_) __attribute__ ((__noreturn__));
+__attribute__ ((__noreturn__))
 DM_INLINE_STATIC void usage_error(int errno_) {
-  error_local(EXIT_FAILURE, errno_, "usage is: dnode portnumber [setsid=0/1]");
-  exit(1);
+  dm_error(errno_, "usage is: dnode portnumber [setsid=0/1]");
 }
 
 /*------------------------------ main ----------------------------------
@@ -192,7 +191,7 @@ int main(int argc, char *argv[])
 /*------------------------ get host name */
 
   if (gethostname((char*)hostname,255) == -1) 
-    error_local(EXIT_FAILURE, errno, "gethostname");
+    dm_error(errno, "gethostname");
 
 /*------------------------ parse arguments */
   if (argc != 2) usage_error(0);

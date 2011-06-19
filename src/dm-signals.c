@@ -43,7 +43,7 @@ static int sigmap[] = {
 
 void propagate_sig(B sig, void (*redirect_sigf)(int sig)) {
   if (sig > (B) (sizeof(sigmap)/sizeof(sigmap[0])) || sig < 0) {
-    error_local(0, 0, "received illegal signal %i", sig);
+    dm_error_msg(0, "received illegal signal %i", sig);
     return;
   }
 
@@ -84,7 +84,7 @@ void clearhandler(enum SIGMAP sig)
 {
   initsa(0);
   if (sigaction(sigmap[sig], &sa, NULL))
-    error_local(1, errno, "Unable to set signal handler for %i", sig);
+    dm_error(errno, "Unable to set signal handler for %i", sig);
 }
 
 void sethandler(enum SIGMAP sig,
@@ -93,5 +93,5 @@ void sethandler(enum SIGMAP sig,
   initsa(SA_SIGINFO);
   sa.sa_sigaction = handler;
   if (sigaction(sigmap[sig], &sa, NULL))
-    error_local(1, errno, "Unable to set signal handler for %i", sig);
+    dm_error(errno, "Unable to set signal handler for %i", sig);
 }

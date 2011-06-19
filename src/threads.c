@@ -37,8 +37,8 @@ static pthread_mutex_t* share_lock = NULL;
 #define THREAD_ERROR_EXIT(func, msg, ...) do {                          \
     int err;                                                            \
     if ((err = func(__VA_ARGS__)))                                      \
-      error_local(EXIT_FAILURE, err,					\
-            "%s in %s:%d with %s(%s)",                                  \
+      dm_error(err,							\
+	       "%s in %s:%d with %s(%s)",				\
             msg, __FILE__, __LINE__, #func, #__VA_ARGS__);              \
   } while (0)
 
@@ -47,8 +47,8 @@ static pthread_mutex_t* share_lock = NULL;
 
 #define THREAD_DISCARD(p, check) do {				\
     if (check && ! p) {						\
-      error_local(EXIT_FAILURE, 0, "Illegal discard at %s:%d",	\
-		  __FILE__, __LINE__);				\
+      dm_error(0, "Illegal discard at %s:%d",			\
+	       __FILE__, __LINE__);				\
     };								\
     free(p);							\
     p = NULL;							\
@@ -56,8 +56,8 @@ static pthread_mutex_t* share_lock = NULL;
 
 #define THREAD_ALLOC(p, check) do {				\
     if (check && p) {						\
-      error_local(EXIT_FAILURE, 0, "Illegal alloc at %s:%d",	\
-		  __FILE__, __LINE__);				\
+      dm_error(0, "Illegal alloc at %s:%d",			\
+	       __FILE__, __LINE__);				\
     };								\
     p = malloc(sizeof(*p));					\
   } while (0)
@@ -215,8 +215,8 @@ P threads_do_pool_int(UL32 nways, thread_func func,
 }
 
 #define PRINT_ERRNO(func, ...)                             \
-  error_local(0, _errno, "At %s:%d with %s(%s)",                 \
-        __FILE__, __LINE__, #func, #__VA_ARGS__)
+  dm_error_msg(_errno, "At %s:%d with %s(%s)",                 \
+	       __FILE__, __LINE__, #func, #__VA_ARGS__)
 
 
 #define THREADS_DESTROY(func, ...) do {                       \

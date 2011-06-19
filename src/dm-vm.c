@@ -27,7 +27,7 @@ static void setupbase(B* sysdict, B* userdict) {
   TAG(msf) = (ARRAY | BYTETYPE); 
   ATTR(msf) = READONLY;
   if (FREEvm + MSF_SIZE + FRAMEBYTES > CEILvm)
-    error_local(EXIT_FAILURE, 0, "VM chosen too small");
+    dm_error(0, "VM chosen too small");
   VALUE_BASE(msf) = (P)FREEvm + FRAMEBYTES; 
   ARRAY_SIZE(msf) = MSF_SIZE;
   moveframe(msf, FREEvm); 
@@ -46,11 +46,11 @@ void maketinysetup(void) {
   size_t sz = 0;
   
   if (makeDmemory(tinysetup))
-    error_local(1, errno, "Insufficient memory");
+    dm_error(errno, "Insufficient memory");
   if ((sysdict = makeopdict((B*) sysop,syserrc,syserrm)) == (B*) -1L)
-    error_local(EXIT_FAILURE, 0, "Cannot make system dictionary");;
+    dm_error(0, "Cannot make system dictionary");;
   if ((userdict = makedict(tinysetup[4])) == (B *)(-1L))
-    error_local(EXIT_FAILURE, 0, "Cannot make user dictionary");
+    dm_error(0, "Cannot make user dictionary");
   tinymemory = TRUE;
   setupbase(sysdict, userdict);
 
@@ -58,17 +58,17 @@ void maketinysetup(void) {
   while (1) {
     sz += 1024;
     if (! (original_dir = (B*) malloc(sz*sizeof(B))))
-      error_local(EXIT_FAILURE, 0, "malloc");
+      dm_error(0, "malloc");
 
     if (getcwd(original_dir, sz)) {
       sz = strlen(original_dir) + 1;
       if (! (original_dir = realloc(original_dir, sz)))
-	error_local(EXIT_FAILURE, 0, "realloc");
+	dm_error(0, "realloc");
       break;
     };
 
     if (errno != ERANGE)
-      error_local(EXIT_FAILURE, errno, "getcwd");
+      dm_error(errno, "getcwd");
     free(original_dir);
   };
 }
@@ -128,9 +128,9 @@ P op_vmresize_(void)
 
     if ((sysdict = makeopdictbase((B*) sysop, syserrc, syserrm, SYS_DICT_SIZE))
         == (B*) -1L)
-      error_local(EXIT_FAILURE, 0, "systemdict > vm");
+      dm_error(0, "systemdict > vm");
     if ((userdict = makedict(setup[4])) == (B *)(-1L))
-      error_local(EXIT_FAILURE, 0, "userdict > vm");
+      dm_error(0, "userdict > vm");
     tinymemory = FALSE;
 
     setupbase(sysdict, userdict);
@@ -139,7 +139,7 @@ P op_vmresize_(void)
   }
 
   if (chdir(original_dir)) 
-    error_local(EXIT_FAILURE, errno, "chdir");
+    dm_error(errno, "chdir");
 
   return VMRESIZE_ERR(do_inter_lock_init ? do_inter_lock_init() : OK, 
 		      TRUE);

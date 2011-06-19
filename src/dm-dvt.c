@@ -83,7 +83,7 @@ DM_INLINE_STATIC P fromconsole(void)
   /* we trim the buffer string object on the operand stack */
   ARRAY_SIZE(o_1) = p - sbuf - 1;
   if (! nb) {
-    error_local(0, 0, "Received end-of-stdin\n");
+    dm_error_msg(0, "Received end-of-stdin\n");
     if (p == sbuf || p[-1] != '\n') ARRAY_SIZE(o_1) += 1;
     return QUIT;
   }
@@ -450,7 +450,7 @@ void run_dvt_mill(void) {
   set_closesockets_atexit();
   setupfd();
   if (makeDmemory(memsetup))
-    error_local(EXIT_FAILURE, 0, "D memory");
+    dm_error(0, "D memory");
 
   sethandler(SIGMAP_INT, SIGINThandler); //override abort on int
 
@@ -460,9 +460,9 @@ void run_dvt_mill(void) {
    the pointers of the tiny D memory so we can revert to the tiny setup.
 */
   if ((sysdict = makeopdict((B *)sysop, syserrc,  syserrm)) == (B *)(-1L))
-    error_local(EXIT_FAILURE,0,"Cannot make system dictionary");
+    dm_error(0,"Cannot make system dictionary");
   if ((userdict = makedict(memsetup[4])) == (B *)(-1L))
-    error_local(EXIT_FAILURE,0,"Cannot make user dictionary");
+    dm_error(0,"Cannot make user dictionary");
 
 /* The first two dictionaries on the dicts are systemdict and userdict;
    they are not removable
@@ -488,7 +488,7 @@ void run_dvt_mill(void) {
 		  "/startup_dvt.d");
  
   if ((sufd = open((char*)startup_dvt, O_RDONLY)) == -1)
-    error_local(EXIT_FAILURE,errno,"Opening startup_dvt.d");
+    dm_error(errno,"Opening startup_dvt.d");
   tnb = 0; 
   sf = FREEvm; 
   p = sf + FRAMEBYTES;
@@ -500,8 +500,8 @@ void run_dvt_mill(void) {
     tnb += nb; 
     p += nb; 
   }
-  if (nb == -1) error_local(EXIT_FAILURE,errno,"Reading startup_dvt.d");
-  if (p == CEILvm) error_local(EXIT_FAILURE, ENOMEM,"startup_dvt.d > VM");
+  if (nb == -1) dm_error(errno,"Reading startup_dvt.d");
+  if (p == CEILvm) dm_error(ENOMEM,"startup_dvt.d > VM");
   ARRAY_SIZE(sf) = tnb;
   FREEvm += DALIGN(FRAMEBYTES + tnb);
   moveframe(sf,x1);

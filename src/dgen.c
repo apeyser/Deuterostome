@@ -112,7 +112,7 @@ int main(void)
 */
 
   if (makeDmemory(memsetup))
-    error_local(EXIT_FAILURE, 0, "D memory");
+    dm_error(0, "D memory");
   
 /*----------------- construct frames for use in execution of D code */
   makename((B*) "error", errorframe);
@@ -134,9 +134,9 @@ int main(void)
    the pointers of the tiny D memory so we can revert to the tiny setup.
 */
   if ((sysdict = makeopdict((B *)sysop, syserrc,  syserrm)) == (B *)(-1L))
-    error_local(EXIT_FAILURE,0,"Cannot make system dictionary");
+    dm_error(0,"Cannot make system dictionary");
   if ((userdict = makedict(memsetup[4])) == (B *)(-1L))
-    error_local(EXIT_FAILURE,0,"Cannot make user dictionary");
+    dm_error(0,"Cannot make user dictionary");
   
 /* The first two dictionaries on the dicts are systemdict and userdict;
    they are not removable
@@ -157,7 +157,7 @@ int main(void)
 		 "/startup_dgen.d");
 
   if ((sufd = open((char*)startup_dvt, O_RDONLY)) == -1)
-    error_local(EXIT_FAILURE, errno,"Opening %s", startup_dvt);
+    dm_error(errno,"Opening %s", startup_dvt);
   tnb = 0; sf = FREEvm; p = sf + FRAMEBYTES;
   TAG(sf) = ARRAY | BYTETYPE; ATTR(sf) = READONLY | ACTIVE | PARENT;
   VALUE_BASE(sf) = (P)p;
@@ -166,8 +166,8 @@ int main(void)
     tnb += nb; 
     p += nb; 
   }
-  if (nb == -1) error_local(EXIT_FAILURE,errno,"Reading %s", startup_dvt);
-  if (p == CEILvm) error_local(EXIT_FAILURE, ENOMEM,"%s > VM", startup_dvt);
+  if (nb == -1) dm_error(errno,"Reading %s", startup_dvt);
+  if (p == CEILvm) dm_error(ENOMEM,"%s > VM", startup_dvt);
   ARRAY_SIZE(sf) = tnb;
   FREEvm += DALIGN(FRAMEBYTES + tnb);
   moveframe(sf,x1);
