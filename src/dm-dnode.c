@@ -677,7 +677,8 @@ DM_INLINE_STATIC void sock_error(BOOLEAN ex, P errno_, const char* msg) {
   unixsigsocket = -1;
 #endif //ENABLE_UNIX_SOCKETS
 
-  *(ex ? dm_error : dm_error_msg)(errno_, "%s", msg);
+  if (ex) dm_error(errno_, "%s", msg);
+  else dm_error_msg(errno_, "%s", msg);
 }
 
 void run_dnode_mill(void) {
