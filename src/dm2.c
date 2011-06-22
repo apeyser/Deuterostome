@@ -732,7 +732,7 @@ DM_INLINE_STATIC P exec_phase(B* f) {
   return e_opd(f);
 }
 
-DM_INLINE_STATIC exec_step_int(UL32 turns) {
+DM_INLINE_STATIC P exec_step_int(UL32 turns) {
   P retc;
   B* f;
 
