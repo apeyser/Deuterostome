@@ -591,16 +591,6 @@ DM_INLINE_STATIC P test_phase(UL32 turns) {
   return OK;
 }
 
-P exec(UL32 turns) {
-  P retc;
-  /* ------------------------------------------- test phase */
-  while (! (retc = test_phase(turns))
-	 && ! (retc = exec_step()))
-    if (turns) turns -= 1;
-
-  return retc;
-}
-
 static B transl_err[] = "translation phase\n";
 DM_INLINE_STATIC P f_arr(B** f) {
   P retc;
@@ -667,7 +657,7 @@ DM_INLINE_STATIC P fetch_phase(B** f) {
 	break;
     };
   };
-      
+
   *f = FREEexecs = x_1;
   return OK;
 }
@@ -742,11 +732,27 @@ DM_INLINE_STATIC P exec_phase(B* f) {
   return e_opd(f);
 }
 
-P exec_step(void) {
+DM_INLINE_STATIC exec_step_int(UL32 turns) {
   P retc;
   B* f;
-  if ((retc = fetch_phase(&f)) || ! f) return retc;
+
+  if ((retc = test_phase(turns))) return retc;
+  if ((retc = fetch_phase(&f))) return retc;
+  if (! f) return OK;
   return exec_phase(f);
+}
+
+P exec(UL32 turns) {
+  P retc;
+
+  while (! (retc = exec_step_int(turns)))
+    if (turns) turns -= 1;
+
+  return retc;
+}
+
+P exec_step(void) {
+  return exec_step_int(1);
 }
 
 /*-------------------- tree handling support --------------------------*/
