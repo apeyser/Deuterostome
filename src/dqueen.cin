@@ -205,7 +205,7 @@ static void killrthreads_exit(void) {
 
 void rthreads_init(void) {
   if (atexit(killrthreads_exit)) 
-    error_local(1, errno, "Unable to add rthread exit handler");
+    dm_error(errno, "Unable to add rthread exit handler");
 }
 
 ///////////////////// makerthreads
@@ -339,28 +339,28 @@ P op_makerthreads(void) {
 
   if (! pid) {
     if ((retc = closesockets_exec()))
-      error_local(1, retc < 0 ? -retc : 0, 
+      dm_error(retc < 0 ? -retc : 0, 
 		  "Unable to close sockets for queen");
 
     if (dup2(rookfd, 3) == -1)
-      error_local(1, errno, "Error duping %i to %i", (int) rookfd, 3);
+      dm_error(errno, "Error duping %i to %i", (int) rookfd, 3);
     if ((retc = nocloseonexec(3)))
-      error_local(1, retc < 0 ? -retc : 0, 
+      dm_error(retc < 0 ? -retc : 0, 
 	    "Error setting no close on exec for fd 3");
     if (dup2(rooksigfd, 4) == -1)
-      error_local(1, errno, "Error duping %i to %i", (int) rooksigfd, 4);
+      dm_error(errno, "Error duping %i to %i", (int) rooksigfd, 4);
     if ((retc = nocloseonexec(4)))
-      error_local(1, retc < 0 ? -retc : 0, 
+      dm_error(retc < 0 ? -retc : 0, 
 	    "Error setting no close on exec for fd 4");
 
     if (dup2(STDERR_FILENO, STDOUT_FILENO) == -1)
-      error_local(1, errno, "Error redirecting 0 from /dev/null");
+      dm_error(errno, "Error redirecting 0 from /dev/null");
     if ((retc = nocloseonexec_simple(STDOUT_FILENO)))
-      error_local(1, retc < 0 ? -retc : 0,
+      dm_error(retc < 0 ? -retc : 0,
 	    "Error setting no close on exec for fd 0");
 
     execl("@drook@", "@drook@", NULL);
-    error_local(1, errno, "Error starting `%s'", "@drook@");
+    dm_error(errno, "Error starting `%s'", "@drook@");
   }
    
   if (close(rookfd)) {

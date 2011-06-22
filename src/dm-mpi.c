@@ -58,11 +58,11 @@ static void mpihandler(MPI_Comm* comm, int* err, ...) {
   inhandler = 1;
 
   if (MPI_Error_string(*err, string, &len))
-    error_local(1, 0, "Unable to produce error string (%i)", *err);
+    dm_error(0, "Unable to produce error string (%i)", *err);
   else if (MPI_Comm_compare(*comm, world, &eq))
-    error_local(1, 0, "MPI Error: %s", string);
+    dm_error(0, "MPI Error: %s", string);
   else
-    error_local(1, 0, "Error %s mpi: %s", 
+    dm_error(0, "Error %s mpi: %s", 
 	  (eq == MPI_IDENT) ? "speaking with pawns" : "speaking with rook",
 	  string);
 
@@ -121,25 +121,25 @@ static P mpithread_barrier(void) {
 DM_INLINE_STATIC void mpithread_lock(void) {
   int errno_;
   if ((errno_ = pthread_mutex_lock(&mpithread_mutex)))
-    error_local(1, errno_, "Failed lock");
+    dm_error(errno_, "Failed lock");
 }
 
 DM_INLINE_STATIC void mpithread_recv_signal(void) {
   int errno_;
   if ((errno_ = pthread_cond_wait(&mpithread_cond, &mpithread_mutex)))
-    error_local(1, errno_, "Failed cond");
+    dm_error(errno_, "Failed cond");
 }
 
 DM_INLINE_STATIC void mpithread_send_signal(void) {
   int errno_;
   if ((errno_ = pthread_cond_signal(&mpithread_cond)))
-    error_local(1, errno_, "Failed signal");
+    dm_error(errno_, "Failed signal");
 }
 
 DM_INLINE_STATIC void mpithread_unlock(void) {
   int errno_;
   if ((errno_ = pthread_mutex_unlock(&mpithread_mutex)))
-    error_local(1, errno_, "Failed unlock");
+    dm_error(errno_, "Failed unlock");
 }
 
 DM_INLINE_STATIC P mpithread_exec(MpiThreadFunc func) {
@@ -159,7 +159,7 @@ DM_INLINE_STATIC P mpithread_exec(MpiThreadFunc func) {
 static void redirect_sig(int sig) {
   int errno_;
   if ((errno_ = pthread_kill(mainthread_id, sig)))
-    error_local(1, errno_, "pthread_kill %i", sig);
+    dm_error(errno_, "pthread_kill %i", sig);
 }
 
 DM_NORETURN
@@ -182,7 +182,7 @@ static void initmpi_(void) {
   MPI_Init_thread(&argc, (char***) &argv, MPI_THREAD_MULTIPLE, &threadtype);
   //  atexit(exithandler);
   if (threadtype < MPI_THREAD_MULTIPLE)
-    error_local(1, 0, "MPI_Init_thread: Requested %i, received %i",
+    dm_error(0, "MPI_Init_thread: Requested %i, received %i",
 	  MPI_THREAD_MULTIPLE, threadtype);
 
   MPI_Comm_create_errhandler(mpihandler, &mpierr);
@@ -298,15 +298,15 @@ DM_INLINE_STATIC void makethread(pthread_t* threadid,
   sigset_t set, oset;
   int errno_;
   if (sigfillset(&set))
-    error_local(1, errno, "Unable to empty sigset");
+    dm_error(errno, "Unable to empty sigset");
   if ((errno_ = pthread_sigmask(SIG_BLOCK, &set, &oset)))
-    error_local(1, errno_, "Unable to block sigs");
+    dm_error(errno_, "Unable to block sigs");
 
   if ((errno_ = pthread_create(threadid, NULL, startthread, threadfunc)))
-    error_local(1, errno_, "Failed thread create");
+    dm_error(errno_, "Failed thread create");
 
   if ((errno_ = pthread_sigmask(SIG_SETMASK, &oset, NULL)))
-    error_local(1, errno_, "Unable to unblock sigs");
+    dm_error(errno_, "Unable to unblock sigs");
 }
 
 void initmpi(void) {

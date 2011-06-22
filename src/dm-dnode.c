@@ -265,7 +265,7 @@ P op_Xconnect(void)
   dvtscreen = HXDefaultScreenOfDisplay(dvtdisplay);
   dvtrootwindow = HXDefaultRootWindow(dvtdisplay);
   if (HXGetWindowAttributes(dvtdisplay,dvtrootwindow,&rootwindowattr) == 0)
-    error_local(EXIT_FAILURE,0,"Xwindows: no root window attributes");
+    dm_error(0, "Xwindows: no root window attributes");
   ndvtwindows = 0; 
   ncachedfonts = 0;
   dvtgc = HXCreateGC(dvtdisplay,dvtrootwindow,0,NULL);
@@ -584,7 +584,7 @@ P op_toconsole(void)
       FREEvm = (B*)DALIGN(p);
       if ((retc = tosocket(consolesocket, stringf))) {
         FREEvm = oldFREEvm;
-	error_local(0, 0, "Unable to propagate: %s", stringf);
+	dm_error_msg(0, "Unable to propagate: %s", stringf);
         return makesocketdead(retc, consolesocket, "toconsole");
       }
       FREEvm = oldFREEvm;
@@ -643,7 +643,7 @@ P op_killsockets(void) {
 DM_INLINE_STATIC void restart(void) __attribute__((noreturn));
 void restart(void) {
   if (sigqueue(getppid(), DM_RESTART, DM_RESTART_VAL))
-    error_local(EXIT_FAILURE, errno, "sigqueue");
+    dm_error(errno, "sigqueue");
   exit(0);
 }
 
@@ -677,7 +677,8 @@ DM_INLINE_STATIC void sock_error(BOOLEAN ex, P errno_, const char* msg) {
   unixsigsocket = -1;
 #endif //ENABLE_UNIX_SOCKETS
 
-  error_local(ex ? EXIT_FAILURE : 0, errno_, "%s", msg);
+  if (ex) dm_error(errno_, "%s", msg);
+  else dm_error_msg(errno_, "%s", msg);
 }
 
 void run_dnode_mill(void) {

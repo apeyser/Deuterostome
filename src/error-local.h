@@ -43,25 +43,24 @@ static void dm_error_msg(int errnum,
   va_end(ap);
 }
 
-static void va_dm_error(int status,
-			int errnum,
+__attribute__ ((noreturn))
+static void va_dm_error(int errnum,
 			const char* format,
 			va_list ap)
 {
   va_dm_error_msg(errnum, format, ap);
-  if (status) exit(status);
+  exit(EXIT_FAILURE);
 }
 
 
-__attribute__ ((unused, format (printf, 3, 4)))
-static void error_local(int status,
-			int errnum,
-			const char* format,
-			...)
+__attribute__ ((noreturn, unused, format (printf, 2, 3)))
+static void dm_error(int errnum,
+		     const char* format,
+		     ...)
 {
   va_list ap;
   va_start(ap, format);
-  va_dm_error(status, errnum, format, ap);
+  va_dm_error(errnum, format, ap);
   va_end(ap);
 }
 

@@ -327,7 +327,7 @@ P addsocket(P fd, const struct SocketType* type, const union SocketInfo* info) {
 
   if (! (next
 	 = (struct socketstore*) malloc(sizeof(struct socketstore))))
-    error_local(1, errno, "Malloc failure creating socketstore");
+    dm_error(errno, "Malloc failure creating socketstore");
 
   next->fd = fd;
   next->type = *type;
@@ -443,9 +443,9 @@ static void _closesockets_cleanup(void) {
 
 void set_closesockets_atexit(void) {
   if (atexit(_closesockets_cleanup))
-    error_local(1, -errno, "Setting atexit closesockets");
+    dm_error(-errno, "Setting atexit closesockets");
   if (atexit(closedisplay))
-    error_local(1, -errno, "Setting atexit closedisplay");
+    dm_error(-errno, "Setting atexit closedisplay");
 }
 
 #if X_DISPLAY_MISSING
@@ -697,7 +697,7 @@ P waitsocket(BOOLEAN ispending, fd_set* out_fds) {
   if ((nact = select(maxsocket, &read_fds, NULL, &err_fds, 
 		     ispending ? &zerosec : NULL)) == -1) {
     if (errno == EINTR) return NEXTEVENT_NOEVENT;
-    error_local(EXIT_FAILURE, errno, "select");
+    dm_error(errno, "select");
   }
 
 #if ! X_DISPLAY_MISSING
@@ -864,7 +864,7 @@ P make_unix_socket(UW port, BOOLEAN isseq, P* retc) {
     if (stat(sock_dir, &buf)) {
       if ((errno != ENOTDIR && errno != ENOENT)
           || mkdir(sock_dir, ~(mode_t) 0)) {
-	error_local(0, errno, "Unable to mkdir: %s", sock_dir);
+	dm_error_msg(errno, "Unable to mkdir: %s", sock_dir);
         free(sock_dir);
         umask(mask);
 	close(sock);
@@ -883,7 +883,7 @@ P make_unix_socket(UW port, BOOLEAN isseq, P* retc) {
   free(sock_dir);
 
   if (! stat(name.sun_path, &buf) && unlink(name.sun_path)) {
-    error_local(0, errno, "Unable to unlink: %s", name.sun_path);
+    dm_error_msg(errno, "Unable to unlink: %s", name.sun_path);
     umask(mask);
     close(sock);
     return -1;
@@ -892,7 +892,7 @@ P make_unix_socket(UW port, BOOLEAN isseq, P* retc) {
   if (bind(sock, (struct sockaddr *) &name, 
            sizeof(name.sun_family)+strlen(name.sun_path)+1)
       < 0) {
-    error_local(0, errno, "Unable to bind: %s", name.sun_path);
+    dm_error_msg(errno, "Unable to bind: %s", name.sun_path);
     umask(mask);
     close(sock);
     return -1;
@@ -1051,7 +1051,7 @@ P op_connect(void)
     if (connect(dgram, (struct sockaddr *) &unixserveraddr,
 		sizeof(unixserveraddr.sun_family)
 		+ strlen(unixserveraddr.sun_path))) {
-      error_local(0, errno, "unix dgram");
+      dm_error_msg(errno, "unix dgram");
       close(sock);
       close(dgram);
       goto ipsocket;
@@ -1248,21 +1248,21 @@ void initfds(void) {
 */
   FD_ZERO(&sock_fds);
   if ((retc = addsocket(STDIN_FILENO, &stdintype, NULL)))
-    error_local(1, retc < 0 ? -retc : 0, "Failed to add STDIN");
+    dm_error(retc < 0 ? -retc : 0, "Failed to add STDIN");
   if ((retc = addsocket(STDOUT_FILENO,  &stdouttype, NULL)))
-    error_local(1, retc < 0 ? -retc : 0, "Failed to add STDOUT");
+    dm_error(retc < 0 ? -retc : 0, "Failed to add STDOUT");
   if ((retc = addsocket(STDERR_FILENO,  &stderrtype, NULL)))
-    error_local(1, retc < 0 ? -retc : 0, "Failed to add STDERR");
+    dm_error(retc < 0 ? -retc : 0, "Failed to add STDERR");
 
   if ((retc = addsocket(DM_NULLR_FILENO, &stdtype, NULL)))
-    error_local(1, retc < 0 ? -retc : 0, "Failed to add NULL read");
+    dm_error(retc < 0 ? -retc : 0, "Failed to add NULL read");
   if ((retc = addsocket(DM_NULLW_FILENO, &stdtype, NULL)))
-    error_local(1, retc < 0 ? -retc : 0, "Failed to add NULL write");
+    dm_error(retc < 0 ? -retc : 0, "Failed to add NULL write");
 
   if ((retc = addsocket(DM_STDIN_FILENO, &stdtype, NULL)))
-    error_local(1, retc < 0 ? -retc : 0, "Failed to add DM_STDIN");
+    dm_error(retc < 0 ? -retc : 0, "Failed to add DM_STDIN");
   if ((retc = addsocket(DM_STDOUT_FILENO, &stdtype, NULL)))
-    error_local(1, retc < 0 ? -retc : 0, "Failed to add DM_STDOUT");
+    dm_error(retc < 0 ? -retc : 0, "Failed to add DM_STDOUT");
   if ((retc = addsocket(DM_STDERR_FILENO, &stderrtype, NULL)))
-    error_local(1, retc < 0 ? -retc : 0, "Failed to add DM_STDERR");
+    dm_error(retc < 0 ? -retc : 0, "Failed to add DM_STDERR");
 }

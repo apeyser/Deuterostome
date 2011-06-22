@@ -607,9 +607,9 @@ void die(void) {
   static sigset_t s;
   static int err;
   if (sigfillset(&s))
-    error_local(EXIT_FAILURE, errno, "sigfillset");
+    dm_error(errno, "sigfillset");
   if ((err = DM_SIGPROCMASK(SIG_SETMASK, &s, NULL)))
-    error_local(EXIT_FAILURE, err, "sigprocmask");
+    dm_error(err, "sigprocmask");
   
   DEBUG("Exiting: %i", (int) exitval);
   exit(((int) exitval) & 0xFF);

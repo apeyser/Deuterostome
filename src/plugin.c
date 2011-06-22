@@ -35,7 +35,7 @@ void initialize_plugins(void) {
   if (lt_dlinit()) {
     const char* e = lt_dlerror();
     fprintf(stderr, "dlinit: %s\n", e ? e: "--");
-    error_local(EXIT_FAILURE, 0, "Can't dlinit");
+    dm_error(0, "Can't dlinit");
   }
 
   makename((B*)"OPAQUENAME", opaquename);

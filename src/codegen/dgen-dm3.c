@@ -38,19 +38,19 @@ P op_tosystem(void)
     
     while ((retc2 = open("/dev/null", O_RDWR, 0)) == -1 && errno == EINTR);
     if (retc2 == -1)
-      error_local(1, errno, "Error opening /dev/null in tosystem");
+      dm_error(errno, "Error opening /dev/null in tosystem");
     
     while ((status = dup2(retc2, STDIN_FILENO)) == -1 && errno == EINTR);
     if (status == -1)
-      error_local(1, errno, "Error opening stdin into /dev/null in tosystem");
+      dm_error(errno, "Error opening stdin into /dev/null in tosystem");
 			
     while ((status = dup2(retc2, STDOUT_FILENO)) == -1 && errno == EINTR);
     if (status == -1)
-      error_local(1, errno, "Error opening stdout into /dev/null in tosystem");
+      dm_error(errno, "Error opening stdout into /dev/null in tosystem");
     
     //fprintf(stderr, "tosystem: '%s' '%s' '%s'\n", ENABLE_BASH, "-c", FREEvm);
     execl(ENABLE_BASH, ENABLE_BASH, "-c", FREEvm, (char*) NULL);
-    error_local(1, errno, "Error exec'ing bash in tosystem");
+    dm_error(errno, "Error exec'ing bash in tosystem");
   }
   
  wts:
@@ -109,26 +109,26 @@ P op_fromsystem(void)
     int retc2;
     while ((retc2 = open("/dev/null", O_RDWR, 0)) == -1 && errno == EINTR);
     if (retc2 == -1) 
-      error_local(1, errno, "Error opening /dev/null in fromsystem");
+      dm_error(errno, "Error opening /dev/null in fromsystem");
 		
     while ((status = dup2(retc2, STDIN_FILENO)) == -1 && errno == EINTR);
     if (status == -1) 
-      error_local(1, errno, "Error opening stdin into /dev/null in fromsystem");
+      dm_error(errno, "Error opening stdin into /dev/null in fromsystem");
     
     while ((status = close(fd[0]))  && errno == EINTR);
     if (status)
-      error_local(1, errno, "Error closing pipe in, in fromsystem");
+      dm_error(errno, "Error closing pipe in, in fromsystem");
 		
     while ((status = dup2(fd[1], STDOUT_FILENO) == -1) && errno == EINTR);
     if (status == -1) 
-      error_local(1, errno, "Error duping pipe out to stdout in fromsystem");
+      dm_error(errno, "Error duping pipe out to stdout in fromsystem");
 		
     while ((status = close(fd[1])) && errno == EINTR);
     if (status)
-      error_local(1, errno, "Error closing pipe out, in fromsystem");
+      dm_error(errno, "Error closing pipe out, in fromsystem");
     
     execl(ENABLE_BASH, ENABLE_BASH, "-c", FREEvm, (char*) NULL);
-    error_local(1, errno, "Error exec'ing bash in fromsystem");
+    dm_error(errno, "Error exec'ing bash in fromsystem");
   }
 
   while ((status = close(fd[1])) == -1 && errno == EINTR) {
