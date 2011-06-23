@@ -3,6 +3,7 @@
 
 #include "dm.h"
 
+DLL_SCOPE P op_statvfs(void);
 DLL_SCOPE P op_fork(void);
 DLL_SCOPE P op_getppid(void);
 DLL_SCOPE P op_makefd(void);

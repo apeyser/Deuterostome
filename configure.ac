@@ -263,6 +263,7 @@ CF_IF_ENABLED([plugins-support], [CF_AC_CHECK_HEADER([stdarg.h])])
 CF_IF_ENABLED([regex], [CF_AC_CHECK_HEADER([regex.h])])
 CF_AC_CHECK_HEADER([spawn.h])
 CF_IF_ENABLED([openssl], [CF_AC_CHECK_HEADER([openssl/sha.h])])
+CF_AC_CHECK_HEADER([sys/statvfs.h])
 
 AC_CHECK_FUNCS([setsid])
 AC_CHECK_FUNCS([srandomdev])

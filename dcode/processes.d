@@ -59,6 +59,23 @@
     dup closedfd ~pop ~close ifelse
   } bind def
 
+  | (file) | file-system-dict
+  /fsstat {
+    statvfs [
+      /BLOCK_SIZE
+      /BLOCKS
+      /BLOCKS_FREE
+      /BLOCKS_AVAIL
+      /FILES
+      /FILES_FREE
+      /FILES_AVAIL
+      /FSID
+      /RDONLY
+      /NOSUID
+      /NAME_MAX
+      makestruct_stack |]
+  } bind def
+
   | ~active | ...
   /inpidsockets {
     {{{pidsockets indict} PROCESSES indict} enddicts} lock

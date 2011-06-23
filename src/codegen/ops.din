@@ -303,7 +303,7 @@ end def |]
       /tmpfile /tmpdir /rmpath /finddir
       /suckfd /closedfd /getfd /ungetfd
       /writefd /closefd /lockfd /unlockfd /trylockfd
-      /glob /setenv /getenv
+      /glob /setenv /getenv /statvfs
     ] def
     /errors 7 dict dup begin |[
       /FILE_NOSUCH (** No such file or directory) def

@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <dirent.h>
+#include <sys/statvfs.h>
 
 #include "dm2.h"
 #include "dm3.h"
@@ -24,6 +25,73 @@
 #include "dm8.h"
 #include "dm-sem.h"
 #include "error-local.h"
+
+#define OP(off) (FREEopds+(off)*FRAMEBYTES)
+
+#define SET(off, tag, attr, key, val) do {			\
+    const B* fr = OP(off);					\
+    TAG(fr)     = (tag);					\
+    ATTR(fr)    = (attr);					\
+    key(fr)     = (val);					\
+  } while (0)
+
+#define SET_LBIG(off, val)					\
+  SET((off), (NUM|LONGBIGTYPE), 0, LONGBIG_VAL, (LBIG) (val))
+
+#define SET_BOOL(off, val)				\
+  SET(off, BOOL, 0, BOOL_VAL, ((val) ? TRUE : FALSE))
+
+/* (file) | 
+   block_size
+   blocks
+   blocks_free
+   blocks_avail
+   files
+   files_free
+   files_avail
+   fsid
+   rdonly
+   nosuid
+   name_max
+*/
+   
+P op_statvfs(void) {
+  struct statvfs s;
+
+  if (FLOORopds > o_1) return OPDS_UNF;
+  if (CEILopds < FREEopds + 10*FRAMEBYTES) return OPDS_OVF;
+
+  if (TAG(o_1) != (ARRAY|BYTETYPE)) return OPD_CLA;
+  if (FREEvm + ARRAY_SIZE(o_1) + 1 >= CEILvm)
+    return VM_OVF;
+  moveB(VALUE_PTR(o_1), FREEvm, ARRAY_SIZE(o_1));
+  FREEvm[ARRAY_SIZE(o_1)] = '\0';
+
+  while (statvfs(FREEvm, &s)) {
+    if (errno != EINTR) return -errno;
+    checkabort();
+  };
+
+  SET_LBIG(-1, s.f_frsize);
+  SET_LBIG(0,  s.f_blocks);
+  SET_LBIG(1,  s.f_bfree);
+  SET_LBIG(2,  s.f_bavail);
+  SET_LBIG(3,  s.f_files);
+  SET_LBIG(4,  s.f_ffree);
+  SET_LBIG(5,  s.f_favail);
+  SET_LBIG(6,  s.f_fsid);
+  SET_BOOL(7,  s.f_flag == ST_RDONLY);
+  SET_BOOL(8,  s.f_flag == ST_NOSUID);
+  SET_LBIG(9,  s.f_namemax);
+
+  FREEopds += 10*FRAMEBYTES;
+  return OK;
+}
+
+#undef OP
+#undef SET
+#undef SET_LBIG
+#undef SET_BOOL
 
 // (dir)/null (prefix) | fdr fdw (dir) (prefixXXXXXX)
 P op_tmpfile(void) {
