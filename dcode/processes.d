@@ -41,8 +41,7 @@
 
   | (dir) (file) | fd
   /wropen {
-    2 copy () 3 1 roll writefile
-    FFLAGS /WRITE_APPEND get openfd
+    FFLAGS /WRITE_TRUNC get openfd
   } bind def
 
   | (dir) (file) | fd
