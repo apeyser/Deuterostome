@@ -227,6 +227,7 @@ B* _sysop[] =
   (B*) "glob", (B*) op_glob,
   (B*) "setenv", (B*) op_setenv,
   (B*) "getenv", (B*) op_getenv,
+  (B*) "statvfs", (B*) op_statvfs,
   (B*) "console", (B*) op_console,
   (B*) "setconsole", (B*) op_setconsole,
   (B*) "]", (B*) op_closelist,
