@@ -26,20 +26,20 @@
 #include "dm-sem.h"
 #include "error-local.h"
 
-#define OP(off) (FREEopds+(off)*FRAMEBYTES)
+#define D_P_OP(off) (FREEopds+(off)*FRAMEBYTES)
 
-#define SET(off, tag, attr, key, val) do {			\
-    const B* fr = OP(off);					\
+#define D_P_SET(off, tag, attr, key, val) do {			\
+    const B* fr = D_P_OP(off);					\
     TAG(fr)     = (tag);					\
     ATTR(fr)    = (attr);					\
     key(fr)     = (val);					\
   } while (0)
 
-#define SET_LBIG(off, val)					\
-  SET((off), (NUM|LONGBIGTYPE), 0, LONGBIG_VAL, (LBIG) (val))
+#define D_P_SET_LBIG(off, val)					\
+  D_P_SET((off), (NUM|LONGBIGTYPE), 0, LONGBIG_VAL, (LBIG) (val))
 
-#define SET_BOOL(off, val)				\
-  SET(off, BOOL, 0, BOOL_VAL, ((val) ? TRUE : FALSE))
+#define D_P_SET_BOOL(off, val)				\
+  D_P_SET(off, BOOL, 0, BOOL_VAL, ((val) ? TRUE : FALSE))
 
 /* (file) | 
    block_size
@@ -72,26 +72,26 @@ P op_statvfs(void) {
     checkabort();
   };
 
-  SET_LBIG(-1, s.f_frsize);
-  SET_LBIG(0,  s.f_blocks);
-  SET_LBIG(1,  s.f_bfree);
-  SET_LBIG(2,  s.f_bavail);
-  SET_LBIG(3,  s.f_files);
-  SET_LBIG(4,  s.f_ffree);
-  SET_LBIG(5,  s.f_favail);
-  SET_LBIG(6,  s.f_fsid);
-  SET_BOOL(7,  s.f_flag == ST_RDONLY);
-  SET_BOOL(8,  s.f_flag == ST_NOSUID);
-  SET_LBIG(9,  s.f_namemax);
+  D_P_SET_LBIG(-1, s.f_frsize);
+  D_P_SET_LBIG(0,  s.f_blocks);
+  D_P_SET_LBIG(1,  s.f_bfree);
+  D_P_SET_LBIG(2,  s.f_bavail);
+  D_P_SET_LBIG(3,  s.f_files);
+  D_P_SET_LBIG(4,  s.f_ffree);
+  D_P_SET_LBIG(5,  s.f_favail);
+  D_P_SET_LBIG(6,  s.f_fsid);
+  D_P_SET_BOOL(7,  s.f_flag == ST_RDONLY);
+  D_P_SET_BOOL(8,  s.f_flag == ST_NOSUID);
+  D_P_SET_LBIG(9,  s.f_namemax);
 
   FREEopds += 10*FRAMEBYTES;
   return OK;
 }
 
-#undef OP
-#undef SET
-#undef SET_LBIG
-#undef SET_BOOL
+#undef D_P_OP
+#undef D_P_SET
+#undef D_P_SET_LBIG
+#undef D_P_SET_BOOL
 
 // (dir)/null (prefix) | fdr fdw (dir) (prefixXXXXXX)
 P op_tmpfile(void) {
