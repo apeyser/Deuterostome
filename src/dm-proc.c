@@ -42,7 +42,7 @@
 #define D_P_SET_BOOL(off, val)				\
   D_P_SET(off, BOOL, 0, BOOL_VAL, ((val) ? TRUE : FALSE))
 
-/* (file) | 
+/* (file)/fd | --
    block_size
    blocks
    blocks_free
@@ -55,20 +55,45 @@
    nosuid
    name_max
 */
-   
+
+DM_INLINE_STATIC int statvfs_int(struct statvfs* s) {
+  return statvfs((B*) FREEvm, s);
+}
+
+static int fstatvfs_int_fd;
+DM_INLINE_STATIC int fstatvfs_int(struct statvfs* s) {
+  return fstatvfs(fstatvfs_int_fd, s);
+}
+
 P op_statvfs(void) {
   struct statvfs s;
+  B* stream;
+  int (*statfunc)(struct statvfs* s);
 
   if (FLOORopds > o_1) return OPDS_UNF;
   if (CEILopds < FREEopds + 10*FRAMEBYTES) return OPDS_OVF;
 
-  if (TAG(o_1) != (ARRAY|BYTETYPE)) return OPD_CLA;
-  if (FREEvm + ARRAY_SIZE(o_1) + 1 >= CEILvm)
-    return VM_OVF;
-  moveB(VALUE_PTR(o_1), FREEvm, ARRAY_SIZE(o_1));
-  FREEvm[ARRAY_SIZE(o_1)] = '\0';
+  switch (TAG(o_1)) {
+    case ARRAY|BYTETYPE:
+      if (FREEvm + ARRAY_SIZE(o_1) + 1 >= CEILvm)
+	return VM_OVF;
+      moveB(VALUE_PTR(o_1), FREEvm, ARRAY_SIZE(o_1));
+      FREEvm[ARRAY_SIZE(o_1)] = '\0';
+      statfunc = statvfs_int;
+      break;
 
-  while (statvfs(FREEvm, &s)) {
+    case STREAM:
+      stream = VALUE_PTR(o_1);
+      if ((fstatvfs_int_fd = (int) STREAM_FD(stream) == -1))
+	return STREAM_CLOSED;
+      statfunc = fstatvfs_int;
+      break;
+
+    default:
+      return OPD_CLA;
+  }
+
+  while (statfunc(&s)) {
     if (errno != EINTR) return -errno;
     checkabort();
   };
