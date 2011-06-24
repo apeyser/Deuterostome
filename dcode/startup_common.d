@@ -1147,7 +1147,7 @@ end def  | of xtext_dict
 | discards an existing former version of 'module_name', performs a 'save'
 | operation.
 
-/module { dup forgetmodule save } bind def
+/module {dup forgetmodule save} bind def
 
 |---------------------------- _module
 | /module_name savebox module_dict | --
