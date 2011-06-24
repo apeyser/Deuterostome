@@ -89,6 +89,26 @@ P op_statvfs(void) {
   return OK;
 }
 
+// (pathname) mode | --
+P op_makedir(void) {
+  ULBIG mode;
+  if (FLOORopds > o_2) return OPDS_UNF;
+  if (TAG(o_2) != (ARRAY|BYTETYPE)) return OPD_CLA;
+  if (CLASS(o_1) != NUM) return OPD_CLA;
+  if (TYPE(o_1) >= SINGLETYPE) return OPD_TYP;
+  if (! VALUE(o_1, &mode)) return UNDF_VAL;
+
+  if (FREEvm + ARRAY_SIZE(o_2) + 1 >= CEILvm) return VM_OVF;
+  moveB(VALUE_PTR(o_2), FREEvm, ARRAY_SIZE(o_2));
+  FREEvm[ARRAY_SIZE(o_2)] = '\0';
+
+  if (mkdir((char*) FREEvm, (mode_t) mode))
+    return -errno;
+
+  FREEopds = o_2;
+  return OK;
+}
+
 // Stein's algorithm or binary gcd algorithm
 // http://www.nist.gov/dads/HTML/binaryGCD.html
 DM_INLINE_STATIC ULBIG gcd(ULBIG u, ULBIG v) {

@@ -95,6 +95,46 @@
       pop pop rmfile
     } ifelse
   } bind def
+  
+
+  /FILE_MODE [
+    /USER_SET    4 8 3 pwr mul
+    /GROUP_SET   2 8 3 pwr mul
+    /STICKY      1 8 3 pwr mul
+    /USER_READ   4 8 2 pwr mul
+    /USER_WRITE  2 8 2 pwr mul
+    /USER_EXEC   1 8 2 pwr mul
+    /USER_ALL    7 8 2 pwr mul
+    /GROUP_READ  4 8 1 pwr mul
+    /GROUP_WRITE 2 8 1 pwr mul
+    /GROUP_EXEC  1 8 1 pwr mul
+    /GROUP_ALL   7 8 1 pwr mul
+    /OTHER_READ  4 8 0 pwr mul
+    /OTHER_WRITE 2 8 0 pwr mul
+    /OTHER_EXEC  1 8 0 pwr mul
+    /OTHER_ALL   7 8 0 pwr mul
+    /ALL_PERM    7 8 mul 7 add 8 mul 7 add
+    /ALL         7 8 mul 7 add 8 mul 7 add 8 mul 7 add
+  ] makestruct mkread def
+
+  | [\/mode.. / null | mode
+  /_mkdir_mode {
+    dup null eq {openlist /ALL_PERM} if
+    closelist 0 exch {FILE_MODE exch get or} forall
+  } bind def
+
+  | (dir) \[/mode.. / null | --
+  /mkdir_p {_mkdir_mode openlist /dir /mode} {
+    0 dir (^\(/*[^/]+/*\)+$) regex pop 4 1 roll pop pop pop {
+      length add
+      dir 0 2 index getinterval mode makedir
+    } forall pop
+  } localfunc bind def
+
+  | (dir) \[/mode.. / null | --
+  /mkdir {_mkdir_mode openlist /dir /mode} {
+    dir mode makedir
+  } localfunc bind def
 
   | ~active | ...
   /inpidsockets {

@@ -209,6 +209,7 @@
   "cp"
   "rename"
   "utimes"
+  "makedir"
   "inter_lock"
   "inter_unlock"
   "inter_lock_set"
