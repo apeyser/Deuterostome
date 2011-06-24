@@ -75,6 +75,27 @@
       makestruct_stack |]
   } bind def
 
+  | fdin fdout | --
+  /copystream {
+    cp close
+  } bind def
+
+  | (dir-in) (file-in) (dir-out) (file-out)
+  /copyfile {
+    4 2 roll
+    rdopen 3 1 roll
+    wropen
+    copystream
+  } bind def
+
+  | (dir-in) (file-in) (dir-out) (file-out)
+  /mvfile {
+    4 copy rename {4 ~pop repeat} {
+      4 copy copyfile
+      pop pop removefile
+    } ifelse
+  } bind def
+
   | ~active | ...
   /inpidsockets {
     {{{pidsockets indict} PROCESSES indict} enddicts} lock

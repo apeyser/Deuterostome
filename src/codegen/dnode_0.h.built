@@ -273,6 +273,9 @@ B* _sysop[] =
   (B*) "setenv", (B*) op_setenv,
   (B*) "getenv", (B*) op_getenv,
   (B*) "statvfs", (B*) op_statvfs,
+  (B*) "realpath", (B*) op_realpath,
+  (B*) "cp", (B*) op_cp,
+  (B*) "rename", (B*) op_rename,
 #ifdef ENABLE_SEM
   (B*) "inter_lock", (B*) op_inter_lock,
   (B*) "inter_unlock", (B*) op_inter_unlock,

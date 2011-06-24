@@ -88,6 +88,234 @@ P op_statvfs(void) {
   return OK;
 }
 
+// Stein's algorithm or binary gcd algorithm
+// http://www.nist.gov/dads/HTML/binaryGCD.html
+DM_INLINE_STATIC ULBIG gcd(ULBIG u, ULBIG v) {
+  ULBIG g;
+
+  // divide by two until we get an odd
+  // u,v even: gcd(u,v) = 2*gcd(u/2, v/2)
+  for (g = 0; ! ((u|v) & 1); ++g) {
+    u >>= 1;
+    v >>= 1;
+  }
+
+  // gcd(0, v) = v
+  while (u)
+    // u even, v odd: gcd(u,v) = gcd(u/2, v)
+    if (! (u&1)) u >>= 1;
+    else if (! (v&1)) v >>= 1;
+    // u,v odd: gcd(u,v) = gcd(|u-v|/2, v)
+    else {
+      ULBIG t = (u-v) >> 1;
+      if (u < v) v = -t;
+      else u = t;
+    }
+  
+  return v << g;
+}
+
+
+//  fd1 fd2 | fd2
+P op_cp(void) {
+  B* streamin;
+  B* streamout;
+  int fdin, fdout;
+  struct statvfs sfin, sfout;
+  ULBIG bs;
+  ssize_t n, nw, nw2;
+  static long pagesize = -1;
+
+  if (pagesize == -1) {
+    errno = 0;
+    if ((pagesize = sysconf(_SC_PAGESIZE)) == -1) {
+      if (errno) return -errno;
+      pagesize = 1;
+    }
+  }
+
+  if (FLOORopds > o_2) return OPDS_UNF;
+  if (TAG(o_1) != STREAM
+      || TAG(o_2) != STREAM)
+    return OPD_CLA;
+  streamin  = VALUE_PTR(o_2);
+  streamout = VALUE_PTR(o_1);
+
+  if ((fdout = STREAM_FD(streamout)) == -1)
+    return STREAM_CLOSED;
+  
+  if (STREAM_RO(streamout)
+      || ! STREAM_RO(streamin))
+    return STREAM_DIR;
+
+  if (STREAM_BUFFERED(streamin)) {
+    STREAM_BUFFERED(streamin) = FALSE;
+    while ((n = write(fdout, &STREAM_CHAR(streamin), 1)) < 1) {
+      if (n && errno != EINTR) return -errno;
+      checkabort();
+    }
+    if (STREAM_FD(streamin) == -1) {
+      moveframe(o_1, o_2);
+      FREEopds = o_1;
+      return OK;
+    }
+  }
+
+  if ((fdin = STREAM_FD(streamin)) == -1)
+    return STREAM_CLOSED;
+
+  while (fstatvfs(fdin, &sfin)) {
+    if (errno != EINTR) return -errno;
+    checkabort();
+  };
+
+  while (fstatvfs(fdout, &sfout)) {
+    if (errno != EINTR) return -errno;
+    checkabort();
+  };
+
+  bs = sfin.f_frsize*(sfout.f_frsize/gcd(sfin.f_frsize, sfout.f_frsize));
+  bs = bs*(pagesize/gcd(bs, pagesize));
+  if (FREEvm + bs >= CEILvm) return VM_OVF;
+
+  while ((n = read(fdin, FREEvm, (size_t) bs))) {
+    if (n == -1) switch (errno) {
+	case EAGAIN: case EINTR: checkabort(); continue;
+	default: return -errno;
+      }
+    STREAM_CHAR(streamin) = FREEvm[n-1];
+
+    nw = 0;
+    while (nw < n) {
+      nw2 = write(fdout, FREEvm + nw, (size_t) (n - nw));
+      if (nw2 == -1) switch (errno) {
+	  case EAGAIN: case EINTR: checkabort(); continue;
+	  default: return -errno;
+	}
+      nw += nw2;
+    }
+  }
+
+  while (close(fdin)) {
+    if (errno != EINTR) return -errno;
+    checkabort();
+  }
+  STREAM_FD(streamin) = -1;
+
+  moveframe(o_1, o_2);
+  FREEopds = o_1;
+  return OK;
+}
+
+// (dir) (file) (dir') (file') | true / false
+P op_rename(void) {
+  B* src;
+  B* dest;
+  B* curr;
+  BOOLEAN s = TRUE;
+
+  if (TAG(o_1) != (ARRAY|BYTETYPE)
+      || TAG(o_2) != (ARRAY|BYTETYPE)
+      || TAG(o_3) != (ARRAY|BYTETYPE)
+      || TAG(o_4) != (ARRAY|BYTETYPE))
+    return OPD_CLA;
+
+  if (FREEvm + ARRAY_SIZE(o_1) + 1 + ARRAY_SIZE(o_2) + 1
+      + ARRAY_SIZE(o_3) + 1 + ARRAY_SIZE(o_4) + 1
+      >= CEILvm)
+    return OK;
+
+  src = curr = FREEvm;
+  moveB(VALUE_PTR(o_4), curr, ARRAY_SIZE(o_4));
+  curr += ARRAY_SIZE(o_4);
+  if (curr != src && curr[-1] != '/')
+    curr++[0] = '/';
+  moveB(VALUE_PTR(o_3), curr, ARRAY_SIZE(o_3));
+  curr += ARRAY_SIZE(o_3);
+  curr[0] = '\0';
+  
+  dest = ++curr;
+  moveB(VALUE_PTR(o_2), curr, ARRAY_SIZE(o_2));
+  curr += ARRAY_SIZE(o_2);
+  if (curr != dest && curr[-1] != '/')
+    curr++[0] = '/';
+  moveB(VALUE_PTR(o_1), curr, ARRAY_SIZE(o_1));
+  curr += ARRAY_SIZE(o_1);
+  curr[0] = '\0';
+
+  if (rename(src, dest)) {
+    if (errno != EXDEV) return -errno;
+    s = FALSE;
+  }
+  
+  TAG(o_4) = BOOL;
+  ATTR(o_4) = 0;
+  BOOL_VAL(o_4) = s;
+
+  FREEopds = o_3;
+  return OK;
+}
+
+// (dir) (file) | (dir') (file')
+P op_realpath(void) {
+  B* src;
+  B dest[PATH_MAX+1];
+  B* curr;
+  B* file;
+  B* efile;
+  B* edest;
+
+  if (FLOORopds > o_2) return OPDS_UNF;
+  if (TAG(o_1) != (ARRAY|BYTETYPE)
+      || TAG(o_2) != (ARRAY|BYTETYPE))
+    return OPD_CLA;
+
+  if (FREEvm + FRAMEBYTES
+      + ARRAY_SIZE(o_1) + 2 + ARRAY_SIZE(o_2)
+      >= CEILvm)
+    return VM_OVF;
+
+  src = curr = FREEvm;
+  moveB(VALUE_PTR(o_1), curr, ARRAY_SIZE(o_1));
+  curr += ARRAY_SIZE(o_1);
+  if (curr != src && curr[-1] != '/') curr++[0] = '/';
+  moveB(VALUE_PTR(o_2), curr, ARRAY_SIZE(o_2));
+  curr += ARRAY_SIZE(o_2);
+  curr[0] = '\0';
+
+  if (! realpath((char*) src, (char*) dest))
+    return -errno;
+  if ((file = strrchr(dest, '/'))) {
+    edest = file++;
+    efile = file + strlen(file);
+  }
+  else
+    edest = efile = file = dest + strlen(dest);
+
+  if (FREEvm + FRAMEBYTES + DALIGN(file-dest)
+      + FRAMEBYTES + DALIGN(efile-file)
+      >= CEILvm)
+    return VM_OVF;
+  
+  TAG(FREEvm) = (ARRAY|BYTETYPE);
+  ATTR(FREEvm) = PARENT;
+  VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
+  ARRAY_SIZE(FREEvm) = edest-dest;
+  moveB(dest, VALUE_PTR(FREEvm), ARRAY_SIZE(FREEvm));
+  moveframe(FREEvm, o_2);
+
+  FREEvm += FRAMEBYTES + DALIGN(ARRAY_SIZE(FREEvm));
+  TAG(FREEvm) = (ARRAY|BYTETYPE);
+  ATTR(FREEvm) = PARENT;
+  VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
+  ARRAY_SIZE(FREEvm) = efile-file;
+  moveB(file, VALUE_PTR(FREEvm), ARRAY_SIZE(FREEvm));
+  moveframe(FREEvm, o_1);
+
+  FREEvm += FRAMEBYTES + DALIGN(ARRAY_SIZE(FREEvm));
+  return OK;
+}
+
 #undef D_P_OP
 #undef D_P_SET
 #undef D_P_SET_LBIG
