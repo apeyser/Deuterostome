@@ -76,12 +76,12 @@
   } bind def
 
   | fdin fdout | --
-  /copystream {
+  /cpstream {
     cp close
   } bind def
 
   | (dir-in) (file-in) (dir-out) (file-out)
-  /copyfile {
+  /cpfile {
     4 2 roll
     rdopen 3 1 roll
     wropen
@@ -92,7 +92,7 @@
   /mvfile {
     4 copy rename {4 ~pop repeat} {
       4 copy copyfile
-      pop pop removefile
+      pop pop rmfile
     } ifelse
   } bind def
 
@@ -965,42 +965,42 @@
     exch         pid_eps wait       | (stdout) (stderr) bool
   } caplocalfunc bind def
 
-|=============================== removepath functions =====================
+|=============================== rmpath functions =====================
 
   | (dir) (file) norecur-bool | --
-  /_removepath {
-    /norecur exch {{(removefile) /DIR_NOTEMPTY makeerror}} {null mkact} ifelse def
-    __removepath
+  /_rmpath {
+    /norecur exch {{(rmfile) /DIR_NOTEMPTY makeerror}} {null mkact} ifelse def
+    __rmpath
   } bind def
 
   | (dir) (file) <</norecur defined>> | --
-  /__removepath {
+  /__rmpath {
     2 copy fileisdir {
       2 copy finddir {
         norecur
-        {1 index exch __removepath} forall pop
+        {1 index exch __rmpath} forall pop
       } if
     } if
     rmpath
   } bind def
 
-  |========================== removefile ========================
+  |========================== rmfile ========================
   | (dir) (file) | --
   |
   | Removes file (dir/file), or dir (dir/file) if empty.
   |
-  /removefile {
-    true ~_removepath /removepath_ ~inlayer PROCESSES indict
+  /rmfile {
+    true ~_rmpath /rmpath_ ~inlayer PROCESSES indict
   } bind def
 
-  |=========================== removedir ========================
+  |=========================== rmdir ========================
   | (dir) (file) | --
   |
   | Removes (dir/file) directory recursively, removing all children
   |   first, then attempting to remove parent.
   |
-  /removedir {
-    false ~_removepath /removepath_ ~inlayer PROCESSES indict
+  /rmdir {
+    false ~_rmpath /rmpath_ ~inlayer PROCESSES indict
   } bind def
 
   |=========================== setwdirp ==========================

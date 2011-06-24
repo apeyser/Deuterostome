@@ -231,6 +231,7 @@ B* _sysop[] =
   (B*) "realpath", (B*) op_realpath,
   (B*) "cp", (B*) op_cp,
   (B*) "rename", (B*) op_rename,
+  (B*) "utimes", (B*) op_utimes,
   (B*) "console", (B*) op_console,
   (B*) "setconsole", (B*) op_setconsole,
   (B*) "]", (B*) op_closelist,

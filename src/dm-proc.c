@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <dirent.h>
 #include <sys/statvfs.h>
+#include <sys/time.h>
 
 #include "dm2.h"
 #include "dm3.h"
@@ -313,6 +314,66 @@ P op_realpath(void) {
   moveframe(FREEvm, o_1);
 
   FREEvm += FRAMEBYTES + DALIGN(ARRAY_SIZE(FREEvm));
+  return OK;
+}
+
+// access-epoch/*/null mod-epoch/*/null (dir) (file) | --
+P op_utimes(void) {
+  B* path;
+  B* curr;
+  struct timespec times[2];
+
+  if (FLOORopds > o_4) return OPDS_UNF;
+  if (TAG(o_1) != (ARRAY|BYTETYPE)
+      || TAG(o_2) != (ARRAY|BYTETYPE))
+    return OPD_CLA;
+
+  if (FREEvm + ARRAY_SIZE(o_1) + 1 + ARRAY_SIZE(o_2) + 1
+      >= CEILvm)
+    return VM_OVF;
+  path = curr = FREEvm;
+  moveB(VALUE_PTR(o_2), curr, ARRAY_SIZE(o_2));
+  curr += ARRAY_SIZE(o_2);
+  if (curr != path && curr[-1] != '/')
+    curr++[0] = '/';
+  moveB(VALUE_PTR(o_1), curr, ARRAY_SIZE(o_1));
+  curr += ARRAY_SIZE(o_1);
+  curr[0] = '\0';
+  
+  if (CLASS(o_3) == NUM) {
+    LBIG t;
+    if (TYPE(o_3) >= SINGLETYPE) return OPD_TYP;
+    if (! VALUE(o_3, &t))
+      times[1].tv_nsec = UTIME_NOW;
+    else {
+      times[1].tv_sec = (time_t) t;
+      times[1].tv_nsec = 0;
+    }
+  }
+  else if (TAG(o_3) == NULLOBJ)
+    times[1].tv_nsec = UTIME_OMIT;
+  else
+    return OPD_CLA;
+  
+  if (CLASS(o_4) == NUM) {
+    LBIG t;
+    if (TYPE(o_4) >= SINGLETYPE) return OPD_TYP;
+    if (! VALUE(o_4, &t))
+      times[0].tv_nsec = UTIME_NOW;
+    else {
+      times[0].tv_sec = (time_t) t;
+      times[0].tv_nsec = 0;
+    }
+  }
+  else if (TAG(o_4) == NULLOBJ)
+    times[0].tv_nsec = UTIME_OMIT;
+  else
+    return OPD_CLA;
+
+  if (utimensat(AT_FDCWD, (char*) path, times, 0))
+    return -errno;
+  
+  FREEopds = o_4;
   return OK;
 }
 

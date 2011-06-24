@@ -3,6 +3,7 @@
 
 #include "dm.h"
 
+DLL_SCOPE P op_utimes(void);
 DLL_SCOPE P op_rename(void);
 DLL_SCOPE P op_cp(void);
 DLL_SCOPE P op_realpath(void);

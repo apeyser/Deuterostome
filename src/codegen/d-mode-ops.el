@@ -208,6 +208,7 @@
   "realpath"
   "cp"
   "rename"
+  "utimes"
   "inter_lock"
   "inter_unlock"
   "inter_lock_set"
