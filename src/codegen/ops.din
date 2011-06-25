@@ -231,7 +231,7 @@
       /dilute_add /matvecmul
       /getstartupdir /gethomedir /getconfdir
       /socketval /getmyname /getmyfqdn
-      /getpid /unpid
+      /getpid /unpid /makepid
     ] def
     /errors 100 dict dup begin |[
       /ABORT (** Internal ABORT returned -- should never appear as error) def

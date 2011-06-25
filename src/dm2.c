@@ -1602,6 +1602,29 @@ P op_unpid(void) {
   return OK;
 }
 
+/*--------------------------------------- makepid
+   use:  pid# | pid
+
+   - converts numerical representation to a pid objects
+
+*/
+P op_makepid(void) {
+  LBIG pid;
+  if (FLOORopds > o_1) return OPDS_UNF;
+  if (CLASS(o_1) != NUM) return OPD_CLA;
+  if (TYPE(o_1) >= SINGLETYPE) return OPD_TYP;
+  if (! VALUE(o_1, pid)) return UNDF_VAL;
+  if (pid < 0) return RNG_CHK;
+#if sizeof(pid) > sizeof(pid_t)
+  if (pid > ~((pid_t) 0)) return RNG_CHK;
+#endif
+
+  TAG(o_1) = (NULLOBJ|PIDTYPE);
+  ATTR(o_1) = 0;
+  PID_VAL(o1) = (pid_t) pid;
+  return OK;
+}
+
 /////////////////////////////////////////// signal handling code
 
 /*--------- signal handler: SIGFPE */
