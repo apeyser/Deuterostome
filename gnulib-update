@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# fstat fstatvfs statvfs sys_statvfs
 modules=" \
 	    futimens glob mkdtemp stat stat-time \
 	    stdio sys_stat utimensat \
