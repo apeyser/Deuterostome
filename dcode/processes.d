@@ -58,8 +58,8 @@
     dup closedfd ~pop ~close ifelse
   } bind def
 
-  | (file) | file-system-dict
-  /fsstat {
+  | (file)/fd | file-system-dict
+  /statfs {
     statvfs [
       /BLOCK_SIZE
       /BLOCKS
@@ -95,7 +95,6 @@
       pop pop rmfile
     } ifelse
   } bind def
-  
 
   /FILE_MODE [
     /USER_SET    4 8 3 pwr mul
@@ -117,7 +116,7 @@
     /ALL         7 8 mul 7 add 8 mul 7 add 8 mul 7 add
   ] makestruct mkread def
 
-  | [\/mode.. / null | mode
+  | \[\/mode.. / null | mode
   /_mkdir_mode {
     dup null eq {openlist /ALL_PERM} if
     closelist 0 exch {FILE_MODE exch get or} forall
@@ -135,6 +134,30 @@
   /mkdir {_mkdir_mode openlist /dir /mode} {
     dir mode makedir
   } localfunc bind def
+
+  | (dir) (file) | dict true / false
+  /statfile {
+    stat not ~false {[
+      /DEV
+      /INODE
+      /MODE
+      /NLINK
+      /UID
+      /GID
+      /RDEV
+      /SIZE
+      /ACCESS_SEC
+      /ACCESS_NSEC
+      /MOD_SEC
+      /MOD_NSEC
+      /STATUS_SEC
+      /STATUS_NSEC
+      /BLOCKSIZE
+      /BLOCKS
+      makestruct_stack |]
+      true
+    } ifelse
+  } bind def
 
   | ~active | ...
   /inpidsockets {

@@ -15,6 +15,7 @@
 #include <dirent.h>
 #include <sys/statvfs.h>
 #include <sys/time.h>
+#include <dirent.h>
 
 #include "dm2.h"
 #include "dm3.h"
@@ -42,6 +43,71 @@
 #define D_P_SET_BOOL(off, val)				\
   D_P_SET(off, BOOL, 0, BOOL_VAL, ((val) ? TRUE : FALSE))
 
+// (dir) | (file)...
+P op_readdir(void) {
+  B* curr;
+  DIR* dir;
+  struct dirent* file;
+  B* ops;
+  P retc;
+
+  if (FLOORopds > o_1) return OPDS_UNF;
+  if (TAG(o_1) != (ARRAY|BYTETYPE)) return OPD_CLA;
+
+  if (FREEvm + ARRAY_SIZE(o_1) + 1 > FREEvm)
+    return VM_OVF;
+  moveB(VALUE_PTR(o_1), FREEvm, ARRAY_SIZE(o_1));
+  FREEvm[ARRAY_SIZE(o_1)] = '\0';
+
+  if (! (dir = opendir(FREEvm)))
+    return -errno;
+
+  errno = 0;
+  ops = o_1;
+  while (file = readdir(dir)) {
+    size_t l = strlen(file->d_name);
+    if (curr + FRAMEBYTES + DALIGN(l) >= CEILvm) {
+      retc = VM_OVF;
+      goto err;
+    };
+    if (ops + FRAMEBYTES > CEILopds) {
+      retc = OPDS_OVF;
+      goto err;
+    };
+
+    TAG(curr) = (ARRAY|BYTETYPE);
+    ATTR(curr) = PARENT;
+    VALUE_PTR(curr) = curr+FRAMEBYTES;
+    moveB(file->d_name, curr+FRAMEBYTES, l);
+    ARRAY_SIZE(curr) = l;
+    moveframe(curr, ops);
+    ATTR(curr) = 0;
+
+    curr += FRAMEBYTES + DALIGN(l);
+    ops += FRAMEBYTES;
+  };
+  if (errno) {
+    retc = -errno;
+    goto err;
+  };
+
+  while (closedir(dir)) {
+    if (errno != EINTR) return -errno;
+    checkabort();
+  };
+
+  FREEvm = curr;
+  FREEopds = ops;
+  return OK;
+
+ err:
+  while (closedir(dir)) {
+    if (errno != EINTR) break;
+    checkabort();
+  }
+  return retc;
+}
+
 /* (file)/fd | --
    block_size
    blocks
@@ -56,19 +122,19 @@
    name_max
 */
 
-DM_INLINE_STATIC int statvfs_int(struct statvfs* s) {
+DM_INLINE_STATIC int statvfs_int(struct statvfs *restrict s) {
   return statvfs((B*) FREEvm, s);
 }
 
 static int fstatvfs_int_fd;
-DM_INLINE_STATIC int fstatvfs_int(struct statvfs* s) {
+DM_INLINE_STATIC int fstatvfs_int(struct statvfs *restrict s) {
   return fstatvfs(fstatvfs_int_fd, s);
 }
 
 P op_statvfs(void) {
   struct statvfs s;
   B* stream;
-  int (*statfunc)(struct statvfs* s);
+  int (*statfunc)(struct statvfs *restrict s);
 
   if (FLOORopds > o_1) return OPDS_UNF;
   if (CEILopds < FREEopds + 10*FRAMEBYTES) return OPDS_OVF;
@@ -111,6 +177,109 @@ P op_statvfs(void) {
   D_P_SET_LBIG(9,  s.f_namemax);
 
   FREEopds += 10*FRAMEBYTES;
+  return OK;
+}
+
+/* (dir) (file)/fd | false /
+     dev
+     ino
+     mode
+     nlink
+     uid
+     gid
+     rdev
+     size
+     access-time-s
+     access-time-ns
+     mod-time-s
+     mod-time-ns
+     c-time-s
+     c-time-ns
+     blksize
+     blocks
+     true
+*/
+DM_INLINE_STATIC int stat_int(struct stat *restrict s) {
+  return stat((B*) FREEvm, s);
+}
+
+static int fstat_int_fd;
+DM_INLINE_STATIC int fstat_int(struct stat *restrict s) {
+  return fstat(fstat_int_fd, s);
+}
+
+P op_stat(void) {
+  struct stat s;
+  B* curr;
+  B* stream;
+  int (*statfunc)(struct stat *restrict s);
+  P off;
+
+  if (FLOORopds > o_1) return OPDS_UNF;
+  switch (TAG(o_1)) {
+    case ARRAY|BYTETYPE:
+      if (FLOORopds > o_2) return OPDS_UNF;
+      if (TAG(o_2) != (ARRAY|BYTETYPE)) return OPD_CLA;
+
+      off = -2;
+      if (FREEvm + ARRAY_SIZE(o_1) + 1
+	  + ARRAY_SIZE(o_2) + 1
+	  >= CEILvm)
+	return VM_OVF;
+
+      curr = FREEvm;
+      moveB(VALUE_PTR(o_2), curr, ARRAY_SIZE(o_2));
+      curr += ARRAY_SIZE(o_2);
+      if (curr != FREEvm && curr[-1] != '/')
+	curr++[0] = '/';
+      moveB(VALUE_PTR(o_1), curr, ARRAY_SIZE(o_1));
+      curr += ARRAY_SIZE(o_1);
+      curr[0] = '\0';
+
+      statfunc = statvfs_int;
+      break;
+
+    case STREAM:
+      off = -1;
+      stream = VALUE_PTR(o_1);
+      if ((fstatvfs_int_fd = (int) STREAM_FD(stream) == -1))
+	return STREAM_CLOSED;
+
+      statfunc = fstatvfs_int;
+      break;
+
+    default:
+      return OPD_CLA;
+  }
+  if (CEILopds < FREEopds + (off+18)*FRAMEBYTES)
+    return OPDS_OVF;
+
+  if (statfunc(&s)) {
+    if (errno != ENOENT) return -errno;
+    D_P_SET_BOOL(off+0, FALSE);
+    FREEopds = (off+1)*FRAMEBYTES;
+    return OK;
+  }
+
+  D_P_SET_LBIG(off+0,  s.st_dev);
+  D_P_SET_LBIG(off+1,  s.st_ino);
+  D_P_SET_LBIG(off+2,  s.st_mode);
+  D_P_SET_LBIG(off+3,  s.st_nlink);
+  D_P_SET_LBIG(off+4,  s.st_uid);
+  D_P_SET_LBIG(off+5,  s.st_gid);
+  D_P_SET_LBIG(off+7,  s.st_rdev);
+  D_P_SET_LBIG(off+8,  s.st_size);
+  D_P_SET_LBIG(off+9,  s.st_atim.tv_sec);
+  D_P_SET_LBIG(off+10, s.st_atim.tv_nsec);
+  D_P_SET_LBIG(off+11, s.st_mtim.tv_sec);
+  D_P_SET_LBIG(off+12, s.st_mtim.tv_nsec);
+  D_P_SET_LBIG(off+13, s.st_ctim.tv_sec);
+  D_P_SET_LBIG(off+14, s.st_ctim.tv_nsec);
+  D_P_SET_LBIG(off+15, s.st_blksize);
+  D_P_SET_LBIG(off+16, s.st_blocks);
+  D_P_SET_BOOL(off+17, TRUE);
+
+  FREEopds = (off+18)*FRAMEBYTES;
   return OK;
 }
 
@@ -362,63 +531,130 @@ P op_realpath(void) {
   return OK;
 }
 
-// access-epoch/*/null mod-epoch/*/null (dir) (file) | --
+static int utimes_fd;
+DM_INLINE_STATIC int futimes_int(const struct timespect times[2]) {
+  return futimens(utimes_fd, times);
+}
+
+DM_INLINE_STATIC int utimes_int(const struct timespect times[2]) {
+  return utimensat(AT_FDCWD, (char*) FREEvm, times, 0);
+}
+
+// access-epoch/*/null access-ns mod-epoch/*/null mod-ns
+// (dir) (file) / fd | --
 P op_utimes(void) {
-  B* path;
   B* curr;
   struct timespec times[2];
+  B* i;
+  B* top;
+  B* bottom;
+  B* stream;
+  B* as;
+  B* ans;
+  B* ms;
+  B* mns;
+  int (*func)(const struct timespect times[2]);
 
-  if (FLOORopds > o_4) return OPDS_UNF;
-  if (TAG(o_1) != (ARRAY|BYTETYPE)
-      || TAG(o_2) != (ARRAY|BYTETYPE))
-    return OPD_CLA;
+  if (FLOORopds > o_1) return OPDS_UNF;
 
-  if (FREEvm + ARRAY_SIZE(o_1) + 1 + ARRAY_SIZE(o_2) + 1
-      >= CEILvm)
-    return VM_OVF;
-  path = curr = FREEvm;
-  moveB(VALUE_PTR(o_2), curr, ARRAY_SIZE(o_2));
-  curr += ARRAY_SIZE(o_2);
-  if (curr != path && curr[-1] != '/')
-    curr++[0] = '/';
-  moveB(VALUE_PTR(o_1), curr, ARRAY_SIZE(o_1));
-  curr += ARRAY_SIZE(o_1);
-  curr[0] = '\0';
+  switch (TAG(o_1)) {
+    case STREAM:
+      bottom = as = o_5;
+      ans         = o_4;
+      ms          = o_3;
+      top = mns   = o_2;
+
+      stream = VALUE_PTR(o_1);
+      if ((utimes_fd = STREAM_FD(stream)) == -1)
+	return STREAM_CLOSED;
+      func = futimes_int;
+      break;
+
+    case ARRAY|BYTETYPE:
+      if (FLOORopds > o_2) return OPDS_UNF;
+      bottom = as = o_6;
+      ans         = o_5;
+      ms          = o_4;
+      top = mns   = o_3;
+
+      if (TAG(o_2) != (ARRAY|BYTETYPE))
+	return OPD_CLA;
+
+      if (FREEvm + ARRAY_SIZE(o_1) + 1 + ARRAY_SIZE(o_2) + 1
+	  >= CEILvm)
+	return VM_OVF;
+      curr = FREEvm;
+      moveB(VALUE_PTR(o_2), curr, ARRAY_SIZE(o_2));
+      curr += ARRAY_SIZE(o_2);
+      if (curr != FREEvm && curr[-1] != '/')
+	curr++[0] = '/';
+      moveB(VALUE_PTR(o_1), curr, ARRAY_SIZE(o_1));
+      curr += ARRAY_SIZE(o_1);
+      curr[0] = '\0';
+
+      func = utimes_int;
+  };
   
-  if (CLASS(o_3) == NUM) {
-    LBIG t;
-    if (TYPE(o_3) >= SINGLETYPE) return OPD_TYP;
-    if (! VALUE(o_3, &t))
-      times[1].tv_nsec = UTIME_NOW;
-    else {
-      times[1].tv_sec = (time_t) t;
-      times[1].tv_nsec = 0;
+  if (FLOORopds > bottom) return OPDS_UNF;
+  for (i = top; i >= bottom; i -= FRAMEBYTES)
+    switch (CLASS(i)) {
+      case NULL:
+	if (TAG(i)) return OPD_TYPE;
+	break;
+      case NUM:
+	if (TAG(i) >= SINGLETYPE) return OPD_TYPE;
+	break;
+      default:
+	return OPD_CLA;
     }
-  }
-  else if (TAG(o_3) == NULLOBJ)
-    times[1].tv_nsec = UTIME_OMIT;
-  else
-    return OPD_CLA;
   
-  if (CLASS(o_4) == NUM) {
-    LBIG t;
-    if (TYPE(o_4) >= SINGLETYPE) return OPD_TYP;
-    if (! VALUE(o_4, &t))
-      times[0].tv_nsec = UTIME_NOW;
-    else {
-      times[0].tv_sec = (time_t) t;
-      times[0].tv_nsec = 0;
-    }
-  }
-  else if (TAG(o_4) == NULLOBJ)
-    times[0].tv_nsec = UTIME_OMIT;
-  else
-    return OPD_CLA;
+  switch (CLASS(as)) {
+    case NUM: {
+      LBIG t;
+      if (! VALUE(as, &t)) {
+	times[1].tv_sec = 0;
+	times[1].tv_nsec = UTIME_NOW;
+      }
+      else {
+	times[1].tv_sec = (time_t) t;
+	if (CLASS(ans) != NUM) return RNG_CHK;
+	if (! VALUE(ans, &t)) return UNDF_VAL;
+	times[1].tv_sec = (long) t;
+      }
+      break
+    };
 
-  if (utimensat(AT_FDCWD, (char*) path, times, 0))
-    return -errno;
+    case NULLOBJ:
+      times[1].tv_sec = 0;
+      times[1].tv_nsec = UTIME_OMIT;
+      break;
+  }
+
+  switch (CLASS(ms)) {
+    case NUM: {
+      LBIG t;
+      if (! VALUE(ms, &t)) {
+	times[0].tv_sec = 0;
+	times[0].tv_nsec = UTIME_NOW;
+      }
+      else {
+	times[0].tv_sec = (time_t) t;
+	if (CLASS(mns) != NUM) return RNG_CHK;
+	if (! VALUE(mns, &t)) return UNDF_VAL;
+	times[0].tv_sec = (long) t;
+      }
+      break
+    };
+
+    case NULLOBJ:
+      times[0].tv_sec = 0;
+      times[0].tv_nsec = UTIME_OMIT;
+      break;
+  }
+
+  if (func(times)) return -errno;
   
-  FREEopds = o_4;
+  FREEopds = bottom;
   return OK;
 }
 
@@ -566,7 +802,7 @@ P op_finddir(void) {
   struct dirent* dirent;
   B* f;
   B* fsub;
-  
+
   if (FLOORopds > o_2) return OPDS_UNF;
   if (CEILopds <= o1) return OPDS_OVF;
   if (TAG(o_1) != (ARRAY|BYTETYPE)) return OPD_ERR;
@@ -596,7 +832,7 @@ P op_finddir(void) {
 
   if (! (dir = opendir(FREEvm))) return -errno;
   curr = FREEvm;
-  
+
   errno = 0;
   while ((dirent = readdir(dir))) {
     if (! strcmp(dirent->d_name, ".") || ! strcmp(dirent->d_name, ".."))
@@ -673,7 +909,6 @@ P op_finddir(void) {
   FREEvm = curr;
   return OK;
 }
-    
 
 // (dir)/null (file-or-subdir) | --
 P op_rmpath(void) {

@@ -304,6 +304,7 @@ end def |]
       /suckfd /closedfd /getfd /ungetfd
       /writefd /closefd /lockfd /unlockfd /trylockfd
       /glob /setenv /getenv /statvfs /realpath /cp /rename /utimes /makedir
+      /stat /readdir
     ] def
     /errors 7 dict dup begin |[
       /FILE_NOSUCH (** No such file or directory) def
