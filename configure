@@ -23522,6 +23522,14 @@ else
 fi
 
 
+ac_fn_c_check_header_mongrel "$LINENO" "sys/statvfs.h" "ac_cv_header_sys_statvfs_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_statvfs_h" = x""yes; then :
+
+else
+    as_fn_error "Header sys/statvfs.h not found" "$LINENO" 5
+fi
+
+
 ac_fn_c_check_header_mongrel "$LINENO" "fnmatch.h" "ac_cv_header_fnmatch_h" "$ac_includes_default"
 if test "x$ac_cv_header_fnmatch_h" = x""yes; then :
 
