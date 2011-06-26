@@ -159,6 +159,19 @@
     } ifelse
   } bind def
 
+  | statfile-dict (dir) (file) | --
+  /utimesput {
+    3 -1 roll {/MOD_SEC /MOD_NSEC /ACCESS_SEC /ACCESS_NSEC} {
+      1 index exch get exch
+    } forall pop
+    6 -2 roll utimes
+  } bind def
+
+  | (dir) (file) | --
+  /utimesset {
+    4 {*} repeat 6 -2 roll utimes
+  } bind def
+
   | ~active | ...
   /inpidsockets {
     {{{pidsockets indict} PROCESSES indict} enddicts} lock
