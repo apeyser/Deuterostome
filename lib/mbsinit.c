@@ -1,18 +1,18 @@
 /* Test for initial conversion state.
-   Copyright (C) 2008 Free Software Foundation, Inc.
+   Copyright (C) 2008-2011 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2008.
 
    This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU Lesser General Public License as published by
+   it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU Lesser General Public License for more details.
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU Lesser General Public License
+   You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <config.h>
@@ -21,6 +21,18 @@
 #include <wchar.h>
 
 #include "verify.h"
+
+#if (defined _WIN32 || defined __WIN32__) && !defined __CYGWIN__
+
+/* On native Windows, 'mbstate_t' is defined as 'int'.  */
+
+int
+mbsinit (const mbstate_t *ps)
+{
+  return ps == NULL || *ps == 0;
+}
+
+#else
 
 /* Platforms that lack mbsinit() also lack mbrlen(), mbrtowc(), mbsrtowcs()
    and wcrtomb(), wcsrtombs().
@@ -43,5 +55,7 @@ mbsinit (const mbstate_t *ps)
 {
   const char *pstate = (const char *)ps;
 
-  return pstate[0] == 0;
+  return pstate == NULL || pstate[0] == 0;
 }
+
+#endif

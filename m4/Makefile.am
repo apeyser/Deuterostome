@@ -19,16 +19,48 @@ dist_noinst_DATA = \
 	cf_gentoo.make cf_debian.make cf_in.make \
 	cf_X11.m4 cf_sem.m4
 
-GNULIB = 00gnulib.m4 gnulib-cache.m4 dirfd.m4 d-type.m4 extensions.m4 \
-	fnmatch.m4 glob.m4 gnulib-common.m4 gnulib-comp.m4 \
-	gnulib-tool.m4 libtool.m4 onceonly.m4 stdio_h.m4 \
-	alloca.m4 codeset.m4 dirent_h.m4 errno_h.m4 getlogin_r.m4 \
-	gettimeofday.m4 glibc21.m4 include_next.m4 localcharset.m4 \
-	locale-fr.m4 locale-ja.m4 locale-zh.m4 longlong.m4 \
-	lstat.m4 malloc.m4 mbrtowc.m4 mbsinit.m4 mbsrtowcs.m4 \
-	mbstate_t.m4 mempcpy.m4 mkdtemp.m4 multiarch.m4 stdbool.m4 \
-	stdint.m4 stdlib_h.m4 string_h.m4 sys_stat_h.m4 sys_time_h.m4 \
-	tempname.m4 unistd_h.m4 wchar.m4 wctype.m4 wint_t.m4
+GNULIB = 00gnulib.m4 fseeko.m4 memrchr.m4 \
+	ftello.m4 mkdir.m4 \
+	alloca.m4 futimens.m4 mkdtemp.m4 \
+	argz.m4 getcwd.m4 mmap-anon.m4 \
+	getdtablesize.m4 mode_t.m4 \
+	getlogin_r.m4 multiarch.m4 \
+	gettime.m4 onceonly.m4 \
+	gettimeofday.m4 open.m4 \
+	glibc21.m4 openat.m4 \
+	glob.m4 plugin-config.m4 \
+	gnulib-cache.m4 realloc.m4 \
+	gnulib-common.m4 rmdir.m4 \
+	gnulib-comp.m4 save-cwd.m4 \
+	gnulib-tool.m4 stat-time.m4 \
+	chdir-long.m4 include_next.m4 stat.m4 \
+	chown.m4 lchown.m4 stdbool.m4 \
+	clock_time.m4 stddef_h.m4 \
+	cloexec.m4 lib-ld.m4 stdint.m4 \
+	close.m4 lib-link.m4 stdio_h.m4 \
+	codeset.m4 lib-prefix.m4 stdlib_h.m4 \
+	configmake.m4 lib_socket_nsl.m4 strdup.m4 \
+	libtool.m4 strerror.m4 \
+	d-type.m4 localcharset.m4 strerror_r.m4 \
+	dirent_h.m4 locale-fr.m4 string_h.m4 \
+	dirfd.m4 locale-ja.m4 sys_stat_h.m4 \
+	dirname.m4 locale-zh.m4 sys_time_h.m4 \
+	double-slash-root.m4 lock.m4 tempname.m4 \
+	dup2.m4 longlong.m4 threadlib.m4 \
+	errno_h.m4 lseek.m4 time_h.m4 \
+	error.m4 lstat.m4 timespec.m4 \
+	extensions.m4 ltdl.m4 unistd-safer.m4 \
+	fchdir.m4 ltoptions.m4 unistd_h.m4 \
+	fclose.m4 ltsugar.m4 unlink.m4 \
+	fcntl-o.m4 ltversion.m4 utimbuf.m4 \
+	fcntl.m4 lt~obsolete.m4 utimens.m4 \
+	fcntl_h.m4 malloc.m4 utimensat.m4 \
+	fdopendir.m4 mbrtowc.m4 utimes.m4 \
+	fflush.m4 mbsinit.m4 warn-on-use.m4 \
+	filenamecat.m4 mbsrtowcs.m4 wchar_h.m4 \
+	fnmatch.m4 mbstate_t.m4 wchar_t.m4 \
+	fpurge.m4 memchr.m4 wctype_h.m4 \
+	freading.m4 mempcpy.m4 wint_t.m4
 
 EXTRA_DIST = $(GNULIB) \
 	latex/ac_latex_class_article.m4 latex/ac_latex_class_book.m4 \

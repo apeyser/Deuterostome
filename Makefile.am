@@ -1,5 +1,4 @@
 EXTRA_DIST = bootstrap autom4te.cfg \
-	link-warning.h \
 	fink/dm.el fink/dm.info \
 	testboxes/dict.box testboxes/list.box testboxes/longarray.box
 
