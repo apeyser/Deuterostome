@@ -1442,17 +1442,11 @@
    'sig_atomic_t'. */
 #undef SIG_ATOMIC_T_SUFFIX
 
-/* The size of `int', as computed by sizeof. */
-#undef SIZEOF_INT
-
 /* The size of `PetscInt', as computed by sizeof. */
 #undef SIZEOF_PETSCINT
 
 /* The size of `PetscScalar', as computed by sizeof. */
 #undef SIZEOF_PETSCSCALAR
-
-/* The size of `pid_t', as computed by sizeof. */
-#undef SIZEOF_PID_T
 
 /* The size of `void*', as computed by sizeof. */
 #undef SIZEOF_VOIDP
@@ -1564,7 +1558,7 @@
    this defined. */
 #undef _POSIX_1_SOURCE
 
-/* Define to 200112L - we are POSIXY */
+/* Define to 200809L - we are POSIXY */
 #undef _POSIX_C_SOURCE
 
 /* Define to 1 if you need to in order for `stat' and other things to work. */

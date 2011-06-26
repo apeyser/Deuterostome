@@ -217,12 +217,8 @@ AC_CHECK_LIBM
 CF_X11_ENABLE
 CF_PREPEND_VARS([LIBS], [XLIB LIBM])
 AC_C_BIGENDIAN
-dnl check pid_t for plugins/process.c
 
-CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([pid_t], [4])])
-CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([int], [4])])
-
-AC_DEFINE([_POSIX_C_SOURCE], [200112L], [Define to 200112L - we are POSIXY])
+AC_DEFINE([_POSIX_C_SOURCE], [200809L], [Define to 200809L - we are POSIXY])
 AC_DEFINE([_XOPEN_SOURCE], [(_XOPEN_SOURCE < 500 ? 500 : _XOPEN_SOURCE)], 
   [Define to >500 - we are POSIXY])
 
