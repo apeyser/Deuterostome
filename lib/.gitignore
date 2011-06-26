@@ -92,3 +92,11 @@
 /utimens.c
 /utimens.h
 /utimensat.c
+/arg-nonnull.h
+/c++defs.h
+/fcntl.h
+/fnmatch.h
+/time.h
+/warn-on-use.h
+/wctype.h
+.dirstamp
