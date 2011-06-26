@@ -1613,11 +1613,11 @@ P op_makepid(void) {
   if (FLOORopds > o_1) return OPDS_UNF;
   if (CLASS(o_1) != NUM) return OPD_CLA;
   if (TYPE(o_1) >= SINGLETYPE) return OPD_TYP;
-  if (! VALUE(o_1, pid)) return UNDF_VAL;
+  if (! VALUE(o_1, &pid)) return UNDF_VAL;
   if (pid < 0) return RNG_CHK;
-#if sizeof(pid) > sizeof(pid_t)
-  if (pid > ~((pid_t) 0)) return RNG_CHK;
-#endif
+  if (sizeof(pid) > sizeof(pid_t)
+      && (ULBIG) pid > (ULBIG) ~((pid_t) 0))
+    return RNG_CHK;
 
   TAG(o_1) = (NULLOBJ|PIDTYPE);
   ATTR(o_1) = 0;

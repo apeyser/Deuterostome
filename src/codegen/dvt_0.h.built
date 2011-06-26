@@ -165,6 +165,7 @@ B* _sysop[] =
   (B*) "getmyfqdn", (B*) op_getmyfqdn,
   (B*) "getpid", (B*) op_getpid,
   (B*) "unpid", (B*) op_unpid,
+  (B*) "makepid", (B*) op_makepid,
   (B*) "connect", (B*) op_connect,
   (B*) "disconnect", (B*) op_disconnect,
   (B*) "send", (B*) op_send,

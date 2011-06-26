@@ -166,6 +166,7 @@
   "getmyfqdn"
   "getpid"
   "unpid"
+  "makepid"
   "regex"
   "regexi"
   "regexs"
