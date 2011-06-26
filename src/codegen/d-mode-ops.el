@@ -211,6 +211,8 @@
   "rename"
   "utimes"
   "makedir"
+  "stat"
+  "readdir"
   "inter_lock"
   "inter_unlock"
   "inter_lock_set"

@@ -279,6 +279,8 @@ B* _sysop[] =
   (B*) "rename", (B*) op_rename,
   (B*) "utimes", (B*) op_utimes,
   (B*) "makedir", (B*) op_makedir,
+  (B*) "stat", (B*) op_stat,
+  (B*) "readdir", (B*) op_readdir,
 #ifdef ENABLE_SEM
   (B*) "inter_lock", (B*) op_inter_lock,
   (B*) "inter_unlock", (B*) op_inter_unlock,

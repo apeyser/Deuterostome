@@ -64,7 +64,7 @@ P op_readdir(void) {
 
   errno = 0;
   ops = o_1;
-  while (file = readdir(dir)) {
+  while ((file = readdir(dir))) {
     size_t l = strlen(file->d_name);
     if (curr + FRAMEBYTES + DALIGN(l) >= CEILvm) {
       retc = VM_OVF;
@@ -236,7 +236,7 @@ P op_stat(void) {
       curr += ARRAY_SIZE(o_1);
       curr[0] = '\0';
 
-      statfunc = statvfs_int;
+      statfunc = stat_int;
       break;
 
     case STREAM:
@@ -245,7 +245,7 @@ P op_stat(void) {
       if ((fstatvfs_int_fd = (int) STREAM_FD(stream) == -1))
 	return STREAM_CLOSED;
 
-      statfunc = fstatvfs_int;
+      statfunc = fstat_int;
       break;
 
     default:
@@ -257,7 +257,7 @@ P op_stat(void) {
   if (statfunc(&s)) {
     if (errno != ENOENT) return -errno;
     D_P_SET_BOOL(off+0, FALSE);
-    FREEopds = (off+1)*FRAMEBYTES;
+    FREEopds += (off+1)*FRAMEBYTES;
     return OK;
   }
 
@@ -279,7 +279,7 @@ P op_stat(void) {
   D_P_SET_LBIG(off+16, s.st_blocks);
   D_P_SET_BOOL(off+17, TRUE);
 
-  FREEopds = (off+18)*FRAMEBYTES;
+  FREEopds += (off+18)*FRAMEBYTES;
   return OK;
 }
 
@@ -532,11 +532,11 @@ P op_realpath(void) {
 }
 
 static int utimes_fd;
-DM_INLINE_STATIC int futimes_int(const struct timespect times[2]) {
+DM_INLINE_STATIC int futimes_int(const struct timespec times[2]) {
   return futimens(utimes_fd, times);
 }
 
-DM_INLINE_STATIC int utimes_int(const struct timespect times[2]) {
+DM_INLINE_STATIC int utimes_int(const struct timespec times[2]) {
   return utimensat(AT_FDCWD, (char*) FREEvm, times, 0);
 }
 
@@ -553,7 +553,7 @@ P op_utimes(void) {
   B* ans;
   B* ms;
   B* mns;
-  int (*func)(const struct timespect times[2]);
+  int (*func)(const struct timespec times[2]);
 
   if (FLOORopds > o_1) return OPDS_UNF;
 
@@ -598,11 +598,11 @@ P op_utimes(void) {
   if (FLOORopds > bottom) return OPDS_UNF;
   for (i = top; i >= bottom; i -= FRAMEBYTES)
     switch (CLASS(i)) {
-      case NULL:
-	if (TAG(i)) return OPD_TYPE;
+      case NULLOBJ:
+	if (TYPE(i)) return OPD_TYP;
 	break;
       case NUM:
-	if (TAG(i) >= SINGLETYPE) return OPD_TYPE;
+	if (TYPE(i) >= SINGLETYPE) return OPD_TYP;
 	break;
       default:
 	return OPD_CLA;
@@ -621,7 +621,7 @@ P op_utimes(void) {
 	if (! VALUE(ans, &t)) return UNDF_VAL;
 	times[1].tv_sec = (long) t;
       }
-      break
+      break;
     };
 
     case NULLOBJ:
@@ -643,7 +643,7 @@ P op_utimes(void) {
 	if (! VALUE(mns, &t)) return UNDF_VAL;
 	times[0].tv_sec = (long) t;
       }
-      break
+      break;
     };
 
     case NULLOBJ:
