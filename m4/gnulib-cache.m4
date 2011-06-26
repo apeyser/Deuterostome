@@ -15,7 +15,7 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=. --libtool --macro-prefix=gl futimens glob mkdtemp stat stdio sys_stat utimensat
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=. --libtool --macro-prefix=gl futimens glob mkdtemp stat stat-time stdio sys_stat utimensat
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
@@ -24,6 +24,7 @@ gl_MODULES([
   glob
   mkdtemp
   stat
+  stat-time
   stdio
   sys_stat
   utimensat

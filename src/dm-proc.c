@@ -16,6 +16,7 @@
 #include <sys/statvfs.h>
 #include <sys/time.h>
 #include <dirent.h>
+#include <stat-time.h>
 
 #include "dm2.h"
 #include "dm3.h"
@@ -269,12 +270,12 @@ P op_stat(void) {
   D_P_SET_LBIG(off+5,  s.st_gid);
   D_P_SET_LBIG(off+7,  s.st_rdev);
   D_P_SET_LBIG(off+8,  s.st_size);
-  D_P_SET_LBIG(off+9,  s.st_atim.tv_sec);
-  D_P_SET_LBIG(off+10, s.st_atim.tv_nsec);
-  D_P_SET_LBIG(off+11, s.st_mtim.tv_sec);
-  D_P_SET_LBIG(off+12, s.st_mtim.tv_nsec);
-  D_P_SET_LBIG(off+13, s.st_ctim.tv_sec);
-  D_P_SET_LBIG(off+14, s.st_ctim.tv_nsec);
+  D_P_SET_LBIG(off+9,  s.st_atime);
+  D_P_SET_LBIG(off+10, get_stat_atime_ns(&s));
+  D_P_SET_LBIG(off+11, s.st_mtime);
+  D_P_SET_LBIG(off+12, get_stat_mtime_ns(&s));
+  D_P_SET_LBIG(off+13, s.st_ctime);
+  D_P_SET_LBIG(off+14, get_stat_ctime_ns(&s));
   D_P_SET_LBIG(off+15, s.st_blksize);
   D_P_SET_LBIG(off+16, s.st_blocks);
   D_P_SET_BOOL(off+17, TRUE);

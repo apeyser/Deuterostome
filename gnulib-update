@@ -1,0 +1,14 @@
+#!/bin/bash
+
+modules=" \
+	    futimens glob mkdtemp stat stat-time \
+	    stdio sys_stat utimensat \
+"
+
+flags=" \
+	    --import --dir=. \
+	    --lib=libgnu --source-base=lib --m4-base=m4 \
+	    --doc-base=doc --tests-base=tests --aux-dir=. \
+	    --libtool --macro-prefix=gl \
+"
+gnulib-tool $flags $modules
