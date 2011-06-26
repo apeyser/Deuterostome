@@ -23264,7 +23264,7 @@ $as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
 $as_echo "#define _POSIX_C_SOURCE 200809L" >>confdefs.h
 
 
-$as_echo "#define _XOPEN_SOURCE (_XOPEN_SOURCE < 500 ? 500 : _XOPEN_SOURCE)" >>confdefs.h
+$as_echo "#define _XOPEN_SOURCE (_XOPEN_SOURCE < 700 ? 700 : _XOPEN_SOURCE)" >>confdefs.h
 
 
 for ac_header in features.h

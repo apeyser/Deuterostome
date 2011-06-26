@@ -219,8 +219,8 @@ CF_PREPEND_VARS([LIBS], [XLIB LIBM])
 AC_C_BIGENDIAN
 
 AC_DEFINE([_POSIX_C_SOURCE], [200809L], [Define to 200809L - we are POSIXY])
-AC_DEFINE([_XOPEN_SOURCE], [(_XOPEN_SOURCE < 500 ? 500 : _XOPEN_SOURCE)], 
-  [Define to >500 - we are POSIXY])
+AC_DEFINE([_XOPEN_SOURCE], [(_XOPEN_SOURCE < 700 ? 700 : _XOPEN_SOURCE)], 
+  [Define to >700 - we are POSIXY])
 
 AC_CHECK_HEADERS([features.h])
 CF_AC_CHECK_HEADERS([endian.h machine/endian.h], [ENDIAN_HDR], 
