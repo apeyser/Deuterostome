@@ -212,8 +212,8 @@ dmrunnode_DEPENDENCIES = $(builddir)/libdmglobals.la \
 dmrunnode_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(dmrunnode_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-am_dnode_OBJECTS =
-nodist_dnode_OBJECTS = dnode.$(OBJEXT)
+am_dnode_OBJECTS = dnode.$(OBJEXT)
+nodist_dnode_OBJECTS =
 dnode_OBJECTS = $(am_dnode_OBJECTS) $(nodist_dnode_OBJECTS)
 dnode_LDADD = $(LDADD)
 am_dpawn_OBJECTS = dpawn-dpawn.$(OBJEXT) dpawn-dm-dpawn.$(OBJEXT) \
@@ -933,7 +933,7 @@ AM_LIBADD = $(AM_LIBS) @RELEASE_INFO@ @VERSION_INFO@ \
 AM_LDADD = $(AM_LIBS) $(top_builddir)/lib/libgnu.la
 INCLUDES = $(am__append_1)
 DIST_SUBDIRS = codegen
-BUILT_SOURCES = paths.h dnode.c \
+BUILT_SOURCES = paths.h dnode.h \
 		drook.c dqueen.c dm-prop.c dm-sem.c
 
 INFILES = $(BUILT_SOURCES)
@@ -1014,8 +1014,8 @@ dmrunnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dmrunnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) \
 	$(ATLAS_FLAGS) $(MPI_FLAGS)
 
-dnode_SOURCES = dnode.h error-local.h
-nodist_dnode_SOURCES = dnode.c
+dnode_SOURCES = dnode.c
+nodist_dnode_SOURCES = dnode.h
 dpawn_SOURCES = dpawn.c dpawn_0.h dm-dpawn.h dm-dpawn.c dm-mpi.h dm-mpi.c
 dpawn_LDADD = $(builddir)/libdmglobals.la \
 	$(builddir)/libdmnodal.la \

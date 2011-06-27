@@ -9,7 +9,7 @@ AM_LDADD = $(AM_LIBS) $(top_builddir)/lib/libgnu.la
 INCLUDES =
 
 DIST_SUBDIRS = codegen
-BUILT_SOURCES = paths.h dnode.c \
+BUILT_SOURCES = paths.h dnode.h \
 		drook.c dqueen.c dm-prop.c dm-sem.c
 INFILES = $(BUILT_SOURCES)
 EXTRA_DIST = $(INFILES:=in) $(IDFILES)
@@ -124,8 +124,8 @@ dmrunnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dmrunnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) \
 	$(ATLAS_FLAGS) $(MPI_FLAGS)
 
-dnode_SOURCES = dnode.h error-local.h
-nodist_dnode_SOURCES = dnode.c
+dnode_SOURCES = dnode.c
+nodist_dnode_SOURCES = dnode.h
 
 dpawn_SOURCES = dpawn.c dpawn_0.h dm-dpawn.h dm-dpawn.c dm-mpi.h dm-mpi.c
 dpawn_LDADD = $(builddir)/libdmglobals.la \

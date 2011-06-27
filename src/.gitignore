@@ -7,7 +7,7 @@
 /dmnuminc.h
 /dmprop
 /dnode
-/dnode.c
+/dnode.h
 /dmrunnode
 /dnode-daemon.c
 /dnode-nice

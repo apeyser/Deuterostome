@@ -61,7 +61,6 @@ static void dm_error(int errnum,
   va_list ap;
   va_start(ap, format);
   va_dm_error(errnum, format, ap);
-  va_end(ap);
 }
 
 

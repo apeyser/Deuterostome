@@ -1,3 +1,4 @@
+#line 2 "@srcdir@/dnode.hin"
 #ifndef DNODE_H
 #define DNODE_H
 
@@ -5,5 +6,6 @@
 
 #define DM_RESTART (SIGUSR1)
 static const union sigval DM_RESTART_VAL = {.sival_int = 1};
+static const char dmrunnode[] = "@dmrunnode@";
 
 #endif
