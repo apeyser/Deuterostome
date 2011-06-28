@@ -32,7 +32,4 @@ Makefile
 *.orig
 /plugins/dm-*-header.h
 /plugins/dm-*-main.h
-/arg-nonnull.h
-/c++defs.h
-/config.rpath
-/warn-on-use.h
+
