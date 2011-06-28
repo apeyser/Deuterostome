@@ -1,5 +1,3 @@
-#line 2 "@srcdir@/dnode.cin"
-
 #include "dm-config.h"
 #include "dm-types.h"
 
@@ -21,26 +19,56 @@
 
 #define DM_IGNORE_RETURN(a) if (a);
 
-__attribute__ ((noreturn, unused, format (printf, 2, 3)))
-static void dm_error(int __errnum, 
-		     const char* __format, ...)
+static void va_dm_error_msg(int errnum,
+			    const char* format,
+			    va_list ap)
 {
   char* str;
   int s;
 
-  va_list ap;
-  va_start(ap, __format);
-  if (vasprintf(&str, __format, ap) != -1) {
-    DM_IGNORE_RETURN(write(1, str, strlen(str)));
+  if (vasprintf(&str, format, ap) != -1) {
+    DM_IGNORE_RETURN(write(STDERR_FILENO, str, strlen(str)));
     free(str);
   }
-  if (__errnum) s = asprintf(&str, ": %s\n", strerror(__errnum));
+
+  if (errnum) s = asprintf(&str, ": %s\n", strerror(errnum));
   else s = asprintf(&str, "\n");
+
   if (s != -1) {
-    DM_IGNORE_RETURN(write(1, str, strlen(str)));
+    DM_IGNORE_RETURN(write(STDERR_FILENO, str, strlen(str)));
     free(str);
   }
+}
+
+__attribute__ ((unused, format (printf, 2, 3)))
+static void dm_error_msg(int errnum,
+			 const char* format,
+			 ...)
+{
+  va_list ap;
+  va_start(ap, format);
+  va_dm_error_msg(errnum, format, ap);
+  va_end(ap);
+}
+
+__attribute__ ((noreturn))
+static void va_dm_error(int errnum,
+			const char* format,
+			va_list ap)
+{
+  va_dm_error_msg(errnum, format, ap);
   exit(EXIT_FAILURE);
+}
+
+
+__attribute__ ((noreturn, unused, format (printf, 2, 3)))
+static void dm_error(int errnum,
+		     const char* format,
+		     ...)
+{
+  va_list ap;
+  va_start(ap, format);
+  va_dm_error(errnum, format, ap);
 }
 
 #define err(fn, ...) do {						\
@@ -82,7 +110,7 @@ static int _argc;
 static pid_t pid = 0;
 
 DM_INLINE_STATIC void dnode(void) {
-  perr(spawn, &pid, "@dmrunnode@", NULL, &attrp, _argv, environ);
+  perr(spawn, &pid, dmrunnode, NULL, &attrp, _argv, environ);
 }
 
 DM_INLINE_STATIC void makealarm(int s) {
@@ -190,8 +218,7 @@ int main(int argc, char *argv[]) {
   _argv = malloc(sizeof(char*)*(argc+1));
   _argc = argc;
 
-  for (; argc > 0; argc--) _argv[argc] = argv[argc];
-  _argv[0] = "@dmrunnode@";
+  for (; argc >= 0; argc--) _argv[argc] = argv[argc];
 
   perr(spawnattr_init,       &attrp);
   perr(spawnattr_setflags,   &attrp, POSIX_SPAWN_SETSIGMASK);
@@ -227,14 +254,14 @@ int main(int argc, char *argv[]) {
       goto restart;
   };
 
-  debug("Exiting");
+  dm_error_msg(0, "Exiting dnode");
   err(waitchild, &status);
   if (WIFEXITED(status)) {
-    debug("exit with %i", WEXITSTATUS(status));
+    dm_error_msg(0, "Status dnode: %i", WEXITSTATUS(status));
     return WEXITSTATUS(status);
   }
 
-  debug("signal exit with %i", WTERMSIG(status));
+  dm_error_msg(0, "Signal dnode: %i", WTERMSIG(status));
   err(sigfillset, &recvd_sa.sa_mask);
   err(sigaction, WTERMSIG(status), &recvd_sa, NULL);
 

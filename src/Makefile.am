@@ -9,7 +9,7 @@ AM_LDADD = $(AM_LIBS) $(top_builddir)/lib/libgnu.la
 INCLUDES =
 
 DIST_SUBDIRS = codegen
-BUILT_SOURCES = paths.h dnode.c \
+BUILT_SOURCES = paths.h dnode.h \
 		drook.c dqueen.c dm-prop.c dm-sem.c
 INFILES = $(BUILT_SOURCES)
 EXTRA_DIST = $(INFILES:=in) $(IDFILES)
@@ -113,10 +113,13 @@ dvt_LDADD = $(builddir)/libdmglobals.la \
 dvt_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_FLAGS)
 dvt_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 
-dmrunnode_SOURCES = dmrunnode.c dnode_0.h dm-dnode.h dm-dnode.c dnode.h \
+dmrunnode_SOURCES = dmrunnode.c dnode_0.h dm-dnode.h dm-dnode.c \
 	$(SOCKSRCS) \
 	$(DNODE_MPI_SRCS)
-nodist_dmrunnode_SOURCES = $(NODIST_SOCKSRCS) $(NODIST_DNODE_MPI_SRCS) $(SEM_SRC)
+nodist_dmrunnode_SOURCES = dnode.h \
+	$(NODIST_SOCKSRCS) \
+	$(NODIST_DNODE_MPI_SRCS) \
+	$(SEM_SRC)
 dmrunnode_LDADD = $(builddir)/libdmglobals.la \
 	$(builddir)/libdmnodal.la \
 	$(AM_LDADD) $(ATLAS_LIBS) $(MPI_LIBS)
@@ -124,8 +127,8 @@ dmrunnode_CFLAGS = $(AM_CFLAGS) @LIBDM_DLL_IMPORT@
 dmrunnode_CPPFLAGS = $(AM_CPPFLAGS) $(ATLAS_ACTIVATE) \
 	$(ATLAS_FLAGS) $(MPI_FLAGS)
 
-dnode_SOURCES = dnode.h error-local.h
-nodist_dnode_SOURCES = dnode.c
+dnode_SOURCES = dnode.c
+nodist_dnode_SOURCES = dnode.h
 
 dpawn_SOURCES = dpawn.c dpawn_0.h dm-dpawn.h dm-dpawn.c dm-mpi.h dm-mpi.c
 dpawn_LDADD = $(builddir)/libdmglobals.la \
