@@ -139,9 +139,9 @@ startup_common_save capsave {
 | on the 'nodes' window.
 
   /consoleline {
-@ENABLE_REGEX_START@
-    (^[ \n]+) regexsi {pop pop} if
-@ENABLE_REGEX_END@
+    /ENABLE_REGEX {
+      (^[ \n]+) regexsi {pop pop} if
+    } if_compile
     dup /line name length 0 gt {
       (%!$#@^) line 0 1 getinterval search { 
         length 1 add /linetag name pop pop
@@ -1708,48 +1708,48 @@ Xwindows {
   /goto_point_emacs_ null mkact def
 
   /take_input_setup {pop pop} bind def
-@ENABLE_EMACSCLIENT_START@ 
-  /take_input_setup {
-    {
-      /emacs_buffer_name name /emacs_server_name name
-      /emacs_client_cmd | [
-        getstartupdir length (emacsclient-run.sh) length add /b array 0
-        getstartupdir fax (emacsclient-run.sh) fax pop | ]
-      def
-      /goto_point_emacs_ {currentdict begin goto_point_emacs} bind def
-      
+  /ENABLE_EMACSCLIENT {
+    /take_input_setup {
       {
-        {/take_input_focus null mkact (focus)}
-        {/raise_emacs null mkact (focus-raise)}
-        {/goto_point_emacs null mkact (process-mark)}
-        {/F1_KEY ~goto_point_emacs_ (invert)}
-        {/F2_KEY ~goto_point_emacs_ (continue)}
-        {/F3_KEY ~goto_point_emacs_ (stop)}
-        {/F4_KEY ~goto_point_emacs_  (abort)}
-        {/CTRL_1_KEY ~goto_point_emacs_ (toggle-scream)}
-      } {
-        exec ~[
-          3 -1 roll
-          ~openlist
-          emacs_client_cmd
-          emacs_server_name
-          1024 /b array 0 | [
-            (\(d-comint-mode-) fax 8 -1 roll fax 
-            ( ") fax emacs_buffer_name fax (") fax
-            (\)) fax
-            0 exch getinterval | ]
-          {
+        /emacs_buffer_name name /emacs_server_name name
+        /emacs_client_cmd | [
+          getstartupdir length (emacsclient-run.sh) length add /b array 0
+          getstartupdir fax (emacsclient-run.sh) fax pop | ]
+        def
+        /goto_point_emacs_ {currentdict begin goto_point_emacs} bind def
+
+        {
+          {/take_input_focus null mkact (focus)}
+          {/raise_emacs null mkact (focus-raise)}
+          {/goto_point_emacs null mkact (process-mark)}
+          {/F1_KEY ~goto_point_emacs_ (invert)}
+          {/F2_KEY ~goto_point_emacs_ (continue)}
+          {/F3_KEY ~goto_point_emacs_ (stop)}
+          {/F4_KEY ~goto_point_emacs_  (abort)}
+          {/CTRL_1_KEY ~goto_point_emacs_ (toggle-scream)}
+        } {
+          exec ~[
+            3 -1 roll
+            ~openlist
+            emacs_client_cmd
+            emacs_server_name
+            1024 /b array 0 | [
+              (\(d-comint-mode-) fax 8 -1 roll fax 
+              ( ") fax emacs_buffer_name fax (") fax
+              (\)) fax
+              0 exch getinterval | ]
             {
-              NULLR NULLW STDERR _sh_ 
-              wait not {(emacs-client) /NOSYSTEM makeerror} if
-            } PROCESSES ~indict stopped cleartomark
-            end
-          } ~exec
-        ] bind def
-      } forall
-    } userdict indict
-  } bind def
-@ENABLE_EMACSCLIENT_END@  
+              {
+                NULLR NULLW STDERR _sh_ 
+                wait not {(emacs-client) /NOSYSTEM makeerror} if
+              } PROCESSES ~indict stopped cleartomark
+              end
+            } ~exec
+          ] bind def
+        } forall
+      } userdict indict
+    } bind def
+  } if_compile
 
   /raise_thehorses {TheHorsesWid true mapwindow end} bind def
   /raise_all {

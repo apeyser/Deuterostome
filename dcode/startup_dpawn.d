@@ -111,9 +111,7 @@ startup_common_save capsave {
 save 1024 /b array 1 index capsave |[
   (matrix.d) loadstartup
   {
-@ENABLE_PETSC_START@
-    {getstartupdir (petsc.d)}
-@ENABLE_PETSC_END@
+    /ENABLE_PETSC {getstartupdir (petsc.d)} if_compile
     {getconfdir (dpawn.d)}
     {gethomedir (.dpawn)}
   } {exec loadopt} forall |]

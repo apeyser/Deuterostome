@@ -8,6 +8,18 @@
 /false 0 1 eq def                             | boolean prototypes
 /true  0 0 eq def
 
+save /startup_in_save name
+/startup_in_buf vmstatus sub 10 div /b array def
+startup_in_save capsave {
+  getstartupdir (startup_common_in.d) startup_in_buf readfile mkact exec
+} stopped startup_in_save restore {
+  1024 /b array 0
+  (Unable to load: ) fax
+  getstartupdir fax (startup_common_in.d\n) fax
+  0 exch getinterval toconsole
+  stop
+} if
+
 |================================= block binding ======================
 | We want to make toconsole, error, quit and die late-binding 
 | even if a procedure is defined with bind, 
@@ -257,7 +269,7 @@
 |
 | returns a new procedure: {/name_l ~names ~active layerlocal}
 |
-/layerlocalfunc_ @NAMEBYTES@ /b array def
+/layerlocalfunc_ /NAMEBYTES get_compile /b array def
 /layerlocalfunc {
   layerlocalfunc_ 0 * 5 index mkact text (_l) fax 0 exch getinterval
   token pop exch pop mkpass
@@ -618,7 +630,7 @@
 
 /debug_dict 50 dict dup begin
 
-/line @NAMEBYTES@ 2 mul 20 add /b array def
+/line /NAMEBYTES get_compile 2 mul 20 add /b array def
 
 /nulltypes 3 dict dup begin
   /T {(:socket=) fax * object socketval * number} def
@@ -677,7 +689,7 @@ end mkread def
    /listclass  { { _ pop } forall } bind def
    /dictclass  { { exch
                    line 0
-                   -@NAMEBYTES@ 4 add 4 -1 roll text 
+                   /NAMEBYTES get_compile neg 4 add 4 -1 roll text 
                    0 exch getinterval toconsole showobj pop
                  } forall
                } bind def 
@@ -838,7 +850,7 @@ end mkread  def
   } ifelse
 } bind def
 
-/objstr @NAMEBYTES@ 2 mul /b array def
+/objstr /NAMEBYTES get_compile 2 mul /b array def
 
 /nullclass {/obj name
   (null) ftext
@@ -1671,15 +1683,11 @@ end mkread def
   {actiondict exch get exec true} {false} ifelse
 } bind def
 
-/PROGS {
-  /GS (@GS@)
-  /PDFLATEX (@PDFLATEX@)
-  /EPSTOPDF (@EPSTOPDF@)
-  /PDFCROP (@PDFCROP@)
-  /PDFTOPS (@PDFTOPS@)
-  /SED (@SED@)
-} makestruct def
-
+/PROGS [
+  {/GS /PDFLATEX /EPSTOPDF /PDFCROP /PDFTOPS /SED /BASH} {
+    dup get_compile
+  } forall |]
+makestruct_close def
 
 save 1024 /b array 1 index capsave | [
   dup 0 (Home:  )   fax gethomedir    fax (\n) fax 0 exch getinterval toconsole

@@ -387,7 +387,7 @@ AC_CONFIG_LINKS([
   dcode/errors.d:src/codegen/errors.d.built
   plugins/startup_dgen.d:src/codegen/startup_dgen.d
   emacs/d-mode-ops.el:src/codegen/d-mode-ops.el
-  plugins/new-plugin.din:dcode/new-plugin.din
+  plugins/new-plugin.d:dcode/new-plugin.d
   doc/dvt-3.0.bib:doc/dvt.bib
   doc/dvt-emacs.bib:doc/dvt.bib
   doc/newbook.bib:doc/dvt.bib
@@ -396,7 +396,7 @@ AC_CONFIG_LINKS([
 AC_CONFIG_FILES([
   Makefile 
   src/Makefile 
-  src/codegen/Makefile 
+  src/codegen/Makefile
   src/dm.pc
   plugins/Makefile plugins/dmflex.l 
   ps/Makefile 

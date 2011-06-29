@@ -327,20 +327,20 @@
     } if
   } bind def
 
-@ENABLE_SEM_START@
-  userdict /dm_type get /dnode eq {
-    /get_threads ~threads bind def
-    /set_threads ~makethreads bind def
+  /ENABLE_SEM {
+    userdict /dm_type get /dnode eq {
+      /get_threads ~threads bind def
+      /set_threads ~makethreads bind def
+    } {
+      /inter_lock_set ~pop bind def
+      /get_threads 0 def
+      /set_threads ~pop bind def
+    } ifelse
   } {
     /inter_lock_set ~pop bind def
     /get_threads 0 def
     /set_threads ~pop bind def
-  } ifelse
-@ENABLE_SEM_ELSE@
-  /inter_lock_set ~pop bind def
-  /get_threads 0 def
-  /set_threads ~pop bind def
-@ENABLE_SEM_END@
+  } ifelse_compile
 
   | ~active fd-in fd-out fd-err \[fd-chained... | --
   | Never returns.
@@ -355,11 +355,7 @@
         1 index exch dupfd 3 1 roll
       } forall
       3 ~closeifopen repeat
-@ENABLE_SEM_START@
       true inter_lock_set
-@ENABLE_SEM_ELSE@
-@ENABLE_SEM_END@
-
       unlock {0} {1} ifelse die
     } ~stopped aborted -1 die_base
   } bind def
@@ -991,7 +987,7 @@
   |
   /tosystem {
     {
-      openlist (@ENABLE_BASH@) (-c) 4 -1 roll NULLR NULLW STDERR 
+      openlist PROGS /BASH get (-c) 4 -1 roll NULLR NULLW STDERR 
       sh_ not {(tosystem) /NOSYSTEM makeerror} if
     } PROCESSES indict
   } bind userdict 3 -1 roll put
@@ -1009,7 +1005,7 @@
   /fromsystem {
     ~pipefd {
       /wt name /rd name {
-        openlist (@ENABLE_BASH@) (-c) 4 -1 roll NULLR wt STDERR 
+        openlist PROGS /BASH get (-c) 4 -1 roll NULLR wt STDERR 
         sh_ not {
           wt close rd close
           (fromsystem) /NOSYSTEM makeerror

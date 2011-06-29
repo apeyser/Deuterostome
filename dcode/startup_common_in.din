@@ -1,0 +1,41 @@
+/COMPILE_PARAMS 100 dict dup begin | [
+
+  /NAMEBYTES @NAMEBYTES@ def
+  /NUMTHREADS @NUMTHREADS@ def
+
+  /GS (@GS@) def
+  /PDFLATEX (@PDFLATEX@) def
+  /EPSTOPDF (@EPSTOPDF@) def
+  /PDFCROP (@PDFCROP@) def
+  /PDFTOPS (@PDFTOPS@) def
+  /SED (@SED@) def
+  /BASH (@BASH@) def
+
+  /ENABLE_PETSC @ENABLE_PETSC@ def
+  /ENABLE_PLUGINS_SUPPORT @ENABLE_PLUGINS_SUPPORT@ def
+  /ENABLE_RTHREADS @ENABLE_RTHREADS@ def
+  /ENABLE_REGEX @ENABLE_REGEX@ def
+  /ENABLE_EMACSCLIENT @ENABLE_EMACSCLIENT@ def
+  /ENABLE_PERL @ENABLE_PERL@ def
+  /ENABLE_XPS @ENABLE_XPS@ def
+  /ENABLE_ATLAS @ENABLE_ATLAS@ def
+  /ENABLE_SEM @ENABLE_SEM@ def
+  /ENABLE_THREADS @ENABLE_THREADS@ def
+
+|]
+end def
+
+| /name | val
+/get_compile {
+  COMPILE_PARAMS exch get
+} bind def
+
+| /name ~active | ...
+/if_compile {
+  exch get_compile exch if
+} bind def
+
+| /name ~active-if ~active-not | ...
+/ifelse_compile {
+  3 -1 roll get_compile 3 1 roll ifelse
+} bind def

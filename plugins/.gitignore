@@ -4,8 +4,7 @@
 /dmpetsc.c
 /errors.d
 /new-plugin.d
-/new-plugin.din
-/petsc.d
+/startup_common_in.d
 /plugin.d
 /process2.c
 /process2.h
