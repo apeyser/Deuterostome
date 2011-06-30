@@ -819,14 +819,19 @@ Xwindows_ {
 } if
 
 (Starting...\n) toconsole
-
-save 1024 /b array 1 index capsave |[
-  {(matrix.d) (processes.d)} ~loadstartup forall
-  {
-    /ENABLE_PETSC get_compile {
+{
+  /reqfiles [
+    (matrix.d)
+    (processes.d)
+  ] def
+  /optfiles [
+    /ENABLE_PETSC {
       {getstartupdir (petsc.d)}
-    } if
+    } if_compile
     {getconfdir (dnode.d)} 
     {gethomedir (.dnode)}
-  } {exec loadopt} forall |]
-pop restore
+  ] def
+} {
+  reqfiles ~loadstartup  forall
+  optfiles {exec loadopt} forall
+} incapsave

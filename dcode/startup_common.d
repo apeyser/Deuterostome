@@ -1350,25 +1350,23 @@ end def  | of xtext_dict
   ] ~warning
 ] bind def
 
-| (buffer) (startup-name) | (buffer)
+| (startup-name) | (buffer)
 /loadstartup {
-    1 index 0 (Loading: ) fax 2 index   fax (\n) fax 
-    0 exch getinterval toconsole
-
-    getstartupdir 1 index fromfiles
-
-    1 index 0 (Done )     fax 3 -1 roll fax (\n) fax
-    0 exch getinterval toconsole
+  warning_buffer {(Loading: ) fax 2 index fax (\n) fax} tostring toconsole
+  getstartupdir 1 index fromfiles
+  warning_buffer {(Done ) fax 3 -1 roll fax (\n) fax} tostring toconsole
 } bind def
 
-| (buffer) (dir) (name) | (buffer)
+| (dir) (name) | (buffer)
 /loadopt {
-  2 index 0 (Trying: ) fax 3 index fax 2 index fax (...\n) fax
-  0 exch getinterval toconsole
+  warning_buffer {
+    (Trying: ) fax 3 index fax 2 index fax (...\n) fax
+  } tostring toconsole
 
   2 copy fromxfiles {
-    2 index 0 (Read: ) fax 3 index fax 2 index fax (\n) fax
-    0 exch getinterval toconsole
+    warning_buffer {
+      (Read: ) fax 3 index fax 2 index fax (\n) fax
+    } tostring toconsole
   } if
   pop pop
 } bind def

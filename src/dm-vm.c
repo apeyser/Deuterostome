@@ -42,12 +42,12 @@ static void setupbase(B* sysdict, B* userdict) {
   
 void maketinysetup(void) {
   B *sysdict, *userdict;
-  LBIG tinysetup[5] = { 100, 50, 10, 1 , 100 };
+  LBIG tinysetup[5] = {100, 50, 10, 1, 100};
   size_t sz = 0;
-  
+
   if (makeDmemory(tinysetup))
     dm_error(errno, "Insufficient memory");
-  if ((sysdict = makeopdict((B*) sysop,syserrc,syserrm)) == (B*) -1L)
+  if ((sysdict = makeopdict((B*) sysop, syserrc, syserrm)) == (B*) -1L)
     dm_error(0, "Cannot make system dictionary");;
   if ((userdict = makedict(tinysetup[4])) == (B *)(-1L))
     dm_error(0, "Cannot make user dictionary");

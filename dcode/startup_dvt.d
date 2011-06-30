@@ -10,6 +10,7 @@
 |  - module support
 
 /dm_type /dvt def
+/abort {dstate_ abort} bind def
 
 save /startup_common_save name 
 /startup_common_buf vmstatus sub 10 div /b array def
@@ -20,8 +21,6 @@ startup_common_save capsave {
   getstartupdir toconsole (startup_common.d\n) toconsole
   stop
 } if
-
-/abort {dstate_ abort} bind def
 
 | pid (source) code
 /error_ops_length 3 def
@@ -1620,50 +1619,6 @@ Xwindows {
   end userdict 3 -1 roll put
 } if
 
-|================= debug abort ==================
-| active_object -> ??
-| wraps the object in an abort, and puts
-| opstack in userdict->[d_opstack]
-| dictstack in userdict->[d_dictstack]
-| execstack in userdict->[d_execstac]
-| in case of an abort
-| call s_debug_abort to do this without wrapping debug_aborted
-| and e_debug_abort to end that regime
-
-/regular_abort /abort find def
-/debug_abort_c false def
-
-/s_debug_abort {
-  true userdict /debug_abort_c put
-  debug_abort_su
-} bind def
-
-/e_debug_abort {
-  false userdict /debug_abort_c put
-  debug_abort_end
-} bind def
-  
-/debug_abort_su {
-  /debug_abort find userdict /abort put
-} bind def
-
-/debug_abort_end {
-  debug_abort_c not {
-    /regular_abort find userdict /abort put
-  } if
-} bind def
-
-
-|-------------------- debug_abort
-| calls dstate_ to get debug info
-| fixes abort to normal
-| and continues aborting
-/debug_abort {
-  debug_abort_end
-  dstate_
-  abort
-} bind def
-
 |-------------------------------- debug_aborted
 | version of aborted which sets abort to debug_abort
 | and undoes it if no abort occurs
@@ -1782,16 +1737,20 @@ Xwindows {
 (dvt) userdict /myid put
 
 (Starting...\n) toconsole
-
-| Read ~/.dvt, if it exists    
 {
-  save 1024 /b array 1 index capsave |[
-    {(processes.d)} ~loadstartup forall
-    {{getconfdir (dvt.d)} {gethomedir (.dvt)}} {exec loadopt} forall |]
-  pop restore
-} aborted {countdictstack 2 sub ~end repeat clear} if
+  /reqfiles [
+    (processes.d)
+  ] def
+  /optfiles [
+    {getconfdir (dvt.d)} 
+    {gethomedir (.dvt)}
+  ] def
+} {
+  reqfiles ~loadstartup  forall
+  optfiles {exec loadopt} forall
+} ~incapsave aborted {countdictstack 2 sub ~end repeat clear} if
 
-dvtsup begin |{
+{
   save /cleanDVT name
   /kbdowner 0 def
   makeNodes
@@ -1802,4 +1761,5 @@ dvtsup begin |{
   } if
 
   supervisor   | we never return
-| }
+} dvtsup indict
+

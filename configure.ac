@@ -28,7 +28,7 @@ CF_AC_ARG_VAR([DVT_NUM_OPDS],
               [dvt operand stack size in frames], [1000])
 CF_AC_ARG_VAR([DVT_NUM_DICTS], 
               [dvt dict stack size in frames], [20])
-CF_AC_ARG_VAR([DVT_NUM_EXECS], [dvt exec stack size in frame], [100])
+CF_AC_ARG_VAR([DVT_NUM_EXECS], [dvt exec stack size in frame], [500])
 CF_AC_ARG_VAR([DVT_MEM_SIZE], [dvt vm allocation size in mb], [10])
 CF_AC_ARG_VAR([DVT_USER_DICT_SIZE], [dvt user dict size], [500])
 

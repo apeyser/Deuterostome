@@ -2097,7 +2097,7 @@ Some influential environment variables:
   DVT_NUM_DICTS
               dvt dict stack size in frames, default=20
   DVT_NUM_EXECS
-              dvt exec stack size in frame, default=100
+              dvt exec stack size in frame, default=500
   DVT_MEM_SIZE
               dvt vm allocation size in mb, default=10
   DVT_USER_DICT_SIZE
@@ -4372,7 +4372,7 @@ $as_echo "setting to ${DVT_NUM_DICTS}" >&6; }
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if ${cf_ac_cv_arg_val} is set" >&5
 $as_echo_n "checking if ${cf_ac_cv_arg_val} is set... " >&6; }
 
-  if test "${DVT_NUM_EXECS-set}" == set ; then DVT_NUM_EXECS="100"; fi
+  if test "${DVT_NUM_EXECS-set}" == set ; then DVT_NUM_EXECS="500"; fi
 
 cat >>confdefs.h <<_ACEOF
 #define DVT_NUM_EXECS ${DVT_NUM_EXECS}
