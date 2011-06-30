@@ -1,6 +1,21 @@
 | -*- mode: d; -*-
 /NEW_PLUGINS module 1000 dict dup begin
 
+save /new_plugins_save name
+1024 /b array 0 
+(Loading: ) fax getstartupdir fax (startup_common_in.d\n) fax
+0 exch getinterval toconsole
+/new_plugins_buf vmstatus sub 10 div /b array def
+new_plugins_save capsave {
+  getstartupdir (startup_common_in.d) new_plugins_buf readfile mkact exec
+} stopped new_plugins_save restore {
+  1024 /b array 0
+  (Unable to load: ) fax
+  getstartupdir fax (startup_common_in.d\n) fax
+  0 exch getinterval toconsole
+  stop
+} if
+
 | lower | LOWER
 /toupper_ {
   save 1024 /b array 1 index capsave    | (string)/name save (string)
@@ -16,7 +31,7 @@
 | /name|(name) | (NAME)
 /toupper {
   dup class /arrayclass ne {
-    @NAMEBYTES@ /b array 0 * 4 -1 roll text 0 exch getinterval
+    /NAMEBYTES get_compile /b array 0 * 4 -1 roll text 0 exch getinterval
   } if toupper_
 } bind def
 

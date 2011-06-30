@@ -7,8 +7,8 @@ AM_LIBADD = $(AM_LIBS) $(LTLIBOBJS) @RELEASE_INFO@ @VERSION_INFO@ \
 	$(top_builddir)/lib/libgnu.la
 INCLUDES = $(INCLTDL)
 
-INFILES = dmpetsc.c petsc.d new-plugin.d
-EXTRA_DIST = dmpetsc.cin petsc.din $(IDFILES)
+INFILES = dmpetsc.c
+EXTRA_DIST = dmpetsc.cin $(IDFILES)
 SUFFIXES =
 
 if ENABLE_PLUGINS_SUPPORT
@@ -17,14 +17,16 @@ edit = 	-e 's,[@]PETSC_DIR[@],$(PETSC_DIR),g' \
         -e 's,[@]PETSC_ARCH[@],$(PETSC_ARCH),g' \
         -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g'
 
-BUILT_SOURCES = errors.d
-nodist_noinst_DATA = errors.d
+BUILT_SOURCES = errors.d startup_common_in.d
+nodist_noinst_DATA = errors.d startup_common_in.d new-plugin.d
 
 errors.d: $(builddir)/../dcode/errors.d
 	rm -f $@
 	$(LN_S) $< $@
 
-BUILT_SOURCES += new-plugin.d
+startup_common_in.d: $(builddir)/../dcode/startup_common_in.d
+	rm -f $@
+	$(LN_S) $< $@
 
 dist_noinst_DATA =
 
@@ -129,8 +131,7 @@ endif ENABLE_PLUGINS
 
 pkglib_LTLIBRARIES = $(PLUGINS)
 pkglib_DATA = $(PLACEHOLDER) 
-nodist_dmstart_DATA = $(IPETSC_D)
-BUILT_SOURCES += $(IPETSC_D)
+dmstart_DATA = $(IPETSC_D)
 
 CLEANFILES = $(BUILT_SOURCES) $(PETSC_D)
 

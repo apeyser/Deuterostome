@@ -495,6 +495,7 @@ P op_stopped(void)
   if (o_1 < FLOORopds) return OPDS_UNF;
   if ((ATTR(o_1) & ACTIVE) == 0) return OPD_ATR;
   if (x3 > CEILexecs) return EXECS_OVF;
+
   TAG(x1) = BOOL; 
   ATTR(x1) = (STOPMARK | ACTIVE);
   BOOL_VAL(x1) = FALSE;

@@ -101,7 +101,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = dmflex.l plugin.d startup_dgen.d new-plugin.din
+CONFIG_CLEAN_FILES = dmflex.l plugin.d startup_dgen.d new-plugin.d
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -208,10 +208,10 @@ DIST_SOURCES = $(am__cpptester_la_SOURCES_DIST) \
 	$(am__stats_la_SOURCES_DIST) $(am__test_la_SOURCES_DIST) \
 	$(am__test2_la_SOURCES_DIST) $(am__throw_la_SOURCES_DIST)
 am__dist_noinst_DATA_DIST = dmpetsc.d stats.d cpptester.d
-nodist_dmstartDATA_INSTALL = $(INSTALL_DATA)
+dmstartDATA_INSTALL = $(INSTALL_DATA)
 pkglibDATA_INSTALL = $(INSTALL_DATA)
-DATA = $(dist_noinst_DATA) $(nodist_dmstart_DATA) \
-	$(nodist_noinst_DATA) $(pkglib_DATA)
+DATA = $(dist_noinst_DATA) $(dmstart_DATA) $(nodist_noinst_DATA) \
+	$(pkglib_DATA)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -841,18 +841,18 @@ AM_LIBADD = $(AM_LIBS) $(LTLIBOBJS) @RELEASE_INFO@ @VERSION_INFO@ \
 	$(top_builddir)/lib/libgnu.la
 
 INCLUDES = $(INCLTDL)
-INFILES = dmpetsc.c petsc.d new-plugin.d
-EXTRA_DIST = dmpetsc.cin petsc.din $(IDFILES)
+INFILES = dmpetsc.c
+EXTRA_DIST = dmpetsc.cin $(IDFILES)
 SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
 @ENABLE_PLUGINS_SUPPORT_TRUE@edit = -e 's,[@]PETSC_DIR[@],$(PETSC_DIR),g' \
 @ENABLE_PLUGINS_SUPPORT_TRUE@        -e 's,[@]PETSC_ARCH[@],$(PETSC_ARCH),g' \
 @ENABLE_PLUGINS_SUPPORT_TRUE@        -e 's,[@]NAMEBYTES[@],$(NAMEBYTES),g'
 
-@ENABLE_PLUGINS_SUPPORT_TRUE@BUILT_SOURCES = errors.d new-plugin.d \
+@ENABLE_PLUGINS_SUPPORT_TRUE@BUILT_SOURCES = errors.d \
+@ENABLE_PLUGINS_SUPPORT_TRUE@	startup_common_in.d \
 @ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__append_1) $(am__append_3) \
-@ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__append_5) $(am__append_6) \
-@ENABLE_PLUGINS_SUPPORT_TRUE@	$(IPETSC_D)
-@ENABLE_PLUGINS_SUPPORT_TRUE@nodist_noinst_DATA = errors.d
+@ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__append_5) $(am__append_6)
+@ENABLE_PLUGINS_SUPPORT_TRUE@nodist_noinst_DATA = errors.d startup_common_in.d new-plugin.d
 @ENABLE_PLUGINS_SUPPORT_TRUE@dist_noinst_DATA = $(am__append_2) \
 @ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__append_4)
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@IPETSC_LIB = dmpetsc.la
@@ -886,7 +886,7 @@ SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
 @ENABLE_PLUGINS_SUPPORT_TRUE@@ENABLE_PLUGINS_TRUE@throw_la_LIBADD = $(AM_LIBADD)
 @ENABLE_PLUGINS_SUPPORT_TRUE@pkglib_LTLIBRARIES = $(PLUGINS)
 @ENABLE_PLUGINS_SUPPORT_TRUE@pkglib_DATA = $(PLACEHOLDER) 
-@ENABLE_PLUGINS_SUPPORT_TRUE@nodist_dmstart_DATA = $(IPETSC_D)
+@ENABLE_PLUGINS_SUPPORT_TRUE@dmstart_DATA = $(IPETSC_D)
 @ENABLE_PLUGINS_SUPPORT_TRUE@CLEANFILES = $(BUILT_SOURCES) $(PETSC_D)
 Makefile = Makefile
 INFILES_RULE = \
@@ -1049,19 +1049,19 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-nodist_dmstartDATA: $(nodist_dmstart_DATA)
+install-dmstartDATA: $(dmstart_DATA)
 	@$(NORMAL_INSTALL)
 	test -z "$(dmstartdir)" || $(MKDIR_P) "$(DESTDIR)$(dmstartdir)"
-	@list='$(nodist_dmstart_DATA)'; for p in $$list; do \
+	@list='$(dmstart_DATA)'; for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  f=$(am__strip_dir) \
-	  echo " $(nodist_dmstartDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(dmstartdir)/$$f'"; \
-	  $(nodist_dmstartDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(dmstartdir)/$$f"; \
+	  echo " $(dmstartDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(dmstartdir)/$$f'"; \
+	  $(dmstartDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(dmstartdir)/$$f"; \
 	done
 
-uninstall-nodist_dmstartDATA:
+uninstall-dmstartDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(nodist_dmstart_DATA)'; for p in $$list; do \
+	@list='$(dmstart_DATA)'; for p in $$list; do \
 	  f=$(am__strip_dir) \
 	  echo " rm -f '$(DESTDIR)$(dmstartdir)/$$f'"; \
 	  rm -f "$(DESTDIR)$(dmstartdir)/$$f"; \
@@ -1215,7 +1215,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-nodist_dmstartDATA
+install-data-am: install-dmstartDATA
 
 install-dvi: install-dvi-am
 
@@ -1261,7 +1261,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-nodist_dmstartDATA uninstall-pkglibDATA \
+uninstall-am: uninstall-dmstartDATA uninstall-pkglibDATA \
 	uninstall-pkglibLTLIBRARIES
 
 .MAKE: install-am install-strip
@@ -1270,20 +1270,24 @@ uninstall-am: uninstall-nodist_dmstartDATA uninstall-pkglibDATA \
 	clean-libtool clean-pkglibLTLIBRARIES ctags distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-nodist_dmstartDATA install-pdf install-pdf-am \
+	install install-am install-data install-data-am \
+	install-dmstartDATA install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
 	install-pkglibDATA install-pkglibLTLIBRARIES install-ps \
 	install-ps-am install-strip installcheck installcheck-am \
 	installdirs maintainer-clean maintainer-clean-generic \
 	mostlyclean mostlyclean-compile mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-nodist_dmstartDATA uninstall-pkglibDATA \
+	uninstall-am uninstall-dmstartDATA uninstall-pkglibDATA \
 	uninstall-pkglibLTLIBRARIES
 
 
 @ENABLE_PLUGINS_SUPPORT_TRUE@errors.d: $(builddir)/../dcode/errors.d
+@ENABLE_PLUGINS_SUPPORT_TRUE@	rm -f $@
+@ENABLE_PLUGINS_SUPPORT_TRUE@	$(LN_S) $< $@
+
+@ENABLE_PLUGINS_SUPPORT_TRUE@startup_common_in.d: $(builddir)/../dcode/startup_common_in.d
 @ENABLE_PLUGINS_SUPPORT_TRUE@	rm -f $@
 @ENABLE_PLUGINS_SUPPORT_TRUE@	$(LN_S) $< $@
 

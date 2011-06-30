@@ -243,11 +243,11 @@ getstartupdir length 0 ne {
   [/FSclass getstartupdir [getstartupdir (startup)]] leftpageadd | dcode
 } if
 
-@ENABLE_PLUGINS_SUPPORT_START@
-userdict /dnode_setup known not {
-  [ /FSclass getplugindir [getplugindir (plugins)]] leftpageadd   | plugins
-} if
-@ENABLE_PLUGINS_SUPPORT_END@
+/ENABLE_PLUGINS_SUPPORT {
+  userdict /dnode_setup known not {
+    [ /FSclass getplugindir [getplugindir (plugins)]] leftpageadd   | plugins
+  } if
+} if_compile
 
 |/leftpageU 2 def               | current used length of object list
 /leftpageT 0 def               | index of top displayed object

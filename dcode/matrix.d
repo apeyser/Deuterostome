@@ -114,56 +114,55 @@
   rows mul 1 index 0 put
 } bind userdef
 
-@ENABLE_ATLAS_START@
+/ENABLE_ATLAS {
 
-|========================== matmul_blas
-|
-| Generic form:
-| C <map> beta A <map> trans B <map> trans alpha | C <map>
-| alpha*A^t?*B^t? + beta*C -> C
-| C may not be A or B, but A may be B.
-|
-| You should know the dimensionality of C:
-| C ~ m x n, where m is rows of A^t? and n is columns of B^t?
-|
-| The following are some simplified forms
+  |========================== matmul_blas
+  |
+  | Generic form:
+  | C <map> beta A <map> trans B <map> trans alpha | C <map>
+  | alpha*A^t?*B^t? + beta*C -> C
+  | C may not be A or B, but A may be B.
+  |
+  | You should know the dimensionality of C:
+  | C ~ m x n, where m is rows of A^t? and n is columns of B^t?
+  |
+  | The following are some simplified forms
 
 
-|--- matmul_simple
-|
-| C <map> A <map> B <map> | C <map>
-| A*B -> C
+  |--- matmul_simple
+  |
+  | C <map> A <map> B <map> | C <map>
+  | A*B -> C
 
-/matmul_simple {
-  0 5 1 roll
-  false 3 1 roll
-  false 1
-  matmul_blas
-} bind userdef
+  /matmul_simple {
+    0 5 1 roll
+    false 3 1 roll
+    false 1
+    matmul_blas
+  } bind userdef
 
-|---- matmul_trans
-|
-| C <map> A <map> transA B <map> transB | C <map>
-| A^t?*B^t? -> C
+  |---- matmul_trans
+  |
+  | C <map> A <map> transA B <map> transB | C <map>
+  | A^t?*B^t? -> C
 
-/matmul_trans {
-  0 7 1 roll 1 matmul_blas
-} bind userdef
+  /matmul_trans {
+    0 7 1 roll 1 matmul_blas
+  } bind userdef
 
-|----- matmul_sum
-|
-| C <map> beta A <map> B <map> alpha | C <map>
-| alpha*A*B + beta*C -> C
+  |----- matmul_sum
+  |
+  | C <map> beta A <map> B <map> alpha | C <map>
+  | alpha*A*B + beta*C -> C
 
-/matmul_sum {
-  false 4 1 roll false exch matmul_blas
-} bind userdef
+  /matmul_sum {
+    false 4 1 roll false exch matmul_blas
+  } bind userdef
 
-| y A A_map x | y=Ax
-/vecmatmul_simple {
-  0 4 -1 roll false exch 1 vecmatmul_blas
-} bind userdef
-
-@ENABLE_ATLAS_END@
+  | y A A_map x | y=Ax
+  /vecmatmul_simple {
+    0 4 -1 roll false exch 1 vecmatmul_blas
+  } bind userdef
+} if_compile
 
 end _module

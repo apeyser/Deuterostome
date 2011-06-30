@@ -1,4 +1,4 @@
-AC_INIT([D-Machine], [4.7.6], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
+AC_INIT([D-Machine], [4.7.7], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
 AC_CONFIG_MACRO_DIR([m4 libltdl/m4])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_AUX_DIR([libltdl/config])
@@ -28,7 +28,7 @@ CF_AC_ARG_VAR([DVT_NUM_OPDS],
               [dvt operand stack size in frames], [1000])
 CF_AC_ARG_VAR([DVT_NUM_DICTS], 
               [dvt dict stack size in frames], [20])
-CF_AC_ARG_VAR([DVT_NUM_EXECS], [dvt exec stack size in frame], [100])
+CF_AC_ARG_VAR([DVT_NUM_EXECS], [dvt exec stack size in frame], [500])
 CF_AC_ARG_VAR([DVT_MEM_SIZE], [dvt vm allocation size in mb], [10])
 CF_AC_ARG_VAR([DVT_USER_DICT_SIZE], [dvt user dict size], [500])
 
@@ -387,7 +387,7 @@ AC_CONFIG_LINKS([
   dcode/errors.d:src/codegen/errors.d.built
   plugins/startup_dgen.d:src/codegen/startup_dgen.d
   emacs/d-mode-ops.el:src/codegen/d-mode-ops.el
-  plugins/new-plugin.din:dcode/new-plugin.din
+  plugins/new-plugin.d:dcode/new-plugin.d
   doc/dvt-3.0.bib:doc/dvt.bib
   doc/dvt-emacs.bib:doc/dvt.bib
   doc/newbook.bib:doc/dvt.bib
@@ -396,7 +396,7 @@ AC_CONFIG_LINKS([
 AC_CONFIG_FILES([
   Makefile 
   src/Makefile 
-  src/codegen/Makefile 
+  src/codegen/Makefile
   src/dm.pc
   plugins/Makefile plugins/dmflex.l 
   ps/Makefile 

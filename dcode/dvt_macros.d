@@ -20,17 +20,17 @@
     15 GAP () PRE    (Shrink) KEY 
                      (  Disconnect) KEY 
                      (  Abort) KEY NL
-@ENABLE_PERL_START@
+    /ENABLE_PERL {
     (PrintFrom:) PRE (  Talk) KEY 
                      (  Ascii) KEY 
                      (  PS) KEY
                      (  EPS) KEY
-@ENABLE_XPS_START@    
+      /ENABLE_XPS {
                      ( xPS) KEY
-@ENABLE_XPS_ELSE@
+      } {
                      ( x1PS) KEY 
                      ( x2PS) KEY
-@ENABLE_XPS_END@    
+      } ifelse_compile
                      ( pdf) KEY 
                      ( dvi) KEY 
                      ( tex) KEY NL      
@@ -39,7 +39,7 @@
                      (  paper) KEY 
                      (  pdf) KEY 
                      (  dvi) KEY NL
-@ENABLE_PERL_END@    
+    } if_compile
     (Selection:) PRE (  show) KEY NL
     (Action:) PRE    (  f1-send) KEY 
                      (  f2-cont) KEY
@@ -67,27 +67,27 @@
     (% dvtsup begin {knode _kill} fornodes end\n)
     (% dvtsup begin {knode _dx} fornodes end\n)
     (% dvtsup begin {knode _sendabort} fornodes end\n)
-@ENABLE_PERL_START@     
-|-- PrintFrom
-    (@getstartupdir fax \(print.pl talk \) fax )
-    (@getstartupdir fax \(print.pl ascii \) fax )
-    (@getstartupdir fax \(print.pl ps \) fax )
-    (@getstartupdir fax \(print.pl eps \) fax )
-@ENABLE_XPS_START@     
-    (@getstartupdir fax \(print.pl x2ps \) fax )
-@ENABLE_XPS_ELSE@
-    (@getstartupdir fax \(print.pl x1ps \) fax )
-    (@getstartupdir fax \(print.pl x2ps \) fax )
-@ENABLE_XPS_END@     
-    (@getstartupdir fax \(print.pl pdf \) fax )
-    (@getstartupdir fax \(print.pl dvi \) fax )
-    (@getstartupdir fax \(print.pl tex \) fax )
-|-- PrintTo
-    (\(gs \) fax faxRpage\n)
-    (\(lw \) fax faxRpage\n)
-    (\(xpdf \) fax faxRpage\n)
-    (\(xdvi \) fax faxRpage\n)
-@ENABLE_PERL_END@
+    /ENABLE_PERL {
+      |-- PrintFrom
+      (@getstartupdir fax \(print.pl talk \) fax )
+      (@getstartupdir fax \(print.pl ascii \) fax )
+      (@getstartupdir fax \(print.pl ps \) fax )
+      (@getstartupdir fax \(print.pl eps \) fax )
+      /ENABLE_XPS {
+        (@getstartupdir fax \(print.pl x2ps \) fax )
+      } {
+        (@getstartupdir fax \(print.pl x1ps \) fax )
+        (@getstartupdir fax \(print.pl x2ps \) fax )
+      } ifelse_compile
+      (@getstartupdir fax \(print.pl pdf \) fax )
+      (@getstartupdir fax \(print.pl dvi \) fax )
+      (@getstartupdir fax \(print.pl tex \) fax )
+      |-- PrintTo
+      (\(gs \) fax faxRpage\n)
+      (\(lw \) fax faxRpage\n)
+      (\(xpdf \) fax faxRpage\n)
+      (\(xdvi \) fax faxRpage\n)
+    } if_compile
     (save 1024 /b array 0 faxLpage \(:\) fax faxRpage \(\\n\) fax 0 exch getinterval toconsole restore\n)
     {userdict begin F1_KEY}
     {userdict begin F2_KEY}

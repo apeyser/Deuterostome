@@ -1,11 +1,2 @@
-/dnode.d
-/dvt_macros.d
+/startup_common_in.d
 /errors.d
-/matrix.d
-/new-plugin.d
-/processes.d
-/startup_common.d
-/startup_dnode.d
-/startup_dpawn.d
-/startup_dvt.d
-/theeye.d
