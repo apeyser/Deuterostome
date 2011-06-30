@@ -19,6 +19,7 @@ edit = 	-e 's,[@]PETSC_DIR[@],$(PETSC_DIR),g' \
 
 BUILT_SOURCES = errors.d startup_common_in.d
 nodist_noinst_DATA = errors.d startup_common_in.d new-plugin.d
+dist_noinst_DATA = petsc.d
 
 errors.d: $(builddir)/../dcode/errors.d
 	rm -f $@
@@ -27,8 +28,6 @@ errors.d: $(builddir)/../dcode/errors.d
 startup_common_in.d: $(builddir)/../dcode/startup_common_in.d
 	rm -f $@
 	$(LN_S) $< $@
-
-dist_noinst_DATA =
 
 if ENABLE_PETSC
 IPETSC_LIB=dmpetsc.la

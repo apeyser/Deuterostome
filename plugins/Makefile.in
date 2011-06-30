@@ -207,7 +207,7 @@ DIST_SOURCES = $(am__cpptester_la_SOURCES_DIST) \
 	$(am__dmflex_la_SOURCES_DIST) $(am__dmpetsc_la_SOURCES_DIST) \
 	$(am__stats_la_SOURCES_DIST) $(am__test_la_SOURCES_DIST) \
 	$(am__test2_la_SOURCES_DIST) $(am__throw_la_SOURCES_DIST)
-am__dist_noinst_DATA_DIST = dmpetsc.d stats.d cpptester.d
+am__dist_noinst_DATA_DIST = petsc.d dmpetsc.d stats.d cpptester.d
 dmstartDATA_INSTALL = $(INSTALL_DATA)
 pkglibDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(dist_noinst_DATA) $(dmstart_DATA) $(nodist_noinst_DATA) \
@@ -853,8 +853,8 @@ SUFFIXES = .cin .hin .elin .din .psin .shin .plin .styin
 @ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__append_1) $(am__append_3) \
 @ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__append_5) $(am__append_6)
 @ENABLE_PLUGINS_SUPPORT_TRUE@nodist_noinst_DATA = errors.d startup_common_in.d new-plugin.d
-@ENABLE_PLUGINS_SUPPORT_TRUE@dist_noinst_DATA = $(am__append_2) \
-@ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__append_4)
+@ENABLE_PLUGINS_SUPPORT_TRUE@dist_noinst_DATA = petsc.d \
+@ENABLE_PLUGINS_SUPPORT_TRUE@	$(am__append_2) $(am__append_4)
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@IPETSC_LIB = dmpetsc.la
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@IPETSC_D = petsc.d
 @ENABLE_PETSC_TRUE@@ENABLE_PLUGINS_SUPPORT_TRUE@dmpetsc_la_SOURCES = dmpetsc.h dmpetsc-bug.c
