@@ -1,6 +1,6 @@
 | -*- mode: d; -*-
 
-/PROCESSES 100 {
+/PROCESSES 200 {
   |================== process ======================
   | ~active | ...
   |
@@ -92,9 +92,9 @@
   } def
 
   | (dir) (file) | fd
-  /appopen {FFLAGS /WRITE_APPEND get FILE_MODE /ALL_RW get openfd} bind def
-  /wropen  {FFLAGS /WRITE_TRUNC  get FILE_MODE /ALL_RW get openfd} bind def
-  /rdopen  {FFLAGS /READ_ONLY    get FILE_MODE /ALL_RW get openfd} bind def
+  /appopen {FFLAGS /WRITE_APPEND   get FILE_MODE /ALL_RW get openfd} bind def
+  /wropen  {FFLAGS /WRITE_TRUNCATE get FILE_MODE /ALL_RW get openfd} bind def
+  /rdopen  {FFLAGS /READ_ONLY      get FILE_MODE /ALL_RW get openfd} bind def
 
   | fd | --
   /close       {dup unmakefd 4 le ~pop ~closefd ifelse} bind def
@@ -144,17 +144,30 @@
   } bind def
 
   | (dir) \[/mode..\] / null | --
-  /mkdir_p {_mkdir_mode openlist /dir /mode} {
-    0 dir (^\(/*[^/]+/*\)+$) regex pop 4 1 roll pop pop pop {
-      length add
-      dir 0 2 index getinterval mode makedir
-    } forall pop
+  /mkdir_p {
+    _mkdir_mode 
+    4 {null} repeat openlist 
+    /dir /mode 
+    /ndir /ldir /fdir /n
+  } {
+    /ldir dir 0 0 getinterval def
+    /n 0 def
+
+    dir {                               | left
+      (^/*[^/]+/*) regex not ~exit if   | left next-dir pre []
+      pop pop /ndir name                | left
+
+      /n n ndir length add def
+      /fdir dir 0 n getinterval def
+      ldir ndir existsfile not {
+        fdir mode makedir
+      } if
+      /ldir fdir def
+    } loop pop
   } localfunc bind def
 
   | (dir) \[/mode..\] / null | --
-  /mkdir {_mkdir_mode openlist /dir /mode} {
-    dir mode makedir
-  } localfunc bind def
+  /mkdir {openlist} {_mkdir_mode makedir} localfunc bind def
 
   | These types must match file enum modes in dm-proc.c
   /FILE_TYPE {
@@ -208,6 +221,11 @@
     } ifelse
     3 1 roll pop pop
   } def
+
+  | (dir) (file)
+  /existsfile {
+    stat not ~false {17 ~pop repeat true} ifelse
+  } bind def
 
   | (dir) (file) | dict true / false
   /statfile {

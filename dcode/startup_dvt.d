@@ -10,7 +10,6 @@
 |  - module support
 
 /dm_type /dvt def
-/abort {dstate_ abort} bind def
 
 save /startup_common_save name 
 /startup_common_buf vmstatus sub 10 div /b array def

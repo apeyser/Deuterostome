@@ -2,6 +2,8 @@
 
 |======================== userdict ===================================
 
+/abort {dstate_ abort} bind def
+
 2 list dictstack dup 0 get /systemdict name   | name the roots
                      1 get /userdict   name
 

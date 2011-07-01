@@ -371,8 +371,8 @@ P op_stat(void) {
   D_P_SET_LBIG(off+4,  s.st_gid);
   D_P_SET_LBIG(off+5,  s.st_rdev);
   D_P_SET_LBIG(off+6,  s.st_size);
-  D_P_SET_LBIG(off+7, s.st_blksize);
-  D_P_SET_LBIG(off+8, s.st_blocks);
+  D_P_SET_LBIG(off+7,  s.st_blksize);
+  D_P_SET_LBIG(off+8,  s.st_blocks);
 
   D_P_SET_LBIG(off+9,  s.st_atime);
   D_P_SET_LBIG(off+10, get_stat_atime_ns(&s));
