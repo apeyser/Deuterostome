@@ -190,7 +190,7 @@
       (Tmp: ) loud_msg pdf_ndir loud_msg pdf_nfile loud_msg
       pdf_ndir pdf_nfile /pdf_gen find ~EPSfigure enddict
       /pdf_fdw |{
-        pdf_path pdf_file PROCESSES /FFLAGS get /WRITE_TRUNCATE get openfd |}
+        pdf_path pdf_file ~wropen inprocess |}
       def
       openlist PROGS /EPSTOPDF get (--hires) (--filter) pdf_fdr pdf_fdw
       {STDERR sh_io_quiet} PROCESSES indict

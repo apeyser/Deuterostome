@@ -39,24 +39,66 @@
     PROCESSES /STDERR_ get exch writefd pop
   } bind def
 
-  | (dir) (file) | fd
-  /wropen {
-    FFLAGS /WRITE_TRUNC get openfd
-  } bind def
+  | These modes must match file enum modes in dm-proc.c
+  /FILE_MODE [
+    /USER_SET    4 8 3 pwr mul
+    /GROUP_SET   2 8 3 pwr mul
+    /STICKY      1 8 3 pwr mul
+    /USER_READ   4 8 2 pwr mul
+    /USER_WRITE  2 8 2 pwr mul
+    /USER_EXEC   1 8 2 pwr mul
+    /USER_ALL    7 8 2 pwr mul
+    /GROUP_READ  4 8 1 pwr mul
+    /GROUP_WRITE 2 8 1 pwr mul
+    /GROUP_EXEC  1 8 1 pwr mul
+    /GROUP_ALL   7 8 1 pwr mul
+    /OTHER_READ  4 8 0 pwr mul
+    /OTHER_WRITE 2 8 0 pwr mul
+    /OTHER_EXEC  1 8 0 pwr mul
+    /OTHER_ALL   7 8 0 pwr mul
+    /ALL_RWX     7 8 mul 7 add 8 mul 7 add
+    /ALL_RW      6 8 mul 6 add 8 mul 6 add
+    /ALL         7 8 mul 7 add 8 mul 7 add 8 mul 7 add
+  ] makestruct mkread def
+
+  /FILE_MODE_BITS [
+    /USER_SET
+    /GROUP_SET
+    /STICKY
+    /USER_READ
+    /USER_WRITE
+    /USER_EXEC
+    /GROUP_READ
+    /GROUP_WRITE
+    /GROUP_EXEC
+    /OTHER_READ
+    /OTHER_WRITE
+    /OTHER_EXEC
+  ] mkread def
+  
+  | mode# | [/mode...]
+  /mkfile_mode {
+    [
+      exch FILE_MODE_BITS {    | /MODE... mode# /MODE
+        FILE_MODE 1 index get  | /MODE... mode# /MODE mode-bits
+        2 index 1 index and ne ~pop ~exch ifelse | /MODE... mode#
+      } forall pop             | /MODE...
+    ]
+  } def
+
+  | [/mode..] | mode
+  /unmkfile_mode {
+    0 exch {FILE_MODE exch get or} forall
+  } def
 
   | (dir) (file) | fd
-  /rdopen {
-    FFLAGS /READ_ONLY get openfd
-  } bind def
+  /appopen {FFLAGS /WRITE_APPEND get FILE_MODE /ALL_RW get openfd} bind def
+  /wropen  {FFLAGS /WRITE_TRUNC  get FILE_MODE /ALL_RW get openfd} bind def
+  /rdopen  {FFLAGS /READ_ONLY    get FILE_MODE /ALL_RW get openfd} bind def
 
   | fd | --
-  /close {
-    dup unmakefd 5 lt ~pop ~closefd ifelse
-  } bind def
-
-  /closeifopen {
-    dup closedfd ~pop ~close ifelse
-  } bind def
+  /close       {dup unmakefd 4 le ~pop ~closefd ifelse} bind def
+  /closeifopen {dup closedfd      ~pop ~close   ifelse} bind def
 
   | (file)/fd | file-system-dict
   /statfs {
@@ -96,33 +138,12 @@
     } ifelse
   } bind def
 
-  /FILE_MODE [
-    /USER_SET    4 8 3 pwr mul
-    /GROUP_SET   2 8 3 pwr mul
-    /STICKY      1 8 3 pwr mul
-    /USER_READ   4 8 2 pwr mul
-    /USER_WRITE  2 8 2 pwr mul
-    /USER_EXEC   1 8 2 pwr mul
-    /USER_ALL    7 8 2 pwr mul
-    /GROUP_READ  4 8 1 pwr mul
-    /GROUP_WRITE 2 8 1 pwr mul
-    /GROUP_EXEC  1 8 1 pwr mul
-    /GROUP_ALL   7 8 1 pwr mul
-    /OTHER_READ  4 8 0 pwr mul
-    /OTHER_WRITE 2 8 0 pwr mul
-    /OTHER_EXEC  1 8 0 pwr mul
-    /OTHER_ALL   7 8 0 pwr mul
-    /ALL_PERM    7 8 mul 7 add 8 mul 7 add
-    /ALL         7 8 mul 7 add 8 mul 7 add 8 mul 7 add
-  ] makestruct mkread def
-
-  | \[\/mode.. / null | mode
+  | [\/mode..] / null | mode
   /_mkdir_mode {
-    dup null eq {openlist /ALL_PERM} if
-    closelist 0 exch {FILE_MODE exch get or} forall
+    dup null eq {FILE_MODE /ALL_RWX get} ~unmkfile_mode ifelse
   } bind def
 
-  | (dir) \[/mode.. / null | --
+  | (dir) \[/mode..\] / null | --
   /mkdir_p {_mkdir_mode openlist /dir /mode} {
     0 dir (^\(/*[^/]+/*\)+$) regex pop 4 1 roll pop pop pop {
       length add
@@ -130,31 +151,89 @@
     } forall pop
   } localfunc bind def
 
-  | (dir) \[/mode.. / null | --
+  | (dir) \[/mode..\] / null | --
   /mkdir {_mkdir_mode openlist /dir /mode} {
     dir mode makedir
   } localfunc bind def
 
+  | These types must match file enum modes in dm-proc.c
+  /FILE_TYPE {
+    /UNKNOWN 0
+    /BLOCK
+    /CHARACTER
+    /REGULAR
+    /DIRECTORY
+    /LINK
+    /SOCKET
+  } makeenum mkread def
+
+  | filetype# | /filetype
+  /mkfile_type {
+    FILE_TYPE {2 index eq ~exit if pop} forall
+    exch pop
+  } def
+
+  | sec nsec | dict
+  /mktime {
+    [
+      /SECONDS
+      /NANOSECONDS
+      makestruct_close |]
+  } def
+
+  | time-dict1 time-dict2 | time-1 < time-2
+  /lttime {
+    1 index /SECONDS get 1 index /SECONDS get lt ~true {
+      1 index /SECONDS get 1 index /SECONDS get gt ~false {
+        1 index /NANOSECOND get 1 index /NANONSECONDS get lt
+      } ifelse
+    } ifelse
+    3 1 roll pop pop
+  } def
+
+  | time-dict1 time-dict2 | time-1 > time-2
+  /gttime {
+    1 index /SECONDS get 1 index /SECONDS get gt ~true {
+      1 index /SECONDS get 1 index /SECONDS get lt ~false {
+        1 index /NANOSECOND get 1 index /NANONSECONDS get gt
+      } ifelse
+    } ifelse
+    3 1 roll pop pop
+  } def
+
+  | time-dict1 time-dict2 | time-1-equals-time-2
+  /eqtime {
+    1 index /SECONDS get 1 index /SECONDS get eq ~true {
+      1 index /NANOSECOND get 1 index /NANONSECONDS get eq
+    } ifelse
+    3 1 roll pop pop
+  } def
+
   | (dir) (file) | dict true / false
   /statfile {
-    stat not ~false {[
-      /DEV
-      /INODE
-      /MODE
-      /NLINK
-      /UID
-      /GID
-      /RDEV
-      /SIZE
-      /ACCESS_SEC
-      /ACCESS_NSEC
-      /MOD_SEC
-      /MOD_NSEC
-      /STATUS_SEC
-      /STATUS_NSEC
-      /BLOCKSIZE
-      /BLOCKS
-      makestruct_stack |]
+    stat not ~false {
+      mkfile_type 8 1 roll
+      mkfile_mode 8 1 roll
+      mktime 7 1 roll
+      mktime 6 1 roll
+      mktime 5 1 roll
+
+      [
+        /DEV
+        /INODE
+        /NLINK
+        /UID
+        /GID
+        /RDEV
+        /SIZE
+        /BLOCKSIZE
+        /BLOCKS
+        /ACCESS
+        /MOD
+        /STATUS
+        /MODE
+        /TYPE
+        makestruct_stack |]
       true
     } ifelse
   } bind def

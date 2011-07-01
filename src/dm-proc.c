@@ -29,6 +29,107 @@
 #include "dm-sem.h"
 #include "error-local.h"
 
+enum {
+  FILE_IRUSR = 00400,
+  FILE_IWUSR = 00200,
+  FILE_IXUSR = 00100,
+  FILE_IRGRP = 00040,
+  FILE_IWGRP = 00020,
+  FILE_IXGRP = 00010,
+  FILE_IROTH = 00004,
+  FILE_IWOTH = 00002,
+  FILE_IXOTH = 00001,
+  FILE_ISUID = 04000,
+  FILE_ISGID = 02000,
+  FILE_ISVTX = 01000,
+  FILE_ALL = 
+  (
+   FILE_IRUSR |
+   FILE_IWUSR |
+   FILE_IXUSR |
+   FILE_IRGRP |
+   FILE_IWGRP |
+   FILE_IXGRP |
+   FILE_IROTH |
+   FILE_IWOTH |
+   FILE_IXOTH |
+   FILE_ISUID |
+   FILE_ISGID |
+   FILE_ISVTX
+  )
+};
+
+static struct {
+  ULBIG d;
+  ULBIG un;
+} perms_map[] = {
+  {FILE_IRUSR, S_IRUSR},
+  {FILE_IWUSR, S_IWUSR},
+  {FILE_IXUSR, S_IXUSR},
+  {FILE_IRGRP, S_IRGRP},
+  {FILE_IWGRP, S_IWGRP},
+  {FILE_IXGRP, S_IXGRP},
+  {FILE_IROTH, S_IROTH},
+  {FILE_IWOTH, S_IWOTH},
+  {FILE_IXOTH, S_IXOTH},
+  {FILE_ISUID, S_ISUID},
+  {FILE_ISGID, S_ISGID},
+  {FILE_ISVTX, S_ISVTX}
+};
+
+DM_INLINE_STATIC ULBIG filemode_d(mode_t mode) {
+  ULBIG perms = 0;
+  P i;
+
+  for (i = 0; i < sizeof(perms_map)/sizeof(perms_map[0]); i++)
+    if (mode & perms_map[i].un) perms |= perms_map[i].d;
+
+  return perms;
+}
+
+DM_INLINE_STATIC mode_t filemode_un(ULBIG perms) {
+  mode_t mode = 0;
+  P i;
+
+  for (i = 0; i < sizeof(perms_map)/sizeof(perms_map[0]); i++)
+    if (perms & perms_map[i].d) mode |= perms_map[i].un;
+  
+  return mode;
+}
+
+enum {
+  FILE_UNKNOWN = 0,
+  FILE_IFBLK,
+  FILE_IFCHR,
+  FILE_IFREG,
+  FILE_IFDIR,
+  FILE_IFLNK,
+  FILE_IFSOCK
+};
+
+static struct {
+  ULBIG d;
+  ULBIG un;
+} type_map[] = {
+  // unknown is unmarked, {FILE_UNKNOWN, *}
+  {FILE_IFBLK,  S_IFBLK},
+  {FILE_IFCHR,  S_IFCHR},
+  {FILE_IFREG,  S_IFREG},
+  {FILE_IFDIR,  S_IFDIR},
+  {FILE_IFLNK,  S_IFLNK},
+  {FILE_IFSOCK, S_IFSOCK}
+};
+
+DM_INLINE_STATIC LBIG filetype_d(mode_t mode) {
+  P i;
+  
+  for (i = 0; i < sizeof(type_map)/sizeof(type_map[0]); i++)
+    if (((ULBIG) (mode & S_IFMT)) == type_map[i].un)
+      return type_map[i].d;
+
+  return 0;
+}
+
 #define D_P_OP(off) (FREEopds+(off)*FRAMEBYTES)
 
 #define D_P_SET(off, tag, attr, key, val) do {			\
@@ -184,20 +285,21 @@ P op_statvfs(void) {
 /* (dir) (file)/fd | false /
      dev
      ino
-     mode
      nlink
      uid
      gid
      rdev
      size
+     blksize
+     blocks
      access-time-s
      access-time-ns
      mod-time-s
      mod-time-ns
      c-time-s
      c-time-ns
-     blksize
-     blocks
+     mode-as-enum
+     type-as-enum
      true
 */
 DM_INLINE_STATIC int stat_int(struct stat *restrict s) {
@@ -264,20 +366,24 @@ P op_stat(void) {
 
   D_P_SET_LBIG(off+0,  s.st_dev);
   D_P_SET_LBIG(off+1,  s.st_ino);
-  D_P_SET_LBIG(off+2,  s.st_mode);
-  D_P_SET_LBIG(off+3,  s.st_nlink);
-  D_P_SET_LBIG(off+4,  s.st_uid);
-  D_P_SET_LBIG(off+5,  s.st_gid);
-  D_P_SET_LBIG(off+7,  s.st_rdev);
-  D_P_SET_LBIG(off+8,  s.st_size);
+  D_P_SET_LBIG(off+2,  s.st_nlink);
+  D_P_SET_LBIG(off+3,  s.st_uid);
+  D_P_SET_LBIG(off+4,  s.st_gid);
+  D_P_SET_LBIG(off+5,  s.st_rdev);
+  D_P_SET_LBIG(off+6,  s.st_size);
+  D_P_SET_LBIG(off+7, s.st_blksize);
+  D_P_SET_LBIG(off+8, s.st_blocks);
+
   D_P_SET_LBIG(off+9,  s.st_atime);
   D_P_SET_LBIG(off+10, get_stat_atime_ns(&s));
   D_P_SET_LBIG(off+11, s.st_mtime);
   D_P_SET_LBIG(off+12, get_stat_mtime_ns(&s));
   D_P_SET_LBIG(off+13, s.st_ctime);
   D_P_SET_LBIG(off+14, get_stat_ctime_ns(&s));
-  D_P_SET_LBIG(off+15, s.st_blksize);
-  D_P_SET_LBIG(off+16, s.st_blocks);
+
+  D_P_SET_LBIG(off+15,  filemode_d(s.st_mode));
+  D_P_SET_LBIG(off+16,  filetype_d(s.st_mode));
+
   D_P_SET_BOOL(off+17, TRUE);
 
   FREEopds += (off+18)*FRAMEBYTES;
@@ -287,6 +393,7 @@ P op_stat(void) {
 // (pathname) mode | --
 P op_makedir(void) {
   ULBIG mode;
+
   if (FLOORopds > o_2) return OPDS_UNF;
   if (TAG(o_2) != (ARRAY|BYTETYPE)) return OPD_CLA;
   if (CLASS(o_1) != NUM) return OPD_CLA;
@@ -297,7 +404,7 @@ P op_makedir(void) {
   moveB(VALUE_PTR(o_2), FREEvm, ARRAY_SIZE(o_2));
   FREEvm[ARRAY_SIZE(o_2)] = '\0';
 
-  if (mkdir((char*) FREEvm, (mode_t) mode))
+  if (mkdir((char*) FREEvm, filemode_un(mode)))
     return -errno;
 
   FREEopds = o_2;
@@ -1441,36 +1548,43 @@ struct {int flags; BOOLEAN read;} flags[] = {
   {O_WRONLY|O_APPEND,         FALSE}
 };
 
-// (dir) (filename) flags | fd
+// (dir) (filename) flags perms | fd
 P op_openfd(void) {
   P flag;
   B* nextvm;
   int fd;
   P retc;
   B* streambox;
+  ULBIG perm;
 
-  if (FLOORopds > o_3) return OPDS_UNF;
+  if (FLOORopds > o_4) return OPDS_UNF;
+
   if (CLASS(o_1) != NUM) return OPD_CLA;
-  if (! PVALUE(o_1, &flag)) return UNDF_VAL;
+  if (! VALUE(o_1, (LBIG*) &perm)) return UNDF_VAL;
+  if (perm & ~((ULBIG) FILE_ALL)) return RNG_CHK;
+
+  if (CLASS(o_2) != NUM) return OPD_CLA;
+  if (! PVALUE(o_2, &flag)) return UNDF_VAL;
   if (flag < 0 || flag >= (P) (sizeof(flags)/sizeof(flags[0])))
     return RNG_CHK;
-  if (TAG(o_2) != (ARRAY|BYTETYPE) || TAG(o_3) != (ARRAY|BYTETYPE))
+
+  if (TAG(o_3) != (ARRAY|BYTETYPE)
+      || TAG(o_4) != (ARRAY|BYTETYPE))
     return OPD_ERR;
   if (FREEvm + FRAMEBYTES + STREAMBOXBYTES >= CEILvm)
     return VM_OVF;
 
-  if (FREEvm + ARRAY_SIZE(o_3)+1 >= CEILvm) return VM_OVF;
-  moveB(VALUE_PTR(o_3), FREEvm, ARRAY_SIZE(o_3));
-  nextvm = FREEvm + ARRAY_SIZE(o_3);
-  if (ARRAY_SIZE(o_3) != 0 && nextvm[-1] != '/')
+  if (FREEvm + ARRAY_SIZE(o_4)+1 >= CEILvm) return VM_OVF;
+  moveB(VALUE_PTR(o_4), FREEvm, ARRAY_SIZE(o_4));
+  nextvm = FREEvm + ARRAY_SIZE(o_4);
+  if (ARRAY_SIZE(o_4) != 0 && nextvm[-1] != '/')
     (nextvm++)[0] = '/';
-  if (nextvm + ARRAY_SIZE(o_2) + 1 >= CEILvm) return VM_OVF;
-  moveB(VALUE_PTR(o_2), nextvm, ARRAY_SIZE(o_2));
-  nextvm += ARRAY_SIZE(o_2);
+  if (nextvm + ARRAY_SIZE(o_3) + 1 >= CEILvm) return VM_OVF;
+  moveB(VALUE_PTR(o_3), nextvm, ARRAY_SIZE(o_3));
+  nextvm += ARRAY_SIZE(o_3);
   nextvm[0] = 0;
 
-  if ((fd = open(FREEvm, flags[flag].flags, 
-		 S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH))
+  if ((fd = open(FREEvm, flags[flag].flags, filemode_un(perm)))
       == -1)
     return -errno;
   if ((retc = addsocket(fd, &pipetype, NULL))) {
@@ -1484,10 +1598,10 @@ P op_openfd(void) {
   STREAM_FD(streambox) = fd;
   STREAM_BUFFERED(streambox) = FALSE;
   STREAM_RO(streambox) = flags[flag].read;
-  moveframe(FREEvm, o_3);
+  moveframe(FREEvm, o_4);
   FREEvm += FRAMEBYTES + STREAMBOXBYTES;
 
-  FREEopds = o_2;
+  FREEopds = o_3;
   return OK;
 }
 

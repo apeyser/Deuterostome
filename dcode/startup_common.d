@@ -1007,9 +1007,9 @@ end def  | of xtext_dict
 | use: dirname filename | objects..  (and/or side effects)
 
 /fromfiles_dict {
-  /fd {
+  /fd {  | 0 is read-only, 438 is 0666 (rw-rw-rw-)
     save {
-      3 1 roll 0 openfd ~suckfd stopped {closefd stop} if
+      3 1 roll 0 438 openfd ~suckfd stopped {closefd stop} if
       exch capsave mkact exec
     } [2 index ~stopped push | ]
     restore ~stop if
