@@ -29,6 +29,91 @@
 #include "dm-sem.h"
 #include "error-local.h"
 
+DM_INLINE_STATIC P pathcat_(B* op, B* def, B** next) {
+  B* curr;
+  B* dir;
+  ULBIG dirlen;
+
+  if (FLOORopds > op) return OPDS_UNF;
+  switch (TAG(op)) {
+    case NULLOBJ:
+      if (! def) return OPD_CLA;
+      dir = def;
+      dirlen = strlen(dir);
+      break;
+
+    case ARRAY|BYTETYPE:
+      dir = VALUE_PTR(op);
+      dirlen = ARRAY_SIZE(op);
+      break;
+
+    default:
+      return OPD_CLA;
+  }
+
+  if (TAG(op+FRAMEBYTES) != (ARRAY|BYTETYPE)) return OPD_CLA;
+
+  if (FREEvm + dirlen + 1 + ARRAY_SIZE(op+FRAMEBYTES) + 1
+      >= CEILvm)
+    return VM_OVF;
+
+  moveB(dir, FREEvm, dirlen);
+  curr = FREEvm+dirlen;
+  if (dirlen && curr[-1] != '/') curr++[0] = '/';
+  moveB(VALUE_PTR(op+FRAMEBYTES), curr, ARRAY_SIZE(op+FRAMEBYTES));
+  curr += ARRAY_SIZE(op+FRAMEBYTES);
+  curr[0] = '\0';
+
+  if (next) *next = curr;
+  return OK;
+}
+
+DM_INLINE_STATIC P tmpcat(B* op) {
+  P retc;
+  B* curr;
+
+  static char *tmp = NULL;
+  if (! tmp) {
+    tmp = getenv("TMPDIR");
+    if (tmp && *tmp) tmp = strdup(tmp);
+    else tmp = "/tmp";
+    if (! tmp) dm_error(errno, "strdup(tmp)");
+  }
+
+  if ((retc = pathcat_(op, tmp, &curr))) return retc;
+  if (curr + 6 + 1 > CEILvm) return VM_OVF;
+  moveB((B*) "XXXXXX", curr, 7);
+  curr += 6 + 1;
+
+  return OK;
+}
+
+DM_INLINE_STATIC P pathscat_(B* op1, B* def, B* op2, B** mid) {
+  B* ofreevm = FREEvm;
+  P retc;
+
+  if ((retc = pathcat_(op1, def, mid))) return retc;
+  FREEvm = *mid;
+  retc = pathcat_(op2, def, NULL);
+  FREEvm = ofreevm;
+  return retc;
+}
+
+#define pathcat(a) pathcat_((a), ".", NULL)
+#define pathscat(a, mid) pathscat_((a), ".", ((a)+2*FRAMEBYTES), (mid))
+#define rpathcat(a) do {			\
+    P retc = pathcat((a));			\
+    if (retc) return retc;			\
+  } while (0)
+#define rpathscat(a, mid) do {			\
+    P retc = pathscat((a), &(mid));		\
+    if (retc) return retc;			\
+  } while (0)
+#define rtmpcat(a) do {				\
+    P retc = tmpcat((a));			\
+    if (retc) return retc;			\
+  } while (0)
+
 enum {
   FILE_IRUSR = 00400,
   FILE_IWUSR = 00200,
@@ -282,7 +367,7 @@ P op_statvfs(void) {
   return OK;
 }
 
-/* (dir) (file)/fd | false /
+/* (dir)/null (file) / fd | false /
      dev
      ino
      nlink
@@ -313,7 +398,6 @@ DM_INLINE_STATIC int fstat_int(struct stat *restrict s) {
 
 P op_stat(void) {
   struct stat s;
-  B* curr;
   B* stream;
   int (*statfunc)(struct stat *restrict s);
   P off;
@@ -321,24 +405,8 @@ P op_stat(void) {
   if (FLOORopds > o_1) return OPDS_UNF;
   switch (TAG(o_1)) {
     case ARRAY|BYTETYPE:
-      if (FLOORopds > o_2) return OPDS_UNF;
-      if (TAG(o_2) != (ARRAY|BYTETYPE)) return OPD_CLA;
-
       off = -2;
-      if (FREEvm + ARRAY_SIZE(o_1) + 1
-	  + ARRAY_SIZE(o_2) + 1
-	  >= CEILvm)
-	return VM_OVF;
-
-      curr = FREEvm;
-      moveB(VALUE_PTR(o_2), curr, ARRAY_SIZE(o_2));
-      curr += ARRAY_SIZE(o_2);
-      if (curr != FREEvm && curr[-1] != '/')
-	curr++[0] = '/';
-      moveB(VALUE_PTR(o_1), curr, ARRAY_SIZE(o_1));
-      curr += ARRAY_SIZE(o_1);
-      curr[0] = '\0';
-
+      rpathcat(o_2);
       statfunc = stat_int;
       break;
 
@@ -530,42 +598,14 @@ P op_cp(void) {
   return OK;
 }
 
-// (dir) (file) (dir') (file') | true / false
+// (dir)/null (file) (dir')/null (file') | true / false
 P op_rename(void) {
   B* src;
   B* dest;
-  B* curr;
   BOOLEAN s = TRUE;
 
-  if (TAG(o_1) != (ARRAY|BYTETYPE)
-      || TAG(o_2) != (ARRAY|BYTETYPE)
-      || TAG(o_3) != (ARRAY|BYTETYPE)
-      || TAG(o_4) != (ARRAY|BYTETYPE))
-    return OPD_CLA;
-
-  if (FREEvm + ARRAY_SIZE(o_1) + 1 + ARRAY_SIZE(o_2) + 1
-      + ARRAY_SIZE(o_3) + 1 + ARRAY_SIZE(o_4) + 1
-      >= CEILvm)
-    return OK;
-
-  src = curr = FREEvm;
-  moveB(VALUE_PTR(o_4), curr, ARRAY_SIZE(o_4));
-  curr += ARRAY_SIZE(o_4);
-  if (curr != src && curr[-1] != '/')
-    curr++[0] = '/';
-  moveB(VALUE_PTR(o_3), curr, ARRAY_SIZE(o_3));
-  curr += ARRAY_SIZE(o_3);
-  curr[0] = '\0';
-  
-  dest = ++curr;
-  moveB(VALUE_PTR(o_2), curr, ARRAY_SIZE(o_2));
-  curr += ARRAY_SIZE(o_2);
-  if (curr != dest && curr[-1] != '/')
-    curr++[0] = '/';
-  moveB(VALUE_PTR(o_1), curr, ARRAY_SIZE(o_1));
-  curr += ARRAY_SIZE(o_1);
-  curr[0] = '\0';
-
+  rpathscat(o_4, dest);
+  src = FREEvm;
   if (rename(src, dest)) {
     if (errno != EXDEV) return -errno;
     s = FALSE;
@@ -579,35 +619,31 @@ P op_rename(void) {
   return OK;
 }
 
-// (dir) (file) | (dir') (file')
+// (dir)/null (file) | (dir') (file')
 P op_realpath(void) {
-  B* src;
   B dest[PATH_MAX+1];
-  B* curr;
   B* file;
   B* efile;
   B* edest;
 
-  if (FLOORopds > o_2) return OPDS_UNF;
-  if (TAG(o_1) != (ARRAY|BYTETYPE)
-      || TAG(o_2) != (ARRAY|BYTETYPE))
-    return OPD_CLA;
+  rpathcat(o_2);
+  if (! realpath((char*) FREEvm, (char*) dest)) {
+    size_t len;
+    if (errno != ENOENT) return -errno;
+    if (TAG(o_2) != NULLOBJ)
+      FREEvm[ARRAY_SIZE(o_2)] = '\0';
+    else
+      strcpy(FREEvm, ".");
 
-  if (FREEvm + FRAMEBYTES
-      + ARRAY_SIZE(o_1) + 2 + ARRAY_SIZE(o_2)
-      >= CEILvm)
-    return VM_OVF;
+    if (! realpath((char*) FREEvm, (char*) dest))
+      return -errno;
+    
+    len = strlen(dest);
+    if (len && dest[len-1] != '/') dest[len++] = '/';
+    moveB(VALUE_PTR(o_1), dest + len, ARRAY_SIZE(o_1));
+    dest[len+ARRAY_SIZE(o_1)] = '\0';
+  }
 
-  src = curr = FREEvm;
-  moveB(VALUE_PTR(o_1), curr, ARRAY_SIZE(o_1));
-  curr += ARRAY_SIZE(o_1);
-  if (curr != src && curr[-1] != '/') curr++[0] = '/';
-  moveB(VALUE_PTR(o_2), curr, ARRAY_SIZE(o_2));
-  curr += ARRAY_SIZE(o_2);
-  curr[0] = '\0';
-
-  if (! realpath((char*) src, (char*) dest))
-    return -errno;
   if ((file = strrchr(dest, '/'))) {
     edest = file++;
     efile = file + strlen(file);
@@ -651,7 +687,6 @@ DM_INLINE_STATIC int utimes_int(const struct timespec times[2]) {
 // access-epoch/*/null access-ns mod-epoch/*/null mod-ns
 // (dir) (file) / fd | --
 P op_utimes(void) {
-  B* curr;
   struct timespec times[2];
   B* i;
   B* top;
@@ -685,21 +720,7 @@ P op_utimes(void) {
       ms          = o_4;
       top = mns   = o_3;
 
-      if (TAG(o_2) != (ARRAY|BYTETYPE))
-	return OPD_CLA;
-
-      if (FREEvm + ARRAY_SIZE(o_1) + 1 + ARRAY_SIZE(o_2) + 1
-	  >= CEILvm)
-	return VM_OVF;
-      curr = FREEvm;
-      moveB(VALUE_PTR(o_2), curr, ARRAY_SIZE(o_2));
-      curr += ARRAY_SIZE(o_2);
-      if (curr != FREEvm && curr[-1] != '/')
-	curr++[0] = '/';
-      moveB(VALUE_PTR(o_1), curr, ARRAY_SIZE(o_1));
-      curr += ARRAY_SIZE(o_1);
-      curr[0] = '\0';
-
+      rpathcat(o_2);
       func = utimes_int;
   };
   
@@ -774,51 +795,17 @@ P op_utimes(void) {
 // (dir)/null (prefix) | fdr fdw (dir) (prefixXXXXXX)
 P op_tmpfile(void) {
   P retc;
-  B* curr = FREEvm;
-  char *tmp;
-  char *tmpsub;
+  B* curr;
+  char* tmp;
+  char* tmpsub;
   size_t n, nsub;
   P fdr, fdw;
 
-  if (FLOORopds > o_2) return OPDS_UNF;
   if (CEILopds <= o2) return OPDS_OVF;
-  if (TAG(o_1) != (ARRAY|BYTETYPE)) return OPD_CLA;
   if (FREEvm + 2*FRAMEBYTES + 2*STREAMBOXBYTES >= CEILvm)
     return VM_OVF;
-
-  switch (TAG(o_2)) {
-    case NULLOBJ:
-      tmp = getenv("TMPDIR");
-      if (! tmp || ! *tmp) tmp = "/tmp";
-      n = strlen(tmp);
-      if (curr + n >= CEILvm) return VM_OVF;
-      moveB(tmp, curr, n);
-      curr += n;
-      break;
- 
-    case (ARRAY|BYTETYPE):
-      if (curr + ARRAY_SIZE(o_2) + 1 >= CEILvm) return VM_OVF;
-      if (! ARRAY_SIZE(o_2)) (curr++)[0] = '.';
-      else {
-	moveB(VALUE_PTR(o_2), curr, ARRAY_SIZE(o_2));
-	curr += ARRAY_SIZE(o_2);
-      }
-      break;
-      
-    default: return OPD_ERR;
-  };
-
-  if (curr[-1] != '/') {
-    if (curr + 1 >= CEILvm) return VM_OVF;
-    (curr++)[0] = '/';
-  }
-  if (curr + ARRAY_SIZE(o_1) + 6 + 1 >= CEILvm) return VM_OVF;
-  moveB(VALUE_PTR(o_1), (B*) curr, ARRAY_SIZE(o_1));
-  curr += ARRAY_SIZE(o_1);
-  moveB((B*) "XXXXXX", curr, 6);
-  curr += 6;
-  curr[0] = '\0';
-
+  
+  rtmpcat(o_2);
   if ((fdr = mkstemp(FREEvm)) == -1) return -errno;
   if (! (tmp = strdup(FREEvm))) return -errno;
   if ((retc = addsocket(fdr, &pipetype, NULL))) {
@@ -850,6 +837,7 @@ P op_tmpfile(void) {
   STREAM_FD(curr) = fdr;
   STREAM_BUFFERED(curr) = FALSE;
   STREAM_RO(curr) = TRUE;
+  STREAM_LOCKED(curr) = FALSE;
   curr += STREAMBOXBYTES;
 
   TAG(curr) = STREAM;
@@ -861,6 +849,7 @@ P op_tmpfile(void) {
   STREAM_FD(curr) = fdw;
   STREAM_BUFFERED(curr) = FALSE;
   STREAM_RO(curr) = FALSE;
+  STREAM_LOCKED(curr) = FALSE;
   curr += STREAMBOXBYTES;
 
   tmpsub = strrchr(tmp, '/') + 1;
@@ -911,35 +900,9 @@ P op_finddir(void) {
   B* f;
   B* fsub;
 
-  if (FLOORopds > o_2) return OPDS_UNF;
   if (CEILopds <= o1) return OPDS_OVF;
-  if (TAG(o_1) != (ARRAY|BYTETYPE)) return OPD_ERR;
-  switch (TAG(o_2)) {
-    case (ARRAY|BYTETYPE):
-      if (ARRAY_SIZE(o_2)) {
-	if (curr + ARRAY_SIZE(o_2) >= CEILvm) return VM_OVF;
-	moveB(VALUE_PTR(o_2), curr, ARRAY_SIZE(o_2));
-	curr += ARRAY_SIZE(o_2);
-	break;
-      }
-      // else intentional fallthrough
-
-    case NULLOBJ:
-      if (curr + 1 >= CEILvm) return VM_OVF;
-      (curr++)[0] = '.';
-      break;
-
-    default:
-      return OPD_ERR;
-  };
-
-  if (curr[-1] != '/' && ARRAY_SIZE(o_1)) (curr++)[0] = '/';
-  if (curr + ARRAY_SIZE(o_1) + 1 >= CEILvm) return VM_OVF;
-  moveB(VALUE_PTR(o_1), curr, ARRAY_SIZE(o_1));
-  curr[ARRAY_SIZE(o_1)] = '\0';
-
+  rpathcat(o_2);
   if (! (dir = opendir(FREEvm))) return -errno;
-  curr = FREEvm;
 
   errno = 0;
   while ((dirent = readdir(dir))) {
@@ -1020,33 +983,7 @@ P op_finddir(void) {
 
 // (dir)/null (file-or-subdir) | --
 P op_rmpath(void) {
-  B* curr = FREEvm;
-  
-  if (FLOORopds > o_2) return OPDS_UNF;
-  if (TAG(o_1) != (ARRAY|BYTETYPE)) return OPD_ERR;
-  switch (TAG(o_2)) {
-    case (ARRAY|BYTETYPE):
-      if (ARRAY_SIZE(o_2)) {
-	if (curr + ARRAY_SIZE(o_2) >= CEILvm) return VM_OVF;
-	moveB(VALUE_PTR(o_2), curr, ARRAY_SIZE(o_2));
-	curr += ARRAY_SIZE(o_2);
-	break;
-      }
-      // else intentional fallthrough
-
-    case NULLOBJ:
-      if (curr + 1 >= CEILvm) return VM_OVF;
-      (curr++)[0] = '.';
-      break;
-
-    default:
-      return OPD_ERR;
-  };
-
-  if (curr[-1] != '/') (curr++)[0] = '/';
-  if (curr + ARRAY_SIZE(o_1) + 1 >= CEILvm) return VM_OVF;
-  moveB(VALUE_PTR(o_1), curr, ARRAY_SIZE(o_1));
-  curr[ARRAY_SIZE(o_1)] = '\0';
+  rpathcat(o_2);
   if (remove((char*) FREEvm)) return -errno;
 
   FREEopds = o_2;
@@ -1055,47 +992,12 @@ P op_rmpath(void) {
 
 // (dir)/null (subdir) | (dir) (subdirXXXXXX) <<directory is created>>
 P op_tmpdir(void) {
-  B* curr = FREEvm;
+  B* curr;
   char *tmp;
   char *tmpsub;
   size_t n, nsub;
 
-  if (FLOORopds > o_2) return OPDS_UNF;
-  if (TAG(o_1) != (ARRAY|BYTETYPE)) return OPD_CLA;
-
-  switch (TAG(o_2)) {
-    case NULLOBJ:
-      tmp = getenv("TMPDIR");
-      if (! tmp || ! *tmp) tmp = "/tmp";
-      n = strlen(tmp);
-      if (curr + n >= CEILvm) return VM_OVF;
-      moveB(tmp, curr, n);
-      curr += n;
-      break;
- 
-    case (ARRAY|BYTETYPE):
-      if (curr + ARRAY_SIZE(o_2) + 1 >= CEILvm) return VM_OVF;
-      if (! ARRAY_SIZE(o_2)) (curr++)[0] = '.';
-      else {
-	moveB(VALUE_PTR(o_2), curr, ARRAY_SIZE(o_2));
-	curr += ARRAY_SIZE(o_2);
-      }
-      break;
-      
-    default: return OPD_ERR;
-  };
-
-  if (curr[-1] != '/') {
-    if (curr + 1 >= CEILvm) return VM_OVF;
-    (curr++)[0] = '/';
-  }
-  if (curr + ARRAY_SIZE(o_1) + 7 >= CEILvm) return VM_OVF;
-  moveB(VALUE_PTR(o_1), (B*) curr, ARRAY_SIZE(o_1));
-  curr += ARRAY_SIZE(o_1);
-  moveB((B*) "XXXXXX", curr, 6);
-  curr += 6;
-  curr[0] = '\0';
-  
+  rtmpcat(o_2);
   if (! mkdtemp(FREEvm)) return -errno;
   if (! (tmp = strdup(FREEvm))) return -errno;
   tmpsub = strrchr(tmp, '/') + 1;
@@ -1236,6 +1138,7 @@ P op_copyfd(void) {
   nstreambox = VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
   moveLBIG((LBIG*) streambox, (LBIG*) nstreambox, STREAMBOXBYTES/PACK_FRAME);
   STREAM_FD(nstreambox) = fdnew;
+  STREAM_LOCKED(nstreambox) = FALSE;
 
   moveframe(FREEvm, o_1);
   FREEvm += FRAMEBYTES + STREAMBOXBYTES;
@@ -1295,6 +1198,7 @@ P op_makefd(void) {
   STREAM_FD(streambox) = (int) fd;
   STREAM_BUFFERED(streambox) = FALSE;
   STREAM_RO(streambox)  = BOOL_VAL(o_1);
+  STREAM_LOCKED(streambox) = FALSE;
   moveframe(FREEvm, o_2);
 
   FREEvm += FRAMEBYTES+STREAMBOXBYTES;  
@@ -1451,6 +1355,7 @@ P op_pipefd(void) {
   STREAM_FD(streambox) = pipefd[0];
   STREAM_BUFFERED(streambox) = FALSE;
   STREAM_RO(streambox) = TRUE;
+  STREAM_LOCKED(streambox) = FALSE;
   moveframe(FREEvm, o1);
   
   FREEvm += FRAMEBYTES + STREAMBOXBYTES;
@@ -1460,6 +1365,7 @@ P op_pipefd(void) {
   STREAM_FD(streambox) = pipefd[1];
   STREAM_BUFFERED(streambox) = FALSE;
   STREAM_RO(streambox) = FALSE;
+  STREAM_LOCKED(streambox) = FALSE;
   moveframe(FREEvm, o2);
 
   FREEvm += FRAMEBYTES + STREAMBOXBYTES;
@@ -1548,16 +1454,16 @@ struct {int flags; BOOLEAN read;} flags[] = {
   {O_WRONLY|O_APPEND,         FALSE}
 };
 
-// (dir) (filename) flags perms | fd
+// (dir)/null (filename) flags perms | fd
 P op_openfd(void) {
   P flag;
-  B* nextvm;
   int fd;
   P retc;
   B* streambox;
   ULBIG perm;
 
-  if (FLOORopds > o_4) return OPDS_UNF;
+  if (FLOORopds > o_2) return OPDS_UNF;
+  rpathcat(o_4);
 
   if (CLASS(o_1) != NUM) return OPD_CLA;
   if (! VALUE(o_1, (LBIG*) &perm)) return UNDF_VAL;
@@ -1568,21 +1474,8 @@ P op_openfd(void) {
   if (flag < 0 || flag >= (P) (sizeof(flags)/sizeof(flags[0])))
     return RNG_CHK;
 
-  if (TAG(o_3) != (ARRAY|BYTETYPE)
-      || TAG(o_4) != (ARRAY|BYTETYPE))
-    return OPD_ERR;
   if (FREEvm + FRAMEBYTES + STREAMBOXBYTES >= CEILvm)
     return VM_OVF;
-
-  if (FREEvm + ARRAY_SIZE(o_4)+1 >= CEILvm) return VM_OVF;
-  moveB(VALUE_PTR(o_4), FREEvm, ARRAY_SIZE(o_4));
-  nextvm = FREEvm + ARRAY_SIZE(o_4);
-  if (ARRAY_SIZE(o_4) != 0 && nextvm[-1] != '/')
-    (nextvm++)[0] = '/';
-  if (nextvm + ARRAY_SIZE(o_3) + 1 >= CEILvm) return VM_OVF;
-  moveB(VALUE_PTR(o_3), nextvm, ARRAY_SIZE(o_3));
-  nextvm += ARRAY_SIZE(o_3);
-  nextvm[0] = 0;
 
   if ((fd = open(FREEvm, flags[flag].flags, filemode_un(perm)))
       == -1)
@@ -1598,6 +1491,7 @@ P op_openfd(void) {
   STREAM_FD(streambox) = fd;
   STREAM_BUFFERED(streambox) = FALSE;
   STREAM_RO(streambox) = flags[flag].read;
+  STREAM_LOCKED(streambox) = FALSE;
   moveframe(FREEvm, o_4);
   FREEvm += FRAMEBYTES + STREAMBOXBYTES;
 
@@ -2034,61 +1928,63 @@ P op_closefd(void) {
   return retc;
 }
 
-P x_op_lockfd(void) {
+DM_INLINE_STATIC P x_op_lockfd_int(BOOLEAN relock) {
   B* streambox;
   if (x_1 < FLOORexecs) return EXECS_UNF;
-  if (CLASS(x_1) != STREAM) return EXECS_COR;
+  if (TAG(x_1) != STREAM) return EXECS_COR;
   
   streambox = VALUE_PTR(x_1);
-  if (STREAM_FD(streambox) != -1)
-    while (lockf(STREAM_FD(streambox), 0, F_ULOCK)) {
+  if (relock != STREAM_LOCKED(streambox)
+      && STREAM_FD(streambox) != -1)
+    while (lockf(STREAM_FD(streambox), relock ? F_LOCK : F_ULOCK, 0)) {
       if (errno != EINTR) return -errno;
       checkabort();
     }
+  STREAM_LOCKED(streambox) = relock;
 
   FREEexecs = x_1;
   repush_stop();
   return OK;
 }
 
+P x_op_lockfd(void) {
+  return x_op_lockfd_int(TRUE);
+}
+
 P x_op_unlockfd(void) {
+  return x_op_lockfd_int(FALSE);
+}
+
+// ~active fd | ...
+DM_INLINE_STATIC P op_lockfd_int(BOOLEAN lock, int cmd) {
   B* streambox;
-  if (x_1 < FLOORexecs) return EXECS_UNF;
-  if (CLASS(x_1) != STREAM) return EXECS_COR;
-  
-  streambox = VALUE_PTR(x_1);
-  if (STREAM_FD(streambox) != -1)
-    while (lockf(STREAM_FD(streambox), 0, F_LOCK)) {
+
+  if (o_2 < FLOORopds) return OPDS_UNF;
+  if (CEILexecs < x5) return EXECS_OVF;
+  if (CLASS(o_1) != STREAM) return OPD_CLA;
+  streambox = VALUE_PTR(o_1);
+  if (STREAM_FD(streambox) == -1) return STREAM_CLOSED;
+  if (! (ATTR(o_2) & ACTIVE)) return OPD_ATR;
+
+  if (lock != STREAM_LOCKED(streambox))
+    while (lockf(STREAM_FD(streambox), cmd, 0)) {
       if (errno != EINTR) return -errno;
       checkabort();
     }
 
-  FREEexecs = x_1;
-  return repush_stop();
-}
-
-// ~active fd | ...
-P op_lockfd(void) {
-  B* streambox;
-
-  if (o_2 < FLOORopds) return OPDS_UNF;
-  if (CEILexecs < x5) return EXECS_OVF;
-  if (CLASS(o_1) != STREAM) return OPD_CLA;
-  streambox = VALUE_PTR(o_1);
-  if (STREAM_FD(streambox) == -1) return STREAM_CLOSED;
-  if (! (ATTR(o_2) & ACTIVE)) return OPD_ATR;
-
-  while (lockf(STREAM_FD(streambox), F_LOCK, 0)) {
-    if (errno != EINTR) return -errno;
-    checkabort();
-  }
-
   moveframe(o_1, x1);
   
   TAG(x2) = OP;
   ATTR(x2) = ACTIVE;
-  OP_NAME(x2) = "x_lockfd";
-  OP_CODE(x2) = x_op_lockfd;
+  if (STREAM_LOCKED(streambox)) {
+    OP_NAME(x2) = "x_lockfd";
+    OP_CODE(x2) = x_op_lockfd;
+  }
+  else {
+    OP_NAME(x2) = "x_unlockfd";
+    OP_CODE(x2) = x_op_unlockfd;
+  }
+  STREAM_LOCKED(streambox) = lock;
 
   TAG(x3) = BOOL;
   ATTR(x3) = (STOPMARK|ABORTMARK|ACTIVE);
@@ -2096,92 +1992,46 @@ P op_lockfd(void) {
 
   moveframe(o_2, x4);
   FREEexecs = x5;
-  FREEopds = o_1;
+  FREEopds = o_2;
 
   return OK;
+}
+
+
+// ~active fd | ...
+P op_lockfd(void) {
+  return op_lockfd_int(TRUE, F_LOCK);
 }
 
 // ~active fd | --
 P op_unlockfd(void) {
-  B* streambox;
-
-  if (o_2 < FLOORopds) return OPDS_UNF;
-  if (CEILexecs < x5) return EXECS_OVF;
-  if (CLASS(o_1) != STREAM) return OPD_CLA;
-  streambox = VALUE_PTR(o_1);
-  if (STREAM_FD(streambox) == -1) return STREAM_CLOSED;
-  if (! (ATTR(o_2) & ACTIVE)) return OPD_ATR;
-
-  while (lockf(STREAM_FD(streambox), F_ULOCK, 0)) {
-    if (errno != EINTR) return -errno;
-    checkabort();
-  }
-
-  moveframe(o_1, x1);
-  
-  TAG(x2) = OP;
-  ATTR(x2) = ACTIVE;
-  OP_NAME(x2) = "x_unlockfd";
-  OP_CODE(x2) = x_op_unlockfd;
-
-  TAG(x3) = BOOL;
-  ATTR(x3) = (STOPMARK|ABORTMARK|ACTIVE);
-  BOOL_VAL(x3) = FALSE;
-
-  moveframe(o_2, x4);
-  FREEexecs = x5;
-  FREEopds = o_1;
-
-  return OK;
+  return op_lockfd_int(FALSE, F_ULOCK);
 }
 
 // ~active fd | ... true-if-success
 P op_trylockfd(void) {
-  B* streambox;
+  B* test;
+  P retc;
 
-  if (o_2 < FLOORopds) return OPDS_UNF;
-  if (CEILexecs < x6) return EXECS_OVF;
-  if (CLASS(o_1) != STREAM) return OPD_CLA;
-  streambox = VALUE_PTR(o_1);
-  if (STREAM_FD(streambox) == -1) return STREAM_CLOSED;
-  if (! (ATTR(o_2) & ACTIVE)) return OPD_ATR;
-
-  while (lockf(STREAM_FD(streambox), F_TLOCK, 0))
-    switch (errno) {
-      case EACCES: case EAGAIN: 
-	TAG(o_2) = BOOL;
-	ATTR(o_2) = 0;
-	BOOL_VAL(o_2) = FALSE;
-	FREEopds = o_1;
-	return OK;
-	
-      case EINTR: checkabort();
-	break;
-
-      default:
-	return -errno;
-    }
-
+  if (CEILexecs < x2) return EXECS_OVF;
+  test = x1;
   TAG(x1) = BOOL;
   ATTR(x1) = 0;
-  BOOL_VAL(x1) = TRUE;
-  
-  moveframe(o_1, x2);
+  FREEexecs = x2;
 
-  TAG(x3) = OP;
-  ATTR(x3) = ACTIVE;
-  OP_NAME(x3) = "x_lockfd";
-  OP_CODE(x3) = x_op_lockfd;
+  switch (retc = op_lockfd_int(TRUE, F_TLOCK)) {
+    case -EACCES: case -EAGAIN:
+      BOOL_VAL(test) = FALSE;
+      return OK;
 
-  TAG(x4) = BOOL;
-  ATTR(x4) = (STOPMARK|ABORTMARK|ACTIVE);
-  BOOL_VAL(x4) = FALSE;
+    case OK:
+      BOOL_VAL(test) = TRUE;
+      return OK;
 
-  moveframe(o_2, x5);
-  FREEexecs = x6;
-  FREEopds = o_2;
-
-  return OK;
+    default:
+      FREEexecs = test;
+      return retc;
+  };
 }
 
 ////// tokenizing /////////////////////////////////////

@@ -347,11 +347,12 @@ extern "C" {
 #define SBOX_CAP(box)         (*(B **) PF_PTR(box,0))
 
 /*------------------------------------- stream box */
-#define STREAMBOXBYTES         DALIGN(4*PACK_FRAME)
+#define STREAMBOXBYTES         DALIGN(5*PACK_FRAME)
 #define STREAM_FD(fdbox)       (*(int*)     PF_PTR(fdbox,0))
 #define STREAM_BUFFERED(fdbox) (*(BOOLEAN*) PF_PTR(fdbox,1))
 #define STREAM_CHAR(fdbox)     (*(B*)       PF_PTR(fdbox,2))
 #define STREAM_RO(fdbox)       (*(BOOLEAN*) PF_PTR(fdbox,3))
+#define STREAM_LOCKED(fdbox)   (*(BOOLEAN*) PF_PTR(fdbox,4))
 
 /*--------------------------------------------- Internal message codes */
 #include "dm-errs.h"
