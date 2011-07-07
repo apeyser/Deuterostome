@@ -74,8 +74,8 @@ P op_error(void)
   p += nb;
   atmost -= nb;
   if ((P)e < 0) /*Clib error */
-    nb = dm_snprintf((char*) p, atmost, "%s",
-		     (char*) strerror((P) -e));
+    nb = dm_snprintf((char*) p, atmost, "errno: %s",
+		     (char*) strerror(-(int)e));
   else { /* one of our error codes: decode */
     m = geterror((P) e);
     nb = dm_snprintf((char*) p, atmost, "%s",
@@ -154,8 +154,8 @@ P op_errormessage(void)
   tnb -= nb;
 
   if ((P)e < 0) /*Clib error */
-    nb = dm_snprintf((char*) s, tnb, "%s",
-		     (char*) strerror(-e));
+    nb = dm_snprintf((char*) s, tnb, "errno: %s",
+		     (char*) strerror(-(int)e));
   else { /* one of our error codes: decode */
     m = geterror((P) e);
     nb = strlen((char*) m);
