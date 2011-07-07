@@ -337,7 +337,7 @@ P op_statvfs(void) {
 
     case STREAM:
       stream = VALUE_PTR(o_1);
-      if ((fstatvfs_int_fd = (int) STREAM_FD(stream) == -1))
+      if ((fstatvfs_int_fd = (int) STREAM_FD(stream)) == -1)
 	return STREAM_CLOSED;
       statfunc = fstatvfs_int;
       break;
