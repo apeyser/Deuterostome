@@ -689,87 +689,64 @@ DM_INLINE_STATIC int utimes_int(const struct timespec times[2]) {
 P op_utimes(void) {
   struct timespec times[2];
   B* i;
-  B* top;
   B* bottom;
-  B* stream;
-  B* as;
-  B* ans;
-  B* ms;
-  B* mns;
   int (*func)(const struct timespec times[2]);
 
+  B *accs, *accns, *mods, *modns;
+
   if (FLOORopds > o_1) return OPDS_UNF;
-
   switch (TAG(o_1)) {
-    case STREAM:
-      bottom = as = o_5;
-      ans         = o_4;
-      ms          = o_3;
-      top = mns   = o_2;
+    case STREAM: {
+      B* stream = VALUE_PTR(o_1);
+      bottom = o_5;
 
-      stream = VALUE_PTR(o_1);
       if ((utimes_fd = STREAM_FD(stream)) == -1)
 	return STREAM_CLOSED;
       func = futimes_int;
       break;
+    };
 
     case ARRAY|BYTETYPE:
-      if (FLOORopds > o_2) return OPDS_UNF;
-      bottom = as = o_6;
-      ans         = o_5;
-      ms          = o_4;
-      top = mns   = o_3;
-
+      bottom = o_6;
       rpathcat(o_2);
       func = utimes_int;
+      break;
+
+    default:
+      return OPD_TYP;
   };
   
   if (FLOORopds > bottom) return OPDS_UNF;
-  for (i = top; i >= bottom; i -= FRAMEBYTES)
+  for (i = bottom + 3*FRAMEBYTES; i >= bottom; i -= FRAMEBYTES)
     switch (CLASS(i)) {
       case NULLOBJ:
 	if (TYPE(i)) return OPD_TYP;
 	break;
+
       case NUM:
 	if (TYPE(i) >= SINGLETYPE) return OPD_TYP;
 	break;
+
       default:
 	return OPD_CLA;
     }
+
+  accs  = bottom;
+  accns = accs  + FRAMEBYTES;
+  mods  = accns + FRAMEBYTES;
+  modns = mods  + FRAMEBYTES;
   
-  switch (CLASS(as)) {
+  switch (CLASS(accs)) {
     case NUM: {
       LBIG t;
-      if (! VALUE(as, &t)) {
-	times[1].tv_sec = 0;
-	times[1].tv_nsec = UTIME_NOW;
-      }
-      else {
-	times[1].tv_sec = (time_t) t;
-	if (CLASS(ans) != NUM) return RNG_CHK;
-	if (! VALUE(ans, &t)) return UNDF_VAL;
-	times[1].tv_sec = (long) t;
-      }
-      break;
-    };
-
-    case NULLOBJ:
-      times[1].tv_sec = 0;
-      times[1].tv_nsec = UTIME_OMIT;
-      break;
-  }
-
-  switch (CLASS(ms)) {
-    case NUM: {
-      LBIG t;
-      if (! VALUE(ms, &t)) {
+      if (! VALUE(accs, &t)) {
 	times[0].tv_sec = 0;
 	times[0].tv_nsec = UTIME_NOW;
       }
       else {
 	times[0].tv_sec = (time_t) t;
-	if (CLASS(mns) != NUM) return RNG_CHK;
-	if (! VALUE(mns, &t)) return UNDF_VAL;
+	if (CLASS(accns) != NUM) return RNG_CHK;
+	if (! VALUE(accns, &t)) return UNDF_VAL;
 	times[0].tv_sec = (long) t;
       }
       break;
@@ -778,6 +755,28 @@ P op_utimes(void) {
     case NULLOBJ:
       times[0].tv_sec = 0;
       times[0].tv_nsec = UTIME_OMIT;
+      break;
+  }
+
+  switch (CLASS(mods)) {
+    case NUM: {
+      LBIG t;
+      if (! VALUE(mods, &t)) {
+	times[1].tv_sec = 0;
+	times[1].tv_nsec = UTIME_NOW;
+      }
+      else {
+	times[1].tv_sec = (time_t) t;
+	if (CLASS(accns) != NUM) return RNG_CHK;
+	if (! VALUE(accns, &t)) return UNDF_VAL;
+	times[1].tv_sec = (long) t;
+      }
+      break;
+    };
+
+    case NULLOBJ:
+      times[1].tv_sec = 0;
+      times[1].tv_nsec = UTIME_OMIT;
       break;
   }
 

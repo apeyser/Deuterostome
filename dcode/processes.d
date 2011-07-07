@@ -258,10 +258,15 @@
 
   | statfile-dict (dir) (file) | --
   /utimesput {
-    3 -1 roll {/MOD_SEC /MOD_NSEC /ACCESS_SEC /ACCESS_NSEC} {
-      1 index exch get exch
-    } forall pop
-    6 -2 roll utimes
+    3 -1 roll                   | (dir) (file) fileinfo
+    {/ACCESS /MOD} {            | .. fileinfo /time
+      1 index exch get          | .. fileinfo time-dict
+      {/SECONDS /NANOSECONDS} { | .. fileinfo subtime.. time-dict /subtime
+        1 index exch get exch   | .. fileinfo subtime.. time-dict
+      } forall pop              | .. fileinfo subtime1 subtime2
+      3 -1 roll                 | .. fileinfo
+    } forall pop                | (dir) (file) access-sec access-ns mod-s mod-ns
+    6 -2 roll utimes            | --
   } bind def
 
   | (dir) (file) | --
