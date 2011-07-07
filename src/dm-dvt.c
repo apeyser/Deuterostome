@@ -184,7 +184,7 @@ P op_errormessage(void)
     if (nb > tnb) nb = tnb;
     moveB(m, s, nb);
   }
-  s += nb; 
+  s += nb;
   tnb -= nb;
 
   nb = dm_snprintf((char*) s, tnb, " in %*s\n",

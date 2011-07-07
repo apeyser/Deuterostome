@@ -684,6 +684,36 @@ DM_INLINE_STATIC int utimes_int(const struct timespec times[2]) {
   return utimensat(AT_FDCWD, (char*) FREEvm, times, 0);
 }
 
+DM_INLINE_STATIC P utimes_pull_(B *restrict op, struct timespec *restrict t) {
+  LBIG tm;
+  switch (CLASS(op)) {
+    case NUM:
+      if (! VALUE(op, &tm)) {
+	t->tv_sec = 0;
+	t->tv_nsec = UTIME_NOW;
+      }
+      else {
+	t->tv_sec = (time_t) tm;
+	if (CLASS(op+FRAMEBYTES) != NUM) return RNG_CHK;
+	if (! VALUE(op+FRAMEBYTES, &tm)) return UNDF_VAL;
+	t->tv_nsec = (long) tm;
+      }
+      break;
+
+    case NULLOBJ:
+      t->tv_sec = 0;
+      t->tv_nsec = UTIME_OMIT;
+      break;
+  }
+
+  return OK;
+}
+
+#define utimes_pull(op, t) do {			\
+    P retc = utimes_pull_((op), (t));		\
+    if (retc) return retc;			\
+  } while (0)
+
 // access-epoch/*/null access-ns mod-epoch/*/null mod-ns
 // (dir) (file) / fd | --
 P op_utimes(void) {
@@ -691,8 +721,6 @@ P op_utimes(void) {
   B* i;
   B* bottom;
   int (*func)(const struct timespec times[2]);
-
-  B *accs, *accns, *mods, *modns;
 
   if (FLOORopds > o_1) return OPDS_UNF;
   switch (TAG(o_1)) {
@@ -715,7 +743,7 @@ P op_utimes(void) {
     default:
       return OPD_TYP;
   };
-  
+
   if (FLOORopds > bottom) return OPDS_UNF;
   for (i = bottom + 3*FRAMEBYTES; i >= bottom; i -= FRAMEBYTES)
     switch (CLASS(i)) {
@@ -731,55 +759,8 @@ P op_utimes(void) {
 	return OPD_CLA;
     }
 
-  accs  = bottom;
-  accns = accs  + FRAMEBYTES;
-  mods  = accns + FRAMEBYTES;
-  modns = mods  + FRAMEBYTES;
-  
-  switch (CLASS(accs)) {
-    case NUM: {
-      LBIG t;
-      if (! VALUE(accs, &t)) {
-	times[0].tv_sec = 0;
-	times[0].tv_nsec = UTIME_NOW;
-      }
-      else {
-	times[0].tv_sec = (time_t) t;
-	if (CLASS(accns) != NUM) return RNG_CHK;
-	if (! VALUE(accns, &t)) return UNDF_VAL;
-	times[0].tv_sec = (long) t;
-      }
-      break;
-    };
-
-    case NULLOBJ:
-      times[0].tv_sec = 0;
-      times[0].tv_nsec = UTIME_OMIT;
-      break;
-  }
-
-  switch (CLASS(mods)) {
-    case NUM: {
-      LBIG t;
-      if (! VALUE(mods, &t)) {
-	times[1].tv_sec = 0;
-	times[1].tv_nsec = UTIME_NOW;
-      }
-      else {
-	times[1].tv_sec = (time_t) t;
-	if (CLASS(accns) != NUM) return RNG_CHK;
-	if (! VALUE(accns, &t)) return UNDF_VAL;
-	times[1].tv_sec = (long) t;
-      }
-      break;
-    };
-
-    case NULLOBJ:
-      times[1].tv_sec = 0;
-      times[1].tv_nsec = UTIME_OMIT;
-      break;
-  }
-
+  utimes_pull(bottom, &times[0]);
+  utimes_pull(bottom+2*FRAMEBYTES, &times[1]);
   if (func(times)) return -errno;
   
   FREEopds = bottom;
