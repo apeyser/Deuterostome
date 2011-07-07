@@ -171,7 +171,7 @@
 
   | These types must match file enum modes in dm-proc.c
   /FILE_TYPE {
-    /UNKNOWN 0
+    /UNKNOWN
     /BLOCK
     /CHARACTER
     /REGULAR
@@ -191,7 +191,7 @@
     [
       /SECONDS
       /NANOSECONDS
-      makestruct_close |]
+      makestruct_stack |]
   } def
 
   | time-dict1 time-dict2 | time-1 < time-2
