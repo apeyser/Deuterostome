@@ -1151,9 +1151,16 @@
     __rmpath
   } bind def
 
+  | (dir) (file) | bool
+  /isdir {
+    stat not {(isdir) /FILE_NOSUCH makeerror} if
+    openlist 18 2 roll cleartomark
+    FILE_TYPE /DIRECTORY get eq
+  } bind def
+
   | (dir) (file) <</norecur defined>> | --
   /__rmpath {
-    2 copy fileisdir {
+    2 copy isdir {
       2 copy finddir {
         norecur
         {1 index exch __rmpath} forall pop
