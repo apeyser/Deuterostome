@@ -251,6 +251,7 @@ P op_readdir(void) {
 
   errno = 0;
   ops = o_1;
+  curr = FREEvm;
   while ((file = readdir(dir))) {
     size_t l = strlen(file->d_name);
     if (curr + FRAMEBYTES + DALIGN(l) >= CEILvm) {
@@ -268,7 +269,6 @@ P op_readdir(void) {
     moveB(file->d_name, curr+FRAMEBYTES, l);
     ARRAY_SIZE(curr) = l;
     moveframe(curr, ops);
-    ATTR(curr) = 0;
 
     curr += FRAMEBYTES + DALIGN(l);
     ops += FRAMEBYTES;
