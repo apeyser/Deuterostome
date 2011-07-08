@@ -198,7 +198,7 @@
   /lttime {
     1 index /SECONDS get 1 index /SECONDS get lt ~true {
       1 index /SECONDS get 1 index /SECONDS get gt ~false {
-        1 index /NANOSECOND get 1 index /NANONSECONDS get lt
+        1 index /NANOSECONDS get 1 index /NANOSECONDS get lt
       } ifelse
     } ifelse
     3 1 roll pop pop
@@ -208,7 +208,7 @@
   /gttime {
     1 index /SECONDS get 1 index /SECONDS get gt ~true {
       1 index /SECONDS get 1 index /SECONDS get lt ~false {
-        1 index /NANOSECOND get 1 index /NANONSECONDS get gt
+        1 index /NANOSECONDS get 1 index /NANOSECONDS get gt
       } ifelse
     } ifelse
     3 1 roll pop pop
@@ -217,7 +217,7 @@
   | time-dict1 time-dict2 | time-1-equals-time-2
   /eqtime {
     1 index /SECONDS get 1 index /SECONDS get eq ~true {
-      1 index /NANOSECOND get 1 index /NANONSECONDS get eq
+      1 index /NANOSECONDS get 1 index /NANOSECONDS get eq
     } ifelse
     3 1 roll pop pop
   } def
