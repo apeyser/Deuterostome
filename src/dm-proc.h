@@ -3,6 +3,14 @@
 
 #include "dm.h"
 
+DLL_SCOPE P op_readdir(void);
+DLL_SCOPE P op_stat(void);
+DLL_SCOPE P op_makedir(void);
+DLL_SCOPE P op_utimes(void);
+DLL_SCOPE P op_rename(void);
+DLL_SCOPE P op_cp(void);
+DLL_SCOPE P op_realpath(void);
+DLL_SCOPE P op_statvfs(void);
 DLL_SCOPE P op_fork(void);
 DLL_SCOPE P op_getppid(void);
 DLL_SCOPE P op_makefd(void);

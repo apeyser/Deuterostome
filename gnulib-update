@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# fstat fstatvfs statvfs sys_statvfs
+modules=" \
+	    futimens glob mkdtemp stat stat-time \
+	    stdio sys_stat utimensat \
+"
+
+flags=" \
+            --no-vc-files \
+	    --import --dir=. \
+	    --lib=libgnu --source-base=lib --m4-base=m4 \
+	    --doc-base=doc --tests-base=tests --aux-dir=. \
+	    --libtool --macro-prefix=gl \
+"
+gnulib-tool $flags $modules

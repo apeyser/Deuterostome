@@ -103,8 +103,8 @@ P op_error(void)
   atmost -= nb;
  
   if (e < 0) { /*Clib error */
-    nb = dm_snprintf((char*) p, atmost,"%s",
-		     (char*) strerror(-e));
+    nb = dm_snprintf((char*) p, atmost,"errno: %s",
+		     (char*) strerror(-(int)e));
   }
   else { /* one of our error codes: decode */
     m = geterror(e);
@@ -149,8 +149,8 @@ P op_errormessage(void)
   s = (B *)VALUE_BASE(o_1);
   tnb = ARRAY_SIZE(o_1);
   if (e < 0) { /*Clib error */
-    nb = dm_snprintf((char*) s, tnb, "%s",
-		     (char*) strerror(-e));
+    nb = dm_snprintf((char*) s, tnb, "errno: %s",
+		     (char*) strerror(-(int)e));
   } else { /* one of our error codes: decode */
     m = geterror(e);
     nb = strlen((char*) m);

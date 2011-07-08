@@ -231,7 +231,7 @@
       /dilute_add /matvecmul
       /getstartupdir /gethomedir /getconfdir
       /socketval /getmyname /getmyfqdn
-      /getpid /unpid
+      /getpid /unpid /makepid
     ] def
     /errors 100 dict dup begin |[
       /ABORT (** Internal ABORT returned -- should never appear as error) def
@@ -303,7 +303,8 @@ end def |]
       /tmpfile /tmpdir /rmpath /finddir
       /suckfd /closedfd /getfd /ungetfd
       /writefd /closefd /lockfd /unlockfd /trylockfd
-      /glob /setenv /getenv
+      /glob /setenv /getenv /statvfs /realpath /cp /rename /utimes /makedir
+      /stat /readdir
     ] def
     /errors 7 dict dup begin |[
       /FILE_NOSUCH (** No such file or directory) def

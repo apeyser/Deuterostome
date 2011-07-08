@@ -2,6 +2,8 @@
 
 |======================== userdict ===================================
 
+/abort {dstate_ abort} bind def
+
 2 list dictstack dup 0 get /systemdict name   | name the roots
                      1 get /userdict   name
 
@@ -1007,9 +1009,9 @@ end def  | of xtext_dict
 | use: dirname filename | objects..  (and/or side effects)
 
 /fromfiles_dict {
-  /fd {
+  /fd {  | 0 is read-only, 438 is 0666 (rw-rw-rw-)
     save {
-      3 1 roll 0 openfd ~suckfd stopped {closefd stop} if
+      3 1 roll 0 438 openfd ~suckfd stopped {closefd stop} if
       exch capsave mkact exec
     } [2 index ~stopped push | ]
     restore ~stop if
@@ -1147,7 +1149,7 @@ end def  | of xtext_dict
 | discards an existing former version of 'module_name', performs a 'save'
 | operation.
 
-/module { dup forgetmodule save } bind def
+/module {dup forgetmodule save} bind def
 
 |---------------------------- _module
 | /module_name savebox module_dict | --

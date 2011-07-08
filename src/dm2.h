@@ -51,6 +51,7 @@ DLL_SCOPE P op_getexecdir(void);
 
 DLL_SCOPE P op_getpid(void);
 DLL_SCOPE P op_unpid(void);
+DLL_SCOPE P op_makepid(void);
 
 DLL_SCOPE P op_syshi(void);
 DLL_SCOPE P op_syslibnum(void);

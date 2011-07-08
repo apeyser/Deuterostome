@@ -1,7 +1,7 @@
 AM_CPPFLAGS = -DDM_HAVE_CONFIG_H -I"$(top_builddir)/lib" -I"$(top_srcdir)/lib"
 AM_CFLAGS = $(GCC_CFLAGS) $(X_CFLAGS) $(OPENSSL_CFLAGS)
 AM_CXXFLAGS = $(GCC_CXXFLAGS)
-AM_LDFLAGS = -no-undefined 
+AM_LDFLAGS = -no-undefined
 AM_LIBS = $(PTHREAD_LIBS) $(X_LDFLAGS) $(OPENSSL_LIBS)
 AM_LIBADD = $(AM_LIBS) @RELEASE_INFO@ @VERSION_INFO@ \
 	$(top_builddir)/lib/libgnu.la
@@ -105,6 +105,11 @@ SOCKSRCS = \
 	dm-proc.c dm-proc.h dm-glob.c dm-glob.h \
 	dm-prop.h dm-dvt-vm.h 
 NODIST_SOCKSRCS = dm-prop.c
+
+getdisplay_SOURCES = getdisplay.c
+getdisplay_LDADD = $(AM_LDADD)
+getdisplay_CPPFLAGS = $(AM_CPPFLAGS)
+getdisplay_CFLAGS = $(AM_CFLAGS)
 
 dvt_SOURCES = dvt.c dvt_0.h dm-dvt.h dm-dvt.c $(SOCKSRCS)
 nodist_dvt_SOURCES = $(NODIST_SOCKSRCS)

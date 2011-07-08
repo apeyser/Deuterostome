@@ -12,3 +12,7 @@
 /unistd.h
 /wchar.h
 /fnmatch.h
+/wctype.h
+/fcntl.h
+/time.h
+.dirstamp

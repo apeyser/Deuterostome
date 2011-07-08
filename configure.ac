@@ -1,4 +1,4 @@
-AC_INIT([D-Machine], [4.7.7], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
+AC_INIT([D-Machine], [4.8.0], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
 AC_CONFIG_MACRO_DIR([m4 libltdl/m4])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_AUX_DIR([libltdl/config])
@@ -217,14 +217,10 @@ AC_CHECK_LIBM
 CF_X11_ENABLE
 CF_PREPEND_VARS([LIBS], [XLIB LIBM])
 AC_C_BIGENDIAN
-dnl check pid_t for plugins/process.c
 
-CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([pid_t], [4])])
-CF_IF_ENABLED([process], [CF_AC_CHECK_SIZEOF([int], [4])])
-
-AC_DEFINE([_POSIX_C_SOURCE], [200112L], [Define to 200112L - we are POSIXY])
-AC_DEFINE([_XOPEN_SOURCE], [(_XOPEN_SOURCE < 500 ? 500 : _XOPEN_SOURCE)], 
-  [Define to >500 - we are POSIXY])
+AC_DEFINE([_POSIX_C_SOURCE], [200809L], [Define to 200809L - we are POSIXY])
+AC_DEFINE([_XOPEN_SOURCE], [(_XOPEN_SOURCE < 700 ? 700 : _XOPEN_SOURCE)], 
+  [Define to >700 - we are POSIXY])
 
 AC_CHECK_HEADERS([features.h])
 CF_AC_CHECK_HEADERS([endian.h machine/endian.h], [ENDIAN_HDR], 
@@ -245,6 +241,7 @@ CF_AC_CHECK_HEADER([string.h])
 CF_AC_CHECK_HEADER([dirent.h])
 CF_AC_CHECK_HEADER([time.h])
 CF_AC_CHECK_HEADER([sys/stat.h])
+CF_AC_CHECK_HEADER([sys/statvfs.h])
 CF_AC_CHECK_HEADER([fnmatch.h])
 CF_AC_CHECK_HEADER([sys/types.h])
 CF_AC_CHECK_HEADER([signal.h])
@@ -263,6 +260,7 @@ CF_IF_ENABLED([plugins-support], [CF_AC_CHECK_HEADER([stdarg.h])])
 CF_IF_ENABLED([regex], [CF_AC_CHECK_HEADER([regex.h])])
 CF_AC_CHECK_HEADER([spawn.h])
 CF_IF_ENABLED([openssl], [CF_AC_CHECK_HEADER([openssl/sha.h])])
+CF_AC_CHECK_HEADER([sys/statvfs.h])
 
 AC_CHECK_FUNCS([setsid])
 AC_CHECK_FUNCS([srandomdev])
