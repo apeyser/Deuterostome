@@ -241,7 +241,7 @@ P op_readdir(void) {
   if (FLOORopds > o_1) return OPDS_UNF;
   if (TAG(o_1) != (ARRAY|BYTETYPE)) return OPD_CLA;
 
-  if (FREEvm + ARRAY_SIZE(o_1) + 1 > FREEvm)
+  if (FREEvm + ARRAY_SIZE(o_1) + 1 >= CEILvm)
     return VM_OVF;
   moveB(VALUE_PTR(o_1), FREEvm, ARRAY_SIZE(o_1));
   FREEvm[ARRAY_SIZE(o_1)] = '\0';
@@ -251,8 +251,22 @@ P op_readdir(void) {
 
   errno = 0;
   ops = o_1;
+  curr = FREEvm;
   while ((file = readdir(dir))) {
     size_t l = strlen(file->d_name);
+    switch (l) {
+      case 1:
+	if (file->d_name[0] == '.') continue;
+	break;
+	
+      case 2:
+	if (file->d_name[0] == '.' && file->d_name[1] == '.')
+	  continue;
+	break;
+
+      default: break;
+    };
+
     if (curr + FRAMEBYTES + DALIGN(l) >= CEILvm) {
       retc = VM_OVF;
       goto err;
@@ -268,7 +282,6 @@ P op_readdir(void) {
     moveB(file->d_name, curr+FRAMEBYTES, l);
     ARRAY_SIZE(curr) = l;
     moveframe(curr, ops);
-    ATTR(curr) = 0;
 
     curr += FRAMEBYTES + DALIGN(l);
     ops += FRAMEBYTES;
