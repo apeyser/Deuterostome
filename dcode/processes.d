@@ -227,7 +227,7 @@
     stat not ~false {17 ~pop repeat true} ifelse
   } bind def
 
-  | (dir) (file) | dict true / false
+  | (dir) (file) / fd | dict true / false
   /statfile {
     stat not ~false {
       mkfile_type 8 1 roll

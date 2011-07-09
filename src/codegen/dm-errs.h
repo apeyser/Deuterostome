@@ -133,3 +133,12 @@
 #define X_SEC_LIB   0x00000A08L /* X security lib missing                */
 
 #define ACTIVE_STREAM 0x00000B00L /* Can't restore open stream */
+
+// *** Operation on closed stream
+#define STREAM_CLOSED 0xC00L
+// *** operation on wrong direction stream
+#define STREAM_DIR    0xC01L
+// *** Stream closed while attempting to write
+#define STREAM_EPIPE  0xC02L
+// *** double unget on stream
+#define STREAM_OVF    0xC03L

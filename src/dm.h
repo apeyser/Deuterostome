@@ -352,7 +352,12 @@ extern "C" {
 #define STREAM_BUFFERED(fdbox) (*(BOOLEAN*) PF_PTR(fdbox,1))
 #define STREAM_CHAR(fdbox)     (*(B*)       PF_PTR(fdbox,2))
 #define STREAM_RO(fdbox)       (*(BOOLEAN*) PF_PTR(fdbox,3))
-#define STREAM_LOCKED(fdbox)   (*(BOOLEAN*) PF_PTR(fdbox,4))
+#define STREAM_LOCKED(fdbox)   (*(STREAM_LOCKED_STATE*) PF_PTR(fdbox,4))
+typedef enum {
+  STREAM_LOCKED_UN   = 0,
+  STREAM_LOCKED_RD   = 1,
+  STREAM_LOCKED_WR   = 2
+} STREAM_LOCKED_STATE;
 
 /*--------------------------------------------- Internal message codes */
 #include "dm-errs.h"

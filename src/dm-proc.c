@@ -830,7 +830,7 @@ P op_tmpfile(void) {
   STREAM_FD(curr) = fdr;
   STREAM_BUFFERED(curr) = FALSE;
   STREAM_RO(curr) = TRUE;
-  STREAM_LOCKED(curr) = FALSE;
+  STREAM_LOCKED(curr) = STREAM_LOCKED_UN;
   curr += STREAMBOXBYTES;
 
   TAG(curr) = STREAM;
@@ -842,7 +842,7 @@ P op_tmpfile(void) {
   STREAM_FD(curr) = fdw;
   STREAM_BUFFERED(curr) = FALSE;
   STREAM_RO(curr) = FALSE;
-  STREAM_LOCKED(curr) = FALSE;
+  STREAM_LOCKED(curr) = STREAM_LOCKED_UN;
   curr += STREAMBOXBYTES;
 
   tmpsub = strrchr(tmp, '/') + 1;
@@ -1131,7 +1131,7 @@ P op_copyfd(void) {
   nstreambox = VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
   moveLBIG((LBIG*) streambox, (LBIG*) nstreambox, STREAMBOXBYTES/PACK_FRAME);
   STREAM_FD(nstreambox) = fdnew;
-  STREAM_LOCKED(nstreambox) = FALSE;
+  STREAM_LOCKED(nstreambox) = STREAM_LOCKED_UN;
 
   moveframe(FREEvm, o_1);
   FREEvm += FRAMEBYTES + STREAMBOXBYTES;
@@ -1191,7 +1191,7 @@ P op_makefd(void) {
   STREAM_FD(streambox) = (int) fd;
   STREAM_BUFFERED(streambox) = FALSE;
   STREAM_RO(streambox)  = BOOL_VAL(o_1);
-  STREAM_LOCKED(streambox) = FALSE;
+  STREAM_LOCKED(streambox) = STREAM_LOCKED_UN;
   moveframe(FREEvm, o_2);
 
   FREEvm += FRAMEBYTES+STREAMBOXBYTES;  
@@ -1348,7 +1348,7 @@ P op_pipefd(void) {
   STREAM_FD(streambox) = pipefd[0];
   STREAM_BUFFERED(streambox) = FALSE;
   STREAM_RO(streambox) = TRUE;
-  STREAM_LOCKED(streambox) = FALSE;
+  STREAM_LOCKED(streambox) = STREAM_LOCKED_UN;
   moveframe(FREEvm, o1);
   
   FREEvm += FRAMEBYTES + STREAMBOXBYTES;
@@ -1358,7 +1358,7 @@ P op_pipefd(void) {
   STREAM_FD(streambox) = pipefd[1];
   STREAM_BUFFERED(streambox) = FALSE;
   STREAM_RO(streambox) = FALSE;
-  STREAM_LOCKED(streambox) = FALSE;
+  STREAM_LOCKED(streambox) = STREAM_LOCKED_UN;
   moveframe(FREEvm, o2);
 
   FREEvm += FRAMEBYTES + STREAMBOXBYTES;
@@ -1484,7 +1484,7 @@ P op_openfd(void) {
   STREAM_FD(streambox) = fd;
   STREAM_BUFFERED(streambox) = FALSE;
   STREAM_RO(streambox) = flags[flag].read;
-  STREAM_LOCKED(streambox) = FALSE;
+  STREAM_LOCKED(streambox) = STREAM_LOCKED_UN;
   moveframe(FREEvm, o_4);
   FREEvm += FRAMEBYTES + STREAMBOXBYTES;
 
@@ -1921,18 +1921,38 @@ P op_closefd(void) {
   return retc;
 }
 
-DM_INLINE_STATIC P x_op_lockfd_int(BOOLEAN relock) {
+DM_INLINE_STATIC P x_op_lockfd_int(STREAM_LOCKED_STATE relock) {
   B* streambox;
+  struct flock f = {
+    .l_whence = SEEK_SET,
+    .l_start = 0,
+    .l_len = 0
+  };
+
   if (x_1 < FLOORexecs) return EXECS_UNF;
-  if (TAG(x_1) != STREAM) return EXECS_COR;
-  
+  if (TAG(x_1) != STREAM) return EXECS_COR;  
   streambox = VALUE_PTR(x_1);
-  if (relock != STREAM_LOCKED(streambox)
-      && STREAM_FD(streambox) != -1)
-    while (lockf(STREAM_FD(streambox), relock ? F_LOCK : F_ULOCK, 0)) {
-      if (errno != EINTR) return -errno;
-      checkabort();
-    }
+
+  if (STREAM_FD(streambox) == -1) goto locked;
+  if (relock == STREAM_LOCKED(streambox)) goto locked;
+  switch (relock) {
+    case STREAM_LOCKED_UN:
+      f.l_type = F_UNLCK;
+      break;
+    case STREAM_LOCKED_RD:
+      f.l_type = F_RDLCK;
+      break;
+    case STREAM_LOCKED_WR:
+      f.l_type = F_WRLCK;
+      break;
+  }
+  
+  while (fcntl(STREAM_FD(streambox), F_SETLKW, &f) == -1) {
+    if (errno != EINTR) return -errno;
+    checkabort();
+  }
+
+ locked:
   STREAM_LOCKED(streambox) = relock;
 
   FREEexecs = x_1;
@@ -1940,17 +1960,34 @@ DM_INLINE_STATIC P x_op_lockfd_int(BOOLEAN relock) {
   return OK;
 }
 
-P x_op_lockfd(void) {
-  return x_op_lockfd_int(TRUE);
+P x_op_lockfd_wr(void) {
+  return x_op_lockfd_int(STREAM_LOCKED_WR);
 }
 
-P x_op_unlockfd(void) {
-  return x_op_lockfd_int(FALSE);
+P x_op_lockfd_rd(void) {
+  return x_op_lockfd_int(STREAM_LOCKED_RD);
 }
+
+P x_op_lockfd_un(void) {
+  return x_op_lockfd_int(STREAM_LOCKED_UN);
+}
+
+typedef enum {
+  D_LOCK_UN   = STREAM_LOCKED_UN,
+  D_LOCK_RD   = STREAM_LOCKED_RD,
+  D_LOCK_WR   = STREAM_LOCKED_WR,
+  D_LOCK_RDWR = STREAM_LOCKED_WR+1
+} D_LOCK_CMD;
 
 // ~active fd | ...
-DM_INLINE_STATIC P op_lockfd_int(BOOLEAN lock, int cmd) {
+DM_INLINE_STATIC P op_lockfd_int(D_LOCK_CMD lock, int cmd) {
+  STREAM_LOCKED_STATE relock;
   B* streambox;
+  struct flock f = {
+    .l_whence = SEEK_SET,
+    .l_start = 0,
+    .l_len = 0
+  };
 
   if (o_2 < FLOORopds) return OPDS_UNF;
   if (CEILexecs < x5) return EXECS_OVF;
@@ -1959,25 +1996,56 @@ DM_INLINE_STATIC P op_lockfd_int(BOOLEAN lock, int cmd) {
   if (STREAM_FD(streambox) == -1) return STREAM_CLOSED;
   if (! (ATTR(o_2) & ACTIVE)) return OPD_ATR;
 
-  if (lock != STREAM_LOCKED(streambox))
-    while (lockf(STREAM_FD(streambox), cmd, 0)) {
-      if (errno != EINTR) return -errno;
-      checkabort();
-    }
+  if (lock != D_LOCK_RDWR) relock = (STREAM_LOCKED_STATE) lock;
+  else switch (STREAM_LOCKED(streambox)) {
+    case STREAM_LOCKED_UN: case STREAM_LOCKED_RD:
+      relock = STREAM_LOCKED_RD;
+      break;
+    case STREAM_LOCKED_WR:
+      relock = STREAM_LOCKED_WR;
+      break;
+  };
+  
 
+  
+  if (relock == STREAM_LOCKED(streambox)) goto locked;
+  switch (relock) {
+    case STREAM_LOCKED_UN:
+      f.l_type = F_UNLCK;
+      break;
+    case STREAM_LOCKED_RD:
+      f.l_type = F_RDLCK;
+      break;
+    case STREAM_LOCKED_WR:
+      f.l_type = F_WRLCK;
+      break;
+  }
+
+  while (fcntl(STREAM_FD(streambox), cmd, &f) == -1) {
+    if (errno != EINTR) return -errno;
+    checkabort();
+  }
+
+ locked:
   moveframe(o_1, x1);
   
   TAG(x2) = OP;
   ATTR(x2) = ACTIVE;
-  if (STREAM_LOCKED(streambox)) {
-    OP_NAME(x2) = "x_lockfd";
-    OP_CODE(x2) = x_op_lockfd;
-  }
-  else {
-    OP_NAME(x2) = "x_unlockfd";
-    OP_CODE(x2) = x_op_unlockfd;
-  }
-  STREAM_LOCKED(streambox) = lock;
+  switch (STREAM_LOCKED(streambox)) {
+    case STREAM_LOCKED_UN:
+      OP_NAME(x2) = "x_lockfd_un";
+      OP_CODE(x2) = x_op_lockfd_un;
+      break;
+    case STREAM_LOCKED_RD:
+      OP_NAME(x2) = "x_lockfd_rd";
+      OP_CODE(x2) = x_op_lockfd_rd;
+      break;
+    case STREAM_LOCKED_WR:
+      OP_NAME(x2) = "x_lockfd_wr";
+      OP_CODE(x2) = x_op_lockfd_wr;
+      break;
+  };
+  STREAM_LOCKED(streambox) = relock;
 
   TAG(x3) = BOOL;
   ATTR(x3) = (STOPMARK|ABORTMARK|ACTIVE);
@@ -1993,16 +2061,25 @@ DM_INLINE_STATIC P op_lockfd_int(BOOLEAN lock, int cmd) {
 
 // ~active fd | ...
 P op_lockfd(void) {
-  return op_lockfd_int(TRUE, F_LOCK);
+  return op_lockfd_int(D_LOCK_RDWR, F_SETLKW);
+}
+
+// ~active fd | ..
+P op_lockfd_ex(void) {
+  return op_lockfd_int(D_LOCK_WR, F_SETLKW);
+}
+
+P op_lockfd_sh(void) {
+  return op_lockfd_int(D_LOCK_RD, F_SETLKW);
 }
 
 // ~active fd | --
 P op_unlockfd(void) {
-  return op_lockfd_int(FALSE, F_ULOCK);
+  return op_lockfd_int(D_LOCK_UN, F_SETLKW);
 }
 
 // ~active fd | ... true-if-success
-P op_trylockfd(void) {
+DM_INLINE_STATIC P op_trylockfd_int(D_LOCK_CMD st) {
   B* test;
   P retc;
 
@@ -2012,7 +2089,7 @@ P op_trylockfd(void) {
   ATTR(x1) = 0;
   FREEexecs = x2;
 
-  switch (retc = op_lockfd_int(TRUE, F_TLOCK)) {
+  switch (retc = op_lockfd_int(st, F_SETLK)) {
     case -EACCES: case -EAGAIN:
       BOOL_VAL(test) = FALSE;
       return OK;
@@ -2025,6 +2102,18 @@ P op_trylockfd(void) {
       FREEexecs = test;
       return retc;
   };
+}
+
+P op_trylockfd(void) {
+  return op_trylockfd_int(D_LOCK_RDWR);
+}
+
+P op_trylockfd_ex(void) {
+  return op_trylockfd_int(D_LOCK_WR);
+}
+
+P op_trylockfd_sh(void) {
+  return op_trylockfd_int(D_LOCK_RD);
 }
 
 ////// tokenizing /////////////////////////////////////

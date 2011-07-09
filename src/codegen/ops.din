@@ -302,7 +302,9 @@ end def |]
       /openfd /readfd /readtomarkfd /readtomarkfd_nb 
       /tmpfile /tmpdir /rmpath /finddir
       /suckfd /closedfd /getfd /ungetfd
-      /writefd /closefd /lockfd /unlockfd /trylockfd
+      /writefd /closefd
+      /lockfd /lockfd_ex /lockfd_sh /unlockfd
+      /trylockfd /trylockfd_ex /trylockfd_sh
       /glob /setenv /getenv /statvfs /realpath /cp /rename /utimes /makedir
       /stat /readdir
     ] def
