@@ -1960,15 +1960,15 @@ DM_INLINE_STATIC P x_op_lockfd_int(STREAM_LOCKED_STATE relock) {
   return OK;
 }
 
-P x_op_lockfd_wr(void) {
+static P x_op_lockfd_wr(void) {
   return x_op_lockfd_int(STREAM_LOCKED_WR);
 }
 
-P x_op_lockfd_rd(void) {
+static P x_op_lockfd_rd(void) {
   return x_op_lockfd_int(STREAM_LOCKED_RD);
 }
 
-P x_op_lockfd_un(void) {
+static P x_op_lockfd_un(void) {
   return x_op_lockfd_int(STREAM_LOCKED_UN);
 }
 
