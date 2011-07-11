@@ -326,6 +326,8 @@ P _syserrc[] = {
   STREAM_CLOSED,
   STREAM_DIR,
   STREAM_EPIPE,
+  STREAM_UNLOCKABLE_TYPE,
+  STREAM_UNLOCKABLE_FILE,
   STREAM_OVF,
   0L
 };
@@ -410,6 +412,8 @@ B* _syserrm[] = {
   (B*) "*** Operation on closed stream",
   (B*) "*** operation on wrong direction stream",
   (B*) "*** Stream closed while attempting to write",
+  (B*) "** Unlockable file descriptor type",
+  (B*) "** Unlockable file",
   (B*) "*** double unget on stream",
   (B*) NULL
 };

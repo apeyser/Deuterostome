@@ -68,7 +68,6 @@ static const struct SocketType pipetype = {
   .exec     = TRUE,
   .proc     = TRUE,
   .stdin    = -1
-
 };
 
 static const struct SocketType sockettype = {

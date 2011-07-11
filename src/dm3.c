@@ -216,16 +216,24 @@ DM_INLINE_STATIC P _delsocket(P fd, enum _DelMode delmode) {
       switch (next->type.stdin) {
 	case  0: if ((retc = _opendevnull(fd, O_WRONLY))) return retc; break;
 	case  1: if ((retc = _opendevnull(fd, O_RDONLY))) return retc; break;
-	case -1: if (close(fd)) retc = -errno; break;
-      }
+	case -1: 
+	  while (close(fd)) {
+	    if (errno != EINTR) {
+	      retc = -errno;
+	      break;
+	    };
+	    checkabort();
+	  };
+	  break;
+      };
 
       if (next->type.listener) {
 	clearsocket(fd);
 	if (next->info.listener.sigfd != -1)
 	  close(next->info.listener.sigfd);
-	if (next->info.listener.recsigfd != -1) 
+	if (next->info.listener.recsigfd != -1)
 	  close(next->info.listener.recsigfd);
-	if (next->info.listener.trecsigfd != -1) 
+	if (next->info.listener.trecsigfd != -1)
 	  close(next->info.listener.trecsigfd);
 	if (mypid == next->pid) {
 	  if (next->redirector != -1) {
