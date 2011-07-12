@@ -142,3 +142,8 @@
 #define STREAM_EPIPE  0xC02L
 // *** double unget on stream
 #define STREAM_OVF    0xC03L
+
+// *** Internal Err -- unknown fd
+#define FD_NOTFOUND 0xC04L
+// ** Internal Err -- dup listener
+#define FD_ISSOCKET 0xC05L

@@ -101,165 +101,169 @@
 #define READ_ERROR                    ((P)       46L)
 // ** Attempt to change file descriptor state
 #define SOCK_STATE                    ((P)       47L)
+// ** Attempt to dup unknown file descriptor -- internal error
+#define FD_NOTFOUND                   ((P)       48L)
+// ** Attempt to dup listener -- internal error
+#define FD_ISSOCKET                   ((P)       49L)
 // ** Internal Unknown error
-#define UNKNOWN_ERR                   ((P)       48L)
+#define UNKNOWN_ERR                   ((P)       50L)
 // ** Internal buffer overflow
-#define BUF_OVF                       ((P)       49L)
+#define BUF_OVF                       ((P)       51L)
 // ** Need openssl to read box file
-#define NEED_SSL                      ((P)       50L)
+#define NEED_SSL                      ((P)       52L)
 #ifdef ENABLE_REGEX
 // Regex Error: Invalid regular expression
-#define REGEX_BADPAT                  ((P)       51L)
+#define REGEX_BADPAT                  ((P)       53L)
 // Regex Error: Invalid collating element
-#define REGEX_ECOLLATE                ((P)       52L)
+#define REGEX_ECOLLATE                ((P)       54L)
 // Regex Error: Invalid character class
-#define REGEX_ECTYPE                  ((P)       53L)
+#define REGEX_ECTYPE                  ((P)       55L)
 // Regex Error: `\' applied to unescapable character
-#define REGEX_EESCAPE                 ((P)       54L)
+#define REGEX_EESCAPE                 ((P)       56L)
 // Regex Error: invalid backreference number
-#define REGEX_ESUBREG                 ((P)       55L)
+#define REGEX_ESUBREG                 ((P)       57L)
 // Regex Error: brackets `[]' not balanced
-#define REGEX_EBRACK                  ((P)       56L)
+#define REGEX_EBRACK                  ((P)       58L)
 // Regex Error: paranthesis `()' not balanced
-#define REGEX_EPAREN                  ((P)       57L)
+#define REGEX_EPAREN                  ((P)       59L)
 // Regex Error: braces `{}' not balanced
-#define REGEX_EBRACE                  ((P)       58L)
+#define REGEX_EBRACE                  ((P)       60L)
 // Regex Error: invalid repetition count(s) in `{}'
-#define REGEX_BADBR                   ((P)       59L)
+#define REGEX_BADBR                   ((P)       61L)
 // Regex Error: invalid character range in `[]'
-#define REGEX_ERANGE                  ((P)       60L)
+#define REGEX_ERANGE                  ((P)       62L)
 // Regex Error: ran out of memory
-#define REGEX_ESPACE                  ((P)       61L)
+#define REGEX_ESPACE                  ((P)       63L)
 // Regex Error: `?', `*', or `+' operand invalid
-#define REGEX_BADRPT                  ((P)       62L)
+#define REGEX_BADRPT                  ((P)       64L)
 // Regex Error: Unknown error
-#define REGEX_UNKNOWN                 ((P)       63L)
+#define REGEX_UNKNOWN                 ((P)       65L)
 #endif //ENABLE_REGEX
 // ** No such file or directory
-#define FILE_NOSUCH                   ((P)       64L)
+#define FILE_NOSUCH                   ((P)       66L)
 // ** Directory not empty
-#define DIR_NOTEMPTY                  ((P)       65L)
+#define DIR_NOTEMPTY                  ((P)       67L)
 // *** Child process failed
-#define CHILD_FAILURE                 ((P)       66L)
+#define CHILD_FAILURE                 ((P)       68L)
 // *** Operation on closed stream
-#define STREAM_CLOSED                 ((P)       67L)
+#define STREAM_CLOSED                 ((P)       69L)
 // *** operation on wrong direction stream
-#define STREAM_DIR                    ((P)       68L)
+#define STREAM_DIR                    ((P)       70L)
 // *** Stream closed while attempting to write
-#define STREAM_EPIPE                  ((P)       69L)
+#define STREAM_EPIPE                  ((P)       71L)
 // ** Unlockable file descriptor type
-#define STREAM_UNLOCKABLE_TYPE        ((P)       70L)
+#define STREAM_UNLOCKABLE_TYPE        ((P)       72L)
 // ** Unlockable file
-#define STREAM_UNLOCKABLE_FILE        ((P)       71L)
+#define STREAM_UNLOCKABLE_FILE        ((P)       73L)
 // *** double unget on stream
-#define STREAM_OVF                    ((P)       72L)
+#define STREAM_OVF                    ((P)       74L)
 #ifdef ENABLE_SEM
 // ** Inter locks not defined
-#define INTER_LOCK_NOT_DEF            ((P)       73L)
+#define INTER_LOCK_NOT_DEF            ((P)       75L)
 #endif //ENABLE_SEM
 // ** Lost connection
-#define LOST_CONN                     ((P)       74L)
+#define LOST_CONN                     ((P)       76L)
 // ** Attempted to send a signal to a socket without that capability
-#define ILL_SOCK                      ((P)       75L)
+#define ILL_SOCK                      ((P)       77L)
 // ** Dead socket
-#define DEAD_SOCKET                   ((P)       76L)
+#define DEAD_SOCKET                   ((P)       78L)
 // ** X windows unavailable
-#define NO_XWINDOWS                   ((P)       77L)
+#define NO_XWINDOWS                   ((P)       79L)
 // ** Error in X windows
-#define X_ERR                         ((P)       78L)
+#define X_ERR                         ((P)       80L)
 // ** Bad X windows font
-#define X_BADFONT                     ((P)       79L)
+#define X_BADFONT                     ((P)       81L)
 // ** Cannot connect to X server
-#define X_BADHOST                     ((P)       80L)
+#define X_BADHOST                     ((P)       82L)
 // ** Unable to load dynamically linked library
-#define LIB_LOAD                      ((P)       81L)
+#define LIB_LOAD                      ((P)       83L)
 // ** Unable to find object in shared library
-#define LIB_EXPORT                    ((P)       82L)
+#define LIB_EXPORT                    ((P)       84L)
 // ** Library has not been loaded
-#define LIB_LINK                      ((P)       83L)
+#define LIB_LINK                      ((P)       85L)
 // ** Unable to add operator to library dictionary
-#define LIB_ADD                       ((P)       84L)
+#define LIB_ADD                       ((P)       86L)
 // ** Library has already been loaded
-#define LIB_LOADED                    ((P)       85L)
+#define LIB_LOADED                    ((P)       87L)
 // ** Overflow in malloc while loading library
-#define LIB_OVF                       ((P)       86L)
+#define LIB_OVF                       ((P)       88L)
 // ** Unable to merge library into sysdict
-#define LIB_MERGE                     ((P)       87L)
+#define LIB_MERGE                     ((P)       89L)
 // ** Unable to initialize loaded library
-#define LIB_INIT                      ((P)       88L)
+#define LIB_INIT                      ((P)       90L)
 // ** Cannot allocate D memory
-#define VMR_ERR                       ((P)       89L)
+#define VMR_ERR                       ((P)       91L)
 // ** vmresize operand doesn't match vm state
-#define VMR_STATE                     ((P)       90L)
+#define VMR_STATE                     ((P)       92L)
 // ** Opaque dict type mismatch
-#define ILL_OPAQUE                    ((P)       91L)
+#define ILL_OPAQUE                    ((P)       93L)
 // ** Illegal attempt to fold opaque object
-#define FOLD_OPAQUE                   ((P)       92L)
+#define FOLD_OPAQUE                   ((P)       94L)
 // ** Unable to restore active opaque object
-#define ACTIVE_OPAQUE                 ((P)       93L)
+#define ACTIVE_OPAQUE                 ((P)       95L)
 // ** Unable to restore open stream object
-#define ACTIVE_STREAM                 ((P)       94L)
+#define ACTIVE_STREAM                 ((P)       96L)
 // ** Compiled without plugin support
-#define NO_PLUGINS                    ((P)       95L)
+#define NO_PLUGINS                    ((P)       97L)
 #ifdef ENABLE_THREADS
 #endif //ENABLE_THREADS
 #ifdef BUILD_ATLAS
 #endif //BUILD_ATLAS
 #ifdef HAVE_ATLAS
 // Matrix Error: illegal vector size
-#define MATRIX_VECTOR_SIZE            ((P)       96L)
+#define MATRIX_VECTOR_SIZE            ((P)       98L)
 // Matrix Error: pivot array corrupted
-#define MATRIX_PIVOT_CORR             ((P)       97L)
+#define MATRIX_PIVOT_CORR             ((P)       99L)
 // Matrix Error: undefined value in cut
-#define MATRIX_UNDEF_CUT              ((P)       98L)
+#define MATRIX_UNDEF_CUT              ((P)      100L)
 // Matrix Error: cut dimension less than 1
-#define MATRIX_ILLEGAL_CUT            ((P)       99L)
+#define MATRIX_ILLEGAL_CUT            ((P)      101L)
 // Matrix Error: number of cut dimensions too small
-#define MATRIX_UNDER_CUT              ((P)      100L)
+#define MATRIX_UNDER_CUT              ((P)      102L)
 // Matrix Error: array too small for cut
-#define MATRIX_NONMATCH_CUT           ((P)      101L)
+#define MATRIX_NONMATCH_CUT           ((P)      103L)
 // Matrix Error: vector dimensions don't match
-#define MATRIX_VECTOR_NONMATCH        ((P)      102L)
+#define MATRIX_VECTOR_NONMATCH        ((P)      104L)
 // Matrix Error: matrix dimensions don't match
-#define MATRIX_NONMATCH_SHAPE         ((P)      103L)
+#define MATRIX_NONMATCH_SHAPE         ((P)      105L)
 // Matrix Error: parameters to clapack illegal
-#define MATRIX_PARAM_ERROR            ((P)      104L)
+#define MATRIX_PARAM_ERROR            ((P)      106L)
 // Matrix Error: Internal Error - message on stack
-#define MATRIX_INT_ERR                ((P)      105L)
+#define MATRIX_INT_ERR                ((P)      107L)
 // Matrix Error: lu matrix is singular
-#define MATRIX_SINGULAR               ((P)      106L)
+#define MATRIX_SINGULAR               ((P)      108L)
 // Matrix Error: illegal overlap
-#define MATRIX_OVERLAP                ((P)      107L)
+#define MATRIX_OVERLAP                ((P)      109L)
 #endif //HAVE_ATLAS
 #ifdef ENABLE_RTHREADS
 // ** Rthreads are inactive
-#define RTHREADS_UNSET                ((P)      108L)
+#define RTHREADS_UNSET                ((P)      110L)
 // ** Rthreads: nodes for dictionay not a numeral
-#define RTHREADS_NUMTYPE              ((P)      109L)
+#define RTHREADS_NUMTYPE              ((P)      111L)
 // ** Rthreads: nodes for dictionary undefined
-#define RTHREADS_NUMUNDF              ((P)      110L)
+#define RTHREADS_NUMUNDF              ((P)      112L)
 // ** Rthreads: nodes for dictionary out of range
-#define RTHREADS_NUMRNG               ((P)      111L)
+#define RTHREADS_NUMRNG               ((P)      113L)
 // ** Rthreads: illegal class for info dictionary
-#define RTHREADS_DICTTYPE             ((P)      112L)
+#define RTHREADS_DICTTYPE             ((P)      114L)
 // ** Rthreads: key/val pair: val not a string
-#define RTHREADS_VALTYPE              ((P)      113L)
+#define RTHREADS_VALTYPE              ((P)      115L)
 // ** Rthreads: key/val pair: val too long
-#define RTHREADS_VALSIZE              ((P)      114L)
+#define RTHREADS_VALSIZE              ((P)      116L)
 // ** Rthreads: key/val pair: val empty
-#define RTHREADS_VALEMPTY             ((P)      115L)
+#define RTHREADS_VALEMPTY             ((P)      117L)
 // ** Rthreads: key/val pair: key too long
-#define RTHREADS_KEYSIZE              ((P)      116L)
+#define RTHREADS_KEYSIZE              ((P)      118L)
 // ** Rthreads: key/val pair: val is active
-#define RTHREADS_VALATR               ((P)      117L)
+#define RTHREADS_VALATR               ((P)      119L)
 #endif //ENABLE_RTHREADS
 #ifdef HOST_IS_32_BIT
 #endif //HOST_IS_32_BIT
 #ifdef ENABLE_PLUGINS_SUPPORT
 #endif //ENABLE_PLUGINS_SUPPORT
 // ** no socket events -- internal
-#define NEXTEVENT_NOEVENT             ((P)      118L)
+#define NEXTEVENT_NOEVENT             ((P)      120L)
 // ** No mpi message msg received -- internal
-#define MPI_NOMSG                     ((P)      119L)
+#define MPI_NOMSG                     ((P)      121L)
 
 #endif //DM_ERRS_H

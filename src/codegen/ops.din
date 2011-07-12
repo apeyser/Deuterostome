@@ -281,6 +281,8 @@
       /ILL_RECAP (** Double capsave) def 
       /READ_ERROR (** Internal Read error) def
       /SOCK_STATE (** Attempt to change file descriptor state) def
+      /FD_NOTFOUND (** Attempt to dup unknown file descriptor -- internal error) def
+      /FD_ISSOCKET (** Attempt to dup listener -- internal error) def
       /UNKNOWN_ERR (** Internal Unknown error) def
       /BUF_OVF (** Internal buffer overflow) def
       /NEED_SSL (** Need openssl to read box file) def|]

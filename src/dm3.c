@@ -382,6 +382,35 @@ P addsocket(P fd, const struct SocketType* type, const union SocketInfo* info) {
   return OK;
 }
 
+P addsocket_dup(P fd) {
+  P retc;
+  struct socketstore* next;
+  struct SocketType* type = NULL;
+
+  for (next = socketstore_head; next; next = next->next)
+    if (next->fd == fd) {
+      type = &next->type;
+      break;
+    }
+
+  if (! type) return FD_NOTFOUND;
+  if (type->listener) return FD_ISSOCKET;
+
+  if (! type->fork) {
+    if ((retc = nocloseonexec(fd))) {
+      delsocket_force(fd);
+      return retc;
+    }
+  }
+  else if ((retc = closeonexec(fd))) {
+    delsocket_force(fd);
+    return retc;
+  }
+
+  sockprintdebug("dup", next);
+  return OK;
+}
+
 DM_INLINE_STATIC P _closesockets(enum _DelMode delmode) {
   int retc = OK, retc_;
   struct socketstore* next = socketstore_head;

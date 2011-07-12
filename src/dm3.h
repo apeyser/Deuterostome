@@ -111,6 +111,7 @@ DLL_SCOPE P op_socketdead(void);
 
 DLL_SCOPE P addsocket(P fd, const struct SocketType* type, 
 		      const union SocketInfo* info);
+DLL_SCOPE P addsocket_dup(P fd);
 DLL_SCOPE P delsocket_force(P fd);
 DLL_SCOPE P delsocket_fork(P fd);
 DLL_SCOPE P delsocket_exec(P fd);

@@ -820,7 +820,6 @@ P op_tmpfile(void) {
   if ((fdr = mkstemp(FREEvm)) == -1) return -errno;
   if (! (tmp = strdup(FREEvm))) return -errno;
   if ((retc = addsocket(fdr, &pipetype, NULL))) {
-    close(fdr);
     free(tmp);
     return retc;
   }
@@ -832,7 +831,6 @@ P op_tmpfile(void) {
   }
   if ((retc = addsocket(fdw, &pipetype, NULL))) {
     delsocket_force(fdr);
-    close(fdw);
     free(tmp);
     return retc;
   }
@@ -1146,20 +1144,16 @@ P op_copyfd(void) {
 
   fdoldl = STREAM_FD_LOCK(streambox);
   if ((fdnew = dup(fdold)) == -1) return -errno;
-  if ((retc = addsocket(fdnew, &pipetype, NULL))) {
-    close(fdnew);
-    return retc;
-  }
+  if ((retc = addsocket(fdnew, &pipetype, NULL))) return retc;
 
   if (fdoldl < 0) fdnewl = fdoldl;
   else if ((fdnewl = dup(fdoldl)) == -1) {
     retc = -errno;
-    close(fdnew);
+    delsocket_force(fdnew);
     return retc;
   }
   else if ((retc = addsocket(fdnewl, &pipetype, NULL))) {
     delsocket_force(fdnew);
-    close(fdnewl);
     return retc;
   }
 
@@ -1260,21 +1254,31 @@ P op_dupfd(void) {
   if (STREAM_RO(streambox1) != STREAM_RO(streambox2))
     return STREAM_DIR;
 
-  if (dup2(fd2, fd1) == -1)
-    return -errno;
+  if (dup2(fd2, fd1) == -1) return -errno;
+  if ((retc = addsocket_dup(fd1))) return retc;
 
-  if (fdl2 < 0) STREAM_FD_LOCK(streambox1) = fdl2;
-  else if (fdl1 < 0) {
-    if ((STREAM_FD_LOCK(streambox1) = dup(fdl2)) == -1) {
+  if (fdl2 < 0) {
+    STREAM_FD_LOCK(streambox1) = fdl2;
+    if (fdl1 >= 0) delsocket_force(fdl1);
+  }
+  else {
+    if (fdl1 < 0) {
+      if ((STREAM_FD_LOCK(streambox1) = dup(fdl2)) == -1) {
+	retc = -errno;
+	closefd(streambox1);
+	return retc;
+      }
+    }
+    else if (dup2(fdl2, fdl1) == -1) {
       retc = -errno;
       closefd(streambox1);
       return retc;
     }
-  }
-  else if (dup2(fdl2, fdl1) == -1) {
-    retc = -errno;
-    closefd(streambox1);
-    return retc;
+
+    if ((retc = addsocket_dup(fdl1))) {
+      closefd(streambox1);
+      return retc;
+    }
   }
 
   FREEopds = o_2;
@@ -1390,13 +1394,12 @@ P op_pipefd(void) {
   if (pipe(pipefd)) return -errno;
 
   if ((retc = addsocket(pipefd[0], &pipetype, NULL))) {
-    delsocket_force(pipefd[1]);
+    close(pipefd[1]);
     return retc;
   }
 
   if ((retc = addsocket(pipefd[1], &pipetype, NULL))) {
     delsocket_force(pipefd[0]);
-    delsocket_force(pipefd[1]);
     return retc;
   }
 
@@ -1534,14 +1537,10 @@ P op_openfd(void) {
   if ((fd = open(FREEvm, flags[flag].flags, filemode_un(perm)))
       == -1)
     return -errno;
-  if ((retc = addsocket(fd, &pipetype, NULL))) {
-    close(fd);
-    return retc;
-  }
+  if ((retc = addsocket(fd, &pipetype, NULL))) return retc;
   if ((lfd = open(FREEvm, O_RDWR)) == -1) lfd = -2;
   else if ((retc = addsocket(lfd, &pipetype, NULL))) {
     delsocket_force(fd);
-    close(lfd);
     return retc;
   }
 
