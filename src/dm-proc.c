@@ -2288,12 +2288,18 @@ DM_INLINE_STATIC P usedfd(void) {
   return OK;
 }
 
+// obj | obj
 DM_INLINE_STATIC P cleanupfd(void) {
+  P retc;
   if (CLASS(o_1) != STREAM
       || STREAM_FD(VALUE_PTR(o_1)) == -1)
     return OK;
 
-  return op_closefd();
+  if ((retc = op_closefd())) return retc;
+
+  // push the stream back on the stack for restore.
+  FREEopds = o2;
+  return OK;
 }
 
 void setupfd(void) {
