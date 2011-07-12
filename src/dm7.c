@@ -722,7 +722,7 @@ P op_writeboxfile(void)
   SETNATIVE(base);
   atmost = top - base;
 
-  if (! closefd) {
+  if (closefd) {
     B* oldfreemem = freemem;
     if (freemem + ARRAY_SIZE(o_2) + 1 > CEILvm) {
       retc = VM_OVF;
