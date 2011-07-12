@@ -1505,9 +1505,9 @@ P op_checkpid(void) {
 }
 
 struct {int flags; BOOLEAN read;} flags[] = {
-  {O_RDONLY,                  TRUE},
-  {O_WRONLY|O_TRUNC|O_CREAT,  FALSE},
-  {O_WRONLY|O_APPEND,         FALSE}
+  {O_RDONLY,                   TRUE},
+  {O_WRONLY|O_TRUNC |O_CREAT,  FALSE},
+  {O_WRONLY|O_APPEND|O_CREAT,  FALSE}
 };
 
 // (dir)/null (filename) flags perms | fd
