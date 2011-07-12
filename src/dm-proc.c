@@ -29,6 +29,29 @@
 #include "dm-sem.h"
 #include "error-local.h"
 
+DM_INLINE_STATIC P closefd(B* stream) {
+  P retc = OK;
+  int fd  = STREAM_FD(stream);
+  int fdl = STREAM_FD_LOCK(stream);
+  
+  if (fd != -1
+      && (retc = delsocket_proc(fd))) {
+    if (fdl >= 0 && fd != fdl)
+      delsocket_force(fdl);
+  }
+  else if (fdl >= 0 && fd != fdl)
+    retc = delsocket_force(fdl);
+
+  STREAM_FD(stream) = -1;
+  STREAM_FD_LOCK(stream) = -1;
+  return retc;
+}
+
+#define rclosefd(stream) do {			\
+    P retc = closefd((stream));			\
+    if (retc) return retc;			\
+  } while (0)
+
 DM_INLINE_STATIC P pathcat_(B* op, B* def, B** next) {
   B* curr;
   B* dir;
@@ -426,7 +449,7 @@ P op_stat(void) {
     case STREAM:
       off = -1;
       stream = VALUE_PTR(o_1);
-      if ((fstatvfs_int_fd = (int) STREAM_FD(stream) == -1))
+      if ((fstat_int_fd = (int) STREAM_FD(stream)) == -1)
 	return STREAM_CLOSED;
 
       statfunc = fstat_int;
@@ -599,13 +622,8 @@ P op_cp(void) {
       nw += nw2;
     }
   }
-
-  while (close(fdin)) {
-    if (errno != EINTR) return -errno;
-    checkabort();
-  }
-  STREAM_FD(streamin) = -1;
-
+  
+  rclosefd(streamin);
   moveframe(o_1, o_2);
   FREEopds = o_1;
   return OK;
@@ -802,20 +820,17 @@ P op_tmpfile(void) {
   if ((fdr = mkstemp(FREEvm)) == -1) return -errno;
   if (! (tmp = strdup(FREEvm))) return -errno;
   if ((retc = addsocket(fdr, &pipetype, NULL))) {
-    delsocket_force(fdr);
     free(tmp);
     return retc;
   }
   if ((fdw = dup((int) fdr)) == -1) {
     retc = -errno;
     delsocket_force(fdr);
-    delsocket_force(fdw);
     free(tmp);
     return retc;
   }
   if ((retc = addsocket(fdw, &pipetype, NULL))) {
     delsocket_force(fdr);
-    delsocket_force(fdw);
     free(tmp);
     return retc;
   }
@@ -830,7 +845,8 @@ P op_tmpfile(void) {
   STREAM_FD(curr) = fdr;
   STREAM_BUFFERED(curr) = FALSE;
   STREAM_RO(curr) = TRUE;
-  STREAM_LOCKED(curr) = FALSE;
+  STREAM_LOCKED(curr) = STREAM_LOCKED_UN;
+  STREAM_FD_LOCK(curr) = fdr;
   curr += STREAMBOXBYTES;
 
   TAG(curr) = STREAM;
@@ -842,7 +858,8 @@ P op_tmpfile(void) {
   STREAM_FD(curr) = fdw;
   STREAM_BUFFERED(curr) = FALSE;
   STREAM_RO(curr) = FALSE;
-  STREAM_LOCKED(curr) = FALSE;
+  STREAM_LOCKED(curr) = STREAM_LOCKED_UN;
+  STREAM_FD_LOCK(curr) = fdw;
   curr += STREAMBOXBYTES;
 
   tmpsub = strrchr(tmp, '/') + 1;
@@ -1114,9 +1131,10 @@ P op_getppid(void) {
 
 // old-fd | new-fd
 P op_copyfd(void) {
+  P retc;
   B* streambox;
   B* nstreambox;
-  int fdold, fdnew;
+  int fdold, fdnew, fdoldl, fdnewl;
 
   if (TAG(o_1) != STREAM) return OPD_CLA;
   streambox = VALUE_PTR(o_1);
@@ -1124,14 +1142,28 @@ P op_copyfd(void) {
   if (FREEvm + FRAMEBYTES + STREAMBOXBYTES >= CEILvm)
     return VM_OVF;
 
+  fdoldl = STREAM_FD_LOCK(streambox);
   if ((fdnew = dup(fdold)) == -1) return -errno;
+  if ((retc = addsocket(fdnew, &pipetype, NULL))) return retc;
+
+  if (fdoldl < 0) fdnewl = fdoldl;
+  else if ((fdnewl = dup(fdoldl)) == -1) {
+    retc = -errno;
+    delsocket_force(fdnew);
+    return retc;
+  }
+  else if ((retc = addsocket(fdnewl, &pipetype, NULL))) {
+    delsocket_force(fdnew);
+    return retc;
+  }
 
   TAG(FREEvm) = STREAM;
   ATTR(FREEvm) = PARENT;
   nstreambox = VALUE_PTR(FREEvm) = FREEvm + FRAMEBYTES;
   moveLBIG((LBIG*) streambox, (LBIG*) nstreambox, STREAMBOXBYTES/PACK_FRAME);
   STREAM_FD(nstreambox) = fdnew;
-  STREAM_LOCKED(nstreambox) = FALSE;
+  STREAM_LOCKED(nstreambox) = STREAM_LOCKED_UN;
+  STREAM_FD_LOCK(nstreambox) = fdnewl;
 
   moveframe(FREEvm, o_1);
   FREEvm += FRAMEBYTES + STREAMBOXBYTES;
@@ -1191,7 +1223,8 @@ P op_makefd(void) {
   STREAM_FD(streambox) = (int) fd;
   STREAM_BUFFERED(streambox) = FALSE;
   STREAM_RO(streambox)  = BOOL_VAL(o_1);
-  STREAM_LOCKED(streambox) = FALSE;
+  STREAM_LOCKED(streambox) = STREAM_LOCKED_UN;
+  STREAM_FD_LOCK(streambox) = -1;
   moveframe(FREEvm, o_2);
 
   FREEvm += FRAMEBYTES+STREAMBOXBYTES;  
@@ -1201,8 +1234,10 @@ P op_makefd(void) {
 
 // fds fdd | --
 P op_dupfd(void) {
+  P retc;
   B* streambox1;
   B* streambox2;
+  int fd1, fd2, fdl1, fdl2;
 
   if (FLOORopds > o_2) return OPDS_UNF;
   if (CLASS(o_1) != STREAM || CLASS(o_2) != STREAM)
@@ -1210,14 +1245,41 @@ P op_dupfd(void) {
 
   streambox1 = VALUE_PTR(o_1);
   streambox2 = VALUE_PTR(o_2);
-  if (STREAM_FD(streambox1) == -1 || STREAM_FD(streambox2) == -1)
-    return STREAM_CLOSED;
+  fd1 = STREAM_FD(streambox1);
+  fd2 = STREAM_FD(streambox2);
+  fdl1 = STREAM_FD_LOCK(streambox1);
+  fdl2 = STREAM_FD_LOCK(streambox2);
+
+  if (fd1 == -1 || fd2 == -1) return STREAM_CLOSED;
   if (STREAM_RO(streambox1) != STREAM_RO(streambox2))
     return STREAM_DIR;
 
-  if (dup2(STREAM_FD(streambox2), STREAM_FD(streambox1))
-      == -1)
-    return -errno;
+  if (dup2(fd2, fd1) == -1) return -errno;
+  if ((retc = addsocket_dup(fd1))) return retc;
+
+  if (fdl2 < 0) {
+    STREAM_FD_LOCK(streambox1) = fdl2;
+    if (fdl1 >= 0) delsocket_force(fdl1);
+  }
+  else {
+    if (fdl1 < 0) {
+      if ((STREAM_FD_LOCK(streambox1) = dup(fdl2)) == -1) {
+	retc = -errno;
+	closefd(streambox1);
+	return retc;
+      }
+    }
+    else if (dup2(fdl2, fdl1) == -1) {
+      retc = -errno;
+      closefd(streambox1);
+      return retc;
+    }
+
+    if ((retc = addsocket_dup(fdl1))) {
+      closefd(streambox1);
+      return retc;
+    }
+  }
 
   FREEopds = o_2;
   return OK;
@@ -1332,13 +1394,12 @@ P op_pipefd(void) {
   if (pipe(pipefd)) return -errno;
 
   if ((retc = addsocket(pipefd[0], &pipetype, NULL))) {
-    delsocket_force(pipefd[1]);
+    close(pipefd[1]);
     return retc;
   }
 
   if ((retc = addsocket(pipefd[1], &pipetype, NULL))) {
     delsocket_force(pipefd[0]);
-    delsocket_force(pipefd[1]);
     return retc;
   }
 
@@ -1348,7 +1409,8 @@ P op_pipefd(void) {
   STREAM_FD(streambox) = pipefd[0];
   STREAM_BUFFERED(streambox) = FALSE;
   STREAM_RO(streambox) = TRUE;
-  STREAM_LOCKED(streambox) = FALSE;
+  STREAM_LOCKED(streambox) = STREAM_LOCKED_UN;
+  STREAM_FD_LOCK(streambox) = -1;
   moveframe(FREEvm, o1);
   
   FREEvm += FRAMEBYTES + STREAMBOXBYTES;
@@ -1358,7 +1420,8 @@ P op_pipefd(void) {
   STREAM_FD(streambox) = pipefd[1];
   STREAM_BUFFERED(streambox) = FALSE;
   STREAM_RO(streambox) = FALSE;
-  STREAM_LOCKED(streambox) = FALSE;
+  STREAM_LOCKED(streambox) = STREAM_LOCKED_UN;
+  STREAM_FD_LOCK(streambox) = -1;
   moveframe(FREEvm, o2);
 
   FREEvm += FRAMEBYTES + STREAMBOXBYTES;
@@ -1442,15 +1505,16 @@ P op_checkpid(void) {
 }
 
 struct {int flags; BOOLEAN read;} flags[] = {
-  {O_RDONLY,                  TRUE},
-  {O_WRONLY|O_TRUNC|O_CREAT,  FALSE},
-  {O_WRONLY|O_APPEND,         FALSE}
+  {O_RDONLY,                   TRUE},
+  {O_WRONLY|O_TRUNC |O_CREAT,  FALSE},
+  {O_WRONLY|O_APPEND|O_CREAT,  FALSE}
 };
 
 // (dir)/null (filename) flags perms | fd
 P op_openfd(void) {
   P flag;
   int fd;
+  int lfd;
   P retc;
   B* streambox;
   ULBIG perm;
@@ -1473,7 +1537,9 @@ P op_openfd(void) {
   if ((fd = open(FREEvm, flags[flag].flags, filemode_un(perm)))
       == -1)
     return -errno;
-  if ((retc = addsocket(fd, &pipetype, NULL))) {
+  if ((retc = addsocket(fd, &pipetype, NULL))) return retc;
+  if ((lfd = open(FREEvm, O_RDWR)) == -1) lfd = -2;
+  else if ((retc = addsocket(lfd, &pipetype, NULL))) {
     delsocket_force(fd);
     return retc;
   }
@@ -1484,7 +1550,8 @@ P op_openfd(void) {
   STREAM_FD(streambox) = fd;
   STREAM_BUFFERED(streambox) = FALSE;
   STREAM_RO(streambox) = flags[flag].read;
-  STREAM_LOCKED(streambox) = FALSE;
+  STREAM_LOCKED(streambox) = STREAM_LOCKED_UN;
+  STREAM_FD_LOCK(streambox) = lfd;
   moveframe(FREEvm, o_4);
   FREEvm += FRAMEBYTES + STREAMBOXBYTES;
 
@@ -1494,7 +1561,6 @@ P op_openfd(void) {
 
 // (buffer) fd | (buffer) fd true / (sub-buffer) false
 P op_readfd(void) {
-  P retc;
   P fd;
   ssize_t nb, nb_;
   B* streambox;
@@ -1541,8 +1607,8 @@ P op_readfd(void) {
   }
 
   if (! buffd && nb_ && ! nb) {
-    STREAM_FD(streambox) = -1;
-    if ((retc = delsocket_proc(fd))) return retc;
+    rclosefd(streambox);
+
     ARRAY_SIZE(o_2) = 1;
     ATTR(o_2) &= ~PARENT;
     TAG(o_1) = BOOL;
@@ -1565,7 +1631,6 @@ P op_readfd(void) {
 
 // fd | (buffer)
 P op_suckfd(void) {
-  P retc;
   P fd;
   ssize_t nb;
   B* streambox;
@@ -1606,8 +1671,7 @@ P op_suckfd(void) {
 
   if (nb) return VM_OVF;
     
-  STREAM_FD(streambox) = -1;
-  if ((retc = delsocket_proc(fd))) return retc;
+  rclosefd(streambox);
   nb = ARRAY_SIZE(FREEvm) = curr - (FREEvm + FRAMEBYTES);
   moveframe(FREEvm, o_1);
   FREEvm += FRAMEBYTES + DALIGN(nb);
@@ -1632,7 +1696,6 @@ P op_getfd(void) {
   ssize_t nb;
   B* streambox;
   B byte;
-  P retc;
   
   if (FLOORopds > o_1) return OPDS_UNF;
   if (CLASS(o_1) != STREAM) return OPD_CLA;
@@ -1653,8 +1716,7 @@ P op_getfd(void) {
     if (nb < 1) checkabort();
     if (! nb) {
       byte = BINF;
-      STREAM_FD(streambox) = -1;
-      if ((retc = delsocket_proc(fd))) return retc;
+      rclosefd(streambox);
     }
     else STREAM_CHAR(streambox) = byte;
   }
@@ -1778,8 +1840,8 @@ P op_readtomarkfd(void) {
   return OK;
 
  closed:
-  STREAM_FD(streambox) = -1;
-  if (fd != -1 && (retc = delsocket_proc(fd))) return retc;
+  rclosefd(streambox);
+
   ARRAY_SIZE(o_3) = curr - VALUE_PTR(o_3);
   ATTR(o_3) &= ~PARENT;
   TAG(o_2) = BOOL;
@@ -1857,8 +1919,7 @@ P op_readtomarkfd_nb(void) {
   return OK;
 
  closed:
-  STREAM_FD(streambox) = -1;
-  if (fd != -1 && (retc = delsocket_proc(fd))) return retc;
+  rclosefd(streambox);
   BOOL_VAL(o1) = FALSE;
   moveframe(o1, o_1);
   nb = ARRAY_SIZE(FREEvm) = curr - (FREEvm + FRAMEBYTES);
@@ -1891,9 +1952,8 @@ P op_writefd(void) {
 	case EINTR: 
 	  checkabort();
 	  continue;
-	case EPIPE: 
-	  delsocket_proc(fd);
-	  STREAM_FD(streambox) = -1;
+	case EPIPE:
+	  closefd(streambox);
 	  return STREAM_EPIPE;
 	default:
 	  return -errno;
@@ -1907,32 +1967,51 @@ P op_writefd(void) {
 
 // fd | --
 P op_closefd(void) {
-  B* streambox;
-  P retc = OK;
   if (FLOORopds > o_1) return OPDS_UNF;
   if (TAG(o_1) != STREAM) return OPD_CLA;
-  streambox = VALUE_PTR(o_1);
-  if (STREAM_FD(streambox) != -1) {
-    retc = delsocket_proc(STREAM_FD(streambox));
-    STREAM_FD(streambox) = -1;
-  }
+  rclosefd(VALUE_PTR(o_1));
   
   FREEopds = o_1;
-  return retc;
+  return OK;
 }
 
-DM_INLINE_STATIC P x_op_lockfd_int(BOOLEAN relock) {
+DM_INLINE_STATIC P x_op_lockfd_int(STREAM_LOCKED_STATE relock) {
   B* streambox;
+  int fd;
+  struct flock f = {
+    .l_whence = SEEK_SET,
+    .l_start = 0,
+    .l_len = 0
+  };
+
   if (x_1 < FLOORexecs) return EXECS_UNF;
-  if (TAG(x_1) != STREAM) return EXECS_COR;
-  
+  if (TAG(x_1) != STREAM) return EXECS_COR;  
   streambox = VALUE_PTR(x_1);
-  if (relock != STREAM_LOCKED(streambox)
-      && STREAM_FD(streambox) != -1)
-    while (lockf(STREAM_FD(streambox), relock ? F_LOCK : F_ULOCK, 0)) {
-      if (errno != EINTR) return -errno;
-      checkabort();
-    }
+
+  if (STREAM_FD(streambox) == -1) goto locked;
+  switch ((fd = STREAM_FD_LOCK(streambox))) {
+    case -1: case -2: return EXECS_COR;
+    default: break;
+  };
+  if (relock == STREAM_LOCKED(streambox)) goto locked;
+  switch (relock) {
+    case STREAM_LOCKED_UN:
+      f.l_type = F_UNLCK;
+      break;
+    case STREAM_LOCKED_RD:
+      f.l_type = F_RDLCK;
+      break;
+    case STREAM_LOCKED_WR:
+      f.l_type = F_WRLCK;
+      break;
+  }
+  
+  while (fcntl(fd, F_SETLKW, &f) == -1) {
+    if (errno != EINTR) return -errno;
+    checkabort();
+  }
+
+ locked:
   STREAM_LOCKED(streambox) = relock;
 
   FREEexecs = x_1;
@@ -1940,17 +2019,35 @@ DM_INLINE_STATIC P x_op_lockfd_int(BOOLEAN relock) {
   return OK;
 }
 
-P x_op_lockfd(void) {
-  return x_op_lockfd_int(TRUE);
+static P x_op_lockfd_wr(void) {
+  return x_op_lockfd_int(STREAM_LOCKED_WR);
 }
 
-P x_op_unlockfd(void) {
-  return x_op_lockfd_int(FALSE);
+static P x_op_lockfd_rd(void) {
+  return x_op_lockfd_int(STREAM_LOCKED_RD);
 }
+
+static P x_op_lockfd_un(void) {
+  return x_op_lockfd_int(STREAM_LOCKED_UN);
+}
+
+typedef enum {
+  D_LOCK_UN   = STREAM_LOCKED_UN,
+  D_LOCK_RD   = STREAM_LOCKED_RD,
+  D_LOCK_WR   = STREAM_LOCKED_WR,
+  D_LOCK_RDWR = STREAM_LOCKED_WR+1
+} D_LOCK_CMD;
 
 // ~active fd | ...
-DM_INLINE_STATIC P op_lockfd_int(BOOLEAN lock, int cmd) {
+DM_INLINE_STATIC P op_lockfd_int(D_LOCK_CMD lock, int cmd) {
+  STREAM_LOCKED_STATE relock;
+  int fd;
   B* streambox;
+  struct flock f = {
+    .l_whence = SEEK_SET,
+    .l_start = 0,
+    .l_len = 0
+  };
 
   if (o_2 < FLOORopds) return OPDS_UNF;
   if (CEILexecs < x5) return EXECS_OVF;
@@ -1958,26 +2055,60 @@ DM_INLINE_STATIC P op_lockfd_int(BOOLEAN lock, int cmd) {
   streambox = VALUE_PTR(o_1);
   if (STREAM_FD(streambox) == -1) return STREAM_CLOSED;
   if (! (ATTR(o_2) & ACTIVE)) return OPD_ATR;
+  switch ((fd = STREAM_FD_LOCK(streambox))) {
+    case -1: return STREAM_UNLOCKABLE_TYPE;
+    case -2: return STREAM_UNLOCKABLE_FILE;
+    default: break;
+  };
 
-  if (lock != STREAM_LOCKED(streambox))
-    while (lockf(STREAM_FD(streambox), cmd, 0)) {
+  if (lock != D_LOCK_RDWR) relock = (STREAM_LOCKED_STATE) lock;
+  else switch (STREAM_LOCKED(streambox)) {
+    case STREAM_LOCKED_UN: case STREAM_LOCKED_RD:
+      relock = STREAM_LOCKED_RD;
+      break;
+    case STREAM_LOCKED_WR:
+      relock = STREAM_LOCKED_WR;
+      break;
+  };
+  
+  if (relock != STREAM_LOCKED(streambox)) {
+    switch (relock) {
+      case STREAM_LOCKED_UN:
+	f.l_type = F_UNLCK;
+	break;
+      case STREAM_LOCKED_RD:
+	f.l_type = F_RDLCK;
+	break;
+      case STREAM_LOCKED_WR:
+	f.l_type = F_WRLCK;
+	break;
+    }
+
+    while (fcntl(fd, cmd, &f) == -1) {
       if (errno != EINTR) return -errno;
       checkabort();
     }
+  };
 
   moveframe(o_1, x1);
   
   TAG(x2) = OP;
   ATTR(x2) = ACTIVE;
-  if (STREAM_LOCKED(streambox)) {
-    OP_NAME(x2) = "x_lockfd";
-    OP_CODE(x2) = x_op_lockfd;
-  }
-  else {
-    OP_NAME(x2) = "x_unlockfd";
-    OP_CODE(x2) = x_op_unlockfd;
-  }
-  STREAM_LOCKED(streambox) = lock;
+  switch (STREAM_LOCKED(streambox)) {
+    case STREAM_LOCKED_UN:
+      OP_NAME(x2) = "x_lockfd_un";
+      OP_CODE(x2) = x_op_lockfd_un;
+      break;
+    case STREAM_LOCKED_RD:
+      OP_NAME(x2) = "x_lockfd_rd";
+      OP_CODE(x2) = x_op_lockfd_rd;
+      break;
+    case STREAM_LOCKED_WR:
+      OP_NAME(x2) = "x_lockfd_wr";
+      OP_CODE(x2) = x_op_lockfd_wr;
+      break;
+  };
+  STREAM_LOCKED(streambox) = relock;
 
   TAG(x3) = BOOL;
   ATTR(x3) = (STOPMARK|ABORTMARK|ACTIVE);
@@ -1993,16 +2124,25 @@ DM_INLINE_STATIC P op_lockfd_int(BOOLEAN lock, int cmd) {
 
 // ~active fd | ...
 P op_lockfd(void) {
-  return op_lockfd_int(TRUE, F_LOCK);
+  return op_lockfd_int(D_LOCK_RDWR, F_SETLKW);
+}
+
+// ~active fd | ..
+P op_lockfd_ex(void) {
+  return op_lockfd_int(D_LOCK_WR, F_SETLKW);
+}
+
+P op_lockfd_sh(void) {
+  return op_lockfd_int(D_LOCK_RD, F_SETLKW);
 }
 
 // ~active fd | --
 P op_unlockfd(void) {
-  return op_lockfd_int(FALSE, F_ULOCK);
+  return op_lockfd_int(D_LOCK_UN, F_SETLKW);
 }
 
 // ~active fd | ... true-if-success
-P op_trylockfd(void) {
+DM_INLINE_STATIC P op_trylockfd_int(D_LOCK_CMD st) {
   B* test;
   P retc;
 
@@ -2012,7 +2152,7 @@ P op_trylockfd(void) {
   ATTR(x1) = 0;
   FREEexecs = x2;
 
-  switch (retc = op_lockfd_int(TRUE, F_TLOCK)) {
+  switch (retc = op_lockfd_int(st, F_SETLK)) {
     case -EACCES: case -EAGAIN:
       BOOL_VAL(test) = FALSE;
       return OK;
@@ -2025,6 +2165,18 @@ P op_trylockfd(void) {
       FREEexecs = test;
       return retc;
   };
+}
+
+P op_trylockfd(void) {
+  return op_trylockfd_int(D_LOCK_RDWR);
+}
+
+P op_trylockfd_ex(void) {
+  return op_trylockfd_int(D_LOCK_WR);
+}
+
+P op_trylockfd_sh(void) {
+  return op_trylockfd_int(D_LOCK_RD);
 }
 
 ////// tokenizing /////////////////////////////////////
@@ -2136,16 +2288,18 @@ DM_INLINE_STATIC P usedfd(void) {
   return OK;
 }
 
+// obj | obj
 DM_INLINE_STATIC P cleanupfd(void) {
   P retc;
-
   if (CLASS(o_1) != STREAM
       || STREAM_FD(VALUE_PTR(o_1)) == -1)
     return OK;
 
-  if (! (retc = op_closefd()))
-    FREEopds = o2;
-  return retc;
+  if ((retc = op_closefd())) return retc;
+
+  // push the stream back on the stack for restore.
+  FREEopds = o2;
+  return OK;
 }
 
 void setupfd(void) {

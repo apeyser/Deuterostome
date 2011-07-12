@@ -216,16 +216,24 @@ DM_INLINE_STATIC P _delsocket(P fd, enum _DelMode delmode) {
       switch (next->type.stdin) {
 	case  0: if ((retc = _opendevnull(fd, O_WRONLY))) return retc; break;
 	case  1: if ((retc = _opendevnull(fd, O_RDONLY))) return retc; break;
-	case -1: if (close(fd)) retc = -errno; break;
-      }
+	case -1: 
+	  while (close(fd)) {
+	    if (errno != EINTR) {
+	      retc = -errno;
+	      break;
+	    };
+	    checkabort();
+	  };
+	  break;
+      };
 
       if (next->type.listener) {
 	clearsocket(fd);
 	if (next->info.listener.sigfd != -1)
 	  close(next->info.listener.sigfd);
-	if (next->info.listener.recsigfd != -1) 
+	if (next->info.listener.recsigfd != -1)
 	  close(next->info.listener.recsigfd);
-	if (next->info.listener.trecsigfd != -1) 
+	if (next->info.listener.trecsigfd != -1)
 	  close(next->info.listener.trecsigfd);
 	if (mypid == next->pid) {
 	  if (next->redirector != -1) {
@@ -371,6 +379,35 @@ P addsocket(P fd, const struct SocketType* type, const union SocketInfo* info) {
   }
 
   sockprintdebug("open", next);
+  return OK;
+}
+
+P addsocket_dup(P fd) {
+  P retc;
+  struct socketstore* next;
+  struct SocketType* type = NULL;
+
+  for (next = socketstore_head; next; next = next->next)
+    if (next->fd == fd) {
+      type = &next->type;
+      break;
+    }
+
+  if (! type) return FD_NOTFOUND;
+  if (type->listener) return FD_ISSOCKET;
+
+  if (! type->fork) {
+    if ((retc = nocloseonexec(fd))) {
+      delsocket_force(fd);
+      return retc;
+    }
+  }
+  else if ((retc = closeonexec(fd))) {
+    delsocket_force(fd);
+    return retc;
+  }
+
+  sockprintdebug("dup", next);
   return OK;
 }
 

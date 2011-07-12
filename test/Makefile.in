@@ -1014,7 +1014,7 @@ tmp = @tmp@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-dist_noinst_DATA = benchmark.d arr.d.in petsc-tester.d matrix-test.d
+dist_noinst_DATA = benchmark.d arr.d.in petsc-tester.d matrix-test.d lock.d
 noinst_DATA = arr.d
 all: all-am
 

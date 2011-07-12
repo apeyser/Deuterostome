@@ -281,6 +281,8 @@
       /ILL_RECAP (** Double capsave) def 
       /READ_ERROR (** Internal Read error) def
       /SOCK_STATE (** Attempt to change file descriptor state) def
+      /FD_NOTFOUND (** Attempt to dup unknown file descriptor -- internal error) def
+      /FD_ISSOCKET (** Attempt to dup listener -- internal error) def
       /UNKNOWN_ERR (** Internal Unknown error) def
       /BUF_OVF (** Internal buffer overflow) def
       /NEED_SSL (** Need openssl to read box file) def|]
@@ -302,17 +304,21 @@ end def |]
       /openfd /readfd /readtomarkfd /readtomarkfd_nb 
       /tmpfile /tmpdir /rmpath /finddir
       /suckfd /closedfd /getfd /ungetfd
-      /writefd /closefd /lockfd /unlockfd /trylockfd
+      /writefd /closefd
+      /lockfd /lockfd_ex /lockfd_sh /unlockfd
+      /trylockfd /trylockfd_ex /trylockfd_sh
       /glob /setenv /getenv /statvfs /realpath /cp /rename /utimes /makedir
       /stat /readdir
     ] def
-    /errors 7 dict dup begin |[
+    /errors 9 dict dup begin |[
       /FILE_NOSUCH (** No such file or directory) def
       /DIR_NOTEMPTY (** Directory not empty) def
       /CHILD_FAILURE (*** Child process failed) def
       /STREAM_CLOSED (*** Operation on closed stream) def
       /STREAM_DIR (*** operation on wrong direction stream) def
       /STREAM_EPIPE (*** Stream closed while attempting to write) def
+      /STREAM_UNLOCKABLE_TYPE (** Unlockable file descriptor type) def
+      /STREAM_UNLOCKABLE_FILE (** Unlockable file) def
       /STREAM_OVF (*** double unget on stream) def |]
     end def |]
   end def |]

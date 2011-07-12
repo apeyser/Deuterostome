@@ -462,7 +462,7 @@ P op_writefile(void)
 }
 
 /*---------------------------------------------------- readboxfile
-   dir filename | root
+   dir filename / fd | root
 
   - reads the contents of the file specified by the strings 'dir' and
     'filename' into VM
@@ -500,43 +500,60 @@ P op_readboxfile(void)
   size_t nread;
   P retc;
   B isnonnative;
-  B* oldfreevm = FREEvm;
-  B* base;
+  B* curr;
   static B sha1[FRAMEBYTES+20];
   B *esha1;
+  BOOLEAN closefd;
+  B* opd;
 #if ENABLE_OPENSSL
   static B rsha1[20];
 #endif //ENABLE_OPENSSL
 
-  if (o_2 < FLOORopds) return OPDS_UNF;
-  if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
-  if (TAG(o_2) != (ARRAY | BYTETYPE)) return OPD_ERR;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  switch (TAG(o_1)) {
+    case STREAM:
+      closefd = FALSE;
+      opd = o_1;
 
-  if (FREEvm + ARRAY_SIZE(o_2) + 1 > CEILvm) return VM_OVF;
-  moveB(VALUE_PTR(o_2), FREEvm, ARRAY_SIZE(o_2));
-  FREEvm += ARRAY_SIZE(o_2);
-  if (FREEvm[-1] != '/') (FREEvm++)[0] = '/';
+      if ((fd = STREAM_FD(VALUE_PTR(o_1))) == -1)
+	return STREAM_CLOSED;
+      break;
 
-  if (FREEvm + ARRAY_SIZE(o_1) + 1 > CEILvm) {
-    FREEvm = oldfreevm;
-    return VM_OVF;
-  }
-  moveB(VALUE_PTR(o_1), FREEvm, ARRAY_SIZE(o_1));
-  FREEvm[ARRAY_SIZE(o_1)] = '\000';
-  FREEvm = oldfreevm;
+    case ARRAY|BYTETYPE:
+      if (o_1 < FLOORopds) return OPDS_UNF;
+      if (TAG(o_2) != (ARRAY | BYTETYPE)) return OPD_ERR;
 
-  while ((fd = open((char*)FREEvm, O_RDONLY)) == -1)
-    if (errno == EINTR) checkabort();
-    else return -errno;
+      closefd = TRUE;
+      curr = FREEvm;
+      opd = o_2;
 
+      if (curr + ARRAY_SIZE(o_2) + 1 > CEILvm) return VM_OVF;
+      moveB(VALUE_PTR(o_2), curr, ARRAY_SIZE(o_2));
+      curr += ARRAY_SIZE(o_2);
+      if (ARRAY_SIZE(o_2) && curr[-1] != '/')
+	(curr++)[0] = '/';
+
+      if (curr + ARRAY_SIZE(o_1) + 1 > CEILvm)
+	return VM_OVF;
+      moveB(VALUE_PTR(o_1), curr, ARRAY_SIZE(o_1));
+      curr[ARRAY_SIZE(o_1)] = '\0';
+
+      while ((fd = open((char*)FREEvm, O_RDONLY)) == -1)
+	if (errno == EINTR) checkabort();
+	else return -errno;
+      break;
+
+    default:
+      return OPD_ERR;
+  };
+
+  curr = FREEvm;
   if ((retc = readbox(fd, sha1, FRAMEBYTES, &nread))) goto fderr;
   if (nread != FRAMEBYTES) {
     retc = BADBOX;
     goto fderr;
   };
 
-  //isnonnative = GETNONNATIVE(sha1);
-  base = FREEvm;
   if (! GETSHA1(sha1)) {
     if (FREEvm + FRAMEBYTES > CEILvm) {
       retc = VM_OVF;
@@ -566,7 +583,7 @@ P op_readboxfile(void)
     retc = VM_OVF;
     goto fderr;
   };
-  if ((retc = closebox(fd))) return retc;
+  if (closefd && (retc = closebox(fd))) return retc;
 
 #if ENABLE_OPENSSL
   if (esha1) {
@@ -579,23 +596,23 @@ P op_readboxfile(void)
 #endif // ENABLE_OPENSSL
 
   FREEvm += DALIGN(nread);
-  if (! GETNATIVEFORMAT(base) || ! GETNATIVEUNDEF(base)) {
+  if (! GETNATIVEFORMAT(curr) || ! GETNATIVEUNDEF(curr)) {
     retc = BAD_FMT;
     goto err;
   }
-  isnonnative = GETNONNATIVE(base);
-  if ((retc = deendian_frame(base, isnonnative))) goto err;
-  if ((retc = unfoldobj(base, (P)base, isnonnative))) goto err;
+  isnonnative = GETNONNATIVE(curr);
+  if ((retc = deendian_frame(curr, isnonnative))) goto err;
+  if ((retc = unfoldobj(curr, (P) curr, isnonnative))) goto err;
 
-  FORMAT(base) = 0;
-  moveframe(base, o_2);
-  FREEopds = o_1;
+  FORMAT(curr) = 0;
+  moveframe(curr, opd);
+  FREEopds = opd + FRAMEBYTES;
   return OK;
 
  fderr:
-  closebox(fd);
+  if (closefd) closebox(fd);
  err:
-  FREEvm = oldfreevm;
+  FREEvm = curr;
   return retc;
 }
 
@@ -622,6 +639,7 @@ P op_umask(void) {
 
 /*---------------------------------------------------- writeboxfile
    root dir filename | --
+   fd filename | --
   
   - the object tree originating from 'root' is folded into a box
   - a file is created to hold the box and the box is written into the file
@@ -650,66 +668,88 @@ P op_writeboxfile(void)
 {
   int fd;
   size_t atmost;
+
   P retc;
   B *oldFREEvm = FREEvm;
-  B* oldfreemem;
   B *base, *top, *freemem;
+  BOOLEAN closefd;
+  B* opd;
   B frame[FRAMEBYTES];
 #if ENABLE_OPENSSL
   static B sha1[FRAMEBYTES+20];
 #endif //ENABLE_OPENSSL
 
-  if (o_3 < FLOORopds) return OPDS_UNF;
-  if (!((CLASS(o_3) == ARRAY)
-        || (CLASS(o_3) == LIST)
-        || (CLASS(o_3) == DICT)))
-    return OPD_ERR;
-  if (TAG(o_2) != (ARRAY | BYTETYPE)) return OPD_ERR;
-  if (TAG(o_1) != (ARRAY | BYTETYPE)) return OPD_ERR;
+  if (o_1 < FLOORopds) return OPDS_UNF;
+  switch (TAG(o_1)) {
+    case STREAM:
+      closefd = FALSE;
+      opd = o_2;
 
-  moveframe(o_3, frame);
+      if ((fd = STREAM_FD(VALUE_PTR(o_1))) == -1)
+	return STREAM_CLOSED;
+      break;
+      
+    case ARRAY|BYTETYPE:
+      closefd = TRUE;
+      opd = o_3;
+
+      if (o_2 < FLOORopds) return OPDS_UNF;
+      if (TAG(o_2) != (ARRAY | BYTETYPE)) return OPD_ERR;
+      break;
+      
+    default:
+      return OPD_ERR;
+  }
+  if (opd < FLOORopds) return OPDS_UNF;
+
+  switch (TAG(opd)) {
+    case ARRAY: case LIST: case DICT: break;
+    default: return OPD_ERR;
+  }
+  moveframe(opd, frame);
   if ((retc = foldobj_ext(frame)) != OK) {
     FREEvm = oldFREEvm;
     return retc;
   }
-		
+
   freemem = FREEvm;
   if (! foldobj_mem(&base, &top)) {
     base = oldFREEvm;
     top = FREEvm;
     FREEvm = oldFREEvm;
   }
- 
+
   SETNATIVE(base);
   atmost = top - base;
-  
-  oldfreemem = freemem;
-  if (freemem + ARRAY_SIZE(o_2) + 1 > CEILvm) {
-    retc = VM_OVF;
-    goto err;
-  }
-  moveB(VALUE_PTR(o_2), freemem, ARRAY_SIZE(o_2));
-  freemem += ARRAY_SIZE(o_2);
-  if (freemem[-1] != '/') (freemem++)[0] = '/';
 
-  if (freemem + ARRAY_SIZE(o_1) + 1 > CEILvm) {
-    retc = VM_OVF;
-    goto err;
-  }
-  moveB(VALUE_PTR(o_1), freemem, ARRAY_SIZE(o_1));
-  freemem[ARRAY_SIZE(o_1)] = '\000';
-  freemem = oldfreemem;
-
-  while ((fd = open((char*)freemem, O_CREAT | O_RDWR | O_TRUNC,
-		    S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH))
-	 == -1)
-    if (errno == EINTR) {
-      if ((retc = checkabort_())) goto fderr;
-    } 
-    else {
-      retc = -errno; 
-      goto fderr;
+  if (closefd) {
+    B* oldfreemem = freemem;
+    if (freemem + ARRAY_SIZE(o_2) + 1 > CEILvm) {
+      retc = VM_OVF;
+      goto err;
     }
+    moveB(VALUE_PTR(o_2), freemem, ARRAY_SIZE(o_2));
+    freemem += ARRAY_SIZE(o_2);
+    if (ARRAY_SIZE(o_2) && freemem[-1] != '/') (freemem++)[0] = '/';
+
+    if (freemem + ARRAY_SIZE(o_1) + 1 > CEILvm) {
+      retc = VM_OVF;
+      goto err;
+    }
+    moveB(VALUE_PTR(o_1), freemem, ARRAY_SIZE(o_1));
+    freemem[ARRAY_SIZE(o_1)] = '\000';
+
+    while ((fd = open((char*) oldfreemem, O_CREAT | O_RDWR | O_TRUNC,
+		      S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH))
+	   == -1)
+      if (errno == EINTR) {
+	if ((retc = checkabort_())) goto fderr;
+      }
+      else {
+	retc = -errno; 
+	goto fderr;
+      }
+  }
 
 #if ENABLE_OPENSSL
   TAG(sha1) = ARRAY|BYTETYPE;
@@ -724,12 +764,12 @@ P op_writeboxfile(void)
   if ((retc = writebox(fd, base, atmost))) goto fderr;
 
   foldobj_free();
-  if ((retc = closebox(fd))) return retc; 
-  FREEopds = o_3;
+  if (closefd && (retc = closebox(fd))) return retc; 
+  FREEopds = opd;
   return OK;
 
  fderr:
-  closebox(fd);
+  if (closefd) closebox(fd);
  err:
   foldobj_free();
   return retc;
@@ -923,7 +963,8 @@ P op_findfile(void)
 
   if (stat((char*)FREEvm, &buf)) {
     if (errno == ENOENT) { // non-existent returns false
-      TAG(o_2) = BOOL; ATTR(o_2) = 0;
+      TAG(o_2) = BOOL;
+      ATTR(o_2) = 0;
       BOOL_VAL(o_2) = FALSE;
       FREEopds = o_1;
       return OK;

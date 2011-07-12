@@ -39,9 +39,15 @@ DLL_SCOPE P op_ungetfd(void);
 DLL_SCOPE P op_closedfd(void);
 DLL_SCOPE P op_writefd(void);
 DLL_SCOPE P op_closefd(void);
-DLL_SCOPE void setupfd(void);
+
 DLL_SCOPE P op_lockfd(void);
+DLL_SCOPE P op_lockfd_ex(void);
+DLL_SCOPE P op_lockfd_sh(void);
 DLL_SCOPE P op_unlockfd(void);
 DLL_SCOPE P op_trylockfd(void);
+DLL_SCOPE P op_trylockfd_ex(void);
+DLL_SCOPE P op_trylockfd_sh(void);
+
+DLL_SCOPE void setupfd(void);
 
 #endif //DM_FD_H

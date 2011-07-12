@@ -347,12 +347,19 @@ extern "C" {
 #define SBOX_CAP(box)         (*(B **) PF_PTR(box,0))
 
 /*------------------------------------- stream box */
-#define STREAMBOXBYTES         DALIGN(5*PACK_FRAME)
-#define STREAM_FD(fdbox)       (*(int*)     PF_PTR(fdbox,0))
-#define STREAM_BUFFERED(fdbox) (*(BOOLEAN*) PF_PTR(fdbox,1))
-#define STREAM_CHAR(fdbox)     (*(B*)       PF_PTR(fdbox,2))
-#define STREAM_RO(fdbox)       (*(BOOLEAN*) PF_PTR(fdbox,3))
-#define STREAM_LOCKED(fdbox)   (*(BOOLEAN*) PF_PTR(fdbox,4))
+#define STREAMBOXBYTES         DALIGN(6*PACK_FRAME)
+#define STREAM_FD(fdbox)       (*(int*)     PF_PTR(fdbox, 0))
+#define STREAM_BUFFERED(fdbox) (*(BOOLEAN*) PF_PTR(fdbox, 1))
+#define STREAM_CHAR(fdbox)     (*(B*)       PF_PTR(fdbox, 2))
+#define STREAM_RO(fdbox)       (*(BOOLEAN*) PF_PTR(fdbox, 3))
+#define STREAM_LOCKED(fdbox)   (*(STREAM_LOCKED_STATE*) PF_PTR(fdbox,4))
+typedef enum {
+  STREAM_LOCKED_UN   = 0,
+  STREAM_LOCKED_RD   = 1,
+  STREAM_LOCKED_WR   = 2
+} STREAM_LOCKED_STATE;
+#define STREAM_FD_LOCK(fdbox)  (*(int*)     PF_PTR(fdbox, 5))
+  // fd >= 0, -1 if unlockable type, -2 if lockable type with no lock
 
 /*--------------------------------------------- Internal message codes */
 #include "dm-errs.h"

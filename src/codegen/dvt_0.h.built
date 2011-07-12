@@ -223,8 +223,12 @@ B* _sysop[] =
   (B*) "writefd", (B*) op_writefd,
   (B*) "closefd", (B*) op_closefd,
   (B*) "lockfd", (B*) op_lockfd,
+  (B*) "lockfd_ex", (B*) op_lockfd_ex,
+  (B*) "lockfd_sh", (B*) op_lockfd_sh,
   (B*) "unlockfd", (B*) op_unlockfd,
   (B*) "trylockfd", (B*) op_trylockfd,
+  (B*) "trylockfd_ex", (B*) op_trylockfd_ex,
+  (B*) "trylockfd_sh", (B*) op_trylockfd_sh,
   (B*) "glob", (B*) op_glob,
   (B*) "setenv", (B*) op_setenv,
   (B*) "getenv", (B*) op_getenv,
@@ -290,6 +294,8 @@ P _syserrc[] = {
   ILL_RECAP,
   READ_ERROR,
   SOCK_STATE,
+  FD_NOTFOUND,
+  FD_ISSOCKET,
   UNKNOWN_ERR,
   BUF_OVF,
   NEED_SSL,
@@ -322,6 +328,8 @@ P _syserrc[] = {
   STREAM_CLOSED,
   STREAM_DIR,
   STREAM_EPIPE,
+  STREAM_UNLOCKABLE_TYPE,
+  STREAM_UNLOCKABLE_FILE,
   STREAM_OVF,
   0L
 };
@@ -374,6 +382,8 @@ B* _syserrm[] = {
   (B*) "** Double capsave",
   (B*) "** Internal Read error",
   (B*) "** Attempt to change file descriptor state",
+  (B*) "** Attempt to dup unknown file descriptor -- internal error",
+  (B*) "** Attempt to dup listener -- internal error",
   (B*) "** Internal Unknown error",
   (B*) "** Internal buffer overflow",
   (B*) "** Need openssl to read box file",
@@ -406,6 +416,8 @@ B* _syserrm[] = {
   (B*) "*** Operation on closed stream",
   (B*) "*** operation on wrong direction stream",
   (B*) "*** Stream closed while attempting to write",
+  (B*) "** Unlockable file descriptor type",
+  (B*) "** Unlockable file",
   (B*) "*** double unget on stream",
   (B*) NULL
 };
