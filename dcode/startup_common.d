@@ -1131,16 +1131,18 @@ end def  | of xtext_dict
 | It discards not only the module itself, but also all layers of a module 
 | that constitutes a project.
 
-/forgetmodule {
-  userdict exch 2 copy known {
-    get dup class /dictclass eq {
-      dup {
-        dup class /boxclass eq 3 -1 roll
-        /mySave ne and {restore} {pop} ifelse
-      } forall
-      /mySave get dup class /boxclass eq {restore} {pop} ifelse 
-    } {pop} ifelse
-  } {pop pop} ifelse
+/forgetmodule {                               | /name
+  userdict exch 2 copy known not {pop pop} {  | userdict /name
+    get dup class /dictclass eq not ~pop {    | dict
+      dup {                                   | dict /n v
+        dup class /boxclass eq                | dict /n v b
+        3 -1 roll /mySave   ne and            | dict v b
+        ~restore ~pop ifelse                  | dict
+      } forall                                | dict
+      /mySave get dup class /boxclass eq      | val b
+      ~restore ~pop ifelse                    | --
+    } ifelse
+  } ifelse
 } bind def
 
 |---------------------------- module
