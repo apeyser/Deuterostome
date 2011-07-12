@@ -449,7 +449,7 @@ P op_stat(void) {
     case STREAM:
       off = -1;
       stream = VALUE_PTR(o_1);
-      if ((fstatvfs_int_fd = (int) STREAM_FD(stream) == -1))
+      if ((fstat_int_fd = (int) STREAM_FD(stream)) == -1)
 	return STREAM_CLOSED;
 
       statfunc = fstat_int;
