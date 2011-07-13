@@ -31,20 +31,17 @@
 
 DM_INLINE_STATIC P closefd(B* stream) {
   P retc = OK;
+  P retc2 = OK;
   int fd  = STREAM_FD(stream);
   int fdl = STREAM_FD_LOCK(stream);
   
-  if (fd != -1
-      && (retc = delsocket_proc(fd))) {
-    if (fdl >= 0 && fd != fdl)
-      delsocket_force(fdl);
-  }
-  else if (fdl >= 0 && fd != fdl)
-    retc = delsocket_force(fdl);
+  if (fd != -1) retc = delsocket_proc(fd);
+  if (fdl >= 0 && fdl != fd)
+    retc2 = delsocket_force(fdl);
 
   STREAM_FD(stream) = -1;
   STREAM_FD_LOCK(stream) = -1;
-  return retc;
+  return retc ? retc : retc2;
 }
 
 #define rclosefd(stream) do {			\
@@ -1260,27 +1257,36 @@ P op_dupfd(void) {
   if (fdl2 < 0) {
     STREAM_FD_LOCK(streambox1) = fdl2;
     if (fdl1 >= 0) delsocket_force(fdl1);
+    goto ret;
   }
-  else {
-    if (fdl1 < 0) {
-      if ((STREAM_FD_LOCK(streambox1) = dup(fdl2)) == -1) {
-	retc = -errno;
-	closefd(streambox1);
-	return retc;
-      }
-    }
-    else if (dup2(fdl2, fdl1) == -1) {
+
+  if (fdl1 < 0) {
+    if ((fdl1 = dup(fdl2)) == -1) {
       retc = -errno;
       closefd(streambox1);
       return retc;
     }
 
-    if ((retc = addsocket_dup(fdl1))) {
+    STREAM_FD_LOCK(streambox1) = fdl1;
+    if ((retc = addsocket(fdl1, &pipetype, NULL))) {
       closefd(streambox1);
       return retc;
     }
+    goto ret;
   }
 
+  if (dup2(fdl2, fdl1) == -1) {
+    retc = -errno;
+    closefd(streambox1);
+    return retc;
+  }
+
+  if ((retc = addsocket_dup(fdl1))) {
+    closefd(streambox1);
+    return retc;
+  }
+
+ ret:
   FREEopds = o_2;
   return OK;
 }
