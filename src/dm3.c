@@ -323,7 +323,7 @@ P op_socketdead(void) {
 // After opening a socket, call addsocket to increase maxsocket,
 // care for recsocket, and add socket to sock_fds.
 P addsocket(P fd, const struct SocketType* type, const union SocketInfo* info) {
-  P retc;
+  P retc = OK;
   struct socketstore* next;
 
   for (next = socketstore_head; next; next = next->next)
@@ -349,15 +349,9 @@ P addsocket(P fd, const struct SocketType* type, const union SocketInfo* info) {
   socketstore_tail = next;
 
   if (! type->fork) {
-    if ((retc = nocloseonexec(fd))) {
-      delsocket_force(fd);
-      return retc;
-    }
+    if ((retc = nocloseonexec(fd))) goto ret;
   }
-  else if ((retc = closeonexec(fd))) {
-    delsocket_force(fd);
-    return retc;
-  }
+  else if ((retc = closeonexec(fd))) goto ret;
 
   if (type->listener) {
     DEBUG("add: %li", fd);
@@ -369,21 +363,22 @@ P addsocket(P fd, const struct SocketType* type, const union SocketInfo* info) {
       if ((retc = forksighandler(info->listener.recsigfd,
 				 info->listener.trecsigfd,
 				 info->listener.unixport, 
-				 &next->redirector))) {
-	delsocket_force(fd);
-	return retc;
-      }
+				 &next->redirector)))
+	goto ret;
       next->info.listener.recsigfd = -1;
       next->info.listener.trecsigfd = -1;
     }
   }
 
   sockprintdebug("open", next);
-  return OK;
+
+ ret:
+  if (retc) delsocket_force(fd);
+  return retc;
 }
 
 P addsocket_dup(P fd) {
-  P retc;
+  P retc = OK;
   struct socketstore* next;
   struct SocketType* type = NULL;
 
@@ -393,22 +388,24 @@ P addsocket_dup(P fd) {
       break;
     }
 
-  if (! type) return FD_NOTFOUND;
-  if (type->listener) return FD_ISSOCKET;
+  if (! type) {
+    retc = FD_NOTFOUND;
+    goto ret;
+  }
+  if (type->listener) {
+    retc = FD_ISSOCKET;
+    goto ret;
+  }
 
   if (! type->fork) {
-    if ((retc = nocloseonexec(fd))) {
-      delsocket_force(fd);
-      return retc;
-    }
+    if ((retc = nocloseonexec(fd))) goto ret;
   }
-  else if ((retc = closeonexec(fd))) {
-    delsocket_force(fd);
-    return retc;
-  }
+  else if ((retc = closeonexec(fd))) goto ret;
 
   sockprintdebug("dup", next);
-  return OK;
+ ret:
+  if (retc) delsocket_force(fd);
+  return retc;
 }
 
 DM_INLINE_STATIC P _closesockets(enum _DelMode delmode) {
