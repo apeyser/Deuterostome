@@ -140,7 +140,7 @@
 
   | [\/mode..] / null | mode
   /_mkdir_mode {
-    dup null eq {FILE_MODE /ALL_RWX get} ~unmkfile_mode ifelse
+    dup null eq {pop FILE_MODE /ALL_RWX get} ~unmkfile_mode ifelse
   } bind def
 
   | (dir) \[/mode..\] / null | --
