@@ -91,35 +91,34 @@
   | The output sits in a pipe, as well as an error messages from
   |  the subprocesses.
   |
-  /process {PROCESSES indict} def
   /eps_ {
     getwdir transcribe
-    null (eps) tmpdir ~setwdirp process getwdir transcribe
+    null (eps) tmpdir ~setwdirp inprocess getwdir transcribe
     openlist
     /preamble /input /ptsize
     /pwd /twd
   } {
-    ~STDERR process [
+    ~STDERR inprocess [
       (Working in temporary directory: `) twd ('\n)
     ] ~writefd forall pop
 
-    (.) (eps.tex) ~wropen process [
+    (.) (eps.tex) ~wropen inprocess [
       predoc (XX) 0 * ptsize * number pop pre preamble main input post
-    ] ~writefd forall ~close process
+    ] ~writefd forall ~close inprocess
 
-    /PDFLATEX prog {STDIN STDERR dup sh_bg (pdflatex) wait_quiet} process
-    /PDFCROP  prog {STDIN STDERR dup sh_bg (pdfcrop)  wait_quiet} process
+    /PDFLATEX prog {STDIN STDERR dup sh_bg (pdflatex) wait_quiet} inprocess
+    /PDFCROP  prog {STDIN STDERR dup sh_bg (pdfcrop)  wait_quiet} inprocess
 
     [
       {/PDFTOPS  ~prog EPS indict sh_quiet true}
       {/SED_PIPE ~prog EPS indict sh_quiet true} |]
-    {fds pipe not {(pdftops | sed) /NOSYSTEM makeerror} if} process
+    {fds pipe not {(pdftops | sed) /NOSYSTEM makeerror} if} inprocess
 
-    /SED_COMMENT prog ~sh_quiet process
-    ~STDOUT process (%%EOF\n) writefd pop
+    /SED_COMMENT prog ~sh_quiet inprocess
+    ~STDOUT inprocess (%%EOF\n) writefd pop
 
     pwd setwdir
-    twd () ~removedir process
+    twd () ~rmdir inprocess
   } caplocalfunc bind def
 
   | /prog | /progname [params...]
@@ -159,7 +158,7 @@
   |  happen internally.
   |
   /xeps {
-    {~[4 1 roll ~eps_] ~readstream process} {
+    {~[4 1 roll ~eps_] ~readstream inprocess} {
       {pop transcribe} {toconsole pop hamuti} ifelse
     } incapsave
   } bind def
