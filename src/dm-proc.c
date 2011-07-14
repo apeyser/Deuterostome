@@ -542,6 +542,7 @@ DM_INLINE_STATIC ULBIG gcd(ULBIG u, ULBIG v) {
 
 //  fd1 fd2 | fd2
 P op_cp(void) {
+  P retc = OK;
   B* streamin;
   B* streamout;
   int fdin, fdout;
@@ -549,6 +550,7 @@ P op_cp(void) {
   ULBIG bs;
   ssize_t n, nw, nw2;
   static long pagesize = -1;
+  B* mem;
 
   if (pagesize == -1) {
     errno = 0;
@@ -600,12 +602,15 @@ P op_cp(void) {
 
   bs = sfin.f_frsize*(sfout.f_frsize/gcd(sfin.f_frsize, sfout.f_frsize));
   bs = bs*(pagesize/gcd(bs, pagesize));
-  if (FREEvm + bs >= CEILvm) return VM_OVF;
 
-  while ((n = read(fdin, FREEvm, (size_t) bs))) {
+  if ((retc = posix_memalign(&mem, pagesize, bs))) return -retc;
+  while ((n = read(fdin, mem, (size_t) bs))) {
     if (n == -1) switch (errno) {
-	case EAGAIN: case EINTR: checkabort(); continue;
-	default: return -errno;
+	case EAGAIN: case EINTR:
+	  if ((retc = checkabort_())) goto ret;
+	  continue;
+	default:
+	  retc = -errno; goto ret;
       }
     STREAM_CHAR(streamin) = FREEvm[n-1];
 
@@ -613,8 +618,12 @@ P op_cp(void) {
     while (nw < n) {
       nw2 = write(fdout, FREEvm + nw, (size_t) (n - nw));
       if (nw2 == -1) switch (errno) {
-	  case EAGAIN: case EINTR: checkabort(); continue;
-	  default: return -errno;
+	  case EAGAIN: case EINTR:
+	    if ((retc = checkabort_())) goto ret;
+	    continue;
+	  default:
+	    retc = -errno;
+	    goto ret;
 	}
       nw += nw2;
     }
@@ -623,7 +632,10 @@ P op_cp(void) {
   rclosefd(streamin);
   moveframe(o_1, o_2);
   FREEopds = o_1;
-  return OK;
+
+ ret:
+  free(mem);
+  return retc;
 }
 
 // (dir)/null (file) (dir')/null (file') | true / false
@@ -1826,7 +1838,7 @@ P op_readtomarkfd(void) {
     case DONE:
       if (curr != VALUE_PTR(o_3)) STREAM_CHAR(streambox) = *(curr-1);
       goto closed;
-    default: 
+    default:
       return retc;
   }
 
