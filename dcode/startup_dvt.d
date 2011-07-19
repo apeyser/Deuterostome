@@ -1361,12 +1361,14 @@ c_         list all connections
 
       node 0 get class /nullclass ne {
         wid nodelocs knode get exec
-        pbuf 0 node 0 get fax
-        knode 0 ne {
-          (:) fax * node 1 get     * number
-          ( ) fax * node 4 get neg * number
-        } if 
-        0 exch getinterval
+        pbuf {
+          * knode * number (: ) fax
+          node 0 get fax
+          knode 0 ne {
+            (:) fax * node 1 get     * number
+            ( ) fax * node 4 get neg * number
+          } if
+        } tostring
         kbdowner 0 ge ~knode {node 4 get} ifelse kbdowner eq 
         ~HIGHTEXT ~NORMALTEXT ifelse
         drawtext node 5 get exec pop pop pop
