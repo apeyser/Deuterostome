@@ -830,11 +830,17 @@ P writefd(P fd, B* where, P n, P secs) {
 P make_socket(UW* port, BOOLEAN tcp, P packet_size, P* retc)
 {
   P sock;
+  int settrue = 1;
   struct sockaddr_in name;
   socklen_t s = sizeof(name);;
   memset(&name, 0, sizeof(struct sockaddr_in));
 
   if ((sock = socket(PF_INET, tcp ? SOCK_STREAM : SOCK_DGRAM, 0)) < 0) {
+    *retc = -errno;
+    return -1;
+  }
+
+  if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &settrue, sizeof(int))) {
     *retc = -errno;
     return -1;
   }

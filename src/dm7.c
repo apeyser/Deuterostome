@@ -140,14 +140,14 @@ P op_gettimeofday(void)
   2,3 = system time
   4,5 = user time of children
   6,7 = system time of children
-  times are in seconds, useconds
+  times are in seconds, +/-useconds
 */
 
 #define reterr(errv) do {retc = errv; goto err;} while (0)
 #define upusage(index, group, ctype, ttype)		\
   ((L64*) VALUE_PTR(x_1))[index]			\
-    = usage_##group.ru_##ctype##time.tv_##ttype		\
-      - ((L64*) VALUE_PTR(x_1))[index]
+  = (L64) usage_##group.ru_##ctype##time.tv_##ttype	\
+    - ((L64*) VALUE_PTR(x_1))[index]
     
 static P x_op_profiletime(void) {
   struct rusage usage_self;
@@ -188,7 +188,7 @@ static P x_op_profiletime(void) {
 
 #define upusage(index, group, ctype, ttype) \
   ((L64*) VALUE_PTR(x1))[index] \
-    = usage_##group.ru_##ctype##time.tv_##ttype
+  = (L64) usage_##group.ru_##ctype##time.tv_##ttype
 
 P op_profiletime(void) {
   struct rusage usage_self;
