@@ -84,7 +84,7 @@ DM_INLINE_STATIC P pathcat_(B* op, B* def, B** next) {
   curr += ARRAY_SIZE(op+FRAMEBYTES);
   curr[0] = '\0';
 
-  if (next) *next = curr;
+  if (next) *next = curr+1;
   return OK;
 }
 
@@ -550,7 +550,7 @@ P op_cp(void) {
   ULBIG bs;
   ssize_t n, nw, nw2;
   static long pagesize = -1;
-  B* mem;
+  void* mem;
 
   if (pagesize == -1) {
     errno = 0;
@@ -612,11 +612,11 @@ P op_cp(void) {
 	default:
 	  retc = -errno; goto ret;
       }
-    STREAM_CHAR(streamin) = FREEvm[n-1];
+    STREAM_CHAR(streamin) = ((B*) mem)[n-1];
 
     nw = 0;
     while (nw < n) {
-      nw2 = write(fdout, FREEvm + nw, (size_t) (n - nw));
+      nw2 = write(fdout, mem + nw, (size_t) (n - nw));
       if (nw2 == -1) switch (errno) {
 	  case EAGAIN: case EINTR:
 	    if ((retc = checkabort_())) goto ret;

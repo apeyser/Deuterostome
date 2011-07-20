@@ -33,4 +33,37 @@
   /run_ex {~lockfd_ex _run} def
   /run_sh {~lockfd_sh _run} def
 
+  /dir (/mnt/mother/ic) def
+  /ncache 10 def
+
+  /_cachetest {
+    /n 0 def
+    n _ pop out dir (tmp.txt) writeboxcache
+    out dir (tmp2.txt) writeboxcache
+    out dir (tmp3.txt) writeboxcache
+    1 1 ncache 1 sub {
+      _ pop {
+        dir (tmp.txt) readboxcache pop
+      } insave
+      {dir (tmp2.txt) readboxcache pop} insave
+      {dir (tmp3.txt) readboxcache pop} insave
+    } for
+    ncache _ pop dir (tmp.txt) rmboxcache
+    dir (tmp2.txt) rmboxcache
+    dir (tmp3.txt) rmboxcache
+  } def
+
+  /tm 8 /x array def
+  /sz 1e8 def
+  /cachetest {0 sz /b array openlist /n /out} {
+    [true false] {
+      _ cache_on ~_cachetest tm profiletime
+      1000 /b array {
+        (user: )   fax * tm 1 get /d ctype 1e6 div tm 0 get add * number (\n) fax
+        (system: ) fax * tm 3 get /d ctype 1e6 div tm 2 get add * number (\n) fax
+        (uchild: ) fax * tm 5 get /d ctype 1e6 div tm 4 get add * number (\n) fax
+        (schild: ) fax * tm 7 get /d ctype 1e6 div tm 6 get add * number (\n) fax
+      } tostring toconsole
+    } forall
+  } localfunc def
 } bind moduledef
