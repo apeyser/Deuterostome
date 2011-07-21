@@ -102,7 +102,7 @@ DM_INLINE_STATIC P tmpcat(B* op) {
 
   if ((retc = pathcat_(op, tmp, &curr))) return retc;
   if (curr + 6 + 1 > CEILvm) return VM_OVF;
-  moveB((B*) "XXXXXX", curr, 7);
+  moveB((B*) "XXXXXX", curr-1, 7);
   curr += 6 + 1;
 
   return OK;
