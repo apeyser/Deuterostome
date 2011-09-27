@@ -1751,6 +1751,12 @@ Xwindows {
   optfiles {exec loadopt} forall
 } ~incapsave aborted {countdictstack 2 sub ~end repeat clear} if
 
+(Deuterostome Copyright \(C\) 2011 Alexander Peyser & Wolfgang Nonner
+This program comes with ABSOLUTELY NO WARRANTY
+This is free software, and you are welcome to redistribute it
+under certain conditions. See COPYING for details.
+) toconsole
+
 {
   save /cleanDVT name
   /kbdowner 0 def
