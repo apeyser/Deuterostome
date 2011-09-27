@@ -92,6 +92,23 @@ int main(int argc, char* argv[]) {
     error_dcoder(1, errno, "Unable to open for writing: %s", argv[1]);
 
   WRITE("| -*- mode: d; -*-");
+  WRITE("| Copyright 2011 Alexander Peyser & Wolfgang Nonner");
+  WRITE("|");
+  WRITE("| This file is part of Deuterostome.");
+  WRITE("|");
+  WRITE("| This program is free software: you can redistribute it and/or modify");
+  WRITE("| it under the terms of the GNU General Public License as published by");
+  WRITE("| the Free Software Foundation, either version 2 of the License, or");
+  WRITE("| (at your option) any later version.");
+  WRITE("|");
+  WRITE("| This program is distributed in the hope that it will be useful,");
+  WRITE("| but WITHOUT ANY WARRANTY; without even the implied warranty of");
+  WRITE("| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the");
+  WRITE("| GNU General Public License for more details.");
+  WRITE("|");
+  WRITE("| You should have received a copy of the GNU General Public License");
+  WRITE("| along with this program.  If not, see <http://www.gnu.org/licenses/>.");
+  WRITE("");
   WRITE("/ERRORS module 1000 dict dup begin");
   for (cemap = emap; cemap->str; cemap++, i++)
     if (fprintf(fd, "  /%-@NAMEBYTES@s %8lldx def\n", 

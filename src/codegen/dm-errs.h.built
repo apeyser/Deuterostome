@@ -1,3 +1,6 @@
+#ifndef DM_ERRS_H
+#define DM_ERRS_H
+
 /*
 
 Copyright 2011 Alexander Peyser & Wolfgang Nonner
@@ -18,9 +21,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#ifndef DM_ERRS_H
-#define DM_ERRS_H
-
 // Automatically produced from src/codegen/ops.d
 // DO NOT EDIT HERE!
 

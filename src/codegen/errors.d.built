@@ -15,6 +15,7 @@
 |
 | You should have received a copy of the GNU General Public License
 | along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 /ERRORS module 1000 dict dup begin
   /OK                                   0x def
   /ABORT                                1x def
