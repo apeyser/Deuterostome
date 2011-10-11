@@ -17,7 +17,7 @@ DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 
 
 CFLAGS = -Wall -g
-CPPFLAGS = -I/usr/include/mpich2
+CPPFLAGS = -I/usr/include/mpich2 -I/usr/include/atlas
 
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -O0
