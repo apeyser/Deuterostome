@@ -24,6 +24,7 @@ PDEBUILD_SED = \
 	          debian/changelog.in >debian/changelog \
 	&& $(SED) -e "s/[@]ATLAS_VERSION[@]/$$ATLAS_VERSION/g" \
 		  -e "s/[@]EMACS_VERSION[@]/$$EMACS_VERSION/g" \
+		  -e "s/[@]LIBATLAS_HEADERS[@]/$$LIBATLAS_HEADERS/g" \
 	          debian/control.in >debian/control 
 
 PDEBUILD_ACTION = \
@@ -45,6 +46,7 @@ debian-setup:
 debian-sed:
 	@: $${ATLAS_VERSION=''}; \
 	: $${EMACS_VERSION=23}; \
+	: $${LIBATLAS_HEADERS=libatlas-dev}; \
 	$(PDEBUILD_SED)
 
 .PHONY: debian-action
@@ -72,6 +74,7 @@ debian:
 ubuntu-sed:
 	@: $${ATLAS_VERSION='(>= 3.6.0-22ubuntu2)'}; \
 	: $${EMACS_VERSION=23}; \
+	: $${LIBATLAS_HEADERS=libatlas-headers}; \
 	$(PDEBUILD_SED)
 
 .PHONY: ubuntu-init
