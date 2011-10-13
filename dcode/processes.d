@@ -183,7 +183,9 @@
   } localfunc bind def
 
   | (dir) \[/mode..\] / null | --
-  /mkdir {openlist} {_mkdir_mode makedir} localfunc bind def
+  /mkdir {openlist} {
+    1 index () existsfile {pop pop} {_mkdir_mode makedir} ifelse
+  } localfunc bind def
 
   | These types must match file enum modes in dm-proc.c
   /FILE_TYPE {
