@@ -145,7 +145,9 @@ AC_DEFUN([CF_GCC_COMPILER_OPTION_INT], [dnl
     AC_LANG_PUSH($3)
     CF_CPPFLAGS="$CPPFLAGS"
     CPPFLAGS="$CPPFLAGS -Werror $1"
-    AC_COMPILE_IFELSE([int some_variable = 0;], [
+    AC_COMPILE_IFELSE([dnl
+      AC_LANG_SOURCE([[int some_variable = 0;]])
+    ], [dnl
       AC_MSG_RESULT([Adding])
       $4="$$4 $1"
     ], [
@@ -174,7 +176,9 @@ AC_DEFUN([CF_DEFINE_IF_CODE_G], [dnl
     AC_LANG_PUSH($3)
     CF_CPPFLAGS="$CPPFLAGS"
     CPPFLAGS="$CPPFLAGS -Werror"
-    AC_COMPILE_IFELSE([$2], [dnl
+    AC_COMPILE_IFELSE([dnl
+      AC_LANG_SOURCE([[$2]])
+    ], [dnl
       AC_DEFINE([HAVE_$1], [1], [Define if you have "$1"])
       AC_MSG_RESULT([HAVE_$1 defined])
     ],[dnl
