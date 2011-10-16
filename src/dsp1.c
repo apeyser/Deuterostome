@@ -479,7 +479,7 @@ P op_ramp(void)
   if ((idx < 0) || (count <= 0)) return RNG_CHK;
   if ((idx + count) > ARRAY_SIZE(o_5)) return RNG_CHK;
   TAG(ff) = TAG(sf) = NUM | TYPE(o_5); 
-  ATTR(ff) = ATTR(ff) = 0;
+  ATTR(ff) = ATTR(sf) = 0;
   MOVE(o_2,ff); 
   MOVE(o_1,sf);
   (*(ramp_list[TYPE(o_5)]))(o_5, ff, sf, idx, count);
