@@ -44,12 +44,10 @@ subdir = .
 DIST_COMMON = README $(am__configure_deps) $(am__include_HEADERS_DIST) \
 	$(am__ltdlinclude_HEADERS_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config-h.in \
-	$(top_srcdir)/configure COPYING.LIB argz.c config.guess \
-	config.sub config/compile config/config.guess \
-	config/config.rpath config/config.sub config/depcomp \
-	config/elisp-comp config/install-sh config/ltmain.sh \
-	config/missing install-sh lt__dirent.c lt__strl.c ltmain.sh \
-	missing
+	$(top_srcdir)/configure COPYING.LIB argz.c config/compile \
+	config/config.guess config/config.sub config/depcomp \
+	config/install-sh config/ltmain.sh  \
+	config/missing  lt__dirent.c lt__strl.c
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/argz.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltdl.m4 \
@@ -229,6 +227,7 @@ LT_CONFIG_H = @LT_CONFIG_H@
 LT_DLLOADERS = @LT_DLLOADERS@
 LT_DLPREOPEN = @LT_DLPREOPEN@
 MAKEINFO = @MAKEINFO@
+MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 NM = @NM@
 NMEDIT = @NMEDIT@
@@ -254,6 +253,7 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
 am__include = @am__include@
@@ -322,7 +322,7 @@ EXTRA_DIST = lt__dirent.c lt__strl.c COPYING.LIB configure.ac \
 CLEANFILES = libltdl.la libltdlc.la libdlloader.la $(LIBOBJS) \
 	$(LTLIBOBJS)
 MOSTLYCLEANFILES = argz.h argz.h-t
-LTDL_VERSION_INFO = -version-info 9:2:2
+LTDL_VERSION_INFO = -version-info 10:0:3
 @INSTALL_LTDL_TRUE@ltdlincludedir = $(includedir)/libltdl
 @INSTALL_LTDL_TRUE@ltdlinclude_HEADERS = libltdl/lt_system.h \
 @INSTALL_LTDL_TRUE@			  libltdl/lt_error.h \
