@@ -150,8 +150,8 @@ DM_INLINE_STATIC P matrix_dims(B* cuts, B* array,
       || t < 1) 
     return MATRIX_UNDEF_CUT;
 
+  if (*lda == 0) return MATRIX_UNDEF_CUT;
   *m = t/(*lda);
-  if (ISUNDEF(*m)) return MATRIX_UNDEF_CUT;  
   if ((*n)*(*m) > ARRAY_SIZE(array)) return MATRIX_NONMATCH_CUT;
 
   return OK;

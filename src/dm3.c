@@ -1047,10 +1047,10 @@ DM_INLINE_STATIC P read_port(P sock, UW eport[1]) {
   ssize_t n = 0, n_;
 
   do {
-    while ((n_ = read(sock, ((B*) eport)+n, sizeof(eport)-n)) == -1)
+    while ((n_ = read(sock, ((B*) eport)+n, sizeof(eport[0])-n)) == -1)
       if (errno == EINTR) checkabort();
       else return -errno;
-  } while ((n += n_) < sizeof(eport));
+  } while ((n += n_) < sizeof(eport[0]));
 
   DEBUG("ports: (%i, %i)", 
 	eport[0], ntohs(eport[0]));
