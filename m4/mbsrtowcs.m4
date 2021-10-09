@@ -1,5 +1,5 @@
-# mbsrtowcs.m4 serial 11
-dnl Copyright (C) 2008-2011 Free Software Foundation, Inc.
+# mbsrtowcs.m4 serial 14
+dnl Copyright (C) 2008-2021 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -14,6 +14,15 @@ AC_DEFUN([gl_FUNC_MBSRTOWCS],
   AC_CHECK_FUNCS_ONCE([mbsrtowcs])
   if test $ac_cv_func_mbsrtowcs = no; then
     HAVE_MBSRTOWCS=0
+    AC_CHECK_DECLS([mbsrtowcs],,, [[
+      #include <wchar.h>
+    ]])
+    if test $ac_cv_have_decl_mbsrtowcs = yes; then
+      dnl On Minix 3.1.8, the system's <wchar.h> declares mbsrtowcs() although
+      dnl it does not have the function. Avoid a collision with gnulib's
+      dnl replacement.
+      REPLACE_MBSRTOWCS=1
+    fi
   else
     if test $REPLACE_MBSTATE_T = 1; then
       REPLACE_MBSRTOWCS=1
@@ -24,11 +33,6 @@ AC_DEFUN([gl_FUNC_MBSRTOWCS],
         *) REPLACE_MBSRTOWCS=1 ;;
       esac
     fi
-  fi
-  if test $HAVE_MBSRTOWCS = 0 || test $REPLACE_MBSRTOWCS = 1; then
-    AC_LIBOBJ([mbsrtowcs])
-    AC_LIBOBJ([mbsrtowcs-state])
-    gl_PREREQ_MBSRTOWCS
   fi
 ])
 
@@ -61,13 +65,6 @@ changequote([,])dnl
           [AC_LANG_SOURCE([[
 #include <locale.h>
 #include <string.h>
-/* Tru64 with Desktop Toolkit C has a bug: <stdio.h> must be included before
-   <wchar.h>.
-   BSD/OS 4.0.1 has a bug: <stddef.h>, <stdio.h> and <time.h> must be
-   included before <wchar.h>.  */
-#include <stddef.h>
-#include <stdio.h>
-#include <time.h>
 #include <wchar.h>
 int main ()
 {

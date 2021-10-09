@@ -1,5 +1,5 @@
-# mbsinit.m4 serial 6
-dnl Copyright (C) 2008, 2010-2011 Free Software Foundation, Inc.
+# mbsinit.m4 serial 9
+dnl Copyright (C) 2008, 2010-2021 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -15,6 +15,15 @@ AC_DEFUN([gl_FUNC_MBSINIT],
   AC_CHECK_FUNCS_ONCE([mbsinit])
   if test $ac_cv_func_mbsinit = no; then
     HAVE_MBSINIT=0
+    AC_CHECK_DECLS([mbsinit],,, [[
+      #include <wchar.h>
+    ]])
+    if test $ac_cv_have_decl_mbsinit = yes; then
+      dnl On Minix 3.1.8, the system's <wchar.h> declares mbsinit() although
+      dnl it does not have the function. Avoid a collision with gnulib's
+      dnl replacement.
+      REPLACE_MBSINIT=1
+    fi
   else
     if test $REPLACE_MBSTATE_T = 1; then
       REPLACE_MBSINIT=1
@@ -26,10 +35,6 @@ AC_DEFUN([gl_FUNC_MBSINIT],
         mingw*) REPLACE_MBSINIT=1 ;;
       esac
     fi
-  fi
-  if test $HAVE_MBSINIT = 0 || test $REPLACE_MBSINIT = 1; then
-    AC_LIBOBJ([mbsinit])
-    gl_PREREQ_MBSINIT
   fi
 ])
 

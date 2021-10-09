@@ -27,6 +27,7 @@ runif() {
     return 0
 }
 
+autoreconf=:
 libtool=false
 gnulibtool=false
 for i ; do
@@ -44,5 +45,5 @@ done
 
 runif gnulibtool gnulib-tool --import $GNULIBTOOL
 runif libtool    libtoolize -c --ltdl $LIBTOOL
-runif :          autoreconf -v --install $AUTORECONF
+runif autoreconf autoreconf -v --install $AUTORECONF
 

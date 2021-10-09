@@ -144,8 +144,18 @@ throw_la_SOURCES = throw.c throw.h
 throw_la_LIBADD = $(AM_LIBADD)
 endif ENABLE_PLUGINS
 
-pkglib_LTLIBRARIES = $(PLUGINS)
-pkglib_DATA = $(PLACEHOLDER) 
+# Work around forbidden directory combinations.  Do not use this
+# without a very good reason!
+# my_execbindir = $(pkglibdir)
+# my_doclibdir = $(docdir)
+#
+# my_execbin_PROGRAMS = foo
+# my_doclib_LIBRARIES = libquux.a
+
+forb_pkglibdir = $(pkglibdir)
+
+forb_pkglib_LTLIBRARIES = $(PLUGINS)
+forb_pkglib_DATA = $(PLACEHOLDER) 
 dmstart_DATA = $(IPETSC_D)
 
 CLEANFILES = $(BUILT_SOURCES) $(PETSC_D)

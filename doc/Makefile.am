@@ -28,7 +28,7 @@ EXTRA_DIST = $(INFILES:=in) $(IDFILES) \
 CLEANFILES = $(INFILES)
 SUFFIXES =
 
-doc_DATA = dvt-3.0.pdf dvt-emacs.pdf newbook.pdf
+doc_DATA = dvt-3.0.pdf dvt-emacs.pdf # newbook.pdf
 
 dvt-emacs.bbl: dvt-emacs.tex
 dvt-emacs.tex: config.sty

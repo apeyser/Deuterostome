@@ -1,12 +1,13 @@
-# include_next.m4 serial 18
-dnl Copyright (C) 2006-2011 Free Software Foundation, Inc.
+# include_next.m4 serial 26
+dnl Copyright (C) 2006-2021 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
 
 dnl From Paul Eggert and Derek Price.
 
-dnl Sets INCLUDE_NEXT and PRAGMA_SYSTEM_HEADER.
+dnl Sets INCLUDE_NEXT, INCLUDE_NEXT_AS_FIRST_DIRECTIVE, PRAGMA_SYSTEM_HEADER,
+dnl and PRAGMA_COLUMNS.
 dnl
 dnl INCLUDE_NEXT expands to 'include_next' if the compiler supports it, or to
 dnl 'include' otherwise.
@@ -105,19 +106,21 @@ dnl We intentionally avoid using AC_LANG_SOURCE here.
   AC_SUBST([INCLUDE_NEXT])
   AC_SUBST([INCLUDE_NEXT_AS_FIRST_DIRECTIVE])
   AC_SUBST([PRAGMA_SYSTEM_HEADER])
-  AC_CACHE_CHECK([whether system header files limit the line length],
-    [gl_cv_pragma_columns],
-    [dnl HP NonStop systems, which define __TANDEM, have this misfeature.
-     AC_EGREP_CPP([choke me],
+
+  dnl HP NonStop systems, which define __TANDEM, limit the line length
+  dnl after including some system header files.
+  AC_CACHE_CHECK([whether source code line length is unlimited],
+    [gl_cv_source_line_length_unlimited],
+    [AC_EGREP_CPP([choke me],
        [
 #ifdef __TANDEM
 choke me
 #endif
        ],
-       [gl_cv_pragma_columns=yes],
-       [gl_cv_pragma_columns=no])
+       [gl_cv_source_line_length_unlimited=no],
+       [gl_cv_source_line_length_unlimited=yes])
     ])
-  if test $gl_cv_pragma_columns = yes; then
+  if test $gl_cv_source_line_length_unlimited = no; then
     PRAGMA_COLUMNS="#pragma COLUMNS 10000"
   else
     PRAGMA_COLUMNS=
@@ -143,7 +146,7 @@ choke me
 # even if the compiler does not support include_next.
 # The three "///" are to pacify Sun C 5.8, which otherwise would say
 # "warning: #include of /usr/include/... may be non-portable".
-# Use `""', not `<>', so that the /// cannot be confused with a C99 comment.
+# Use '""', not '<>', so that the /// cannot be confused with a C99 comment.
 # Note: This macro assumes that the header file is not empty after
 # preprocessing, i.e. it does not only define preprocessor macros but also
 # provides some type/enum definitions or function/variable declarations.
@@ -183,39 +186,16 @@ AC_DEFUN([gl_NEXT_HEADERS_INTERNAL],
      else
        AC_CACHE_CHECK(
          [absolute name of <]m4_defn([gl_HEADER_NAME])[>],
-         m4_defn([gl_next_header]),
+         [gl_next_header],
          [m4_if([$2], [check],
             [AS_VAR_PUSHDEF([gl_header_exists],
                             [ac_cv_header_]m4_defn([gl_HEADER_NAME]))
-             if test AS_VAR_GET(gl_header_exists) = yes; then
+             if test AS_VAR_GET([gl_header_exists]) = yes; then
              AS_VAR_POPDEF([gl_header_exists])
             ])
-               AC_LANG_CONFTEST(
-                 [AC_LANG_SOURCE(
-                    [[#include <]]m4_dquote(m4_defn([gl_HEADER_NAME]))[[>]]
-                  )])
-               dnl AIX "xlc -E" and "cc -E" omit #line directives for header
-               dnl files that contain only a #include of other header files and
-               dnl no non-comment tokens of their own. This leads to a failure
-               dnl to detect the absolute name of <dirent.h>, <signal.h>,
-               dnl <poll.h> and others. The workaround is to force preservation
-               dnl of comments through option -C. This ensures all necessary
-               dnl #line directives are present. GCC supports option -C as well.
-               case "$host_os" in
-                 aix*) gl_absname_cpp="$ac_cpp -C" ;;
-                 *)    gl_absname_cpp="$ac_cpp" ;;
-               esac
-               dnl eval is necessary to expand gl_absname_cpp.
-               dnl Ultrix and Pyramid sh refuse to redirect output of eval,
-               dnl so use subshell.
-               AS_VAR_SET([gl_next_header],
-                 ['"'`(eval "$gl_absname_cpp conftest.$ac_ext") 2>&AS_MESSAGE_LOG_FD |
-                  sed -n '\#/]m4_defn([gl_HEADER_NAME])[#{
-                    s#.*"\(.*/]m4_defn([gl_HEADER_NAME])[\)".*#\1#
-                    s#^/[^/]#//&#
-                    p
-                    q
-                  }'`'"'])
+           gl_ABSOLUTE_HEADER_ONE(gl_HEADER_NAME)
+           AS_VAR_COPY([gl_header], [gl_cv_absolute_]AS_TR_SH(gl_HEADER_NAME))
+           AS_VAR_SET([gl_next_header], ['"'$gl_header'"'])
           m4_if([$2], [check],
             [else
                AS_VAR_SET([gl_next_header], ['<'gl_HEADER_NAME'>'])

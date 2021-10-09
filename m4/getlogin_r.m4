@@ -1,6 +1,6 @@
-#serial 9
+#serial 13
 
-# Copyright (C) 2005-2007, 2009-2011 Free Software Foundation, Inc.
+# Copyright (C) 2005-2007, 2009-2021 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -30,8 +30,8 @@ AC_DEFUN([gl_FUNC_GETLOGIN_R],
     HAVE_GETLOGIN_R=0
   else
     HAVE_GETLOGIN_R=1
-    dnl On OSF/1 5.1, getlogin_r returns a truncated result if the buffer is
-    dnl not large enough.
+    dnl On Mac OS X 10.13 and OSF/1 5.1, getlogin_r returns a truncated result
+    dnl if the buffer is not large enough.
     AC_REQUIRE([AC_CANONICAL_HOST])
     AC_CACHE_CHECK([whether getlogin_r works with small buffers],
       [gl_cv_func_getlogin_r_works],
@@ -39,18 +39,23 @@ AC_DEFUN([gl_FUNC_GETLOGIN_R],
         dnl Initial guess, used when cross-compiling.
 changequote(,)dnl
         case "$host_os" in
-                # Guess no on OSF/1.
-          osf*) gl_cv_func_getlogin_r_works="guessing no" ;;
-                # Guess yes otherwise.
-          *)    gl_cv_func_getlogin_r_works="guessing yes" ;;
+                          # Guess no on Mac OS X, OSF/1.
+          darwin* | osf*) gl_cv_func_getlogin_r_works="guessing no" ;;
+                          # Guess yes otherwise.
+          *)              gl_cv_func_getlogin_r_works="guessing yes" ;;
         esac
 changequote([,])dnl
         AC_RUN_IFELSE(
           [AC_LANG_SOURCE([[
 #include <stddef.h>
+#include <string.h>
 #include <unistd.h>
 #if !HAVE_DECL_GETLOGIN_R
-extern int getlogin_r (char *, size_t);
+extern
+# ifdef __cplusplus
+"C"
+# endif
+int getlogin_r (char *, size_t);
 #endif
 int
 main (void)
@@ -59,26 +64,25 @@ main (void)
   char buf[100];
 
   if (getlogin_r (buf, 0) == 0)
-    result |= 16;
+    result |= 1;
   if (getlogin_r (buf, 1) == 0)
-    result |= 17;
+    result |= 2;
+  if (getlogin_r (buf, 100) == 0)
+    {
+      size_t n = strlen (buf);
+      if (getlogin_r (buf, n) == 0)
+        result |= 4;
+    }
   return result;
 }]])],
           [gl_cv_func_getlogin_r_works=yes],
-          [case $? in
-             16 | 17) gl_cv_func_getlogin_r_works=no ;;
-           esac
-          ],
+          [gl_cv_func_getlogin_r_works=no],
           [:])
       ])
     case "$gl_cv_func_getlogin_r_works" in
       *yes) ;;
       *) REPLACE_GETLOGIN_R=1 ;;
     esac
-  fi
-  if test $HAVE_GETLOGIN_R = 0 || test $REPLACE_GETLOGIN_R = 1; then
-    AC_LIBOBJ([getlogin_r])
-    gl_PREREQ_GETLOGIN_R
   fi
 ])
 

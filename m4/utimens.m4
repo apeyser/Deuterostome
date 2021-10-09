@@ -1,18 +1,16 @@
-dnl Copyright (C) 2003-2011 Free Software Foundation, Inc.
+dnl Copyright (C) 2003-2021 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
 
-dnl serial 5
+dnl serial 11
 
 AC_DEFUN([gl_UTIMENS],
 [
-  AC_LIBOBJ([utimens])
-
   dnl Prerequisites of lib/utimens.c.
   AC_REQUIRE([gl_FUNC_UTIMES])
   AC_REQUIRE([gl_CHECK_TYPE_STRUCT_TIMESPEC])
-  AC_REQUIRE([gl_CHECK_TYPE_STRUCT_UTIMBUF])
+  AC_REQUIRE([AC_CANONICAL_HOST]) dnl for cross-compiles
   AC_CHECK_FUNCS_ONCE([futimes futimesat futimens utimensat lutimes])
 
   if test $ac_cv_func_futimens = no && test $ac_cv_func_futimesat = yes; then
@@ -26,17 +24,29 @@ AC_DEFUN([gl_UTIMENS],
 #include <stddef.h>
 #include <sys/times.h>
 #include <fcntl.h>
-]], [[    int fd = open ("conftest.file", O_RDWR);
+]GL_MDA_DEFINES],
+        [[int fd = open ("conftest.file", O_RDWR);
           if (fd < 0) return 1;
           if (futimesat (fd, NULL, NULL)) return 2;
         ]])],
         [gl_cv_func_futimesat_works=yes],
         [gl_cv_func_futimesat_works=no],
-        [gl_cv_func_futimesat_works="guessing no"])
+        [case "$host_os" in
+                            # Guess yes on Linux systems.
+           linux-* | linux) gl_cv_func_futimesat_works="guessing yes" ;;
+                            # Guess yes on glibc systems.
+           *-gnu*)          gl_cv_func_futimesat_works="guessing yes" ;;
+                            # If we don't know, obey --enable-cross-guesses.
+           *)               gl_cv_func_futimesat_works="$gl_cross_guess_normal" ;;
+         esac
+        ])
       rm -f conftest.file])
-    if test "$gl_cv_func_futimesat_works" != yes; then
-      AC_DEFINE([FUTIMESAT_NULL_BUG], [1],
-        [Define to 1 if futimesat mishandles a NULL file name.])
-    fi
+    case "$gl_cv_func_futimesat_works" in
+      *yes) ;;
+      *)
+        AC_DEFINE([FUTIMESAT_NULL_BUG], [1],
+          [Define to 1 if futimesat mishandles a NULL file name.])
+        ;;
+    esac
   fi
 ])

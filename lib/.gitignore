@@ -16,3 +16,4 @@
 /fcntl.h
 /time.h
 .dirstamp
+/dummy.c

@@ -1,20 +1,20 @@
 /* dirname.c -- return all but the last element in a file name
 
-   Copyright (C) 1990, 1998, 2000-2001, 2003-2006, 2009-2011 Free Software
+   Copyright (C) 1990, 1998, 2000-2001, 2003-2006, 2009-2021 Free Software
    Foundation, Inc.
 
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
+   This file is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Lesser General Public License as
+   published by the Free Software Foundation; either version 2.1 of the
+   License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
+   This file is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   GNU Lesser General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   You should have received a copy of the GNU Lesser General Public License
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #include <config.h>
 
@@ -25,7 +25,7 @@
 
 /* Return the length of the prefix of FILE that will be used by
    dir_name.  If FILE is in the working directory, this returns zero
-   even though `dir_name (FILE)' will return ".".  Works properly even
+   even though 'dir_name (FILE)' will return ".".  Works properly even
    if there are trailing slashes (by effectively ignoring them).  */
 
 size_t
@@ -53,9 +53,9 @@ dir_len (char const *file)
 }
 
 
-/* In general, we can't use the builtin `dirname' function if available,
+/* In general, we can't use the builtin 'dirname' function if available,
    since it has different meanings in different environments.
-   In some environments the builtin `dirname' modifies its argument.
+   In some environments the builtin 'dirname' modifies its argument.
 
    Return the leading directories part of FILE, allocated with malloc.
    Works properly even if there are trailing slashes (by effectively

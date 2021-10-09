@@ -1,8 +1,10 @@
-# errno_h.m4 serial 9
-dnl Copyright (C) 2004, 2006, 2008-2011 Free Software Foundation, Inc.
+# errno_h.m4 serial 13
+dnl Copyright (C) 2004, 2006, 2008-2021 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
+
+AC_PREREQ([2.61])
 
 AC_DEFUN_ONCE([gl_HEADER_ERRNO_H],
 [
@@ -10,6 +12,9 @@ AC_DEFUN_ONCE([gl_HEADER_ERRNO_H],
   AC_CACHE_CHECK([for complete errno.h], [gl_cv_header_errno_h_complete], [
     AC_EGREP_CPP([booboo],[
 #include <errno.h>
+#if !defined ETXTBSY
+booboo
+#endif
 #if !defined ENOMSG
 booboo
 #endif
@@ -34,6 +39,12 @@ booboo
 #if !defined ENOTSUP
 booboo
 #endif
+#if !defined ENETRESET
+booboo
+#endif
+#if !defined ECONNABORTED
+booboo
+#endif
 #if !defined ESTALE
 booboo
 #endif
@@ -41,6 +52,15 @@ booboo
 booboo
 #endif
 #if !defined ECANCELED
+booboo
+#endif
+#if !defined EOWNERDEAD
+booboo
+#endif
+#if !defined ENOTRECOVERABLE
+booboo
+#endif
+#if !defined EILSEQ
 booboo
 #endif
       ],
@@ -110,10 +130,4 @@ yes
     AC_SUBST($1[_HIDDEN])
     AC_SUBST($1[_VALUE])
   fi
-])
-
-dnl Autoconf >= 2.61 has AC_COMPUTE_INT built-in.
-dnl Remove this when we can assume autoconf >= 2.61.
-m4_ifdef([AC_COMPUTE_INT], [], [
-  AC_DEFUN([AC_COMPUTE_INT], [_AC_COMPUTE_INT([$2],[$1],[$3],[$4])])
 ])

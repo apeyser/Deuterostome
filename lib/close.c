@@ -1,36 +1,69 @@
 /* close replacement.
-   Copyright (C) 2008-2011 Free Software Foundation, Inc.
+   Copyright (C) 2008-2021 Free Software Foundation, Inc.
 
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
+   This file is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Lesser General Public License as
+   published by the Free Software Foundation; either version 2.1 of the
+   License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
+   This file is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   GNU Lesser General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   You should have received a copy of the GNU Lesser General Public License
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #include <config.h>
 
 /* Specification.  */
 #include <unistd.h>
 
+#include <errno.h>
+
 #include "fd-hook.h"
+#if HAVE_MSVC_INVALID_PARAMETER_HANDLER
+# include "msvc-inval.h"
+#endif
+
+#undef close
+
+#if defined _WIN32 && !defined __CYGWIN__
+# if HAVE_MSVC_INVALID_PARAMETER_HANDLER
+static int
+close_nothrow (int fd)
+{
+  int result;
+
+  TRY_MSVC_INVAL
+    {
+      result = _close (fd);
+    }
+  CATCH_MSVC_INVAL
+    {
+      result = -1;
+      errno = EBADF;
+    }
+  DONE_MSVC_INVAL;
+
+  return result;
+}
+# else
+#  define close_nothrow _close
+# endif
+#else
+# define close_nothrow close
+#endif
 
 /* Override close() to call into other gnulib modules.  */
 
 int
 rpl_close (int fd)
-#undef close
 {
 #if WINDOWS_SOCKETS
-  int retval = execute_all_close_hooks (close, fd);
+  int retval = execute_all_close_hooks (close_nothrow, fd);
 #else
-  int retval = close (fd);
+  int retval = close_nothrow (fd);
 #endif
 
 #if REPLACE_FCHDIR

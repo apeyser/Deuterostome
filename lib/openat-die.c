@@ -1,6 +1,6 @@
 /* Report a save- or restore-cwd failure in our openat replacement and then exit.
 
-   Copyright (C) 2005-2006, 2008-2011 Free Software Foundation, Inc.
+   Copyright (C) 2005-2006, 2008-2021 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #include <config.h>
 
@@ -30,14 +30,14 @@
 #include "gettext.h"
 #define _(msgid) gettext (msgid)
 
-void
+_Noreturn void
 openat_save_fail (int errnum)
 {
 #ifndef GNULIB_LIBPOSIX
   error (exit_failure, errnum,
          _("unable to record current working directory"));
 #endif
-  /* The `noreturn' attribute cannot be applied to error, since it returns
+  /* _Noreturn cannot be applied to error, since it returns
      when its first argument is 0.  To help compilers understand that this
      function does not return, call abort.  Also, the abort is a
      safety feature if exit_failure is 0 (which shouldn't happen).  */
@@ -49,7 +49,7 @@ openat_save_fail (int errnum)
    during an openat emulation.  The caller must ensure that fd 2 is
    not a just-opened fd, even when openat_safer is not in use.  */
 
-void
+_Noreturn void
 openat_restore_fail (int errnum)
 {
 #ifndef GNULIB_LIBPOSIX

@@ -68,6 +68,7 @@ extern int h_errno;
 
 /*--------------------------- initialize a socket address */
 
+#define h_addr h_addr_list[0] /* for backward compatibility */
 P init_sockaddr(struct sockaddr_in *name, 
                 const char *hostname,
                 UW port)

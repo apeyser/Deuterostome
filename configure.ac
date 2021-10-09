@@ -1,9 +1,9 @@
-AC_INIT([D-Machine], [4.8.10], [Alexander Peyser <peyser.alex@gmail.com>], [dm])
-AC_CONFIG_MACRO_DIR([m4 libltdl/m4])
-AC_CANONICAL_SYSTEM
+AC_INIT([D-Machine],[4.8.10],[Alexander Peyser <peyser.alex@gmail.com>],[dm])
+AC_CONFIG_MACRO_DIRS([m4 libltdl/m4])
+AC_CANONICAL_TARGET
 AC_CONFIG_AUX_DIR([libltdl/config])
 AM_INIT_AUTOMAKE
-AC_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 AX_PREFIX_CONFIG_H([src/dm-config.h])
 AX_PREFIX_CONFIG_H([src/codegen/dm-config.h])
 AM_PATH_LISPDIR
@@ -112,7 +112,6 @@ CF_IF_ENABLED([doc], [
 AC_PROG_CC
 gl_EARLY
 AM_PROG_CC_C_O
-AC_PROG_CC_STDC
 AC_C_CONST
 AC_C_RESTRICT
 CF_C_INLINE
@@ -200,9 +199,10 @@ CF_AC_ARG_VAR_QUOTE([guipdf],
  [name of program to display pdf's, eg gnome-open or launch -i com.apple.Preview],
  [xpdf])
 
-CF_EMACS_ENABLED([
+CF_AM_CONDITIONAL([EMACS], [:])
+#CF_EMACS_ENABLED([
   CF_EMACS_SOURCE([server])
-])
+#])
 
 AC_CHECK_HEADERS([unistd.h])
 AC_PROG_INSTALL
@@ -213,7 +213,7 @@ CF_SET_TOP_DIR
 
 CF_LIBTOOL
 
-AC_CHECK_LIBM
+LT_LIB_M
 CF_X11_ENABLE
 CF_PREPEND_VARS([LIBS], [XLIB LIBM])
 AC_C_BIGENDIAN
